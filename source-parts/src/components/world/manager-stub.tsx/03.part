@@ -53,10 +53,11 @@ export const ZEUS: Profile = {
   id: "zeus",
   numeral: "I",
   name: "ゼウス",
-  title: "主権を継いだ六詠第一位",
-  image: "/manager-zeus.jpeg",
+  title: "主権を継いだ六詠第一位・最強の管理人",
+  image: "/manager-zeus-detail.jpeg",
   pos: "50% 42%",
   accent: "#e6c58b",
+  sovereign: true,
   quotes: [
     "俺…私が一位なのは事実だけど、それで毎回偉そうに座ってろって？　疲れるやん",
     "じゃあ、そういう事で",

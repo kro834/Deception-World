@@ -16,7 +16,7 @@
         </div>
       </section>
       {profile.rider ? <FormPickup rider={profile.rider} /> : null}
-      <DossierNav items={ROKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="ROKUEI" />
+      <DossierNav items={RIKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="RIKUEI" />
     </main>
   );
 }

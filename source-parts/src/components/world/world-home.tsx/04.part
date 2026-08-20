@@ -74,17 +74,18 @@
               <div className="manager-archive-panel is-managers" role="tabpanel">
                 <div className="signal-array" aria-label="六詠を示す6つのシグナル">
                   <GuardedLink
-                    className="signal has-visual is-accessible"
+                    className="signal has-visual is-accessible is-face-safe zeus-signal"
                     to="/managers/zeus"
                     assets={MANAGER_ASSETS.zeus}
                     style={{ ["--delay" as string]: "0s" }}
                     aria-label="六詠I ゼウスの個別資料を開く"
                   >
-                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 42%" }} loading="lazy" decoding="async" />
+                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
                     <span>I</span>
                     <i />
                     <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
+                    <em className="signal-apex">最強</em>
                   </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
@@ -132,13 +133,13 @@
                     <b>レジャス</b>
                   </GuardedLink>
                   <GuardedLink
-                    className="signal has-visual is-accessible"
+                    className="signal has-visual is-accessible is-face-safe"
                     to="/managers/opus"
                     assets={MANAGER_ASSETS.opus}
                     style={{ ["--delay" as string]: "0.64s" }}
                     aria-label="六詠V オパスの個別資料を開く"
                   >
-                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 12%" }} loading="lazy" decoding="async" />
+                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
                     <span>V</span>
                     <i />
                     <small>OPEN DOSSIER</small>

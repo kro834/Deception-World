@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, ROKUEI_NAV, NameText } from "./dossier-nav";
+import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 
@@ -35,6 +35,7 @@ type Profile = {
   facts: { dt: string; dd: string }[];
   sections: Section[];
   rider?: RiderForm;
+  sovereign?: boolean;
 };
 
 export function FormPickup({ rider }: { rider: RiderForm }) {
@@ -220,10 +221,21 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
 function ManagerDossier({ profile }: { profile: Profile }) {
   useWorldMode();
   return (
-    <main className="manager-page" style={{ ["--manager-accent" as string]: profile.accent, ["--manager-accent-soft" as string]: profile.accent }}>
+    <main
+      className={`manager-page${profile.sovereign ? " is-sovereign" : ""}`}
+      style={{ ["--manager-accent" as string]: profile.accent, ["--manager-accent-soft" as string]: profile.accent }}
+    >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
+        {profile.sovereign ? (
+          <div className="sovereign-aura">
+            <i />
+            <i />
+            <i />
+            <span>I</span>
+          </div>
+        ) : null}
       </div>
       <header className="manager-topbar">
         <Link to="/world" hash="manager-archive" className="brand">
@@ -246,18 +258,58 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
             <img src={profile.image} alt={`${profile.name}のキャラクタービジュアル`} style={{ objectPosition: profile.pos, objectFit: "cover" }} />
+            {profile.sovereign ? (
+              <div className="sovereign-portrait-effects" aria-hidden="true">
+                <i />
+                <i />
+              </div>
+            ) : null}
+            {profile.sovereign ? (
+              <div className="sovereign-apex-seal" role="img" aria-label="六詠第一位、最強の管理人">
+                <small>UNCONTESTED</small>
+                <strong>最強</strong>
+                <span>RIKUEI // I</span>
+              </div>
+            ) : null}
             <span className="manager-numeral">{profile.numeral}</span>
           </div>
         </div>
         <div className="manager-introduction">
+          {profile.sovereign ? (
+            <p className="sovereign-dominance">
+              <span>ABOVE ALL SIX</span>
+              <b>六詠最強</b>
+            </p>
+          ) : null}
           <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
           <h1>
-            <small>ROKUEI {profile.numeral}</small>
+            <small>RIKUEI {profile.numeral}</small>
             <span className="manager-display-name">
               <NameText value={profile.name} />
             </span>
           </h1>
           <p className="manager-title"># {profile.title}</p>
+          {profile.sovereign ? (
+            <section className="sovereign-status" aria-label="六詠第一位・最強の管理人">
+              <div className="sovereign-emblem" aria-hidden="true">
+                <i />
+                <span>I</span>
+              </div>
+              <div className="sovereign-status-copy">
+                <small>SUPREME AUTHORITY // RANK I</small>
+                <strong>最強の管理人</strong>
+                <p>ABSOLUTE SOVEREIGNTY</p>
+              </div>
+              <div className="sovereign-scale" aria-hidden="true">
+                <span><i /><b>VI</b></span>
+                <span><i /><b>V</b></span>
+                <span><i /><b>IV</b></span>
+                <span><i /><b>III</b></span>
+                <span><i /><b>II</b></span>
+                <span className="is-apex"><i /><b>I</b></span>
+              </div>
+            </section>
+          ) : null}
           <div className="manager-quotes" aria-label={`${profile.name}の台詞`}>
             {profile.quotes.map((q) => (
               <q key={q}>{q}</q>
@@ -298,7 +350,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         </div>
       </section>
       {profile.rider ? <FormPickup rider={profile.rider} /> : null}
-      <DossierNav items={ROKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="ROKUEI" />
+      <DossierNav items={RIKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="RIKUEI" />
     </main>
   );
 }
@@ -540,10 +592,11 @@ export const ZEUS: Profile = {
   id: "zeus",
   numeral: "I",
   name: "ゼウス",
-  title: "主権を継いだ六詠第一位",
-  image: "/manager-zeus.jpeg",
+  title: "主権を継いだ六詠第一位・最強の管理人",
+  image: "/manager-zeus-detail.jpeg",
   pos: "50% 42%",
   accent: "#e6c58b",
+  sovereign: true,
   quotes: [
     "俺…私が一位なのは事実だけど、それで毎回偉そうに座ってろって？　疲れるやん",
     "じゃあ、そういう事で",

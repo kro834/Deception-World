@@ -8,6 +8,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/poster-card-08.jpeg": 453700,
   "/poster-card-09.jpeg": 549000,
   "/poster-card-10.jpeg": 382400,
+  "/episode-05-farce.png": 2267760,
   "/manager-lejas.jpeg": 283500,
   "/manager-lejas-face.jpeg": 280014,
   "/manager-lejas-portrait.jpeg": 280014,
@@ -16,6 +17,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-shuza.jpeg": 572000,
   "/manager-reemu.jpeg": 801600,
   "/manager-zeus.jpeg": 478105,
+  "/manager-zeus-detail.jpeg": 1535283,
   "/manager-opus.jpeg": 342588,
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
@@ -28,7 +30,7 @@ export const WORLD_ENTER_ASSETS = [
 ] as const;
 
 export const MANAGER_ASSETS = {
-  zeus: ["/manager-zeus.jpeg"],
+  zeus: ["/manager-zeus.jpeg", "/manager-zeus-detail.jpeg"],
   lejas: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"],
   opus: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"],
   "rex-loi": ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"],

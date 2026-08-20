@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, ROKUEI_NAV } from "./dossier-nav";
+import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { UiVectorIcon } from "./ui-vector-icon";
 
@@ -64,7 +64,7 @@ export function LejasPage() {
             </span>
             <div className="manager-portrait-meta">
               <span>{closeUp ? "FACE CLOSE-UP" : "VISUAL CONFIRMED"}</span>
-              <b>ROKUEI / IV</b>
+              <b>RIKUEI / IV</b>
             </div>
             <i className="manager-scanline" aria-hidden="true" />
             <span className="lejas-tap-hint">{closeUp ? "タップで引きショット" : "タップで顔アップ"}</span>
@@ -77,7 +77,7 @@ export function LejasPage() {
           </p>
           <p className="manager-file-number">ARCHIVE ACCESS // IV</p>
           <h1>
-            <small>ROKUEI IV</small>
+            <small>RIKUEI IV</small>
             <span className="manager-display-name">レジャス</span>
           </h1>
           <p className="manager-title"># 真実だけで破滅を組み上げる盤面の管理人</p>
@@ -201,7 +201,7 @@ export function LejasPage() {
           ],
         }}
       />
-      <DossierNav items={ROKUEI_NAV} currentHref="/managers/lejas" indexLabel="ROKUEI" />
+      <DossierNav items={RIKUEI_NAV} currentHref="/managers/lejas" indexLabel="RIKUEI" />
     </main>
   );
 }

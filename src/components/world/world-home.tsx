@@ -68,7 +68,7 @@ const COLUMNS = [
   {
     no: "02",
     title: "六詠",
-    kicker: "ROKUEI",
+    kicker: "RIKUEI",
     body: "世界・概念・領域・物語・法則。あらゆる層を管轄する管理人の最上位、六詠。六つの信号が揃ったとき、サーガ世界の勝敗条件は書き換えられる。",
     pickup: [
       "世界・概念・領域・物語・法則。あらゆる層を管轄する管理人の最上位、六詠。六つの信号が揃ったとき、サーガ世界の勝敗条件は書き換えられる。",
@@ -96,6 +96,7 @@ const EPISODES = [
   { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
   { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "55% 18%", alt: "白い帽子と衣装の人物が崩壊した街を見下ろすEP3のサムネイル" },
   { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
+  { no: "05", title: "FARCE", src: "/episode-05-farce.png", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
 ];
 
 function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
@@ -705,17 +706,18 @@ export function WorldHome() {
               <div className="manager-archive-panel is-managers" role="tabpanel">
                 <div className="signal-array" aria-label="六詠を示す6つのシグナル">
                   <GuardedLink
-                    className="signal has-visual is-accessible"
+                    className="signal has-visual is-accessible is-face-safe zeus-signal"
                     to="/managers/zeus"
                     assets={MANAGER_ASSETS.zeus}
                     style={{ ["--delay" as string]: "0s" }}
                     aria-label="六詠I ゼウスの個別資料を開く"
                   >
-                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 42%" }} loading="lazy" decoding="async" />
+                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
                     <span>I</span>
                     <i />
                     <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
+                    <em className="signal-apex">最強</em>
                   </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
@@ -763,13 +765,13 @@ export function WorldHome() {
                     <b>レジャス</b>
                   </GuardedLink>
                   <GuardedLink
-                    className="signal has-visual is-accessible"
+                    className="signal has-visual is-accessible is-face-safe"
                     to="/managers/opus"
                     assets={MANAGER_ASSETS.opus}
                     style={{ ["--delay" as string]: "0.64s" }}
                     aria-label="六詠V オパスの個別資料を開く"
                   >
-                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 12%" }} loading="lazy" decoding="async" />
+                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
                     <span>V</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1025,7 +1027,7 @@ export function WorldHome() {
             </div>
             <div className="episode-archive-meta">
               <p>
-                <strong>04</strong>
+                <strong>{String(EPISODES.length).padStart(2, "0")}</strong>
                 <span>RECORDS FOUND</span>
               </p>
               <div className="episode-controls" aria-label="エピソードの表示操作">
@@ -1040,7 +1042,7 @@ export function WorldHome() {
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
                 </button>
-                <output>{String(episode + 1).padStart(2, "0")} / 04</output>
+                <output>{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
                 <button
                   type="button"
                   className="ios26-glass"

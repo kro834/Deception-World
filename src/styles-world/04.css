@@ -279,6 +279,15 @@
   transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.72, 0.2, 1);
 }
 
+.signal.is-face-safe {
+  --signal-zoom: 1;
+  --signal-zoom-origin: 50% 0%;
+}
+
+.signal.is-face-safe > img {
+  object-position: 50% 0%;
+}
+
 .signal.is-accessible {
   cursor: pointer;
   transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;

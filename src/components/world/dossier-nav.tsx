@@ -10,13 +10,13 @@ export type DossierLink = {
   kicker?: string;
 };
 
-export const ROKUEI_NAV: DossierLink[] = [
-  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus.jpeg"], kicker: "ROKUEI I" },
-  { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"], kicker: "ROKUEI II" },
-  { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"], kicker: "ROKUEI III" },
-  { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"], kicker: "ROKUEI IV" },
-  { id: "V", name: "オパス", href: "/managers/opus", assets: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"], kicker: "ROKUEI V" },
-  { id: "VI", name: "リームー", href: "/managers/reemu", assets: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"], kicker: "ROKUEI VI" },
+export const RIKUEI_NAV: DossierLink[] = [
+  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus.jpeg", "/manager-zeus-detail.jpeg"], kicker: "RIKUEI I" },
+  { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"], kicker: "RIKUEI II" },
+  { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"], kicker: "RIKUEI III" },
+  { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"], kicker: "RIKUEI IV" },
+  { id: "V", name: "オパス", href: "/managers/opus", assets: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"], kicker: "RIKUEI V" },
+  { id: "VI", name: "リームー", href: "/managers/reemu", assets: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"], kicker: "RIKUEI VI" },
 ];
 
 export const RIDER_NAV: DossierLink[] = [

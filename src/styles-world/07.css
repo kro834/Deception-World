@@ -21,6 +21,7 @@
 .episode-card:nth-child(2) { --episode-tone: var(--red); }
 .episode-card:nth-child(3) { --episode-tone: var(--cyan); }
 .episode-card:nth-child(4) { --episode-tone: #d65b65; }
+.episode-card:nth-child(5) { --episode-tone: #ee3e78; }
 
 .episode-card-surface {
   position: relative;
@@ -499,4 +500,3 @@ html:has(.rider-nightmare-dialog[open]) {
   letter-spacing: 0.26em;
   animation: worldColumnDialogContentIn 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
