@@ -9,16 +9,14 @@
 ```bash
 git clone https://github.com/kro834/Deception-World.git
 cd Deception-World
-npm install                 # postinstall で source-parts から巨大ソースを復元
+npm install
 cp .env.example .env        # ローカル再生だけなら空のままで可
-npm run dev                 # predev で画像・動画も取得
+npm run dev
 ```
 
-巨大ファイル（`world-home.tsx` / `rider-page.tsx` / `boot.js` / `p2p.ts` など）は `source-parts/` に分割してあります。`npm install` が自動で `assemble-source` を走り、本来のパスへ書き出します。
+`src/` の本体ソースと `public/` の画像・動画はリポジトリに入っています。`npm install` の postinstall で `source-parts/` からも巨大ファイルを復元します。画像が欠けている場合は `npm run fetch-assets` を使えます。
 
-スタイルは `src/styles-world.css`（barrel）が `src/styles-world/01.css`–19.css を `@import` します。
-
-`public/` の画像・動画が未取得なら `npm run fetch-assets` を試してください（公開プレビューから取り込み）。
+スタイルは `src/styles-world.css`（barrel）が `src/styles-world/01.css`–`19.css` を `@import` します。
 
 ## 必要な環境変数
 

@@ -138,7 +138,7 @@ function getRenderer() {
   return renderer;
 }
 
-// ── Swipe rail ───────────────────────────────────────────────────────────
+// ── Swipe rail ───────────────────────────────────────────────────────────────
 function initRail(root) {
   if (!root || root.dataset.liquidBound === "true") return;
   root.dataset.liquidBound = "true";

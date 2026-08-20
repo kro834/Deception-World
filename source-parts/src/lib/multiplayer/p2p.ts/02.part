@@ -206,7 +206,7 @@
     }
   }
 
-  // ── diagnostics + recovery ───────────────────────────────────────────────
+  // ── diagnostics + recovery ─────────────────────────────────────────────────
 
   private pingAll(): void {
     const wire = JSON.stringify({ t: "ping" });

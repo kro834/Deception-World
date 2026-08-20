@@ -76,7 +76,7 @@ function initAction(root) {
   root.addEventListener('pointerleave', release);
 }
 
-// ── Side panel ─────────────────────────────────────────────────
+// ── Side panel ───────────────────────────────────────────────────────────────
 function initPanel() {
   const trigger = document.querySelector('.side-panel-trigger');
   const panel = document.querySelector('.side-panel');
