@@ -98,7 +98,7 @@ export function SlideOpenControl({
     return ratio;
   };
 
-  const complete = () => {
+  const complete = (source: "keyboard" | "pointer") => {
     if (completingRef.current) return;
     const metrics = getMetrics();
     completingRef.current = true;
@@ -107,6 +107,12 @@ export function SlideOpenControl({
     setOffset(metrics?.distance ?? travel.current);
     setProgress(1);
     clearTimers();
+
+    // A pointer drag must not become the dialog's focus-return target. If the
+    // button stays focused, closing the dialog restores focus here and the
+    // focus-visible halo makes the completed slider look selected. Keyboard
+    // activation keeps the focus return for accessible navigation.
+    if (source === "pointer") internalButtonRef.current?.blur();
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
@@ -131,7 +137,6 @@ export function SlideOpenControl({
 
     event.preventDefault();
     event.stopPropagation();
-    event.currentTarget.focus({ preventScroll: true });
     activePointer.current = event.pointerId;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
     setDragging(true);
@@ -154,7 +159,7 @@ export function SlideOpenControl({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    if (ratio >= OPEN_THRESHOLD) complete();
+    if (ratio >= OPEN_THRESHOLD) complete("pointer");
     else reset();
   };
 
@@ -191,7 +196,7 @@ export function SlideOpenControl({
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        if (event.detail === 0) complete();
+        if (event.detail === 0) complete("keyboard");
       }}
       onDragStart={(event) => event.preventDefault()}
     >

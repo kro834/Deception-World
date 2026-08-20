@@ -484,11 +484,11 @@
 }
 
 .ios-slide-open[data-completing="true"] {
-  border-color: color-mix(in srgb, var(--slide-accent) 72%, #fff);
+  border-color: color-mix(in srgb, var(--slide-accent) 58%, #fff);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    0 16px 42px rgba(0, 0, 0, 0.46),
-    0 0 26px color-mix(in srgb, var(--slide-accent) 32%, transparent);
+    inset 0 0 18px color-mix(in srgb, var(--slide-accent) 16%, transparent),
+    0 16px 38px rgba(0, 0, 0, 0.42);
 }
 
 .ios-slide-open[data-completing="true"] .ios-slide-open-thumb > b { rotate: 90deg; }
