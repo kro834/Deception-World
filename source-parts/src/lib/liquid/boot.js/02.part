@@ -1,0 +1,181 @@
+      this.geometry = null; this.targetGeometry = null; this.lastTime = 0;
+    }
+    const lens = root.querySelector(':scope > .liquid-selection-lens');
+    const r = lens ? parseFloat(getComputedStyle(lens).borderTopLeftRadius) : 18;
+    this.cornerRadius = isFinite(r) ? Math.max(r, 0) : 18;
+    this.resize(root);
+    const src = railTexture(root, this.dpr);
+    if (!src) { root.dataset.liquidWebgl = 'fallback'; return false; }
+    this.source = src;
+    const gl = this.gl;
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    root.dataset.liquidWebgl = 'true'; root.dataset.liquidWebglActive = 'false';
+    return true;
+  }
+  isActive(root) { return this.activeRoot === root; }
+  detach(root) {
+    if (this.activeRoot !== root) return;
+    this.stop(); this.canvas.remove();
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
+  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
+  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
+  setPhase(phase) {
+    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
+    this.releasing = phase === 'rest';
+    if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
+    this.schedule();
+  }
+  schedule() {
+    if (this.frame !== null || !this.activeRoot || !this.geometry || !this.source) return;
+    this.frame = requestAnimationFrame(this.draw);
+  }
+  stop() { if (this.frame !== null) cancelAnimationFrame(this.frame); this.frame = null; }
+  applyScissor(gl, g) {
+    const ex = g.width * (this.pressExpansion.x + this.heldExpansion.x + this.dragExpansion.x + 0.24);
+    const ey = g.height * (this.pressExpansion.y + this.heldExpansion.y + this.dragExpansion.y);
+    const halo = 30, ratio = this.dpr;
+    const left = g.x - ex - halo + this.overscan, top = g.y - ey - halo + this.overscan;
+    const w = g.width + ex * 2 + halo * 2, h = g.height + ey * 2 + halo * 2;
+    const pl = Math.max(0, Math.floor(left * ratio));
+    const pb = Math.max(0, Math.floor(this.canvas.height - (top + h) * ratio));
+    const pr = Math.min(this.canvas.width, Math.ceil((left + w) * ratio));
+    const pt = Math.min(this.canvas.height, Math.ceil(this.canvas.height - top * ratio));
+    if (pr - pl <= 0 || pt - pb <= 0) return;
+    gl.enable(gl.SCISSOR_TEST); gl.scissor(pl, pb, pr - pl, pt - pb);
+  }
+  draw(time) {
+    this.frame = null;
+    const root = this.activeRoot, gl = this.gl, g0 = this.geometry;
+    if (!root || !gl || !g0) return;
+    const elapsed = this.lastTime === 0 ? 16 : Math.min(48, time - this.lastTime);
+    this.lastTime = time;
+
+    // Droplet lag: chase the requested geometry instead of snapping to it.
+    let settling = false;
+    const target = this.targetGeometry;
+    if (target) {
+      const follow = 1 - Math.exp(-elapsed / 52);
+      const d = Math.abs(target.x - g0.x) + Math.abs(target.y - g0.y)
+              + Math.abs(target.width - g0.width) + Math.abs(target.height - g0.height);
+      if (d < 0.12) this.geometry = target;
+      else {
+        this.geometry = {
+          x: g0.x + (target.x - g0.x) * follow, y: g0.y + (target.y - g0.y) * follow,
+          width: g0.width + (target.width - g0.width) * follow,
+          height: g0.height + (target.height - g0.height) * follow,
+        };
+        settling = true;
+      }
+    }
+
+    if (this.releasing) {
+      // Exponential release: ~150ms to the shader's transparent cutoff.
+      const fade = Math.exp(-elapsed / 42);
+      this.phase *= fade; this.phaseVelocity = 0;
+      this.velocity.x *= fade; this.velocity.y *= fade;
+      const glide = 1 - fade, s = this.targetGeometry || this.geometry;
+      const tx = s.x + s.width / 2, ty = s.y + s.height / 2;
+      this.pointer = { x: this.pointer.x + (tx - this.pointer.x) * glide, y: this.pointer.y + (ty - this.pointer.y) * glide };
+      if (this.phase <= 0.025) { this.phase = 0; this.velocity = { x: 0, y: 0 }; }
+    } else {
+      const steps = Math.max(1, Math.ceil(elapsed / 12)), ss = elapsed / steps / 1000;
+      for (let i = 0; i < steps; i++) {
+        const k = this.targetPhase > this.phase ? 245 : 210;
+        const c = this.targetPhase > this.phase ? 27 : 29;
+        this.phaseVelocity += ((this.targetPhase - this.phase) * k - this.phaseVelocity * c) * ss;
+        this.phase += this.phaseVelocity * ss;
+      }
+      this.phase = clamp(this.phase, -0.018, 1.035);
+      if (Math.abs(this.targetPhase - this.phase) < 0.001 && Math.abs(this.phaseVelocity) < 0.008) {
+        this.phase = this.targetPhase; this.phaseVelocity = 0;
+      }
+      const decay = Math.exp(-elapsed / 72);
+      this.velocity.x *= decay; this.velocity.y *= decay;
+    }
+
+    const g = this.geometry;
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.disable(gl.SCISSOR_TEST);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    this.applyScissor(gl, g);
+    gl.useProgram(this.program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    gl.enableVertexAttribArray(this.loc);
+    gl.vertexAttribPointer(this.loc, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.uniform1i(this.uniform('u_texture'), 0);
+    gl.uniform2f(this.uniform('u_canvas_size'), this.canvas.width, this.canvas.height);
+    gl.uniform2f(this.uniform('u_root_size'), this.rootWidth, this.rootHeight);
+    gl.uniform4f(this.uniform('u_lens'), g.x + g.width / 2, g.y + g.height / 2, g.width / 2, g.height / 2);
+    gl.uniform2f(this.uniform('u_pointer'), this.pointer.x, this.pointer.y);
+    gl.uniform2f(this.uniform('u_velocity'), this.velocity.x, this.velocity.y);
+    gl.uniform3f(this.uniform('u_accent'), this.accent[0], this.accent[1], this.accent[2]);
+    gl.uniform1f(this.uniform('u_dpr'), this.dpr);
+    gl.uniform1f(this.uniform('u_overscan'), this.overscan);
+    gl.uniform1f(this.uniform('u_phase'), this.phase);
+    gl.uniform1f(this.uniform('u_corner_radius'), this.cornerRadius);
+    gl.uniform2f(this.uniform('u_press_expansion'), this.pressExpansion.x, this.pressExpansion.y);
+    gl.uniform2f(this.uniform('u_held_expansion'), this.heldExpansion.x, this.heldExpansion.y);
+    gl.uniform2f(this.uniform('u_drag_expansion'), this.dragExpansion.x, this.dragExpansion.y);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disable(gl.SCISSOR_TEST);
+    if (!this.releasing && this.phase > 0.001) root.dataset.liquidWebglActive = 'true';
+
+    const moving = this.targetPhase > 0 && Math.hypot(this.velocity.x, this.velocity.y) > 0.012;
+    if (this.phase !== this.targetPhase || moving || settling) { this.schedule(); return; }
+    if (this.phase === 0) { root.dataset.liquidWebglActive = 'false'; this.releasing = false; this.lastTime = 0; }
+  }
+}
+
+let renderer = null;
+function getRenderer() {
+  if (!renderer) renderer = new GlassRenderer();
+  return renderer;
+}
+
+// ── Swipe rail ───────────────────────────────────────────────────────────
+function initRail(root) {
+  if (!root || root.dataset.liquidBound === "true") return;
+  root.dataset.liquidBound = "true";
+  const lens = root.querySelector(':scope > .liquid-selection-lens');
+  const glow = root.querySelector('.liquid-contact-glow');
+  const tabs = () => [...root.querySelectorAll(':scope > button[role="tab"]')];
+  let gesture = null, holdTimer = null, moveFrame = null, pending = null;
+  let active = tabs().findIndex(t => t.getAttribute('aria-selected') === 'true');
+  if (active < 0) active = 0;
+
+  const reduce = () => mq(REDUCED_MOTION).matches;
+  const measure = () => {
+    const rr = root.getBoundingClientRect();
+    const sx = rr.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = rr.height / Math.max(root.offsetHeight, 1) || 1;
+    return tabs().map(t => {
+      const r = t.getBoundingClientRect();
+      return { x: (r.left - rr.left) / sx, y: (r.top - rr.top) / sy, width: r.width / sx, height: r.height / sy };
+    });
+  };
+  const settle = (i) => {
+    const g = measure()[i]; if (!g || !lens) return;
+    lens.style.width = g.width.toFixed(2) + 'px';
+    lens.style.height = g.height.toFixed(2) + 'px';
+    lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+    lens.style.removeProperty('scale');
+    root.dataset.liquidInitialized = 'true';
+    if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
+  };
+  const select = (i) => {
+    if (i === active) return;
+    active = i;
+    tabs().forEach((t, k) => {
+      t.setAttribute('aria-selected', String(k === i));
+      t.classList.toggle('is-active', k === i);
+    });
+    root.dispatchEvent(new CustomEvent('railselect', { detail: { index: i } }));
+  };
+  const setContact = (i) => {
+    tabs().forEach((t, k) => {
