@@ -131,21 +131,13 @@
         aria-label="アクセス拒否"
         onCancel={(e) => {
           e.preventDefault();
-          danteDialogRef.current?.close();
+          closeDante();
         }}
         onClick={(e) => {
-          if (e.target === danteDialogRef.current) danteDialogRef.current?.close();
+          if (e.target === danteDialogRef.current) closeDante();
         }}
       >
         <div className="dante-denied-inner" tabIndex={-1}>
-          <button
-            className="dante-dialog-close"
-            type="button"
-            aria-label="アクセス拒否表示を閉じる"
-            onClick={() => danteDialogRef.current?.close()}
-          >
-            CLOSE
-          </button>
           <p className="dante-denied-kicker">ACCESS DENIED</p>
           <div className="dante-no-stack" aria-hidden="true">
             <strong className="dante-no-ghost">NO</strong>

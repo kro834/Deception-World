@@ -140,6 +140,7 @@ export function WorldHome() {
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
+  const [shuffling, setShuffling] = useState(false);
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
@@ -154,6 +155,8 @@ export function WorldHome() {
   const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
+  const shuffleTimers = useRef<number[]>([]);
+  const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
 
   useEffect(() => {
@@ -246,6 +249,8 @@ export function WorldHome() {
   useEffect(() => {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+      shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
     };
   }, []);
   const current = POSTERS[poster];

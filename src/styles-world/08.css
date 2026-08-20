@@ -280,22 +280,6 @@
   animation: danteDenied 0.68s steps(2, end) both;
 }
 
-.dante-denied-inner button {
-  position: fixed;
-  z-index: 2;
-  top: 20px;
-  right: 24px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid rgba(241, 74, 96, 0.48);
-  background: rgba(5, 0, 0, 0.84);
-  color: #fff;
-  cursor: pointer;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-}
-
 /* Fail-open. `.motion-on` lands on boot, but `data-scroll-motion-ready` is only
    set once the reveal observer is actually wired up. Gating on both means a
    script failure leaves content VISIBLE instead of stranding the whole page at
@@ -492,4 +476,3 @@ html[data-scroll-motion-ready="true"] [data-motion-reveal][data-motion-visible="
   from { opacity: 0; transform: scale(1.09); filter: saturate(0.45) contrast(1.12); }
   to { opacity: 1; transform: scale(1.025); filter: saturate(0.92) contrast(1.04); }
 }
-

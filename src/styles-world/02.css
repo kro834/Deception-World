@@ -370,6 +370,34 @@
 .poster-back-card-3 { transform: translate(-3.5%, 3.5%) rotate(-2.4deg) scale(0.95); opacity: 0.12; }
 .poster-back-card-4 { transform: translate(3%, -3%) rotate(2.1deg) scale(0.935); opacity: 0.09; }
 
+.poster-deck.is-shuffling .poster-frame {
+  animation: posterDeckShuffle 0.92s cubic-bezier(0.2, 0.72, 0.18, 1) both;
+}
+
+.poster-deck.is-shuffling .poster-back-card {
+  animation: posterCardRiffle 0.46s steps(4, end) 2;
+}
+
+.poster-deck.is-shuffling .poster-back-card-2 { animation-delay: 35ms; }
+.poster-deck.is-shuffling .poster-back-card-3 { animation-delay: 70ms; }
+.poster-deck.is-shuffling .poster-back-card-4 { animation-delay: 105ms; }
+
+@keyframes posterDeckShuffle {
+  0%, 100% { translate: 0 0; rotate: 0deg; scale: 1; }
+  12% { translate: -3.5% -1%; rotate: -1.8deg; scale: 0.985; }
+  26% { translate: 4% 0.8%; rotate: 2.2deg; scale: 0.992; }
+  42% { translate: -5% 1.4%; rotate: -2.6deg; scale: 0.98; }
+  60% { translate: 4.5% -1.2%; rotate: 2deg; scale: 0.99; }
+  78% { translate: -2.2% 0.6%; rotate: -1.1deg; scale: 0.995; }
+}
+
+@keyframes posterCardRiffle {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: -14% -1%; rotate: -5deg; }
+  50% { translate: 13% 1%; rotate: 4deg; }
+  75% { translate: -7% 0; rotate: -2deg; }
+}
+
 .poster-frame {
   --tilt-x: 0deg;
   --tilt-y: 0deg;
@@ -492,4 +520,3 @@
   mix-blend-mode: screen;
   animation: posterScanSweep 7.5s cubic-bezier(0.55, 0, 0.45, 1) infinite;
 }
-

@@ -125,10 +125,6 @@ export function SideMenuLayer() {
               <span>オープニング</span>
               <i>OPENING</i>
             </Link>
-            <a href="/Deception-World.zip" download="Deception-World.zip">
-              <span>サイトZIP</span>
-              <i>EXPORT</i>
-            </a>
           </div>
         </div>
       </aside>

@@ -161,6 +161,7 @@
                         host.classList.remove("is-glitching");
                         const dlg = danteDialogRef.current;
                         if (!dlg) return;
+                        if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
                         try {
                           dlg.showModal();
                         } catch {
@@ -171,6 +172,10 @@
                         inner?.classList.remove("is-slam");
                         void (inner as HTMLElement | null)?.offsetWidth;
                         inner?.classList.add("is-slam");
+                        danteCloseTimer.current = window.setTimeout(() => {
+                          danteCloseTimer.current = null;
+                          if (dlg.open) dlg.close();
+                        }, 2600);
                       }, 420);
                     }}
                   >

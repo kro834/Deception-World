@@ -1,6 +1,6 @@
 .manager-archive-tabs {
   display: grid;
-  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.42fr) minmax(0, 0.74fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border: 1px solid rgba(132, 203, 255, 0.12);
   background: rgba(4, 7, 11, 0.56);
 }
@@ -558,4 +558,3 @@
   transition: opacity 0.42s ease, transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
-

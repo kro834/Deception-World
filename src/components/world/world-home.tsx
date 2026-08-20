@@ -221,6 +221,7 @@ export function WorldHome() {
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
+  const [shuffling, setShuffling] = useState(false);
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
@@ -235,6 +236,8 @@ export function WorldHome() {
   const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
+  const shuffleTimers = useRef<number[]>([]);
+  const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
 
   useEffect(() => {
@@ -327,6 +330,8 @@ export function WorldHome() {
   useEffect(() => {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+      shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
     };
   }, []);
   const current = POSTERS[poster];
@@ -341,6 +346,45 @@ export function WorldHome() {
       if (wrapped !== p) setPrevPoster(p);
       return wrapped;
     });
+  };
+
+  const shufflePoster = () => {
+    if (shuffling) return;
+    setLocked(true);
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+
+    const jumpToAnotherPoster = () => {
+      goPoster((p) => p + 1 + Math.floor(Math.random() * (POSTERS.length - 1)));
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      jumpToAnotherPoster();
+      return;
+    }
+
+    setShuffling(true);
+    [0, 90, 185, 290, 415, 565, 740].forEach((delay, index, steps) => {
+      const timer = window.setTimeout(() => {
+        jumpToAnotherPoster();
+        if (index === steps.length - 1) {
+          const settleTimer = window.setTimeout(() => {
+            setShuffling(false);
+            shuffleTimers.current = [];
+          }, 180);
+          shuffleTimers.current.push(settleTimer);
+        }
+      }, delay);
+      shuffleTimers.current.push(timer);
+    });
+  };
+
+  const closeDante = () => {
+    if (danteCloseTimer.current != null) {
+      window.clearTimeout(danteCloseTimer.current);
+      danteCloseTimer.current = null;
+    }
+    const dlg = danteDialogRef.current;
+    if (dlg?.open) dlg.close();
   };
 
   const goEpisode = (index: number) => {
@@ -492,7 +536,7 @@ export function WorldHome() {
         </div>
 
         <div className="poster-stage" id="poster-stage">
-          <div className="poster-deck">
+          <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
             </div>
@@ -546,18 +590,16 @@ export function WorldHome() {
               <button
                 type="button"
                 className="poster-shuffle ios26-glass"
-                onClick={() => {
-                  setLocked(true);
-                  goPoster((p) => p + 1);
-                }}
+                disabled={shuffling}
+                onClick={shufflePoster}
               >
                 <span aria-hidden="true">↻</span>
-                <b>SHUFFLE POSTER</b>
+                <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
               </button>
               <button
                 type="button"
                 className="poster-reset ios26-glass"
-                disabled={poster === 0}
+                disabled={poster === 0 || shuffling}
                 onClick={() => goPoster(0)}
               >
                 <span aria-hidden="true">↤</span>
@@ -568,6 +610,7 @@ export function WorldHome() {
                 className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
                 aria-pressed={locked}
                 aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
+                disabled={shuffling}
                 onClick={() => setLocked((v) => !v)}
               >
                 <span aria-hidden="true">
@@ -731,6 +774,7 @@ export function WorldHome() {
                         host.classList.remove("is-glitching");
                         const dlg = danteDialogRef.current;
                         if (!dlg) return;
+                        if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
                         try {
                           dlg.showModal();
                         } catch {
@@ -741,6 +785,10 @@ export function WorldHome() {
                         inner?.classList.remove("is-slam");
                         void (inner as HTMLElement | null)?.offsetWidth;
                         inner?.classList.add("is-slam");
+                        danteCloseTimer.current = window.setTimeout(() => {
+                          danteCloseTimer.current = null;
+                          if (dlg.open) dlg.close();
+                        }, 2600);
                       }, 420);
                     }}
                   >
@@ -1123,21 +1171,13 @@ export function WorldHome() {
         aria-label="アクセス拒否"
         onCancel={(e) => {
           e.preventDefault();
-          danteDialogRef.current?.close();
+          closeDante();
         }}
         onClick={(e) => {
-          if (e.target === danteDialogRef.current) danteDialogRef.current?.close();
+          if (e.target === danteDialogRef.current) closeDante();
         }}
       >
         <div className="dante-denied-inner" tabIndex={-1}>
-          <button
-            className="dante-dialog-close"
-            type="button"
-            aria-label="アクセス拒否表示を閉じる"
-            onClick={() => danteDialogRef.current?.close()}
-          >
-            CLOSE
-          </button>
           <p className="dante-denied-kicker">ACCESS DENIED</p>
           <div className="dante-no-stack" aria-hidden="true">
             <strong className="dante-no-ghost">NO</strong>
