@@ -1,0 +1,495 @@
+.rider-archive-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 28px;
+  color: var(--archive-accent-soft);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+}
+
+.rider-archive-eyebrow i {
+  width: 76px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--archive-accent), transparent);
+}
+
+.rider-archive-file-number {
+  margin: 0 0 13px;
+  color: var(--dim);
+  font-size: 8px;
+  letter-spacing: 0.28em;
+}
+
+.rider-archive-introduction h1 {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(54px, 7vw, 104px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.065em;
+}
+
+.rider-archive-introduction h1 small {
+  color: color-mix(in srgb, var(--archive-accent) 78%, #fff 22%);
+  font-size: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.36em;
+}
+
+.rider-archive-introduction h1 > span,
+.rider-archive-introduction h1 > strong {
+  display: block;
+  max-width: 100%;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.rider-archive-introduction h1 > span {
+  font-size: 0.66em;
+  letter-spacing: 0.02em;
+}
+
+.rider-archive-introduction h1.is-long > strong {
+  font-size: clamp(44px, 5.3vw, 78px);
+}
+
+.rider-archive-person {
+  margin: 24px 0 0;
+  color: var(--archive-accent-soft);
+  font-size: clamp(14px, 1.45vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.rider-archive-title {
+  margin: 10px 0 0;
+  color: rgba(244, 246, 251, 0.68);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.rider-archive-quotes {
+  display: grid;
+  gap: 12px;
+  margin: 38px 0;
+  padding: 24px 0 24px 24px;
+  border-left: 1px solid color-mix(in srgb, var(--archive-accent) 62%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--archive-accent) 5%, transparent), transparent 72%);
+}
+
+.rider-archive-quotes q {
+  display: block;
+  max-width: 680px;
+  color: rgba(244, 246, 251, 0.88);
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(12px, 1.15vw, 16px);
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-quotes q::before { content: "「"; color: var(--archive-accent); }
+.rider-archive-quotes q::after { content: "」"; color: var(--archive-accent); }
+
+.rider-archive-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+}
+
+.rider-archive-facts > div,
+.rider-archive-stats > div {
+  min-width: 0;
+  padding: 15px 17px;
+  border-right: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.rider-archive-facts dt,
+.rider-archive-stats dt {
+  margin-bottom: 7px;
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.24em;
+}
+
+.rider-archive-facts dd,
+.rider-archive-stats dd {
+  margin: 0;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-scroll-cue {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 34px;
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.24em;
+}
+
+.rider-archive-scroll-cue i {
+  width: 54px;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.rider-archive-scroll-cue i::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--archive-accent);
+  animation: riderArchiveCue 2.2s ease-in-out infinite;
+}
+
+.rider-archive-dossier,
+.rider-archive-form-records,
+.rider-archive-pagination {
+  position: relative;
+  z-index: 1;
+  width: min(1320px, calc(100% - 48px));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.rider-archive-dossier,
+.rider-archive-form-records {
+  padding: clamp(88px, 10vw, 152px) 0;
+}
+
+.rider-archive-section-index {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 64px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+}
+
+.rider-archive-section-index span {
+  color: var(--archive-accent);
+  font-family: var(--font-display);
+  font-size: 32px;
+}
+
+.rider-archive-section-index small {
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.28em;
+}
+
+.rider-archive-civilian {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.62fr) minmax(0, 1.38fr);
+  min-width: 0;
+  margin: 0 0 clamp(58px, 7vw, 96px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+  border-radius: clamp(20px, 3vw, 38px) clamp(44px, 6vw, 72px) clamp(24px, 4vw, 48px) clamp(14px, 2vw, 28px);
+  background:
+    linear-gradient(120deg, rgba(11, 16, 24, 0.98), rgba(6, 9, 14, 0.94)),
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--archive-accent) 12%, transparent), transparent 28rem);
+  box-shadow: 0 28px 82px rgba(0, 0, 0, 0.3);
+  animation: riderArchiveFormVisualIn 0.84s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
+
+.rider-archive-identity-records {
+  display: grid;
+  min-width: 0;
+}
+
+.rider-archive-identity-records.has-nightmare {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 2.6vw, 34px);
+  margin-bottom: clamp(58px, 7vw, 96px);
+}
+
+.rider-archive-identity-records.has-nightmare .rider-archive-civilian {
+  grid-template-columns: 1fr;
+  margin-bottom: 0;
+}
+
+.rider-archive-identity-records.has-nightmare .rider-archive-civilian-visual {
+  aspect-ratio: 4 / 5;
+  border-right: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 16%, transparent);
+}
+
+.rider-archive-identity-records.has-nightmare .rider-archive-civilian > figcaption {
+  min-height: 270px;
+  justify-content: flex-start;
+  padding: clamp(26px, 3.4vw, 46px);
+}
+
+.rider-archive-identity-records.has-nightmare .rider-archive-civilian > figcaption > h2 {
+  font-size: clamp(32px, 3.8vw, 54px);
+}
+
+.rider-nightmare-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(231, 26, 156, 0.34);
+  border-radius: clamp(20px, 3vw, 38px) clamp(44px, 6vw, 72px) clamp(24px, 4vw, 48px) clamp(14px, 2vw, 28px);
+  background:
+    linear-gradient(145deg, rgba(12, 8, 24, 0.98), rgba(6, 9, 17, 0.95)),
+    radial-gradient(circle at 78% 12%, rgba(231, 26, 156, 0.2), transparent 23rem);
+  box-shadow: 0 28px 82px rgba(0, 0, 0, 0.34);
+  animation: riderArchiveFormVisualIn 0.84s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
+
+.rider-nightmare-card::before {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  width: 62%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e71a9c, #ff4f55);
+  pointer-events: none;
+}
+
+.rider-nightmare-card-visual {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(231, 26, 156, 0.24);
+  background: #06030b;
+}
+
+.rider-nightmare-card-visual > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.98) contrast(1.04);
+  transition: transform 0.9s cubic-bezier(0.2, 0.75, 0.16, 1), filter 0.9s ease;
+}
+
+.rider-nightmare-card:hover .rider-nightmare-card-visual > img {
+  filter: saturate(1.06) contrast(1.06);
+  transform: scale(1.025);
+}
+
+.rider-nightmare-card-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 52%, rgba(4, 2, 9, 0.9));
+  pointer-events: none;
+}
+
+.rider-nightmare-card-visual > span {
+  position: absolute;
+  z-index: 3;
+  top: 22px;
+  left: 22px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
+}
+
+.rider-nightmare-pickup-button {
+  position: absolute;
+  z-index: 6;
+  right: clamp(18px, 3vw, 34px);
+  bottom: clamp(18px, 3vw, 34px);
+  display: grid;
+  place-items: center;
+  width: clamp(54px, 5.4vw, 68px);
+  height: clamp(54px, 5.4vw, 68px);
+  min-width: 54px;
+  min-height: 54px;
+  padding: 0;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(231, 26, 156, 0.88);
+  box-shadow: 0 0 0 7px rgba(231, 26, 156, 0.12), 0 16px 36px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.rider-nightmare-pickup-button span {
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.rider-nightmare-pickup-button:focus-visible {
+  background: rgba(231, 26, 156, 0.88);
+  box-shadow: 0 0 0 7px rgba(231, 26, 156, 0.12), 0 16px 36px rgba(0, 0, 0, 0.4);
+  transform: none;
+}
+
+.rider-nightmare-card-copy {
+  display: flex;
+  min-width: 0;
+  min-height: 270px;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: clamp(26px, 3.4vw, 46px);
+}
+
+.rider-nightmare-card-copy > p {
+  margin: 0 0 14px;
+  color: #ff6fc1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+}
+
+.rider-nightmare-card-copy > small {
+  color: rgba(244, 246, 251, 0.5);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+}
+
+.rider-nightmare-card-copy > h2 {
+  margin: clamp(18px, 2.4vw, 30px) 0 15px;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.3vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.rider-nightmare-card-copy > h2 > span,
+.rider-nightmare-dialog-heading > h2 > span {
+  display: block;
+}
+
+.rider-nightmare-card-copy > q {
+  margin: 0 0 24px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(13px, 1.4vw, 17px);
+  line-height: 1.8;
+}
+
+.rider-nightmare-card-copy dl,
+.rider-nightmare-card-copy dl > div {
+  margin: 0;
+}
+
+.rider-nightmare-card-copy dl > div {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  border-top: 1px solid rgba(231, 26, 156, 0.22);
+  border-bottom: 1px solid rgba(231, 26, 156, 0.22);
+}
+
+.rider-nightmare-card-copy dt,
+.rider-nightmare-card-copy dd {
+  margin: 0;
+  padding: 16px 0;
+}
+
+.rider-nightmare-card-copy dt {
+  color: #ff5cb7;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.rider-nightmare-card-copy dd {
+  color: rgba(244, 246, 251, 0.9);
+  font-size: clamp(17px, 2vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.rider-nightmare-dialog {
+  width: min(1220px, calc(100vw - 34px));
+  max-width: none;
+  max-height: min(92dvh, 960px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(231, 26, 156, 0.42);
+  color: #f6f7fb;
+  background: transparent;
+  box-shadow: 0 44px 140px rgba(0, 0, 0, 0.72);
+}
+
+.rider-nightmare-dialog[open] {
+  display: block;
+  animation: riderNightmareDialogIn 0.68s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rider-nightmare-dialog::backdrop {
+  background: rgba(1, 2, 6, 0.88);
+  animation: riderNightmareBackdropIn 0.42s ease both;
+}
+
+.rider-nightmare-dialog-panel {
+  position: relative;
+  max-height: min(92dvh, 960px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background:
+    radial-gradient(circle at 84% 12%, rgba(231, 26, 156, 0.18), transparent 30rem),
+    linear-gradient(145deg, #090612, #04070d 68%);
+}
+
+.rider-nightmare-dialog-close {
+  position: sticky;
+  z-index: 12;
+  top: max(16px, env(safe-area-inset-top));
+  display: flex;
+  width: max-content;
+  min-height: 48px;
+  margin: 18px 18px -66px auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 8px 7px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(8, 7, 14, 0.88);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+
+.rider-nightmare-dialog-close span {
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.rider-nightmare-dialog-close i {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 21px;
+  font-style: normal;
+  background: #e71a9c;
+}
