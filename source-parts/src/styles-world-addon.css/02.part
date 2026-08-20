@@ -1,0 +1,237 @@
+.form-pickup-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 32px;
+}
+
+.form-pickup-copy > p,
+.form-pickup-copy > small {
+  margin: 0;
+  color: color-mix(in srgb, var(--manager-accent, #78b69b) 80%, #fff);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.form-pickup-copy h2 { margin: 0; font-size: clamp(28px, 4vw, 48px); }
+.form-pickup-copy h2 span { display: block; font-size: 0.42em; letter-spacing: 0.12em; }
+.form-pickup-copy em { font-style: normal; letter-spacing: 0.16em; color: rgba(244, 246, 251, 0.62); }
+.form-pickup-copy q { margin: 8px 0 0; color: rgba(244, 246, 251, 0.78); }
+
+.form-pickup-dialog {
+  width: min(1100px, calc(100vw - 28px));
+  max-height: min(92dvh, 920px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--manager-accent, #78b69b) 40%, transparent);
+  background: transparent;
+  color: #f6f7fb;
+  outline: none !important;
+}
+
+.form-pickup-dialog::backdrop { background: rgba(2, 4, 8, 0.86); }
+
+.form-pickup-panel {
+  position: relative;
+  padding: 28px 24px 32px;
+  background: #07090e;
+}
+
+.form-pickup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.form-pickup-close:focus,
+.form-pickup-close:focus-visible { outline: none; }
+
+.form-pickup-heading h2 { margin: 8px 0; font-size: clamp(28px, 4vw, 46px); }
+
+.form-pickup-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.form-pickup-layout figure { margin: 0; overflow: hidden; border-radius: 18px; background: #05070b; }
+.form-pickup-layout img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.form-pickup-layout figcaption { display: flex; justify-content: space-between; padding: 10px 12px 14px; }
+
+.form-pickup-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-pickup-stats > div {
+  padding: 10px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.form-pickup-stats dt { margin-bottom: 4px; color: rgba(244, 246, 251, 0.45); font-size: 8px; letter-spacing: 0.18em; }
+.form-pickup-stats dd { margin: 0; font-weight: 700; }
+
+.form-pickup-sections { display: grid; gap: 18px; }
+.form-pickup-sections header { display: flex; gap: 10px; align-items: baseline; }
+.form-pickup-sections header span,
+.form-pickup-sections header p {
+  margin: 0;
+  color: color-mix(in srgb, var(--manager-accent, #78b69b) 80%, #fff);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+}
+.form-pickup-sections h3 { margin: 8px 0 4px; font-size: 15px; }
+.form-pickup-sections p { margin: 0; color: rgba(244, 246, 251, 0.76); font-size: 13px; line-height: 1.7; }
+
+.form-pickup-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.form-pickup-gallery figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #05070b;
+}
+
+.form-pickup-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.form-pickup-gallery figcaption {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px 12px;
+  font-size: 11px;
+}
+
+@keyframes danteCardGlitch {
+  0% { filter: none; transform: none; }
+  20% { filter: contrast(1.4) saturate(0.4); transform: translateX(-3px); }
+  40% { filter: contrast(1.8); transform: translateX(4px); }
+  60% { filter: none; transform: translateX(-2px); }
+  100% { filter: none; transform: none; }
+}
+
+@keyframes danteNoSlam {
+  0% { transform: scale(1.18); filter: contrast(1.6); }
+  100% { transform: none; filter: none; }
+}
+
+@media (max-width: 840px) {
+  header.topbar {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left));
+  }
+  header.topbar nav { display: none !important; }
+  .topbar-actions { grid-column: 2 !important; justify-self: end !important; }
+  .site-update-control { top: calc(88px + env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); }
+  .site-update-button { width: 40px; min-width: 40px; height: 40px; padding: 0; }
+  .site-update-button > b,
+  .site-update-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  br.tab-br { display: block; }
+  .world-column-tabs b,
+  .world-column-dialog-tabs b,
+  .liquid-swipe-tabs > button[role="tab"] span {
+    white-space: normal;
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  .poster-index { display: block !important; }
+  .manager-hero {
+    display: grid !important;
+    grid-template-columns: minmax(240px, 0.86fr) minmax(0, 1.14fr);
+    width: min(100% - 36px, 1080px);
+    min-height: 0;
+    gap: 36px;
+    padding-top: 108px;
+    align-items: start;
+  }
+  .manager-portrait-frame { position: relative; top: auto; max-height: none; }
+  .form-pickup { width: min(100% - 32px, 1000px); }
+}
+
+@media (max-width: 760px) {
+  .form-pickup-card,
+  .form-pickup-layout,
+  .form-pickup-stats,
+  .form-pickup-gallery,
+  .rider-form-gallery,
+  .rider-archive-identity-records.has-nightmare {
+    grid-template-columns: 1fr;
+  }
+}
+
+.export-page {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 48px 24px;
+  background: #05070c;
+  color: #f4f6fb;
+  text-align: center;
+  font-family: "Noto Sans JP", sans-serif;
+}
+.export-page p {
+  margin: 0;
+  letter-spacing: 0.42em;
+  font-size: 10px;
+  color: rgba(244, 246, 251, 0.42);
+}
+.export-page h1 {
+  margin: 0;
+  font-family: Cinzel, serif;
+  font-size: 28px;
+  font-weight: 600;
+}
+.export-page b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.export-page-btn {
+  display: inline-flex;
+  min-width: 220px;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+.export-page-alt,
+.export-page small {
+  color: rgba(244, 246, 251, 0.48);
+  font-size: 12px;
+}
+.export-page-alt { text-decoration: underline; }
