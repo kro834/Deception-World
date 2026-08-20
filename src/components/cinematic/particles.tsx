@@ -70,7 +70,7 @@ export function Particles({ active }: { active: boolean }) {
           ctx.fillStyle = p.gold
             ? `rgba(240, 215, 138, ${p.a})`
             : `rgba(159, 212, 255, ${p.a})`;
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI.PI * 2);
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fill();
         }
       }
