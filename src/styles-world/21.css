@@ -117,11 +117,23 @@ html[data-mode="world"] .episode-card:focus-visible {
   }
 }
 
+@media (max-width: 840px) {
+  /* The pickup rail becomes two rows here, so its shell must stop being a stadium. */
+  .world-column-dialog-tabs.liquid-swipe-tabs {
+    --liquid-shell-radius: 30px;
+    border-radius: var(--liquid-shell-radius);
+  }
+}
+
 @media (max-width: 560px) {
   /* A two-row switcher needs a rounded rectangle, not a single-row stadium. */
   .world-column-tabs.liquid-swipe-tabs:not(.world-column-dialog-tabs) {
     --liquid-shell-radius: 30px;
     border-radius: var(--liquid-shell-radius);
+  }
+
+  .world-column-dialog-copy {
+    margin-top: 24px;
   }
 
   .story-section,

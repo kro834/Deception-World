@@ -868,29 +868,75 @@ br.tab-br { display: none; }
   width: 50px;
   height: 50px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--slide-accent) 28%, rgba(255, 255, 255, 0.78));
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 22%, rgba(255, 255, 255, 0.52), transparent 34%),
-    linear-gradient(145deg, color-mix(in srgb, var(--slide-accent) 88%, #fff 8%), color-mix(in srgb, var(--slide-accent) 72%, #02050a));
+    radial-gradient(circle at 28% 12%, rgba(255, 255, 255, 0.5), transparent 38%),
+    radial-gradient(circle at 76% 88%, color-mix(in srgb, var(--slide-accent) 34%, transparent), transparent 48%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.2), color-mix(in srgb, var(--slide-accent) 26%, rgba(8, 14, 24, 0.46)) 58%, rgba(5, 9, 16, 0.52));
+  -webkit-backdrop-filter: blur(16px) saturate(185%) brightness(1.08);
+  backdrop-filter: blur(16px) saturate(185%) brightness(1.08);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 4px 14px color-mix(in srgb, var(--slide-accent) 36%, rgba(0, 0, 0, 0.62));
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 1px 0 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 44%, rgba(255, 255, 255, 0.16)),
+    inset 0 0 18px color-mix(in srgb, var(--slide-accent) 13%, transparent),
+    0 7px 22px color-mix(in srgb, var(--slide-accent) 24%, rgba(0, 0, 0, 0.64)),
+    0 2px 5px rgba(0, 0, 0, 0.28);
   transform: translate3d(var(--slide-offset, 0), -50%, 0);
   pointer-events: none;
   transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
+.ios-slide-open .ios-slide-open-thumb::before,
+.ios-slide-open .ios-slide-open-thumb::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.ios-slide-open .ios-slide-open-thumb::before {
+  z-index: 0;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 24% 2%, rgba(255, 255, 255, 0.48), transparent 42%),
+    linear-gradient(154deg, rgba(255, 255, 255, 0.2), transparent 34%, rgba(255, 255, 255, 0.035) 60%, transparent 74%);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+.ios-slide-open .ios-slide-open-thumb::after {
+  z-index: 1;
+  top: 6px;
+  left: 9px;
+  width: 28px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(104deg, transparent 5%, rgba(255, 255, 255, 0.18) 22%, rgba(255, 255, 255, 0.82) 50%, color-mix(in srgb, var(--slide-accent) 34%, transparent) 72%, transparent 94%);
+  filter: blur(0.4px);
+  mix-blend-mode: screen;
+  opacity: 0.74;
+  transform: rotate(-17deg) translate3d(0, 0, 0);
+  transition: transform 0.28s ease, opacity 0.2s ease;
+}
+
 .ios-slide-open .ios-slide-open-thumb > i {
   position: absolute;
+  z-index: 2;
   inset: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 12px color-mix(in srgb, var(--slide-accent) 14%, transparent);
 }
 
 .ios-slide-open .ios-slide-open-thumb > b {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   width: 24px;
   height: 24px;
@@ -901,9 +947,29 @@ br.tab-br { display: none; }
   transition: rotate 0.28s ease;
 }
 
+.ios-slide-open .ios-slide-open-thumb svg {
+  display: block;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.36)) drop-shadow(0 0 5px rgba(255, 255, 255, 0.16));
+}
+
 .ios-slide-open[data-dragging="true"] .ios-slide-open-thumb,
 .ios-slide-open[data-dragging="true"] .ios-slide-open-fill {
   transition: none;
+}
+
+.ios-slide-open[data-dragging="true"] .ios-slide-open-thumb,
+.ios-slide-open[data-completing="true"] .ios-slide-open-thumb {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 58%, rgba(255, 255, 255, 0.18)),
+    inset 0 0 22px color-mix(in srgb, var(--slide-accent) 20%, transparent),
+    0 9px 26px color-mix(in srgb, var(--slide-accent) 34%, rgba(0, 0, 0, 0.62));
+}
+
+.ios-slide-open[data-dragging="true"] .ios-slide-open-thumb::after,
+.ios-slide-open[data-completing="true"] .ios-slide-open-thumb::after {
+  opacity: 1;
+  transform: rotate(-11deg) translate3d(5px, 1px, 0) scale(1.06);
 }
 
 .ios-slide-open[data-completing="true"] {
@@ -940,8 +1006,18 @@ br.tab-br { display: none; }
 @media (hover: hover) and (pointer: fine) {
   .ios-slide-open:hover .ios-slide-open-thumb {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.62),
-      0 6px 18px color-mix(in srgb, var(--slide-accent) 48%, rgba(0, 0, 0, 0.56));
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      inset 1px 0 0 rgba(255, 255, 255, 0.26),
+      inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 52%, rgba(255, 255, 255, 0.16)),
+      inset 0 0 20px color-mix(in srgb, var(--slide-accent) 17%, transparent),
+      0 8px 24px color-mix(in srgb, var(--slide-accent) 30%, rgba(0, 0, 0, 0.62)),
+      0 2px 5px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .ios-slide-open .ios-slide-open-thumb {
+    background: color-mix(in srgb, var(--slide-accent) 48%, #101824);
   }
 }
 
@@ -970,6 +1046,7 @@ br.tab-br { display: none; }
   .ios-slide-open-fill,
   .ios-slide-open-label,
   .ios-slide-open .ios-slide-open-thumb,
+  .ios-slide-open .ios-slide-open-thumb::after,
   .ios-slide-open .ios-slide-open-thumb > b {
     transition: none !important;
   }
@@ -983,6 +1060,12 @@ br.tab-br { display: none; }
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  .ios-slide-open .ios-slide-open-thumb {
+    background: color-mix(in srgb, var(--slide-accent) 48%, #101824);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 @media (forced-colors: active) {
@@ -990,6 +1073,11 @@ br.tab-br { display: none; }
   .ios-slide-open .ios-slide-open-thumb {
     border: 2px solid ButtonText;
     forced-color-adjust: auto;
+  }
+
+  .ios-slide-open .ios-slide-open-thumb::before,
+  .ios-slide-open .ios-slide-open-thumb::after {
+    display: none;
   }
 }
 
