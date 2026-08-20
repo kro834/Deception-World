@@ -1,0 +1,531 @@
+.rider-nightmare-dialog-heading {
+  padding: clamp(70px, 9vw, 122px) clamp(24px, 7vw, 96px) clamp(42px, 6vw, 74px);
+  border-bottom: 1px solid rgba(231, 26, 156, 0.2);
+}
+
+.rider-nightmare-dialog-heading > p {
+  display: flex;
+  margin: 0 0 18px;
+  align-items: center;
+  gap: 13px;
+  color: #ff6fc1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+}
+
+.rider-nightmare-dialog-heading > p span {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid rgba(231, 26, 156, 0.4);
+  border-radius: 50%;
+}
+
+.rider-nightmare-dialog-heading > small {
+  color: rgba(244, 246, 251, 0.45);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+}
+
+.rider-nightmare-dialog-heading h2 {
+  max-width: 920px;
+  margin: 20px 0;
+  font-family: var(--font-display);
+  font-size: clamp(42px, 7vw, 92px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.rider-nightmare-dialog-heading q {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(16px, 2vw, 24px);
+}
+
+.rider-nightmare-dialog-description {
+  display: block;
+  max-width: 52rem;
+  margin-top: 20px;
+  color: rgba(239, 242, 248, 0.52);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.rider-nightmare-dialog-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
+  min-width: 0;
+}
+
+.rider-nightmare-dialog-layout > figure {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  min-width: 0;
+  min-height: min(88dvh, 900px);
+  margin: 0;
+  overflow: hidden;
+  background: #05020a;
+}
+
+.rider-nightmare-dialog-layout > figure img {
+  width: 100%;
+  height: min(88dvh, 900px);
+  object-fit: cover;
+}
+
+.rider-nightmare-dialog-layout > figure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 52%, rgba(3, 2, 8, 0.9));
+  pointer-events: none;
+}
+
+.rider-nightmare-dialog-layout figcaption {
+  position: absolute;
+  z-index: 2;
+  right: 26px;
+  bottom: 26px;
+  left: 26px;
+  display: grid;
+  gap: 8px;
+}
+
+.rider-nightmare-dialog-layout figcaption span {
+  color: #ff65bc;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.rider-nightmare-dialog-layout figcaption b {
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 26px);
+  overflow-wrap: anywhere;
+}
+
+.rider-nightmare-dialog-record {
+  min-width: 0;
+  padding: clamp(32px, 6vw, 76px);
+}
+
+.rider-nightmare-dialog-record > dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 52px;
+  border-top: 1px solid rgba(231, 26, 156, 0.2);
+}
+
+.rider-nightmare-dialog-record > dl > div {
+  min-width: 0;
+  padding: 17px 0;
+  border-bottom: 1px solid rgba(231, 26, 156, 0.16);
+}
+
+.rider-nightmare-dialog-record dt,
+.rider-nightmare-dialog-record dd {
+  margin: 0;
+}
+
+.rider-nightmare-dialog-record dt {
+  margin-bottom: 6px;
+  color: #ff6fc1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.rider-nightmare-dialog-record dd {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(14px, 1.4vw, 18px);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.rider-nightmare-dialog-sections {
+  display: grid;
+}
+
+.rider-nightmare-dialog-sections > section {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.64fr) minmax(0, 1.36fr);
+  gap: clamp(24px, 4vw, 58px);
+  padding: clamp(34px, 4vw, 56px) 0;
+  border-top: 1px solid rgba(231, 26, 156, 0.15);
+}
+
+.rider-nightmare-dialog-sections header > span {
+  color: #ff52b3;
+  font-family: var(--font-display);
+  font-size: 10px;
+}
+
+.rider-nightmare-dialog-sections header > p {
+  margin: 12px 0 16px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.rider-nightmare-dialog-sections h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.6vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.rider-nightmare-dialog-sections section > div p {
+  margin: 0 0 1.2em;
+  color: rgba(239, 242, 248, 0.72);
+  font-size: 13px;
+  line-height: 2.05;
+}
+
+@keyframes riderNightmareDialogIn {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(0.974); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes riderNightmareBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rider-archive-civilian::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  right: 0;
+  width: 44%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--archive-accent));
+  pointer-events: none;
+}
+
+.rider-archive-civilian-visual {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-right: 1px solid color-mix(in srgb, var(--archive-accent-soft) 16%, transparent);
+  background: #05070b;
+}
+
+.rider-archive-civilian-visual > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.94) contrast(1.03);
+  transition: transform 0.9s cubic-bezier(0.2, 0.75, 0.16, 1), filter 0.9s ease;
+}
+
+.rider-archive-civilian.fit-contain .rider-archive-civilian-visual > img {
+  object-fit: contain;
+}
+
+.rider-archive-civilian:hover .rider-archive-civilian-visual > img {
+  filter: saturate(1.02) contrast(1.05);
+  transform: scale(1.025);
+}
+
+.rider-archive-civilian-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 60%, rgba(3, 5, 8, 0.78)),
+    linear-gradient(90deg, transparent 62%, rgba(3, 5, 8, 0.28));
+  pointer-events: none;
+}
+
+.rider-archive-civilian-visual > span {
+  position: absolute;
+  z-index: 3;
+  top: 22px;
+  left: 22px;
+  padding-left: 28px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
+}
+
+.rider-archive-civilian-visual > span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 18px;
+  height: 1px;
+  background: var(--archive-accent);
+}
+
+.rider-archive-civilian > figcaption {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(30px, 6vw, 82px);
+}
+
+.rider-archive-civilian > figcaption > p {
+  margin: 0 0 14px;
+  color: var(--archive-accent-soft);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+}
+
+.rider-archive-civilian > figcaption > small {
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.22em;
+}
+
+.rider-archive-civilian > figcaption > h2 {
+  max-width: 100%;
+  margin: clamp(18px, 3vw, 34px) 0;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 70px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.rider-archive-civilian dl,
+.rider-archive-civilian dl > div {
+  margin: 0;
+}
+
+.rider-archive-civilian dl > div {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  max-width: 460px;
+  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 18%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 18%, transparent);
+}
+
+.rider-archive-civilian dt,
+.rider-archive-civilian dd {
+  margin: 0;
+  padding: 16px 0;
+}
+
+.rider-archive-civilian dt {
+  color: var(--archive-accent);
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.rider-archive-civilian dd {
+  min-width: 0;
+  color: rgba(244, 246, 251, 0.9);
+  font-size: clamp(17px, 2vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-sections {
+  display: grid;
+}
+
+.rider-archive-copy-section {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(42px, 7vw, 104px);
+  margin-bottom: 18px;
+  padding: clamp(48px, 6vw, 78px) clamp(24px, 4vw, 58px);
+  border: 1px solid var(--glass-border-soft);
+  border-radius: clamp(22px, 3vw, 40px) clamp(44px, 5vw, 68px) clamp(22px, 3vw, 40px) clamp(14px, 2vw, 26px);
+  background: linear-gradient(130deg, color-mix(in srgb, var(--archive-accent) 3%, transparent), rgba(7, 12, 19, 0.3));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.rider-archive-copy-heading > span {
+  color: var(--archive-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.rider-archive-copy-heading > p {
+  margin: 16px 0 20px;
+  color: var(--archive-accent-soft);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+}
+
+.rider-archive-copy-heading h2 {
+  max-width: 520px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 56px);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.rider-archive-copy-body {
+  display: grid;
+  gap: 22px;
+  align-content: start;
+}
+
+.rider-archive-copy-body p,
+.rider-archive-form-copy p,
+.rider-archive-record-grid article p {
+  margin: 0;
+  color: rgba(218, 224, 235, 0.74);
+  font-size: clamp(13px, 1.15vw, 15px);
+  line-height: 2.08;
+  text-align: justify;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-form-records {
+  padding-top: clamp(48px, 6vw, 82px);
+}
+
+.rider-archive-form {
+  position: relative;
+  margin-bottom: clamp(42px, 6vw, 80px);
+  padding: clamp(44px, 6vw, 82px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+  border-radius: clamp(24px, 4vw, 52px) clamp(58px, 8vw, 98px) clamp(24px, 4vw, 52px) clamp(14px, 2vw, 28px);
+  background:
+    linear-gradient(125deg, rgba(12, 17, 25, 0.97), rgba(7, 10, 16, 0.95)),
+    radial-gradient(circle at 86% 0%, color-mix(in srgb, var(--archive-accent) 16%, transparent), transparent 30rem);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+}
+
+.rider-archive-form::before,
+.rider-archive-form::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.rider-archive-form::before {
+  top: 0;
+  left: 0;
+  width: 38%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--archive-accent), transparent);
+}
+
+.rider-archive-form::after {
+  top: -11rem;
+  right: -11rem;
+  width: 22rem;
+  height: 22rem;
+  border: 1px solid color-mix(in srgb, var(--archive-accent-soft) 9%, transparent);
+  border-radius: 50%;
+  transition: transform 1.2s cubic-bezier(0.2, 0.75, 0.16, 1);
+}
+
+.rider-archive-form:hover::after {
+  transform: scale(1.12) rotate(12deg);
+}
+
+.rider-archive-form-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.55fr);
+  align-items: end;
+  gap: clamp(30px, 6vw, 80px);
+}
+
+.rider-archive-form-heading p {
+  margin: 0 0 14px;
+  color: var(--archive-accent-soft);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+}
+
+.rider-archive-form-heading > div > span {
+  color: var(--dim);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.rider-archive-form-heading h2 {
+  margin: 17px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(39px, 5.6vw, 78px);
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.rider-archive-form-heading h2 > span,
+.rider-archive-form-heading h2 > strong,
+.rider-archive-form-heading h2 > em {
+  display: block;
+  max-width: 100%;
+  font: inherit;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.rider-archive-form-heading h2 > span {
+  font-size: 0.64em;
+  letter-spacing: 0.01em;
+}
+
+.rider-archive-form-heading h2 > em {
+  margin-top: 8px;
+  color: var(--archive-accent-soft);
+  font-size: 0.42em;
+  letter-spacing: 0.04em;
+}
+
+.rider-archive-form-heading h2.is-long > strong {
+  font-size: 0.72em;
+}
+
+.rider-archive-form-heading h2.is-long > em {
+  font-size: clamp(11px, 1.4vw, 18px);
+}
+
+.rider-archive-call {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rider-archive-call b {
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
+  color: color-mix(in srgb, var(--archive-accent) 76%, #fff 24%);
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.13em;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  margin: 46px 0;
+  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
+}
