@@ -1,0 +1,393 @@
+/* `viewport-fit=cover` is enabled for the site, so compact iOS/iPadOS and
+   Android layouts reserve the physical safe area without changing the shared
+   glass material or interaction geometry. */
+@media (max-width: 840px), (orientation: landscape) and (max-height: 600px) and (max-width: 1000px) {
+  .topbar,
+  .manager-topbar,
+  .rider-archive-topbar {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  .hero {
+    padding-right: max(clamp(18px, 4vw, 24px), env(safe-area-inset-right));
+    padding-left: max(clamp(18px, 4vw, 24px), env(safe-area-inset-left));
+  }
+}
+
+/* Android/WebView compositor profile. The artwork, Liquid Glass, glow and
+   interaction layers stay intact; only raster area, update cadence and layer
+   ownership are tuned so ANGLE/Vulkan compositors do less repeated work. */
+html[data-android-renderer] {
+  min-height: 100%;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html[data-android-renderer] body,
+html[data-android-renderer] .site-shell,
+html[data-android-renderer] .manager-page,
+html[data-android-renderer] .rider-archive-page {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+html[data-android-renderer] body {
+  text-rendering: auto;
+}
+
+html[data-android-renderer] .ambient {
+  contain: layout paint style;
+  isolation: isolate;
+}
+
+html[data-android-renderer] .grain {
+  inset: -28%;
+  animation-duration: 0.56s;
+}
+
+html[data-one-ui-renderer] .grain {
+  animation-duration: 0.64s;
+}
+
+html[data-android-renderer] .ambient-orb,
+html[data-android-renderer] .poster-image,
+html[data-android-renderer] .poster-sheen,
+html[data-android-renderer] .manager-glow,
+html[data-android-renderer] .rider-archive-glow,
+html[data-android-renderer] .world-column-orbit,
+html[data-android-renderer] .world-column-orbit-glow,
+html[data-android-renderer] .liquid-rail-surface,
+html[data-android-renderer] .liquid-selection-lens,
+html[data-android-renderer] .liquid-selection-surface,
+html[data-android-renderer] .liquid-contact-glow,
+html[data-android-renderer] .liquid-contact-reflection,
+html[data-android-renderer] .liquid-lens-reflection {
+  backface-visibility: hidden;
+}
+
+html[data-android-renderer] .liquid-contact-glow,
+html[data-android-renderer] .liquid-contact-reflection,
+html[data-android-renderer] .liquid-lens-reflection {
+  contain: paint;
+}
+
+html[data-android-renderer] .poster-frame,
+html[data-android-renderer] .liquid-swipe-tabs,
+html[data-android-renderer] .world-column-dialog-card,
+html[data-android-renderer] .rider-nightmare-dialog-panel {
+  isolation: isolate;
+}
+
+html[data-android-renderer] .poster-image img,
+html[data-android-renderer] .manager-portrait-frame img,
+html[data-android-renderer] .rider-image,
+html[data-android-renderer] .rider-archive-portrait img,
+html[data-android-renderer] .rider-nightmare-image img {
+  image-rendering: auto;
+  backface-visibility: hidden;
+}
+
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="heading"],
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="copy"],
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="backdrop"],
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="profile-media"],
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="profile-copy"],
+html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="media"] {
+  backface-visibility: hidden;
+}
+
+@media (max-width: 840px) {
+  html[data-android-renderer] .topbar,
+  html[data-android-renderer] .manager-topbar,
+  html[data-android-renderer] .rider-archive-topbar {
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  html[data-android-renderer] .hero {
+    min-height: 100svh;
+    min-height: 100dvh;
+    padding-right: max(18px, env(safe-area-inset-right));
+    padding-left: max(18px, env(safe-area-inset-left));
+  }
+
+  html[data-android-renderer] .poster-control-cluster {
+    width: min(100%, 438px);
+    max-width: calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    min-height: 56px;
+  }
+
+  html[data-android-renderer] .poster-shuffle,
+  html[data-android-renderer] .poster-reset,
+  html[data-android-renderer] .poster-lock,
+  html[data-android-renderer] .motion-toggle,
+  html[data-android-renderer] .episode-controls button {
+    min-height: 48px;
+  }
+
+  html[data-android-renderer] .world-column-dialog,
+  html[data-android-renderer] .rider-nightmare-dialog {
+    width: calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  html[data-android-renderer] .world-column-dialog-card,
+  html[data-android-renderer] .rider-nightmare-dialog-panel {
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+  }
+
+  html[data-android-renderer] .dialog-inner {
+    padding-top: max(60px, calc(48px + env(safe-area-inset-top)));
+    padding-right: max(24px, env(safe-area-inset-right));
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+    padding-left: max(24px, env(safe-area-inset-left));
+  }
+
+  html[data-android-renderer] .poster-dialog-close,
+  html[data-android-renderer] .world-column-dialog-close,
+  html[data-android-renderer] .rider-nightmare-dialog-close {
+    top: max(14px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    min-height: 48px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  html[data-android-renderer] .poster-control-cluster {
+    max-width: calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    min-height: 56px;
+  }
+
+  html[data-android-renderer] .poster-shuffle,
+  html[data-android-renderer] .poster-reset,
+  html[data-android-renderer] .poster-lock,
+  html[data-android-renderer] .motion-toggle,
+  html[data-android-renderer] .episode-controls button {
+    min-height: 48px;
+  }
+
+  html[data-android-renderer] .world-column-dialog,
+  html[data-android-renderer] .rider-nightmare-dialog {
+    width: calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes siteUpdateSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 840px), (orientation: landscape) and (max-height: 600px) {
+  .site-update-control {
+    top: calc(72px + env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+  }
+
+  .site-update-button {
+    min-width: 46px;
+    width: 46px;
+    padding: 8px;
+    gap: 0;
+  }
+
+  .site-update-button > b {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-update-button,
+  .site-update-button[data-liquid-pressed="true"] {
+    scale: 1;
+    transition-duration: 0.001ms !important;
+  }
+
+  .site-update-button[aria-busy="true"] > i {
+    animation: none;
+  }
+
+  .site-update-glow {
+    display: none;
+  }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .site-update-button {
+    background: #101a28;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+
+/* ── Site-wide brush-up: selection, scrollbar, hover language ────── */
+
+::selection {
+  background: color-mix(in srgb, var(--cyan) 26%, rgba(10, 20, 32, 0.2));
+  color: #f2faff;
+}
+
+/* Root scroller only. Inner rails (episode grid) keep their hidden bars. */
+html {
+  scrollbar-color: rgba(103, 216, 255, 0.32) rgba(8, 12, 19, 0.85);
+}
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #070b12;
+}
+
+html::-webkit-scrollbar-thumb {
+  border: 2px solid #070b12;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(103, 216, 255, 0.42), rgba(36, 140, 255, 0.3));
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(103, 216, 255, 0.62), rgba(36, 140, 255, 0.46));
+}
+
+/* Hover parity for surfaces that until now only reacted to focus-visible or
+   :active. Pointer-hover devices only, so touch scrolling never triggers a
+   lift, and the lifts stay inside the transition sets each surface already
+   declares (border-color / box-shadow / transform / scale). */
+@media (hover: hover) {
+  .signal.is-accessible:hover {
+    z-index: 2;
+    border-color: rgba(103, 216, 255, 0.46);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34), inset 0 0 24px rgba(36, 140, 255, 0.08);
+    transform: translateY(-3px);
+  }
+
+  .signal.is-accessible:hover > img {
+    filter: saturate(1) contrast(1.06);
+    transform: scale(calc(var(--signal-zoom, 1.025) * 1.03));
+  }
+
+  .signal.is-accessible:hover::before {
+    background: rgba(5, 7, 11, 0.62);
+    opacity: 1;
+    transform: translate(2px, -2px);
+  }
+
+  .other-archive-card:hover {
+    border-color: rgba(103, 216, 255, 0.4);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+    translate: 0 -3px;
+  }
+
+  .dante-archive:hover {
+    border-color: rgba(255, 96, 96, 0.42);
+    scale: 1.012;
+  }
+
+  .world-column-orbit-trigger:hover {
+    border-color: rgba(215, 171, 81, 0.52);
+    background: linear-gradient(90deg, rgba(215, 171, 81, 0.1), transparent 62%);
+    scale: 1.015;
+  }
+
+  .world-column-orbit-trigger:hover i {
+    rotate: 90deg;
+  }
+
+  .liquid-glass-action.rider-profile-link:hover {
+    border-color: color-mix(in srgb, var(--rider-tone) 58%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--rider-tone) 13%, transparent), transparent);
+    scale: 1.014;
+  }
+
+  .liquid-glass-action.rider-profile-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  .poster-shuffle:hover,
+  .poster-reset:hover,
+  .poster-lock:hover {
+    border-color: rgba(202, 231, 250, 0.28);
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  .poster-shuffle:hover {
+    border-color: color-mix(in srgb, var(--cyan) 46%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 13%, transparent), transparent);
+  }
+}
+
+.world-column-orbit-trigger i {
+  transition: rotate 0.4s var(--glass-spring);
+}
+
+
+/* ── Depth parallax on hold ──────────────────────────────── */
+
+/* Long-pressing pushes the rail back and pulls the lens forward. The
+   unpressed tabs recede and dim so the pressed one reads as the near plane;
+   scale and opacity only, so it stays on the compositor. */
+.liquid-swipe-tabs > button[role="tab"] > * {
+  transition:
+    scale 0.42s var(--glass-spring),
+    opacity 0.34s ease,
+    filter 0.34s ease;
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] > button[role="tab"]:not([data-liquid-contact="true"]) > *,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > button[role="tab"]:not([data-liquid-contact="true"]) > * {
+  scale: 0.93;
+  opacity: 0.5;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] > button[role="tab"]:not([data-liquid-contact="true"]) > * {
+  scale: 0.915;
+  opacity: 0.42;
+}
+
+/* The shell itself settles back a touch, which is what sells the two planes. */
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-rail-surface,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface {
+  filter: brightness(0.88) saturate(0.9);
+}
+
+/* ── Side panel ──────────────────────────────────── */
+
+.side-panel-trigger {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 12%, rgba(255, 255, 255, 0.16), transparent 44%),
+    radial-gradient(ellipse at 78% 112%, color-mix(in srgb, var(--cyan) 16%, transparent), transparent 52%),
+    rgba(10, 18, 29, 0.42);
+  -webkit-backdrop-filter: blur(12px) saturate(155%);
+  backdrop-filter: blur(12px) saturate(155%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 26px rgba(0, 0, 0, 0.3);
+  color: rgba(238, 250, 255, 0.92);
+  cursor: pointer;
+  isolation: isolate;
+  scale: 1;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    scale 0.34s var(--glass-settle);
+}
