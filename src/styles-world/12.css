@@ -1,0 +1,369 @@
+@media (max-width: 360px) {
+  .poster-control-cluster {
+    width: 100%;
+  }
+}
+
+/* Tablet sizing must be viewport-driven. iPadOS can expose a fine pointer in
+   desktop-class browsing, so geometry must never depend on pointer type. */
+@media (min-width: 561px) and (max-width: 840px) {
+  .poster-controls {
+    padding-inline: 6px;
+  }
+
+  .poster-control-cluster {
+    width: min(90%, 430px);
+    max-width: calc(100vw - 64px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    isolation: isolate;
+  }
+
+  .poster-index {
+    display: none;
+  }
+
+  .poster-stage {
+    --poster-width: min(70vw, 480px);
+    gap: 56px;
+  }
+}
+
+/* The 13-inch iPad Pro renders at 1376 × 1032 CSS px. Keep a small
+   future-facing margin instead of keying this layout to the older 1366 × 1024
+   size, and preserve a comfortable first-screen composition. */
+@media (min-width: 841px) and (max-width: 1440px) and (min-height: 600px) and (max-height: 1100px) {
+  .poster-stage {
+    --poster-width: min(38vw, calc(62svh - 140px), 450px);
+    gap: 56px;
+  }
+
+  .poster-controls {
+    padding-inline: 8px;
+  }
+
+  .poster-control-cluster {
+    width: min(90%, 420px);
+    max-width: calc(100vw - 64px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    isolation: isolate;
+  }
+
+}
+
+@media (min-width: 841px) and (max-width: 1400px) and (min-height: 600px) and (max-height: 1100px) {
+  .poster-index { display: none; }
+}
+
+/* Wide, short desktop and Android desktop-mode viewports need the same
+   height-aware sizing as tablets. Full-height desktop screens retain the
+   larger 510px key visual. */
+@media (min-width: 1441px) and (max-height: 1000px) {
+  .poster-stage {
+    --poster-width: min(34vw, calc(62svh - 140px), 450px);
+    gap: 56px;
+  }
+
+  .poster-control-cluster {
+    width: min(90%, 420px);
+  }
+}
+
+/* ── Liquid Glass interaction system ─────────────────────────── */
+
+.liquid-swipe-tabs {
+  --liquid-current-accent: var(--cyan);
+  --liquid-shell-radius: 24px;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 0;
+  border-radius: var(--liquid-shell-radius);
+  background: rgba(10, 18, 29, 0.26);
+  -webkit-backdrop-filter: blur(12px) saturate(155%) contrast(1.035);
+  backdrop-filter: blur(12px) saturate(155%) contrast(1.035);
+  box-shadow: none;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  scale: 1;
+}
+
+.liquid-rail-surface {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  contain: paint;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: inherit;
+  overflow: hidden;
+  -webkit-clip-path: inset(0 round var(--liquid-shell-radius));
+  clip-path: inset(0 round var(--liquid-shell-radius));
+  isolation: isolate;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% -12%, rgba(255, 255, 255, 0.2), transparent 38%),
+    radial-gradient(ellipse at 86% 118%, color-mix(in srgb, var(--liquid-current-accent) 10%, transparent), transparent 46%),
+    linear-gradient(132deg, rgba(255, 255, 255, 0.075), transparent 34%, rgba(103, 216, 255, 0.035) 63%, transparent 84%),
+    rgba(10, 18, 29, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.045),
+    inset 0 -1px 0 rgba(132, 203, 255, 0.055),
+    0 14px 36px rgba(0, 0, 0, 0.18);
+  transform: translateZ(0) scale(1);
+  transform-origin: center;
+  transition:
+    transform 0.42s var(--glass-spring),
+    border-color 0.32s ease,
+    box-shadow 0.42s var(--glass-spring);
+}
+
+.liquid-swipe-tabs::after {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  right: 12%;
+  left: 12%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  opacity: 0.74;
+}
+
+.liquid-swipe-tabs > button[role="tab"] {
+  position: relative;
+  z-index: 6;
+  touch-action: pan-y;
+}
+
+.liquid-refraction-canvas {
+  position: absolute;
+  z-index: 5;
+  top: calc(-1 * var(--liquid-canvas-overscan, 38px));
+  left: calc(-1 * var(--liquid-canvas-overscan, 38px));
+  width: calc(100% + var(--liquid-canvas-overscan, 38px) * 2);
+  height: calc(100% + var(--liquid-canvas-overscan, 38px) * 2);
+  contain: strict;
+  border: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateZ(0);
+  /* The handoff back to the DOM lens now happens on the release frame, so the
+     canvas has to fade rather than snap. Fading in is still instant: the
+     shader's own phase spring is the fade-in. */
+  transition: opacity 0.15s linear;
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-refraction-canvas {
+  opacity: 1;
+  transition: none;
+  will-change: opacity;
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="fallback"] {
+  background: rgba(10, 18, 29, 0.58);
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="fallback"] > .liquid-rail-surface {
+  background-color: rgba(10, 18, 29, 0.16);
+}
+
+.liquid-swipe-tabs[data-liquid-spatial-selection="true"][data-liquid-held="true"],
+.liquid-swipe-tabs[data-liquid-spatial-selection="true"][data-liquid-held="true"] > button[role="tab"] {
+  touch-action: none;
+}
+
+.liquid-swipe-tabs > button[role="tab"]:focus-visible {
+  outline-color: var(--liquid-accent, var(--cyan));
+  outline-offset: -3px;
+}
+
+.liquid-contact-glow {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-160px, -160px, 0);
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.2), rgba(103, 216, 255, 0.065) 31%, transparent 67%),
+    radial-gradient(circle at 58% 56%, color-mix(in srgb, var(--liquid-current-accent) 10%, transparent), transparent 58%);
+  mix-blend-mode: screen;
+  transition: opacity 0.18s ease;
+  will-change: auto;
+}
+
+.liquid-contact-reflection {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 76px;
+  height: 28px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-120px, -120px, 0);
+  transform-origin: center;
+  background: linear-gradient(104deg, transparent 7%, rgba(255, 255, 255, 0.06) 20%, rgba(255, 255, 255, 0.46) 48%, color-mix(in srgb, var(--liquid-current-accent) 28%, transparent) 68%, transparent 92%);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.08);
+  mix-blend-mode: screen;
+  transition: opacity 0.16s ease;
+  will-change: auto;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-glow,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface > .liquid-contact-glow {
+  opacity: 1;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-reflection {
+  opacity: 0.58;
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-rail-surface > .liquid-contact-reflection,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface > .liquid-contact-reflection {
+  opacity: 0.92;
+}
+
+.liquid-selection-lens {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  /* Stadium, clamped by the browser to half the shorter side. The shader reads
+     this value back through configureRoot(), so the refraction silhouette
+     follows automatically. */
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transform-origin: 0 0;
+  scale: 1;
+  transition:
+    transform 0.5s var(--glass-settle),
+    scale 0.5s var(--glass-settle),
+    width 0.5s var(--glass-spring),
+    height 0.5s var(--glass-spring),
+    opacity 0.18s ease;
+  will-change: auto;
+}
+
+.liquid-selection-surface {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--liquid-current-accent) 52%, rgba(255, 255, 255, 0.34));
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 30% 8%, rgba(255, 255, 255, 0.28), transparent 35%),
+    linear-gradient(120deg, color-mix(in srgb, var(--liquid-current-accent) 21%, transparent), rgba(255, 255, 255, 0.065) 48%, color-mix(in srgb, var(--liquid-current-accent) 11%, transparent));
+  box-shadow:
+    0 12px 30px color-mix(in srgb, var(--liquid-current-accent) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 color-mix(in srgb, var(--liquid-current-accent) 25%, transparent);
+  transform: translateZ(0) scale(1);
+  transition:
+    transform 0.42s var(--glass-spring),
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.3s ease;
+  will-change: auto;
+}
+
+.liquid-selection-surface::before,
+.liquid-selection-surface::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.liquid-selection-surface::before {
+  z-index: 1;
+  inset: 1px;
+  background:
+    radial-gradient(ellipse at 21% -8%, rgba(255, 255, 255, 0.28), transparent 42%),
+    linear-gradient(154deg, rgba(255, 255, 255, 0.18), transparent 33%, rgba(255, 255, 255, 0.025) 58%, transparent 72%),
+    radial-gradient(ellipse at 82% 112%, color-mix(in srgb, var(--liquid-current-accent) 22%, transparent), transparent 54%);
+  opacity: 0.88;
+}
+
+.liquid-selection-surface::after {
+  z-index: 1;
+  right: 10%;
+  bottom: 1px;
+  left: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--liquid-current-accent) 52%, rgba(255, 255, 255, 0.34)), transparent);
+  opacity: 0.7;
+}
+
+.liquid-lens-reflection {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 68px;
+  height: 22px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.3;
+  transform: translate3d(-100px, -100px, 0);
+  transform-origin: center;
+  background: linear-gradient(104deg, transparent, rgba(255, 255, 255, 0.52) 46%, color-mix(in srgb, var(--liquid-current-accent) 36%, transparent) 66%, transparent);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+  mix-blend-mode: screen;
+  transition: opacity 0.18s ease;
+  will-change: auto;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-glow,
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-reflection,
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens,
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens > .liquid-selection-surface,
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens > .liquid-selection-surface,
+.liquid-swipe-tabs[data-liquid-held="true"] .liquid-lens-reflection,
+.liquid-swipe-tabs[data-liquid-dragging="true"] .liquid-lens-reflection {
+  will-change: transform, opacity;
+}
+
+.liquid-swipe-tabs[data-liquid-initialized="true"] > .liquid-selection-lens {
+  opacity: 1;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface {
+  border-color: rgba(226, 244, 255, 0.28);
+  transform: translateZ(0) scale(1.006);
+  transition-duration: 0.12s, 0.12s, 0.12s;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-selection-lens {
+  transition-duration: 0.3s, 0.3s, 0.3s, 0.3s, 0.12s;
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-selection-lens > .liquid-selection-surface {
+  transform: translateZ(0) scale(1.045);
+  transition-duration: 0.12s, 0.12s, 0.12s, 0.12s;
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-selection-lens > .liquid-selection-surface {
+  transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+  border-color: color-mix(in srgb, var(--liquid-current-accent) 44%, rgba(255, 255, 255, 0.24));
+  background: linear-gradient(128deg, rgba(255, 255, 255, 0.035), color-mix(in srgb, var(--liquid-current-accent) 6%, transparent));
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 1px 0 0 rgba(255, 255, 255, 0.075),
+    inset 0 -1px 0 color-mix(in srgb, var(--liquid-current-accent) 22%, transparent);
+  transform: translateZ(0) scale(1);
+}
