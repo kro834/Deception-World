@@ -1,0 +1,133 @@
+  root.addEventListener('pointerup', finish);
+  root.addEventListener('pointercancel', () => cancel());
+  root.addEventListener('contextmenu', (e) => e.preventDefault());
+  if (lockScroll) {
+    root.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+  }
+
+  let swallowClick = false;
+  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
+    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+    select(i); settle(i);
+  }));
+
+  const relayout = () => {
+    if (gesture) return;
+    const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
+    if (i >= 0) active = i;
+    settle(active);
+  };
+  let ro = 0;
+  new ResizeObserver(() => {
+    if (ro) return;
+    ro = requestAnimationFrame(() => { ro = 0; relayout(); });
+  }).observe(root);
+  root.addEventListener('liquidrelayout', relayout);
+  requestAnimationFrame(() => settle(active));
+}
+
+// ── Standalone glass pressable ───────────────────────────────────────────────
+function initAction(root) {
+  if (!root || root.dataset.liquidBound === "true") return;
+  root.dataset.liquidBound = "true";
+  const lens = root.querySelector(':scope > .liquid-selection-lens');
+  let pid = null, holdTimer = null, start = null, rect = null;
+  const layout = () => {
+    const g = { x: 0, y: 0, width: Math.max(root.offsetWidth, 1), height: Math.max(root.offsetHeight, 1) };
+    if (lens) {
+      lens.style.width = g.width.toFixed(2) + 'px';
+      lens.style.height = g.height.toFixed(2) + 'px';
+      lens.style.transform = 'translate3d(0,0,0)';
+    }
+    return g;
+  };
+  const release = () => {
+    if (pid === null) return;
+    pid = null; clearTimeout(holdTimer);
+    root.dataset.liquidPressed = 'false'; root.dataset.liquidHeld = 'false';
+    if (getRenderer().isActive(root)) getRenderer().setPhase('rest');
+  };
+  root.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || pid !== null) return;
+    pid = e.pointerId; start = { x: e.clientX, y: e.clientY };
+    rect = root.getBoundingClientRect();
+    const g = layout();
+    root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'false';
+    root.dataset.liquidInitialized = 'true';
+    if (!mq(REDUCED_MOTION).matches && getRenderer().activate(root)) {
+      getRenderer().setAccent(getComputedStyle(root).getPropertyValue('--liquid-current-accent').trim());
+      getRenderer().setGeometry(g); getRenderer().setPhase('pressed');
+    }
+    if (getRenderer().isActive(root)) getRenderer().setContact({ x: e.clientX - rect.left, y: e.clientY - rect.top }, { x: 0, y: 0 });
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      if (pid === null) return;
+      root.dataset.liquidHeld = 'true';
+      if (getRenderer().isActive(root)) getRenderer().setPhase('held');
+    }, 105);
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (pid !== e.pointerId) return;
+    if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 11) { release(); return; }
+    if (getRenderer().isActive(root)) getRenderer().setContact({ x: e.clientX - rect.left, y: e.clientY - rect.top }, { x: 0, y: 0 });
+  });
+  root.addEventListener('pointerup', release);
+  root.addEventListener('pointercancel', release);
+  root.addEventListener('pointerleave', release);
+}
+
+// ── Side panel ─────────────────────────────────────────────────
+function initPanel() {
+  const trigger = document.querySelector('.side-panel-trigger');
+  const panel = document.querySelector('.side-panel');
+  const scrim = document.querySelector('.side-panel-scrim');
+  if (!trigger || !panel || !scrim) return;
+  if (panel.dataset.liquidBound === 'true') return;
+  panel.dataset.liquidBound = 'true';
+  const set = (open) => {
+    panel.dataset.open = String(open);
+    scrim.dataset.open = String(open);
+    trigger.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (!open) trigger.focus({ preventScroll: true });
+  };
+  trigger.addEventListener('click', () => set(true));
+  scrim.addEventListener('click', () => set(false));
+  const closeBtn = panel.querySelector('.side-panel-close');
+  if (closeBtn) closeBtn.addEventListener('click', function () { set(false); });
+  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.dataset.open === 'true') set(false); });
+}
+
+// Each surface is initialised independently: a failure in one must not strand
+// the others, and a WebGL failure must never stop the DOM lens from working.
+function safely(label, fn) {
+  try { fn(); return true; }
+  catch (err) { console.error('[glass] ' + label + ' failed:', err); return false; }
+}
+
+export function bootLiquidGlass(scope) {
+  if (typeof document === "undefined") return;
+  const root = scope || document;
+  let railsOk = 0;
+  root.querySelectorAll('.liquid-swipe-tabs:not(.liquid-glass-action)').forEach(function (el) {
+    if (safely('rail', function () { initRail(el); })) railsOk++;
+  });
+  root.querySelectorAll('.liquid-glass-action').forEach(function (el) {
+    safely('action', function () { initAction(el); });
+  });
+  safely('panel', initPanel);
+  document.documentElement.setAttribute('data-scroll-motion-ready', 'true');
+  root.querySelectorAll('[data-reveal]').forEach(function (el) {
+    el.setAttribute('data-visible', 'true');
+  });
+  const webglOk = safely('webgl', function () { if (!getRenderer().ensure()) throw new Error('unavailable'); });
+  const status = document.getElementById('glass-status');
+  if (status) {
+    status.textContent = 'JS: OK / rails: ' + railsOk + ' / WebGL: ' + (webglOk ? 'ON' : 'OFF (CSSフォールバック)');
+    status.dataset.state = railsOk > 0 ? 'ok' : 'bad';
+  }
+}
+
+export { initRail, initAction };
+
