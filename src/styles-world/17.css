@@ -1,0 +1,599 @@
+.rider-archive-stats dd {
+  color: var(--archive-accent-soft);
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.rider-archive-form-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 2vw, 22px);
+  margin: 0 0 clamp(34px, 5vw, 54px);
+}
+
+.rider-archive-form-gallery figure {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 2 / 3;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 28%, transparent);
+  background: #05070b;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.32);
+  animation: riderArchiveFormVisualIn 0.8s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
+
+.rider-archive-form-gallery figure:nth-child(2) {
+  animation-delay: 0.09s;
+}
+
+.rider-archive-form-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.2, 0.75, 0.16, 1), filter 0.8s ease;
+}
+
+.rider-archive-form-gallery .fit-contain img {
+  object-fit: contain;
+}
+
+.rider-archive-form-gallery figure:hover img {
+  filter: saturate(1.08) contrast(1.03);
+  transform: scale(1.025);
+}
+
+.rider-archive-form-gallery figcaption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: clamp(13px, 2vw, 20px);
+  background: linear-gradient(0deg, rgba(3, 5, 9, 0.96), rgba(3, 5, 9, 0.05));
+}
+
+.rider-archive-form-gallery figcaption span {
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.22em;
+}
+
+.rider-archive-form-gallery figcaption b {
+  color: var(--archive-accent-soft);
+  font-family: var(--font-display);
+  font-size: clamp(12px, 1.8vw, 18px);
+  letter-spacing: 0.12em;
+}
+
+.rider-archive-form-copy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 42px;
+}
+
+.rider-archive-record-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 12px;
+  margin-top: 48px;
+}
+
+.rider-archive-record-grid > div {
+  min-width: 0;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid color-mix(in srgb, var(--archive-accent-soft) 12%, transparent);
+  background: rgba(255, 255, 255, 0.012);
+  transition: border-color 0.35s ease, background 0.35s ease, transform 0.35s ease;
+}
+
+.rider-archive-record-grid > div:hover {
+  border-color: color-mix(in srgb, var(--archive-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--archive-accent) 3%, transparent);
+  transform: translateY(-3px);
+}
+
+.rider-archive-record-grid > div > span {
+  display: block;
+  margin-bottom: 26px;
+  color: var(--archive-accent);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+}
+
+.rider-archive-record-grid article + article {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 10%, transparent);
+}
+
+.rider-archive-record-grid article h3 {
+  margin: 0 0 11px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-record-grid article p {
+  font-size: 12px;
+  line-height: 1.85;
+  text-align: left;
+}
+
+.rider-archive-pagination {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  margin-bottom: clamp(78px, 9vw, 128px);
+  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+}
+
+.rider-archive-pagination > a {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 130px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  padding: 28px 38px;
+  transition: background 0.35s ease;
+}
+
+.rider-archive-pagination > a:first-child {
+  padding-left: 62px;
+  border-right: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+}
+
+.rider-archive-pagination > a:last-child {
+  align-items: flex-end;
+  padding-right: 62px;
+  border-left: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+  text-align: right;
+}
+
+.rider-archive-pagination > a > small {
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.22em;
+}
+
+.rider-archive-pagination > a > b {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.24em;
+  row-gap: 2px;
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.8vw, 27px);
+  line-height: 1.16;
+  white-space: normal;
+}
+
+.rider-archive-pagination > a > b > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.rider-archive-pagination > a:last-child > b {
+  justify-content: flex-end;
+}
+
+.rider-archive-pagination > a > span:last-child {
+  position: absolute;
+  top: 50%;
+  color: var(--archive-accent);
+  font-size: 20px;
+  transform: translateY(-50%);
+}
+
+.rider-archive-pagination > a:first-child > span:last-child { left: 26px; }
+.rider-archive-pagination > a:last-child > span:last-child { right: 26px; }
+
+.rider-archive-pagination > a:hover,
+.rider-archive-pagination > a:focus-visible {
+  background: color-mix(in srgb, var(--archive-accent) 6%, transparent);
+}
+
+.rider-archive-pagination-index {
+  align-items: center;
+  width: 170px;
+  color: var(--dim);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+}
+
+.rider-archive-pagination-index i {
+  color: var(--archive-accent);
+  font-size: 7px;
+  font-style: normal;
+  letter-spacing: 0.28em;
+}
+
+.rider-archive-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.rider-archive-footer > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rider-archive-footer > a svg {
+  width: 14px;
+  transform: rotate(-90deg);
+}
+
+.rider-archive-footer > a path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+@keyframes riderArchiveOrbit {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes riderArchivePortraitIn {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateX(-34px) scale(0.985); }
+  to { opacity: 1; clip-path: inset(0); transform: none; }
+}
+
+@keyframes riderArchiveCopyIn {
+  from { opacity: 0; transform: translateX(22px); }
+}
+
+@keyframes riderArchiveFormVisualIn {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(22px); }
+  to { opacity: 1; clip-path: inset(0); transform: none; }
+}
+
+@keyframes riderArchiveImageBreathe {
+  to { transform: scale(1.026); }
+}
+
+@keyframes riderArchiveScan {
+  from { transform: translateY(-10%); }
+  to { transform: translateY(680%); }
+}
+
+@keyframes riderArchiveCue {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+@media (max-width: 1080px) {
+  .rider-archive-hero {
+    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+    gap: 42px;
+    width: min(100% - 36px, 1080px);
+  }
+
+  .rider-archive-introduction h1 {
+    font-size: clamp(48px, 7vw, 76px);
+  }
+
+  .rider-archive-introduction h1.is-long > strong {
+    font-size: clamp(40px, 5.3vw, 62px);
+  }
+
+  .rider-archive-copy-section {
+    grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr);
+    gap: 42px;
+  }
+
+  .rider-archive-form-copy {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 760px) {
+  .rider-archive-topbar {
+    min-height: 68px;
+    padding: 10px 18px;
+  }
+
+  .rider-archive-topbar .brand small,
+  .rider-archive-back span {
+    display: none;
+  }
+
+  .rider-archive-back {
+    padding: 10px;
+  }
+
+  .rider-archive-hero {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    padding: 90px 18px 82px;
+  }
+
+  .rider-archive-portrait-column {
+    margin: 0 auto 58px;
+  }
+
+  .rider-archive-portrait {
+    position: relative;
+    top: auto;
+    width: min(100%, 560px);
+    max-height: none;
+  }
+
+  .rider-archive-introduction {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .rider-archive-introduction h1 {
+    font-size: clamp(48px, 14vw, 74px);
+  }
+
+  .rider-archive-introduction h1.is-long > strong {
+    font-size: min(11vw, 58px);
+  }
+
+  .rider-archive-person {
+    font-size: 14px;
+  }
+
+  .rider-archive-quotes {
+    margin: 34px 0;
+    padding-left: 18px;
+  }
+
+  .rider-archive-dossier,
+  .rider-archive-form-records,
+  .rider-archive-pagination {
+    width: calc(100% - 36px);
+  }
+
+  .rider-archive-civilian {
+    grid-template-columns: minmax(190px, 0.72fr) minmax(0, 1.28fr);
+  }
+
+  .rider-archive-civilian > figcaption {
+    padding: 28px;
+  }
+
+  .rider-archive-civilian > figcaption > h2 {
+    font-size: clamp(28px, 6.4vw, 46px);
+  }
+
+  .rider-nightmare-dialog {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .rider-nightmare-dialog-panel {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .rider-nightmare-dialog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-nightmare-dialog-layout > figure {
+    position: relative;
+    min-height: 68svh;
+  }
+
+  .rider-nightmare-dialog-layout > figure img {
+    height: 68svh;
+  }
+
+  .rider-nightmare-dialog-sections > section {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-archive-copy-section {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .rider-archive-copy-heading h2 {
+    font-size: clamp(32px, 9vw, 48px);
+  }
+
+  .rider-archive-copy-body p,
+  .rider-archive-form-copy p {
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .rider-archive-form {
+    padding: 38px 24px;
+  }
+
+  .rider-archive-form-heading {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .rider-archive-form-heading h2 {
+    font-size: clamp(34px, 10vw, 56px);
+  }
+
+  .rider-archive-form-heading h2.is-long > strong {
+    font-size: clamp(24px, 7vw, 38px);
+  }
+
+  .rider-archive-call {
+    justify-content: flex-start;
+  }
+
+  .rider-archive-record-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-archive-pagination {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rider-archive-pagination > a {
+    min-height: 112px;
+    padding: 22px 18px;
+  }
+
+  .rider-archive-pagination > a:first-child {
+    padding-left: 42px;
+  }
+
+  .rider-archive-pagination > a:last-child {
+    padding-right: 42px;
+  }
+
+  .rider-archive-pagination-index {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: auto;
+    min-height: 72px !important;
+    border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 14%, transparent);
+  }
+}
+
+@media (max-width: 640px) {
+  .rider-archive-identity-records.has-nightmare {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .rider-archive-hero {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .rider-archive-portrait figcaption {
+    right: 20px;
+    bottom: 20px;
+    left: 20px;
+  }
+
+  .rider-archive-introduction h1 {
+    font-size: clamp(40px, 13.6vw, 60px);
+  }
+
+  .rider-archive-introduction h1.is-long > strong {
+    font-size: clamp(29px, 9.5vw, 44px);
+  }
+
+  .rider-archive-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-archive-dossier,
+  .rider-archive-form-records,
+  .rider-archive-pagination {
+    width: calc(100% - 28px);
+  }
+
+  .rider-archive-civilian {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-archive-civilian-visual {
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--archive-accent-soft) 16%, transparent);
+  }
+
+  .rider-archive-civilian > figcaption {
+    padding: 26px 22px 30px;
+  }
+
+  .rider-archive-civilian > figcaption > h2 {
+    font-size: clamp(25px, 8.8vw, 40px);
+  }
+
+  .rider-archive-civilian dd {
+    font-size: clamp(16px, 5.2vw, 22px);
+  }
+
+  .rider-nightmare-card-copy {
+    min-height: 0;
+    padding: 26px 22px 30px;
+  }
+
+  .rider-nightmare-card-copy > h2 {
+    font-size: clamp(27px, 9.2vw, 40px);
+  }
+
+  .rider-nightmare-dialog-heading {
+    padding: 74px 20px 38px;
+  }
+
+  .rider-nightmare-dialog-heading h2 {
+    font-size: clamp(34px, 11.5vw, 52px);
+  }
+
+  .rider-nightmare-dialog-record {
+    padding: 30px 20px 44px;
+  }
+
+  .rider-nightmare-dialog-record > dl {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-nightmare-dialog-layout > figure,
+  .rider-nightmare-dialog-layout > figure img {
+    min-height: 0;
+    height: 62svh;
+  }
+
+  .rider-archive-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rider-archive-form-heading h2 {
+    font-size: clamp(26px, 8vw, 44px);
+  }
+
+  .rider-archive-pagination > a > b {
+    font-size: clamp(12px, 3.6vw, 15px);
+    line-height: 1.24;
+  }
+
+  .rider-archive-pagination > a > b > span {
+    flex-basis: 100%;
+  }
+
+  .rider-archive-pagination > a {
+    min-height: 120px;
+    padding: 20px 10px;
+  }
+
+  .rider-archive-pagination > a:first-child {
+    padding-left: 30px;
+  }
+
+  .rider-archive-pagination > a:last-child {
+    padding-right: 30px;
+  }
+
+  .rider-archive-pagination > a:first-child > span:last-child {
+    left: 10px;
+  }
+
+  .rider-archive-pagination > a:last-child > span:last-child {
+    right: 10px;
+  }
+
+  .rider-archive-pagination > a > small {
+    letter-spacing: 0.1em;
+  }
+
+  .rider-archive-footer {
+    gap: 18px;
+  }
+}
