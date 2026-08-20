@@ -4,6 +4,7 @@ import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { SlideOpenControl } from "./slide-open-control";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 type RiderDossier = {
   id: string;
@@ -721,7 +722,9 @@ export function RiderPage({ id }: { id: string }) {
         </Link>
         <Link to="/world" hash="riders" className="manager-back">
           <span>ライダー一覧へ戻る</span>
-          <i aria-hidden="true">↙</i>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="arrow-down-left" size={14} />
+          </i>
         </Link>
       </header>
       <section className="manager-hero">
@@ -853,7 +856,9 @@ export function RiderPage({ id }: { id: string }) {
           <div className="rider-nightmare-dialog-panel">
             <button type="button" className="rider-nightmare-dialog-close" onClick={closeNightmare} aria-label="閉じる">
               <span>CLOSE</span>
-              <i>×</i>
+              <i aria-hidden="true">
+                <UiVectorIcon kind="close" size={16} />
+              </i>
             </button>
             <div className="rider-nightmare-dialog-heading">
               <p>

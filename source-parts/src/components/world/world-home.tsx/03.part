@@ -260,7 +260,9 @@
                 aria-busy={shuffling}
                 onClick={shufflePoster}
               >
-                <span aria-hidden="true">↻</span>
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="shuffle" size={18} />
+                </span>
                 <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
               </button>
               <button
@@ -269,7 +271,9 @@
                 disabled={poster === 0 || shuffling}
                 onClick={() => goPoster(0)}
               >
-                <span aria-hidden="true">↤</span>
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="reset" size={17} />
+                </span>
                 <b>RESET</b>
               </button>
               <button

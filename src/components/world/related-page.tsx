@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 type Related = {
   id: string;
@@ -200,7 +201,9 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         </Link>
         <Link to="/world" hash="manager-archive" className="manager-back">
           <span>その他へ戻る</span>
-          <i aria-hidden="true">↙</i>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="arrow-down-left" size={14} />
+          </i>
         </Link>
       </header>
       <section className="manager-hero">

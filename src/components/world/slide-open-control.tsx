@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, Ref } from "react";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 type SlideOpenControlProps = {
+  ariaControls?: string;
   ariaLabel: string;
+  buttonRef?: Ref<HTMLButtonElement>;
   className?: string;
+  expanded?: boolean;
   label?: string;
   onOpen: () => void;
 };
@@ -11,12 +15,15 @@ type SlideOpenControlProps = {
 const OPEN_THRESHOLD = 0.68;
 
 export function SlideOpenControl({
+  ariaControls,
   ariaLabel,
+  buttonRef,
   className = "",
+  expanded,
   label = "詳細を開く",
   onOpen,
 }: SlideOpenControlProps) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const internalButtonRef = useRef<HTMLButtonElement>(null);
   const thumbRef = useRef<HTMLSpanElement>(null);
   const activePointer = useRef<number | null>(null);
   const grabOffset = useRef(0);
@@ -28,6 +35,15 @@ export function SlideOpenControl({
   const [progress, setProgress] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [completing, setCompleting] = useState(false);
+
+  const setButtonRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      internalButtonRef.current = node;
+      if (typeof buttonRef === "function") buttonRef(node);
+      else if (buttonRef) buttonRef.current = node;
+    },
+    [buttonRef],
+  );
 
   const clearTimers = () => {
     if (activateTimer.current != null) window.clearTimeout(activateTimer.current);
@@ -51,7 +67,7 @@ export function SlideOpenControl({
   }, []);
 
   const getMetrics = () => {
-    const button = buttonRef.current;
+    const button = internalButtonRef.current;
     const thumb = thumbRef.current;
     if (!button || !thumb) return null;
     const buttonRect = button.getBoundingClientRect();
@@ -158,13 +174,15 @@ export function SlideOpenControl({
 
   return (
     <button
-      ref={buttonRef}
+      ref={setButtonRef}
       type="button"
       className={`${className} ios-slide-open`.trim()}
       style={style}
       data-dragging={dragging}
       data-completing={completing}
       aria-haspopup="dialog"
+      aria-controls={ariaControls}
+      aria-expanded={expanded}
       aria-label={`${ariaLabel}。右へスライドして開きます`}
       onPointerDown={startDrag}
       onPointerMove={drag}
@@ -188,7 +206,9 @@ export function SlideOpenControl({
       </span>
       <span ref={thumbRef} className="ios-slide-open-thumb" aria-hidden="true">
         <i />
-        <b>+</b>
+        <b>
+          <UiVectorIcon kind="plus" size={22} />
+        </b>
       </span>
     </button>
   );

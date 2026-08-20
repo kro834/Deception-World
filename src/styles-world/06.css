@@ -463,6 +463,7 @@
   height: 44px;
   flex: 0 0 44px;
   place-items: center;
+  padding: 0;
   overflow: hidden;
   border: 1px solid var(--glass-border);
   border-radius: 999px;
@@ -475,6 +476,14 @@
   color: var(--text);
   cursor: pointer;
   transition: border-color 0.28s ease, background 0.28s ease, color 0.28s ease, transform 0.28s ease;
+}
+
+.episode-controls button > span {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  line-height: 0;
 }
 
 .episode-controls button:focus-visible {
@@ -499,6 +508,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.16em;
   text-align: center;
+  text-indent: 0.16em;
   white-space: nowrap;
 }
 
@@ -518,4 +528,3 @@
   scrollbar-width: none;
   touch-action: pan-x pan-y;
 }
-

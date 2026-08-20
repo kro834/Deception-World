@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, ROKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -111,7 +112,9 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         <div className="form-pickup-panel">
           <button type="button" className="form-pickup-close" onClick={close} aria-label="閉じる">
             <span>CLOSE</span>
-            <i>×</i>
+            <i aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </i>
           </button>
           <div className="form-pickup-heading">
             <p>
@@ -232,7 +235,9 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         </Link>
         <Link to="/world" hash="manager-archive" className="manager-back">
           <span>六詠一覧へ戻る</span>
-          <i aria-hidden="true">↙</i>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="arrow-down-left" size={14} />
+          </i>
         </Link>
       </header>
       <section className="manager-hero">

@@ -97,8 +97,14 @@
 }
 
 .manager-back i {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  place-items: center;
   color: var(--manager-accent);
   font-style: normal;
+  line-height: 0;
 }
 
 .manager-back:focus-visible {
@@ -480,4 +486,3 @@
     radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--manager-accent) 16%, transparent), transparent 30rem);
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
 }
-

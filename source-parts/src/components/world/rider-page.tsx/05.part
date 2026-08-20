@@ -42,7 +42,9 @@
           <div className="rider-nightmare-dialog-panel">
             <button type="button" className="rider-nightmare-dialog-close" onClick={closeNightmare} aria-label="閉じる">
               <span>CLOSE</span>
-              <i>×</i>
+              <i aria-hidden="true">
+                <UiVectorIcon kind="close" size={16} />
+              </i>
             </button>
             <div className="rider-nightmare-dialog-heading">
               <p>

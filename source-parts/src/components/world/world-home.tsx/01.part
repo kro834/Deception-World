@@ -6,6 +6,8 @@ import { useWorldMode } from "./use-world-mode";
 import { LiquidLens } from "./liquid-rail";
 import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { RIDER_NAV, NameText } from "./dossier-nav";
+import { SlideOpenControl } from "./slide-open-control";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 const POSTERS = [
   { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },

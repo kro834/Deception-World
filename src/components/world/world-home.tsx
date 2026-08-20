@@ -6,6 +6,8 @@ import { useWorldMode } from "./use-world-mode";
 import { LiquidLens } from "./liquid-rail";
 import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { RIDER_NAV, NameText } from "./dossier-nav";
+import { SlideOpenControl } from "./slide-open-control";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 const POSTERS = [
   { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
@@ -599,7 +601,9 @@ export function WorldHome() {
                 aria-busy={shuffling}
                 onClick={shufflePoster}
               >
-                <span aria-hidden="true">↻</span>
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="shuffle" size={18} />
+                </span>
                 <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
               </button>
               <button
@@ -608,7 +612,9 @@ export function WorldHome() {
                 disabled={poster === 0 || shuffling}
                 onClick={() => goPoster(0)}
               >
-                <span aria-hidden="true">↤</span>
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="reset" size={17} />
+                </span>
                 <b>RESET</b>
               </button>
               <button
@@ -890,40 +896,15 @@ export function WorldHome() {
               <div>
                 <p>{column.body}</p>
               </div>
-              <button
-                ref={pickupBtnRef}
-                type="button"
-                className="world-column-orbit-trigger ios26-glass"
-                aria-haspopup="dialog"
-                aria-expanded={pickupOpen}
-                aria-controls="world-column-pickup"
-                onPointerUp={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openPickup();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openPickup();
-                }}
-              >
-                <span>
-                  <small>PICK UP</small>
-                  <b>ピックアップ</b>
-                </span>
-                <i aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path
-                      d="M12 6v12M6 12h12"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </i>
-              </button>
+              <SlideOpenControl
+                ariaControls="world-column-pickup"
+                ariaLabel="世界観コラムのピックアップを開く"
+                buttonRef={pickupBtnRef}
+                className="world-column-slide-open"
+                expanded={pickupOpen}
+                label="ピックアップ"
+                onOpen={openPickup}
+              />
             </div>
           </div>
         </section>
@@ -1033,7 +1014,9 @@ export function WorldHome() {
                   onClick={() => goEpisode(episode - 1)}
                   aria-label="前のエピソードへ"
                 >
-                  <span aria-hidden="true">←</span>
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-left" size={17} />
+                  </span>
                 </button>
                 <output>{String(episode + 1).padStart(2, "0")} / 04</output>
                 <button
@@ -1043,7 +1026,9 @@ export function WorldHome() {
                   onClick={() => goEpisode(episode + 1)}
                   aria-label="次のエピソードへ"
                 >
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-right" size={17} />
+                  </span>
                 </button>
               </div>
             </div>

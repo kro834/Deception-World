@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 export type DossierLink = {
   id: string;
@@ -82,7 +83,9 @@ export function DossierNav({
             <b>
               <NameText value={prev.name} />
             </b>
-            <span aria-hidden="true">←</span>
+            <span aria-hidden="true">
+              <UiVectorIcon kind="arrow-left" size={18} />
+            </span>
           </GuardedLink>
         ) : (
           <span className="manager-pagination-spacer" aria-hidden="true" />
@@ -99,7 +102,9 @@ export function DossierNav({
             <b>
               <NameText value={next.name} />
             </b>
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true">
+              <UiVectorIcon kind="arrow-right" size={18} />
+            </span>
           </GuardedLink>
         ) : (
           <span className="manager-pagination-spacer" aria-hidden="true" />

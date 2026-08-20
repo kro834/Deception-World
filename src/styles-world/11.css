@@ -249,8 +249,12 @@
 .manager-pagination > a > span:last-child {
   position: absolute;
   top: 50%;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
   color: var(--manager-accent);
-  font-size: 20px;
+  line-height: 0;
   transform: translateY(-50%);
 }
 
@@ -263,19 +267,29 @@
 }
 
 .manager-pagination-index {
+  display: flex;
   align-items: center;
+  justify-content: center;
   width: 160px;
+  flex-direction: column;
+  gap: 7px;
   color: var(--dim);
   font-size: 8px;
+  line-height: 1.2;
   letter-spacing: 0.22em;
+  text-align: center;
 }
 
 .manager-pagination-index i {
+  display: block;
   color: var(--manager-accent);
   font-size: 6px;
   font-style: normal;
   letter-spacing: 0.4em;
+  text-indent: 0.4em;
 }
+
+.manager-pagination-index > span { text-indent: 0.22em; }
 
 .manager-footer {
   position: relative;
@@ -637,4 +651,3 @@
     transform: none !important;
   }
 }
-

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, ROKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 export function LejasPage() {
   useWorldMode();
@@ -26,7 +27,9 @@ export function LejasPage() {
         </Link>
         <Link to="/world" hash="manager-archive" className="manager-back">
           <span>六詠一覧へ戻る</span>
-          <i aria-hidden="true">↙</i>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="arrow-down-left" size={14} />
+          </i>
         </Link>
       </header>
 

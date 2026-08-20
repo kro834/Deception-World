@@ -120,7 +120,9 @@ export function RiderPage({ id }: { id: string }) {
         </Link>
         <Link to="/world" hash="riders" className="manager-back">
           <span>ライダー一覧へ戻る</span>
-          <i aria-hidden="true">↙</i>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="arrow-down-left" size={14} />
+          </i>
         </Link>
       </header>
       <section className="manager-hero">

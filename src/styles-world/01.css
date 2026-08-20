@@ -371,8 +371,17 @@ html[data-page-scrolled] .rider-archive-topbar {
 }
 
 .brand-sigil i {
+  display: block;
   font-style: normal;
+  line-height: 1;
+  text-indent: 0.12em;
   transform: rotate(-45deg);
+}
+
+.ui-vector-icon {
+  display: block;
+  flex: 0 0 auto;
+  overflow: visible;
 }
 
 .brand > span:last-child {
@@ -529,4 +538,3 @@ html[data-page-scrolled] .rider-archive-topbar {
   background: rgba(5, 13, 23, 0.42);
   font-style: normal;
 }
-

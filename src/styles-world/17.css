@@ -190,8 +190,12 @@
 .rider-archive-pagination > a > span:last-child {
   position: absolute;
   top: 50%;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
   color: var(--archive-accent);
-  font-size: 20px;
+  line-height: 0;
   transform: translateY(-50%);
 }
 
@@ -204,19 +208,29 @@
 }
 
 .rider-archive-pagination-index {
+  display: flex;
   align-items: center;
+  justify-content: center;
   width: 170px;
+  flex-direction: column;
+  gap: 7px;
   color: var(--dim);
   font-size: 8px;
+  line-height: 1.2;
   letter-spacing: 0.2em;
+  text-align: center;
 }
 
 .rider-archive-pagination-index i {
+  display: block;
   color: var(--archive-accent);
   font-size: 7px;
   font-style: normal;
   letter-spacing: 0.28em;
+  text-indent: 0.28em;
 }
+
+.rider-archive-pagination-index > span { text-indent: 0.2em; }
 
 .rider-archive-footer {
   position: relative;
@@ -597,4 +611,3 @@
     gap: 18px;
   }
 }
-

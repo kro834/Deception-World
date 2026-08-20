@@ -273,9 +273,14 @@
 .poster-shuffle span,
 .poster-reset span,
 .poster-lock span {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
   color: var(--cyan);
   font-size: 18px;
-  line-height: 1;
+  line-height: 0;
   transition: transform 0.45s cubic-bezier(0.2, 0.75, 0.16, 1);
 }
 

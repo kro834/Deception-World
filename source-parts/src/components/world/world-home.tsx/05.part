@@ -70,40 +70,15 @@
               <div>
                 <p>{column.body}</p>
               </div>
-              <button
-                ref={pickupBtnRef}
-                type="button"
-                className="world-column-orbit-trigger ios26-glass"
-                aria-haspopup="dialog"
-                aria-expanded={pickupOpen}
-                aria-controls="world-column-pickup"
-                onPointerUp={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openPickup();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openPickup();
-                }}
-              >
-                <span>
-                  <small>PICK UP</small>
-                  <b>ピックアップ</b>
-                </span>
-                <i aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path
-                      d="M12 6v12M6 12h12"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </i>
-              </button>
+              <SlideOpenControl
+                ariaControls="world-column-pickup"
+                ariaLabel="世界観コラムのピックアップを開く"
+                buttonRef={pickupBtnRef}
+                className="world-column-slide-open"
+                expanded={pickupOpen}
+                label="ピックアップ"
+                onOpen={openPickup}
+              />
             </div>
           </div>
         </section>
@@ -213,7 +188,9 @@
                   onClick={() => goEpisode(episode - 1)}
                   aria-label="前のエピソードへ"
                 >
-                  <span aria-hidden="true">←</span>
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-left" size={17} />
+                  </span>
                 </button>
                 <output>{String(episode + 1).padStart(2, "0")} / 04</output>
                 <button
@@ -223,4 +200,6 @@
                   onClick={() => goEpisode(episode + 1)}
                   aria-label="次のエピソードへ"
                 >
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-right" size={17} />
+                  </span>
