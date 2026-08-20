@@ -1,0 +1,186 @@
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Liquid glass, standalone. A vanilla port of LiquidSwipeTabs + the WebGL
+// renderer, with no build step and no framework. Every tunable that mattered
+// during development is named the same as in the React source.
+// ─────────────────────────────────────────────────────────────────────────────
+import VERT_SRC from "./vert.glsl?raw";
+import FRAG_SRC from "./frag.glsl?raw";
+
+const VERTEX_SHADER = VERT_SRC;
+const FRAGMENT_SHADER = FRAG_SRC;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const mix = (a, b, t) => a + (b - a) * t;
+
+function nearestTab(px, py, geos) {
+  let best = 0, bestD = Infinity;
+  for (let i = 0; i < geos.length; i++) {
+    const cx = geos[i].x + geos[i].width / 2;
+    const cy = geos[i].y + geos[i].height / 2;
+    const dx = px - cx, dy = py - cy;
+    const d = dx * dx + dy * dy;
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+}
+
+const mqCache = new Map();
+const mq = (q) => { let l = mqCache.get(q); if (!l) { l = matchMedia(q); mqCache.set(q, l); } return l; };
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+
+function parseColor(color) {
+  const c = document.createElement('canvas').getContext('2d');
+  if (!c) return [0.4, 0.85, 1];
+  c.fillStyle = '#67d8ff'; c.fillStyle = color || '#67d8ff';
+  const n = c.fillStyle;
+  if (n.startsWith('#')) {
+    const hex = n.slice(1);
+    const v = parseInt(hex.length === 3 ? hex.split('').map(x => x + x).join('') : hex.slice(0, 6), 16);
+    return [((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255];
+  }
+  const ch = (n.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+  return ch.length < 3 ? [0.4, 0.85, 1] : [ch[0] / 255, ch[1] / 255, ch[2] / 255];
+}
+
+function roundRect(c, x, y, w, h, r) {
+  const s = Math.min(r, w / 2, h / 2);
+  c.beginPath(); c.moveTo(x + s, y);
+  c.arcTo(x + w, y, x + w, y + h, s); c.arcTo(x + w, y + h, x, y + h, s);
+  c.arcTo(x, y + h, x, y, s); c.arcTo(x, y, x + w, y, s); c.closePath();
+}
+
+// Rasterise whatever sits under the lens so the shader has something to refract.
+function railTexture(root, dpr) {
+  const w = Math.max(root.offsetWidth, 1), h = Math.max(root.offsetHeight, 1);
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const c = cv.getContext('2d'); if (!c) return null;
+  c.scale(dpr, dpr);
+  const g = c.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, 'rgba(32,52,72,0.34)'); g.addColorStop(0.48, 'rgba(13,25,39,0.22)');
+  g.addColorStop(1, 'rgba(25,43,62,0.30)');
+  c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const rr = root.getBoundingClientRect();
+  const sx = rr.width / w || 1, sy = rr.height / h || 1;
+  const tabs = [...root.querySelectorAll(':scope > button[role="tab"]')];
+  const cells = tabs.length ? tabs : [root];
+  const standalone = tabs.length === 0;
+  for (const cell of cells) {
+    const r = cell.getBoundingClientRect();
+    const x = (r.left - rr.left) / sx, y = (r.top - rr.top) / sy;
+    const cw = r.width / sx, chh = r.height / sy;
+    const active = standalone || cell.getAttribute('aria-selected') === 'true';
+    roundRect(c, x, y, cw, chh, Math.min(cw, chh) * 0.5);
+    c.fillStyle = active ? 'rgba(213,239,255,0.095)' : 'rgba(255,255,255,0.018)';
+    c.fill();
+    c.strokeStyle = active ? 'rgba(219,243,255,0.19)' : 'rgba(210,235,250,0.065)';
+    c.lineWidth = 1; c.stroke();
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = walker.nextNode())) {
+      const raw = n.textContent || ''; if (!raw.trim()) continue;
+      const p = n.parentElement; if (!p) continue;
+      const st = getComputedStyle(p);
+      if (st.display === 'none' || st.visibility === 'hidden' || Number(st.opacity) === 0) continue;
+      const range = document.createRange(); range.selectNodeContents(n);
+      const tr = range.getBoundingClientRect(); range.detach();
+      if (tr.width <= 0 || tr.height <= 0) continue;
+      const fs = parseFloat(st.fontSize) || 12;
+      c.save();
+      c.globalAlpha = clamp(parseFloat(st.opacity) || 1, 0, 1);
+      c.fillStyle = st.color;
+      c.font = st.fontStyle + ' ' + st.fontWeight + ' ' + fs + 'px ' + st.fontFamily;
+      c.textBaseline = 'alphabetic';
+      if ('letterSpacing' in c) c.letterSpacing = st.letterSpacing;
+      c.shadowColor = 'rgba(0,0,0,0.34)'; c.shadowBlur = 2;
+      let t = raw;
+      if (st.textTransform === 'uppercase') t = t.toLocaleUpperCase();
+      else if (st.textTransform === 'lowercase') t = t.toLocaleLowerCase();
+      c.fillText(t, (tr.left - rr.left) / sx, (tr.top - rr.top) / sy + (tr.height / sy) * 0.79);
+      c.restore();
+    }
+  }
+  return cv;
+}
+
+class GlassRenderer {
+  constructor() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.className = 'liquid-refraction-canvas';
+    this.canvas.setAttribute('aria-hidden', 'true');
+    this.gl = null; this.program = null; this.buffer = null; this.texture = null;
+    this.loc = -1; this.uniforms = new Map();
+    this.activeRoot = null; this.source = null; this.frame = null; this.lastTime = 0;
+    this.phase = 0; this.targetPhase = 0; this.phaseVelocity = 0; this.releasing = false;
+    this.geometry = null; this.targetGeometry = null;
+    this.pointer = { x: 0, y: 0 }; this.targetPointer = { x: 0, y: 0 };
+    this.velocity = { x: 0, y: 0 };
+    this.accent = [0.4, 0.85, 1];
+    this.dpr = 1;
+    this.overscan = 44;               // canvas margin around the rail
+    this.rootWidth = 1; this.rootHeight = 1; this.cornerRadius = 18;
+    // One shared expansion profile for every surface.
+    this.pressExpansion = { x: 0.022, y: 0.034 };
+    this.heldExpansion  = { x: 0.075, y: 0.15 };
+    this.dragExpansion  = { x: 0.05,  y: 0.075 };
+    this.dead = false;
+    // Bound here rather than declared as a class field: class fields are a
+    // syntax error in older WebKit, and one syntax error kills the entire
+    // script — including the code that makes the lens visible at all.
+    this.draw = this.draw.bind(this);
+  }
+  compile(gl, type, src) {
+    const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  ensure() {
+    if (this.dead) return false;
+    if (this.gl && this.program) return true;
+    try {
+      const gl = this.canvas.getContext('webgl', {
+        alpha: true, antialias: false, depth: false, premultipliedAlpha: true, powerPreference: 'low-power',
+      });
+      if (!gl) throw new Error('no webgl');
+      const p = gl.createProgram();
+      gl.attachShader(p, this.compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER));
+      gl.attachShader(p, this.compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+      const b = gl.createBuffer(), t = gl.createTexture();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.disable(gl.BLEND);
+      this.gl = gl; this.program = p; this.buffer = b; this.texture = t;
+      this.loc = gl.getAttribLocation(p, 'a_position');
+      return true;
+    } catch (e) { console.warn('[glass] webgl unavailable:', e.message); this.dead = true; return false; }
+  }
+  uniform(n) {
+    if (!this.uniforms.has(n)) this.uniforms.set(n, this.gl.getUniformLocation(this.program, n));
+    return this.uniforms.get(n);
+  }
+  resize(root) {
+    this.dpr = Math.min(devicePixelRatio || 1, 1.5);
+    this.rootWidth = Math.max(root.offsetWidth, 1);
+    this.rootHeight = Math.max(root.offsetHeight, 1);
+    const w = Math.round((this.rootWidth + this.overscan * 2) * this.dpr);
+    const h = Math.round((this.rootHeight + this.overscan * 2) * this.dpr);
+    if (this.canvas.width !== w) this.canvas.width = w;
+    if (this.canvas.height !== h) this.canvas.height = h;
+    this.canvas.style.setProperty('--liquid-canvas-overscan', this.overscan + 'px');
+  }
+  activate(root) {
+    if (!this.ensure()) { root.dataset.liquidWebgl = 'fallback'; return false; }
+    if (this.activeRoot !== root) {
+      this.stop();
+      if (this.activeRoot) { this.activeRoot.dataset.liquidWebgl = 'false'; this.activeRoot.dataset.liquidWebglActive = 'false'; }
+      this.activeRoot = root; root.appendChild(this.canvas);
+      this.phase = 0; this.targetPhase = 0; this.phaseVelocity = 0; this.releasing = false;
