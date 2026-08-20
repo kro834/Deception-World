@@ -19,7 +19,8 @@
     "fetch-assets": "node scripts/fetch-public-assets.mjs",
     "fetch-source": "node scripts/fetch-source.mjs",
     "assemble-source": "node scripts/assemble-source.mjs",
-    "predev": "node scripts/fetch-public-assets.mjs"
+    "postinstall": "node scripts/assemble-source.mjs",
+    "predev": "node scripts/assemble-source.mjs && node scripts/fetch-public-assets.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
