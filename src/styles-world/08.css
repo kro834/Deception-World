@@ -97,6 +97,7 @@
 
 .world-column-dialog-copy {
   min-width: 0;
+  padding: 0 clamp(10px, 2vw, 24px) clamp(12px, 2vw, 24px);
   animation: worldColumnDialogCopyIn 0.48s 0.05s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 

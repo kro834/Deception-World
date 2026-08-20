@@ -310,40 +310,6 @@
   text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
 }
 
-.rider-nightmare-pickup-button {
-  position: absolute;
-  z-index: 6;
-  right: clamp(18px, 3vw, 34px);
-  bottom: clamp(18px, 3vw, 34px);
-  display: grid;
-  place-items: center;
-  width: clamp(54px, 5.4vw, 68px);
-  height: clamp(54px, 5.4vw, 68px);
-  min-width: 54px;
-  min-height: 54px;
-  padding: 0;
-  aspect-ratio: 1;
-  border: 1px solid rgba(255, 255, 255, 0.64);
-  border-radius: 50%;
-  color: #fff;
-  background: rgba(231, 26, 156, 0.88);
-  box-shadow: 0 0 0 7px rgba(231, 26, 156, 0.12), 0 16px 36px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.rider-nightmare-pickup-button span {
-  font-size: 30px;
-  font-weight: 300;
-  line-height: 1;
-}
-
-.rider-nightmare-pickup-button:focus-visible {
-  background: rgba(231, 26, 156, 0.88);
-  box-shadow: 0 0 0 7px rgba(231, 26, 156, 0.12), 0 16px 36px rgba(0, 0, 0, 0.4);
-  transform: none;
-}
-
 .rider-nightmare-card-copy {
   display: flex;
   min-width: 0;

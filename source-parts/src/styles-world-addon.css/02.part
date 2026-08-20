@@ -336,7 +336,6 @@
   position: relative;
   right: auto;
   bottom: auto;
-  width: min(100%, 240px);
   align-self: flex-end;
   margin-top: auto;
   margin-left: auto;
