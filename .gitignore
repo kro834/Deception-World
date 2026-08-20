@@ -10,3 +10,6 @@ attachments
 *.zip
 .env
 .env.local
+.DS_Store
+/tmp
+*.log
