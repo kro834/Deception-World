@@ -1,0 +1,389 @@
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-rail-surface > .liquid-contact-glow,
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-rail-surface > .liquid-contact-reflection,
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] .liquid-lens-reflection {
+  /* visibility, not just opacity: a mix-blend-mode element at opacity 0 still
+     forces its blending group to be composited every frame. */
+  visibility: hidden;
+  opacity: 0;
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"]::after {
+  opacity: 0.22;
+}
+
+.liquid-swipe-tabs[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > button[data-liquid-contact="true"] > * {
+  opacity: 0.28;
+  transition: opacity 0.1s ease, scale 0.32s var(--glass-spring);
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-rail-surface {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(132, 203, 255, 0.08),
+    0 18px 46px rgba(0, 0, 0, 0.25);
+  transform: translateZ(0) scale(1.016);
+  transition-duration: 0.34s, 0.34s, 0.34s;
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens > .liquid-selection-surface {
+  transform: translateZ(0) scale(1.065);
+  transition-duration: 0.34s, 0.34s, 0.34s, 0.34s;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] {
+  cursor: grabbing;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens {
+  /* A short linear chase, matching the ~52ms the shader uses for the same
+     purpose. Without it the non-WebGL lens tracks the pointer rigidly while
+     the WebGL one flows, so the two paths felt like different controls. */
+  transition:
+    transform 0.09s linear,
+    scale 0.09s linear,
+    opacity 0.12s ease;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface {
+  transform: translateZ(0) scale(1.022);
+  transition-duration: 0.2s, 0.2s, 0.2s;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens > .liquid-selection-surface {
+  transform: translateZ(0) scale(1.075);
+  box-shadow:
+    0 16px 38px color-mix(in srgb, var(--liquid-current-accent) 18%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 color-mix(in srgb, var(--liquid-current-accent) 30%, transparent);
+  transition-duration: 0.2s, 0.2s, 0.2s, 0.2s;
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] .liquid-lens-reflection {
+  opacity: 0.62;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] .liquid-lens-reflection {
+  opacity: 0.88;
+}
+
+.liquid-swipe-tabs > button[role="tab"] {
+  transform: translateZ(0);
+  transition:
+    color 0.18s ease,
+    background 0.2s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.liquid-swipe-tabs > button[role="tab"] > * {
+  scale: 1;
+  transition: scale 0.42s var(--glass-spring);
+}
+
+.liquid-swipe-tabs[data-liquid-pressed="true"] > button[data-liquid-contact="true"] > * {
+  z-index: 6;
+  scale: 1.025;
+}
+
+.liquid-swipe-tabs[data-liquid-held="true"] > button[data-liquid-contact="true"] > * {
+  scale: 1.04;
+}
+
+.liquid-swipe-tabs[data-liquid-dragging="true"] > button[data-liquid-contact="true"] > * {
+  scale: 1.052;
+}
+
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > .liquid-selection-lens,
+.motion-off .liquid-selection-lens {
+  transition-duration: 0.001ms !important;
+  scale: 1 !important;
+}
+
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"],
+.motion-off .liquid-swipe-tabs {
+  scale: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > .liquid-rail-surface,
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > .liquid-selection-lens > .liquid-selection-surface,
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"].rider-tabs .liquid-selection-lens::before,
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > button[role="tab"],
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > button[role="tab"] > *,
+.motion-off .liquid-rail-surface,
+.motion-off .liquid-selection-surface,
+.motion-off .rider-tabs.liquid-swipe-tabs .liquid-selection-lens::before,
+.motion-off .liquid-swipe-tabs > button[role="tab"],
+.motion-off .liquid-swipe-tabs > button[role="tab"] > * {
+  transition-duration: 0.001ms !important;
+  transform: translateZ(0) scale(1) !important;
+  scale: 1 !important;
+}
+
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > .liquid-rail-surface > .liquid-contact-glow,
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] > .liquid-rail-surface > .liquid-contact-reflection,
+.liquid-swipe-tabs[data-liquid-reduced-motion="true"] .liquid-lens-reflection,
+.motion-off .liquid-rail-surface > .liquid-contact-glow,
+.motion-off .liquid-rail-surface > .liquid-contact-reflection,
+.motion-off .liquid-lens-reflection {
+  display: none;
+}
+
+.manager-archive-tabs.liquid-swipe-tabs,
+.world-column-tabs.liquid-swipe-tabs,
+.world-column-dialog-tabs.liquid-swipe-tabs,
+.rider-tabs.liquid-swipe-tabs {
+  gap: 5px;
+  padding: 5px;
+  background: transparent;
+}
+
+/* Stadium switchers. These have to be chained with .liquid-swipe-tabs to beat
+   the shared `--liquid-shell-radius: 24px` further up, which has the same
+   specificity but is declared later in the sheet. */
+.manager-archive-tabs.liquid-swipe-tabs,
+.world-column-tabs.liquid-swipe-tabs,
+.world-column-dialog-tabs.liquid-swipe-tabs {
+  --liquid-shell-radius: 999px;
+  border-radius: 999px;
+}
+
+.manager-archive-tabs.liquid-swipe-tabs button,
+.world-column-tabs.liquid-swipe-tabs button,
+.world-column-dialog-tabs.liquid-swipe-tabs button,
+.rider-tabs.liquid-swipe-tabs button {
+  overflow: hidden;
+  border: 1px solid rgba(202, 231, 250, 0.095);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.014);
+}
+
+.manager-archive-tabs.liquid-swipe-tabs button.is-active,
+.world-column-tabs.liquid-swipe-tabs button.is-active,
+.world-column-dialog-tabs.liquid-swipe-tabs button.is-active,
+.rider-tabs.liquid-swipe-tabs button.is-active {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.manager-archive-tabs.liquid-swipe-tabs button,
+.world-column-tabs.liquid-swipe-tabs button,
+.world-column-dialog-tabs.liquid-swipe-tabs button {
+  border: 1px solid rgba(202, 231, 250, 0.095);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.014);
+}
+
+.manager-archive-tabs.liquid-swipe-tabs button::after,
+.rider-tabs.liquid-swipe-tabs button::before {
+  display: none;
+}
+
+.world-column-dialog-tabs.liquid-swipe-tabs button:focus-visible,
+.world-column-dialog-tabs.liquid-swipe-tabs button.is-active {
+  transform: none;
+}
+
+.manager-archive-tabs.liquid-swipe-tabs .liquid-selection-lens {
+  border-radius: 999px;
+}
+
+/* The archive switcher used to scale less than the other rails on hold and
+   drag. Every rail now shares the generic 1.065 / 1.075 so the gesture feels
+   identical wherever it is performed. */
+
+.world-column-tabs.liquid-swipe-tabs .liquid-selection-lens,
+.world-column-dialog-tabs.liquid-swipe-tabs .liquid-selection-lens {
+  border-radius: 999px;
+}
+
+.rider-tabs.liquid-swipe-tabs {
+  --liquid-shell-radius: 30px;
+  --rider-liquid-safe-inline: clamp(18px, 2.3vw, 26px);
+  min-height: 0;
+  z-index: 3;
+  /* Reserve breathing room while allowing the held lens to paint above the
+     console frame instead of being cut off by it. */
+  margin: 14px var(--rider-liquid-safe-inline);
+  border: 0;
+  border-radius: var(--liquid-shell-radius);
+  border-right: 0;
+}
+
+/* The rail frame is an environmental reflection, not part of the moving
+   selection. Keep it behind the expanded rider lens and remove its side
+   strokes while a rider is being held or dragged so they cannot cut through
+   the foreground glass capsule. */
+.rider-tabs.liquid-swipe-tabs::after {
+  z-index: 2;
+}
+
+.rider-tabs.liquid-swipe-tabs[data-liquid-held="true"]::after,
+.rider-tabs.liquid-swipe-tabs[data-liquid-dragging="true"]::after {
+  opacity: 0;
+}
+
+.rider-tabs.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-rail-surface,
+.rider-tabs.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface {
+  border-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(132, 203, 255, 0.04),
+    0 18px 46px rgba(0, 0, 0, 0.25);
+}
+
+.rider-tabs.liquid-swipe-tabs button {
+  min-height: 70px;
+  border: 1px solid rgba(202, 231, 250, 0.095);
+}
+
+.rider-tabs.liquid-swipe-tabs > button[data-liquid-contact="true"] {
+  z-index: 7;
+}
+
+.rider-tabs.liquid-swipe-tabs .liquid-selection-lens {
+  isolation: isolate;
+  border-radius: 999px;
+}
+
+/* WebGL glass remains intentionally translucent. Without an occluding glass
+   base, the rail and console borders stay perfectly straight underneath the
+   enlarged lens and visually cut through both ends. This backing follows the
+   renderer's rider-specific expansion exactly, so the moving capsule is
+   conclusively painted in front of every surrounding frame. */
+.rider-tabs.liquid-swipe-tabs .liquid-selection-lens::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 28% 6%, rgba(255, 255, 255, 0.14), transparent 38%),
+    linear-gradient(128deg, #17263a, #0b1423 52%, #111c2d);
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(103, 216, 255, 0.08);
+  transform: translateZ(0) scale(1);
+  transform-origin: center;
+  transition:
+    transform 0.32s var(--glass-spring),
+    opacity 0.14s ease;
+}
+
+.rider-tabs.liquid-swipe-tabs .liquid-selection-surface {
+  z-index: 1;
+}
+
+.rider-tabs.liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-selection-lens::before {
+  opacity: 0.36;
+  transform: translateZ(0) scale(1.025, 1.04);
+}
+
+.rider-tabs.liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens::before {
+  opacity: 1;
+  transform: translateZ(0) scale(1.115, 1.22);
+}
+
+.rider-tabs.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens::before {
+  opacity: 1;
+  transform: translateZ(0) scale(1.17, 1.31);
+}
+
+@media (min-width: 561px) and (max-width: 840px) {
+  .rider-tabs.liquid-swipe-tabs button:last-of-type {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .rider-tabs.liquid-swipe-tabs button:last-of-type {
+    width: calc(50% - 2.5px);
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+
+.threat-panel,
+.world-column,
+.rider-console,
+.episode-archive,
+.return-strip,
+.manager-rider-record,
+.rider-archive-civilian,
+.rider-nightmare-card,
+.rider-archive-form,
+.manager-pagination,
+.rider-archive-pagination {
+  border-color: var(--glass-border-soft);
+  box-shadow: var(--glass-shadow);
+}
+
+.threat-panel,
+.world-column,
+.rider-console,
+.episode-archive,
+.return-strip {
+  background-color: rgba(9, 16, 26, 0.76);
+  background-blend-mode: screen, normal;
+}
+
+.motion-toggle,
+.episode-controls button,
+.world-column-orbit-trigger,
+.world-column-dialog-close,
+.poster-dialog-close,
+.dante-dialog-close,
+.rider-nightmare-dialog-close,
+.rider-nightmare-pickup-button {
+  border-color: var(--glass-border);
+  background:
+    radial-gradient(circle at 26% -8%, rgba(255, 255, 255, 0.22), transparent 40%),
+    radial-gradient(ellipse at 82% 118%, rgba(103, 216, 255, 0.09), transparent 46%),
+    linear-gradient(132deg, rgba(255, 255, 255, 0.045), transparent 38%, rgba(255, 255, 255, 0.025) 68%, transparent),
+    var(--glass-regular);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.topbar .motion-toggle,
+.manager-topbar .manager-back,
+.rider-archive-topbar .rider-archive-back {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.motion-toggle {
+  padding: 0 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+}
+
+.manager-back,
+.rider-archive-back,
+.poster-shuffle,
+.poster-reset,
+.poster-lock,
+.poster-dialog-close,
+.dante-dialog-close,
+.motion-toggle,
+.episode-controls button,
+.primary-action,
+.world-column-orbit-trigger,
+.world-column-dialog-close,
+.rider-nightmare-dialog-close,
+.rider-nightmare-pickup-button {
+  scale: 1;
+  transition:
+    border-color 0.28s ease,
+    color 0.28s ease,
+    background 0.28s ease,
+    transform 0.46s var(--glass-spring),
+    scale 0.46s var(--glass-spring),
+    box-shadow 0.28s ease;
+}
