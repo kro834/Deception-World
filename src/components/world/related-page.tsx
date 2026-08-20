@@ -111,7 +111,7 @@ const RELATED: Related[] = [
     accent: "#c9d4ff",
     title: "関係と軌道を守る、アレイン家共同当主",
     quotes: [
-      "月は太陽の光を借る。けれど、どこへ返すかまでは太陽に決めさせぬ",
+      "月は太陽の光を借りる。けれど、どこへ返すかまでは太陽に決めさせぬ",
       "礼節とは、相手を遠ざける壁ではない。傷付けずに近付くための距離である",
     ],
     facts: [
@@ -129,7 +129,7 @@ const RELATED: Related[] = [
       name: "レルム",
       sub: "ムーンフォーム",
       calls: ["REALMS!", "MOON!", "Rollout!", "SYNCHRONIZE! REALMS SYSTEM!", "MOON!"],
-      quote: "月は太陽の光を借る。けれど、どこへ返すかまでは太陽に決めさせぬ",
+      quote: "月は太陽の光を借りる。けれど、どこへ返すかまでは太陽に決めさせぬ",
       stats: [
         { dt: "HEIGHT", dd: "216.4cm" },
         { dt: "WEIGHT", dd: "79.2kg" },
