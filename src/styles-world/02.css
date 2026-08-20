@@ -1,0 +1,494 @@
+.site-update-button > i::before,
+.site-update-button > i::after,
+.site-update-button > i > span::before {
+  content: "";
+  position: absolute;
+}
+
+.site-update-button > i::before {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--cyan);
+  border-right-color: transparent;
+  border-radius: 50%;
+}
+
+.site-update-button > i::after {
+  top: 6px;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-top: 1.5px solid var(--cyan);
+  border-right: 1.5px solid var(--cyan);
+  transform: rotate(12deg);
+}
+
+.site-update-button[aria-busy="true"] > i {
+  animation: siteUpdateSpin 0.9s linear infinite;
+}
+
+.site-update-button > b {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+}
+
+.site-update-glow {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.24), rgba(103, 216, 255, 0.09) 38%, transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-120px, -120px, 0);
+  transition: opacity 0.14s ease;
+}
+
+.site-update-button[data-liquid-pressed="true"] .site-update-glow {
+  opacity: 1;
+}
+
+.site-update-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[data-scroll-motion] {
+  --motion-progress: 0.5;
+  --motion-shift: 0px;
+  --motion-shift-reverse: 0px;
+  --motion-scale: 1;
+  --motion-opacity: 1;
+}
+
+[data-motion-active="true"] [data-motion-layer="heading"],
+[data-motion-active="true"] [data-motion-layer="copy"],
+[data-motion-active="true"] [data-motion-layer="backdrop"],
+[data-motion-active="true"] [data-motion-layer="profile-media"],
+[data-motion-active="true"] [data-motion-layer="profile-copy"],
+[data-motion-active="true"] [data-motion-layer="media"] {
+  will-change: translate, scale, opacity;
+}
+
+[data-scroll-motion="feature"][data-motion-active="true"],
+[data-scroll-motion="finale"][data-motion-active="true"] .finale-backdrop img,
+[data-scroll-motion="finale"][data-motion-active="true"] .finale-content {
+  will-change: translate, scale, opacity;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(360px, 0.92fr) minmax(380px, 0.72fr);
+  align-items: center;
+  min-height: 100svh;
+  padding: 112px clamp(24px, 6vw, 112px) 80px;
+  isolation: isolate;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 24%;
+  z-index: -1;
+  background: linear-gradient(transparent, var(--ink));
+}
+
+.hero-backdrop {
+  position: absolute;
+  z-index: -3;
+  inset: -3rem;
+  overflow: hidden;
+  opacity: 0.22;
+  translate: 0 var(--motion-shift-reverse);
+  scale: var(--motion-scale);
+}
+
+.hero-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 11, 0.97) 0%, rgba(5, 7, 11, 0.89) 38%, rgba(5, 7, 11, 0.44) 70%, rgba(5, 7, 11, 0.68) 100%),
+    linear-gradient(0deg, var(--ink), transparent 34%, rgba(5, 7, 11, 0.5));
+}
+
+.hero-backdrop-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-backdrop-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(34px) saturate(120%);
+  transform: scale(1.12);
+  animation: backdropBreathe 16s ease-in-out infinite alternate;
+}
+
+.hero-backdrop-current {
+  z-index: 0;
+  animation: posterImageFadeIn 0.9s ease both;
+}
+
+.hero-backdrop-previous {
+  z-index: 1;
+  animation: posterImageFadeOut 0.9s ease both;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  padding: 4vh 5vw 4vh 1vw;
+  animation: heroRise 1s 1.2s both cubic-bezier(0.2, 0.75, 0.2, 1);
+  translate: 0 var(--motion-shift);
+  opacity: var(--motion-opacity);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 28px;
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+}
+
+.eyebrow i {
+  display: block;
+  width: 82px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  letter-spacing: -0.07em;
+  line-height: 0.93;
+}
+
+.hero h1 span,
+.hero h1 strong {
+  display: block;
+}
+
+.hero h1 span {
+  color: rgba(244, 246, 251, 0.9);
+  font-size: clamp(42px, 5.5vw, 92px);
+  font-weight: 300;
+}
+
+.hero h1 strong {
+  margin-top: 12px;
+  font-size: clamp(50px, 6.4vw, 108px);
+  font-weight: 900;
+  background: linear-gradient(105deg, #fff 10%, #9be9ff 40%, #3c92ff 66%, #faf2d6 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 26px rgba(36, 140, 255, 0.2));
+}
+
+.hero-lead {
+  margin: 34px 0 0;
+  color: rgba(244, 246, 251, 0.68);
+  font-size: clamp(14px, 1.15vw, 17px);
+  letter-spacing: 0.06em;
+  line-height: 2.05;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  margin-top: 38px;
+}
+
+.primary-action {
+  position: relative;
+  display: inline-flex;
+  min-width: 228px;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  overflow: hidden;
+  padding: 0 20px 0 23px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 0%, rgba(255, 255, 255, 0.14), transparent 42%),
+    linear-gradient(110deg, rgba(36, 140, 255, 0.17), var(--glass-regular));
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 16px 38px rgba(0, 0, 0, 0.22);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.primary-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 25%, rgba(103, 216, 255, 0.18), transparent 70%);
+  transform: translateX(-110%);
+  transition: transform 0.65s;
+}
+
+.primary-action span,
+.primary-action svg {
+  position: relative;
+  z-index: 1;
+}
+
+.primary-action svg,
+.text-action svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.text-action {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: rgba(244, 246, 251, 0.58);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  transition: color 0.25s;
+}
+
+.hero-metadata {
+  display: flex;
+  margin-top: 48px;
+  border-top: 1px solid rgba(132, 203, 255, 0.14);
+}
+
+.hero-metadata > span {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px 18px 0 0;
+}
+
+.hero-metadata small {
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.24em;
+}
+
+.hero-metadata b {
+  overflow: hidden;
+  color: rgba(244, 246, 251, 0.8);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poster-stage {
+  --poster-width: min(42vw, 510px);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(52px, 5.4vh, 64px);
+  min-width: 0;
+  perspective: 1200px;
+  animation: posterReveal 1.2s 1.05s both cubic-bezier(0.2, 0.75, 0.2, 1);
+  translate: 0 var(--motion-shift-reverse);
+  scale: var(--motion-scale);
+}
+
+.poster-deck {
+  position: relative;
+  width: var(--poster-width);
+  aspect-ratio: 2 / 3;
+  isolation: isolate;
+}
+
+.poster-back-card {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  padding: 5px;
+  border: 1px solid rgba(103, 216, 255, 0.18);
+  background: #090c12;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+  opacity: 0.2;
+  pointer-events: none;
+  filter: saturate(0.45) contrast(0.9) brightness(0.72);
+  transition: transform 0.72s cubic-bezier(0.2, 0.75, 0.16, 1), opacity 0.5s ease;
+  animation: posterBackSettle 0.72s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
+
+.poster-back-card img {
+  width: 100%;
+  height: 100%;
+  background: #090c12;
+}
+
+.poster-back-card-1 { transform: translate(-6%, -2.5%) rotate(-4.8deg) scale(0.985); }
+.poster-back-card-2 { transform: translate(6%, 1.5%) rotate(4.2deg) scale(0.97); opacity: 0.16; }
+.poster-back-card-3 { transform: translate(-3.5%, 3.5%) rotate(-2.4deg) scale(0.95); opacity: 0.12; }
+.poster-back-card-4 { transform: translate(3%, -3%) rotate(2.1deg) scale(0.935); opacity: 0.09; }
+
+.poster-frame {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glow-x: 50%;
+  --glow-y: 50%;
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  background: linear-gradient(145deg, rgba(103, 216, 255, 0.62), rgba(255, 255, 255, 0.04) 38%, rgba(215, 171, 81, 0.5));
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.62),
+    0 0 60px rgba(36, 140, 255, 0.09),
+    0 0 130px -30px color-mix(in srgb, var(--cyan) 55%, transparent),
+    /* A one-pixel split either side of the frame reads as lens dispersion at
+       the artwork edge without touching the image itself. */
+    inset 1px 0 0 rgba(103, 216, 255, 0.24),
+    inset -1px 0 0 rgba(231, 26, 156, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease-out, box-shadow 0.4s;
+}
+
+.poster-frame::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -18px;
+  border: 1px solid rgba(103, 216, 255, 0.1);
+  clip-path: polygon(0 0, 25% 0, 25% 1px, 75% 1px, 75% 0, 100% 0, 100% 24%, calc(100% - 1px) 24%, calc(100% - 1px) 76%, 100% 76%, 100% 100%, 75% 100%, 75% calc(100% - 1px), 25% calc(100% - 1px), 25% 100%, 0 100%, 0 76%, 1px 76%, 1px 24%, 0 24%);
+}
+
+/* ── Poster: holographic frame and HUD overlays ──────────────────── */
+
+/* A dichroic ring around the artwork. The conic gradient rides a transformed
+   child so the shimmer is a compositor rotation, not a per-frame repaint of
+   the whole poster; the ring mask keeps it inside the 6px frame band. */
+.poster-holo-ring {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.78;
+  -webkit-mask:
+    linear-gradient(#000, #000) content-box,
+    linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000, #000) content-box,
+    linear-gradient(#000, #000);
+  mask-composite: exclude;
+  padding: inherit;
+}
+
+.poster-holo-ring::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(103, 216, 255, 0.95),
+    rgba(231, 26, 156, 0.75) 14%,
+    rgba(215, 171, 81, 0.9) 29%,
+    rgba(120, 255, 214, 0.75) 44%,
+    rgba(103, 216, 255, 0.95) 58%,
+    rgba(160, 120, 255, 0.8) 74%,
+    rgba(255, 255, 255, 0.85) 88%,
+    rgba(103, 216, 255, 0.95)
+  );
+  animation: posterHoloSpin 22s linear infinite;
+}
+
+.poster-media {
+  position: absolute;
+  z-index: 1;
+  inset: 6px;
+  overflow: hidden;
+  background: #090c12;
+}
+
+/* Fine scan grid. Static, so it costs one paint and nothing per frame. */
+.poster-media::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(6, 12, 20, 0.34) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(103, 216, 255, 0.05) 0 1px, transparent 1px 92px);
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+}
+
+/* Travelling readout bar. translateY only — runs on the compositor. */
+.poster-media::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 22%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(103, 216, 255, 0.05) 42%,
+    rgba(180, 240, 255, 0.16) 72%,
+    rgba(103, 216, 255, 0.02) 78%,
+    transparent
+  );
+  mix-blend-mode: screen;
+  animation: posterScanSweep 7.5s cubic-bezier(0.55, 0, 0.45, 1) infinite;
+}
