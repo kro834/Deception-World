@@ -1,6 +1,6 @@
-import { forwardRef, memo, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
-import { MANAGER_ASSETS, warmLater } from "@/lib/asset-loader";
+import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens } from "./liquid-rail";
@@ -96,7 +96,7 @@ const EPISODES = [
   { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
   { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "55% 18%", alt: "白い帽子と衣装の人物が崩壊した街を見下ろすEP3のサムネイル" },
   { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
-  { no: "05", title: "FARCE", src: "/episode-05-farce.png", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
+  { no: "05", title: "FARCE", src: "/episode-05-farce.jpeg", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
 ];
 
 function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
@@ -225,6 +225,7 @@ const RiderRail = memo(
 
 export function WorldHome() {
   useWorldMode();
+  const shellRef = useRef<HTMLDivElement>(null);
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
@@ -232,6 +233,7 @@ export function WorldHome() {
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
+  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
   const [pickupOpen, setPickupOpen] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
@@ -247,11 +249,26 @@ export function WorldHome() {
   const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
+  const riderTabRef = useRef(0);
+  const riderTransitionTimer = useRef<number | null>(null);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
+    if (current === next) return;
+    if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+    setPreviousRiderTab(current);
+    riderTabRef.current = next;
+    setRiderTab(next);
+    riderTransitionTimer.current = window.setTimeout(() => {
+      setPreviousRiderTab(null);
+      riderTransitionTimer.current = null;
+    }, 220);
+  }, []);
 
   useEffect(() => {
     const off1 = bindRail(managerRail.current, setManagerTab);
     const off2 = bindRail(columnRail.current, setColumnTab);
-    const off3 = bindRail(riderRail.current, setRiderTab);
+    const off3 = bindRail(riderRail.current, selectRider);
     const off4 = bindRail(pickupRail.current, setColumnTab);
     const id = requestAnimationFrame(() => bootLiquidGlass(document));
     return () => {
@@ -261,7 +278,7 @@ export function WorldHome() {
       off4();
       cancelAnimationFrame(id);
     };
-  }, []);
+  }, [selectRider]);
 
   useEffect(() => {
     if (locked) return;
@@ -275,22 +292,19 @@ export function WorldHome() {
   }, [locked]);
 
   useEffect(() => {
-    RIDERS.forEach((r) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.src = r.img;
-      void img.decode?.().catch(() => undefined);
-    });
-    warmLater([
-      ...POSTERS.map((p) => p.src),
-      ...EPISODES.map((e) => e.src),
-      "/manager-zeus.jpeg",
-      "/manager-rex-loi.jpeg",
-      "/manager-shuza.jpeg",
-      "/manager-lejas-portrait.jpeg",
-      "/manager-opus.jpeg",
-      "/manager-reemu.jpeg",
-    ]);
+    const shell = shellRef.current;
+    if (!shell || typeof IntersectionObserver === "undefined") return;
+    const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
+        });
+      },
+      { rootMargin: "240px 0px" },
+    );
+    regions.forEach((region) => observer.observe(region));
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -343,6 +357,7 @@ export function WorldHome() {
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
+      if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
     };
   }, []);
   const current = POSTERS[poster];
@@ -366,11 +381,14 @@ export function WorldHome() {
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
 
-    const jumpToAnotherPoster = () => {
-      goPoster((p) => p + 1 + Math.floor(Math.random() * (POSTERS.length - 1)));
-    };
+    const finalPoster = (poster + 1 + Math.floor(Math.random() * (POSTERS.length - 1))) % POSTERS.length;
+    const previewOffsets = [1, 3, 2, 1, 2, 3, 1, 3, 2];
+    const finalImage = new Image();
+    finalImage.decoding = "async";
+    finalImage.fetchPriority = "high";
+    finalImage.src = POSTERS[finalPoster].src;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      jumpToAnotherPoster();
+      goPoster(finalPoster);
       shuffleActive.current = false;
       return;
     }
@@ -378,7 +396,10 @@ export function WorldHome() {
     setShuffling(true);
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(() => {
-        jumpToAnotherPoster();
+        const next = index === steps.length - 1
+          ? finalPoster
+          : (poster + previewOffsets[index % previewOffsets.length]) % POSTERS.length;
+        goPoster(next);
         if (index === steps.length - 1) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
@@ -415,6 +436,10 @@ export function WorldHome() {
   const openPickup = () => {
     const dlg = pickupDialogRef.current;
     if (!dlg) return;
+    const resetScroll = () => {
+      dlg.scrollTop = 0;
+      dlg.querySelector<HTMLElement>(".world-column-dialog-card")?.scrollTo({ top: 0, left: 0 });
+    };
     if (pickupCloseTimer.current != null) {
       window.clearTimeout(pickupCloseTimer.current);
       pickupCloseTimer.current = null;
@@ -427,12 +452,14 @@ export function WorldHome() {
         /* already open */
       }
     }
+    resetScroll();
     setPickupOpen(true);
-    (document.activeElement as HTMLElement | null)?.blur();
     syncRail(pickupRail.current, columnTab);
     requestAnimationFrame(() => {
+      resetScroll();
       bootLiquidGlass(dlg);
       pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+      dlg.querySelector<HTMLElement>(".world-column-dialog-close")?.focus({ preventScroll: true });
     });
   };
 
@@ -446,6 +473,7 @@ export function WorldHome() {
     if (dlg.dataset.closing === "true") return;
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     pickupCloseTimer.current = window.setTimeout(() => {
       try {
         dlg.close();
@@ -455,11 +483,11 @@ export function WorldHome() {
       delete dlg.dataset.closing;
       pickupCloseTimer.current = null;
       setPickupOpen(false);
-    }, 360);
+    }, reducedMotion ? 0 : 360);
   };
 
   return (
-    <div className="site-shell motion-on" data-motion-enabled="true">
+    <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
       <SideMenuLayer />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -491,7 +519,7 @@ export function WorldHome() {
       </header>
       <SiteUpdateButton />
 
-      <section className="hero" id="top">
+      <section className="hero" id="top" data-performance-region>
         <div className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
@@ -689,7 +717,7 @@ export function WorldHome() {
           </div>
         </div>
 
-        <div className="threat-panel" id="manager-archive">
+        <div className="threat-panel" id="manager-archive" data-performance-region>
           <div className="threat-copy">
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
@@ -908,7 +936,7 @@ export function WorldHome() {
           </div>
         </div>
 
-        <section className="world-column" aria-label="世界観コラム">
+        <section className="world-column" aria-label="世界観コラム" data-performance-region>
           <div className="world-column-content">
             <div className="world-column-index">
               <span>WORLD COLUMN</span>
@@ -934,7 +962,7 @@ export function WorldHome() {
         </section>
       </section>
 
-      <section className="riders-section" id="riders">
+      <section className="riders-section" id="riders" data-performance-region>
         <div className="section-index">
           <span>02</span>
           <small>SEVEN RIDERS</small>
@@ -952,16 +980,19 @@ export function WorldHome() {
           <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
             <div className="rider-visual fit-cover">
               {RIDERS.map((r, i) => (
-                <img
-                  key={r.id}
-                  src={r.img}
-                  alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
-                  className={i === riderTab ? "is-on" : ""}
-                  style={{ objectPosition: r.pos }}
-                  decoding="async"
-                  fetchPriority={i === 0 ? "high" : "low"}
-                  draggable={false}
-                />
+                i === riderTab || i === previousRiderTab ? (
+                  <img
+                    key={r.id}
+                    src={r.img}
+                    alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
+                    className={i === riderTab ? "is-on" : ""}
+                    style={{ objectPosition: r.pos }}
+                    decoding="async"
+                    loading={i === riderTab ? "eager" : "lazy"}
+                    fetchPriority={i === riderTab ? "high" : "low"}
+                    draggable={false}
+                  />
+                ) : null
               ))}
             </div>
             <div className="rider-monogram" aria-hidden="true">
@@ -995,7 +1026,7 @@ export function WorldHome() {
         </div>
       </section>
 
-      <section className="records-section" id="records">
+      <section className="records-section" id="records" data-performance-region>
         <div className="section-index">
           <span>03</span>
           <small>NEW RECORDS</small>
@@ -1062,7 +1093,15 @@ export function WorldHome() {
               <article
                 key={ep.no}
                 className={i === episode ? "episode-card is-active" : "episode-card"}
+                role="button"
+                tabIndex={0}
+                aria-pressed={i === episode}
                 onClick={() => goEpisode(i)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  goEpisode(i);
+                }}
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
@@ -1085,7 +1124,7 @@ export function WorldHome() {
         </section>
       </section>
 
-      <section className="finale-section">
+      <section className="finale-section" data-performance-region>
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img src="/deception-world-poster.jpeg" alt="" loading="lazy" decoding="async" />

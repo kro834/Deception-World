@@ -1,0 +1,133 @@
+/* Interaction and rendering polish */
+
+html[data-mode="world"] {
+  scroll-padding-top: calc(96px + env(safe-area-inset-top));
+}
+
+.site-shell :where(#top, #story, #manager-archive, #riders, #records) {
+  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+}
+
+/* UPDATE belongs to the opening composition and should not cover deep links. */
+html[data-mode="world"] .site-shell > .site-update-control {
+  position: absolute;
+}
+
+:is(.hero h1, .story-heading h2, .section-title h2, .records-heading h2, .manager-introduction h1) {
+  text-wrap: balance;
+}
+
+:is(.story-copy, .section-title, .manager-copy-body, .world-column-copy) p {
+  text-wrap: pretty;
+}
+
+.riders-section,
+.records-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
+}
+
+[data-performance-region][data-viewport-active="false"] *,
+[data-performance-region][data-viewport-active="false"] *::before,
+[data-performance-region][data-viewport-active="false"] *::after {
+  animation-play-state: paused !important;
+}
+
+/* A static tile keeps the film texture without repainting a 200% SVG layer. */
+.grain {
+  inset: 0;
+  background-image: url("/noise.png");
+  background-size: 256px 256px;
+  opacity: 0.027;
+  animation: none;
+}
+
+.side-panel-close {
+  width: 44px;
+  height: 44px;
+}
+
+.episode-card {
+  cursor: pointer;
+}
+
+html[data-mode="world"] .world-column-dialog .world-column-dialog-close:focus-visible,
+html[data-mode="world"] .form-pickup-dialog .form-pickup-close:focus-visible,
+html[data-mode="world"] .rider-nightmare-dialog .rider-nightmare-dialog-close:focus-visible,
+html[data-mode="world"] .rider-dossier-open:focus-visible,
+html[data-mode="world"] .dossier-jump a:focus-visible,
+html[data-mode="world"] .episode-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--cyan) 78%, white) !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 4px rgba(4, 8, 14, 0.86) !important;
+}
+
+@media (min-width: 841px) and (max-width: 1440px) {
+  .hero .poster-controls {
+    width: min(458px, 46vw);
+    max-width: calc(100vw - 48px);
+  }
+
+  .poster-control-cluster {
+    grid-template-columns: minmax(124px, 1.35fr) repeat(2, minmax(82px, 0.825fr));
+  }
+}
+
+@media (max-width: 840px), (pointer: coarse) {
+  .ambient-orb {
+    width: 30rem;
+    height: 30rem;
+    filter: blur(76px);
+    animation-duration: 26s;
+  }
+
+  .signal {
+    animation: none;
+  }
+
+  .manager-archive-tabs button,
+  .rider-tabs button {
+    align-items: center;
+    text-align: center;
+  }
+
+  .manager-archive-tabs small {
+    font-size: 8px;
+  }
+
+  .sovereign-status-copy small,
+  .sovereign-status-copy p {
+    font-size: 8px;
+  }
+
+  .is-sovereign .manager-portrait-column::before,
+  .sovereign-aura > i:nth-child(2),
+  .sovereign-aura > i:nth-child(3),
+  .sovereign-portrait-effects > i,
+  .sovereign-status::after,
+  .sovereign-emblem > i {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .story-section,
+  .riders-section,
+  .records-section {
+    padding-block: 78px;
+  }
+}
+
+@media (hover: none) {
+  .episode-card:not(.is-active) .episode-card-surface {
+    border-color: var(--glass-border-soft);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.065);
+    opacity: 0.64;
+    transform: scale(0.97);
+  }
+
+  .episode-card:not(.is-active) .episode-thumbnail img {
+    filter: saturate(0.88) contrast(1.05);
+    transform: none;
+  }
+}

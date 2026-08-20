@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { createCinematicScore } from "@/lib/cinematic-audio";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { useLoadGate } from "@/components/load-gate";
 import { Particles } from "./particles";
 
@@ -49,7 +50,24 @@ export function TitleSequence() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const phaseRef = useRef(phase);
   const { go } = useLoadGate();
+  const router = useRouter();
   phaseRef.current = phase;
+
+  useEffect(() => {
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      void Promise.all([
+        preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
+        router.preloadRoute({ to: "/world" }).catch(() => undefined),
+      ]);
+    }, 2200);
+    return () => window.clearTimeout(timer);
+  }, [router]);
 
   useEffect(() => {
     return () => {
@@ -282,7 +300,7 @@ export function TitleSequence() {
           type="button"
           className="cine-btn"
           disabled={phase !== "complete"}
-          onClick={() => void go({ to: "/world", assets: WORLD_ENTER_ASSETS, always: true })}
+          onClick={() => void go({ to: "/world", assets: WORLD_ENTER_ASSETS })}
         >
           <span>ENTER THE WORLD</span>
         </button>

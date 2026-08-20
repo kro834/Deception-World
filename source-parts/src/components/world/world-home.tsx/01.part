@@ -1,6 +1,6 @@
-import { forwardRef, memo, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
-import { MANAGER_ASSETS, warmLater } from "@/lib/asset-loader";
+import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens } from "./liquid-rail";

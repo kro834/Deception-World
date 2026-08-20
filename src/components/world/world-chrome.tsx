@@ -47,7 +47,14 @@ export function SiteUpdateButton() {
 
 export function SideMenuTrigger() {
   return (
-    <button className="side-panel-trigger ios26-glass" type="button" aria-expanded="false" aria-label="メニューを開く">
+    <button
+      className="side-panel-trigger ios26-glass"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-side-panel"
+      aria-haspopup="dialog"
+      aria-label="メニューを開く"
+    >
       <span className="side-panel-trigger-ring" aria-hidden="true" />
       <span className="side-panel-trigger-glyph" aria-hidden="true">
         <i />
@@ -62,7 +69,16 @@ export function SideMenuLayer() {
   return (
     <>
       <div className="side-panel-scrim" data-open="false" aria-hidden="true" />
-      <aside className="side-panel" data-open="false" aria-label="サイトメニュー">
+      <aside
+        id="site-side-panel"
+        className="side-panel"
+        data-open="false"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="true"
+        aria-label="サイトメニュー"
+        tabIndex={-1}
+      >
         <div className="side-panel-head">
           <div>
             <p>NAVIGATION</p>

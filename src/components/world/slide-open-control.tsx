@@ -14,6 +14,13 @@ type SlideOpenControlProps = {
 
 const OPEN_THRESHOLD = 0.68;
 
+type SlideMetrics = {
+  buttonRect: DOMRect;
+  thumbRect: DOMRect;
+  inset: number;
+  distance: number;
+};
+
 export function SlideOpenControl({
   ariaControls,
   ariaLabel,
@@ -28,6 +35,7 @@ export function SlideOpenControl({
   const activePointer = useRef<number | null>(null);
   const grabOffset = useRef(0);
   const travel = useRef(0);
+  const dragMetrics = useRef<SlideMetrics | null>(null);
   const activateTimer = useRef<number | null>(null);
   const resetTimer = useRef<number | null>(null);
   const completingRef = useRef(false);
@@ -55,6 +63,7 @@ export function SlideOpenControl({
   const reset = () => {
     activePointer.current = null;
     grabOffset.current = 0;
+    dragMetrics.current = null;
     completingRef.current = false;
     setDragging(false);
     setCompleting(false);
@@ -79,7 +88,7 @@ export function SlideOpenControl({
   };
 
   const moveToPointer = (clientX: number) => {
-    const metrics = getMetrics();
+    const metrics = dragMetrics.current ?? getMetrics();
     if (!metrics) return 0;
     const next = Math.max(
       0,
@@ -128,6 +137,7 @@ export function SlideOpenControl({
     if (completingRef.current || (event.pointerType === "mouse" && event.button !== 0)) return;
     const metrics = getMetrics();
     if (!metrics) return;
+    dragMetrics.current = metrics;
     const hitPadding = 10;
     if (
       event.clientX < metrics.thumbRect.left - hitPadding ||
@@ -193,6 +203,7 @@ export function SlideOpenControl({
       onPointerMove={drag}
       onPointerUp={finishDrag}
       onPointerCancel={cancelDrag}
+      onLostPointerCapture={cancelDrag}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();

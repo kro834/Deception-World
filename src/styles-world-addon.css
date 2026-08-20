@@ -30,7 +30,7 @@ html[data-mode="world"][data-loading] body {
 .liquid-swipe-tabs > button[role="tab"],
 .world-column-tabs,
 .world-column-dialog-tabs {
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 html[data-rail-lock] .world-column-dialog,

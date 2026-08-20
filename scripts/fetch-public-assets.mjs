@@ -35,6 +35,7 @@ const files = [
   "episode-02-legends.jpeg",
   "episode-03-deception-world.jpeg",
   "episode-04-kill.jpeg",
+  "episode-05-farce.jpeg",
   "episode-05-farce.png",
   "favicon-32.png",
   "favicon.png",

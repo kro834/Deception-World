@@ -46,6 +46,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     if (!dialog) return;
     dialog.scrollTop = 0;
     dialog.scrollLeft = 0;
+    dialog.querySelector<HTMLElement>(".form-pickup-panel")?.scrollTo({ top: 0, left: 0 });
   };
   const open = () => {
     const dialog = dlg.current;
@@ -56,8 +57,10 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     } catch {
       /* already open */
     }
-    window.requestAnimationFrame(resetScroll);
-    (document.activeElement as HTMLElement | null)?.blur();
+    window.requestAnimationFrame(() => {
+      resetScroll();
+      dialog.querySelector<HTMLElement>(".form-pickup-close")?.focus({ preventScroll: true });
+    });
   };
   const close = () => {
     dlg.current?.close();
@@ -77,8 +80,8 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             alt={`${riderPrefix}${rider.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
-            fetchPriority="high"
-            loading="eager"
+            fetchPriority="auto"
+            loading="lazy"
           />
           <span>RIDER</span>
           <SlideOpenControl
@@ -257,7 +260,13 @@ function ManagerDossier({ profile }: { profile: Profile }) {
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
-            <img src={profile.image} alt={`${profile.name}のキャラクタービジュアル`} style={{ objectPosition: profile.pos, objectFit: "cover" }} />
+            <img
+              src={profile.image}
+              alt={`${profile.name}のキャラクタービジュアル`}
+              style={{ objectPosition: profile.pos, objectFit: "cover" }}
+              decoding="async"
+              fetchPriority="high"
+            />
             {profile.sovereign ? (
               <div className="sovereign-portrait-effects" aria-hidden="true">
                 <i />

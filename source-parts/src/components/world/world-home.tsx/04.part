@@ -57,7 +57,7 @@
           </div>
         </div>
 
-        <div className="threat-panel" id="manager-archive">
+        <div className="threat-panel" id="manager-archive" data-performance-region>
           <div className="threat-copy">
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>

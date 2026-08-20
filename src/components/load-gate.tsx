@@ -22,7 +22,6 @@ type GoOptions = {
   to: string;
   hash?: string;
   assets: readonly string[];
-  always?: boolean;
 };
 
 type LoadGateApi = {
@@ -44,32 +43,48 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const busy = useRef(false);
 
   const go = useCallback(
-    async ({ to, hash, assets, always = false }: GoOptions) => {
+    async ({ to, hash, assets }: GoOptions) => {
       if (busy.current) return;
-      if (!always && assetsWarmed(assets)) {
+      if (assetsWarmed(assets)) {
         await navigate({ to: to as never, hash });
         return;
       }
       busy.current = true;
-      setGate({ active: true, percent: 1 });
-      document.documentElement.dataset.loading = "true";
-      const started = performance.now();
+      let overlayVisible = false;
+      let overlayShownAt = 0;
+      let latestPercent = 1;
+      const showTimer = window.setTimeout(() => {
+        overlayVisible = true;
+        overlayShownAt = performance.now();
+        document.documentElement.dataset.loading = "true";
+        setGate({ active: true, percent: latestPercent });
+      }, 140);
       try {
         await Promise.all([
           preloadAssets(assets, (percent) => {
-            setGate((s) => ({ ...s, percent: Math.max(1, percent) }));
+            latestPercent = Math.max(1, percent);
+            if (overlayVisible) {
+              setGate((s) => ({ ...s, percent: latestPercent }));
+            }
           }),
           router.preloadRoute({ to: to as never }).catch(() => undefined),
         ]);
       } finally {
-        setGate({ active: true, percent: 100 });
-        const wait = Math.max(0, 680 - (performance.now() - started));
-        await new Promise((r) => window.setTimeout(r, wait));
-        await navigate({ to: to as never, hash });
-        await new Promise((r) => window.setTimeout(r, 220));
-        document.documentElement.removeAttribute("data-loading");
-        setGate({ active: false, percent: 0 });
-        busy.current = false;
+        window.clearTimeout(showTimer);
+        if (overlayVisible) {
+          setGate({ active: true, percent: 100 });
+          const minimumVisibleTime = Math.max(0, 120 - (performance.now() - overlayShownAt));
+          if (minimumVisibleTime > 0) {
+            await new Promise((resolve) => window.setTimeout(resolve, minimumVisibleTime));
+          }
+        }
+        try {
+          await navigate({ to: to as never, hash });
+        } finally {
+          document.documentElement.removeAttribute("data-loading");
+          setGate({ active: false, percent: 0 });
+          busy.current = false;
+        }
       }
     },
     [navigate, router],
@@ -144,7 +159,6 @@ export function GuardedLink({
   className,
   style,
   children,
-  always,
   ...rest
 }: {
   to: string;
@@ -153,20 +167,18 @@ export function GuardedLink({
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
-  always?: boolean;
   "aria-label"?: string;
 }) {
   const { go } = useLoadGate();
   const href = hash ? `${to}#${hash}` : to;
 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
-      window.location.assign(href);
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
       return;
     }
-    void go({ to, hash, assets, always });
+    e.preventDefault();
+    e.stopPropagation();
+    void go({ to, hash, assets });
   };
 
   return (
@@ -192,18 +204,6 @@ export function AppGuards() {
     document.addEventListener("contextmenu", block);
     document.addEventListener("selectstart", block);
     document.addEventListener("dragstart", blockAlways);
-    const lockZoom = (e: Event) => e.preventDefault();
-    const lockPinchMove = (e: TouchEvent) => {
-      if (e.touches.length > 1) e.preventDefault();
-    };
-    const lockCtrlWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) e.preventDefault();
-    };
-    document.addEventListener("gesturestart", lockZoom, { passive: false });
-    document.addEventListener("gesturechange", lockZoom, { passive: false });
-    document.addEventListener("gestureend", lockZoom, { passive: false });
-    document.addEventListener("touchmove", lockPinchMove, { passive: false });
-    window.addEventListener("wheel", lockCtrlWheel, { passive: false });
     return () => {
       document.removeEventListener("copy", block);
       document.removeEventListener("cut", block);
@@ -211,11 +211,6 @@ export function AppGuards() {
       document.removeEventListener("contextmenu", block);
       document.removeEventListener("selectstart", block);
       document.removeEventListener("dragstart", blockAlways);
-      document.removeEventListener("gesturestart", lockZoom);
-      document.removeEventListener("gesturechange", lockZoom);
-      document.removeEventListener("gestureend", lockZoom);
-      document.removeEventListener("touchmove", lockPinchMove);
-      window.removeEventListener("wheel", lockCtrlWheel);
     };
   }, []);
   return null;

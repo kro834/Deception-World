@@ -58,7 +58,7 @@
           </div>
         </div>
 
-        <section className="world-column" aria-label="世界観コラム">
+        <section className="world-column" aria-label="世界観コラム" data-performance-region>
           <div className="world-column-content">
             <div className="world-column-index">
               <span>WORLD COLUMN</span>
@@ -84,7 +84,7 @@
         </section>
       </section>
 
-      <section className="riders-section" id="riders">
+      <section className="riders-section" id="riders" data-performance-region>
         <div className="section-index">
           <span>02</span>
           <small>SEVEN RIDERS</small>
@@ -102,16 +102,19 @@
           <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
             <div className="rider-visual fit-cover">
               {RIDERS.map((r, i) => (
-                <img
-                  key={r.id}
-                  src={r.img}
-                  alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
-                  className={i === riderTab ? "is-on" : ""}
-                  style={{ objectPosition: r.pos }}
-                  decoding="async"
-                  fetchPriority={i === 0 ? "high" : "low"}
-                  draggable={false}
-                />
+                i === riderTab || i === previousRiderTab ? (
+                  <img
+                    key={r.id}
+                    src={r.img}
+                    alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
+                    className={i === riderTab ? "is-on" : ""}
+                    style={{ objectPosition: r.pos }}
+                    decoding="async"
+                    loading={i === riderTab ? "eager" : "lazy"}
+                    fetchPriority={i === riderTab ? "high" : "low"}
+                    draggable={false}
+                  />
+                ) : null
               ))}
             </div>
             <div className="rider-monogram" aria-hidden="true">
@@ -145,7 +148,7 @@
         </div>
       </section>
 
-      <section className="records-section" id="records">
+      <section className="records-section" id="records" data-performance-region>
         <div className="section-index">
           <span>03</span>
           <small>NEW RECORDS</small>

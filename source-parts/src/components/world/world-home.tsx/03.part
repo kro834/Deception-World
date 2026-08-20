@@ -18,11 +18,14 @@
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
 
-    const jumpToAnotherPoster = () => {
-      goPoster((p) => p + 1 + Math.floor(Math.random() * (POSTERS.length - 1)));
-    };
+    const finalPoster = (poster + 1 + Math.floor(Math.random() * (POSTERS.length - 1))) % POSTERS.length;
+    const previewOffsets = [1, 3, 2, 1, 2, 3, 1, 3, 2];
+    const finalImage = new Image();
+    finalImage.decoding = "async";
+    finalImage.fetchPriority = "high";
+    finalImage.src = POSTERS[finalPoster].src;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      jumpToAnotherPoster();
+      goPoster(finalPoster);
       shuffleActive.current = false;
       return;
     }
@@ -30,7 +33,10 @@
     setShuffling(true);
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(() => {
-        jumpToAnotherPoster();
+        const next = index === steps.length - 1
+          ? finalPoster
+          : (poster + previewOffsets[index % previewOffsets.length]) % POSTERS.length;
+        goPoster(next);
         if (index === steps.length - 1) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
@@ -67,6 +73,10 @@
   const openPickup = () => {
     const dlg = pickupDialogRef.current;
     if (!dlg) return;
+    const resetScroll = () => {
+      dlg.scrollTop = 0;
+      dlg.querySelector<HTMLElement>(".world-column-dialog-card")?.scrollTo({ top: 0, left: 0 });
+    };
     if (pickupCloseTimer.current != null) {
       window.clearTimeout(pickupCloseTimer.current);
       pickupCloseTimer.current = null;
@@ -79,12 +89,14 @@
         /* already open */
       }
     }
+    resetScroll();
     setPickupOpen(true);
-    (document.activeElement as HTMLElement | null)?.blur();
     syncRail(pickupRail.current, columnTab);
     requestAnimationFrame(() => {
+      resetScroll();
       bootLiquidGlass(dlg);
       pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+      dlg.querySelector<HTMLElement>(".world-column-dialog-close")?.focus({ preventScroll: true });
     });
   };
 
@@ -98,6 +110,7 @@
     if (dlg.dataset.closing === "true") return;
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     pickupCloseTimer.current = window.setTimeout(() => {
       try {
         dlg.close();
@@ -107,11 +120,11 @@
       delete dlg.dataset.closing;
       pickupCloseTimer.current = null;
       setPickupOpen(false);
-    }, 360);
+    }, reducedMotion ? 0 : 360);
   };
 
   return (
-    <div className="site-shell motion-on" data-motion-enabled="true">
+    <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
       <SideMenuLayer />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -143,7 +156,7 @@
       </header>
       <SiteUpdateButton />
 
-      <section className="hero" id="top">
+      <section className="hero" id="top" data-performance-region>
         <div className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>

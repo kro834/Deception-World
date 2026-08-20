@@ -8,7 +8,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/poster-card-08.jpeg": 453700,
   "/poster-card-09.jpeg": 549000,
   "/poster-card-10.jpeg": 382400,
-  "/episode-05-farce.png": 2267760,
+  "/episode-05-farce.jpeg": 320800,
   "/manager-lejas.jpeg": 283500,
   "/manager-lejas-face.jpeg": 280014,
   "/manager-lejas-portrait.jpeg": 280014,
@@ -25,23 +25,37 @@ const KNOWN_BYTES: Record<string, number> = {
 
 export const WORLD_ENTER_ASSETS = [
   "/deception-world-poster.jpeg",
-  "/poster-card-03.jpeg",
-  "/poster-card-04.jpeg",
 ] as const;
 
 export const MANAGER_ASSETS = {
-  zeus: ["/manager-zeus.jpeg", "/manager-zeus-detail.jpeg"],
-  lejas: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"],
-  opus: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"],
-  "rex-loi": ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"],
-  shuza: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"],
-  reemu: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"],
+  zeus: ["/manager-zeus-detail.jpeg"],
+  lejas: ["/manager-lejas.jpeg"],
+  opus: ["/manager-opus.jpeg"],
+  "rex-loi": ["/manager-rex-loi.jpeg"],
+  shuza: ["/manager-shuza.jpeg"],
+  reemu: ["/manager-reemu.jpeg"],
 } as const;
 
 const warmed = new Set<string>();
 
+function browserHasAsset(url: string) {
+  if (typeof window === "undefined" || typeof performance === "undefined") return false;
+  const key = assetKey(url);
+  let absolute = key;
+  try {
+    absolute = new URL(key, window.location.href).href;
+  } catch {
+    /* keep the original key */
+  }
+  return performance.getEntriesByName(absolute, "resource").length > 0;
+}
+
+function assetReady(url: string) {
+  return warmed.has(url) || warmed.has(assetKey(url)) || browserHasAsset(url);
+}
+
 export function assetsWarmed(urls: readonly string[]) {
-  return urls.length > 0 && urls.every((u) => warmed.has(u) || warmed.has(assetKey(u)));
+  return urls.length > 0 && urls.every(assetReady);
 }
 
 function assetKey(url: string) {
@@ -65,8 +79,16 @@ async function pullOne(
   totals: number[],
   onProgress: (percent: number) => void,
 ) {
+  if (assetReady(url)) {
+    received[index] = totals[index];
+    warmed.add(url);
+    warmed.add(assetKey(url));
+    emitProgress(received, totals, onProgress);
+    return;
+  }
   try {
     const res = await fetch(url, { cache: "force-cache" });
+    if (!res.ok) throw new Error(`Asset request failed: ${res.status}`);
     const headerLen = Number(res.headers.get("content-length"));
     if (Number.isFinite(headerLen) && headerLen > 0) totals[index] = headerLen;
     if (!res.body) {
@@ -122,20 +144,4 @@ export async function preloadAssets(
     warmed.add(assetKey(u));
   });
   onProgress(100);
-}
-
-export function warmLater(urls: readonly string[]) {
-  if (typeof window === "undefined") return;
-  window.setTimeout(() => {
-    for (const url of urls) {
-      if (warmed.has(url) || warmed.has(assetKey(url))) continue;
-      const img = new Image();
-      img.decoding = "async";
-      img.onload = () => {
-        warmed.add(url);
-        warmed.add(assetKey(url));
-      };
-      img.src = url;
-    }
-  }, 400);
 }

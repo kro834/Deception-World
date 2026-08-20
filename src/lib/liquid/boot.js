@@ -335,6 +335,16 @@ function initRail(root) {
   let active = tabs().findIndex(t => t.getAttribute('aria-selected') === 'true');
   if (active < 0) active = 0;
 
+  const syncTabState = (i) => {
+    tabs().forEach((tab, index) => {
+      const selected = index === i;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.classList.toggle('is-active', selected);
+      tab.tabIndex = selected ? 0 : -1;
+    });
+  };
+  syncTabState(active);
+
   const reduce = () => mq(REDUCED_MOTION).matches;
   const measure = () => {
     const rr = root.getBoundingClientRect();
@@ -354,14 +364,15 @@ function initRail(root) {
     root.dataset.liquidInitialized = 'true';
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
   };
-  const select = (i) => {
-    if (i === active) return;
-    active = i;
-    tabs().forEach((t, k) => {
-      t.setAttribute('aria-selected', String(k === i));
-      t.classList.toggle('is-active', k === i);
-    });
-    root.dispatchEvent(new CustomEvent('railselect', { detail: { index: i } }));
+  const select = (i, focus = false) => {
+    const list = tabs();
+    if (!list.length) return;
+    const next = clamp(i, 0, list.length - 1);
+    const changed = next !== active;
+    active = next;
+    syncTabState(active);
+    if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
+    if (focus) list[active].focus({ preventScroll: true });
   };
   const setContact = (i) => {
     tabs().forEach((t, k) => {
@@ -395,14 +406,12 @@ function initRail(root) {
     pageLocked = true;
     document.documentElement.dataset.railLock = 'true';
     window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
-    window.addEventListener('wheel', blockPageScroll, { passive: false, capture: true });
   };
   const unlockPage = () => {
     if (!pageLocked) return;
     pageLocked = false;
     delete document.documentElement.dataset.railLock;
     window.removeEventListener('touchmove', blockPageScroll, { capture: true });
-    window.removeEventListener('wheel', blockPageScroll, { capture: true });
   };
   const cancel = () => { if (!gesture) return; gesture = null; reset(); unlockPage(); settle(active); };
 
@@ -499,7 +508,6 @@ function initRail(root) {
     };
     root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'false';
     setContact(start);
-    lockPage();
     if (!reduce() && getRenderer().activate(root)) {
       getRenderer().setAccent(getComputedStyle(target).getPropertyValue('--liquid-accent').trim());
       getRenderer().setGeometry(gesture.geos[start]);
@@ -511,6 +519,8 @@ function initRail(root) {
     holdTimer = setTimeout(() => {
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
+      lockPage();
+      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');
     }, 105);
   });
@@ -526,16 +536,18 @@ function initRail(root) {
         return;
       }
       clearTimeout(holdTimer);
+      if (gesture.pointerType !== 'mouse' && !gesture.held && Math.abs(dy) > Math.abs(dx) * 1.12) {
+        cancel(); return;
+      }
       if (lockScroll) {
         gesture.axis = 'free';
-      } else if (Math.abs(dy) > Math.abs(dx) * 1.12) {
-        cancel(); return;
       } else {
         gesture.axis = 'horizontal';
       }
+      lockPage();
       root.dataset.liquidDragging = 'true'; root.dataset.liquidHeld = 'true';
       if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
-      try { root.setPointerCapture(gesture.pointerId); } catch (err) {}
+      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
     }
     e.preventDefault();
     pending = { x: e.clientX, y: e.clientY, t: e.timeStamp };
@@ -571,10 +583,8 @@ function initRail(root) {
   };
   root.addEventListener('pointerup', finish);
   root.addEventListener('pointercancel', () => cancel());
+  root.addEventListener('lostpointercapture', () => { if (gesture) cancel(); });
   root.addEventListener('contextmenu', (e) => e.preventDefault());
-  if (lockScroll) {
-    root.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
-  }
 
   let swallowClick = false;
   tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
@@ -582,10 +592,28 @@ function initRail(root) {
     select(i); settle(i);
   }));
 
+  root.addEventListener('keydown', (e) => {
+    const tab = e.target.closest('button[role="tab"]');
+    if (!tab || !root.contains(tab)) return;
+    const list = tabs();
+    const current = list.indexOf(tab);
+    if (current < 0 || !list.length) return;
+    let next = current;
+    if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = list.length - 1;
+    else if (e.key === 'ArrowRight') next = (current + 1) % list.length;
+    else if (e.key === 'ArrowLeft') next = (current - 1 + list.length) % list.length;
+    else return;
+    e.preventDefault();
+    select(next, true);
+    settle(next);
+  });
+
   const relayout = () => {
     if (gesture) return;
     const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
     if (i >= 0) active = i;
+    syncTabState(active);
     settle(active);
   };
   let ro = 0;
@@ -655,19 +683,57 @@ function initPanel() {
   if (!trigger || !panel || !scrim) return;
   if (panel.dataset.liquidBound === 'true') return;
   panel.dataset.liquidBound = 'true';
+  const closeBtn = panel.querySelector('.side-panel-close');
+  const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  let isOpen = panel.dataset.open === 'true';
+  let previousBodyOverflow = '';
+
+  const focusables = () => [...panel.querySelectorAll(focusableSelector)]
+    .filter((element) => element.tabIndex >= 0 && element.getAttribute('aria-hidden') !== 'true');
   const set = (open) => {
+    if (open === isOpen) return;
+    isOpen = open;
+    if (open) previousBodyOverflow = document.body.style.overflow;
+    else trigger.focus({ preventScroll: true });
     panel.dataset.open = String(open);
     scrim.dataset.open = String(open);
+    panel.setAttribute('aria-hidden', String(!open));
+    panel.inert = !open;
     trigger.setAttribute('aria-expanded', String(open));
-    document.body.style.overflow = open ? 'hidden' : '';
-    if (!open) trigger.focus({ preventScroll: true });
+    document.body.style.overflow = open ? 'hidden' : previousBodyOverflow;
+    if (open) (closeBtn || panel).focus({ preventScroll: true });
   };
+  panel.setAttribute('aria-hidden', String(!isOpen));
+  panel.inert = !isOpen;
   trigger.addEventListener('click', () => set(true));
   scrim.addEventListener('click', () => set(false));
-  const closeBtn = panel.querySelector('.side-panel-close');
   if (closeBtn) closeBtn.addEventListener('click', function () { set(false); });
   panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.dataset.open === 'true') set(false); });
+  panel.addEventListener('keydown', (e) => {
+    if (!isOpen) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      set(false);
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const items = focusables();
+    if (!items.length) {
+      e.preventDefault();
+      panel.focus({ preventScroll: true });
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+      e.preventDefault();
+      last.focus({ preventScroll: true });
+    } else if (!e.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+      e.preventDefault();
+      first.focus({ preventScroll: true });
+    }
+  });
 }
 
 // Each surface is initialised independently: a failure in one must not strand
@@ -701,4 +767,3 @@ export function bootLiquidGlass(scope) {
 }
 
 export { initRail, initAction };
-

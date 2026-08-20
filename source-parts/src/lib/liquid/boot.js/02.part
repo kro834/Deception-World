@@ -149,6 +149,16 @@ function initRail(root) {
   let active = tabs().findIndex(t => t.getAttribute('aria-selected') === 'true');
   if (active < 0) active = 0;
 
+  const syncTabState = (i) => {
+    tabs().forEach((tab, index) => {
+      const selected = index === i;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.classList.toggle('is-active', selected);
+      tab.tabIndex = selected ? 0 : -1;
+    });
+  };
+  syncTabState(active);
+
   const reduce = () => mq(REDUCED_MOTION).matches;
   const measure = () => {
     const rr = root.getBoundingClientRect();
@@ -168,14 +178,15 @@ function initRail(root) {
     root.dataset.liquidInitialized = 'true';
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
   };
-  const select = (i) => {
-    if (i === active) return;
-    active = i;
-    tabs().forEach((t, k) => {
-      t.setAttribute('aria-selected', String(k === i));
-      t.classList.toggle('is-active', k === i);
-    });
-    root.dispatchEvent(new CustomEvent('railselect', { detail: { index: i } }));
+  const select = (i, focus = false) => {
+    const list = tabs();
+    if (!list.length) return;
+    const next = clamp(i, 0, list.length - 1);
+    const changed = next !== active;
+    active = next;
+    syncTabState(active);
+    if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
+    if (focus) list[active].focus({ preventScroll: true });
   };
   const setContact = (i) => {
     tabs().forEach((t, k) => {

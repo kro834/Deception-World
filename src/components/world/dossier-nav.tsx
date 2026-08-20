@@ -11,27 +11,27 @@ export type DossierLink = {
 };
 
 export const RIKUEI_NAV: DossierLink[] = [
-  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus.jpeg", "/manager-zeus-detail.jpeg"], kicker: "RIKUEI I" },
-  { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"], kicker: "RIKUEI II" },
-  { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"], kicker: "RIKUEI III" },
-  { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"], kicker: "RIKUEI IV" },
-  { id: "V", name: "オパス", href: "/managers/opus", assets: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"], kicker: "RIKUEI V" },
-  { id: "VI", name: "リームー", href: "/managers/reemu", assets: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"], kicker: "RIKUEI VI" },
+  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus-detail.jpeg"], kicker: "RIKUEI I" },
+  { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg"], kicker: "RIKUEI II" },
+  { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg"], kicker: "RIKUEI III" },
+  { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg"], kicker: "RIKUEI IV" },
+  { id: "V", name: "オパス", href: "/managers/opus", assets: ["/manager-opus.jpeg"], kicker: "RIKUEI V" },
+  { id: "VI", name: "リームー", href: "/managers/reemu", assets: ["/manager-reemu.jpeg"], kicker: "RIKUEI VI" },
 ];
 
 export const RIDER_NAV: DossierLink[] = [
-  { id: "saga", name: "サーガ", href: "/riders/saga", assets: ["/civilian-saga.jpeg", "/nightmare-machiavel-gore.jpeg", "/saga-extreme-middle.jpeg", "/saga-extreme-ultra.jpeg"], kicker: "RIDER 01" },
-  { id: "realm", name: "レルム", href: "/riders/realm", assets: ["/civilian-realm.jpeg", "/rider-profile-realm.jpeg"], kicker: "RIDER 02" },
-  { id: "lore", name: "ローア", href: "/riders/lore", assets: ["/civilian-lore.jpeg", "/rider-profile-lore.jpeg"], kicker: "RIDER 03" },
-  { id: "vandal", name: "ヴァンダール", href: "/riders/vandal", assets: ["/civilian-vandal.jpeg", "/rider-profile-vandal.jpeg"], kicker: "RIDER 04" },
-  { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg", "/rider-profile-leddic.jpeg"], kicker: "RIDER 05" },
-  { id: "argenome", name: "アルゲノム", href: "/riders/argenome", assets: ["/civilian-argenome.jpeg", "/rider-profile-argenome.jpeg"], kicker: "RIDER 06" },
-  { id: "over-zeztz", name: "オーバーゼッツ", href: "/riders/over-zeztz", assets: ["/civilian-over-zeztz.jpeg", "/rider-profile-over-zeztz.jpeg"], kicker: "RIDER 07" },
+  { id: "saga", name: "サーガ", href: "/riders/saga", assets: ["/civilian-saga.jpeg"], kicker: "RIDER 01" },
+  { id: "realm", name: "レルム", href: "/riders/realm", assets: ["/civilian-realm.jpeg"], kicker: "RIDER 02" },
+  { id: "lore", name: "ローア", href: "/riders/lore", assets: ["/civilian-lore.jpeg"], kicker: "RIDER 03" },
+  { id: "vandal", name: "ヴァンダール", href: "/riders/vandal", assets: ["/civilian-vandal.jpeg"], kicker: "RIDER 04" },
+  { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg"], kicker: "RIDER 05" },
+  { id: "argenome", name: "アルゲノム", href: "/riders/argenome", assets: ["/civilian-argenome.jpeg"], kicker: "RIDER 06" },
+  { id: "over-zeztz", name: "オーバーゼッツ", href: "/riders/over-zeztz", assets: ["/civilian-over-zeztz.jpeg"], kicker: "RIDER 07" },
 ];
 
 export const RELATED_NAV: DossierLink[] = [
-  { id: "01", name: "テラ・アレイン", href: "/characters/terra", assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"], kicker: "RELATED 01" },
-  { id: "02", name: "ルナ・アレイン", href: "/characters/luna", assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"], kicker: "RELATED 02" },
+  { id: "01", name: "テラ・アレイン", href: "/characters/terra", assets: ["/character-terra.jpeg"], kicker: "RELATED 01" },
+  { id: "02", name: "ルナ・アレイン", href: "/characters/luna", assets: ["/character-luna.jpeg"], kicker: "RELATED 02" },
 ];
 
 export function NameText({ value }: { value: string }) {

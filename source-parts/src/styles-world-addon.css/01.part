@@ -30,7 +30,7 @@ html[data-mode="world"][data-loading] body {
 .liquid-swipe-tabs > button[role="tab"],
 .world-column-tabs,
 .world-column-dialog-tabs {
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 html[data-rail-lock] .world-column-dialog,
@@ -437,4 +437,3 @@ br.tab-br { display: none; }
 .form-pickup-plus span { font-size: 30px; font-weight: 300; line-height: 1; }
 .form-pickup-plus:focus,
 .form-pickup-plus:focus-visible { outline: none; }
-

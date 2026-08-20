@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -675,32 +675,25 @@ export function RiderPage({ id }: { id: string }) {
   const openNightmare = () => {
     const dlg = nightmareRef.current;
     if (!dlg) return;
+    const resetScroll = () => {
+      dlg.scrollTop = 0;
+      dlg.querySelector<HTMLElement>(".rider-nightmare-dialog-panel")?.scrollTo({ top: 0, left: 0 });
+    };
+    resetScroll();
     try {
       dlg.showModal();
     } catch {
       /* already open */
     }
-    (document.activeElement as HTMLElement | null)?.blur();
+    window.requestAnimationFrame(() => {
+      resetScroll();
+      dlg.querySelector<HTMLElement>(".rider-nightmare-dialog-close")?.focus({ preventScroll: true });
+    });
   };
   const closeNightmare = () => {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
-  useEffect(() => {
-    const href = primaryForm?.img ?? rider.img;
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.href = href;
-    link.setAttribute("fetchpriority", "high");
-    document.head.appendChild(link);
-    const img = new Image();
-    img.decoding = "async";
-    img.fetchPriority = "high";
-    img.src = href;
-    void img.decode?.().catch(() => undefined);
-    return () => link.remove();
-  }, [primaryForm?.img, rider.img]);
   return (
     <main
       className="manager-page rider-dossier-page"

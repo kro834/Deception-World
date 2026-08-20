@@ -7,7 +7,15 @@
               <article
                 key={ep.no}
                 className={i === episode ? "episode-card is-active" : "episode-card"}
+                role="button"
+                tabIndex={0}
+                aria-pressed={i === episode}
                 onClick={() => goEpisode(i)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  goEpisode(i);
+                }}
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
@@ -30,7 +38,7 @@
         </section>
       </section>
 
-      <section className="finale-section">
+      <section className="finale-section" data-performance-region>
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img src="/deception-world-poster.jpeg" alt="" loading="lazy" decoding="async" />
