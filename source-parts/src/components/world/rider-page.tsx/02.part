@@ -1,0 +1,193 @@
+      { dt: "WEIGHT", dd: "76kg" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "REALMS / COMMANDER",
+        title: "一人で作戦本部として機能する帰還者。",
+        body: [
+          "ベル・アレインは、検体災害と高危険度異常存在へ対抗するREALMSの元日本支部リーダー。創設者ソル・アレインと英国人の母の息子で、レルムズドライバー唯一の完全適合者である。",
+          "自ら前線へ出ながら戦況、人員、被害予測、敵の進路を同時管理する。出生や来歴の全貌は組織内でも不明。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "PERSONALITY / DECISION",
+        title: "誰かが前を向くため、決断の後にも笑う。",
+        body: [
+          "明るく親しみやすく、冗談や軽口で場を動かす。意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。基準は外見や出自ではなく共存可能性である。",
+        ],
+      },
+      {
+        no: "03",
+        kicker: "BODY / COMBAT",
+        title: "生身でも、この世界で最強とされる。",
+        body: [
+          "黒く染めた髪、淡い蒼の瞳、長い耳を持ち、白いコートを好む。反射神経、空間認識、情報処理に秀で、初手の必殺技と欺瞞を織り交ぜる。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/rider-profile-realm.jpeg",
+        pos: "50% 8%",
+        system: "レルムズドライバー × レジェンズルーレット",
+        name: "レルム",
+        sub: "レジェンズ",
+        calls: ["ROULETTE ON!", "JARAMM… LEGENDS! HIT!", "Rollout!", "JACKPOT!!", "RIDER! REALM! LEGENDS!!"],
+        stats: [
+          { dt: "HEIGHT", dd: "218.8cm" },
+          { dt: "WEIGHT", dd: "103.6kg" },
+          { dt: "PUNCH", dd: "198.6t" },
+          { dt: "KICK", dd: "268.8t" },
+          { dt: "JUMP", dd: "188.8m" },
+          { dt: "100m", dd: "0.06sec" },
+        ],
+        abilities: [
+          { name: "レジェンズルーレット", body: "敵、戦場、目的、許容損害から方策を抽出する混合戦略生成器。勝率、EMP、被害、ベルの倫理で重み付けする。" },
+          { name: "LEGENDS", body: "伝説から人物の力ではなく、勝利の開始条件、方策、終了条件を抽出する。" },
+          { name: "JACKPOT", body: "IDENTIFY、REACH、SAFE、CLOSEの四証明で、全経路を同じ勝利条件へ収束させる。" },
+        ],
+        arsenal: [
+          { name: "メビウスネイバー", body: "矢で装甲処理、損傷転嫁、再生、権限経路を観測する弩。" },
+          { name: "レルムスレイヤー", body: "防御と回避を観測しながら逃走、転嫁、再生、時間回帰、分身交換を順に閉じる銃。" },
+          { name: "レジェンズエッジ", body: "一撃の刃長、角度、位相、軌道を更新し、斬撃を刺突、柄打ち、追撃へ組み替える長剣。" },
+        ],
+        finishers: [
+          { name: "レジェンズモディフィカーレ", body: "敵本体、管理構造、再生中枢へ攻撃可能だと実証する高速キック。" },
+          { name: "ジャックポット・レジェンズフィナーレ", body: "四証明の完了後、観測楔、敗北回避経路の封鎖、最終行動へ最適化したキックを順に実行する。" },
+        ],
+      },
+    ],
+    civilian: {
+      name: "ベル・アレイン",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。REALMS元日本支部リーダー。",
+    },
+  },
+  {
+    id: "lore",
+    no: "03",
+    name: "LORE",
+    ja: "ローア",
+    person: "ローア",
+    enPerson: "LORE",
+    epithet: "卑怯者",
+    tone: "#67d8ff",
+    img: "/rider-profile-lore.jpeg",
+    pos: "50% 10%",
+    civilianImg: "/civilian-lore.jpeg",
+    civilianPos: "50% 8%",
+    title: "管理人の側から、世界へ踏み込む第三のライダー。",
+    quotes: ["命の終わり際に向けられる最後の眼差しが好きだった", "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった"],
+    facts: [
+      { dt: "NAME", dd: "ローア" },
+      { dt: "AGE", dd: "不明" },
+      { dt: "GENDER", dd: "男性" },
+      { dt: "BIRTHDAY", dd: "9月2日" },
+      { dt: "HEIGHT", dd: "179.0cm" },
+      { dt: "WEIGHT", dd: "71.2kg" },
+      { dt: "CV", dd: "内山昂輝" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "POSITION / PRESENT",
+        title: "世界を弄んだ管理人は、かつての敵と並び立つ。",
+        body: [
+          "サーガ世界の管理人であり、かつてシエルを殺害した経験を持つ。現在は諸事情によって弱体化し、過去に敵対した者たちとの共闘へ臨んでいる。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "PERSONALITY / COWARDICE",
+        title: "善意も悪意も、自分で踏みにじる。",
+        body: [
+          "自己肯定感は低いが、プライドは高い。口論で大敗した際の憂さ晴らしとしてサーガ世界を創造し、そこで偶然行った人助けを感謝されて舞い上がった結果、『仮面ライダーサーガ』の結末をバッドエンドへ導いた。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/rider-profile-lore.jpeg",
+        pos: "50% 10%",
+        system: "ローアドライバー × ローアライズコア",
+        name: "ローア",
+        sub: "リキッド",
+        calls: ["LIQUID On!", "Roll Out…", "FLOWING Lore System", "Liquid PHASE…!"],
+        stats: [
+          { dt: "HEIGHT", dd: "可変" },
+          { dt: "WEIGHT", dd: "可変" },
+          { dt: "PUNCH", dd: "66.8t" },
+          { dt: "KICK", dd: "176.9t" },
+          { dt: "JUMP", dd: "488.8m" },
+          { dt: "100m", dd: "0.05sec" },
+        ],
+        abilities: [
+          { name: "LIQUID", body: "肉体と装甲を流動位相へ変換し、物理攻撃の衝撃を一点で受け止めず全身へ分散する。" },
+          { name: "REPAIR", body: "破損した空間、精神、夢界接続を流動的に補修する。崩壊を一時的に止める応急処置を得意とする。" },
+          { name: "SOLID", body: "対象の位置、動作、能力発動、位相変動を一時的に固定する。高速移動、空間転移、夢界潜行を大幅に制限する。" },
+        ],
+        arsenal: [
+          { name: "ローアライズコア", body: "リキッドとソリッドの位相を切り替える中核。EMPは無制限。" },
+        ],
+        finishers: [
+          { name: "FLOW ENDER", body: "対象周囲の空間を流動化し、流動位相エネルギーを収束した蹴撃で内部構造を液状情報へ分解する。" },
+          { name: "PRESS ENDER", body: "対象周囲の空間を固定し、高密度位相エネルギーを収束したライダーキックを叩き込む。" },
+        ],
+      },
+    ],
+    civilian: {
+      name: "ローア",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。サーガ世界の管理人。",
+      cv: "内山昂輝",
+    },
+  },
+  {
+    id: "vandal",
+    no: "04",
+    name: "VANDAL",
+    ja: "ヴァンダール",
+    person: "レックス・ロワ",
+    enPerson: "VANDAL",
+    epithet: "秩序の大口と裁定者の仮面",
+    tone: "#e71a9c",
+    img: "/rider-profile-vandal.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/civilian-vandal.jpeg",
+    civilianPos: "50% 10%",
+    title: "六詠第二位が、肉弾戦へ権限を変換する。",
+    quotes: ["世界は、今日も選択を許されて居ます", "生者には生を。死者には静寂を", "今日も又、道を閉ざす物だけを壊しましょう"],
+    facts: [
+      { dt: "NAME", dd: "レックス・ロワ" },
+      { dt: "AGE", dd: "不明" },
+      { dt: "GENDER", dd: "両性具有／性自認は女性" },
+      { dt: "HEIGHT", dd: "185.0cm" },
+      { dt: "WEIGHT", dd: "80.1kg" },
+      { dt: "DIVINITY", dd: "秩序の神" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "POSITION / IDEAL",
+        title: "世界を残し、支配だけを終わらせる。",
+        body: [
+          "『六詠』の管理人の一人。特定の領域ではなく、単独で中央官制の全役割を背負う。世界は残し、支配だけを終わらせる。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "PERSONALITY / VERDICT",
+        title: "他者の選択を奪わない、完全なる良心。",
+        body: [
+          "力有る者には責任を。私の力が、私の欲によって振るわれぬ様に。道を閉ざす物だけを壊す。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/rider-profile-vandal.jpeg",
+        pos: "50% 8%",
+        system: "ヴァンダールドライバー × スペシャルコア",
+        name: "ヴァンダール",
