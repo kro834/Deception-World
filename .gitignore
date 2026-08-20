@@ -1,0 +1,12 @@
+node_modules
+.tanstack
+.vercel
+.nitro
+.output
+dist
+screenshots
+artifacts
+attachments
+*.zip
+.env
+.env.local
