@@ -1,4 +1,14 @@
 #!/usr/bin/env node
+/**
+ * Deploy-time database migrator (node-postgres, `pg`).
+ *
+ * Runs during `npm run build` — on every Vercel deploy — applying pending files
+ * in ../migrations to DATABASE_URL. Each file is applied in one transaction and
+ * recorded in a `_migrations` table, so it runs once and is safe to re-run.
+ *
+ * No DATABASE_URL (local / preview builds) -> skip; the PGLite fallback applies
+ * the same files at startup instead (see src/lib/db.ts).
+ */
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -39,6 +49,7 @@ async function main() {
       const text = await readFile(join(migrationsDir, name), "utf8");
       try {
         await client.query("BEGIN");
+        // pg's simple-query protocol runs a whole multi-statement file at once.
         await client.query(text);
         await client.query("INSERT INTO _migrations (name) VALUES ($1)", [name]);
         await client.query("COMMIT");
@@ -47,7 +58,7 @@ async function main() {
         try {
           await client.query("ROLLBACK");
         } catch {
-          /* keep original */
+          // ROLLBACK fails when the connection died — keep the original error.
         }
         throw err;
       }
@@ -63,5 +74,9 @@ async function main() {
 
 main().catch((err) => {
   console.error("[migrate] failed:", err?.message || err);
+  // pg errors carry the context needed to debug a bad SQL file.
+  for (const key of ["code", "detail", "hint", "position", "where"]) {
+    if (err?.[key] != null) console.error(`[migrate]   ${key}: ${err[key]}`);
+  }
   process.exit(1);
 });
