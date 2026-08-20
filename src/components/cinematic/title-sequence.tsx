@@ -113,7 +113,9 @@ export function TitleSequence() {
     phaseRef.current = "idle";
     setPhase("idle");
     setReplayKey((k) => k + 1);
-  }, []);
+    const score = getScore();
+    if (!score.muted()) score.start();
+  }, [getScore]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -167,7 +169,7 @@ export function TitleSequence() {
     <section
       className={stageClass}
       onPointerDown={phase === "playing" ? unlockAudio : undefined}
-      role="img"
+      role="region"
       aria-label="仮面ライダーサーガ Deception World オープニング"
     >
       <video
@@ -182,29 +184,45 @@ export function TitleSequence() {
         loop
       />
 
+      <div className="cine-light-field" aria-hidden="true" />
+      <div className="cine-scanline" aria-hidden="true" />
+      <div className="cine-flare" aria-hidden="true" />
       <HudRings />
       <Particles active={phase === "playing"} />
 
       <div className="cine-line" />
 
+      <div className="cine-sequence-meta" aria-hidden="true">
+        <span>DW // OPENING 02</span>
+        <span>WORLD SIGNAL 07</span>
+      </div>
+
       <div className="cine-stack">
-        <div className="cine-logo-wrap">
-          <img
-            src="/logo-title.jpg"
-            alt=""
-            className="cine-logo-glow"
-            decoding="async"
-            draggable={false}
-          />
-          <img
-            src="/logo-title.jpg"
-            alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
-            className="cine-logo-core"
-            decoding="async"
-            fetchPriority="high"
-            draggable={false}
-          />
-          <div className="cine-logo-shine" />
+        <div className="cine-title-lockup">
+          <div className="cine-logo-wrap">
+            <img
+              src="/logo-title.jpg"
+              alt=""
+              className="cine-logo-glow"
+              decoding="async"
+              draggable={false}
+            />
+            <img
+              src="/logo-title.jpg"
+              alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
+              className="cine-logo-core"
+              decoding="async"
+              fetchPriority="high"
+              draggable={false}
+            />
+            <div className="cine-logo-shine" />
+            <span className="cine-logo-frame" aria-hidden="true" />
+          </div>
+          <div className="cine-title-caption" aria-hidden="true">
+            <span>THE SECOND SAGA</span>
+            <i />
+            <span>DECEPTION WORLD</span>
+          </div>
         </div>
       </div>
 
@@ -212,7 +230,18 @@ export function TitleSequence() {
       <div className="cine-grain" />
       <div className="cine-letterbox top" />
       <div className="cine-letterbox bottom" />
-      <div className="cine-progress" />
+      <div className="cine-progress" aria-hidden="true">
+        <span />
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="cine-cue" aria-hidden="true">
+        <span>INITIALIZE SIGNAL</span>
+        <span>TRACE DECEPTION</span>
+        <span>WORLD LOCKED</span>
+      </div>
 
       <div className="cine-enter-hint">
         <p className="cine-pulse cine-kicker">Opening</p>
@@ -221,6 +250,7 @@ export function TitleSequence() {
       <button
         type="button"
         className="cine-ghost cine-skip"
+        disabled={phase !== "playing"}
         onClick={skip}
         aria-label="オープニングをスキップ"
         aria-keyshortcuts="Escape Enter Space S"
@@ -230,27 +260,39 @@ export function TitleSequence() {
         <kbd>ESC</kbd>
       </button>
 
-      <div className="cine-always">
+      <div className="cine-always" aria-hidden={phase === "idle"}>
         <button
           type="button"
           className="cine-ghost inline-flex items-center gap-2"
+          disabled={phase === "idle"}
           onClick={toggleMute}
           aria-label={muted ? "音声をオン" : "音声をオフ"}
+          aria-keyshortcuts="M"
         >
           {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-          <span className="hidden sm:inline">{muted ? "MUTE" : "SOUND"}</span>
+          <span className="hidden sm:inline">{muted ? "SOUND OFF" : "SOUND ON"}</span>
         </button>
       </div>
 
-      <div className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3">
+      <div
+        className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"
+        aria-hidden={phase !== "complete"}
+      >
         <button
           type="button"
           className="cine-btn"
+          disabled={phase !== "complete"}
           onClick={() => void go({ to: "/world", assets: WORLD_ENTER_ASSETS, always: true })}
         >
           <span>ENTER THE WORLD</span>
         </button>
-        <button type="button" className="cine-btn" onClick={replay}>
+        <button
+          type="button"
+          className="cine-btn"
+          disabled={phase !== "complete"}
+          onClick={replay}
+          aria-keyshortcuts="R"
+        >
           <span className="inline-flex items-center gap-2">
             <RotateCcw className="size-3.5" />
             もう一度

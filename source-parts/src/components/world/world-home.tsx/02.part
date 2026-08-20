@@ -156,6 +156,7 @@ export function WorldHome() {
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const shuffleTimers = useRef<number[]>([]);
+  const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
 
@@ -250,6 +251,7 @@ export function WorldHome() {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      shuffleActive.current = false;
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
     };
   }, []);

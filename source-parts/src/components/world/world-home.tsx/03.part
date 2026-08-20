@@ -12,7 +12,8 @@
   };
 
   const shufflePoster = () => {
-    if (shuffling) return;
+    if (shuffleActive.current) return;
+    shuffleActive.current = true;
     setLocked(true);
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
@@ -22,18 +23,20 @@
     };
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       jumpToAnotherPoster();
+      shuffleActive.current = false;
       return;
     }
 
     setShuffling(true);
-    [0, 90, 185, 290, 415, 565, 740].forEach((delay, index, steps) => {
+    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(() => {
         jumpToAnotherPoster();
         if (index === steps.length - 1) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
+            shuffleActive.current = false;
             shuffleTimers.current = [];
-          }, 180);
+          }, 300);
           shuffleTimers.current.push(settleTimer);
         }
       }, delay);
@@ -198,7 +201,7 @@
           </div>
         </div>
 
-        <div className="poster-stage" id="poster-stage">
+        <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
@@ -254,6 +257,7 @@
                 type="button"
                 className="poster-shuffle ios26-glass"
                 disabled={shuffling}
+                aria-busy={shuffling}
                 onClick={shufflePoster}
               >
                 <span aria-hidden="true">↻</span>

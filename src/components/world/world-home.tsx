@@ -237,6 +237,7 @@ export function WorldHome() {
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const shuffleTimers = useRef<number[]>([]);
+  const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
 
@@ -331,6 +332,7 @@ export function WorldHome() {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      shuffleActive.current = false;
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
     };
   }, []);
@@ -349,7 +351,8 @@ export function WorldHome() {
   };
 
   const shufflePoster = () => {
-    if (shuffling) return;
+    if (shuffleActive.current) return;
+    shuffleActive.current = true;
     setLocked(true);
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
@@ -359,18 +362,20 @@ export function WorldHome() {
     };
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       jumpToAnotherPoster();
+      shuffleActive.current = false;
       return;
     }
 
     setShuffling(true);
-    [0, 90, 185, 290, 415, 565, 740].forEach((delay, index, steps) => {
+    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(() => {
         jumpToAnotherPoster();
         if (index === steps.length - 1) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
+            shuffleActive.current = false;
             shuffleTimers.current = [];
-          }, 180);
+          }, 300);
           shuffleTimers.current.push(settleTimer);
         }
       }, delay);
@@ -535,7 +540,7 @@ export function WorldHome() {
           </div>
         </div>
 
-        <div className="poster-stage" id="poster-stage">
+        <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
@@ -591,6 +596,7 @@ export function WorldHome() {
                 type="button"
                 className="poster-shuffle ios26-glass"
                 disabled={shuffling}
+                aria-busy={shuffling}
                 onClick={shufflePoster}
               >
                 <span aria-hidden="true">↻</span>
