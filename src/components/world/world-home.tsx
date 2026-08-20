@@ -717,7 +717,7 @@ export function WorldHome() {
                     <i />
                     <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
-                    <em className="signal-apex">最強</em>
+                    <em className="signal-apex" aria-hidden="true">✦</em>
                   </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"

@@ -265,10 +265,10 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               </div>
             ) : null}
             {profile.sovereign ? (
-              <div className="sovereign-apex-seal" role="img" aria-label="六詠第一位、最強の管理人">
-                <small>UNCONTESTED</small>
-                <strong>最強</strong>
-                <span>RIKUEI // I</span>
+              <div className="sovereign-apex-seal" role="img" aria-label="六詠第一位、主権の管理人">
+                <small>SOVEREIGNTY</small>
+                <strong>I</strong>
+                <span>RIKUEI // PRIMARY</span>
               </div>
             ) : null}
             <span className="manager-numeral">{profile.numeral}</span>
@@ -277,8 +277,8 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         <div className="manager-introduction">
           {profile.sovereign ? (
             <p className="sovereign-dominance">
-              <span>ABOVE ALL SIX</span>
-              <b>六詠最強</b>
+              <span>AUTHORITY TRACE</span>
+              <b>主権</b>
             </p>
           ) : null}
           <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
@@ -290,15 +290,15 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           </h1>
           <p className="manager-title"># {profile.title}</p>
           {profile.sovereign ? (
-            <section className="sovereign-status" aria-label="六詠第一位・最強の管理人">
+            <section className="sovereign-status" aria-label="六詠第一位・主権の管理人">
               <div className="sovereign-emblem" aria-hidden="true">
                 <i />
                 <span>I</span>
               </div>
               <div className="sovereign-status-copy">
-                <small>SUPREME AUTHORITY // RANK I</small>
-                <strong>最強の管理人</strong>
-                <p>ABSOLUTE SOVEREIGNTY</p>
+                <small>AUTHORITY PROTOCOL // RANK I</small>
+                <strong>第一位</strong>
+                <p>SOVEREIGNTY CONFIRMED</p>
               </div>
               <div className="sovereign-scale" aria-hidden="true">
                 <span><i /><b>VI</b></span>

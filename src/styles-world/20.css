@@ -26,16 +26,19 @@
   z-index: 3;
   top: 15px;
   left: 46px;
-  padding: 5px 8px 4px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
   border: 1px solid rgba(255, 246, 214, 0.58);
   border-radius: 999px;
   background: rgba(25, 17, 5, 0.74);
   box-shadow: 0 0 16px rgba(244, 215, 142, 0.2);
   color: #fff8df;
-  font-size: 7px;
+  font-size: 11px;
   font-style: normal;
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   line-height: 1;
   text-shadow: 0 0 10px rgba(244, 215, 142, 0.62);
 }
@@ -368,7 +371,7 @@
 }
 
 .is-sovereign .manager-introduction::before {
-  content: "NO.1";
+  content: "I";
   position: absolute;
   z-index: -1;
   top: -54px;
@@ -633,12 +636,12 @@
 }
 
 .sovereign-scale .is-apex::after {
-  content: "APEX";
+  content: "✦";
   position: absolute;
   top: -8px;
   left: 50%;
   color: rgba(255, 250, 240, 0.62);
-  font-size: 5px;
+  font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.12em;
   transform: translateX(-50%);
