@@ -36,6 +36,10 @@ const POSTERS = [
   { src: "/poster-card-25.jpeg", pos: "50% 43%", fit: "cover", alt: "荒野で大剣を構える赤いライダーのキービジュアル" },
   { src: "/poster-card-26.jpeg", pos: "50% 48%", fit: "cover", alt: "森で向き合うライダーとレックス・ロワのキービジュアル" },
   { src: "/poster-card-27.jpeg", pos: "50% 42%", fit: "cover", alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル" },
+  { src: "/poster-card-28.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ多色の神装ライダー" },
+  { src: "/poster-card-29.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ星光のライダー" },
+  { src: "/poster-card-30.jpeg", pos: "50% 34%", fit: "cover", alt: "紅い光を宿すヴェール姿の人物" },
+  { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
 ];
 
 const RIDERS = [
@@ -69,7 +73,7 @@ const COLUMNS = [
     pickup: [
       "世界・概念・領域・物語・法則。あらゆる層を管轄する管理人の最上位、六詠。六つの信号が揃ったとき、サーガ世界の勝敗条件は書き換えられる。",
       "六詠は人格ではなく、権限の集合体として観測される。個体名が解禁されるのは、その信号が物語側へ露出した瞬間だけだ。",
-      "現在フロントから参照できるのは一部に限られる。未解禁のシグナルは、閲覧そのものが世界への干渉になるため、意図的に伏せられている。",
+      "現在フロントでは六つの個体記録を参照できる。すべての信号が露出したことで、六詠同士の関係と権限の衝突が同一の盤面上へ現れ始めている。",
       "ライダーが世界へ踏み込むたび、六詠の均衡はわずかに傾く。傾きを戻すのか、加速させるのか。それがこの時代の管轄である。",
     ],
   },
@@ -279,9 +283,11 @@ export function WorldHome() {
     warmLater([
       ...POSTERS.map((p) => p.src),
       ...EPISODES.map((e) => e.src),
+      "/manager-zeus.jpeg",
       "/manager-rex-loi.jpeg",
       "/manager-shuza.jpeg",
       "/manager-lejas-portrait.jpeg",
+      "/manager-opus.jpeg",
       "/manager-reemu.jpeg",
     ]);
   }, []);
@@ -690,7 +696,7 @@ export function WorldHome() {
               <br />
               ABOVE THE WORLD.
             </h3>
-            <p>最上位管理人、六詠。個体情報へのアクセスは一部制限されています。</p>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
           </div>
           <div className="signal-column">
             <ManagerRail ref={managerRail} />
@@ -698,11 +704,19 @@ export function WorldHome() {
             {managerTab === 0 ? (
               <div className="manager-archive-panel is-managers" role="tabpanel">
                 <div className="signal-array" aria-label="六詠を示す6つのシグナル">
-                  <div className="signal" style={{ ["--delay" as string]: "0s" }} aria-label="六詠I 未解禁">
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/zeus"
+                    assets={MANAGER_ASSETS.zeus}
+                    style={{ ["--delay" as string]: "0s" }}
+                    aria-label="六詠I ゼウスの個別資料を開く"
+                  >
+                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 42%" }} loading="lazy" decoding="async" />
                     <span>I</span>
                     <i />
-                    <small>RESTRICTED</small>
-                  </div>
+                    <small>OPEN DOSSIER</small>
+                    <b>ゼウス</b>
+                  </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
                     to="/managers/rex-loi"
@@ -748,11 +762,19 @@ export function WorldHome() {
                     <small>OPEN DOSSIER</small>
                     <b>レジャス</b>
                   </GuardedLink>
-                  <div className="signal" style={{ ["--delay" as string]: "0.64s" }} aria-label="六詠V 未解禁">
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/opus"
+                    assets={MANAGER_ASSETS.opus}
+                    style={{ ["--delay" as string]: "0.64s" }}
+                    aria-label="六詠V オパスの個別資料を開く"
+                  >
+                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 12%" }} loading="lazy" decoding="async" />
                     <span>V</span>
                     <i />
-                    <small>RESTRICTED</small>
-                  </div>
+                    <small>OPEN DOSSIER</small>
+                    <b>オパス</b>
+                  </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
                     to="/managers/reemu"

@@ -196,9 +196,11 @@ export function WorldHome() {
     warmLater([
       ...POSTERS.map((p) => p.src),
       ...EPISODES.map((e) => e.src),
+      "/manager-zeus.jpeg",
       "/manager-rex-loi.jpeg",
       "/manager-shuza.jpeg",
       "/manager-lejas-portrait.jpeg",
+      "/manager-opus.jpeg",
       "/manager-reemu.jpeg",
     ]);
   }, []);

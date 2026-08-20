@@ -20,9 +20,11 @@ import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
 import { Route as ManagersLejasRouteImport } from './routes/managers/lejas'
+import { Route as ManagersOpusRouteImport } from './routes/managers/opus'
 import { Route as ManagersReemuRouteImport } from './routes/managers/reemu'
 import { Route as ManagersRexLoiRouteImport } from './routes/managers/rex-loi'
 import { Route as ManagersShuzaRouteImport } from './routes/managers/shuza'
+import { Route as ManagersZeusRouteImport } from './routes/managers/zeus'
 import { Route as RidersIdRouteImport } from './routes/riders/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -81,6 +83,11 @@ const ManagersLejasRoute = ManagersLejasRouteImport.update({
   path: '/lejas',
   getParentRoute: () => ManagersRoute,
 } as any)
+const ManagersOpusRoute = ManagersOpusRouteImport.update({
+  id: '/opus',
+  path: '/opus',
+  getParentRoute: () => ManagersRoute,
+} as any)
 const ManagersReemuRoute = ManagersReemuRouteImport.update({
   id: '/reemu',
   path: '/reemu',
@@ -94,6 +101,11 @@ const ManagersRexLoiRoute = ManagersRexLoiRouteImport.update({
 const ManagersShuzaRoute = ManagersShuzaRouteImport.update({
   id: '/shuza',
   path: '/shuza',
+  getParentRoute: () => ManagersRoute,
+} as any)
+const ManagersZeusRoute = ManagersZeusRouteImport.update({
+  id: '/zeus',
+  path: '/zeus',
   getParentRoute: () => ManagersRoute,
 } as any)
 const RidersIdRoute = RidersIdRouteImport.update({
@@ -119,9 +131,11 @@ export interface FileRoutesByFullPath {
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
   '/managers/lejas': typeof ManagersLejasRoute
+  '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
   '/managers/rex-loi': typeof ManagersRexLoiRoute
   '/managers/shuza': typeof ManagersShuzaRoute
+  '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -137,9 +151,11 @@ export interface FileRoutesByTo {
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
   '/managers/lejas': typeof ManagersLejasRoute
+  '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
   '/managers/rex-loi': typeof ManagersRexLoiRoute
   '/managers/shuza': typeof ManagersShuzaRoute
+  '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -156,9 +172,11 @@ export interface FileRoutesById {
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
   '/managers/lejas': typeof ManagersLejasRoute
+  '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
   '/managers/rex-loi': typeof ManagersRexLoiRoute
   '/managers/shuza': typeof ManagersShuzaRoute
+  '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -176,9 +194,11 @@ export interface FileRouteTypes {
     | '/characters/luna'
     | '/characters/terra'
     | '/managers/lejas'
+    | '/managers/opus'
     | '/managers/reemu'
     | '/managers/rex-loi'
     | '/managers/shuza'
+    | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -194,9 +214,11 @@ export interface FileRouteTypes {
     | '/characters/luna'
     | '/characters/terra'
     | '/managers/lejas'
+    | '/managers/opus'
     | '/managers/reemu'
     | '/managers/rex-loi'
     | '/managers/shuza'
+    | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
   id:
@@ -212,9 +234,11 @@ export interface FileRouteTypes {
     | '/characters/luna'
     | '/characters/terra'
     | '/managers/lejas'
+    | '/managers/opus'
     | '/managers/reemu'
     | '/managers/rex-loi'
     | '/managers/shuza'
+    | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -310,6 +334,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManagersLejasRouteImport
       parentRoute: typeof ManagersRoute
     }
+    '/managers/opus': {
+      id: '/managers/opus'
+      path: '/opus'
+      fullPath: '/managers/opus'
+      preLoaderRoute: typeof ManagersOpusRouteImport
+      parentRoute: typeof ManagersRoute
+    }
     '/managers/reemu': {
       id: '/managers/reemu'
       path: '/reemu'
@@ -329,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/shuza'
       fullPath: '/managers/shuza'
       preLoaderRoute: typeof ManagersShuzaRouteImport
+      parentRoute: typeof ManagersRoute
+    }
+    '/managers/zeus': {
+      id: '/managers/zeus'
+      path: '/zeus'
+      fullPath: '/managers/zeus'
+      preLoaderRoute: typeof ManagersZeusRouteImport
       parentRoute: typeof ManagersRoute
     }
     '/riders/$id': {
@@ -364,16 +402,20 @@ const CharactersRouteWithChildren = CharactersRoute._addFileChildren(
 
 interface ManagersRouteChildren {
   ManagersLejasRoute: typeof ManagersLejasRoute
+  ManagersOpusRoute: typeof ManagersOpusRoute
   ManagersReemuRoute: typeof ManagersReemuRoute
   ManagersRexLoiRoute: typeof ManagersRexLoiRoute
   ManagersShuzaRoute: typeof ManagersShuzaRoute
+  ManagersZeusRoute: typeof ManagersZeusRoute
 }
 
 const ManagersRouteChildren: ManagersRouteChildren = {
   ManagersLejasRoute: ManagersLejasRoute,
+  ManagersOpusRoute: ManagersOpusRoute,
   ManagersReemuRoute: ManagersReemuRoute,
   ManagersRexLoiRoute: ManagersRexLoiRoute,
   ManagersShuzaRoute: ManagersShuzaRoute,
+  ManagersZeusRoute: ManagersZeusRoute,
 }
 
 const ManagersRouteWithChildren = ManagersRoute._addFileChildren(

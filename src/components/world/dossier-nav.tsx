@@ -11,11 +11,11 @@ export type DossierLink = {
 };
 
 export const ROKUEI_NAV: DossierLink[] = [
-  { id: "I", name: "未解禁", href: null, assets: [], kicker: "RESTRICTED" },
+  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus.jpeg"], kicker: "ROKUEI I" },
   { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"], kicker: "ROKUEI II" },
   { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"], kicker: "ROKUEI III" },
   { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"], kicker: "ROKUEI IV" },
-  { id: "V", name: "未解禁", href: null, assets: [], kicker: "RESTRICTED" },
+  { id: "V", name: "オパス", href: "/managers/opus", assets: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"], kicker: "ROKUEI V" },
   { id: "VI", name: "リームー", href: "/managers/reemu", assets: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"], kicker: "ROKUEI VI" },
 ];
 

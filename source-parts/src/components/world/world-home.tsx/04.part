@@ -65,7 +65,7 @@
               <br />
               ABOVE THE WORLD.
             </h3>
-            <p>最上位管理人、六詠。個体情報へのアクセスは一部制限されています。</p>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
           </div>
           <div className="signal-column">
             <ManagerRail ref={managerRail} />
@@ -73,11 +73,19 @@
             {managerTab === 0 ? (
               <div className="manager-archive-panel is-managers" role="tabpanel">
                 <div className="signal-array" aria-label="六詠を示す6つのシグナル">
-                  <div className="signal" style={{ ["--delay" as string]: "0s" }} aria-label="六詠I 未解禁">
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/zeus"
+                    assets={MANAGER_ASSETS.zeus}
+                    style={{ ["--delay" as string]: "0s" }}
+                    aria-label="六詠I ゼウスの個別資料を開く"
+                  >
+                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 42%" }} loading="lazy" decoding="async" />
                     <span>I</span>
                     <i />
-                    <small>RESTRICTED</small>
-                  </div>
+                    <small>OPEN DOSSIER</small>
+                    <b>ゼウス</b>
+                  </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
                     to="/managers/rex-loi"
@@ -123,11 +131,19 @@
                     <small>OPEN DOSSIER</small>
                     <b>レジャス</b>
                   </GuardedLink>
-                  <div className="signal" style={{ ["--delay" as string]: "0.64s" }} aria-label="六詠V 未解禁">
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/opus"
+                    assets={MANAGER_ASSETS.opus}
+                    style={{ ["--delay" as string]: "0.64s" }}
+                    aria-label="六詠V オパスの個別資料を開く"
+                  >
+                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 12%" }} loading="lazy" decoding="async" />
                     <span>V</span>
                     <i />
-                    <small>RESTRICTED</small>
-                  </div>
+                    <small>OPEN DOSSIER</small>
+                    <b>オパス</b>
+                  </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
                     to="/managers/reemu"

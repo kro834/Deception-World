@@ -15,6 +15,9 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-rex-loi.jpeg": 516600,
   "/manager-shuza.jpeg": 572000,
   "/manager-reemu.jpeg": 801600,
+  "/manager-zeus.jpeg": 478105,
+  "/manager-opus.jpeg": 342588,
+  "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
 };
 
@@ -25,7 +28,9 @@ export const WORLD_ENTER_ASSETS = [
 ] as const;
 
 export const MANAGER_ASSETS = {
+  zeus: ["/manager-zeus.jpeg"],
   lejas: ["/manager-lejas.jpeg", "/manager-lejas-portrait.jpeg", "/manager-lejas-rider.jpeg"],
+  opus: ["/manager-opus.jpeg", "/manager-opus-rider.jpeg"],
   "rex-loi": ["/manager-rex-loi.jpeg", "/manager-rex-loi-rider.jpeg"],
   shuza: ["/manager-shuza.jpeg", "/manager-shuza-rider.jpeg"],
   reemu: ["/manager-reemu.jpeg", "/manager-reemu-rider.jpeg"],

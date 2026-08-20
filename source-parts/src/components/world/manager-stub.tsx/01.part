@@ -12,6 +12,7 @@ export type RiderForm = {
   pos: string;
   system: string;
   name: string;
+  prefix?: string;
   sub?: string;
   calls: string[];
   quote?: string;
@@ -38,6 +39,7 @@ type Profile = {
 
 export function FormPickup({ rider }: { rider: RiderForm }) {
   const dlg = useRef<HTMLDialogElement>(null);
+  const riderPrefix = rider.prefix ?? "仮面ライダー";
   const resetScroll = () => {
     const dialog = dlg.current;
     if (!dialog) return;
@@ -66,12 +68,12 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const finishers = rider.finishers ?? [];
   const extraForms = rider.extraForms ?? [];
   return (
-    <section className="form-pickup" aria-label={`仮面ライダー${rider.name}の記録`}>
+    <section className="form-pickup" aria-label={`${riderPrefix}${rider.name}の記録`}>
       <article className="form-pickup-card">
         <div className="form-pickup-visual">
           <img
             src={rider.img}
-            alt={`仮面ライダー${rider.name}のフォームビジュアル`}
+            alt={`${riderPrefix}${rider.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
             fetchPriority="high"
@@ -80,7 +82,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           <span>RIDER</span>
           <SlideOpenControl
             className="form-pickup-plus"
-            ariaLabel={`仮面ライダー${rider.name}をピックアップ`}
+            ariaLabel={`${riderPrefix}${rider.name}をピックアップ`}
             label="フォーム詳細"
             onOpen={open}
           />
@@ -89,7 +91,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           <p>TRANSFORMATION RECORD</p>
           <small>PICKUP</small>
           <h2>
-            <span>仮面ライダー</span>
+            <span>{riderPrefix}</span>
             <b>{rider.name}</b>
           </h2>
           {rider.sub ? <em>{rider.sub}</em> : null}
@@ -100,7 +102,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         ref={dlg}
         className="form-pickup-dialog"
         tabIndex={-1}
-        aria-label={`仮面ライダー${rider.name}`}
+        aria-label={`${riderPrefix}${rider.name}`}
         onCancel={(e) => {
           e.preventDefault();
           close();
@@ -122,7 +124,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             </p>
             <small>{rider.system}</small>
             <h2>
-              仮面ライダー <b>{rider.name}</b>
+              {riderPrefix} <b>{rider.name}</b>
             </h2>
             {rider.sub ? <em>{rider.sub}</em> : null}
             <div className="rider-call">
