@@ -1,0 +1,451 @@
+.manager-back:active,
+.rider-archive-back:active,
+.poster-shuffle:active,
+.poster-reset:not(:disabled):active,
+.poster-lock:active,
+.poster-dialog-close:active,
+.dante-dialog-close:active,
+.motion-toggle:active,
+.episode-controls button:not(:disabled):active,
+.primary-action:active,
+.world-column-orbit-trigger:active,
+.world-column-dialog-close:active,
+.rider-nightmare-dialog-close:active,
+.rider-nightmare-pickup-button:active {
+  scale: 1.034;
+  opacity: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(103, 216, 255, 0.12),
+    0 16px 38px rgba(0, 0, 0, 0.24);
+}
+
+.poster-shuffle:active,
+.poster-reset:not(:disabled):active,
+.poster-lock:active {
+  transform: none;
+  background:
+    radial-gradient(circle at 30% -8%, rgba(255, 255, 255, 0.18), transparent 46%),
+    linear-gradient(132deg, rgba(103, 216, 255, 0.08), transparent 58%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.world-column-orbit-trigger:active {
+  transform: translateY(-1px);
+}
+
+.signal.is-accessible:active,
+.dante-archive:active {
+  transform: translateY(-1px);
+  scale: 1.018;
+  opacity: 1;
+}
+
+.signal.is-accessible,
+.dante-archive {
+  scale: 1;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease,
+    scale 0.46s var(--glass-spring);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .topbar,
+  .manager-topbar,
+  .rider-archive-topbar,
+  .liquid-swipe-tabs,
+  .liquid-rail-surface,
+  .liquid-selection-lens,
+  .liquid-selection-surface,
+  .poster-control-cluster,
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock,
+  .motion-toggle,
+  .episode-controls button,
+  .world-column-orbit-trigger,
+  .world-column-dialog-close,
+  .poster-dialog-close,
+  .dante-dialog-close,
+  .rider-nightmare-dialog-close,
+  .rider-nightmare-pickup-button {
+    background-color: rgba(13, 22, 34, 0.96);
+  }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-clear: rgba(9, 15, 24, 0.94);
+    --glass-regular: rgba(8, 14, 22, 0.97);
+    --glass-tinted: rgba(10, 20, 32, 0.98);
+    --glass-border: rgba(232, 247, 255, 0.48);
+    --glass-border-soft: rgba(212, 238, 255, 0.34);
+  }
+
+  .topbar,
+  .manager-topbar,
+  .rider-archive-topbar,
+  .liquid-swipe-tabs,
+  .liquid-rail-surface,
+  .liquid-selection-lens,
+  .poster-control-cluster,
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock,
+  .motion-toggle,
+  .episode-controls button,
+  .primary-action,
+  .world-column-orbit-trigger,
+  .world-column-dialog-close,
+  .poster-dialog-close,
+  .dante-dialog-close,
+  .rider-nightmare-dialog-close,
+  .rider-nightmare-pickup-button {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .liquid-swipe-tabs {
+    background: #0c1520;
+  }
+
+  .liquid-rail-surface {
+    background: #0c1520;
+  }
+
+  .liquid-contact-glow,
+  .liquid-contact-reflection,
+  .liquid-lens-reflection,
+  .liquid-refraction-canvas {
+    display: none;
+  }
+
+  .poster-dialog {
+    background: #03070d;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .liquid-selection-surface {
+    background: color-mix(in srgb, var(--liquid-current-accent) 34%, #101824);
+    border-color: color-mix(in srgb, var(--liquid-current-accent) 64%, #fff);
+  }
+
+  .manager-back:active,
+  .rider-archive-back:active,
+  .poster-shuffle:active,
+  .poster-reset:not(:disabled):active,
+  .poster-lock:active,
+  .poster-dialog-close:active,
+  .dante-dialog-close:active,
+  .motion-toggle:active,
+  .episode-controls button:not(:disabled):active,
+  .primary-action:active,
+  .world-column-orbit-trigger:active,
+  .world-column-dialog-close:active,
+  .rider-nightmare-dialog-close:active,
+  .rider-nightmare-pickup-button:active {
+    scale: 1;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .liquid-swipe-tabs button:not(:disabled):active,
+  .manager-back:active,
+  .rider-archive-back:active,
+  .poster-shuffle:active,
+  .poster-reset:not(:disabled):active,
+  .poster-lock:active,
+  .poster-dialog-close:active,
+  .dante-dialog-close:active,
+  .motion-toggle:active,
+  .episode-controls button:not(:disabled):active,
+  .primary-action:active,
+  .world-column-orbit-trigger:active,
+  .world-column-dialog-close:active,
+  .rider-nightmare-dialog-close:active,
+  .rider-nightmare-pickup-button:active,
+  .signal.is-accessible:active,
+  .dante-archive:active {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-swipe-tabs,
+  .liquid-rail-surface,
+  .liquid-selection-surface,
+  .liquid-swipe-tabs > button[role="tab"],
+  .manager-back,
+  .rider-archive-back,
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock,
+  .poster-dialog-close,
+  .dante-dialog-close,
+  .motion-toggle,
+  .episode-controls button,
+  .primary-action,
+  .world-column-orbit-trigger,
+  .world-column-dialog-close,
+  .rider-nightmare-dialog-close,
+  .rider-nightmare-pickup-button,
+  .signal.is-accessible,
+  .dante-archive {
+    scale: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .liquid-swipe-tabs > button[role="tab"][aria-selected="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -4px;
+  }
+}
+
+/* ── Seven Riders / individual archive ───────────────────────────── */
+
+.rider-archive-page {
+  --archive-accent: #248cff;
+  --archive-accent-soft: #67d8ff;
+  position: relative;
+  min-height: 100vh;
+  overflow: clip;
+  background:
+    radial-gradient(ellipse 72% 40% at -12% 40%, transparent 69.3%, color-mix(in srgb, var(--archive-accent-soft) 10%, transparent) 69.7%, transparent 70.2%),
+    radial-gradient(ellipse 64% 35% at 112% 74%, transparent 69.3%, color-mix(in srgb, var(--archive-accent) 5%, transparent) 69.8%, transparent 70.2%),
+    radial-gradient(circle at 8% 18%, color-mix(in srgb, var(--archive-accent) 10%, transparent), transparent 34rem),
+    radial-gradient(circle at 92% 70%, color-mix(in srgb, var(--archive-accent-soft) 5%, transparent), transparent 40rem),
+    var(--ink);
+  color: var(--text);
+}
+
+.rider-archive-ambient {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rider-archive-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--archive-accent-soft) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--archive-accent-soft) 13%, transparent) 1px, transparent 1px);
+  background-size: 68px 68px;
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
+}
+
+.rider-archive-orbit {
+  position: absolute;
+  top: -32rem;
+  left: -20rem;
+  width: 64rem;
+  height: 64rem;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 16%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 8rem color-mix(in srgb, var(--archive-accent) 2%, transparent),
+    0 0 0 19rem color-mix(in srgb, var(--archive-accent-soft) 1.4%, transparent);
+  animation: riderArchiveOrbit 26s linear infinite;
+}
+
+.rider-archive-topbar {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px clamp(20px, 4vw, 72px);
+  border-bottom: 1px solid var(--glass-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), transparent 46%),
+    linear-gradient(120deg, color-mix(in srgb, var(--archive-accent) 8%, transparent), transparent 38%),
+    var(--glass-regular);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(155%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(155%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.rider-archive-topbar .brand-sigil {
+  border-color: color-mix(in srgb, var(--archive-accent) 62%, transparent);
+  color: var(--archive-accent);
+}
+
+.rider-archive-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 44px;
+  padding: 11px 16px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 0%, rgba(255, 255, 255, 0.14), transparent 44%),
+    var(--glass-clear);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  backdrop-filter: blur(14px) saturate(145%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 10px 28px rgba(0, 0, 0, 0.18);
+  color: rgba(244, 246, 251, 0.68);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  transition: border-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.rider-archive-back i {
+  color: var(--archive-accent);
+  font-style: normal;
+}
+
+.rider-archive-back:focus-visible {
+  border-color: color-mix(in srgb, var(--archive-accent) 52%, transparent);
+  color: #fff;
+  transform: translateX(-3px);
+}
+
+.rider-archive-hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(310px, 0.86fr) minmax(0, 1.14fr);
+  align-items: center;
+  gap: clamp(48px, 7vw, 116px);
+  width: min(1460px, calc(100% - 48px));
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(118px, 11vw, 166px) clamp(0px, 2vw, 28px) clamp(84px, 8vw, 132px);
+}
+
+.rider-archive-portrait-column {
+  align-self: stretch;
+}
+
+.rider-archive-portrait {
+  position: sticky;
+  top: 104px;
+  width: min(100%, 580px);
+  aspect-ratio: 2 / 3;
+  max-height: calc(100svh - 132px);
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--archive-accent) 38%, transparent);
+  background: #07090d;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.48), 0 0 72px color-mix(in srgb, var(--archive-accent) 8%, transparent);
+  animation: riderArchivePortraitIn 0.95s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
+
+.rider-archive-portrait::before,
+.rider-archive-portrait::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  width: 54px;
+  height: 54px;
+  pointer-events: none;
+}
+
+.rider-archive-portrait::before {
+  top: 12px;
+  left: 12px;
+  border-top: 1px solid var(--archive-accent-soft);
+  border-left: 1px solid var(--archive-accent-soft);
+}
+
+.rider-archive-portrait::after {
+  right: 12px;
+  bottom: 12px;
+  border-right: 1px solid var(--archive-accent);
+  border-bottom: 1px solid var(--archive-accent);
+}
+
+.rider-archive-portrait > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.94) contrast(1.04);
+  animation: riderArchiveImageBreathe 13s ease-in-out infinite alternate;
+}
+
+.rider-archive-portrait.fit-contain > img {
+  object-fit: contain;
+}
+
+.rider-archive-portrait-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 54%, rgba(3, 5, 8, 0.94) 100%),
+    linear-gradient(90deg, rgba(3, 5, 8, 0.2), transparent 36%);
+  pointer-events: none;
+}
+
+.rider-archive-code {
+  position: absolute;
+  z-index: 2;
+  top: 26px;
+  left: 28px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 62px);
+  font-weight: 200;
+  letter-spacing: -0.05em;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+}
+
+.rider-archive-portrait figcaption {
+  position: absolute;
+  z-index: 2;
+  right: 30px;
+  bottom: 28px;
+  left: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rider-archive-portrait figcaption span {
+  color: var(--archive-accent-soft);
+  font-size: 7px;
+  letter-spacing: 0.24em;
+}
+
+.rider-archive-portrait figcaption b {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-align: right;
+}
+
+.rider-archive-scanline {
+  position: absolute;
+  z-index: 3;
+  top: -10%;
+  right: 0;
+  left: 0;
+  height: 18%;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--archive-accent-soft) 14%, transparent), transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: riderArchiveScan 5.4s linear infinite;
+}
+
+.rider-archive-introduction {
+  max-width: 780px;
+  min-width: 0;
+  animation: riderArchiveCopyIn 0.9s 0.14s cubic-bezier(0.2, 0.75, 0.16, 1) both;
+}
