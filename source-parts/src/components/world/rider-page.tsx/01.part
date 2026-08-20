@@ -1,0 +1,206 @@
+import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { useWorldMode } from "./use-world-mode";
+import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
+import { FormPickup } from "./manager-stub";
+
+type RiderDossier = {
+  id: string;
+  no: string;
+  name: string;
+  ja: string;
+  person: string;
+  enPerson: string;
+  epithet: string;
+  tone: string;
+  img: string;
+  pos: string;
+  civilianImg: string;
+  civilianPos: string;
+  title: string;
+  quotes: string[];
+  facts: { dt: string; dd: string }[];
+  sections: { no: string; kicker: string; title: string; body: string[] }[];
+  forms: {
+    img: string;
+    pos: string;
+    system: string;
+    name: string;
+    sub?: string;
+    calls: string[];
+    stats?: { dt: string; dd: string }[];
+    abilities?: { name: string; body: string }[];
+    arsenal?: { name: string; body: string }[];
+    finishers?: { name: string; body: string }[];
+  }[];
+  civilian: { name: string; kicker: string; body: string; cv?: string };
+  nightmare?: {
+    name: string;
+    kicker: string;
+    quote: string;
+    img: string;
+    pos: string;
+    facts: { dt: string; dd: string }[];
+    sections: { no: string; kicker: string; title: string; body: string[] }[];
+  };
+};
+
+export const RIDER_DOSSIERS: RiderDossier[] = [
+  {
+    id: "saga",
+    no: "01",
+    name: "SAGA",
+    ja: "サーガ",
+    person: "シエル ／ 月城悠真",
+    enPerson: "YUMA TSUKISHIRO",
+    epithet: "夢見る者",
+    tone: "#248cff",
+    img: "/rider-profile-saga.jpeg",
+    pos: "50% 10%",
+    civilianImg: "/civilian-saga.jpeg",
+    civilianPos: "50% 12%",
+    title: "最も弱い地点から、結末へ踏み込む第一のライダー。",
+    quotes: ["俺たちが夢を叶えるんだ。", "世界を変える", "俺たちの世界を返せ!"],
+    facts: [
+      { dt: "NAME", dd: "月城 悠真（つきしろ ゆうま）" },
+      { dt: "AGE", dd: "19歳" },
+      { dt: "SPECIES", dd: "人間" },
+      { dt: "HEIGHT", dd: "179cm" },
+      { dt: "WEIGHT", dd: "70kg" },
+      { dt: "ROLE", dd: "仮面ライダーサーガ" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "DESTINY / LIBERATION",
+        title: "人類を滅ぼす運命から、世界を取り戻す戦いへ。",
+        body: [
+          "元は何の変哲もない十九歳の青年。『サーガの世界』で物語の主人公シエルに選ばれてしまった。管理人から人類癬滅を強要され、仮面ライダーサーガとして世界を滅ぼす運命を背負ううち、精神は退廃していった。",
+          "しかし怪作の夢へ潜ったことで呪縛から解放され、新たな力を獲得。仲間と夢を叶え、奪われた世界を取り戻すため、味方陣営のダークホースとして戦う。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "BATTLE / DISTANCE",
+        title: "生身を避け、能力と射程で戦場を制する。",
+        body: [
+          "生身の身体能力は低く、変身前の交戦を徹底して避ける。本領は能力を多用する遠距離戦。万物を拒絶する半汎用式ライダーシステムが、サーガの核になる。",
+        ],
+      },
+      {
+        no: "03",
+        kicker: "POWER / SAGA SYSTEM",
+        title: "万物を拒絶する、半汎用式ライダーシステム。",
+        body: [
+          "『拒絶』は他者から拒まれる恐怖、喪失、受け入れ難い事実、希死念慮までを含む。融合から生まれたクリスタルコアは、後の究極形態を成立させる中核となる。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/saga-extreme-middle.jpeg",
+        pos: "50% 8%",
+        system: "エクスサーガドライバー × デュアルエクスコア",
+        name: "エクスプリームサーガ",
+        sub: "MIDDLE",
+        calls: ["EXCONVERT!!", "HIGH SUPREME!!", "Rollout!", "GENOCIDE! RIDER! SA-GA!"],
+        stats: [
+          { dt: "HEIGHT", dd: "249.9cm" },
+          { dt: "WEIGHT", dd: "255.3kg" },
+          { dt: "PUNCH", dd: "205.6t／測定不能" },
+          { dt: "KICK", dd: "308.9t／測定不能" },
+          { dt: "JUMP", dd: "1033.5m" },
+          { dt: "100m", dd: "0.002sec" },
+        ],
+        abilities: [
+          { name: "LEARNING", body: "一撃から重心、意図、発動条件、夢界接続、精神状態、因果の揺らぎを解析する。" },
+          { name: "DARK MATTER CHARGING", body: "宇宙と夢に混在するダークマターを負荷なく集積し、分離、接続、構造解析、矛盾結果の保持能力を高める。" },
+          { name: "HIGH SUPREME", body: "MIDDLEで生んだ可能性をULTRAの裁定へ繋ぎ、史上最高の戦闘力を発揮する。" },
+        ],
+        arsenal: [
+          { name: "フェイタルエッジ／レルムスレイヤー／アクシスレイカー", body: "悠真が継続して使用する三種の追加武装。デュアルエクスコアは外部武装へ実在・非実在の定義を供給する。" },
+          { name: "ユナイトエッジ", body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。" },
+        ],
+        finishers: [
+          { name: "ハイグリーム・エッジ", body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。" },
+          { name: "エクスプリームビッグバン", body: "対象を残すべきものと終わらせるべきものへ分岐し、完全な悪夢は存在可能性ごと消す。" },
+        ],
+      },
+      {
+        img: "/saga-extreme-ultra.jpeg",
+        pos: "50% 8%",
+        system: "エクスサーガドライバー × デュアルエクスコア",
+        name: "エクスプリームサーガ・ウルトラ",
+        sub: "ULTRA",
+        calls: ["HIGH SUPREME!", "ULTRA CORE!", "EXSUPREME SAGA ULTRA!"],
+      },
+    ],
+    civilian: {
+      name: "月城 悠真",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
+      cv: "坂田将吾",
+    },
+    nightmare: {
+      name: "マキャベル ゴアナイトメア",
+      kicker: "NIGHTMARE PICKUP 01 / MACHIAVEL GORE NIGHTMARE",
+      quote: "アナタは、ワタシの主人公でしょ？",
+      img: "/nightmare-machiavel-gore.jpeg",
+      pos: "48% 8%",
+      facts: [
+        { dt: "FORM", dd: "マキャベル ゴアナイトメア" },
+        { dt: "HOST", dd: "シエル（月城悠真）" },
+        { dt: "HEIGHT", dd: "219.8cm（est.）" },
+        { dt: "WEIGHT", dd: "75.8kg（est.）" },
+        { dt: "NIGHTMARE", dd: "拒絶" },
+        { dt: "CV", dd: "上田麗奈" },
+      ],
+      sections: [
+        {
+          no: "01",
+          kicker: "ORIGIN / ANOTHER CIEL",
+          title: "シエルの魂から生まれた、もう一人のシエル。",
+          body: [
+            "『仮面ライダーサーガ ドリームチャプター』Case 1では声のみで現れ、Case 2で姿と正体を明かした特別なナイトメア。通常のナイトメアが夢主の深層心理へ侵入して悪夢を生むのに対し、彼女はシエルの魂に引き寄せられて誕生した。",
+          ],
+        },
+        {
+          no: "02",
+          kicker: "APPEARANCE / PERSONA",
+          title: "慈愛と嘲笑を、同じ穏やかさで語る脚本家。",
+          body: [
+            "青い巨大な衣装を纏う女性型の大柄なナイトメア。ドレス、喪服、花嫁衣装、舞台衣装のいずれにも見える装いには、白銀のレース、赤と青の蕎薇が刻まれる。フードの内側に人の顔はなく、花弁のように開閉する赤黒い発光体の中心へ白い瞳が一つだけ浮かぶ。",
+          ],
+        },
+        {
+          no: "03",
+          kicker: "NIGHTMARE / REJECTION",
+          title: "現象ではなく、届いたという結果を拒絶する。",
+          body: [
+            "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "realm",
+    no: "02",
+    name: "REALM",
+    ja: "レルム",
+    person: "ベル・アレイン",
+    enPerson: "BELL ALAIN",
+    epithet: "完成品",
+    tone: "#f14a60",
+    img: "/rider-profile-realm.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/civilian-realm.jpeg",
+    civilianPos: "50% 10%",
+    title: "失われた信号が、名前を持って帰還する。",
+    quotes: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
+    facts: [
+      { dt: "NAME", dd: "ベル・アレイン" },
+      { dt: "AGE", dd: "26歳" },
+      { dt: "GENDER", dd: "男性" },
+      { dt: "NATIONALITY", dd: "フランス" },
+      { dt: "HEIGHT", dd: "183cm" },
