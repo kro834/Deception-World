@@ -1,0 +1,97 @@
+              <div className="manager-copy-body">
+                {s.body.map((p) => (
+                  <p key={p.slice(0, 24)}>{p}</p>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      {primaryForm ? (
+        <FormPickup
+          rider={{
+            img: primaryForm.img,
+            pos: primaryForm.pos,
+            system: primaryForm.system,
+            name: rider.ja,
+            sub: primaryForm.sub ?? (primaryForm.name !== rider.ja ? primaryForm.name : undefined),
+            calls: primaryForm.calls,
+            stats: primaryForm.stats,
+            abilities: primaryForm.abilities,
+            arsenal: primaryForm.arsenal,
+            finishers: primaryForm.finishers,
+            extraForms: rider.forms,
+          }}
+        />
+      ) : null}
+      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="SEVEN RIDERS" />
+      {rider.nightmare ? (
+        <dialog
+          ref={nightmareRef}
+          className="rider-nightmare-dialog"
+          tabIndex={-1}
+          aria-label={rider.nightmare.name}
+          onCancel={(e) => {
+            e.preventDefault();
+            closeNightmare();
+          }}
+          onClick={(e) => {
+            if (e.target === nightmareRef.current) closeNightmare();
+          }}
+        >
+          <div className="rider-nightmare-dialog-panel">
+            <button type="button" className="rider-nightmare-dialog-close" onClick={closeNightmare} aria-label="閉じる">
+              <span>CLOSE</span>
+              <i>×</i>
+            </button>
+            <div className="rider-nightmare-dialog-heading">
+              <p>
+                <span>NIGHTMARE PICKUP</span>
+              </p>
+              <small>{rider.nightmare.kicker}</small>
+              <h2>
+                <span>{rider.nightmare.name}</span>
+              </h2>
+              <q>{rider.nightmare.quote}</q>
+            </div>
+            <div className="rider-nightmare-dialog-layout">
+              <figure>
+                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} />
+                <figcaption>
+                  <span>FORM VISUAL</span>
+                  <b>MACHIAVEL GORE NIGHTMARE</b>
+                </figcaption>
+              </figure>
+              <div className="rider-nightmare-dialog-record">
+                <dl>
+                  {rider.nightmare.facts.map((f) => (
+                    <div key={f.dt}>
+                      <dt>{f.dt}</dt>
+                      <dd>{f.dd}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <div className="rider-nightmare-dialog-sections">
+                  {rider.nightmare.sections.map((s) => (
+                    <section key={s.no}>
+                      <header>
+                        <span>{s.no}</span>
+                        <p>{s.kicker}</p>
+                      </header>
+                      <h3>{s.title}</h3>
+                      <div>
+                        {s.body.map((p) => (
+                          <p key={p.slice(0, 20)}>{p}</p>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </dialog>
+      ) : null}
+    </main>
+  );
+}

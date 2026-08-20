@@ -1,0 +1,160 @@
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="episode-grid" ref={episodeGridRef} role="region" aria-label="判明済みエピソードのハイライト">
+            {EPISODES.map((ep, i) => (
+              <article
+                key={ep.no}
+                className={i === episode ? "episode-card is-active" : "episode-card"}
+                onClick={() => goEpisode(i)}
+              >
+                <div className="episode-card-surface">
+                  <div className="episode-thumbnail">
+                    <img src={ep.src} alt={ep.alt} style={{ objectPosition: ep.pos }} loading="lazy" decoding="async" />
+                    <span aria-hidden="true">EP.{ep.no}</span>
+                    <i aria-hidden="true" />
+                  </div>
+                  <div className="episode-card-copy">
+                    <p>
+                      <span>EPISODE</span>
+                      <b>{ep.no}</b>
+                    </p>
+                    <h4>{ep.title}</h4>
+                    <small>IDENTIFIED RECORD</small>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </section>
+
+      <section className="finale-section">
+        <div className="finale-sticky">
+          <div className="finale-backdrop" aria-hidden="true">
+            <img src="/deception-world-poster.jpeg" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div className="finale-content">
+            <span>THE WORLD IS WAITING.</span>
+            <h2>
+              サーガは、
+              <br />
+              まだ終わらない。
+            </h2>
+            <a className="primary-action ios26-glass" href="#top">
+              <span>RETURN TO THE KEY VISUAL</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div className="footer-title">
+          <span>仮面ライダーサーガ</span>
+          <b>DECEPTION WORLD</b>
+        </div>
+        <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
+        <a href="#top">BACK TO TOP ↑</a>
+      </footer>
+
+      <dialog
+        ref={pickupDialogRef}
+        id="world-column-pickup"
+        className="world-column-dialog"
+        tabIndex={-1}
+        aria-labelledby="world-column-pickup-title"
+        onCancel={(e) => {
+          e.preventDefault();
+          closePickup();
+        }}
+        onClick={(e) => {
+          if (e.target === pickupDialogRef.current) closePickup();
+        }}
+      >
+        <div className="world-column-dialog-card">
+          <div className="world-column-dialog-toolbar">
+            <p>
+              WORLD COLUMN
+              <i>FIELD NOTES</i>
+            </p>
+            <button
+              type="button"
+              className="world-column-dialog-close"
+              onPointerUp={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closePickup(e);
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closePickup(e);
+              }}
+              aria-label="ピックアップを閉じる"
+            >
+              <span>CLOSE</span>
+              <i aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path
+                    d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </i>
+            </button>
+          </div>
+          <div className="world-column-dialog-heading">
+            <small>ARCHIVE / {column.kicker}</small>
+            <h2 id="world-column-pickup-title">世界観コラム</h2>
+          </div>
+          <PickupRail ref={pickupRail} />
+          <div className="world-column-dialog-copy" key={column.no}>
+            <p className="world-column-dialog-number">コラム{column.no}</p>
+            <h3>{column.title}</h3>
+            <div>
+              {column.pickup.map((para) => (
+                <p key={para.slice(0, 18)}>{para}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog
+        ref={danteDialogRef}
+        className="dante-denied-dialog"
+        tabIndex={-1}
+        aria-label="アクセス拒否"
+        onCancel={(e) => {
+          e.preventDefault();
+          danteDialogRef.current?.close();
+        }}
+        onClick={(e) => {
+          if (e.target === danteDialogRef.current) danteDialogRef.current?.close();
+        }}
+      >
+        <div className="dante-denied-inner" tabIndex={-1}>
+          <button
+            className="dante-dialog-close"
+            type="button"
+            aria-label="アクセス拒否表示を閉じる"
+            onClick={() => danteDialogRef.current?.close()}
+          >
+            CLOSE
+          </button>
+          <p className="dante-denied-kicker">ACCESS DENIED</p>
+          <div className="dante-no-stack" aria-hidden="true">
+            <strong className="dante-no-ghost">NO</strong>
+            <strong className="dante-no-ghost is-offset">NO</strong>
+          </div>
+          <strong className="dante-no">NO</strong>
+          <p className="dante-denied-note">管理外 ／ 対象外記録</p>
+        </div>
+      </dialog>
+    </div>
+  );
+}
