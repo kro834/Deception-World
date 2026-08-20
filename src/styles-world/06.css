@@ -1,0 +1,520 @@
+.tone-red { --rider-tone: var(--red); --rider-tone-alt: var(--gold); }
+.tone-cyan { --rider-tone: var(--cyan); --rider-tone-alt: var(--blue); }
+.tone-magenta { --rider-tone: var(--magenta); --rider-tone-alt: var(--gold); }
+.tone-green { --rider-tone: var(--green); --rider-tone-alt: #d8f26b; }
+.tone-algenome { --rider-tone: #d71920; --rider-tone-alt: #f2f2f2; }
+.tone-over { --rider-tone: var(--red); --rider-tone-alt: var(--teal); }
+
+.rider-detail::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0.18;
+  background-image: linear-gradient(90deg, transparent 49.8%, var(--rider-tone) 50%, transparent 50.2%);
+  background-size: 64px 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 60%);
+  mask-image: linear-gradient(90deg, transparent, black 60%);
+}
+
+.rider-detail::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: -12%;
+  bottom: -12%;
+  left: -24%;
+  width: 20%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--rider-tone-alt) 32%, transparent),
+    color-mix(in srgb, var(--rider-tone) 18%, transparent),
+    transparent
+  );
+  filter: blur(2px);
+  transform: skewX(-13deg);
+  animation: riderSelectionSweep 0.92s 0.08s cubic-bezier(0.18, 0.75, 0.2, 1) both;
+}
+
+.rider-visual {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(53%, 560px);
+  overflow: hidden;
+  border-left: 1px solid color-mix(in srgb, var(--rider-tone) 26%, transparent);
+  background: #03060a;
+  animation: riderVisualIn 0.72s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+.rider-visual::before,
+.rider-visual::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rider-visual::before {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 11, 0.98), transparent 28%),
+    linear-gradient(0deg, rgba(5, 7, 11, 0.72), transparent 34%);
+}
+
+.rider-visual::after {
+  opacity: 0.16;
+  background: repeating-linear-gradient(0deg, transparent 0 5px, var(--rider-tone-alt) 6px, transparent 7px);
+  mix-blend-mode: screen;
+}
+
+.rider-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.04);
+  transform: scale(1.025);
+  animation: riderPortraitIn 0.92s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+.rider-visual.fit-contain img {
+  object-fit: contain;
+  padding: 20px 0;
+}
+
+.rider-monogram {
+  position: absolute;
+  z-index: 1;
+  top: -0.22em;
+  right: 3vw;
+  color: color-mix(in srgb, var(--rider-tone) 11%, transparent);
+  font-family: var(--font-display);
+  font-size: clamp(240px, 32vw, 480px);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.rider-copy-block {
+  position: relative;
+  z-index: 3;
+  width: min(57%, 640px);
+  animation: riderCopyIn 0.52s 0.08s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+.rider-number,
+.rider-person,
+.rider-detail h3,
+.rider-description,
+.rider-line {
+  position: relative;
+  z-index: 1;
+}
+
+.rider-number {
+  position: absolute;
+  z-index: 3;
+  top: 32px;
+  left: 36px;
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.28em;
+}
+
+.rider-person {
+  margin: 0 0 10px;
+  color: var(--rider-tone);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+.rider-detail h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.2vw, 68px);
+  letter-spacing: -0.05em;
+  line-height: 1.06;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.rider-name-line {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.rider-description {
+  max-width: 580px;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+/* The rider CTA is a standalone liquid-glass pressable. It carries the
+   `liquid-swipe-tabs` class so every pressed / held / WebGL state rule written
+   for the rail applies verbatim; only shape and layout are restated here. */
+.liquid-glass-action.rider-profile-link {
+  z-index: 1;
+  --liquid-shell-radius: 999px;
+  --liquid-current-accent: var(--rider-tone, var(--cyan));
+  display: inline-flex;
+  width: fit-content;
+  min-width: min(100%, 286px);
+  margin-top: 28px;
+  border: 1px solid color-mix(in srgb, var(--rider-tone) 38%, transparent);
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rider-tone) 9%, transparent), transparent);
+  cursor: pointer;
+  scale: 1;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    scale 0.34s var(--glass-settle);
+}
+
+.liquid-glass-action > .liquid-selection-lens {
+  border-radius: 999px;
+}
+
+/* At rest there is no selection to mark, so the lens only exists under a
+   finger — unlike the rail, where it tracks the active tab permanently. */
+.liquid-swipe-tabs.liquid-glass-action[data-liquid-initialized="true"] > .liquid-selection-lens {
+  opacity: 0;
+}
+
+.liquid-swipe-tabs.liquid-glass-action[data-liquid-pressed="true"] > .liquid-selection-lens {
+  opacity: 1;
+}
+
+/* 押したら拡大: the shader grows the material on its own, and the shell
+   follows so the whole control swells under the finger. Durations match the
+   rail exactly — a fast 0.12s snap on contact, then a slower 0.34s swell as
+   the press turns into a hold. */
+.liquid-glass-action[data-liquid-pressed="true"] {
+  border-color: color-mix(in srgb, var(--rider-tone) 62%, transparent);
+  scale: 1.022;
+  transition-duration: 0.12s, 0.12s, 0.12s;
+}
+
+.liquid-glass-action[data-liquid-held="true"] {
+  scale: 1.038;
+  transition-duration: 0.34s, 0.34s, 0.34s;
+}
+
+.liquid-glass-action-link {
+  position: relative;
+  z-index: 6;
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  gap: 34px;
+  padding: 14px 22px 14px 26px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Let the refracted copy carry the label while the glass is over it, exactly
+   as the rail does for the tab under the lens. */
+.liquid-glass-action[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-glass-action-link > * {
+  opacity: 0.28;
+  transition: opacity 0.1s ease;
+}
+
+.rider-profile-link > .liquid-glass-action-link > span {
+  display: grid;
+  gap: 3px;
+}
+
+.rider-profile-link .liquid-glass-action-link small {
+  color: var(--rider-tone-alt);
+  font-size: 6px;
+  letter-spacing: 0.24em;
+}
+
+.rider-profile-link .liquid-glass-action-link svg {
+  width: 19px;
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.rider-profile-link .liquid-glass-action-link path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.liquid-glass-action-link:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid var(--rider-tone);
+  outline-offset: 3px;
+}
+
+.liquid-glass-action:focus-within {
+  border-color: var(--rider-tone);
+}
+
+.liquid-glass-action-link:focus-visible svg {
+  transform: translateX(4px);
+}
+
+.rider-line {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 36px;
+  color: var(--rider-tone);
+}
+
+.rider-line span {
+  width: min(260px, 36vw);
+  height: 1px;
+  background: linear-gradient(90deg, var(--rider-tone), var(--rider-tone-alt), transparent);
+}
+
+.rider-line b {
+  font-size: 7px;
+  letter-spacing: 0.28em;
+}
+
+.records-section {
+  background: var(--ink);
+}
+
+.records-heading {
+  max-width: 1280px;
+  margin: 0 auto 52px;
+}
+
+.records-heading h2 {
+  font-size: clamp(48px, 6.4vw, 92px);
+}
+
+.return-strip {
+  position: relative;
+  display: grid;
+  max-width: 1280px;
+  grid-template-columns: 1fr 0.75fr;
+  align-items: center;
+  gap: 40px;
+  margin: 22px auto 0;
+  overflow: hidden;
+  padding: 28px 32px;
+  border: 1px solid rgba(241, 74, 96, 0.18);
+  background: linear-gradient(100deg, rgba(241, 74, 96, 0.1), rgba(11, 15, 22, 0.9) 45%);
+}
+
+.return-strip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.return-strip span {
+  color: var(--red);
+  font-size: 7px;
+  letter-spacing: 0.25em;
+}
+
+.return-strip b {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.11em;
+}
+
+.return-strip p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.return-strip > i {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--red);
+  box-shadow: 0 0 24px var(--red);
+}
+
+.episode-archive {
+  position: relative;
+  max-width: 1280px;
+  margin: 22px auto 0;
+  overflow: hidden;
+  padding: 28px;
+  border: 1px solid rgba(132, 203, 255, 0.16);
+  border-radius: clamp(18px, 3vw, 38px) clamp(46px, 7vw, 82px) clamp(24px, 4vw, 52px) clamp(16px, 2vw, 28px);
+  background:
+    linear-gradient(90deg, rgba(103, 216, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(103, 216, 255, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 100% 0%, rgba(36, 140, 255, 0.12), transparent 27rem),
+    linear-gradient(145deg, rgba(13, 19, 29, 0.96), rgba(6, 9, 14, 0.98));
+  background-size: 36px 36px, 36px 36px, auto, auto;
+}
+
+.episode-archive::before,
+.episode-archive::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.episode-archive::before {
+  top: 0;
+  left: 0;
+  width: 84px;
+  height: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 22px rgba(103, 216, 255, 0.8);
+}
+
+.episode-archive::after {
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  height: 68px;
+  background: var(--gold);
+  box-shadow: 0 0 22px rgba(215, 171, 81, 0.7);
+}
+
+.episode-archive-heading {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(132, 203, 255, 0.14);
+}
+
+.episode-archive-heading > div:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.episode-archive-heading > div:first-child > span {
+  color: var(--cyan);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+}
+
+.episode-archive-heading h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(25px, 2.7vw, 38px);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.episode-archive-meta {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.episode-archive-meta > p {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  color: var(--dim);
+}
+
+.episode-archive-meta strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.episode-archive-meta p span {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.episode-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.episode-controls button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 0%, rgba(255, 255, 255, 0.16), transparent 42%),
+    var(--glass-regular);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 10px 24px rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.28s ease, background 0.28s ease, color 0.28s ease, transform 0.28s ease;
+}
+
+.episode-controls button:focus-visible {
+  border-color: color-mix(in srgb, var(--cyan) 58%, transparent);
+  background: rgba(103, 216, 255, 0.1);
+  color: var(--cyan);
+  transform: scale(1.045);
+}
+
+.episode-controls button:disabled {
+  border-color: rgba(132, 203, 255, 0.08);
+  color: rgba(244, 246, 248, 0.24);
+  cursor: default;
+  transform: none;
+}
+
+.episode-controls output {
+  min-width: 68px;
+  color: var(--dim);
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.16em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.episode-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-auto-columns: min(72%, 860px);
+  grid-auto-flow: column;
+  grid-template-columns: none;
+  gap: 14px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 8px 1px 20px;
+  scroll-padding-inline: 1px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+}
