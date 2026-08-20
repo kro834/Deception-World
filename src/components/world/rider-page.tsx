@@ -26,6 +26,7 @@ type RiderDossier = {
     pos: string;
     system: string;
     name: string;
+    displayName?: string;
     sub?: string;
     calls: string[];
     stats?: { dt: string; dd: string }[];
@@ -102,6 +103,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         pos: "50% 8%",
         system: "エクスサーガドライバー × デュアルエクスコア",
         name: "エクスプリームサーガ",
+        displayName: "エクスプリームサーガ",
         sub: "MIDDLE",
         calls: ["EXCONVERT!!", "HIGH SUPREME!!", "Rollout!", "GENOCIDE! RIDER! SA-GA!"],
         stats: [
@@ -239,6 +241,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         pos: "50% 8%",
         system: "レルムズドライバー × レジェンズルーレット",
         name: "レルム",
+        displayName: "レルムレジェンズ",
         sub: "レジェンズ",
         calls: ["ROULETTE ON!", "JARAMM… LEGENDS! HIT!", "Rollout!", "JACKPOT!!", "RIDER! REALM! LEGENDS!!"],
         stats: [
@@ -832,7 +835,7 @@ export function RiderPage({ id }: { id: string }) {
             img: primaryForm.img,
             pos: primaryForm.pos,
             system: primaryForm.system,
-            name: rider.ja,
+            name: primaryForm.displayName ?? rider.ja,
             sub: primaryForm.sub ?? (primaryForm.name !== rider.ja ? primaryForm.name : undefined),
             calls: primaryForm.calls,
             stats: primaryForm.stats,

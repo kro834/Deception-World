@@ -36,15 +36,28 @@ type Profile = {
 
 export function FormPickup({ rider }: { rider: RiderForm }) {
   const dlg = useRef<HTMLDialogElement>(null);
+  const resetScroll = () => {
+    const dialog = dlg.current;
+    if (!dialog) return;
+    dialog.scrollTop = 0;
+    dialog.scrollLeft = 0;
+  };
   const open = () => {
+    const dialog = dlg.current;
+    if (!dialog) return;
+    resetScroll();
     try {
-      dlg.current?.showModal();
+      dialog.showModal();
     } catch {
       /* already open */
     }
+    window.requestAnimationFrame(resetScroll);
     (document.activeElement as HTMLElement | null)?.blur();
   };
-  const close = () => dlg.current?.close();
+  const close = () => {
+    dlg.current?.close();
+    resetScroll();
+  };
   const stats = rider.stats ?? [];
   const abilities = rider.abilities ?? [];
   const arsenal = rider.arsenal ?? [];

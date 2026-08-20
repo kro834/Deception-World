@@ -455,17 +455,25 @@ br.tab-br { display: none; }
   letter-spacing: 0.24em;
 }
 
-.form-pickup-copy h2 { margin: 0; font-size: clamp(28px, 4vw, 48px); }
+.form-pickup-copy h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
 .form-pickup-copy h2 span { display: block; font-size: 0.42em; letter-spacing: 0.12em; }
 .form-pickup-copy em { font-style: normal; letter-spacing: 0.16em; color: rgba(244, 246, 251, 0.62); }
 .form-pickup-copy q { margin: 8px 0 0; color: rgba(244, 246, 251, 0.78); }
 
 .form-pickup-dialog {
-  width: min(1100px, calc(100vw - 28px));
+  width: min(1100px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));
   max-height: min(92dvh, 920px);
   margin: auto;
   padding: 0;
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border: 1px solid color-mix(in srgb, var(--manager-accent, #78b69b) 40%, transparent);
   background: transparent;
   color: #f6f7fb;
@@ -499,7 +507,13 @@ br.tab-br { display: none; }
 .form-pickup-close:focus,
 .form-pickup-close:focus-visible { outline: none; }
 
-.form-pickup-heading h2 { margin: 8px 0; font-size: clamp(28px, 4vw, 46px); }
+.form-pickup-heading h2 {
+  margin: 8px 0;
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
 
 .form-pickup-layout {
   display: grid;
@@ -524,6 +538,9 @@ br.tab-br { display: none; }
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+.form-pickup-stats > div:nth-child(3n) { border-right: 0; }
+.form-pickup-stats > div:nth-last-child(-n + 3) { border-bottom: 0; }
 
 .form-pickup-stats dt { margin-bottom: 4px; color: rgba(244, 246, 251, 0.45); font-size: 8px; letter-spacing: 0.18em; }
 .form-pickup-stats dd { margin: 0; font-weight: 700; }
@@ -606,17 +623,28 @@ br.tab-br { display: none; }
   .manager-hero {
     display: grid !important;
     grid-template-columns: minmax(240px, 0.86fr) minmax(0, 1.14fr);
-    width: min(100% - 36px, 1080px);
+    width: min(100% - 48px, 1080px);
     min-height: 0;
     gap: 36px;
     padding-top: 108px;
     align-items: start;
   }
   .manager-portrait-frame { position: relative; top: auto; max-height: none; }
-  .form-pickup { width: min(100% - 32px, 1000px); }
+  .form-pickup { width: min(100% - 40px, 1000px); }
 }
 
 @media (max-width: 760px) {
+  .manager-hero {
+    padding-right: max(18px, env(safe-area-inset-right));
+    padding-left: max(18px, env(safe-area-inset-left));
+  }
+
+  .manager-dossier,
+  .manager-rider-record,
+  .manager-pagination {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+
   .form-pickup-card,
   .form-pickup-layout,
   .form-pickup-stats,
@@ -624,6 +652,18 @@ br.tab-br { display: none; }
   .rider-form-gallery,
   .rider-archive-identity-records.has-nightmare {
     grid-template-columns: 1fr;
+  }
+
+  .form-pickup-stats > div {
+    border-right: 0;
+  }
+
+  .form-pickup-stats > div:nth-last-child(-n + 3) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .form-pickup-stats > div:last-child {
+    border-bottom: 0;
   }
 }
 

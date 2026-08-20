@@ -26,6 +26,7 @@ type RiderDossier = {
     pos: string;
     system: string;
     name: string;
+    displayName?: string;
     sub?: string;
     calls: string[];
     stats?: { dt: string; dd: string }[];
@@ -102,6 +103,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         pos: "50% 8%",
         system: "エクスサーガドライバー × デュアルエクスコア",
         name: "エクスプリームサーガ",
+        displayName: "エクスプリームサーガ",
         sub: "MIDDLE",
         calls: ["EXCONVERT!!", "HIGH SUPREME!!", "Rollout!", "GENOCIDE! RIDER! SA-GA!"],
         stats: [

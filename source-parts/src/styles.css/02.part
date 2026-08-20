@@ -16,12 +16,10 @@
   0% {
     opacity: 0;
     transform: scale(1.08);
-    filter: brightness(0.08) saturate(0.8);
   }
   100% {
     opacity: 0.48;
     transform: scale(1);
-    filter: brightness(0.42) saturate(1.15);
   }
 }
 
@@ -162,6 +160,27 @@
 
 .cine-pulse {
   animation: pulse-hint 2.4s ease-in-out infinite;
+}
+
+@media (max-width: 700px) {
+  .cine-grain {
+    opacity: 0.035;
+    animation-duration: 1.2s;
+  }
+
+  .cine-logo-glow {
+    filter: blur(10px) saturate(1.2) brightness(1.15);
+  }
+
+  .cine-skip {
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(7.5vh, 48px);
+    min-width: 112px;
+  }
+
+  .cine-skip kbd {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -374,4 +393,3 @@ html[data-rail-lock] body {
     opacity: 0;
   }
 }
-

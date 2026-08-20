@@ -33,6 +33,7 @@
         pos: "50% 8%",
         system: "レルムズドライバー × レジェンズルーレット",
         name: "レルム",
+        displayName: "レルムレジェンズ",
         sub: "レジェンズ",
         calls: ["ROULETTE ON!", "JARAMM… LEGENDS! HIT!", "Rollout!", "JACKPOT!!", "RIDER! REALM! LEGENDS!!"],
         stats: [

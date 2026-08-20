@@ -13,7 +13,7 @@
             img: primaryForm.img,
             pos: primaryForm.pos,
             system: primaryForm.system,
-            name: rider.ja,
+            name: primaryForm.displayName ?? rider.ja,
             sub: primaryForm.sub ?? (primaryForm.name !== rider.ja ? primaryForm.name : undefined),
             calls: primaryForm.calls,
             stats: primaryForm.stats,

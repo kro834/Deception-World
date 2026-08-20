@@ -58,8 +58,8 @@ export function createCinematicScore(): CinematicScore {
       // Sub drone with slow beating
       const droneGain = ctx.createGain();
       droneGain.gain.setValueAtTime(0, t0);
-      droneGain.gain.linearRampToValueAtTime(0.14, t0 + 7.5);
-      droneGain.gain.linearRampToValueAtTime(0.08, t0 + 14);
+      droneGain.gain.linearRampToValueAtTime(0.14, t0 + 4.2);
+      droneGain.gain.linearRampToValueAtTime(0.08, t0 + 7.5);
       droneGain.connect(master);
       nodes.push(droneGain);
 
@@ -74,7 +74,7 @@ export function createCinematicScore(): CinematicScore {
 
       // Low rumble (brown noise through a lowpass)
       const rumble = ctx.createBufferSource();
-      rumble.buffer = makeBrownNoise(ctx, 20);
+      rumble.buffer = makeBrownNoise(ctx, 4);
       rumble.loop = true;
       const rumbleFilter = ctx.createBiquadFilter();
       rumbleFilter.type = "lowpass";
@@ -82,8 +82,8 @@ export function createCinematicScore(): CinematicScore {
       rumbleFilter.Q.value = 0.7;
       const rumbleGain = ctx.createGain();
       rumbleGain.gain.setValueAtTime(0, t0);
-      rumbleGain.gain.linearRampToValueAtTime(0.22, t0 + 5);
-      rumbleGain.gain.linearRampToValueAtTime(0.1, t0 + 13);
+      rumbleGain.gain.linearRampToValueAtTime(0.22, t0 + 3.2);
+      rumbleGain.gain.linearRampToValueAtTime(0.1, t0 + 7);
       rumble.connect(rumbleFilter);
       rumbleFilter.connect(rumbleGain);
       rumbleGain.connect(master);
@@ -93,28 +93,28 @@ export function createCinematicScore(): CinematicScore {
 
       // Whoosh at the reveal
       const whoosh = ctx.createBufferSource();
-      whoosh.buffer = makeWhiteNoise(ctx, 2.4);
+      whoosh.buffer = makeWhiteNoise(ctx, 1.8);
       const whooshFilter = ctx.createBiquadFilter();
       whooshFilter.type = "bandpass";
       whooshFilter.Q.value = 0.85;
-      whooshFilter.frequency.setValueAtTime(180, t0 + 5.3);
-      whooshFilter.frequency.exponentialRampToValueAtTime(2400, t0 + 6.8);
+      whooshFilter.frequency.setValueAtTime(180, t0 + 2.4);
+      whooshFilter.frequency.exponentialRampToValueAtTime(2400, t0 + 3.7);
       const whooshGain = ctx.createGain();
-      whooshGain.gain.setValueAtTime(0, t0 + 5.3);
-      whooshGain.gain.linearRampToValueAtTime(0.18, t0 + 5.9);
-      whooshGain.gain.exponentialRampToValueAtTime(0.001, t0 + 7.7);
+      whooshGain.gain.setValueAtTime(0, t0 + 2.4);
+      whooshGain.gain.linearRampToValueAtTime(0.18, t0 + 2.9);
+      whooshGain.gain.exponentialRampToValueAtTime(0.001, t0 + 4.2);
       whoosh.connect(whooshFilter);
       whooshFilter.connect(whooshGain);
       whooshGain.connect(master);
-      whoosh.start(t0 + 5.3);
+      whoosh.start(t0 + 2.4);
       sources.push(whoosh);
       nodes.push(whooshFilter, whooshGain);
 
       // Metallic shimmer / bell at full reveal
       const shimmerGain = ctx.createGain();
-      shimmerGain.gain.setValueAtTime(0, t0 + 8.0);
-      shimmerGain.gain.linearRampToValueAtTime(0.09, t0 + 8.4);
-      shimmerGain.gain.exponentialRampToValueAtTime(0.001, t0 + 12.0);
+      shimmerGain.gain.setValueAtTime(0, t0 + 4.5);
+      shimmerGain.gain.linearRampToValueAtTime(0.09, t0 + 4.8);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.001, t0 + 7.2);
       shimmerGain.connect(master);
       nodes.push(shimmerGain);
       for (const freq of [784, 1176, 1568]) {
@@ -122,8 +122,8 @@ export function createCinematicScore(): CinematicScore {
         osc.type = "sine";
         osc.frequency.value = freq;
         osc.connect(shimmerGain);
-        osc.start(t0 + 8.0);
-        osc.stop(t0 + 12.5);
+        osc.start(t0 + 4.5);
+        osc.stop(t0 + 7.4);
         oscillators.push(osc);
       }
     })();

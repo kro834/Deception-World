@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { createCinematicScore } from "@/lib/cinematic-audio";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { useLoadGate } from "@/components/load-gate";
 import { Particles } from "./particles";
 
-const SEQUENCE_MS = 12500;
+const SEQUENCE_MS = 7600;
 
 function HudRings() {
   const ticks = Array.from({ length: 60 }, (_, i) => {
@@ -47,17 +47,28 @@ export function TitleSequence() {
   const [replayKey, setReplayKey] = useState(0);
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const phaseRef = useRef(phase);
   const { go } = useLoadGate();
+  phaseRef.current = phase;
 
   useEffect(() => {
-    scoreRef.current = createCinematicScore();
-    return () => scoreRef.current?.stop();
-  }, [replayKey]);
+    return () => {
+      scoreRef.current?.stop();
+      scoreRef.current = null;
+    };
+  }, []);
+
+  const getScore = useCallback(() => {
+    if (!scoreRef.current) {
+      scoreRef.current = createCinematicScore();
+      scoreRef.current.setMuted(muted);
+    }
+    return scoreRef.current;
+  }, [muted]);
 
   const begin = useCallback(() => {
+    phaseRef.current = "playing";
     setPhase("playing");
-    void scoreRef.current?.unlock();
-    scoreRef.current?.start();
     const video = videoRef.current;
     if (video) {
       video.currentTime = 0;
@@ -65,46 +76,56 @@ export function TitleSequence() {
     }
   }, []);
 
+  const finish = useCallback(() => {
+    phaseRef.current = "complete";
+    setPhase("complete");
+    scoreRef.current?.stop();
+    scoreRef.current = null;
+    videoRef.current?.pause();
+  }, []);
+
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
-      setPhase("complete");
+      finish();
       return;
     }
-    const t = window.setTimeout(() => begin(), 750);
+    const t = window.setTimeout(() => begin(), 120);
     return () => window.clearTimeout(t);
-  }, [begin, replayKey]);
+  }, [begin, finish, replayKey]);
 
   useEffect(() => {
     if (phase !== "playing") return;
-    const t = window.setTimeout(() => setPhase("complete"), SEQUENCE_MS);
+    const t = window.setTimeout(finish, SEQUENCE_MS);
     return () => window.clearTimeout(t);
-  }, [phase]);
+  }, [finish, phase]);
 
   const skip = useCallback(() => {
-    setPhase("complete");
-    const video = videoRef.current;
-    if (video && video.duration) {
-      video.currentTime = Math.max(0, video.duration - 0.05);
-      void video.play().catch(() => undefined);
-    }
-  }, []);
+    finish();
+  }, [finish]);
 
   const replay = useCallback(() => {
     scoreRef.current?.stop();
+    scoreRef.current = null;
+    const video = videoRef.current;
+    video?.pause();
+    if (video) video.currentTime = 0;
+    phaseRef.current = "idle";
     setPhase("idle");
     setReplayKey((k) => k + 1);
   }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "Enter") {
+      const target = e.target instanceof Element ? e.target : null;
+      const isInteractive = Boolean(target?.closest("button, a, input, textarea, select, [contenteditable='true']"));
+      const isSkipKey = e.key === "Escape" || e.key === " " || e.key === "Enter" || e.key.toLowerCase() === "s";
+      if (phase === "playing" && isSkipKey && (!isInteractive || e.key === "Escape")) {
         e.preventDefault();
-        if (phase === "playing") skip();
-        else if (phase === "complete") replay();
-      } else if (e.key === "r" || e.key === "R") {
+        skip();
+      } else if (phase === "complete" && !isInteractive && e.key.toLowerCase() === "r") {
         replay();
-      } else if (e.key === "m" || e.key === "M") {
+      } else if (!isInteractive && e.key.toLowerCase() === "m") {
         setMuted((m) => {
           const next = !m;
           scoreRef.current?.setMuted(next);
@@ -117,19 +138,22 @@ export function TitleSequence() {
   }, [phase, replay, skip]);
 
   const toggleMute = () => {
-    void scoreRef.current?.unlock();
+    const score = getScore();
     setMuted((m) => {
       const next = !m;
-      scoreRef.current?.setMuted(next);
+      score.setMuted(next);
+      if (!next && phaseRef.current === "playing") {
+        void score.unlock().then(() => score.start());
+      }
       return next;
     });
   };
 
   const unlockAudio = () => {
-    void scoreRef.current?.unlock();
-    if (phase === "playing" && !scoreRef.current?.muted()) {
-      scoreRef.current?.start();
-    }
+    const score = getScore();
+    void score.unlock().then(() => {
+      if (phaseRef.current === "playing" && !score.muted()) score.start();
+    });
   };
 
   const stageClass =
@@ -142,7 +166,7 @@ export function TitleSequence() {
   return (
     <section
       className={stageClass}
-      onPointerDown={unlockAudio}
+      onPointerDown={phase === "playing" ? unlockAudio : undefined}
       role="img"
       aria-label="仮面ライダーサーガ Deception World オープニング"
     >
@@ -154,12 +178,12 @@ export function TitleSequence() {
         poster="/atmosphere-poster.jpg"
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         loop
       />
 
       <HudRings />
-      <Particles active={phase !== "idle"} />
+      <Particles active={phase === "playing"} />
 
       <div className="cine-line" />
 
@@ -169,12 +193,15 @@ export function TitleSequence() {
             src="/logo-title.jpg"
             alt=""
             className="cine-logo-glow"
+            decoding="async"
             draggable={false}
           />
           <img
             src="/logo-title.jpg"
             alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
             className="cine-logo-core"
+            decoding="async"
+            fetchPriority="high"
             draggable={false}
           />
           <div className="cine-logo-shine" />
@@ -195,8 +222,12 @@ export function TitleSequence() {
         type="button"
         className="cine-ghost cine-skip"
         onClick={skip}
+        aria-label="オープニングをスキップ"
+        aria-keyshortcuts="Escape Enter Space S"
       >
-        スキップ
+        <SkipForward className="size-4" aria-hidden="true" />
+        <span>スキップ</span>
+        <kbd>ESC</kbd>
       </button>
 
       <div className="cine-always">
