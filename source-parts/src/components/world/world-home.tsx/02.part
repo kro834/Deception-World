@@ -1,0 +1,251 @@
+      "伝説扱いされた瞬間に、その人物は「終わった物語」へ送られる。レジェンズはそれを拒否し、進行中の盤面へ自ら戻ってくる。",
+      "七人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
+    ],
+  },
+];
+
+const EPISODES = [
+  { no: "01", title: "HIDE-AND-SEEK", src: "/episode-01-hide-and-seek.jpeg", pos: "50% 30%", alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル" },
+  { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
+  { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "55% 18%", alt: "白い帽子と衣装の人物が崩壊した街を見下ろすEP3のサムネイル" },
+  { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
+];
+
+function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
+  if (!scroller || !child) return;
+  const left = child.offsetLeft - (scroller.clientWidth - child.clientWidth) / 2;
+  scroller.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+}
+
+function bindRail(el: HTMLElement | null, onIndex: (i: number) => void) {
+  if (!el) return () => undefined;
+  const handler = (e: Event) => onIndex((e as CustomEvent).detail.index);
+  el.addEventListener("railselect", handler);
+  return () => el.removeEventListener("railselect", handler);
+}
+
+function syncRail(rail: HTMLElement | null, index: number) {
+  if (!rail || rail.dataset.liquidDragging === "true") return;
+  rail.querySelectorAll<HTMLElement>('button[role="tab"]').forEach((tab, i) => {
+    tab.classList.toggle("is-active", i === index);
+    tab.setAttribute("aria-selected", String(i === index));
+  });
+  rail.dispatchEvent(new Event("liquidrelayout"));
+}
+
+/* Rails are memoized so poster autoplay / tab-panel state cannot reset
+   the vanilla liquid-glass DOM (is-active, lens transform, WebGL bind). */
+const ManagerRail = memo(
+  forwardRef<HTMLDivElement>(function ManagerRail(_props, ref) {
+    return (
+      <div ref={ref} className="manager-archive-tabs liquid-swipe-tabs" role="tablist" aria-label="キャラクター分類">
+        <LiquidLens />
+        <button type="button" role="tab" className="is-active" aria-selected="true" style={{ ["--liquid-accent" as string]: "var(--cyan)" }}>
+          <small>FRONT / 01</small>
+          <b>六詠</b>
+        </button>
+        <button type="button" role="tab" aria-selected="false" style={{ ["--liquid-accent" as string]: "var(--red)" }}>
+          <small>REVERSE / 02</small>
+          <b>管理外</b>
+        </button>
+        <button type="button" role="tab" aria-selected="false" style={{ ["--liquid-accent" as string]: "#69df74" }}>
+          <small>RELATED / 03</small>
+          <b>その他</b>
+        </button>
+      </div>
+    );
+  }),
+);
+
+const ColumnRail = memo(
+  forwardRef<HTMLDivElement>(function ColumnRail(_props, ref) {
+    return (
+      <div ref={ref} className="world-column-tabs liquid-swipe-tabs" role="tablist" aria-label="コラムを選択">
+        <LiquidLens />
+        {COLUMNS.map((c, i) => (
+          <button
+            key={c.no}
+            type="button"
+            role="tab"
+            className={i === 0 ? "is-active" : ""}
+            aria-selected={i === 0}
+            style={{ ["--liquid-accent" as string]: "var(--gold)" }}
+          >
+            <small>{c.no}</small>
+            <b>{c.title === "脚本制と採録制" ? <>脚本制と<br className="tab-br" />採録制</> : c.title}</b>
+          </button>
+        ))}
+      </div>
+    );
+  }),
+);
+
+const PickupRail = memo(
+  forwardRef<HTMLDivElement>(function PickupRail(_props, ref) {
+    return (
+      <div
+        ref={ref}
+        className="world-column-tabs world-column-dialog-tabs liquid-swipe-tabs"
+        role="tablist"
+        aria-label="ピックアップするコラム"
+      >
+        <LiquidLens />
+        {COLUMNS.map((c, i) => (
+          <button
+            key={c.no}
+            type="button"
+            role="tab"
+            className={i === 0 ? "is-active" : ""}
+            aria-selected={i === 0}
+            style={{ ["--liquid-accent" as string]: "var(--gold)" }}
+          >
+            <small>{c.no}</small>
+            <b>{c.title === "脚本制と採録制" ? <>脚本制と<br className="tab-br" />採録制</> : c.title}</b>
+          </button>
+        ))}
+      </div>
+    );
+  }),
+);
+
+const RiderRail = memo(
+  forwardRef<HTMLDivElement>(function RiderRail(_props, ref) {
+    return (
+      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="七人のメインライダー">
+        <LiquidLens />
+        {RIDERS.map((r, i) => (
+          <button
+            key={r.id}
+            type="button"
+            role="tab"
+            className={i === 0 ? "is-active" : ""}
+            aria-selected={i === 0}
+            style={{
+              ["--tab-tone" as string]: r.tone,
+              ["--liquid-accent" as string]: r.tone,
+            }}
+          >
+            <small>{r.no}</small>
+            <span>{r.name === "OVER ZEZTZ" ? <>OVER<br className="tab-br" />ZEZTZ</> : r.name}</span>
+            <i />
+          </button>
+        ))}
+      </div>
+    );
+  }),
+);
+
+export function WorldHome() {
+  useWorldMode();
+  const [poster, setPoster] = useState(0);
+  const [prevPoster, setPrevPoster] = useState<number | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [managerTab, setManagerTab] = useState(0);
+  const [columnTab, setColumnTab] = useState(0);
+  const [riderTab, setRiderTab] = useState(0);
+  const [episode, setEpisode] = useState(0);
+  const [pickupOpen, setPickupOpen] = useState(false);
+  const managerRail = useRef<HTMLDivElement>(null);
+  const columnRail = useRef<HTMLDivElement>(null);
+  const riderRail = useRef<HTMLDivElement>(null);
+  const episodeGridRef = useRef<HTMLDivElement>(null);
+  const pickupBtnRef = useRef<HTMLButtonElement>(null);
+  const pickupDialogRef = useRef<HTMLDialogElement>(null);
+  const danteDialogRef = useRef<HTMLDialogElement>(null);
+  const pickupRail = useRef<HTMLDivElement>(null);
+  const pickupCloseTimer = useRef<number | null>(null);
+  const episodeProgrammatic = useRef(false);
+
+  useEffect(() => {
+    const off1 = bindRail(managerRail.current, setManagerTab);
+    const off2 = bindRail(columnRail.current, setColumnTab);
+    const off3 = bindRail(riderRail.current, setRiderTab);
+    const off4 = bindRail(pickupRail.current, setColumnTab);
+    const id = requestAnimationFrame(() => bootLiquidGlass(document));
+    return () => {
+      off1();
+      off2();
+      off3();
+      off4();
+      cancelAnimationFrame(id);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (locked) return;
+    const t = window.setInterval(() => {
+      setPoster((p) => {
+        setPrevPoster(p);
+        return (p + 1) % POSTERS.length;
+      });
+    }, 5200);
+    return () => window.clearInterval(t);
+  }, [locked]);
+
+  useEffect(() => {
+    RIDERS.forEach((r) => {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = r.img;
+      void img.decode?.().catch(() => undefined);
+    });
+    warmLater([
+      ...POSTERS.map((p) => p.src),
+      ...EPISODES.map((e) => e.src),
+      "/manager-rex-loi.jpeg",
+      "/manager-shuza.jpeg",
+      "/manager-lejas-portrait.jpeg",
+      "/manager-reemu.jpeg",
+    ]);
+  }, []);
+
+  useEffect(() => {
+    const grid = episodeGridRef.current;
+    if (!grid) return;
+    let frame = 0;
+    const syncFromScroll = () => {
+      frame = 0;
+      if (episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      if (!cards.length) return;
+      const mid = grid.scrollLeft + grid.clientWidth / 2;
+      let best = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
+      cards.forEach((card, i) => {
+        const center = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      setEpisode((cur) => (cur === best ? cur : best));
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(syncFromScroll);
+    };
+    grid.addEventListener("scroll", onScroll, { passive: true });
+    grid.addEventListener("scrollend", syncFromScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      grid.removeEventListener("scroll", onScroll);
+      grid.removeEventListener("scrollend", syncFromScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    syncRail(columnRail.current, columnTab);
+    syncRail(pickupRail.current, columnTab);
+  }, [columnTab]);
+
+  useEffect(() => {
+    syncRail(riderRail.current, riderTab);
+  }, [riderTab]);
+
+  useEffect(() => {
+    return () => {
+      if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    };
+  }, []);
+  const current = POSTERS[poster];
