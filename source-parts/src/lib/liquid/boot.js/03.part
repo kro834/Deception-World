@@ -1,0 +1,204 @@
+      if (k === i) t.setAttribute('data-liquid-contact', 'true');
+      else t.removeAttribute('data-liquid-contact');
+    });
+  };
+  const contact = (cx, cy) => {
+    if (!gesture) return;
+    const r = gesture.rect;
+    const sx = r.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = r.height / Math.max(root.offsetHeight, 1) || 1;
+    const lx = (cx - r.left) / sx, ly = (cy - r.top) / sy;
+    if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
+    if (root.dataset.liquidWebglActive === 'true' || !glow) return;
+    glow.style.transform = 'translate3d(' + (lx - 66).toFixed(1) + 'px,' + (ly - 66).toFixed(1) + 'px,0)';
+  };
+  const reset = () => {
+    root.dataset.liquidDragging = 'false';
+    root.dataset.liquidPressed = 'false';
+    root.dataset.liquidHeld = 'false';
+    setContact(null);
+    if (getRenderer().isActive(root)) getRenderer().setPhase('rest');
+    clearTimeout(holdTimer);
+  };
+  const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  let pageLocked = false;
+  const blockPageScroll = (e) => { e.preventDefault(); };
+  const lockPage = () => {
+    if (!lockScroll || pageLocked) return;
+    pageLocked = true;
+    document.documentElement.dataset.railLock = 'true';
+    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
+    window.addEventListener('wheel', blockPageScroll, { passive: false, capture: true });
+  };
+  const unlockPage = () => {
+    if (!pageLocked) return;
+    pageLocked = false;
+    delete document.documentElement.dataset.railLock;
+    window.removeEventListener('touchmove', blockPageScroll, { capture: true });
+    window.removeEventListener('wheel', blockPageScroll, { capture: true });
+  };
+  const cancel = () => { if (!gesture) return; gesture = null; reset(); unlockPage(); settle(active); };
+
+  const process = () => {
+    moveFrame = null;
+    if (!gesture || !pending) return;
+    const m = pending; pending = null;
+    const dt = Math.max(1, m.t - gesture.lastT);
+    const ivx = (m.x - gesture.lastX) / dt, ivy = (m.y - gesture.lastY) / dt;
+    const blend = 1 - Math.exp(-dt / 24);
+    gesture.vx = Math.sign(ivx) !== Math.sign(gesture.vx) ? ivx : mix(gesture.vx, ivx, blend);
+    gesture.vy = Math.sign(ivy) !== Math.sign(gesture.vy) ? ivy : mix(gesture.vy, ivy, blend);
+    gesture.lastX = m.x; gesture.lastY = m.y; gesture.lastT = m.t;
+    if (gesture.axis === 'pending') { contact(m.x, m.y); return; }
+
+    if (lockScroll) {
+      const px = (m.x - gesture.rect.left) / gesture.sx;
+      const py = (m.y - gesture.rect.top) / (gesture.sy || 1);
+      const geos = measure();
+      gesture.geos = geos;
+      const preview = nearestTab(px, py, geos);
+      gesture.raw = preview;
+      setContact(preview);
+      const g = geos[preview];
+      const tab = tabs()[preview];
+      if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
+      const lw = g.width, lh = g.height;
+      const geo = {
+        x: clamp(px - lw / 2, 0, Math.max(0, root.offsetWidth - lw)),
+        y: clamp(py - lh / 2, 0, Math.max(0, root.offsetHeight - lh)),
+        width: lw,
+        height: lh,
+      };
+      if (lens) {
+        lens.style.width = geo.width.toFixed(2) + 'px';
+        lens.style.height = geo.height.toFixed(2) + 'px';
+        lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
+      }
+      if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
+      contact(m.x, m.y);
+      return;
+    }
+
+    const px = (m.x - gesture.rect.left) / gesture.sx;
+    const geos = gesture.geos, last = geos.length - 1;
+    let raw = 0;
+    for (let i = 0; i <= last; i++) {
+      const c = geos[i].x + geos[i].width / 2;
+      if (px <= c) { raw = i === 0 ? 0 : i - 1 + (px - (geos[i - 1].x + geos[i - 1].width / 2)) / (c - (geos[i - 1].x + geos[i - 1].width / 2)); break; }
+      raw = i;
+    }
+    raw = clamp(raw, 0, last);
+    const lo = Math.floor(raw), hi = Math.min(last, Math.ceil(raw)), t = raw - lo;
+    const from = geos[lo], to = geos[hi];
+    const g = {
+      x: mix(from.x, to.x, t), y: mix(from.y, to.y, t),
+      width: mix(from.width, to.width, t), height: mix(from.height, to.height, t),
+    };
+    gesture.raw = raw;
+    const preview = clamp(Math.round(raw), 0, last);
+    setContact(preview);
+    const tab = tabs()[preview];
+    if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
+    if (lens) {
+      lens.style.width = g.width.toFixed(2) + 'px';
+      lens.style.height = g.height.toFixed(2) + 'px';
+      lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+    }
+    if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
+    contact(m.x, m.y);
+  };
+
+  root.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    const list = tabs();
+    let target = e.target.closest('button[role="tab"]');
+    let start = target ? list.indexOf(target) : -1;
+    if (start < 0) {
+      if (!lockScroll) return;
+      const rect0 = root.getBoundingClientRect();
+      const sx0 = rect0.width / Math.max(root.offsetWidth, 1) || 1;
+      const sy0 = rect0.height / Math.max(root.offsetHeight, 1) || 1;
+      start = nearestTab((e.clientX - rect0.left) / sx0, (e.clientY - rect0.top) / sy0, measure());
+      target = list[start];
+    }
+    if (start < 0 || !target) return;
+    const rect = root.getBoundingClientRect();
+    gesture = {
+      axis: 'pending', start, raw: start, held: false, pointerId: e.pointerId, pointerType: e.pointerType,
+      startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
+      vx: 0, vy: 0, geos: measure(), rect,
+      sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
+      sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
+    };
+    root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'false';
+    setContact(start);
+    lockPage();
+    if (!reduce() && getRenderer().activate(root)) {
+      getRenderer().setAccent(getComputedStyle(target).getPropertyValue('--liquid-accent').trim());
+      getRenderer().setGeometry(gesture.geos[start]);
+      getRenderer().setPhase('pressed');
+    }
+    settle(start);
+    contact(e.clientX, e.clientY);
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      if (!gesture) return;
+      gesture.held = true; root.dataset.liquidHeld = 'true';
+      if (getRenderer().isActive(root)) getRenderer().setPhase('held');
+    }, 105);
+  });
+
+  root.addEventListener('pointermove', (e) => {
+    if (!gesture || gesture.pointerId !== e.pointerId) return;
+    if (gesture.axis === 'pending') {
+      const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
+      const threshold = (gesture.pointerType === 'mouse' ? 7 : 11) + (gesture.held ? 6 : 0);
+      if (Math.hypot(dx, dy) < threshold) {
+        pending = { x: e.clientX, y: e.clientY, t: e.timeStamp };
+        if (moveFrame === null) moveFrame = requestAnimationFrame(process);
+        return;
+      }
+      clearTimeout(holdTimer);
+      if (lockScroll) {
+        gesture.axis = 'free';
+      } else if (Math.abs(dy) > Math.abs(dx) * 1.12) {
+        cancel(); return;
+      } else {
+        gesture.axis = 'horizontal';
+      }
+      root.dataset.liquidDragging = 'true'; root.dataset.liquidHeld = 'true';
+      if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
+      try { root.setPointerCapture(gesture.pointerId); } catch (err) {}
+    }
+    e.preventDefault();
+    pending = { x: e.clientX, y: e.clientY, t: e.timeStamp };
+    if (moveFrame === null) moveFrame = requestAnimationFrame(process);
+  });
+
+  const finish = (e) => {
+    if (!gesture || gesture.pointerId !== e.pointerId) return;
+    const g = gesture;
+    if (g.axis === 'pending') {
+      const moved = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
+      const threshold = (g.pointerType === 'mouse' ? 7 : 11) + (g.held ? 6 : 0);
+      const hit = document.elementFromPoint(e.clientX, e.clientY);
+      const over = hit ? hit.closest('button[role="tab"]') : null;
+      // A sloppy tap still counts when the finger lifts over the same tab.
+      if (moved >= threshold && over !== tabs()[g.start]) { cancel(); return; }
+      gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
+    }
+    if (g.axis === 'free') {
+      const px = (e.clientX - g.rect.left) / g.sx;
+      const py = (e.clientY - g.rect.top) / (g.sy || 1);
+      const idx = nearestTab(px, py, measure());
+      swallowClick = true;
+      gesture = null; reset(); unlockPage(); select(idx);
+      requestAnimationFrame(() => settle(idx));
+      return;
+    }
+    let idx = Math.round(g.raw);
+    if (Math.abs(g.vx) > 0.42) idx = g.vx > 0 ? Math.max(idx, g.start + 1) : Math.min(idx, g.start - 1);
+    idx = clamp(idx, 0, tabs().length - 1);
+    gesture = null; reset(); unlockPage(); select(idx);
+    requestAnimationFrame(() => settle(idx));
+  };
