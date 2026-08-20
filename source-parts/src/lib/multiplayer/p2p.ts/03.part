@@ -1,0 +1,59 @@
+        this.emitPeers();
+      }
+      if (slot.terminal || live === "connected") continue;
+      if (now - slot.lastProgressAt <= STALL_MS) continue;
+      if (slot.recoveryAttempts >= MAX_RECOVERY_ATTEMPTS) {
+        slot.terminal = true;
+        this.emitPeers();
+        continue;
+      }
+      slot.recoveryAttempts += 1;
+      slot.lastProgressAt = now; // re-arm the stall window
+      if (this.opts.selfId > peerId) {
+        // We are the dialer: rebuild the pair from scratch.
+        const { name } = slot.info;
+        const attempts = slot.recoveryAttempts;
+        slot.pc.close();
+        this.peers.delete(peerId);
+        const fresh = this.connectTo(peerId, name, true);
+        if (fresh) fresh.recoveryAttempts = attempts;
+        this.schedulePoll(FAST_POLL_MS);
+      }
+      // Receiver side: count the stall window and wait for the dialer's
+      // fresh offer (onSignal absorbs it, recreating our pc if needed).
+    }
+  }
+
+  private async readCandidateType(slot: PeerSlot): Promise<void> {
+    // relay = TURN (none configured by default); srflx/host = direct path.
+    try {
+      const stats = await slot.pc.getStats();
+      let selected: RTCIceCandidatePairStats | undefined;
+      stats.forEach((s) => {
+        if (s.type === "candidate-pair" && (s as RTCIceCandidatePairStats).nominated) {
+          selected = s as RTCIceCandidatePairStats;
+        }
+      });
+      const localId = selected?.localCandidateId;
+      if (localId) {
+        const local = stats.get(localId) as { candidateType?: string } | undefined;
+        slot.info.candidateType = local?.candidateType ?? null;
+        this.emitPeers();
+      }
+    } catch {
+      // getStats is best-effort diagnostics only.
+    }
+  }
+
+  private emitPeers(): void {
+    // Only notify when something observable actually changed — React state
+    // setters otherwise re-render consumers on every poll/ping.
+    const list = this.peerList();
+    const fingerprint = JSON.stringify(
+      list.map((p) => [p.id, p.name, p.connectionState, p.candidateType, p.rttMs]),
+    );
+    if (fingerprint === this.lastPeersFingerprint) return;
+    this.lastPeersFingerprint = fingerprint;
+    this.opts.onPeersChanged?.(list);
+  }
+}
