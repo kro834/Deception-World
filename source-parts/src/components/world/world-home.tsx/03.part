@@ -1,0 +1,238 @@
+  const previous = prevPoster != null ? POSTERS[prevPoster] : null;
+  const rider = RIDERS[riderTab];
+  const column = COLUMNS[columnTab];
+
+  const goPoster = (next: number | ((p: number) => number)) => {
+    setPoster((p) => {
+      const n = typeof next === "function" ? next(p) : next;
+      const wrapped = ((n % POSTERS.length) + POSTERS.length) % POSTERS.length;
+      if (wrapped !== p) setPrevPoster(p);
+      return wrapped;
+    });
+  };
+
+  const goEpisode = (index: number) => {
+    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
+    setEpisode(next);
+    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
+    episodeProgrammatic.current = true;
+    scrollAxisX(episodeGridRef.current, card ?? null);
+    window.setTimeout(() => {
+      episodeProgrammatic.current = false;
+    }, 520);
+  };
+
+  const openPickup = () => {
+    const dlg = pickupDialogRef.current;
+    if (!dlg) return;
+    if (pickupCloseTimer.current != null) {
+      window.clearTimeout(pickupCloseTimer.current);
+      pickupCloseTimer.current = null;
+    }
+    delete dlg.dataset.closing;
+    if (!dlg.open) {
+      try {
+        dlg.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    setPickupOpen(true);
+    (document.activeElement as HTMLElement | null)?.blur();
+    syncRail(pickupRail.current, columnTab);
+    requestAnimationFrame(() => {
+      bootLiquidGlass(dlg);
+      pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+    });
+  };
+
+  const closePickup = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
+    event?.stopPropagation?.();
+    const dlg = pickupDialogRef.current;
+    if (!dlg?.open) {
+      setPickupOpen(false);
+      return;
+    }
+    if (dlg.dataset.closing === "true") return;
+    dlg.dataset.closing = "true";
+    if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    pickupCloseTimer.current = window.setTimeout(() => {
+      try {
+        dlg.close();
+      } catch {
+        /* already closed */
+      }
+      delete dlg.dataset.closing;
+      pickupCloseTimer.current = null;
+      setPickupOpen(false);
+    }, 360);
+  };
+
+  return (
+    <div className="site-shell motion-on" data-motion-enabled="true">
+      <SideMenuLayer />
+      <div className="ambient" aria-hidden="true">
+        <div className="ambient-grid" />
+        <div className="ambient-orb orb-a" />
+        <div className="ambient-orb orb-b" />
+        <div className="grain" />
+      </div>
+
+      <header className="topbar">
+        <div className="topbar-leading">
+          <a className="brand" href="#top" aria-label="Deception World トップへ">
+            <span className="brand-sigil">
+              <i>DW</i>
+            </span>
+            <span>
+              <b>DECEPTION WORLD</b>
+              <small>KAMEN RIDER SAGA</small>
+            </span>
+          </a>
+        </div>
+        <nav aria-label="メインメニュー">
+          <a href="#story">STORY</a>
+          <a href="#riders">RIDERS</a>
+          <a href="#records">RECORDS</a>
+        </nav>
+        <div className="topbar-actions">
+          <SideMenuTrigger />
+        </div>
+      </header>
+      <SiteUpdateButton />
+
+      <section className="hero" id="top">
+        <div className="hero-backdrop" aria-hidden="true">
+          {previous ? (
+            <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
+              <img src={previous.src} alt="" style={{ objectPosition: previous.pos }} decoding="async" />
+            </span>
+          ) : null}
+          <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
+            <img
+              src={current.src}
+              alt=""
+              style={{ objectPosition: current.pos }}
+              fetchPriority="high"
+              decoding="async"
+            />
+          </span>
+        </div>
+        <div className="hero-copy">
+          <p className="eyebrow">
+            <span>THE SECOND SAGA</span>
+            <i />
+          </p>
+          <h1>
+            <span>世界は、</span>
+            <strong>欺瞞でできている。</strong>
+          </h1>
+          <p className="hero-lead">
+            救うべきものは、夢の向こうにはない。
+            <br />
+            6人の最上位管理人と、7人のライダーが同じ世界で交差する。
+          </p>
+          <div className="hero-actions">
+            <a className="primary-action ios26-glass" href="#story">
+              <span>ENTER THE WORLD</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h13M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a className="text-action" href="#poster-stage">
+              POSTER
+            </a>
+          </div>
+          <div className="hero-metadata" aria-label="作品情報">
+            <span>
+              <small>FORMAT</small>
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
+          </div>
+        </div>
+
+        <div className="poster-stage" id="poster-stage">
+          <div className="poster-deck">
+            <div className="poster-back-card poster-back-card-1" aria-hidden="true">
+              <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
+            </div>
+            <div className="poster-back-card poster-back-card-2" aria-hidden="true">
+              <img src={POSTERS[(poster + 2) % POSTERS.length].src} alt="" decoding="async" />
+            </div>
+            <div className="poster-back-card poster-back-card-3" aria-hidden="true">
+              <img src={POSTERS[(poster + 3) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+            </div>
+            <div className="poster-back-card poster-back-card-4" aria-hidden="true">
+              <img src={POSTERS[(poster + 4) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+            </div>
+            <div className="poster-frame">
+              <span className="poster-holo-ring" aria-hidden="true" />
+              <div className="poster-media">
+                {previous ? (
+                  <img
+                    className="poster-image poster-image-previous"
+                    key={`poster-prev-${prevPoster}`}
+                    src={previous.src}
+                    alt=""
+                    style={{ objectPosition: previous.pos, objectFit: previous.fit === "contain" ? "contain" : "cover" }}
+                    onAnimationEnd={() => setPrevPoster(null)}
+                  />
+                ) : null}
+                <img
+                  className={current.fit === "contain" ? "poster-image poster-image-current is-contain" : "poster-image poster-image-current"}
+                  key={`poster-${poster}`}
+                  src={current.src}
+                  alt={current.alt}
+                  style={{ objectPosition: current.pos, objectFit: current.fit === "contain" ? "contain" : "cover" }}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                <span className="poster-sheen" aria-hidden="true" />
+              </div>
+              <span className="corner corner-tl" aria-hidden="true" />
+              <span className="corner corner-tr" aria-hidden="true" />
+              <span className="corner corner-bl" aria-hidden="true" />
+              <span className="corner corner-br" aria-hidden="true" />
+            </div>
+          </div>
+          <div className="orbit" aria-hidden="true" />
+          <div className="orbit orbit-two" aria-hidden="true" />
+          <div className="poster-index">
+            <span>KEY VISUAL</span>
+            <b>{String(poster + 1).padStart(2, "0")}</b>
+          </div>
+          <div className="poster-controls">
+            <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
+              <button
+                type="button"
+                className="poster-shuffle ios26-glass"
+                onClick={() => {
+                  setLocked(true);
+                  goPoster((p) => p + 1);
+                }}
+              >
+                <span aria-hidden="true">↻</span>
+                <b>SHUFFLE POSTER</b>
+              </button>
+              <button
+                type="button"
+                className="poster-reset ios26-glass"
+                disabled={poster === 0}
+                onClick={() => goPoster(0)}
+              >
+                <span aria-hidden="true">↤</span>
+                <b>RESET</b>
+              </button>
+              <button
+                type="button"
+                className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
+                aria-pressed={locked}
+                aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
