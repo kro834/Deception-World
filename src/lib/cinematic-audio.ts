@@ -48,16 +48,21 @@ export function createCinematicScore(): CinematicScore {
     void (async () => {
       await unlock();
       if (!ctx) return;
+
       master = ctx.createGain();
       master.gain.value = isMuted ? 0 : 0.85;
       master.connect(ctx.destination);
+
       const t0 = ctx.currentTime;
+
+      // Sub drone with slow beating
       const droneGain = ctx.createGain();
       droneGain.gain.setValueAtTime(0, t0);
       droneGain.gain.linearRampToValueAtTime(0.14, t0 + 7.5);
       droneGain.gain.linearRampToValueAtTime(0.08, t0 + 14);
       droneGain.connect(master);
       nodes.push(droneGain);
+
       for (const freq of [42, 42.35, 63]) {
         const osc = ctx.createOscillator();
         osc.type = "sine";
@@ -66,6 +71,8 @@ export function createCinematicScore(): CinematicScore {
         osc.start(t0);
         oscillators.push(osc);
       }
+
+      // Low rumble (brown noise through a lowpass)
       const rumble = ctx.createBufferSource();
       rumble.buffer = makeBrownNoise(ctx, 20);
       rumble.loop = true;
@@ -83,6 +90,8 @@ export function createCinematicScore(): CinematicScore {
       rumble.start(t0);
       sources.push(rumble);
       nodes.push(rumbleFilter, rumbleGain);
+
+      // Whoosh at the reveal
       const whoosh = ctx.createBufferSource();
       whoosh.buffer = makeWhiteNoise(ctx, 2.4);
       const whooshFilter = ctx.createBiquadFilter();
@@ -100,6 +109,8 @@ export function createCinematicScore(): CinematicScore {
       whoosh.start(t0 + 5.3);
       sources.push(whoosh);
       nodes.push(whooshFilter, whooshGain);
+
+      // Metallic shimmer / bell at full reveal
       const shimmerGain = ctx.createGain();
       shimmerGain.gain.setValueAtTime(0, t0 + 8.0);
       shimmerGain.gain.linearRampToValueAtTime(0.09, t0 + 8.4);
@@ -128,10 +139,18 @@ export function createCinematicScore(): CinematicScore {
     }
     window.setTimeout(() => {
       for (const osc of oscillators) {
-        try { osc.stop(); } catch { /* already stopped */ }
+        try {
+          osc.stop();
+        } catch {
+          /* already stopped */
+        }
       }
       for (const src of sources) {
-        try { src.stop(); } catch { /* already stopped */ }
+        try {
+          src.stop();
+        } catch {
+          /* already stopped */
+        }
       }
       oscillators.length = 0;
       sources.length = 0;
@@ -147,5 +166,11 @@ export function createCinematicScore(): CinematicScore {
     }
   }
 
-  return { unlock, start, stop, setMuted, muted: () => isMuted };
+  return {
+    unlock,
+    start,
+    stop,
+    setMuted,
+    muted: () => isMuted,
+  };
 }

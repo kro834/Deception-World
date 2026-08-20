@@ -157,12 +157,20 @@ export function TitleSequence() {
         preload="auto"
         loop
       />
+
       <HudRings />
       <Particles active={phase !== "idle"} />
+
       <div className="cine-line" />
+
       <div className="cine-stack">
         <div className="cine-logo-wrap">
-          <img src="/logo-title.jpg" alt="" className="cine-logo-glow" draggable={false} />
+          <img
+            src="/logo-title.jpg"
+            alt=""
+            className="cine-logo-glow"
+            draggable={false}
+          />
           <img
             src="/logo-title.jpg"
             alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
@@ -172,17 +180,25 @@ export function TitleSequence() {
           <div className="cine-logo-shine" />
         </div>
       </div>
+
       <div className="cine-vignette" />
       <div className="cine-grain" />
       <div className="cine-letterbox top" />
       <div className="cine-letterbox bottom" />
       <div className="cine-progress" />
+
       <div className="cine-enter-hint">
         <p className="cine-pulse cine-kicker">Opening</p>
       </div>
-      <button type="button" className="cine-ghost cine-skip" onClick={skip}>
+
+      <button
+        type="button"
+        className="cine-ghost cine-skip"
+        onClick={skip}
+      >
         スキップ
       </button>
+
       <div className="cine-always">
         <button
           type="button"
@@ -194,6 +210,7 @@ export function TitleSequence() {
           <span className="hidden sm:inline">{muted ? "MUTE" : "SOUND"}</span>
         </button>
       </div>
+
       <div className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3">
         <button
           type="button"
