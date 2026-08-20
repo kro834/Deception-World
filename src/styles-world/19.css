@@ -1,0 +1,360 @@
+/* HUD tick marks, same language as the poster corner brackets. */
+.side-panel-trigger::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -5px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 42%, transparent);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  scale: 0.86;
+  transition: opacity 0.32s ease, scale 0.42s var(--glass-spring);
+  -webkit-mask: conic-gradient(from 0deg, #000 0 14%, transparent 14% 36%, #000 36% 64%, transparent 64% 86%, #000 86%);
+  mask: conic-gradient(from 0deg, #000 0 14%, transparent 14% 36%, #000 36% 64%, transparent 64% 86%, #000 86%);
+}
+
+/* Dichroic rim, borrowed from the poster frame so the two read as one system.
+   Rotation lives on a transformed child, not an animated gradient. */
+.side-panel-trigger-ring {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  padding: 1px;
+  transition: opacity 0.34s ease;
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask-composite: exclude;
+}
+
+.side-panel-trigger-ring::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 210%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(103, 216, 255, 0.95),
+    rgba(231, 26, 156, 0.7) 22%,
+    rgba(215, 171, 81, 0.85) 44%,
+    rgba(120, 255, 214, 0.7) 66%,
+    rgba(103, 216, 255, 0.95)
+  );
+  animation: posterHoloSpin 6s linear infinite;
+}
+
+.side-panel-trigger-glyph {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+}
+
+.side-panel-trigger-glyph i {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  transition:
+    width 0.38s var(--glass-spring),
+    translate 0.38s var(--glass-spring),
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.side-panel-trigger-glyph i:nth-child(2) {
+  width: 10px;
+}
+
+.side-panel-trigger-glyph i:nth-child(3) {
+  width: 13px;
+}
+
+@media (hover: hover) {
+  .side-panel-trigger:hover {
+    border-color: transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 14px 34px rgba(0, 0, 0, 0.38),
+      0 0 26px -6px color-mix(in srgb, var(--cyan) 62%, transparent);
+    scale: 1.07;
+  }
+
+  .side-panel-trigger:hover .side-panel-trigger-ring,
+  .side-panel-trigger:focus-visible .side-panel-trigger-ring {
+    opacity: 1;
+  }
+
+  .side-panel-trigger:hover::before,
+  .side-panel-trigger:focus-visible::before {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* The three rules snap to one width and light up — a system coming online
+     rather than a hamburger wiggling. */
+  .side-panel-trigger:hover .side-panel-trigger-glyph i {
+    width: 17px;
+    background: color-mix(in srgb, var(--cyan) 72%, #ffffff);
+    box-shadow: 0 0 9px color-mix(in srgb, var(--cyan) 60%, transparent);
+  }
+
+  .side-panel-trigger:hover .side-panel-trigger-glyph i:nth-child(1) {
+    translate: 0 -1px;
+  }
+
+  .side-panel-trigger:hover .side-panel-trigger-glyph i:nth-child(3) {
+    translate: 0 1px;
+  }
+}
+
+.side-panel-trigger:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+.side-panel-trigger[aria-expanded="true"] .side-panel-trigger-glyph i:nth-child(2) {
+  width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel-trigger-ring::before {
+    animation: none;
+  }
+}
+
+.side-panel-scrim {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(3, 6, 10, 0.62);
+  -webkit-backdrop-filter: blur(9px) saturate(130%);
+  backdrop-filter: blur(9px) saturate(130%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.34s ease;
+}
+
+.side-panel-scrim[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-panel {
+  position: fixed;
+  z-index: 61;
+  top: 0;
+  right: 0;
+  display: flex;
+  width: min(88vw, 384px);
+  height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 26px) 26px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  border-left: 1px solid var(--glass-border-soft);
+  background:
+    linear-gradient(200deg, rgba(103, 216, 255, 0.07), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 30%),
+    rgba(7, 11, 18, 0.86);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  backdrop-filter: blur(26px) saturate(160%);
+  box-shadow: -30px 0 80px rgba(0, 0, 0, 0.5), inset 1px 0 0 rgba(255, 255, 255, 0.07);
+  translate: 100% 0;
+  visibility: hidden;
+  transition: translate 0.46s var(--glass-spring), visibility 0.46s;
+  overscroll-behavior: contain;
+}
+
+.side-panel[data-open="true"] {
+  translate: 0 0;
+  visibility: visible;
+}
+
+.side-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.side-panel-head p {
+  margin: 0;
+  color: var(--dim);
+  font-size: 7px;
+  letter-spacing: 0.28em;
+}
+
+.side-panel-head b {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+}
+
+.side-panel-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid var(--glass-border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(238, 250, 255, 0.86);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: border-color 0.28s ease, background 0.28s ease, rotate 0.4s var(--glass-spring);
+}
+
+@media (hover: hover) {
+  .side-panel-close:hover {
+    border-color: rgba(255, 120, 120, 0.5);
+    background: rgba(255, 120, 120, 0.1);
+    rotate: 90deg;
+  }
+}
+
+.side-panel-group {
+  margin-bottom: 24px;
+}
+
+.side-panel-group > p {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-size: 7px;
+  letter-spacing: 0.28em;
+}
+
+.side-panel-links {
+  display: grid;
+  gap: 5px;
+}
+
+.side-panel-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 18px;
+  border: 1px solid rgba(202, 231, 250, 0.09);
+  border-radius: 999px;
+  color: rgba(238, 250, 255, 0.82);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: border-color 0.28s ease, background 0.28s ease, translate 0.32s var(--glass-spring);
+}
+
+.side-panel-links a i {
+  color: var(--dim);
+  font-size: 8px;
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+
+@media (hover: hover) {
+  .side-panel-links a:hover {
+    border-color: color-mix(in srgb, var(--cyan) 44%, transparent);
+    background: color-mix(in srgb, var(--cyan) 9%, transparent);
+    translate: 3px 0;
+  }
+}
+
+.side-panel-links a:focus-visible {
+  border-color: var(--cyan);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel,
+  .side-panel-scrim,
+  .side-panel-links a,
+  .side-panel-close,
+  .side-panel-trigger,
+  .side-panel-trigger span {
+    transition-duration: 0.001ms;
+  }
+}
+
+/* ── Brand logo ──────────────────────────────── */
+
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
+
+.brand-text-fallback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Logo asset absent -> restore the original wordmark, no broken image. */
+.brand[data-logo-missing="true"] .brand-logo {
+  display: none;
+}
+
+.brand[data-logo-missing="true"] .brand-text-fallback {
+  position: static;
+  display: inline-flex;
+  width: auto;
+  height: auto;
+  align-items: center;
+  gap: 12px;
+  overflow: visible;
+  clip-path: none;
+}
+
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+
+/* Demo scaffolding only — not part of the design system. */
+body { padding: 0; }
+.demo { max-width: 860px; margin: 0 auto; padding: 120px 24px 96px; display: grid; gap: 46px; }
+.glass-status { margin: 0; padding: 12px 20px; border-radius: 999px; font: 600 12px/1.6 ui-monospace, monospace;
+  letter-spacing: 0.06em; border: 1px solid; }
+.glass-status[data-state="ok"]  { color: #8ef0c8; border-color: rgba(110,240,200,0.4); background: rgba(110,240,200,0.07); }
+.glass-status[data-state="bad"] { color: #ff9a9a; border-color: rgba(255,120,120,0.45); background: rgba(255,120,120,0.09); }
+
+/* Fail-open: if the script never runs, the rail must still read as a working
+   control rather than an empty bar with an invisible lens. */
+.liquid-swipe-tabs:not([data-liquid-initialized]) > button[role="tab"].is-active {
+  border-color: color-mix(in srgb, var(--liquid-accent, var(--cyan)) 55%, transparent);
+  background: color-mix(in srgb, var(--liquid-accent, var(--cyan)) 12%, transparent);
+  color: #fff;
+}
+
+.demo-note { margin: 0; padding: 18px 22px; border: 1px solid var(--glass-border-soft);
+  border-radius: 22px; background: rgba(255,255,255,0.03); color: var(--muted);
+  font-size: 13px; line-height: 1.9; }
+.demo-note b { color: var(--text); }
+.demo-block h2 { margin: 0 0 16px; font-family: var(--font-display); font-size: 12px;
+  letter-spacing: 0.22em; color: var(--dim); font-weight: 700; }
+.demo-list { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; line-height: 2.1; }
+.demo-list code { color: var(--cyan); font-family: ui-monospace, monospace; font-size: 12px; }
+.rider-detail.demo-block { padding: 0; border: 0; background: none; min-height: 0; }
