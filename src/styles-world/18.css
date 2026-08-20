@@ -333,7 +333,7 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 
-/* ── Depth parallax on hold ──────────────────────────────── */
+/* ── Depth parallax on hold ──────────────────────────────────────── */
 
 /* Long-pressing pushes the rail back and pulls the lens forward. The
    unpressed tabs recede and dim so the pressed one reads as the near plane;
@@ -362,7 +362,7 @@ html::-webkit-scrollbar-thumb:hover {
   filter: brightness(0.88) saturate(0.9);
 }
 
-/* ── Side panel ──────────────────────────────────── */
+/* ── Side panel ──────────────────────────────────────────────────── */
 
 .side-panel-trigger {
   position: relative;
@@ -391,3 +391,4 @@ html::-webkit-scrollbar-thumb:hover {
     box-shadow 0.3s ease,
     scale 0.34s var(--glass-settle);
 }
+

@@ -158,7 +158,7 @@ export function grokPwaPlugin() {
     },
     load(id) {
       if (id !== `\0${GROK_OG_IDENTITY_ID}`) return;
-      return `export const grokOgIdentity = ${JSON.stringify(snapshotOgIdentity())}`;
+      return `export const grokOgIdentity = ${JSON.stringify(snapshotOgIdentity())};`;
     },
     transformIndexHtml(html) {
       return injectGrokPwaHead(html, {

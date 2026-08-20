@@ -66,7 +66,7 @@
   }
 }
 
-/* ── Liquid Glass interaction system ─────────────────────────── */
+/* ── Liquid Glass interaction system ─────────────────────────────── */
 
 .liquid-swipe-tabs {
   --liquid-current-accent: var(--cyan);
@@ -367,3 +367,4 @@
     inset 0 -1px 0 color-mix(in srgb, var(--liquid-current-accent) 22%, transparent);
   transform: translateZ(0) scale(1);
 }
+

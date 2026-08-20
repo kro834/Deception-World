@@ -167,6 +167,8 @@ export class P2PRoom {
     return [...this.peers.values()].map((s) => ({ ...s.info }));
   }
 
+  // ── signaling loop ─────────────────────────────────────────────────────────
+
   private schedulePoll(delay: number): void {
     if (this.closed) return;
     if (this.pollTimer) clearTimeout(this.pollTimer);
@@ -175,6 +177,8 @@ export class P2PRoom {
 
   private anyPairConnecting(): boolean {
     for (const s of this.peers.values()) {
+      // Terminal pairs (NAT-blocked after all recovery attempts) must not pin
+      // the session at the 400ms fast-poll rate.
       if (s.terminal) continue;
       if (s.info.connectionState !== "connected") return true;
     }
@@ -224,6 +228,7 @@ export class P2PRoom {
       if (existing) {
         existing.info.name = p.name;
       } else {
+        // Exactly one side dials each pair; the other waits for the offer.
         this.connectTo(p.id, p.name, this.opts.selfId > p.id);
       }
     }
@@ -235,6 +240,8 @@ export class P2PRoom {
     }
     this.emitPeers();
   }
+
+  // ── per-pair connection ────────────────────────────────────────────────────
 
   private connectTo(peerId: string, name: string, initiator: boolean): PeerSlot | null {
     if (this.closed) return null;
@@ -273,6 +280,8 @@ export class P2PRoom {
       }
       this.emitPeers();
       if (pc.connectionState === "failed") {
+        // Refires negotiationneeded → a fresh offer through signaling, so a
+        // lost offer or dead path cannot wedge the pair (glare-safe).
         pc.restartIce();
       }
       if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
@@ -293,6 +302,7 @@ export class P2PRoom {
     pc.ondatachannel = (e) => this.attachChannel(slot, e.channel);
 
     if (initiator) {
+      // Creating the channels triggers negotiationneeded → the offer.
       this.attachChannel(
         slot,
         pc.createDataChannel("state", { ordered: false, maxRetransmits: 0 }),
@@ -335,6 +345,7 @@ export class P2PRoom {
     };
   }
 
+  /** Apply buffered ICE candidates once a remote description is in place. */
   private async flushPendingCandidates(slot: PeerSlot): Promise<void> {
     while (slot.pendingCandidates.length > 0) {
       const candidate = slot.pendingCandidates.shift()!;
@@ -356,6 +367,8 @@ export class P2PRoom {
     if (this.closed) return;
     let slot = this.peers.get(from);
     if (!slot) {
+      // New peers dial us in the same poll that adds them to the roster.
+      // Signals outlive membership, so drop senders the roster doesn't vouch for.
       if (!roster.has(from)) return;
       const created = this.connectTo(from, "", false);
       if (!created) return;
@@ -371,8 +384,11 @@ export class P2PRoom {
         slot.ignoreOffer = !polite && collision;
         if (slot.ignoreOffer) return;
         try {
-          await slot.pc.setRemoteDescription(description);
+          await slot.pc.setRemoteDescription(description); // implicit rollback when polite
         } catch (err) {
+          // A pc resumed from suspend can be unable to take any new remote
+          // offer (stale DTLS fingerprint). Rebuild the pair once and apply
+          // the same offer to the fresh pc before giving up.
           if (kind !== "offer" || slot.recreatedForOffer) throw err;
           const attempts = slot.recoveryAttempts;
           const name = slot.info.name;
@@ -396,24 +412,35 @@ export class P2PRoom {
       } else if (kind === "ice") {
         const candidate = payload as RTCIceCandidateInit;
         if (!slot.pc.remoteDescription) {
+          // Candidate raced ahead of its SDP — hold it until the description
+          // lands (flushed after every successful setRemoteDescription).
           slot.pendingCandidates.push(candidate);
           return;
         }
         try {
           await slot.pc.addIceCandidate(candidate);
         } catch (err) {
+          // The enclosing catch would swallow a rethrow; log the real signal.
           if (!slot.ignoreOffer) console.warn("[p2p] addIceCandidate failed:", err);
         }
       }
     } catch {
-      // Negotiation errors resolve on the next offer cycle.
+      // Negotiation errors resolve on the next offer cycle; state is visible
+      // to the app via connectionState.
     }
   }
 
+  /**
+   * Signals are serialized per remote peer (a candidate must never overtake
+   * its SDP into the DB) and retried on failure with short backoff.
+   */
   private sendSignal(to: string, kind: SignalKind, payload: unknown): Promise<void> {
     const prev = this.signalQueues.get(to) ?? Promise.resolve();
     const next = prev.then(() => this.postSignal(to, kind, payload));
-    this.signalQueues.set(to, next.catch(() => {}));
+    this.signalQueues.set(
+      to,
+      next.catch(() => {}),
+    );
     return next;
   }
 
@@ -437,6 +464,8 @@ export class P2PRoom {
         throw new Error(`signal POST failed: ${res.status}`);
       } catch (err) {
         if (attempt >= SIGNAL_RETRY_DELAYS_MS.length) {
+          // Delivery gave up; the pair converges on the next offer cycle (or
+          // the watchdog rebuilds it). Logged once so failures are visible.
           console.warn(`[p2p] signal ${kind} to ${to} failed after retries`, err);
           return;
         }
@@ -445,6 +474,8 @@ export class P2PRoom {
     }
   }
 
+  // ── diagnostics + recovery ─────────────────────────────────────────────────
+
   private pingAll(): void {
     const wire = JSON.stringify({ t: "ping" });
     for (const slot of this.peers.values()) {
@@ -452,16 +483,28 @@ export class P2PRoom {
       const stale =
         slot.pingSentAt !== undefined && performance.now() - slot.pingSentAt > 2 * PING_INTERVAL_MS;
       if (slot.pingSentAt === undefined || stale) {
+        // A lost pong must not freeze rttMs forever: expire and re-ping.
         slot.pingSentAt = performance.now();
         slot.state.send(wire);
       }
     }
   }
 
+  /**
+   * Stuck-pair recovery, piggybacked on the ping interval. A pair that has
+   * made no progress for STALL_MS gets rebuilt by the dialer with a FRESH
+   * RTCPeerConnection (new DTLS identity — fixes the suspend/resume
+   * fingerprint wedge). After MAX_RECOVERY_ATTEMPTS the pair is terminal:
+   * visible to the app as its last connectionState, ignored by fast-poll.
+   */
   private watchdog(): void {
     if (this.closed) return;
     const now = Date.now();
     for (const [peerId, slot] of this.peers) {
+      // pc.close() and some suspend/resume wedges never fire
+      // connectionstatechange — read the LIVE state so a silently-dead pc
+      // still trips the stall timer instead of hiding behind a cached
+      // "connected". Only live progress states refresh the stall clock.
       const live = slot.pc.connectionState;
       if (live !== slot.info.connectionState) {
         slot.info.connectionState = live;
@@ -476,8 +519,9 @@ export class P2PRoom {
         continue;
       }
       slot.recoveryAttempts += 1;
-      slot.lastProgressAt = now;
+      slot.lastProgressAt = now; // re-arm the stall window
       if (this.opts.selfId > peerId) {
+        // We are the dialer: rebuild the pair from scratch.
         const { name } = slot.info;
         const attempts = slot.recoveryAttempts;
         slot.pc.close();
@@ -486,10 +530,13 @@ export class P2PRoom {
         if (fresh) fresh.recoveryAttempts = attempts;
         this.schedulePoll(FAST_POLL_MS);
       }
+      // Receiver side: count the stall window and wait for the dialer's
+      // fresh offer (onSignal absorbs it, recreating our pc if needed).
     }
   }
 
   private async readCandidateType(slot: PeerSlot): Promise<void> {
+    // relay = TURN (none configured by default); srflx/host = direct path.
     try {
       const stats = await slot.pc.getStats();
       let selected: RTCIceCandidatePairStats | undefined;
@@ -510,6 +557,8 @@ export class P2PRoom {
   }
 
   private emitPeers(): void {
+    // Only notify when something observable actually changed — React state
+    // setters otherwise re-render consumers on every poll/ping.
     const list = this.peerList();
     const fingerprint = JSON.stringify(
       list.map((p) => [p.id, p.name, p.connectionState, p.candidateType, p.rttMs]),
