@@ -1,0 +1,273 @@
+import { Link } from "@tanstack/react-router";
+import { useRef } from "react";
+import { useWorldMode } from "./use-world-mode";
+import { DossierNav, ROKUEI_NAV, NameText } from "./dossier-nav";
+
+type Section = { no: string; kicker: string; title: string; body: string[] };
+
+export type RiderForm = {
+  img: string;
+  pos: string;
+  system: string;
+  name: string;
+  sub?: string;
+  calls: string[];
+  quote?: string;
+  stats?: { dt: string; dd: string }[];
+  abilities?: { name: string; body: string }[];
+  arsenal?: { name: string; body: string }[];
+  finishers?: { name: string; body: string }[];
+  extraForms?: { img: string; pos: string; name: string; sub?: string }[];
+};
+
+type Profile = {
+  id: string;
+  numeral: string;
+  name: string;
+  title: string;
+  image: string;
+  pos: string;
+  accent: string;
+  quotes: string[];
+  facts: { dt: string; dd: string }[];
+  sections: Section[];
+  rider?: RiderForm;
+};
+
+export function FormPickup({ rider }: { rider: RiderForm }) {
+  const dlg = useRef<HTMLDialogElement>(null);
+  const open = () => {
+    try {
+      dlg.current?.showModal();
+    } catch {
+      /* already open */
+    }
+    (document.activeElement as HTMLElement | null)?.blur();
+  };
+  const close = () => dlg.current?.close();
+  const stats = rider.stats ?? [];
+  const abilities = rider.abilities ?? [];
+  const arsenal = rider.arsenal ?? [];
+  const finishers = rider.finishers ?? [];
+  const extraForms = rider.extraForms ?? [];
+  return (
+    <section className="form-pickup" aria-label={`仮面ライダー${rider.name}の記録`}>
+      <article className="form-pickup-card">
+        <div className="form-pickup-visual">
+          <img
+            src={rider.img}
+            alt={`仮面ライダー${rider.name}のフォームビジュアル`}
+            style={{ objectPosition: rider.pos }}
+            decoding="async"
+            fetchPriority="high"
+            loading="eager"
+          />
+          <span>RIDER</span>
+          <button
+            type="button"
+            className="form-pickup-plus"
+            aria-haspopup="dialog"
+            aria-label={`仮面ライダー${rider.name}をピックアップ`}
+            onPointerUp={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              open();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              open();
+            }}
+          >
+            <span>+</span>
+          </button>
+        </div>
+        <div className="form-pickup-copy">
+          <p>TRANSFORMATION RECORD</p>
+          <small>PICKUP</small>
+          <h2>
+            <span>仮面ライダー</span>
+            <b>{rider.name}</b>
+          </h2>
+          {rider.sub ? <em>{rider.sub}</em> : null}
+          <q>{rider.quote ?? rider.system}</q>
+        </div>
+      </article>
+      <dialog
+        ref={dlg}
+        className="form-pickup-dialog"
+        tabIndex={-1}
+        aria-label={`仮面ライダー${rider.name}`}
+        onCancel={(e) => {
+          e.preventDefault();
+          close();
+        }}
+        onClick={(e) => {
+          if (e.target === dlg.current) close();
+        }}
+      >
+        <div className="form-pickup-panel">
+          <button type="button" className="form-pickup-close" onClick={close} aria-label="閉じる">
+            <span>CLOSE</span>
+            <i>×</i>
+          </button>
+          <div className="form-pickup-heading">
+            <p>
+              <span>RIDER PICKUP</span>
+            </p>
+            <small>{rider.system}</small>
+            <h2>
+              仮面ライダー <b>{rider.name}</b>
+            </h2>
+            {rider.sub ? <em>{rider.sub}</em> : null}
+            <div className="rider-call">
+              {rider.calls.map((c) => (
+                <b key={c}>{c}</b>
+              ))}
+            </div>
+          </div>
+          <div className="form-pickup-layout">
+            <figure>
+              <img src={rider.img} alt="" style={{ objectPosition: rider.pos }} decoding="async" loading="lazy" />
+              <figcaption>
+                <span>FORM VISUAL</span>
+                <b>{rider.name}</b>
+              </figcaption>
+            </figure>
+            <div>
+              {stats.length ? (
+                <dl className="form-pickup-stats">
+                  {stats.map((s) => (
+                    <div key={s.dt}>
+                      <dt>{s.dt}</dt>
+                      <dd>{s.dd}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              <div className="form-pickup-sections">
+                {abilities.length ? (
+                  <section>
+                    <header>
+                      <span>01</span>
+                      <p>ABILITY</p>
+                    </header>
+                    {abilities.map((a) => (
+                      <div key={a.name}>
+                        <h3>{a.name}</h3>
+                        <p>{a.body}</p>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+                {arsenal.length ? (
+                  <section>
+                    <header>
+                      <span>02</span>
+                      <p>ARSENAL</p>
+                    </header>
+                    {arsenal.map((a) => (
+                      <div key={a.name}>
+                        <h3>{a.name}</h3>
+                        <p>{a.body}</p>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+                {finishers.length ? (
+                  <section>
+                    <header>
+                      <span>03</span>
+                      <p>FINISHER</p>
+                    </header>
+                    {finishers.map((a) => (
+                      <div key={a.name}>
+                        <h3>{a.name}</h3>
+                        <p>{a.body}</p>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+              </div>
+              {extraForms.length > 1 ? (
+                <div className="form-pickup-gallery">
+                  {extraForms.map((f) => (
+                    <figure key={`${f.name}-${f.sub ?? ""}`}>
+                      <img src={f.img} alt="" style={{ objectPosition: f.pos }} decoding="async" loading="lazy" />
+                      <figcaption>
+                        <span>{f.sub ?? "FORM"}</span>
+                        <b>{f.name}</b>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </dialog>
+    </section>
+  );
+}
+
+function ManagerDossier({ profile }: { profile: Profile }) {
+  useWorldMode();
+  return (
+    <main className="manager-page" style={{ ["--manager-accent" as string]: profile.accent, ["--manager-accent-soft" as string]: profile.accent }}>
+      <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      <header className="manager-topbar">
+        <Link to="/world" hash="manager-archive" className="brand">
+          <span className="brand-sigil">
+            <i>DW</i>
+          </span>
+          <span>
+            <b>DECEPTION WORLD</b>
+            <small>MANAGER ARCHIVE / {profile.numeral}</small>
+          </span>
+        </Link>
+        <Link to="/world" hash="manager-archive" className="manager-back">
+          <span>六詠一覧へ戻る</span>
+          <i aria-hidden="true">↙</i>
+        </Link>
+      </header>
+      <section className="manager-hero">
+        <div className="manager-portrait-column">
+          <div className="manager-portrait-frame">
+            <img src={profile.image} alt={`${profile.name}のキャラクタービジュアル`} style={{ objectPosition: profile.pos, objectFit: "cover" }} />
+            <span className="manager-numeral">{profile.numeral}</span>
+          </div>
+        </div>
+        <div className="manager-introduction">
+          <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
+          <h1>
+            <small>ROKUEI {profile.numeral}</small>
+            <span className="manager-display-name">
+              <NameText value={profile.name} />
+            </span>
+          </h1>
+          <p className="manager-title"># {profile.title}</p>
+          <div className="manager-quotes" aria-label={`${profile.name}の台詞`}>
+            {profile.quotes.map((q) => (
+              <q key={q}>{q}</q>
+            ))}
+          </div>
+          <dl className="manager-facts">
+            {profile.facts.map((f) => (
+              <div key={f.dt}>
+                <dt>{f.dt}</dt>
+                <dd>
+                  <NameText value={f.dd} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+      <section className="manager-dossier" aria-label={`${profile.name}の人物資料`}>
+        <div className="manager-section-index">
+          <span>{profile.numeral}</span>
+          <small>CHARACTER DOSSIER</small>
+        </div>
