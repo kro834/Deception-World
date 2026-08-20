@@ -1,0 +1,222 @@
+    title: "英国支部から派遣された、最強のエージェント。",
+    quotes: ["My name is Code Number Seven.", "Nice to meet you… but I’m about to erase you.", "So, goodbye. I'm on it."],
+    facts: [
+      { dt: "NAME", dd: "James Smith" },
+      { dt: "CODE", dd: "セヴン" },
+      { dt: "AGE", dd: "28歳" },
+      { dt: "SEX", dd: "男性" },
+      { dt: "HEIGHT", dd: "185cm" },
+      { dt: "AFFILIATION", dd: "CODE英国支部" },
+      { dt: "OCCUPATION", dd: "エージェント" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "AGENT PROFILE",
+        title: "陽気な顔と、任務の最適解。",
+        body: [
+          "コードナンバー：セヴン。CODE英国支部のエージェント。陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆る。近接、銃器、潜入、解析、情報回収を一人でこなす。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "MISSION SUPPORT",
+        title: "戦闘・潜入・解析を支えるCODE装備。",
+        body: [
+          "ゼッツフォン、ゼッツカメラ、ゼッツセンサー、ゼッツライセンス。任務の道具は身分ごと世界の境界をまたぐ。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/rider-profile-over-zeztz.jpeg",
+        pos: "50% 8%",
+        system: "ゼッツドライバー × フィジカムインパクトカプセム",
+        name: "オーバーゼッツ",
+        sub: "フィジカムインパクト",
+        calls: ["グッドモーニング！ ライダー！", "ゼ・ゼ・ゼッツ！", "インパクト！"],
+        stats: [
+          { dt: "HEIGHT", dd: "200.5cm" },
+          { dt: "WEIGHT", dd: "97.7kg" },
+          { dt: "PUNCH", dd: "17.7t" },
+          { dt: "KICK", dd: "37.7t" },
+          { dt: "JUMP", dd: "27.7m" },
+          { dt: "100m", dd: "1.7秒" },
+        ],
+        abilities: [
+          { name: "フィジカムマスク", body: "オブザームロッドで環境観測、レッドオプチカムで視力強化、レッドシグナムで生体測定を行う。" },
+          { name: "クラッシャム", body: "濃酸素吸入で疲労回復、集中力、判断力、睡眠を向上させる。" },
+          { name: "インパクトレムアーム／レッグ", body: "腕で強力パンチ、脚で衝撃波を伝播させ崩壊攻撃を行う。" },
+        ],
+        arsenal: [
+          { name: "ブレイカムゼッツァー", body: "可変武器。さまざまな形態に切り替える。" },
+          { name: "ワルサーP38", body: "1938年ドイツ陸軍採用の自動式手鉄。ジェームズの愛用品。" },
+        ],
+        finishers: [
+          { name: "インパクトバニッシュ", body: "フィジカムインパクトの必殺技。" },
+          { name: "インパクトオーバーバニッシュ", body: "フィジカムインパクトの超必殺技。" },
+        ],
+      },
+    ],
+    civilian: {
+      name: "ジェームズ・スミス",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。CODE Number Seven。",
+    },
+  },
+];
+
+export function RiderPage({ id }: { id: string }) {
+  useWorldMode();
+  const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
+  const nightmareRef = useRef<HTMLDialogElement>(null);
+  const openNightmare = () => {
+    const dlg = nightmareRef.current;
+    if (!dlg) return;
+    try {
+      dlg.showModal();
+    } catch {
+      /* already open */
+    }
+    (document.activeElement as HTMLElement | null)?.blur();
+  };
+  const closeNightmare = () => {
+    nightmareRef.current?.close();
+  };
+  const primaryForm = rider.forms[0];
+  useEffect(() => {
+    const href = primaryForm?.img ?? rider.img;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = href;
+    link.setAttribute("fetchpriority", "high");
+    document.head.appendChild(link);
+    const img = new Image();
+    img.decoding = "async";
+    img.fetchPriority = "high";
+    img.src = href;
+    void img.decode?.().catch(() => undefined);
+    return () => link.remove();
+  }, [primaryForm?.img, rider.img]);
+  return (
+    <main
+      className="manager-page rider-dossier-page"
+      style={{ ["--manager-accent" as string]: rider.tone, ["--rider-tone" as string]: rider.tone, ["--archive-accent" as string]: rider.tone, ["--archive-accent-soft" as string]: rider.tone }}
+    >
+      <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      <header className="manager-topbar">
+        <Link to="/world" hash="riders" className="brand">
+          <span className="brand-sigil">
+            <i>DW</i>
+          </span>
+          <span>
+            <b>DECEPTION WORLD</b>
+            <small>CHARACTER FILE // {rider.no}</small>
+          </span>
+        </Link>
+        <Link to="/world" hash="riders" className="manager-back">
+          <span>ライダー一覧へ戻る</span>
+          <i aria-hidden="true">↙</i>
+        </Link>
+      </header>
+      <section className="manager-hero">
+        <div className="manager-portrait-column">
+          <div className="manager-portrait-frame">
+            <img src={rider.civilianImg} alt={`${rider.civilian.name}の変身前ビジュアル`} style={{ objectPosition: rider.civilianPos, objectFit: "cover" }} decoding="async" fetchPriority="high" />
+            <span className="manager-numeral">{rider.no}</span>
+          </div>
+        </div>
+        <div className="manager-introduction">
+          <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
+          <h1>
+            <small>{rider.enPerson}</small>
+            <span className="manager-display-name">
+              <NameText value={rider.civilian.name} />
+            </span>
+          </h1>
+          <p className="manager-title"># {rider.epithet}</p>
+          <div className="manager-quotes">
+            {rider.quotes.map((q) => (
+              <q key={q}>{q}</q>
+            ))}
+          </div>
+          <dl className="manager-facts">
+            {rider.facts.map((f) => (
+              <div key={f.dt}>
+                <dt>{f.dt}</dt>
+                <dd>
+                  <NameText value={f.dd} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+      <section className={rider.nightmare ? "rider-archive-identity-records has-nightmare" : "rider-archive-identity-records"} aria-label="変身前記録">
+        <figure className="rider-archive-civilian">
+          <div className="rider-archive-civilian-visual">
+            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} />
+            <span>BEFORE</span>
+            <i className="rider-archive-civilian-shade" />
+          </div>
+          <figcaption>
+            <p>{rider.civilian.kicker}</p>
+            <small>変身前ビジュアル // CONFIRMED</small>
+            <h2>{rider.civilian.name}</h2>
+            <p>{rider.civilian.body}</p>
+            {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}
+          </figcaption>
+        </figure>
+        {rider.nightmare ? (
+          <article className="rider-nightmare-card">
+            <div className="rider-nightmare-card-visual">
+              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} />
+              <span>NIGHTMARE</span>
+              <i className="rider-nightmare-card-shade" />
+              <button
+                type="button"
+                className="rider-nightmare-pickup-button"
+                aria-haspopup="dialog"
+                aria-label={`${rider.nightmare.name}をピックアップ`}
+                onPointerUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openNightmare();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openNightmare();
+                }}
+              >
+                <span>+</span>
+              </button>
+            </div>
+            <div className="rider-nightmare-card-copy">
+              <p>{rider.nightmare.kicker}</p>
+              <small>PICKUP</small>
+              <h2>
+                <span>{rider.nightmare.name}</span>
+              </h2>
+              <q>{rider.nightmare.quote}</q>
+            </div>
+          </article>
+        ) : null}
+      </section>
+      <section className="manager-dossier">
+        <div className="manager-section-index">
+          <span>{rider.no}</span>
+          <small>CHARACTER DOSSIER</small>
+        </div>
+        <div className="manager-sections">
+          {rider.sections.map((s) => (
+            <article className="manager-copy-section" key={s.no}>
+              <div className="manager-copy-heading">
+                <span>{s.no}</span>
+                <p>{s.kicker}</p>
+                <h2>{s.title}</h2>
+              </div>
