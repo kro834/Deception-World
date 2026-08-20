@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, ROKUEI_NAV, NameText } from "./dossier-nav";
+import { SlideOpenControl } from "./slide-open-control";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -76,24 +77,12 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             loading="eager"
           />
           <span>RIDER</span>
-          <button
-            type="button"
+          <SlideOpenControl
             className="form-pickup-plus"
-            aria-haspopup="dialog"
-            aria-label={`仮面ライダー${rider.name}をピックアップ`}
-            onPointerUp={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              open();
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              open();
-            }}
-          >
-            <span>+</span>
-          </button>
+            ariaLabel={`仮面ライダー${rider.name}をピックアップ`}
+            label="フォーム詳細"
+            onOpen={open}
+          />
         </div>
         <div className="form-pickup-copy">
           <p>TRANSFORMATION RECORD</p>

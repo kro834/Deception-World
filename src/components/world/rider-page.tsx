@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
+import { SlideOpenControl } from "./slide-open-control";
 
 type RiderDossier = {
   id: string;
@@ -777,24 +778,12 @@ export function RiderPage({ id }: { id: string }) {
               <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} />
               <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
-              <button
-                type="button"
+              <SlideOpenControl
                 className="rider-nightmare-pickup-button"
-                aria-haspopup="dialog"
-                aria-label={`${rider.nightmare.name}をピックアップ`}
-                onPointerUp={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openNightmare();
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openNightmare();
-                }}
-              >
-                <span>+</span>
-              </button>
+                ariaLabel={`${rider.nightmare.name}をピックアップ`}
+                label="記録を開く"
+                onOpen={openNightmare}
+              />
             </div>
             <div className="rider-nightmare-card-copy">
               <p>{rider.nightmare.kicker}</p>

@@ -275,3 +275,281 @@
   font-size: 12px;
 }
 .export-page-alt { text-decoration: underline; }
+
+/* ── iOS-style slide-to-open controls ───────────────────────────── */
+
+.ios-slide-open {
+  --slide-accent: var(--manager-accent, var(--archive-accent, #67d8ff));
+  position: absolute;
+  z-index: 6;
+  display: block;
+  width: min(216px, calc(100% - 36px));
+  height: 58px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 4px;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: auto;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% -20%, rgba(255, 255, 255, 0.28), transparent 44%),
+    linear-gradient(135deg, color-mix(in srgb, var(--slide-accent) 17%, rgba(7, 12, 20, 0.9)), rgba(7, 10, 17, 0.82));
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 28%, transparent),
+    0 16px 38px rgba(0, 0, 0, 0.42);
+  cursor: ew-resize;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  scale: 1;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, scale 0.35s var(--glass-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.form-pickup-plus.ios-slide-open {
+  right: 18px;
+  bottom: 18px;
+}
+
+.rider-nightmare-pickup-button.ios-slide-open {
+  --slide-accent: #e71a9c;
+  right: clamp(18px, 3vw, 34px);
+  bottom: clamp(18px, 3vw, 34px);
+}
+
+.ios-slide-open::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  top: 1px;
+  right: 14%;
+  left: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.54), transparent);
+  pointer-events: none;
+}
+
+.ios-slide-open-fill {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: var(--slide-fill, 50px);
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--slide-accent) 58%, rgba(255, 255, 255, 0.1)), color-mix(in srgb, var(--slide-accent) 28%, transparent));
+  opacity: 0.72;
+  transition: width 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-slide-open-label {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 35px;
+  bottom: 0;
+  left: 64px;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  opacity: var(--slide-label-opacity, 1);
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.ios-slide-open .ios-slide-open-label small,
+.ios-slide-open .ios-slide-open-label b {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ios-slide-open .ios-slide-open-label small {
+  color: color-mix(in srgb, var(--slide-accent) 72%, #fff);
+  font-family: var(--font-display, serif);
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.2em;
+}
+
+.ios-slide-open .ios-slide-open-label b {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+}
+
+.ios-slide-open-arrows {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 15px;
+  display: flex;
+  gap: 2px;
+  transform: translateY(-50%);
+  opacity: 0.54;
+  pointer-events: none;
+}
+
+.ios-slide-open-arrows i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--slide-accent) 72%, #fff);
+  border-right: 1px solid color-mix(in srgb, var(--slide-accent) 72%, #fff);
+  transform: rotate(45deg);
+  animation: iosSlideArrow 1.35s ease-in-out infinite;
+}
+
+.ios-slide-open-arrows i:nth-child(2) { animation-delay: 0.14s; }
+
+.ios-slide-open .ios-slide-open-thumb {
+  position: absolute;
+  z-index: 4;
+  top: 4px;
+  left: 4px;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 22%, rgba(255, 255, 255, 0.52), transparent 34%),
+    linear-gradient(145deg, color-mix(in srgb, var(--slide-accent) 88%, #fff 8%), color-mix(in srgb, var(--slide-accent) 72%, #02050a));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    0 4px 14px color-mix(in srgb, var(--slide-accent) 36%, rgba(0, 0, 0, 0.62));
+  transform: translate3d(var(--slide-offset, 0), 0, 0);
+  pointer-events: none;
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.ios-slide-open .ios-slide-open-thumb > i {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+.ios-slide-open .ios-slide-open-thumb > b {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 27px;
+  font-weight: 300;
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.42);
+  transition: rotate 0.28s ease;
+}
+
+.ios-slide-open[data-dragging="true"] .ios-slide-open-thumb,
+.ios-slide-open[data-dragging="true"] .ios-slide-open-fill {
+  transition: none;
+}
+
+.ios-slide-open[data-completing="true"] {
+  border-color: color-mix(in srgb, var(--slide-accent) 72%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 16px 42px rgba(0, 0, 0, 0.46),
+    0 0 26px color-mix(in srgb, var(--slide-accent) 32%, transparent);
+}
+
+.ios-slide-open[data-completing="true"] .ios-slide-open-thumb > b { rotate: 90deg; }
+.ios-slide-open[data-completing="true"] .ios-slide-open-arrows { opacity: 0; }
+
+.ios-slide-open:focus,
+.ios-slide-open:focus-visible {
+  outline: none;
+}
+
+.ios-slide-open:focus-visible {
+  border-color: color-mix(in srgb, var(--slide-accent) 82%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 0 3px rgba(4, 8, 14, 0.9),
+    0 0 0 5px color-mix(in srgb, var(--slide-accent) 72%, #fff),
+    0 16px 38px rgba(0, 0, 0, 0.42);
+}
+
+.ios-slide-open:active,
+.rider-nightmare-pickup-button.ios-slide-open:active {
+  transform: none;
+  scale: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ios-slide-open:hover .ios-slide-open-thumb {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.62),
+      0 6px 18px color-mix(in srgb, var(--slide-accent) 48%, rgba(0, 0, 0, 0.56));
+  }
+}
+
+@media (max-width: 480px) {
+  .ios-slide-open {
+    width: min(190px, calc(100% - 28px));
+    height: 54px;
+    min-height: 54px;
+  }
+
+  .form-pickup-plus.ios-slide-open { right: 14px; bottom: 14px; }
+  .rider-nightmare-pickup-button.ios-slide-open { right: 14px; bottom: 14px; }
+
+  .ios-slide-open .ios-slide-open-thumb {
+    width: 46px;
+    height: 46px;
+  }
+
+  .ios-slide-open-label { left: 59px; }
+  .ios-slide-open .ios-slide-open-label small { font-size: 5.5px; }
+  .ios-slide-open .ios-slide-open-label b { font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ios-slide-open,
+  .ios-slide-open-fill,
+  .ios-slide-open-label,
+  .ios-slide-open .ios-slide-open-thumb,
+  .ios-slide-open .ios-slide-open-thumb > b {
+    transition: none !important;
+  }
+
+  .ios-slide-open-arrows i { animation: none; }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .ios-slide-open {
+    background: #0b111b;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ios-slide-open,
+  .ios-slide-open .ios-slide-open-thumb {
+    border: 2px solid ButtonText;
+    forced-color-adjust: auto;
+  }
+}
+
+@keyframes iosSlideArrow {
+  0%, 100% { opacity: 0.24; translate: -2px 0; }
+  50% { opacity: 1; translate: 2px 0; }
+}
