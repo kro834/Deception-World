@@ -1,0 +1,226 @@
+              <div className="manager-archive-panel is-other" role="tabpanel">
+                <p className="system-label is-other">RELATED / ALAIN</p>
+                <h3>その他</h3>
+                <div className="other-array" aria-label="その他">
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/terra"
+                    assets={["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"]}
+                    aria-label="テラ・アレインの個別資料を開く"
+                  >
+                    <img
+                      src="/character-terra-thumb.jpeg"
+                      alt="テラ・アレインのキャラクタービジュアル"
+                      width={720}
+                      height={954}
+                      style={{ objectPosition: "50% 12%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 01</span>
+                    <span className="other-card-copy">
+                      <small>TERRA ALAIN</small>
+                      <b>
+                        <NameText value="テラ・アレイン" />
+                      </b>
+                      <i>レルム アースフォーム</i>
+                    </span>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/luna"
+                    assets={["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"]}
+                    aria-label="ルナ・アレインの個別資料を開く"
+                  >
+                    <img
+                      src="/character-luna-thumb.jpeg"
+                      alt="ルナ・アレインのキャラクタービジュアル"
+                      width={720}
+                      height={1260}
+                      style={{ objectPosition: "50% 12%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 02</span>
+                    <span className="other-card-copy">
+                      <small>LUNA ALAIN</small>
+                      <b>
+                        <NameText value="ルナ・アレイン" />
+                      </b>
+                      <i>レルム ムーンフォーム</i>
+                    </span>
+                  </GuardedLink>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <section className="world-column" aria-label="世界観コラム">
+          <div className="world-column-content">
+            <div className="world-column-index">
+              <span>WORLD COLUMN</span>
+              <ColumnRail ref={columnRail} />
+            </div>
+            <div className="world-column-copy" role="tabpanel">
+              <p className="world-column-number">コラム{column.no}</p>
+              <h3>{column.title}</h3>
+              <div>
+                <p>{column.body}</p>
+              </div>
+              <button
+                ref={pickupBtnRef}
+                type="button"
+                className="world-column-orbit-trigger ios26-glass"
+                aria-haspopup="dialog"
+                aria-expanded={pickupOpen}
+                aria-controls="world-column-pickup"
+                onPointerUp={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openPickup();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openPickup();
+                }}
+              >
+                <span>
+                  <small>PICK UP</small>
+                  <b>ピックアップ</b>
+                </span>
+                <i aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path
+                      d="M12 6v12M6 12h12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.9"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </i>
+              </button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section className="riders-section" id="riders">
+        <div className="section-index">
+          <span>02</span>
+          <small>SEVEN RIDERS</small>
+        </div>
+        <div className="section-title">
+          <p className="eyebrow">
+            <span>SEVEN RIDERS / ONE WORLD</span>
+            <i />
+          </p>
+          <h2>七人が、世界へ。</h2>
+          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント。七つの軌跡が同じ世界で交差する。</p>
+        </div>
+        <div className="rider-console">
+          <RiderRail ref={riderRail} />
+          <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
+            <div className="rider-visual fit-cover">
+              {RIDERS.map((r, i) => (
+                <img
+                  key={r.id}
+                  src={r.img}
+                  alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
+                  className={i === riderTab ? "is-on" : ""}
+                  style={{ objectPosition: r.pos }}
+                  decoding="async"
+                  fetchPriority={i === 0 ? "high" : "low"}
+                  draggable={false}
+                />
+              ))}
+            </div>
+            <div className="rider-monogram" aria-hidden="true">
+              {rider.name.slice(0, 1)}
+            </div>
+            <div className="rider-number">RIDER / {rider.no}</div>
+            <div className="rider-copy-block">
+              <p className="rider-person">
+                <NameText value={rider.person} />
+              </p>
+              <h3 aria-label={`仮面ライダー${rider.ja}`}>
+                <span className="rider-name-line">仮面ライダー</span>
+                <br />
+                <span className="rider-name-line">{rider.ja}</span>
+              </h3>
+              <p className="rider-description">{rider.desc}</p>
+              <div className="rider-line">
+                <span />
+                <b>{rider.name}</b>
+              </div>
+              <GuardedLink
+                className="rider-dossier-open"
+                to={`/riders/${rider.id}`}
+                assets={RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img]}
+              >
+                <small>OPEN DOSSIER</small>
+                <b>個別資料</b>
+              </GuardedLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="records-section" id="records">
+        <div className="section-index">
+          <span>03</span>
+          <small>NEW RECORDS</small>
+        </div>
+        <div className="records-heading">
+          <p className="eyebrow">
+            <span>POWER BEYOND THE BORDER</span>
+            <i />
+          </p>
+          <h2>
+            到達点は、
+            <br />
+            ひとつではない。
+          </h2>
+        </div>
+        <div className="return-strip">
+          <div>
+            <span>RETURNING SIGNAL</span>
+            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
+          </div>
+          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
+          <i aria-hidden="true" />
+        </div>
+        <section className="episode-archive" aria-labelledby="episode-archive-title">
+          <div className="episode-archive-heading">
+            <div>
+              <span>EPISODE ARCHIVE</span>
+              <h3 id="episode-archive-title">判明済みエピソード</h3>
+            </div>
+            <div className="episode-archive-meta">
+              <p>
+                <strong>04</strong>
+                <span>RECORDS FOUND</span>
+              </p>
+              <div className="episode-controls" aria-label="エピソードの表示操作">
+                <button
+                  type="button"
+                  className="ios26-glass"
+                  disabled={episode === 0}
+                  onClick={() => goEpisode(episode - 1)}
+                  aria-label="前のエピソードへ"
+                >
+                  <span aria-hidden="true">←</span>
+                </button>
+                <output>{String(episode + 1).padStart(2, "0")} / 04</output>
+                <button
+                  type="button"
+                  className="ios26-glass"
+                  disabled={episode === EPISODES.length - 1}
+                  onClick={() => goEpisode(episode + 1)}
+                  aria-label="次のエピソードへ"
+                >
+                  <span aria-hidden="true">→</span>
