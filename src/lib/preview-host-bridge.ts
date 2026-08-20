@@ -38,7 +38,9 @@ const HistorySchema = EnvelopeSchema.extend({
 });
 
 export type PreviewHostBridgeOptions = {
+  /** Prefer the app router when available; falls back to history.pushState. */
   navigate?: (path: string) => void;
+  /** Best-effort registered paths for host autosuggest (may be empty). */
   getRoutePaths?: () => string[];
 };
 
@@ -54,13 +56,17 @@ export function isSafeBridgePath(path: string): boolean {
   }
 }
 
+/**
+ * Install host↔guest messaging. Returns a dispose function.
+ * Noops (returns a no-op dispose) when not embedded under a Grok parent.
+ */
 export function installPreviewHostBridge(
   options: PreviewHostBridgeOptions = {},
 ): () => void {
   if (typeof window === "undefined") return () => {};
 
   const ancestorOrigin =
-    typeof location.ancestorOrigins !== "undefined" && location.ancestorOrigins.length > 0
+    typeof location.ancestorOrigins !== 'undefined' && location.ancestorOrigins.length > 0
       ? location.ancestorOrigins[0]
       : null;
   const parentOrigin = resolveParentEmbedderOrigin(
@@ -82,6 +88,10 @@ export function installPreviewHostBridge(
     );
   };
 
+  // Floor for chrome Back: only the first install in a fresh history stack is
+  // root. Full document navigations reinstall this bridge on a deep URL; if we
+  // re-stamped that entry as root, Back would no-op while earlier in-preview
+  // history still exists. Preserve an existing tag (bfcache / SPA remount).
   try {
     const current = window.history.state;
     const alreadyTagged =
@@ -164,6 +174,8 @@ export function installPreviewHostBridge(
     const envelope = EnvelopeSchema.safeParse(event.data);
     if (!envelope.success || envelope.data.version !== PREVIEW_BRIDGE_VERSION) return;
 
+    // Host re-handshake: it may have (re)mounted after our install-time
+    // announce, or asked before we hydrated. Announce again.
     if (envelope.data.type === "hello") {
       if (!HelloSchema.safeParse(event.data).success) return;
       announce();
@@ -174,6 +186,7 @@ export function installPreviewHostBridge(
       const parsed = NavigateSchema.safeParse(event.data);
       if (!parsed.success) return;
       navigate(parsed.data.path);
+      // Router navigations often update location asynchronously; report after a tick.
       queueMicrotask(reportLocation);
       return;
     }
@@ -181,7 +194,9 @@ export function installPreviewHostBridge(
     if (envelope.data.type === "history") {
       const parsed = HistorySchema.safeParse(event.data);
       if (!parsed.success) return;
+      // Do not history.go(-1) off the first entry — that leaves the preview.
       if (parsed.data.delta === -1 && isAtHistoryRoot()) return;
+      // Location sync comes from the popstate listener once history settles.
       window.history.go(parsed.data.delta);
     }
   };
@@ -190,10 +205,12 @@ export function installPreviewHostBridge(
     reportLocation();
   };
 
+  // Same-document `#` navigations fire hashchange, not popstate / pushState.
   const onHashChange = () => {
     reportLocation();
   };
 
+  // Patch history so in-app SPA navigations sync the host address bar.
   window.history.pushState = (data, unused, url) => {
     const next =
       data && typeof data === "object"
@@ -229,6 +246,7 @@ export function installPreviewHostBridge(
   };
 }
 
+/** Collect static path patterns from a TanStack route tree (best-effort). */
 export function collectRoutePathsFromTree(routeTree: unknown): string[] {
   const paths = new Set<string>();
 
