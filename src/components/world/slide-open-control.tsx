@@ -9,6 +9,7 @@ type SlideOpenControlProps = {
   className?: string;
   expanded?: boolean;
   label?: string;
+  opensDialog?: boolean;
   onOpen: () => void;
 };
 
@@ -28,6 +29,7 @@ export function SlideOpenControl({
   className = "",
   expanded,
   label = "詳細を開く",
+  opensDialog = true,
   onOpen,
 }: SlideOpenControlProps) {
   const internalButtonRef = useRef<HTMLButtonElement>(null);
@@ -37,7 +39,6 @@ export function SlideOpenControl({
   const travel = useRef(0);
   const dragMetrics = useRef<SlideMetrics | null>(null);
   const activateTimer = useRef<number | null>(null);
-  const resetTimer = useRef<number | null>(null);
   const completingRef = useRef(false);
   const [offset, setOffset] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -55,9 +56,7 @@ export function SlideOpenControl({
 
   const clearTimers = () => {
     if (activateTimer.current != null) window.clearTimeout(activateTimer.current);
-    if (resetTimer.current != null) window.clearTimeout(resetTimer.current);
     activateTimer.current = null;
-    resetTimer.current = null;
   };
 
   const reset = () => {
@@ -126,8 +125,8 @@ export function SlideOpenControl({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
       () => {
+        reset();
         onOpen();
-        resetTimer.current = window.setTimeout(reset, reducedMotion ? 0 : 360);
       },
       reducedMotion ? 0 : 140,
     );
@@ -195,9 +194,9 @@ export function SlideOpenControl({
       style={style}
       data-dragging={dragging}
       data-completing={completing}
-      aria-haspopup="dialog"
+      aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
-      aria-expanded={expanded}
+      aria-expanded={opensDialog ? expanded : undefined}
       aria-label={`${ariaLabel}。右へスライドして開きます`}
       onPointerDown={startDrag}
       onPointerMove={drag}

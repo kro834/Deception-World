@@ -333,8 +333,13 @@
 
 .rider-nightmare-pickup-button.ios-slide-open {
   --slide-accent: #e71a9c;
-  right: clamp(18px, 3vw, 34px);
-  bottom: clamp(18px, 3vw, 34px);
+  position: relative;
+  right: auto;
+  bottom: auto;
+  width: min(100%, 240px);
+  align-self: flex-end;
+  margin-top: auto;
+  margin-left: auto;
 }
 
 .world-column-slide-open.ios-slide-open {
@@ -531,7 +536,7 @@
   }
 
   .form-pickup-plus.ios-slide-open { right: 14px; bottom: 14px; }
-  .rider-nightmare-pickup-button.ios-slide-open { right: 14px; bottom: 14px; }
+  .rider-nightmare-pickup-button.ios-slide-open { right: auto; bottom: auto; }
 
   .ios-slide-open .ios-slide-open-thumb {
     width: 46px;

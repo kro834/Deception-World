@@ -687,7 +687,7 @@ export function RiderPage({ id }: { id: string }) {
     }
     window.requestAnimationFrame(() => {
       resetScroll();
-      dlg.querySelector<HTMLElement>(".rider-nightmare-dialog-close")?.focus({ preventScroll: true });
+      dlg.focus({ preventScroll: true });
     });
   };
   const closeNightmare = () => {
@@ -774,12 +774,6 @@ export function RiderPage({ id }: { id: string }) {
               <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} />
               <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
-              <SlideOpenControl
-                className="rider-nightmare-pickup-button"
-                ariaLabel={`${rider.nightmare.name}をピックアップ`}
-                label="記録を開く"
-                onOpen={openNightmare}
-              />
             </div>
             <div className="rider-nightmare-card-copy">
               <p>{rider.nightmare.kicker}</p>
@@ -788,6 +782,12 @@ export function RiderPage({ id }: { id: string }) {
                 <span>{rider.nightmare.name}</span>
               </h2>
               <q>{rider.nightmare.quote}</q>
+              <SlideOpenControl
+                className="rider-nightmare-pickup-button"
+                ariaLabel={`${rider.nightmare.name}をピックアップ`}
+                label="記録を開く"
+                onOpen={openNightmare}
+              />
             </div>
           </article>
         ) : null}

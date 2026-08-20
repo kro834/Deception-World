@@ -1,7 +1,7 @@
 import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
-import { GuardedLink } from "@/components/load-gate";
+import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens } from "./liquid-rail";
 import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
@@ -87,6 +87,15 @@ const COLUMNS = [
       "仮面ライダーレルム、ベル・アレインの復活はその象徴だ。失われた信号が再び名前を持ったとき、周囲の因果は追記ではなく上書きされる。",
       "伝説扱いされた瞬間に、その人物は「終わった物語」へ送られる。レジェンズはそれを拒否し、進行中の盤面へ自ら戻ってくる。",
       "七人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
+    ],
+  },
+  {
+    no: "04",
+    title: "ゼウス",
+    kicker: "ZEUS",
+    body: "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
+    pickup: [
+      "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
     ],
   },
 ];
@@ -225,6 +234,7 @@ const RiderRail = memo(
 
 export function WorldHome() {
   useWorldMode();
+  const { go } = useLoadGate();
   const shellRef = useRef<HTMLDivElement>(null);
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
@@ -459,7 +469,7 @@ export function WorldHome() {
       resetScroll();
       bootLiquidGlass(dlg);
       pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
-      dlg.querySelector<HTMLElement>(".world-column-dialog-close")?.focus({ preventScroll: true });
+      dlg.focus({ preventScroll: true });
     });
   };
 
@@ -745,7 +755,11 @@ export function WorldHome() {
                     <i />
                     <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
-                    <em className="signal-apex" aria-hidden="true">✦</em>
+                    <em className="signal-apex" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 1.5 14.4 9.6 22.5 12l-8.1 2.4L12 22.5l-2.4-8.1L1.5 12l8.1-2.4L12 1.5Z" />
+                      </svg>
+                    </em>
                   </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"
@@ -1013,14 +1027,18 @@ export function WorldHome() {
                 <span />
                 <b>{rider.name}</b>
               </div>
-              <GuardedLink
+              <SlideOpenControl
                 className="rider-dossier-open"
-                to={`/riders/${rider.id}`}
-                assets={RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img]}
-              >
-                <small>OPEN DOSSIER</small>
-                <b>個別資料</b>
-              </GuardedLink>
+                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
+                label="個別資料"
+                opensDialog={false}
+                onOpen={() => {
+                  void go({
+                    to: `/riders/${rider.id}`,
+                    assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
+                  });
+                }}
+              />
             </div>
           </div>
         </div>

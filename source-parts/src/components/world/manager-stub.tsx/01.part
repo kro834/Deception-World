@@ -59,7 +59,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     }
     window.requestAnimationFrame(() => {
       resetScroll();
-      dialog.querySelector<HTMLElement>(".form-pickup-close")?.focus({ preventScroll: true });
+      dialog.focus({ preventScroll: true });
     });
   };
   const close = () => {

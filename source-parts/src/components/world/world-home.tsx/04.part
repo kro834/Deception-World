@@ -85,7 +85,11 @@
                     <i />
                     <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
-                    <em className="signal-apex" aria-hidden="true">✦</em>
+                    <em className="signal-apex" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 1.5 14.4 9.6 22.5 12l-8.1 2.4L12 22.5l-2.4-8.1L1.5 12l8.1-2.4L12 1.5Z" />
+                      </svg>
+                    </em>
                   </GuardedLink>
                   <GuardedLink
                     className="signal has-visual is-accessible"

@@ -2,6 +2,15 @@
       "七人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
     ],
   },
+  {
+    no: "04",
+    title: "ゼウス",
+    kicker: "ZEUS",
+    body: "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
+    pickup: [
+      "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
+    ],
+  },
 ];
 
 const EPISODES = [
@@ -138,6 +147,7 @@ const RiderRail = memo(
 
 export function WorldHome() {
   useWorldMode();
+  const { go } = useLoadGate();
   const shellRef = useRef<HTMLDivElement>(null);
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);

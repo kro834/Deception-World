@@ -141,7 +141,7 @@
 .world-column-tabs {
   display: grid;
   min-width: 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -487,4 +487,3 @@
     radial-gradient(circle at 68% 68%, color-mix(in srgb, var(--rider-tone) 17%, transparent), transparent 20rem),
     linear-gradient(135deg, rgba(8, 14, 23, 0.75), rgba(5, 7, 11, 0.96));
 }
-

@@ -135,14 +135,18 @@
                 <span />
                 <b>{rider.name}</b>
               </div>
-              <GuardedLink
+              <SlideOpenControl
                 className="rider-dossier-open"
-                to={`/riders/${rider.id}`}
-                assets={RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img]}
-              >
-                <small>OPEN DOSSIER</small>
-                <b>個別資料</b>
-              </GuardedLink>
+                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
+                label="個別資料"
+                opensDialog={false}
+                onOpen={() => {
+                  void go({
+                    to: `/riders/${rider.id}`,
+                    assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
+                  });
+                }}
+              />
             </div>
           </div>
         </div>

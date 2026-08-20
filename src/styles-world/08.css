@@ -33,7 +33,7 @@
 
 .world-column-dialog-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-content: start;
   gap: 10px;
   animation: worldColumnDialogContentIn 0.54s 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;

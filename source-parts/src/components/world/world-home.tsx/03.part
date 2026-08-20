@@ -96,7 +96,7 @@
       resetScroll();
       bootLiquidGlass(dlg);
       pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
-      dlg.querySelector<HTMLElement>(".world-column-dialog-close")?.focus({ preventScroll: true });
+      dlg.focus({ preventScroll: true });
     });
   };
 

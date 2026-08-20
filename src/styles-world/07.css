@@ -351,6 +351,7 @@ html:has(.rider-nightmare-dialog[open]) {
   border: 0;
   color: var(--white);
   background: transparent;
+  outline: none;
 }
 
 .world-column-dialog::backdrop {
