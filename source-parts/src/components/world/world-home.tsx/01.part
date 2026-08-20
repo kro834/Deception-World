@@ -1,0 +1,81 @@
+import { forwardRef, memo, useEffect, useRef, useState } from "react";
+import { bootLiquidGlass } from "@/lib/liquid/boot.js";
+import { MANAGER_ASSETS, warmLater } from "@/lib/asset-loader";
+import { GuardedLink } from "@/components/load-gate";
+import { useWorldMode } from "./use-world-mode";
+import { LiquidLens } from "./liquid-rail";
+import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
+import { RIDER_NAV, NameText } from "./dossier-nav";
+
+const POSTERS = [
+  { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
+  { src: "/poster-card-03.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 03" },
+  { src: "/poster-card-04.jpeg", pos: "50% 30%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 04" },
+  { src: "/poster-card-05.jpeg", pos: "50% 32%", fit: "cover", alt: "Deception Worldのキービジュアル 05" },
+  { src: "/poster-card-06.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレルムのキービジュアル 06" },
+  { src: "/poster-card-07.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーローアのキービジュアル 07" },
+  { src: "/poster-card-08.jpeg", pos: "50% 50%", fit: "contain", alt: "青い装甲のライダーのキービジュアル 08" },
+  { src: "/poster-card-09.jpeg", pos: "50% 30%", fit: "cover", alt: "仮面ライダーヴァンダールのキービジュアル 09" },
+  { src: "/poster-card-10.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレディックのキービジュアル 10" },
+  { src: "/poster-card-11.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーアルゲノムのキービジュアル 11" },
+  { src: "/poster-card-12.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーオーバーゼッツのキービジュアル 12" },
+  { src: "/poster-card-13.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーフリートのキービジュアル 13" },
+  { src: "/poster-card-14.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダールーラーのキービジュアル 14" },
+  { src: "/poster-card-15.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーサーガ Deception Worldのタイトルポスター" },
+  { src: "/poster-card-16.jpeg", pos: "50% 50%", fit: "contain", alt: "二人のライダーが並ぶDeception Worldのキービジュアル" },
+  { src: "/poster-card-17.jpeg", pos: "50% 46%", fit: "cover", alt: "夜空の下で使む青と金の仮面ライダーサーガ" },
+  { src: "/poster-card-18.jpeg", pos: "50% 44%", fit: "cover", alt: "星の装甲をまとい座る仮面ライダーのキービジュアル" },
+  { src: "/poster-card-19.jpeg", pos: "50% 50%", fit: "contain", alt: "雪原で赤い剣を振るウライダーの戦闘キービジュアル" },
+  { src: "/poster-card-20.jpeg", pos: "50% 46%", fit: "cover", alt: "赤いライダーと白緑のライダーが並ぶキービジュアル" },
+  { src: "/poster-card-21.jpeg", pos: "50% 50%", fit: "contain", alt: "白緑と青金のライダーが対峙するキービジュアル" },
+  { src: "/poster-card-22.jpeg", pos: "50% 42%", fit: "cover", alt: "星空を宿す装甲のライダーのキービジュアル" },
+  { src: "/poster-card-23.jpeg", pos: "50% 48%", fit: "cover", alt: "青と金の仮面ライダーサーガが構えるキービジュアル" },
+  { src: "/poster-card-24.jpeg", pos: "50% 46%", fit: "cover", alt: "星の装甲をまとったライダーが低く構えるキービジュアル" },
+  { src: "/poster-card-25.jpeg", pos: "50% 43%", fit: "cover", alt: "荒野で大剣を構える赤いライダーのキービジュアル" },
+  { src: "/poster-card-26.jpeg", pos: "50% 48%", fit: "cover", alt: "森で向き合うライダーとレックス・ロワのキービジュアル" },
+  { src: "/poster-card-27.jpeg", pos: "50% 42%", fit: "cover", alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル" },
+];
+
+const RIDERS = [
+  { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga.jpeg", pos: "44% 14%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
+  { id: "realm", no: "02", name: "REALM", ja: "レルム", person: "ベル・アレイン", tone: "#f14a60", img: "/rider-realm.jpeg", pos: "50% 16%", desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。" },
+  { id: "lore", no: "03", name: "LORE", ja: "ローア", person: "ローア", tone: "#67d8ff", img: "/rider-loa.jpeg", pos: "50% 12%", desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。" },
+  { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandaal.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },
+  { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ遗り着く警部補。" },
+  { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
+  { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
+];
+
+const COLUMNS = [
+  {
+    no: "01",
+    title: "脚本制と採録制",
+    kicker: "SCRIPT / RECORD",
+    body: "世界は脚本として書かれるものと、現場で採録されるものに分かれる。最上位管理人は両者の境界を管轄し、物語が現実へ洩漏する瞬間を監視する。",
+    pickup: [
+      "世界は脚本として書かれるものと、現場で採録されるものに分かれる。最上位管理人は両者の境界を管轄し、物語が現実へ洩漏する瞬間を監視する。",
+      "脚本制は結末を先に置く。採録制は現場の選択を正史として残す。どちらが勝つかで、サーガ世界の因果はまったく別の形になる。",
+      "洩漏は常に微細だ。台詞のひとこと、小道具の配置、ライダーの視線。それが現実側へ染み出したとき、管理人は記録を封じるか、物語を追認するかを決める。",
+      "このコラムは確定した年表ではない。境界そのものを観測するためのフィールドノートであり、いま進行中の干渉を拾い上げている。",
+    ],
+  },
+  {
+    no: "02",
+    title: "六詠",
+    kicker: "ROKUEI",
+    body: "世界・概念・領域・物語・法則。あらゆる層を管轄する管理人の最上位、六詠。六つの信号が揃ったとき、サーガ世界の勝敗条件は書き換えられる。",
+    pickup: [
+      "世界・概念・領域・物語・法則。あらゆる層を管轄する管理人の最上位、六詠。六つの信号が揃ったとき、サーガ世界の勝敗条件は書き換えられる。",
+      "六詠は人格ではなく、権限の集合体として観測される。個体名が解禁されるのは、その信号が物語側へ露出した瞬間だけだ。",
+      "現在フロントから参照できるのは一部に限られる。未解禁のシグナルは、閲覧そのものが世界への干渉になるため、意図的に伏せられている。",
+      "ライダーが世界へ踏み込むたび、六詠の均衡はわずかに傾く。傾きを戻すのか、加速させるのか。それがこの時代の管轄である。",
+    ],
+  },
+  {
+    no: "03",
+    title: "レジェンズ",
+    kicker: "LEGENDS",
+    body: "過去作から帰還するライダーと、この世界で新たに名乗りを上げる者たち。伝説は記録ではなく、いま現在進行形の干渉である。",
+    pickup: [
+      "過去作から帰還するライダーと、この世界で新たに名乗りを上げる者たち。伝説は記録ではなく、いま現在進行形の干渉である。",
+      "仮面ライダーレルム、ベル・アレインの復活はその象徴だ。失われた信号が再び名前を持ったとき、周囲の因果は追記ではなく上書きされる。",
