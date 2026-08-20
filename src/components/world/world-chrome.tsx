@@ -83,11 +83,26 @@ export function SideMenuLayer() {
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            <a href="#top"><span>トップ</span><i>TOP</i></a>
-            <a href="#story"><span>ストーリー</span><i>STORY</i></a>
-            <a href="#riders"><span>七人のライダー</span><i>RIDERS</i></a>
-            <a href="#records"><span>レコード</span><i>RECORDS</i></a>
-            <a href="#manager-archive"><span>六詠</span><i>ARCHIVE</i></a>
+            <a href="#top">
+              <span>トップ</span>
+              <i>TOP</i>
+            </a>
+            <a href="#story">
+              <span>ストーリー</span>
+              <i>STORY</i>
+            </a>
+            <a href="#riders">
+              <span>七人のライダー</span>
+              <i>RIDERS</i>
+            </a>
+            <a href="#records">
+              <span>レコード</span>
+              <i>RECORDS</i>
+            </a>
+            <a href="#manager-archive">
+              <span>六詠</span>
+              <i>ARCHIVE</i>
+            </a>
           </div>
         </div>
         <div className="side-panel-group">
@@ -110,8 +125,8 @@ export function SideMenuLayer() {
               <span>オープニング</span>
               <i>OPENING</i>
             </Link>
-            <a href="https://github.com/kro834/Deception-World/archive/refs/heads/main.zip">
-              <span>ソースZIP</span>
+            <a href="/Deception-World.zip" download="Deception-World.zip">
+              <span>サイトZIP</span>
               <i>EXPORT</i>
             </a>
           </div>
