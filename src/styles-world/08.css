@@ -1,0 +1,494 @@
+.world-column-dialog-heading > p i {
+  color: rgba(244, 246, 251, 0.48);
+  font-style: normal;
+}
+
+.world-column-dialog-heading > small {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  animation: worldColumnDialogContentIn 0.5s 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.world-column-dialog-heading h2 {
+  max-width: 880px;
+  margin: 10px 0 clamp(36px, 6vw, 72px);
+  font-family: var(--font-display);
+  font-size: clamp(50px, 8vw, 112px);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.065em;
+  animation: worldColumnDialogContentIn 0.56s 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.world-column-dialog-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(30px, 5vw, 56px);
+}
+
+.world-column-dialog-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px;
+  animation: worldColumnDialogContentIn 0.54s 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.world-column-dialog-tabs button {
+  display: grid;
+  min-width: 0;
+  min-height: 82px;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 14px 15px 18px;
+  border: 1px solid rgba(132, 203, 255, 0.12);
+  border-radius: 18px;
+  color: rgba(244, 246, 251, 0.5);
+  background: rgba(255, 255, 255, 0.018);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+}
+
+.world-column-dialog-tabs button:focus-visible,
+.world-column-dialog-tabs button.is-active {
+  border-color: rgba(132, 203, 255, 0.46);
+  color: var(--white);
+  background: rgba(36, 140, 255, 0.08);
+  transform: translateX(3px);
+}
+
+.world-column-dialog-tabs button small,
+.world-column-dialog-tabs button b {
+  grid-column: 1;
+}
+
+.world-column-dialog-tabs button small {
+  color: var(--cyan);
+  font-size: 7px;
+  letter-spacing: 0.18em;
+}
+
+.world-column-dialog-tabs button b {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.world-column-dialog-tabs button i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(36, 140, 255, 0.58);
+  font-size: 17px;
+  font-style: normal;
+}
+
+.world-column-dialog-copy {
+  min-width: 0;
+  animation: worldColumnDialogCopyIn 0.48s 0.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.world-column-dialog-number {
+  margin: 0 0 10px;
+  color: rgba(215, 171, 81, 0.78);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.world-column-dialog-copy h3 {
+  margin: 0 0 30px;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.world-column-dialog-copy > div {
+  columns: 2;
+  column-gap: clamp(30px, 4vw, 60px);
+}
+
+.world-column-dialog-copy > div p {
+  break-inside: avoid;
+  margin: 0 0 20px;
+  color: rgba(244, 246, 251, 0.72);
+  font-size: 14px;
+  letter-spacing: 0.035em;
+  line-height: 2.05;
+}
+
+@keyframes worldColumnSpotlightIn {
+  from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.94); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes worldColumnSpotlightOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.96); }
+}
+
+@keyframes worldColumnBackdropIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes worldColumnBackdropOut { from { opacity: 1; } to { opacity: 0; } }
+
+@keyframes worldColumnDialogCopyIn {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes worldColumnDialogContentIn {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes worldColumnDialogOrbitsIn {
+  from { opacity: 0; transform: scale(0.82) rotate(-4deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.poster-dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(2, 4, 7, 0.92);
+  color: #fff;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.poster-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.dialog-inner {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  padding: 60px 24px 32px;
+}
+
+.dialog-inner:focus,
+.world-column-dialog-heading h2:focus,
+.rider-nightmare-dialog-heading h2:focus {
+  outline: none;
+}
+
+.dialog-inner img {
+  width: auto;
+  max-width: min(92vw, 820px);
+  height: auto;
+  max-height: calc(100vh - 92px);
+  max-height: calc(100dvh - 92px);
+  object-fit: contain;
+  box-shadow: 0 40px 100px #000;
+}
+
+.dialog-inner button {
+  position: fixed;
+  z-index: 2;
+  top: 20px;
+  right: 24px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(103, 216, 255, 0.35);
+  background: rgba(5, 7, 11, 0.82);
+  color: #fff;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.dante-denied-dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 28, 50, 0.025) 0 1px, transparent 1px 5px),
+    radial-gradient(circle at 50% 50%, rgba(140, 0, 16, 0.2), transparent 48%),
+    #030000;
+  color: #fff;
+}
+
+.dante-denied-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.96);
+}
+
+.dante-denied-inner {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 100%;
+  place-items: center;
+  overflow: hidden;
+}
+
+.dante-denied-inner:focus {
+  outline: none;
+}
+
+.dante-denied-inner::before,
+.dante-denied-inner::after {
+  content: "ACCESS DENIED // ACCESS DENIED // ACCESS DENIED // ACCESS DENIED";
+  position: absolute;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  color: rgba(241, 74, 96, 0.46);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.dante-denied-inner::before { top: 22px; }
+.dante-denied-inner::after { bottom: 22px; }
+
+.dante-denied-inner strong {
+  color: #f11d35;
+  font-family: var(--font-display);
+  font-size: clamp(150px, 46vw, 680px);
+  font-weight: 700;
+  letter-spacing: -0.11em;
+  line-height: 0.72;
+  text-indent: -0.06em;
+  text-shadow: 0 0 18px rgba(241, 29, 53, 0.58), 0 0 90px rgba(241, 29, 53, 0.24);
+  animation: danteDenied 0.68s steps(2, end) both;
+}
+
+.dante-denied-inner button {
+  position: fixed;
+  z-index: 2;
+  top: 20px;
+  right: 24px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(241, 74, 96, 0.48);
+  background: rgba(5, 0, 0, 0.84);
+  color: #fff;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+/* Fail-open. `.motion-on` lands on boot, but `data-scroll-motion-ready` is only
+   set once the reveal observer is actually wired up. Gating on both means a
+   script failure leaves content VISIBLE instead of stranding the whole page at
+   opacity 0 — which is what a blank white render looks like to a visitor. */
+html[data-scroll-motion-ready="true"] .site-shell.motion-on [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
+html[data-scroll-motion-ready="true"] .site-shell.motion-on [data-reveal][data-visible="true"],
+html[data-reveal-safety="on"] [data-reveal],
+html[data-reveal-safety="on"] [data-motion-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-scroll-motion-ready="true"] [data-motion-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.78s ease, transform 0.78s cubic-bezier(0.2, 0.75, 0.16, 1);
+}
+
+html[data-scroll-motion-ready="true"] [data-motion-reveal][data-motion-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.motion-off *,
+.motion-off *::before,
+.motion-off *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+.motion-off [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.motion-off [data-scroll-motion],
+.motion-off [data-scroll-motion] [data-motion-layer],
+.motion-off [data-motion-reveal] {
+  transform: none !important;
+  translate: none !important;
+  scale: none !important;
+  opacity: 1 !important;
+}
+
+.motion-off .topbar::after,
+.motion-off .manager-topbar::after,
+.motion-off .rider-archive-topbar::after {
+  transform: scaleX(0) !important;
+}
+
+.motion-off .episode-card,
+.motion-off .episode-card-surface {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.motion-off .episode-card-surface::after,
+.motion-off .rider-detail::after {
+  display: none !important;
+  animation: none !important;
+}
+
+.motion-off .finale-section {
+  min-height: 84svh;
+}
+
+.motion-off .finale-sticky {
+  position: relative;
+  min-height: 84svh;
+}
+
+.motion-off .world-column-orbits {
+  display: none !important;
+}
+
+.motion-off .world-column-orbit-hit {
+  display: grid !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  transform: translate3d(-50%, -50%, 0) scale(1) !important;
+  transition: none !important;
+}
+
+.motion-off .world-column-orbit-hit::before,
+.motion-off .world-column-orbit-hit b {
+  transition: none !important;
+  transform: none !important;
+}
+
+.motion-off .world-column-orbit-trigger,
+.motion-off .world-column-dialog-tabs button {
+  transition: none !important;
+  transform: none !important;
+}
+
+.motion-off .world-column-dialog-card,
+.motion-off .world-column-dialog-copy,
+.motion-off .world-column-dialog-orbits,
+.motion-off .world-column-dialog-heading > *,
+.motion-off .world-column-dialog-tabs,
+.motion-off .world-column-dialog::backdrop {
+  animation: none !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+@keyframes bootProgress {
+  0% { transform: scaleX(0); }
+  65% { transform: scaleX(0.72); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes bootSlice {
+  to { transform: scaleY(1); }
+}
+
+@keyframes heroRise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes posterReveal {
+  from { opacity: 0; transform: translateY(30px) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes posterImageFadeIn {
+  from { opacity: 0; transform: scale(1.012); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes posterImageFadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.992); }
+}
+
+@keyframes posterBackSettle {
+  from { opacity: 0; }
+}
+
+@keyframes backdropBreathe {
+  from { transform: scale(1.12); }
+  to { transform: scale(1.17) translate3d(-0.8%, 0.7%, 0); }
+}
+
+@keyframes orbitSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitalDrift {
+  from { transform: translate3d(-3%, -2%, 0) scale(0.94); }
+  to { transform: translate3d(5%, 4%, 0) scale(1.08); }
+}
+
+@keyframes grainShift {
+  0% { transform: translate3d(-2%, 1%, 0); }
+  50% { transform: translate3d(1%, -2%, 0); }
+  100% { transform: translate3d(2%, 2%, 0); }
+}
+
+@keyframes scrollLine {
+  0% { transform: translateX(-100%); }
+  50%, 100% { transform: translateX(100%); }
+}
+
+@keyframes signalPulse {
+  0%, 100% { border-color: rgba(132, 203, 255, 0.09); }
+  50% { border-color: rgba(241, 74, 96, 0.23); }
+}
+
+@keyframes danteDenied {
+  0% { opacity: 0; transform: scale(1.55) skewX(-8deg); filter: blur(8px); }
+  35% { opacity: 1; transform: scale(0.92) skewX(4deg); filter: blur(0); }
+  58% { transform: scale(1.06) translateX(-1.2%); }
+  76% { transform: scale(0.98) translateX(0.8%); }
+  100% { transform: scale(1); }
+}
+
+@keyframes riderVisualIn {
+  from { opacity: 0; transform: translateX(22px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes riderPortraitIn {
+  from { opacity: 0; transform: scale(1.09); filter: saturate(0.45) contrast(1.12); }
+  to { opacity: 1; transform: scale(1.025); filter: saturate(0.92) contrast(1.04); }
+}
