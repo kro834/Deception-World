@@ -3,25 +3,23 @@
 仮面ライダーサーガ Deception World
 
 公開リポジトリ: https://github.com/kro834/Deception-World
-公開プレビュー: https://sand-zenith-meadow-dune.grok.me/
 
 ## 起動
 
 ```bash
+git clone https://github.com/kro834/Deception-World.git
+cd Deception-World
 npm install
-npm run fetch-source   # 残りの巨大ソース（CSS / ホーム / ライダー等）をソースZIPから展開
-npm run fetch-assets   # public/ の画像・動画を取得
+npm run assemble-source   # source-parts から巨大ソースを復元
+cp .env.example .env      # ローカル再生だけなら空のままで可
 npm run dev
 ```
 
-http://localhost:8080 を開いてください。
+巨大ファイル（`world-home.tsx` / `rider-page.tsx` / `boot.js` / `p2p.ts` など）は `source-parts/` に分割してあります。`npm run assemble-source` が結合して本来のパスへ書き出します。
 
-`npm run fetch-source` は公開プレビューの `Deception-World-source.zip` から、本リポにまだ入っていない／途中で切れているソースを補完します。
-`npm run fetch-assets` は同じプレビューから `public/` 配下の画像を取り込みます。
+スタイルは `src/styles-world.css` （barrel）が `src/styles-world/01.css`–19.css を `@import` します。
 
-## ソースZIP
-
-プレビューの `/download` からも全ソースZIP（画像なし・約247KB）を保存できます。
+`public/` の画像・動画が未取得なら `npm run fetch-assets` を試してください（公開プレビューから取り込み）。
 
 ## 必要な環境変数
 
