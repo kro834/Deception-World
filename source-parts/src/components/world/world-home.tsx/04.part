@@ -1,0 +1,196 @@
+                onClick={() => setLocked((v) => !v)}
+              >
+                <span aria-hidden="true">
+                  {locked ? (
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path d="M8 10V8a4 4 0 0 1 7.5-2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                    </svg>
+                  )}
+                </span>
+                <b>
+                  <small>{locked ? "LOCKED" : "AUTO"}</small>
+                  {locked ? "固定中" : "自動切替"}
+                </b>
+              </button>
+            </div>
+            <output>
+              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+            </output>
+          </div>
+        </div>
+        <a className="scroll-cue" href="#story">
+          <span>SCROLL TO DESCEND</span>
+          <i />
+        </a>
+      </section>
+
+      <section className="story-section" id="story">
+        <div className="section-index">
+          <span>01</span>
+          <small>WORLD / STORY</small>
+        </div>
+        <div className="story-layout">
+          <div className="story-heading">
+            <p className="eyebrow">
+              <span>THIS IS NOT A DREAM</span>
+              <i />
+            </p>
+            <h2>
+              救うべき世界は、
+              <br />
+              <em>現実</em>にある。
+            </h2>
+          </div>
+          <div className="story-copy">
+            <p className="story-lead story-lead-sequel">
+              <span>『ドリームチャプター』に続く</span>
+              <span>劇場版第二作</span>
+            </p>
+            <p>世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。</p>
+            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ。異なる立場を背おった七人は、ひとつの結末へ向けて交差する。</p>
+          </div>
+        </div>
+
+        <div className="threat-panel" id="manager-archive">
+          <div className="threat-copy">
+            <span className="system-label">MANAGER ARCHIVE</span>
+            <h3>
+              SIX SIGNALS
+              <br />
+              ABOVE THE WORLD.
+            </h3>
+            <p>最上位管理人、六詠。個体情報へのアクセスは一部制限されています。</p>
+          </div>
+          <div className="signal-column">
+            <ManagerRail ref={managerRail} />
+
+            {managerTab === 0 ? (
+              <div className="manager-archive-panel is-managers" role="tabpanel">
+                <div className="signal-array" aria-label="六詠を示す6つのシグナル">
+                  <div className="signal" style={{ ["--delay" as string]: "0s" }} aria-label="六詠I 未解禁">
+                    <span>I</span>
+                    <i />
+                    <small>RESTRICTED</small>
+                  </div>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/rex-loi"
+                    assets={MANAGER_ASSETS["rex-loi"]}
+                    style={{ ["--delay" as string]: "0.16s" }}
+                  >
+                    <img src="/manager-rex-loi.jpeg" alt="レックス・ロワのキャラクタービジュアル" width={1024} height={1536} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
+                    <span>II</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>レックス・ロワ</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/shuza"
+                    assets={MANAGER_ASSETS.shuza}
+                    style={{ ["--delay" as string]: "0.32s" }}
+                  >
+                    <img src="/manager-shuza.jpeg" alt="シュザのキャラクタービジュアル" width={1050} height={1498} style={{ objectPosition: "50% 16%" }} loading="lazy" decoding="async" />
+                    <span>III</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>シュザ</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible lejas-signal"
+                    to="/managers/lejas"
+                    assets={MANAGER_ASSETS.lejas}
+                    style={{ ["--delay" as string]: "0.48s" }}
+                    aria-label="六詠IV レジャスの個別資料を開く"
+                  >
+                    <img
+                      src="/manager-lejas-portrait.jpeg"
+                      alt="レジャスの顔アップ"
+                      width={1500}
+                      height={1872}
+                      style={{ objectPosition: "50% 8%", objectFit: "cover" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>IV</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>レジャス</b>
+                  </GuardedLink>
+                  <div className="signal" style={{ ["--delay" as string]: "0.64s" }} aria-label="六詠V 未解禁">
+                    <span>V</span>
+                    <i />
+                    <small>RESTRICTED</small>
+                  </div>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/reemu"
+                    assets={MANAGER_ASSETS.reemu}
+                    style={{ ["--delay" as string]: "0.8s" }}
+                  >
+                    <img src="/manager-reemu.jpeg" alt="リームーのキャラクタービジュアル" width={941} height={1672} style={{ objectPosition: "50% 14%" }} loading="lazy" decoding="async" />
+                    <span>VI</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>リームー</b>
+                  </GuardedLink>
+                </div>
+              </div>
+            ) : managerTab === 1 ? (
+              <div className="manager-archive-panel is-unmanaged" role="tabpanel">
+                <p className="system-label">UNMANAGED / REVERSE</p>
+                <h3 className="unmanaged-heading">
+                  管理外
+                </h3>
+                <p>個体情報へのアクセスは制限されています。</p>
+                <div className="unmanaged-array" aria-label="管理外">
+                  <button
+                    className="dante-archive"
+                    type="button"
+                    aria-label="管理人殺し ダンテへのアクセスを試みる"
+                    onClick={(e) => {
+                      const host = e.currentTarget;
+                      host.classList.add("is-glitching");
+                      window.setTimeout(() => {
+                        host.classList.remove("is-glitching");
+                        const dlg = danteDialogRef.current;
+                        if (!dlg) return;
+                        try {
+                          dlg.showModal();
+                        } catch {
+                          /* already open */
+                        }
+                        (document.activeElement as HTMLElement | null)?.blur();
+                        const inner = dlg.querySelector(".dante-denied-inner");
+                        inner?.classList.remove("is-slam");
+                        void (inner as HTMLElement | null)?.offsetWidth;
+                        inner?.classList.add("is-slam");
+                      }, 420);
+                    }}
+                  >
+                    <span className="dante-visual">
+                      <img
+                        src="/manager-killer-dante.jpeg"
+                        alt="ダンテのキャラクタービジュアル"
+                        width={1416}
+                        height={1756}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                    <span className="dante-copy">
+                      <small>ANOMALOUS RECORD</small>
+                      <b>DANTE</b>
+                      <em>管理人殺し</em>
+                      <i>ACCESS //</i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            ) : (
