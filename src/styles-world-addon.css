@@ -251,6 +251,15 @@ html[data-rail-lock] .world-column-dialog-card {
   padding: 10px 8px;
 }
 
+/* The compact selector must not grow when a title wraps. Its grid cells and
+   glass selection lens now share one invariant height for every column. */
+.world-column-tabs.liquid-swipe-tabs:not(.world-column-dialog-tabs) > button[role="tab"] {
+  block-size: 66px;
+  min-block-size: 66px;
+  max-block-size: 66px;
+  box-sizing: border-box;
+}
+
 .world-column-tabs b,
 .world-column-dialog-tabs b {
   width: 100%;
@@ -764,6 +773,32 @@ br.tab-br { display: none; }
   position: relative;
   width: min(100%, 300px);
   margin: 12px 0 0 auto;
+}
+
+/* Reserve the same title and summary space before expansion, so switching
+   between short and long columns never resizes the surrounding frame. */
+.world-column-copy h3 {
+  min-block-size: 1em;
+}
+
+.world-column-copy > div {
+  min-block-size: 104px;
+}
+
+@media (max-width: 840px) {
+  .world-column-copy > div {
+    min-block-size: 120px;
+  }
+}
+
+@media (max-width: 560px) {
+  .world-column-copy h3 {
+    min-block-size: 2em;
+  }
+
+  .world-column-copy > div {
+    min-block-size: 144px;
+  }
 }
 
 .ios-slide-open::after {

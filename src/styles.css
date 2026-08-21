@@ -737,6 +737,31 @@
   animation: world-dive-core 0.5s cubic-bezier(0.12, 0.7, 0.1, 1) both;
 }
 
+/* Keep the light stream running while assets load, then let the vanishing
+   point overtake the camera like the illuminated mouth of a tunnel. */
+.is-arriving .cine-dive-tunnel {
+  animation: world-dive-tunnel-exit 0.52s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
+.is-arriving .cine-dive-flash {
+  inset: -12vh 0;
+  background: radial-gradient(
+    circle at center,
+    #fff 0 12%,
+    rgb(235 250 255 / 0.99) 30%,
+    rgb(181 230 244 / 0.98) 58%,
+    rgb(224 248 255 / 0.96) 100%
+  );
+  animation: world-dive-exit-light 0.52s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
+.is-arriving .cine-dive-flash::before {
+  width: min(52vw, 680px);
+  background: radial-gradient(circle, #fff 0 18%, #effcff 34%, rgb(162 221 239 / 0.92) 57%, transparent 76%);
+  box-shadow: 0 0 18vmax rgb(184 235 247 / 0.8), 0 0 30vmax rgb(255 255 255 / 0.56);
+  animation: world-dive-exit-core 0.52s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
 .is-diving .cine-dive-status {
   animation: world-dive-status 0.24s ease-out 0.3s both;
 }
@@ -1048,6 +1073,39 @@
 @keyframes world-dive-vanishing-pulse {
   0%, 100% { opacity: 0.58; transform: scale(0.84); }
   50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes world-dive-tunnel-exit {
+  0% {
+    opacity: 0.9;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(0.74);
+  }
+  56% { opacity: 1; }
+  100% {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate(-50%, -50%) scale(2.42);
+  }
+}
+
+@keyframes world-dive-exit-light {
+  0% { opacity: 0; }
+  34% { opacity: 0.22; }
+  72% { opacity: 0.88; }
+  100% { opacity: 1; }
+}
+
+@keyframes world-dive-exit-core {
+  0% {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) scale(0.08);
+  }
+  44% { opacity: 1; }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(8);
+  }
 }
 
 @keyframes world-dive-flash {

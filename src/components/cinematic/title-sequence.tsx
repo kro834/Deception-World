@@ -8,8 +8,9 @@ import { Particles } from "./particles";
 
 const SEQUENCE_MS = 6600;
 const WORLD_DIVE_MIN_MS = 900;
+const WORLD_DIVE_EXIT_MS = 520;
 
-type SequencePhase = "idle" | "playing" | "complete" | "diving";
+type SequencePhase = "idle" | "playing" | "complete" | "diving" | "arriving";
 
 function HudRings() {
   const ticks = Array.from({ length: 60 }, (_, i) => {
@@ -158,6 +159,12 @@ export function TitleSequence() {
         new Promise((resolve) => window.setTimeout(resolve, reduced ? 180 : WORLD_DIVE_MIN_MS)),
       ]);
       if (!mountedRef.current || phaseRef.current !== "diving") return;
+      phaseRef.current = "arriving";
+      setPhase("arriving");
+      await new Promise((resolve) =>
+        window.setTimeout(resolve, reduced ? 120 : WORLD_DIVE_EXIT_MS),
+      );
+      if (!mountedRef.current || phaseRef.current !== "arriving") return;
       await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
     } catch {
       if (mountedRef.current) {
@@ -177,7 +184,12 @@ export function TitleSequence() {
         skip();
       } else if (phase === "complete" && !isInteractive && e.key.toLowerCase() === "r") {
         replay();
-      } else if (phase !== "diving" && !isInteractive && e.key.toLowerCase() === "m") {
+      } else if (
+        phase !== "diving" &&
+        phase !== "arriving" &&
+        !isInteractive &&
+        e.key.toLowerCase() === "m"
+      ) {
         setMuted((m) => {
           const next = !m;
           scoreRef.current?.setMuted(next);
@@ -215,7 +227,10 @@ export function TitleSequence() {
         ? "cine-stage is-complete"
         : phase === "diving"
           ? "cine-stage is-complete is-diving"
-        : "cine-stage";
+          : phase === "arriving"
+            ? "cine-stage is-complete is-diving is-arriving"
+            : "cine-stage";
+  const isWorldTransitioning = phase === "diving" || phase === "arriving";
 
   return (
     <section
@@ -223,7 +238,7 @@ export function TitleSequence() {
       onPointerDown={phase === "playing" ? unlockAudio : undefined}
       role="region"
       aria-label="仮面ライダーサーガ Deception World オープニング"
-      aria-busy={phase === "diving"}
+      aria-busy={isWorldTransitioning}
     >
       <video
         key={`atm-${replayKey}`}
@@ -241,7 +256,7 @@ export function TitleSequence() {
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings />
-      <Particles active={phase === "playing" || phase === "diving"} />
+      <Particles active={phase === "playing" || isWorldTransitioning} />
 
       <div className="cine-line" />
 
@@ -324,11 +339,11 @@ export function TitleSequence() {
         <kbd>ESC</kbd>
       </button>
 
-      <div className="cine-always" aria-hidden={phase === "idle" || phase === "diving"}>
+      <div className="cine-always" aria-hidden={phase === "idle" || isWorldTransitioning}>
         <button
           type="button"
           className="cine-ghost inline-flex items-center gap-2"
-          disabled={phase === "idle" || phase === "diving"}
+          disabled={phase === "idle" || isWorldTransitioning}
           onClick={toggleMute}
           aria-label={muted ? "音声をオン" : "音声をオフ"}
           aria-keyshortcuts="M"
