@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 type ZeusButtonPosition = { x: number; y: number };
 
@@ -49,6 +49,7 @@ function readPosition(): ZeusButtonPosition {
 }
 
 export function ZeusButtonProvider({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [enabled, setEnabledState] = useState(true);
   const [position, setPosition] = useState<ZeusButtonPosition>(DEFAULT_POSITION);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -103,7 +104,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   return (
     <ZeusButtonContext.Provider value={settings}>
       {children}
-      {enabled && portalTarget
+      {enabled && pathname !== "/" && portalTarget
         ? createPortal(
             <ZeusButton
               position={position}

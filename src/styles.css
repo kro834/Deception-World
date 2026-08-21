@@ -1716,7 +1716,7 @@ html[data-rail-lock] body {
 .zeus-button {
   --zeus-button-size: clamp(84px, 8.8vw, 122px);
   position: fixed;
-  z-index: 2147483000;
+  z-index: 2147483647;
   top: 82dvh;
   left: 90vw;
   width: var(--zeus-button-size);
