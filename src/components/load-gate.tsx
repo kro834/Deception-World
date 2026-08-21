@@ -41,7 +41,7 @@ const RIDER_CUT_IN_ROUTES = {
 } as const satisfies Record<string, RiderCutInVariant>;
 
 const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: number }> = {
-  leddic: { cover: 260, reveal: 760 },
+  leddic: { cover: 230, reveal: 660 },
   argenome: { cover: 300, reveal: 620 },
   "over-zeztz": { cover: 340, reveal: 820 },
 };
@@ -247,8 +247,10 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
   if (variant === "leddic") {
     return (
       <div className="rider-cutin-stage leddic-cutin-stage" aria-hidden="true">
-        <span className="leddic-shoji is-left"><i /></span>
-        <span className="leddic-shoji is-right"><i /></span>
+        <span className="leddic-room-glow" />
+        <span className="leddic-floor" />
+        <span className="leddic-shoji is-left"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
+        <span className="leddic-shoji is-right"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
         <span className="leddic-seam" />
         <span className="rider-cutin-caption"><small>GREEN VEIL // OPEN</small><b>LEDDIC</b></span>
       </div>
@@ -259,10 +261,15 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
     return (
       <div className="rider-cutin-stage argenome-cutin-stage" aria-hidden="true">
         <span className="argenome-ink" />
+        <span className="argenome-cut-plane is-upper" />
+        <span className="argenome-cut-plane is-lower" />
         <span className="argenome-slash is-echo-one" />
         <span className="argenome-slash is-echo-two" />
         <span className="argenome-slash is-main" />
         <span className="argenome-flare" />
+        <span className="argenome-sparks">
+          {Array.from({ length: 10 }, (_, index) => <i key={index} />)}
+        </span>
         <span className="rider-cutin-caption"><small>SCARLET TRACE // SEVER</small><b>ARGENOME</b></span>
       </div>
     );
@@ -271,9 +278,13 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
   return (
     <div className="rider-cutin-stage over-zeztz-cutin-stage" aria-hidden="true">
       <span className="over-zeztz-crack" />
+      <span className="over-zeztz-strike"><i /><i /></span>
       <span className="over-zeztz-impact" />
       <span className="over-zeztz-shards">
         {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+      </span>
+      <span className="over-zeztz-debris">
+        {Array.from({ length: 10 }, (_, index) => <i key={index} />)}
       </span>
       <span className="rider-cutin-caption"><small>BREAK LIMIT // COLLAPSE</small><b>OVER-ZEZTZ</b></span>
     </div>
