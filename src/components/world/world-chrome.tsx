@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
+import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 
@@ -142,6 +143,11 @@ export function SideMenuLayer() {
         <div className="side-panel-group">
           <p>SYSTEM</p>
           <div className="side-panel-links">
+            <Link to="/form-archive">
+              <span>サーガ フォームアーカイブ</span>
+              <i>FORM ARCHIVE</i>
+            </Link>
+            <ZeusButtonToggle />
             <Link to="/">
               <span>オープニング</span>
               <i>OPENING</i>

@@ -64,7 +64,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilianImg: "/civilian-saga.jpeg",
     civilianPos: "50% 12%",
     title: "最も弱い地点から、結末へ踏み込む第一のライダー。",
-    quotes: ["俺たちが夢を叶えるんだ。", "世界を変える", "俺たちの世界を返せ!"],
+    quotes: ["俺たちが夢を叶えるんだ。", "世界を変える", "俺達の世界を返せ…！"],
     facts: [
       { dt: "NAME", dd: "月城 悠真（つきしろ ゆうま）" },
       { dt: "AGE", dd: "19歳" },

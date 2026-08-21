@@ -415,8 +415,24 @@ export function WorldHome() {
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
 
-    const finalPoster = (poster + 1 + Math.floor(Math.random() * (POSTERS.length - 1))) % POSTERS.length;
-    const previewOffsets = [1, 3, 2, 1, 2, 3, 1, 3, 2];
+    const randomBelow = (upperBound: number) => {
+      if (typeof window.crypto?.getRandomValues !== "function") {
+        return Math.floor(Math.random() * upperBound);
+      }
+      const values = new Uint32Array(1);
+      const rejectionLimit = Math.floor(0x1_0000_0000 / upperBound) * upperBound;
+      do {
+        window.crypto.getRandomValues(values);
+      } while (values[0] >= rejectionLimit);
+      return values[0] % upperBound;
+    };
+    const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
+    for (let index = posterSequence.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [posterSequence[index], posterSequence[swapIndex]] = [posterSequence[swapIndex], posterSequence[index]];
+    }
+    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
+    const previewPosters = posterSequence.slice(0, 9);
     const finalImage = new Image();
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
@@ -432,7 +448,7 @@ export function WorldHome() {
       const timer = window.setTimeout(() => {
         const next = index === steps.length - 1
           ? finalPoster
-          : (poster + previewOffsets[index % previewOffsets.length]) % POSTERS.length;
+          : previewPosters[index % previewPosters.length];
         goPoster(next);
         if (index === steps.length - 1) {
           const settleTimer = window.setTimeout(() => {
@@ -1291,14 +1307,23 @@ export function WorldHome() {
             <h2 id="world-column-pickup-title">世界観コラム</h2>
           </div>
           <PickupRail ref={pickupRail} />
-          <div className="world-column-dialog-copy" key={column.no}>
-            <p className="world-column-dialog-number">コラム{column.no}</p>
-            <h3>{column.title}</h3>
-            <div>
-              {column.pickup.map((para) => (
-                <p key={para.slice(0, 18)}>{para}</p>
-              ))}
-            </div>
+          <div className="world-column-dialog-copy-stack">
+            {COLUMNS.map((item, index) => (
+              <div
+                key={item.no}
+                className={`world-column-dialog-copy world-column-dialog-copy-pane${index === columnTab ? " is-active" : ""}`}
+                role="tabpanel"
+                aria-hidden={index !== columnTab}
+              >
+                <p className="world-column-dialog-number">コラム{item.no}</p>
+                <h3>{item.title}</h3>
+                <div>
+                  {item.pickup.map((para) => (
+                    <p key={para.slice(0, 18)}>{para}</p>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </dialog>

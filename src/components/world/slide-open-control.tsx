@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent, Ref } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import type { PointerEvent as ReactPointerEvent, Ref } from "react";
 import { UiVectorIcon } from "./ui-vector-icon";
 
 type SlideOpenControlProps = {
@@ -40,10 +40,7 @@ export function SlideOpenControl({
   const dragMetrics = useRef<SlideMetrics | null>(null);
   const activateTimer = useRef<number | null>(null);
   const completingRef = useRef(false);
-  const [offset, setOffset] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [completing, setCompleting] = useState(false);
+  const suppressFocusRing = useRef(false);
 
   const setButtonRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -64,14 +61,26 @@ export function SlideOpenControl({
     grabOffset.current = 0;
     dragMetrics.current = null;
     completingRef.current = false;
-    setDragging(false);
-    setCompleting(false);
-    setOffset(0);
-    setProgress(0);
+    const button = internalButtonRef.current;
+    if (button) {
+      button.dataset.dragging = "false";
+      button.dataset.completing = "false";
+    }
+    button?.style.setProperty("--slide-offset", "0px");
+    button?.style.setProperty("--slide-fill", "50px");
+    button?.style.setProperty("--slide-label-opacity", "1");
   };
 
   useEffect(() => {
     return () => clearTimers();
+  }, []);
+
+  useEffect(() => {
+    const enableKeyboardFocus = () => {
+      suppressFocusRing.current = false;
+    };
+    document.addEventListener("keydown", enableKeyboardFocus, true);
+    return () => document.removeEventListener("keydown", enableKeyboardFocus, true);
   }, []);
 
   const getMetrics = () => {
@@ -101,8 +110,10 @@ export function SlideOpenControl({
       ),
     );
     const ratio = metrics.distance > 0 ? next / metrics.distance : 0;
-    setOffset(next);
-    setProgress(ratio);
+    const button = internalButtonRef.current;
+    button?.style.setProperty("--slide-offset", `${next}px`);
+    button?.style.setProperty("--slide-fill", `${next + 50}px`);
+    button?.style.setProperty("--slide-label-opacity", String(Math.max(0.2, 1 - ratio * 0.8)));
     return ratio;
   };
 
@@ -110,17 +121,26 @@ export function SlideOpenControl({
     if (completingRef.current) return;
     const metrics = getMetrics();
     completingRef.current = true;
-    setDragging(false);
-    setCompleting(true);
-    setOffset(metrics?.distance ?? travel.current);
-    setProgress(1);
+    const completedOffset = metrics?.distance ?? travel.current;
+    const button = internalButtonRef.current;
+    if (button) {
+      button.dataset.dragging = "false";
+      button.dataset.completing = "true";
+    }
+    button?.style.setProperty("--slide-offset", `${completedOffset}px`);
+    button?.style.setProperty("--slide-fill", `${completedOffset + 50}px`);
+    button?.style.setProperty("--slide-label-opacity", "0.2");
     clearTimers();
 
     // A pointer drag must not become the dialog's focus-return target. If the
     // button stays focused, closing the dialog restores focus here and the
     // focus-visible halo makes the completed slider look selected. Keyboard
     // activation keeps the focus return for accessible navigation.
-    if (source === "pointer") internalButtonRef.current?.blur();
+    if (source === "pointer") {
+      suppressFocusRing.current = true;
+      if (button) button.dataset.keyboardFocus = "false";
+      button?.blur();
+    }
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
@@ -144,6 +164,8 @@ export function SlideOpenControl({
       (event.pointerType === "mouse" && event.button !== 0)
     )
       return;
+    suppressFocusRing.current = true;
+    event.currentTarget.dataset.keyboardFocus = "false";
     const metrics = getMetrics();
     if (!metrics) return;
     dragMetrics.current = metrics;
@@ -160,7 +182,7 @@ export function SlideOpenControl({
     event.stopPropagation();
     activePointer.current = event.pointerId;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
-    setDragging(true);
+    event.currentTarget.dataset.dragging = "true";
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
     } catch {
@@ -205,20 +227,14 @@ export function SlideOpenControl({
     reset();
   };
 
-  const style = {
-    "--slide-offset": `${offset}px`,
-    "--slide-fill": `${offset + 50}px`,
-    "--slide-label-opacity": String(Math.max(0.2, 1 - progress * 0.8)),
-  } as CSSProperties;
-
   return (
     <button
       ref={setButtonRef}
       type="button"
       className={`${className} ios-slide-open`.trim()}
-      style={style}
-      data-dragging={dragging}
-      data-completing={completing}
+      data-dragging="false"
+      data-completing="false"
+      data-keyboard-focus="false"
       aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
       aria-expanded={opensDialog ? expanded : undefined}
@@ -228,6 +244,18 @@ export function SlideOpenControl({
       onPointerUp={finishDrag}
       onPointerCancel={cancelDrag}
       onLostPointerCapture={cancelDrag}
+      onFocus={(event) => {
+        if (event.currentTarget.matches(":focus-visible") && !suppressFocusRing.current) {
+          event.currentTarget.dataset.keyboardFocus = "true";
+        }
+      }}
+      onBlur={(event) => {
+        event.currentTarget.dataset.keyboardFocus = "false";
+      }}
+      onKeyDown={(event) => {
+        suppressFocusRing.current = false;
+        event.currentTarget.dataset.keyboardFocus = "true";
+      }}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();

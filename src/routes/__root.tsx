@@ -2,6 +2,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
+import { ZeusButtonProvider } from "@/components/zeus-button";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "Deception World";
@@ -63,12 +64,14 @@ export const Route = createRootRoute({
       </head>
       <body className="antialiased">
         <PreviewHostBridge />
-        <AuthProvider>
-          <LoadGateProvider>
-            <AppGuards />
-            <Outlet />
-          </LoadGateProvider>
-        </AuthProvider>
+        <ZeusButtonProvider>
+          <AuthProvider>
+            <LoadGateProvider>
+              <AppGuards />
+              <Outlet />
+            </LoadGateProvider>
+          </AuthProvider>
+        </ZeusButtonProvider>
         <Scripts />
       </body>
     </html>

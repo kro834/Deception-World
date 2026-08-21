@@ -756,6 +756,14 @@ br.tab-br { display: none; }
 .form-pickup-plus.ios-slide-open {
   right: 18px;
   bottom: 18px;
+  contain: layout paint;
+  -webkit-backdrop-filter: blur(11px) saturate(142%);
+  backdrop-filter: blur(11px) saturate(142%);
+}
+
+.form-pickup-plus.ios-slide-open .ios-slide-open-thumb {
+  -webkit-backdrop-filter: blur(8px) saturate(148%);
+  backdrop-filter: blur(8px) saturate(148%);
 }
 
 .rider-nightmare-pickup-button.ios-slide-open {
@@ -780,9 +788,25 @@ br.tab-br { display: none; }
    and switching text can never move the slider or resize the outer frame. */
 .world-column-number-stack,
 .world-column-heading-stack,
-.world-column-summary-stack {
+.world-column-summary-stack,
+.world-column-dialog-copy-stack {
   display: grid;
   min-width: 0;
+}
+
+.world-column-dialog-copy-pane {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+.world-column-dialog-copy-pane.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: worldColumnDialogCopyIn 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .world-column-stack-item {
@@ -1186,6 +1210,7 @@ br.tab-br { display: none; }
 .ios-slide-open[data-dragging="true"] .ios-slide-open-thumb,
 .ios-slide-open[data-dragging="true"] .ios-slide-open-fill {
   transition: none;
+  will-change: transform, width;
 }
 
 .ios-slide-open[data-dragging="true"] .ios-slide-open-thumb,
@@ -1219,7 +1244,7 @@ br.tab-br { display: none; }
   outline: none;
 }
 
-.ios-slide-open:focus-visible {
+.ios-slide-open[data-keyboard-focus="true"]:focus-visible {
   border-color: color-mix(in srgb, var(--slide-accent) 82%, #fff);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),

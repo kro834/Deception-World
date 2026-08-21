@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as DownloadRouteImport } from './routes/download'
+import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RidersRouteImport } from './routes/riders'
@@ -41,6 +42,11 @@ const CharactersRoute = CharactersRouteImport.update({
 const DownloadRoute = DownloadRouteImport.update({
   id: '/download',
   path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormArchiveRoute = FormArchiveRouteImport.update({
+  id: '/form-archive',
+  path: '/form-archive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/riders': typeof RidersRouteWithChildren
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/riders': typeof RidersRouteWithChildren
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/riders': typeof RidersRouteWithChildren
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/form-archive'
     | '/login'
     | '/managers'
     | '/riders'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/form-archive'
     | '/login'
     | '/managers'
     | '/riders'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/form-archive'
     | '/login'
     | '/managers'
     | '/riders'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CharactersRoute: typeof CharactersRouteWithChildren
   DownloadRoute: typeof DownloadRoute
+  FormArchiveRoute: typeof FormArchiveRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
   RidersRoute: typeof RidersRouteWithChildren
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/download'
       fullPath: '/download'
       preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/form-archive': {
+      id: '/form-archive'
+      path: '/form-archive'
+      fullPath: '/form-archive'
+      preLoaderRoute: typeof FormArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -437,6 +457,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersRoute: CharactersRouteWithChildren,
   DownloadRoute: DownloadRoute,
+  FormArchiveRoute: FormArchiveRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
   RidersRoute: RidersRouteWithChildren,
