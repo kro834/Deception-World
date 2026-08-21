@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { LiquidPointerGlow } from "@/components/world/liquid-rail";
 import "@/styles-world.css";
@@ -19,16 +25,49 @@ export const Route = createFileRoute("/form-archive")({
 });
 
 function FormArchive() {
-  const [archive, setArchive] = useState<"saga" | "realm">("saga");
+  type ArchiveKind = "saga" | "realm";
+
+  const [archive, setArchive] = useState<ArchiveKind>("saga");
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [holdingArchive, setHoldingArchive] = useState<ArchiveKind | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ignoreClickUntilRef = useRef(0);
   const isSaga = archive === "saga";
 
-  const selectArchive = (next: "saga" | "realm") => {
+  const selectArchive = useCallback((next: ArchiveKind) => {
     if (next === archive) return;
     setLoaded(false);
     setArchive(next);
-  };
+  }, [archive]);
+
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    setHoldingArchive(null);
+  }, []);
+
+  const beginLongPress = useCallback((event: ReactPointerEvent<HTMLButtonElement>, next: ArchiveKind) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    cancelLongPress();
+    setHoldingArchive(next);
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      ignoreClickUntilRef.current = performance.now() + 800;
+      setHoldingArchive(null);
+      selectArchive(next);
+    }, 440);
+  }, [cancelLongPress, selectArchive]);
+
+  const activateArchive = useCallback((next: ArchiveKind) => {
+    if (performance.now() < ignoreClickUntilRef.current) return;
+    selectArchive(next);
+  }, [selectArchive]);
+
+  useEffect(() => cancelLongPress, [cancelLongPress]);
 
   return (
     <main className="form-archive-page" data-archive-kind={archive}>
@@ -40,7 +79,14 @@ function FormArchive() {
           aria-selected={isSaga}
           aria-controls="form-archive-frame"
           data-liquid-pointer="true"
-          onClick={() => selectArchive("saga")}
+          className={holdingArchive === "saga" ? "is-long-pressing" : undefined}
+          title="タップまたは長押しでサーガへ切り替え"
+          onPointerDown={(event) => beginLongPress(event, "saga")}
+          onPointerUp={cancelLongPress}
+          onPointerCancel={cancelLongPress}
+          onPointerLeave={cancelLongPress}
+          onContextMenu={(event) => event.preventDefault()}
+          onClick={() => activateArchive("saga")}
         >
           <LiquidPointerGlow />
           <small>SAGA</small>
@@ -52,7 +98,14 @@ function FormArchive() {
           aria-selected={!isSaga}
           aria-controls="form-archive-frame"
           data-liquid-pointer="true"
-          onClick={() => selectArchive("realm")}
+          className={holdingArchive === "realm" ? "is-long-pressing" : undefined}
+          title="タップまたは長押しでレルムへ切り替え"
+          onPointerDown={(event) => beginLongPress(event, "realm")}
+          onPointerUp={cancelLongPress}
+          onPointerCancel={cancelLongPress}
+          onPointerLeave={cancelLongPress}
+          onContextMenu={(event) => event.preventDefault()}
+          onClick={() => activateArchive("realm")}
         >
           <LiquidPointerGlow />
           <small>REALM</small>
