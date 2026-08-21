@@ -4,6 +4,7 @@ import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { LiquidPointerGlow } from "./liquid-rail";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -116,7 +117,8 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         }}
       >
         <div className="form-pickup-panel">
-          <button type="button" className="form-pickup-close" onClick={close} aria-label="閉じる">
+          <button type="button" className="form-pickup-close" data-liquid-pointer="true" onClick={close} aria-label="閉じる">
+            <LiquidPointerGlow />
             <span>CLOSE</span>
             <i aria-hidden="true">
               <UiVectorIcon kind="close" size={16} />

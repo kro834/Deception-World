@@ -11,6 +11,13 @@
     if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
     if (root.dataset.liquidWebglActive === 'true' || !glow) return;
     glow.style.transform = 'translate3d(' + (lx - 66).toFixed(1) + 'px,' + (ly - 66).toFixed(1) + 'px,0)';
+    if (reflection) {
+      const tilt = clamp(gesture.vx * 7, -9, 9);
+      reflection.style.transform = 'translate3d(' + (lx - 38).toFixed(1) + 'px,' + (ly - 14).toFixed(1) + 'px,0) rotate(' + tilt.toFixed(1) + 'deg)';
+    }
+    if (lensReflection && lensGeometry) {
+      lensReflection.style.transform = 'translate3d(' + (lx - lensGeometry.x - 34).toFixed(1) + 'px,' + (ly - lensGeometry.y - 11).toFixed(1) + 'px,0)';
+    }
   };
   const reset = () => {
     root.dataset.liquidDragging = 'false';
@@ -67,6 +74,7 @@
         width: lw,
         height: lh,
       };
+      lensGeometry = geo;
       if (lens) {
         lens.style.width = geo.width.toFixed(2) + 'px';
         lens.style.height = geo.height.toFixed(2) + 'px';
@@ -92,6 +100,7 @@
       x: mix(from.x, to.x, t), y: mix(from.y, to.y, t),
       width: mix(from.width, to.width, t), height: mix(from.height, to.height, t),
     };
+    lensGeometry = g;
     gesture.raw = raw;
     const preview = clamp(Math.round(raw), 0, last);
     setContact(preview);

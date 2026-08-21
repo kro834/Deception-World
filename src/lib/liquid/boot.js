@@ -330,8 +330,11 @@ function initRail(root) {
   root.dataset.liquidBound = "true";
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
+  const reflection = root.querySelector('.liquid-contact-reflection');
+  const lensReflection = root.querySelector('.liquid-lens-reflection');
   const tabs = () => [...root.querySelectorAll(':scope > button[role="tab"]')];
   let gesture = null, holdTimer = null, moveFrame = null, pending = null;
+  let lensGeometry = null;
   let active = tabs().findIndex(t => t.getAttribute('aria-selected') === 'true');
   if (active < 0) active = 0;
 
@@ -357,6 +360,7 @@ function initRail(root) {
   };
   const settle = (i) => {
     const g = measure()[i]; if (!g || !lens) return;
+    lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
@@ -389,6 +393,13 @@ function initRail(root) {
     if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
     if (root.dataset.liquidWebglActive === 'true' || !glow) return;
     glow.style.transform = 'translate3d(' + (lx - 66).toFixed(1) + 'px,' + (ly - 66).toFixed(1) + 'px,0)';
+    if (reflection) {
+      const tilt = clamp(gesture.vx * 7, -9, 9);
+      reflection.style.transform = 'translate3d(' + (lx - 38).toFixed(1) + 'px,' + (ly - 14).toFixed(1) + 'px,0) rotate(' + tilt.toFixed(1) + 'deg)';
+    }
+    if (lensReflection && lensGeometry) {
+      lensReflection.style.transform = 'translate3d(' + (lx - lensGeometry.x - 34).toFixed(1) + 'px,' + (ly - lensGeometry.y - 11).toFixed(1) + 'px,0)';
+    }
   };
   const reset = () => {
     root.dataset.liquidDragging = 'false';
@@ -445,6 +456,7 @@ function initRail(root) {
         width: lw,
         height: lh,
       };
+      lensGeometry = geo;
       if (lens) {
         lens.style.width = geo.width.toFixed(2) + 'px';
         lens.style.height = geo.height.toFixed(2) + 'px';
@@ -470,6 +482,7 @@ function initRail(root) {
       x: mix(from.x, to.x, t), y: mix(from.y, to.y, t),
       width: mix(from.width, to.width, t), height: mix(from.height, to.height, t),
     };
+    lensGeometry = g;
     gesture.raw = raw;
     const preview = clamp(Math.round(raw), 0, last);
     setContact(preview);
@@ -763,8 +776,8 @@ export function bootLiquidGlass(scope) {
   root.querySelectorAll('[data-reveal]').forEach(function (el) {
     el.setAttribute('data-visible', 'true');
   });
-  const webglOk = safely('webgl', function () { if (!getRenderer().ensure()) throw new Error('unavailable'); });
   const status = document.getElementById('glass-status');
+  const webglOk = status ? safely('webgl', function () { if (!getRenderer().ensure()) throw new Error('unavailable'); }) : true;
   if (status) {
     status.textContent = 'JS: OK / rails: ' + railsOk + ' / WebGL: ' + (webglOk ? 'ON' : 'OFF (CSSフォールバック)');
     status.dataset.state = railsOk > 0 ? 'ok' : 'bad';

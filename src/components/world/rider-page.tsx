@@ -5,6 +5,7 @@ import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { LiquidPointerGlow } from "./liquid-rail";
 
 type RiderDossier = {
   id: string;
@@ -756,7 +757,7 @@ export function RiderPage({ id }: { id: string }) {
       <section className={rider.nightmare ? "rider-archive-identity-records has-nightmare" : "rider-archive-identity-records"} aria-label="変身前記録">
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
-            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} />
+            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} loading="lazy" decoding="async" fetchPriority="low" />
             <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
@@ -771,7 +772,7 @@ export function RiderPage({ id }: { id: string }) {
         {rider.nightmare ? (
           <article className="rider-nightmare-card">
             <div className="rider-nightmare-card-visual">
-              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} />
+              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
               <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
             </div>
@@ -847,7 +848,8 @@ export function RiderPage({ id }: { id: string }) {
           }}
         >
           <div className="rider-nightmare-dialog-panel">
-            <button type="button" className="rider-nightmare-dialog-close" onClick={closeNightmare} aria-label="閉じる">
+            <button type="button" className="rider-nightmare-dialog-close" data-liquid-pointer="true" onClick={closeNightmare} aria-label="閉じる">
+              <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
                 <UiVectorIcon kind="close" size={16} />
@@ -865,7 +867,7 @@ export function RiderPage({ id }: { id: string }) {
             </div>
             <div className="rider-nightmare-dialog-layout">
               <figure>
-                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} />
+                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
                 <figcaption>
                   <span>FORM VISUAL</span>
                   <b>MACHIAVEL GORE NIGHTMARE</b>

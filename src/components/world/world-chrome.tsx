@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { RIDER_NAV } from "./dossier-nav";
+import { LiquidPointerGlow } from "./liquid-rail";
 
 export function SiteUpdateButton() {
   const [busy, setBusy] = useState(false);
@@ -12,6 +13,7 @@ export function SiteUpdateButton() {
     <aside className="site-update-control" aria-label="サイト更新">
       <button
         className="site-update-button ios26-glass"
+        data-liquid-pointer="true"
         type="button"
         aria-busy={busy}
         disabled={busy}
@@ -32,7 +34,7 @@ export function SiteUpdateButton() {
             });
         }}
       >
-        <span className="site-update-glow" aria-hidden="true" />
+        <LiquidPointerGlow />
         <i aria-hidden="true">
           <span />
         </i>
@@ -49,12 +51,14 @@ export function SideMenuTrigger() {
   return (
     <button
       className="side-panel-trigger ios26-glass"
+      data-liquid-pointer="true"
       type="button"
       aria-expanded="false"
       aria-controls="site-side-panel"
       aria-haspopup="dialog"
       aria-label="メニューを開く"
     >
+      <LiquidPointerGlow />
       <span className="side-panel-trigger-ring" aria-hidden="true" />
       <span className="side-panel-trigger-glyph" aria-hidden="true">
         <i />
@@ -84,7 +88,8 @@ export function SideMenuLayer() {
             <p>NAVIGATION</p>
             <b>DECEPTION WORLD</b>
           </div>
-          <button className="side-panel-close" type="button" aria-label="メニューを閉じる">
+          <button className="side-panel-close ios26-glass" type="button" data-liquid-pointer="true" aria-label="メニューを閉じる">
+            <LiquidPointerGlow />
             <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
               <path
                 d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"

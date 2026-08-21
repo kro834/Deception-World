@@ -110,8 +110,8 @@
                     className={i === riderTab ? "is-on" : ""}
                     style={{ objectPosition: r.pos }}
                     decoding="async"
-                    loading={i === riderTab ? "eager" : "lazy"}
-                    fetchPriority={i === riderTab ? "high" : "low"}
+                    loading="lazy"
+                    fetchPriority={i === riderTab ? "auto" : "low"}
                     draggable={false}
                   />
                 ) : null
@@ -191,10 +191,12 @@
                 <button
                   type="button"
                   className="ios26-glass"
+                  data-liquid-pointer="true"
                   disabled={episode === 0}
                   onClick={() => goEpisode(episode - 1)}
                   aria-label="前のエピソードへ"
                 >
+                  <LiquidPointerGlow />
                   <span aria-hidden="true">
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
@@ -203,10 +205,12 @@
                 <button
                   type="button"
                   className="ios26-glass"
+                  data-liquid-pointer="true"
                   disabled={episode === EPISODES.length - 1}
                   onClick={() => goEpisode(episode + 1)}
                   aria-label="次のエピソードへ"
                 >
+                  <LiquidPointerGlow />
                   <span aria-hidden="true">
                     <UiVectorIcon kind="arrow-right" size={17} />
                   </span>

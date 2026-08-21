@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+export function LiquidPointerGlow() {
+  return <span className="liquid-pointer-glow" aria-hidden="true" />;
+}
+
 export function LiquidLens() {
   return (
     <>

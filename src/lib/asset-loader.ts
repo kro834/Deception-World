@@ -1,5 +1,5 @@
 const KNOWN_BYTES: Record<string, number> = {
-  "/deception-world-poster.jpeg": 953800,
+  "/deception-world-poster.jpeg": 815933,
   "/poster-card-03.jpeg": 293500,
   "/poster-card-04.jpeg": 369600,
   "/poster-card-05.jpeg": 537900,
@@ -17,7 +17,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-shuza.jpeg": 572000,
   "/manager-reemu.jpeg": 801600,
   "/manager-zeus.jpeg": 478105,
-  "/manager-zeus-detail.jpeg": 1535283,
+  "/manager-zeus-detail.jpeg": 576239,
   "/manager-opus.jpeg": 342588,
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,

@@ -154,7 +154,7 @@ export function RiderPage({ id }: { id: string }) {
       <section className={rider.nightmare ? "rider-archive-identity-records has-nightmare" : "rider-archive-identity-records"} aria-label="変身前記録">
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
-            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} />
+            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} loading="lazy" decoding="async" fetchPriority="low" />
             <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
@@ -169,7 +169,7 @@ export function RiderPage({ id }: { id: string }) {
         {rider.nightmare ? (
           <article className="rider-nightmare-card">
             <div className="rider-nightmare-card-visual">
-              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} />
+              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
               <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
             </div>

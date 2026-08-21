@@ -180,8 +180,8 @@ export function bootLiquidGlass(scope) {
   root.querySelectorAll('[data-reveal]').forEach(function (el) {
     el.setAttribute('data-visible', 'true');
   });
-  const webglOk = safely('webgl', function () { if (!getRenderer().ensure()) throw new Error('unavailable'); });
   const status = document.getElementById('glass-status');
+  const webglOk = status ? safely('webgl', function () { if (!getRenderer().ensure()) throw new Error('unavailable'); }) : true;
   if (status) {
     status.textContent = 'JS: OK / rails: ' + railsOk + ' / WebGL: ' + (webglOk ? 'ON' : 'OFF (CSSフォールバック)');
     status.dataset.state = railsOk > 0 ? 'ok' : 'bad';

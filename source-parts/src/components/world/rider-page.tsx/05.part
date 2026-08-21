@@ -40,7 +40,8 @@
           }}
         >
           <div className="rider-nightmare-dialog-panel">
-            <button type="button" className="rider-nightmare-dialog-close" onClick={closeNightmare} aria-label="閉じる">
+            <button type="button" className="rider-nightmare-dialog-close" data-liquid-pointer="true" onClick={closeNightmare} aria-label="閉じる">
+              <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
                 <UiVectorIcon kind="close" size={16} />
@@ -58,7 +59,7 @@
             </div>
             <div className="rider-nightmare-dialog-layout">
               <figure>
-                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} />
+                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
                 <figcaption>
                   <span>FORM VISUAL</span>
                   <b>MACHIAVEL GORE NIGHTMARE</b>

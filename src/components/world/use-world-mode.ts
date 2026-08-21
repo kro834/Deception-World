@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+import { useLiquidPointerLight } from "./use-liquid-pointer-light";
 
 export function useWorldMode() {
+  useLiquidPointerLight();
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.dataset.mode;

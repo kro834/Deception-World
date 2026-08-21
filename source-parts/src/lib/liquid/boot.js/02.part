@@ -144,8 +144,11 @@ function initRail(root) {
   root.dataset.liquidBound = "true";
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
+  const reflection = root.querySelector('.liquid-contact-reflection');
+  const lensReflection = root.querySelector('.liquid-lens-reflection');
   const tabs = () => [...root.querySelectorAll(':scope > button[role="tab"]')];
   let gesture = null, holdTimer = null, moveFrame = null, pending = null;
+  let lensGeometry = null;
   let active = tabs().findIndex(t => t.getAttribute('aria-selected') === 'true');
   if (active < 0) active = 0;
 
@@ -171,6 +174,7 @@ function initRail(root) {
   };
   const settle = (i) => {
     const g = measure()[i]; if (!g || !lens) return;
+    lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';

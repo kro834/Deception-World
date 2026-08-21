@@ -215,6 +215,18 @@ export function WorldHome() {
   }, [locked]);
 
   useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
+    const timer = window.setTimeout(() => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [poster]);
+
+  useEffect(() => {
     const shell = shellRef.current;
     if (!shell || typeof IntersectionObserver === "undefined") return;
     const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");

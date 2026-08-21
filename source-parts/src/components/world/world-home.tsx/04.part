@@ -1,5 +1,6 @@
                 onClick={() => setLocked((v) => !v)}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   {locked ? (
                     <svg viewBox="0 0 24 24" width="14" height="14">

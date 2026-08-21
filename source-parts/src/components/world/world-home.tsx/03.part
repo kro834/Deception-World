@@ -1,4 +1,5 @@
   const previous = prevPoster != null ? POSTERS[prevPoster] : null;
+  const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
 
@@ -188,7 +189,8 @@
             6人の最上位管理人と、7人のライダーが同じ世界で交差する。
           </p>
           <div className="hero-actions">
-            <a className="primary-action ios26-glass" href="#story">
+            <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
+              <LiquidPointerGlow />
               <span>ENTER THE WORLD</span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M5 12h13M13 6l6 6-6 6" />
@@ -217,16 +219,16 @@
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
-              <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
+              <img src={nextPoster.src} alt="" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img src={POSTERS[(poster + 2) % POSTERS.length].src} alt="" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img src={POSTERS[(poster + 3) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img src={POSTERS[(poster + 4) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
@@ -269,10 +271,12 @@
               <button
                 type="button"
                 className="poster-shuffle ios26-glass"
+                data-liquid-pointer="true"
                 disabled={shuffling}
                 aria-busy={shuffling}
                 onClick={shufflePoster}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   <UiVectorIcon kind="shuffle" size={18} />
                 </span>
@@ -281,9 +285,11 @@
               <button
                 type="button"
                 className="poster-reset ios26-glass"
+                data-liquid-pointer="true"
                 disabled={poster === 0 || shuffling}
                 onClick={() => goPoster(0)}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   <UiVectorIcon kind="reset" size={17} />
                 </span>
@@ -292,6 +298,7 @@
               <button
                 type="button"
                 className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
+                data-liquid-pointer="true"
                 aria-pressed={locked}
                 aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
                 disabled={shuffling}

@@ -50,7 +50,8 @@
               <br />
               まだ終わらない。
             </h2>
-            <a className="primary-action ios26-glass" href="#top">
+            <a className="primary-action ios26-glass" href="#top" data-liquid-pointer="true">
+              <LiquidPointerGlow />
               <span>RETURN TO THE KEY VISUAL</span>
             </a>
           </div>
@@ -89,6 +90,7 @@
             <button
               type="button"
               className="world-column-dialog-close"
+              data-liquid-pointer="true"
               onPointerUp={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -101,6 +103,7 @@
               }}
               aria-label="ピックアップを閉じる"
             >
+              <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="14" height="14">

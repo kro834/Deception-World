@@ -3,7 +3,7 @@ import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
-import { LiquidLens } from "./liquid-rail";
+import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
 import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
@@ -302,6 +302,18 @@ export function WorldHome() {
   }, [locked]);
 
   useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
+    const timer = window.setTimeout(() => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [poster]);
+
+  useEffect(() => {
     const shell = shellRef.current;
     if (!shell || typeof IntersectionObserver === "undefined") return;
     const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");
@@ -372,6 +384,7 @@ export function WorldHome() {
   }, []);
   const current = POSTERS[poster];
   const previous = prevPoster != null ? POSTERS[prevPoster] : null;
+  const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
 
@@ -561,7 +574,8 @@ export function WorldHome() {
             6人の最上位管理人と、7人のライダーが同じ世界で交差する。
           </p>
           <div className="hero-actions">
-            <a className="primary-action ios26-glass" href="#story">
+            <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
+              <LiquidPointerGlow />
               <span>ENTER THE WORLD</span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M5 12h13M13 6l6 6-6 6" />
@@ -590,16 +604,16 @@ export function WorldHome() {
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
-              <img src={POSTERS[(poster + 1) % POSTERS.length].src} alt="" decoding="async" />
+              <img src={nextPoster.src} alt="" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img src={POSTERS[(poster + 2) % POSTERS.length].src} alt="" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img src={POSTERS[(poster + 3) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img src={POSTERS[(poster + 4) % POSTERS.length].src} alt="" loading="lazy" decoding="async" />
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
             </div>
             <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
@@ -642,10 +656,12 @@ export function WorldHome() {
               <button
                 type="button"
                 className="poster-shuffle ios26-glass"
+                data-liquid-pointer="true"
                 disabled={shuffling}
                 aria-busy={shuffling}
                 onClick={shufflePoster}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   <UiVectorIcon kind="shuffle" size={18} />
                 </span>
@@ -654,9 +670,11 @@ export function WorldHome() {
               <button
                 type="button"
                 className="poster-reset ios26-glass"
+                data-liquid-pointer="true"
                 disabled={poster === 0 || shuffling}
                 onClick={() => goPoster(0)}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   <UiVectorIcon kind="reset" size={17} />
                 </span>
@@ -665,11 +683,13 @@ export function WorldHome() {
               <button
                 type="button"
                 className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
+                data-liquid-pointer="true"
                 aria-pressed={locked}
                 aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
                 disabled={shuffling}
                 onClick={() => setLocked((v) => !v)}
               >
+                <LiquidPointerGlow />
                 <span aria-hidden="true">
                   {locked ? (
                     <svg viewBox="0 0 24 24" width="14" height="14">
@@ -1002,8 +1022,8 @@ export function WorldHome() {
                     className={i === riderTab ? "is-on" : ""}
                     style={{ objectPosition: r.pos }}
                     decoding="async"
-                    loading={i === riderTab ? "eager" : "lazy"}
-                    fetchPriority={i === riderTab ? "high" : "low"}
+                    loading="lazy"
+                    fetchPriority={i === riderTab ? "auto" : "low"}
                     draggable={false}
                   />
                 ) : null
@@ -1083,10 +1103,12 @@ export function WorldHome() {
                 <button
                   type="button"
                   className="ios26-glass"
+                  data-liquid-pointer="true"
                   disabled={episode === 0}
                   onClick={() => goEpisode(episode - 1)}
                   aria-label="前のエピソードへ"
                 >
+                  <LiquidPointerGlow />
                   <span aria-hidden="true">
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
@@ -1095,10 +1117,12 @@ export function WorldHome() {
                 <button
                   type="button"
                   className="ios26-glass"
+                  data-liquid-pointer="true"
                   disabled={episode === EPISODES.length - 1}
                   onClick={() => goEpisode(episode + 1)}
                   aria-label="次のエピソードへ"
                 >
+                  <LiquidPointerGlow />
                   <span aria-hidden="true">
                     <UiVectorIcon kind="arrow-right" size={17} />
                   </span>
@@ -1154,7 +1178,8 @@ export function WorldHome() {
               <br />
               まだ終わらない。
             </h2>
-            <a className="primary-action ios26-glass" href="#top">
+            <a className="primary-action ios26-glass" href="#top" data-liquid-pointer="true">
+              <LiquidPointerGlow />
               <span>RETURN TO THE KEY VISUAL</span>
             </a>
           </div>
@@ -1193,6 +1218,7 @@ export function WorldHome() {
             <button
               type="button"
               className="world-column-dialog-close"
+              data-liquid-pointer="true"
               onPointerUp={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1205,6 +1231,7 @@ export function WorldHome() {
               }}
               aria-label="ピックアップを閉じる"
             >
+              <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="14" height="14">
