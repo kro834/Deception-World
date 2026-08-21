@@ -133,11 +133,18 @@ export function SlideOpenControl({
   };
 
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (completingRef.current || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (
+      completingRef.current ||
+      !event.isPrimary ||
+      (event.pointerType === "mouse" && event.button !== 0)
+    )
+      return;
     const metrics = getMetrics();
     if (!metrics) return;
     dragMetrics.current = metrics;
-    const hitPadding = 10;
+    // A finger obscures the glass thumb on compact screens. Give coarse
+    // pointers a larger pickup area while keeping mouse targeting precise.
+    const hitPadding = event.pointerType === "mouse" ? 10 : 24;
     if (
       event.clientX < metrics.thumbRect.left - hitPadding ||
       event.clientX > metrics.thumbRect.right + hitPadding
@@ -149,7 +156,12 @@ export function SlideOpenControl({
     activePointer.current = event.pointerId;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
     setDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Some Android WebViews keep delivering the pointer without capture.
+      // The drag remains usable through the normal bubbling event stream.
+    }
     moveToPointer(event.clientX);
   };
 
@@ -165,8 +177,12 @@ export function SlideOpenControl({
     event.stopPropagation();
     const ratio = moveToPointer(event.clientX);
     activePointer.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // Pointer capture can already be gone after an Android compositor handoff.
     }
     if (ratio >= OPEN_THRESHOLD) complete("pointer");
     else reset();
@@ -174,8 +190,12 @@ export function SlideOpenControl({
 
   const cancelDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (activePointer.current !== event.pointerId) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // Treat a missing capture as a normal cancellation.
     }
     reset();
   };

@@ -1,6 +1,11 @@
   root.addEventListener('pointerup', finish);
   root.addEventListener('pointercancel', () => cancel());
-  root.addEventListener('lostpointercapture', () => { if (gesture) cancel(); });
+  root.addEventListener('lostpointercapture', (e) => {
+    // Touch pointers are implicitly captured by the pressed tab on Android.
+    // Moving capture to the rail emits a bubbling lostpointercapture from that
+    // child; only cancel when the rail itself actually loses capture.
+    if (e.target === root && gesture) cancel();
+  });
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
   let swallowClick = false;

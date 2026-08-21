@@ -39,6 +39,17 @@ html[data-android-renderer] body {
   text-rendering: auto;
 }
 
+/* Chrome Android and several embedded WebViews can promote a slightly
+   diagonal movement to page panning before the slide-to-open thumb receives
+   enough Pointer Events. Keep that compact control's gesture stream local.
+   Selection rails retain pan-y, so a vertical swipe over a rail still scrolls
+   the page and a horizontal swipe selects an item. */
+html[data-android-renderer] .ios-slide-open {
+  touch-action: none;
+  -ms-touch-action: none;
+  overscroll-behavior: contain;
+}
+
 html[data-android-renderer] .ambient {
   contain: layout paint style;
   isolation: isolate;
@@ -391,4 +402,3 @@ html::-webkit-scrollbar-thumb:hover {
     box-shadow 0.3s ease,
     scale 0.34s var(--glass-settle);
 }
-
