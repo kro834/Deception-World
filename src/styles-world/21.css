@@ -68,8 +68,15 @@ html[data-mode="world"] .site-shell > .site-update-control {
 
 /* Keep the modal control anchored to its own top-right safe area. The shared
    pointer-light positioning above must not turn it back into toolbar content. */
-.world-column-dialog-close[data-liquid-pointer] {
+.world-column-dialog-close[data-liquid-pointer],
+.form-pickup-close[data-liquid-pointer] {
   position: absolute;
+}
+
+/* Reserve the iPad pickup header's control lane so its long rider title can
+   never run underneath the close control once the button is re-anchored. */
+.form-pickup-heading {
+  padding-right: 64px;
 }
 
 .liquid-pointer-glow {
