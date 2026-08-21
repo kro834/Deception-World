@@ -6,7 +6,10 @@ import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { useLoadGate } from "@/components/load-gate";
 import { Particles } from "./particles";
 
-const SEQUENCE_MS = 7600;
+const SEQUENCE_MS = 6600;
+const WORLD_DIVE_MS = 720;
+
+type SequencePhase = "idle" | "playing" | "complete" | "diving";
 
 function HudRings() {
   const ticks = Array.from({ length: 60 }, (_, i) => {
@@ -43,7 +46,7 @@ function HudRings() {
 }
 
 export function TitleSequence() {
-  const [phase, setPhase] = useState<"idle" | "playing" | "complete">("idle");
+  const [phase, setPhase] = useState<SequencePhase>("idle");
   const [muted, setMuted] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
@@ -65,7 +68,7 @@ export function TitleSequence() {
         preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
         router.preloadRoute({ to: "/world" }).catch(() => undefined),
       ]);
-    }, 2200);
+    }, 1800);
     return () => window.clearTimeout(timer);
   }, [router]);
 
@@ -135,6 +138,26 @@ export function TitleSequence() {
     if (!score.muted()) score.start();
   }, [getScore]);
 
+  const enterWorld = useCallback(async () => {
+    if (phaseRef.current !== "complete") return;
+
+    phaseRef.current = "diving";
+    setPhase("diving");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    try {
+      await Promise.all([
+        preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
+        router.preloadRoute({ to: "/world" }).catch(() => undefined),
+        new Promise((resolve) => window.setTimeout(resolve, reduced ? 180 : WORLD_DIVE_MS)),
+      ]);
+      await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
+    } catch {
+      phaseRef.current = "complete";
+      setPhase("complete");
+    }
+  }, [go, router]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target instanceof Element ? e.target : null;
@@ -181,6 +204,8 @@ export function TitleSequence() {
       ? "cine-stage is-playing"
       : phase === "complete"
         ? "cine-stage is-complete"
+        : phase === "diving"
+          ? "cine-stage is-complete is-diving"
         : "cine-stage";
 
   return (
@@ -189,6 +214,7 @@ export function TitleSequence() {
       onPointerDown={phase === "playing" ? unlockAudio : undefined}
       role="region"
       aria-label="仮面ライダーサーガ Deception World オープニング"
+      aria-busy={phase === "diving"}
     >
       <video
         key={`atm-${replayKey}`}
@@ -206,7 +232,7 @@ export function TitleSequence() {
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings />
-      <Particles active={phase === "playing"} />
+      <Particles active={phase === "playing" || phase === "diving"} />
 
       <div className="cine-line" />
 
@@ -246,6 +272,14 @@ export function TitleSequence() {
 
       <div className="cine-vignette" />
       <div className="cine-grain" />
+      <div className="cine-dive-tunnel" aria-hidden="true" />
+      <div className="cine-dive-flash" aria-hidden="true" />
+      {phase === "diving" ? (
+        <div className="cine-dive-status" role="status" aria-live="polite">
+          <small>WORLD LINK // DIVE</small>
+          <span>境界を通過中</span>
+        </div>
+      ) : null}
       <div className="cine-letterbox top" />
       <div className="cine-letterbox bottom" />
       <div className="cine-progress" aria-hidden="true">
@@ -278,11 +312,11 @@ export function TitleSequence() {
         <kbd>ESC</kbd>
       </button>
 
-      <div className="cine-always" aria-hidden={phase === "idle"}>
+      <div className="cine-always" aria-hidden={phase === "idle" || phase === "diving"}>
         <button
           type="button"
           className="cine-ghost inline-flex items-center gap-2"
-          disabled={phase === "idle"}
+          disabled={phase === "idle" || phase === "diving"}
           onClick={toggleMute}
           aria-label={muted ? "音声をオン" : "音声をオフ"}
           aria-keyshortcuts="M"
@@ -300,7 +334,7 @@ export function TitleSequence() {
           type="button"
           className="cine-btn"
           disabled={phase !== "complete"}
-          onClick={() => void go({ to: "/world", assets: WORLD_ENTER_ASSETS })}
+          onClick={() => void enterWorld()}
         >
           <span>ENTER THE WORLD</span>
         </button>
