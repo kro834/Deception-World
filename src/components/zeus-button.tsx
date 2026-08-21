@@ -65,20 +65,29 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let frame = 0;
     const updateTarget = () => {
+      frame = 0;
       const openDialogs = Array.from(document.querySelectorAll<HTMLDialogElement>("dialog[open]"));
       setPortalTarget(openDialogs.at(-1) ?? document.body);
       setSideMenuOpen(Boolean(document.querySelector('.side-panel[data-open="true"]')));
     };
+    const scheduleTargetUpdate = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateTarget);
+    };
     updateTarget();
-    const observer = new MutationObserver(updateTarget);
+    const observer = new MutationObserver(scheduleTargetUpdate);
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ["open", "data-open"],
       childList: true,
       subtree: true,
     });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const setEnabled = useCallback((next: boolean) => {
@@ -158,11 +167,13 @@ function ZeusButton({
   const start = useRef({ x: 0, y: 0 });
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
+  const navigatingRef = useRef(false);
+  const [navigating, setNavigating] = useState(false);
 
-  const clearHoldTimer = () => {
+  const clearHoldTimer = useCallback(() => {
     if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
     holdTimer.current = null;
-  };
+  }, []);
 
   const clampCenter = useCallback((clientX: number, clientY: number) => {
     const button = buttonRef.current;
@@ -216,7 +227,7 @@ function ZeusButton({
     return () => window.removeEventListener("resize", onResize);
   }, [placeButton]);
 
-  useEffect(() => () => clearHoldTimer(), []);
+  useEffect(() => () => clearHoldTimer(), [clearHoldTimer]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
@@ -233,17 +244,45 @@ function ZeusButton({
   };
 
   const goToTop = useCallback(async () => {
-    document
-      .querySelector<HTMLButtonElement>('.side-panel[data-open="true"] .side-panel-close')
-      ?.click();
-    await navigate({ to: "/world", hash: "top" });
-    window.requestAnimationFrame(() => {
-      document.getElementById("top")?.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-        block: "start",
+    if (navigatingRef.current) return;
+    navigatingRef.current = true;
+    setNavigating(true);
+    clearHoldTimer();
+    activePointer.current = null;
+    held.current = false;
+
+    try {
+      document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
+      const openDialogs = Array.from(document.querySelectorAll<HTMLDialogElement>("dialog[open]")).reverse();
+      for (const dialog of openDialogs) {
+        try {
+          dialog.close("zeus-navigation");
+        } catch {
+          /* A dialog may already be closing through its own transition. */
+        }
+      }
+      document
+        .querySelector<HTMLButtonElement>('.side-panel[data-open="true"] .side-panel-close')
+        ?.click();
+      document.querySelectorAll<HTMLIFrameElement>("iframe").forEach((frame) => {
+        frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
       });
-    });
-  }, [navigate]);
+
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+      });
+      await navigate({ to: "/world", hash: "top" });
+      window.requestAnimationFrame(() => {
+        document.getElementById("top")?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "start",
+        });
+      });
+    } finally {
+      navigatingRef.current = false;
+      setNavigating(false);
+    }
+  }, [clearHoldTimer, navigate]);
 
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
     if (activePointer.current !== event.pointerId) return;
@@ -253,6 +292,8 @@ function ZeusButton({
     if (wasHeld && !cancelled) {
       moveToPointer(event.clientX, event.clientY);
       onPositionChange(pendingPosition.current);
+    } else if (wasHeld && cancelled) {
+      placeButton(position);
     }
     held.current = false;
     event.currentTarget.dataset.dragging = "false";
@@ -273,11 +314,15 @@ function ZeusButton({
       type="button"
       className="zeus-button"
       data-dragging="false"
+      data-navigating={String(navigating)}
       aria-grabbed="false"
+      aria-busy={navigating}
       aria-label="ゼウスボタン。押すとトップへ戻り、長押しすると移動できます"
       onPointerDown={(event) => {
+        if (navigatingRef.current) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
         event.preventDefault();
+        const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
         const rect = event.currentTarget.getBoundingClientRect();
@@ -296,8 +341,8 @@ function ZeusButton({
         holdTimer.current = window.setTimeout(() => {
           if (activePointer.current !== event.pointerId) return;
           held.current = true;
-          event.currentTarget.dataset.dragging = "true";
-          event.currentTarget.setAttribute("aria-grabbed", "true");
+          target.dataset.dragging = "true";
+          target.setAttribute("aria-grabbed", "true");
         }, LONG_PRESS_MS);
       }}
       onPointerMove={(event) => {

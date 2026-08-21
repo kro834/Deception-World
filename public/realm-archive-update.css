@@ -1,0 +1,41 @@
+/* Realm standalone refinements layered over the imported archive. */
+
+#realm--saga-form-compare-ios .compare-swap-js {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
+  display: inline-grid;
+  place-items: center;
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  transition: transform 480ms cubic-bezier(.2, .82, .24, 1);
+  will-change: transform;
+}
+
+#realm--saga-form-compare-ios .compare-swap-js.is-flipped .compare-swap-icon {
+  transform: rotateY(180deg);
+}
+
+#realm--saga-form-compare-ios .compare-swap-js[aria-busy="true"] {
+  cursor: progress;
+  pointer-events: none;
+}
+
+#realm--saga-form-compare-ios.is-swapping .compare-side-a,
+#realm--saga-form-compare-ios.is-swapping .compare-side-b {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(.2, .82, .24, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
+    transition-duration: 1ms;
+  }
+
+  #realm--saga-form-compare-ios.is-swapping .compare-side-a,
+  #realm--saga-form-compare-ios.is-swapping .compare-side-b {
+    animation-duration: 1ms;
+  }
+}

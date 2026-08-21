@@ -12,6 +12,229 @@
   --font-display: "Cinzel", serif;
   --font-sans: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
 }
+/* ── Form archive route chrome and dive ─────────────────────── */
+.archive-route-dive {
+  z-index: 2147483000;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 48%, rgb(23 90 112 / 0.34), transparent 24%),
+    radial-gradient(circle at 30% 18%, rgb(88 48 134 / 0.2), transparent 28%),
+    #010205;
+}
+
+.archive-dive-space {
+  position: absolute;
+  z-index: 1;
+  inset: -12%;
+  opacity: 0.72;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 5%, rgb(90 206 230 / 0.08) 16%, transparent 36%),
+    repeating-conic-gradient(from 6deg, transparent 0deg 6deg, rgb(125 220 255 / 0.055) 6.2deg 6.42deg, transparent 6.7deg 12deg);
+  transform: scale(1.08);
+  animation: archive-dive-space-rush 0.7s linear infinite;
+}
+
+.archive-route-dive.is-arriving .archive-dive-space {
+  animation: archive-dive-space-arrive 0.52s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
+.form-archive-page {
+  --archive-cyan: #75ddff;
+  --archive-violet: #9b83ff;
+  --archive-gold: #e0ba66;
+  isolation: isolate;
+}
+
+.form-archive-page iframe {
+  position: relative;
+  z-index: 1;
+}
+
+.form-archive-switcher {
+  position: fixed;
+  z-index: 54;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  display: grid;
+  width: min(310px, calc(100vw - 148px));
+  min-width: 220px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid rgb(207 235 255 / 0.22);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 22% 0%, rgb(255 255 255 / 0.2), transparent 38%),
+    linear-gradient(112deg, rgb(15 35 48 / 0.82), rgb(17 13 37 / 0.84));
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  backdrop-filter: blur(22px) saturate(165%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 14px 42px rgb(0 0 0 / 0.42),
+    0 0 24px rgb(103 216 255 / 0.1);
+  translate: -50% 0;
+}
+
+.form-archive-switcher-track {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border: 1px solid rgb(127 231 255 / 0.48);
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 24% 0%, rgb(255 255 255 / 0.32), transparent 45%),
+    linear-gradient(118deg, rgb(57 184 211 / 0.38), rgb(105 76 204 / 0.32));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 0 18px rgb(101 219 244 / 0.22);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+}
+
+.form-archive-switcher-track[data-active="realm"] {
+  border-color: rgb(213 180 255 / 0.52);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 0 20px rgb(160 117 255 / 0.25);
+  transform: translate3d(100%, 0, 0);
+}
+
+.form-archive-switcher button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  place-content: center;
+  gap: 3px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(188 205 217 / 0.68);
+  transition: color 0.26s ease, text-shadow 0.26s ease, transform 0.22s ease;
+}
+
+.form-archive-switcher button:active {
+  transform: scale(0.97);
+}
+
+.form-archive-switcher button[aria-selected="true"] {
+  color: #fff;
+  text-shadow: 0 0 14px rgb(117 221 255 / 0.32);
+}
+
+.form-archive-switcher button small {
+  font: 700 0.48rem/1 var(--font-display);
+  letter-spacing: 0.26em;
+}
+
+.form-archive-switcher button b {
+  font: 600 0.72rem/1.1 var(--font-sans);
+  letter-spacing: 0.12em;
+}
+
+.form-archive-switcher button:focus-visible {
+  outline: 2px solid var(--archive-cyan);
+  outline-offset: -2px;
+}
+
+.form-archive-page .side-panel-trigger.form-archive-menu-trigger {
+  position: fixed;
+  z-index: 62;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+}
+
+.form-archive-frame-status {
+  position: fixed;
+  z-index: 53;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background: rgb(2 2 7 / 0.86);
+  color: rgb(225 238 247 / 0.76);
+  font: 600 0.58rem/1 var(--font-display);
+  letter-spacing: 0.3em;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.32s ease, visibility 0.32s;
+}
+
+.form-archive-frame-status.is-loaded {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.form-archive-frame-status i {
+  width: 36px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(117 221 255 / 0.18);
+  border-top-color: var(--archive-cyan);
+  border-right-color: var(--archive-gold);
+  border-radius: 50%;
+  animation: archive-frame-spin 0.9s linear infinite;
+}
+
+.zeus-button[data-navigating="true"] {
+  pointer-events: none;
+  filter: brightness(1.08) saturate(1.08);
+  transform: translate3d(-50%, -50%, 0) scale(0.94);
+}
+
+@keyframes archive-frame-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes archive-dive-space-rush {
+  from { opacity: 0.4; transform: scale(0.64) rotate(-0.5deg); }
+  48% { opacity: 0.78; }
+  to { opacity: 0.18; transform: scale(1.42) rotate(0.7deg); }
+}
+
+@keyframes archive-dive-space-arrive {
+  from { opacity: 0.7; transform: scale(1.08); }
+  to { opacity: 0; transform: scale(2.2); }
+}
+
+@media (max-width: 560px) {
+  .form-archive-switcher {
+    left: max(12px, env(safe-area-inset-left));
+    width: min(248px, calc(100vw - 84px));
+    min-width: 0;
+    translate: 0 0;
+  }
+
+  .form-archive-switcher button {
+    min-height: 42px;
+  }
+
+  .form-archive-page .side-panel-trigger.form-archive-menu-trigger {
+    right: max(10px, env(safe-area-inset-right));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-dive-space,
+  .form-archive-frame-status i {
+    animation: none !important;
+  }
+
+  .form-archive-switcher-track,
+  .form-archive-switcher button,
+  .form-archive-frame-status,
+  .zeus-button[data-navigating="true"] {
+    transition-duration: 0.001ms !important;
+  }
+}
+
 
 @layer base {
   html,

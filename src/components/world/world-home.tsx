@@ -1257,6 +1257,15 @@ export function WorldHome() {
         className="world-column-dialog"
         tabIndex={-1}
         aria-labelledby="world-column-pickup-title"
+        onClose={() => {
+          const dialog = pickupDialogRef.current;
+          if (pickupCloseTimer.current != null) {
+            window.clearTimeout(pickupCloseTimer.current);
+            pickupCloseTimer.current = null;
+          }
+          if (dialog) delete dialog.dataset.closing;
+          setPickupOpen(false);
+        }}
         onCancel={(e) => {
           e.preventDefault();
           closePickup();
