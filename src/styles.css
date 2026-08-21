@@ -186,15 +186,41 @@
   border-radius: 50%;
   background: repeating-conic-gradient(
     from 2deg,
-    transparent 0deg 4.5deg,
-    rgb(159 212 255 / 0.18) 4.8deg 5.05deg,
-    rgb(240 215 138 / 0.1) 5.1deg 5.3deg,
+    transparent 0deg 4.35deg,
+    rgb(159 212 255 / 0.34) 4.62deg 4.86deg,
+    rgb(240 215 138 / 0.17) 4.94deg 5.08deg,
     transparent 5.6deg 10deg
   );
-  -webkit-mask-image: radial-gradient(circle, transparent 0 3%, #000 13% 64%, transparent 76%);
-  mask-image: radial-gradient(circle, transparent 0 3%, #000 13% 64%, transparent 76%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 4%, #000 12% 72%, transparent 84%);
+  mask-image: radial-gradient(circle, transparent 0 4%, #000 12% 72%, transparent 84%);
   transform: translate(-50%, -50%) scale(0.14) rotate(-3deg);
   will-change: opacity, transform, filter;
+}
+
+.cine-dive-tunnel > i {
+  position: absolute;
+  inset: 5%;
+  border-radius: 50%;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 2.58deg,
+    rgb(197 235 255 / 0.5) 2.7deg 2.83deg,
+    transparent 2.96deg 6.4deg
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 0 7%, #000 17% 70%, transparent 82%);
+  mask-image: radial-gradient(circle, transparent 0 7%, #000 17% 70%, transparent 82%);
+  transform: translateZ(0) scale(0.52);
+  will-change: opacity, transform;
+}
+
+.cine-dive-tunnel > i:nth-child(2) {
+  background: repeating-conic-gradient(
+    from 1.7deg,
+    transparent 0deg 4.72deg,
+    rgb(240 215 138 / 0.38) 4.86deg 5deg,
+    transparent 5.16deg 9.2deg
+  );
 }
 
 .cine-dive-tunnel::before,
@@ -211,7 +237,7 @@
   background: repeating-radial-gradient(
     circle,
     transparent 0 5.4%,
-    rgb(159 212 255 / 0.22) 5.7% 5.82%,
+    rgb(159 212 255 / 0.38) 5.7% 5.84%,
     transparent 6.15% 10.4%
   );
   box-shadow: inset 0 0 12vmax rgb(0 0 0 / 0.72);
@@ -220,15 +246,15 @@
 .cine-dive-tunnel::after {
   inset: 43%;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 4%, #9fd4ff 18%, rgb(74 126 170 / 0.62) 38%, transparent 72%);
-  box-shadow: 0 0 7vmax rgb(159 212 255 / 0.68), 0 0 13vmax rgb(212 176 86 / 0.24);
+  background: radial-gradient(circle, #fff 0 3%, #9fd4ff 14%, rgb(74 126 170 / 0.68) 34%, transparent 70%);
+  box-shadow: 0 0 7vmax rgb(159 212 255 / 0.74), 0 0 13vmax rgb(212 176 86 / 0.28);
 }
 
 .cine-dive-flash {
   z-index: 29;
   inset: 0;
   overflow: hidden;
-  background: #010307;
+  background: radial-gradient(circle at center, rgb(222 244 255 / 0.52), rgb(84 164 194 / 0.2) 28%, rgb(1 3 7 / 0.36) 58%, transparent 78%);
   will-change: opacity;
 }
 
@@ -660,43 +686,59 @@
 }
 
 .is-diving .cine-atmosphere {
-  animation: world-dive-background 0.72s cubic-bezier(0.12, 0.76, 0.08, 1) both;
+  animation: world-dive-background 0.38s ease-out both;
 }
 
 .is-diving .cine-light-field {
-  animation: world-dive-light 0.72s cubic-bezier(0.12, 0.76, 0.08, 1) both;
+  animation: world-dive-light 0.42s ease-out both;
 }
 
 .is-diving .cine-stack {
-  animation: world-dive-logo 0.72s cubic-bezier(0.12, 0.76, 0.08, 1) both;
+  animation: world-dive-logo-release 0.24s ease-out both;
 }
 
 .is-diving .cine-hud {
-  animation: world-dive-hud 0.72s cubic-bezier(0.12, 0.76, 0.08, 1) both;
+  animation: world-dive-hud 0.34s ease-out both;
 }
 
 .is-diving .cine-particles {
-  animation: world-dive-particles 0.72s cubic-bezier(0.12, 0.76, 0.08, 1) both;
+  animation: world-dive-particles 0.32s ease-out both;
 }
 
 .is-diving .cine-vignette {
-  animation: world-dive-vignette 0.72s ease-in both;
+  animation: world-dive-vignette 0.36s ease-out both;
 }
 
 .is-diving .cine-dive-tunnel {
-  animation: world-dive-tunnel 0.72s cubic-bezier(0.08, 0.7, 0.02, 1) both;
+  animation: world-dive-tunnel-enter 0.28s cubic-bezier(0.12, 0.82, 0.12, 1) both;
+}
+
+.is-diving .cine-dive-tunnel::before {
+  animation: world-dive-ring-stream 0.36s linear 0.06s infinite;
+}
+
+.is-diving .cine-dive-tunnel::after {
+  animation: world-dive-vanishing-pulse 0.68s ease-in-out 0.08s infinite;
+}
+
+.is-diving .cine-dive-tunnel > i:nth-child(1) {
+  animation: world-dive-streak-stream 0.42s linear infinite;
+}
+
+.is-diving .cine-dive-tunnel > i:nth-child(2) {
+  animation: world-dive-streak-stream 0.54s linear -0.27s infinite;
 }
 
 .is-diving .cine-dive-flash {
-  animation: world-dive-cover 0.72s ease-in both;
+  animation: world-dive-flash 0.5s ease-out both;
 }
 
 .is-diving .cine-dive-flash::before {
-  animation: world-dive-core 0.72s cubic-bezier(0.08, 0.7, 0.02, 1) both;
+  animation: world-dive-core 0.5s cubic-bezier(0.12, 0.7, 0.1, 1) both;
 }
 
 .is-diving .cine-dive-status {
-  animation: world-dive-status 0.26s ease-out 0.42s both;
+  animation: world-dive-status 0.24s ease-out 0.3s both;
 }
 
 .is-diving .cine-chrome,
@@ -945,76 +987,84 @@
     filter: brightness(0.4) saturate(1.15);
     transform: scale(1);
   }
-  52% {
-    opacity: 0.76;
-    filter: brightness(0.72) saturate(1.6) blur(1px);
-  }
   100% {
-    opacity: 0;
-    filter: brightness(1.2) saturate(1.8) blur(7px);
-    transform: scale(2.45);
+    opacity: 0.16;
+    filter: brightness(0.28) saturate(1.35) blur(1px);
+    transform: scale(1.08);
   }
 }
 
 @keyframes world-dive-light {
   0% { opacity: 0.52; transform: scale(1.04); }
-  54% { opacity: 1; }
-  100% { opacity: 0; transform: scale(4.2); }
+  100% { opacity: 0.16; transform: scale(1.24); }
 }
 
-@keyframes world-dive-logo {
-  0% { opacity: 1; filter: blur(0); transform: scale(1); }
-  34% { opacity: 1; filter: blur(0); }
-  100% { opacity: 0; filter: blur(8px); transform: scale(8.5); }
+@keyframes world-dive-logo-release {
+  0% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(2px); }
 }
 
 @keyframes world-dive-hud {
   0% { opacity: 0.22; transform: translate(-50%, -50%) scale(1) rotate(0); }
-  45% { opacity: 0.72; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(5.2) rotate(24deg); }
+  100% { opacity: 0.06; transform: translate(-50%, -50%) scale(1.12) rotate(8deg); }
 }
 
 @keyframes world-dive-particles {
   0% { opacity: 1; filter: blur(0); transform: scale(1); }
-  100% { opacity: 0; filter: blur(4px); transform: scale(4.8); }
+  100% { opacity: 0.2; filter: blur(1px); transform: scale(1.06); }
 }
 
 @keyframes world-dive-vignette {
   0% { opacity: 1; transform: scale(1); }
-  56% { opacity: 0.25; }
-  100% { opacity: 0; transform: scale(1.7); }
+  100% { opacity: 0.88; transform: scale(0.98); }
 }
 
-@keyframes world-dive-tunnel {
+@keyframes world-dive-tunnel-enter {
   0% {
     opacity: 0;
-    filter: blur(4px);
+    filter: blur(2px);
     transform: translate(-50%, -50%) scale(0.14) rotate(-3deg);
   }
-  15% { opacity: 0.95; }
-  62% { opacity: 1; filter: blur(0); }
   100% {
-    opacity: 0;
-    filter: blur(2px);
-    transform: translate(-50%, -50%) scale(4.6) rotate(4deg);
+    opacity: 0.9;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(0.74) rotate(0);
   }
 }
 
-@keyframes world-dive-cover {
-  0%, 48% { opacity: 0; }
-  76% { opacity: 0.24; }
-  100% { opacity: 1; }
+@keyframes world-dive-ring-stream {
+  0% { opacity: 0; transform: scale(0.48); }
+  18% { opacity: 0.78; }
+  100% { opacity: 0; transform: scale(1.58); }
+}
+
+@keyframes world-dive-streak-stream {
+  0% { opacity: 0; transform: translateZ(0) scale(0.5) rotate(-0.25deg); }
+  18% { opacity: 0.9; }
+  72% { opacity: 0.58; }
+  100% { opacity: 0; transform: translateZ(0) scale(1.62) rotate(0.65deg); }
+}
+
+@keyframes world-dive-vanishing-pulse {
+  0%, 100% { opacity: 0.58; transform: scale(0.84); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes world-dive-flash {
+  0% { opacity: 0; }
+  26% { opacity: 0.76; }
+  100% { opacity: 0; }
 }
 
 @keyframes world-dive-core {
-  0%, 28% {
+  0% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.05);
   }
-  56% { opacity: 1; }
+  38% { opacity: 1; }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(12);
+    transform: translate(-50%, -50%) scale(2.8);
   }
 }
 
@@ -1024,7 +1074,7 @@
 }
 
 @keyframes world-dive-interface {
-  to { opacity: 0; filter: blur(4px); transform: scale(1.08); }
+  to { opacity: 0; filter: blur(3px); transform: scale(1.03); }
 }
 
 @keyframes world-dive-bar-top {
@@ -1320,6 +1370,9 @@
   .cine-progress > span,
   .cine-progress > i,
   .cine-dive-tunnel,
+  .cine-dive-tunnel::before,
+  .cine-dive-tunnel::after,
+  .cine-dive-tunnel > i,
   .cine-dive-flash,
   .cine-dive-flash::before,
   .cine-dive-status {

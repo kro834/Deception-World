@@ -7,7 +7,7 @@ import { useLoadGate } from "@/components/load-gate";
 import { Particles } from "./particles";
 
 const SEQUENCE_MS = 6600;
-const WORLD_DIVE_MS = 720;
+const WORLD_DIVE_MIN_MS = 900;
 
 type SequencePhase = "idle" | "playing" | "complete" | "diving";
 
@@ -52,6 +52,7 @@ export function TitleSequence() {
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const phaseRef = useRef(phase);
+  const mountedRef = useRef(true);
   const { go } = useLoadGate();
   const router = useRouter();
   phaseRef.current = phase;
@@ -73,7 +74,9 @@ export function TitleSequence() {
   }, [router]);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       scoreRef.current?.stop();
       scoreRef.current = null;
     };
@@ -141,6 +144,9 @@ export function TitleSequence() {
   const enterWorld = useCallback(async () => {
     if (phaseRef.current !== "complete") return;
 
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     phaseRef.current = "diving";
     setPhase("diving");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -149,12 +155,15 @@ export function TitleSequence() {
       await Promise.all([
         preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
         router.preloadRoute({ to: "/world" }).catch(() => undefined),
-        new Promise((resolve) => window.setTimeout(resolve, reduced ? 180 : WORLD_DIVE_MS)),
+        new Promise((resolve) => window.setTimeout(resolve, reduced ? 180 : WORLD_DIVE_MIN_MS)),
       ]);
+      if (!mountedRef.current || phaseRef.current !== "diving") return;
       await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
     } catch {
-      phaseRef.current = "complete";
-      setPhase("complete");
+      if (mountedRef.current) {
+        phaseRef.current = "complete";
+        setPhase("complete");
+      }
     }
   }, [go, router]);
 
@@ -168,7 +177,7 @@ export function TitleSequence() {
         skip();
       } else if (phase === "complete" && !isInteractive && e.key.toLowerCase() === "r") {
         replay();
-      } else if (!isInteractive && e.key.toLowerCase() === "m") {
+      } else if (phase !== "diving" && !isInteractive && e.key.toLowerCase() === "m") {
         setMuted((m) => {
           const next = !m;
           scoreRef.current?.setMuted(next);
@@ -272,7 +281,10 @@ export function TitleSequence() {
 
       <div className="cine-vignette" />
       <div className="cine-grain" />
-      <div className="cine-dive-tunnel" aria-hidden="true" />
+      <div className="cine-dive-tunnel" aria-hidden="true">
+        <i />
+        <i />
+      </div>
       <div className="cine-dive-flash" aria-hidden="true" />
       {phase === "diving" ? (
         <div className="cine-dive-status" role="status" aria-live="polite">
