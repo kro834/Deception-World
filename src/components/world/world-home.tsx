@@ -130,6 +130,17 @@ function syncRail(rail: HTMLElement | null, index: number) {
   rail.dispatchEvent(new Event("liquidrelayout"));
 }
 
+function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" | "other" }) {
+  return (
+    <div className={`archive-placeholder is-${tone}`} role="img" aria-label={`未判明の資料スロット ${index}`}>
+      <span>{String(index).padStart(2, "0")}</span>
+      <i aria-hidden="true" />
+      <small>UNRESOLVED</small>
+      <b>？？？</b>
+    </div>
+  );
+}
+
 /* Rails are memoized so poster autoplay / tab-panel state cannot reset
    the vanilla liquid-glass DOM (is-active, lens transform, WebGL bind). */
 const ManagerRail = memo(
@@ -762,7 +773,7 @@ export function WorldHome() {
 
             {managerTab === 0 ? (
               <div className="manager-archive-panel is-managers" role="tabpanel">
-                <div className="signal-array" aria-label="六詠を示す6つのシグナル">
+                <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
                   <GuardedLink
                     className="signal has-visual is-accessible is-face-safe zeus-signal"
                     to="/managers/zeus"
@@ -855,12 +866,8 @@ export function WorldHome() {
               </div>
             ) : managerTab === 1 ? (
               <div className="manager-archive-panel is-unmanaged" role="tabpanel">
-                <p className="system-label">UNMANAGED / REVERSE</p>
-                <h3 className="unmanaged-heading">
-                  管理外
-                </h3>
-                <p>個体情報へのアクセスは制限されています。</p>
-                <div className="unmanaged-array" aria-label="管理外">
+                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
+                <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
                   <button
                     className="dante-archive"
                     type="button"
@@ -907,13 +914,15 @@ export function WorldHome() {
                       <i>ACCESS //</i>
                     </span>
                   </button>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
+                  ))}
                 </div>
               </div>
             ) : (
               <div className="manager-archive-panel is-other" role="tabpanel">
-                <p className="system-label is-other">RELATED / ALAIN</p>
-                <h3>その他</h3>
-                <div className="other-array" aria-label="その他">
+                <p className="visually-hidden">その他の関連資料</p>
+                <div className="manager-slot-grid other-array" aria-label="その他">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
@@ -964,6 +973,9 @@ export function WorldHome() {
                       <i>レルム ムーンフォーム</i>
                     </span>
                   </GuardedLink>
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 3} tone="other" />
+                  ))}
                 </div>
               </div>
             )}
@@ -976,11 +988,39 @@ export function WorldHome() {
               <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
-            <div className="world-column-copy" role="tabpanel">
-              <p className="world-column-number">コラム{column.no}</p>
-              <h3>{column.title}</h3>
-              <div>
-                <p>{column.body}</p>
+            <div className="world-column-copy" role="tabpanel" aria-label={`コラム${column.no} ${column.title}`}>
+              <div className="world-column-number-stack">
+                {COLUMNS.map((item, index) => (
+                  <p
+                    key={item.no}
+                    className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    コラム{item.no}
+                  </p>
+                ))}
+              </div>
+              <div className="world-column-heading-stack">
+                {COLUMNS.map((item, index) => (
+                  <h3
+                    key={item.no}
+                    className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    {item.title}
+                  </h3>
+                ))}
+              </div>
+              <div className="world-column-summary-stack">
+                {COLUMNS.map((item, index) => (
+                  <div
+                    key={item.no}
+                    className={`world-column-summary-pane world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    <p>{item.body}</p>
+                  </div>
+                ))}
               </div>
               <SlideOpenControl
                 ariaControls="world-column-pickup"

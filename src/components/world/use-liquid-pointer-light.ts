@@ -22,14 +22,20 @@ export function useLiquidPointerLight() {
 
     const setActive = (target: LiquidTarget | null, value: boolean) => {
       if (!target) return;
-      if (value) target.dataset.liquidPointerActive = "true";
-      else delete target.dataset.liquidPointerActive;
+      if (value) {
+        if (target.dataset.liquidPointerActive !== "true") target.dataset.liquidPointerActive = "true";
+      } else if (target.dataset.liquidPointerActive) {
+        delete target.dataset.liquidPointerActive;
+      }
     };
 
     const setPressed = (target: LiquidTarget | null, value: boolean) => {
       if (!target) return;
-      if (value) target.dataset.liquidPointerPressed = "true";
-      else delete target.dataset.liquidPointerPressed;
+      if (value) {
+        if (target.dataset.liquidPointerPressed !== "true") target.dataset.liquidPointerPressed = "true";
+      } else if (target.dataset.liquidPointerPressed) {
+        delete target.dataset.liquidPointerPressed;
+      }
     };
 
     const flush = () => {
@@ -70,6 +76,7 @@ export function useLiquidPointerLight() {
       activate(target, event.clientX, event.clientY);
     };
     const onPointerMove = (event: PointerEvent) => {
+      if (!event.isPrimary) return;
       const target = findTarget(event.target) ?? (pointerId === event.pointerId ? pressed : null);
       if (target) activate(target, event.clientX, event.clientY);
     };

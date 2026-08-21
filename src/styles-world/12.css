@@ -194,7 +194,7 @@
     radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.2), rgba(103, 216, 255, 0.065) 31%, transparent 67%),
     radial-gradient(circle at 58% 56%, color-mix(in srgb, var(--liquid-current-accent) 10%, transparent), transparent 58%);
   mix-blend-mode: screen;
-  transition: opacity 0.18s ease;
+  transition: opacity 0.12s ease-out;
   will-change: auto;
 }
 
@@ -213,22 +213,22 @@
   background: linear-gradient(104deg, transparent 7%, rgba(255, 255, 255, 0.06) 20%, rgba(255, 255, 255, 0.46) 48%, color-mix(in srgb, var(--liquid-current-accent) 28%, transparent) 68%, transparent 92%);
   box-shadow: 0 0 18px rgba(255, 255, 255, 0.08);
   mix-blend-mode: screen;
-  transition: opacity 0.16s ease;
+  transition: opacity 0.11s ease-out;
   will-change: auto;
 }
 
 .liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-glow,
 .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface > .liquid-contact-glow {
-  opacity: 1;
+  opacity: 0.78;
 }
 
 .liquid-swipe-tabs[data-liquid-pressed="true"] > .liquid-rail-surface > .liquid-contact-reflection {
-  opacity: 0.58;
+  opacity: 0.42;
 }
 
 .liquid-swipe-tabs[data-liquid-held="true"] > .liquid-rail-surface > .liquid-contact-reflection,
 .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-rail-surface > .liquid-contact-reflection {
-  opacity: 0.92;
+  opacity: 0.68;
 }
 
 .liquid-selection-lens {
@@ -316,13 +316,14 @@
   height: 22px;
   border-radius: 50%;
   pointer-events: none;
-  opacity: 0.3;
+  visibility: hidden;
+  opacity: 0;
   transform: translate3d(-100px, -100px, 0);
   transform-origin: center;
   background: linear-gradient(104deg, transparent, rgba(255, 255, 255, 0.52) 46%, color-mix(in srgb, var(--liquid-current-accent) 36%, transparent) 66%, transparent);
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
   mix-blend-mode: screen;
-  transition: opacity 0.18s ease;
+  transition: opacity 0.11s ease-out, visibility 0s linear 0.11s;
   will-change: auto;
 }
 
@@ -334,7 +335,17 @@
 .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens > .liquid-selection-surface,
 .liquid-swipe-tabs[data-liquid-held="true"] .liquid-lens-reflection,
 .liquid-swipe-tabs[data-liquid-dragging="true"] .liquid-lens-reflection {
+  visibility: visible;
+  transition-delay: 0s;
   will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-contact-glow,
+  .liquid-contact-reflection,
+  .liquid-lens-reflection {
+    display: none;
+  }
 }
 
 .liquid-swipe-tabs[data-liquid-initialized="true"] > .liquid-selection-lens {
@@ -367,4 +378,3 @@
     inset 0 -1px 0 color-mix(in srgb, var(--liquid-current-accent) 22%, transparent);
   transform: translateZ(0) scale(1);
 }
-

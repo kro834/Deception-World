@@ -59,11 +59,11 @@
 }
 
 .liquid-swipe-tabs[data-liquid-held="true"] .liquid-lens-reflection {
-  opacity: 0.62;
+  opacity: 0.48;
 }
 
 .liquid-swipe-tabs[data-liquid-dragging="true"] .liquid-lens-reflection {
-  opacity: 0.88;
+  opacity: 0.68;
 }
 
 .liquid-swipe-tabs > button[role="tab"] {
@@ -387,4 +387,3 @@
     scale 0.46s var(--glass-spring),
     box-shadow 0.28s ease;
 }
-

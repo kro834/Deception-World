@@ -13,10 +13,13 @@ import {
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { assetsWarmed, preloadAssets } from "@/lib/asset-loader";
 
+type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz";
+
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "default" | "zeus";
+  variant: "default" | "zeus" | RiderCutInVariant;
+  phase: "loading" | "covering" | "revealing";
 };
 
 type GoOptions = {
@@ -31,6 +34,20 @@ type LoadGateApi = {
 
 const LoadGateContext = createContext<LoadGateApi | null>(null);
 
+const RIDER_CUT_IN_ROUTES = {
+  "/riders/leddic": "leddic",
+  "/riders/argenome": "argenome",
+  "/riders/over-zeztz": "over-zeztz",
+} as const satisfies Record<string, RiderCutInVariant>;
+
+const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: number }> = {
+  leddic: { cover: 260, reveal: 760 },
+  argenome: { cover: 300, reveal: 620 },
+  "over-zeztz": { cover: 340, reveal: 820 },
+};
+
+const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
+
 export function useLoadGate() {
   const ctx = useContext(LoadGateContext);
   if (!ctx) throw new Error("LoadGateProvider missing");
@@ -40,18 +57,52 @@ export function useLoadGate() {
 export function LoadGateProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const router = useRouter();
-  const [gate, setGate] = useState<GateState>({ active: false, percent: 0, variant: "default" });
+  const [gate, setGate] = useState<GateState>({
+    active: false,
+    percent: 0,
+    variant: "default",
+    phase: "loading",
+  });
   const busy = useRef(false);
 
   const go = useCallback(
     async ({ to, hash, assets }: GoOptions) => {
       if (busy.current) return;
-      if (assetsWarmed(assets)) {
+      const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
+      if (assetsWarmed(assets) && !cutInVariant) {
         await navigate({ to: to as never, hash });
         return;
       }
       busy.current = true;
       const variant = to === "/managers/zeus" ? "zeus" : "default";
+
+      if (cutInVariant) {
+        const startedAt = performance.now();
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const timings = reduceMotion ? { cover: 80, reveal: 140 } : RIDER_CUT_IN_TIMINGS[cutInVariant];
+        document.documentElement.dataset.loading = "true";
+        setGate({ active: true, percent: assetsWarmed(assets) ? 100 : 1, variant: cutInVariant, phase: "covering" });
+        try {
+          await Promise.all([
+            preloadAssets(assets, (percent) => {
+              setGate((state) => ({ ...state, percent: Math.max(1, percent) }));
+            }),
+            router.preloadRoute({ to: to as never }).catch(() => undefined),
+          ]);
+          const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
+          if (coverTimeLeft > 0) await wait(coverTimeLeft);
+          setGate({ active: true, percent: 100, variant: cutInVariant, phase: "covering" });
+          await navigate({ to: to as never, hash });
+          setGate({ active: true, percent: 100, variant: cutInVariant, phase: "revealing" });
+          await wait(timings.reveal);
+        } finally {
+          document.documentElement.removeAttribute("data-loading");
+          setGate({ active: false, percent: 0, variant: "default", phase: "loading" });
+          busy.current = false;
+        }
+        return;
+      }
+
       let overlayVisible = false;
       let overlayShownAt = 0;
       let latestPercent = 1;
@@ -59,7 +110,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         overlayVisible = true;
         overlayShownAt = performance.now();
         document.documentElement.dataset.loading = "true";
-        setGate({ active: true, percent: latestPercent, variant });
+        setGate({ active: true, percent: latestPercent, variant, phase: "loading" });
       }, variant === "zeus" ? 0 : 140);
       try {
         await Promise.all([
@@ -74,7 +125,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       } finally {
         window.clearTimeout(showTimer);
         if (overlayVisible) {
-          setGate({ active: true, percent: 100, variant });
+          setGate({ active: true, percent: 100, variant, phase: "loading" });
           const minimumDuration = variant === "zeus" ? 860 : 120;
           const minimumVisibleTime = Math.max(0, minimumDuration - (performance.now() - overlayShownAt));
           if (minimumVisibleTime > 0) {
@@ -85,7 +136,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           await navigate({ to: to as never, hash });
         } finally {
           document.documentElement.removeAttribute("data-loading");
-          setGate({ active: false, percent: 0, variant: "default" });
+          setGate({ active: false, percent: 0, variant: "default", phase: "loading" });
           busy.current = false;
         }
       }
@@ -98,12 +149,22 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   return (
     <LoadGateContext.Provider value={api}>
       {children}
-      <LoadOverlay active={gate.active} percent={gate.percent} variant={gate.variant} />
+      <LoadOverlay active={gate.active} percent={gate.percent} variant={gate.variant} phase={gate.phase} />
     </LoadGateContext.Provider>
   );
 }
 
-function LoadOverlay({ active, percent, variant }: { active: boolean; percent: number; variant: GateState["variant"] }) {
+function LoadOverlay({
+  active,
+  percent,
+  variant,
+  phase,
+}: {
+  active: boolean;
+  percent: number;
+  variant: GateState["variant"];
+  phase: GateState["phase"];
+}) {
   const [shown, setShown] = useState(0);
   const shownRef = useRef(0);
 
@@ -129,6 +190,24 @@ function LoadOverlay({ active, percent, variant }: { active: boolean; percent: n
   if (!active) return null;
   const display = Math.max(0, Math.min(100, Math.round(shown)));
   const isZeus = variant === "zeus";
+  const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz";
+
+  if (isRiderCutIn) {
+    return (
+      <div
+        className={`load-gate rider-route-cutin is-${variant}-cutin is-${phase}`}
+        role="progressbar"
+        aria-live="polite"
+        aria-busy="true"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={display}
+        aria-label={`${cutInLabel(variant)}の個別資料を読み込み中 ${display}%`}
+      >
+        <RiderRouteCutIn variant={variant} />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -154,6 +233,49 @@ function LoadOverlay({ active, percent, variant }: { active: boolean; percent: n
           <i style={{ transform: `scaleX(${display / 100})` }} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function cutInLabel(variant: RiderCutInVariant) {
+  if (variant === "leddic") return "レディック";
+  if (variant === "argenome") return "アルゲノム";
+  return "オーバーゼッツ";
+}
+
+function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
+  if (variant === "leddic") {
+    return (
+      <div className="rider-cutin-stage leddic-cutin-stage" aria-hidden="true">
+        <span className="leddic-shoji is-left"><i /></span>
+        <span className="leddic-shoji is-right"><i /></span>
+        <span className="leddic-seam" />
+        <span className="rider-cutin-caption"><small>GREEN VEIL // OPEN</small><b>LEDDIC</b></span>
+      </div>
+    );
+  }
+
+  if (variant === "argenome") {
+    return (
+      <div className="rider-cutin-stage argenome-cutin-stage" aria-hidden="true">
+        <span className="argenome-ink" />
+        <span className="argenome-slash is-echo-one" />
+        <span className="argenome-slash is-echo-two" />
+        <span className="argenome-slash is-main" />
+        <span className="argenome-flare" />
+        <span className="rider-cutin-caption"><small>SCARLET TRACE // SEVER</small><b>ARGENOME</b></span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rider-cutin-stage over-zeztz-cutin-stage" aria-hidden="true">
+      <span className="over-zeztz-crack" />
+      <span className="over-zeztz-impact" />
+      <span className="over-zeztz-shards">
+        {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+      </span>
+      <span className="rider-cutin-caption"><small>BREAK LIMIT // COLLAPSE</small><b>OVER-ZEZTZ</b></span>
     </div>
   );
 }

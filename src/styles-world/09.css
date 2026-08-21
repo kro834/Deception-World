@@ -541,11 +541,11 @@
     font-size: clamp(36px, 12vw, 54px);
   }
 
-  .world-column-copy > div {
+  .world-column-summary-pane {
     columns: auto;
   }
 
-  .world-column-copy > div p {
+  .world-column-summary-pane p {
     font-size: 12px;
     line-height: 2;
   }

@@ -1,0 +1,380 @@
+/* Route-specific rider dossier cut-ins. The overlay remains mounted across
+   navigation: the closed treatment covers the old page, then reveals the new. */
+
+.load-gate.rider-route-cutin {
+  display: block;
+  overflow: hidden;
+  background: transparent;
+  color: #fff;
+  isolation: isolate;
+}
+
+.rider-cutin-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #020407;
+  transform: translateZ(0);
+}
+
+.rider-cutin-caption {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  min-width: min(72vw, 440px);
+  justify-items: center;
+  gap: 9px;
+  color: #f3fbf8;
+  text-align: center;
+  text-shadow: 0 3px 24px rgba(0, 0, 0, 0.82);
+  transform: translate3d(-50%, -50%, 0);
+  transition: opacity 0.22s ease, transform 0.34s cubic-bezier(0.2, 0.78, 0.16, 1);
+}
+
+.rider-cutin-caption small {
+  font-family: var(--font-display);
+  font-size: clamp(7px, 0.72vw, 10px);
+  font-weight: 800;
+  letter-spacing: 0.35em;
+}
+
+.rider-cutin-caption b {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 5.4vw, 72px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+.is-revealing .rider-cutin-caption {
+  opacity: 0;
+  transform: translate3d(-50%, calc(-50% - 10px), 0) scale(1.03);
+}
+
+/* LEDDIC — green shoji doors opening from the centre. */
+.leddic-cutin-stage {
+  background: #031009;
+}
+
+.leddic-shoji {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  bottom: 0;
+  width: 50.2%;
+  overflow: hidden;
+  border-color: rgba(173, 255, 205, 0.34);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 3px), rgba(5, 39, 24, 0.88) calc(12.5% - 3px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(16.666% - 3px), rgba(5, 39, 24, 0.82) calc(16.666% - 3px) 16.666%),
+    radial-gradient(circle at 50% 42%, rgba(113, 255, 169, 0.2), transparent 38%),
+    linear-gradient(112deg, rgba(232, 255, 236, 0.86), rgba(79, 161, 103, 0.56) 50%, rgba(10, 65, 37, 0.88));
+  box-shadow: inset 0 0 72px rgba(1, 20, 9, 0.88), 0 0 42px rgba(71, 255, 139, 0.14);
+  transition: transform 0.72s cubic-bezier(0.76, 0, 0.18, 1), filter 0.54s ease;
+  will-change: transform;
+}
+
+.leddic-shoji::before,
+.leddic-shoji::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.leddic-shoji::before {
+  inset: 3.5% 3%;
+  border: clamp(5px, 0.7vw, 11px) solid rgba(3, 37, 20, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(196, 255, 213, 0.25);
+}
+
+.leddic-shoji::after {
+  top: 0;
+  bottom: 0;
+  width: clamp(12px, 1.45vw, 25px);
+  background: linear-gradient(90deg, #082c1a, #26754a 50%, #061c10);
+  box-shadow: 0 0 22px rgba(87, 255, 153, 0.2);
+}
+
+.leddic-shoji.is-left {
+  left: 0;
+  border-right: 1px solid rgba(203, 255, 219, 0.48);
+}
+
+.leddic-shoji.is-left::after {
+  right: 0;
+}
+
+.leddic-shoji.is-right {
+  right: 0;
+  border-left: 1px solid rgba(203, 255, 219, 0.48);
+}
+
+.leddic-shoji.is-right::after {
+  left: 0;
+}
+
+.leddic-shoji > i {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  width: clamp(13px, 1.45vw, 22px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(226, 201, 109, 0.76);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3bf, #96772d 58%, #2c2410);
+  box-shadow: 0 0 0 4px rgba(7, 40, 23, 0.88), 0 0 20px rgba(179, 255, 205, 0.28);
+  transform: translateY(-50%);
+}
+
+.leddic-shoji.is-left > i { right: clamp(24px, 3vw, 48px); }
+.leddic-shoji.is-right > i { left: clamp(24px, 3vw, 48px); }
+
+.leddic-seam {
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  background: #d8ffe3;
+  box-shadow: 0 0 18px 5px rgba(87, 255, 153, 0.52), 0 0 80px 20px rgba(33, 218, 115, 0.2);
+  transition: opacity 0.24s ease, transform 0.55s ease;
+}
+
+.is-leddic-cutin .rider-cutin-caption small { color: #a5ffc4; }
+.is-leddic-cutin .rider-cutin-caption b { color: #effff3; }
+
+.is-leddic-cutin.is-revealing .leddic-shoji.is-left {
+  filter: brightness(1.12);
+  transform: translate3d(-102%, 0, 0);
+}
+
+.is-leddic-cutin.is-revealing .leddic-shoji.is-right {
+  filter: brightness(1.12);
+  transform: translate3d(102%, 0, 0);
+}
+
+.is-leddic-cutin.is-revealing .leddic-seam {
+  opacity: 0;
+  transform: scaleX(22);
+}
+
+/* ARGENOME — one decisive crimson cut with restrained, fast-decaying echoes. */
+.argenome-cutin-stage {
+  background: transparent;
+}
+
+.argenome-ink {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 46% 54%, rgba(119, 0, 18, 0.22), transparent 48%),
+    #020203;
+  transition: opacity 0.18s 0.08s ease-out;
+}
+
+.argenome-slash {
+  position: absolute;
+  z-index: 7;
+  top: 50%;
+  left: 50%;
+  width: 160vmax;
+  height: 2px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent 1%, #79000d 18%, #ff2942 43%, #fff4ef 50%, #ff203b 57%, #6d000b 82%, transparent 99%);
+  transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(0.03);
+  transform-origin: center;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.is-argenome-cutin.is-covering .argenome-slash.is-main {
+  animation: argenomeCoverSlash 0.3s cubic-bezier(0.12, 0.72, 0.16, 1) both;
+}
+
+.argenome-slash.is-main {
+  height: clamp(2px, 0.24vw, 4px);
+  box-shadow: 0 0 9px 2px rgba(255, 33, 58, 0.86), 0 0 34px 8px rgba(205, 0, 28, 0.35);
+}
+
+.argenome-slash.is-echo-one,
+.argenome-slash.is-echo-two {
+  height: 1px;
+  filter: blur(0.25px);
+}
+
+.argenome-slash.is-echo-one { translate: 0 -13px; }
+.argenome-slash.is-echo-two { translate: 0 14px; }
+
+.argenome-flare {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  width: min(30vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 245, 238, 0.96), rgba(255, 18, 48, 0.35) 9%, transparent 62%);
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.12);
+  pointer-events: none;
+}
+
+.is-argenome-cutin .rider-cutin-caption small { color: #ff6578; }
+.is-argenome-cutin .rider-cutin-caption b { color: #fff5f2; }
+
+.is-argenome-cutin.is-revealing .argenome-ink {
+  opacity: 0;
+}
+
+.is-argenome-cutin.is-revealing .argenome-slash.is-main {
+  animation: argenomeRevealSlash 0.5s cubic-bezier(0.12, 0.72, 0.16, 1) both;
+}
+
+.is-argenome-cutin.is-revealing .argenome-slash.is-echo-one {
+  animation: argenomeSlashEcho 0.42s 0.05s ease-out both;
+}
+
+.is-argenome-cutin.is-revealing .argenome-slash.is-echo-two {
+  animation: argenomeSlashEcho 0.38s 0.1s ease-out both;
+}
+
+.is-argenome-cutin.is-revealing .argenome-flare {
+  animation: argenomeFlare 0.4s ease-out both;
+}
+
+/* OVER-ZEZTZ — a sealed screen fractures into independently moving shards. */
+.over-zeztz-cutin-stage {
+  background: transparent;
+}
+
+.over-zeztz-crack {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(41deg, transparent 49.82%, rgba(128, 236, 255, 0.56) 49.92% 50.02%, transparent 50.12%) 50% 50% / 100% 100%,
+    linear-gradient(122deg, transparent 49.78%, rgba(94, 199, 255, 0.38) 49.9% 50.02%, transparent 50.15%) 50% 50% / 100% 100%,
+    linear-gradient(167deg, transparent 49.84%, rgba(205, 252, 255, 0.42) 49.94% 50.03%, transparent 50.13%) 50% 50% / 100% 100%,
+    radial-gradient(circle at 50% 50%, rgba(58, 190, 255, 0.2), transparent 22%),
+    #020509;
+  transition: opacity 0.1s ease-out;
+}
+
+.over-zeztz-impact {
+  position: absolute;
+  z-index: 18;
+  top: 50%;
+  left: 50%;
+  width: clamp(28px, 4vw, 58px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(188, 248, 255, 0.82);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(103, 216, 255, 0.76), 0 0 76px rgba(36, 140, 255, 0.48);
+  opacity: 0.84;
+  transform: translate3d(-50%, -50%, 0) scale(0.4);
+}
+
+.over-zeztz-shards,
+.over-zeztz-shards > i {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+}
+
+.over-zeztz-shards > i {
+  background: linear-gradient(145deg, #07111c, #020509 70%);
+  filter: drop-shadow(0 0 1px rgba(170, 244, 255, 0.7));
+  transform: translate3d(0, 0, 0) rotate(0);
+  transition: transform 0.74s cubic-bezier(0.32, 0, 0.7, 0.18), opacity 0.54s 0.1s ease-out;
+  will-change: transform, opacity;
+}
+
+.over-zeztz-shards > i:nth-child(1) { clip-path: polygon(0 0, 30% 0, 23% 28%, 0 42%); --shard-x: -26vw; --shard-y: -22vh; --shard-r: -13deg; }
+.over-zeztz-shards > i:nth-child(2) { clip-path: polygon(30% 0, 58% 0, 51% 29%, 35% 39%, 23% 28%); --shard-x: -5vw; --shard-y: -31vh; --shard-r: 9deg; }
+.over-zeztz-shards > i:nth-child(3) { clip-path: polygon(58% 0, 100% 0, 100% 31%, 75% 38%, 51% 29%); --shard-x: 25vw; --shard-y: -27vh; --shard-r: 16deg; }
+.over-zeztz-shards > i:nth-child(4) { clip-path: polygon(0 42%, 23% 28%, 35% 39%, 30% 58%, 0 68%); --shard-x: -34vw; --shard-y: -4vh; --shard-r: 15deg; }
+.over-zeztz-shards > i:nth-child(5) { clip-path: polygon(23% 28%, 51% 29%, 50% 50%, 30% 58%, 35% 39%); --shard-x: -15vw; --shard-y: -9vh; --shard-r: -18deg; }
+.over-zeztz-shards > i:nth-child(6) { clip-path: polygon(51% 29%, 75% 38%, 70% 59%, 50% 50%); --shard-x: 13vw; --shard-y: -7vh; --shard-r: 20deg; }
+.over-zeztz-shards > i:nth-child(7) { clip-path: polygon(75% 38%, 100% 31%, 100% 68%, 70% 59%); --shard-x: 36vw; --shard-y: -1vh; --shard-r: -14deg; }
+.over-zeztz-shards > i:nth-child(8) { clip-path: polygon(0 68%, 30% 58%, 37% 78%, 23% 100%, 0 100%); --shard-x: -30vw; --shard-y: 21vh; --shard-r: -16deg; }
+.over-zeztz-shards > i:nth-child(9) { clip-path: polygon(30% 58%, 50% 50%, 53% 76%, 37% 78%); --shard-x: -9vw; --shard-y: 18vh; --shard-r: 17deg; }
+.over-zeztz-shards > i:nth-child(10) { clip-path: polygon(50% 50%, 70% 59%, 66% 82%, 53% 76%); --shard-x: 10vw; --shard-y: 21vh; --shard-r: -19deg; }
+.over-zeztz-shards > i:nth-child(11) { clip-path: polygon(70% 59%, 100% 68%, 100% 100%, 78% 100%, 66% 82%); --shard-x: 31vw; --shard-y: 23vh; --shard-r: 14deg; }
+.over-zeztz-shards > i:nth-child(12) { clip-path: polygon(23% 100%, 37% 78%, 53% 76%, 66% 82%, 78% 100%); --shard-x: 2vw; --shard-y: 34vh; --shard-r: -8deg; }
+
+.is-over-zeztz-cutin .rider-cutin-caption small { color: #8cecff; }
+.is-over-zeztz-cutin .rider-cutin-caption b { color: #ecfbff; }
+
+.is-over-zeztz-cutin.is-revealing .over-zeztz-crack {
+  opacity: 0;
+}
+
+.is-over-zeztz-cutin.is-revealing .over-zeztz-impact {
+  animation: overZeztzImpact 0.32s ease-out both;
+}
+
+.is-over-zeztz-cutin.is-revealing .over-zeztz-shards > i {
+  opacity: 0;
+  transform: translate3d(var(--shard-x), var(--shard-y), 0) rotate(var(--shard-r)) scale(1.07);
+}
+
+@keyframes argenomeCoverSlash {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(0.02); }
+  38% { opacity: 1; }
+  100% { opacity: 0.72; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1); }
+}
+
+@keyframes argenomeRevealSlash {
+  0% { opacity: 0.68; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1); }
+  34% { opacity: 1; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.04) scaleY(2.2); }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.08) scaleY(12); }
+}
+
+@keyframes argenomeSlashEcho {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(0.75); }
+  22% { opacity: 0.36; }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.06) scaleY(5); }
+}
+
+@keyframes argenomeFlare {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(0.12); }
+  28% { opacity: 0.72; }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(1.3); }
+}
+
+@keyframes overZeztzImpact {
+  0% { opacity: 0.84; transform: translate3d(-50%, -50%, 0) scale(0.4); }
+  42% { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(2.4); }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(7); }
+}
+
+@media (max-width: 560px) {
+  .rider-cutin-caption {
+    min-width: 88vw;
+  }
+
+  .rider-cutin-caption small {
+    letter-spacing: 0.24em;
+  }
+
+  .rider-cutin-caption b {
+    font-size: clamp(28px, 11vw, 48px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rider-route-cutin .rider-cutin-stage,
+  .rider-route-cutin .rider-cutin-stage * {
+    animation: none !important;
+    transition-duration: 0.08s !important;
+  }
+
+  .rider-route-cutin.is-revealing .rider-cutin-stage {
+    opacity: 0;
+  }
+}

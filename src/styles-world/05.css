@@ -223,12 +223,12 @@
   letter-spacing: -0.05em;
 }
 
-.world-column-copy > div {
+.world-column-summary-pane {
   columns: 2;
   column-gap: clamp(28px, 4vw, 58px);
 }
 
-.world-column-copy > div p {
+.world-column-summary-pane p {
   break-inside: avoid;
   margin: 0 0 20px;
   color: var(--muted);

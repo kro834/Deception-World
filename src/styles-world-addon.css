@@ -775,29 +775,225 @@ br.tab-br { display: none; }
   margin: 12px 0 0 auto;
 }
 
-/* Reserve the same title and summary space before expansion, so switching
-   between short and long columns never resizes the surrounding frame. */
-.world-column-copy h3 {
-  min-block-size: 1em;
+/* Every column contributes to the number/title/body track even while hidden.
+   The largest item therefore reserves each region at the current viewport,
+   and switching text can never move the slider or resize the outer frame. */
+.world-column-number-stack,
+.world-column-heading-stack,
+.world-column-summary-stack {
+  display: grid;
+  min-width: 0;
 }
 
-.world-column-copy > div {
-  min-block-size: 104px;
+.world-column-stack-item {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
-@media (max-width: 840px) {
-  .world-column-copy > div {
-    min-block-size: 120px;
-  }
+.world-column-stack-item.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: worldColumnReveal 0.56s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 六詠・管理外・その他 share one six-slot matrix. Fixed rows make the
+   category switch height-independent; unknown records remain visible slots. */
+.manager-archive-panel,
+.manager-archive-panel.is-unmanaged,
+.manager-archive-panel.is-other {
+  display: block;
+  min-block-size: 0;
+  block-size: 366px;
+}
+
+.manager-slot-grid,
+.manager-slot-grid.signal-array,
+.manager-slot-grid.unmanaged-array,
+.manager-slot-grid.other-array {
+  display: grid;
+  min-block-size: 0;
+  block-size: 366px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 178px);
+  gap: 10px;
+}
+
+.manager-slot-grid > .signal,
+.manager-slot-grid > .dante-archive,
+.manager-slot-grid > .other-archive-card,
+.manager-slot-grid > .archive-placeholder {
+  min-block-size: 0;
+  block-size: 178px;
+}
+
+.manager-slot-grid .dante-archive {
+  display: block;
+  overflow: hidden;
+  border-radius: 20px 34px 20px 12px;
+  background: #12070a;
+}
+
+.manager-slot-grid .dante-visual {
+  position: absolute;
+  inset: 0;
+}
+
+.manager-slot-grid .dante-visual::after {
+  background:
+    linear-gradient(180deg, rgba(8, 2, 4, 0.08) 20%, rgba(8, 2, 4, 0.94) 100%),
+    linear-gradient(90deg, rgba(8, 2, 4, 0.42), transparent 70%);
+}
+
+.manager-slot-grid .dante-copy {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  justify-content: flex-end;
+  padding: 16px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.92);
+}
+
+.manager-slot-grid .dante-copy small {
+  font-size: 6px;
+}
+
+.manager-slot-grid .dante-copy b {
+  margin-top: 5px;
+  font-size: clamp(20px, 2.6vw, 34px);
+}
+
+.manager-slot-grid .dante-copy em {
+  font-size: 8px;
+}
+
+.manager-slot-grid .dante-copy i {
+  margin-top: 7px;
+  font-size: 5px;
+}
+
+.manager-slot-grid .other-archive-card {
+  border-radius: 20px 34px 20px 12px;
+}
+
+.manager-slot-grid .other-card-code {
+  top: 14px;
+  left: 14px;
+}
+
+.manager-slot-grid .other-card-copy {
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  gap: 4px;
+}
+
+.manager-slot-grid .other-card-copy b {
+  font-size: clamp(12px, 1.3vw, 18px);
+}
+
+.manager-slot-grid .other-card-copy i {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-placeholder {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  align-content: space-between;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px dashed rgba(132, 203, 255, 0.16);
+  border-radius: 20px 34px 20px 12px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.022), transparent 60%),
+    rgba(5, 9, 15, 0.5);
+  color: rgba(244, 246, 251, 0.48);
+  isolation: isolate;
+}
+
+.archive-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, transparent 0 17px, rgba(255, 255, 255, 0.018) 17px 18px);
+  pointer-events: none;
+}
+
+.archive-placeholder span,
+.archive-placeholder i,
+.archive-placeholder small,
+.archive-placeholder b {
+  position: relative;
+  z-index: 1;
+}
+
+.archive-placeholder span {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 300;
+}
+
+.archive-placeholder i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.archive-placeholder small {
+  font-size: 6px;
+  letter-spacing: 0.22em;
+}
+
+.archive-placeholder b {
+  overflow: hidden;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-placeholder.is-unmanaged {
+  border-color: rgba(241, 74, 96, 0.17);
+  color: rgba(241, 74, 96, 0.54);
+}
+
+.archive-placeholder.is-other {
+  border-color: rgba(105, 223, 116, 0.17);
+  color: rgba(105, 223, 116, 0.52);
 }
 
 @media (max-width: 560px) {
-  .world-column-copy h3 {
-    min-block-size: 2em;
+  .manager-archive-panel,
+  .manager-archive-panel.is-unmanaged,
+  .manager-archive-panel.is-other {
+    block-size: 524px;
   }
 
-  .world-column-copy > div {
-    min-block-size: 144px;
+  .manager-slot-grid,
+  .manager-slot-grid.signal-array,
+  .manager-slot-grid.unmanaged-array,
+  .manager-slot-grid.other-array {
+    block-size: 524px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, 168px);
+  }
+
+  .manager-slot-grid > .signal,
+  .manager-slot-grid > .dante-archive,
+  .manager-slot-grid > .other-archive-card,
+  .manager-slot-grid > .archive-placeholder {
+    block-size: 168px;
+  }
+
+  .manager-slot-grid .dante-copy {
+    padding: 14px;
   }
 }
 
