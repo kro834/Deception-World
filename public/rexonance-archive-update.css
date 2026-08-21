@@ -208,3 +208,39 @@
     transition: none !important;
   }
 }
+
+/* Keep each archive progress fill and its highlight in one clipped layer. */
+#saga-forms-performance-v5 .files-form-progress-v14 > span > em,
+#saga-forms-performance-v5 .v6s-progress-rail::after {
+  display: none !important;
+}
+
+#saga-forms-performance-v5 .files-form-progress-v14 > span > i,
+#saga-forms-performance-v5 .v6s-progress-rail > i {
+  overflow: hidden;
+}
+
+#saga-forms-performance-v5 .files-form-progress-v14 > span > i::after,
+#saga-forms-performance-v5 .v6s-progress-rail > i::after {
+  position: absolute;
+  inset: -2px auto -2px -34%;
+  width: 34%;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.94) 48%, var(--active-2, #8eeaff) 70%, transparent);
+  filter: drop-shadow(0 0 5px var(--active-2, #8eeaff));
+  animation: archive-unified-progress-glint 2.15s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes archive-unified-progress-glint {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(395%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #saga-forms-performance-v5 .files-form-progress-v14 > span > i::after,
+  #saga-forms-performance-v5 .v6s-progress-rail > i::after {
+    animation: none !important;
+    opacity: 0;
+  }
+}
