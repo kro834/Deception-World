@@ -103,7 +103,7 @@ const COLUMNS = [
 const EPISODES = [
   { no: "01", title: "HIDE-AND-SEEK", src: "/episode-01-hide-and-seek.jpeg", pos: "50% 30%", alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル" },
   { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
-  { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "55% 18%", alt: "白い帽子と衣装の人物が崩壊した街を見下ろすEP3のサムネイル" },
+  { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "50% 18%", alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル" },
   { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
   { no: "05", title: "FARCE", src: "/episode-05-farce.jpeg", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
 ];

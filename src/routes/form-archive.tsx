@@ -32,6 +32,7 @@ type ArchivePress = {
   originY: number;
   clientX: number;
   clientY: number;
+  startProgress: 0 | 1;
   target: HTMLButtonElement;
 };
 
@@ -66,14 +67,13 @@ function FormArchive() {
     setDragProgress(next);
   }, []);
 
-  const progressFromPointer = useCallback((clientX: number) => {
+  const progressFromDrag = useCallback((press: ArchivePress, clientX: number) => {
     const bounds = switcherRef.current?.getBoundingClientRect();
-    if (!bounds) return archive === "realm" ? 1 : 0;
+    if (!bounds) return press.startProgress;
 
-    const firstCenter = bounds.left + bounds.width * 0.25;
     const travel = bounds.width * 0.5;
-    return Math.min(1, Math.max(0, (clientX - firstCenter) / travel));
-  }, [archive]);
+    return Math.min(1, Math.max(0, press.startProgress + (clientX - press.originX) / travel));
+  }, []);
 
   const cancelPointerGesture = useCallback(() => {
     clearLongPressTimer();
@@ -98,6 +98,7 @@ function FormArchive() {
       originY: event.clientY,
       clientX: event.clientX,
       clientY: event.clientY,
+      startProgress: archive === "realm" ? 1 : 0,
       target,
     };
     target.setPointerCapture(event.pointerId);
@@ -108,9 +109,9 @@ function FormArchive() {
 
       longPressTimerRef.current = null;
       setHoldingArchive(null);
-      updateDragProgress(progressFromPointer(press.clientX));
+      updateDragProgress(press.startProgress);
     }, 360);
-  }, [cancelPointerGesture, progressFromPointer, updateDragProgress]);
+  }, [archive, cancelPointerGesture, updateDragProgress]);
 
   const moveLongPress = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     const press = pressRef.current;
@@ -121,7 +122,7 @@ function FormArchive() {
 
     if (dragProgressRef.current !== null) {
       event.preventDefault();
-      updateDragProgress(progressFromPointer(event.clientX));
+      updateDragProgress(progressFromDrag(press, event.clientX));
       return;
     }
 
@@ -130,7 +131,7 @@ function FormArchive() {
 
     ignoreClickUntilRef.current = performance.now() + 650;
     cancelPointerGesture();
-  }, [cancelPointerGesture, progressFromPointer, updateDragProgress]);
+  }, [cancelPointerGesture, progressFromDrag, updateDragProgress]);
 
   const finishLongPress = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     const press = pressRef.current;

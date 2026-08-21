@@ -244,3 +244,129 @@
     opacity: 0;
   }
 }
+
+/* Reserve independent text and progress regions on tablet-sized selectors. */
+@media (min-width: 621px) and (max-width: 1180px) {
+  body #saga-forms-performance-v5 .selected-telemetry {
+    min-height: 5.8rem;
+    padding: 0.78rem 0.86rem 1.38rem;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-state {
+    min-width: 0;
+    gap: 0.68rem;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-copy,
+  body #saga-forms-performance-v5 .stage-head,
+  body #saga-forms-performance-v5 .stage-forms,
+  body #saga-forms-performance-v5 .form-chip {
+    min-width: 0;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-name {
+    max-width: 100%;
+    overflow: hidden;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-tier,
+  body #saga-forms-performance-v5 .telemetry-status {
+    line-height: 1.35;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-status {
+    max-width: min(8.5rem, 24vw);
+    white-space: normal;
+  }
+
+  body #saga-forms-performance-v5 .v6s-progress-rail {
+    inset: auto 0.88rem 0.52rem;
+  }
+
+  body #saga-forms-performance-v5 .stage {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  body #saga-forms-performance-v5 .stage-head {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  body #saga-forms-performance-v5 .stage[data-tier] .stage-forms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body #saga-forms-performance-v5 .stage[data-tier="06"] .stage-forms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body #saga-forms-performance-v5 .stage-meta,
+  body #saga-forms-performance-v5 .chip-name {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  body #saga-forms-performance-v5 .stage-meta {
+    justify-self: end;
+    line-height: 1.45;
+    text-align: right;
+  }
+
+  body #saga-forms-performance-v5 .chip-name {
+    overflow: visible;
+    line-height: 1.35;
+    text-overflow: clip;
+  }
+}
+
+/* iPad landscape uses a narrow selector column beside the active dossier. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  body #saga-forms-performance-v5 .selected-telemetry {
+    min-height: 8.75rem;
+    padding: 0.82rem 0.86rem 1.55rem;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-state {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0.48rem 0.68rem;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-index {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-copy,
+  body #saga-forms-performance-v5 .telemetry-status {
+    grid-column: 2;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+  }
+
+  body #saga-forms-performance-v5 .telemetry-status {
+    justify-self: start;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  body #saga-forms-performance-v5 .v6s-progress-rail {
+    inset: auto 0.88rem 0.5rem;
+  }
+
+  body #saga-forms-performance-v5 .stage[data-tier="05"] .stage-forms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
