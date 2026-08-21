@@ -45,7 +45,7 @@
   z-index: 1;
 }
 
-.form-archive-switcher {
+.form-archive-switcher.liquid-swipe-tabs {
   position: fixed;
   z-index: 54;
   top: max(12px, env(safe-area-inset-top));
@@ -55,158 +55,95 @@
   min-width: 220px;
   isolation: isolate;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: 4px;
-  overflow: hidden;
-  border: 1px solid rgb(207 235 255 / 0.22);
+  padding: 5px;
+  overflow: visible;
+  border: 0;
   border-radius: 999px;
-  background:
-    radial-gradient(circle at 18% -35%, rgb(255 255 255 / 0.38), transparent 45%),
-    linear-gradient(118deg, rgb(24 49 61 / 0.58), rgb(19 17 43 / 0.62));
-  -webkit-backdrop-filter: blur(28px) saturate(185%) contrast(108%);
-  backdrop-filter: blur(28px) saturate(185%) contrast(108%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    0 14px 42px rgb(0 0 0 / 0.42),
-    0 0 24px rgb(103 216 255 / 0.1);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
   cursor: grab;
   touch-action: pan-y pinch-zoom;
   translate: -50% 0;
 }
 
-.form-archive-switcher::before,
-.form-archive-switcher::after {
-  position: absolute;
-  content: "";
-  pointer-events: none;
-}
-
-.form-archive-switcher::before {
-  z-index: 0;
-  inset: 1px;
-  border-radius: inherit;
+.form-archive-switcher.liquid-swipe-tabs > .liquid-rail-surface {
+  border-color: rgb(207 235 255 / 0.2);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.16), transparent 38%),
-    radial-gradient(circle at 26% 120%, rgb(101 226 255 / 0.12), transparent 44%),
-    radial-gradient(circle at 78% -20%, rgb(181 139 255 / 0.14), transparent 42%);
-  box-shadow: inset 0 0 18px rgb(255 255 255 / 0.035);
+    radial-gradient(circle at 22% -12%, rgb(255 255 255 / 0.2), transparent 38%),
+    radial-gradient(ellipse at 86% 118%, color-mix(in srgb, var(--liquid-current-accent) 10%, transparent), transparent 46%),
+    linear-gradient(132deg, rgb(255 255 255 / 0.075), transparent 34%, rgb(103 216 255 / 0.035) 63%, transparent 84%),
+    rgb(10 18 29 / 0.26);
+  -webkit-backdrop-filter: blur(12px) saturate(155%) contrast(1.035);
+  backdrop-filter: blur(12px) saturate(155%) contrast(1.035);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 1px 0 0 rgb(255 255 255 / 0.045),
+    inset 0 -1px 0 rgb(132 203 255 / 0.055),
+    0 14px 36px rgb(0 0 0 / 0.24);
 }
 
-.form-archive-switcher::after {
-  z-index: 4;
-  inset: 0;
-  border: 1px solid transparent;
-  border-radius: inherit;
-  background: linear-gradient(115deg, rgb(255 255 255 / 0.3), rgb(115 229 255 / 0.08) 38%, rgb(190 151 255 / 0.16) 72%, rgb(255 255 255 / 0.24)) border-box;
-  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
-  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.72;
+.form-archive-switcher.liquid-swipe-tabs > .liquid-selection-lens {
+  top: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  height: calc(100% - 10px);
+  border-radius: 999px;
+  opacity: 1;
+  transform: translate3d(calc(var(--archive-switch-progress, 0) * 100%), 0, 0);
+  transition:
+    transform 0.5s var(--glass-settle),
+    scale 0.5s var(--glass-settle),
+    opacity 0.18s ease;
+}
+
+.form-archive-switcher.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
+  border-color: color-mix(in srgb, var(--liquid-current-accent) 52%, rgb(255 255 255 / 0.34));
+}
+
+.form-archive-switcher.liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens {
+  transition: transform 0.09s linear, scale 0.09s linear, opacity 0.12s ease;
+  will-change: transform;
+}
+
+.form-archive-switcher.liquid-swipe-tabs .liquid-contact-glow {
+  transform: translate3d(
+    calc(var(--archive-contact-x, -100px) - 66px),
+    calc(var(--archive-contact-y, -100px) - 66px),
+    0
+  );
+}
+
+.form-archive-switcher.liquid-swipe-tabs .liquid-contact-reflection {
+  transform: translate3d(
+    calc(var(--archive-contact-x, -100px) - 38px),
+    calc(var(--archive-contact-y, -100px) - 14px),
+    0
+  );
 }
 
 .form-archive-switcher[data-dragging="true"] {
   cursor: grabbing;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    0 16px 48px rgb(0 0 0 / 0.46),
-    0 0 30px rgb(103 216 255 / 0.2);
-}
-
-.form-archive-switcher-track {
-  position: absolute;
-  z-index: 1;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  border: 1px solid rgb(127 231 255 / 0.48);
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 24% -18%, rgb(255 255 255 / 0.48), transparent 48%),
-    linear-gradient(122deg, rgb(70 207 229 / 0.34), rgb(104 82 210 / 0.3));
-  -webkit-backdrop-filter: blur(18px) saturate(190%);
-  backdrop-filter: blur(18px) saturate(190%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    0 0 18px rgb(101 219 244 / 0.22);
-  transform: translate3d(0, 0, 0);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-  pointer-events: none;
-}
-
-.form-archive-switcher-track::before {
-  position: absolute;
-  inset: 2px 9% auto;
-  height: 38%;
-  border-radius: 999px;
-  content: "";
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.34), transparent);
-  filter: blur(0.2px);
-  opacity: 0.74;
-}
-
-.form-archive-switcher-track[data-active="realm"] {
-  border-color: rgb(213 180 255 / 0.52);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    0 0 20px rgb(160 117 255 / 0.25);
-  transform: translate3d(100%, 0, 0);
-}
-
-.form-archive-switcher[data-dragging="true"] .form-archive-switcher-track {
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  will-change: transform;
-}
-
-.form-archive-switcher[data-drag-target="saga"] .form-archive-switcher-track {
-  border-color: rgb(127 231 255 / 0.64);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.34),
-    0 0 24px rgb(101 219 244 / 0.34);
-}
-
-.form-archive-switcher[data-drag-target="realm"] .form-archive-switcher-track {
-  border-color: rgb(213 180 255 / 0.68);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.34),
-    0 0 26px rgb(160 117 255 / 0.36);
 }
 
 .form-archive-switcher button {
   position: relative;
-  z-index: 2;
+  z-index: 6;
   display: grid;
   min-width: 0;
   min-height: 44px;
   place-content: center;
   gap: 3px;
   overflow: hidden;
-  border: 0;
+  border: 1px solid rgb(202 231 250 / 0.095);
   border-radius: 999px;
   background: transparent;
   color: rgb(188 205 217 / 0.68);
   touch-action: pan-y pinch-zoom;
   -webkit-touch-callout: none;
   user-select: none;
-  transition: color 0.26s ease, text-shadow 0.26s ease, transform 0.22s ease;
-}
-
-.form-archive-switcher button::after {
-  position: absolute;
-  z-index: -1;
-  inset: 3px;
-  border: 1px solid transparent;
-  border-radius: inherit;
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.86);
-}
-
-.form-archive-switcher button.is-long-pressing::after {
-  border-color: rgb(153 235 255 / 0.66);
-  box-shadow: inset 0 0 20px rgb(96 215 244 / 0.2), 0 0 16px rgb(109 224 255 / 0.16);
-  animation: archive-switch-long-press 360ms linear both;
+  transition: color 0.18s ease, text-shadow 0.18s ease, border-color 0.22s ease;
 }
 
 .form-archive-switcher[data-dragging="true"] button:active {
@@ -217,22 +154,6 @@
 .form-archive-switcher[data-drag-target="realm"] button[data-archive="realm"] {
   color: #fff;
   text-shadow: 0 0 16px rgb(147 231 255 / 0.48);
-}
-
-@keyframes archive-switch-long-press {
-  from {
-    opacity: 0.28;
-    transform: scale(0.86);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.form-archive-switcher button:active {
-  transform: scale(0.97);
 }
 
 .form-archive-switcher button[aria-selected="true"] {
@@ -251,8 +172,8 @@
 }
 
 .form-archive-switcher button:focus-visible {
-  outline: 2px solid var(--archive-cyan);
-  outline-offset: -2px;
+  outline-color: var(--liquid-accent, var(--archive-cyan));
+  outline-offset: -3px;
 }
 
 .form-archive-page .side-panel-trigger.form-archive-menu-trigger {
@@ -338,15 +259,10 @@
     animation: none !important;
   }
 
-  .form-archive-switcher button.is-long-pressing::after {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
-  }
-
-  .form-archive-switcher-track,
+  .form-archive-switcher > .liquid-rail-surface,
+  .form-archive-switcher > .liquid-selection-lens,
+  .form-archive-switcher .liquid-selection-surface,
   .form-archive-switcher button,
-  .form-archive-switcher button::after,
   .form-archive-frame-status,
   .zeus-button[data-navigating="true"] {
     transition-duration: 0.001ms !important;

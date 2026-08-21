@@ -7,7 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
-import { LiquidPointerGlow } from "@/components/world/liquid-rail";
+import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
 import "@/styles-world.css";
 import "@/styles-world-addon.css";
 
@@ -48,6 +48,10 @@ function FormArchive() {
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ignoreClickUntilRef = useRef(0);
   const isSaga = archive === "saga";
+  const switchProgress = dragProgress ?? (isSaga ? 0 : 1);
+  const contactArchive = dragProgress === null
+    ? holdingArchive
+    : dragProgress >= 0.5 ? "realm" : "saga";
 
   const selectArchive = useCallback((next: ArchiveKind) => {
     if (next === archive) return;
@@ -65,6 +69,15 @@ function FormArchive() {
   const updateDragProgress = useCallback((next: number | null) => {
     dragProgressRef.current = next;
     setDragProgress(next);
+  }, []);
+
+  const updateLiquidContact = useCallback((clientX: number, clientY: number) => {
+    const switcher = switcherRef.current;
+    const bounds = switcher?.getBoundingClientRect();
+    if (!switcher || !bounds) return;
+
+    switcher.style.setProperty("--archive-contact-x", `${clientX - bounds.left}px`);
+    switcher.style.setProperty("--archive-contact-y", `${clientY - bounds.top}px`);
   }, []);
 
   const progressFromDrag = useCallback((press: ArchivePress, clientX: number) => {
@@ -102,6 +115,7 @@ function FormArchive() {
       target,
     };
     target.setPointerCapture(event.pointerId);
+    updateLiquidContact(event.clientX, event.clientY);
     setHoldingArchive(next);
     longPressTimerRef.current = setTimeout(() => {
       const press = pressRef.current;
@@ -111,7 +125,7 @@ function FormArchive() {
       setHoldingArchive(null);
       updateDragProgress(press.startProgress);
     }, 360);
-  }, [archive, cancelPointerGesture, updateDragProgress]);
+  }, [archive, cancelPointerGesture, updateDragProgress, updateLiquidContact]);
 
   const moveLongPress = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     const press = pressRef.current;
@@ -119,6 +133,7 @@ function FormArchive() {
 
     press.clientX = event.clientX;
     press.clientY = event.clientY;
+    updateLiquidContact(event.clientX, event.clientY);
 
     if (dragProgressRef.current !== null) {
       event.preventDefault();
@@ -131,7 +146,7 @@ function FormArchive() {
 
     ignoreClickUntilRef.current = performance.now() + 650;
     cancelPointerGesture();
-  }, [cancelPointerGesture, progressFromDrag, updateDragProgress]);
+  }, [cancelPointerGesture, progressFromDrag, updateDragProgress, updateLiquidContact]);
 
   const finishLongPress = useCallback((event: ReactPointerEvent<HTMLButtonElement>) => {
     const press = pressRef.current;
@@ -170,26 +185,32 @@ function FormArchive() {
       <div
         ref={switcherRef}
         id="archive-switcher"
-        className="form-archive-switcher ios26-glass"
+        className="form-archive-switcher liquid-swipe-tabs ios26-glass"
         role="tablist"
         aria-label="フォームアーカイブを切り替え。長押し後、左右へスライドできます"
         data-dragging={dragProgress !== null ? "true" : undefined}
         data-drag-target={dragProgress === null ? undefined : dragProgress >= 0.5 ? "realm" : "saga"}
+        data-liquid-initialized="true"
+        data-liquid-pressed={holdingArchive !== null || dragProgress !== null ? "true" : undefined}
+        data-liquid-held={dragProgress !== null ? "true" : undefined}
+        data-liquid-dragging={dragProgress !== null ? "true" : undefined}
+        style={{
+          ["--archive-switch-progress" as string]: switchProgress,
+          ["--liquid-current-accent" as string]: switchProgress >= 0.5
+            ? "var(--archive-violet)"
+            : "var(--archive-cyan)",
+        }}
       >
-        <span
-          className="form-archive-switcher-track"
-          aria-hidden="true"
-          data-active={archive}
-          style={dragProgress === null ? undefined : { transform: `translate3d(${dragProgress * 100}%, 0, 0)` }}
-        />
+        <LiquidLens />
         <button
           type="button"
           role="tab"
           aria-selected={isSaga}
           aria-controls="form-archive-frame"
           data-liquid-pointer="true"
+          data-liquid-contact={contactArchive === "saga" ? "true" : undefined}
           data-archive="saga"
-          className={holdingArchive === "saga" ? "is-long-pressing" : undefined}
+          style={{ ["--liquid-accent" as string]: "var(--archive-cyan)" }}
           title="タップ、または長押しして左右へスライド"
           onPointerDown={(event) => beginLongPress(event, "saga")}
           onPointerMove={moveLongPress}
@@ -209,8 +230,9 @@ function FormArchive() {
           aria-selected={!isSaga}
           aria-controls="form-archive-frame"
           data-liquid-pointer="true"
+          data-liquid-contact={contactArchive === "realm" ? "true" : undefined}
           data-archive="realm"
-          className={holdingArchive === "realm" ? "is-long-pressing" : undefined}
+          style={{ ["--liquid-accent" as string]: "var(--archive-violet)" }}
           title="タップ、または長押しして左右へスライド"
           onPointerDown={(event) => beginLongPress(event, "realm")}
           onPointerMove={moveLongPress}

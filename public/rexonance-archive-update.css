@@ -246,7 +246,7 @@
 }
 
 /* Reserve independent text and progress regions on tablet-sized selectors. */
-@media (min-width: 621px) and (max-width: 1180px) {
+@media (min-width: 621px) and (max-width: 1440px) {
   body #saga-forms-performance-v5 .selected-telemetry {
     min-height: 5.8rem;
     padding: 0.78rem 0.86rem 1.38rem;
@@ -326,10 +326,10 @@
 }
 
 /* iPad landscape uses a narrow selector column beside the active dossier. */
-@media (min-width: 901px) and (max-width: 1180px) {
+@media (min-width: 901px) and (max-width: 1440px) {
   body #saga-forms-performance-v5 .selected-telemetry {
     min-height: 8.75rem;
-    padding: 0.82rem 0.86rem 1.55rem;
+    padding: 0.82rem 0.86rem 2rem;
   }
 
   body #saga-forms-performance-v5 .telemetry-state {
@@ -363,7 +363,7 @@
   }
 
   body #saga-forms-performance-v5 .v6s-progress-rail {
-    inset: auto 0.88rem 0.5rem;
+    inset: auto 0.88rem 0.72rem;
   }
 
   body #saga-forms-performance-v5 .stage[data-tier="05"] .stage-forms {
