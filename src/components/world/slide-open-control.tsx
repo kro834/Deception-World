@@ -125,8 +125,13 @@ export function SlideOpenControl({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
       () => {
-        reset();
         onOpen();
+        // A route transition can spend a short time preloading before the
+        // current page unmounts. Keep the thumb at the completed edge during
+        // that interval so it never appears to spring back before navigation.
+        // Dialog launchers stay on the same page, so reset them only after the
+        // modal has had a frame to cover the control.
+        if (opensDialog) window.requestAnimationFrame(reset);
       },
       reducedMotion ? 0 : 140,
     );

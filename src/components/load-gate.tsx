@@ -75,7 +75,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         window.clearTimeout(showTimer);
         if (overlayVisible) {
           setGate({ active: true, percent: 100, variant });
-          const minimumDuration = variant === "zeus" ? 360 : 120;
+          const minimumDuration = variant === "zeus" ? 860 : 120;
           const minimumVisibleTime = Math.max(0, minimumDuration - (performance.now() - overlayShownAt));
           if (minimumVisibleTime > 0) {
             await new Promise((resolve) => window.setTimeout(resolve, minimumVisibleTime));

@@ -59,6 +59,19 @@ html[data-mode="world"] .site-shell > .site-update-control {
   touch-action: manipulation;
 }
 
+/* The contact light is decorative and must never become a flex item. The
+   hero CTA has a more specific span rule in the base layer, which otherwise
+   makes this 132px light determine the button's height on iPad. */
+[data-liquid-pointer] > .liquid-pointer-glow {
+  position: absolute;
+}
+
+/* Keep the modal control anchored to its own top-right safe area. The shared
+   pointer-light positioning above must not turn it back into toolbar content. */
+.world-column-dialog-close[data-liquid-pointer] {
+  position: absolute;
+}
+
 .liquid-pointer-glow {
   position: absolute;
   z-index: 1;

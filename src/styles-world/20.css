@@ -1150,3 +1150,230 @@
     animation: none;
   }
 }
+
+/* The sovereign archive opens like a ceremonial apparatus rather than the
+   ordinary route loader: distant crown rays expand first, then the twin-tone
+   seal converges around rank I. */
+.load-gate.is-sovereign-gate {
+  isolation: isolate;
+  overflow: hidden;
+  animation: sovereignGateReveal 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.load-gate.is-sovereign-gate::before,
+.load-gate.is-sovereign-gate::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.load-gate.is-sovereign-gate::before {
+  width: max(130vmax, 1180px);
+  aspect-ratio: 1;
+  opacity: 0.58;
+  background:
+    repeating-conic-gradient(from -8deg, transparent 0deg 7deg, rgba(244, 215, 142, 0.085) 7.4deg 7.8deg, transparent 8.2deg 17deg),
+    repeating-conic-gradient(from 4deg, transparent 0deg 18deg, rgba(99, 230, 205, 0.07) 18.3deg 18.8deg, transparent 19.2deg 36deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 8%, #000 20% 52%, transparent 72%);
+  mask-image: radial-gradient(circle, transparent 0 8%, #000 20% 52%, transparent 72%);
+  transform: translate(-50%, -50%) rotate(-8deg) scale(0.72);
+  animation: sovereignGateRays 11s 0.12s linear infinite;
+}
+
+.load-gate.is-sovereign-gate::after {
+  width: min(88vw, 920px);
+  height: min(43vw, 330px);
+  border: 1px solid rgba(199, 255, 243, 0.16);
+  border-right-color: rgba(99, 230, 205, 0.52);
+  border-left-color: rgba(244, 215, 142, 0.48);
+  border-radius: 50%;
+  box-shadow:
+    -42px 0 90px rgba(244, 215, 142, 0.1),
+    42px 0 96px rgba(99, 230, 205, 0.12),
+    inset 0 0 80px rgba(116, 239, 214, 0.035);
+  opacity: 0;
+  transform: translate(-50%, -50%) perspective(700px) rotateX(68deg) scale(0.54);
+  animation: sovereignGateHorizon 2.8s 0.1s cubic-bezier(0.16, 0.8, 0.2, 1) infinite;
+}
+
+.is-sovereign-gate .load-gate-inner {
+  z-index: 1;
+  width: min(72vw, 430px);
+  min-width: 0;
+  gap: 0.9rem;
+  padding: clamp(30px, 5vw, 54px);
+}
+
+.is-sovereign-gate .load-gate-inner::before {
+  animation: sovereignGateNumeral 4.6s 0.12s ease-in-out infinite;
+}
+
+.is-sovereign-gate .load-gate-inner::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: min(72vh, 660px);
+  background: linear-gradient(transparent, rgba(244, 215, 142, 0.16) 24%, #dffef7 50%, rgba(99, 230, 205, 0.18) 76%, transparent);
+  filter: drop-shadow(-12px 0 18px rgba(244, 215, 142, 0.26)) drop-shadow(12px 0 18px rgba(99, 230, 205, 0.28));
+  opacity: 0.72;
+  transform: translate(-50%, -50%) scaleY(0);
+  animation: sovereignGateAxis 2.4s 0.16s cubic-bezier(0.16, 0.9, 0.2, 1) infinite;
+}
+
+.is-sovereign-gate .load-gate-mark {
+  width: clamp(82px, 11vw, 108px);
+  height: clamp(82px, 11vw, 108px);
+  border-width: 1px;
+  background:
+    radial-gradient(circle at 43% 35%, rgba(255, 255, 255, 0.22), transparent 18%),
+    radial-gradient(circle, rgba(99, 230, 205, 0.16), rgba(244, 215, 142, 0.055) 52%, rgba(4, 19, 18, 0.7) 72%);
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  text-shadow: -5px 0 18px rgba(244, 215, 142, 0.52), 5px 0 20px rgba(99, 230, 205, 0.56);
+  animation: sovereignGateMark 2.9s 0.08s cubic-bezier(0.16, 0.9, 0.2, 1) infinite;
+}
+
+.is-sovereign-gate .load-gate-mark::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  border: 1px solid rgba(235, 255, 250, 0.12);
+  border-top-color: rgba(244, 215, 142, 0.72);
+  border-bottom-color: rgba(99, 230, 205, 0.72);
+  transform: rotate(45deg);
+  animation: sovereignGateDiamond 5.4s linear infinite;
+}
+
+.is-sovereign-gate .load-gate-mark::after {
+  inset: -13px;
+  animation-duration: 2.8s;
+}
+
+.is-sovereign-gate .load-gate-sovereign-orbit {
+  inset: -31px;
+  border-style: solid;
+  border-color: rgba(99, 230, 205, 0.2);
+  border-right-color: rgba(99, 230, 205, 0.76);
+  border-left-color: rgba(244, 215, 142, 0.68);
+  box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.025);
+  animation-duration: 9s;
+}
+
+.is-sovereign-gate .load-gate-kicker,
+.is-sovereign-gate .load-gate-label,
+.is-sovereign-gate .load-gate-percent,
+.is-sovereign-gate .load-gate-track {
+  animation: sovereignGateCopyIn 0.76s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.is-sovereign-gate .load-gate-kicker { animation-delay: 0.2s; }
+.is-sovereign-gate .load-gate-label { animation-delay: 0.28s; }
+.is-sovereign-gate .load-gate-percent { animation-delay: 0.34s; }
+.is-sovereign-gate .load-gate-track { animation-delay: 0.4s; }
+
+.is-sovereign-gate .load-gate-track {
+  height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, rgba(244, 215, 142, 0.13), rgba(99, 230, 205, 0.15));
+  box-shadow: -12px 0 24px rgba(244, 215, 142, 0.12), 12px 0 24px rgba(99, 230, 205, 0.14);
+}
+
+.is-sovereign-gate .load-gate-track > i {
+  box-shadow: 0 0 18px rgba(139, 255, 232, 0.52);
+  transition: transform 120ms linear;
+}
+
+@keyframes sovereignGateReveal {
+  from { opacity: 0; filter: brightness(0.55); }
+  to { opacity: 1; filter: brightness(1); }
+}
+
+@keyframes sovereignGateRays {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(0.72); }
+  9% { opacity: 0.58; }
+  100% { opacity: 0.48; transform: translate(-50%, -50%) rotate(8deg) scale(0.96); }
+}
+
+@keyframes sovereignGateHorizon {
+  0% { opacity: 0; transform: translate(-50%, -50%) perspective(700px) rotateX(68deg) scale(0.54); }
+  28% { opacity: 0.72; }
+  76% { opacity: 0.3; }
+  100% { opacity: 0; transform: translate(-50%, -50%) perspective(700px) rotateX(68deg) scale(1.12); }
+}
+
+@keyframes sovereignGateAxis {
+  0% { opacity: 0; transform: translate(-50%, -50%) scaleY(0); }
+  30% { opacity: 0.78; transform: translate(-50%, -50%) scaleY(1); }
+  72% { opacity: 0.28; transform: translate(-50%, -50%) scaleY(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scaleY(0.08); }
+}
+
+@keyframes sovereignGateNumeral {
+  0%, 100% { color: rgba(140, 244, 223, 0.025); filter: blur(0); transform: translate(-50%, -50%) scale(0.96); }
+  50% { color: rgba(244, 215, 142, 0.065); filter: blur(0.2px); transform: translate(-50%, -50%) scale(1.04); }
+}
+
+@keyframes sovereignGateMark {
+  0% { opacity: 0; transform: scale(0.72); filter: brightness(0.7); }
+  22% { opacity: 1; transform: scale(1.04); filter: brightness(1.28); }
+  46%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes sovereignGateDiamond {
+  to { transform: rotate(405deg); }
+}
+
+@keyframes sovereignGateCopyIn {
+  from { opacity: 0; transform: translateY(16px); letter-spacing: 0.5em; }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .is-sovereign-gate .load-gate-inner {
+    width: min(86vw, 360px);
+    padding: 26px 18px;
+  }
+
+  .is-sovereign-gate .load-gate-kicker {
+    max-width: 80vw;
+    line-height: 1.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-gate.is-sovereign-gate,
+  .load-gate.is-sovereign-gate::before,
+  .load-gate.is-sovereign-gate::after,
+  .is-sovereign-gate .load-gate-inner::before,
+  .is-sovereign-gate .load-gate-inner::after,
+  .is-sovereign-gate .load-gate-mark,
+  .is-sovereign-gate .load-gate-mark::before,
+  .is-sovereign-gate .load-gate-mark::after,
+  .is-sovereign-gate .load-gate-sovereign-orbit,
+  .is-sovereign-gate .load-gate-kicker,
+  .is-sovereign-gate .load-gate-label,
+  .is-sovereign-gate .load-gate-percent,
+  .is-sovereign-gate .load-gate-track {
+    animation: none !important;
+  }
+
+  .load-gate.is-sovereign-gate::before {
+    opacity: 0.36;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  .load-gate.is-sovereign-gate::after {
+    opacity: 0.42;
+    transform: translate(-50%, -50%) perspective(700px) rotateX(68deg) scale(0.88);
+  }
+
+  .is-sovereign-gate .load-gate-inner::after {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+}
