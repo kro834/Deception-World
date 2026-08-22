@@ -13,7 +13,10 @@
 
   let cleanupTimer = 0;
   let animationFrame = 0;
+  let motionAnimations = [];
   let colorsSwapped = compare.classList.contains("is-color-swapped");
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const railBar = compare.querySelector(".compare-sync-rail span");
 
   const updateChannelColors = () => {
     compare.classList.toggle("is-color-swapped", colorsSwapped);
@@ -38,8 +41,51 @@
   const finishAnimation = () => {
     window.clearTimeout(cleanupTimer);
     window.cancelAnimationFrame(animationFrame);
+    motionAnimations.forEach((animation) => {
+      try {
+        animation.cancel();
+      } catch {
+        // The animation can already be detached during archive navigation.
+      }
+    });
+    motionAnimations = [];
     compare.classList.remove("is-swapping");
     swapButton.removeAttribute("aria-busy");
+  };
+
+  const animatePanels = () => {
+    if (reducedMotion?.matches) return;
+
+    if (railBar instanceof HTMLElement && typeof railBar.animate === "function") {
+      railBar.style.transformOrigin = colorsSwapped ? "right center" : "left center";
+      motionAnimations.push(
+        railBar.animate(
+          [
+            { opacity: 0.18, transform: "scaleX(.04)" },
+            { offset: 0.68, opacity: 1, transform: "scaleX(1)" },
+            { opacity: 0.46, transform: "scaleX(1)" },
+          ],
+          { duration: 520, easing: "cubic-bezier(.2,.82,.2,1)" },
+        ),
+      );
+    }
+
+    [...compare.querySelectorAll(".compare-side")].forEach((panel, index) => {
+      if (!(panel instanceof HTMLElement) || typeof panel.animate !== "function") return;
+      const direction = index === 1 ? -1 : 1;
+      motionAnimations.push(
+        panel.animate(
+          [
+            {
+              opacity: 0.94,
+              transform: `translate3d(${direction * 8}px,0,0) scale(.996)`,
+            },
+            { opacity: 1, transform: "translate3d(0,0,0) scale(1)" },
+          ],
+          { duration: 360, easing: "cubic-bezier(.2,.82,.2,1)" },
+        ),
+      );
+    });
   };
 
   const animateSwap = () => {
@@ -49,6 +95,7 @@
     compare.classList.remove("is-swapping");
     animationFrame = window.requestAnimationFrame(() => {
       compare.classList.add("is-swapping");
+      animatePanels();
       cleanupTimer = window.setTimeout(finishAnimation, 560);
     });
   };

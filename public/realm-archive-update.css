@@ -8,13 +8,20 @@
 #realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
   display: inline-grid;
   place-items: center;
+  color: var(--saga-cyan);
+  text-shadow: 0 0 12px rgba(98, 234, 255, 0.55);
   transform: rotateY(0deg);
   transform-style: preserve-3d;
-  transition: transform 480ms cubic-bezier(.2, .82, .24, 1);
+  transition:
+    transform 480ms cubic-bezier(.2, .82, .24, 1),
+    color 420ms ease,
+    text-shadow 420ms ease;
   will-change: transform;
 }
 
-#realm--saga-form-compare-ios .compare-swap-js.is-flipped .compare-swap-icon {
+#edition-panel-realm #realm--saga-form-compare-ios.is-color-swapped .compare-swap-js.is-flipped .compare-swap-icon {
+  color: var(--saga-violet) !important;
+  text-shadow: 0 0 12px rgba(187, 140, 255, 0.58) !important;
   transform: rotateY(180deg);
 }
 

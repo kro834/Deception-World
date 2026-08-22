@@ -14,6 +14,10 @@ const realmUpdate = readFileSync(
   new URL("../public/realm-archive-update.js", import.meta.url),
   "utf8",
 );
+const realmUpdateCss = readFileSync(
+  new URL("../public/realm-archive-update.css", import.meta.url),
+  "utf8",
+);
 
 for (const [label, html] of [
   ["standalone", standalone],
@@ -48,4 +52,13 @@ test("Realm comparison swaps the analysis channel colors with the selected forms
   assert.match(realmUpdate, /compare\.classList\.toggle\("is-color-swapped", colorsSwapped\)/);
   assert.match(realmUpdate, /colorsSwapped \? "VIOLET CHANNEL" : "CYAN CHANNEL"/);
   assert.match(realmUpdate, /colorsSwapped \? "CYAN CHANNEL" : "VIOLET CHANNEL"/);
+});
+
+test("Realm comparison reuses Saga's panel motion and arrow color states", () => {
+  assert.match(realmUpdate, /panel\.animate\(/);
+  assert.match(realmUpdate, /translate3d\(\$\{direction \* 8\}px,0,0\) scale\(\.996\)/);
+  assert.match(realmUpdate, /duration: 360, easing: "cubic-bezier\(\.2,\.82,\.2,1\)"/);
+  assert.match(realmUpdate, /railBar\.animate\(/);
+  assert.match(realmUpdateCss, /\.is-color-swapped \.compare-swap-js\.is-flipped \.compare-swap-icon \{[\s\S]*?color: var\(--saga-violet\) !important/);
+  assert.match(realmUpdateCss, /text-shadow: 0 0 12px rgba\(187, 140, 255, 0\.58\)/);
 });
