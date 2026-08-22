@@ -5,11 +5,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-#realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
+#edition-panel-realm #realm--saga-forms-performance-v5 #realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
+  --realm-swap-arrow: var(--saga-cyan);
+  --realm-swap-arrow-glow: rgba(98, 234, 255, 0.58);
   display: inline-grid;
   place-items: center;
-  color: var(--saga-cyan);
-  text-shadow: 0 0 12px rgba(98, 234, 255, 0.55);
+  color: var(--realm-swap-arrow) !important;
+  text-shadow:
+    0 0 8px var(--realm-swap-arrow-glow),
+    0 0 16px color-mix(in srgb, var(--realm-swap-arrow) 38%, transparent) !important;
   transform: rotateY(0deg);
   transform-style: preserve-3d;
   transition:
@@ -18,9 +22,13 @@
   will-change: transform;
 }
 
-#edition-panel-realm #realm--saga-form-compare-ios.is-color-swapped .compare-swap-js.is-flipped .compare-swap-icon {
-  color: var(--saga-violet) !important;
-  transform: rotateY(180deg);
+#edition-panel-realm #realm--saga-forms-performance-v5 #realm--saga-form-compare-ios.is-color-swapped .compare-swap-js .compare-swap-icon {
+  --realm-swap-arrow: var(--saga-violet);
+  --realm-swap-arrow-glow: rgba(187, 140, 255, 0.62);
+}
+
+#edition-panel-realm #realm--saga-forms-performance-v5 #realm--saga-form-compare-ios .compare-swap-js.is-flipped .compare-swap-icon {
+  transform: rotateY(180deg) !important;
 }
 
 #realm--saga-form-compare-ios .compare-swap-js[aria-busy="true"] {
@@ -53,7 +61,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
+  #edition-panel-realm #realm--saga-forms-performance-v5 #realm--saga-form-compare-ios .compare-swap-js .compare-swap-icon {
     transition: none !important;
   }
 

@@ -6,7 +6,8 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
-const stabilityStylesheet = '<link rel="stylesheet" href="/archive-mobile-stability.css">';
+const stabilityStylesheet =
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r34">';
 const archives = [
   {
     kind: "saga",
@@ -51,7 +52,7 @@ for (const archive of archives) {
 
   const withEmbeddedMarker = output.replace(
     /<html\b([^>]*)>/,
-    '<html$1 data-embedded-archive="true">',
+    `<html$1 data-embedded-archive="true" data-archive-kind="${archive.kind}">`,
   );
   const withMobileStyles = withEmbeddedMarker.includes(stabilityStylesheet)
     ? withEmbeddedMarker

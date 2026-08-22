@@ -34,6 +34,8 @@ for (const [label, html] of [
 }
 
 test("Realm comparison controller keeps both input sides in Saga's direct mode", () => {
+  assert.match(standalone, /realm-archive-update\.css\?v=20260822-r34/);
+  assert.match(standalone, /realm-archive-update\.js\?v=20260822-r34/);
   assert.match(standalone, /panel\.classList\.add\('saga-compare-ready'\)/);
   assert.match(standalone, /compare\.classList\.add\('is-enhanced'\)/);
   assert.match(standalone, /nativeMode\.checked=true/);
@@ -62,7 +64,12 @@ test("Realm comparison reuses Saga's panel motion and arrow color states", () =>
   assert.match(realmUpdate, /railBar\.animate\(/);
   assert.match(realmUpdate, /duration: 520, easing: "cubic-bezier\(\.2,\.82,\.2,1\)"/);
   assert.match(realmUpdate, /compare\.classList\.add\("is-swapping"\)/);
-  assert.match(realmUpdateCss, /\.is-color-swapped \.compare-swap-js\.is-flipped \.compare-swap-icon \{[\s\S]*?color: var\(--saga-violet\) !important/);
+  assert.match(realmUpdateCss, /\.is-color-swapped \.compare-swap-js \.compare-swap-icon \{[\s\S]*?--realm-swap-arrow: var\(--saga-violet\)/);
+  assert.match(realmUpdateCss, /--realm-swap-arrow-glow: rgba\(187, 140, 255, 0\.62\)/);
+  assert.match(realmUpdateCss, /color: var\(--realm-swap-arrow\) !important/);
+  assert.match(realmUpdateCss, /text-shadow:[\s\S]*?var\(--realm-swap-arrow-glow\)[\s\S]*?!important/);
+  assert.match(standalone, /swap\.classList\.toggle\('is-flipped',colorsSwapped\)/);
+  assert.match(realmUpdateCss, /\.compare-swap-js\.is-flipped \.compare-swap-icon \{[\s\S]*?rotateY\(180deg\) !important/);
   assert.match(realmUpdateCss, /\.is-swapping \.compare-sync-rail/);
   assert.match(realmUpdateCss, /transform 0\.46s cubic-bezier\(0\.16, 1, 0\.3, 1\)/);
   assert.match(realmUpdateCss, /color 0\.34s ease/);

@@ -9529,7 +9529,7 @@ th {
   .edition-panel-saga { display: none !important; }
   .edition-panel-realm { display: block !important; }
 </style>
-<link rel="stylesheet" href="/realm-archive-update.css">
+<link rel="stylesheet" href="/realm-archive-update.css?v=20260822-r34">
 </head>
 <body>
   <input class="edition-choice" type="radio" name="edition-choice" id="edition-choice-saga" value="saga">
@@ -9641,6 +9641,7 @@ th {
       colorsSwapped=!colorsSwapped;
       updateChannelColors();
       updateStatus();
+      swap.classList.toggle('is-flipped',colorsSwapped);
       swap.classList.remove('is-swapping');
       void swap.offsetWidth;
       swap.classList.add('is-swapping');
@@ -9657,6 +9658,7 @@ th {
   updateStatus();
   window.addEventListener('pageshow',()=>{
     swap?.classList.remove('is-swapping');
+    swap?.classList.toggle('is-flipped',colorsSwapped);
     for(const side of ['a','b']){
       const select=panel.querySelector('#realm--saga-compare-select-'+side);
       if(select&&sides[side])sides[side].sync(select.value||sides[side].value(),false);
@@ -9664,7 +9666,7 @@ th {
     updateStatus();
   });
 })()</script>
-<script src="/realm-archive-motion.js" defer></script>
-<script src="/realm-archive-update.js" defer></script>
+<script src="/realm-archive-motion.js?v=20260822-r34" defer></script>
+<script src="/realm-archive-update.js?v=20260822-r34" defer></script>
 </body>
 </html>

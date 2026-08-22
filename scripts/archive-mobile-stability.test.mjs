@@ -14,6 +14,7 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260822-r34/);
   assert.match(route, /<iframe\s+key=\{archive\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === archive\) return/);
@@ -25,7 +26,9 @@ test("embedded archives externalize base64 images and load the mobile stability 
     const html = readFileSync(file, "utf8");
     assert.doesNotMatch(html, /data:image\//);
     assert.match(html, /data-embedded-archive="true"/);
+    assert.match(html, /data-archive-kind="(?:saga|realm)"/);
     assert.match(html, /archive-mobile-stability\.css/);
+    assert.match(html, /archive-mobile-stability\.css\?v=20260822-r34/);
     assert.ok(statSync(file).size < 1_000_000, `${file.pathname} should stay below 1 MB`);
 
     for (const match of html.matchAll(/\/archive-media\/([^"')\s]+)/g)) {
@@ -50,9 +53,13 @@ test("embedded archives release stale vertical scroll locks during Realm startup
   assert.match(mobileStyles, /html\[data-embedded-archive="true"\][\s\S]*?overflow-y: auto/);
   assert.match(mobileStyles, /touch-action: pan-y/);
   assert.match(mobileStyles, /#edition-panel-realm\.saga-booting[\s\S]*?overflow-y: visible/);
+  assert.match(mobileStyles, /data-archive-kind="realm"[\s\S]*?overflow-y: scroll/);
+  assert.match(route, /scrolling="yes"/);
   const realmUpdate = readFileSync(new URL("../public/realm-archive-update.js", import.meta.url), "utf8");
   assert.match(realmUpdate, /releaseStaleScrollLock/);
   assert.match(realmUpdate, /scheduleStartupScrollRecovery/);
+  assert.match(realmUpdate, /forceResetTransientUi/);
+  assert.match(realmUpdate, /classList\.remove\("is-selector-sheet-open", "is-selector-sheet-closing"\)/);
   assert.match(realmUpdate, /\[120, 480, 1200\]/);
   assert.match(realmUpdate, /document\.documentElement\.style\.removeProperty\("overflow"\)/);
   assert.match(route, /contentWindow\?\.postMessage\([\s\S]*?saga-archive:close-transients/);

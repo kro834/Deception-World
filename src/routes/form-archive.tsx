@@ -30,8 +30,8 @@ function FormArchive() {
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html"
-    : "/realm-form-archive-embedded.html";
+    ? "/saga-form-archive-embedded.html?v=20260822-r34"
+    : "/realm-form-archive-embedded.html?v=20260822-r34";
 
   useEffect(() => {
     // A cached opaque-origin iframe can finish before React observes its load
@@ -131,6 +131,7 @@ function FormArchive() {
         sandbox="allow-scripts allow-downloads"
         referrerPolicy="no-referrer"
         loading="eager"
+        scrolling="yes"
         onLoad={(event) => {
           // A newly created WebKit iframe can restore an inline scroll lock
           // from the archive controller before its first paint. Ask the loaded

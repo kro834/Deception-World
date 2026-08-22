@@ -114,6 +114,22 @@
     document.body.style.removeProperty("touch-action");
   };
 
+  const forceResetTransientUi = () => {
+    archiveRoot?.classList.remove("is-selector-sheet-open", "is-selector-sheet-closing");
+    const selector = document.querySelector("#realm--form-selector");
+    selector?.removeAttribute("aria-modal");
+    selector?.removeAttribute("role");
+    const scrim = archiveRoot?.querySelector(".selector-sheet-scrim");
+    if (scrim instanceof HTMLElement) scrim.hidden = true;
+    archiveRoot?.querySelectorAll("[inert]").forEach((element) => {
+      if (element instanceof HTMLElement) element.inert = false;
+    });
+    archiveRoot
+      ?.querySelector(".mobile-dock .dock-current")
+      ?.setAttribute("aria-expanded", "false");
+    document.querySelectorAll("dialog[open]").forEach((dialog) => dialog.close("archive-reset"));
+  };
+
   const scheduleStartupScrollRecovery = () => {
     window.requestAnimationFrame(releaseStaleScrollLock);
     // Image decode and motion-profile setup finish on separate WebKit frames.
@@ -155,6 +171,7 @@
   scheduleStartupScrollRecovery();
   window.addEventListener("pageshow", () => {
     finishAnimation();
+    forceResetTransientUi();
     updateChannelColors();
     swapButton.classList.toggle("is-flipped", colorsSwapped);
     releaseStaleScrollLock();
@@ -162,7 +179,7 @@
   window.addEventListener("message", (event) => {
     if (event.data?.type !== "saga-archive:close-transients") return;
     finishAnimation();
-    document.querySelectorAll("dialog[open]").forEach((dialog) => dialog.close("zeus-navigation"));
+    forceResetTransientUi();
     scheduleStartupScrollRecovery();
   });
 })();

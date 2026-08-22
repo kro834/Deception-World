@@ -26,6 +26,23 @@ html[data-embedded-archive="true"] body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Realm is generated from a dual-edition standalone document. Give its
+   embedded version one unambiguous root scroller from the first frame so
+   iOS does not wait for scroll-container relatching after iframe load. */
+html[data-embedded-archive="true"][data-archive-kind="realm"] {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+}
+
+html[data-embedded-archive="true"][data-archive-kind="realm"] body {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
 /* The Realm source keeps its full-page boot class until hero decoding ends.
    In the embedded route the loader is non-blocking, so that class must not
    turn the edition panel into a temporary scroll container on iOS. */
