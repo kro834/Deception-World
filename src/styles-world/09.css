@@ -695,6 +695,81 @@
     font-size: 5px;
   }
 
+  .episode-card.has-pickup .episode-card-copy {
+    padding-right: 60px;
+  }
+
+  .episode-pickup-plus {
+    top: 12px;
+    right: 12px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .episode-pickup-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100svh - 16px);
+  }
+
+  .episode-pickup-panel {
+    max-height: calc(100svh - 16px);
+    padding: 60px 16px max(20px, env(safe-area-inset-bottom));
+    border-radius: 24px;
+  }
+
+  .episode-pickup-close {
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .episode-pickup-heading {
+    padding: 0 48px 22px 2px;
+  }
+
+  .episode-pickup-heading h2 {
+    margin-top: 8px;
+    font-size: clamp(30px, 10vw, 44px);
+  }
+
+  .episode-pickup-heading p {
+    line-height: 1.6;
+  }
+
+  .episode-pickup-grid {
+    display: flex;
+    gap: 10px;
+    margin-inline: -2px;
+    padding: 2px 2px 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 2px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .episode-pickup-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .episode-pickup-item {
+    width: min(76vw, 270px);
+    flex: 0 0 min(76vw, 270px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .episode-pickup-item > div {
+    min-height: 102px;
+    padding: 16px;
+  }
+
+  .episode-pickup-item h3 {
+    font-size: 18px;
+  }
+
   .finale-section {
     min-height: 124svh;
     padding: 0;

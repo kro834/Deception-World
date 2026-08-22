@@ -9118,18 +9118,18 @@ th {
 
 <style id="realm-v25-static-direct-images">
 /* v25: iPad/iPhone Files preview must not depend on JS, img backgrounds, or :has(). */
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 .form-detail {
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) .form-detail {
   display:none!important; visibility:hidden!important; opacity:0!important; pointer-events:none!important;
 }
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-stella:checked ~ .archive-workspace #realm--saga-detail-stella,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-burst:checked ~ .archive-workspace #realm--saga-detail-burst,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-blast:checked ~ .archive-workspace #realm--saga-detail-blast,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-legends:checked ~ .archive-workspace #realm--saga-detail-legends,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal:checked ~ .archive-workspace #realm--saga-detail-royal,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--saga-detail-royal-wrath,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--saga-detail-royal-abyss,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--saga-detail-royal-birth,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--saga-detail-royal-nehan {
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-stella:checked ~ .archive-workspace #realm--saga-detail-stella,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-burst:checked ~ .archive-workspace #realm--saga-detail-burst,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-blast:checked ~ .archive-workspace #realm--saga-detail-blast,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-legends:checked ~ .archive-workspace #realm--saga-detail-legends,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-royal:checked ~ .archive-workspace #realm--saga-detail-royal,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--saga-detail-royal-wrath,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--saga-detail-royal-abyss,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--saga-detail-royal-birth,
+#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5:not(.motion-capable) #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--saga-detail-royal-nehan {
   display:grid!important; visibility:visible!important; opacity:1!important; pointer-events:auto!important;
   position:relative!important; transform:none!important;
 }
@@ -9664,6 +9664,7 @@ th {
     updateStatus();
   });
 })()</script>
+<script src="/realm-archive-motion.js" defer></script>
 <script src="/realm-archive-update.js" defer></script>
 </body>
 </html>

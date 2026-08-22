@@ -9,12 +9,34 @@
 
 .episode-card {
   --episode-tone: var(--cyan);
+  position: relative;
   min-width: 0;
   overflow: visible;
   border: 0;
   background: transparent;
   scroll-snap-align: center;
   scroll-snap-stop: always;
+}
+
+.episode-card-select {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: clamp(20px, 2.4vw, 34px);
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.episode-card-select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--episode-tone) 76%, white 12%);
+  outline-offset: -4px;
 }
 
 .episode-card:nth-child(1) { --episode-tone: #a66aff; }
@@ -132,6 +154,69 @@
   box-shadow: 0 0 18px var(--episode-tone);
 }
 
+.episode-pickup-plus {
+  position: absolute;
+  z-index: 7;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--episode-tone) 58%, rgba(255, 255, 255, 0.54));
+  border-radius: 50%;
+  color: #fff;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.38), transparent 38%),
+    color-mix(in srgb, var(--episode-tone) 72%, rgba(4, 8, 15, 0.86));
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 color-mix(in srgb, var(--episode-tone) 54%, transparent),
+    0 13px 30px rgba(0, 0, 0, 0.38),
+    0 0 24px color-mix(in srgb, var(--episode-tone) 22%, transparent);
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* styles-world/21.css gives every pointer-light host relative positioning.
+   These controls are anchored overlays, so keep the stronger absolute rule. */
+.episode-pickup-plus[data-liquid-pointer],
+.episode-pickup-close[data-liquid-pointer] {
+  position: absolute;
+}
+
+.episode-pickup-plus-icon,
+.episode-pickup-close-icon {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.episode-pickup-plus:hover {
+  border-color: color-mix(in srgb, var(--episode-tone) 82%, white 18%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    0 16px 34px rgba(0, 0, 0, 0.42),
+    0 0 30px color-mix(in srgb, var(--episode-tone) 30%, transparent);
+  transform: translateY(-2px) scale(1.025);
+}
+
+.episode-pickup-plus:active {
+  transform: scale(0.95);
+}
+
+.episode-pickup-plus:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
 .episode-card-copy {
   display: flex;
   min-height: 132px;
@@ -213,6 +298,216 @@
 .episode-progress span.is-active::after,
 .episode-progress span.is-past::after {
   transform: scaleX(1);
+}
+
+@keyframes episodePickupDialogIn {
+  from { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.975); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes episodePickupItemIn {
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.episode-pickup-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(980px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100svh - 40px);
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.episode-pickup-dialog::backdrop {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(69, 126, 190, 0.16), transparent 42%),
+    rgba(1, 3, 7, 0.88);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  backdrop-filter: blur(12px) saturate(125%);
+}
+
+.episode-pickup-dialog[open] {
+  animation: episodePickupDialogIn 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.episode-pickup-panel {
+  position: relative;
+  max-height: calc(100svh - 40px);
+  padding: clamp(30px, 4vw, 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(133, 204, 255, 0.22);
+  border-radius: clamp(24px, 4vw, 44px);
+  background:
+    linear-gradient(90deg, rgba(103, 216, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(103, 216, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 92% 6%, rgba(103, 216, 255, 0.15), transparent 30rem),
+    linear-gradient(145deg, rgba(13, 19, 29, 0.98), rgba(5, 8, 13, 0.99));
+  background-size: 36px 36px, 36px 36px, auto, auto;
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.episode-pickup-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: clamp(28px, 6vw, 72px);
+  width: min(32%, 220px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  box-shadow: 0 0 24px rgba(103, 216, 255, 0.68);
+}
+
+.episode-pickup-close {
+  position: absolute;
+  z-index: 8;
+  top: 22px;
+  right: 22px;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  color: var(--text);
+  background: rgba(13, 21, 33, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 13px 28px rgba(0, 0, 0, 0.34);
+  cursor: pointer;
+}
+
+.episode-pickup-close:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.episode-pickup-heading {
+  min-width: 0;
+  padding: 6px 66px 26px 2px;
+}
+
+.episode-pickup-heading small,
+.episode-pickup-heading p,
+.episode-pickup-item small {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.episode-pickup-heading small {
+  color: var(--gold);
+}
+
+.episode-pickup-heading h2 {
+  margin: 9px 0 8px;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5vw, 58px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.episode-pickup-heading p {
+  margin: 0;
+  color: var(--dim);
+}
+
+.episode-pickup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.episode-pickup-item {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(132, 203, 255, 0.15);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.065), transparent 38%),
+    rgba(5, 9, 15, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  animation: episodePickupItemIn 480ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.episode-pickup-item:nth-child(2) { animation-delay: 140ms; }
+.episode-pickup-item:nth-child(3) { animation-delay: 200ms; }
+
+.episode-pickup-item figure {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  margin: 0;
+  overflow: hidden;
+  background: #05080e;
+}
+
+.episode-pickup-item figure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 60%, rgba(3, 6, 10, 0.82));
+}
+
+.episode-pickup-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.episode-pickup-item figure > span {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 10px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.episode-pickup-item > div {
+  display: grid;
+  min-height: 110px;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+}
+
+.episode-pickup-item small {
+  color: var(--cyan);
+}
+
+.episode-pickup-item h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 23px);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .episode-pickup-dialog[open],
+  .episode-pickup-item {
+    animation: none;
+  }
+
+  .episode-pickup-plus {
+    transition: none;
+  }
 }
 
 .finale-section {
@@ -337,6 +632,7 @@ footer a:hover {
 
 html:has(.world-column-dialog[open]),
 html:has(.poster-dialog[open]),
+html:has(.episode-pickup-dialog[open]),
 html:has(.rider-nightmare-dialog[open]) {
   overflow: hidden;
 }

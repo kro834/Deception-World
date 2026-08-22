@@ -100,9 +100,71 @@ const COLUMNS = [
   },
 ];
 
-const EPISODES = [
-  { no: "01", title: "HIDE-AND-SEEK", src: "/episode-01-hide-and-seek.jpeg", pos: "50% 30%", alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル" },
-  { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
+type EpisodePickup = {
+  label: string;
+  src: string;
+  pos: string;
+  alt: string;
+};
+
+type EpisodeRecord = {
+  no: string;
+  title: string;
+  src: string;
+  pos: string;
+  alt: string;
+  pickups?: EpisodePickup[];
+};
+
+const EPISODES: EpisodeRecord[] = [
+  {
+    no: "01",
+    title: "HIDE-AND-SEEK",
+    src: "/episode-01-hide-and-seek.jpeg",
+    pos: "50% 30%",
+    alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル",
+    pickups: [
+      {
+        label: "リームー/仮面ライダーフリート",
+        src: "/manager-reemu-rider.jpeg",
+        pos: "50% 12%",
+        alt: "リームーが変身した仮面ライダーフリート",
+      },
+      {
+        label: "紅城真守/仮面ライダーアルゲノム",
+        src: "/rider-profile-argenome.jpeg",
+        pos: "50% 8%",
+        alt: "紅城真守が変身した仮面ライダーアルゲノム",
+      },
+    ],
+  },
+  {
+    no: "02",
+    title: "LEGENDS",
+    src: "/episode-02-legends.jpeg",
+    pos: "50% 50%",
+    alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダーレルムレジェンズ",
+        src: "/rider-profile-realm.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーレルムレジェンズ",
+      },
+      {
+        label: "仮面ライダーレルム　アースフォーム",
+        src: "/rider-realm-earth.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーレルム アースフォーム",
+      },
+      {
+        label: "仮面ライダーレルム　ムーンフォーム",
+        src: "/rider-realm-moon.jpeg",
+        pos: "50% 10%",
+        alt: "仮面ライダーレルム ムーンフォーム",
+      },
+    ],
+  },
   { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "50% 18%", alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル" },
   { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
   { no: "05", title: "FARCE", src: "/episode-05-farce.jpeg", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
@@ -256,11 +318,13 @@ export function WorldHome() {
   const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
+  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
   const riderRail = useRef<HTMLDivElement>(null);
   const episodeGridRef = useRef<HTMLDivElement>(null);
+  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const danteDialogRef = useRef<HTMLDialogElement>(null);
@@ -398,6 +462,7 @@ export function WorldHome() {
   const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
+  const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];
 
   const goPoster = (next: number | ((p: number) => number)) => {
     setPoster((p) => {
@@ -481,6 +546,32 @@ export function WorldHome() {
     window.setTimeout(() => {
       episodeProgrammatic.current = false;
     }, 520);
+  };
+
+  const openEpisodePickup = (index: number) => {
+    const dialog = episodePickupDialogRef.current;
+    if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    setEpisodePickup(index);
+    dialog.scrollTop = 0;
+    dialog.querySelector<HTMLElement>(".episode-pickup-panel")?.scrollTo({ top: 0, left: 0 });
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    window.requestAnimationFrame(() => {
+      dialog.scrollTop = 0;
+      dialog.querySelector<HTMLElement>(".episode-pickup-panel")?.scrollTo({ top: 0, left: 0 });
+      bootLiquidGlass(dialog);
+      dialog.focus({ preventScroll: true });
+    });
+  };
+
+  const closeEpisodePickup = () => {
+    const dialog = episodePickupDialogRef.current;
+    if (dialog?.open) dialog.close();
   };
 
   const openPickup = () => {
@@ -1188,16 +1279,7 @@ export function WorldHome() {
             {EPISODES.map((ep, i) => (
               <article
                 key={ep.no}
-                className={i === episode ? "episode-card is-active" : "episode-card"}
-                role="button"
-                tabIndex={0}
-                aria-pressed={i === episode}
-                onClick={() => goEpisode(i)}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  goEpisode(i);
-                }}
+                className={`episode-card${i === episode ? " is-active" : ""}${ep.pickups?.length ? " has-pickup" : ""}`}
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
@@ -1214,6 +1296,33 @@ export function WorldHome() {
                     <small>IDENTIFIED RECORD</small>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  className="episode-card-select"
+                  aria-label={`EP.${ep.no} ${ep.title}を選択`}
+                  aria-pressed={i === episode}
+                  onClick={() => goEpisode(i)}
+                />
+                {ep.pickups?.length ? (
+                  <button
+                    type="button"
+                    className="episode-pickup-plus ios26-glass"
+                    data-liquid-pointer="true"
+                    aria-haspopup="dialog"
+                    aria-controls="episode-pickup-dialog"
+                    aria-label={`EP.${ep.no}のピックアップを開く`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      openEpisodePickup(i);
+                    }}
+                  >
+                    <LiquidPointerGlow />
+                    <span className="episode-pickup-plus-icon" aria-hidden="true">
+                      <UiVectorIcon kind="plus" size={23} />
+                    </span>
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>
@@ -1248,6 +1357,66 @@ export function WorldHome() {
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
+
+      <dialog
+        ref={episodePickupDialogRef}
+        id="episode-pickup-dialog"
+        className="episode-pickup-dialog"
+        tabIndex={-1}
+        aria-labelledby="episode-pickup-title"
+        onClose={() => setEpisodePickup(null)}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeEpisodePickup();
+        }}
+        onClick={(event) => {
+          if (event.target === episodePickupDialogRef.current) closeEpisodePickup();
+        }}
+      >
+        <div className="episode-pickup-panel">
+          <button
+            type="button"
+            className="episode-pickup-close ios26-glass"
+            data-liquid-pointer="true"
+            onClick={closeEpisodePickup}
+            aria-label="エピソードのピックアップを閉じる"
+          >
+            <LiquidPointerGlow />
+            <span className="episode-pickup-close-icon" aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </span>
+          </button>
+          <header className="episode-pickup-heading">
+            <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
+            <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>
+            <p>IDENTIFIED CHARACTER / RIDER RECORDS</p>
+          </header>
+          <div className="episode-pickup-grid">
+            {selectedEpisodePickup?.pickups
+              ? selectedEpisodePickup.pickups.map((item, index) => (
+                  <article className="episode-pickup-item" key={item.label}>
+                    <figure>
+                      <img
+                        src={item.src}
+                        alt={item.alt}
+                        style={{ objectPosition: item.pos }}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    </figure>
+                    <div>
+                      <small>EP.{selectedEpisodePickup.no} / PICKUP</small>
+                      <h3>
+                        <NameText value={item.label} />
+                      </h3>
+                    </div>
+                  </article>
+                ))
+              : null}
+          </div>
+        </div>
+      </dialog>
 
       <dialog
         ref={pickupDialogRef}

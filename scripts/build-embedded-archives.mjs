@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
@@ -29,6 +30,7 @@ const extensions = new Map([
 ]);
 
 mkdirSync(mediaDirectory, { recursive: true });
+buildRealmArchiveMotion();
 
 for (const archive of archives) {
   const source = readFileSync(archive.source, "utf8");
