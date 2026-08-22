@@ -1,52 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
+import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
-
-export function SiteUpdateButton() {
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
-
-  return (
-    <aside className="site-update-control" aria-label="サイト更新">
-      <button
-        className="site-update-button ios26-glass"
-        data-liquid-pointer="true"
-        type="button"
-        aria-busy={busy}
-        disabled={busy}
-        aria-label="サイトの最新版を確認"
-        onClick={() => {
-          if (busy) return;
-          setBusy(true);
-          setStatus("確認中");
-          const started = performance.now();
-          void preloadAssets(WORLD_ENTER_ASSETS, () => undefined)
-            .catch(() => undefined)
-            .then(async () => {
-              const wait = Math.max(0, 720 - (performance.now() - started));
-              await new Promise((r) => window.setTimeout(r, wait));
-              setBusy(false);
-              setStatus("最新です");
-              window.setTimeout(() => setStatus(""), 3200);
-            });
-        }}
-      >
-        <LiquidPointerGlow />
-        <i aria-hidden="true">
-          <span />
-        </i>
-        <b>{busy ? "CHECKING" : "UPDATE"}</b>
-      </button>
-      <span className={status ? "site-update-status is-on" : "site-update-status"} role="status" aria-live="polite">
-        {status}
-      </span>
-    </aside>
-  );
-}
 
 export function SideMenuTrigger({
   open,

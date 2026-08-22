@@ -171,8 +171,6 @@
           <SideMenuTrigger />
         </div>
       </header>
-      <SiteUpdateButton />
-
       <section className="hero" id="top" data-performance-region>
         <div className="hero-backdrop" aria-hidden="true">
           {previous ? (

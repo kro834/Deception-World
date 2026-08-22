@@ -4,7 +4,7 @@ import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
-import { SiteUpdateButton, SideMenuLayer, SideMenuTrigger } from "./world-chrome";
+import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -567,8 +567,6 @@ export function WorldHome() {
           <SideMenuTrigger />
         </div>
       </header>
-      <SiteUpdateButton />
-
       <section className="hero" id="top" data-performance-region>
         <div className="hero-backdrop" aria-hidden="true">
           {previous ? (

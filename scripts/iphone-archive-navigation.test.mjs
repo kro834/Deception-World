@@ -7,6 +7,10 @@ const worldChrome = readFileSync(
   new URL("../src/components/world/world-chrome.tsx", import.meta.url),
   "utf8",
 );
+const worldHome = readFileSync(
+  new URL("../src/components/world/world-home.tsx", import.meta.url),
+  "utf8",
+);
 const zeusButton = readFileSync(
   new URL("../src/components/zeus-button.tsx", import.meta.url),
   "utf8",
@@ -23,6 +27,13 @@ const transitionStyles = readFileSync(
 );
 const titleSequence = readFileSync(
   new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url),
+  "utf8",
+);
+const titleSequenceSourcePart = readFileSync(
+  new URL(
+    "../source-parts/src/components/cinematic/title-sequence.tsx/01.part",
+    import.meta.url,
+  ),
   "utf8",
 );
 const diveVelocity = readFileSync(
@@ -98,6 +109,10 @@ test("the opening dive adds an adaptive, mobile-bounded perspective layer", () =
   assert.match(transitionStyles, /z-index: 2147483000/);
 });
 
+test("the deployment assembler preserves the iPhone title dive implementation", () => {
+  assert.equal(titleSequenceSourcePart, titleSequence);
+});
+
 test("opening the side menu keeps the Zeus control full-size and draggable", () => {
   assert.match(zeusButton, /data-menu-open=\{String\(sideMenuOpen\)\}/);
   assert.doesNotMatch(zeusButton, /panelLeft/);
@@ -106,4 +121,9 @@ test("opening the side menu keeps the Zeus control full-size and draggable", () 
     /body:has\(\.side-panel\[data-open="true"\]\) > \.zeus-button[\s\S]*?scale\(0\.66\)/,
   );
   assert.match(styles, /\.zeus-button\[data-menu-open="true"\]::before/);
+});
+
+test("the world no longer renders the manual update button", () => {
+  assert.doesNotMatch(worldChrome, /SiteUpdateButton|site-update-control|サイトの最新版を確認/);
+  assert.doesNotMatch(worldHome, /SiteUpdateButton|site-update-control/);
 });
