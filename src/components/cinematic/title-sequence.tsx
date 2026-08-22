@@ -10,6 +10,8 @@ import { Particles } from "./particles";
 const SEQUENCE_MS = 6600;
 const WORLD_DIVE_MIN_MS = 900;
 const WORLD_DIVE_EXIT_MS = 520;
+const WORLD_DIVE_REDUCED_MIN_MS = 520;
+const WORLD_DIVE_REDUCED_EXIT_MS = 340;
 
 type SequencePhase = "idle" | "playing" | "complete" | "diving" | "arriving";
 
@@ -50,6 +52,7 @@ function HudRings() {
 export function TitleSequence() {
   const [phase, setPhase] = useState<SequencePhase>("idle");
   const [muted, setMuted] = useState(false);
+  const [reducedDive, setReducedDive] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -153,18 +156,21 @@ export function TitleSequence() {
     phaseRef.current = "diving";
     setPhase("diving");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setReducedDive(reduced);
 
     try {
       await Promise.all([
         preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
         router.preloadRoute({ to: "/world" }).catch(() => undefined),
-        new Promise((resolve) => window.setTimeout(resolve, reduced ? 180 : WORLD_DIVE_MIN_MS)),
+        new Promise((resolve) =>
+          window.setTimeout(resolve, reduced ? WORLD_DIVE_REDUCED_MIN_MS : WORLD_DIVE_MIN_MS),
+        ),
       ]);
       if (!mountedRef.current || phaseRef.current !== "diving") return;
       phaseRef.current = "arriving";
       setPhase("arriving");
       await new Promise((resolve) =>
-        window.setTimeout(resolve, reduced ? 120 : WORLD_DIVE_EXIT_MS),
+        window.setTimeout(resolve, reduced ? WORLD_DIVE_REDUCED_EXIT_MS : WORLD_DIVE_EXIT_MS),
       );
       if (!mountedRef.current || phaseRef.current !== "arriving") return;
       await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
@@ -222,7 +228,7 @@ export function TitleSequence() {
     });
   };
 
-  const stageClass =
+  const stageStateClass =
     phase === "playing"
       ? "cine-stage is-playing"
       : phase === "complete"
@@ -232,6 +238,7 @@ export function TitleSequence() {
           : phase === "arriving"
             ? "cine-stage is-complete is-diving is-arriving"
             : "cine-stage";
+  const stageClass = `${stageStateClass}${reducedDive ? " is-reduced-dive" : ""}`;
   const isWorldTransitioning = phase === "diving" || phase === "arriving";
 
   return (

@@ -117,7 +117,13 @@ export function DiveVelocityCanvas({ active, arriving }: { active: boolean; arri
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const context = canvas.getContext("2d", { alpha: true, desynchronized: true });
+    let context: CanvasRenderingContext2D | null = null;
+    try {
+      context = canvas.getContext("2d", { alpha: true, desynchronized: true });
+    } catch {
+      // Older mobile Safari versions reject unknown context attributes.
+    }
+    context ??= canvas.getContext("2d");
     if (!context) return;
 
     if (!active) {

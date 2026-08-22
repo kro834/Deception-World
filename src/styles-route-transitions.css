@@ -455,6 +455,64 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+@keyframes dw-dive-reduced-tunnel-in {
+  from { opacity: 0; }
+  to { opacity: 0.86; }
+}
+
+@keyframes dw-dive-reduced-tunnel-out {
+  from { opacity: 0.86; }
+  to { opacity: 0.2; }
+}
+
+@keyframes dw-dive-reduced-light {
+  from { opacity: 0.28; }
+  to { opacity: 1; }
+}
+
+/* iOS exposes Reduce Motion through matchMedia. Keep a short, opacity-led
+   tunnel instead of removing the world transition entirely. */
+.cine-stage.is-reduced-dive .cine-dive-velocity {
+  display: none;
+}
+
+.cine-stage.is-reduced-dive .cine-dive-tunnel::before,
+.cine-stage.is-reduced-dive .cine-dive-tunnel::after,
+.cine-stage.is-reduced-dive .cine-dive-tunnel > i,
+.cine-stage.is-reduced-dive .cine-dive-flash,
+.cine-stage.is-reduced-dive .cine-dive-flash::before,
+.cine-stage.is-reduced-dive .cine-dive-status {
+  animation: none !important;
+}
+
+.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel {
+  opacity: 0.86;
+  transform: translate(-50%, -50%) scale(0.82);
+  animation: dw-dive-reduced-tunnel-in 0.24s ease-out both !important;
+}
+
+.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel::after {
+  opacity: 0.92;
+  transform: scale(1);
+}
+
+.cine-stage.is-reduced-dive.is-diving .cine-dive-flash {
+  opacity: 0.72;
+}
+
+.cine-stage.is-reduced-dive.is-diving .cine-dive-status {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.cine-stage.is-reduced-dive.is-arriving .cine-dive-tunnel {
+  animation: dw-dive-reduced-tunnel-out 0.3s ease-out both !important;
+}
+
+.cine-stage.is-reduced-dive.is-arriving .cine-dive-flash {
+  animation: dw-dive-reduced-light 0.3s ease-out both !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cine-dive-tunnel,
   .cine-dive-tunnel::before,
