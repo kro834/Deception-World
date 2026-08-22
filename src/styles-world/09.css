@@ -669,16 +669,25 @@
 
   .episode-card-surface {
     display: grid;
-    grid-template-columns: minmax(118px, 0.9fr) minmax(0, 1.1fr);
+    min-height: 124px;
+    height: auto;
+    grid-template-columns: minmax(104px, 0.86fr) minmax(0, 1.14fr);
   }
 
   .episode-thumbnail {
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
     height: 100%;
-    min-height: 108px;
+    min-height: 124px;
+    aspect-ratio: auto;
   }
 
   .episode-card-copy {
-    min-height: 108px;
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    min-height: 124px;
     padding: 14px 13px 13px;
   }
 
@@ -687,6 +696,12 @@
   }
 
   .episode-card-copy h4 {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
     font-size: clamp(15px, 5vw, 21px);
   }
 
@@ -706,6 +721,19 @@
     height: 46px;
     -webkit-backdrop-filter: blur(10px) saturate(135%);
     backdrop-filter: blur(10px) saturate(135%);
+  }
+
+  @media (max-width: 360px) {
+    .episode-card.has-pickup .episode-card-copy {
+      padding-right: 54px;
+    }
+
+    .episode-pickup-plus {
+      top: 10px;
+      right: 10px;
+      width: 42px;
+      height: 42px;
+    }
   }
 
   .episode-pickup-dialog {

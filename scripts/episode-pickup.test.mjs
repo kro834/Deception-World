@@ -81,11 +81,33 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
   assert.match(baseStyles, /\.episode-pickup-dialog::backdrop/);
   assert.match(baseStyles, /\.episode-pickup-dialog:focus \{[\s\S]*?outline: none/);
   assert.match(baseStyles, /html:has\(\.episode-pickup-dialog\[open\]\)/);
-  assert.match(baseStyles, /\.episode-pickup-grid \{[\s\S]*?repeat\(auto-fit, minmax\(210px, 1fr\)\)/);
+  assert.match(
+    baseStyles,
+    /\.episode-pickup-grid \{[\s\S]*?repeat\(auto-fit, minmax\(210px, 1fr\)\)/,
+  );
   assert.match(baseStyles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(mobileStyles, /@media \(max-width: 560px\)/);
   assert.match(mobileStyles, /\.episode-pickup-dialog \{[\s\S]*?width: calc\(100vw - 16px\)/);
   assert.match(mobileStyles, /\.episode-pickup-grid \{[\s\S]*?scroll-snap-type: x mandatory/);
   assert.match(mobileStyles, /\.episode-pickup-item \{[\s\S]*?flex: 0 0 min\(76vw, 270px\)/);
   assert.match(mobileStyles, /\.episode-pickup-dialog::backdrop \{[\s\S]*?blur\(6px\)/);
+});
+
+test("iPhone episode images stay inside their column and leave every title fully visible", () => {
+  assert.match(
+    mobileStyles,
+    /\.episode-card-surface \{[\s\S]*?min-height: 124px;[\s\S]*?height: auto;[\s\S]*?grid-template-columns: minmax\(104px, 0\.86fr\) minmax\(0, 1\.14fr\)/,
+  );
+  assert.match(
+    mobileStyles,
+    /\.episode-thumbnail \{[\s\S]*?width: 100%;[\s\S]*?min-width: 0;[\s\S]*?aspect-ratio: auto/,
+  );
+  assert.match(
+    mobileStyles,
+    /\.episode-card-copy \{[\s\S]*?z-index: 2;[\s\S]*?min-width: 0;[\s\S]*?min-height: 124px/,
+  );
+  assert.match(
+    mobileStyles,
+    /\.episode-card-copy h4 \{[\s\S]*?max-width: 100%;[\s\S]*?overflow: visible/,
+  );
 });
