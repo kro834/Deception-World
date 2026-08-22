@@ -9456,6 +9456,56 @@ th {
   position:relative!important;
 }
 </style>
+<style id="realm-v29-saga-comparison-parity">
+/*
+  Keep Realm's comparison controls identical to Saga's enhanced iOS layout:
+  a native form picker and a directly linked range slider on both sides.
+*/
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .files-compare-mode-v14,
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .files-quick-fallback-v14,
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-chip-slider {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-controls {
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-controls > .compare-range-head {
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-controls > .compare-range {
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-live-status {
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+@media (max-width:620px) {
+  #edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-layout {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-select {
+    font-size:max(.66rem,11px)!important;
+  }
+}
+</style>
 <style id="realm-standalone-outer-switch">
   .edition-shell,
   .edition-panel-saga { display: none !important; }
@@ -9482,6 +9532,10 @@ th {
 <script id="realm-v26-comparison-controller">(()=>{
   const panel=document.getElementById('edition-panel-realm');
   if(!panel)return;
+  const compare=panel.querySelector('#realm--saga-form-compare-ios');
+  if(!compare||compare.getAttribute('data-controller-ready')==='true')return;
+  panel.classList.add('saga-compare-ready');
+  compare.classList.add('is-enhanced');
   const ids=["stella","burst","blast","legends","royal","royal-wrath","royal-abyss","royal-birth","royal-nehan"];
   const names={"stella":"ステラフォーム","burst":"バーストフォーム","blast":"ブラストフォーム","legends":"レジェンズ","royal":"ロイヤル","royal-wrath":"ロイヤル・ラース","royal-abyss":"ロイヤル・アビス","royal-birth":"ロイヤル・バース","royal-nehan":"ロイヤル・ネハン"};
   const pad=(value)=>String(value).padStart(2,'0');
@@ -9508,6 +9562,8 @@ th {
     const quickControls=sidePanel?.querySelector(':scope > .files-quick-fallback-v14');
     const cards=sidePanel?[...sidePanel.querySelectorAll(':scope > .compare-card-stack > .compare-form-card')]:[];
     if(radios.length!==ids.length||cards.length!==ids.length||!select||!range||!output)continue;
+    if(nativeMode)nativeMode.checked=true;
+    if(quickMode)quickMode.checked=false;
     const value=()=>radios.find((radio)=>radio.checked)?.value||ids[0];
     const sync=(next,notify=true)=>{
       const index=Math.max(0,ids.indexOf(next));
@@ -9536,12 +9592,13 @@ th {
     radios.forEach((radio)=>radio.addEventListener('change',()=>{if(radio.checked)sync(radio.value)}));
     const applyMode=()=>{
       if(!nativeMode||!quickMode||!nativeControls||!quickControls)return;
-      const isNative=nativeMode.checked;
-      nativeControls.style.setProperty('display',isNative?'grid':'none','important');
-      quickControls.style.setProperty('display',isNative?'none':'block','important');
-      nativeControls.setAttribute('aria-hidden',String(!isNative));
-      quickControls.setAttribute('aria-hidden',String(isNative));
-      sync(isNative?select.value:value(),false);
+      nativeMode.checked=true;
+      quickMode.checked=false;
+      nativeControls.style.setProperty('display','grid','important');
+      quickControls.style.setProperty('display','none','important');
+      nativeControls.setAttribute('aria-hidden','false');
+      quickControls.setAttribute('aria-hidden','true');
+      sync(select.value||value(),false);
     };
     nativeMode?.addEventListener('change',applyMode);
     quickMode?.addEventListener('change',applyMode);
@@ -9557,16 +9614,27 @@ th {
       sides.a.sync(b,false);
       sides.b.sync(a,false);
       updateStatus();
-      const compare=panel.querySelector('#realm--saga-form-compare-ios');
-      if(compare){
-        compare.classList.remove('is-swapping');
-        void compare.offsetWidth;
-        compare.classList.add('is-swapping');
-        setTimeout(()=>compare.classList.remove('is-swapping'),520);
-      }
+      swap.classList.remove('is-swapping');
+      void swap.offsetWidth;
+      swap.classList.add('is-swapping');
+      setTimeout(()=>swap.classList.remove('is-swapping'),520);
     });
   }
+  for(const fallbackInput of compare.querySelectorAll('.compare-radio,.files-mode-state-v14,#realm--saga-compare-swap-state')){
+    fallbackInput.tabIndex=-1;
+    fallbackInput.setAttribute('aria-hidden','true');
+  }
+  compare.setAttribute('data-controller-ready','true');
+  compare.setAttribute('data-controller','ios-direct-realm-v29');
   updateStatus();
+  window.addEventListener('pageshow',()=>{
+    swap?.classList.remove('is-swapping');
+    for(const side of ['a','b']){
+      const select=panel.querySelector('#realm--saga-compare-select-'+side);
+      if(select&&sides[side])sides[side].sync(select.value||sides[side].value(),false);
+    }
+    updateStatus();
+  });
 })()</script>
 <script src="/realm-archive-update.js" defer></script>
 </body>
