@@ -10,6 +10,10 @@ const embedded = readFileSync(
   new URL("../public/realm-form-archive-embedded.html", import.meta.url),
   "utf8",
 );
+const realmUpdate = readFileSync(
+  new URL("../public/realm-archive-update.js", import.meta.url),
+  "utf8",
+);
 
 for (const [label, html] of [
   ["standalone", standalone],
@@ -34,3 +38,14 @@ test("Realm comparison controller keeps both input sides in Saga's direct mode",
   assert.match(standalone, /window\.addEventListener\('pageshow'/);
 });
 
+test("Realm comparison swaps the analysis channel colors with the selected forms", () => {
+  assert.match(standalone, /\.is-color-swapped \.compare-side-a \{[\s\S]*?--side-accent:var\(--saga-violet\)/);
+  assert.match(standalone, /\.is-color-swapped \.compare-side-b \{[\s\S]*?--side-accent:var\(--saga-cyan\)/);
+  assert.match(standalone, /colorsSwapped=!colorsSwapped/);
+  assert.match(standalone, /labels\[0\]\.textContent=colorsSwapped\?'VIOLET CHANNEL':'CYAN CHANNEL'/);
+  assert.match(standalone, /labels\[1\]\.textContent=colorsSwapped\?'CYAN CHANNEL':'VIOLET CHANNEL'/);
+  assert.match(realmUpdate, /colorsSwapped = !colorsSwapped/);
+  assert.match(realmUpdate, /compare\.classList\.toggle\("is-color-swapped", colorsSwapped\)/);
+  assert.match(realmUpdate, /colorsSwapped \? "VIOLET CHANNEL" : "CYAN CHANNEL"/);
+  assert.match(realmUpdate, /colorsSwapped \? "CYAN CHANNEL" : "VIOLET CHANNEL"/);
+});

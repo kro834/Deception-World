@@ -13,6 +13,14 @@
 
   let cleanupTimer = 0;
   let animationFrame = 0;
+  let colorsSwapped = compare.classList.contains("is-color-swapped");
+
+  const updateChannelColors = () => {
+    compare.classList.toggle("is-color-swapped", colorsSwapped);
+    const labels = [...compare.querySelectorAll(".compare-side legend small")];
+    if (labels[0]) labels[0].textContent = colorsSwapped ? "VIOLET CHANNEL" : "CYAN CHANNEL";
+    if (labels[1]) labels[1].textContent = colorsSwapped ? "CYAN CHANNEL" : "VIOLET CHANNEL";
+  };
 
   const selectedValue = (group) =>
     groups[group].find((input) => input instanceof HTMLInputElement && input.checked)?.value ?? "";
@@ -55,6 +63,8 @@
       const left = selectedValue("a");
       const right = selectedValue("b");
       if (!left || !right || !selectValue("a", right) || !selectValue("b", left)) return;
+      colorsSwapped = !colorsSwapped;
+      updateChannelColors();
       animateSwap();
     },
     true,
@@ -70,6 +80,7 @@
     }
   });
 
+  updateChannelColors();
   window.addEventListener("pageshow", finishAnimation);
   window.addEventListener("message", (event) => {
     if (event.data?.type !== "saga-archive:close-transients") return;

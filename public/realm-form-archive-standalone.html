@@ -9497,6 +9497,24 @@ th {
   opacity:1!important;
 }
 
+/* Keep each selected form's analysis channel color attached during a swap. */
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios.is-color-swapped .compare-side-a {
+  --side-accent:var(--saga-violet);
+  --side-rgb:var(--saga-violet-rgb);
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios.is-color-swapped .compare-side-b {
+  --side-accent:var(--saga-cyan);
+  --side-rgb:var(--saga-cyan-rgb);
+}
+
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-side,
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-form-card,
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-range-head output,
+#edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-side legend b {
+  transition:border-color .42s ease,box-shadow .42s ease,color .42s ease,background-color .42s ease;
+}
+
 @media (max-width:620px) {
   #edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-layout {
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
@@ -9539,6 +9557,14 @@ th {
   const names={"stella":"ステラフォーム","burst":"バーストフォーム","blast":"ブラストフォーム","legends":"レジェンズ","royal":"ロイヤル","royal-wrath":"ロイヤル・ラース","royal-abyss":"ロイヤル・アビス","royal-birth":"ロイヤル・バース","royal-nehan":"ロイヤル・ネハン"};
   const pad=(value)=>String(value).padStart(2,'0');
   const sides={};
+  let colorsSwapped=false;
+
+  function updateChannelColors(){
+    compare.classList.toggle('is-color-swapped',colorsSwapped);
+    const labels=[...compare.querySelectorAll('.compare-side legend small')];
+    if(labels[0])labels[0].textContent=colorsSwapped?'VIOLET CHANNEL':'CYAN CHANNEL';
+    if(labels[1])labels[1].textContent=colorsSwapped?'CYAN CHANNEL':'VIOLET CHANNEL';
+  }
 
   function updateStatus(){
     const status=panel.querySelector('#realm--saga-compare-live-status');
@@ -9612,6 +9638,8 @@ th {
       const b=sides.b.value();
       sides.a.sync(b,false);
       sides.b.sync(a,false);
+      colorsSwapped=!colorsSwapped;
+      updateChannelColors();
       updateStatus();
       swap.classList.remove('is-swapping');
       void swap.offsetWidth;
@@ -9625,6 +9653,7 @@ th {
   }
   compare.setAttribute('data-controller-ready','true');
   compare.setAttribute('data-controller','ios-direct-realm-v29');
+  updateChannelColors();
   updateStatus();
   window.addEventListener('pageshow',()=>{
     swap?.classList.remove('is-swapping');
