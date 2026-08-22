@@ -47,31 +47,6 @@ const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: n
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
-const ARCHIVE_PRELOAD_BUDGET_MS = 560;
-
-async function preloadArchiveDocument(onProgress: (percent: number) => void) {
-  try {
-    const response = await window.fetch("/saga-form-archive-standalone.html", { cache: "force-cache" });
-    if (!response.ok) throw new Error(`Archive request failed: ${response.status}`);
-    const total = Math.max(1, Number(response.headers.get("content-length")) || 7_700_000);
-    if (!response.body) {
-      await response.arrayBuffer();
-      onProgress(100);
-      return;
-    }
-    const reader = response.body.getReader();
-    let received = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      received += value.byteLength;
-      onProgress(Math.max(1, Math.min(96, Math.round((received / total) * 100))));
-    }
-    onProgress(100);
-  } catch {
-    onProgress(100);
-  }
-}
 
 export function useLoadGate() {
   const ctx = useContext(LoadGateContext);
@@ -120,34 +95,34 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         const startedAt = performance.now();
         const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const timings = reduceMotion ? { cover: 180, reveal: 120 } : { cover: 900, reveal: 520 };
+        let progressTimer = 0;
         document.documentElement.dataset.loading = "true";
-        setGate({ active: true, percent: 1, variant: "archive", phase: "covering" });
+        setGate({ active: true, percent: 4, variant: "archive", phase: "covering" });
         try {
-          const archiveWarmup = Promise.allSettled([
-            preloadArchiveDocument((percent) => {
+          if (!reduceMotion) {
+            progressTimer = window.setInterval(() => {
               if (!isCurrent()) return;
-              setGate((state) => ({ ...state, percent: Math.max(1, percent) }));
-            }),
-            router.preloadRoute({ to: to as never }),
-          ]);
+              const elapsed = performance.now() - startedAt;
+              const next = Math.min(88, 4 + (elapsed / timings.cover) * 84);
+              setGate((state) => ({ ...state, percent: Math.max(state.percent, next) }));
+            }, 120);
+          }
 
-          // The standalone archive is intentionally large. Waiting for the whole
-          // document made a menu tap look inert on memory-constrained iPhones.
-          // Warm it briefly, then let the route's own iframe finish loading while
-          // the dive transition remains visible.
-          await Promise.race([
-            archiveWarmup,
-            wait(reduceMotion ? 60 : ARCHIVE_PRELOAD_BUDGET_MS),
-          ]);
+          // Only warm the lightweight React route. The archive document is loaded
+          // once by its iframe; fetching the multi-megabyte standalone document
+          // here as well could exhaust iOS WebKit's per-tab memory budget.
+          await router.preloadRoute({ to: to as never }).catch(() => undefined);
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
+          if (progressTimer) window.clearInterval(progressTimer);
           setGate({ active: true, percent: 100, variant: "archive", phase: "covering" });
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
           setGate({ active: true, percent: 100, variant: "archive", phase: "revealing" });
           await wait(timings.reveal);
         } finally {
+          if (progressTimer) window.clearInterval(progressTimer);
           if (isCurrent()) {
             document.documentElement.removeAttribute("data-loading");
             setGate({ active: false, percent: 0, variant: "default", phase: "loading" });

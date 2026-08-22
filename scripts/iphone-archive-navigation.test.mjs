@@ -12,8 +12,16 @@ test("the iPhone archive entry closes its menu and never waits for the full stan
     worldChrome,
     /<GuardedLink to="\/form-archive" assets=\{\[\]\} beforeNavigate=\{close\}>/,
   );
-  assert.match(loadGate, /const ARCHIVE_PRELOAD_BUDGET_MS = \d+;/);
-  assert.match(loadGate, /Promise\.race\(\[\s*archiveWarmup,/);
+  assert.doesNotMatch(loadGate, /preloadArchiveDocument/);
+  assert.doesNotMatch(loadGate, /saga-form-archive-standalone\.html/);
+  assert.match(loadGate, /router\.preloadRoute\(\{ to: to as never \}\)/);
+  assert.doesNotMatch(loadGate, /fetch\s*\(/);
+  assert.match(styles, /@media \(max-width: 1180px\), \(any-pointer: coarse\)/);
+  assert.match(styles, /width: min\(92vmax, 980px\)/);
+  assert.match(styles, /archive-mobile-tunnel-out/);
+  assert.match(styles, /\.archive-route-dive\.is-arriving \.cine-dive-tunnel > i[\s\S]*?animation: none !important/);
+  assert.match(styles, /height: 100vh;\s*height: 100svh;/);
+  assert.doesNotMatch(styles, /height: 100svh;\s*height: 100dvh;/);
 });
 
 test("opening the side menu keeps the Zeus control full-size and draggable", () => {

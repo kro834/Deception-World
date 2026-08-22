@@ -29,12 +29,26 @@ function FormArchive() {
   const [loaded, setLoaded] = useState(false);
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const isSaga = archive === "saga";
+  const archiveDocument = isSaga
+    ? "/saga-form-archive-embedded.html"
+    : "/realm-form-archive-embedded.html";
+
+  useEffect(() => {
+    // A cached opaque-origin iframe can finish before React observes its load
+    // event on iOS deep links. Never leave the loading veil or switch lock in
+    // place indefinitely when the document is already visible underneath it.
+    const fallback = window.setTimeout(() => setLoaded(true), 1800);
+    return () => window.clearTimeout(fallback);
+  }, [archive]);
 
   const selectArchive = useCallback((next: ArchiveKind) => {
-    if (next === archive) return;
+    // Let WebKit release the current iframe document before another archive is
+    // requested. Rapid Saga/Realm toggles during onLoad can otherwise overlap
+    // two image-heavy document constructions on iPhone and iPad.
+    if (!loaded || next === archive) return;
     setLoaded(false);
     setArchive(next);
-  }, [archive]);
+  }, [archive, loaded]);
 
   useEffect(() => {
     const switcher = switcherRef.current;
@@ -57,6 +71,7 @@ function FormArchive() {
         id="archive-switcher"
         className="form-archive-switcher liquid-swipe-tabs ios26-glass"
         role="tablist"
+        aria-busy={!loaded}
         aria-label="フォームアーカイブを切り替え。タップ、長押し、または左右へのスライドで選択できます"
         style={{
           ["--liquid-current-accent" as string]: isSaga
@@ -107,11 +122,13 @@ function FormArchive() {
         <span>{isSaga ? "SAGA" : "REALM"} ARCHIVE</span>
       </div>
       <iframe
+        key={archive}
         id="form-archive-frame"
         title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
-        src={isSaga ? "/saga-form-archive-standalone.html" : "/realm-form-archive-standalone.html"}
+        src={archiveDocument}
         sandbox="allow-scripts allow-downloads"
         referrerPolicy="no-referrer"
+        loading="eager"
         onLoad={() => setLoaded(true)}
       />
     </main>

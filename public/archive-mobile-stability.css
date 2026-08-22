@@ -1,0 +1,118 @@
+:root {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body {
+  max-width: 100%;
+  overscroll-behavior-x: none;
+}
+
+body {
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+}
+
+@supports (content-visibility: auto) {
+  [id$="saga-forms-performance-v5"] :is(.section:not(.selector-console):not(.detail-section), .archive-footer) {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 820px;
+  }
+}
+
+/* iOS/iPadOS WebKit has a comparatively small per-tab graphics budget. Keep
+   selection and panel transitions, but avoid continuously rasterizing several
+   full-screen blurred layers while the archive is embedded in the main app. */
+@media (any-pointer: coarse), (max-width: 1180px) {
+  [id$="saga-forms-performance-v5"] {
+    isolation: isolate;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(
+    .v6s-ambient-grid,
+    .v6s-fx-orbit,
+    .v6s-fx-ray.is-secondary,
+    .v6s-fx-core,
+    .solo-cover-aura-v14,
+    .solo-cover-orbit-v14,
+    .solo-cover-scan-v14
+  ) {
+    display: none !important;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(
+    .section,
+    .stage,
+    .selector-console,
+    .detail-section,
+    .compare-side,
+    .compare-form-card
+  ) {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(
+    .archive-nav,
+    .selected-telemetry,
+    .mobile-dock,
+    .selector-sheet,
+    .offline-edition-switch
+  ),
+  .edition-shell {
+    -webkit-backdrop-filter: blur(6px) saturate(112%) !important;
+    backdrop-filter: blur(6px) saturate(112%) !important;
+  }
+
+  [id$="saga-forms-performance-v5"] .form-art {
+    filter: none !important;
+    transition-duration: 320ms !important;
+  }
+
+  /* The host app owns the top archive switcher. Move the document's own page
+     links into the reserved hero gap so the two control rows never overlap. */
+  html[data-embedded-archive="true"] [id$="saga-forms-performance-v5"] .archive-nav {
+    transform: translateY(64px) !important;
+  }
+
+  [id$="saga-forms-performance-v5"] .files-form-progress-v14 > span > i::after,
+  [id$="saga-forms-performance-v5"] .v6s-progress-rail > i::after,
+  [id$="saga-forms-performance-v5"] .v6s-progress-rail::after {
+    display: none !important;
+  }
+}
+
+@media (max-width: 620px) {
+  [id$="saga-forms-performance-v5"] {
+    padding-inline: max(0.5rem, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(.form-chip, button, select, input) {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 1180px) {
+  [id$="saga-forms-performance-v5"] .archive-workspace {
+    max-width: 100%;
+  }
+
+  [id$="saga-forms-performance-v5"] .telemetry-name,
+  [id$="saga-forms-performance-v5"] .chip-name {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [id$="saga-forms-performance-v5"] *,
+  [id$="saga-forms-performance-v5"] *::before,
+  [id$="saga-forms-performance-v5"] *::after {
+    scroll-behavior: auto !important;
+  }
+}
