@@ -25,7 +25,6 @@ const POSITION_KEY = "deception-world:zeus-button-position";
 const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.9, y: 0.82 };
 const LONG_PRESS_MS = 420;
 const MOVE_TOLERANCE = 9;
-const RETURN_DIVE_THRESHOLD_MS = 96;
 const RETURN_DIVE_MINIMUM_MS = 360;
 const RETURN_DIVE_EXIT_MS = 520;
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
@@ -60,7 +59,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const navigatingRef = useRef(false);
-  const returnDiveTimer = useRef<number | null>(null);
+  const returnDiveFrame = useRef<number | null>(null);
   const returnDiveVisibleRef = useRef(false);
   const returnDiveShownAt = useRef(0);
   const [navigating, setNavigating] = useState(false);
@@ -68,9 +67,9 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const [returnDiveVisible, setReturnDiveVisible] = useState(false);
   const [returnDiveArriving, setReturnDiveArriving] = useState(false);
 
-  const clearReturnDiveTimer = useCallback(() => {
-    if (returnDiveTimer.current != null) window.clearTimeout(returnDiveTimer.current);
-    returnDiveTimer.current = null;
+  const clearReturnDiveFrame = useCallback(() => {
+    if (returnDiveFrame.current != null) window.cancelAnimationFrame(returnDiveFrame.current);
+    returnDiveFrame.current = null;
   }, []);
 
   useEffect(() => {
@@ -84,10 +83,10 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
 
   useEffect(
     () => () => {
-      clearReturnDiveTimer();
+      clearReturnDiveFrame();
       document.documentElement.removeAttribute("data-zeus-return-loading");
     },
-    [clearReturnDiveTimer],
+    [clearReturnDiveFrame],
   );
 
   useEffect(() => {
@@ -142,17 +141,17 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     setNavigating(true);
     setReturnImage(false);
     setReturnDiveArriving(false);
-    clearReturnDiveTimer();
+    clearReturnDiveFrame();
 
-    returnDiveTimer.current = window.setTimeout(() => {
+    returnDiveFrame.current = window.requestAnimationFrame(() => {
       if (!navigatingRef.current) return;
-      returnDiveTimer.current = null;
+      returnDiveFrame.current = null;
       returnDiveVisibleRef.current = true;
       returnDiveShownAt.current = performance.now();
       document.documentElement.dataset.zeusReturnLoading = "true";
       setReturnImage(true);
       setReturnDiveVisible(true);
-    }, RETURN_DIVE_THRESHOLD_MS);
+    });
 
     try {
       document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
@@ -186,7 +185,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
         });
       });
     } finally {
-      clearReturnDiveTimer();
+      clearReturnDiveFrame();
       if (returnDiveVisibleRef.current) {
         const minimumTimeLeft = Math.max(
           0,
@@ -210,7 +209,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
       navigatingRef.current = false;
       setNavigating(false);
     }
-  }, [clearReturnDiveTimer, navigate]);
+  }, [clearReturnDiveFrame, navigate]);
 
   return (
     <ZeusButtonContext.Provider value={settings}>

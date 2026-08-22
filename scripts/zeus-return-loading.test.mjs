@@ -9,10 +9,10 @@ const styles = readFileSync(
 );
 const returnImage = statSync(new URL("../public/zeus-button-return.jpeg", import.meta.url));
 
-test("perceptible Zeus navigation owns its state above the re-portalled button", () => {
+test("Zeus navigation enters its dive on the next painted frame", () => {
   assert.match(source, /export function ZeusButtonProvider[\s\S]*?const navigatingRef = useRef/);
-  assert.match(source, /const RETURN_DIVE_THRESHOLD_MS = 96/);
-  assert.match(source, /window\.setTimeout\([\s\S]*?RETURN_DIVE_THRESHOLD_MS/);
+  assert.match(source, /returnDiveFrame\.current = window\.requestAnimationFrame/);
+  assert.match(source, /window\.cancelAnimationFrame\(returnDiveFrame\.current\)/);
   assert.match(source, /setReturnImage\(true\);[\s\S]*?setReturnDiveVisible\(true\)/);
   assert.match(
     source,
