@@ -9,6 +9,8 @@ const archiveRoute = readFileSync(new URL("../src/routes/form-archive.tsx", impo
 const rootRoute = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
 const transitionStyles = readFileSync(new URL("../src/styles-route-transitions.css", import.meta.url), "utf8");
+const titleSequence = readFileSync(new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url), "utf8");
+const diveVelocity = readFileSync(new URL("../src/components/cinematic/dive-velocity-canvas.tsx", import.meta.url), "utf8");
 
 test("the iPhone archive entry closes its menu and never waits for the full standalone document", () => {
   assert.match(
@@ -48,6 +50,20 @@ test("title and archive routes ship the same deployment-safe dive animation", ()
   assert.match(transitionStyles, /dw-dive-mobile-streaks/);
   assert.match(transitionStyles, /width: min\(94vmax, 860px\)/);
   assert.doesNotMatch(transitionStyles, /150vmax/);
+});
+
+test("the opening dive adds an adaptive, mobile-bounded perspective layer", () => {
+  assert.match(titleSequence, /<DiveVelocityCanvas active=\{isWorldTransitioning\}/);
+  assert.match(titleSequence, /window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
+  assert.match(diveVelocity, /maxPixels = compact \? 1_350_000 : 3_200_000/);
+  assert.match(diveVelocity, /device\.connection\?\.saveData/);
+  assert.match(diveVelocity, /slowFrames >= 7/);
+  assert.match(diveVelocity, /cancelAnimationFrame\(frame\)/);
+  assert.match(diveVelocity, /prefers-reduced-motion: reduce/);
+  assert.match(transitionStyles, /\.cine-stage\.is-diving \.cine-dive-velocity/);
+  assert.match(transitionStyles, /\.cine-stage\.is-arriving \.cine-dive-velocity/);
+  assert.match(transitionStyles, /\.cine-stage\.is-arriving \.cine-dive-flash \{\s*inset: -8vh 0;/);
+  assert.match(transitionStyles, /\.cine-dive-velocity \{\s*display: none;/);
 });
 
 test("opening the side menu keeps the Zeus control full-size and draggable", () => {

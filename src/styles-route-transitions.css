@@ -72,6 +72,25 @@
   opacity: 0;
 }
 
+/* A single adaptive canvas adds true perspective motion to the opening dive.
+   Its backing resolution and streak count are capped in JavaScript, avoiding
+   the large composited surfaces that previously destabilised mobile WebKit. */
+.cine-dive-velocity {
+  position: absolute;
+  z-index: 19;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  contain: strict;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transform: translateZ(0) scale(1.015);
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
 .cine-dive-tunnel {
   z-index: 18;
   top: 50%;
@@ -241,6 +260,10 @@
   animation: dw-dive-status-in 0.24s ease-out 0.2s both;
 }
 
+.cine-stage.is-diving .cine-dive-velocity {
+  animation: dw-dive-velocity-in 0.34s ease-out both;
+}
+
 .cine-stage.is-arriving .cine-dive-tunnel,
 .archive-route-dive.is-arriving .cine-dive-tunnel {
   animation: dw-dive-tunnel-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -253,11 +276,21 @@
   animation: dw-dive-exit-light 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Overscan the title's exit light so visual-viewport rounding and iPad safe
+   areas can never expose the black stage at the moment the tunnel opens. */
+.cine-stage.is-arriving .cine-dive-flash {
+  inset: -8vh 0;
+}
+
 .cine-stage.is-arriving .cine-dive-flash::before,
 .archive-route-dive.is-arriving .cine-dive-flash::before {
   width: min(54vw, 660px);
   background: radial-gradient(circle, #fff 0 20%, #effcff 38%, rgb(155 222 239 / 0.88) 60%, transparent 78%);
   animation: dw-dive-exit-core 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cine-stage.is-arriving .cine-dive-velocity {
+  animation: dw-dive-velocity-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (max-width: 560px) {
@@ -307,6 +340,11 @@
 /* iPhone and touch-first iPads retain the forward motion while staying inside
    WebKit's graphics budget: bounded surfaces, one streak plane, no blur. */
 @media (max-width: 1180px), (any-pointer: coarse) {
+  .cine-dive-velocity {
+    mix-blend-mode: normal;
+    transform: translateZ(0);
+  }
+
   .cine-stage .cine-dive-tunnel,
   .archive-route-dive .cine-dive-tunnel {
     width: min(94vmax, 860px);
@@ -370,6 +408,18 @@
   to { opacity: 0; transform: translateZ(0) scale(1.2); }
 }
 
+@keyframes dw-dive-velocity-in {
+  from { opacity: 0; transform: translateZ(0) scale(1.015); }
+  28% { opacity: 0.78; }
+  to { opacity: 1; transform: translateZ(0) scale(1.045); }
+}
+
+@keyframes dw-dive-velocity-out {
+  from { opacity: 1; transform: translateZ(0) scale(1.045); }
+  56% { opacity: 1; }
+  to { opacity: 0.28; transform: translateZ(0) scale(1.1); }
+}
+
 @keyframes dw-dive-core-pulse {
   0%, 100% { opacity: 0.62; transform: scale(0.84); }
   50% { opacity: 1; transform: scale(1.08); }
@@ -412,8 +462,13 @@
   .cine-dive-tunnel > i,
   .cine-dive-flash,
   .cine-dive-flash::before,
-  .cine-dive-status {
+  .cine-dive-status,
+  .cine-dive-velocity {
     animation: none !important;
+  }
+
+  .cine-dive-velocity {
+    display: none;
   }
 
   .is-diving .cine-dive-flash {

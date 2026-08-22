@@ -4,6 +4,7 @@ import { RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { createCinematicScore } from "@/lib/cinematic-audio";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { useLoadGate } from "@/components/load-gate";
+import { DiveVelocityCanvas } from "./dive-velocity-canvas";
 import { Particles } from "./particles";
 
 const SEQUENCE_MS = 6600;
@@ -148,6 +149,7 @@ export function TitleSequence() {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     phaseRef.current = "diving";
     setPhase("diving");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -296,6 +298,7 @@ export function TitleSequence() {
 
       <div className="cine-vignette" />
       <div className="cine-grain" />
+      <DiveVelocityCanvas active={isWorldTransitioning} arriving={phase === "arriving"} />
       <div className="cine-dive-tunnel" aria-hidden="true">
         <i />
         <i />
