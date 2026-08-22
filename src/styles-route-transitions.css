@@ -25,7 +25,13 @@
   left: max(12px, env(safe-area-inset-left));
   height: 1px;
   content: "";
-  background: linear-gradient(90deg, transparent, rgb(117 221 255 / 0.32), rgb(224 186 102 / 0.24), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(117 221 255 / 0.32),
+    rgb(224 186 102 / 0.24),
+    transparent
+  );
   pointer-events: none;
 }
 
@@ -70,6 +76,24 @@
   position: absolute;
   pointer-events: none;
   opacity: 0;
+}
+
+/* The title dive is portalled to the document root. Keeping it outside the
+   paint-contained title stage prevents mobile WebKit from dropping the first
+   transition frame while the destination route is prepared. */
+.title-world-dive-overlay {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  contain: strict;
+  background: rgb(0 4 10 / 0.12);
+  pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 /* A single adaptive canvas adds true perspective motion to the opening dive.
@@ -162,15 +186,28 @@
 .cine-dive-tunnel::after {
   inset: 42%;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 5%, #bcecff 17%, rgb(72 178 205 / 0.76) 38%, transparent 72%);
-  box-shadow: 0 0 7vmax rgb(115 222 239 / 0.72), 0 0 12vmax rgb(224 186 102 / 0.24);
+  background: radial-gradient(
+    circle,
+    #fff 0 5%,
+    #bcecff 17%,
+    rgb(72 178 205 / 0.76) 38%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 7vmax rgb(115 222 239 / 0.72),
+    0 0 12vmax rgb(224 186 102 / 0.24);
 }
 
 .cine-dive-flash {
   z-index: 29;
   inset: 0;
   overflow: hidden;
-  background: radial-gradient(circle at center, rgb(228 249 255 / 0.55), rgb(75 165 193 / 0.18) 32%, transparent 74%);
+  background: radial-gradient(
+    circle at center,
+    rgb(228 249 255 / 0.55),
+    rgb(75 165 193 / 0.18) 32%,
+    transparent 74%
+  );
   will-change: opacity;
 }
 
@@ -180,7 +217,14 @@
   width: min(42vw, 520px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 7%, #dff8ff 19%, rgb(106 205 226 / 0.72) 38%, rgb(224 186 102 / 0.22) 54%, transparent 74%);
+  background: radial-gradient(
+    circle,
+    #fff 0 7%,
+    #dff8ff 19%,
+    rgb(106 205 226 / 0.72) 38%,
+    rgb(224 186 102 / 0.22) 54%,
+    transparent 74%
+  );
   box-shadow: 0 0 12vmax rgb(130 224 239 / 0.46);
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.08);
@@ -210,69 +254,92 @@
 
 .cine-dive-status small {
   color: #f0d78a;
-  font: 600 0.54rem/1 "Cinzel", serif;
+  font:
+    600 0.54rem/1 "Cinzel",
+    serif;
   letter-spacing: 0.32em;
 }
 
 .cine-dive-status span {
-  font: 500 0.64rem/1 "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+  font:
+    500 0.64rem/1 "Noto Sans JP",
+    "Hiragino Sans",
+    system-ui,
+    sans-serif;
   letter-spacing: 0.26em;
 }
 
 .cine-stage.is-diving .cine-dive-tunnel,
+.title-world-dive-overlay.is-diving .cine-dive-tunnel,
 .archive-route-dive.is-diving .cine-dive-tunnel {
   animation: dw-dive-tunnel-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .cine-stage.is-diving .cine-dive-tunnel::before,
+.title-world-dive-overlay.is-diving .cine-dive-tunnel::before,
 .archive-route-dive.is-diving .cine-dive-tunnel::before {
   animation: dw-dive-rings 0.48s linear infinite;
 }
 
 .cine-stage.is-diving .cine-dive-tunnel::after,
+.title-world-dive-overlay.is-diving .cine-dive-tunnel::after,
 .archive-route-dive.is-diving .cine-dive-tunnel::after {
   animation: dw-dive-core-pulse 0.64s ease-in-out infinite;
 }
 
 .cine-stage.is-diving .cine-dive-tunnel > i,
+.title-world-dive-overlay.is-diving .cine-dive-tunnel > i,
 .archive-route-dive.is-diving .cine-dive-tunnel > i {
   animation: dw-dive-streaks 0.5s linear infinite;
 }
 
 .cine-stage.is-diving .cine-dive-tunnel > i:nth-child(2),
+.title-world-dive-overlay.is-diving .cine-dive-tunnel > i:nth-child(2),
 .archive-route-dive.is-diving .cine-dive-tunnel > i:nth-child(2) {
   animation-delay: -0.25s;
   animation-duration: 0.62s;
 }
 
 .cine-stage.is-diving .cine-dive-flash,
+.title-world-dive-overlay.is-diving .cine-dive-flash,
 .archive-route-dive.is-diving .cine-dive-flash {
   animation: dw-dive-entry-flash 0.46s ease-out both;
 }
 
 .cine-stage.is-diving .cine-dive-flash::before,
+.title-world-dive-overlay.is-diving .cine-dive-flash::before,
 .archive-route-dive.is-diving .cine-dive-flash::before {
   animation: dw-dive-entry-core 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .cine-stage.is-diving .cine-dive-status,
+.title-world-dive-overlay.is-diving .cine-dive-status,
 .archive-route-dive.is-diving .cine-dive-status {
   animation: dw-dive-status-in 0.24s ease-out 0.2s both;
 }
 
-.cine-stage.is-diving .cine-dive-velocity {
+.cine-stage.is-diving .cine-dive-velocity,
+.title-world-dive-overlay.is-diving .cine-dive-velocity {
   animation: dw-dive-velocity-in 0.34s ease-out both;
 }
 
 .cine-stage.is-arriving .cine-dive-tunnel,
+.title-world-dive-overlay.is-arriving .cine-dive-tunnel,
 .archive-route-dive.is-arriving .cine-dive-tunnel {
   animation: dw-dive-tunnel-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .cine-stage.is-arriving .cine-dive-flash,
+.title-world-dive-overlay.is-arriving .cine-dive-flash,
 .archive-route-dive.is-arriving .cine-dive-flash {
   inset: 0;
-  background: radial-gradient(circle at center, #fff 0 11%, rgb(232 250 255 / 0.98) 35%, rgb(174 229 243 / 0.94) 64%, rgb(222 247 252 / 0.92) 100%);
+  background: radial-gradient(
+    circle at center,
+    #fff 0 11%,
+    rgb(232 250 255 / 0.98) 35%,
+    rgb(174 229 243 / 0.94) 64%,
+    rgb(222 247 252 / 0.92) 100%
+  );
   animation: dw-dive-exit-light 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -283,13 +350,21 @@
 }
 
 .cine-stage.is-arriving .cine-dive-flash::before,
+.title-world-dive-overlay.is-arriving .cine-dive-flash::before,
 .archive-route-dive.is-arriving .cine-dive-flash::before {
   width: min(54vw, 660px);
-  background: radial-gradient(circle, #fff 0 20%, #effcff 38%, rgb(155 222 239 / 0.88) 60%, transparent 78%);
+  background: radial-gradient(
+    circle,
+    #fff 0 20%,
+    #effcff 38%,
+    rgb(155 222 239 / 0.88) 60%,
+    transparent 78%
+  );
   animation: dw-dive-exit-core 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.cine-stage.is-arriving .cine-dive-velocity {
+.cine-stage.is-arriving .cine-dive-velocity,
+.title-world-dive-overlay.is-arriving .cine-dive-velocity {
   animation: dw-dive-velocity-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -346,6 +421,7 @@
   }
 
   .cine-stage .cine-dive-tunnel,
+  .title-world-dive-overlay .cine-dive-tunnel,
   .archive-route-dive .cine-dive-tunnel {
     width: min(94vmax, 860px);
     height: min(94vmax, 860px);
@@ -355,6 +431,7 @@
   }
 
   .cine-stage .cine-dive-tunnel > i,
+  .title-world-dive-overlay .cine-dive-tunnel > i,
   .archive-route-dive .cine-dive-tunnel > i {
     inset: 12%;
     -webkit-mask-image: none;
@@ -362,13 +439,16 @@
   }
 
   .cine-stage .cine-dive-tunnel > i:nth-child(2),
+  .title-world-dive-overlay .cine-dive-tunnel > i:nth-child(2),
   .archive-route-dive .cine-dive-tunnel > i:nth-child(2),
   .cine-stage .cine-dive-tunnel::before,
+  .title-world-dive-overlay .cine-dive-tunnel::before,
   .archive-route-dive .cine-dive-tunnel::before {
     display: none;
   }
 
   .cine-stage.is-diving .cine-dive-tunnel > i:first-child,
+  .title-world-dive-overlay.is-diving .cine-dive-tunnel > i:first-child,
   .archive-route-dive.is-diving .cine-dive-tunnel > i:first-child {
     animation: dw-dive-mobile-streaks 0.62s linear infinite;
   }
@@ -379,95 +459,206 @@
 }
 
 @keyframes dw-dive-tunnel-in {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.28) rotate(-2deg); }
-  to { opacity: 0.92; transform: translate(-50%, -50%) scale(0.84) rotate(0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.28) rotate(-2deg);
+  }
+  to {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(0.84) rotate(0);
+  }
 }
 
 @keyframes dw-dive-tunnel-out {
-  from { opacity: 0.92; transform: translate(-50%, -50%) scale(0.84); }
-  48% { opacity: 1; }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(1.32); }
+  from {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(0.84);
+  }
+  48% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.32);
+  }
 }
 
 @keyframes dw-dive-rings {
-  from { opacity: 0; transform: scale(0.52); }
-  22% { opacity: 0.8; }
-  to { opacity: 0; transform: scale(1.5); }
+  from {
+    opacity: 0;
+    transform: scale(0.52);
+  }
+  22% {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
 }
 
 @keyframes dw-dive-streaks {
-  from { opacity: 0; transform: translateZ(0) scale(0.54); }
-  20% { opacity: 0.94; }
-  72% { opacity: 0.62; }
-  to { opacity: 0; transform: translateZ(0) scale(1.54); }
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.54);
+  }
+  20% {
+    opacity: 0.94;
+  }
+  72% {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 0;
+    transform: translateZ(0) scale(1.54);
+  }
 }
 
 @keyframes dw-dive-mobile-streaks {
-  from { opacity: 0; transform: translateZ(0) scale(0.64); }
-  24% { opacity: 0.88; }
-  to { opacity: 0; transform: translateZ(0) scale(1.2); }
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.64);
+  }
+  24% {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 0;
+    transform: translateZ(0) scale(1.2);
+  }
 }
 
 @keyframes dw-dive-velocity-in {
-  from { opacity: 0; transform: translateZ(0) scale(1.015); }
-  28% { opacity: 0.78; }
-  to { opacity: 1; transform: translateZ(0) scale(1.045); }
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(1.015);
+  }
+  28% {
+    opacity: 0.78;
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) scale(1.045);
+  }
 }
 
 @keyframes dw-dive-velocity-out {
-  from { opacity: 1; transform: translateZ(0) scale(1.045); }
-  56% { opacity: 1; }
-  to { opacity: 0.28; transform: translateZ(0) scale(1.1); }
+  from {
+    opacity: 1;
+    transform: translateZ(0) scale(1.045);
+  }
+  56% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.28;
+    transform: translateZ(0) scale(1.1);
+  }
 }
 
 @keyframes dw-dive-core-pulse {
-  0%, 100% { opacity: 0.62; transform: scale(0.84); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(0.84);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
 }
 
 @keyframes dw-dive-entry-flash {
-  from { opacity: 0; }
-  26% { opacity: 0.7; }
-  to { opacity: 0; }
+  from {
+    opacity: 0;
+  }
+  26% {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes dw-dive-entry-core {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.08); }
-  38% { opacity: 1; }
-  to { opacity: 0; transform: translate(-50%, -50%) scale(2.6); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.08);
+  }
+  38% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.6);
+  }
 }
 
 @keyframes dw-dive-exit-light {
-  from { opacity: 0; }
-  34% { opacity: 0.24; }
-  74% { opacity: 0.9; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  34% {
+    opacity: 0.24;
+  }
+  74% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes dw-dive-exit-core {
-  from { opacity: 0.16; transform: translate(-50%, -50%) scale(0.1); }
-  44% { opacity: 1; }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(5.2); }
+  from {
+    opacity: 0.16;
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+  44% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(5.2);
+  }
 }
 
 @keyframes dw-dive-status-in {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 @keyframes dw-dive-reduced-tunnel-in {
-  from { opacity: 0; }
-  to { opacity: 0.86; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.86;
+  }
 }
 
 @keyframes dw-dive-reduced-tunnel-out {
-  from { opacity: 0.86; }
-  to { opacity: 0.2; }
+  from {
+    opacity: 0.86;
+  }
+  to {
+    opacity: 0.2;
+  }
 }
 
 @keyframes dw-dive-reduced-light {
-  from { opacity: 0.28; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.28;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* iOS exposes Reduce Motion through matchMedia. Keep a short, opacity-led
@@ -476,40 +667,56 @@
   display: none;
 }
 
+.title-world-dive-overlay.is-reduced-dive .cine-dive-velocity {
+  display: none;
+}
+
 .cine-stage.is-reduced-dive .cine-dive-tunnel::before,
+.title-world-dive-overlay.is-reduced-dive .cine-dive-tunnel::before,
 .cine-stage.is-reduced-dive .cine-dive-tunnel::after,
+.title-world-dive-overlay.is-reduced-dive .cine-dive-tunnel::after,
 .cine-stage.is-reduced-dive .cine-dive-tunnel > i,
+.title-world-dive-overlay.is-reduced-dive .cine-dive-tunnel > i,
 .cine-stage.is-reduced-dive .cine-dive-flash,
+.title-world-dive-overlay.is-reduced-dive .cine-dive-flash,
 .cine-stage.is-reduced-dive .cine-dive-flash::before,
-.cine-stage.is-reduced-dive .cine-dive-status {
+.title-world-dive-overlay.is-reduced-dive .cine-dive-flash::before,
+.cine-stage.is-reduced-dive .cine-dive-status,
+.title-world-dive-overlay.is-reduced-dive .cine-dive-status {
   animation: none !important;
 }
 
-.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel {
+.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel,
+.title-world-dive-overlay.is-reduced-dive.is-diving .cine-dive-tunnel {
   opacity: 0.86;
   transform: translate(-50%, -50%) scale(0.82);
   animation: dw-dive-reduced-tunnel-in 0.24s ease-out both !important;
 }
 
-.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel::after {
+.cine-stage.is-reduced-dive.is-diving .cine-dive-tunnel::after,
+.title-world-dive-overlay.is-reduced-dive.is-diving .cine-dive-tunnel::after {
   opacity: 0.92;
   transform: scale(1);
 }
 
-.cine-stage.is-reduced-dive.is-diving .cine-dive-flash {
+.cine-stage.is-reduced-dive.is-diving .cine-dive-flash,
+.title-world-dive-overlay.is-reduced-dive.is-diving .cine-dive-flash {
   opacity: 0.72;
 }
 
-.cine-stage.is-reduced-dive.is-diving .cine-dive-status {
+.cine-stage.is-reduced-dive.is-diving .cine-dive-status,
+.title-world-dive-overlay.is-reduced-dive.is-diving .cine-dive-status {
   opacity: 1;
   transform: translate(-50%, 0);
 }
 
-.cine-stage.is-reduced-dive.is-arriving .cine-dive-tunnel {
+.cine-stage.is-reduced-dive.is-arriving .cine-dive-tunnel,
+.title-world-dive-overlay.is-reduced-dive.is-arriving .cine-dive-tunnel {
   animation: dw-dive-reduced-tunnel-out 0.3s ease-out both !important;
 }
 
-.cine-stage.is-reduced-dive.is-arriving .cine-dive-flash {
+.cine-stage.is-reduced-dive.is-arriving .cine-dive-flash,
+.title-world-dive-overlay.is-reduced-dive.is-arriving .cine-dive-flash {
   animation: dw-dive-reduced-light 0.3s ease-out both !important;
 }
 

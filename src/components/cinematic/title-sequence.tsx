@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import { RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { createCinematicScore } from "@/lib/cinematic-audio";
@@ -14,6 +15,19 @@ const WORLD_DIVE_REDUCED_MIN_MS = 520;
 const WORLD_DIVE_REDUCED_EXIT_MS = 340;
 
 type SequencePhase = "idle" | "playing" | "complete" | "diving" | "arriving";
+
+function waitForVisualPaint() {
+  return new Promise<void>((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    window.setTimeout(finish, 96);
+    window.requestAnimationFrame(() => window.requestAnimationFrame(finish));
+  });
+}
 
 function HudRings() {
   const ticks = Array.from({ length: 60 }, (_, i) => {
@@ -63,10 +77,16 @@ export function TitleSequence() {
   phaseRef.current = phase;
 
   useEffect(() => {
-    const connection = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    }).connection;
-    if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") {
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    if (
+      connection?.saveData ||
+      connection?.effectiveType === "slow-2g" ||
+      connection?.effectiveType === "2g"
+    ) {
       return;
     }
     const timer = window.setTimeout(() => {
@@ -159,6 +179,11 @@ export function TitleSequence() {
     setReducedDive(reduced);
 
     try {
+      // Mobile WebKit can postpone painting a newly composited layer while the
+      // destination route and hero image are being prepared. Commit and paint
+      // the fixed dive overlay first so the transition cannot be skipped.
+      await waitForVisualPaint();
+      if (!mountedRef.current || phaseRef.current !== "diving") return;
       await Promise.all([
         preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
         router.preloadRoute({ to: "/world" }).catch(() => undefined),
@@ -185,8 +210,11 @@ export function TitleSequence() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target instanceof Element ? e.target : null;
-      const isInteractive = Boolean(target?.closest("button, a, input, textarea, select, [contenteditable='true']"));
-      const isSkipKey = e.key === "Escape" || e.key === " " || e.key === "Enter" || e.key.toLowerCase() === "s";
+      const isInteractive = Boolean(
+        target?.closest("button, a, input, textarea, select, [contenteditable='true']"),
+      );
+      const isSkipKey =
+        e.key === "Escape" || e.key === " " || e.key === "Enter" || e.key.toLowerCase() === "s";
       if (phase === "playing" && isSkipKey && (!isInteractive || e.key === "Escape")) {
         e.preventDefault();
         skip();
@@ -240,154 +268,170 @@ export function TitleSequence() {
             : "cine-stage";
   const stageClass = `${stageStateClass}${reducedDive ? " is-reduced-dive" : ""}`;
   const isWorldTransitioning = phase === "diving" || phase === "arriving";
+  const diveOverlay =
+    isWorldTransitioning && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className={`title-world-dive-overlay is-diving${
+              phase === "arriving" ? " is-arriving" : ""
+            }${reducedDive ? " is-reduced-dive" : ""}`}
+            aria-hidden="true"
+          >
+            <DiveVelocityCanvas active arriving={phase === "arriving"} />
+            <div className="cine-dive-tunnel">
+              <i />
+              <i />
+            </div>
+            <div className="cine-dive-flash" />
+            {phase === "diving" ? (
+              <div className="cine-dive-status">
+                <small>WORLD LINK // DIVE</small>
+                <span>境界を通過中</span>
+              </div>
+            ) : null}
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
-    <section
-      className={stageClass}
-      onPointerDown={phase === "playing" ? unlockAudio : undefined}
-      role="region"
-      aria-label="仮面ライダーサーガ Deception World オープニング"
-      aria-busy={isWorldTransitioning}
-    >
-      <video
-        key={`atm-${replayKey}`}
-        ref={videoRef}
-        className="cine-atmosphere"
-        src="/atmosphere.mp4"
-        poster="/atmosphere-poster.jpg"
-        muted
-        playsInline
-        preload="metadata"
-        loop
-      />
+    <>
+      <section
+        className={stageClass}
+        onPointerDown={phase === "playing" ? unlockAudio : undefined}
+        role="region"
+        aria-label="仮面ライダーサーガ Deception World オープニング"
+        aria-busy={isWorldTransitioning}
+      >
+        <video
+          key={`atm-${replayKey}`}
+          ref={videoRef}
+          className="cine-atmosphere"
+          src="/atmosphere.mp4"
+          poster="/atmosphere-poster.jpg"
+          muted
+          playsInline
+          preload="metadata"
+          loop
+        />
 
-      <div className="cine-light-field" aria-hidden="true" />
-      <div className="cine-scanline" aria-hidden="true" />
-      <div className="cine-flare" aria-hidden="true" />
-      <HudRings />
-      <Particles active={phase === "playing" || isWorldTransitioning} />
+        <div className="cine-light-field" aria-hidden="true" />
+        <div className="cine-scanline" aria-hidden="true" />
+        <div className="cine-flare" aria-hidden="true" />
+        <HudRings />
+        <Particles active={phase === "playing" || isWorldTransitioning} />
 
-      <div className="cine-line" />
+        <div className="cine-line" />
 
-      <div className="cine-sequence-meta" aria-hidden="true">
-        <span>DW // OPENING 02</span>
-        <span>WORLD SIGNAL 07</span>
-      </div>
+        <div className="cine-sequence-meta" aria-hidden="true">
+          <span>DW // OPENING 02</span>
+          <span>WORLD SIGNAL 07</span>
+        </div>
 
-      <div className="cine-stack">
-        <div className="cine-title-lockup">
-          <div className="cine-logo-wrap">
-            <img
-              src="/logo-title.jpg"
-              alt=""
-              className="cine-logo-glow"
-              decoding="async"
-              draggable={false}
-            />
-            <img
-              src="/logo-title.jpg"
-              alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
-              className="cine-logo-core"
-              decoding="async"
-              fetchPriority="high"
-              draggable={false}
-            />
-            <div className="cine-logo-shine" />
-            <span className="cine-logo-frame" aria-hidden="true" />
-          </div>
-          <div className="cine-title-caption" aria-hidden="true">
-            <span>THE SECOND SAGA</span>
-            <i />
-            <span>DECEPTION WORLD</span>
+        <div className="cine-stack">
+          <div className="cine-title-lockup">
+            <div className="cine-logo-wrap">
+              <img
+                src="/logo-title.jpg"
+                alt=""
+                className="cine-logo-glow"
+                decoding="async"
+                draggable={false}
+              />
+              <img
+                src="/logo-title.jpg"
+                alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
+                className="cine-logo-core"
+                decoding="async"
+                fetchPriority="high"
+                draggable={false}
+              />
+              <div className="cine-logo-shine" />
+              <span className="cine-logo-frame" aria-hidden="true" />
+            </div>
+            <div className="cine-title-caption" aria-hidden="true">
+              <span>THE SECOND SAGA</span>
+              <i />
+              <span>DECEPTION WORLD</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="cine-vignette" />
-      <div className="cine-grain" />
-      <DiveVelocityCanvas active={isWorldTransitioning} arriving={phase === "arriving"} />
-      <div className="cine-dive-tunnel" aria-hidden="true">
-        <i />
-        <i />
-      </div>
-      <div className="cine-dive-flash" aria-hidden="true" />
-      {phase === "diving" ? (
-        <div className="cine-dive-status" role="status" aria-live="polite">
-          <small>WORLD LINK // DIVE</small>
-          <span>境界を通過中</span>
+        <div className="cine-vignette" />
+        <div className="cine-grain" />
+        <div className="cine-letterbox top" />
+        <div className="cine-letterbox bottom" />
+        <div className="cine-progress" aria-hidden="true">
+          <span />
+          <i />
+          <i />
+          <i />
+          <i />
         </div>
-      ) : null}
-      <div className="cine-letterbox top" />
-      <div className="cine-letterbox bottom" />
-      <div className="cine-progress" aria-hidden="true">
-        <span />
-        <i />
-        <i />
-        <i />
-        <i />
-      </div>
-      <div className="cine-cue" aria-hidden="true">
-        <span>INITIALIZE SIGNAL</span>
-        <span>TRACE DECEPTION</span>
-        <span>WORLD LOCKED</span>
-      </div>
+        <div className="cine-cue" aria-hidden="true">
+          <span>INITIALIZE SIGNAL</span>
+          <span>TRACE DECEPTION</span>
+          <span>WORLD LOCKED</span>
+        </div>
 
-      <div className="cine-enter-hint">
-        <p className="cine-pulse cine-kicker">Opening</p>
-      </div>
+        <div className="cine-enter-hint">
+          <p className="cine-pulse cine-kicker">Opening</p>
+        </div>
 
-      <button
-        type="button"
-        className="cine-ghost cine-skip"
-        disabled={phase !== "playing"}
-        onClick={skip}
-        aria-label="オープニングをスキップ"
-        aria-keyshortcuts="Escape Enter Space S"
-      >
-        <SkipForward className="size-4" aria-hidden="true" />
-        <span>スキップ</span>
-        <kbd>ESC</kbd>
-      </button>
-
-      <div className="cine-always" aria-hidden={phase === "idle" || isWorldTransitioning}>
         <button
           type="button"
-          className="cine-ghost inline-flex items-center gap-2"
-          disabled={phase === "idle" || isWorldTransitioning}
-          onClick={toggleMute}
-          aria-label={muted ? "音声をオン" : "音声をオフ"}
-          aria-keyshortcuts="M"
+          className="cine-ghost cine-skip"
+          disabled={phase !== "playing"}
+          onClick={skip}
+          aria-label="オープニングをスキップ"
+          aria-keyshortcuts="Escape Enter Space S"
         >
-          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-          <span className="hidden sm:inline">{muted ? "SOUND OFF" : "SOUND ON"}</span>
+          <SkipForward className="size-4" aria-hidden="true" />
+          <span>スキップ</span>
+          <kbd>ESC</kbd>
         </button>
-      </div>
 
-      <div
-        className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"
-        aria-hidden={phase !== "complete"}
-      >
-        <button
-          type="button"
-          className="cine-btn"
-          disabled={phase !== "complete"}
-          onClick={() => void enterWorld()}
+        <div className="cine-always" aria-hidden={phase === "idle" || isWorldTransitioning}>
+          <button
+            type="button"
+            className="cine-ghost inline-flex items-center gap-2"
+            disabled={phase === "idle" || isWorldTransitioning}
+            onClick={toggleMute}
+            aria-label={muted ? "音声をオン" : "音声をオフ"}
+            aria-keyshortcuts="M"
+          >
+            {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+            <span className="hidden sm:inline">{muted ? "SOUND OFF" : "SOUND ON"}</span>
+          </button>
+        </div>
+
+        <div
+          className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"
+          aria-hidden={phase !== "complete"}
         >
-          <span>ENTER THE WORLD</span>
-        </button>
-        <button
-          type="button"
-          className="cine-btn"
-          disabled={phase !== "complete"}
-          onClick={replay}
-          aria-keyshortcuts="R"
-        >
-          <span className="inline-flex items-center gap-2">
-            <RotateCcw className="size-3.5" />
-            もう一度
-          </span>
-        </button>
-      </div>
-    </section>
+          <button
+            type="button"
+            className="cine-btn"
+            disabled={phase !== "complete"}
+            onClick={() => void enterWorld()}
+          >
+            <span>ENTER THE WORLD</span>
+          </button>
+          <button
+            type="button"
+            className="cine-btn"
+            disabled={phase !== "complete"}
+            onClick={replay}
+            aria-keyshortcuts="R"
+          >
+            <span className="inline-flex items-center gap-2">
+              <RotateCcw className="size-3.5" />
+              もう一度
+            </span>
+          </button>
+        </div>
+      </section>
+      {diveOverlay}
+    </>
   );
 }

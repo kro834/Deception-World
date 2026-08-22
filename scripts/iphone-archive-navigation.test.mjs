@@ -3,14 +3,32 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const loadGate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
-const worldChrome = readFileSync(new URL("../src/components/world/world-chrome.tsx", import.meta.url), "utf8");
-const zeusButton = readFileSync(new URL("../src/components/zeus-button.tsx", import.meta.url), "utf8");
-const archiveRoute = readFileSync(new URL("../src/routes/form-archive.tsx", import.meta.url), "utf8");
+const worldChrome = readFileSync(
+  new URL("../src/components/world/world-chrome.tsx", import.meta.url),
+  "utf8",
+);
+const zeusButton = readFileSync(
+  new URL("../src/components/zeus-button.tsx", import.meta.url),
+  "utf8",
+);
+const archiveRoute = readFileSync(
+  new URL("../src/routes/form-archive.tsx", import.meta.url),
+  "utf8",
+);
 const rootRoute = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
-const transitionStyles = readFileSync(new URL("../src/styles-route-transitions.css", import.meta.url), "utf8");
-const titleSequence = readFileSync(new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url), "utf8");
-const diveVelocity = readFileSync(new URL("../src/components/cinematic/dive-velocity-canvas.tsx", import.meta.url), "utf8");
+const transitionStyles = readFileSync(
+  new URL("../src/styles-route-transitions.css", import.meta.url),
+  "utf8",
+);
+const titleSequence = readFileSync(
+  new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url),
+  "utf8",
+);
+const diveVelocity = readFileSync(
+  new URL("../src/components/cinematic/dive-velocity-canvas.tsx", import.meta.url),
+  "utf8",
+);
 
 test("the iPhone archive entry closes its menu and never waits for the full standalone document", () => {
   assert.match(
@@ -24,7 +42,10 @@ test("the iPhone archive entry closes its menu and never waits for the full stan
   assert.match(styles, /@media \(max-width: 1180px\), \(any-pointer: coarse\)/);
   assert.match(styles, /width: min\(92vmax, 980px\)/);
   assert.match(styles, /archive-mobile-tunnel-out/);
-  assert.match(styles, /\.archive-route-dive\.is-arriving \.cine-dive-tunnel > i[\s\S]*?animation: none !important/);
+  assert.match(
+    styles,
+    /\.archive-route-dive\.is-arriving \.cine-dive-tunnel > i[\s\S]*?animation: none !important/,
+  );
   assert.match(styles, /height: 100vh;\s*height: 100svh;/);
   assert.doesNotMatch(styles, /height: 100svh;\s*height: 100dvh;/);
 });
@@ -53,7 +74,10 @@ test("title and archive routes ship the same deployment-safe dive animation", ()
 });
 
 test("the opening dive adds an adaptive, mobile-bounded perspective layer", () => {
-  assert.match(titleSequence, /<DiveVelocityCanvas active=\{isWorldTransitioning\}/);
+  assert.match(titleSequence, /createPortal/);
+  assert.match(titleSequence, /waitForVisualPaint/);
+  assert.match(titleSequence, /title-world-dive-overlay is-diving/);
+  assert.match(titleSequence, /<DiveVelocityCanvas active arriving=/);
   assert.match(titleSequence, /window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
   assert.match(titleSequence, /WORLD_DIVE_REDUCED_MIN_MS = 520/);
   assert.match(titleSequence, /WORLD_DIVE_REDUCED_EXIT_MS = 340/);
@@ -70,6 +94,8 @@ test("the opening dive adds an adaptive, mobile-bounded perspective layer", () =
   assert.match(transitionStyles, /\.cine-dive-velocity \{\s*display: none;/);
   assert.match(transitionStyles, /\.cine-stage\.is-reduced-dive\.is-diving \.cine-dive-tunnel/);
   assert.match(transitionStyles, /dw-dive-reduced-light/);
+  assert.match(transitionStyles, /\.title-world-dive-overlay \{/);
+  assert.match(transitionStyles, /z-index: 2147483000/);
 });
 
 test("opening the side menu keeps the Zeus control full-size and draggable", () => {
