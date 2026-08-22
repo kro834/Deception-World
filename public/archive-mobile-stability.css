@@ -15,27 +15,20 @@ body {
   box-sizing: border-box;
 }
 
-/* A newly mounted embedded archive must remain vertically interactive while
-   its optional motion controller and images initialize. Modal selector code
-   may still set an inline lock while it is genuinely open. */
-html[data-embedded-archive="true"],
-html[data-embedded-archive="true"] body {
-  min-height: 100%;
-  overflow-y: auto;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Realm is generated from a dual-edition standalone document. Give its
-   embedded version one unambiguous root scroller from the first frame so
-   iOS does not wait for scroll-container relatching after iframe load. */
+/* Both generated archives must expose exactly one root scroller. Previously
+   Saga left html and body scrollable while Realm only promoted html, so iOS
+   could latch a gesture to a body scroller that disappeared after boot. */
+html[data-embedded-archive="true"][data-archive-kind="saga"],
 html[data-embedded-archive="true"][data-archive-kind="realm"] {
   height: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
   overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
+html[data-embedded-archive="true"][data-archive-kind="saga"] body,
 html[data-embedded-archive="true"][data-archive-kind="realm"] body {
   height: auto;
   min-height: 100%;

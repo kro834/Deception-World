@@ -7,7 +7,9 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
-  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r34">';
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r35">';
+const stabilityScript =
+  '<script src="/archive-scroll-stability.js?v=20260822-r35" defer></script>';
 const archives = [
   {
     kind: "saga",
@@ -57,9 +59,12 @@ for (const archive of archives) {
   const withMobileStyles = withEmbeddedMarker.includes(stabilityStylesheet)
     ? withEmbeddedMarker
     : withEmbeddedMarker.replace("</head>", `${stabilityStylesheet}\n</head>`);
+  const withScrollStability = withMobileStyles.includes(stabilityScript)
+    ? withMobileStyles
+    : withMobileStyles.replace("</head>", `${stabilityScript}\n</head>`);
 
-  writeFileSync(archive.output, withMobileStyles);
+  writeFileSync(archive.output, withScrollStability);
   console.log(
-    `[embedded-archive] ${archive.kind}: externalized ${imageCount} image references; ${Buffer.byteLength(withMobileStyles)} byte HTML`,
+    `[embedded-archive] ${archive.kind}: externalized ${imageCount} image references; ${Buffer.byteLength(withScrollStability)} byte HTML`,
   );
 }

@@ -30,8 +30,8 @@ function FormArchive() {
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20260822-r34"
-    : "/realm-form-archive-embedded.html?v=20260822-r34";
+    ? "/saga-form-archive-embedded.html?v=20260822-r35"
+    : "/realm-form-archive-embedded.html?v=20260822-r35";
 
   useEffect(() => {
     // A cached opaque-origin iframe can finish before React observes its load

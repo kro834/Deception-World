@@ -4,6 +4,7 @@ import test from "node:test";
 
 const route = readFileSync(new URL("../src/routes/form-archive.tsx", import.meta.url), "utf8");
 const mobileStyles = readFileSync(new URL("../public/archive-mobile-stability.css", import.meta.url), "utf8");
+const scrollStability = readFileSync(new URL("../public/archive-scroll-stability.js", import.meta.url), "utf8");
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 const embeddedArchives = [
@@ -14,7 +15,8 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20260822-r34/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20260822-r35/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260822-r35/);
   assert.match(route, /<iframe\s+key=\{archive\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === archive\) return/);
@@ -28,7 +30,8 @@ test("embedded archives externalize base64 images and load the mobile stability 
     assert.match(html, /data-embedded-archive="true"/);
     assert.match(html, /data-archive-kind="(?:saga|realm)"/);
     assert.match(html, /archive-mobile-stability\.css/);
-    assert.match(html, /archive-mobile-stability\.css\?v=20260822-r34/);
+    assert.match(html, /archive-mobile-stability\.css\?v=20260822-r35/);
+    assert.match(html, /archive-scroll-stability\.js\?v=20260822-r35/);
     assert.ok(statSync(file).size < 1_000_000, `${file.pathname} should stay below 1 MB`);
 
     for (const match of html.matchAll(/\/archive-media\/([^"')\s]+)/g)) {
@@ -49,19 +52,19 @@ test("coarse-pointer devices trim continuous GPU effects without removing intera
   assert.doesNotMatch(mobileStyles, /pointer-events:\s*none/);
 });
 
-test("embedded archives release stale vertical scroll locks during Realm startup", () => {
-  assert.match(mobileStyles, /html\[data-embedded-archive="true"\][\s\S]*?overflow-y: auto/);
+test("embedded archives use one root scroller and recover stale locks throughout the session", () => {
   assert.match(mobileStyles, /touch-action: pan-y/);
   assert.match(mobileStyles, /#edition-panel-realm\.saga-booting[\s\S]*?overflow-y: visible/);
+  assert.match(mobileStyles, /data-archive-kind="saga"[\s\S]*?overflow-y: scroll/);
   assert.match(mobileStyles, /data-archive-kind="realm"[\s\S]*?overflow-y: scroll/);
   assert.match(route, /scrolling="yes"/);
-  const realmUpdate = readFileSync(new URL("../public/realm-archive-update.js", import.meta.url), "utf8");
-  assert.match(realmUpdate, /releaseStaleScrollLock/);
-  assert.match(realmUpdate, /scheduleStartupScrollRecovery/);
-  assert.match(realmUpdate, /forceResetTransientUi/);
-  assert.match(realmUpdate, /classList\.remove\("is-selector-sheet-open", "is-selector-sheet-closing"\)/);
-  assert.match(realmUpdate, /\[120, 480, 1200\]/);
-  assert.match(realmUpdate, /document\.documentElement\.style\.removeProperty\("overflow"\)/);
+  assert.match(scrollStability, /releaseStaleScrollLock/);
+  assert.match(scrollStability, /forceResetTransientUi/);
+  assert.match(scrollStability, /new MutationObserver/);
+  assert.match(scrollStability, /pointercancel/);
+  assert.match(scrollStability, /touchcancel/);
+  assert.match(scrollStability, /is-selector-sheet-closing[\s\S]*?420/);
+  assert.match(scrollStability, /document\.documentElement\.style\.removeProperty\(property\)/);
   assert.match(route, /contentWindow\?\.postMessage\([\s\S]*?saga-archive:close-transients/);
 });
 
