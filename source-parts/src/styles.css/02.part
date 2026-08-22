@@ -833,7 +833,11 @@ html[data-rail-lock] body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease, box-shadow 0.24s ease;
+  transition:
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.26s ease,
+    box-shadow 0.3s ease;
+  will-change: transform, filter;
   contain: layout paint style;
 }
 
@@ -1004,9 +1008,13 @@ html[data-rail-lock] body {
   outline-offset: 2px;
 }
 
-/* Keep the global control operable without covering the menu controls. */
-body:has(.side-panel[data-open="true"]) > .zeus-button {
-  transform: translate3d(-50%, -50%, 0) scale(0.66);
+/* The menu must not resize or relocate the global control. A subtle ring lift
+   confirms that the button remains available above the open panel. */
+.zeus-button[data-menu-open="true"]::before {
+  border-color: rgb(67 222 189 / 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgb(239 196 91 / 0.3),
+    0 0 22px rgb(52 215 183 / 0.2);
 }
 
 @media (max-width: 560px) {

@@ -47,6 +47,7 @@ const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: n
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
+const ARCHIVE_PRELOAD_BUDGET_MS = 560;
 
 async function preloadArchiveDocument(onProgress: (percent: number) => void) {
   try {
@@ -122,11 +123,21 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         document.documentElement.dataset.loading = "true";
         setGate({ active: true, percent: 1, variant: "archive", phase: "covering" });
         try {
-          await Promise.all([
+          const archiveWarmup = Promise.allSettled([
             preloadArchiveDocument((percent) => {
+              if (!isCurrent()) return;
               setGate((state) => ({ ...state, percent: Math.max(1, percent) }));
             }),
-            router.preloadRoute({ to: to as never }).catch(() => undefined),
+            router.preloadRoute({ to: to as never }),
+          ]);
+
+          // The standalone archive is intentionally large. Waiting for the whole
+          // document made a menu tap look inert on memory-constrained iPhones.
+          // Warm it briefly, then let the route's own iframe finish loading while
+          // the dive transition remains visible.
+          await Promise.race([
+            archiveWarmup,
+            wait(reduceMotion ? 60 : ARCHIVE_PRELOAD_BUDGET_MS),
           ]);
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);

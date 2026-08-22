@@ -181,24 +181,16 @@ function ZeusButton({
     const rect = button.getBoundingClientRect();
     const viewportWidth = Math.max(1, window.innerWidth);
     const viewportHeight = Math.max(1, window.innerHeight);
-    const safe = sideMenuOpen ? 4 : 12;
-    const panelLeft = sideMenuOpen
-      ? document.querySelector<HTMLElement>('.side-panel[data-open="true"]')?.getBoundingClientRect().left
-      : undefined;
+    const safe = 12;
     const minX = rect.width / 2 + safe;
-    const maxX = Math.max(
-      minX,
-      panelLeft == null
-        ? viewportWidth - rect.width / 2 - safe
-        : panelLeft - rect.width / 2 + 7,
-    );
+    const maxX = Math.max(minX, viewportWidth - rect.width / 2 - safe);
     const centerX = Math.max(minX, Math.min(maxX, clientX));
     const centerY = Math.max(
       rect.height / 2 + safe,
       Math.min(viewportHeight - rect.height / 2 - safe, clientY),
     );
     return { x: centerX, y: centerY };
-  }, [sideMenuOpen]);
+  }, []);
 
   const placeButton = useCallback((next: ZeusButtonPosition) => {
     const button = buttonRef.current;
@@ -315,6 +307,7 @@ function ZeusButton({
       className="zeus-button"
       data-dragging="false"
       data-navigating={String(navigating)}
+      data-menu-open={String(sideMenuOpen)}
       aria-grabbed="false"
       aria-busy={navigating}
       aria-label="ゼウスボタン。押すとトップへ戻り、長押しすると移動できます"

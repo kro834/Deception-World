@@ -244,7 +244,7 @@ export function SideMenuLayer({
                 <i>SAGA / REALM</i>
               </a>
             ) : (
-              <GuardedLink to="/form-archive" assets={[]}>
+              <GuardedLink to="/form-archive" assets={[]} beforeNavigate={close}>
                 <span>フォームアーカイブ</span>
                 <i>SAGA / REALM</i>
               </GuardedLink>
