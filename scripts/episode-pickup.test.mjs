@@ -10,17 +10,18 @@ const baseStyles = readFileSync(baseStylesUrl, "utf8");
 const mobileStyles = readFileSync(mobileStylesUrl, "utf8");
 
 const expectedPickups = [
-  ["リームー/仮面ライダーフリート", "/manager-reemu-rider.jpeg"],
-  ["紅城真守/仮面ライダーアルゲノム", "/rider-profile-argenome.jpeg"],
-  ["仮面ライダーレルムレジェンズ", "/rider-profile-realm.jpeg"],
-  ["仮面ライダーレルム　アースフォーム", "/rider-realm-earth.jpeg"],
-  ["仮面ライダーレルム　ムーンフォーム", "/rider-realm-moon.jpeg"],
+  ["リームー/仮面ライダーフリート", "/manager-reemu-rider.jpeg", "/managers/reemu"],
+  ["紅城真守/仮面ライダーアルゲノム", "/rider-profile-argenome.jpeg", "/riders/argenome"],
+  ["仮面ライダーレルムレジェンズ", "/rider-profile-realm.jpeg", "/riders/realm"],
+  ["仮面ライダーレルム　アースフォーム", "/rider-realm-earth.jpeg", "/riders/realm"],
+  ["仮面ライダーレルム　ムーンフォーム", "/rider-realm-moon.jpeg", "/riders/realm"],
 ];
 
 test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
-  for (const [label, src] of expectedPickups) {
+  for (const [label, src, to] of expectedPickups) {
     assert.match(worldHome, new RegExp(`label: "${label}"`));
     assert.match(worldHome, new RegExp(`src: "${src}"`));
+    assert.match(worldHome, new RegExp(`to: "${to}"`));
     assert.ok(
       existsSync(new URL(`../public${src}`, import.meta.url)),
       `${src} must exist in public`,
@@ -32,6 +33,7 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
   const ep2 = episodeData.slice(episodeData.indexOf('no: "02"'), episodeData.indexOf('no: "03"'));
   assert.equal((ep1.match(/label: "/g) ?? []).length, 2);
   assert.equal((ep2.match(/label: "/g) ?? []).length, 3);
+  assert.match(ep2, /displayLines: \["仮面ライダーレルム", "レジェンズ"\]/);
 });
 
 test("episode selection and the single-tap plus remain sibling controls", () => {
@@ -51,11 +53,22 @@ test("the pickup dialog is modal, dismissible, and scroll-reset on every open", 
   assert.match(worldHome, /ref=\{episodePickupDialogRef\}/);
   assert.match(worldHome, /id="episode-pickup-dialog"/);
   assert.match(worldHome, /dialog\.showModal\(\)/);
-  assert.match(worldHome, /\.episode-pickup-panel"\)\?\.scrollTo\(\{ top: 0, left: 0 \}\)/);
-  assert.match(worldHome, /bootLiquidGlass\(dialog\)/);
+  assert.match(worldHome, /currentPanel\.scrollTop = 0/);
+  assert.match(worldHome, /currentPanel\.scrollLeft = 0/);
+  assert.match(worldHome, /episodePickupFrame\.current = window\.requestAnimationFrame/);
+  assert.match(worldHome, /\.episode-pickup-close"\)\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.doesNotMatch(worldHome, /bootLiquidGlass\(dialog\)/);
   assert.match(worldHome, /onCancel=\{\(event\) => \{[\s\S]*?closeEpisodePickup\(\)/);
   assert.match(worldHome, /event\.target === episodePickupDialogRef\.current/);
-  assert.match(worldHome, /<NameText value=\{item\.label\} \/>/);
+  assert.match(worldHome, /className="episode-pickup-name-line"/);
+});
+
+test("every pickup opens its matching dossier without leaving the dialog behind", () => {
+  assert.match(worldHome, /<GuardedLink[\s\S]*?className="episode-pickup-item"/);
+  assert.match(worldHome, /to=\{item\.to\}/);
+  assert.match(worldHome, /assets=\{item\.assets\}/);
+  assert.match(worldHome, /beforeNavigate=\{closeEpisodePickup\}/);
+  assert.match(worldHome, /OPEN DOSSIER <UiVectorIcon kind="arrow-right" size=\{15\} \/>/);
 });
 
 test("the plus and dialog include desktop and iPhone-specific Liquid Glass layout", () => {
@@ -66,6 +79,7 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
   );
   assert.match(baseStyles, /backdrop-filter: blur\(18px\) saturate\(170%\)/);
   assert.match(baseStyles, /\.episode-pickup-dialog::backdrop/);
+  assert.match(baseStyles, /\.episode-pickup-dialog:focus \{[\s\S]*?outline: none/);
   assert.match(baseStyles, /html:has\(\.episode-pickup-dialog\[open\]\)/);
   assert.match(baseStyles, /\.episode-pickup-grid \{[\s\S]*?repeat\(auto-fit, minmax\(210px, 1fr\)\)/);
   assert.match(baseStyles, /@media \(prefers-reduced-motion: reduce\)/);
@@ -73,4 +87,5 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
   assert.match(mobileStyles, /\.episode-pickup-dialog \{[\s\S]*?width: calc\(100vw - 16px\)/);
   assert.match(mobileStyles, /\.episode-pickup-grid \{[\s\S]*?scroll-snap-type: x mandatory/);
   assert.match(mobileStyles, /\.episode-pickup-item \{[\s\S]*?flex: 0 0 min\(76vw, 270px\)/);
+  assert.match(mobileStyles, /\.episode-pickup-dialog::backdrop \{[\s\S]*?blur\(6px\)/);
 });

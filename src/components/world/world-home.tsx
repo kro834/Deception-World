@@ -102,9 +102,14 @@ const COLUMNS = [
 
 type EpisodePickup = {
   label: string;
+  displayLines?: readonly string[];
   src: string;
   pos: string;
   alt: string;
+  width: number;
+  height: number;
+  to: string;
+  assets: readonly string[];
 };
 
 type EpisodeRecord = {
@@ -129,12 +134,20 @@ const EPISODES: EpisodeRecord[] = [
         src: "/manager-reemu-rider.jpeg",
         pos: "50% 12%",
         alt: "リームーが変身した仮面ライダーフリート",
+        width: 1086,
+        height: 1448,
+        to: "/managers/reemu",
+        assets: MANAGER_ASSETS.reemu,
       },
       {
         label: "紅城真守/仮面ライダーアルゲノム",
         src: "/rider-profile-argenome.jpeg",
         pos: "50% 8%",
         alt: "紅城真守が変身した仮面ライダーアルゲノム",
+        width: 1350,
+        height: 1800,
+        to: "/riders/argenome",
+        assets: RIDER_NAV.find((item) => item.id === "argenome")?.assets ?? ["/civilian-argenome.jpeg"],
       },
     ],
   },
@@ -147,21 +160,34 @@ const EPISODES: EpisodeRecord[] = [
     pickups: [
       {
         label: "仮面ライダーレルムレジェンズ",
+        displayLines: ["仮面ライダーレルム", "レジェンズ"],
         src: "/rider-profile-realm.jpeg",
         pos: "50% 8%",
         alt: "仮面ライダーレルムレジェンズ",
+        width: 1221,
+        height: 1800,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? ["/civilian-realm.jpeg"],
       },
       {
         label: "仮面ライダーレルム　アースフォーム",
         src: "/rider-realm-earth.jpeg",
         pos: "50% 12%",
         alt: "仮面ライダーレルム アースフォーム",
+        width: 1026,
+        height: 1533,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? ["/civilian-realm.jpeg"],
       },
       {
         label: "仮面ライダーレルム　ムーンフォーム",
         src: "/rider-realm-moon.jpeg",
         pos: "50% 10%",
         alt: "仮面ライダーレルム ムーンフォーム",
+        width: 1024,
+        height: 1536,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? ["/civilian-realm.jpeg"],
       },
     ],
   },
@@ -325,6 +351,8 @@ export function WorldHome() {
   const riderRail = useRef<HTMLDivElement>(null);
   const episodeGridRef = useRef<HTMLDivElement>(null);
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
+  const episodeScrollTimer = useRef<number | null>(null);
+  const episodePickupFrame = useRef<number | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const danteDialogRef = useRef<HTMLDialogElement>(null);
@@ -455,6 +483,8 @@ export function WorldHome() {
       shuffleActive.current = false;
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+      if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+      if (episodePickupFrame.current != null) window.cancelAnimationFrame(episodePickupFrame.current);
     };
   }, []);
   const current = POSTERS[poster];
@@ -543,8 +573,10 @@ export function WorldHome() {
     const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
     episodeProgrammatic.current = true;
     scrollAxisX(episodeGridRef.current, card ?? null);
-    window.setTimeout(() => {
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
       episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
     }, 520);
   };
 
@@ -553,7 +585,11 @@ export function WorldHome() {
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
     setEpisodePickup(index);
     dialog.scrollTop = 0;
-    dialog.querySelector<HTMLElement>(".episode-pickup-panel")?.scrollTo({ top: 0, left: 0 });
+    const panel = dialog.querySelector<HTMLElement>(".episode-pickup-panel");
+    if (panel) {
+      panel.scrollTop = 0;
+      panel.scrollLeft = 0;
+    }
     if (!dialog.open) {
       try {
         dialog.showModal();
@@ -561,15 +597,25 @@ export function WorldHome() {
         /* already open */
       }
     }
-    window.requestAnimationFrame(() => {
+    if (episodePickupFrame.current != null) window.cancelAnimationFrame(episodePickupFrame.current);
+    episodePickupFrame.current = window.requestAnimationFrame(() => {
+      episodePickupFrame.current = null;
+      if (!dialog.open) return;
       dialog.scrollTop = 0;
-      dialog.querySelector<HTMLElement>(".episode-pickup-panel")?.scrollTo({ top: 0, left: 0 });
-      bootLiquidGlass(dialog);
-      dialog.focus({ preventScroll: true });
+      const currentPanel = dialog.querySelector<HTMLElement>(".episode-pickup-panel");
+      if (currentPanel) {
+        currentPanel.scrollTop = 0;
+        currentPanel.scrollLeft = 0;
+      }
+      dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
     });
   };
 
   const closeEpisodePickup = () => {
+    if (episodePickupFrame.current != null) {
+      window.cancelAnimationFrame(episodePickupFrame.current);
+      episodePickupFrame.current = null;
+    }
     const dialog = episodePickupDialogRef.current;
     if (dialog?.open) dialog.close();
   };
@@ -1394,24 +1440,41 @@ export function WorldHome() {
           <div className="episode-pickup-grid">
             {selectedEpisodePickup?.pickups
               ? selectedEpisodePickup.pickups.map((item, index) => (
-                  <article className="episode-pickup-item" key={item.label}>
+                  <GuardedLink
+                    className="episode-pickup-item"
+                    key={item.label}
+                    to={item.to}
+                    assets={item.assets}
+                    beforeNavigate={closeEpisodePickup}
+                    aria-label={`${item.label}の個別ページを開く`}
+                  >
                     <figure>
                       <img
                         src={item.src}
                         alt={item.alt}
                         style={{ objectPosition: item.pos }}
-                        loading="lazy"
+                        width={item.width}
+                        height={item.height}
+                        loading={index === 0 ? "eager" : "lazy"}
                         decoding="async"
+                        fetchPriority={index === 0 ? "high" : "low"}
                       />
                       <span>{String(index + 1).padStart(2, "0")}</span>
                     </figure>
                     <div>
                       <small>EP.{selectedEpisodePickup.no} / PICKUP</small>
                       <h3>
-                        <NameText value={item.label} />
+                        {item.displayLines?.map((line) => (
+                          <span className="episode-pickup-name-line" key={line}>
+                            <NameText value={line} />
+                          </span>
+                        )) ?? <NameText value={item.label} />}
                       </h3>
+                      <span className="episode-pickup-open" aria-hidden="true">
+                        OPEN DOSSIER <UiVectorIcon kind="arrow-right" size={15} />
+                      </span>
                     </div>
-                  </article>
+                  </GuardedLink>
                 ))
               : null}
           </div>

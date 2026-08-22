@@ -704,11 +704,18 @@
     right: 12px;
     width: 46px;
     height: 46px;
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
   }
 
   .episode-pickup-dialog {
     width: calc(100vw - 16px);
     max-height: calc(100svh - 16px);
+  }
+
+  .episode-pickup-dialog::backdrop {
+    -webkit-backdrop-filter: blur(6px) saturate(110%);
+    backdrop-filter: blur(6px) saturate(110%);
   }
 
   .episode-pickup-panel {
@@ -722,6 +729,8 @@
     right: 12px;
     width: 44px;
     height: 44px;
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
+    backdrop-filter: blur(10px) saturate(135%);
   }
 
   .episode-pickup-heading {
@@ -768,6 +777,10 @@
 
   .episode-pickup-item h3 {
     font-size: 18px;
+  }
+
+  .episode-pickup-open {
+    padding-top: 9px;
   }
 
   .finale-section {
