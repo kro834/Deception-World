@@ -66,56 +66,58 @@ function FormArchive() {
 
   return (
     <main className="form-archive-page" data-archive-kind={archive}>
-      <div
-        ref={switcherRef}
-        id="archive-switcher"
-        className="form-archive-switcher liquid-swipe-tabs ios26-glass"
-        role="tablist"
-        aria-busy={!loaded}
-        aria-label="フォームアーカイブを切り替え。タップ、長押し、または左右へのスライドで選択できます"
-        style={{
-          ["--liquid-current-accent" as string]: isSaga
-            ? "var(--archive-cyan)"
-            : "var(--archive-violet)",
-        }}
-      >
-        <LiquidLens />
-        <button
-          type="button"
-          role="tab"
-          className={isSaga ? "is-active" : ""}
-          tabIndex={isSaga ? 0 : -1}
-          aria-selected={isSaga}
-          aria-controls="form-archive-frame"
-          data-liquid-pointer="true"
-          data-archive="saga"
-          style={{ ["--liquid-accent" as string]: "var(--archive-cyan)" }}
-          title="タップ、長押し、または左右へスライド"
-          onClick={() => selectArchive("saga")}
+      <header className="form-archive-toolbar" aria-label="フォームアーカイブ操作">
+        <div
+          ref={switcherRef}
+          id="archive-switcher"
+          className="form-archive-switcher liquid-swipe-tabs ios26-glass"
+          role="tablist"
+          aria-busy={!loaded}
+          aria-label="フォームアーカイブを切り替え。タップ、長押し、または左右へのスライドで選択できます"
+          style={{
+            ["--liquid-current-accent" as string]: isSaga
+              ? "var(--archive-cyan)"
+              : "var(--archive-violet)",
+          }}
         >
-          <LiquidPointerGlow />
-          <small>SAGA</small>
-          <b>サーガ</b>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          className={!isSaga ? "is-active" : ""}
-          tabIndex={!isSaga ? 0 : -1}
-          aria-selected={!isSaga}
-          aria-controls="form-archive-frame"
-          data-liquid-pointer="true"
-          data-archive="realm"
-          style={{ ["--liquid-accent" as string]: "var(--archive-violet)" }}
-          title="タップ、長押し、または左右へスライド"
-          onClick={() => selectArchive("realm")}
-        >
-          <LiquidPointerGlow />
-          <small>REALM</small>
-          <b>レルム</b>
-        </button>
-      </div>
-      <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} className="form-archive-menu-trigger" />
+          <LiquidLens />
+          <button
+            type="button"
+            role="tab"
+            className={isSaga ? "is-active" : ""}
+            tabIndex={isSaga ? 0 : -1}
+            aria-selected={isSaga}
+            aria-controls="form-archive-frame"
+            data-liquid-pointer="true"
+            data-archive="saga"
+            style={{ ["--liquid-accent" as string]: "var(--archive-cyan)" }}
+            title="タップ、長押し、または左右へスライド"
+            onClick={() => selectArchive("saga")}
+          >
+            <LiquidPointerGlow />
+            <small>SAGA</small>
+            <b>サーガ</b>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={!isSaga ? "is-active" : ""}
+            tabIndex={!isSaga ? 0 : -1}
+            aria-selected={!isSaga}
+            aria-controls="form-archive-frame"
+            data-liquid-pointer="true"
+            data-archive="realm"
+            style={{ ["--liquid-accent" as string]: "var(--archive-violet)" }}
+            title="タップ、長押し、または左右へスライド"
+            onClick={() => selectArchive("realm")}
+          >
+            <LiquidPointerGlow />
+            <small>REALM</small>
+            <b>レルム</b>
+          </button>
+        </div>
+        <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} className="form-archive-menu-trigger" />
+      </header>
       <SideMenuLayer context="archive" open={menuOpen} onOpenChange={setMenuOpen} />
       <div className={`form-archive-frame-status${loaded ? " is-loaded" : ""}`} role="status" aria-live="polite">
         <i aria-hidden="true" />

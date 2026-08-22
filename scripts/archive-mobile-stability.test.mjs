@@ -41,7 +41,8 @@ test("coarse-pointer devices trim continuous GPU effects without removing intera
   assert.match(mobileStyles, /@media \(any-pointer: coarse\)/);
   assert.match(mobileStyles, /content-visibility: auto/);
   assert.match(mobileStyles, /\.v6s-fx-orbit/);
-  assert.match(mobileStyles, /\.archive-nav \{\s*transform: translateY\(64px\) !important/);
+  assert.match(mobileStyles, /\.archive-nav \{\s*transform: none !important/);
+  assert.doesNotMatch(mobileStyles, /translateY\(64px\)/);
   assert.doesNotMatch(mobileStyles, /pointer-events:\s*none/);
 });
 

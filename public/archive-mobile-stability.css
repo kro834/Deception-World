@@ -75,10 +75,11 @@ img {
     transition-duration: 320ms !important;
   }
 
-  /* The host app owns the top archive switcher. Move the document's own page
-     links into the reserved hero gap so the two control rows never overlap. */
+  /* The host app now reserves a dedicated toolbar above the iframe. Keep the
+     document navigation in its natural flow instead of offsetting it into the
+     hero copy, which previously caused iPhone text collisions. */
   html[data-embedded-archive="true"] [id$="saga-forms-performance-v5"] .archive-nav {
-    transform: translateY(64px) !important;
+    transform: none !important;
   }
 
   [id$="saga-forms-performance-v5"] .files-form-progress-v14 > span > i::after,
@@ -90,11 +91,47 @@ img {
 
 @media (max-width: 620px) {
   [id$="saga-forms-performance-v5"] {
-    padding-inline: max(0.5rem, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
+    box-sizing: border-box;
+    width: 100%;
+    padding-inline: max(0.625rem, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
+  }
+
+  html[data-embedded-archive="true"] [id$="saga-forms-performance-v5"] .archive-nav {
+    max-width: calc(100% - 1.25rem) !important;
+    margin-inline: auto;
+    scroll-padding-inline: 0.5rem;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(
+    .hero-copy,
+    .selector-title,
+    .selector-heading,
+    .selected-telemetry,
+    .telemetry-state,
+    .detail-toolbar-copy,
+    .detail-head,
+    .archive-workspace
+  ) {
+    min-width: 0;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(
+    .telemetry-name,
+    .chip-name,
+    .detail-toolbar-copy strong,
+    .detail-head h2,
+    .detail-head h3
+  ) {
+    overflow-wrap: anywhere;
   }
 
   [id$="saga-forms-performance-v5"] :is(.form-chip, button, select, input) {
     -webkit-tap-highlight-color: transparent;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(.table-responsive, .progression, .compare-chip-slider) {
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

@@ -4,6 +4,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import appCss from "../styles.css?url";
+import routeTransitionsCss from "../styles-route-transitions.css?url";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -45,6 +46,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/__grok/icon-180.png" },
+      { rel: "stylesheet", href: routeTransitionsCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
