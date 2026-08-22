@@ -46,6 +46,18 @@ test("coarse-pointer devices trim continuous GPU effects without removing intera
   assert.doesNotMatch(mobileStyles, /pointer-events:\s*none/);
 });
 
+test("embedded archives release stale vertical scroll locks during Realm startup", () => {
+  assert.match(mobileStyles, /html\[data-embedded-archive="true"\][\s\S]*?overflow-y: auto/);
+  assert.match(mobileStyles, /touch-action: pan-y/);
+  assert.match(mobileStyles, /#edition-panel-realm\.saga-booting[\s\S]*?overflow-y: visible/);
+  const realmUpdate = readFileSync(new URL("../public/realm-archive-update.js", import.meta.url), "utf8");
+  assert.match(realmUpdate, /releaseStaleScrollLock/);
+  assert.match(realmUpdate, /scheduleStartupScrollRecovery/);
+  assert.match(realmUpdate, /\[120, 480, 1200\]/);
+  assert.match(realmUpdate, /document\.documentElement\.style\.removeProperty\("overflow"\)/);
+  assert.match(route, /contentWindow\?\.postMessage\([\s\S]*?saga-archive:close-transients/);
+});
+
 test("production builds regenerate embedded archives from their standalone sources", () => {
   assert.equal(packageJson.scripts["archive:embed"], "node scripts/build-embedded-archives.mjs");
   assert.equal(packageJson.scripts.prebuild, "npm run archive:embed");

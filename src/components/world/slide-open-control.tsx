@@ -10,7 +10,7 @@ type SlideOpenControlProps = {
   expanded?: boolean;
   label?: string;
   opensDialog?: boolean;
-  onOpen: () => void;
+  onOpen: (source: "keyboard" | "pointer") => void;
 };
 
 const OPEN_THRESHOLD = 0.68;
@@ -145,7 +145,7 @@ export function SlideOpenControl({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
       () => {
-        onOpen();
+        onOpen(source);
         // A route transition can spend a short time preloading before the
         // current page unmounts. Keep the thumb at the completed edge during
         // that interval so it never appears to spring back before navigation.

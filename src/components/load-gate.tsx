@@ -26,6 +26,7 @@ type GoOptions = {
   to: string;
   hash?: string;
   assets: readonly string[];
+  transitionCovered?: boolean;
 };
 
 type LoadGateApi = {
@@ -78,11 +79,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const go = useCallback(
-    async ({ to, hash, assets }: GoOptions) => {
+    async ({ to, hash, assets, transitionCovered = false }: GoOptions) => {
       if (busy.current) return;
       const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
       const isArchive = to === "/form-archive";
-      if (assetsWarmed(assets) && !cutInVariant && !isArchive) {
+      if (transitionCovered && !cutInVariant && !isArchive) {
         await navigate({ to: to as never, hash });
         return;
       }
@@ -163,35 +164,24 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      let overlayVisible = false;
-      let overlayShownAt = 0;
+      const overlayShownAt = performance.now();
       let latestPercent = 1;
-      const showTimer = window.setTimeout(() => {
-        if (!isCurrent()) return;
-        overlayVisible = true;
-        overlayShownAt = performance.now();
-        document.documentElement.dataset.loading = "true";
-        setGate({ active: true, percent: latestPercent, variant, phase: "loading" });
-      }, variant === "zeus" ? 0 : 140);
+      document.documentElement.dataset.loading = "true";
+      setGate({ active: true, percent: latestPercent, variant, phase: "loading" });
       try {
         await Promise.all([
           preloadAssets(assets, (percent) => {
             latestPercent = Math.max(1, percent);
-            if (overlayVisible) {
-              setGate((s) => ({ ...s, percent: latestPercent, variant }));
-            }
+            setGate((s) => ({ ...s, percent: latestPercent, variant }));
           }),
           router.preloadRoute({ to: to as never }).catch(() => undefined),
         ]);
       } finally {
-        window.clearTimeout(showTimer);
-        if (overlayVisible) {
-          setGate({ active: true, percent: 100, variant, phase: "loading" });
-          const minimumDuration = variant === "zeus" ? 860 : 120;
-          const minimumVisibleTime = Math.max(0, minimumDuration - (performance.now() - overlayShownAt));
-          if (minimumVisibleTime > 0) {
-            await new Promise((resolve) => window.setTimeout(resolve, minimumVisibleTime));
-          }
+        setGate({ active: true, percent: 100, variant, phase: "loading" });
+        const minimumDuration = variant === "zeus" ? 860 : 120;
+        const minimumVisibleTime = Math.max(0, minimumDuration - (performance.now() - overlayShownAt));
+        if (minimumVisibleTime > 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, minimumVisibleTime));
         }
         if (isCurrent()) {
           try {

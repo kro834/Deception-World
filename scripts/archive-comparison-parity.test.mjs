@@ -56,14 +56,16 @@ test("Realm comparison swaps the analysis channel colors with the selected forms
 
 test("Realm comparison reuses Saga's panel motion and arrow color states", () => {
   assert.match(realmUpdate, /panel\.animate\(/);
-  assert.match(realmUpdate, /translate3d\(\$\{direction \* 10\}px,0,0\) scale\(\.995\)/);
-  assert.match(realmUpdate, /duration: 420, easing: "cubic-bezier\(\.16,1,\.3,1\)"/);
-  assert.match(realmUpdate, /window\.setTimeout\(finishAnimation, 520\)/);
-  assert.doesNotMatch(realmUpdate, /railBar\.animate\(/);
+  assert.match(realmUpdate, /translate3d\(\$\{direction \* 8\}px,0,0\) scale\(\.996\)/);
+  assert.match(realmUpdate, /duration: 360, easing: "cubic-bezier\(\.2,\.82,\.2,1\)"/);
+  assert.match(realmUpdate, /window\.setTimeout\(finishAnimation, 560\)/);
+  assert.match(realmUpdate, /railBar\.animate\(/);
+  assert.match(realmUpdate, /duration: 520, easing: "cubic-bezier\(\.2,\.82,\.2,1\)"/);
+  assert.match(realmUpdate, /compare\.classList\.add\("is-swapping"\)/);
   assert.match(realmUpdateCss, /\.is-color-swapped \.compare-swap-js\.is-flipped \.compare-swap-icon \{[\s\S]*?color: var\(--saga-violet\) !important/);
+  assert.match(realmUpdateCss, /\.is-swapping \.compare-sync-rail/);
   assert.match(realmUpdateCss, /transform 0\.46s cubic-bezier\(0\.16, 1, 0\.3, 1\)/);
   assert.match(realmUpdateCss, /color 0\.34s ease/);
   assert.doesNotMatch(realmUpdateCss, /animation-duration:\s*480ms/);
   assert.doesNotMatch(realmUpdateCss, /cubic-bezier\(\.2,\s*\.82,\s*\.24,\s*1\)/);
-  assert.doesNotMatch(realmUpdateCss, /is-swapping \.compare-side-/);
 });

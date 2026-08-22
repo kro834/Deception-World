@@ -198,7 +198,7 @@ export function TitleSequence() {
         window.setTimeout(resolve, reduced ? WORLD_DIVE_REDUCED_EXIT_MS : WORLD_DIVE_EXIT_MS),
       );
       if (!mountedRef.current || phaseRef.current !== "arriving") return;
-      await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
+      await go({ to: "/world", assets: WORLD_ENTER_ASSETS, transitionCovered: true });
     } catch {
       if (mountedRef.current) {
         phaseRef.current = "complete";

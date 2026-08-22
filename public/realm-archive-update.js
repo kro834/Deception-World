@@ -3,6 +3,8 @@
 
   const compare = document.querySelector("#realm--saga-form-compare-ios");
   const swapButton = document.querySelector("#realm--saga-compare-swap-button");
+  const syncRail = document.querySelector("#realm--saga-compare-sync-rail");
+  const archiveRoot = document.querySelector("#realm--saga-forms-performance-v5");
 
   if (!compare || !(swapButton instanceof HTMLButtonElement)) return;
 
@@ -13,6 +15,7 @@
 
   let cleanupTimer = 0;
   let animationFrame = 0;
+  let motionAnimations = [];
   let colorsSwapped = compare.classList.contains("is-color-swapped");
   const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
@@ -39,6 +42,14 @@
   const finishAnimation = () => {
     window.clearTimeout(cleanupTimer);
     window.cancelAnimationFrame(animationFrame);
+    motionAnimations.forEach((animation) => {
+      try {
+        animation.cancel();
+      } catch {
+        // A completed Web Animation no longer needs cancellation.
+      }
+    });
+    motionAnimations = [];
     compare.classList.remove("is-swapping");
     swapButton.classList.remove("is-swapping");
     swapButton.removeAttribute("aria-busy");
@@ -46,18 +57,34 @@
 
   const animatePanels = () => {
     if (reducedMotion?.matches) return;
+    const railBar = syncRail?.querySelector("span");
+    if (railBar instanceof HTMLElement && typeof railBar.animate === "function") {
+      railBar.style.transformOrigin = "center";
+      motionAnimations.push(
+        railBar.animate(
+          [
+            { opacity: 0.18, transform: "scaleX(.04)", filter: "brightness(1)" },
+            { offset: 0.68, opacity: 1, transform: "scaleX(1)", filter: "brightness(1.9)" },
+            { opacity: 0.46, transform: "scaleX(1)", filter: "brightness(1.15)" },
+          ],
+          { duration: 520, easing: "cubic-bezier(.2,.82,.2,1)" },
+        ),
+      );
+    }
     [...compare.querySelectorAll(".compare-side")].forEach((panel, index) => {
       if (!(panel instanceof HTMLElement) || typeof panel.animate !== "function") return;
       const direction = index === 1 ? -1 : 1;
-      panel.animate(
-        [
-          {
-            opacity: 0.92,
-            transform: `translate3d(${direction * 10}px,0,0) scale(.995)`,
-          },
-          { opacity: 1, transform: "translate3d(0,0,0) scale(1)" },
-        ],
-        { duration: 420, easing: "cubic-bezier(.16,1,.3,1)" },
+      motionAnimations.push(
+        panel.animate(
+          [
+            {
+              opacity: 0.94,
+              transform: `translate3d(${direction * 8}px,0,0) scale(.996)`,
+            },
+            { opacity: 1, transform: "translate3d(0,0,0) scale(1)" },
+          ],
+          { duration: 360, easing: "cubic-bezier(.2,.82,.2,1)" },
+        ),
       );
     });
   };
@@ -67,10 +94,33 @@
     swapButton.setAttribute("aria-busy", "true");
     swapButton.classList.toggle("is-flipped", colorsSwapped);
     swapButton.classList.remove("is-swapping");
+    compare.classList.remove("is-swapping");
     animationFrame = window.requestAnimationFrame(() => {
       swapButton.classList.add("is-swapping");
+      compare.classList.add("is-swapping");
       animatePanels();
-      cleanupTimer = window.setTimeout(finishAnimation, 520);
+      cleanupTimer = window.setTimeout(finishAnimation, 560);
+    });
+  };
+
+  const releaseStaleScrollLock = () => {
+    const transientOpen =
+      archiveRoot?.classList.contains("is-selector-sheet-open") ||
+      Boolean(document.querySelector("dialog[open], .image-lightbox[open]"));
+    if (transientOpen) return;
+    document.documentElement.style.removeProperty("overflow");
+    document.body.style.removeProperty("overflow");
+    document.documentElement.style.removeProperty("touch-action");
+    document.body.style.removeProperty("touch-action");
+  };
+
+  const scheduleStartupScrollRecovery = () => {
+    window.requestAnimationFrame(releaseStaleScrollLock);
+    // Image decode and motion-profile setup finish on separate WebKit frames.
+    // Recheck during that short startup window without disturbing a selector
+    // sheet that the visitor has genuinely opened in the meantime.
+    [120, 480, 1200].forEach((delay) => {
+      window.setTimeout(releaseStaleScrollLock, delay);
     });
   };
 
@@ -102,14 +152,17 @@
   });
 
   updateChannelColors();
+  scheduleStartupScrollRecovery();
   window.addEventListener("pageshow", () => {
     finishAnimation();
     updateChannelColors();
     swapButton.classList.toggle("is-flipped", colorsSwapped);
+    releaseStaleScrollLock();
   });
   window.addEventListener("message", (event) => {
     if (event.data?.type !== "saga-archive:close-transients") return;
     finishAnimation();
     document.querySelectorAll("dialog[open]").forEach((dialog) => dialog.close("zeus-navigation"));
+    scheduleStartupScrollRecovery();
   });
 })();

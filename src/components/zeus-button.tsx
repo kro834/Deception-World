@@ -165,6 +165,7 @@ function ZeusButton({
   const held = useRef(false);
   const moved = useRef(false);
   const start = useRef({ x: 0, y: 0 });
+  const latestPointer = useRef({ x: 0, y: 0 });
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
   const navigatingRef = useRef(false);
@@ -192,6 +193,43 @@ function ZeusButton({
     return { x: centerX, y: centerY };
   }, []);
 
+  const setVisualCenter = useCallback((targetX: number, targetY: number) => {
+    const button = buttonRef.current;
+    if (!button) return { x: targetX, y: targetY };
+
+    let left = Number.parseFloat(button.style.left);
+    let top = Number.parseFloat(button.style.top);
+    if (!Number.isFinite(left)) left = button.offsetLeft;
+    if (!Number.isFinite(top)) top = button.offsetTop;
+
+    // The button is portalled into the topmost dialog so it remains operable.
+    // A transformed dialog becomes the containing block of a fixed child, so
+    // CSS left/top no longer use viewport coordinates. Correct against the
+    // rendered rectangle to keep the exact grabbed point under the finger.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      button.style.left = `${left}px`;
+      button.style.top = `${top}px`;
+      const rect = button.getBoundingClientRect();
+      const deltaX = targetX - (rect.left + rect.width / 2);
+      const deltaY = targetY - (rect.top + rect.height / 2);
+      if (Math.abs(deltaX) < 0.25 && Math.abs(deltaY) < 0.25) break;
+
+      const parent = button.offsetParent;
+      let scaleX = 1;
+      let scaleY = 1;
+      if (parent instanceof HTMLElement) {
+        const parentRect = parent.getBoundingClientRect();
+        if (parent.offsetWidth > 0) scaleX = parentRect.width / parent.offsetWidth || 1;
+        if (parent.offsetHeight > 0) scaleY = parentRect.height / parent.offsetHeight || 1;
+      }
+      left += deltaX / scaleX;
+      top += deltaY / scaleY;
+    }
+
+    const rect = button.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }, []);
+
   const placeButton = useCallback((next: ZeusButtonPosition) => {
     const button = buttonRef.current;
     if (!button) return next;
@@ -201,12 +239,11 @@ function ZeusButton({
       next.x * viewportWidth,
       next.y * viewportHeight,
     );
-    button.style.left = `${centerX}px`;
-    button.style.top = `${centerY}px`;
-    const normalized = { x: centerX / viewportWidth, y: centerY / viewportHeight };
+    const actual = setVisualCenter(centerX, centerY);
+    const normalized = { x: actual.x / viewportWidth, y: actual.y / viewportHeight };
     pendingPosition.current = normalized;
     return normalized;
-  }, [clampCenter]);
+  }, [clampCenter, setVisualCenter]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => placeButton(position));
@@ -230,9 +267,8 @@ function ZeusButton({
       clientX - grabOffset.current.x,
       clientY - grabOffset.current.y,
     );
-    button.style.left = `${centerX}px`;
-    button.style.top = `${centerY}px`;
-    pendingPosition.current = { x: centerX / viewportWidth, y: centerY / viewportHeight };
+    const actual = setVisualCenter(centerX, centerY);
+    pendingPosition.current = { x: actual.x / viewportWidth, y: actual.y / viewportHeight };
   };
 
   const goToTop = useCallback(async () => {
@@ -318,6 +354,7 @@ function ZeusButton({
         const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
+        latestPointer.current = { x: event.clientX, y: event.clientY };
         const rect = event.currentTarget.getBoundingClientRect();
         grabOffset.current = {
           x: event.clientX - (rect.left + rect.width / 2),
@@ -336,10 +373,12 @@ function ZeusButton({
           held.current = true;
           target.dataset.dragging = "true";
           target.setAttribute("aria-grabbed", "true");
+          moveToPointer(latestPointer.current.x, latestPointer.current.y);
         }, LONG_PRESS_MS);
       }}
       onPointerMove={(event) => {
         if (activePointer.current !== event.pointerId) return;
+        latestPointer.current = { x: event.clientX, y: event.clientY };
         const distance = Math.hypot(event.clientX - start.current.x, event.clientY - start.current.y);
         if (!held.current) {
           if (distance > MOVE_TOLERANCE) {

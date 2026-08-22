@@ -131,7 +131,16 @@ function FormArchive() {
         sandbox="allow-scripts allow-downloads"
         referrerPolicy="no-referrer"
         loading="eager"
-        onLoad={() => setLoaded(true)}
+        onLoad={(event) => {
+          // A newly created WebKit iframe can restore an inline scroll lock
+          // from the archive controller before its first paint. Ask the loaded
+          // document to clear transient UI before exposing it to interaction.
+          event.currentTarget.contentWindow?.postMessage(
+            { type: "saga-archive:close-transients" },
+            "*",
+          );
+          setLoaded(true);
+        }}
       />
     </main>
   );

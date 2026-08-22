@@ -15,6 +15,33 @@ body {
   box-sizing: border-box;
 }
 
+/* A newly mounted embedded archive must remain vertically interactive while
+   its optional motion controller and images initialize. Modal selector code
+   may still set an inline lock while it is genuinely open. */
+html[data-embedded-archive="true"],
+html[data-embedded-archive="true"] body {
+  min-height: 100%;
+  overflow-y: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* The Realm source keeps its full-page boot class until hero decoding ends.
+   In the embedded route the loader is non-blocking, so that class must not
+   turn the edition panel into a temporary scroll container on iOS. */
+html[data-embedded-archive="true"] #edition-panel-realm.saga-booting,
+html[data-embedded-archive="true"] #edition-panel-realm.saga-booting .edition-body {
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y;
+}
+
+html[data-embedded-archive="true"]:has([id$="saga-forms-performance-v5"].is-selector-sheet-open),
+html[data-embedded-archive="true"]:has([id$="saga-forms-performance-v5"].is-selector-sheet-open) body {
+  overflow-y: hidden;
+  touch-action: none;
+}
+
 img {
   max-width: 100%;
 }

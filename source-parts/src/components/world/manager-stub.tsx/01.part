@@ -41,6 +41,8 @@ type Profile = {
 
 export function FormPickup({ rider }: { rider: RiderForm }) {
   const dlg = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
+  const pointerOpened = useRef(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
   const resetScroll = () => {
     const dialog = dlg.current;
@@ -49,9 +51,18 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     dialog.scrollLeft = 0;
     dialog.querySelector<HTMLElement>(".form-pickup-panel")?.scrollTo({ top: 0, left: 0 });
   };
-  const open = () => {
+  const clearPointerFocus = () => {
+    if (!pointerOpened.current) return;
+    const button = opener.current;
+    if (!button) return;
+    button.dataset.keyboardFocus = "false";
+    button.blur();
+  };
+  const open = (source: "keyboard" | "pointer") => {
     const dialog = dlg.current;
     if (!dialog) return;
+    pointerOpened.current = source === "pointer";
+    clearPointerFocus();
     resetScroll();
     try {
       dialog.showModal();
@@ -61,10 +72,16 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     window.requestAnimationFrame(() => {
       resetScroll();
       dialog.focus({ preventScroll: true });
+      clearPointerFocus();
     });
   };
   const close = () => {
     dlg.current?.close();
+    // WebKit restores dialog focus to its opener after close(). Pointer-opened
+    // sliders must not look selected after that restoration. Keyboard-opened
+    // sliders keep the native return focus for accessible navigation.
+    clearPointerFocus();
+    window.requestAnimationFrame(clearPointerFocus);
     resetScroll();
   };
   const stats = rider.stats ?? [];
@@ -86,6 +103,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           />
           <span>RIDER</span>
           <SlideOpenControl
+            buttonRef={opener}
             className="form-pickup-plus"
             ariaLabel={`${riderPrefix}${rider.name}をピックアップ`}
             label="フォーム詳細"
