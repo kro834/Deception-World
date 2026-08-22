@@ -9,9 +9,9 @@ const styles = readFileSync(
 );
 const returnImage = statSync(new URL("../public/zeus-button-return.jpeg", import.meta.url));
 
-test("slow Zeus navigation owns its state above the re-portalled button", () => {
+test("perceptible Zeus navigation owns its state above the re-portalled button", () => {
   assert.match(source, /export function ZeusButtonProvider[\s\S]*?const navigatingRef = useRef/);
-  assert.match(source, /const RETURN_DIVE_THRESHOLD_MS = 420/);
+  assert.match(source, /const RETURN_DIVE_THRESHOLD_MS = 96/);
   assert.match(source, /window\.setTimeout\([\s\S]*?RETURN_DIVE_THRESHOLD_MS/);
   assert.match(source, /setReturnImage\(true\);[\s\S]*?setReturnDiveVisible\(true\)/);
   assert.match(
