@@ -275,6 +275,7 @@ export function TitleSequence() {
             className={`title-world-dive-overlay is-diving${
               phase === "arriving" ? " is-arriving" : ""
             }${reducedDive ? " is-reduced-dive" : ""}`}
+            data-dive-version="ios-portal-v2"
             aria-hidden="true"
           >
             <DiveVelocityCanvas active arriving={phase === "arriving"} />

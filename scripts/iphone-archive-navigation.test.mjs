@@ -88,6 +88,7 @@ test("the opening dive adds an adaptive, mobile-bounded perspective layer", () =
   assert.match(titleSequence, /createPortal/);
   assert.match(titleSequence, /waitForVisualPaint/);
   assert.match(titleSequence, /title-world-dive-overlay is-diving/);
+  assert.match(titleSequence, /data-dive-version="ios-portal-v2"/);
   assert.match(titleSequence, /<DiveVelocityCanvas active arriving=/);
   assert.match(titleSequence, /window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
   assert.match(titleSequence, /WORLD_DIVE_REDUCED_MIN_MS = 520/);
