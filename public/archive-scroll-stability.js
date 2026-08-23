@@ -9,7 +9,15 @@
   let recoveryFrame = 0;
   let closeFallback = 0;
 
-  const archiveRoots = () => [...document.querySelectorAll(rootSelector)];
+  const archiveKind = document.documentElement.dataset.archiveKind;
+  const isActiveArchiveRoot = (root) => {
+    if (!(root instanceof HTMLElement)) return false;
+    if (archiveKind === "realm") return root.id.startsWith("realm--");
+    if (archiveKind === "saga") return !root.id.startsWith("realm--");
+    return !root.closest("[hidden], [aria-hidden='true']");
+  };
+  const archiveRoots = () =>
+    [...document.querySelectorAll(rootSelector)].filter(isActiveArchiveRoot);
   const notifyReady = () => {
     if (window.parent === window) return;
     window.parent.postMessage(

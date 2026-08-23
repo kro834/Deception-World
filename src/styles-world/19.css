@@ -249,22 +249,31 @@
   gap: 5px;
 }
 
-.side-panel-links a {
+.side-panel-links :is(a, button.side-panel-link-button) {
   display: flex;
+  box-sizing: border-box;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 11px 18px;
   border: 1px solid rgba(202, 231, 250, 0.09);
   border-radius: 999px;
+  background: transparent;
   color: rgba(238, 250, 255, 0.82);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 12px;
   letter-spacing: 0.06em;
+  line-height: inherit;
+  text-align: left;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition: border-color 0.28s ease, background 0.28s ease, translate 0.32s var(--glass-spring);
 }
 
-.side-panel-links a i {
+.side-panel-links :is(a, button.side-panel-link-button) i {
   color: var(--dim);
   font-size: 8px;
   font-style: normal;
@@ -272,22 +281,23 @@
 }
 
 @media (hover: hover) {
-  .side-panel-links a:hover {
+  .side-panel-links :is(a, button.side-panel-link-button):hover {
     border-color: color-mix(in srgb, var(--cyan) 44%, transparent);
     background: color-mix(in srgb, var(--cyan) 9%, transparent);
     translate: 3px 0;
   }
 }
 
-.side-panel-links a:focus-visible {
+.side-panel-links :is(a, button.side-panel-link-button):focus-visible {
   border-color: var(--cyan);
+  outline: 2px solid color-mix(in srgb, var(--cyan) 68%, white);
   outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .side-panel,
   .side-panel-scrim,
-  .side-panel-links a,
+  .side-panel-links :is(a, button.side-panel-link-button),
   .side-panel-close,
   .side-panel-trigger,
   .side-panel-trigger span {

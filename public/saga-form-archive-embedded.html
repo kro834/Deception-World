@@ -311,8 +311,8 @@ svg {
 }
 </style>
 <link rel="stylesheet" href="/rexonance-archive-update.css">
-<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r37">
-<script src="/archive-scroll-stability.js?v=20260823-r37" defer></script>
+<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r41">
+<script src="/archive-scroll-stability.js?v=20260823-r41" defer></script>
 </head>
 <body>
 <div id="saga-boot-loader" class="saga-boot-loader" role="status" aria-live="polite" aria-label="フォームアーカイブを読み込み中">
@@ -5600,15 +5600,96 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const navLinks = [...root.querySelectorAll('.archive-nav a')];
-  if ('IntersectionObserver' in window) {
-    const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
-    const sectionObserver = new IntersectionObserver(entries => {
-      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible) return;
-      navLinks.forEach(link => link.setAttribute('aria-current', String(link.getAttribute('href') === '#' + visible.target.id)));
-    }, { rootMargin: '-18% 0px -66% 0px', threshold: [0.01, 0.2, 0.5] });
-    sections.forEach(section => sectionObserver.observe(section));
+  const archiveNav = navLinks[0]?.closest('.archive-nav');
+  const navEntries = navLinks.map((link, index) => {
+    const target = document.getElementById(link.hash.slice(1));
+    link.dataset.locationIndex = String(index + 1).padStart(2, '0');
+    return target ? { link, target, index } : null;
+  }).filter(Boolean);
+  let activeLocationIndex = -1;
+  let locationIntentIndex = -1;
+  let locationIntentTimer = 0;
 
+  function setArchiveLocation(entry) {
+    if (!entry) return;
+    navEntries.forEach(item => {
+      item.link.setAttribute('aria-current', String(item.index === entry.index));
+    });
+    root.dataset.archiveLocation = entry.target.id;
+    root.style.setProperty('--archive-location-progress', String((entry.index + 1) / Math.max(navEntries.length, 1)));
+    archiveNav?.setAttribute('data-current-location', `${String(entry.index + 1).padStart(2, '0')}/${String(navEntries.length).padStart(2, '0')}`);
+    if (activeLocationIndex === entry.index) return;
+    activeLocationIndex = entry.index;
+    if (archiveNav && archiveNav.scrollWidth > archiveNav.clientWidth) {
+      const left = entry.link.offsetLeft - (archiveNav.clientWidth - entry.link.offsetWidth) / 2;
+      archiveNav.scrollTo({ left: Math.max(0, left), behavior: 'auto' });
+    }
+  }
+
+  function releaseArchiveLocationIntent() {
+    if (locationIntentIndex < 0) return;
+    locationIntentIndex = -1;
+    window.clearTimeout(locationIntentTimer);
+    locationIntentTimer = 0;
+    schedulePageUpdate();
+  }
+
+  function holdArchiveLocationIntent(entry, delay = 1400) {
+    locationIntentIndex = entry.index;
+    setArchiveLocation(entry);
+    window.clearTimeout(locationIntentTimer);
+    locationIntentTimer = window.setTimeout(releaseArchiveLocationIntent, delay);
+  }
+
+  function resolveArchiveLocationEntry(measured, probe, atDocumentEnd, currentIndex) {
+    const byDocumentTop = [...measured].sort((a, b) => a.top - b.top || a.index - b.index);
+    if (!byDocumentTop.length) return null;
+    if (atDocumentEnd) return byDocumentTop[byDocumentTop.length - 1];
+
+    const formEntry = measured.find(entry => entry.index === 0);
+    const detailEntry = measured.find(entry => entry.index === 1);
+    const reachedEntries = byDocumentTop.filter(entry => entry.top <= probe + 1);
+    let current = reachedEntries[reachedEntries.length - 1] || formEntry || byDocumentTop[0];
+    const introRowIsClustered = Boolean(
+      formEntry
+      && detailEntry
+      && Math.abs(formEntry.top - detailEntry.top) <= 96
+    );
+    const laterSectionReached = byDocumentTop.some(entry => entry.index > 1 && entry.top <= probe + 1);
+    if (introRowIsClustered && !laterSectionReached) {
+      // On iPad the two intro columns share one visual row, but their heading
+      // rectangles can cross by a few pixels. Keep an explicit Form/Detail
+      // choice stable; when returning from a later section, default to Form.
+      const preferredIntroIndex = currentIndex === 0 || currentIndex === 1 ? currentIndex : 0;
+      current = preferredIntroIndex === 1 ? detailEntry : formEntry;
+    }
+    return current;
+  }
+
+  function updateArchiveLocation() {
+    if (!navEntries.length) return;
+    const intended = navEntries.find(entry => entry.index === locationIntentIndex);
+    if (intended) {
+      setArchiveLocation(intended);
+      return;
+    }
+    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+    const probe = scrollTop + Math.min(240, Math.max(96, window.innerHeight * 0.18));
+    const measured = navEntries.map(entry => ({
+      ...entry,
+      top: entry.target.getBoundingClientRect().top + scrollTop
+    }));
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const atDocumentEnd = maxScroll > 0 && scrollTop >= maxScroll - 2;
+    const current = resolveArchiveLocationEntry(measured, probe, atDocumentEnd, activeLocationIndex);
+    setArchiveLocation(current);
+  }
+
+  navEntries.forEach(entry => {
+    entry.link.addEventListener('click', () => holdArchiveLocationIntent(entry));
+  });
+
+  if ('IntersectionObserver' in window) {
     const heroObserver = new IntersectionObserver(entries => {
       const visible = Boolean(entries[0]?.isIntersecting);
       root.classList.toggle('dock-ready', !visible);
@@ -5641,10 +5722,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     const progress = Math.min(1, Math.max(0, window.scrollY / max));
     scrollProgress.firstElementChild.style.transform = `scaleX(${progress})`;
+    updateArchiveLocation();
+  }
+  function schedulePageUpdate() {
+    if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updatePageProgress);
   }
   window.addEventListener('scroll', () => {
-    if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updatePageProgress);
+    schedulePageUpdate();
+    if (locationIntentIndex >= 0) {
+      window.clearTimeout(locationIntentTimer);
+      locationIntentTimer = window.setTimeout(releaseArchiveLocationIntent, 220);
+    }
   }, { passive: true });
+  window.addEventListener('scrollend', releaseArchiveLocationIntent, { passive: true });
+  window.addEventListener('hashchange', schedulePageUpdate, { passive: true });
+  const locationResizeObserver = 'ResizeObserver' in window
+    ? new ResizeObserver(schedulePageUpdate)
+    : null;
+  locationResizeObserver?.observe(root);
 
   reducedMotion.addEventListener?.('change', event => {
     if (!event.matches) return;
@@ -5663,6 +5758,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('resize', () => {
     if (sheetOpen && !window.matchMedia('(max-width: 620px)').matches) closeSelectorSheet({ immediate: true });
+    schedulePageUpdate();
   }, { passive: true });
 
   function syncVisibility() {

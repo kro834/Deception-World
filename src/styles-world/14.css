@@ -76,6 +76,7 @@
       .side-panel-trigger,
       .side-panel-close,
       .side-panel-links a,
+      .side-panel-links button.side-panel-link-button,
       .episode-pickup-plus,
       .ios-slide-open {
     background-color: rgba(13, 22, 34, 0.96);

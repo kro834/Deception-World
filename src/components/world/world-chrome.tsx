@@ -6,6 +6,23 @@ import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 
+const SITE_ANNOUNCEMENTS = [
+  {
+    id: "who-supreme",
+    sequence: "TRANSMISSION 01",
+    date: "2026.08.23",
+    title: "Who Supreme?",
+    image: "/announcement-who-supreme.jpeg",
+    imageAlt: "青白く発光する仮面とEX. Beyond imagination.の文字",
+    width: 960,
+    height: 1441,
+  },
+] as const;
+
+type AnnouncementId = (typeof SITE_ANNOUNCEMENTS)[number]["id"];
+
+const SIDE_MENU_OPEN_INPUT_EVENT = "deception-world:side-menu-open-input";
+
 export function SideMenuTrigger({
   open,
   onOpenChange,
@@ -24,7 +41,20 @@ export function SideMenuTrigger({
       aria-controls="site-side-panel"
       aria-haspopup="dialog"
       aria-label="メニューを開く"
-      onClick={onOpenChange ? () => onOpenChange(true) : undefined}
+      onClick={
+        onOpenChange
+          ? (event) => {
+              const openedByKeyboard = event.detail === 0;
+              window.dispatchEvent(
+                new CustomEvent(SIDE_MENU_OPEN_INPUT_EVENT, {
+                  detail: { keyboard: openedByKeyboard },
+                }),
+              );
+              if (!openedByKeyboard) event.currentTarget.blur();
+              onOpenChange(true);
+            }
+          : undefined
+      }
     >
       <LiquidPointerGlow />
       <span className="side-panel-trigger-ring" aria-hidden="true" />
@@ -48,10 +78,27 @@ export function SideMenuLayer({
 } = {}) {
   const panelRef = useRef<HTMLElement>(null);
   const announcementRef = useRef<HTMLDialogElement>(null);
+  const announcementTriggerRef = useRef<HTMLButtonElement>(null);
+  const announcementStageRef = useRef<HTMLDivElement>(null);
+  const announcementHeadingRef = useRef<HTMLHeadingElement>(null);
+  const announcementOpenedByKeyboardRef = useRef(false);
+  const sideMenuRestoreFocusRef = useRef(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
   const close = () => onOpenChange?.(false);
+  const selectedAnnouncement =
+    SITE_ANNOUNCEMENTS.find((notice) => notice.id === selectedAnnouncementId) ?? null;
+
+  useEffect(() => {
+    const rememberInput = (event: Event) => {
+      const detail = (event as CustomEvent<{ keyboard?: boolean }>).detail;
+      sideMenuRestoreFocusRef.current = detail?.keyboard === true;
+    };
+    window.addEventListener(SIDE_MENU_OPEN_INPUT_EVENT, rememberInput);
+    return () => window.removeEventListener(SIDE_MENU_OPEN_INPUT_EVENT, rememberInput);
+  }, []);
 
   useEffect(() => {
     if (!controlled || !isOpen) return;
@@ -62,18 +109,31 @@ export function SideMenuLayer({
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const frame = window.requestAnimationFrame(() => {
-      panel.querySelector<HTMLElement>(".side-panel-close")?.focus({ preventScroll: true });
+      const focusTarget = sideMenuRestoreFocusRef.current
+        ? panel.querySelector<HTMLElement>(".side-panel-close")
+        : panel;
+      focusTarget?.focus({ preventScroll: true });
     });
     return () => {
       window.cancelAnimationFrame(frame);
       document.body.style.overflow = previousOverflow;
-      previousFocus?.focus({ preventScroll: true });
+      if (sideMenuRestoreFocusRef.current) {
+        previousFocus?.focus({ preventScroll: true });
+      } else if (
+        document.activeElement instanceof HTMLElement &&
+        panel.contains(document.activeElement)
+      ) {
+        document.activeElement.blur();
+      }
+      sideMenuRestoreFocusRef.current = false;
     };
   }, [controlled, isOpen]);
 
   useEffect(() => {
     const dialog = announcementRef.current;
     if (!dialog || !announcementOpen) return;
+    const sidePanel = panelRef.current;
+    const announcementTrigger = announcementTriggerRef.current;
 
     if (!dialog.open) {
       try {
@@ -84,34 +144,57 @@ export function SideMenuLayer({
       }
     }
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const ownsBodyScrollLock = previousOverflow !== "hidden";
+    if (ownsBodyScrollLock) document.body.style.overflow = "hidden";
     dialog.scrollTop = 0;
-    const frame = window.requestAnimationFrame(() => {
-      dialog
-        .querySelector<HTMLButtonElement>(".site-announcement-close")
-        ?.focus({ preventScroll: true });
-    });
+    // Focusing the dialog itself prevents WebKit from auto-focusing (and
+    // visually latching) the first close control when showModal() runs.
+    dialog.focus({ preventScroll: true });
 
     return () => {
-      window.cancelAnimationFrame(frame);
       if (dialog.open) dialog.close();
-      document.body.style.overflow = previousOverflow;
-      document
-        .querySelector<HTMLButtonElement>(".side-panel-trigger")
-        ?.focus({ preventScroll: true });
+      if (ownsBodyScrollLock) document.body.style.overflow = previousOverflow;
+      if (announcementOpenedByKeyboardRef.current) {
+        const returnTarget =
+          sidePanel?.dataset.open === "true" && announcementTrigger?.isConnected
+            ? announcementTrigger
+            : document.querySelector<HTMLButtonElement>(".side-panel-trigger");
+        returnTarget?.focus({ preventScroll: true });
+      } else if (
+        document.activeElement instanceof HTMLElement &&
+        dialog.contains(document.activeElement)
+      ) {
+        document.activeElement.blur();
+      }
+      announcementOpenedByKeyboardRef.current = false;
     };
   }, [announcementOpen]);
 
-  const openAnnouncement = () => {
-    if (controlled) close();
-    else panelRef.current?.querySelector<HTMLButtonElement>(".side-panel-close")?.click();
+  useEffect(() => {
+    if (!announcementOpen || !selectedAnnouncement) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (announcementStageRef.current) announcementStageRef.current.scrollTop = 0;
+      announcementHeadingRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [announcementOpen, selectedAnnouncement]);
+
+  const openAnnouncements = (event: MouseEvent<HTMLButtonElement>) => {
+    const openedByKeyboard = event.detail === 0;
+    announcementOpenedByKeyboardRef.current = openedByKeyboard;
+    if (!openedByKeyboard) event.currentTarget.blur();
+    setSelectedAnnouncementId(null);
     setAnnouncementOpen(true);
   };
 
-  const closeAnnouncement = () => setAnnouncementOpen(false);
+  const closeAnnouncement = (restoreFocus = announcementOpenedByKeyboardRef.current) => {
+    announcementOpenedByKeyboardRef.current = restoreFocus;
+    setAnnouncementOpen(false);
+    setSelectedAnnouncementId(null);
+  };
 
   const onAnnouncementBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) closeAnnouncement();
+    if (event.target === event.currentTarget) closeAnnouncement(false);
   };
 
   const onPanelKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -119,6 +202,7 @@ export function SideMenuLayer({
     if (event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
+      sideMenuRestoreFocusRef.current = true;
       close();
       return;
     }
@@ -158,6 +242,9 @@ export function SideMenuLayer({
         className="side-panel-scrim"
         data-open={String(isOpen)}
         aria-hidden="true"
+        onPointerDown={() => {
+          sideMenuRestoreFocusRef.current = false;
+        }}
         onClick={controlled ? close : undefined}
       />
       <aside
@@ -172,6 +259,9 @@ export function SideMenuLayer({
         aria-label="サイトメニュー"
         tabIndex={-1}
         inert={controlled ? !isOpen : undefined}
+        onPointerDown={() => {
+          sideMenuRestoreFocusRef.current = false;
+        }}
         onKeyDown={controlled ? onPanelKeyDown : undefined}
       >
         <div className="side-panel-head">
@@ -184,7 +274,14 @@ export function SideMenuLayer({
             type="button"
             data-liquid-pointer="true"
             aria-label="メニューを閉じる"
-            onClick={controlled ? close : undefined}
+            onClick={
+              controlled
+                ? (event) => {
+                    if (event.detail !== 0) event.currentTarget.blur();
+                    close();
+                  }
+                : undefined
+            }
           >
             <LiquidPointerGlow />
             <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
@@ -267,14 +364,13 @@ export function SideMenuLayer({
           <p>INFORMATION</p>
           <div className="side-panel-links">
             <button
-              className="side-panel-announcement-trigger ios26-glass"
+              ref={announcementTriggerRef}
+              className="side-panel-link-button side-panel-announcement-trigger"
               type="button"
-              data-liquid-pointer="true"
               aria-haspopup="dialog"
               aria-controls="site-announcement-dialog"
-              onClick={openAnnouncement}
+              onClick={openAnnouncements}
             >
-              <LiquidPointerGlow />
               <span>お知らせ</span>
               <i>NOTICE</i>
             </button>
@@ -306,50 +402,129 @@ export function SideMenuLayer({
         ref={announcementRef}
         id="site-announcement-dialog"
         className="site-announcement-dialog"
-        aria-labelledby="site-announcement-title"
+        aria-labelledby="site-announcement-hub-title"
+        tabIndex={-1}
         onClick={onAnnouncementBackdrop}
         onCancel={(event) => {
           event.preventDefault();
-          closeAnnouncement();
+          closeAnnouncement(true);
         }}
         onClose={() => setAnnouncementOpen(false)}
       >
-        <article className="site-announcement-card">
+        <section
+          className="site-announcement-hub"
+          data-view={selectedAnnouncement ? "detail" : "index"}
+        >
           <span className="site-announcement-aura" aria-hidden="true" />
-          <button
-            className="site-announcement-close ios26-glass"
-            type="button"
-            data-liquid-pointer="true"
-            aria-label="お知らせを閉じる"
-            onClick={closeAnnouncement}
-          >
-            <LiquidPointerGlow />
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-              <path
-                d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-          <figure className="site-announcement-visual">
-            {announcementOpen ? (
-              <img
-                src="/announcement-who-supreme.jpeg"
-                alt="青白く発光する仮面とEX. Beyond imagination.の文字"
-                width="960"
-                height="1441"
-                decoding="async"
-              />
-            ) : null}
-          </figure>
-          <div className="site-announcement-copy">
-            <p>NOTICE / TRANSMISSION 01</p>
-            <h2 id="site-announcement-title">Who Supreme?</h2>
+          <header className="site-announcement-header">
+            <div>
+              <p>INFORMATION / ARCHIVE</p>
+              <h2 id="site-announcement-hub-title">お知らせ</h2>
+            </div>
+            <span className="site-announcement-count" aria-label="お知らせ1件">
+              {String(SITE_ANNOUNCEMENTS.length).padStart(2, "0")} ACTIVE
+            </span>
+            <button
+              className="site-announcement-close ios26-glass"
+              type="button"
+              aria-label="お知らせを閉じる"
+              onClick={(event) => {
+                event.stopPropagation();
+                const restoreFocus = event.detail === 0;
+                if (!restoreFocus) event.currentTarget.blur();
+                closeAnnouncement(restoreFocus);
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path
+                  d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </header>
+          <div ref={announcementStageRef} className="site-announcement-stage">
+            {selectedAnnouncement ? (
+              <article className="site-announcement-detail">
+                <button
+                  className="site-announcement-back"
+                  type="button"
+                  onClick={() => setSelectedAnnouncementId(null)}
+                >
+                  <span aria-hidden="true">←</span>
+                  一覧へ戻る
+                </button>
+                <figure className="site-announcement-visual">
+                  {announcementOpen ? (
+                    <img
+                      src={selectedAnnouncement.image}
+                      alt={selectedAnnouncement.imageAlt}
+                      width={selectedAnnouncement.width}
+                      height={selectedAnnouncement.height}
+                      decoding="async"
+                    />
+                  ) : null}
+                </figure>
+                <div className="site-announcement-copy">
+                  <p>
+                    NOTICE / {selectedAnnouncement.sequence}
+                    <time dateTime={selectedAnnouncement.date.replaceAll(".", "-")}>
+                      {selectedAnnouncement.date}
+                    </time>
+                  </p>
+                  <h3 ref={announcementHeadingRef} tabIndex={-1}>
+                    {selectedAnnouncement.title}
+                  </h3>
+                </div>
+              </article>
+            ) : (
+              <div className="site-announcement-index">
+                <div className="site-announcement-index-copy">
+                  <p>新着情報と記録された通信を選択してください。</p>
+                  <span>SELECT TRANSMISSION</span>
+                </div>
+                <ul className="site-announcement-list">
+                  {SITE_ANNOUNCEMENTS.map((notice) => (
+                    <li key={notice.id}>
+                      <button
+                        className="site-announcement-list-item"
+                        type="button"
+                        onClick={() => setSelectedAnnouncementId(notice.id)}
+                        aria-label={`${notice.title}を開く`}
+                      >
+                        <span className="site-announcement-list-visual" aria-hidden="true">
+                          {announcementOpen ? (
+                            <img
+                              src={notice.image}
+                              alt=""
+                              width={notice.width}
+                              height={notice.height}
+                              decoding="async"
+                            />
+                          ) : null}
+                        </span>
+                        <span className="site-announcement-list-copy">
+                          <span>
+                            <small>{notice.sequence}</small>
+                            <time dateTime={notice.date.replaceAll(".", "-")}>{notice.date}</time>
+                          </span>
+                          <b>{notice.title}</b>
+                          <i>OPEN RECORD</i>
+                        </span>
+                        <span className="site-announcement-list-arrow" aria-hidden="true">
+                          ↗
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        </article>
+        </section>
       </dialog>
     </>
   );

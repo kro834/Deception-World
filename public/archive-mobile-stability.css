@@ -36,24 +36,52 @@ html[data-embedded-archive="true"][data-archive-kind="realm"] body {
   touch-action: pan-y;
 }
 
-/* The Realm source keeps its full-page boot class until hero decoding ends.
-   In the embedded route the loader is non-blocking, so that class must not
-   turn the edition panel into a temporary scroll container on iOS. */
-html[data-embedded-archive="true"] #edition-panel-realm.saga-booting,
-html[data-embedded-archive="true"] #edition-panel-realm.saga-booting .edition-body {
-  overflow-x: clip;
-  overflow-y: visible;
+/* The source archive clips the edition wrapper horizontally. WebKit resolves
+   the other overflow axis to `auto`, which creates a second, almost stationary
+   vertical scroller inside the document (typically only a few pixels tall).
+   iPadOS can latch the first drag to that inner scroller and stop forwarding
+   later drags to the real document scroller. Horizontal clipping already
+   belongs to html above, so every embedded edition wrapper stays transparent
+   to vertical touch scrolling before, during and after boot. */
+html[data-embedded-archive="true"] :is(#edition-panel-saga, #edition-panel-realm),
+html[data-embedded-archive="true"] :is(#edition-panel-saga, #edition-panel-realm) > .edition-body {
+  overflow: visible !important;
+  overscroll-behavior: auto;
   touch-action: pan-y;
 }
 
-html[data-embedded-archive="true"]:has([id$="saga-forms-performance-v5"].is-selector-sheet-open),
-html[data-embedded-archive="true"]:has([id$="saga-forms-performance-v5"].is-selector-sheet-open) body {
+/* Only the archive selected by this embedded document may own the modal
+   scroll lock. This prevents an inactive edition retained by a source bundle
+   from locking the active page through a broad :has() match. */
+html[data-embedded-archive="true"][data-archive-kind="saga"]:has(#saga-forms-performance-v5.is-selector-sheet-open),
+html[data-embedded-archive="true"][data-archive-kind="saga"]:has(#saga-forms-performance-v5.is-selector-sheet-open) body,
+html[data-embedded-archive="true"][data-archive-kind="realm"]:has(#realm--saga-forms-performance-v5.is-selector-sheet-open),
+html[data-embedded-archive="true"][data-archive-kind="realm"]:has(#realm--saga-forms-performance-v5.is-selector-sheet-open) body {
   overflow-y: hidden;
   touch-action: none;
 }
 
 img {
   max-width: 100%;
+}
+
+/* Desktop telemetry keeps the selected location legible without consuming a
+   sixth navigation slot. Coarse-pointer layouts keep their existing spacing. */
+[id$="saga-forms-performance-v5"] .archive-nav[data-current-location] {
+  position: relative;
+}
+
+@media (hover: hover) and (min-width: 900px) {
+  [id$="saga-forms-performance-v5"] .archive-nav[data-current-location]::before {
+    position: absolute;
+    inset: -1.05rem 0.3rem auto auto;
+    content: "LOC // " attr(data-current-location);
+    color: var(--active-2, #73d9ff);
+    font: 700 0.48rem/1 var(--font-mono, ui-monospace, monospace);
+    letter-spacing: 0.16em;
+    opacity: 0.72;
+    text-shadow: 0 0 9px rgb(var(--active-2-rgb, 115 217 255) / 48%);
+  }
 }
 
 /* Horizontal archives must not become vertical dead zones. Android Chrome
