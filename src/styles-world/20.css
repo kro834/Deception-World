@@ -13,12 +13,22 @@
     linear-gradient(90deg, rgba(49, 31, 7, 0.62), transparent 56%);
 }
 
-.signal.zeus-signal:is(:hover, :focus-visible) {
+.signal.zeus-signal:focus-visible {
   border-color: rgba(255, 237, 184, 0.8);
   box-shadow:
     0 18px 52px rgba(0, 0, 0, 0.38),
     0 0 38px rgba(244, 215, 142, 0.22),
     inset 0 0 26px rgba(244, 215, 142, 0.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .signal.zeus-signal:hover {
+    border-color: rgba(255, 237, 184, 0.8);
+    box-shadow:
+      0 18px 52px rgba(0, 0, 0, 0.38),
+      0 0 38px rgba(244, 215, 142, 0.22),
+      inset 0 0 26px rgba(244, 215, 142, 0.08);
+  }
 }
 
 .signal-apex {
@@ -912,13 +922,24 @@
   box-shadow: 0 0 16px rgba(99, 230, 205, 0.7), 0 0 26px rgba(244, 215, 142, 0.4);
 }
 
-.signal.zeus-signal:is(:hover, :focus-visible) {
+.signal.zeus-signal:focus-visible {
   border-color: rgba(151, 255, 233, 0.86);
   box-shadow:
     0 18px 52px rgba(0, 0, 0, 0.38),
     -14px 0 42px rgba(244, 215, 142, 0.18),
     14px 0 42px rgba(99, 230, 205, 0.2),
     inset 0 0 26px rgba(153, 255, 235, 0.07);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .signal.zeus-signal:hover {
+    border-color: rgba(151, 255, 233, 0.86);
+    box-shadow:
+      0 18px 52px rgba(0, 0, 0, 0.38),
+      -14px 0 42px rgba(244, 215, 142, 0.18),
+      14px 0 42px rgba(99, 230, 205, 0.2),
+      inset 0 0 26px rgba(153, 255, 235, 0.07);
+  }
 }
 
 .signal-apex {

@@ -1,0 +1,301 @@
+/* Lightweight future-interface layer.
+   This pass only decorates existing geometry: no extra interaction surface,
+   large blur plane, or layout-dependent animation is introduced. */
+
+.site-shell {
+  --future-hud-primary: var(--cyan);
+  --future-hud-secondary: var(--gold);
+}
+
+.form-archive-page {
+  --future-hud-primary: var(--archive-cyan);
+  --future-hud-secondary: var(--archive-gold);
+}
+
+.form-archive-page[data-archive-kind="realm"] {
+  --future-hud-primary: var(--archive-violet);
+  --future-hud-secondary: var(--archive-cyan);
+}
+
+.manager-page.is-sovereign {
+  --future-hud-primary: var(--sovereign-aquamarine, #63e6cd);
+  --future-hud-secondary: var(--sovereign-gold, #f4d78e);
+}
+
+/* A quiet viewport telemetry frame keeps the three major surfaces in one
+   interface family. Safe-area insets prevent it touching a notch or gesture
+   bar, and pointer-events keep every control fully operable. */
+:is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::before {
+  content: "";
+  position: fixed;
+  z-index: 39;
+  top: max(8px, calc(env(safe-area-inset-top, 0px) + 4px));
+  right: max(8px, calc(env(safe-area-inset-right, 0px) + 4px));
+  bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) + 4px));
+  left: max(8px, calc(env(safe-area-inset-left, 0px) + 4px));
+  background:
+    linear-gradient(90deg, var(--future-hud-primary), transparent) left top / 52px 1px no-repeat,
+    linear-gradient(180deg, var(--future-hud-primary), transparent) left top / 1px 52px no-repeat,
+    linear-gradient(270deg, var(--future-hud-secondary), transparent) right top / 52px 1px no-repeat,
+    linear-gradient(180deg, var(--future-hud-secondary), transparent) right top / 1px 52px no-repeat,
+    linear-gradient(90deg, var(--future-hud-secondary), transparent) left bottom / 52px 1px
+      no-repeat,
+    linear-gradient(0deg, var(--future-hud-secondary), transparent) left bottom / 1px 52px no-repeat,
+    linear-gradient(270deg, var(--future-hud-primary), transparent) right bottom / 52px 1px
+      no-repeat,
+    linear-gradient(0deg, var(--future-hud-primary), transparent) right bottom / 1px 52px no-repeat;
+  opacity: 0.54;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+/* Small bottom telemetry ticks are limited to tablet/desktop widths; the
+   mobile viewport stays clean and preserves its full reading area. */
+@media (min-width: 720px) {
+  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after {
+    content: "";
+    position: fixed;
+    z-index: 39;
+    bottom: max(11px, calc(env(safe-area-inset-bottom, 0px) + 7px));
+    left: 50%;
+    width: min(40vw, 360px);
+    height: 7px;
+    background:
+      linear-gradient(
+          90deg,
+          transparent,
+          var(--future-hud-primary) 24%,
+          var(--future-hud-secondary) 76%,
+          transparent
+        )
+        0 0 / 100% 1px no-repeat,
+      repeating-linear-gradient(
+          90deg,
+          transparent 0 14px,
+          color-mix(in srgb, var(--future-hud-primary) 48%, transparent) 14px 15px
+        )
+        0 3px / 100% 4px no-repeat;
+    opacity: 0.34;
+    pointer-events: none;
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Hero copy gains a non-rectangular targeting bracket without changing its
+   text measure or hit testing. */
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  inset: -20px -14px;
+  background:
+    linear-gradient(90deg, rgba(103, 216, 255, 0.62), transparent) left top / 74px 1px no-repeat,
+    linear-gradient(180deg, rgba(103, 216, 255, 0.52), transparent) left top / 1px 44px no-repeat,
+    linear-gradient(270deg, rgba(215, 171, 81, 0.48), transparent) right bottom / 62px 1px no-repeat,
+    linear-gradient(0deg, rgba(215, 171, 81, 0.4), transparent) right bottom / 1px 38px no-repeat;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.hero-metadata > span {
+  position: relative;
+  padding-inline-start: 12px;
+  border-inline-start: 1px solid rgba(103, 216, 255, 0.2);
+  background: linear-gradient(90deg, rgba(103, 216, 255, 0.035), transparent 72%);
+}
+
+/* Repeated information blocks now read as modules in the same HUD, while the
+   inset outline avoids modifying their measured dimensions. */
+:is(.threat-panel, .rider-console, .world-column-content, .episode-archive) {
+  outline: 1px solid rgba(103, 216, 255, 0.055);
+  outline-offset: -6px;
+}
+
+/* Navigation telemetry. The marker is deliberately static on touch devices;
+   fine pointers get the existing hover movement plus this status response. */
+.side-panel::before {
+  content: "";
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 82px);
+  right: max(26px, calc(env(safe-area-inset-right, 0px) + 18px));
+  width: 68px;
+  height: 7px;
+  background:
+    linear-gradient(90deg, transparent, rgba(103, 216, 255, 0.74)) 0 0 / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, rgba(103, 216, 255, 0.34) 0 1px, transparent 1px 9px) 0 4px /
+      100% 3px no-repeat;
+  opacity: 0.54;
+  pointer-events: none;
+}
+
+.side-panel-group > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.side-panel-group > p::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
+:is(.side-panel-links a, .side-panel-announcement-trigger) {
+  position: relative;
+  padding-inline-start: 22px;
+}
+
+:is(.side-panel-links a, .side-panel-announcement-trigger)::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 9px;
+  width: 2px;
+  height: 9px;
+  border-radius: 99px;
+  background: var(--cyan);
+  box-shadow: 0 0 9px rgba(103, 216, 255, 0.56);
+  opacity: 0.26;
+  pointer-events: none;
+  transform: translateY(-50%) scaleY(0.6);
+  transition:
+    opacity 0.2s ease,
+    transform 0.28s var(--glass-spring);
+}
+
+:is(.side-panel-links a, .side-panel-announcement-trigger):focus-visible::before {
+  opacity: 0.92;
+  transform: translateY(-50%) scaleY(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.side-panel-links a, .side-panel-announcement-trigger):hover::before {
+    opacity: 0.92;
+    transform: translateY(-50%) scaleY(1);
+  }
+}
+
+/* Archive chrome receives a slim system label and a fixed-geometry status
+   grid. Both remain outside the embedded document's scrolling surface. */
+.form-archive-toolbar {
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.32),
+    inset 0 -1px 0 color-mix(in srgb, var(--future-hud-primary) 16%, transparent);
+}
+
+.form-archive-switcher.liquid-swipe-tabs {
+  outline: 1px solid color-mix(in srgb, var(--future-hud-primary) 14%, transparent);
+  outline-offset: 3px;
+}
+
+.form-archive-frame-status {
+  background:
+    linear-gradient(rgba(117, 221, 255, 0.025) 1px, transparent 1px) 50% 50% / 42px 42px,
+    linear-gradient(90deg, rgba(117, 221, 255, 0.025) 1px, transparent 1px) 50% 50% / 42px 42px,
+    radial-gradient(
+      circle at 50% 48%,
+      color-mix(in srgb, var(--future-hud-primary) 10%, transparent),
+      transparent 20rem
+    ),
+    rgba(2, 2, 7, 0.9);
+}
+
+@media (min-width: 700px) {
+  .form-archive-toolbar::before {
+    content: "FORM INTERFACE // LINKED";
+    position: absolute;
+    bottom: 28px;
+    left: max(22px, calc(env(safe-area-inset-left, 0px) + 18px));
+    color: color-mix(in srgb, var(--future-hud-primary) 70%, rgba(225, 238, 247, 0.7));
+    font-family: var(--font-display);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    pointer-events: none;
+  }
+}
+
+/* Zeus keeps the gold/aquamarine language but gains a second, instrument-like
+   frame. Outline does not affect portrait layout or its responsive crop. */
+.is-sovereign .manager-portrait-frame {
+  outline: 1px solid rgba(99, 230, 205, 0.28);
+  outline-offset: 6px;
+}
+
+.is-sovereign .sovereign-status {
+  outline: 1px solid rgba(244, 215, 142, 0.11);
+  outline-offset: -6px;
+}
+
+@media (min-width: 1040px) {
+  .is-sovereign .manager-topbar::before {
+    content: "AUTHORITY NODE // 01";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: rgba(154, 244, 225, 0.68);
+    font-family: var(--font-display);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 560px) {
+  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::before {
+    opacity: 0.4;
+  }
+
+  .hero-copy::before {
+    inset: -12px -8px;
+    opacity: 0.48;
+  }
+
+  .hero-metadata > span {
+    padding-inline-start: 8px;
+  }
+
+  .is-sovereign .manager-portrait-frame {
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 720px) {
+  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after {
+    animation: futureHudSignal 4.8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.side-panel-links a, .side-panel-announcement-trigger)::before {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::before,
+  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after,
+  .hero-copy::before {
+    opacity: 0.28;
+  }
+
+  .form-archive-frame-status {
+    background: #020207;
+  }
+}
+
+@keyframes futureHudSignal {
+  0%,
+  100% {
+    opacity: 0.24;
+  }
+
+  50% {
+    opacity: 0.48;
+  }
+}

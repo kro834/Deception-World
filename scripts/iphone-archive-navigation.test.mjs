@@ -58,7 +58,7 @@ test("the iPhone archive entry closes its menu and never waits for the full stan
     /\.archive-route-dive\.is-arriving \.cine-dive-tunnel > i[\s\S]*?animation: none !important/,
   );
   assert.match(styles, /height: 100vh;\s*height: 100svh;/);
-  assert.doesNotMatch(styles, /height: 100svh;\s*height: 100dvh;/);
+  assert.match(styles, /height: 100svh;\s*height: 100dvh;/);
 });
 
 test("the archive switcher occupies a dedicated iPhone-safe toolbar above the iframe", () => {

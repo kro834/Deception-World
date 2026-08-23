@@ -75,6 +75,38 @@ export function SlideOpenControl({
     return () => clearTimers();
   }, []);
 
+  /* Capture can fail in Android WebViews. A pointer released outside the
+     element must still clear the drag state instead of leaving the thumb and
+     page gesture ownership active. */
+  useEffect(() => {
+    const cancelDanglingDrag = (event?: PointerEvent) => {
+      if (
+        activePointer.current == null ||
+        (event && event.pointerId !== activePointer.current)
+      )
+        return;
+      const button = internalButtonRef.current;
+      const pointerId = activePointer.current;
+      try {
+        if (button?.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
+      } catch {
+        /* Native gesture takeover already released capture. */
+      }
+      reset();
+    };
+    const cancelOnBlur = () => cancelDanglingDrag();
+    window.addEventListener("pointerup", cancelDanglingDrag);
+    window.addEventListener("pointercancel", cancelDanglingDrag);
+    window.addEventListener("blur", cancelOnBlur);
+    window.addEventListener("pagehide", cancelOnBlur);
+    return () => {
+      window.removeEventListener("pointerup", cancelDanglingDrag);
+      window.removeEventListener("pointercancel", cancelDanglingDrag);
+      window.removeEventListener("blur", cancelOnBlur);
+      window.removeEventListener("pagehide", cancelOnBlur);
+    };
+  });
+
   useEffect(() => {
     const enableKeyboardFocus = () => {
       suppressFocusRing.current = false;

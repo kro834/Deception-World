@@ -311,8 +311,8 @@ svg {
 }
 </style>
 <link rel="stylesheet" href="/rexonance-archive-update.css">
-<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r35">
-<script src="/archive-scroll-stability.js?v=20260822-r35" defer></script>
+<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r37">
+<script src="/archive-scroll-stability.js?v=20260823-r37" defer></script>
 </head>
 <body>
 <div id="saga-boot-loader" class="saga-boot-loader" role="status" aria-live="polite" aria-label="フォームアーカイブを読み込み中">
@@ -5488,7 +5488,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (event.pointerType === 'mouse' || event.isPrimary === false) return;
       didSwipe = false;
       pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
-      trigger.setPointerCapture?.(event.pointerId);
+      try { trigger.setPointerCapture?.(event.pointerId); }
+      catch (_) { /* WebView capture handoff: window cleanup still clears state. */ }
     });
     trigger.addEventListener('pointerup', event => {
       if (!pointerStart || pointerStart.id !== event.pointerId) return;
@@ -6890,5 +6891,24 @@ document.addEventListener('DOMContentLoaded', () => {
 }, { once: true });
 </script>
 <script src="/rexonance-archive-update.js" defer></script>
+<script data-archive-ready-signal>
+(() => {
+  const announceReady = () => {
+    document.documentElement.dataset.archiveReadySignal = "scheduled";
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      window.parent.postMessage({
+        type: "saga-archive:ready",
+        kind: document.documentElement.dataset.archiveKind
+      }, "*");
+      document.documentElement.dataset.archiveReadySignal = "sent";
+    }));
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", announceReady, { once: true });
+  } else {
+    announceReady();
+  }
+})();
+</script>
 </body>
 </html>

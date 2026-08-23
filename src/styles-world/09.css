@@ -413,6 +413,21 @@
     padding: 0 6px;
   }
 
+  .poster-lock {
+    gap: 4px;
+    padding-inline: 4px;
+  }
+
+  .poster-lock span {
+    width: 18px;
+    flex-basis: 18px;
+  }
+
+  .poster-lock b {
+    font-size: 6.5px;
+    letter-spacing: 0.12em;
+  }
+
   .poster-controls output {
     text-align: center;
   }
@@ -739,6 +754,7 @@
   .episode-pickup-dialog {
     width: calc(100vw - 16px);
     max-height: calc(100svh - 16px);
+    max-height: calc(100dvh - 16px);
   }
 
   .episode-pickup-dialog::backdrop {
@@ -748,6 +764,7 @@
 
   .episode-pickup-panel {
     max-height: calc(100svh - 16px);
+    max-height: calc(100dvh - 16px);
     padding: 60px 16px max(20px, env(safe-area-inset-bottom));
     border-radius: 24px;
   }

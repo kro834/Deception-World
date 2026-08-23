@@ -281,6 +281,16 @@ function ZeusButton({
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
 
+  const getViewport = useCallback(() => {
+    const viewport = window.visualViewport;
+    return {
+      width: Math.max(1, viewport?.width ?? window.innerWidth),
+      height: Math.max(1, viewport?.height ?? window.innerHeight),
+      offsetLeft: viewport?.offsetLeft ?? 0,
+      offsetTop: viewport?.offsetTop ?? 0,
+    };
+  }, []);
+
   const clearHoldTimer = useCallback(() => {
     if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
     holdTimer.current = null;
@@ -290,18 +300,31 @@ function ZeusButton({
     const button = buttonRef.current;
     if (!button) return { x: clientX, y: clientY };
     const rect = button.getBoundingClientRect();
-    const viewportWidth = Math.max(1, window.innerWidth);
-    const viewportHeight = Math.max(1, window.innerHeight);
+    const viewport = getViewport();
+    const computed = window.getComputedStyle(button);
+    const safeInset = (name: string) => {
+      const value = Number.parseFloat(computed.getPropertyValue(name));
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    };
     const safe = 12;
-    const minX = rect.width / 2 + safe;
-    const maxX = Math.max(minX, viewportWidth - rect.width / 2 - safe);
-    const centerX = Math.max(minX, Math.min(maxX, clientX));
-    const centerY = Math.max(
-      rect.height / 2 + safe,
-      Math.min(viewportHeight - rect.height / 2 - safe, clientY),
+    const safeTop = Math.max(safe, safeInset("--zeus-safe-top"));
+    const safeRight = Math.max(safe, safeInset("--zeus-safe-right"));
+    const safeBottom = Math.max(safe, safeInset("--zeus-safe-bottom"));
+    const safeLeft = Math.max(safe, safeInset("--zeus-safe-left"));
+    const minX = viewport.offsetLeft + rect.width / 2 + safeLeft;
+    const maxX = Math.max(
+      minX,
+      viewport.offsetLeft + viewport.width - rect.width / 2 - safeRight,
     );
+    const minY = viewport.offsetTop + rect.height / 2 + safeTop;
+    const maxY = Math.max(
+      minY,
+      viewport.offsetTop + viewport.height - rect.height / 2 - safeBottom,
+    );
+    const centerX = Math.max(minX, Math.min(maxX, clientX));
+    const centerY = Math.max(minY, Math.min(maxY, clientY));
     return { x: centerX, y: centerY };
-  }, []);
+  }, [getViewport]);
 
   const setVisualCenter = useCallback((targetX: number, targetY: number) => {
     const button = buttonRef.current;
@@ -344,18 +367,20 @@ function ZeusButton({
     (next: ZeusButtonPosition) => {
       const button = buttonRef.current;
       if (!button) return next;
-      const viewportWidth = Math.max(1, window.innerWidth);
-      const viewportHeight = Math.max(1, window.innerHeight);
+      const viewport = getViewport();
       const { x: centerX, y: centerY } = clampCenter(
-        next.x * viewportWidth,
-        next.y * viewportHeight,
+        viewport.offsetLeft + next.x * viewport.width,
+        viewport.offsetTop + next.y * viewport.height,
       );
       const actual = setVisualCenter(centerX, centerY);
-      const normalized = { x: actual.x / viewportWidth, y: actual.y / viewportHeight };
+      const normalized = {
+        x: (actual.x - viewport.offsetLeft) / viewport.width,
+        y: (actual.y - viewport.offsetTop) / viewport.height,
+      };
       pendingPosition.current = normalized;
       return normalized;
     },
-    [clampCenter, setVisualCenter],
+    [clampCenter, getViewport, setVisualCenter],
   );
 
   useEffect(() => {
@@ -366,8 +391,31 @@ function ZeusButton({
   useEffect(() => {
     const onResize = () => placeButton(pendingPosition.current);
     window.addEventListener("resize", onResize, { passive: true });
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize, { passive: true });
+    window.visualViewport?.addEventListener("resize", onResize, { passive: true });
+    window.visualViewport?.addEventListener("scroll", onResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      window.visualViewport?.removeEventListener("resize", onResize);
+      window.visualViewport?.removeEventListener("scroll", onResize);
+    };
   }, [placeButton]);
+
+  useEffect(() => {
+    const preventHeldTouchScroll = (event: TouchEvent) => {
+      if (held.current && activePointer.current != null && event.cancelable) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("touchmove", preventHeldTouchScroll, {
+      passive: false,
+      capture: true,
+    });
+    return () => {
+      window.removeEventListener("touchmove", preventHeldTouchScroll, { capture: true });
+    };
+  }, []);
 
   useEffect(
     () => () => {
@@ -376,17 +424,60 @@ function ZeusButton({
     [clearHoldTimer],
   );
 
+  /* Pointer capture is not guaranteed in Samsung Internet or embedded
+     WebViews. If the finger leaves the button, terminate the pending long
+     press at the window boundary so the document-wide touch guard cannot be
+     stranded. Normal pointerup reaches the React handler first and makes this
+     fallback a no-op. */
+  useEffect(() => {
+    const cancelDanglingPointer = (event?: PointerEvent) => {
+      if (
+        activePointer.current == null ||
+        (event && event.pointerId !== activePointer.current)
+      )
+        return;
+      const button = buttonRef.current;
+      const pointerId = activePointer.current;
+      clearHoldTimer();
+      activePointer.current = null;
+      held.current = false;
+      moved.current = true;
+      if (button) {
+        button.dataset.dragging = "false";
+        button.setAttribute("aria-grabbed", "false");
+        try {
+          if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
+        } catch {
+          /* Native gesture takeover already released capture. */
+        }
+      }
+    };
+    const cancelOnBlur = () => cancelDanglingPointer();
+    window.addEventListener("pointerup", cancelDanglingPointer);
+    window.addEventListener("pointercancel", cancelDanglingPointer);
+    window.addEventListener("blur", cancelOnBlur);
+    window.addEventListener("pagehide", cancelOnBlur);
+    return () => {
+      window.removeEventListener("pointerup", cancelDanglingPointer);
+      window.removeEventListener("pointercancel", cancelDanglingPointer);
+      window.removeEventListener("blur", cancelOnBlur);
+      window.removeEventListener("pagehide", cancelOnBlur);
+    };
+  });
+
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
     if (!button) return;
-    const viewportWidth = Math.max(1, window.innerWidth);
-    const viewportHeight = Math.max(1, window.innerHeight);
+    const viewport = getViewport();
     const { x: centerX, y: centerY } = clampCenter(
       clientX - grabOffset.current.x,
       clientY - grabOffset.current.y,
     );
     const actual = setVisualCenter(centerX, centerY);
-    pendingPosition.current = { x: actual.x / viewportWidth, y: actual.y / viewportHeight };
+    pendingPosition.current = {
+      x: (actual.x - viewport.offsetLeft) / viewport.width,
+      y: (actual.y - viewport.offsetTop) / viewport.height,
+    };
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
@@ -470,6 +561,14 @@ function ZeusButton({
           if (distance > MOVE_TOLERANCE) {
             moved.current = true;
             clearHoldTimer();
+            activePointer.current = null;
+            try {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                event.currentTarget.releasePointerCapture(event.pointerId);
+              }
+            } catch {
+              /* Native scrolling may already have released capture. */
+            }
           }
           return;
         }

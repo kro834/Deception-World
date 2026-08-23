@@ -15,11 +15,13 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20260822-r35/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20260822-r35/);
-  assert.match(route, /<iframe\s+key=\{archive\}/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20260823-r39/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260823-r39/);
+  assert.match(route, /<iframe[\s\S]*?key=\{archive\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === archive\) return/);
+  assert.doesNotMatch(route, /setTimeout\(\(\) => setLoaded\(true\), 1800\)/);
+  assert.match(route, /saga-archive:ready/);
 });
 
 test("embedded archives externalize base64 images and load the mobile stability layer", () => {
@@ -30,8 +32,10 @@ test("embedded archives externalize base64 images and load the mobile stability 
     assert.match(html, /data-embedded-archive="true"/);
     assert.match(html, /data-archive-kind="(?:saga|realm)"/);
     assert.match(html, /archive-mobile-stability\.css/);
-    assert.match(html, /archive-mobile-stability\.css\?v=20260822-r35/);
-    assert.match(html, /archive-scroll-stability\.js\?v=20260822-r35/);
+    assert.match(html, /archive-mobile-stability\.css\?v=20260823-r37/);
+    assert.match(html, /archive-scroll-stability\.js\?v=20260823-r37/);
+    assert.match(html, /data-archive-ready-signal/);
+    assert.match(html, /saga-archive:ready/);
     assert.ok(statSync(file).size < 1_000_000, `${file.pathname} should stay below 1 MB`);
 
     for (const match of html.matchAll(/\/archive-media\/([^"')\s]+)/g)) {
@@ -57,6 +61,9 @@ test("embedded archives use one root scroller and recover stale locks throughout
   assert.match(mobileStyles, /#edition-panel-realm\.saga-booting[\s\S]*?overflow-y: visible/);
   assert.match(mobileStyles, /data-archive-kind="saga"[\s\S]*?overflow-y: scroll/);
   assert.match(mobileStyles, /data-archive-kind="realm"[\s\S]*?overflow-y: scroll/);
+  assert.match(mobileStyles, /\.compare-chip-slider[\s\S]*?touch-action: pan-x pan-y pinch-zoom !important/);
+  assert.match(mobileStyles, /\.archive-hero,[\s\S]*?\.hero-grid,[\s\S]*?min-width: 0/);
+  assert.match(mobileStyles, /\.archive-hero \{\s*grid-template-columns: minmax\(0, 1fr\) !important/);
   assert.match(route, /scrolling="yes"/);
   assert.match(scrollStability, /releaseStaleScrollLock/);
   assert.match(scrollStability, /forceResetTransientUi/);
@@ -66,6 +73,7 @@ test("embedded archives use one root scroller and recover stale locks throughout
   assert.match(scrollStability, /is-selector-sheet-closing[\s\S]*?420/);
   assert.match(scrollStability, /document\.documentElement\.style\.removeProperty\(property\)/);
   assert.match(route, /contentWindow\?\.postMessage\([\s\S]*?saga-archive:close-transients/);
+  assert.match(scrollStability, /saga-archive:ready/);
 });
 
 test("production builds regenerate embedded archives from their standalone sources", () => {

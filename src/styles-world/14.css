@@ -70,7 +70,14 @@
   .poster-dialog-close,
   .dante-dialog-close,
   .rider-nightmare-dialog-close,
-  .rider-nightmare-pickup-button {
+      .rider-nightmare-pickup-button,
+      .side-panel,
+      .side-panel-scrim,
+      .side-panel-trigger,
+      .side-panel-close,
+      .side-panel-links a,
+      .episode-pickup-plus,
+      .ios-slide-open {
     background-color: rgba(13, 22, 34, 0.96);
   }
 }
@@ -449,4 +456,3 @@
   min-width: 0;
   animation: riderArchiveCopyIn 0.9s 0.14s cubic-bezier(0.2, 0.75, 0.16, 1) both;
 }
-

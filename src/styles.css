@@ -156,8 +156,8 @@
    it. Other, scrollable rails retain the shared `pan-y` behavior. */
 html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs,
 html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
-  touch-action: none;
-  -ms-touch-action: none;
+  touch-action: pan-y pinch-zoom;
+  -ms-touch-action: pan-y;
   overscroll-behavior: contain;
 }
 
@@ -278,6 +278,19 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: manipulation;
+  }
+
+  /* Routed long-form pages can paint before their code-split stylesheet has
+     finished evaluating. Promote the document scroller from the first DOM
+     frame so iOS does not latch the initial gesture to the title screen's
+     overflow lock. */
+  body:has(.site-shell, .manager-page, .rider-archive-page) {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y pinch-zoom;
   }
 
   button:not(:disabled),
@@ -1070,12 +1083,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   transition: opacity 0.25s ease 0.12s, color 160ms ease, border-color 160ms ease, background 160ms ease, transform 0.25s ease 0.12s;
 }
 
-.cine-skip:hover {
-  border-color: rgb(159 212 255 / 0.72);
-  color: #fff;
-  background: rgb(10 18 30 / 0.9);
-}
-
 .cine-skip:focus-visible {
   outline: 2px solid var(--color-ice);
   outline-offset: 3px;
@@ -1176,14 +1183,26 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   z-index: 1;
 }
 
-.cine-btn:hover {
-  border-color: rgb(240 215 138 / 0.7);
-  color: #fff8e6;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.65),
-    inset 0 -1px 0 rgb(212 176 86 / 0.28),
-    0 14px 34px rgb(0 0 0 / 0.42),
-    0 0 24px rgb(212 176 86 / 0.18);
+@media (hover: hover) and (pointer: fine) {
+  .cine-skip:hover {
+    border-color: rgb(159 212 255 / 0.72);
+    color: #fff;
+    background: rgb(10 18 30 / 0.9);
+  }
+
+  .cine-btn:hover {
+    border-color: rgb(240 215 138 / 0.7);
+    color: #fff8e6;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.65),
+      inset 0 -1px 0 rgb(212 176 86 / 0.28),
+      0 14px 34px rgb(0 0 0 / 0.42),
+      0 0 24px rgb(212 176 86 / 0.18);
+  }
+
+  .cine-ghost:hover {
+    color: var(--color-ice);
+  }
 }
 
 .cine-btn:active {
@@ -1203,6 +1222,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   color: rgb(232 238 248 / 0.55);
   background: transparent;
   border: none;
+  min-width: 44px;
   min-height: 44px;
   padding: 0.4rem 0.7rem;
   touch-action: manipulation;
@@ -1214,10 +1234,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-ghost:disabled {
   cursor: default;
   pointer-events: none;
-}
-
-.cine-ghost:hover {
-  color: var(--color-ice);
 }
 
 .cine-enter-hint {
@@ -1944,6 +1960,7 @@ html[data-rail-lock] body {
   width: 100%;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   overflow: hidden;
   background: #020207;
   overscroll-behavior: none;
@@ -1964,7 +1981,7 @@ html[data-rail-lock] body {
   .form-archive-page,
   .form-archive-page iframe {
     max-width: 100vw;
-    max-height: 100svh;
+    max-height: 100dvh;
   }
 }
 
@@ -2040,6 +2057,10 @@ html[data-rail-lock] body {
 
 .zeus-button {
   --zeus-button-size: clamp(84px, 8.8vw, 122px);
+  --zeus-safe-top: env(safe-area-inset-top, 0px);
+  --zeus-safe-right: env(safe-area-inset-right, 0px);
+  --zeus-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --zeus-safe-left: env(safe-area-inset-left, 0px);
   position: fixed;
   z-index: 2147483647;
   top: 82dvh;
@@ -2063,7 +2084,7 @@ html[data-rail-lock] body {
   transform: translate3d(-50%, -50%, 0) scale(1);
   transform-origin: center;
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y pinch-zoom;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;

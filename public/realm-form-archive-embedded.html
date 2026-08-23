@@ -9530,8 +9530,8 @@ th {
   .edition-panel-realm { display: block !important; }
 </style>
 <link rel="stylesheet" href="/realm-archive-update.css?v=20260822-r34">
-<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r35">
-<script src="/archive-scroll-stability.js?v=20260822-r35" defer></script>
+<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r37">
+<script src="/archive-scroll-stability.js?v=20260823-r37" defer></script>
 </head>
 <body>
   <input class="edition-choice" type="radio" name="edition-choice" id="edition-choice-saga" value="saga">
@@ -9668,7 +9668,26 @@ th {
     updateStatus();
   });
 })()</script>
-<script src="/realm-archive-motion.js?v=20260822-r34" defer></script>
+<script src="/realm-archive-motion.js?v=20260823-r40" defer></script>
 <script src="/realm-archive-update.js?v=20260822-r34" defer></script>
+<script data-archive-ready-signal>
+(() => {
+  const announceReady = () => {
+    document.documentElement.dataset.archiveReadySignal = "scheduled";
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      window.parent.postMessage({
+        type: "saga-archive:ready",
+        kind: document.documentElement.dataset.archiveKind
+      }, "*");
+      document.documentElement.dataset.archiveReadySignal = "sent";
+    }));
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", announceReady, { once: true });
+  } else {
+    announceReady();
+  }
+})();
+</script>
 </body>
 </html>

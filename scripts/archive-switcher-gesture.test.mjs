@@ -25,10 +25,14 @@ test("form archive uses the shared Liquid Glass rail gesture", () => {
   }
 });
 
-test("Android keeps the archive gesture on the rail and tolerates capture handoff", () => {
+test("Android keeps vertical page panning available until the archive rail is held", () => {
   assert.match(
     styles,
-    /html\[data-android-renderer\] \.form-archive-switcher\.liquid-swipe-tabs[\s\S]*?touch-action: none;/,
+    /html\[data-android-renderer\] \.form-archive-switcher\.liquid-swipe-tabs[^}]*touch-action: pan-y pinch-zoom;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /html\[data-android-renderer\] \.form-archive-switcher\.liquid-swipe-tabs[^}]*touch-action: none;/,
   );
   assert.match(liquidRail, /try \{ root\.setPointerCapture\(gesture\.pointerId\); \} catch/);
   assert.match(liquidRail, /if \(e\.target === root && gesture\) cancel\(\);/);

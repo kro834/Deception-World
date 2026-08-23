@@ -38,9 +38,11 @@
   object-fit: contain;
 }
 
-.rider-archive-form-gallery figure:hover img {
-  filter: saturate(1.08) contrast(1.03);
-  transform: scale(1.025);
+@media (hover: hover) and (pointer: fine) {
+  .rider-archive-form-gallery figure:hover img {
+    filter: saturate(1.08) contrast(1.03);
+    transform: scale(1.025);
+  }
 }
 
 .rider-archive-form-gallery figcaption {
@@ -90,10 +92,12 @@
   transition: border-color 0.35s ease, background 0.35s ease, transform 0.35s ease;
 }
 
-.rider-archive-record-grid > div:hover {
-  border-color: color-mix(in srgb, var(--archive-accent) 28%, transparent);
-  background: color-mix(in srgb, var(--archive-accent) 3%, transparent);
-  transform: translateY(-3px);
+@media (hover: hover) and (pointer: fine) {
+  .rider-archive-record-grid > div:hover {
+    border-color: color-mix(in srgb, var(--archive-accent) 28%, transparent);
+    background: color-mix(in srgb, var(--archive-accent) 3%, transparent);
+    transform: translateY(-3px);
+  }
 }
 
 .rider-archive-record-grid > div > span {
@@ -202,9 +206,14 @@
 .rider-archive-pagination > a:first-child > span:last-child { left: 26px; }
 .rider-archive-pagination > a:last-child > span:last-child { right: 26px; }
 
-.rider-archive-pagination > a:hover,
 .rider-archive-pagination > a:focus-visible {
   background: color-mix(in srgb, var(--archive-accent) 6%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rider-archive-pagination > a:hover {
+    background: color-mix(in srgb, var(--archive-accent) 6%, transparent);
+  }
 }
 
 .rider-archive-pagination-index {

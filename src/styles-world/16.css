@@ -231,9 +231,11 @@
   object-fit: contain;
 }
 
-.rider-archive-civilian:hover .rider-archive-civilian-visual > img {
-  filter: saturate(1.02) contrast(1.05);
-  transform: scale(1.025);
+@media (hover: hover) and (pointer: fine) {
+  .rider-archive-civilian:hover .rider-archive-civilian-visual > img {
+    filter: saturate(1.02) contrast(1.05);
+    transform: scale(1.025);
+  }
 }
 
 .rider-archive-civilian-shade {
@@ -441,8 +443,10 @@
   transition: transform 1.2s cubic-bezier(0.2, 0.75, 0.16, 1);
 }
 
-.rider-archive-form:hover::after {
-  transform: scale(1.12) rotate(12deg);
+@media (hover: hover) and (pointer: fine) {
+  .rider-archive-form:hover::after {
+    transform: scale(1.12) rotate(12deg);
+  }
 }
 
 .rider-archive-form-heading {
@@ -529,4 +533,3 @@
   border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
   border-left: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
 }
-

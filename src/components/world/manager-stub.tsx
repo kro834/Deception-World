@@ -622,7 +622,7 @@ export const ZEUS: Profile = {
   numeral: "I",
   name: "ゼウス",
   title: "主権を継いだ六詠第一位",
-  image: "/manager-zeus-detail.jpeg",
+  image: "/manager-zeus-detail.jpeg?v=20260823-2",
   pos: "50% 42%",
   accent: "#e6c58b",
   sovereign: true,

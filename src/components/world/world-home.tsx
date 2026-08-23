@@ -346,6 +346,7 @@ export function WorldHome() {
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
   const riderRail = useRef<HTMLDivElement>(null);
@@ -383,13 +384,17 @@ export function WorldHome() {
     const off2 = bindRail(columnRail.current, setColumnTab);
     const off3 = bindRail(riderRail.current, selectRider);
     const off4 = bindRail(pickupRail.current, setColumnTab);
-    const id = requestAnimationFrame(() => bootLiquidGlass(document));
+    let disposeGlass: (() => void) | undefined;
+    const id = requestAnimationFrame(() => {
+      disposeGlass = bootLiquidGlass(document);
+    });
     return () => {
       off1();
       off2();
       off3();
       off4();
       cancelAnimationFrame(id);
+      disposeGlass?.();
     };
   }, [selectRider]);
 
@@ -675,7 +680,7 @@ export function WorldHome() {
 
   return (
     <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
-      <SideMenuLayer />
+      <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb orb-a" />
@@ -701,7 +706,7 @@ export function WorldHome() {
           <a href="#records">RECORDS</a>
         </nav>
         <div className="topbar-actions">
-          <SideMenuTrigger />
+          <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
       <section className="hero" id="top" data-performance-region>

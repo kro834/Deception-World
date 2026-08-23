@@ -1012,7 +1012,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (event.pointerType === 'mouse' || event.isPrimary === false) return;
       didSwipe = false;
       pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
-      trigger.setPointerCapture?.(event.pointerId);
+      try { trigger.setPointerCapture?.(event.pointerId); }
+      catch (_) { /* WebView capture handoff: window cleanup still clears state. */ }
     });
     trigger.addEventListener('pointerup', event => {
       if (!pointerStart || pointerStart.id !== event.pointerId) return;

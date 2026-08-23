@@ -326,7 +326,8 @@ function getRenderer() {
 
 // ── Swipe rail ───────────────────────────────────────────────────────────────
 function initRail(root) {
-  if (!root || root.dataset.liquidBound === "true") return;
+  if (!root) return function () {};
+  if (root.dataset.liquidBound === "true") return root.__liquidDispose || function () {};
   root.dataset.liquidBound = "true";
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
@@ -424,7 +425,16 @@ function initRail(root) {
     delete document.documentElement.dataset.railLock;
     window.removeEventListener('touchmove', blockPageScroll, { capture: true });
   };
-  const cancel = () => { if (!gesture) return; gesture = null; reset(); unlockPage(); settle(active); };
+  const cancel = () => {
+    const wasActive = Boolean(gesture);
+    gesture = null;
+    pending = null;
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    reset();
+    unlockPage();
+    if (wasActive) settle(active);
+  };
 
   const process = () => {
     moveFrame = null;
@@ -533,7 +543,7 @@ function initRail(root) {
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
       lockPage();
-      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
+      try { root.setPointerCapture(gesture.pointerId); } catch { /* Native gesture takeover is safe. */ }
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');
     }, 105);
   });
@@ -560,7 +570,7 @@ function initRail(root) {
       lockPage();
       root.dataset.liquidDragging = 'true'; root.dataset.liquidHeld = 'true';
       if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
-      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
+      try { root.setPointerCapture(gesture.pointerId); } catch { /* Native gesture takeover is safe. */ }
     }
     e.preventDefault();
     pending = { x: e.clientX, y: e.clientY, t: e.timeStamp };
@@ -604,6 +614,19 @@ function initRail(root) {
   });
   root.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  // Pointer capture is not guaranteed in Samsung Internet and embedded
+  // Android WebViews. Finish/cancel at the window boundary as well so a lift
+  // outside the rail, app backgrounding or route transition can never leave
+  // the document-wide touchmove lock behind.
+  window.addEventListener('pointerup', finish, true);
+  window.addEventListener('pointercancel', cancel, true);
+  window.addEventListener('blur', cancel);
+  window.addEventListener('pagehide', cancel);
+  const handleVisibilityChange = () => {
+    if (document.hidden) cancel();
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
   let swallowClick = false;
   tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
     if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
@@ -635,12 +658,32 @@ function initRail(root) {
     settle(active);
   };
   let ro = 0;
-  new ResizeObserver(() => {
+  const resizeObserver = new ResizeObserver(() => {
     if (ro) return;
     ro = requestAnimationFrame(() => { ro = 0; relayout(); });
-  }).observe(root);
+  });
+  resizeObserver.observe(root);
   root.addEventListener('liquidrelayout', relayout);
   requestAnimationFrame(() => settle(active));
+
+  const dispose = () => {
+    cancel();
+    clearTimeout(holdTimer);
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    if (ro) cancelAnimationFrame(ro);
+    ro = 0;
+    resizeObserver.disconnect();
+    window.removeEventListener('pointerup', finish, true);
+    window.removeEventListener('pointercancel', cancel, true);
+    window.removeEventListener('blur', cancel);
+    window.removeEventListener('pagehide', cancel);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (getRenderer().isActive(root)) getRenderer().detach(root);
+    root.__liquidDispose = null;
+  };
+  root.__liquidDispose = dispose;
+  return dispose;
 }
 
 // ── Standalone glass pressable ───────────────────────────────────────────────
@@ -699,6 +742,10 @@ function initPanel() {
   const panel = document.querySelector('.side-panel');
   const scrim = document.querySelector('.side-panel-scrim');
   if (!trigger || !panel || !scrim) return;
+  // React owns the open state on routed pages. Binding this legacy fallback as
+  // well would mutate data-open behind React's back, so any unrelated render
+  // could close the panel while leaving aria-expanded and the body lock stale.
+  if (panel.dataset.reactControlled === 'true') return;
   if (panel.dataset.liquidBound === 'true') return;
   panel.dataset.liquidBound = 'true';
   const closeBtn = panel.querySelector('.side-panel-close');
@@ -762,11 +809,16 @@ function safely(label, fn) {
 }
 
 export function bootLiquidGlass(scope) {
-  if (typeof document === "undefined") return;
+  if (typeof document === "undefined") return function () {};
   const root = scope || document;
   let railsOk = 0;
+  const disposers = [];
   root.querySelectorAll('.liquid-swipe-tabs:not(.liquid-glass-action)').forEach(function (el) {
-    if (safely('rail', function () { initRail(el); })) railsOk++;
+    let dispose;
+    if (safely('rail', function () { dispose = initRail(el); })) {
+      railsOk++;
+      if (typeof dispose === 'function') disposers.push(dispose);
+    }
   });
   root.querySelectorAll('.liquid-glass-action').forEach(function (el) {
     safely('action', function () { initAction(el); });
@@ -782,6 +834,9 @@ export function bootLiquidGlass(scope) {
     status.textContent = 'JS: OK / rails: ' + railsOk + ' / WebGL: ' + (webglOk ? 'ON' : 'OFF (CSSフォールバック)');
     status.dataset.state = railsOk > 0 ? 'ok' : 'bad';
   }
+  return function () {
+    disposers.forEach(function (dispose) { dispose(); });
+  };
 }
 
 export { initRail, initAction };

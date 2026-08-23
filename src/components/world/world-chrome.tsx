@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
@@ -47,6 +47,8 @@ export function SideMenuLayer({
   onOpenChange?: (open: boolean) => void;
 } = {}) {
   const panelRef = useRef<HTMLElement>(null);
+  const announcementRef = useRef<HTMLDialogElement>(null);
+  const [announcementOpen, setAnnouncementOpen] = useState(false);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
   const close = () => onOpenChange?.(false);
@@ -55,7 +57,8 @@ export function SideMenuLayer({
     if (!controlled || !isOpen) return;
     const panel = panelRef.current;
     if (!panel) return;
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const frame = window.requestAnimationFrame(() => {
@@ -67,6 +70,49 @@ export function SideMenuLayer({
       previousFocus?.focus({ preventScroll: true });
     };
   }, [controlled, isOpen]);
+
+  useEffect(() => {
+    const dialog = announcementRef.current;
+    if (!dialog || !announcementOpen) return;
+
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        setAnnouncementOpen(false);
+        return;
+      }
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.scrollTop = 0;
+    const frame = window.requestAnimationFrame(() => {
+      dialog
+        .querySelector<HTMLButtonElement>(".site-announcement-close")
+        ?.focus({ preventScroll: true });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (dialog.open) dialog.close();
+      document.body.style.overflow = previousOverflow;
+      document
+        .querySelector<HTMLButtonElement>(".side-panel-trigger")
+        ?.focus({ preventScroll: true });
+    };
+  }, [announcementOpen]);
+
+  const openAnnouncement = () => {
+    if (controlled) close();
+    else panelRef.current?.querySelector<HTMLButtonElement>(".side-panel-close")?.click();
+    setAnnouncementOpen(true);
+  };
+
+  const closeAnnouncement = () => setAnnouncementOpen(false);
+
+  const onAnnouncementBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target === event.currentTarget) closeAnnouncement();
+  };
 
   const onPanelKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!controlled || !isOpen) return;
@@ -80,7 +126,9 @@ export function SideMenuLayer({
     const panel = panelRef.current;
     if (!panel) return;
     const focusable = Array.from(
-      panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+      panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
     ).filter((item) => item.tabIndex >= 0 && item.getAttribute("aria-hidden") !== "true");
     if (!focusable.length) {
       event.preventDefault();
@@ -89,10 +137,16 @@ export function SideMenuLayer({
     }
     const first = focusable[0];
     const last = focusable.at(-1)!;
-    if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+    if (
+      event.shiftKey &&
+      (document.activeElement === first || !panel.contains(document.activeElement))
+    ) {
       event.preventDefault();
       last.focus({ preventScroll: true });
-    } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+    } else if (
+      !event.shiftKey &&
+      (document.activeElement === last || !panel.contains(document.activeElement))
+    ) {
       event.preventDefault();
       first.focus({ preventScroll: true });
     }
@@ -110,6 +164,7 @@ export function SideMenuLayer({
         ref={panelRef}
         id="site-side-panel"
         className="side-panel"
+        data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
         aria-modal={true}
@@ -169,11 +224,26 @@ export function SideMenuLayer({
               </>
             ) : (
               <>
-                <a href="#top"><span>トップ</span><i>TOP</i></a>
-                <a href="#story"><span>ストーリー</span><i>STORY</i></a>
-                <a href="#riders"><span>七人のライダー</span><i>RIDERS</i></a>
-                <a href="#records"><span>レコード</span><i>RECORDS</i></a>
-                <a href="#manager-archive"><span>六詠</span><i>ARCHIVE</i></a>
+                <a href="#top" onClick={controlled ? close : undefined}>
+                  <span>トップ</span>
+                  <i>TOP</i>
+                </a>
+                <a href="#story" onClick={controlled ? close : undefined}>
+                  <span>ストーリー</span>
+                  <i>STORY</i>
+                </a>
+                <a href="#riders" onClick={controlled ? close : undefined}>
+                  <span>七人のライダー</span>
+                  <i>RIDERS</i>
+                </a>
+                <a href="#records" onClick={controlled ? close : undefined}>
+                  <span>レコード</span>
+                  <i>RECORDS</i>
+                </a>
+                <a href="#manager-archive" onClick={controlled ? close : undefined}>
+                  <span>六詠</span>
+                  <i>ARCHIVE</i>
+                </a>
               </>
             )}
           </div>
@@ -193,6 +263,23 @@ export function SideMenuLayer({
             </div>
           </div>
         ) : null}
+        <div className="side-panel-group">
+          <p>INFORMATION</p>
+          <div className="side-panel-links">
+            <button
+              className="side-panel-announcement-trigger ios26-glass"
+              type="button"
+              data-liquid-pointer="true"
+              aria-haspopup="dialog"
+              aria-controls="site-announcement-dialog"
+              onClick={openAnnouncement}
+            >
+              <LiquidPointerGlow />
+              <span>お知らせ</span>
+              <i>NOTICE</i>
+            </button>
+          </div>
+        </div>
         <div className="side-panel-group">
           <p>SYSTEM</p>
           <div className="side-panel-links">
@@ -215,6 +302,55 @@ export function SideMenuLayer({
           </div>
         </div>
       </aside>
+      <dialog
+        ref={announcementRef}
+        id="site-announcement-dialog"
+        className="site-announcement-dialog"
+        aria-labelledby="site-announcement-title"
+        onClick={onAnnouncementBackdrop}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeAnnouncement();
+        }}
+        onClose={() => setAnnouncementOpen(false)}
+      >
+        <article className="site-announcement-card">
+          <span className="site-announcement-aura" aria-hidden="true" />
+          <button
+            className="site-announcement-close ios26-glass"
+            type="button"
+            data-liquid-pointer="true"
+            aria-label="お知らせを閉じる"
+            onClick={closeAnnouncement}
+          >
+            <LiquidPointerGlow />
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path
+                d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+          <figure className="site-announcement-visual">
+            {announcementOpen ? (
+              <img
+                src="/announcement-who-supreme.jpeg"
+                alt="青白く発光する仮面とEX. Beyond imagination.の文字"
+                width="960"
+                height="1441"
+                decoding="async"
+              />
+            ) : null}
+          </figure>
+          <div className="site-announcement-copy">
+            <p>NOTICE / TRANSMISSION 01</p>
+            <h2 id="site-announcement-title">Who Supreme?</h2>
+          </div>
+        </article>
+      </dialog>
     </>
   );
 }

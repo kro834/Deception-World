@@ -7,9 +7,9 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
-  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260822-r35">';
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r37">';
 const stabilityScript =
-  '<script src="/archive-scroll-stability.js?v=20260822-r35" defer></script>';
+  '<script src="/archive-scroll-stability.js?v=20260823-r37" defer></script>';
 const archives = [
   {
     kind: "saga",
@@ -62,9 +62,31 @@ for (const archive of archives) {
   const withScrollStability = withMobileStyles.includes(stabilityScript)
     ? withMobileStyles
     : withMobileStyles.replace("</head>", `${stabilityScript}\n</head>`);
+  const readySignal = `<script data-archive-ready-signal>
+(() => {
+  const announceReady = () => {
+    document.documentElement.dataset.archiveReadySignal = "scheduled";
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      window.parent.postMessage({
+        type: "saga-archive:ready",
+        kind: document.documentElement.dataset.archiveKind
+      }, "*");
+      document.documentElement.dataset.archiveReadySignal = "sent";
+    }));
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", announceReady, { once: true });
+  } else {
+    announceReady();
+  }
+})();
+</script>`;
+  const withReadySignal = withScrollStability.includes("data-archive-ready-signal")
+    ? withScrollStability
+    : withScrollStability.replace("</body>", `${readySignal}\n</body>`);
 
-  writeFileSync(archive.output, withScrollStability);
+  writeFileSync(archive.output, withReadySignal);
   console.log(
-    `[embedded-archive] ${archive.kind}: externalized ${imageCount} image references; ${Buffer.byteLength(withScrollStability)} byte HTML`,
+    `[embedded-archive] ${archive.kind}: externalized ${imageCount} image references; ${Buffer.byteLength(withReadySignal)} byte HTML`,
   );
 }

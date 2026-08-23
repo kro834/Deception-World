@@ -353,6 +353,8 @@ html[data-page-scrolled] .rider-archive-topbar {
   display: inline-flex;
   align-items: center;
   width: max-content;
+  min-width: 44px;
+  min-height: 44px;
   gap: 12px;
 }
 
@@ -410,6 +412,9 @@ html[data-page-scrolled] .rider-archive-topbar {
 
 .topbar nav a {
   position: relative;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   padding: 12px 0;
   color: rgba(244, 246, 251, 0.64);
   font-size: 9px;
@@ -430,12 +435,14 @@ html[data-page-scrolled] .rider-archive-topbar {
   transition: transform 0.25s;
 }
 
-.topbar nav a:hover {
-  color: #fff;
-}
+@media (hover: hover) and (pointer: fine) {
+  .topbar nav a:hover {
+    color: #fff;
+  }
 
-.topbar nav a:hover::after {
-  transform: scaleX(1);
+  .topbar nav a:hover::after {
+    transform: scaleX(1);
+  }
 }
 
 .motion-toggle {

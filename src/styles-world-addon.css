@@ -254,9 +254,9 @@ html[data-rail-lock] .world-column-dialog-card {
 /* The compact selector must not grow when a title wraps. Its grid cells and
    glass selection lens now share one invariant height for every column. */
 .world-column-tabs.liquid-swipe-tabs:not(.world-column-dialog-tabs) > button[role="tab"] {
-  block-size: 66px;
-  min-block-size: 66px;
-  max-block-size: 66px;
+  block-size: 70px;
+  min-block-size: 70px;
+  max-block-size: 70px;
   box-sizing: border-box;
 }
 
@@ -1272,8 +1272,16 @@ br.tab-br { display: none; }
 }
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .ios-slide-open {
+    border-color: rgba(202, 231, 250, 0.28);
+    background: #0b111b;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 26px rgba(0, 0, 0, 0.34);
+  }
+
   .ios-slide-open .ios-slide-open-thumb {
-    background: color-mix(in srgb, var(--slide-accent) 48%, #101824);
+    border-color: rgba(211, 238, 255, 0.5);
+    background: #315c70;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 6px 18px rgba(0, 0, 0, 0.4);
   }
 }
 

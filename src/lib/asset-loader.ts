@@ -28,7 +28,7 @@ export const WORLD_ENTER_ASSETS = [
 ] as const;
 
 export const MANAGER_ASSETS = {
-  zeus: ["/manager-zeus-detail.jpeg"],
+  zeus: ["/manager-zeus-detail.jpeg?v=20260823-2"],
   lejas: ["/manager-lejas.jpeg"],
   opus: ["/manager-opus.jpeg"],
   "rex-loi": ["/manager-rex-loi.jpeg"],

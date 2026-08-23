@@ -56,6 +56,19 @@ img {
   max-width: 100%;
 }
 
+/* Horizontal archives must not become vertical dead zones. Android Chrome
+   applies touch-action before script axis detection, so pan-x alone prevents
+   the root document from ever receiving a vertical swipe that starts here. */
+[id$="saga-forms-performance-v5"] :is(
+  .compare-chip-slider,
+  .files-quick-scroll-v14,
+  .table-responsive,
+  .progression
+) {
+  touch-action: pan-x pan-y pinch-zoom !important;
+  overscroll-behavior-x: contain;
+}
+
 @supports (content-visibility: auto) {
   [id$="saga-forms-performance-v5"] :is(.section:not(.selector-console):not(.detail-section), .archive-footer) {
     content-visibility: auto;
@@ -140,6 +153,10 @@ img {
   }
 
   [id$="saga-forms-performance-v5"] :is(
+    .archive-hero,
+    .hero-topline,
+    .hero-grid,
+    .archive-nav,
     .hero-copy,
     .selector-title,
     .selector-heading,
@@ -152,6 +169,10 @@ img {
     min-width: 0;
   }
 
+  [id$="saga-forms-performance-v5"] .archive-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
   [id$="saga-forms-performance-v5"] :is(
     .telemetry-name,
     .chip-name,
@@ -160,6 +181,33 @@ img {
     .detail-head h3
   ) {
     overflow-wrap: anywhere;
+  }
+
+  [id$="saga-forms-performance-v5"] .telemetry-state {
+    height: auto !important;
+    min-height: 5.4rem;
+  }
+
+  [id$="saga-forms-performance-v5"] :is(.telemetry-name, .chip-name) {
+    display: block !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    -webkit-line-clamp: unset !important;
+  }
+
+  [id$="saga-forms-performance-v5"] .form-chip {
+    height: auto !important;
+    min-height: 4.5rem !important;
+  }
+
+  [id$="saga-forms-performance-v5"] .solo-cover-caption-v14 {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  [id$="saga-forms-performance-v5"] .solo-cover-caption-v14 strong {
+    font-size: clamp(8px, 2.7vw, 10px);
+    letter-spacing: 0.05em;
   }
 
   [id$="saga-forms-performance-v5"] :is(.form-chip, button, select, input) {
@@ -172,6 +220,18 @@ img {
   }
 }
 
+@media (any-pointer: coarse) {
+  [id$="saga-forms-performance-v5"] :is(
+    .archive-wordmark,
+    .archive-nav a,
+    .selector-collapse,
+    .detail-nav button
+  ) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
 @media (min-width: 621px) and (max-width: 1180px) {
   [id$="saga-forms-performance-v5"] .archive-workspace {
     max-width: 100%;
@@ -180,6 +240,11 @@ img {
   [id$="saga-forms-performance-v5"] .telemetry-name,
   [id$="saga-forms-performance-v5"] .chip-name {
     overflow-wrap: anywhere;
+  }
+
+  [id$="saga-forms-performance-v5"] .form-chip {
+    height: auto !important;
+    min-height: 5rem !important;
   }
 }
 

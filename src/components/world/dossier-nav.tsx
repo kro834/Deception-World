@@ -11,7 +11,7 @@ export type DossierLink = {
 };
 
 export const RIKUEI_NAV: DossierLink[] = [
-  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus-detail.jpeg"], kicker: "RIKUEI I" },
+  { id: "I", name: "ゼウス", href: "/managers/zeus", assets: ["/manager-zeus-detail.jpeg?v=20260823-2"], kicker: "RIKUEI I" },
   { id: "II", name: "レックス・ロワ", href: "/managers/rex-loi", assets: ["/manager-rex-loi.jpeg"], kicker: "RIKUEI II" },
   { id: "III", name: "シュザ", href: "/managers/shuza", assets: ["/manager-shuza.jpeg"], kicker: "RIKUEI III" },
   { id: "IV", name: "レジャス", href: "/managers/lejas", assets: ["/manager-lejas.jpeg"], kicker: "RIKUEI IV" },

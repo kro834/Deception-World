@@ -10,6 +10,16 @@
   let closeFallback = 0;
 
   const archiveRoots = () => [...document.querySelectorAll(rootSelector)];
+  const notifyReady = () => {
+    if (window.parent === window) return;
+    window.parent.postMessage(
+      {
+        type: "saga-archive:ready",
+        kind: document.documentElement.dataset.archiveKind,
+      },
+      "*",
+    );
+  };
 
   const selectorState = (root) => {
     const selector = root?.querySelector('[id$="form-selector"]');
@@ -116,12 +126,17 @@
 
   forceResetTransientUi();
   observeArchiveState();
+  window.requestAnimationFrame(notifyReady);
   [120, 480, 1200].forEach((delay) => window.setTimeout(scheduleRecovery, delay));
 
   window.addEventListener("pageshow", forceResetTransientUi);
   window.addEventListener("message", (event) => {
-    if (event.data?.type !== "saga-archive:close-transients") return;
-    forceResetTransientUi();
+    if (event.data?.type === "saga-archive:close-transients") {
+      forceResetTransientUi();
+      window.requestAnimationFrame(notifyReady);
+    } else if (event.data?.type === "saga-archive:status-request") {
+      notifyReady();
+    }
   });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) scheduleRecovery();

@@ -21,6 +21,7 @@ export const Route = createFileRoute("/form-archive")({
 });
 
 type ArchiveKind = "saga" | "realm";
+const ARCHIVE_READY_FAILSAFE_MS = 900;
 
 function FormArchive() {
   useWorldMode();
@@ -28,27 +29,44 @@ function FormArchive() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const switcherRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20260822-r35"
-    : "/realm-form-archive-embedded.html?v=20260822-r35";
+    ? "/saga-form-archive-embedded.html?v=20260823-r39"
+    : "/realm-form-archive-embedded.html?v=20260823-r39";
 
   useEffect(() => {
-    // A cached opaque-origin iframe can finish before React observes its load
-    // event on iOS deep links. Never leave the loading veil or switch lock in
-    // place indefinitely when the document is already visible underneath it.
-    const fallback = window.setTimeout(() => setLoaded(true), 1800);
-    return () => window.clearTimeout(fallback);
+    const markArchiveReady = (event: MessageEvent) => {
+      if (event.data?.type !== "saga-archive:ready" || event.data?.kind !== archive) return;
+      setLoaded(true);
+    };
+    window.addEventListener("message", markArchiveReady);
+    // Opaque-origin sandboxed frames can suppress MessageEvent.source on a
+    // small set of WebKit/WebView builds. The child still owns its boot
+    // surface, so release only the outer veil after a short bounded fallback.
+    const failSafe = window.setTimeout(() => setLoaded(true), ARCHIVE_READY_FAILSAFE_MS);
+    return () => {
+      window.removeEventListener("message", markArchiveReady);
+      window.clearTimeout(failSafe);
+    };
   }, [archive]);
 
-  const selectArchive = useCallback((next: ArchiveKind) => {
-    // Let WebKit release the current iframe document before another archive is
-    // requested. Rapid Saga/Realm toggles during onLoad can otherwise overlap
-    // two image-heavy document constructions on iPhone and iPad.
-    if (!loaded || next === archive) return;
-    setLoaded(false);
-    setArchive(next);
-  }, [archive, loaded]);
+  const selectArchive = useCallback(
+    (next: ArchiveKind) => {
+      // Let WebKit release the current iframe document before another archive is
+      // requested. Rapid Saga/Realm toggles during onLoad can otherwise overlap
+      // two image-heavy document constructions on iPhone and iPad.
+      if (!loaded || next === archive) return;
+      setLoaded(false);
+      setArchive(next);
+    },
+    [archive, loaded],
+  );
+
+  useEffect(() => {
+    selectArchiveRef.current = selectArchive;
+  }, [selectArchive]);
 
   useEffect(() => {
     const switcher = switcherRef.current;
@@ -56,13 +74,16 @@ function FormArchive() {
 
     const handleRailSelect = (event: Event) => {
       const index = (event as CustomEvent<{ index?: number }>).detail?.index;
-      selectArchive(index === 1 ? "realm" : "saga");
+      selectArchiveRef.current(index === 1 ? "realm" : "saga");
     };
 
     switcher.addEventListener("railselect", handleRailSelect);
-    initRail(switcher);
-    return () => switcher.removeEventListener("railselect", handleRailSelect);
-  }, [selectArchive]);
+    const disposeRail = initRail(switcher);
+    return () => {
+      switcher.removeEventListener("railselect", handleRailSelect);
+      disposeRail?.();
+    };
+  }, []);
 
   return (
     <main className="form-archive-page" data-archive-kind={archive}>
@@ -73,6 +94,7 @@ function FormArchive() {
           className="form-archive-switcher liquid-swipe-tabs ios26-glass"
           role="tablist"
           aria-busy={!loaded}
+          inert={!loaded ? true : undefined}
           aria-label="フォームアーカイブを切り替え。タップ、長押し、または左右へのスライドで選択できます"
           style={{
             ["--liquid-current-accent" as string]: isSaga
@@ -116,14 +138,23 @@ function FormArchive() {
             <b>レルム</b>
           </button>
         </div>
-        <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} className="form-archive-menu-trigger" />
+        <SideMenuTrigger
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          className="form-archive-menu-trigger"
+        />
       </header>
       <SideMenuLayer context="archive" open={menuOpen} onOpenChange={setMenuOpen} />
-      <div className={`form-archive-frame-status${loaded ? " is-loaded" : ""}`} role="status" aria-live="polite">
+      <div
+        className={`form-archive-frame-status${loaded ? " is-loaded" : ""}`}
+        role="status"
+        aria-live="polite"
+      >
         <i aria-hidden="true" />
         <span>{isSaga ? "SAGA" : "REALM"} ARCHIVE</span>
       </div>
       <iframe
+        ref={frameRef}
         key={archive}
         id="form-archive-frame"
         title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
@@ -140,7 +171,7 @@ function FormArchive() {
             { type: "saga-archive:close-transients" },
             "*",
           );
-          setLoaded(true);
+          window.requestAnimationFrame(() => setLoaded(true));
         }}
       />
     </main>

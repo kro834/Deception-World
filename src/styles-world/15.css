@@ -284,9 +284,11 @@
   transition: transform 0.9s cubic-bezier(0.2, 0.75, 0.16, 1), filter 0.9s ease;
 }
 
-.rider-nightmare-card:hover .rider-nightmare-card-visual > img {
-  filter: saturate(1.06) contrast(1.06);
-  transform: scale(1.025);
+@media (hover: hover) and (pointer: fine) {
+  .rider-nightmare-card:hover .rider-nightmare-card-visual > img {
+    filter: saturate(1.06) contrast(1.06);
+    transform: scale(1.025);
+  }
 }
 
 .rider-nightmare-card-shade {

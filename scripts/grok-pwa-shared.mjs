@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const DEFAULT_APP_NAME = "Grok App";
+export const SITE_APP_NAME = "Deception World";
 export const OG_SERVICE_URL_DEFAULT = "https://og.grok.me";
 export const OG_SITE_REL_PATH = "src/lib/og/site.json";
 
@@ -134,14 +135,18 @@ export function stripInstallParams(url) {
   return rest ? `${path}?${rest}` : path;
 }
 
-export function renderInstallPageHtml(template, { host, url } = {}) {
+export function renderInstallPageHtml(template, { host: _host, url } = {}) {
   return String(template)
-    .replaceAll("{{APP_NAME}}", escapeHtml(appNameFromHost(host)))
+    .replaceAll("{{APP_NAME}}", escapeHtml(SITE_APP_NAME))
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
 export function renderWebManifest(hostHeader) {
-  const name = appNameFromHost(hostHeader);
+  // The publishing host is an opaque deployment slug, not the product name.
+  // Keep appNameFromHost() available for platform utilities, but never expose
+  // that slug as this site's iOS/Android Home Screen identity.
+  void hostHeader;
+  const name = SITE_APP_NAME;
   return JSON.stringify(
     {
       name,
@@ -357,6 +362,7 @@ function insertBeforeHeadClose(html, snippet) {
 }
 
 export function normalizeHeadContext(ctx = {}) {
+  if (typeof ctx === "string") ctx = { appName: ctx };
   const cwd = ctx.cwd ?? process.cwd();
   const site = ctx.site !== undefined ? ctx.site : snapshotOgIdentity(cwd).site;
   const appName = resolveOgTitle(site, ctx.appName ?? DEFAULT_APP_NAME, ctx.host ?? "");
@@ -371,17 +377,38 @@ export function normalizeHeadContext(ctx = {}) {
   };
 }
 
-export function injectGrokPwaHead(html, ctx = {}) {
+export function injectGrokPwaHead(
+  html,
+  ctx = {},
+  legacyProjectId,
+  legacyCreator,
+  legacyCreatorId,
+) {
   if (typeof html !== "string") return html;
-  const { site, projectId, creator, creatorId, host } = normalizeHeadContext(ctx);
+  const context =
+    typeof ctx === "string"
+      ? {
+          appName: ctx,
+          projectId: legacyProjectId,
+          creator: legacyCreator,
+          creatorId: legacyCreatorId,
+        }
+      : ctx;
+  const { site, projectId, creator, creatorId, host } = normalizeHeadContext(context);
   const documentTitle = titleFromDocument(html);
   const appName = resolveOgTitle(
     site,
-    ctx.appName ?? DEFAULT_APP_NAME,
+    context.appName ?? DEFAULT_APP_NAME,
     host,
     documentTitle,
   );
-  let next = stripShareMetaTags(html);
+  // A production caller opts into canonical share metadata by supplying its
+  // request host or a baked site identity. Legacy positional calls only ask
+  // for platform/PWA chrome and must preserve author-provided social tags.
+  const hasExplicitShareIdentity =
+    typeof ctx !== "string" &&
+    Boolean(context.host || context.site !== undefined || context.cwd !== undefined);
+  let next = hasExplicitShareIdentity ? stripShareMetaTags(html) : html;
 
   const missing = grokPwaHeadTags(appName)
     .filter(([key]) => {
@@ -391,10 +418,20 @@ export function injectGrokPwaHead(html, ctx = {}) {
     })
     .map(([, tag]) => tag);
 
-  next = insertAfterHeadOpen(
-    next,
-    grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
-  );
+  if (hasExplicitShareIdentity) {
+    next = insertAfterHeadOpen(
+      next,
+      grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
+    );
+  } else if (
+    !next.includes('name="twitter:card"') &&
+    !next.includes("name='twitter:card'")
+  ) {
+    next = insertAfterHeadOpen(
+      next,
+      '<meta name="twitter:card" content="summary_large_image">',
+    );
+  }
 
   if (!next.includes("/grok-app-builder/extensions.js")) {
     missing.push(...grokExtensionsHeadTags(projectId));

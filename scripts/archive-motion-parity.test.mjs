@@ -26,7 +26,7 @@ test("Realm motion controller is regenerated exactly from Saga's current control
 
 test("Realm archive loads its normalized motion controller in both deliverables", () => {
   for (const html of [realmStandalone, realmEmbedded]) {
-    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20260822-r34" defer><\/script>/);
+    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20260823-r40" defer><\/script>/);
   }
 });
 

@@ -46,6 +46,11 @@
   translate: -50% 0;
 }
 
+.form-archive-toolbar .form-archive-switcher[aria-busy="true"] {
+  pointer-events: none;
+  cursor: wait;
+}
+
 .form-archive-page .form-archive-toolbar .side-panel-trigger.form-archive-menu-trigger {
   position: absolute;
   z-index: 3;

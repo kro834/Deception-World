@@ -44,9 +44,11 @@
   transition: transform 1s cubic-bezier(0.2, 0.72, 0.2, 1), filter 0.7s ease;
 }
 
-.rider-record-visual:hover > img {
-  filter: saturate(1.08) contrast(1.02);
-  transform: scale(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .rider-record-visual:hover > img {
+    filter: saturate(1.08) contrast(1.02);
+    transform: scale(1.05);
+  }
 }
 
 .rider-record-visual figcaption {
@@ -261,9 +263,14 @@
 .manager-pagination > a:first-child > span:last-child { left: 26px; }
 .manager-pagination > a:last-child > span:last-child { right: 26px; }
 
-.manager-pagination > a:hover,
 .manager-pagination > a:focus-visible {
   background: color-mix(in srgb, var(--manager-accent) 6%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .manager-pagination > a:hover {
+    background: color-mix(in srgb, var(--manager-accent) 6%, transparent);
+  }
 }
 
 .manager-pagination-index {

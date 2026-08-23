@@ -2,6 +2,35 @@
   .poster-control-cluster {
     width: 100%;
   }
+
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock {
+    gap: 4px;
+    padding-inline: 2px;
+  }
+
+  .poster-shuffle b,
+  .poster-reset b,
+  .poster-lock b {
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 840px) and (max-height: 500px) {
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock {
+    gap: 2px;
+    padding-inline: 2px;
+  }
+
+  .poster-shuffle b,
+  .poster-reset b,
+  .poster-lock b {
+    font-size: 6px;
+    letter-spacing: 0.08em;
+  }
 }
 
 /* Tablet sizing must be viewport-driven. iPadOS can expose a fine pointer in
