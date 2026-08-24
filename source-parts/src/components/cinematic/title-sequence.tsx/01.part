@@ -47,6 +47,25 @@ function HudRings() {
   return (
     <svg className="cine-hud" viewBox="0 0 200 200" aria-hidden="true">
       <g fill="none" stroke="currentColor" className="text-ice/80" strokeWidth="0.35">
+        <g className="cine-hud-orbits">
+          <ellipse cx="100" cy="100" rx="92" ry="31" strokeDasharray="1.5 5.5" />
+          <ellipse
+            cx="100"
+            cy="100"
+            rx="92"
+            ry="31"
+            strokeDasharray="18 9"
+            transform="rotate(60 100 100)"
+          />
+          <ellipse
+            cx="100"
+            cy="100"
+            rx="92"
+            ry="31"
+            strokeDasharray="4 11"
+            transform="rotate(120 100 100)"
+          />
+        </g>
         <g className="cine-hud-spin">
           <circle cx="100" cy="100" r="78" />
           <circle cx="100" cy="100" r="86" strokeDasharray="2 6" />
@@ -58,8 +77,37 @@ function HudRings() {
           <circle cx="100" cy="100" r="52" strokeDasharray="12 8" />
           <circle cx="100" cy="100" r="44" />
         </g>
+        <g className="cine-hud-reticle">
+          <path d="M100 7v18M100 175v18M7 100h18M175 100h18" />
+          <path d="M100 33l4 7-4 7-4-7zM100 153l4 7-4 7-4-7z" />
+          <circle cx="100" cy="100" r="7" strokeDasharray="2 3" />
+        </g>
       </g>
     </svg>
+  );
+}
+
+function CinematicDepthField() {
+  return (
+    <div className="cine-depth-field" aria-hidden="true">
+      <div className="cine-depth-grid" />
+      <div className="cine-aperture">
+        <i />
+        <i />
+        <i />
+      </div>
+      <div className="cine-orbit cine-orbit-a" />
+      <div className="cine-orbit cine-orbit-b" />
+      <div className="cine-prism-field">
+        {Array.from({ length: 12 }, (_, index) => (
+          <i key={index} />
+        ))}
+      </div>
+      <div className="cine-impact-bloom">
+        <i />
+        <i />
+      </div>
+    </div>
   );
 }
 
@@ -67,6 +115,7 @@ export function TitleSequence() {
   const [phase, setPhase] = useState<SequencePhase>("idle");
   const [muted, setMuted] = useState(false);
   const [reducedDive, setReducedDive] = useState(false);
+  const [economyOpening, setEconomyOpening] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -81,12 +130,20 @@ export function TitleSequence() {
     const connection = (
       navigator as Navigator & {
         connection?: { saveData?: boolean; effectiveType?: string };
+        deviceMemory?: number;
       }
-    ).connection;
+    );
+    const economy =
+      connection.connection?.saveData === true ||
+      connection.connection?.effectiveType === "slow-2g" ||
+      connection.connection?.effectiveType === "2g" ||
+      (connection.deviceMemory !== undefined && connection.deviceMemory <= 2) ||
+      (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2);
+    setEconomyOpening(economy);
     if (
-      connection?.saveData ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g"
+      connection.connection?.saveData ||
+      connection.connection?.effectiveType === "slow-2g" ||
+      connection.connection?.effectiveType === "2g"
     ) {
       return;
     }
@@ -297,7 +354,9 @@ export function TitleSequence() {
           : phase === "arriving"
             ? "cine-stage is-complete is-diving is-arriving"
             : "cine-stage";
-  const stageClass = `${stageStateClass}${reducedDive ? " is-reduced-dive" : ""}`;
+  const stageClass = `${stageStateClass}${reducedDive ? " is-reduced-dive" : ""}${
+    economyOpening ? " is-economy-opening" : ""
+  }`;
   const isWorldTransitioning = phase === "diving" || phase === "arriving";
   const diveOverlay =
     isWorldTransitioning && typeof document !== "undefined"
@@ -335,19 +394,21 @@ export function TitleSequence() {
         aria-label="仮面ライダーサーガ Deception World オープニング"
         aria-busy={isWorldTransitioning}
       >
-        <video
-          key={`atm-${replayKey}`}
-          ref={videoRef}
-          className="cine-atmosphere"
-          src="/atmosphere.mp4"
-          poster="/atmosphere-poster.jpg"
-          muted
-          playsInline
-          preload="none"
-          loop
-        />
-
-        <div className="cine-light-field" aria-hidden="true" />
+        <div className="cine-camera" aria-hidden="true">
+          <video
+            key={`atm-${replayKey}`}
+            ref={videoRef}
+            className="cine-atmosphere"
+            src="/atmosphere.mp4"
+            poster="/atmosphere-poster.jpg"
+            muted
+            playsInline
+            preload="none"
+            loop
+          />
+          <div className="cine-light-field" />
+          <CinematicDepthField />
+        </div>
         <div className="cine-scanline" aria-hidden="true" />
         <div className="cine-flare" aria-hidden="true" />
         <HudRings />
@@ -367,6 +428,20 @@ export function TitleSequence() {
                 src="/logo-title.jpg"
                 alt=""
                 className="cine-logo-glow"
+                decoding="async"
+                draggable={false}
+              />
+              <img
+                src="/logo-title.jpg"
+                alt=""
+                className="cine-logo-echo cine-logo-echo-ice"
+                decoding="async"
+                draggable={false}
+              />
+              <img
+                src="/logo-title.jpg"
+                alt=""
+                className="cine-logo-echo cine-logo-echo-gold"
                 decoding="async"
                 draggable={false}
               />

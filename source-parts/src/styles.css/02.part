@@ -266,20 +266,106 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   }
 }
 
+@keyframes cinematic-camera-path {
+  0% { transform: scale(1.07) translate3d(-0.7%, 0.45%, 0); }
+  31% { transform: scale(1.035) translate3d(0.35%, -0.2%, 0); }
+  58% { transform: scale(1.048) translate3d(-0.15%, -0.45%, 0); }
+  100% { transform: scale(1.018) translate3d(0, 0, 0); }
+}
+
+@keyframes depth-field-reveal {
+  0% { opacity: 0; transform: scale(0.86); }
+  32% { opacity: 0.72; transform: scale(0.97); }
+  68% { opacity: 0.46; transform: scale(1.025); }
+  100% { opacity: 0.38; transform: scale(1); }
+}
+
+@keyframes depth-grid-drift {
+  0% { opacity: 0; transform: rotate(-8deg) scale(0.76); }
+  26% { opacity: 0.72; }
+  100% { opacity: 0.42; transform: rotate(1deg) scale(1.06); }
+}
+
+@keyframes aperture-assembly {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.48) rotate(-21deg); }
+  30% { opacity: 0.66; }
+  62% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.035) rotate(2deg); }
+  100% { opacity: 0.36; transform: translate(-50%, -50%) scale(1) rotate(0); }
+}
+
+@keyframes orbit-a-lock {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-14deg) scale(0.68); }
+  38% { opacity: 0.5; }
+  100% { opacity: 0.3; transform: translate(-50%, -50%) rotate(5deg) scale(1); }
+}
+
+@keyframes orbit-b-lock {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(54deg) scale(0.62); }
+  44% { opacity: 0.4; }
+  100% { opacity: 0.24; transform: translate(-50%, -50%) rotate(74deg) scale(1); }
+}
+
+@keyframes prism-signal {
+  0% { opacity: 0; filter: blur(2px); }
+  22% { opacity: 0.8; filter: blur(0); }
+  46% { opacity: 0.24; }
+  100% { opacity: 0; filter: blur(1px); }
+}
+
+@keyframes impact-bloom {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.16); }
+  22% { opacity: 0.92; }
+  54% { opacity: 0.24; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.42); }
+}
+
+@keyframes impact-ring {
+  0% { opacity: 0; transform: scale(0.42); }
+  28% { opacity: 0.72; }
+  100% { opacity: 0; transform: scale(1.62); }
+}
+
+@keyframes logo-echo-ice {
+  0% { opacity: 0; transform: translate3d(-18px, 0, 0) scale(0.985); }
+  32% { opacity: 0.34; }
+  100% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes logo-echo-gold {
+  0% { opacity: 0; transform: translate3d(18px, 0, 0) scale(0.985); }
+  32% { opacity: 0.3; }
+  100% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes hud-orbit-precession {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hud-reticle-lock {
+  0% { opacity: 0; transform: scale(1.28) rotate(-5deg); }
+  54% { opacity: 0.8; }
+  100% { opacity: 0.52; transform: scale(1) rotate(0); }
+}
+
 @keyframes logo-emerge {
   0% {
     opacity: 0;
-    transform: translateY(6px) scale(0.9);
+    transform: translateY(10px) scale(0.86);
     clip-path: inset(48% 0 48% 0);
   }
-  20% {
-    opacity: 0.26;
+  18% {
+    opacity: 0.2;
     clip-path: inset(41% 0 41% 0);
   }
-  52% {
-    opacity: 0.86;
-    transform: translateY(0) scale(1.018);
-    clip-path: inset(6% 0 6% 0);
+  44% {
+    opacity: 0.92;
+    transform: translateY(0) scale(1.026);
+    clip-path: inset(4% 0 4% 0);
+  }
+  62% {
+    opacity: 1;
+    transform: scale(0.996);
+    clip-path: inset(0);
   }
   100% {
     opacity: 1;
@@ -462,6 +548,37 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 @media (max-width: 700px) {
+  .cine-camera {
+    inset: -2.5%;
+  }
+
+  .cine-depth-grid {
+    opacity: 0.36;
+  }
+
+  .cine-aperture {
+    width: min(112vw, 720px);
+  }
+
+  .cine-orbit {
+    width: 126vw;
+    height: 48vw;
+  }
+
+  .cine-orbit-b {
+    width: 112vw;
+    height: 38vw;
+  }
+
+  .cine-prism-field > i:nth-child(n + 7) {
+    display: none;
+  }
+
+  .cine-impact-bloom {
+    width: 118vw;
+    height: 58vw;
+  }
+
   .cine-sequence-meta {
     top: max(0.9rem, env(safe-area-inset-top));
     right: max(0.85rem, env(safe-area-inset-right));
@@ -517,6 +634,14 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     filter: blur(10px) saturate(1.2) brightness(1.15);
   }
 
+  .cine-logo-echo-ice {
+    transform: translate3d(-8px, 0, 0) scale(1.006);
+  }
+
+  .cine-logo-echo-gold {
+    transform: translate3d(8px, 0, 0) scale(1.006);
+  }
+
   .cine-skip {
     right: max(0.75rem, env(safe-area-inset-right));
     bottom: max(7.5vh, 48px);
@@ -528,7 +653,34 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   }
 }
 
+.cine-stage.is-economy-opening .cine-depth-grid,
+.cine-stage.is-economy-opening .cine-orbit-b,
+.cine-stage.is-economy-opening .cine-logo-echo,
+.cine-stage.is-economy-opening .cine-prism-field > i:nth-child(n + 5) {
+  display: none;
+}
+
+.cine-stage.is-economy-opening .cine-grain {
+  animation: none;
+  opacity: 0.025;
+}
+
+.cine-stage.is-economy-opening .cine-impact-bloom::before {
+  filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .cine-camera,
+  .cine-depth-field,
+  .cine-depth-grid,
+  .cine-aperture,
+  .cine-orbit,
+  .cine-prism-field > i,
+  .cine-impact-bloom,
+  .cine-impact-bloom > i,
+  .cine-logo-echo,
+  .cine-hud-orbits,
+  .cine-hud-reticle,
   .cine-atmosphere,
   .cine-logo-wrap,
   .cine-logo-shine,
@@ -569,6 +721,33 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   .cine-light-field {
     opacity: 0.45;
     transform: none;
+  }
+
+  .cine-camera {
+    transform: none;
+  }
+
+  .cine-depth-field {
+    opacity: 0.24;
+    transform: none;
+  }
+
+  .cine-depth-grid,
+  .cine-orbit-b,
+  .cine-prism-field,
+  .cine-impact-bloom,
+  .cine-logo-echo {
+    display: none;
+  }
+
+  .cine-aperture {
+    opacity: 0.22;
+    transform: translate(-50%, -50%);
+  }
+
+  .cine-orbit-a {
+    opacity: 0.18;
+    transform: translate(-50%, -50%) rotate(5deg);
   }
 
   .cine-scanline,
