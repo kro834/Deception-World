@@ -8,6 +8,7 @@ import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 
 const POSTERS = [
   { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
@@ -354,12 +355,13 @@ export function WorldHome() {
   const episodeGridRef = useRef<HTMLDivElement>(null);
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const episodeScrollTimer = useRef<number | null>(null);
-  const episodePickupFrame = useRef<number | null>(null);
+  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
+  const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
@@ -490,7 +492,8 @@ export function WorldHome() {
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-      if (episodePickupFrame.current != null) window.cancelAnimationFrame(episodePickupFrame.current);
+      cancelEpisodePickupScrollReset.current?.();
+      cancelColumnPickupScrollReset.current?.();
     };
   }, []);
   const current = POSTERS[poster];
@@ -590,12 +593,7 @@ export function WorldHome() {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
     setEpisodePickup(index);
-    dialog.scrollTop = 0;
-    const panel = dialog.querySelector<HTMLElement>(".episode-pickup-panel");
-    if (panel) {
-      panel.scrollTop = 0;
-      panel.scrollLeft = 0;
-    }
+    cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
       try {
         dialog.showModal();
@@ -603,25 +601,14 @@ export function WorldHome() {
         /* already open */
       }
     }
-    if (episodePickupFrame.current != null) window.cancelAnimationFrame(episodePickupFrame.current);
-    episodePickupFrame.current = window.requestAnimationFrame(() => {
-      episodePickupFrame.current = null;
-      if (!dialog.open) return;
-      dialog.scrollTop = 0;
-      const currentPanel = dialog.querySelector<HTMLElement>(".episode-pickup-panel");
-      if (currentPanel) {
-        currentPanel.scrollTop = 0;
-        currentPanel.scrollLeft = 0;
-      }
+    cancelEpisodePickupScrollReset.current = settlePickupScroll(dialog, [".episode-pickup-panel"], () => {
       dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
     });
   };
 
   const closeEpisodePickup = () => {
-    if (episodePickupFrame.current != null) {
-      window.cancelAnimationFrame(episodePickupFrame.current);
-      episodePickupFrame.current = null;
-    }
+    cancelEpisodePickupScrollReset.current?.();
+    cancelEpisodePickupScrollReset.current = null;
     const dialog = episodePickupDialogRef.current;
     if (dialog?.open) dialog.close();
   };
@@ -629,15 +616,12 @@ export function WorldHome() {
   const openPickup = () => {
     const dlg = pickupDialogRef.current;
     if (!dlg) return;
-    const resetScroll = () => {
-      dlg.scrollTop = 0;
-      dlg.querySelector<HTMLElement>(".world-column-dialog-card")?.scrollTo({ top: 0, left: 0 });
-    };
     if (pickupCloseTimer.current != null) {
       window.clearTimeout(pickupCloseTimer.current);
       pickupCloseTimer.current = null;
     }
     delete dlg.dataset.closing;
+    cancelColumnPickupScrollReset.current?.();
     if (!dlg.open) {
       try {
         dlg.showModal();
@@ -645,11 +629,9 @@ export function WorldHome() {
         /* already open */
       }
     }
-    resetScroll();
     setPickupOpen(true);
     syncRail(pickupRail.current, columnTab);
-    requestAnimationFrame(() => {
-      resetScroll();
+    cancelColumnPickupScrollReset.current = settlePickupScroll(dlg, [".world-column-dialog-card"], () => {
       bootLiquidGlass(dlg);
       pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
       dlg.focus({ preventScroll: true });
@@ -664,6 +646,8 @@ export function WorldHome() {
       return;
     }
     if (dlg.dataset.closing === "true") return;
+    cancelColumnPickupScrollReset.current?.();
+    cancelColumnPickupScrollReset.current = null;
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1416,7 +1400,11 @@ export function WorldHome() {
         className="episode-pickup-dialog"
         tabIndex={-1}
         aria-labelledby="episode-pickup-title"
-        onClose={() => setEpisodePickup(null)}
+        onClose={() => {
+          const dialog = episodePickupDialogRef.current;
+          if (dialog) resetPickupScroll(dialog, [".episode-pickup-panel"]);
+          setEpisodePickup(null);
+        }}
         onCancel={(event) => {
           event.preventDefault();
           closeEpisodePickup();
@@ -1500,6 +1488,7 @@ export function WorldHome() {
             pickupCloseTimer.current = null;
           }
           if (dialog) delete dialog.dataset.closing;
+          if (dialog) resetPickupScroll(dialog, [".world-column-dialog-card"]);
           setPickupOpen(false);
         }}
         onCancel={(e) => {

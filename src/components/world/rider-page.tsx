@@ -6,6 +6,7 @@ import { FormPickup } from "./manager-stub";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
+import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 
 type RiderDossier = {
   id: string;
@@ -815,25 +816,27 @@ export function RiderPage({ id }: { id: string }) {
   useWorldMode();
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
+  const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
+  const resetNightmareScroll = () => {
+    const dialog = nightmareRef.current;
+    if (dialog) resetPickupScroll(dialog, [".rider-nightmare-dialog-panel"]);
+  };
   const openNightmare = () => {
     const dlg = nightmareRef.current;
     if (!dlg) return;
-    const resetScroll = () => {
-      dlg.scrollTop = 0;
-      dlg.querySelector<HTMLElement>(".rider-nightmare-dialog-panel")?.scrollTo({ top: 0, left: 0 });
-    };
-    resetScroll();
+    cancelNightmareScrollReset.current?.();
     try {
       dlg.showModal();
     } catch {
       /* already open */
     }
-    window.requestAnimationFrame(() => {
-      resetScroll();
+    cancelNightmareScrollReset.current = settlePickupScroll(dlg, [".rider-nightmare-dialog-panel"], () => {
       dlg.focus({ preventScroll: true });
     });
   };
   const closeNightmare = () => {
+    cancelNightmareScrollReset.current?.();
+    cancelNightmareScrollReset.current = null;
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
@@ -988,6 +991,7 @@ export function RiderPage({ id }: { id: string }) {
           className="rider-nightmare-dialog"
           tabIndex={-1}
           aria-label={rider.nightmare.name}
+          onClose={resetNightmareScroll}
           onCancel={(e) => {
             e.preventDefault();
             closeNightmare();

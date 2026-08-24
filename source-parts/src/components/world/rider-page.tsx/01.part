@@ -6,6 +6,7 @@ import { FormPickup } from "./manager-stub";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
+import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 
 type RiderDossier = {
   id: string;

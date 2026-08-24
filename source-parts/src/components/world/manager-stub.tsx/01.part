@@ -5,6 +5,7 @@ import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
+import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -43,13 +44,12 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const dlg = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const pointerOpened = useRef(false);
+  const cancelScrollReset = useRef<(() => void) | null>(null);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
   const resetScroll = () => {
     const dialog = dlg.current;
     if (!dialog) return;
-    dialog.scrollTop = 0;
-    dialog.scrollLeft = 0;
-    dialog.querySelector<HTMLElement>(".form-pickup-panel")?.scrollTo({ top: 0, left: 0 });
+    resetPickupScroll(dialog, [".form-pickup-panel"]);
   };
   const clearPointerFocus = () => {
     if (!pointerOpened.current) return;
@@ -63,19 +63,20 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     if (!dialog) return;
     pointerOpened.current = source === "pointer";
     clearPointerFocus();
-    resetScroll();
+    cancelScrollReset.current?.();
     try {
       dialog.showModal();
     } catch {
       /* already open */
     }
-    window.requestAnimationFrame(() => {
-      resetScroll();
+    cancelScrollReset.current = settlePickupScroll(dialog, [".form-pickup-panel"], () => {
       dialog.focus({ preventScroll: true });
       clearPointerFocus();
     });
   };
   const close = () => {
+    cancelScrollReset.current?.();
+    cancelScrollReset.current = null;
     dlg.current?.close();
     // WebKit restores dialog focus to its opener after close(). Pointer-opened
     // sliders must not look selected after that restoration. Keyboard-opened
@@ -126,6 +127,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         className="form-pickup-dialog"
         tabIndex={-1}
         aria-label={`${riderPrefix}${rider.name}`}
+        onClose={resetScroll}
         onCancel={(e) => {
           e.preventDefault();
           close();

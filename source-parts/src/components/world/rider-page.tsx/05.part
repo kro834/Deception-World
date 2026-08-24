@@ -31,6 +31,7 @@
           className="rider-nightmare-dialog"
           tabIndex={-1}
           aria-label={rider.nightmare.name}
+          onClose={resetNightmareScroll}
           onCancel={(e) => {
             e.preventDefault();
             closeNightmare();

@@ -168,6 +168,7 @@ export function WorldHome() {
   const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
+  const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
@@ -293,6 +294,7 @@ export function WorldHome() {
       shuffleActive.current = false;
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+      cancelColumnPickupScrollReset.current?.();
     };
   }, []);
   const current = POSTERS[poster];

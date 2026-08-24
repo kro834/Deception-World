@@ -80,6 +80,7 @@
             pickupCloseTimer.current = null;
           }
           if (dialog) delete dialog.dataset.closing;
+          if (dialog) resetPickupScroll(dialog, [".world-column-dialog-card"]);
           setPickupOpen(false);
         }}
         onCancel={(e) => {

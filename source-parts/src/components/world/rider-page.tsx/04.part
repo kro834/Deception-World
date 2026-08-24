@@ -70,25 +70,27 @@ export function RiderPage({ id }: { id: string }) {
   useWorldMode();
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
+  const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
+  const resetNightmareScroll = () => {
+    const dialog = nightmareRef.current;
+    if (dialog) resetPickupScroll(dialog, [".rider-nightmare-dialog-panel"]);
+  };
   const openNightmare = () => {
     const dlg = nightmareRef.current;
     if (!dlg) return;
-    const resetScroll = () => {
-      dlg.scrollTop = 0;
-      dlg.querySelector<HTMLElement>(".rider-nightmare-dialog-panel")?.scrollTo({ top: 0, left: 0 });
-    };
-    resetScroll();
+    cancelNightmareScrollReset.current?.();
     try {
       dlg.showModal();
     } catch {
       /* already open */
     }
-    window.requestAnimationFrame(() => {
-      resetScroll();
+    cancelNightmareScrollReset.current = settlePickupScroll(dlg, [".rider-nightmare-dialog-panel"], () => {
       dlg.focus({ preventScroll: true });
     });
   };
   const closeNightmare = () => {
+    cancelNightmareScrollReset.current?.();
+    cancelNightmareScrollReset.current = null;
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
