@@ -8,7 +8,7 @@ import { useLoadGate } from "@/components/load-gate";
 import { DiveVelocityCanvas } from "./dive-velocity-canvas";
 import { Particles } from "./particles";
 
-const SEQUENCE_MS = 6600;
+const SEQUENCE_MS = 5800;
 const WORLD_DIVE_MIN_MS = 900;
 const WORLD_DIVE_EXIT_MS = 520;
 const WORLD_DIVE_REDUCED_MIN_MS = 520;
@@ -70,6 +70,7 @@ export function TitleSequence() {
   const [replayKey, setReplayKey] = useState(0);
   const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoStartTimerRef = useRef<number | null>(null);
   const phaseRef = useRef(phase);
   const mountedRef = useRef(true);
   const { go } = useLoadGate();
@@ -89,19 +90,34 @@ export function TitleSequence() {
     ) {
       return;
     }
-    const timer = window.setTimeout(() => {
+    let idleId: number | null = null;
+    const warm = () => {
       void Promise.all([
         preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
         router.preloadRoute({ to: "/world" }).catch(() => undefined),
       ]);
-    }, 1800);
-    return () => window.clearTimeout(timer);
+    };
+    // Let the title poster and controls paint before the larger world artwork
+    // competes for network/decoding time, then use the first idle window so the
+    // destination is still warm well before the shortened opening completes.
+    const timer = window.setTimeout(() => {
+      if (typeof window.requestIdleCallback === "function") {
+        idleId = window.requestIdleCallback(warm, { timeout: 900 });
+      } else {
+        warm();
+      }
+    }, 650);
+    return () => {
+      window.clearTimeout(timer);
+      if (idleId != null) window.cancelIdleCallback(idleId);
+    };
   }, [router]);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      if (videoStartTimerRef.current != null) window.clearTimeout(videoStartTimerRef.current);
       scoreRef.current?.stop();
       scoreRef.current = null;
     };
@@ -121,7 +137,14 @@ export function TitleSequence() {
     const video = videoRef.current;
     if (video) {
       video.currentTime = 0;
-      void video.play().catch(() => undefined);
+      if (videoStartTimerRef.current != null) window.clearTimeout(videoStartTimerRef.current);
+      // `preload="none"` keeps the 1 MB atmosphere clip off the critical
+      // startup path. The poster carries the first frames; playback joins once
+      // the opening chrome has had a chance to paint.
+      videoStartTimerRef.current = window.setTimeout(() => {
+        videoStartTimerRef.current = null;
+        void video.play().catch(() => undefined);
+      }, 90);
     }
   }, []);
 
@@ -130,6 +153,10 @@ export function TitleSequence() {
     setPhase("complete");
     scoreRef.current?.stop();
     scoreRef.current = null;
+    if (videoStartTimerRef.current != null) {
+      window.clearTimeout(videoStartTimerRef.current);
+      videoStartTimerRef.current = null;
+    }
     videoRef.current?.pause();
   }, []);
 
@@ -157,6 +184,10 @@ export function TitleSequence() {
     scoreRef.current?.stop();
     scoreRef.current = null;
     const video = videoRef.current;
+    if (videoStartTimerRef.current != null) {
+      window.clearTimeout(videoStartTimerRef.current);
+      videoStartTimerRef.current = null;
+    }
     video?.pause();
     if (video) video.currentTime = 0;
     phaseRef.current = "idle";
@@ -312,7 +343,7 @@ export function TitleSequence() {
           poster="/atmosphere-poster.jpg"
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           loop
         />
 

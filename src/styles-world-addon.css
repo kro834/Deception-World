@@ -1137,14 +1137,17 @@ br.tab-br { display: none; }
 .ios-slide-open .ios-slide-open-thumb {
   position: absolute;
   z-index: 4;
-  /* Keep the thumb vertically stable even when WebKit drops a composited
-     transform on backdrop-filtered controls. Only horizontal travel belongs
-     in transform; the rail geometry owns vertical centering. */
-  top: 4px;
+  /* Both block edges own the vertical geometry. This survives WebKit dropping
+     a composited transform and also adapts 50px/46px thumbs without a media
+     query that can drift away from the rail height. The matching inline
+     geometry in SlideOpenControl protects fresh source reconstruction too. */
+  top: 3px;
+  right: auto;
+  bottom: 3px;
   left: 4px;
   display: grid;
   width: var(--slide-thumb-size);
-  height: var(--slide-thumb-size);
+  height: auto;
   place-items: center;
   overflow: hidden;
   isolation: isolate;

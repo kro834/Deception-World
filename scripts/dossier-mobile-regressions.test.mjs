@@ -20,6 +20,10 @@ const zeusButton = readFileSync(
   "utf8",
 );
 const styles = readFileSync(new URL("../src/styles-world-addon.css", import.meta.url), "utf8");
+const reconstructedStyles = readFileSync(
+  new URL("../source-parts/src/styles-world-addon.css/02.part", import.meta.url),
+  "utf8",
+);
 
 test("Cipher uses the supplied dedicated thumbnail without replacing its dossier art", () => {
   assert.match(worldHome, /id: "cipher"[\s\S]*?img: "\/rider-cipher-thumbnail\.jpeg"/);
@@ -48,10 +52,16 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.match(slideControl, /next \+ metrics\.thumbRect\.width/);
   assert.match(styles, /--slide-thumb-size: 50px/);
   assert.match(styles, /--slide-thumb-size: 46px/);
-  assert.match(styles, /\.ios-slide-open \.ios-slide-open-thumb \{[\s\S]*?top: 4px/);
+  assert.match(styles, /\.ios-slide-open \.ios-slide-open-thumb \{[\s\S]*?top: 3px;[\s\S]*?bottom: 3px;[\s\S]*?height: auto/);
   assert.match(styles, /translate3d\(var\(--slide-offset, 0px\), 0, 0\)/);
   assert.doesNotMatch(styles, /\.form-pickup-plus\.ios-slide-open \{[^}]*contain:/s);
   assert.doesNotMatch(styles, /translate3d\(var\(--slide-offset[^)]*\), -50%/);
+  assert.match(slideControl, /top: "3px"[\s\S]*?bottom: "3px"[\s\S]*?height: "auto"/);
+  assert.match(slideControl, /transform: "translate3d\(var\(--slide-offset, 0px\), 0, 0\)"/);
+  assert.match(reconstructedStyles, /top: 3px;[\s\S]*?bottom: 3px;[\s\S]*?height: auto/);
+  assert.match(reconstructedStyles, /translate3d\(var\(--slide-offset, 0px\), 0, 0\)/);
+  assert.doesNotMatch(reconstructedStyles, /\.form-pickup-plus\.ios-slide-open \{[^}]*contain:/s);
+  assert.doesNotMatch(reconstructedStyles, /translate3d\(var\(--slide-offset[^)]*\), -50%/);
   assert.doesNotMatch(styles, /\.form-pickup-plus span \{/);
 });
 

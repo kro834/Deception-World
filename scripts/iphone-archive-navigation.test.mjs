@@ -21,6 +21,10 @@ const archiveRoute = readFileSync(
 );
 const rootRoute = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+const reconstructedOpeningStyles = readFileSync(
+  new URL("../source-parts/src/styles.css/01.part", import.meta.url),
+  "utf8",
+);
 const transitionStyles = readFileSync(
   new URL("../src/styles-route-transitions.css", import.meta.url),
   "utf8",
@@ -112,6 +116,19 @@ test("the opening dive adds an adaptive, mobile-bounded perspective layer", () =
 
 test("the deployment assembler preserves the iPhone title dive implementation", () => {
   assert.equal(titleSequenceSourcePart, titleSequence);
+});
+
+test("the shortened opening keeps heavy startup work off the first paint", () => {
+  assert.match(titleSequence, /const SEQUENCE_MS = 5800/);
+  assert.match(titleSequence, /requestIdleCallback\(warm, \{ timeout: 900 \}\)/);
+  assert.match(titleSequence, /\}, 650\);/);
+  assert.match(titleSequence, /preload="none"/);
+  assert.match(titleSequence, /videoStartTimerRef\.current = window\.setTimeout/);
+  assert.match(styles, /--seq: 5\.8s/);
+  assert.match(styles, /progress-marker 0\.4s ease 5\.4s forwards/);
+  assert.match(reconstructedOpeningStyles, /--seq: 5\.8s/);
+  assert.match(reconstructedOpeningStyles, /animation: progress-fill var\(--seq\) linear forwards/);
+  assert.match(reconstructedOpeningStyles, /progress-marker 0\.4s ease 5\.4s forwards/);
 });
 
 test("opening the side menu keeps the Zeus control full-size and draggable", () => {

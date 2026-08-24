@@ -308,7 +308,20 @@ export function SlideOpenControl({
         <i />
         <i />
       </span>
-      <span ref={thumbRef} className="ios-slide-open-thumb" aria-hidden="true">
+      <span
+        ref={thumbRef}
+        className="ios-slide-open-thumb"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: "3px",
+          right: "auto",
+          bottom: "3px",
+          left: "4px",
+          height: "auto",
+          transform: "translate3d(var(--slide-offset, 0px), 0, 0)",
+        }}
+      >
         <i />
         <b>
           <UiVectorIcon kind="plus" size={22} />

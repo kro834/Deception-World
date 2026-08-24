@@ -302,7 +302,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 /* ── Cinematic stage ───────────────────────────────────────── */
 
 .cine-stage {
-  --seq: 6.6s;
+  --seq: 5.8s;
   position: relative;
   isolation: isolate;
   contain: layout paint style;
@@ -352,7 +352,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-light-field {
-  animation: light-field-in 5.9s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
+  animation: light-field-in 5.1s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
 }
 
 .is-complete .cine-light-field {
@@ -395,7 +395,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-flare {
-  animation: cinematic-flare 6.2s ease-out 0.18s both;
+  animation: cinematic-flare 5.5s ease-out 0.18s both;
 }
 
 .cine-vignette {
@@ -882,9 +882,9 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-progress > i:nth-of-type(1) { animation: progress-marker 0.4s ease 0.2s forwards; }
-.is-playing .cine-progress > i:nth-of-type(2) { animation: progress-marker 0.4s ease 2.15s forwards; }
-.is-playing .cine-progress > i:nth-of-type(3) { animation: progress-marker 0.4s ease 4.25s forwards; }
-.is-playing .cine-progress > i:nth-of-type(4) { animation: progress-marker 0.4s ease 6.15s forwards; }
+.is-playing .cine-progress > i:nth-of-type(2) { animation: progress-marker 0.4s ease 1.95s forwards; }
+.is-playing .cine-progress > i:nth-of-type(3) { animation: progress-marker 0.4s ease 3.85s forwards; }
+.is-playing .cine-progress > i:nth-of-type(4) { animation: progress-marker 0.4s ease 5.4s forwards; }
 
 .is-complete .cine-progress {
   opacity: 0;
@@ -916,8 +916,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-cue span:nth-child(1) { animation: cue-phase 1.2s ease 0.34s both; }
-.is-playing .cine-cue span:nth-child(2) { animation: cue-phase 1.35s ease 1.82s both; }
-.is-playing .cine-cue span:nth-child(3) { animation: cue-phase 1.5s ease 3.58s both; }
+.is-playing .cine-cue span:nth-child(2) { animation: cue-phase 1.35s ease 1.65s both; }
+.is-playing .cine-cue span:nth-child(3) { animation: cue-phase 1.5s ease 3.15s both; }
 
 .is-complete .cine-cue {
   opacity: 0;
