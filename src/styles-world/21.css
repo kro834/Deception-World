@@ -8,6 +8,18 @@ html[data-mode="world"] {
   scroll-margin-top: calc(96px + env(safe-area-inset-top));
 }
 
+.site-shell #riders-return {
+  position: absolute;
+  /* Place the hash target slightly before the section so returning from a
+     dossier leaves the riders heading comfortably lower in the viewport. */
+  top: -48px;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+  pointer-events: none;
+}
+
 /* UPDATE belongs to the opening composition and should not cover deep links. */
 html[data-mode="world"] .site-shell > .site-update-control {
   position: absolute;

@@ -1,5 +1,9 @@
 /* Route chrome lives outside the generated styles bundle so postinstall's
    source assembly cannot drop navigation spacing or transition primitives. */
+html[data-route-scroll-settling="true"] {
+  scroll-behavior: auto !important;
+}
+
 .form-archive-page {
   --archive-toolbar-height: calc(env(safe-area-inset-top) + 72px);
 }

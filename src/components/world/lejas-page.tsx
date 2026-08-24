@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -16,7 +16,7 @@ export function LejasPage() {
         <div className="manager-glow" />
       </div>
       <header className="manager-topbar">
-        <Link to="/world" hash="manager-archive" className="brand" aria-label="Deception Worldの六詠一覧へ戻る">
+        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand" aria-label="Deception Worldの六詠一覧へ戻る">
           <span className="brand-sigil">
             <i>DW</i>
           </span>
@@ -24,13 +24,13 @@ export function LejasPage() {
             <b>DECEPTION WORLD</b>
             <small>MANAGER ARCHIVE / IV</small>
           </span>
-        </Link>
-        <Link to="/world" hash="manager-archive" className="manager-back">
+        </GuardedLink>
+        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
           <span>六詠一覧へ戻る</span>
           <i aria-hidden="true">
             <UiVectorIcon kind="arrow-down-left" size={14} />
           </i>
-        </Link>
+        </GuardedLink>
       </header>
 
       <section className="manager-hero" id="top">

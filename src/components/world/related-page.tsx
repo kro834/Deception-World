@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
@@ -190,7 +190,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         <div className="manager-glow" />
       </div>
       <header className="manager-topbar">
-        <Link to="/world" hash="manager-archive" className="brand">
+        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand">
           <span className="brand-sigil">
             <i>DW</i>
           </span>
@@ -198,13 +198,13 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
             <b>DECEPTION WORLD</b>
             <small>RELATED / {person.code}</small>
           </span>
-        </Link>
-        <Link to="/world" hash="manager-archive" className="manager-back">
+        </GuardedLink>
+        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
           <span>その他へ戻る</span>
           <i aria-hidden="true">
             <UiVectorIcon kind="arrow-down-left" size={14} />
           </i>
-        </Link>
+        </GuardedLink>
       </header>
       <section className="manager-hero">
         <div className="manager-portrait-column">

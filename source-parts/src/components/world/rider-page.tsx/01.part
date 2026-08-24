@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { useRef } from "react";
+import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";

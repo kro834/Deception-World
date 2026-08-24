@@ -11,6 +11,14 @@ const loadGate = readFileSync(
   "utf8",
 );
 const router = readFileSync(new URL("../src/router.tsx", import.meta.url), "utf8");
+const riderPage = readFileSync(
+  new URL("../src/components/world/rider-page.tsx", import.meta.url),
+  "utf8",
+);
+const transitionStyles = readFileSync(
+  new URL("../src/styles-route-transitions.css", import.meta.url),
+  "utf8",
+);
 const slideControl = readFileSync(
   new URL("../src/components/world/slide-open-control.tsx", import.meta.url),
   "utf8",
@@ -20,6 +28,10 @@ const zeusButton = readFileSync(
   "utf8",
 );
 const styles = readFileSync(new URL("../src/styles-world-addon.css", import.meta.url), "utf8");
+const worldPolishStyles = readFileSync(
+  new URL("../src/styles-world/21.css", import.meta.url),
+  "utf8",
+);
 const reconstructedStyles = readFileSync(
   new URL("../source-parts/src/styles-world-addon.css/02.part", import.meta.url),
   "utf8",
@@ -36,8 +48,25 @@ test("detail routes use per-location restoration without overwriting the world s
   assert.match(router, /scrollRestoration:\s*true/);
   assert.match(loadGate, /useLayoutEffect\(\(\) => \{[\s\S]*?resetDetailScroll/);
   assert.match(loadGate, /router snapshots the outgoing world's position/);
-  assert.match(loadGate, /attributeFilter: \["data-loading"\]/);
+  assert.match(loadGate, /holdRouteScrollMotion/);
+  assert.match(loadGate, /dataset\.routeScrollSettling = "true"/);
+  assert.match(loadGate, /\[90, 240\]/);
+  assert.match(loadGate, /await wait\(90\);[\s\S]*?await wait\(150\)/);
+  assert.match(loadGate, /document\.addEventListener\("wheel", noteInteraction/);
+  assert.doesNotMatch(loadGate, /attributeFilter: \["data-loading"\]/);
+  assert.doesNotMatch(loadGate, /document\.scrollingElement\?\.scrollTo/);
+  assert.match(
+    transitionStyles,
+    /html\[data-route-scroll-settling="true"\]\s*\{[\s\S]*?scroll-behavior:\s*auto\s*!important/,
+  );
   assert.doesNotMatch(loadGate, /resetDossierScroll/);
+});
+
+test("all rider dossiers return slightly deeper into the eight-rider section", () => {
+  assert.equal((riderPage.match(/hash="riders-return"/g) ?? []).length, 2);
+  assert.equal((riderPage.match(/<GuardedLink/g) ?? []).length >= 2, true);
+  assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
+  assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*-48px/);
 });
 
 test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", () => {

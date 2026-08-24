@@ -8,7 +8,7 @@ const title = readFileSync(new URL("../src/components/cinematic/title-sequence.t
 test("only form archive and the Zeus dossier mount route transition surfaces", () => {
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
   assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
-  assert.match(gate, /if \(!isArchiveTransition && !isZeusTransition\) \{\s*await navigate/);
+  assert.match(gate, /if \(!isArchiveTransition && !isZeusTransition\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/);
   assert.doesNotMatch(gate, /preloadAssets/);
   assert.doesNotMatch(gate, /RIDER_CUT_IN_ROUTES/);
   assert.match(gate, /className=\{`load-gate is-sovereign-gate/);

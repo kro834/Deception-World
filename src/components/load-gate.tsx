@@ -34,6 +34,60 @@ type LoadGateApi = {
 const LoadGateContext = createContext<LoadGateApi | null>(null);
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
+const nextFrame = () => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
+const SCROLL_KEYS = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]);
+let routeScrollMotionLocks = 0;
+
+function holdRouteScrollMotion() {
+  routeScrollMotionLocks += 1;
+  document.documentElement.dataset.routeScrollSettling = "true";
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    routeScrollMotionLocks = Math.max(0, routeScrollMotionLocks - 1);
+    if (routeScrollMotionLocks === 0) {
+      document.documentElement.removeAttribute("data-route-scroll-settling");
+    }
+  };
+}
+
+async function settleWorldHash(hash: string) {
+  // TanStack restores the previous document position after the destination
+  // route commits, and mobile WebKit can repeat that restoration after layout.
+  // Keep aligning briefly, but stop the moment the user starts interacting.
+  let userInteracted = false;
+  const noteInteraction = (event: Event) => {
+    if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+    userInteracted = true;
+  };
+  const align = () => {
+    if (!userInteracted) {
+      document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
+    }
+  };
+  document.addEventListener("pointerdown", noteInteraction, true);
+  document.addEventListener("touchstart", noteInteraction, { capture: true, passive: true });
+  document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
+  document.addEventListener("keydown", noteInteraction, true);
+  try {
+    align();
+    await nextFrame();
+    align();
+    await nextFrame();
+    align();
+    await wait(90);
+    align();
+    await wait(150);
+    align();
+  } finally {
+    document.removeEventListener("pointerdown", noteInteraction, true);
+    document.removeEventListener("touchstart", noteInteraction, true);
+    document.removeEventListener("wheel", noteInteraction, true);
+    document.removeEventListener("keydown", noteInteraction, true);
+  }
+}
 
 export function useLoadGate() {
   const ctx = useContext(LoadGateContext);
@@ -71,7 +125,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
       const isZeusTransition = to === "/managers/zeus";
       if (!isArchiveTransition && !isZeusTransition) {
-        await navigate({ to: to as never, hash });
+        const changesDocument = pathname !== to;
+        const releaseScrollMotion = changesDocument ? holdRouteScrollMotion() : null;
+        try {
+          await navigate({ to: to as never, hash });
+          if (changesDocument && to === "/world" && hash) await settleWorldHash(hash);
+        } finally {
+          if (releaseScrollMotion) window.setTimeout(releaseScrollMotion, 360);
+        }
         return;
       }
       busy.current = true;
@@ -279,27 +340,59 @@ export function AppGuards() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   useLayoutEffect(() => {
-    if (!/^\/(?:riders|managers|characters)\//.test(pathname)) return;
+    if (!DETAIL_ROUTE.test(pathname)) return;
+    const releaseScrollMotion = holdRouteScrollMotion();
+    const timers: number[] = [];
+    let firstFrame = 0;
+    let finalFrame = 0;
+    let userInteracted = false;
+    let stopped = false;
+
     const resetDetailScroll = () => {
+      if (stopped || userInteracted) return;
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior: "auto" });
     };
+    const stopResetting = () => {
+      if (stopped) return;
+      stopped = true;
+      if (firstFrame) window.cancelAnimationFrame(firstFrame);
+      if (finalFrame) window.cancelAnimationFrame(finalFrame);
+      timers.splice(0).forEach((timer) => window.clearTimeout(timer));
+      document.removeEventListener("pointerdown", noteInteraction, true);
+      document.removeEventListener("touchstart", noteInteraction, true);
+      document.removeEventListener("wheel", noteInteraction, true);
+      document.removeEventListener("keydown", noteInteraction, true);
+      releaseScrollMotion();
+    };
+    function noteInteraction(event: Event) {
+      if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+      userInteracted = true;
+      stopResetting();
+    }
 
     // The router snapshots the outgoing world's position before this layout
-    // effect runs. Reset only after the dossier DOM has replaced it, so going
-    // back can restore the source position instead of inheriting zero.
+    // effect runs. Keep smooth scrolling disabled until its delayed restoration
+    // has settled, otherwise the outgoing world visibly races toward the top.
     resetDetailScroll();
-    const settleFrame = window.requestAnimationFrame(resetDetailScroll);
-    const loadingObserver = new MutationObserver(() => {
-      if (!document.documentElement.hasAttribute("data-loading")) resetDetailScroll();
+    document.addEventListener("pointerdown", noteInteraction, true);
+    document.addEventListener("touchstart", noteInteraction, { capture: true, passive: true });
+    document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
+    document.addEventListener("keydown", noteInteraction, true);
+    firstFrame = window.requestAnimationFrame(() => {
+      resetDetailScroll();
+      finalFrame = window.requestAnimationFrame(resetDetailScroll);
     });
-    loadingObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-loading"],
+    [90, 240].forEach((delay) => {
+      timers.push(window.setTimeout(resetDetailScroll, delay));
     });
+    timers.push(window.setTimeout(stopResetting, 360));
+
     return () => {
-      window.cancelAnimationFrame(settleFrame);
-      loadingObserver.disconnect();
+      // Cover browser-back and native history restoration as the detail route
+      // unmounts, even when navigation did not originate from GuardedLink.
+      const releaseExitMotion = holdRouteScrollMotion();
+      window.setTimeout(releaseExitMotion, 360);
+      stopResetting();
     };
   }, [pathname]);
 

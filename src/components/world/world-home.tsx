@@ -1189,6 +1189,7 @@ export function WorldHome() {
       </section>
 
       <section className="riders-section" id="riders" data-performance-region>
+        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index">
           <span>02</span>
           <small>EIGHT RIDERS</small>

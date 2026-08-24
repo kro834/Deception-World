@@ -104,7 +104,7 @@ export function RiderPage({ id }: { id: string }) {
         <div className="manager-glow" />
       </div>
       <header className="manager-topbar">
-        <Link to="/world" hash="riders" className="brand">
+        <GuardedLink to="/world" hash="riders-return" assets={[]} className="brand">
           <span className="brand-sigil">
             <i>DW</i>
           </span>
@@ -112,13 +112,13 @@ export function RiderPage({ id }: { id: string }) {
             <b>DECEPTION WORLD</b>
             <small>CHARACTER FILE // {rider.no}</small>
           </span>
-        </Link>
-        <Link to="/world" hash="riders" className="manager-back">
+        </GuardedLink>
+        <GuardedLink to="/world" hash="riders-return" assets={[]} className="manager-back">
           <span>ライダー一覧へ戻る</span>
           <i aria-hidden="true">
             <UiVectorIcon kind="arrow-down-left" size={14} />
           </i>
-        </Link>
+        </GuardedLink>
       </header>
       <section className="manager-hero">
         <div className="manager-portrait-column">

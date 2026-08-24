@@ -35,6 +35,11 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
   assert.match(dossier, /name: "DEAD DROP"/);
   assert.match(dossier, /name: "BLACKOUT"/);
   assert.match(dossier, /name: "BURN NOTICE"/);
+  assert.match(dossier, /"ON EARTH!\?"/);
+  assert.match(dossier, /"FOCUS ON!"/);
+  assert.match(dossier, /サイファードライバー × プライムコア/);
+  assert.match(dossier, /name: "サイファーエンター"/);
+  assert.match(dossier, /name: "サイファーコンカー"/);
 });
 
 test("Cipher dossier navigation no longer mounts a route loading cut-in", () => {
@@ -43,6 +48,6 @@ test("Cipher dossier navigation no longer mounts a route loading cut-in", () => 
   assert.doesNotMatch(worldCss, /styles-world\/22\.css/);
   assert.match(
     gate,
-    /if \(!isArchiveTransition && !isZeusTransition\) \{\s*await navigate/,
+    /if \(!isArchiveTransition && !isZeusTransition\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
 });
