@@ -50,6 +50,7 @@ const RIDERS = [
   { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
   { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
   { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
+  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher.jpeg", pos: "50% 8%", desc: "最期の死者" },
 ];
 
 const COLUMNS = [
@@ -86,7 +87,7 @@ const COLUMNS = [
       "過去作から帰還するライダーと、この世界で新たに名乗りを上げる者たち。伝説は記録ではなく、いま現在進行形の干渉である。",
       "仮面ライダーレルム、ベル・アレインの復活はその象徴だ。失われた信号が再び名前を持ったとき、周囲の因果は追記ではなく上書きされる。",
       "伝説扱いされた瞬間に、その人物は「終わった物語」へ送られる。レジェンズはそれを拒否し、進行中の盤面へ自ら戻ってくる。",
-      "七人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
+      "八人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
     ],
   },
   {
@@ -307,7 +308,7 @@ const PickupRail = memo(
 const RiderRail = memo(
   forwardRef<HTMLDivElement>(function RiderRail(_props, ref) {
     return (
-      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="七人のメインライダー">
+      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="八人のメインライダー">
         <LiquidLens />
         {RIDERS.map((r, i) => (
           <button
@@ -738,7 +739,7 @@ export function WorldHome() {
           <p className="hero-lead">
             救うべきものは、夢の向こうにはない。
             <br />
-            6人の最上位管理人と、7人のライダーが同じ世界で交差する。
+            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
           </p>
           <div className="hero-actions">
             <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
@@ -910,7 +911,7 @@ export function WorldHome() {
               <span>劇場版第二作</span>
             </p>
             <p>世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。</p>
-            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ。異なる立場を背負った七人は、ひとつの結末へ向けて交差する。</p>
+            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。</p>
           </div>
         </div>
 
@@ -1195,15 +1196,15 @@ export function WorldHome() {
       <section className="riders-section" id="riders" data-performance-region>
         <div className="section-index">
           <span>02</span>
-          <small>SEVEN RIDERS</small>
+          <small>EIGHT RIDERS</small>
         </div>
         <div className="section-title">
           <p className="eyebrow">
-            <span>SEVEN RIDERS / ONE WORLD</span>
+            <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>七人が、世界へ。</h2>
-          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント。七つの軌跡が同じ世界で交差する。</p>
+          <h2>八人が、世界へ。</h2>
+          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。</p>
         </div>
         <div className="rider-console">
           <RiderRail ref={riderRail} />

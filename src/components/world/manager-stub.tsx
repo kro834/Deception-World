@@ -17,6 +17,7 @@ export type RiderForm = {
   sub?: string;
   calls: string[];
   quote?: string;
+  overview?: string[];
   stats?: { dt: string; dd: string }[];
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
@@ -84,6 +85,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     window.requestAnimationFrame(clearPointerFocus);
     resetScroll();
   };
+  const overview = rider.overview ?? [];
   const stats = rider.stats ?? [];
   const abilities = rider.abilities ?? [];
   const arsenal = rider.arsenal ?? [];
@@ -166,6 +168,17 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               </figcaption>
             </figure>
             <div>
+              {overview.length ? (
+                <section className="form-pickup-overview" aria-label="フォーム概要">
+                  <header>
+                    <span>00</span>
+                    <p>OVERVIEW</p>
+                  </header>
+                  {overview.map((paragraph) => (
+                    <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                  ))}
+                </section>
+              ) : null}
               {stats.length ? (
                 <dl className="form-pickup-stats">
                   {stats.map((s) => (

@@ -303,7 +303,7 @@ export function SideMenuLayer({
                 {[
                   ["top", "トップ", "TOP"],
                   ["story", "ストーリー", "STORY"],
-                  ["riders", "七人のライダー", "RIDERS"],
+                  ["riders", "八人のライダー", "RIDERS"],
                   ["records", "レコード", "RECORDS"],
                   ["manager-archive", "六詠", "RIKUEI"],
                 ].map(([hash, label, code]) => (
@@ -330,7 +330,7 @@ export function SideMenuLayer({
                   <i>STORY</i>
                 </a>
                 <a href="#riders" onClick={controlled ? close : undefined}>
-                  <span>七人のライダー</span>
+                  <span>八人のライダー</span>
                   <i>RIDERS</i>
                 </a>
                 <a href="#records" onClick={controlled ? close : undefined}>

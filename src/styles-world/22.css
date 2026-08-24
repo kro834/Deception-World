@@ -442,6 +442,192 @@
   animation: argenomeSpark 0.44s var(--spark-delay) cubic-bezier(0.15, 0.7, 0.22, 1) both;
 }
 
+/* CIPHER — a pink/cyan crossfire overwhelms the frame with false traces. */
+.cipher-cutin-stage { background: transparent; }
+
+.cipher-void,
+.cipher-scan-grid,
+.cipher-slash-field,
+.cipher-cross-flare,
+.cipher-data-fragments {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cipher-void {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(237, 61, 196, 0.22), transparent 28%),
+    radial-gradient(circle at 42% 52%, rgba(79, 207, 255, 0.15), transparent 38%),
+    linear-gradient(122deg, #020208, #12071a 48%, #02101a);
+  box-shadow: inset 0 0 20vmax rgba(0, 0, 0, 0.88);
+  transition: opacity 0.3s ease-out;
+}
+
+.cipher-scan-grid {
+  z-index: 2;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 7.8vw, rgba(89, 211, 255, 0.055) 7.85vw 7.92vw),
+    repeating-linear-gradient(0deg, transparent 0 7.8vh, rgba(244, 70, 206, 0.05) 7.86vh 7.94vh);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 52%, transparent 84%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 0 52%, transparent 84%);
+  opacity: 0.72;
+  transform: perspective(860px) rotateX(58deg) scale(1.35);
+  transform-origin: center 62%;
+  transition: opacity 0.28s ease-out, transform 0.68s cubic-bezier(0.16, 0.76, 0.2, 1);
+}
+
+.cipher-slash-field {
+  z-index: 8;
+  overflow: hidden;
+}
+
+.cipher-slash-field > i {
+  --cipher-tone: #ff58d2;
+  position: absolute;
+  top: var(--cipher-y);
+  left: var(--cipher-x);
+  width: var(--cipher-length);
+  height: clamp(2px, 0.22vw, 4px);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--cipher-tone) 16%, #fff 48% 53%, var(--cipher-tone) 84%, transparent);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--cipher-tone) 88%, transparent), 0 0 24px color-mix(in srgb, var(--cipher-tone) 46%, transparent);
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(0.03);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.cipher-slash-field > i:nth-child(1)  { --cipher-x: 18%; --cipher-y: 15%; --cipher-r: 31deg;  --cipher-length: 54vw; --cipher-delay: 0s; }
+.cipher-slash-field > i:nth-child(2)  { --cipher-x: 72%; --cipher-y: 18%; --cipher-r: -38deg; --cipher-length: 48vw; --cipher-delay: 0.025s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(3)  { --cipher-x: 44%; --cipher-y: 25%; --cipher-r: 58deg;  --cipher-length: 62vw; --cipher-delay: 0.05s; }
+.cipher-slash-field > i:nth-child(4)  { --cipher-x: 84%; --cipher-y: 31%; --cipher-r: -24deg; --cipher-length: 52vw; --cipher-delay: 0.075s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(5)  { --cipher-x: 24%; --cipher-y: 36%; --cipher-r: -56deg; --cipher-length: 57vw; --cipher-delay: 0.1s; }
+.cipher-slash-field > i:nth-child(6)  { --cipher-x: 63%; --cipher-y: 41%; --cipher-r: 22deg;  --cipher-length: 68vw; --cipher-delay: 0.04s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(7)  { --cipher-x: 40%; --cipher-y: 48%; --cipher-r: -16deg; --cipher-length: 74vw; --cipher-delay: 0.125s; }
+.cipher-slash-field > i:nth-child(8)  { --cipher-x: 78%; --cipher-y: 52%; --cipher-r: 49deg;  --cipher-length: 58vw; --cipher-delay: 0.065s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(9)  { --cipher-x: 16%; --cipher-y: 58%; --cipher-r: 14deg;  --cipher-length: 49vw; --cipher-delay: 0.15s; }
+.cipher-slash-field > i:nth-child(10) { --cipher-x: 57%; --cipher-y: 62%; --cipher-r: -47deg; --cipher-length: 66vw; --cipher-delay: 0.09s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(11) { --cipher-x: 86%; --cipher-y: 68%; --cipher-r: 37deg;  --cipher-length: 50vw; --cipher-delay: 0.175s; }
+.cipher-slash-field > i:nth-child(12) { --cipher-x: 31%; --cipher-y: 73%; --cipher-r: -29deg; --cipher-length: 61vw; --cipher-delay: 0.115s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(13) { --cipher-x: 69%; --cipher-y: 79%; --cipher-r: 62deg;  --cipher-length: 54vw; --cipher-delay: 0.2s; }
+.cipher-slash-field > i:nth-child(14) { --cipher-x: 12%; --cipher-y: 84%; --cipher-r: -41deg; --cipher-length: 45vw; --cipher-delay: 0.14s; --cipher-tone: #62dfff; }
+.cipher-slash-field > i:nth-child(15) { --cipher-x: 48%; --cipher-y: 89%; --cipher-r: 25deg;  --cipher-length: 64vw; --cipher-delay: 0.225s; }
+.cipher-slash-field > i:nth-child(16) { --cipher-x: 88%; --cipher-y: 91%; --cipher-r: -63deg; --cipher-length: 48vw; --cipher-delay: 0.165s; --cipher-tone: #62dfff; }
+
+.cipher-cross-flare {
+  z-index: 12;
+  top: 50%;
+  left: 50%;
+  width: min(22vw, 320px);
+  height: min(22vw, 320px);
+  inset: auto;
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(255, 255, 255, 0.95) 49.6% 50.4%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(255, 255, 255, 0.95) 49.6% 50.4%, transparent 53%),
+    radial-gradient(circle, #fff 0 4%, rgba(255, 89, 213, 0.66) 12%, rgba(83, 219, 255, 0.26) 34%, transparent 68%);
+  filter: drop-shadow(0 0 26px rgba(255, 70, 205, 0.5));
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.12) rotate(18deg);
+  will-change: transform, opacity;
+}
+
+.cipher-data-fragments { z-index: 10; }
+
+.cipher-data-fragments > i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(8px, 1vw, 15px);
+  height: clamp(2px, 0.25vw, 4px);
+  border: 1px solid color-mix(in srgb, var(--cipher-fragment-tone, #ff58d2) 74%, #fff);
+  background: color-mix(in srgb, var(--cipher-fragment-tone, #ff58d2) 38%, transparent);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--cipher-fragment-tone, #ff58d2) 55%, transparent);
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) rotate(var(--fragment-r, 0deg)) scale(0.2);
+  will-change: transform, opacity;
+}
+
+.cipher-data-fragments > i:nth-child(1)  { --fragment-x: -43vw; --fragment-y: -29vh; --fragment-r: 28deg;  --fragment-delay: 0s; }
+.cipher-data-fragments > i:nth-child(2)  { --fragment-x: -31vw; --fragment-y: 24vh;  --fragment-r: -48deg; --fragment-delay: 0.015s; --cipher-fragment-tone: #62dfff; }
+.cipher-data-fragments > i:nth-child(3)  { --fragment-x: -22vw; --fragment-y: -12vh; --fragment-r: 72deg;  --fragment-delay: 0.03s; }
+.cipher-data-fragments > i:nth-child(4)  { --fragment-x: -12vw; --fragment-y: 34vh;  --fragment-r: -19deg; --fragment-delay: 0.045s; --cipher-fragment-tone: #62dfff; }
+.cipher-data-fragments > i:nth-child(5)  { --fragment-x: 4vw;   --fragment-y: -35vh; --fragment-r: 46deg;  --fragment-delay: 0.06s; }
+.cipher-data-fragments > i:nth-child(6)  { --fragment-x: 14vw;  --fragment-y: 28vh;  --fragment-r: -63deg; --fragment-delay: 0.075s; --cipher-fragment-tone: #62dfff; }
+.cipher-data-fragments > i:nth-child(7)  { --fragment-x: 23vw;  --fragment-y: -21vh; --fragment-r: 13deg;  --fragment-delay: 0.09s; }
+.cipher-data-fragments > i:nth-child(8)  { --fragment-x: 31vw;  --fragment-y: 17vh;  --fragment-r: -37deg; --fragment-delay: 0.105s; --cipher-fragment-tone: #62dfff; }
+.cipher-data-fragments > i:nth-child(9)  { --fragment-x: 39vw;  --fragment-y: -9vh;  --fragment-r: 68deg;  --fragment-delay: 0.12s; }
+.cipher-data-fragments > i:nth-child(10) { --fragment-x: 44vw;  --fragment-y: 31vh;  --fragment-r: -24deg; --fragment-delay: 0.135s; --cipher-fragment-tone: #62dfff; }
+.cipher-data-fragments > i:nth-child(11) { --fragment-x: -38vw; --fragment-y: 7vh;   --fragment-r: 52deg;  --fragment-delay: 0.15s; }
+.cipher-data-fragments > i:nth-child(12) { --fragment-x: 36vw;  --fragment-y: 5vh;   --fragment-r: -71deg; --fragment-delay: 0.165s; --cipher-fragment-tone: #62dfff; }
+
+.is-cipher-cutin .rider-cutin-caption small { color: #ff7bdc; }
+.is-cipher-cutin .rider-cutin-caption b {
+  color: #f8fbff;
+  text-shadow: -4px 0 20px rgba(255, 66, 203, 0.5), 4px 0 20px rgba(76, 213, 255, 0.45);
+}
+
+.is-cipher-cutin.is-covering .cipher-slash-field > i {
+  animation: cipherSlashCover 0.34s var(--cipher-delay) cubic-bezier(0.1, 0.78, 0.16, 1) both;
+}
+
+.is-cipher-cutin.is-covering .cipher-cross-flare {
+  animation: cipherCrossCover 0.42s 0.12s ease-out both;
+}
+
+.is-cipher-cutin.is-revealing .cipher-void,
+.is-cipher-cutin.is-revealing .cipher-scan-grid { opacity: 0; }
+
+.is-cipher-cutin.is-revealing .cipher-scan-grid {
+  transform: perspective(860px) rotateX(58deg) scale(1.7) translateY(12%);
+}
+
+.is-cipher-cutin.is-revealing .cipher-slash-field > i {
+  animation: cipherSlashReveal 0.48s var(--cipher-delay) cubic-bezier(0.08, 0.76, 0.12, 1) both;
+}
+
+.is-cipher-cutin.is-revealing .cipher-cross-flare {
+  animation: cipherCrossReveal 0.54s ease-out both;
+}
+
+.is-cipher-cutin.is-revealing .cipher-data-fragments > i {
+  animation: cipherFragmentBurst 0.54s var(--fragment-delay) cubic-bezier(0.12, 0.68, 0.2, 1) both;
+}
+
+@keyframes cipherSlashCover {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(0.03); }
+  22% { opacity: 1; }
+  68% { opacity: 0.96; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(1); }
+  100% { opacity: 0.26; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(1.08); }
+}
+
+@keyframes cipherSlashReveal {
+  0% { opacity: 0.22; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(0.18); }
+  18% { opacity: 1; }
+  54% { opacity: 0.94; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(1.28); }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(var(--cipher-r)) scaleX(1.65); }
+}
+
+@keyframes cipherCrossCover {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(0.12) rotate(18deg); }
+  30% { opacity: 1; }
+  100% { opacity: 0.34; transform: translate3d(-50%, -50%, 0) scale(1.6) rotate(43deg); }
+}
+
+@keyframes cipherCrossReveal {
+  0% { opacity: 0.2; transform: translate3d(-50%, -50%, 0) scale(0.18) rotate(24deg); }
+  22% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(-50%, -50%, 0) scale(7.8) rotate(86deg); }
+}
+
+@keyframes cipherFragmentBurst {
+  0% { opacity: 0; transform: translate3d(-50%, -50%, 0) rotate(var(--fragment-r)) scale(0.2); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(calc(-50% + var(--fragment-x)), calc(-50% + var(--fragment-y)), 0) rotate(calc(var(--fragment-r) + 120deg)) scale(1.1); }
+}
+
 /* OVER-ZEZTZ — a sealed screen fractures into independently moving shards. */
 .over-zeztz-cutin-stage {
   background: transparent;
@@ -742,6 +928,15 @@
 
   .rider-cutin-caption b {
     font-size: clamp(28px, 11vw, 48px);
+  }
+
+  .cipher-slash-field > i {
+    box-shadow: 0 0 9px color-mix(in srgb, var(--cipher-tone) 78%, transparent);
+  }
+
+  .cipher-slash-field > i:nth-child(n + 13),
+  .cipher-data-fragments > i:nth-child(n + 10) {
+    display: none;
   }
 }
 

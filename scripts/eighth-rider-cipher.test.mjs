@@ -1,0 +1,48 @@
+import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import test from "node:test";
+
+const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+
+const home = read("src/components/world/world-home.tsx");
+const dossier = read("src/components/world/rider-page.tsx");
+const nav = read("src/components/world/dossier-nav.tsx");
+const gate = read("src/components/load-gate.tsx");
+const cutInCss = read("src/styles-world/22.css");
+
+test("Cipher is the eighth rider everywhere the rider index is exposed", () => {
+  assert.match(home, /id: "cipher",\s*no: "08"/);
+  assert.match(home, /aria-label="八人のメインライダー"/);
+  assert.match(home, /EIGHT RIDERS \/ ONE WORLD/);
+  assert.match(nav, /href: "\/riders\/cipher"/);
+  assert.match(nav, /kicker: "RIDER 08"/);
+  assert.match(dossier, /indexLabel="EIGHT RIDERS"/);
+});
+
+test("Lucien and both Cipher forms use the supplied records and assets", () => {
+  for (const path of [
+    "../public/civilian-cipher.jpeg",
+    "../public/rider-cipher.jpeg",
+    "../public/rider-cipher-blacksite.jpeg",
+  ]) {
+    assert.equal(existsSync(new URL(path, import.meta.url)), true, `${path} must exist`);
+  }
+  assert.match(dossier, /title: "最期の死者"/);
+  assert.match(dossier, /name: "サイファー"/);
+  assert.match(dossier, /name: "サイファー・ブラックサイト"/);
+  assert.match(dossier, /rider\.id === "cipher" \? rider\.forms/);
+  assert.match(dossier, /name: "SPOOF"/);
+  assert.match(dossier, /name: "DEAD DROP"/);
+  assert.match(dossier, /name: "BLACKOUT"/);
+  assert.match(dossier, /name: "BURN NOTICE"/);
+});
+
+test("Cipher dossier navigation uses a dedicated sixteen-strike cut-in", () => {
+  assert.match(gate, /"\/riders\/cipher": "cipher"/);
+  assert.match(gate, /Array\.from\(\{ length: 16 \}/);
+  assert.match(gate, /cipher-slash-field/);
+  assert.match(cutInCss, /@keyframes cipherSlashCover/);
+  assert.match(cutInCss, /@keyframes cipherSlashReveal/);
+  assert.match(cutInCss, /\.cipher-slash-field > i:nth-child\(16\)/);
+  assert.match(cutInCss, /@media \(max-width: 560px\)[\s\S]*\.cipher-slash-field/);
+});

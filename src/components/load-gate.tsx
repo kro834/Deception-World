@@ -13,7 +13,7 @@ import {
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { assetsWarmed, preloadAssets } from "@/lib/asset-loader";
 
-type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz";
+type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
 
 type GateState = {
   active: boolean;
@@ -39,12 +39,14 @@ const RIDER_CUT_IN_ROUTES = {
   "/riders/leddic": "leddic",
   "/riders/argenome": "argenome",
   "/riders/over-zeztz": "over-zeztz",
+  "/riders/cipher": "cipher",
 } as const satisfies Record<string, RiderCutInVariant>;
 
 const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: number }> = {
   leddic: { cover: 230, reveal: 660 },
   argenome: { cover: 300, reveal: 620 },
   "over-zeztz": { cover: 340, reveal: 820 },
+  cipher: { cover: 420, reveal: 760 },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
@@ -246,7 +248,7 @@ function LoadOverlay({
   const display = Math.max(0, Math.min(100, Math.round(shown)));
   const isZeus = variant === "zeus";
   const isArchive = variant === "archive";
-  const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz";
+  const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz" || variant === "cipher";
 
   if (isRiderCutIn) {
     return (
@@ -319,6 +321,7 @@ function LoadOverlay({
 function cutInLabel(variant: RiderCutInVariant) {
   if (variant === "leddic") return "レディック";
   if (variant === "argenome") return "アルゲノム";
+  if (variant === "cipher") return "サイファー";
   return "オーバーゼッツ";
 }
 
@@ -350,6 +353,23 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
           {Array.from({ length: 10 }, (_, index) => <i key={index} />)}
         </span>
         <span className="rider-cutin-caption"><small>SCARLET TRACE // SEVER</small><b>ARGENOME</b></span>
+      </div>
+    );
+  }
+
+  if (variant === "cipher") {
+    return (
+      <div className="rider-cutin-stage cipher-cutin-stage" aria-hidden="true">
+        <span className="cipher-void" />
+        <span className="cipher-scan-grid" />
+        <span className="cipher-slash-field">
+          {Array.from({ length: 16 }, (_, index) => <i key={index} />)}
+        </span>
+        <span className="cipher-cross-flare" />
+        <span className="cipher-data-fragments">
+          {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+        </span>
+        <span className="rider-cutin-caption"><small>NO TRACE // DEAD DROP</small><b>CIPHER</b></span>
       </div>
     );
   }

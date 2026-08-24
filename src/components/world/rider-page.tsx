@@ -32,6 +32,7 @@ type RiderDossier = {
     displayName?: string;
     sub?: string;
     calls: string[];
+    overview?: string[];
     stats?: { dt: string; dd: string }[];
     abilities?: { name: string; body: string }[];
     arsenal?: { name: string; body: string }[];
@@ -667,6 +668,147 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       body: "変身前ビジュアル // CONFIRMED。CODE Number Seven。",
     },
   },
+  {
+    id: "cipher",
+    no: "08",
+    name: "CIPHER",
+    ja: "サイファー",
+    person: "リュシアン・ヴァレール",
+    enPerson: "LUCIEN VALÈRE",
+    epithet: "最期の死者",
+    tone: "#f05bcf",
+    img: "/rider-cipher.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/civilian-cipher.jpeg",
+    civilianPos: "50% 20%",
+    title: "最期の死者",
+    quotes: [
+      "信用なんて要らねえよ。俺が仕事を終わらせるまで、敵だと思ってろ",
+      "お前らが勝手に“こっち側”だと思い込んだだけだ",
+    ],
+    facts: [
+      { dt: "NAME", dd: "リュシアン・ヴァレール" },
+      { dt: "AGE", dd: "30歳" },
+      { dt: "GENDER", dd: "男性" },
+      { dt: "NATIONALITY", dd: "フランス" },
+      { dt: "HEIGHT", dd: "186.2cm" },
+      { dt: "WEIGHT", dd: "78.4kg" },
+      { dt: "AFFILIATION", dd: "SCARS" },
+      { dt: "ROLE", dd: "特務情報官" },
+      { dt: "CV", dd: "内山昂輝" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "DOUBLE IDENTITY / ISOLATED LINE",
+        title: "味方である事実さえ、潜入を守るための機密になる。",
+        body: [
+          "REALMSフランス本部に所属する特務情報官でありながら、表向きはSCARSの構成員として行動する潜入要員。ベルは『Deception World』開始以前から彼の正体を知る数少ない人物だが、二人の情報共有はREALMSの正規通信網からさえ隔離されている。記録へ残る連絡経路そのものが潜入の痕跡になるため、味方へ身分を証明することすら任務上の危険となる。",
+          "その結果、悠真を含む日本支部側の大半は、リュシアンを純粋なSCARS構成員として認識している。彼は誤解を解こうとはせず、むしろ敵として警戒される立場を維持する。協力者の名簿へ載ることより、敵組織が抱く人物像から一度も逸脱しないことを優先し、自分が疑われ続ける状況そのものを防壁として利用する。",
+        ],
+      },
+      {
+        no: "02",
+        kicker: "PROFESSIONAL / CONTROLLED PERCEPTION",
+        title: "信用ではなく、相手の認識を制御する。",
+        body: [
+          "徹底したプロフェッショナル。目的、必要情報、成功条件、撤退条件を常に切り分け、感情的な好悪を任務判断へ混ぜることを嫌う。愛想を振り撒かず、信用を獲得すること自体にも興味を示さない。潜入で重要なのは好かれることではなく、《相手が自分をどういう人物だと思っているかを把握し、その認識から逸脱しないこと》だと考えているからだ。",
+          "必要なら敵を助け、味方を攻撃し、故意に任務を失敗させる。潜入役としての整合性を守るため、本当に仲間へ損害を与える判断すら行うが、それは残酷さの誇示ではない。どこまで失えば潜入を継続でき、どの地点を越えれば任務そのものが無意味になるのかを、冷静に計算した結果である。彼にとって演技とは表情や口調だけではなく、周囲が観測する結果まで含めて完成させるものだ。",
+          "一方で、計画が崩れた際には撤退条件へ即座に切り替える。正体を守ることへ固執して目的を失うのではなく、情報の回収、対象の排除、味方の生存のうち何を残せるかを選び直す。信用を求めない姿勢は孤立を恐れない強さであると同時に、任務が終わるまで誰にも本心を渡さない危うさでもある。",
+        ],
+      },
+      {
+        no: "03",
+        kicker: "ETHICS / NECESSARY LOSS",
+        title: "犠牲を必要という一語で閉じる者を、決して許さない。",
+        body: [
+          "無関係な人間を使い捨てることを極端に嫌う。任務上どうしても避けられなかった犠牲と、自分たちの無能や準備不足が生んだ犠牲を同じ言葉で処理する者へは、露骨な嫌悪を向ける。「必要な犠牲だった、で報告書を閉じる奴は大体ただの馬鹿だ」という言葉には、損失を数字へ変換して責任から逃げる態度への拒絶が表れている。",
+          "彼自身も味方へ損害を与え得る立場だからこそ、発生した代価の責任を曖昧にしない。誰を危険へ置いたのか、ほかに選択肢はなかったのか、次に同じ損失を防ぐには何を変えるべきかを記録する。冷淡に見える判断の内側には、犠牲を美化せず、失われたものを任務成功の陰へ隠さない厳格な倫理がある。",
+        ],
+      },
+      {
+        no: "04",
+        kicker: "RELATIONS / HOSTILE MASK",
+        title: "悪態の奥で、必要な情報だけは一度も取りこぼさない。",
+        body: [
+          "口調は冷静だが、育ちの良いフランス人らしい言葉遣いからは少し遠く、親しい相手ほど口が悪い。旧知のベルには特に容赦がなく、ベルもその態度へ慣れているため、互いに悪態を交わしながら必要な情報だけを正確に交換する。余計な情緒を通信へ残さない二人の会話は、冷たさではなく長い信頼によって成立した実務の形でもある。",
+          "悠真には潜入任務の都合から、長期間にわたって明確な敵意を演じる。ただし、悠真が自分を削って他者を守ろうとする危うい自己犠牲性への苛立ちだけは演技ではない。味方だと明かせないまま本気で批判し続け、やがて彼自身が悠真を庇って死亡する。その結末は、感情を任務へ持ち込まないと決めた男が、最後には自分の命を判断へ組み込んだという皮肉を残す。",
+        ],
+      },
+      {
+        no: "05",
+        kicker: "CIPHER / INFORMATIONAL UNCERTAINTY",
+        title: "正体が消えても、取得した情報だけは生還させる。",
+        body: [
+          "サイファーシステムは、直接的な戦闘や異常存在対処を主目的とする通常のREALMS SYSTEMとは異なり、潜入、偽装、情報収集、対組織工作へ特化している。認証や権限そのものを奪うのではなく、敵側から何者として認識されるかを揺らし、位置、敵対判定、発信点へ複数の偽情報を混ぜることで、《本人を示す情報》を不確定にする。",
+          "取得した情報は『DEAD DROP』によって周囲へ微細な暗号として分散保存される。捕縛されても、死亡しても、後からREALMSが回収できる。正体が露見して潜入を継続できなくなれば、ブラックサイトへ移行し、偽装へ割いていた資源を身体駆動、武装、敵解析へ転用する。自分が生還できない局面でも、仕事と記録だけは終わらせる。それが、最期の死者と呼ばれるリュシアンの戦い方である。",
+        ],
+      },
+    ],
+    forms: [
+      {
+        img: "/rider-cipher.jpeg",
+        pos: "50% 8%",
+        system: "サイファードライバー × プロキシコア",
+        name: "サイファー",
+        calls: ["CIPHER IN!", "NO TRACE!", "ROLLOUT!", "CIPHER!"],
+        overview: [
+          "リュシアンがREALMSフランス本部で極秘開発された『サイファードライバー』と『プロキシコア』を使用して変身する仮面ライダー。通常のREALMS SYSTEMが直接戦闘と異常存在対処を目的とするのに対し、潜入、偽装、情報収集、対組織工作を主目的に設計された。",
+          "純粋な性能だけでもインテグラルサーガからヴァーテックスサーガ級へ迫る戦闘力を持つが、本領は数値ではなく《情報的不確定性》を利用した戦闘にある。",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "211.8cm" },
+          { dt: "WEIGHT", dd: "88.6kg" },
+          { dt: "PUNCH", dd: "68.8t" },
+          { dt: "KICK", dd: "118.6t" },
+          { dt: "JUMP", dd: "128.8m" },
+          { dt: "100m", dd: "0.18秒" },
+          { dt: "CALCULATION", dd: "7200TOPS / 96Core" },
+          { dt: "AI", dd: "SPECTRE" },
+          { dt: "EMP", dd: "2400E" },
+        ],
+        abilities: [
+          { name: "SPOOF", body: "対象の認証信号、通信形式、権限署名を解析し、限定的な偽装信号を生成する。管理権限そのものをコピーせず、《敵側システムから何者として認識されるか》だけを偽装する。" },
+          { name: "TRACE", body: "敵が能力や命令を行使した際、処理の発生源と対象までの経路を追跡する。通信、エネルギー、管理権限、戦闘命令を流れとして捉え、攻撃すべき中継点や情報源を特定する。" },
+          { name: "PROXY", body: "自身の位置情報、敵対判定、通信発信点へ複数の偽信号を混入する。分身ではなく、《どの情報が本人を示すのか》を曖昧化し、高度な解析能力を持つ敵ほど判断負荷を増大させる。" },
+          { name: "DEAD DROP", body: "戦闘中に取得した情報を周囲へ微細な暗号情報として分散保存する。リュシアン本人が捕縛・死亡した場合でもREALMS側が後から回収でき、SCARS内部で得た情報の多くをベルへ届けている。" },
+        ],
+      },
+      {
+        img: "/rider-cipher-blacksite.jpeg",
+        pos: "50% 7%",
+        system: "サイファードライバー × プロキシコア",
+        name: "サイファー・ブラックサイト",
+        sub: "BLACKSITE",
+        calls: ["CIPHER IN!", "BLACKSITE!", "ROLLOUT!", "ERASE THE TRACE!", "CIPHER BLACK!"],
+        overview: [
+          "潜入継続が不可能となった場合、または対象を確実に排除しなければ任務を達成できない場合に移行する強襲戦闘形態。通常サイファーが《正体を隠しながら仕事を終える》形態なら、ブラックサイトは《正体が露見した後でも仕事だけは終わらせる》ための形態である。",
+          "SPOOFやPROXYへ割り当てていた演算資源とEMPの大部分を身体駆動、武装、敵解析へ転用し、戦闘能力を飛躍的に向上させる。短時間ならヴィンクルムサーガやレルムレジェンズ級とも正面から交戦可能だが、純粋な総合戦闘性能ではレルムレジェンズを下回る。",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "217.8cm" },
+          { dt: "WEIGHT", dd: "108.8kg" },
+          { dt: "PUNCH", dd: "176.8t" },
+          { dt: "KICK", dd: "248.8t" },
+          { dt: "JUMP", dd: "188.8m" },
+          { dt: "100m", dd: "0.045秒" },
+          { dt: "CALCULATION", dd: "18000TOPS / 144Core" },
+          { dt: "AI", dd: "SPECTRE BLACK" },
+          { dt: "EMP", dd: "5200E" },
+        ],
+        abilities: [
+          { name: "BLACKOUT", body: "敵の視覚、通信、照準、能力発動補助へ流入する情報を一時的に分断する。完全な能力封印ではなく、情報入力と出力の間へ僅かな遅延を生じさせ、数瞬だけで致命的な間合いへ侵入する。" },
+          { name: "BURN NOTICE", body: "潜入任務中に取得した対象の戦闘情報を一括解放し、現在の敵へ特化した戦闘プロファイルを構築する。長期間観測した相手ほど攻略精度が高い一方、未観測の敵への恩恵は少なく、未知への適応力はレルムレジェンズなどに劣る。" },
+        ],
+      },
+    ],
+    civilian: {
+      name: "リュシアン・ヴァレール",
+      kicker: "BEFORE TRANSFORMATION / SCARS",
+      body: "変身前ビジュアル // CONFIRMED。REALMSフランス本部からSCARSへ潜入した特務情報官。",
+      cv: "内山昂輝",
+    },
+  },
 ];
 
 export function RiderPage({ id }: { id: string }) {
@@ -695,6 +837,7 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  const pickupForms = rider.id === "cipher" ? rider.forms : primaryForm ? [primaryForm] : [];
   return (
     <main
       className="manager-page rider-dossier-page"
@@ -815,24 +958,30 @@ export function RiderPage({ id }: { id: string }) {
           ))}
         </div>
       </section>
-      {primaryForm ? (
-        <FormPickup
-          rider={{
-            img: primaryForm.img,
-            pos: primaryForm.pos,
-            system: primaryForm.system,
-            name: primaryForm.displayName ?? rider.ja,
-            sub: primaryForm.sub ?? (primaryForm.name !== rider.ja ? primaryForm.name : undefined),
-            calls: primaryForm.calls,
-            stats: primaryForm.stats,
-            abilities: primaryForm.abilities,
-            arsenal: primaryForm.arsenal,
-            finishers: primaryForm.finishers,
-            extraForms: rider.forms,
-          }}
-        />
+      {pickupForms.length ? (
+        <div className="rider-form-pickup-stack">
+          {pickupForms.map((form, index) => (
+            <FormPickup
+              key={`${form.name}-${form.sub ?? "base"}`}
+              rider={{
+                img: form.img,
+                pos: form.pos,
+                system: form.system,
+                name: form.displayName ?? (index === 0 ? rider.ja : form.name),
+                sub: form.sub ?? (index === 0 && form.name !== rider.ja ? form.name : undefined),
+                calls: form.calls,
+                overview: form.overview,
+                stats: form.stats,
+                abilities: form.abilities,
+                arsenal: form.arsenal,
+                finishers: form.finishers,
+                extraForms: index === 0 ? rider.forms : undefined,
+              }}
+            />
+          ))}
+        </div>
       ) : null}
-      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="SEVEN RIDERS" />
+      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="EIGHT RIDERS" />
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}

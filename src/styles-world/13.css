@@ -294,17 +294,9 @@
   transform: translateZ(0) scale(1.17, 1.31);
 }
 
-@media (min-width: 561px) and (max-width: 840px) {
-  .rider-tabs.liquid-swipe-tabs button:last-of-type {
-    grid-column: 2;
-  }
-}
-
-@media (max-width: 560px) {
-  .rider-tabs.liquid-swipe-tabs button:last-of-type {
-    width: calc(50% - 2.5px);
-    grid-column: 1 / -1;
-    justify-self: center;
+@media (max-width: 840px) {
+  .rider-tabs.liquid-swipe-tabs button:nth-last-of-type(-n + 2) {
+    border-bottom: 0;
   }
 }
 
