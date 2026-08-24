@@ -777,7 +777,6 @@ br.tab-br { display: none; }
 .form-pickup-plus.ios-slide-open {
   right: 18px;
   bottom: 18px;
-  contain: layout paint;
   -webkit-backdrop-filter: blur(11px) saturate(142%);
   backdrop-filter: blur(11px) saturate(142%);
 }
@@ -1138,7 +1137,10 @@ br.tab-br { display: none; }
 .ios-slide-open .ios-slide-open-thumb {
   position: absolute;
   z-index: 4;
-  top: 50%;
+  /* Keep the thumb vertically stable even when WebKit drops a composited
+     transform on backdrop-filtered controls. Only horizontal travel belongs
+     in transform; the rail geometry owns vertical centering. */
+  top: 4px;
   left: 4px;
   display: grid;
   width: var(--slide-thumb-size);
@@ -1161,7 +1163,7 @@ br.tab-br { display: none; }
     inset 0 0 18px color-mix(in srgb, var(--slide-accent) 13%, transparent),
     0 7px 22px color-mix(in srgb, var(--slide-accent) 24%, rgba(0, 0, 0, 0.64)),
     0 2px 5px rgba(0, 0, 0, 0.28);
-  transform: translate3d(var(--slide-offset, 0), -50%, 0);
+  transform: translate3d(var(--slide-offset, 0px), 0, 0);
   pointer-events: none;
   transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }

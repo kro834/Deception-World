@@ -48,6 +48,10 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.match(slideControl, /next \+ metrics\.thumbRect\.width/);
   assert.match(styles, /--slide-thumb-size: 50px/);
   assert.match(styles, /--slide-thumb-size: 46px/);
+  assert.match(styles, /\.ios-slide-open \.ios-slide-open-thumb \{[\s\S]*?top: 4px/);
+  assert.match(styles, /translate3d\(var\(--slide-offset, 0px\), 0, 0\)/);
+  assert.doesNotMatch(styles, /\.form-pickup-plus\.ios-slide-open \{[^}]*contain:/s);
+  assert.doesNotMatch(styles, /translate3d\(var\(--slide-offset[^)]*\), -50%/);
   assert.doesNotMatch(styles, /\.form-pickup-plus span \{/);
 });
 
