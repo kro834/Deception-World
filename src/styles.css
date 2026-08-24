@@ -203,7 +203,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .zeus-button[data-navigating="true"] {
   pointer-events: none;
   filter: brightness(1.08) saturate(1.08);
-  transform: translate3d(-50%, -50%, 0) scale(0.94);
+  transform: translate3d(-50%, -50%, 0) scale(1);
 }
 
 @keyframes archive-frame-spin {

@@ -25,8 +25,21 @@ test("Zeus swaps only its compact character image without mounting a fullscreen 
   assert.doesNotMatch(source, /data-zeus-return-loading/);
 });
 
-test("the fullscreen loading gate remains exclusive to form archive transitions", () => {
+test("Zeus keeps the same outer button size while its return image is active", () => {
+  assert.match(
+    styles,
+    /\.zeus-button\[data-navigating="true"\]\s*\{[^}]*transform:\s*translate3d\(-50%, -50%, 0\) scale\(1\)/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /\.zeus-button\[data-navigating="true"\]\s*\{[^}]*scale\((?:0?\.[0-9]+|1\.[0-9]+)\)/,
+  );
+});
+
+test("the fullscreen route effects are limited to form archive and the Zeus dossier", () => {
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
-  assert.match(gate, /if \(!isArchiveTransition\) \{[\s\S]*?await navigate/);
+  assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
+  assert.match(gate, /if \(!isArchiveTransition && !isZeusTransition\) \{[\s\S]*?await navigate/);
+  assert.match(gate, /className=\{`load-gate is-sovereign-gate/);
   assert.doesNotMatch(gate, /zeus-button-return|zeus-return-dive/);
 });

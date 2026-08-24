@@ -10,6 +10,7 @@ const loadGate = readFileSync(
   new URL("../src/components/load-gate.tsx", import.meta.url),
   "utf8",
 );
+const router = readFileSync(new URL("../src/router.tsx", import.meta.url), "utf8");
 const slideControl = readFileSync(
   new URL("../src/components/world/slide-open-control.tsx", import.meta.url),
   "utf8",
@@ -27,10 +28,12 @@ test("Cipher uses the supplied dedicated thumbnail without replacing its dossier
   );
 });
 
-test("detail routes reset to the top on every route entry", () => {
-  assert.match(loadGate, /\^\\\/\(\?:riders\|managers\|characters\)\\\//);
-  assert.match(loadGate, /window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
-  assert.match(loadGate, /requestAnimationFrame\(resetDossierScroll\)/);
+test("detail routes use per-location restoration without overwriting the world scroll", () => {
+  assert.match(router, /scrollRestoration:\s*true/);
+  assert.match(loadGate, /useLayoutEffect\(\(\) => \{[\s\S]*?resetDetailScroll/);
+  assert.match(loadGate, /router snapshots the outgoing world's position/);
+  assert.match(loadGate, /attributeFilter: \["data-loading"\]/);
+  assert.doesNotMatch(loadGate, /resetDossierScroll/);
 });
 
 test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", () => {

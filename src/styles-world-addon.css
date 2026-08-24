@@ -1366,3 +1366,26 @@ br.tab-br { display: none; }
   0%, 100% { opacity: 0.24; translate: -2px 0; }
   50% { opacity: 1; translate: 2px 0; }
 }
+/* Zeus keeps the ceremonial sovereign record display, but deliberately has
+   no progress meter or percentage. The release is a visual handoff only. */
+.load-gate.is-sovereign-gate.is-revealing {
+  animation: sovereign-gate-record-release 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sovereign-gate-record-release {
+  from {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  to {
+    opacity: 0;
+    filter: brightness(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-gate.is-sovereign-gate.is-revealing {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -41,5 +41,8 @@ test("Cipher dossier navigation no longer mounts a route loading cut-in", () => 
   assert.doesNotMatch(gate, /RIDER_CUT_IN_ROUTES/);
   assert.doesNotMatch(gate, /cipher-slash-field/);
   assert.doesNotMatch(worldCss, /styles-world\/22\.css/);
-  assert.match(gate, /if \(!isArchiveTransition\) \{\s*await navigate/);
+  assert.match(
+    gate,
+    /if \(!isArchiveTransition && !isZeusTransition\) \{\s*await navigate/,
+  );
 });
