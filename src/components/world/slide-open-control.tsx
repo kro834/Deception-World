@@ -67,7 +67,8 @@ export function SlideOpenControl({
       button.dataset.completing = "false";
     }
     button?.style.setProperty("--slide-offset", "0px");
-    button?.style.setProperty("--slide-fill", "50px");
+    const thumbWidth = thumbRef.current?.getBoundingClientRect().width ?? 50;
+    button?.style.setProperty("--slide-fill", `${thumbWidth}px`);
     button?.style.setProperty("--slide-label-opacity", "1");
   };
 
@@ -144,7 +145,7 @@ export function SlideOpenControl({
     const ratio = metrics.distance > 0 ? next / metrics.distance : 0;
     const button = internalButtonRef.current;
     button?.style.setProperty("--slide-offset", `${next}px`);
-    button?.style.setProperty("--slide-fill", `${next + 50}px`);
+    button?.style.setProperty("--slide-fill", `${next + metrics.thumbRect.width}px`);
     button?.style.setProperty("--slide-label-opacity", String(Math.max(0.2, 1 - ratio * 0.8)));
     return ratio;
   };
@@ -160,7 +161,10 @@ export function SlideOpenControl({
       button.dataset.completing = "true";
     }
     button?.style.setProperty("--slide-offset", `${completedOffset}px`);
-    button?.style.setProperty("--slide-fill", `${completedOffset + 50}px`);
+    button?.style.setProperty(
+      "--slide-fill",
+      `${completedOffset + (metrics?.thumbRect.width ?? 50)}px`,
+    );
     button?.style.setProperty("--slide-label-opacity", "0.2");
     clearTimers();
 

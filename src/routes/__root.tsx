@@ -66,14 +66,14 @@ export const Route = createRootRoute({
       </head>
       <body className="antialiased">
         <PreviewHostBridge />
-        <ZeusButtonProvider>
-          <AuthProvider>
-            <LoadGateProvider>
+        <AuthProvider>
+          <LoadGateProvider>
+            <ZeusButtonProvider>
               <AppGuards />
               <Outlet />
-            </LoadGateProvider>
-          </AuthProvider>
-        </ZeusButtonProvider>
+            </ZeusButtonProvider>
+          </LoadGateProvider>
+        </AuthProvider>
         <Scripts />
       </body>
     </html>

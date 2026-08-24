@@ -414,28 +414,6 @@ br.tab-br { display: none; }
   letter-spacing: 0.28em;
 }
 
-.form-pickup-plus {
-  position: absolute;
-  z-index: 6;
-  right: 18px;
-  bottom: 18px;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  color: #fff;
-  background: color-mix(in srgb, var(--manager-accent, #78b69b) 82%, #000);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-}
-
-.form-pickup-plus span { font-size: 30px; font-weight: 300; line-height: 1; }
-.form-pickup-plus:focus,
-.form-pickup-plus:focus-visible { outline: none; }
-
 .form-pickup-copy {
   display: flex;
   flex-direction: column;
@@ -763,6 +741,7 @@ br.tab-br { display: none; }
 
 .ios-slide-open {
   --slide-accent: var(--manager-accent, var(--archive-accent, #67d8ff));
+  --slide-thumb-size: 50px;
   position: absolute;
   z-index: 6;
   display: block;
@@ -1081,7 +1060,7 @@ br.tab-br { display: none; }
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: var(--slide-fill, 50px);
+  width: var(--slide-fill, var(--slide-thumb-size));
   border-radius: 999px;
   background: linear-gradient(90deg, color-mix(in srgb, var(--slide-accent) 58%, rgba(255, 255, 255, 0.1)), color-mix(in srgb, var(--slide-accent) 28%, transparent));
   opacity: 0.72;
@@ -1162,8 +1141,8 @@ br.tab-br { display: none; }
   top: 50%;
   left: 4px;
   display: grid;
-  width: 50px;
-  height: 50px;
+  width: var(--slide-thumb-size);
+  height: var(--slide-thumb-size);
   place-items: center;
   overflow: hidden;
   isolation: isolate;
@@ -1329,6 +1308,7 @@ br.tab-br { display: none; }
 
 @media (max-width: 480px) {
   .ios-slide-open {
+    --slide-thumb-size: 46px;
     width: min(190px, calc(100% - 28px));
     height: 54px;
     min-height: 54px;
@@ -1336,11 +1316,6 @@ br.tab-br { display: none; }
 
   .form-pickup-plus.ios-slide-open { right: 14px; bottom: 14px; }
   .rider-nightmare-pickup-button.ios-slide-open { right: auto; bottom: auto; }
-
-  .ios-slide-open .ios-slide-open-thumb {
-    width: 46px;
-    height: 46px;
-  }
 
   .ios-slide-open-label { left: 59px; }
   .ios-slide-open .ios-slide-open-label small { font-size: 5.5px; }

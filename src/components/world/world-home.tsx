@@ -50,7 +50,7 @@ const RIDERS = [
   { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
   { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
   { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
-  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher.jpeg", pos: "50% 8%", desc: "最期の死者" },
+  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail.jpeg", pos: "50% 8%", desc: "最期の死者" },
 ];
 
 const COLUMNS = [
@@ -929,7 +929,7 @@ export function WorldHome() {
             <ManagerRail ref={managerRail} />
 
             {managerTab === 0 ? (
-              <div className="manager-archive-panel is-managers" role="tabpanel">
+              <div key="managers" className="manager-archive-panel is-managers" role="tabpanel">
                 <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
                   <GuardedLink
                     className="signal has-visual is-accessible is-face-safe zeus-signal"
@@ -1022,7 +1022,7 @@ export function WorldHome() {
                 </div>
               </div>
             ) : managerTab === 1 ? (
-              <div className="manager-archive-panel is-unmanaged" role="tabpanel">
+              <div key="unmanaged" className="manager-archive-panel is-unmanaged" role="tabpanel">
                 <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
                 <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
                   <button
@@ -1077,7 +1077,7 @@ export function WorldHome() {
                 </div>
               </div>
             ) : (
-              <div className="manager-archive-panel is-other" role="tabpanel">
+              <div key="other" className="manager-archive-panel is-other" role="tabpanel">
                 <p className="visually-hidden">その他の関連資料</p>
                 <div className="manager-slot-grid other-array" aria-label="その他">
                   <GuardedLink

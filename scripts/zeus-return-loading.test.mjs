@@ -1,42 +1,21 @@
 import assert from "node:assert/strict";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync(new URL("../src/components/zeus-button.tsx", import.meta.url), "utf8");
-const styles = readFileSync(
-  new URL("../src/styles-route-transitions.css", import.meta.url),
-  "utf8",
-);
-const returnImage = statSync(new URL("../public/zeus-button-return.jpeg", import.meta.url));
+const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
 
-test("Zeus navigation enters its dive on the next painted frame", () => {
+test("Zeus navigation closes transient UI and uses the shared route controller", () => {
   assert.match(source, /export function ZeusButtonProvider[\s\S]*?const navigatingRef = useRef/);
-  assert.match(source, /returnDiveFrame\.current = window\.requestAnimationFrame/);
-  assert.match(source, /window\.cancelAnimationFrame\(returnDiveFrame\.current\)/);
-  assert.match(source, /setReturnImage\(true\);[\s\S]*?setReturnDiveVisible\(true\)/);
-  assert.match(
-    source,
-    /createPortal\(<ZeusReturnDive arriving=\{returnDiveArriving\} \/>, document\.body\)/,
-  );
-  assert.match(source, /setReturnImage\(false\);[\s\S]*?setReturnDiveArriving\(true\)/);
-  assert.match(source, /removeAttribute\("data-zeus-return-loading"\)/);
+  assert.match(source, /const \{ go \} = useLoadGate\(\)/);
+  assert.match(source, /await go\(\{ to: "\/world", hash: "top" \}\)/);
+  assert.match(source, /dialog\.close\("zeus-navigation"\)/);
+  assert.match(root, /<LoadGateProvider>[\s\S]*?<ZeusButtonProvider>/);
 });
 
-test("the Zeus button preloads and crossfades to the supplied return character", () => {
-  assert.match(source, /data-return-loading=\{String\(returnImage\)\}/);
-  assert.match(source, /src="\/zeus-button-return\.jpeg"/);
-  assert.match(source, /loading="eager"/);
-  assert.match(styles, /\.zeus-button\[data-return-loading="true"\]/);
-  assert.match(styles, /\.zeus-button-image\.is-returning/);
-  assert.ok(returnImage.size > 100_000, "the character asset should retain useful detail");
-  assert.ok(returnImage.size < 500_000, "the preloaded character asset should stay lightweight");
-});
-
-test("slow return uses an adaptive emerald and platinum dive", () => {
-  assert.match(source, /<DiveVelocityCanvas active arriving=\{arriving\} \/>/);
-  assert.match(styles, /\.zeus-return-dive \{[\s\S]*?--zeus-emerald: #32e6ba/);
-  assert.match(styles, /--zeus-platinum: #edf6f4/);
-  assert.match(styles, /\.zeus-return-dive\.is-arriving/);
-  assert.match(styles, /@media \(max-width: 760px\), \(any-pointer: coarse\)/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+test("Zeus no longer preloads a second character or mounts its own loading dive", () => {
+  assert.doesNotMatch(source, /zeus-button-return\.jpeg/);
+  assert.doesNotMatch(source, /data-return-loading/);
+  assert.doesNotMatch(source, /ZeusReturnDive/);
+  assert.doesNotMatch(source, /DiveVelocityCanvas/);
 });

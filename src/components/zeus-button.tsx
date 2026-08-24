@@ -10,8 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { DiveVelocityCanvas } from "@/components/cinematic/dive-velocity-canvas";
+import { useRouterState } from "@tanstack/react-router";
+import { useLoadGate } from "@/components/load-gate";
 
 type ZeusButtonPosition = { x: number; y: number };
 
@@ -25,8 +25,6 @@ const POSITION_KEY = "deception-world:zeus-button-position";
 const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.9, y: 0.82 };
 const LONG_PRESS_MS = 420;
 const MOVE_TOLERANCE = 9;
-const RETURN_DIVE_MINIMUM_MS = 360;
-const RETURN_DIVE_EXIT_MS = 520;
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
 function readPosition(): ZeusButtonPosition {
@@ -52,25 +50,14 @@ function readPosition(): ZeusButtonPosition {
 }
 
 export function ZeusButtonProvider({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
+  const { go } = useLoadGate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [enabled, setEnabledState] = useState(true);
   const [position, setPosition] = useState<ZeusButtonPosition>(DEFAULT_POSITION);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const navigatingRef = useRef(false);
-  const returnDiveFrame = useRef<number | null>(null);
-  const returnDiveVisibleRef = useRef(false);
-  const returnDiveShownAt = useRef(0);
   const [navigating, setNavigating] = useState(false);
-  const [returnImage, setReturnImage] = useState(false);
-  const [returnDiveVisible, setReturnDiveVisible] = useState(false);
-  const [returnDiveArriving, setReturnDiveArriving] = useState(false);
-
-  const clearReturnDiveFrame = useCallback(() => {
-    if (returnDiveFrame.current != null) window.cancelAnimationFrame(returnDiveFrame.current);
-    returnDiveFrame.current = null;
-  }, []);
 
   useEffect(() => {
     try {
@@ -80,14 +67,6 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     }
     setPosition(readPosition());
   }, []);
-
-  useEffect(
-    () => () => {
-      clearReturnDiveFrame();
-      document.documentElement.removeAttribute("data-zeus-return-loading");
-    },
-    [clearReturnDiveFrame],
-  );
 
   useEffect(() => {
     let frame = 0;
@@ -139,19 +118,6 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     if (navigatingRef.current) return;
     navigatingRef.current = true;
     setNavigating(true);
-    setReturnImage(false);
-    setReturnDiveArriving(false);
-    clearReturnDiveFrame();
-
-    returnDiveFrame.current = window.requestAnimationFrame(() => {
-      if (!navigatingRef.current) return;
-      returnDiveFrame.current = null;
-      returnDiveVisibleRef.current = true;
-      returnDiveShownAt.current = performance.now();
-      document.documentElement.dataset.zeusReturnLoading = "true";
-      setReturnImage(true);
-      setReturnDiveVisible(true);
-    });
 
     try {
       document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
@@ -172,10 +138,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
         frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
       });
 
-      await new Promise<void>((resolve) => {
-        window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
-      });
-      await navigate({ to: "/world", hash: "top" });
+      await go({ to: "/world", hash: "top" });
       window.requestAnimationFrame(() => {
         document.getElementById("top")?.scrollIntoView({
           behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -185,31 +148,10 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
         });
       });
     } finally {
-      clearReturnDiveFrame();
-      if (returnDiveVisibleRef.current) {
-        const minimumTimeLeft = Math.max(
-          0,
-          RETURN_DIVE_MINIMUM_MS - (performance.now() - returnDiveShownAt.current),
-        );
-        if (minimumTimeLeft > 0) {
-          await new Promise((resolve) => window.setTimeout(resolve, minimumTimeLeft));
-        }
-        setReturnImage(false);
-        setReturnDiveArriving(true);
-        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        await new Promise((resolve) =>
-          window.setTimeout(resolve, reduceMotion ? 160 : RETURN_DIVE_EXIT_MS),
-        );
-      }
-      returnDiveVisibleRef.current = false;
-      returnDiveShownAt.current = 0;
-      document.documentElement.removeAttribute("data-zeus-return-loading");
-      setReturnDiveVisible(false);
-      setReturnDiveArriving(false);
       navigatingRef.current = false;
       setNavigating(false);
     }
-  }, [clearReturnDiveFrame, navigate]);
+  }, [go]);
 
   return (
     <ZeusButtonContext.Provider value={settings}>
@@ -220,15 +162,11 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
               position={position}
               sideMenuOpen={sideMenuOpen}
               navigating={navigating}
-              returnImage={returnImage}
               onPositionChange={savePosition}
               onNavigate={goToTop}
             />,
             portalTarget,
           )
-        : null}
-      {returnDiveVisible && portalTarget
-        ? createPortal(<ZeusReturnDive arriving={returnDiveArriving} />, document.body)
         : null}
     </ZeusButtonContext.Provider>
   );
@@ -260,14 +198,12 @@ function ZeusButton({
   position,
   sideMenuOpen,
   navigating,
-  returnImage,
   onPositionChange,
   onNavigate,
 }: {
   position: ZeusButtonPosition;
   sideMenuOpen: boolean;
   navigating: boolean;
-  returnImage: boolean;
   onPositionChange: (position: ZeusButtonPosition) => void;
   onNavigate: () => Promise<void>;
 }) {
@@ -280,14 +216,23 @@ function ZeusButton({
   const latestPointer = useRef({ x: 0, y: 0 });
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
+  const placementFrame = useRef<number | null>(null);
 
   const getViewport = useCallback(() => {
     const viewport = window.visualViewport;
+    const width = Math.max(1, viewport?.width ?? window.innerWidth);
+    const height = Math.max(1, viewport?.height ?? window.innerHeight);
+    const maxOffsetLeft = Math.max(0, window.innerWidth - width);
+    const maxOffsetTop = Math.max(0, window.innerHeight - height);
+    const clampOffset = (value: number, maximum: number) =>
+      Math.max(0, Math.min(maximum, Number.isFinite(value) ? value : 0));
     return {
-      width: Math.max(1, viewport?.width ?? window.innerWidth),
-      height: Math.max(1, viewport?.height ?? window.innerHeight),
-      offsetLeft: viewport?.offsetLeft ?? 0,
-      offsetTop: viewport?.offsetTop ?? 0,
+      width,
+      height,
+      // iOS reports transient negative offsets while the page rubber-bands
+      // above its top edge. Never persist that bounce into the saved position.
+      offsetLeft: clampOffset(viewport?.offsetLeft ?? 0, maxOffsetLeft),
+      offsetTop: clampOffset(viewport?.offsetTop ?? 0, maxOffsetTop),
     };
   }, []);
 
@@ -389,7 +334,13 @@ function ZeusButton({
   }, [placeButton, position]);
 
   useEffect(() => {
-    const onResize = () => placeButton(pendingPosition.current);
+    const onResize = () => {
+      if (activePointer.current != null || placementFrame.current != null) return;
+      placementFrame.current = window.requestAnimationFrame(() => {
+        placementFrame.current = null;
+        placeButton(pendingPosition.current);
+      });
+    };
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("orientationchange", onResize, { passive: true });
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
@@ -399,6 +350,8 @@ function ZeusButton({
       window.removeEventListener("orientationchange", onResize);
       window.visualViewport?.removeEventListener("resize", onResize);
       window.visualViewport?.removeEventListener("scroll", onResize);
+      if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
+      placementFrame.current = null;
     };
   }, [placeButton]);
 
@@ -516,7 +469,6 @@ function ZeusButton({
       className="zeus-button"
       data-dragging="false"
       data-navigating={String(navigating)}
-      data-return-loading={String(returnImage)}
       data-menu-open={String(sideMenuOpen)}
       aria-grabbed="false"
       aria-busy={navigating}
@@ -593,52 +545,9 @@ function ZeusButton({
         fetchPriority="high"
         draggable={false}
       />
-      <img
-        className="zeus-button-image is-returning"
-        src="/zeus-button-return.jpeg"
-        alt=""
-        width={768}
-        height={768}
-        loading="eager"
-        decoding="async"
-        draggable={false}
-      />
       <span className="zeus-button-move" aria-hidden="true">
         MOVE
       </span>
     </button>
-  );
-}
-
-function ZeusReturnDive({ arriving }: { arriving: boolean }) {
-  return (
-    <div
-      className={`zeus-return-dive is-diving${arriving ? " is-arriving" : ""}`}
-      role="status"
-      aria-live="polite"
-      aria-busy={!arriving}
-      aria-label={arriving ? "トップ画面の読み込みが完了しました" : "トップ画面へダイブ中"}
-    >
-      <DiveVelocityCanvas active arriving={arriving} />
-      <span className="zeus-return-depth" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-      <span className="zeus-return-rings" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </span>
-      <span className="zeus-return-core" aria-hidden="true" />
-      <span className="zeus-return-flash" aria-hidden="true" />
-      <span className="zeus-return-vignette" aria-hidden="true" />
-      <span className="zeus-return-status">
-        <small>SOVEREIGN VECTOR // RIKUEI I</small>
-        <b>{arriving ? "主権座標へ到達" : "世界中枢へダイブ中"}</b>
-        <i aria-hidden="true">
-          <u />
-        </i>
-      </span>
-    </div>
   );
 }
