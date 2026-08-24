@@ -41,7 +41,7 @@ const POSTERS = [
   { src: "/poster-card-29.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ星光のライダー" },
   { src: "/poster-card-30.jpeg", pos: "50% 34%", fit: "cover", alt: "紅い光を宿すヴェール姿の人物" },
   { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
-  { src: "/poster-card-32.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
+  { src: "/poster-card-32-20260825.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
   { src: "/poster-card-33.jpeg", pos: "50% 50%", fit: "cover", alt: "夜の遊園地に立つ紅黒の装甲ライダー" },
 ];
 
@@ -53,7 +53,7 @@ const RIDERS = [
   { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
   { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
   { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
-  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail.jpeg", pos: "50% 8%", desc: "最期の死者" },
+  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail-20260825.jpeg", pos: "50% 8%", desc: "最期の死者" },
 ];
 
 const COLUMNS = [

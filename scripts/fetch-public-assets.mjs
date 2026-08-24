@@ -90,7 +90,7 @@ const files = [
   "poster-card-29.jpeg",
   "poster-card-30.jpeg",
   "poster-card-31.jpeg",
-  "poster-card-32.jpeg",
+  "poster-card-32-20260825.jpeg",
   "poster-card-33.jpeg",
   "rider-algenome.jpeg",
   "rider-leddic-home.jpeg",

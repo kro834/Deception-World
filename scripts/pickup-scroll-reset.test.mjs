@@ -12,10 +12,16 @@ const home = read("../src/components/world/world-home.tsx");
 test("pickup scroll reset survives React commit and WebKit dialog focus restoration", () => {
   assert.match(helper, /target\.scrollTop = 0/);
   assert.match(helper, /target\.scrollLeft = 0/);
+  assert.match(helper, /target\.style\.scrollBehavior = "auto"/);
   assert.match(helper, /behavior: "auto"/);
-  assert.equal((helper.match(/window\.requestAnimationFrame/g) ?? []).length, 2);
+  assert.ok((helper.match(/window\.requestAnimationFrame/g) ?? []).length >= 3);
   assert.match(helper, /if \(cancelled \|\| !dialog\.open\) return/);
-  assert.match(helper, /if \(!cancelled && dialog\.open\) reset\(\)/);
+  assert.match(helper, /\[90, 240, 520, 900\]/);
+  assert.match(helper, /new ResizeObserver\(requestLayoutReset\)/);
+  assert.match(helper, /dialog\.addEventListener\("load", requestLayoutReset, true\)/);
+  assert.match(helper, /dialog\.addEventListener\("touchstart", noteInteraction/);
+  assert.match(helper, /userInteracted = true/);
+  assert.match(helper, /window\.setTimeout\(stopWatching, 1200\)/);
   assert.match(helper, /window\.cancelAnimationFrame\(firstFrame\)/);
   assert.match(helper, /window\.cancelAnimationFrame\(finalFrame\)/);
   assert.equal(reconstructedHelper, helper);

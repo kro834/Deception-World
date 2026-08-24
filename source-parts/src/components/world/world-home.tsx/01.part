@@ -41,7 +41,7 @@ const POSTERS = [
   { src: "/poster-card-29.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ星光のライダー" },
   { src: "/poster-card-30.jpeg", pos: "50% 34%", fit: "cover", alt: "紅い光を宿すヴェール姿の人物" },
   { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
-  { src: "/poster-card-32.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
+  { src: "/poster-card-32-20260825.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
   { src: "/poster-card-33.jpeg", pos: "50% 50%", fit: "cover", alt: "夜の遊園地に立つ紅黒の装甲ライダー" },
 ];
 

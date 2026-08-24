@@ -26,9 +26,9 @@ const reconstructedStyles = readFileSync(
 );
 
 test("Cipher uses the supplied dedicated thumbnail without replacing its dossier art", () => {
-  assert.match(worldHome, /id: "cipher"[\s\S]*?img: "\/rider-cipher-thumbnail\.jpeg"/);
+  assert.match(worldHome, /id: "cipher"[\s\S]*?img: "\/rider-cipher-thumbnail-20260825\.jpeg"/);
   assert.ok(
-    statSync(new URL("../public/rider-cipher-thumbnail.jpeg", import.meta.url)).size > 100_000,
+    statSync(new URL("../public/rider-cipher-thumbnail-20260825.jpeg", import.meta.url)).size > 100_000,
   );
 });
 
