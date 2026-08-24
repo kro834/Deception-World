@@ -4,6 +4,8 @@ import test from "node:test";
 
 const source = readFileSync(new URL("../src/components/zeus-button.tsx", import.meta.url), "utf8");
 const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
+const styles = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
+const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 
 test("Zeus navigation closes transient UI and uses the shared route controller", () => {
   assert.match(source, /export function ZeusButtonProvider[\s\S]*?const navigatingRef = useRef/);
@@ -13,9 +15,18 @@ test("Zeus navigation closes transient UI and uses the shared route controller",
   assert.match(root, /<LoadGateProvider>[\s\S]*?<ZeusButtonProvider>/);
 });
 
-test("Zeus no longer preloads a second character or mounts its own loading dive", () => {
-  assert.doesNotMatch(source, /zeus-button-return\.jpeg/);
-  assert.doesNotMatch(source, /data-return-loading/);
+test("Zeus swaps only its compact character image without mounting a fullscreen loader", () => {
+  assert.match(source, /const \[returnImage, setReturnImage\] = useState\(false\)/);
+  assert.match(source, /data-return-loading=\{String\(returnImage\)\}/);
+  assert.match(source, /src="\/zeus-button-return\.jpeg"/);
+  assert.match(styles, /\.zeus-button\[data-return-loading="true"\][\s\S]*?\.zeus-button-image\.is-returning/);
   assert.doesNotMatch(source, /ZeusReturnDive/);
   assert.doesNotMatch(source, /DiveVelocityCanvas/);
+  assert.doesNotMatch(source, /data-zeus-return-loading/);
+});
+
+test("the fullscreen loading gate remains exclusive to form archive transitions", () => {
+  assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
+  assert.match(gate, /if \(!isArchiveTransition\) \{[\s\S]*?await navigate/);
+  assert.doesNotMatch(gate, /zeus-button-return|zeus-return-dive/);
 });

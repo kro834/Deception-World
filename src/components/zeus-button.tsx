@@ -25,6 +25,7 @@ const POSITION_KEY = "deception-world:zeus-button-position";
 const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.9, y: 0.82 };
 const LONG_PRESS_MS = 420;
 const MOVE_TOLERANCE = 9;
+const RETURN_IMAGE_MIN_MS = 360;
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
 function readPosition(): ZeusButtonPosition {
@@ -58,6 +59,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const navigatingRef = useRef(false);
   const [navigating, setNavigating] = useState(false);
+  const [returnImage, setReturnImage] = useState(false);
 
   useEffect(() => {
     try {
@@ -118,8 +120,15 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     if (navigatingRef.current) return;
     navigatingRef.current = true;
     setNavigating(true);
+    setReturnImage(true);
+    const returnImageStartedAt = performance.now();
 
     try {
+      // Give the compact image swap one paint before navigation. The shared
+      // fullscreen gate remains reserved for form-archive transitions.
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
       document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
       const openDialogs = Array.from(
         document.querySelectorAll<HTMLDialogElement>("dialog[open]"),
@@ -148,6 +157,11 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
         });
       });
     } finally {
+      const remaining = RETURN_IMAGE_MIN_MS - (performance.now() - returnImageStartedAt);
+      if (remaining > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      }
+      setReturnImage(false);
       navigatingRef.current = false;
       setNavigating(false);
     }
@@ -162,6 +176,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
               position={position}
               sideMenuOpen={sideMenuOpen}
               navigating={navigating}
+              returnImage={returnImage}
               onPositionChange={savePosition}
               onNavigate={goToTop}
             />,
@@ -198,12 +213,14 @@ function ZeusButton({
   position,
   sideMenuOpen,
   navigating,
+  returnImage,
   onPositionChange,
   onNavigate,
 }: {
   position: ZeusButtonPosition;
   sideMenuOpen: boolean;
   navigating: boolean;
+  returnImage: boolean;
   onPositionChange: (position: ZeusButtonPosition) => void;
   onNavigate: () => Promise<void>;
 }) {
@@ -469,6 +486,7 @@ function ZeusButton({
       className="zeus-button"
       data-dragging="false"
       data-navigating={String(navigating)}
+      data-return-loading={String(returnImage)}
       data-menu-open={String(sideMenuOpen)}
       aria-grabbed="false"
       aria-busy={navigating}
@@ -543,6 +561,15 @@ function ZeusButton({
         alt=""
         decoding="async"
         fetchPriority="high"
+        draggable={false}
+      />
+      <img
+        className="zeus-button-image is-returning"
+        src="/zeus-button-return.jpeg"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        fetchPriority="low"
         draggable={false}
       />
       <span className="zeus-button-move" aria-hidden="true">

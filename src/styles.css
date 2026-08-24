@@ -2117,6 +2117,49 @@ html[data-rail-lock] body {
   -webkit-user-drag: none;
 }
 
+.zeus-button-image {
+  position: relative;
+  z-index: 0;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.2s ease,
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.24s ease;
+}
+
+.zeus-button-image.is-returning {
+  position: absolute;
+  z-index: 1;
+  inset: 5px;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  opacity: 0;
+  filter: saturate(1.08) brightness(1.04);
+  transform: scale(0.88);
+}
+
+.zeus-button[data-return-loading="true"] {
+  border-color: rgb(235 211 142 / 0.92);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.92),
+    0 0 0 3px rgb(8 34 31 / 0.8),
+    0 12px 34px rgb(0 0 0 / 0.5),
+    0 0 28px rgb(55 230 194 / 0.34),
+    0 0 42px rgb(239 211 139 / 0.24);
+}
+
+.zeus-button[data-return-loading="true"] .zeus-button-image.is-default {
+  opacity: 0;
+  filter: blur(1.5px) brightness(1.16);
+  transform: scale(1.1);
+}
+
+.zeus-button[data-return-loading="true"] .zeus-button-image.is-returning {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .zeus-button-aura {
   position: absolute;
   z-index: 2;
@@ -2280,6 +2323,7 @@ html[data-rail-lock] body {
 
 @media (prefers-reduced-motion: reduce) {
   .zeus-button,
+  .zeus-button-image,
   .zeus-button-move,
   .side-panel-zeus-toggle,
   .side-panel-zeus-toggle > i,
