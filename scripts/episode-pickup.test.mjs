@@ -56,7 +56,11 @@ test("the pickup dialog is modal, dismissible, and scroll-reset on every open", 
   assert.match(worldHome, /settlePickupScroll\(dialog, \["\.episode-pickup-panel"\]/);
   assert.match(worldHome, /cancelEpisodePickupScrollReset\.current\?\.\(\)/);
   assert.match(worldHome, /resetPickupScroll\(dialog, \["\.episode-pickup-panel"\]\)/);
+  assert.match(worldHome, /episodePickupOpenedByKeyboard\.current/);
   assert.match(worldHome, /\.episode-pickup-close"\)\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(worldHome, /dialog\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(worldHome, /openEpisodePickup\(i, event\.currentTarget, event\.detail === 0\)/);
+  assert.match(worldHome, /window\.requestAnimationFrame\(\(\) => trigger\?\.blur\(\)\)/);
   assert.doesNotMatch(worldHome, /bootLiquidGlass\(dialog\)/);
   assert.match(worldHome, /onCancel=\{\(event\) => \{[\s\S]*?closeEpisodePickup\(\)/);
   assert.match(worldHome, /event\.target === episodePickupDialogRef\.current/);
@@ -79,7 +83,10 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
   );
   assert.match(baseStyles, /backdrop-filter: blur\(18px\) saturate\(170%\)/);
   assert.match(baseStyles, /\.episode-pickup-dialog::backdrop/);
-  assert.match(baseStyles, /\.episode-pickup-dialog:focus \{[\s\S]*?outline: none/);
+  assert.match(
+    baseStyles,
+    /\.episode-pickup-dialog:focus,[\s\S]*?\.episode-pickup-dialog:focus-visible \{[\s\S]*?outline: none !important/,
+  );
   assert.match(baseStyles, /html:has\(\.episode-pickup-dialog\[open\]\)/);
   assert.match(
     baseStyles,

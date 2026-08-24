@@ -356,6 +356,8 @@ export function WorldHome() {
   const riderRail = useRef<HTMLDivElement>(null);
   const episodeGridRef = useRef<HTMLDivElement>(null);
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
+  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const episodePickupOpenedByKeyboard = useRef(false);
   const episodeScrollTimer = useRef<number | null>(null);
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
@@ -591,9 +593,11 @@ export function WorldHome() {
     }, 520);
   };
 
-  const openEpisodePickup = (index: number) => {
+  const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
     setEpisodePickup(index);
     cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
@@ -603,8 +607,13 @@ export function WorldHome() {
         /* already open */
       }
     }
+    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
     cancelEpisodePickupScrollReset.current = settlePickupScroll(dialog, [".episode-pickup-panel"], () => {
-      dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
+      if (episodePickupOpenedByKeyboard.current) {
+        dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
+      } else {
+        dialog.focus({ preventScroll: true });
+      }
     });
   };
 
@@ -1352,7 +1361,7 @@ export function WorldHome() {
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
-                      openEpisodePickup(i);
+                      openEpisodePickup(i, event.currentTarget, event.detail === 0);
                     }}
                   >
                     <LiquidPointerGlow />
@@ -1406,6 +1415,13 @@ export function WorldHome() {
           const dialog = episodePickupDialogRef.current;
           if (dialog) resetPickupScroll(dialog, [".episode-pickup-panel"]);
           setEpisodePickup(null);
+          if (!episodePickupOpenedByKeyboard.current) {
+            const trigger = episodePickupTriggerRef.current;
+            trigger?.blur();
+            window.requestAnimationFrame(() => trigger?.blur());
+          }
+          episodePickupTriggerRef.current = null;
+          episodePickupOpenedByKeyboard.current = false;
         }}
         onCancel={(event) => {
           event.preventDefault();
