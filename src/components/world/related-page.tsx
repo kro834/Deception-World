@@ -209,7 +209,13 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
-            <img src={person.image} alt={`${person.name}のキャラクタービジュアル`} style={{ objectPosition: person.pos, objectFit: "cover" }} />
+            <img
+              src={person.image}
+              alt={`${person.name}のキャラクタービジュアル`}
+              style={{ objectPosition: person.pos, objectFit: "cover" }}
+              decoding="async"
+              fetchPriority="high"
+            />
             <span className="manager-numeral">{person.code}</span>
           </div>
         </div>

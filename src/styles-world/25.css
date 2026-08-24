@@ -1,0 +1,227 @@
+/* Adaptive interface refinement.
+   The visual language stays recognisably Deception World: depth comes from
+   crisp instrument lines and material contrast, not additional blur planes. */
+
+:is(.site-shell, .manager-page, .rider-archive-page, .form-archive-page) {
+  --future-line: color-mix(in srgb, var(--future-hud-primary, var(--cyan)) 22%, transparent);
+  --future-line-strong: color-mix(in srgb, var(--future-hud-primary, var(--cyan)) 48%, transparent);
+  --future-glint: color-mix(in srgb, var(--future-hud-secondary, var(--gold)) 72%, white 8%);
+}
+
+/* The fixed chrome feels like one coherent navigation instrument without
+   making its backdrop blur more expensive. */
+:is(.topbar, .manager-topbar, .rider-archive-topbar, .form-archive-toolbar) {
+  background-image:
+    linear-gradient(90deg, transparent 0 8%, var(--future-line) 50%, transparent 92%),
+    radial-gradient(circle at 12% -30%, rgba(103, 216, 255, 0.08), transparent 32%);
+  box-shadow:
+    inset 0 -1px 0 var(--future-line),
+    0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+.section-index {
+  position: relative;
+  min-height: 34px;
+  padding-inline-start: 18px;
+}
+
+.section-index::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 14px rgba(103, 216, 255, 0.34);
+  rotate: 45deg;
+}
+
+.section-index small {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-index small::after {
+  content: "NODE / ONLINE";
+  color: color-mix(in srgb, var(--cyan) 62%, var(--dim));
+  font-size: 6px;
+  letter-spacing: 0.22em;
+  opacity: 0.64;
+}
+
+:is(.threat-panel, .rider-console, .episode-archive, .world-column-content) {
+  border-color: var(--future-line);
+  background-blend-mode: screen, normal;
+  box-shadow:
+    0 28px 76px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    inset 0 0 0 1px rgba(103, 216, 255, 0.022);
+}
+
+.threat-panel {
+  background:
+    linear-gradient(135deg, rgba(103, 216, 255, 0.045), transparent 32%),
+    linear-gradient(110deg, rgba(12, 17, 25, 0.98), rgba(8, 14, 22, 0.9));
+}
+
+.rider-console {
+  background:
+    linear-gradient(145deg, rgba(103, 216, 255, 0.04), transparent 28%),
+    linear-gradient(320deg, rgba(215, 171, 81, 0.025), transparent 32%),
+    rgba(8, 13, 20, 0.9);
+}
+
+/* Repeated records get a consistent modular cadence. Geometry and reserved
+   copy heights remain untouched, preventing the earlier responsive drift. */
+:is(.signal, .other-archive-card, .episode-card-surface, .manager-copy-section) {
+  border-color: var(--future-line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 24px rgba(103, 216, 255, 0.018);
+}
+
+:is(.signal, .other-archive-card, .episode-card) {
+  contain: layout style;
+}
+
+.manager-copy-section {
+  position: relative;
+  background:
+    linear-gradient(125deg, rgba(103, 216, 255, 0.024), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent);
+}
+
+.manager-copy-section::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 22px;
+  height: 22px;
+  border-top: 1px solid var(--future-line-strong);
+  border-right: 1px solid var(--future-glint);
+  pointer-events: none;
+}
+
+.manager-facts > div {
+  background:
+    linear-gradient(135deg, rgba(103, 216, 255, 0.035), transparent 58%),
+    rgba(255, 255, 255, 0.012);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.hero-metadata > span,
+.return-strip {
+  border-color: var(--future-line);
+}
+
+.hero-metadata small,
+.system-label,
+.manager-file-number,
+.episode-archive-heading > div:first-child > span {
+  text-shadow: 0 0 14px color-mix(in srgb, var(--future-hud-primary, var(--cyan)) 30%, transparent);
+}
+
+/* Only fine pointers receive lift and directional glints. Touch layouts keep
+   stable card geometry and therefore avoid accidental emphasis after taps. */
+@media (hover: hover) and (pointer: fine) {
+  :is(.signal.is-accessible, .other-archive-card, .episode-card) {
+    transition:
+      border-color 0.26s ease,
+      box-shadow 0.32s ease,
+      transform 0.42s var(--glass-spring);
+  }
+
+  :is(.signal.is-accessible, .other-archive-card, .episode-card):hover {
+    border-color: var(--future-line-strong);
+    box-shadow:
+      0 20px 48px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      inset 0 0 28px rgba(103, 216, 255, 0.035);
+    transform: translateY(-3px);
+  }
+}
+
+/* Below-fold prose and dossiers can skip layout/paint until approached. */
+.manager-dossier {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1200px;
+}
+
+/* Background tabs and low-capability devices should never spend time
+   repainting decorative loops. Interactive transitions remain available. */
+html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *,
+html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *::before,
+html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *::after {
+  animation-play-state: paused !important;
+}
+
+html[data-world-effects="economy"] :is(.ambient-orb, .orbit) {
+  animation: none !important;
+}
+
+html[data-world-effects="economy"] .poster-holo-ring::before,
+html[data-world-effects="economy"] .poster-sheen::after,
+html[data-world-effects="economy"] .corner::before,
+html[data-world-effects="economy"] .side-panel-trigger-ring::before {
+  animation: none !important;
+}
+
+html[data-world-effects="economy"] .ambient-orb {
+  filter: blur(62px);
+  opacity: 0.065;
+}
+
+html[data-world-effects="economy"] .hero-backdrop-layer img {
+  filter: blur(20px) saturate(108%);
+}
+
+html[data-world-effects="economy"] .grain {
+  display: none;
+}
+
+@media (max-width: 840px), (pointer: coarse) {
+  .section-index {
+    margin-bottom: clamp(42px, 9vw, 62px);
+  }
+
+  .section-index small::after {
+    display: none;
+  }
+
+  .ambient-orb {
+    filter: blur(64px);
+    animation: none;
+  }
+
+  .hero-backdrop-layer img {
+    filter: blur(22px) saturate(112%);
+    animation: none;
+  }
+
+  .poster-sheen::after,
+  .corner::before,
+  .side-panel-trigger-ring::before {
+    animation: none;
+  }
+
+  .liquid-pointer-glow {
+    width: 112px;
+    height: 112px;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.signal.is-accessible, .other-archive-card, .episode-card) {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :is(.threat-panel, .rider-console, .episode-archive, .world-column-content, .manager-copy-section) {
+    background-color: #09101a;
+    background-image: none;
+  }
+}

@@ -11,6 +11,10 @@ type LiquidTarget = HTMLElement & {
 
 export function useLiquidPointerLight() {
   useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
+    if (reducedMotion.matches || reducedTransparency.matches) return;
+
     let active: LiquidTarget | null = null;
     let pressed: LiquidTarget | null = null;
     let pointerId: number | null = null;
@@ -40,7 +44,7 @@ export function useLiquidPointerLight() {
 
     const flush = () => {
       frame = 0;
-      if (!nextPoint) return;
+      if (!nextPoint || document.hidden) return;
       const { target, x, y } = nextPoint;
       nextPoint = null;
       const rect = target.getBoundingClientRect();
@@ -77,6 +81,9 @@ export function useLiquidPointerLight() {
     };
     const onPointerMove = (event: PointerEvent) => {
       if (!event.isPrimary) return;
+      // `pointerover` already activates an eligible control. Avoid a DOM
+      // `closest()` lookup for every mouse movement elsewhere on the page.
+      if (!active && pointerId === null) return;
       const target = findTarget(event.target) ?? (pointerId === event.pointerId ? pressed : null);
       if (target) activate(target, event.clientX, event.clientY);
     };
@@ -111,11 +118,19 @@ export function useLiquidPointerLight() {
       if (active === target) active = null;
     };
     const reset = () => {
+      nextPoint = null;
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
       setPressed(pressed, false);
       setActive(active, false);
       pressed = null;
       active = null;
       pointerId = null;
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) reset();
     };
 
     document.addEventListener("pointerover", onPointerOver, { passive: true });
@@ -126,6 +141,7 @@ export function useLiquidPointerLight() {
     document.addEventListener("pointerout", onPointerOut, { passive: true });
     document.addEventListener("focusin", onFocusIn);
     document.addEventListener("focusout", onFocusOut);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("blur", reset);
 
     return () => {
@@ -137,8 +153,8 @@ export function useLiquidPointerLight() {
       document.removeEventListener("pointerout", onPointerOut);
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("blur", reset);
-      if (frame) window.cancelAnimationFrame(frame);
       reset();
     };
   }, []);
