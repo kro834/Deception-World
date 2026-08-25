@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
@@ -7,6 +7,7 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { rememberRiderReturn } from "./rider-return-state";
 
 type RiderDossier = {
   id: string;
@@ -825,6 +826,9 @@ export function RiderPage({ id }: { id: string }) {
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
   const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    rememberRiderReturn(rider.id);
+  }, [rider.id]);
   const resetNightmareScroll = () => {
     const dialog = nightmareRef.current;
     if (dialog) resetPickupScroll(dialog, [".rider-nightmare-dialog-panel"]);
@@ -868,7 +872,7 @@ export function RiderPage({ id }: { id: string }) {
             <small>CHARACTER FILE // {rider.no}</small>
           </span>
         </GuardedLink>
-        <GuardedLink to="/world" hash="riders-return" assets={[]} className="manager-back">
+        <GuardedLink to="/world" hash="riders-return" assets={[]} className="manager-back" aria-label="ライダー一覧へ戻る">
           <span>ライダー一覧へ戻る</span>
           <i aria-hidden="true">
             <UiVectorIcon kind="arrow-down-left" size={14} />

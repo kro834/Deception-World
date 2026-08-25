@@ -10,13 +10,14 @@ html[data-mode="world"] {
 
 .site-shell #riders-return {
   position: absolute;
-  /* Place the hash target slightly before the section so returning from a
-     dossier leaves the riders heading comfortably lower in the viewport. */
-  top: -48px;
+  /* The root already supplies the fixed-header inset through scroll-padding.
+     Keep this return-only target inside the section so the heading and the
+     first rider card re-enter together instead of leaving a large empty band. */
+  top: clamp(64px, 6vw, 88px);
   left: 0;
   width: 1px;
   height: 1px;
-  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+  scroll-margin-top: 0;
   pointer-events: none;
 }
 

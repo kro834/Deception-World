@@ -9,6 +9,7 @@ import { RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
   { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
@@ -309,7 +310,7 @@ const PickupRail = memo(
 );
 
 const RiderRail = memo(
-  forwardRef<HTMLDivElement>(function RiderRail(_props, ref) {
+  forwardRef<HTMLDivElement, { initialIndex: number }>(function RiderRail({ initialIndex }, ref) {
     return (
       <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="八人のメインライダー">
         <LiquidLens />
@@ -318,8 +319,8 @@ const RiderRail = memo(
             key={r.id}
             type="button"
             role="tab"
-            className={i === 0 ? "is-active" : ""}
-            aria-selected={i === 0}
+            className={i === initialIndex ? "is-active" : ""}
+            aria-selected={i === initialIndex}
             style={{
               ["--tab-tone" as string]: r.tone,
               ["--liquid-accent" as string]: r.tone,
@@ -339,13 +340,18 @@ export function WorldHome() {
   useWorldMode();
   const { go } = useLoadGate();
   const shellRef = useRef<HTMLDivElement>(null);
+  const [initialRiderTab] = useState(() => {
+    const returnId = readRiderReturn();
+    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
+    return returnIndex >= 0 ? returnIndex : 0;
+  });
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
   const [shuffling, setShuffling] = useState(false);
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
-  const [riderTab, setRiderTab] = useState(0);
+  const [riderTab, setRiderTab] = useState(initialRiderTab);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
@@ -370,8 +376,12 @@ export function WorldHome() {
   const shuffleActive = useRef(false);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
-  const riderTabRef = useRef(0);
+  const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    clearRiderReturn();
+  }, []);
 
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
@@ -1203,7 +1213,7 @@ export function WorldHome() {
           <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。</p>
         </div>
         <div className="rider-console">
-          <RiderRail ref={riderRail} />
+          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
             <div className="rider-visual fit-cover">
               {RIDERS.map((r, i) => (

@@ -32,6 +32,10 @@ const worldPolishStyles = readFileSync(
   new URL("../src/styles-world/21.css", import.meta.url),
   "utf8",
 );
+const riderReturnState = readFileSync(
+  new URL("../src/components/world/rider-return-state.ts", import.meta.url),
+  "utf8",
+);
 const reconstructedStyles = readFileSync(
   new URL("../source-parts/src/styles-world-addon.css/02.part", import.meta.url),
   "utf8",
@@ -62,11 +66,29 @@ test("detail routes use per-location restoration without overwriting the world s
   assert.doesNotMatch(loadGate, /resetDossierScroll/);
 });
 
-test("all rider dossiers return slightly deeper into the eight-rider section", () => {
+test("all rider dossiers return deeper without a doubled fixed-header inset", () => {
   assert.equal((riderPage.match(/hash="riders-return"/g) ?? []).length, 2);
   assert.equal((riderPage.match(/<GuardedLink/g) ?? []).length >= 2, true);
   assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
-  assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*-48px/);
+  assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*clamp\(64px, 6vw, 88px\)/);
+  assert.match(worldPolishStyles, /#riders-return[\s\S]*?scroll-margin-top:\s*0/);
+});
+
+test("the rider selected before opening a dossier is restored once on return", () => {
+  assert.match(riderPage, /rememberRiderReturn\(rider\.id\)/);
+  assert.match(worldHome, /const returnId = readRiderReturn\(\)/);
+  assert.match(worldHome, /RIDERS\.findIndex\(\(rider\) => rider\.id === returnId\)/);
+  assert.match(worldHome, /useState\(initialRiderTab\)/);
+  assert.match(worldHome, /useRef\(riderTab\)/);
+  assert.match(worldHome, /<RiderRail ref=\{riderRail\} initialIndex=\{initialRiderTab\} \/>/);
+  assert.match(worldHome, /aria-selected=\{i === initialIndex\}/);
+  assert.match(riderReturnState, /sessionStorage\.setItem\(RIDER_RETURN_KEY, id\)/);
+  assert.match(worldHome, /useEffect\(\(\) => \{\s*clearRiderReturn\(\);\s*\}, \[\]\)/);
+  assert.match(riderReturnState, /sessionStorage\.removeItem\(RIDER_RETURN_KEY\)/);
+});
+
+test("the compact mobile return control keeps an accessible name", () => {
+  assert.match(riderPage, /className="manager-back" aria-label="ライダー一覧へ戻る"/);
 });
 
 test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", () => {
