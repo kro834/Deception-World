@@ -78,6 +78,20 @@ test("the restored Zeus record display has no progress bar or percentage", () =>
   );
 });
 
+test("the form archive dive keeps its cinematic status without a numeric percentage", () => {
+  const archiveBranch = gate.slice(
+    gate.lastIndexOf("return (", gate.indexOf("function RiderRouteDive")),
+    gate.indexOf("function RiderRouteDive"),
+  );
+  assert.match(archiveBranch, /role="status"/);
+  assert.match(archiveBranch, /aria-label="フォームアーカイブとの間を移動中"/);
+  assert.match(archiveBranch, /記録宇宙へダイブ中/);
+  assert.doesNotMatch(
+    archiveBranch,
+    /role="progressbar"|aria-valuemin|aria-valuemax|aria-valuenow|\$\{display\}%|\d+%/,
+  );
+});
+
 test("the title dive declares that it already covers the transition", () => {
   assert.match(gate, /transitionCovered\?: boolean/);
   assert.match(title, /transitionCovered: true/);

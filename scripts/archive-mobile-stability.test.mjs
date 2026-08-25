@@ -15,8 +15,8 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20260823-r41/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20260823-r41/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20260825-r42/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260825-r42/);
   assert.match(route, /<iframe[\s\S]*?key=\{archive\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === archive\) return/);

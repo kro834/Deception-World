@@ -282,7 +282,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       {children}
       <LoadOverlay
         active={gate.active}
-        percent={gate.percent}
         variant={gate.variant}
         phase={gate.phase}
       />
@@ -292,37 +291,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
 function LoadOverlay({
   active,
-  percent,
   variant,
   phase,
 }: {
   active: boolean;
-  percent: number;
   variant: GateState["variant"];
   phase: GateState["phase"];
 }) {
-  const [shown, setShown] = useState(0);
-  const shownRef = useRef(0);
-
-  useEffect(() => {
-    if (!active) {
-      shownRef.current = 0;
-      setShown(0);
-      return;
-    }
-    let raf = 0;
-    const tick = () => {
-      const cur = shownRef.current;
-      const next = cur + (percent - cur) * 0.11;
-      const snapped = percent >= 100 && next > 99.2 ? 100 : next;
-      shownRef.current = snapped;
-      setShown(snapped);
-      if (Math.abs(percent - snapped) > 0.15) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [active, percent]);
-
   if (!active) return null;
   const isRiderDive = variant === "saga" || variant === "realm" || variant === "lore" || variant === "vandal";
   if (isRiderDive) {
@@ -365,24 +340,20 @@ function LoadOverlay({
       </div>
     );
   }
-  const display = Math.max(0, Math.min(100, Math.round(shown)));
   return (
     <div
       className={`load-gate archive-route-dive is-diving${phase === "revealing" ? " is-arriving" : ""}`}
-      role="progressbar"
+      role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={display}
-      aria-label={`フォームアーカイブとの間を移動中 ${display}%`}
+      aria-label="フォームアーカイブとの間を移動中"
     >
       <span className="archive-dive-space" aria-hidden="true" />
       <span className="cine-dive-tunnel" aria-hidden="true"><i /><i /></span>
       <span className="cine-dive-flash" aria-hidden="true" />
       <span className="cine-dive-status">
         <small>SAGA / REALM // FORM ARCHIVE</small>
-        <span>{phase === "revealing" ? "境界光を通過中" : `記録宇宙へダイブ中 ${display}%`}</span>
+        <span>{phase === "revealing" ? "境界光を通過中" : "記録宇宙へダイブ中"}</span>
       </span>
     </div>
   );

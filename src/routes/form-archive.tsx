@@ -33,8 +33,8 @@ function FormArchive() {
   const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20260823-r41"
-    : "/realm-form-archive-embedded.html?v=20260823-r41";
+    ? "/saga-form-archive-embedded.html?v=20260825-r42"
+    : "/realm-form-archive-embedded.html?v=20260825-r42";
 
   useEffect(() => {
     const markArchiveReady = (event: MessageEvent) => {
