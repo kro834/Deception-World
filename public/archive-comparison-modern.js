@@ -101,6 +101,84 @@
     return rows;
   };
 
+  const createPlaceholder = (label) => {
+    const item = document.createElement("div");
+    item.className = "spec-item compare-spec-placeholder";
+    item.setAttribute("aria-label", `${label}: この形態には比較可能な数値がありません`);
+    item.innerHTML = `<span class="text-small text-muted"></span><span class="spec-value">NO DATA</span>`;
+    const name = item.querySelector(".text-muted");
+    if (name) name.textContent = label;
+    return item;
+  };
+
+  const naturalHeight = (element) => {
+    element.style.removeProperty("--compare-row-height");
+    return Math.ceil(Math.max(element.scrollHeight, element.getBoundingClientRect().height));
+  };
+
+  const alignSpecRows = (cardA, cardB) => {
+    [cardA, cardB].forEach((card) => {
+      card.style.removeProperty("--compare-head-height");
+      card.querySelectorAll(".compare-spec-placeholder").forEach((item) => item.remove());
+      card.querySelectorAll(".spec-item").forEach((item) => {
+        item.style.removeProperty("order");
+        item.style.removeProperty("--compare-row-height");
+        item.removeAttribute("data-compare-row");
+      });
+    });
+
+    const artworkHeight = window.matchMedia("(max-width: 390px)").matches
+      ? 150
+      : window.matchMedia("(max-width: 700px)").matches
+        ? 176
+        : 300;
+    [cardA, cardB].forEach((card) => {
+      const artwork = card.querySelector(".form-art");
+      if (!(artwork instanceof HTMLElement)) return;
+      artwork.style.setProperty("height", `${artworkHeight}px`, "important");
+      artwork.style.setProperty("min-height", `${artworkHeight}px`, "important");
+      artwork.style.setProperty("max-height", `${artworkHeight}px`, "important");
+      artwork.style.setProperty("object-fit", "contain", "important");
+    });
+
+    const gridA = cardA.querySelector(".viz-grid");
+    const gridB = cardB.querySelector(".viz-grid");
+    if (!(gridA instanceof HTMLElement) || !(gridB instanceof HTMLElement)) return 0;
+    const rowsA = rowsByLabel(cardA);
+    const rowsB = rowsByLabel(cardB);
+    const labels = [...rowsA.keys(), ...[...rowsB.keys()].filter((label) => !rowsA.has(label))];
+
+    labels.forEach((label, index) => {
+      let rowA = rowsA.get(label)?.item;
+      let rowB = rowsB.get(label)?.item;
+      if (!(rowA instanceof HTMLElement)) {
+        rowA = createPlaceholder(label);
+        gridA.appendChild(rowA);
+      }
+      if (!(rowB instanceof HTMLElement)) {
+        rowB = createPlaceholder(label);
+        gridB.appendChild(rowB);
+      }
+      const order = String(index + 1);
+      rowA.style.order = order;
+      rowB.style.order = order;
+      rowA.dataset.compareRow = order;
+      rowB.dataset.compareRow = order;
+      const height = Math.max(naturalHeight(rowA), naturalHeight(rowB));
+      rowA.style.setProperty("--compare-row-height", `${height}px`);
+      rowB.style.setProperty("--compare-row-height", `${height}px`);
+    });
+
+    const headA = cardA.querySelector(".detail-head");
+    const headB = cardB.querySelector(".detail-head");
+    if (headA instanceof HTMLElement && headB instanceof HTMLElement) {
+      const height = Math.ceil(Math.max(headA.scrollHeight, headB.scrollHeight));
+      cardA.style.setProperty("--compare-head-height", `${height}px`);
+      cardB.style.setProperty("--compare-head-height", `${height}px`);
+    }
+    return labels.length;
+  };
+
   const clearResults = (root) => {
     root.querySelectorAll(".spec-item[data-compare-result]").forEach((item) => {
       item.removeAttribute("data-compare-result");
@@ -165,6 +243,7 @@
     if (!(cardA instanceof HTMLElement) || !(cardB instanceof HTMLElement)) return;
 
     clearResults(root);
+    const alignedRows = alignSpecRows(cardA, cardB);
     const rowsA = rowsByLabel(cardA);
     const rowsB = rowsByLabel(cardB);
     let leadsA = 0;
@@ -198,6 +277,7 @@
     sideB.classList.toggle("is-catalog-leader", leadsB > leadsA);
     root.dataset.catalogComparison = "ready";
     root.dataset.catalogLeads = `${leadsA}:${leadsB}`;
+    root.dataset.catalogRowsAligned = String(alignedRows);
   };
 
   const initialize = () => {
@@ -224,6 +304,8 @@
     window.setTimeout(refresh, 120);
     window.setTimeout(refresh, 720);
     window.addEventListener("pageshow", refresh);
+    window.addEventListener("resize", refresh, { passive: true });
+    document.fonts?.ready.then(refresh);
     window.ArchiveComparisonUI = { refresh };
   };
 

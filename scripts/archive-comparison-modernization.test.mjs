@@ -20,8 +20,8 @@ const archives = [
 test("Saga and Realm archives load one shared modern comparison layer", () => {
   for (const archive of archives) {
     const html = readFileSync(new URL(`../public/${archive}`, import.meta.url), "utf8");
-    assert.match(html, /archive-comparison-modern\.css\?v=20260825-r42/);
-    assert.match(html, /archive-comparison-modern\.js\?v=20260825-r42/);
+    assert.match(html, /archive-comparison-modern\.css\?v=20260826-r43/);
+    assert.match(html, /archive-comparison-modern\.js\?v=20260826-r43/);
   }
 });
 
@@ -48,4 +48,15 @@ test("catalog metrics identify the leading side and respect lower running times"
   assert.match(comparisonJs, /root\.dataset\.catalogLeads = `\$\{leadsA\}:\$\{leadsB\}`/);
   assert.match(comparisonCss, /\.spec-item\[data-compare-result="lead"\]/);
   assert.match(comparisonCss, /\.compare-advantage-summary/);
+});
+
+test("matching catalog fields stay in the same horizontal row", () => {
+  assert.match(comparisonCss, /\.compare-form-card \.viz-grid \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) !important/);
+  assert.match(comparisonCss, /min-height: var\(--compare-row-height, 5\.15rem\) !important/);
+  assert.match(comparisonJs, /const alignSpecRows = \(cardA, cardB\) =>/);
+  assert.match(comparisonJs, /createPlaceholder\(label\)/);
+  assert.match(comparisonJs, /rowA\.style\.order = order/);
+  assert.match(comparisonJs, /rowB\.style\.setProperty\("--compare-row-height", `\$\{height\}px`\)/);
+  assert.match(comparisonJs, /artwork\.style\.setProperty\("height", `\$\{artworkHeight\}px`, "important"\)/);
+  assert.match(comparisonJs, /root\.dataset\.catalogRowsAligned = String\(alignedRows\)/);
 });
