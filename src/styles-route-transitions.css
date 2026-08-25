@@ -761,3 +761,361 @@ html[data-route-scroll-settling="true"] {
     transform: translate(-50%, 0);
   }
 }
+
+/* The first four rider dossiers share one fast dive language, while their
+   light routes remain unmistakably tied to each rider. The effect uses only
+   bounded transform/opacity surfaces, so it remains stable on mobile WebKit. */
+.load-gate.rider-route-dive {
+  --rider-dive-primary: 36 140 255;
+  --rider-dive-secondary: 159 212 255;
+  --rider-dive-shadow: 2 11 31;
+  contain: strict;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(var(--rider-dive-primary) / 0.3), transparent 25%),
+    radial-gradient(circle at 16% 16%, rgb(var(--rider-dive-secondary) / 0.14), transparent 34%),
+    linear-gradient(145deg, rgb(var(--rider-dive-shadow) / 0.99), #010205 68%);
+  transform: translateZ(0);
+}
+
+.load-gate.rider-route-dive.is-realm-dive {
+  --rider-dive-primary: 241 74 96;
+  --rider-dive-secondary: 255 179 107;
+  --rider-dive-shadow: 30 4 12;
+}
+
+.load-gate.rider-route-dive.is-lore-dive {
+  --rider-dive-primary: 103 216 255;
+  --rider-dive-secondary: 222 252 255;
+  --rider-dive-shadow: 1 17 28;
+}
+
+.load-gate.rider-route-dive.is-vandal-dive {
+  --rider-dive-primary: 231 26 156;
+  --rider-dive-secondary: 151 79 255;
+  --rider-dive-shadow: 25 2 29;
+}
+
+.rider-route-dive .archive-dive-space {
+  opacity: 0.88;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 4%,
+      rgb(var(--rider-dive-primary) / 0.12) 15%,
+      transparent 36%
+    ),
+    repeating-conic-gradient(
+      from 4deg,
+      transparent 0deg 5.8deg,
+      rgb(var(--rider-dive-primary) / 0.12) 6deg 6.24deg,
+      rgb(var(--rider-dive-secondary) / 0.07) 6.34deg 6.48deg,
+      transparent 6.72deg 11.8deg
+    );
+}
+
+.rider-route-dive .cine-dive-tunnel {
+  background: repeating-conic-gradient(
+    from 1deg,
+    transparent 0deg 3.8deg,
+    rgb(var(--rider-dive-primary) / 0.66) 4.04deg 4.38deg,
+    rgb(var(--rider-dive-secondary) / 0.38) 4.48deg 4.64deg,
+    transparent 4.92deg 8.6deg
+  );
+}
+
+.rider-route-dive .cine-dive-tunnel > i {
+  background: repeating-conic-gradient(
+    from 2deg,
+    transparent 0deg 2.45deg,
+    rgb(var(--rider-dive-secondary) / 0.74) 2.62deg 2.87deg,
+    transparent 3.04deg 5.8deg
+  );
+}
+
+.rider-route-dive .cine-dive-tunnel > i:nth-child(2) {
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 4deg,
+    rgb(var(--rider-dive-primary) / 0.58) 4.18deg 4.42deg,
+    transparent 4.62deg 8deg
+  );
+}
+
+.rider-route-dive .cine-dive-tunnel::before {
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0 5.1%,
+    rgb(var(--rider-dive-secondary) / 0.5) 5.34% 5.54%,
+    transparent 5.8% 9.8%
+  );
+}
+
+.rider-route-dive .cine-dive-tunnel::after {
+  background: radial-gradient(
+    circle,
+    #fff 0 5%,
+    rgb(var(--rider-dive-secondary)) 18%,
+    rgb(var(--rider-dive-primary) / 0.84) 40%,
+    transparent 72%
+  );
+  box-shadow:
+    0 0 7vmax rgb(var(--rider-dive-primary) / 0.78),
+    0 0 13vmax rgb(var(--rider-dive-secondary) / 0.32);
+}
+
+.rider-route-dive .cine-dive-flash {
+  background: radial-gradient(
+    circle at center,
+    rgb(var(--rider-dive-secondary) / 0.52),
+    rgb(var(--rider-dive-primary) / 0.2) 34%,
+    transparent 74%
+  );
+}
+
+.rider-route-dive .cine-dive-flash::before {
+  background: radial-gradient(
+    circle,
+    #fff 0 7%,
+    rgb(var(--rider-dive-secondary)) 20%,
+    rgb(var(--rider-dive-primary) / 0.76) 40%,
+    rgb(var(--rider-dive-primary) / 0.2) 57%,
+    transparent 75%
+  );
+  box-shadow: 0 0 12vmax rgb(var(--rider-dive-primary) / 0.56);
+}
+
+.rider-route-dive.is-arriving .cine-dive-flash {
+  background: radial-gradient(
+    circle at center,
+    #fff 0 12%,
+    rgb(var(--rider-dive-secondary)) 38%,
+    rgb(var(--rider-dive-primary) / 0.94) 67%,
+    rgb(var(--rider-dive-secondary) / 0.92) 100%
+  );
+}
+
+.rider-route-dive.is-arriving .cine-dive-flash::before {
+  background: radial-gradient(
+    circle,
+    #fff 0 20%,
+    rgb(var(--rider-dive-secondary)) 40%,
+    rgb(var(--rider-dive-primary) / 0.92) 62%,
+    transparent 80%
+  );
+}
+
+.rider-dive-vector-field {
+  position: absolute;
+  z-index: 12;
+  top: 50%;
+  left: 50%;
+  width: min(136vmax, 1540px);
+  height: min(136vmax, 1540px);
+  border-radius: 50%;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 8.6deg,
+    rgb(var(--rider-dive-primary) / 0.24) 8.78deg 9deg,
+    transparent 9.2deg 17deg
+  );
+  -webkit-mask-image: radial-gradient(circle, transparent 0 12%, #000 27% 68%, transparent 84%);
+  mask-image: radial-gradient(circle, transparent 0 12%, #000 27% 68%, transparent 84%);
+  pointer-events: none;
+  transform: translate3d(-50%, -50%, 0) scale(0.42) rotate(-7deg);
+  will-change: opacity, transform;
+}
+
+.rider-route-dive.is-diving .rider-dive-vector-field {
+  animation: rider-dive-vector-rush 0.58s linear infinite;
+}
+
+.rider-route-dive.is-arriving .rider-dive-vector-field {
+  animation: rider-dive-vector-arrive 0.48s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
+.rider-dive-mark {
+  position: absolute;
+  z-index: 27;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: clamp(54px, 7vmax, 92px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(var(--rider-dive-secondary) / 0.84);
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgb(var(--rider-dive-primary) / 0.3), transparent 52%),
+    rgb(var(--rider-dive-shadow) / 0.72);
+  box-shadow:
+    0 0 0 8px rgb(var(--rider-dive-primary) / 0.08),
+    0 0 32px rgb(var(--rider-dive-primary) / 0.56),
+    inset 0 0 24px rgb(var(--rider-dive-secondary) / 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(0.22);
+  will-change: opacity, transform;
+}
+
+.rider-dive-mark::before,
+.rider-dive-mark::after {
+  position: absolute;
+  inset: -16px;
+  border: 1px solid rgb(var(--rider-dive-primary) / 0.28);
+  content: "";
+}
+
+.rider-dive-mark::after {
+  inset: -30px;
+  border-style: dashed;
+  opacity: 0.52;
+}
+
+.rider-dive-mark > i {
+  color: rgb(var(--rider-dive-secondary));
+  font:
+    600 clamp(0.68rem, 1.15vmax, 0.96rem)/1 "Cinzel",
+    serif;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 15px rgb(var(--rider-dive-primary) / 0.86);
+  transform: rotate(-45deg) translateX(0.07em);
+}
+
+.rider-route-dive.is-diving .rider-dive-mark {
+  animation: rider-dive-mark-in 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+}
+
+.rider-route-dive.is-diving .rider-dive-mark::after {
+  animation: rider-dive-mark-orbit 1.4s linear infinite;
+}
+
+.rider-route-dive.is-arriving .rider-dive-mark {
+  animation: rider-dive-mark-arrive 0.42s cubic-bezier(0.12, 0.78, 0.08, 1) both;
+}
+
+.rider-route-dive .rider-dive-status::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rider-dive-primary)),
+    rgb(var(--rider-dive-secondary)),
+    transparent
+  );
+  box-shadow: 0 0 16px rgb(var(--rider-dive-primary) / 0.48);
+}
+
+.rider-route-dive .rider-dive-status small {
+  color: rgb(var(--rider-dive-secondary));
+  text-shadow: 0 0 14px rgb(var(--rider-dive-primary) / 0.56);
+}
+
+@keyframes rider-dive-vector-rush {
+  from {
+    opacity: 0.34;
+    transform: translate3d(-50%, -50%, 0) scale(0.42) rotate(-7deg);
+  }
+  to {
+    opacity: 0.86;
+    transform: translate3d(-50%, -50%, 0) scale(1.12) rotate(2deg);
+  }
+}
+
+@keyframes rider-dive-vector-arrive {
+  from {
+    opacity: 0.78;
+    transform: translate3d(-50%, -50%, 0) scale(0.8) rotate(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(2.2) rotate(8deg);
+  }
+}
+
+@keyframes rider-dive-mark-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(0.22);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(1);
+  }
+}
+
+@keyframes rider-dive-mark-arrive {
+  0% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(1);
+  }
+  38% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) rotate(48deg) scale(0.64);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(68deg) scale(7.2);
+  }
+}
+
+@keyframes rider-dive-mark-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1180px), (any-pointer: coarse) {
+  .rider-dive-vector-field {
+    width: min(96vmax, 900px);
+    height: min(96vmax, 900px);
+    -webkit-mask-image: radial-gradient(circle, transparent 0 16%, #000 31% 72%, transparent 88%);
+    mask-image: radial-gradient(circle, transparent 0 16%, #000 31% 72%, transparent 88%);
+  }
+
+  .rider-dive-mark {
+    box-shadow:
+      0 0 0 7px rgb(var(--rider-dive-primary) / 0.08),
+      0 0 24px rgb(var(--rider-dive-primary) / 0.48);
+  }
+}
+
+@media (max-width: 560px) {
+  .rider-dive-mark {
+    top: 48%;
+    width: 58px;
+  }
+
+  .rider-dive-mark::before {
+    inset: -12px;
+  }
+  .rider-dive-mark::after {
+    inset: -22px;
+  }
+
+  .rider-route-dive .rider-dive-status {
+    bottom: max(7vh, calc(env(safe-area-inset-bottom) + 22px));
+  }
+
+  .rider-route-dive .rider-dive-status small {
+    font-size: 0.5rem;
+    letter-spacing: 0.24em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rider-route-dive .rider-dive-vector-field,
+  .rider-route-dive .rider-dive-mark,
+  .rider-route-dive .rider-dive-mark::after {
+    animation: none !important;
+  }
+
+  .rider-route-dive.is-covering .rider-dive-mark {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(1);
+  }
+
+  .rider-route-dive.is-revealing .rider-dive-mark {
+    opacity: 0;
+  }
+}

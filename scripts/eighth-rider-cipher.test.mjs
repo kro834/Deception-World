@@ -53,6 +53,6 @@ test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {
   assert.match(cutInCss, /\.is-cipher-cutin\.is-revealing \.cipher-slash-field/);
   assert.match(
     gate,
-    /if \(!isArchiveTransition && !isZeusTransition && !cutInVariant\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
+    /if \(!isArchiveTransition && !isZeusTransition && !riderTransitionVariant\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
 });

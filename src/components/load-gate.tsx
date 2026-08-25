@@ -13,12 +13,14 @@ import {
 } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 
+type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
+type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "archive" | "zeus" | RiderCutInVariant;
+  variant: "archive" | "zeus" | RiderTransitionVariant;
   phase: "covering" | "revealing";
 };
 
@@ -35,6 +37,13 @@ type LoadGateApi = {
 
 const LoadGateContext = createContext<LoadGateApi | null>(null);
 
+const RIDER_DIVE_ROUTES = {
+  "/riders/saga": "saga",
+  "/riders/realm": "realm",
+  "/riders/lore": "lore",
+  "/riders/vandal": "vandal",
+} as const satisfies Record<string, RiderDiveVariant>;
+
 const RIDER_CUT_IN_ROUTES = {
   "/riders/leddic": "leddic",
   "/riders/argenome": "argenome",
@@ -47,6 +56,20 @@ const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: n
   argenome: { cover: 320, reveal: 640 },
   "over-zeztz": { cover: 360, reveal: 760 },
   cipher: { cover: 400, reveal: 720 },
+};
+
+const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: number }> = {
+  saga: { cover: 520, reveal: 480 },
+  realm: { cover: 520, reveal: 480 },
+  lore: { cover: 520, reveal: 480 },
+  vandal: { cover: 520, reveal: 480 },
+};
+
+const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; label: string }> = {
+  saga: { no: "01", name: "SAGA", label: "サーガ" },
+  realm: { no: "02", name: "REALM", label: "レルム" },
+  lore: { no: "03", name: "LORE", label: "ローア" },
+  vandal: { no: "04", name: "VANDAL", label: "ヴァンダール" },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
@@ -140,8 +163,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       if (busy.current) return;
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
       const isZeusTransition = to === "/managers/zeus";
+      const diveVariant = RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES];
       const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
-      if (!isArchiveTransition && !isZeusTransition && !cutInVariant) {
+      const riderTransitionVariant = diveVariant ?? cutInVariant;
+      if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
         const changesDocument = pathname !== to;
         const releaseScrollMotion = changesDocument ? holdRouteScrollMotion() : null;
         try {
@@ -158,11 +183,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      if (cutInVariant && !isArchiveTransition) {
+      if (riderTransitionVariant && !isArchiveTransition) {
         const releaseScrollMotion = holdRouteScrollMotion();
-        const timings = reduceMotion ? { cover: 100, reveal: 160 } : RIDER_CUT_IN_TIMINGS[cutInVariant];
+        const timings = reduceMotion
+          ? { cover: 100, reveal: 160 }
+          : diveVariant
+            ? RIDER_DIVE_TIMINGS[diveVariant]
+            : RIDER_CUT_IN_TIMINGS[cutInVariant];
         document.documentElement.dataset.loading = "true";
-        setGate({ active: true, percent: 100, variant: cutInVariant, phase: "covering" });
+        setGate({ active: true, percent: 100, variant: riderTransitionVariant, phase: "covering" });
         try {
           // Keep these cinematic cuts lightweight: warm only the route module.
           // The destination remains the sole owner of its large image assets.
@@ -172,7 +201,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
-          setGate({ active: true, percent: 100, variant: cutInVariant, phase: "revealing" });
+          setGate({ active: true, percent: 100, variant: riderTransitionVariant, phase: "revealing" });
           await wait(timings.reveal);
         } finally {
           window.setTimeout(releaseScrollMotion, 360);
@@ -295,6 +324,10 @@ function LoadOverlay({
   }, [active, percent]);
 
   if (!active) return null;
+  const isRiderDive = variant === "saga" || variant === "realm" || variant === "lore" || variant === "vandal";
+  if (isRiderDive) {
+    return <RiderRouteDive variant={variant} phase={phase} />;
+  }
   const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz" || variant === "cipher";
   if (isRiderCutIn) {
     return (
@@ -350,6 +383,30 @@ function LoadOverlay({
       <span className="cine-dive-status">
         <small>SAGA / REALM // FORM ARCHIVE</small>
         <span>{phase === "revealing" ? "境界光を通過中" : `記録宇宙へダイブ中 ${display}%`}</span>
+      </span>
+    </div>
+  );
+}
+
+function RiderRouteDive({ variant, phase }: { variant: RiderDiveVariant; phase: GateState["phase"] }) {
+  const meta = RIDER_DIVE_META[variant];
+  const revealing = phase === "revealing";
+  return (
+    <div
+      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}`}
+      role="status"
+      aria-live="polite"
+      aria-busy={!revealing}
+      aria-label={revealing ? `${meta.label}の個別資料へ到着しました` : `${meta.label}の個別資料へダイブ中`}
+    >
+      <span className="archive-dive-space" aria-hidden="true" />
+      <span className="rider-dive-vector-field" aria-hidden="true" />
+      <span className="cine-dive-tunnel" aria-hidden="true"><i /><i /></span>
+      <span className="rider-dive-mark" aria-hidden="true"><i>{meta.no}</i></span>
+      <span className="cine-dive-flash" aria-hidden="true" />
+      <span className="cine-dive-status rider-dive-status">
+        <small>{meta.name} // RIDER {meta.no}</small>
+        <span>{revealing ? "個別資料へ到着" : "記録位相へダイブ中"}</span>
       </span>
     </div>
   );
