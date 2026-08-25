@@ -13,10 +13,12 @@ import {
 } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 
+type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
+
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "archive" | "zeus";
+  variant: "archive" | "zeus" | RiderCutInVariant;
   phase: "covering" | "revealing";
 };
 
@@ -32,6 +34,20 @@ type LoadGateApi = {
 };
 
 const LoadGateContext = createContext<LoadGateApi | null>(null);
+
+const RIDER_CUT_IN_ROUTES = {
+  "/riders/leddic": "leddic",
+  "/riders/argenome": "argenome",
+  "/riders/over-zeztz": "over-zeztz",
+  "/riders/cipher": "cipher",
+} as const satisfies Record<string, RiderCutInVariant>;
+
+const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: number }> = {
+  leddic: { cover: 260, reveal: 680 },
+  argenome: { cover: 320, reveal: 640 },
+  "over-zeztz": { cover: 360, reveal: 760 },
+  cipher: { cover: 400, reveal: 720 },
+};
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 const nextFrame = () => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
@@ -124,7 +140,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       if (busy.current) return;
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
       const isZeusTransition = to === "/managers/zeus";
-      if (!isArchiveTransition && !isZeusTransition) {
+      const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
+      if (!isArchiveTransition && !isZeusTransition && !cutInVariant) {
         const changesDocument = pathname !== to;
         const releaseScrollMotion = changesDocument ? holdRouteScrollMotion() : null;
         try {
@@ -140,6 +157,33 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const isCurrent = () => transitionId.current === requestId;
       const startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (cutInVariant && !isArchiveTransition) {
+        const releaseScrollMotion = holdRouteScrollMotion();
+        const timings = reduceMotion ? { cover: 100, reveal: 160 } : RIDER_CUT_IN_TIMINGS[cutInVariant];
+        document.documentElement.dataset.loading = "true";
+        setGate({ active: true, percent: 100, variant: cutInVariant, phase: "covering" });
+        try {
+          // Keep these cinematic cuts lightweight: warm only the route module.
+          // The destination remains the sole owner of its large image assets.
+          await router.preloadRoute({ to: to as never }).catch(() => undefined);
+          const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
+          if (coverTimeLeft > 0) await wait(coverTimeLeft);
+          if (!isCurrent()) return;
+          await navigate({ to: to as never, hash });
+          if (!isCurrent()) return;
+          setGate({ active: true, percent: 100, variant: cutInVariant, phase: "revealing" });
+          await wait(timings.reveal);
+        } finally {
+          window.setTimeout(releaseScrollMotion, 360);
+          if (isCurrent()) {
+            document.documentElement.removeAttribute("data-loading");
+            setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
+            busy.current = false;
+          }
+        }
+        return;
+      }
 
       if (isZeusTransition && !isArchiveTransition) {
         const timings = reduceMotion ? { cover: 180, reveal: 140 } : { cover: 720, reveal: 360 };
@@ -251,6 +295,20 @@ function LoadOverlay({
   }, [active, percent]);
 
   if (!active) return null;
+  const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz" || variant === "cipher";
+  if (isRiderCutIn) {
+    return (
+      <div
+        className={`load-gate rider-route-cutin is-${variant}-cutin is-${phase}`}
+        role="status"
+        aria-live="polite"
+        aria-busy={phase === "covering"}
+        aria-label={phase === "revealing" ? `${cutInLabel(variant)}の個別資料を展開しました` : `${cutInLabel(variant)}の個別資料を展開中`}
+      >
+        <RiderRouteCutIn variant={variant} />
+      </div>
+    );
+  }
   if (variant === "zeus") {
     return (
       <div
@@ -293,6 +351,72 @@ function LoadOverlay({
         <small>SAGA / REALM // FORM ARCHIVE</small>
         <span>{phase === "revealing" ? "境界光を通過中" : `記録宇宙へダイブ中 ${display}%`}</span>
       </span>
+    </div>
+  );
+}
+
+function cutInLabel(variant: RiderCutInVariant) {
+  if (variant === "leddic") return "レディック";
+  if (variant === "argenome") return "アルゲノム";
+  if (variant === "cipher") return "サイファー";
+  return "オーバーゼッツ";
+}
+
+function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
+  if (variant === "leddic") {
+    return (
+      <div className="rider-cutin-stage leddic-cutin-stage" aria-hidden="true">
+        <span className="leddic-room-glow" />
+        <span className="leddic-floor" />
+        <span className="leddic-motes">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</span>
+        <span className="leddic-shoji is-left"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
+        <span className="leddic-shoji is-right"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
+        <span className="leddic-seam" />
+        <span className="rider-cutin-caption"><small>GREEN VEIL // OPEN</small><b>LEDDIC</b></span>
+      </div>
+    );
+  }
+
+  if (variant === "argenome") {
+    return (
+      <div className="rider-cutin-stage argenome-cutin-stage" aria-hidden="true">
+        <span className="argenome-ink" />
+        <span className="argenome-cut-plane is-upper" />
+        <span className="argenome-cut-plane is-lower" />
+        <span className="argenome-sigil" />
+        <span className="argenome-slash is-echo-one" />
+        <span className="argenome-slash is-echo-two" />
+        <span className="argenome-slash is-main" />
+        <span className="argenome-flare" />
+        <span className="argenome-sparks">{Array.from({ length: 14 }, (_, index) => <i key={index} />)}</span>
+        <span className="rider-cutin-caption"><small>SCARLET TRACE // SEVER</small><b>ARGENOME</b></span>
+      </div>
+    );
+  }
+
+  if (variant === "cipher") {
+    return (
+      <div className="rider-cutin-stage cipher-cutin-stage" aria-hidden="true">
+        <span className="cipher-void" />
+        <span className="cipher-scan-grid" />
+        <span className="cipher-reticle" />
+        <span className="cipher-slash-field">{Array.from({ length: 20 }, (_, index) => <i key={index} />)}</span>
+        <span className="cipher-cross-flare" />
+        <span className="cipher-data-fragments">{Array.from({ length: 16 }, (_, index) => <i key={index} />)}</span>
+        <span className="rider-cutin-caption"><small>NO TRACE // DEAD DROP</small><b>CIPHER</b></span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rider-cutin-stage over-zeztz-cutin-stage" aria-hidden="true">
+      <span className="over-zeztz-crack" />
+      <span className="over-zeztz-strike"><i /><i /></span>
+      <span className="over-zeztz-impact" />
+      <span className="over-zeztz-pressure-ring" />
+      <span className="over-zeztz-shards">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</span>
+      <span className="over-zeztz-debris">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</span>
+      <span className="rider-cutin-caption"><small>BREAK LIMIT // COLLAPSE</small><b>OVER-ZEZTZ</b></span>
     </div>
   );
 }

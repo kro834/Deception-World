@@ -9,6 +9,7 @@ const dossier = read("src/components/world/rider-page.tsx");
 const nav = read("src/components/world/dossier-nav.tsx");
 const gate = read("src/components/load-gate.tsx");
 const worldCss = read("src/styles-world.css");
+const cutInCss = read("src/styles-world/22.css");
 
 test("Cipher is the eighth rider everywhere the rider index is exposed", () => {
   assert.match(home, /id: "cipher",\s*no: "08"/);
@@ -42,12 +43,16 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
   assert.match(dossier, /name: "サイファーコンカー"/);
 });
 
-test("Cipher dossier navigation no longer mounts a route loading cut-in", () => {
-  assert.doesNotMatch(gate, /RIDER_CUT_IN_ROUTES/);
-  assert.doesNotMatch(gate, /cipher-slash-field/);
-  assert.doesNotMatch(worldCss, /styles-world\/22\.css/);
+test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {
+  assert.match(gate, /RIDER_CUT_IN_ROUTES/);
+  assert.match(gate, /"\/riders\/cipher": "cipher"/);
+  assert.match(gate, /cipher-reticle/);
+  assert.match(gate, /cipher-slash-field[^]*?Array\.from\(\{ length: 20 \}/);
+  assert.match(gate, /cipher-data-fragments[^]*?Array\.from\(\{ length: 16 \}/);
+  assert.match(worldCss, /styles-world\/22\.css/);
+  assert.match(cutInCss, /\.is-cipher-cutin\.is-revealing \.cipher-slash-field/);
   assert.match(
     gate,
-    /if \(!isArchiveTransition && !isZeusTransition\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
+    /if \(!isArchiveTransition && !isZeusTransition && !cutInVariant\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
 });

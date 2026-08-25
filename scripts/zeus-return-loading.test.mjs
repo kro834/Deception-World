@@ -36,10 +36,14 @@ test("Zeus keeps the same outer button size while its return image is active", (
   );
 });
 
-test("the fullscreen route effects are limited to form archive and the Zeus dossier", () => {
+test("fullscreen route effects are limited to archive, Zeus, and four rider dossiers", () => {
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
   assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
-  assert.match(gate, /if \(!isArchiveTransition && !isZeusTransition\) \{[\s\S]*?await navigate/);
+  assert.match(gate, /if \(!isArchiveTransition && !isZeusTransition && !cutInVariant\) \{[\s\S]*?await navigate/);
+  assert.match(gate, /"\/riders\/leddic": "leddic"/);
+  assert.match(gate, /"\/riders\/argenome": "argenome"/);
+  assert.match(gate, /"\/riders\/over-zeztz": "over-zeztz"/);
+  assert.match(gate, /"\/riders\/cipher": "cipher"/);
   assert.match(gate, /className=\{`load-gate is-sovereign-gate/);
   assert.doesNotMatch(gate, /zeus-button-return|zeus-return-dive/);
 });
