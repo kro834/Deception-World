@@ -72,7 +72,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive";
+  context?: "world" | "archive" | "movie";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -267,7 +267,13 @@ export function SideMenuLayer({
         <div className="side-panel-head">
           <div>
             <p>NAVIGATION</p>
-            <b>{context === "archive" ? "FORM ARCHIVE" : "DECEPTION WORLD"}</b>
+            <b>
+              {context === "archive"
+                ? "FORM ARCHIVE"
+                : context === "movie"
+                  ? "DREAM CHAPTER"
+                  : "DECEPTION WORLD"}
+            </b>
           </div>
           <button
             className="side-panel-close ios26-glass"
@@ -319,6 +325,29 @@ export function SideMenuLayer({
                   </GuardedLink>
                 ))}
               </>
+            ) : context === "movie" ? (
+              <>
+                <a href="#top" onClick={controlled ? close : undefined}>
+                  <span>トップ</span>
+                  <i>TOP</i>
+                </a>
+                <a href="#posters" onClick={controlled ? close : undefined}>
+                  <span>ポスター</span>
+                  <i>POSTERS</i>
+                </a>
+                <a href="#characters" onClick={controlled ? close : undefined}>
+                  <span>キャラクター</span>
+                  <i>CAST</i>
+                </a>
+                <a href="#dolminence" onClick={controlled ? close : undefined}>
+                  <span>ドルミネンス</span>
+                  <i>DOLMINENCE</i>
+                </a>
+                <a href="#cases" onClick={controlled ? close : undefined}>
+                  <span>エピソード</span>
+                  <i>CASES</i>
+                </a>
+              </>
             ) : (
               <>
                 <a href="#top" onClick={controlled ? close : undefined}>
@@ -342,6 +371,33 @@ export function SideMenuLayer({
                   <i>ARCHIVE</i>
                 </a>
               </>
+            )}
+          </div>
+        </div>
+        <div className="side-panel-group">
+          <p>STORIES</p>
+          <div className="side-panel-links">
+            {context === "movie" ? (
+              <>
+                <a href="#top" aria-current="page" onClick={controlled ? close : undefined}>
+                  <span>映画第一作「ドリームチャプター」</span>
+                  <i>MOVIE 01</i>
+                </a>
+                <GuardedLink
+                  to="/world"
+                  hash="top"
+                  assets={WORLD_ENTER_ASSETS}
+                  beforeNavigate={close}
+                >
+                  <span>ディセプションワールド</span>
+                  <i>MAIN SITE</i>
+                </GuardedLink>
+              </>
+            ) : (
+              <GuardedLink to="/dream-chapter" assets={[]} beforeNavigate={close}>
+                <span>映画第一作「ドリームチャプター」</span>
+                <i>MOVIE 01</i>
+              </GuardedLink>
             )}
           </div>
         </div>

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as DownloadRouteImport } from './routes/download'
+import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
@@ -42,6 +43,11 @@ const CharactersRoute = CharactersRouteImport.update({
 const DownloadRoute = DownloadRouteImport.update({
   id: '/download',
   path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DreamChapterRoute = DreamChapterRouteImport.update({
+  id: '/dream-chapter',
+  path: '/dream-chapter',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormArchiveRoute = FormArchiveRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/dream-chapter': typeof DreamChapterRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/dream-chapter': typeof DreamChapterRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
+  '/dream-chapter': typeof DreamChapterRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/dream-chapter'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/dream-chapter'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/'
     | '/characters'
     | '/download'
+    | '/dream-chapter'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -259,6 +271,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CharactersRoute: typeof CharactersRouteWithChildren
   DownloadRoute: typeof DownloadRoute
+  DreamChapterRoute: typeof DreamChapterRoute
   FormArchiveRoute: typeof FormArchiveRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/download'
       fullPath: '/download'
       preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dream-chapter': {
+      id: '/dream-chapter'
+      path: '/dream-chapter'
+      fullPath: '/dream-chapter'
+      preLoaderRoute: typeof DreamChapterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/form-archive': {
@@ -457,6 +477,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersRoute: CharactersRouteWithChildren,
   DownloadRoute: DownloadRoute,
+  DreamChapterRoute: DreamChapterRoute,
   FormArchiveRoute: FormArchiveRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
