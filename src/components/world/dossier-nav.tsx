@@ -20,8 +20,8 @@ export const RIKUEI_NAV: DossierLink[] = [
 ];
 
 export const RIDER_NAV: DossierLink[] = [
-  { id: "saga", name: "サーガ", href: "/riders/saga", assets: ["/civilian-saga.jpeg"], kicker: "RIDER 01" },
-  { id: "realm", name: "レルム", href: "/riders/realm", assets: ["/civilian-realm.jpeg"], kicker: "RIDER 02" },
+  { id: "saga", name: "サーガ", href: "/riders/saga", assets: ["/civilian-yuma-20260826.jpeg"], kicker: "RIDER 01" },
+  { id: "realm", name: "レルム", href: "/riders/realm", assets: ["/civilian-bell-20260826.jpeg"], kicker: "RIDER 02" },
   { id: "lore", name: "ローア", href: "/riders/lore", assets: ["/civilian-lore.jpeg"], kicker: "RIDER 03" },
   { id: "vandal", name: "ヴァンダール", href: "/riders/vandal", assets: ["/civilian-vandal.jpeg"], kicker: "RIDER 04" },
   { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg"], kicker: "RIDER 05" },
