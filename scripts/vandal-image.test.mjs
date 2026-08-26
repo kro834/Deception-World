@@ -10,13 +10,22 @@ const riderPage = readFileSync(
   new URL("../src/components/world/rider-page.tsx", import.meta.url),
   "utf8",
 );
+const managerPage = readFileSync(
+  new URL("../src/components/world/manager-stub.tsx", import.meta.url),
+  "utf8",
+);
 const image = new URL("../public/rider-vandal-20260826.jpeg", import.meta.url);
 
-test("Vandal uses the supplied visual across its index and dossier", () => {
+test("Vandal uses the supplied visual across its index and both dossiers", () => {
   assert.match(worldHome, /id: "vandal"[^\n]+img: "\/rider-vandal-20260826\.jpeg"/);
   assert.equal((riderPage.match(/\/rider-vandal-20260826\.jpeg/g) ?? []).length, 2);
+  assert.match(
+    managerPage,
+    /export const REX_LOI:[^]*?rider: \{[^]*?img: "\/rider-vandal-20260826\.jpeg"/,
+  );
   assert.doesNotMatch(worldHome, /\/rider-vandaal\.jpeg/);
   assert.doesNotMatch(riderPage, /\/rider-profile-vandal\.jpeg/);
+  assert.doesNotMatch(managerPage, /\/manager-rex-loi-rider\.jpeg/);
 });
 
 test("the replacement Vandal image is a lightweight local JPEG", () => {

@@ -452,7 +452,7 @@ export const REX_LOI: Profile = {
     },
   ],
   rider: {
-    img: "/manager-rex-loi-rider.jpeg",
+    img: "/rider-vandal-20260826.jpeg",
     pos: "50% 8%",
     system: "ヴァンダールドライバー × スペシャルコア",
     name: "ヴァンダール",
