@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { bootLiquidGlass } from "@/lib/liquid/boot.js";
+import { LiquidPointerGlow } from "@/components/world/liquid-rail";
+import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import {
@@ -100,9 +103,13 @@ function DossierContent({ character }: { character: DreamCharacter }) {
 
 function CharacterDialog({
   character,
+  openedByKeyboard,
+  trigger,
   onClose,
 }: {
   character: DreamCharacter | null;
+  openedByKeyboard: boolean;
+  trigger: HTMLButtonElement | null;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -113,17 +120,34 @@ function CharacterDialog({
     if (!dialog || !character) return;
     const previousOverflow = document.body.style.overflow;
     if (!dialog.open) dialog.showModal();
-    dialog.scrollTop = 0;
     document.body.style.overflow = "hidden";
-    const frame = window.requestAnimationFrame(() =>
-      closeRef.current?.focus({ preventScroll: true }),
+    const stopSettling = settlePickupScroll(
+      dialog,
+      [
+        ".dream-dossier-shell",
+        ".dream-dossier-layout",
+        ".dream-dossier-visuals",
+        ".dream-dossier-copy",
+      ],
+      () => document.dispatchEvent(new CustomEvent("liquidrelayout")),
     );
+    if (openedByKeyboard) closeRef.current?.focus({ preventScroll: true });
+    else {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      dialog.focus({ preventScroll: true });
+    }
     return () => {
-      window.cancelAnimationFrame(frame);
+      stopSettling();
       document.body.style.overflow = previousOverflow;
       if (dialog.open) dialog.close();
+      if (openedByKeyboard) {
+        window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
+      } else {
+        trigger?.blur();
+        window.requestAnimationFrame(() => trigger?.blur());
+      }
     };
-  }, [character]);
+  }, [character, openedByKeyboard, trigger]);
 
   if (!character) return null;
 
@@ -131,6 +155,7 @@ function CharacterDialog({
     <dialog
       ref={dialogRef}
       className="dream-dossier-dialog"
+      tabIndex={-1}
       aria-label={`${character.name}の詳細資料`}
       onCancel={(event) => {
         event.preventDefault();
@@ -146,8 +171,13 @@ function CharacterDialog({
           className="dream-dossier-close ios26-glass"
           type="button"
           aria-label="詳細資料を閉じる"
-          onClick={onClose}
+          data-liquid-pointer="true"
+          onClick={(event) => {
+            onClose();
+            if (event.detail !== 0) event.currentTarget.blur();
+          }}
         >
+          <LiquidPointerGlow />
           <span>CLOSE</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
@@ -244,9 +274,13 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
 
 function DolminenceDialog({
   record,
+  openedByKeyboard,
+  trigger,
   onClose,
 }: {
   record: DreamDolminence | null;
+  openedByKeyboard: boolean;
+  trigger: HTMLButtonElement | null;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -257,17 +291,34 @@ function DolminenceDialog({
     if (!dialog || !record) return;
     const previousOverflow = document.body.style.overflow;
     if (!dialog.open) dialog.showModal();
-    dialog.scrollTop = 0;
     document.body.style.overflow = "hidden";
-    const frame = window.requestAnimationFrame(() =>
-      closeRef.current?.focus({ preventScroll: true }),
+    const stopSettling = settlePickupScroll(
+      dialog,
+      [
+        ".dream-dossier-shell",
+        ".dream-dossier-layout",
+        ".dream-dossier-visuals",
+        ".dream-dossier-copy",
+      ],
+      () => document.dispatchEvent(new CustomEvent("liquidrelayout")),
     );
+    if (openedByKeyboard) closeRef.current?.focus({ preventScroll: true });
+    else {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      dialog.focus({ preventScroll: true });
+    }
     return () => {
-      window.cancelAnimationFrame(frame);
+      stopSettling();
       document.body.style.overflow = previousOverflow;
       if (dialog.open) dialog.close();
+      if (openedByKeyboard) {
+        window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
+      } else {
+        trigger?.blur();
+        window.requestAnimationFrame(() => trigger?.blur());
+      }
     };
-  }, [record]);
+  }, [openedByKeyboard, record, trigger]);
 
   if (!record) return null;
 
@@ -275,6 +326,7 @@ function DolminenceDialog({
     <dialog
       ref={dialogRef}
       className="dream-dossier-dialog dream-dolminence-dialog"
+      tabIndex={-1}
       aria-label={`${record.name}の機密資料`}
       onCancel={(event) => {
         event.preventDefault();
@@ -290,8 +342,13 @@ function DolminenceDialog({
           className="dream-dossier-close ios26-glass"
           type="button"
           aria-label="機密資料を閉じる"
-          onClick={onClose}
+          data-liquid-pointer="true"
+          onClick={(event) => {
+            onClose();
+            if (event.detail !== 0) event.currentTarget.blur();
+          }}
         >
+          <LiquidPointerGlow />
           <span>CLOSE</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
@@ -307,21 +364,248 @@ export function DreamChapter() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
+  const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
+  const [posterLocked, setPosterLocked] = useState(false);
+  const [posterShuffling, setPosterShuffling] = useState(false);
+  const [posterVisible, setPosterVisible] = useState(true);
+  const [posterMotionEnabled, setPosterMotionEnabled] = useState(true);
   const [character, setCharacter] = useState<DreamCharacter | null>(null);
   const [dolminenceRecord, setDolminenceRecord] = useState<DreamDolminence | null>(null);
+  const [characterOpenedByKeyboard, setCharacterOpenedByKeyboard] = useState(false);
+  const [dolminenceOpenedByKeyboard, setDolminenceOpenedByKeyboard] = useState(false);
+  const characterTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const dolminenceTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const posterSectionRef = useRef<HTMLElement | null>(null);
+  const shuffleTimers = useRef<number[]>([]);
+  const shuffleActive = useRef(false);
+  const shuffleRunId = useRef(0);
   const activePoster = DREAM_POSTERS[posterIndex];
+  const previousPoster =
+    previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
+
+  const cancelShuffle = useCallback(() => {
+    shuffleRunId.current += 1;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setPosterShuffling(false);
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.dreamChapter = "true";
+    let disposeGlass: (() => void) | undefined;
+    const frame = window.requestAnimationFrame(() => {
+      disposeGlass = bootLiquidGlass(document);
+    });
     return () => {
+      window.cancelAnimationFrame(frame);
+      disposeGlass?.();
       delete document.documentElement.dataset.dreamChapter;
     };
   }, []);
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const sync = () => {
+      const constrained =
+        connection?.saveData ||
+        connection?.effectiveType === "slow-2g" ||
+        connection?.effectiveType === "2g";
+      setPosterMotionEnabled(!document.hidden && !media.matches && !constrained);
+    };
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    media.addEventListener?.("change", sync);
+    return () => {
+      document.removeEventListener("visibilitychange", sync);
+      media.removeEventListener?.("change", sync);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = posterSectionRef.current;
+    if (!section || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPosterVisible(entry.isIntersecting),
+      { rootMargin: "240px 0px" },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (previousPosterIndex == null) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(
+      () => setPreviousPosterIndex(null),
+      reduced ? 0 : 720,
+    );
+    return () => window.clearTimeout(timer);
+  }, [previousPosterIndex]);
+
+  const selectPoster = useCallback((next: number) => {
+    setPosterIndex((current) => {
+      const wrapped = ((next % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
+      if (wrapped !== current) setPreviousPosterIndex(current);
+      return wrapped;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (
+      posterLocked ||
+      posterShuffling ||
+      !posterVisible ||
+      !posterMotionEnabled ||
+      menuOpen ||
+      character != null ||
+      dolminenceRecord != null
+    ) return;
+    const timer = window.setTimeout(() => {
+      setPosterIndex((current) => {
+        const next = (current + 1) % DREAM_POSTERS.length;
+        setPreviousPosterIndex(current);
+        return next;
+      });
+    }, 5200);
+    return () => window.clearTimeout(timer);
+  }, [
+    character,
+    dolminenceRecord,
+    menuOpen,
+    posterIndex,
+    posterLocked,
+    posterMotionEnabled,
+    posterShuffling,
+    posterVisible,
+  ]);
+
+  useEffect(() => {
+    if (!posterMotionEnabled || !posterVisible || menuOpen || character || dolminenceRecord) return;
+    const timer = window.setTimeout(() => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = DREAM_POSTERS[(posterIndex + 1) % DREAM_POSTERS.length].src;
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [character, dolminenceRecord, menuOpen, posterIndex, posterMotionEnabled, posterVisible]);
+
+  useEffect(() => {
+    if (
+      !posterVisible ||
+      !posterMotionEnabled ||
+      menuOpen ||
+      character != null ||
+      dolminenceRecord != null
+    ) {
+      cancelShuffle();
+    }
+  }, [
+    cancelShuffle,
+    character,
+    dolminenceRecord,
+    menuOpen,
+    posterMotionEnabled,
+    posterVisible,
+  ]);
+
+  useEffect(
+    () => () => {
+      shuffleRunId.current += 1;
+      shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      shuffleTimers.current = [];
+      shuffleActive.current = false;
+    },
+    [],
+  );
+
+  const shufflePosters = useCallback(() => {
+    if (shuffleActive.current) return;
+
+    const randomBelow = (upperBound: number) => {
+      if (typeof window.crypto?.getRandomValues !== "function") {
+        return Math.floor(Math.random() * upperBound);
+      }
+      const values = new Uint32Array(1);
+      const rejectionLimit = Math.floor(0x1_0000_0000 / upperBound) * upperBound;
+      do {
+        window.crypto.getRandomValues(values);
+      } while (values[0] >= rejectionLimit);
+      return values[0] % upperBound;
+    };
+
+    const sequence = DREAM_POSTERS.map((_, index) => index).filter(
+      (index) => index !== posterIndex,
+    );
+    for (let index = sequence.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      let currentValue = sequence[index];
+      let swapValue = sequence[swapIndex];
+      [currentValue, swapValue] = [swapValue, currentValue];
+      sequence[index] = currentValue;
+      sequence[swapIndex] = swapValue;
+    }
+    const finalPoster = sequence.pop() ?? (posterIndex + 1) % DREAM_POSTERS.length;
+    const previews = sequence.slice(0, 9);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      selectPoster(finalPoster);
+      return;
+    }
+
+    cancelShuffle();
+    shuffleActive.current = true;
+    const runId = shuffleRunId.current;
+    setPosterShuffling(true);
+    const finalImage = new Image();
+    finalImage.decoding = "async";
+    finalImage.fetchPriority = "high";
+    finalImage.src = DREAM_POSTERS[finalPoster].src;
+    const finalReady = finalImage.decode?.().catch(() => undefined) ?? Promise.resolve();
+    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach(
+      (delay, index, steps) => {
+        const timer = window.setTimeout(async () => {
+          if (index === steps.length - 1) {
+            await Promise.race([
+              finalReady,
+              new Promise<void>((resolve) => window.setTimeout(resolve, 900)),
+            ]);
+          }
+          if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+          const next =
+            index === steps.length - 1
+              ? finalPoster
+              : previews[index % Math.max(previews.length, 1)] ?? finalPoster;
+          selectPoster(next);
+          if (index === steps.length - 1) {
+            const settleTimer = window.setTimeout(() => {
+              if (shuffleRunId.current !== runId) return;
+              setPosterShuffling(false);
+              shuffleActive.current = false;
+              shuffleTimers.current = [];
+            }, 300);
+            shuffleTimers.current.push(settleTimer);
+          }
+        }, delay);
+        shuffleTimers.current.push(timer);
+      },
+    );
+  }, [cancelShuffle, posterIndex, selectPoster]);
+
   return (
     <main id="top" className="dream-page">
       <header className="dream-site-header">
-        <GuardedLink className="dream-back-link" to="/world" hash="top" assets={WORLD_ENTER_ASSETS}>
+        <GuardedLink
+          className="dream-back-link"
+          to="/world"
+          hash="top"
+          assets={WORLD_ENTER_ASSETS}
+          transition="dream"
+        >
           <span aria-hidden="true">←</span>
           <span>
             <small>RETURN TO</small>
@@ -338,15 +622,14 @@ export function DreamChapter() {
       <SideMenuLayer context="movie" open={menuOpen} onOpenChange={setMenuOpen} />
 
       <section className="dream-hero" aria-labelledby="dream-title">
-        <img
-          className="dream-hero-image"
-          src="/dream-chapter-poster-03.jpeg"
-          alt=""
-          width="1448"
-          height="1086"
-          fetchPriority="high"
-          decoding="async"
-        />
+        <div className="dream-hero-field" aria-hidden="true">
+          <span className="dream-aurora dream-aurora-blue" />
+          <span className="dream-aurora dream-aurora-gold" />
+          <span className="dream-light-gate" />
+          <span className="dream-dream-grid" />
+          <span className="dream-star-field dream-star-field-near" />
+          <span className="dream-star-field dream-star-field-far" />
+        </div>
         <span className="dream-hero-vignette" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-a" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-b" aria-hidden="true" />
@@ -361,6 +644,7 @@ export function DreamChapter() {
             alt="仮面ライダーサーガ Dream Chapter"
             width="1280"
             height="731"
+            fetchPriority="high"
             decoding="async"
           />
           <div>
@@ -376,6 +660,7 @@ export function DreamChapter() {
 
       <section
         id="posters"
+        ref={posterSectionRef}
         className="dream-section dream-poster-section"
         aria-labelledby="poster-title"
       >
@@ -385,8 +670,26 @@ export function DreamChapter() {
           <span>01 — 08</span>
         </header>
 
-        <div className="dream-poster-stage">
-          <figure>
+        <div className={`dream-poster-stage${posterShuffling ? " is-shuffling" : ""}`}>
+          {previousPoster ? (
+            <figure className="dream-poster-previous" aria-hidden="true">
+              <img
+                src={previousPoster.src}
+                alt=""
+                width={previousPoster.width}
+                height={previousPoster.height}
+                style={{
+                  objectFit: previousPoster.fit,
+                  objectPosition: previousPoster.position,
+                }}
+                decoding="async"
+              />
+            </figure>
+          ) : null}
+          <figure
+            className="dream-poster-current"
+            onAnimationEnd={() => setPreviousPosterIndex(null)}
+          >
             <img
               key={activePoster.src}
               src={activePoster.src}
@@ -412,14 +715,17 @@ export function DreamChapter() {
                 type="button"
                 role="tab"
                 aria-selected={posterIndex === index}
-                className={posterIndex === index ? "is-active" : undefined}
+                className={`ios26-glass${posterIndex === index ? " is-active" : ""}`}
+                data-liquid-pointer="true"
                 onClick={(event) => {
-                  setPosterIndex(index);
+                  cancelShuffle();
+                  selectPoster(index);
                   if (event.detail !== 0) event.currentTarget.blur();
                 }}
               >
+                <LiquidPointerGlow />
                 <img
-                  src={poster.src}
+                  src={`/dream-chapter-poster-thumb-${String(index + 1).padStart(2, "0")}.jpeg`}
                   alt=""
                   width={poster.width}
                   height={poster.height}
@@ -430,6 +736,58 @@ export function DreamChapter() {
                 <span>{String(index + 1).padStart(2, "0")}</span>
               </button>
             ))}
+          </div>
+          <div className="dream-poster-controls" aria-label="ポスター操作">
+            <button
+              type="button"
+              className="dream-poster-shuffle ios26-glass"
+              data-liquid-pointer="true"
+              aria-label="ポスターをシャッフル"
+              disabled={posterShuffling}
+              onClick={(event) => {
+                shufflePosters();
+                if (event.detail !== 0) event.currentTarget.blur();
+              }}
+            >
+              <LiquidPointerGlow />
+              <span>SHUFFLE</span>
+              <b aria-hidden="true">↝</b>
+            </button>
+            <button
+              type="button"
+              className="dream-poster-reset ios26-glass"
+              data-liquid-pointer="true"
+              aria-label="最初のポスターへ戻す"
+              onClick={(event) => {
+                cancelShuffle();
+                selectPoster(0);
+                if (event.detail !== 0) event.currentTarget.blur();
+              }}
+            >
+              <LiquidPointerGlow />
+              <span>RESET</span>
+              <b aria-hidden="true">01</b>
+            </button>
+            <button
+              type="button"
+              className="dream-poster-lock ios26-glass"
+              data-liquid-pointer="true"
+              aria-label={
+                posterLocked
+                  ? "ポスターを固定解除して自動切替を再開"
+                  : "ポスターを固定して自動切替を停止"
+              }
+              aria-pressed={posterLocked}
+              onClick={(event) => {
+                cancelShuffle();
+                setPosterLocked((locked) => !locked);
+                if (event.detail !== 0) event.currentTarget.blur();
+              }}
+            >
+              <LiquidPointerGlow />
+              <span>{posterLocked ? "UNLOCK" : "LOCK"}</span>
+              <b aria-hidden="true">{posterLocked ? "◇" : "◆"}</b>
+            </button>
           </div>
         </div>
       </section>
@@ -449,9 +807,18 @@ export function DreamChapter() {
             <article key={item.id} style={{ ["--dream-accent" as string]: item.accent }}>
               <button
                 type="button"
-                onClick={() => setCharacter(item)}
+                className="ios26-glass"
+                data-liquid-pointer="true"
+                onClick={(event) => {
+                  characterTriggerRef.current = event.currentTarget;
+                  setCharacterOpenedByKeyboard(event.detail === 0);
+                  setDolminenceRecord(null);
+                  setCharacter(item);
+                  if (event.detail !== 0) event.currentTarget.blur();
+                }}
                 aria-label={`${item.name}の詳細を開く`}
               >
+                <LiquidPointerGlow />
                 <img
                   src={item.portrait}
                   alt={item.portraitAlt}
@@ -493,12 +860,18 @@ export function DreamChapter() {
             <article key={record.id} style={{ ["--dream-accent" as string]: record.accent }}>
               <button
                 type="button"
-                onClick={() => {
+                className="ios26-glass"
+                data-liquid-pointer="true"
+                onClick={(event) => {
+                  dolminenceTriggerRef.current = event.currentTarget;
+                  setDolminenceOpenedByKeyboard(event.detail === 0);
                   setCharacter(null);
                   setDolminenceRecord(record);
+                  if (event.detail !== 0) event.currentTarget.blur();
                 }}
                 aria-label={`${record.name}の機密資料を開く`}
               >
+                <LiquidPointerGlow />
                 <img
                   src={record.image}
                   alt={record.imageAlt}
@@ -544,13 +917,23 @@ export function DreamChapter() {
       <footer className="dream-footer">
         <p>KAMEN RIDER SAGA / THE MOVIE I</p>
         <h2>DREAM CHAPTER</h2>
-        <GuardedLink to="/world" hash="top" assets={WORLD_ENTER_ASSETS}>
+        <GuardedLink to="/world" hash="top" assets={WORLD_ENTER_ASSETS} transition="dream">
           DECEPTION WORLDへ戻る
         </GuardedLink>
       </footer>
 
-      <CharacterDialog character={character} onClose={() => setCharacter(null)} />
-      <DolminenceDialog record={dolminenceRecord} onClose={() => setDolminenceRecord(null)} />
+      <CharacterDialog
+        character={character}
+        openedByKeyboard={characterOpenedByKeyboard}
+        trigger={characterTriggerRef.current}
+        onClose={() => setCharacter(null)}
+      />
+      <DolminenceDialog
+        record={dolminenceRecord}
+        openedByKeyboard={dolminenceOpenedByKeyboard}
+        trigger={dolminenceTriggerRef.current}
+        onClose={() => setDolminenceRecord(null)}
+      />
     </main>
   );
 }

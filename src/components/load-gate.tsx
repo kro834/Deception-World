@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 
-type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal";
+type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
@@ -28,6 +28,7 @@ type GoOptions = {
   to: string;
   hash?: string;
   assets?: readonly string[];
+  transition?: "dream";
   transitionCovered?: boolean;
 };
 
@@ -63,6 +64,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   realm: { cover: 520, reveal: 480 },
   lore: { cover: 520, reveal: 480 },
   vandal: { cover: 520, reveal: 480 },
+  dream: { cover: 620, reveal: 520 },
 };
 
 const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; label: string }> = {
@@ -70,6 +72,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   realm: { no: "02", name: "REALM", label: "レルム" },
   lore: { no: "03", name: "LORE", label: "ローア" },
   vandal: { no: "04", name: "VANDAL", label: "ヴァンダール" },
+  dream: { no: "I", name: "DREAM CHAPTER", label: "ドリームチャプター" },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
@@ -159,11 +162,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const go = useCallback(
-    async ({ to, hash }: GoOptions) => {
+    async ({ to, hash, transition }: GoOptions) => {
       if (busy.current) return;
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
       const isZeusTransition = to === "/managers/zeus";
-      const diveVariant = RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES];
+      const isDreamTransition =
+        pathname !== to && (to === "/dream-chapter" || transition === "dream");
+      const diveVariant = isDreamTransition
+        ? "dream"
+        : RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES];
       const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
       const riderTransitionVariant = diveVariant ?? cutInVariant;
       if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
@@ -193,9 +200,19 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         document.documentElement.dataset.loading = "true";
         setGate({ active: true, percent: 100, variant: riderTransitionVariant, phase: "covering" });
         try {
+          // Mobile Safari may coalesce the state update with route/module work.
+          // Give the Dream dive two paints so its first frame is always visible.
+          if (diveVariant === "dream") {
+            await nextFrame();
+            await nextFrame();
+            if (!isCurrent()) return;
+          }
           // Keep these cinematic cuts lightweight: warm only the route module.
           // The destination remains the sole owner of its large image assets.
-          await router.preloadRoute({ to: to as never }).catch(() => undefined);
+          await Promise.race([
+            router.preloadRoute({ to: to as never }).catch(() => undefined),
+            wait(2400),
+          ]);
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
@@ -299,7 +316,12 @@ function LoadOverlay({
   phase: GateState["phase"];
 }) {
   if (!active) return null;
-  const isRiderDive = variant === "saga" || variant === "realm" || variant === "lore" || variant === "vandal";
+  const isRiderDive =
+    variant === "saga" ||
+    variant === "realm" ||
+    variant === "lore" ||
+    variant === "vandal" ||
+    variant === "dream";
   if (isRiderDive) {
     return <RiderRouteDive variant={variant} phase={phase} />;
   }
@@ -453,6 +475,7 @@ export function GuardedLink({
   to,
   hash,
   assets,
+  transition,
   className,
   style,
   beforeNavigate,
@@ -462,6 +485,7 @@ export function GuardedLink({
   to: string;
   hash?: string;
   assets: readonly string[];
+  transition?: "dream";
   className?: string;
   style?: CSSProperties;
   beforeNavigate?: () => void;
@@ -478,7 +502,7 @@ export function GuardedLink({
     e.preventDefault();
     e.stopPropagation();
     beforeNavigate?.();
-    void go({ to, hash, assets });
+    void go({ to, hash, assets, transition });
   };
 
   return (

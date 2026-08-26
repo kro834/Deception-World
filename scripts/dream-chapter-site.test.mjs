@@ -12,11 +12,21 @@ const dataSource = readProjectFile("src/components/dream-chapter/dream-chapter-d
 const pageSource = readProjectFile("src/components/dream-chapter/dream-chapter.tsx");
 const menuSource = readProjectFile("src/components/world/world-chrome.tsx");
 const styleSource = readProjectFile("src/styles-dream-chapter.css");
+const loadGateSource = readProjectFile("src/components/load-gate.tsx");
+const routeTransitionStyleSource = readProjectFile("src/styles-route-transitions.css");
+const pickupScrollResetSource = readProjectFile(
+  "src/components/world/pickup-scroll-reset.ts",
+);
 
 const routePath = "src/routes/dream-chapter.tsx";
 const posterAssets = Array.from(
   { length: 8 },
   (_, index) => `public/dream-chapter-poster-${String(index + 1).padStart(2, "0")}.jpeg`,
+);
+const posterThumbnailAssets = Array.from(
+  { length: 8 },
+  (_, index) =>
+    `public/dream-chapter-poster-thumb-${String(index + 1).padStart(2, "0")}.jpeg`,
 );
 const characterAssets = [
   "public/dream-chapter-ciel.jpeg",
@@ -310,10 +320,162 @@ test("all nineteen optimized movie JPEG assets are valid and stay below 700 KB",
   }
 });
 
+test("poster controls use dedicated low-traffic thumbnails", () => {
+  for (const asset of posterThumbnailAssets) {
+    const absolutePath = path.join(repositoryRoot, asset);
+    assert.ok(existsSync(absolutePath), `${asset} must exist`);
+    const size = statSync(absolutePath).size;
+    assert.ok(size > 0 && size < 90_000, `${asset} is ${size} bytes`);
+    assert.ok(jpegDimensions(readFileSync(absolutePath)), `${asset} must be a valid JPEG`);
+  }
+  assert.match(pageSource, /dream-chapter-poster-thumb-/);
+});
+
 test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", () => {
   assert.match(styleSource, /@media\s*\(max-width:\s*980px\)/);
   assert.match(styleSource, /@media\s*\(max-width:\s*640px\)/);
   assert.match(styleSource, /safe-area-inset-top/);
   assert.match(styleSource, /safe-area-inset-bottom/);
   assert.match(styleSource, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+});
+
+test("Dream Chapter hero uses a non-character ambient background", () => {
+  const heroStart = pageSource.indexOf('<section className="dream-hero"');
+  const heroEnd = pageSource.indexOf("</section>", heroStart);
+  assert.notEqual(heroStart, -1, "Dream Chapter must retain its hero section");
+  assert.notEqual(heroEnd, -1, "Dream Chapter hero section must be bounded");
+  const heroSource = pageSource.slice(heroStart, heroEnd);
+
+  assert.match(
+    heroSource,
+    /className=["']dream-(?:ambient-backdrop|hero-field)["']/,
+    "the hero needs a dedicated environment-only ambient backdrop",
+  );
+  assert.doesNotMatch(
+    heroSource,
+    /src=["']\/dream-chapter-(?:poster-\d+|ciel|diluculum|keiya|keiya-awakened|kaisaku|lord-[^"']+|dread|lupin)\.(?:jpe?g|png|webp)["']/,
+    "the hero background must not feature a specific character or reuse a character poster",
+  );
+  assert.match(styleSource, /\.dream-(?:ambient-backdrop|hero-field)\s*\{/);
+  assert.match(
+    styleSource,
+    /\.dream-(?:ambient-backdrop|hero-field)[\s\S]*?pointer-events:\s*none/,
+    "ambient decoration must never intercept touch input",
+  );
+});
+
+test("poster archive implements unbiased shuffle, lock, and Liquid Glass controls", () => {
+  assert.match(
+    pageSource,
+    /(?:window\.)?crypto\?*\.getRandomValues|(?:window\.)?crypto\.getRandomValues/,
+    "poster shuffle must use real randomized selection when Web Crypto is available",
+  );
+  assert.match(
+    pageSource,
+    /for\s*\([^;]+;[^;]+>\s*0;[^)]+\)[\s\S]{0,500}\[[^\]]+\]\s*=\s*\[[^\]]+\]/,
+    "poster order must be shuffled instead of advancing through a fixed sequence",
+  );
+  assert.match(pageSource, /prefers-reduced-motion:\s*reduce/);
+  assert.match(pageSource, /aria-label=["']ポスターをシャッフル["']/);
+  assert.match(pageSource, /ポスターを固定して自動切替を停止/);
+  assert.match(pageSource, /ポスターを固定解除して自動切替を再開/);
+  assert.match(pageSource, /aria-pressed=\{[^}]*lock/i);
+  assert.match(pageSource, /className=[^\n]*dream-poster-shuffle[^\n]*ios26-glass/);
+  assert.match(pageSource, /className=[^\n]*dream-poster-lock[^\n]*ios26-glass/);
+  assert.match(pageSource, /data-liquid-pointer=["']true["']/);
+  assert.match(pageSource, /window\.clearTimeout/);
+});
+
+test("Dream Chapter navigation has a dedicated loading transition", () => {
+  const loadingSources = `${loadGateSource}\n${routeTransitionStyleSource}\n${styleSource}`;
+
+  assert.match(
+    loadGateSource,
+    /["']\/dream-chapter["']/,
+    "the shared route gate must recognize Dream Chapter navigation",
+  );
+  assert.match(
+    loadingSources,
+    /dream[\s\S]{0,100}(?:gate|loading|dive)|(?:gate|loading|dive)[\s\S]{0,100}dream/i,
+    "Dream Chapter needs a named loading/dive presentation rather than an unstyled delay",
+  );
+  assert.match(
+    loadingSources,
+    /prefers-reduced-motion:\s*reduce/,
+    "the loading transition must respect reduced motion",
+  );
+  assert.match(loadGateSource, /preloadRoute/);
+  assert.match(loadGateSource, /document\.documentElement\.dataset\.loading/);
+});
+
+test("all Dream Chapter pickup and poster controls use the shared Liquid Glass interaction", () => {
+  assert.match(pageSource, /import\s*\{[^}]*LiquidPointerGlow[^}]*\}/);
+  assert.ok(
+    (pageSource.match(/className=[^\n>]*ios26-glass/g) ?? []).length >= 6,
+    "shuffle, lock, poster tabs, character cards, Dolminence cards, and closes need glass surfaces",
+  );
+  assert.ok(
+    (pageSource.match(/data-liquid-pointer=["']true["']/g) ?? []).length >= 6,
+    "every interactive glass surface needs pointer-following light",
+  );
+  assert.ok(
+    (pageSource.match(/<LiquidPointerGlow\s*\/>/g) ?? []).length >= 6,
+    "every interactive glass surface needs the shared reflected-light layer",
+  );
+  assert.match(styleSource, /backdrop-filter:\s*blur\(/);
+  assert.match(styleSource, /-webkit-backdrop-filter:\s*blur\(/);
+  assert.match(styleSource, /@media\s*\(hover:\s*hover\)\s*and\s*\(pointer:\s*fine\)/);
+});
+
+test("every pickup resets to its top after showModal and clears pointer focus on close", () => {
+  assert.match(
+    pageSource,
+    /import\s*\{[^}]*settlePickupScroll[^}]*\}\s*from\s*["']@\/components\/world\/pickup-scroll-reset["']/,
+  );
+  assert.ok(
+    (pageSource.match(/settlePickupScroll\s*\(/g) ?? []).length >= 2,
+    "both character and Dolminence pickups must use the delayed WebKit-safe reset",
+  );
+  assert.match(pageSource, /showModal\(\)[\s\S]{0,700}settlePickupScroll/);
+  assert.match(pageSource, /event\.detail\s*===\s*0/);
+  assert.match(pageSource, /event\.currentTarget\.blur\(\)/);
+  assert.match(
+    pageSource,
+    /document\.activeElement\s+instanceof\s+HTMLElement[\s\S]{0,300}\.blur\(\)/,
+    "pointer-opened pickups must not leave a latched focus highlight behind",
+  );
+  assert.match(pickupScrollResetSource, /ResizeObserver/);
+  assert.match(pickupScrollResetSource, /\[90,\s*240,\s*520,\s*900\]/);
+  assert.match(pickupScrollResetSource, /pointerdown/);
+  assert.match(pickupScrollResetSource, /touchstart/);
+});
+
+test("Dream Chapter has explicit iPhone/iPad layouts and bounded mobile dialogs", () => {
+  assert.match(
+    styleSource,
+    /@media\s*\(max-width:\s*(?:1080|1100|1180|1200)px\)/,
+    "iPad landscape needs its own breakpoint instead of falling through to desktop",
+  );
+  assert.match(styleSource, /@media\s*\(max-width:\s*640px\)/);
+  assert.match(styleSource, /safe-area-inset-top/);
+  assert.match(styleSource, /safe-area-inset-bottom/);
+  assert.match(styleSource, /\.dream-dossier-dialog[\s\S]{0,500}overscroll-behavior:\s*contain/);
+  assert.match(styleSource, /\.dream-dossier-shell[\s\S]{0,500}max-width/);
+  assert.match(styleSource, /touch-action:\s*manipulation/);
+  assert.match(styleSource, /overflow-x:\s*(?:hidden|clip)/);
+});
+
+test("Dream Chapter motion and image work is throttled for mobile performance", () => {
+  assert.match(styleSource, /content-visibility:\s*auto/);
+  assert.match(styleSource, /contain-intrinsic-size:/);
+  assert.ok(
+    (pageSource.match(/loading=["']lazy["']/g) ?? []).length >= 4,
+    "offscreen posters and dossier art must stay lazy-loaded",
+  );
+  assert.match(pageSource, /decoding=["']async["']/);
+  assert.match(pageSource, /fetchPriority=["']high["']/);
+  assert.match(pageSource, /prefers-reduced-motion:\s*reduce/);
+  assert.match(styleSource, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(styleSource, /animation:\s*none\s*!important/);
+  assert.match(styleSource, /transition:\s*none\s*!important/);
 });

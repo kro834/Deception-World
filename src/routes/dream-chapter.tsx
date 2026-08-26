@@ -25,7 +25,7 @@ export const Route = createFileRoute("/dream-chapter")({
       {
         rel: "preload",
         as: "image",
-        href: "/dream-chapter-poster-03.jpeg",
+        href: "/dream-chapter-logo.jpeg",
       },
     ],
   }),

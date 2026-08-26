@@ -21,10 +21,15 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-opus.jpeg": 342588,
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
+  "/dream-chapter-logo.jpeg": 211523,
 };
 
 export const WORLD_ENTER_ASSETS = [
   "/deception-world-poster.jpeg",
+] as const;
+
+export const DREAM_CHAPTER_ENTER_ASSETS = [
+  "/dream-chapter-logo.jpeg",
 ] as const;
 
 export const MANAGER_ASSETS = {

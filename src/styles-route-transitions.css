@@ -795,6 +795,17 @@ html[data-route-scroll-settling="true"] {
   --rider-dive-shadow: 25 2 29;
 }
 
+.load-gate.rider-route-dive.is-dream-dive {
+  --rider-dive-primary: 96 156 255;
+  --rider-dive-secondary: 255 180 62;
+  --rider-dive-shadow: 3 7 22;
+  background:
+    radial-gradient(circle at 50% 48%, rgb(255 255 255 / 0.1), transparent 13%),
+    radial-gradient(circle at 50% 50%, rgb(var(--rider-dive-primary) / 0.3), transparent 27%),
+    radial-gradient(circle at 18% 16%, rgb(var(--rider-dive-secondary) / 0.15), transparent 34%),
+    linear-gradient(145deg, rgb(var(--rider-dive-shadow) / 0.99), #010205 68%);
+}
+
 .rider-route-dive .archive-dive-space {
   opacity: 0.88;
   background:

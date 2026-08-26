@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { DREAM_CHAPTER_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
@@ -387,6 +387,7 @@ export function SideMenuLayer({
                   to="/world"
                   hash="top"
                   assets={WORLD_ENTER_ASSETS}
+                  transition="dream"
                   beforeNavigate={close}
                 >
                   <span>ディセプションワールド</span>
@@ -394,7 +395,11 @@ export function SideMenuLayer({
                 </GuardedLink>
               </>
             ) : (
-              <GuardedLink to="/dream-chapter" assets={[]} beforeNavigate={close}>
+              <GuardedLink
+                to="/dream-chapter"
+                assets={DREAM_CHAPTER_ENTER_ASSETS}
+                beforeNavigate={close}
+              >
                 <span>映画第一作「ドリームチャプター」</span>
                 <i>MOVIE 01</i>
               </GuardedLink>
