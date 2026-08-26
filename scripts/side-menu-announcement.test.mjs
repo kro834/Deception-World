@@ -9,7 +9,10 @@ const chrome = readFileSync(
 const styles = readFileSync(new URL("../src/styles-world/23.css", import.meta.url), "utf8");
 const menuStyles = readFileSync(new URL("../src/styles-world/19.css", import.meta.url), "utf8");
 const styleIndex = readFileSync(new URL("../src/styles-world.css", import.meta.url), "utf8");
-const image = new URL("../public/announcement-who-supreme.jpeg", import.meta.url);
+const announcementImages = [
+  new URL("../public/announcement-not-even-close.jpeg", import.meta.url),
+  new URL("../public/announcement-who-supreme.jpeg", import.meta.url),
+];
 
 test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /<p>INFORMATION<\/p>/);
@@ -17,8 +20,11 @@ test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /<span>お知らせ<\/span>/);
   assert.match(chrome, /aria-controls="site-announcement-dialog"/);
   assert.match(chrome, /const SITE_ANNOUNCEMENTS = \[/);
+  assert.match(chrome, /title: "Not Even Close\."/);
+  assert.match(chrome, /image: "\/announcement-not-even-close\.jpeg"/);
   assert.match(chrome, /title: "Who Supreme\?"/);
   assert.match(chrome, /image: "\/announcement-who-supreme\.jpeg"/);
+  assert.match(chrome, /aria-label=\{`お知らせ\$\{SITE_ANNOUNCEMENTS\.length\}件`\}/);
   assert.match(menuStyles, /\.side-panel-links :is\(a, button\.side-panel-link-button\)/);
 });
 
@@ -107,11 +113,14 @@ test("announcement glass is safe-area aware, internally scrollable, and responsi
 });
 
 test("the supplied announcement image is shipped as an optimized local asset", () => {
-  assert.equal(existsSync(image), true);
-  const bytes = readFileSync(image);
-  assert.equal(bytes[0], 0xff);
-  assert.equal(bytes[1], 0xd8);
-  assert.ok(statSync(image).size < 200_000, "announcement image should remain below 200 KB");
+  for (const image of announcementImages) {
+    assert.equal(existsSync(image), true);
+    const bytes = readFileSync(image);
+    assert.equal(bytes[0], 0xff);
+    assert.equal(bytes[1], 0xd8);
+    assert.ok(statSync(image).size < 200_000, "announcement image should remain below 200 KB");
+  }
+  assert.match(chrome, /width: 900,[\s\S]*?height: 1125/);
   assert.match(chrome, /width: 960,[\s\S]*?height: 1441/);
   assert.match(chrome, /width=\{selectedAnnouncement\.width\}/);
   assert.match(chrome, /height=\{selectedAnnouncement\.height\}/);

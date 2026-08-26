@@ -8,6 +8,16 @@ import { LiquidPointerGlow } from "./liquid-rail";
 
 const SITE_ANNOUNCEMENTS = [
   {
+    id: "not-even-close",
+    sequence: "TRANSMISSION 02",
+    date: "2026.08.26",
+    title: "Not Even Close.",
+    image: "/announcement-not-even-close.jpeg",
+    imageAlt: "金色と青紫色に発光する仮面とDeus. A NEW ERA BEGINS.の文字",
+    width: 900,
+    height: 1125,
+  },
+  {
     id: "who-supreme",
     sequence: "TRANSMISSION 01",
     date: "2026.08.23",
@@ -482,7 +492,10 @@ export function SideMenuLayer({
               <p>INFORMATION / ARCHIVE</p>
               <h2 id="site-announcement-hub-title">お知らせ</h2>
             </div>
-            <span className="site-announcement-count" aria-label="お知らせ1件">
+            <span
+              className="site-announcement-count"
+              aria-label={`お知らせ${SITE_ANNOUNCEMENTS.length}件`}
+            >
               {String(SITE_ANNOUNCEMENTS.length).padStart(2, "0")} ACTIVE
             </span>
             <button
