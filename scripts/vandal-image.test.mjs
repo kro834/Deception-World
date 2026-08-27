@@ -14,10 +14,24 @@ const managerPage = readFileSync(
   new URL("../src/components/world/manager-stub.tsx", import.meta.url),
   "utf8",
 );
-const image = new URL("../public/rider-vandal-20260826.jpeg", import.meta.url);
+const thumbnail = new URL(
+  "../public/rider-vandal-thumbnail-20260827.jpeg",
+  import.meta.url,
+);
+const dossierImage = new URL(
+  "../public/rider-vandal-20260826.jpeg",
+  import.meta.url,
+);
 
-test("Vandal uses the supplied visual across its index and both dossiers", () => {
-  assert.match(worldHome, /id: "vandal"[^\n]+img: "\/rider-vandal-20260826\.jpeg"/);
+test("Vandal uses the dedicated thumbnail in the rider index", () => {
+  assert.match(
+    worldHome,
+    /id: "vandal"[^\n]+img: "\/rider-vandal-thumbnail-20260827\.jpeg"/,
+  );
+  assert.doesNotMatch(worldHome, /id: "vandal"[^\n]+img: "\/rider-vandal-20260826\.jpeg"/);
+});
+
+test("Vandal keeps the full visual across both dossiers", () => {
   assert.equal((riderPage.match(/\/rider-vandal-20260826\.jpeg/g) ?? []).length, 2);
   assert.match(
     managerPage,
@@ -28,10 +42,12 @@ test("Vandal uses the supplied visual across its index and both dossiers", () =>
   assert.doesNotMatch(managerPage, /\/manager-rex-loi-rider\.jpeg/);
 });
 
-test("the replacement Vandal image is a lightweight local JPEG", () => {
-  assert.equal(existsSync(image), true);
-  const bytes = readFileSync(image);
-  assert.equal(bytes[0], 0xff);
-  assert.equal(bytes[1], 0xd8);
-  assert.ok(statSync(image).size < 500_000);
+test("the Vandal thumbnail and dossier visual are lightweight local JPEGs", () => {
+  for (const image of [thumbnail, dossierImage]) {
+    assert.equal(existsSync(image), true);
+    const bytes = readFileSync(image);
+    assert.equal(bytes[0], 0xff);
+    assert.equal(bytes[1], 0xd8);
+    assert.ok(statSync(image).size < 500_000);
+  }
 });
