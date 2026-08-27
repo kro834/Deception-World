@@ -77,6 +77,18 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
+test("Rexonance pickup title keeps the requested two-line Japanese break", () => {
+  for (const source of [pickup, reconstructedPickup]) {
+    assert.match(
+      source,
+      /isRexonance \? \([\s\S]*?<span>\{riderPrefix\}<\/span>[\s\S]*?<b>\{rider\.name\}<\/b>/,
+    );
+  }
+  assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 span,[\s\S]*?display: block/);
+  assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 b \{[\s\S]*?white-space: nowrap/);
+  assert.match(styles, /\.is-rexonance-pickup \.form-pickup-copy h2 b \{[\s\S]*?white-space: nowrap/);
+});
+
 test("generated and reconstructable source retain the Rexonance feature markers", () => {
   for (const source of [reconstructedRider, reconstructedPickup]) {
     assert.match(source, /rexonance/i);

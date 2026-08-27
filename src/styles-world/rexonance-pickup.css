@@ -179,6 +179,7 @@
 }
 
 .is-rexonance-pickup .form-pickup-copy h2 span {
+  display: block;
   margin-bottom: 10px;
   color: rgba(246, 248, 255, 0.66);
   font-size: 0.3em;
@@ -186,11 +187,13 @@
 }
 
 .is-rexonance-pickup .form-pickup-copy h2 b {
+  display: block;
   color: transparent;
   background: linear-gradient(102deg, #eefcff 0 12%, var(--rex-cyan) 31%, #f7e3ef 52%, var(--rex-pink) 69%, var(--rex-gold) 94%);
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(0 0 18px rgba(114, 231, 255, 0.17));
+  white-space: nowrap;
 }
 
 .is-rexonance-pickup .form-pickup-copy em {
@@ -467,12 +470,27 @@
   line-height: 0.98;
 }
 
+.is-rexonance-dialog .form-pickup-heading h2 span,
+.is-rexonance-dialog .form-pickup-heading h2 b {
+  display: block;
+}
+
+.is-rexonance-dialog .form-pickup-heading h2 span {
+  margin-bottom: 0.18em;
+  color: rgba(246, 248, 255, 0.72);
+  font-size: 0.34em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1;
+}
+
 .is-rexonance-dialog .form-pickup-heading h2 b {
   color: transparent;
   background: linear-gradient(106deg, #f8fdff 4%, var(--rex-cyan) 35%, #f3e8f0 55%, var(--rex-pink) 74%, var(--rex-gold) 98%);
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(0 0 24px rgba(114, 231, 255, 0.15));
+  white-space: nowrap;
 }
 
 .is-rexonance-dialog .form-pickup-heading > em {
@@ -1193,7 +1211,7 @@
   }
 
   .is-rexonance-pickup .form-pickup-copy h2 {
-    font-size: clamp(34px, 11.5vw, 52px);
+    font-size: clamp(28px, 8.7vw, 42px);
   }
 
   .is-rexonance-pickup .form-pickup-copy q {
@@ -1239,7 +1257,7 @@
   }
 
   .is-rexonance-dialog .form-pickup-heading h2 {
-    font-size: clamp(36px, 12vw, 58px);
+    font-size: clamp(28px, 8.7vw, 44px);
   }
 
   .is-rexonance-dialog .form-pickup-heading > small {
