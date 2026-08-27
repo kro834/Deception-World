@@ -94,6 +94,13 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  const pickupForms =
+    rider.id === "saga"
+      ? rider.forms.filter((form) => form.featuredPickup)
+      : rider.id === "cipher" ? rider.forms
+        : primaryForm
+          ? [primaryForm]
+          : [];
   return (
     <main
       className="manager-page rider-dossier-page"

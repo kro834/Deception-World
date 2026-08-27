@@ -1,0 +1,1382 @@
+/* ── Rexonance Saga / premium pickup ───────────────────────────── */
+
+.form-pickup.is-rexonance-pickup {
+  --rex-cyan: #72e7ff;
+  --rex-cyan-deep: #168fd6;
+  --rex-pink: #ff73d8;
+  --rex-pink-deep: #bf3da8;
+  --rex-gold: #e9c47b;
+  --rex-ink: #050711;
+  --slide-accent: var(--rex-cyan);
+  position: relative;
+  isolation: isolate;
+  width: min(1180px, calc(100% - 40px));
+  margin-top: 38px;
+}
+
+.form-pickup.is-rexonance-pickup::before,
+.form-pickup.is-rexonance-pickup::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.form-pickup.is-rexonance-pickup::before {
+  inset: -38px -26px;
+  background:
+    radial-gradient(circle at 18% 32%, rgba(72, 208, 255, 0.16), transparent 31%),
+    radial-gradient(circle at 82% 64%, rgba(255, 84, 208, 0.13), transparent 30%);
+  filter: blur(24px);
+}
+
+.form-pickup.is-rexonance-pickup::after {
+  top: -18px;
+  right: 9%;
+  left: 9%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rex-cyan), #fff, var(--rex-pink), transparent);
+  box-shadow: 0 0 20px rgba(113, 231, 255, 0.52);
+}
+
+.is-rexonance-pickup .form-pickup-card {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: minmax(300px, 0.84fr) minmax(0, 1.16fr);
+  min-height: 430px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 18px 62px 30px 18px;
+  background:
+    linear-gradient(145deg, rgba(5, 9, 18, 0.985), rgba(11, 8, 20, 0.97)) padding-box,
+    linear-gradient(118deg, rgba(114, 231, 255, 0.88), rgba(233, 196, 123, 0.7) 35%, rgba(255, 115, 216, 0.88) 70%, rgba(114, 231, 255, 0.74)) border-box;
+  box-shadow:
+    0 38px 100px rgba(0, 0, 0, 0.58),
+    0 0 42px rgba(83, 206, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 70px rgba(91, 126, 255, 0.06);
+}
+
+.is-rexonance-pickup .form-pickup-card::before {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, transparent 0 49.9%, rgba(255, 255, 255, 0.06) 50%, transparent 50.1%),
+    repeating-linear-gradient(90deg, transparent 0 71px, rgba(114, 231, 255, 0.035) 72px),
+    repeating-linear-gradient(0deg, transparent 0 71px, rgba(255, 115, 216, 0.025) 72px);
+  content: "";
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 22%, #000 48%, #000);
+  mask-image: linear-gradient(90deg, transparent 22%, #000 48%, #000);
+}
+
+.is-rexonance-pickup .form-pickup-card::after {
+  position: absolute;
+  z-index: 5;
+  right: 34px;
+  bottom: 23px;
+  width: 124px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rex-pink), var(--rex-cyan));
+  box-shadow: 0 0 12px rgba(114, 231, 255, 0.6);
+  content: "";
+  pointer-events: none;
+}
+
+.is-rexonance-pickup .form-pickup-visual,
+.is-rexonance-pickup .form-pickup-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.is-rexonance-pickup .form-pickup-visual {
+  min-height: 430px;
+  background:
+    radial-gradient(circle at 52% 24%, rgba(89, 221, 255, 0.18), transparent 31%),
+    #03050b;
+}
+
+.is-rexonance-pickup .form-pickup-visual::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 62%, rgba(5, 7, 17, 0.92)),
+    linear-gradient(0deg, rgba(5, 7, 17, 0.76), transparent 40%),
+    radial-gradient(circle at 50% 38%, transparent 32%, rgba(5, 7, 17, 0.25) 76%);
+  content: "";
+  pointer-events: none;
+}
+
+.is-rexonance-pickup .form-pickup-visual::after {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(transparent, var(--rex-cyan), #fff 48%, var(--rex-pink), transparent);
+  box-shadow: 0 0 18px rgba(114, 231, 255, 0.8);
+  content: "";
+  opacity: 0.7;
+}
+
+.is-rexonance-pickup .form-pickup-visual img {
+  filter: saturate(1.08) contrast(1.04);
+  transform: scale(1.015);
+}
+
+.is-rexonance-pickup .form-pickup-visual > span {
+  top: 22px;
+  left: 22px;
+  padding: 7px 10px;
+  border: 1px solid rgba(114, 231, 255, 0.3);
+  border-radius: 999px;
+  color: rgba(233, 246, 255, 0.9);
+  background: rgba(4, 8, 16, 0.54);
+  letter-spacing: 0.34em;
+  -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
+}
+
+.is-rexonance-pickup .form-pickup-copy {
+  justify-content: center;
+  gap: 12px;
+  padding: 52px clamp(30px, 5vw, 72px);
+  background:
+    radial-gradient(circle at 100% 0, rgba(255, 115, 216, 0.12), transparent 34%),
+    radial-gradient(circle at 0 100%, rgba(114, 231, 255, 0.09), transparent 39%);
+}
+
+.is-rexonance-pickup .form-pickup-copy > p {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--rex-gold);
+  font-size: 9px;
+}
+
+.is-rexonance-pickup .form-pickup-copy > p::before {
+  width: 42px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rex-cyan), var(--rex-pink));
+  box-shadow: 0 0 8px rgba(114, 231, 255, 0.6);
+  content: "";
+}
+
+.is-rexonance-pickup .form-pickup-copy > small {
+  color: rgba(114, 231, 255, 0.8);
+  letter-spacing: 0.34em;
+}
+
+.is-rexonance-pickup .form-pickup-copy h2 {
+  margin: 8px 0 0;
+  font-size: clamp(36px, 5vw, 64px);
+  letter-spacing: -0.055em;
+  line-height: 1.03;
+}
+
+.is-rexonance-pickup .form-pickup-copy h2 span {
+  margin-bottom: 10px;
+  color: rgba(246, 248, 255, 0.66);
+  font-size: 0.3em;
+  letter-spacing: 0.24em;
+}
+
+.is-rexonance-pickup .form-pickup-copy h2 b {
+  color: transparent;
+  background: linear-gradient(102deg, #eefcff 0 12%, var(--rex-cyan) 31%, #f7e3ef 52%, var(--rex-pink) 69%, var(--rex-gold) 94%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(114, 231, 255, 0.17));
+}
+
+.is-rexonance-pickup .form-pickup-copy em {
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: rgba(228, 237, 255, 0.68);
+  background: linear-gradient(90deg, rgba(114, 231, 255, 0.08), rgba(255, 115, 216, 0.08));
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.is-rexonance-pickup .form-pickup-copy q {
+  max-width: 34em;
+  padding-left: 14px;
+  border-left: 1px solid rgba(233, 196, 123, 0.52);
+  color: rgba(246, 248, 255, 0.83);
+  font-family: var(--font-display, serif);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.rexonance-card-ornaments {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.rexonance-card-ornaments i {
+  position: absolute;
+  border: 1px solid rgba(114, 231, 255, 0.14);
+  border-radius: 50%;
+}
+
+.rexonance-card-ornaments i:nth-child(1) {
+  top: -240px;
+  right: -130px;
+  width: 520px;
+  aspect-ratio: 1;
+  border-color: rgba(255, 115, 216, 0.17);
+  box-shadow: inset 0 0 0 34px rgba(114, 231, 255, 0.012);
+}
+
+.rexonance-card-ornaments i:nth-child(2) {
+  top: -182px;
+  right: -72px;
+  width: 360px;
+  aspect-ratio: 1;
+  border-style: dashed;
+  border-color: rgba(233, 196, 123, 0.2);
+  animation: rexonanceCardOrbit 24s linear infinite;
+}
+
+.rexonance-card-ornaments i:nth-child(3) {
+  right: 67px;
+  bottom: 39px;
+  width: 58px;
+  aspect-ratio: 1;
+  border-color: rgba(114, 231, 255, 0.38);
+  box-shadow: 0 0 18px rgba(255, 115, 216, 0.16), inset 0 0 16px rgba(114, 231, 255, 0.08);
+}
+
+.rexonance-card-ornaments span {
+  position: absolute;
+  top: 28px;
+  right: 34px;
+  width: 9px;
+  aspect-ratio: 1;
+  rotate: 45deg;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 12px var(--rex-cyan), 20px 20px 0 -3px rgba(255, 115, 216, 0.58);
+}
+
+.is-rexonance-pickup .form-pickup-plus.ios-slide-open {
+  --slide-accent: var(--rex-cyan);
+  width: min(236px, calc(100% - 32px));
+  border-color: rgba(212, 246, 255, 0.54);
+  background:
+    radial-gradient(circle at 12% 0, rgba(255, 255, 255, 0.28), transparent 42%),
+    linear-gradient(110deg, rgba(17, 136, 177, 0.45), rgba(29, 14, 48, 0.86) 48%, rgba(177, 48, 148, 0.42));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 115, 216, 0.34),
+    0 0 24px rgba(114, 231, 255, 0.18),
+    0 16px 38px rgba(0, 0, 0, 0.52);
+}
+
+.is-rexonance-pickup .ios-slide-open-fill {
+  background: linear-gradient(90deg, rgba(114, 231, 255, 0.76), rgba(255, 115, 216, 0.54));
+}
+
+.is-rexonance-pickup .ios-slide-open .ios-slide-open-thumb {
+  background:
+    radial-gradient(circle at 33% 25%, rgba(255, 255, 255, 0.78), transparent 25%),
+    linear-gradient(145deg, rgba(114, 231, 255, 0.68), rgba(255, 115, 216, 0.56));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(255, 115, 216, 0.56),
+    0 0 0 1px rgba(255, 255, 255, 0.24),
+    0 8px 26px rgba(82, 203, 255, 0.38);
+}
+
+/* Premium dialog */
+
+.form-pickup-dialog.is-rexonance-dialog {
+  --rex-cyan: #72e7ff;
+  --rex-pink: #ff73d8;
+  --rex-gold: #e9c47b;
+  width: min(1280px, calc(100vw - 30px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  max-height: min(94dvh, 1040px);
+  overflow: auto;
+  border: 1px solid transparent;
+  border-radius: 18px 54px 24px 18px;
+  background:
+    linear-gradient(#050711, #050711) padding-box,
+    linear-gradient(122deg, rgba(114, 231, 255, 0.82), rgba(233, 196, 123, 0.45) 38%, rgba(255, 115, 216, 0.78) 72%, rgba(114, 231, 255, 0.6)) border-box;
+  box-shadow: 0 44px 140px rgba(0, 0, 0, 0.72), 0 0 54px rgba(114, 231, 255, 0.12);
+}
+
+.form-pickup-dialog.is-rexonance-dialog::backdrop {
+  background:
+    radial-gradient(circle at 25% 28%, rgba(50, 176, 222, 0.13), transparent 32%),
+    radial-gradient(circle at 76% 72%, rgba(218, 55, 170, 0.12), transparent 34%),
+    rgba(1, 2, 8, 0.93);
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+  backdrop-filter: blur(8px) saturate(112%);
+}
+
+.is-rexonance-dialog .form-pickup-panel {
+  isolation: isolate;
+  min-height: 100%;
+  padding: clamp(26px, 4vw, 56px);
+  background:
+    linear-gradient(90deg, rgba(114, 231, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(rgba(255, 115, 216, 0.022) 1px, transparent 1px),
+    radial-gradient(circle at 8% 2%, rgba(114, 231, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 96% 18%, rgba(255, 115, 216, 0.13), transparent 27%),
+    linear-gradient(145deg, #070a14 0%, #050711 54%, #0a0712 100%);
+  background-size: 72px 72px, 72px 72px, auto, auto, auto;
+}
+
+.is-rexonance-dialog .form-pickup-panel::before {
+  position: absolute;
+  z-index: -1;
+  inset: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 10px 40px 18px 10px;
+  content: "";
+  pointer-events: none;
+}
+
+.is-rexonance-dialog .form-pickup-panel::after {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  right: 11%;
+  left: 11%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--rex-cyan), #fff 48%, var(--rex-pink), transparent);
+  box-shadow: 0 0 18px rgba(114, 231, 255, 0.68);
+  content: "";
+  pointer-events: none;
+}
+
+.rexonance-panel-ambient {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rexonance-panel-ambient i {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.rexonance-panel-ambient i:nth-child(1) {
+  top: -330px;
+  right: -260px;
+  width: 720px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 115, 216, 0.16);
+  box-shadow: inset 0 0 0 54px rgba(114, 231, 255, 0.012), inset 0 0 0 122px rgba(255, 115, 216, 0.01);
+}
+
+.rexonance-panel-ambient i:nth-child(2) {
+  top: -238px;
+  right: -168px;
+  width: 536px;
+  aspect-ratio: 1;
+  border: 1px dashed rgba(233, 196, 123, 0.17);
+  animation: rexonanceCardOrbit 32s linear infinite reverse;
+}
+
+.rexonance-panel-ambient i:nth-child(3) {
+  top: 108px;
+  left: -270px;
+  width: 520px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(114, 231, 255, 0.11);
+  box-shadow: 0 0 84px rgba(114, 231, 255, 0.035);
+}
+
+.rexonance-panel-ambient span {
+  position: absolute;
+  right: 7%;
+  bottom: 5%;
+  width: 240px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 115, 216, 0.7), rgba(114, 231, 255, 0.7), transparent);
+  box-shadow: 0 0 12px rgba(114, 231, 255, 0.38);
+}
+
+.is-rexonance-dialog .form-pickup-close {
+  z-index: 12;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  width: 52px;
+  height: 52px;
+  border-color: rgba(159, 232, 255, 0.36);
+  background: linear-gradient(145deg, rgba(114, 231, 255, 0.14), rgba(255, 115, 216, 0.1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(114, 231, 255, 0.1);
+  -webkit-backdrop-filter: blur(13px) saturate(150%);
+  backdrop-filter: blur(13px) saturate(150%);
+}
+
+.is-rexonance-dialog .form-pickup-heading {
+  position: relative;
+  z-index: 2;
+  max-width: calc(100% - 70px);
+  padding: 4px 0 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.is-rexonance-dialog .form-pickup-heading > p {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 15px;
+  color: var(--rex-gold);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+}
+
+.is-rexonance-dialog .form-pickup-heading > p::before {
+  width: 52px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rex-cyan), var(--rex-pink));
+  box-shadow: 0 0 10px var(--rex-cyan);
+  content: "";
+}
+
+.is-rexonance-dialog .form-pickup-heading > small {
+  display: block;
+  max-width: 72ch;
+  color: rgba(225, 234, 250, 0.62);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.7;
+}
+
+.is-rexonance-dialog .form-pickup-heading h2 {
+  margin: 12px 0 6px;
+  font-size: clamp(38px, 6.3vw, 88px);
+  font-weight: 420;
+  letter-spacing: -0.065em;
+  line-height: 0.98;
+}
+
+.is-rexonance-dialog .form-pickup-heading h2 b {
+  color: transparent;
+  background: linear-gradient(106deg, #f8fdff 4%, var(--rex-cyan) 35%, #f3e8f0 55%, var(--rex-pink) 74%, var(--rex-gold) 98%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 24px rgba(114, 231, 255, 0.15));
+}
+
+.is-rexonance-dialog .form-pickup-heading > em {
+  display: block;
+  margin-top: 13px;
+  color: rgba(224, 232, 248, 0.58);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+}
+
+.is-rexonance-dialog .rider-call {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 22px;
+}
+
+.is-rexonance-dialog .rider-call b {
+  padding: 7px 10px;
+  border: 1px solid rgba(114, 231, 255, 0.14);
+  border-radius: 999px;
+  color: rgba(232, 244, 255, 0.75);
+  background: linear-gradient(105deg, rgba(114, 231, 255, 0.06), rgba(255, 115, 216, 0.06));
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.is-rexonance-dialog .form-pickup-layout {
+  position: relative;
+  z-index: 2;
+  grid-template-columns: minmax(290px, 0.76fr) minmax(0, 1.24fr);
+  gap: clamp(24px, 4vw, 54px);
+  margin-top: 34px;
+  align-items: start;
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure {
+  position: sticky;
+  top: 18px;
+  border: 1px solid transparent;
+  border-radius: 12px 42px 18px 12px;
+  background:
+    linear-gradient(#050711, #050711) padding-box,
+    linear-gradient(145deg, rgba(114, 231, 255, 0.65), rgba(233, 196, 123, 0.35), rgba(255, 115, 216, 0.58)) border-box;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.46), 0 0 30px rgba(114, 231, 255, 0.07);
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure::before {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(5, 7, 17, 0.72), transparent 30%),
+    linear-gradient(110deg, transparent 55%, rgba(114, 231, 255, 0.08), transparent 72%);
+  content: "";
+  pointer-events: none;
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure img {
+  aspect-ratio: 3 / 4;
+  filter: saturate(1.08) contrast(1.035);
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure figcaption {
+  position: relative;
+  z-index: 3;
+  align-items: center;
+  min-height: 58px;
+  border-top: 1px solid rgba(114, 231, 255, 0.15);
+  background: linear-gradient(90deg, rgba(114, 231, 255, 0.08), rgba(255, 115, 216, 0.08));
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure figcaption span {
+  color: var(--rex-cyan);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+}
+
+.is-rexonance-dialog .form-pickup-layout > figure figcaption b {
+  max-width: 68%;
+  text-align: right;
+  font-size: 11px;
+}
+
+.form-pickup-overview {
+  margin: 0 0 22px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px 30px 14px 14px;
+  background: linear-gradient(135deg, rgba(114, 231, 255, 0.045), rgba(255, 115, 216, 0.035));
+}
+
+.form-pickup-overview header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.form-pickup-overview header span,
+.form-pickup-overview header p {
+  margin: 0;
+  color: var(--rex-cyan, #72e7ff);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.form-pickup-overview > div {
+  display: grid;
+  gap: 12px;
+}
+
+.form-pickup-overview > div p {
+  margin: 0;
+  color: rgba(235, 240, 250, 0.78);
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+.is-rexonance-dialog .form-pickup-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: hidden;
+  border-color: rgba(114, 231, 255, 0.13);
+  border-radius: 14px;
+  background: rgba(1, 4, 11, 0.34);
+}
+
+.is-rexonance-dialog .form-pickup-stats > div {
+  min-width: 0;
+  border-color: rgba(255, 255, 255, 0.065);
+  background: linear-gradient(145deg, rgba(114, 231, 255, 0.025), rgba(255, 115, 216, 0.018));
+}
+
+.is-rexonance-dialog .form-pickup-stats > div:nth-child(3n) {
+  border-right: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.is-rexonance-dialog .form-pickup-stats > div:nth-child(5n) {
+  border-right: 0;
+}
+
+.is-rexonance-dialog .form-pickup-stats > div:nth-last-child(-n + 5) {
+  border-bottom: 0;
+}
+
+.is-rexonance-dialog .form-pickup-stats dt {
+  color: rgba(114, 231, 255, 0.56);
+  font-weight: 800;
+}
+
+.is-rexonance-dialog .form-pickup-stats dd {
+  overflow-wrap: anywhere;
+  color: rgba(248, 249, 255, 0.91);
+  font-size: 11px;
+}
+
+.is-rexonance-dialog .form-pickup-sections {
+  gap: 20px;
+}
+
+.is-rexonance-dialog .form-pickup-sections > section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 17px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 13px 28px 13px 13px;
+  background: linear-gradient(145deg, rgba(114, 231, 255, 0.03), rgba(255, 115, 216, 0.022));
+}
+
+.is-rexonance-dialog .form-pickup-sections > section > header {
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.is-rexonance-dialog .form-pickup-sections > section > header span,
+.is-rexonance-dialog .form-pickup-sections > section > header p {
+  color: var(--rex-cyan);
+  font-weight: 800;
+}
+
+.is-rexonance-dialog .form-pickup-sections > section > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 10px 20px 10px 10px;
+  background: rgba(1, 3, 9, 0.38);
+}
+
+.is-rexonance-dialog .form-pickup-sections h3 {
+  margin-top: 0;
+  color: rgba(246, 248, 255, 0.93);
+  font-size: 13px;
+  letter-spacing: 0.025em;
+}
+
+.is-rexonance-dialog .form-pickup-sections p {
+  color: rgba(224, 230, 242, 0.7);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+.rexonance-weapon-gallery {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(38px, 6vw, 74px);
+  padding-top: 27px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.rexonance-weapon-gallery > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.rexonance-weapon-gallery > header small {
+  color: var(--rex-cyan);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+}
+
+.rexonance-weapon-gallery > header h3 {
+  margin: 6px 0 0;
+  color: transparent;
+  background: linear-gradient(105deg, #fff, var(--rex-cyan), var(--rex-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 520;
+  letter-spacing: -0.045em;
+}
+
+.rexonance-weapon-gallery > header > span {
+  padding: 8px 12px;
+  border: 1px solid rgba(233, 196, 123, 0.2);
+  border-radius: 999px;
+  color: var(--rex-gold);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.rexonance-weapon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.rexonance-weapon-grid figure {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 12px 34px 16px 12px;
+  background:
+    linear-gradient(#050711, #050711) padding-box,
+    linear-gradient(128deg, rgba(114, 231, 255, 0.46), rgba(233, 196, 123, 0.18), rgba(255, 115, 216, 0.42)) border-box;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.34);
+  content-visibility: auto;
+  contain-intrinsic-size: 480px 320px;
+}
+
+.rexonance-weapon-grid figure.is-wide {
+  grid-column: 1 / -1;
+}
+
+.rexonance-weapon-grid figure > div {
+  position: relative;
+  overflow: hidden;
+  min-height: 210px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(114, 231, 255, 0.08), transparent 58%),
+    #02040a;
+}
+
+.rexonance-weapon-grid figure > div::before,
+.rexonance-weapon-grid figure > div::after {
+  position: absolute;
+  z-index: 2;
+  content: "";
+  pointer-events: none;
+}
+
+.rexonance-weapon-grid figure > div::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 49.8%, rgba(255, 255, 255, 0.055) 50%, transparent 50.2%),
+    linear-gradient(0deg, rgba(5, 7, 17, 0.48), transparent 24%, transparent 76%, rgba(5, 7, 17, 0.36));
+}
+
+.rexonance-weapon-grid figure > div::after {
+  top: 10%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rex-cyan), var(--rex-pink), transparent);
+  box-shadow: 0 0 10px rgba(114, 231, 255, 0.5);
+  opacity: 0.45;
+  animation: rexonanceWeaponScan 5.8s ease-in-out infinite;
+}
+
+.rexonance-weapon-grid img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 210px;
+  aspect-ratio: 16 / 7;
+  object-fit: contain;
+  filter: saturate(1.04) contrast(1.025);
+}
+
+.rexonance-weapon-grid figcaption {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 16px;
+  min-height: 74px;
+  padding: 14px 17px 16px;
+  border-top: 1px solid rgba(114, 231, 255, 0.12);
+  background: linear-gradient(100deg, rgba(114, 231, 255, 0.065), rgba(255, 115, 216, 0.045));
+}
+
+.rexonance-weapon-grid figcaption small {
+  grid-column: 1;
+  color: rgba(114, 231, 255, 0.7);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.rexonance-weapon-grid figcaption b {
+  grid-column: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: rgba(248, 249, 255, 0.92);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.rexonance-weapon-grid figcaption > span {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  color: rgba(233, 196, 123, 0.52);
+  font-family: var(--font-display, serif);
+  font-size: 25px;
+  font-weight: 300;
+}
+
+/* Water-blue × pink spiral transition */
+
+.rexonance-gate {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  min-height: 100dvh;
+  padding:
+    max(28px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(28px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  color: #fff;
+  background:
+    radial-gradient(circle at center, rgba(17, 29, 58, 0.66), rgba(2, 3, 10, 0.96) 54%, #010107 82%),
+    #010107;
+  isolation: isolate;
+  pointer-events: all;
+  touch-action: none;
+  animation: rexonanceGateLife 0.92s ease both;
+}
+
+.rexonance-gate::before,
+.rexonance-gate::after {
+  position: absolute;
+  z-index: -1;
+  inset: -20%;
+  content: "";
+  pointer-events: none;
+}
+
+.rexonance-gate::before {
+  background:
+    repeating-conic-gradient(from 15deg at 50% 50%, transparent 0 12deg, rgba(114, 231, 255, 0.14) 14deg, transparent 18deg 34deg, rgba(255, 115, 216, 0.13) 36deg, transparent 40deg 54deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 10%, #000 18% 63%, transparent 75%);
+  mask-image: radial-gradient(circle, transparent 0 10%, #000 18% 63%, transparent 75%);
+  animation: rexonanceGateVortex 0.92s cubic-bezier(0.12, 0.65, 0.18, 1) both;
+}
+
+.rexonance-gate::after {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.94) 0, rgba(165, 240, 255, 0.5) 4%, rgba(255, 122, 217, 0.2) 10%, transparent 31%);
+  transform: scale(0.02);
+  animation: rexonanceGateFlash 0.92s cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+
+.rexonance-gate-field {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.rexonance-gate-spiral {
+  position: absolute;
+  width: min(124vmax, 1480px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0.62;
+  -webkit-mask-image: radial-gradient(circle, transparent 0 15%, #000 22% 59%, transparent 70%);
+  mask-image: radial-gradient(circle, transparent 0 15%, #000 22% 59%, transparent 70%);
+  will-change: transform;
+}
+
+.rexonance-gate-spiral.is-cyan {
+  background: repeating-conic-gradient(from 4deg, transparent 0 18deg, rgba(106, 231, 255, 0.65) 20deg, transparent 23deg 42deg);
+  animation: rexonanceSpiralCyan 0.92s cubic-bezier(0.11, 0.67, 0.12, 1) both;
+}
+
+.rexonance-gate-spiral.is-pink {
+  width: min(104vmax, 1260px);
+  background: repeating-conic-gradient(from -12deg, transparent 0 20deg, rgba(255, 105, 213, 0.58) 22deg, transparent 26deg 48deg);
+  animation: rexonanceSpiralPink 0.92s cubic-bezier(0.11, 0.67, 0.12, 1) both;
+}
+
+.rexonance-gate-orbit {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.27);
+  border-radius: 50%;
+  box-shadow: 0 0 26px rgba(114, 231, 255, 0.12), inset 0 0 26px rgba(255, 115, 216, 0.08);
+}
+
+.rexonance-gate-orbit::before,
+.rexonance-gate-orbit::after {
+  position: absolute;
+  width: 7px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 18px 4px var(--orbit-color, #72e7ff);
+  content: "";
+}
+
+.rexonance-gate-orbit::before { top: 12%; left: 21%; }
+.rexonance-gate-orbit::after { right: 12%; bottom: 22%; --orbit-color: #ff73d8; }
+
+.rexonance-gate-orbit.is-outer {
+  width: min(74vmin, 720px);
+  aspect-ratio: 1;
+  animation: rexonanceOrbitOuter 0.92s ease-out both;
+}
+
+.rexonance-gate-orbit.is-inner {
+  width: min(47vmin, 450px);
+  aspect-ratio: 1;
+  border-style: dashed;
+  border-color: rgba(233, 196, 123, 0.38);
+  animation: rexonanceOrbitInner 0.92s ease-out both;
+}
+
+.rexonance-gate-rush {
+  position: absolute;
+  top: 50%;
+  width: 54vw;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), var(--rush-color));
+  box-shadow: 0 0 13px var(--rush-color);
+  transform-origin: 100% 50%;
+}
+
+.rexonance-gate-rush.is-left {
+  right: 54%;
+  --rush-color: #72e7ff;
+  animation: rexonanceRushLeft 0.92s ease-out both;
+}
+
+.rexonance-gate-rush.is-right {
+  left: 54%;
+  --rush-color: #ff73d8;
+  transform-origin: 0 50%;
+  animation: rexonanceRushRight 0.92s ease-out both;
+}
+
+.rexonance-gate-sigil {
+  position: relative;
+  display: grid;
+  width: min(22vmin, 184px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  rotate: 45deg;
+  background: linear-gradient(145deg, rgba(114, 231, 255, 0.17), rgba(255, 115, 216, 0.12));
+  box-shadow:
+    0 0 0 7px rgba(2, 4, 12, 0.68),
+    0 0 0 8px rgba(233, 196, 123, 0.32),
+    0 0 46px rgba(114, 231, 255, 0.36),
+    inset 0 0 36px rgba(255, 115, 216, 0.17);
+  animation: rexonanceSigilArrival 0.92s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rexonance-gate-sigil::before,
+.rexonance-gate-sigil::after,
+.rexonance-gate-sigil > i {
+  position: absolute;
+  inset: 16%;
+  border: 1px solid rgba(114, 231, 255, 0.48);
+  content: "";
+}
+
+.rexonance-gate-sigil::after {
+  inset: 30%;
+  border-color: rgba(255, 115, 216, 0.55);
+}
+
+.rexonance-gate-sigil > i {
+  inset: -18%;
+  border-color: rgba(233, 196, 123, 0.3);
+  border-style: dashed;
+}
+
+.rexonance-gate-sigil b {
+  color: transparent;
+  background: linear-gradient(135deg, #fff, #72e7ff 38%, #ff73d8 68%, #e9c47b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--font-display, serif);
+  font-size: clamp(42px, 8vmin, 78px);
+  font-weight: 360;
+  line-height: 1;
+  rotate: -45deg;
+}
+
+.rexonance-gate-copy {
+  position: absolute;
+  z-index: 3;
+  bottom: max(8vh, calc(env(safe-area-inset-bottom) + 22px));
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  animation: rexonanceCopyArrival 0.92s ease both;
+}
+
+.rexonance-gate-copy small {
+  color: #e9c47b;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.42em;
+}
+
+.rexonance-gate-copy strong {
+  margin: 7px 0 4px;
+  color: transparent;
+  background: linear-gradient(90deg, #fff, #72e7ff 35%, #ff73d8 70%, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--font-display, serif);
+  font-size: clamp(27px, 5vw, 58px);
+  font-weight: 360;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
+
+.rexonance-gate-copy span {
+  color: rgba(225, 235, 250, 0.56);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+}
+
+@keyframes rexonanceCardOrbit {
+  to { rotate: 360deg; }
+}
+
+@keyframes rexonanceWeaponScan {
+  0%, 16% { translate: 0 -30px; opacity: 0; }
+  34%, 64% { opacity: 0.46; }
+  82%, 100% { translate: 0 210px; opacity: 0; }
+}
+
+@keyframes rexonanceGateLife {
+  0% { opacity: 0; }
+  9%, 76% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes rexonanceGateVortex {
+  0% { opacity: 0; transform: rotate(-38deg) scale(1.46); }
+  28% { opacity: 0.76; }
+  100% { opacity: 0.2; transform: rotate(116deg) scale(0.18); }
+}
+
+@keyframes rexonanceGateFlash {
+  0%, 68% { opacity: 0; transform: scale(0.02); }
+  82% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(4.2); }
+}
+
+@keyframes rexonanceSpiralCyan {
+  0% { transform: rotate(-28deg) scale(1.5); opacity: 0; }
+  18% { opacity: 0.62; }
+  100% { transform: rotate(196deg) scale(0.14); opacity: 0.2; }
+}
+
+@keyframes rexonanceSpiralPink {
+  0% { transform: rotate(42deg) scale(1.6); opacity: 0; }
+  18% { opacity: 0.58; }
+  100% { transform: rotate(-220deg) scale(0.12); opacity: 0.16; }
+}
+
+@keyframes rexonanceOrbitOuter {
+  0% { transform: rotate(-54deg) scale(1.25); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: rotate(172deg) scale(0.22); opacity: 0; }
+}
+
+@keyframes rexonanceOrbitInner {
+  0% { transform: rotate(36deg) scale(1.4); opacity: 0; }
+  30% { opacity: 0.8; }
+  100% { transform: rotate(-210deg) scale(0.18); opacity: 0; }
+}
+
+@keyframes rexonanceRushLeft {
+  0% { opacity: 0; transform: translateX(-60vw) rotate(8deg) scaleX(0.1); }
+  36% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateX(48vw) rotate(8deg) scaleX(1.8); }
+}
+
+@keyframes rexonanceRushRight {
+  0% { opacity: 0; transform: translateX(60vw) rotate(-8deg) scaleX(0.1); }
+  36% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateX(-48vw) rotate(-8deg) scaleX(1.8); }
+}
+
+@keyframes rexonanceSigilArrival {
+  0% { opacity: 0; transform: translateZ(-240px) scale(0.2); }
+  34%, 72% { opacity: 1; transform: translateZ(0) scale(1); }
+  100% { opacity: 0; transform: translateZ(380px) scale(3.4); }
+}
+
+@keyframes rexonanceCopyArrival {
+  0%, 15% { opacity: 0; translate: 0 16px; }
+  36%, 76% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: 0 -12px; }
+}
+
+@media (max-width: 900px) {
+  .is-rexonance-pickup .form-pickup-card {
+    grid-template-columns: minmax(250px, 0.82fr) minmax(0, 1.18fr);
+  }
+
+  .is-rexonance-dialog .form-pickup-layout {
+    grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.22fr);
+    gap: 24px;
+  }
+
+  .is-rexonance-dialog .form-pickup-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .is-rexonance-dialog .form-pickup-stats > div,
+  .is-rexonance-dialog .form-pickup-stats > div:nth-child(5n) {
+    border-right: 1px solid rgba(255, 255, 255, 0.065);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+  }
+
+  .is-rexonance-dialog .form-pickup-stats > div:nth-child(2n) { border-right: 0; }
+  .is-rexonance-dialog .form-pickup-stats > div:nth-last-child(-n + 2) { border-bottom: 0; }
+}
+
+@media (max-width: 700px) {
+  .form-pickup.is-rexonance-pickup {
+    width: calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    margin-top: 28px;
+    margin-bottom: 54px;
+  }
+
+  .is-rexonance-pickup .form-pickup-card {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    border-radius: 16px 38px 22px 16px;
+  }
+
+  .is-rexonance-pickup .form-pickup-visual {
+    min-height: 0;
+    aspect-ratio: 4 / 4.65;
+  }
+
+  .is-rexonance-pickup .form-pickup-visual::before {
+    background: linear-gradient(0deg, rgba(5, 7, 17, 0.9), transparent 42%);
+  }
+
+  .is-rexonance-pickup .form-pickup-visual::after {
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rex-cyan), #fff, var(--rex-pink), transparent);
+  }
+
+  .is-rexonance-pickup .form-pickup-copy {
+    gap: 9px;
+    padding: 28px 22px 34px;
+  }
+
+  .is-rexonance-pickup .form-pickup-copy h2 {
+    font-size: clamp(34px, 11.5vw, 52px);
+  }
+
+  .is-rexonance-pickup .form-pickup-copy q {
+    padding-right: 118px;
+    font-size: 11px;
+  }
+
+  .is-rexonance-pickup .form-pickup-plus.ios-slide-open {
+    right: 14px;
+    bottom: 14px;
+    width: min(210px, calc(100% - 28px));
+  }
+
+  .form-pickup-dialog.is-rexonance-dialog {
+    width: calc(100vw - 12px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-height: calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    border-radius: 12px 30px 16px 12px;
+  }
+
+  .is-rexonance-dialog .form-pickup-panel {
+    padding:
+      max(24px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(32px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    background-size: 48px 48px, 48px 48px, auto, auto, auto;
+  }
+
+  .is-rexonance-dialog .form-pickup-panel::before {
+    inset: 8px;
+  }
+
+  .is-rexonance-dialog .form-pickup-close {
+    top: max(14px, env(safe-area-inset-top));
+    right: max(14px, env(safe-area-inset-right));
+    width: 46px;
+    height: 46px;
+  }
+
+  .is-rexonance-dialog .form-pickup-heading {
+    max-width: 100%;
+    padding: 48px 0 24px;
+  }
+
+  .is-rexonance-dialog .form-pickup-heading h2 {
+    font-size: clamp(36px, 12vw, 58px);
+  }
+
+  .is-rexonance-dialog .form-pickup-heading > small {
+    padding-right: 32px;
+    font-size: 8px;
+  }
+
+  .is-rexonance-dialog .rider-call {
+    gap: 5px;
+  }
+
+  .is-rexonance-dialog .rider-call b {
+    padding: 6px 8px;
+    font-size: 7px;
+  }
+
+  .is-rexonance-dialog .form-pickup-layout {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    margin-top: 24px;
+  }
+
+  .is-rexonance-dialog .form-pickup-layout > figure {
+    position: relative;
+    top: auto;
+  }
+
+  .form-pickup-overview {
+    padding: 17px 15px;
+  }
+
+  .form-pickup-overview > div p {
+    font-size: 12px;
+    line-height: 1.9;
+  }
+
+  .is-rexonance-dialog .form-pickup-sections > section {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .rexonance-weapon-gallery > header {
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rexonance-weapon-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rexonance-weapon-grid figure.is-wide {
+    grid-column: auto;
+  }
+
+  .rexonance-weapon-grid figure > div,
+  .rexonance-weapon-grid img {
+    min-height: 170px;
+  }
+
+  .rexonance-gate-copy {
+    bottom: max(6vh, calc(env(safe-area-inset-bottom) + 18px));
+  }
+
+  .rexonance-gate-copy small {
+    font-size: 6.5px;
+    letter-spacing: 0.3em;
+  }
+
+  .rexonance-gate-copy strong {
+    font-size: clamp(26px, 10vw, 42px);
+  }
+
+  .rexonance-gate-copy span {
+    font-size: 6px;
+    letter-spacing: 0.18em;
+  }
+}
+
+@media (max-width: 420px) {
+  .is-rexonance-pickup .form-pickup-copy q {
+    padding-right: 0;
+  }
+
+  .is-rexonance-dialog .form-pickup-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .is-rexonance-dialog .form-pickup-stats > div,
+  .is-rexonance-dialog .form-pickup-stats > div:nth-child(2n),
+  .is-rexonance-dialog .form-pickup-stats > div:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+  }
+
+  .is-rexonance-dialog .form-pickup-stats > div:last-child {
+    border-bottom: 0;
+  }
+
+  .rexonance-weapon-grid figure > div,
+  .rexonance-weapon-grid img {
+    min-height: 138px;
+  }
+
+  .rexonance-weapon-grid figcaption {
+    padding: 12px 13px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rexonance-card-ornaments i,
+  .rexonance-panel-ambient i,
+  .rexonance-weapon-grid figure > div::after {
+    animation: none !important;
+  }
+
+  .rexonance-gate,
+  .rexonance-gate::before,
+  .rexonance-gate::after,
+  .rexonance-gate-spiral,
+  .rexonance-gate-orbit,
+  .rexonance-gate-rush,
+  .rexonance-gate-sigil,
+  .rexonance-gate-copy {
+    animation-duration: 90ms !important;
+  }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .is-rexonance-pickup .form-pickup-visual > span,
+  .is-rexonance-dialog .form-pickup-close {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .form-pickup-dialog.is-rexonance-dialog::backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

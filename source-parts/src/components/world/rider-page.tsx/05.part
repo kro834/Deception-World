@@ -7,23 +7,33 @@
           ))}
         </div>
       </section>
-      {primaryForm ? (
+      {pickupForms.map((form) => (
         <FormPickup
+          key={`${rider.id}-${form.name}`}
           rider={{
-            img: primaryForm.img,
-            pos: primaryForm.pos,
-            system: primaryForm.system,
-            name: primaryForm.displayName ?? rider.ja,
-            sub: primaryForm.sub ?? (primaryForm.name !== rider.ja ? primaryForm.name : undefined),
-            calls: primaryForm.calls,
-            stats: primaryForm.stats,
-            abilities: primaryForm.abilities,
-            arsenal: primaryForm.arsenal,
-            finishers: primaryForm.finishers,
-            extraForms: rider.forms,
+            img: form.img,
+            pos: form.pos,
+            system: form.system,
+            name: form.displayName ?? rider.ja,
+            sub: form.sub ?? (form.name !== rider.ja ? form.name : undefined),
+            calls: form.calls,
+            quote: form.quote,
+            overview: form.overview,
+            theme: form.theme,
+            stats: form.stats,
+            abilities: form.abilities,
+            arsenal: form.arsenal,
+            finishers: form.finishers,
+            weaponGallery: form.weaponGallery,
+            extraForms:
+              rider.id === "saga"
+                ? form.theme === "rexonance"
+                  ? undefined
+                  : rider.forms.filter((candidate) => !candidate.featuredPickup || candidate === form)
+                : rider.forms,
           }}
         />
-      ) : null}
+      ))}
       <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="SEVEN RIDERS" />
       {rider.nightmare ? (
         <dialog

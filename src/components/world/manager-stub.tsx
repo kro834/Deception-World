@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
@@ -24,6 +25,8 @@ export type RiderForm = {
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
   extraForms?: { img: string; pos: string; name: string; sub?: string }[];
+  theme?: "rexonance";
+  weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
 };
 
 type Profile = {
@@ -46,7 +49,10 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const opener = useRef<HTMLButtonElement>(null);
   const pointerOpened = useRef(false);
   const cancelScrollReset = useRef<(() => void) | null>(null);
+  const gateTimer = useRef<number | null>(null);
+  const [gateActive, setGateActive] = useState(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
+  const isRexonance = rider.theme === "rexonance";
   const resetScroll = () => {
     const dialog = dlg.current;
     if (!dialog) return;
@@ -59,7 +65,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     button.dataset.keyboardFocus = "false";
     button.blur();
   };
-  const open = (source: "keyboard" | "pointer") => {
+  const showDialog = (source: "keyboard" | "pointer") => {
     const dialog = dlg.current;
     if (!dialog) return;
     pointerOpened.current = source === "pointer";
@@ -75,6 +81,25 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
       clearPointerFocus();
     });
   };
+  const open = (source: "keyboard" | "pointer") => {
+    if (!isRexonance) {
+      showDialog(source);
+      return;
+    }
+    pointerOpened.current = source === "pointer";
+    clearPointerFocus();
+    if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+    setGateActive(true);
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    gateTimer.current = window.setTimeout(
+      () => {
+        gateTimer.current = null;
+        setGateActive(false);
+        window.requestAnimationFrame(() => showDialog(source));
+      },
+      reducedMotion ? 90 : 920,
+    );
+  };
   const close = () => {
     cancelScrollReset.current?.();
     cancelScrollReset.current = null;
@@ -86,15 +111,31 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     window.requestAnimationFrame(clearPointerFocus);
     resetScroll();
   };
-  const overview = rider.overview ?? [];
   const stats = rider.stats ?? [];
   const abilities = rider.abilities ?? [];
   const arsenal = rider.arsenal ?? [];
   const finishers = rider.finishers ?? [];
   const extraForms = rider.extraForms ?? [];
+  const overview = rider.overview ?? [];
+  const weaponGallery = rider.weaponGallery ?? [];
+  useEffect(
+    () => () => {
+      if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+      cancelScrollReset.current?.();
+    },
+    [],
+  );
   return (
-    <section className="form-pickup" aria-label={`${riderPrefix}${rider.name}の記録`}>
+    <section className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`} aria-label={`${riderPrefix}${rider.name}の記録`}>
       <article className="form-pickup-card">
+        {isRexonance ? (
+          <div className="rexonance-card-ornaments" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <span />
+          </div>
+        ) : null}
         <div className="form-pickup-visual">
           <img
             src={rider.img}
@@ -126,7 +167,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
       </article>
       <dialog
         ref={dlg}
-        className="form-pickup-dialog"
+        className={`form-pickup-dialog${isRexonance ? " is-rexonance-dialog" : ""}`}
         tabIndex={-1}
         aria-label={`${riderPrefix}${rider.name}`}
         onClose={resetScroll}
@@ -139,6 +180,14 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         }}
       >
         <div className="form-pickup-panel">
+          {isRexonance ? (
+            <div className="rexonance-panel-ambient" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <span />
+            </div>
+          ) : null}
           <button type="button" className="form-pickup-close" data-liquid-pointer="true" onClick={close} aria-label="閉じる">
             <LiquidPointerGlow />
             <span>CLOSE</span>
@@ -156,8 +205,8 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             </h2>
             {rider.sub ? <em>{rider.sub}</em> : null}
             <div className="rider-call">
-              {rider.calls.map((c) => (
-                <b key={c}>{c}</b>
+              {rider.calls.map((c, index) => (
+                <b key={`${c}-${index}`}>{c}</b>
               ))}
             </div>
           </div>
@@ -174,11 +223,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 <section className="form-pickup-overview" aria-label="フォーム概要">
                   <header>
                     <span>00</span>
-                    <p>OVERVIEW</p>
+                    <p>{isRexonance ? "OVERVIEW / TRINITY RESONANCE" : "OVERVIEW"}</p>
                   </header>
-                  {overview.map((paragraph) => (
-                    <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-                  ))}
+                  <div>
+                    {overview.map((paragraph) => (
+                      <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                    ))}
+                  </div>
                 </section>
               ) : null}
               {stats.length ? (
@@ -250,8 +301,64 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               ) : null}
             </div>
           </div>
+          {weaponGallery.length ? (
+            <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
+              <header>
+                <div>
+                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>
+                  <h3>共鳴武装群</h3>
+                </div>
+                <span>{String(weaponGallery.length).padStart(2, "0")} SYSTEMS</span>
+              </header>
+              <div className="rexonance-weapon-grid">
+                {weaponGallery.map((weapon, index) => (
+                  <figure key={weapon.name} className={index === weaponGallery.length - 1 ? "is-wide" : undefined}>
+                    <div>
+                      <img
+                        src={weapon.img}
+                        alt={`${weapon.name}の武装ビジュアル`}
+                        style={{ objectPosition: weapon.pos ?? "50% 50%" }}
+                        decoding="async"
+                        loading="lazy"
+                        fetchPriority="low"
+                      />
+                    </div>
+                    <figcaption>
+                      <small>{weapon.label}</small>
+                      <b>{weapon.name}</b>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </dialog>
+      {gateActive && typeof document !== "undefined"
+        ? createPortal(
+            <div className="rexonance-gate" role="status" aria-live="polite" aria-label="レクソナンスサーガの記録を展開中">
+              <div className="rexonance-gate-field" aria-hidden="true">
+                <i className="rexonance-gate-spiral is-cyan" />
+                <i className="rexonance-gate-spiral is-pink" />
+                <i className="rexonance-gate-orbit is-outer" />
+                <i className="rexonance-gate-orbit is-inner" />
+                <span className="rexonance-gate-rush is-left" />
+                <span className="rexonance-gate-rush is-right" />
+                <div className="rexonance-gate-sigil">
+                  <i />
+                  <b>R</b>
+                </div>
+              </div>
+              <div className="rexonance-gate-copy">
+                <small>ORDER × DIVINITY × WILL</small>
+                <strong>REXONANCE</strong>
+                <span>TRINITY SOVEREIGN LINK ESTABLISHED</span>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

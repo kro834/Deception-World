@@ -1,0 +1,86 @@
+import assert from "node:assert/strict";
+import { readFileSync, statSync } from "node:fs";
+import test from "node:test";
+
+const riderPage = readFileSync(
+  new URL("../src/components/world/rider-page.tsx", import.meta.url),
+  "utf8",
+);
+const pickup = readFileSync(
+  new URL("../src/components/world/manager-stub.tsx", import.meta.url),
+  "utf8",
+);
+const styles = readFileSync(
+  new URL("../src/styles-world/rexonance-pickup.css", import.meta.url),
+  "utf8",
+);
+const reconstructedRider = ["01.part", "04.part", "05.part"]
+  .map((part) => readFileSync(new URL(`../source-parts/src/components/world/rider-page.tsx/${part}`, import.meta.url), "utf8"))
+  .join("\n");
+const reconstructedPickup = readFileSync(
+  new URL("../source-parts/src/components/world/manager-stub.tsx/01.part", import.meta.url),
+  "utf8",
+);
+
+const assets = [
+  "rider-rexonance-saga-pickup.jpeg",
+  "weapon-realm-slayer-mark-vi.jpeg",
+  "weapon-realm-slayer-mark-xiv.jpeg",
+  "weapon-axis-raker-mark-vii-arcs.jpeg",
+  "weapon-axis-raker-mark-vii-launcher.jpeg",
+  "weapon-unite-edge-lancer.jpeg",
+];
+
+test("Saga keeps Extreme and Rexonance as two dedicated pickup records", () => {
+  assert.match(riderPage, /name: "エクスプリームサーガ"[\s\S]*?featuredPickup: true/);
+  assert.match(riderPage, /name: "レクソナンスサーガ"[\s\S]*?featuredPickup: true,[\s\S]*?theme: "rexonance"/);
+  assert.match(riderPage, /rider\.id === "saga"[\s\S]*?rider\.forms\.filter\(\(form\) => form\.featuredPickup\)/);
+  assert.match(riderPage, /332\.2t/);
+  assert.match(riderPage, /480\.5t/);
+  assert.match(riderPage, /50000YOPS／∞Core/);
+  assert.match(riderPage, /SA-GA OS 5\.5/);
+  assert.match(riderPage, /REXONANCE NANO ARMOR/);
+  assert.match(riderPage, /デウスシフト・レクソナンスパーク/);
+});
+
+test("all supplied Rexonance and linked-armament assets are present and mapped", () => {
+  for (const asset of assets) {
+    assert.ok(statSync(new URL(`../public/${asset}`, import.meta.url)).size > 50_000, asset);
+    assert.match(riderPage, new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  for (const label of [
+    "レルムスレイヤー・マークⅥ",
+    "レルムスレイヤー・マークXIV",
+    "アクシスレイカー・マークⅦ　アークスモード",
+    "アクシスレイカー・マークⅦ　ランチャーモード",
+    "ユナイトエッジ　ランサーモード",
+  ]) {
+    assert.ok(riderPage.includes(label), label);
+  }
+});
+
+test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
+  assert.match(pickup, /const isRexonance = rider\.theme === "rexonance"/);
+  assert.match(pickup, /setGateActive\(true\)/);
+  assert.match(
+    pickup,
+    /window\.setTimeout\(\s*\(\) => \{[\s\S]*?showDialog\(source\)[\s\S]*?\},\s*reducedMotion \? 90 : 920,\s*\)/,
+  );
+  assert.match(pickup, /createPortal\(/);
+  assert.match(pickup, /rexonance-gate-spiral is-cyan/);
+  assert.match(pickup, /rexonance-gate-spiral is-pink/);
+  assert.match(pickup, /className="rexonance-weapon-gallery"/);
+  assert.match(styles, /\.is-rexonance-pickup/);
+  assert.match(styles, /\.is-rexonance-dialog/);
+  assert.match(styles, /\.rexonance-weapon-grid/);
+  assert.match(styles, /@media \(max-width: 700px\)/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("generated and reconstructable source retain the Rexonance feature markers", () => {
+  for (const source of [reconstructedRider, reconstructedPickup]) {
+    assert.match(source, /rexonance/i);
+  }
+  assert.match(reconstructedRider, /rider-rexonance-saga-pickup\.jpeg/);
+  assert.match(reconstructedPickup, /rexonance-gate-spiral is-cyan/);
+});

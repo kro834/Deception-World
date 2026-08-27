@@ -34,11 +34,15 @@ type RiderDossier = {
     displayName?: string;
     sub?: string;
     calls: string[];
+    quote?: string;
     overview?: string[];
+    featuredPickup?: boolean;
+    theme?: "rexonance";
     stats?: { dt: string; dd: string }[];
     abilities?: { name: string; body: string }[];
     arsenal?: { name: string; body: string }[];
     finishers?: { name: string; body: string }[];
+    weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
   }[];
   civilian: { name: string; kicker: string; body: string; cv?: string };
   nightmare?: {
@@ -111,6 +115,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         name: "エクスプリームサーガ",
         displayName: "エクスプリームサーガ",
         sub: "MIDDLE",
+        featuredPickup: true,
         calls: ["EXCONVERT!!", "HIGH SUPREME!!", "Rollout!", "GENOCIDE! RIDER! SA-GA!"],
         stats: [
           { dt: "HEIGHT", dd: "249.9cm" },
@@ -141,6 +146,74 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         name: "エクスプリームサーガ・ウルトラ",
         sub: "ULTRA",
         calls: ["HIGH SUPREME!", "ULTRA CORE!", "EXSUPREME SAGA ULTRA!"],
+      },
+      {
+        img: "/rider-rexonance-saga-pickup.jpeg",
+        pos: "50% 7%",
+        system: "エクスサーガドライバー × デュアルエクスコア／レクソナンスコア",
+        name: "レクソナンスサーガ",
+        displayName: "レクソナンスサーガ",
+        sub: "TRINITY RESONANCE / FINAL ARRIVAL",
+        featuredPickup: true,
+        theme: "rexonance",
+        quote: "無限出力を、無限の攻撃として完成させる。",
+        calls: [
+          "EXCONVERT！",
+          "Ultra DEUS！",
+          "REXONANCE！",
+          "GODSIDE！RIDER！",
+          "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
+          "REXONANCE！",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "244.9cm" },
+          { dt: "WEIGHT", dd: "190.8kg" },
+          { dt: "PUNCH", dd: "332.2t" },
+          { dt: "KICK", dd: "480.5t" },
+          { dt: "JUMP", dd: "6000m" },
+          { dt: "100m", dd: "0.00021sec" },
+          { dt: "FLIGHT", dd: "測定不能" },
+          { dt: "KHAOS DeuX", dd: "50000YOPS／∞Core" },
+          { dt: "KOSMOS DeuX", dd: "9000TOPS／300Core" },
+          { dt: "EMP", dd: "無制限" },
+        ],
+        overview: [
+          "月城悠真がエクスサーガドライバーへデュアルエクスコアとレクソナンスコアを装填して変身する、サーガシステムの最終到達形態。秩序と破壊を司るレックス・ロワ、最高位神格を持つ五代目ゼウス、そして神から切り離されながら一人の人間として生きた悠真。三者を融合して個を消すのではなく、それぞれを独立したまま超共鳴させ、戦闘出力だけを月城悠真へ集約することで成立する。",
+          "エクスプリームサーガが開いた無制限出力の設計思想を継承し、REXONANCE DRIVE、REXONANCE DEUS、KHAOS DeuX、KOSMOS DeuXを統合。生成した力を踏み込み、加速、姿勢維持、装甲突破、位相貫通、権限干渉、存在構造への伝達まで連続的に再配分する。作用域であるエフェクティブ・エリアを極小化し、装甲内部のトランスミッション・エリアを最短化することで、反射や散逸を抑え、同じ出力をより鋭く、確実に対象へ到達させる。",
+          "攻撃の周波数、位相、権限署名は戦闘中にも更新され、一般的な無効化処理の成立条件から外れる構成へ逐次遷移する。さらに超高位管理権限は反管理権限さえ外部権限要求として捕捉し、レックスの主権で作用範囲を整理し、ゼウスの第一性で悠真の処理を先行させる。最大出力だけでなく、実際に届く実効攻撃性能においてエクスプリーム・ウルトラを上回る、無限出力を無限の攻撃へ完成させた形態である。",
+          "ゼウス由来の超自己進化は、現在の装甲、演算、出力、攻撃形式を次世代状態へ更新し続ける。レックス由来の絶対秩序は、その進化結果へ境界と役割を与え、破綻のない一つの戦闘体系へ即座に固定する。進化によって秩序を失わず、秩序によって進化を止めない循環こそがレクソナンスの核であり、スリムな外形に反して、全身は一つの巨大な攻撃機関として機能する。",
+        ],
+        abilities: [
+          { name: "SA-GA OS 5.5", body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。" },
+          { name: "超自己進化 × 絶対秩序", body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。" },
+          { name: "REXONANCE NANO ARMOR", body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。" },
+          { name: "REXONANCE DRIVE", body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。" },
+          { name: "REXONANCE DEUS", body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。" },
+          { name: "ラーニング／拒絶／Exception World", body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。" },
+        ],
+        arsenal: [
+          { name: "レルムスレイヤー・マークⅥ", body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。" },
+          { name: "レルムスレイヤー・マークXIV", body: "より高い権限干渉と構造切断へ対応する次世代仕様。" },
+          { name: "アクシスレイカー・マークⅦ", body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。" },
+          { name: "ユナイトエッジ・ランサーモード", body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。" },
+          { name: "共鳴武装群", body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。" },
+        ],
+        finishers: [
+          { name: "ハイグリーム・エッジ／レクソナンスレイド", body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。" },
+          { name: "スクワッドビッグバン／レクソナンス・エクスラッシュ", body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。" },
+          { name: "レクソナンスプロージョン", body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。" },
+          { name: "レクソナンスメテオ", body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。" },
+          { name: "レクソナンスリボルト", body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。" },
+          { name: "レクソナンスストライク", body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。" },
+          { name: "デウスシフト・レクソナンスパーク", body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。" },
+        ],
+        weaponGallery: [
+          { img: "/weapon-realm-slayer-mark-vi.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークⅥ", label: "ORDER BREAKER / MARK VI" },
+          { img: "/weapon-realm-slayer-mark-xiv.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークXIV", label: "ORDER BREAKER / MARK XIV" },
+          { img: "/weapon-axis-raker-mark-vii-arcs.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　アークスモード", label: "AXIS RAKER / ARCS MODE" },
+          { img: "/weapon-axis-raker-mark-vii-launcher.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　ランチャーモード", label: "AXIS RAKER / LAUNCHER MODE" },
+          { img: "/weapon-unite-edge-lancer.jpeg", pos: "50% 50%", name: "ユナイトエッジ　ランサーモード", label: "UNITE EDGE / LANCER MODE" },
+        ],
       },
     ],
     civilian: {
@@ -852,7 +925,13 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
-  const pickupForms = rider.id === "cipher" ? rider.forms : primaryForm ? [primaryForm] : [];
+  const pickupForms =
+    rider.id === "saga"
+      ? rider.forms.filter((form) => form.featuredPickup)
+      : rider.id === "cipher" ? rider.forms
+        : primaryForm
+          ? [primaryForm]
+          : [];
   return (
     <main
       className="manager-page rider-dossier-page"
@@ -985,12 +1064,22 @@ export function RiderPage({ id }: { id: string }) {
                 name: form.displayName ?? (index === 0 ? rider.ja : form.name),
                 sub: form.sub ?? (index === 0 && form.name !== rider.ja ? form.name : undefined),
                 calls: form.calls,
+                quote: form.quote,
                 overview: form.overview,
+                theme: form.theme,
                 stats: form.stats,
                 abilities: form.abilities,
                 arsenal: form.arsenal,
                 finishers: form.finishers,
-                extraForms: index === 0 ? rider.forms : undefined,
+                weaponGallery: form.weaponGallery,
+                extraForms:
+                  rider.id === "saga"
+                    ? form.theme === "rexonance"
+                      ? undefined
+                      : rider.forms.filter((candidate) => !candidate.featuredPickup || candidate === form)
+                    : index === 0
+                      ? rider.forms
+                      : undefined,
               }}
             />
           ))}
