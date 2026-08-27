@@ -177,9 +177,11 @@
                     type="button"
                     aria-label="管理人殺し ダンテへのアクセスを試みる"
                     onClick={(e) => {
+                      if (danteOpenTimer.current != null) return;
                       const host = e.currentTarget;
                       host.classList.add("is-glitching");
-                      window.setTimeout(() => {
+                      danteOpenTimer.current = window.setTimeout(() => {
+                        danteOpenTimer.current = null;
                         host.classList.remove("is-glitching");
                         const dlg = danteDialogRef.current;
                         if (!dlg) return;

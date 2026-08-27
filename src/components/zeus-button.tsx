@@ -433,7 +433,7 @@ function ZeusButton({
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
     };
-  });
+  }, [clearHoldTimer]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;

@@ -375,6 +375,7 @@ export function WorldHome() {
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
+  const danteOpenTimer = useRef<number | null>(null);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
@@ -504,6 +505,7 @@ export function WorldHome() {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
+      if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
@@ -1049,9 +1051,11 @@ export function WorldHome() {
                     type="button"
                     aria-label="管理人殺し ダンテへのアクセスを試みる"
                     onClick={(e) => {
+                      if (danteOpenTimer.current != null) return;
                       const host = e.currentTarget;
                       host.classList.add("is-glitching");
-                      window.setTimeout(() => {
+                      danteOpenTimer.current = window.setTimeout(() => {
+                        danteOpenTimer.current = null;
                         host.classList.remove("is-glitching");
                         const dlg = danteDialogRef.current;
                         if (!dlg) return;

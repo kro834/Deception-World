@@ -50,6 +50,9 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const pointerOpened = useRef(false);
   const cancelScrollReset = useRef<(() => void) | null>(null);
   const gateTimer = useRef<number | null>(null);
+  const gatePending = useRef(false);
+  const gateSource = useRef<"keyboard" | "pointer">("pointer");
+  const gateImage = useRef<HTMLImageElement | null>(null);
   const [gateActive, setGateActive] = useState(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
   const isRexonance = rider.theme === "rexonance";
@@ -81,6 +84,16 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
       clearPointerFocus();
     });
   };
+  const finishGate = () => {
+    if (!gatePending.current) return;
+    gatePending.current = false;
+    if (gateTimer.current !== null) {
+      window.clearTimeout(gateTimer.current);
+      gateTimer.current = null;
+    }
+    setGateActive(false);
+    window.requestAnimationFrame(() => showDialog(gateSource.current));
+  };
   const open = (source: "keyboard" | "pointer") => {
     if (!isRexonance) {
       showDialog(source);
@@ -88,17 +101,18 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     }
     pointerOpened.current = source === "pointer";
     clearPointerFocus();
-    if (gateTimer.current !== null) return;
+    if (gatePending.current) return;
+    gatePending.current = true;
+    gateSource.current = source;
     setGateActive(true);
+    const preload = new window.Image();
+    preload.decoding = "async";
+    preload.fetchPriority = "high";
+    preload.src = rider.img;
+    gateImage.current = preload;
+    void preload.decode?.().catch(() => undefined);
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    gateTimer.current = window.setTimeout(
-      () => {
-        gateTimer.current = null;
-        setGateActive(false);
-        window.requestAnimationFrame(() => showDialog(source));
-      },
-      reducedMotion ? 90 : 920,
-    );
+    gateTimer.current = window.setTimeout(finishGate, reducedMotion ? 180 : 1400);
   };
   const close = () => {
     cancelScrollReset.current?.();
@@ -120,7 +134,9 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const weaponGallery = rider.weaponGallery ?? [];
   useEffect(
     () => () => {
+      gatePending.current = false;
       if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+      gateImage.current = null;
       cancelScrollReset.current?.();
     },
     [],
@@ -146,8 +162,8 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             alt={`${riderPrefix}${rider.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
-            fetchPriority="auto"
-            loading="lazy"
+            fetchPriority={isRexonance ? "high" : "auto"}
+            loading={isRexonance ? "eager" : "lazy"}
           />
           <span>RIDER</span>
           <SlideOpenControl
@@ -217,7 +233,14 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           </div>
           <div className="form-pickup-layout">
             <figure>
-              <img src={rider.img} alt="" style={{ objectPosition: rider.pos }} decoding="async" loading="lazy" />
+              <img
+                src={rider.img}
+                alt=""
+                style={{ objectPosition: rider.pos }}
+                decoding="async"
+                loading={isRexonance ? "eager" : "lazy"}
+                fetchPriority={isRexonance ? "high" : "auto"}
+              />
               <figcaption>
                 <span>FORM VISUAL</span>
                 <b>{rider.name}</b>
@@ -342,7 +365,16 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
       </dialog>
       {gateActive && typeof document !== "undefined"
         ? createPortal(
-            <div className="rexonance-gate" role="status" aria-live="polite" aria-label="レクソナンスサーガの記録を展開中">
+            <div
+              className="rexonance-gate"
+              role="status"
+              aria-live="polite"
+              aria-label="レクソナンスサーガの記録を展開中"
+              onAnimationEnd={(event) => {
+                if (event.currentTarget !== event.target || event.animationName !== "rexonanceGateLife") return;
+                finishGate();
+              }}
+            >
               <div className="rexonance-gate-field" aria-hidden="true">
                 <i className="rexonance-gate-spiral is-cyan" />
                 <i className="rexonance-gate-spiral is-pink" />

@@ -14,6 +14,10 @@ type SlideOpenControlProps = {
 };
 
 const OPEN_THRESHOLD = 0.68;
+const POINTER_INTENT_THRESHOLD = 10;
+const HORIZONTAL_INTENT_RATIO = 1.2;
+
+type PointerIntent = "idle" | "pending" | "horizontal";
 
 type SlideMetrics = {
   buttonRect: DOMRect;
@@ -35,6 +39,8 @@ export function SlideOpenControl({
   const internalButtonRef = useRef<HTMLButtonElement>(null);
   const thumbRef = useRef<HTMLSpanElement>(null);
   const activePointer = useRef<number | null>(null);
+  const pointerIntent = useRef<PointerIntent>("idle");
+  const pointerStart = useRef({ x: 0, y: 0 });
   const grabOffset = useRef(0);
   const travel = useRef(0);
   const dragMetrics = useRef<SlideMetrics | null>(null);
@@ -51,13 +57,15 @@ export function SlideOpenControl({
     [buttonRef],
   );
 
-  const clearTimers = () => {
+  const clearTimers = useCallback(() => {
     if (activateTimer.current != null) window.clearTimeout(activateTimer.current);
     activateTimer.current = null;
-  };
+  }, []);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     activePointer.current = null;
+    pointerIntent.current = "idle";
+    pointerStart.current = { x: 0, y: 0 };
     grabOffset.current = 0;
     dragMetrics.current = null;
     completingRef.current = false;
@@ -70,11 +78,11 @@ export function SlideOpenControl({
     const thumbWidth = thumbRef.current?.getBoundingClientRect().width ?? 50;
     button?.style.setProperty("--slide-fill", `${thumbWidth}px`);
     button?.style.setProperty("--slide-label-opacity", "1");
-  };
+  }, []);
 
   useEffect(() => {
     return () => clearTimers();
-  }, []);
+  }, [clearTimers]);
 
   /* Capture can fail in Android WebViews. A pointer released outside the
      element must still clear the drag state instead of leaving the thumb and
@@ -106,7 +114,7 @@ export function SlideOpenControl({
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
     };
-  });
+  }, [reset]);
 
   useEffect(() => {
     const enableKeyboardFocus = () => {
@@ -214,28 +222,63 @@ export function SlideOpenControl({
     )
       return;
 
-    event.preventDefault();
-    event.stopPropagation();
     activePointer.current = event.pointerId;
+    pointerIntent.current = "pending";
+    pointerStart.current = { x: event.clientX, y: event.clientY };
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
-    event.currentTarget.dataset.dragging = "true";
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {
-      // Some Android WebViews keep delivering the pointer without capture.
-      // The drag remains usable through the normal bubbling event stream.
-    }
-    moveToPointer(event.clientX);
   };
 
   const drag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (activePointer.current !== event.pointerId) return;
+
+    if (pointerIntent.current === "pending") {
+      const deltaX = event.clientX - pointerStart.current.x;
+      const deltaY = event.clientY - pointerStart.current.y;
+      const horizontalDistance = Math.abs(deltaX);
+      const verticalDistance = Math.abs(deltaY);
+
+      if (
+        horizontalDistance < POINTER_INTENT_THRESHOLD &&
+        verticalDistance < POINTER_INTENT_THRESHOLD
+      ) {
+        return;
+      }
+
+      // Once vertical movement wins, abandon the slider without cancelling
+      // the pointer event. The browser remains responsible for native page
+      // scrolling on iOS, Android and pointer-capable desktop devices.
+      if (verticalDistance >= horizontalDistance) {
+        reset();
+        return;
+      }
+
+      // Diagonal movement stays undecided until horizontal intent is clear.
+      if (horizontalDistance < verticalDistance * HORIZONTAL_INTENT_RATIO) return;
+
+      pointerIntent.current = "horizontal";
+      event.currentTarget.dataset.dragging = "true";
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Some Android WebViews keep delivering the pointer without capture.
+        // The window-level cleanup still prevents a dangling drag state.
+      }
+    }
+
+    if (pointerIntent.current !== "horizontal") return;
     event.preventDefault();
+    event.stopPropagation();
     moveToPointer(event.clientX);
   };
 
   const finishDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (activePointer.current !== event.pointerId) return;
+
+    if (pointerIntent.current !== "horizontal") {
+      reset();
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     const ratio = moveToPointer(event.clientX);

@@ -84,13 +84,16 @@ test("Eight Riders uses the supplied Rexonance portrait for Saga", () => {
 test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(pickup, /const isRexonance = rider\.theme === "rexonance"/);
   assert.match(pickup, /setGateActive\(true\)/);
-  assert.match(
-    pickup,
-    /window\.setTimeout\(\s*\(\) => \{[\s\S]*?showDialog\(source\)[\s\S]*?\},\s*reducedMotion \? 90 : 920,\s*\)/,
-  );
+  assert.match(pickup, /gatePending\.current = true/);
+  assert.match(pickup, /new window\.Image\(\)/);
+  assert.match(pickup, /preload\.decode\?\.\(\)/);
+  assert.match(pickup, /window\.setTimeout\(finishGate, reducedMotion \? 180 : 1400\)/);
+  assert.match(pickup, /event\.animationName !== "rexonanceGateLife"/);
   assert.match(pickup, /createPortal\(/);
-  assert.match(pickup, /if \(gateTimer\.current !== null\) return/);
+  assert.match(pickup, /if \(gatePending\.current\) return/);
   assert.match(pickup, /aria-busy=\{gateActive\}/);
+  assert.match(pickup, /fetchPriority=\{isRexonance \? "high" : "auto"\}/);
+  assert.match(pickup, /loading=\{isRexonance \? "eager" : "lazy"\}/);
   assert.match(pickup, /rexonance-gate-spiral is-cyan/);
   assert.match(pickup, /rexonance-gate-spiral is-pink/);
   assert.match(pickup, /rexonance-gate-stars/);

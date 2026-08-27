@@ -23,13 +23,28 @@ export const Route = createFileRoute("/form-archive")({
 type ArchiveKind = "saga" | "realm";
 const ARCHIVE_READY_FAILSAFE_MS = 900;
 
+type ArchiveTransition = {
+  archive: ArchiveKind;
+  generation: number;
+};
+
+type ArchiveReadyFallback = ArchiveTransition & {
+  frame: HTMLIFrameElement;
+  timer: number;
+};
+
 function FormArchive() {
   useWorldMode();
   const [archive, setArchive] = useState<ArchiveKind>("saga");
+  const [transitionGeneration, setTransitionGeneration] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
+  const transitionGenerationRef = useRef(0);
+  const activeTransitionRef = useRef<ArchiveTransition>({ archive: "saga", generation: 0 });
+  const loadedFrameTransitionRef = useRef<ArchiveTransition | null>(null);
+  const readyFallbackRef = useRef<ArchiveReadyFallback | null>(null);
   const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
@@ -37,31 +52,93 @@ function FormArchive() {
     : "/realm-form-archive-embedded.html?v=20260826-r43";
 
   useEffect(() => {
-    const markArchiveReady = (event: MessageEvent) => {
-      if (event.data?.type !== "saga-archive:ready" || event.data?.kind !== archive) return;
+    const expectedArchive = archive;
+    const expectedGeneration = transitionGeneration;
+    const expectedFrame = frameRef.current;
+
+    const releaseIfCurrent = () => {
+      const activeTransition = activeTransitionRef.current;
+      const loadedFrameTransition = loadedFrameTransitionRef.current;
+      if (
+        activeTransition.archive !== expectedArchive ||
+        activeTransition.generation !== expectedGeneration ||
+        loadedFrameTransition?.archive !== expectedArchive ||
+        loadedFrameTransition.generation !== expectedGeneration ||
+        frameRef.current !== expectedFrame ||
+        expectedFrame?.dataset.archiveKind !== expectedArchive ||
+        expectedFrame.dataset.archiveGeneration !== String(expectedGeneration)
+      ) {
+        return;
+      }
+
+      const fallback = readyFallbackRef.current;
+      if (
+        fallback?.archive === expectedArchive &&
+        fallback.generation === expectedGeneration &&
+        fallback.frame === expectedFrame
+      ) {
+        window.clearTimeout(fallback.timer);
+        readyFallbackRef.current = null;
+      }
       setLoaded(true);
     };
+
+    const markArchiveReady = (event: MessageEvent) => {
+      if (event.data?.type !== "saga-archive:ready" || event.data?.kind !== expectedArchive) {
+        return;
+      }
+
+      const expectedWindow = expectedFrame?.contentWindow ?? null;
+      const loadedFrameTransition = loadedFrameTransitionRef.current;
+      // Sandboxed archive documents have an opaque origin. A few WebKit and
+      // embedded WebView versions consequently expose MessageEvent.source as
+      // null. Never trust that source-less message directly: the generation-
+      // bound fallback installed by the current iframe's load event owns that
+      // compatibility path, so a queued message from an old iframe cannot
+      // release a newer transition.
+      const shouldUseOpaqueWebKitFallback =
+        event.source === null &&
+        (event.origin === "null" || event.origin === "") &&
+        loadedFrameTransition?.archive === expectedArchive &&
+        loadedFrameTransition.generation === expectedGeneration;
+      if (shouldUseOpaqueWebKitFallback) return;
+      if (expectedWindow === null || event.source !== expectedWindow) return;
+
+      releaseIfCurrent();
+    };
     window.addEventListener("message", markArchiveReady);
-    // Opaque-origin sandboxed frames can suppress MessageEvent.source on a
-    // small set of WebKit/WebView builds. The child still owns its boot
-    // surface, so release only the outer veil after a short bounded fallback.
-    const failSafe = window.setTimeout(() => setLoaded(true), ARCHIVE_READY_FAILSAFE_MS);
     return () => {
       window.removeEventListener("message", markArchiveReady);
-      window.clearTimeout(failSafe);
+      const fallback = readyFallbackRef.current;
+      if (
+        fallback?.archive === expectedArchive &&
+        fallback.generation === expectedGeneration &&
+        fallback.frame === expectedFrame
+      ) {
+        window.clearTimeout(fallback.timer);
+        readyFallbackRef.current = null;
+      }
     };
-  }, [archive]);
+  }, [archive, transitionGeneration]);
 
   const selectArchive = useCallback(
     (next: ArchiveKind) => {
       // Let WebKit release the current iframe document before another archive is
       // requested. Rapid Saga/Realm toggles during onLoad can otherwise overlap
       // two image-heavy document constructions on iPhone and iPad.
-      if (!loaded || next === archive) return;
+      if (!loaded || next === activeTransitionRef.current.archive) return;
+      const generation = transitionGenerationRef.current + 1;
+      transitionGenerationRef.current = generation;
+      activeTransitionRef.current = { archive: next, generation };
+      loadedFrameTransitionRef.current = null;
+      const fallback = readyFallbackRef.current;
+      if (fallback) window.clearTimeout(fallback.timer);
+      readyFallbackRef.current = null;
       setLoaded(false);
+      setTransitionGeneration(generation);
       setArchive(next);
     },
-    [archive, loaded],
+    [loaded],
   );
 
   useEffect(() => {
@@ -155,8 +232,10 @@ function FormArchive() {
       </div>
       <iframe
         ref={frameRef}
-        key={archive}
+        key={`${archive}:${transitionGeneration}`}
         id="form-archive-frame"
+        data-archive-kind={archive}
+        data-archive-generation={transitionGeneration}
         title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
         src={archiveDocument}
         sandbox="allow-scripts allow-downloads"
@@ -164,14 +243,45 @@ function FormArchive() {
         loading="eager"
         scrolling="yes"
         onLoad={(event) => {
+          const frame = event.currentTarget;
+          const activeTransition = activeTransitionRef.current;
+          if (
+            frameRef.current !== frame ||
+            frame.dataset.archiveKind !== activeTransition.archive ||
+            frame.dataset.archiveGeneration !== String(activeTransition.generation)
+          ) {
+            return;
+          }
+
+          loadedFrameTransitionRef.current = activeTransition;
+          const previousFallback = readyFallbackRef.current;
+          if (previousFallback) window.clearTimeout(previousFallback.timer);
+          const timer = window.setTimeout(() => {
+            const fallback = readyFallbackRef.current;
+            const currentTransition = activeTransitionRef.current;
+            if (
+              fallback?.timer !== timer ||
+              fallback.archive !== activeTransition.archive ||
+              fallback.generation !== activeTransition.generation ||
+              fallback.frame !== frame ||
+              currentTransition.archive !== activeTransition.archive ||
+              currentTransition.generation !== activeTransition.generation ||
+              frameRef.current !== frame
+            ) {
+              return;
+            }
+
+            readyFallbackRef.current = null;
+            setLoaded(true);
+          }, ARCHIVE_READY_FAILSAFE_MS);
+          readyFallbackRef.current = { ...activeTransition, frame, timer };
+
           // A newly created WebKit iframe can restore an inline scroll lock
           // from the archive controller before its first paint. Ask the loaded
-          // document to clear transient UI before exposing it to interaction.
-          event.currentTarget.contentWindow?.postMessage(
-            { type: "saga-archive:close-transients" },
-            "*",
-          );
-          window.requestAnimationFrame(() => setLoaded(true));
+          // document to clear transient UI, then request a fresh child-owned
+          // ready signal. Loading the document alone is not archive readiness.
+          frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
+          frame.contentWindow?.postMessage({ type: "saga-archive:status-request" }, "*");
         }}
       />
     </main>

@@ -171,6 +171,7 @@ export function WorldHome() {
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
+  const danteOpenTimer = useRef<number | null>(null);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(0);
@@ -292,6 +293,7 @@ export function WorldHome() {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
+      if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       cancelColumnPickupScrollReset.current?.();

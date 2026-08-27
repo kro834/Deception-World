@@ -3,8 +3,14 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 
 const route = readFileSync(new URL("../src/routes/form-archive.tsx", import.meta.url), "utf8");
-const mobileStyles = readFileSync(new URL("../public/archive-mobile-stability.css", import.meta.url), "utf8");
-const scrollStability = readFileSync(new URL("../public/archive-scroll-stability.js", import.meta.url), "utf8");
+const mobileStyles = readFileSync(
+  new URL("../public/archive-mobile-stability.css", import.meta.url),
+  "utf8",
+);
+const scrollStability = readFileSync(
+  new URL("../public/archive-scroll-stability.js", import.meta.url),
+  "utf8",
+);
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 const embeddedArchives = [
@@ -17,11 +23,30 @@ test("the app uses memory-safe embedded archives and recreates the iframe when s
   assert.match(route, /\/realm-form-archive-embedded\.html/);
   assert.match(route, /saga-form-archive-embedded\.html\?v=20260826-r43/);
   assert.match(route, /realm-form-archive-embedded\.html\?v=20260826-r43/);
-  assert.match(route, /<iframe[\s\S]*?key=\{archive\}/);
+  assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
-  assert.match(route, /if \(!loaded \|\| next === archive\) return/);
+  assert.match(route, /if \(!loaded \|\| next === activeTransitionRef\.current\.archive\) return/);
   assert.doesNotMatch(route, /setTimeout\(\(\) => setLoaded\(true\), 1800\)/);
   assert.match(route, /saga-archive:ready/);
+});
+
+test("archive readiness is owned by the current child frame and transition generation", () => {
+  assert.match(route, /activeTransition\.archive !== expectedArchive/);
+  assert.match(route, /activeTransition\.generation !== expectedGeneration/);
+  assert.match(route, /frameRef\.current !== expectedFrame/);
+  assert.match(route, /event\.source !== expectedWindow/);
+  assert.match(
+    route,
+    /event\.source === null &&[\s\S]*?loadedFrameTransition\?\.archive === expectedArchive &&[\s\S]*?loadedFrameTransition\.generation === expectedGeneration;[\s\S]*?if \(shouldUseOpaqueWebKitFallback\) return/,
+  );
+  assert.match(route, /fallback\.generation !== activeTransition\.generation/);
+  assert.match(route, /fallback\.frame !== frame/);
+  assert.match(route, /setLoaded\(true\);[\s\S]*?ARCHIVE_READY_FAILSAFE_MS/);
+  assert.match(route, /data-archive-generation=\{transitionGeneration\}/);
+  assert.match(route, /loadedFrameTransitionRef\.current = activeTransition/);
+  assert.match(route, /loadedFrameTransitionRef\.current = null/);
+  assert.match(route, /saga-archive:status-request/);
+  assert.doesNotMatch(route, /requestAnimationFrame\(\(\) => setLoaded\(true\)\)/);
 });
 
 test("embedded archives externalize base64 images and load the mobile stability layer", () => {
@@ -68,9 +93,15 @@ test("embedded archives use one root scroller and recover stale locks throughout
   );
   assert.match(mobileStyles, /data-archive-kind="saga"[\s\S]*?overflow-y: scroll/);
   assert.match(mobileStyles, /data-archive-kind="realm"[\s\S]*?overflow-y: scroll/);
-  assert.match(mobileStyles, /\.compare-chip-slider[\s\S]*?touch-action: pan-x pan-y pinch-zoom !important/);
+  assert.match(
+    mobileStyles,
+    /\.compare-chip-slider[\s\S]*?touch-action: pan-x pan-y pinch-zoom !important/,
+  );
   assert.match(mobileStyles, /\.archive-hero,[\s\S]*?\.hero-grid,[\s\S]*?min-width: 0/);
-  assert.match(mobileStyles, /\.archive-hero \{\s*grid-template-columns: minmax\(0, 1fr\) !important/);
+  assert.match(
+    mobileStyles,
+    /\.archive-hero \{\s*grid-template-columns: minmax\(0, 1fr\) !important/,
+  );
   assert.match(route, /scrolling="yes"/);
   assert.match(scrollStability, /releaseStaleScrollLock/);
   assert.match(scrollStability, /forceResetTransientUi/);

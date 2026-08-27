@@ -34,8 +34,8 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
   assert.equal((ep1.match(/label: "/g) ?? []).length, 2);
   assert.equal((ep2.match(/label: "/g) ?? []).length, 3);
   assert.match(ep2, /displayLines: \["仮面ライダーレルム", "レジェンズ"\]/);
-  assert.match(ep2, /label: "仮面ライダーレルム　アースフォーム"[\s\S]*?to: "\/characters\/terra"/);
-  assert.match(ep2, /label: "仮面ライダーレルム　ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/);
+  assert.match(ep2, /label: "仮面ライダーレルム\u3000アースフォーム"[\s\S]*?to: "\/characters\/terra"/);
+  assert.match(ep2, /label: "仮面ライダーレルム\u3000ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/);
 });
 
 test("episode selection and the single-tap plus remain sibling controls", () => {
