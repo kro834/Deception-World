@@ -13,8 +13,8 @@ const expectedPickups = [
   ["リームー/仮面ライダーフリート", "/manager-reemu-rider.jpeg", "/managers/reemu"],
   ["紅城真守/仮面ライダーアルゲノム", "/rider-profile-argenome.jpeg", "/riders/argenome"],
   ["仮面ライダーレルムレジェンズ", "/rider-profile-realm.jpeg", "/riders/realm"],
-  ["仮面ライダーレルム　アースフォーム", "/rider-realm-earth.jpeg", "/riders/realm"],
-  ["仮面ライダーレルム　ムーンフォーム", "/rider-realm-moon.jpeg", "/riders/realm"],
+  ["仮面ライダーレルム　アースフォーム", "/rider-realm-earth.jpeg", "/characters/terra"],
+  ["仮面ライダーレルム　ムーンフォーム", "/rider-realm-moon.jpeg", "/characters/luna"],
 ];
 
 test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
@@ -34,6 +34,8 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
   assert.equal((ep1.match(/label: "/g) ?? []).length, 2);
   assert.equal((ep2.match(/label: "/g) ?? []).length, 3);
   assert.match(ep2, /displayLines: \["仮面ライダーレルム", "レジェンズ"\]/);
+  assert.match(ep2, /label: "仮面ライダーレルム　アースフォーム"[\s\S]*?to: "\/characters\/terra"/);
+  assert.match(ep2, /label: "仮面ライダーレルム　ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/);
 });
 
 test("episode selection and the single-tap plus remain sibling controls", () => {
