@@ -21,13 +21,15 @@ test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /<span>お知らせ<\/span>/);
   assert.match(chrome, /aria-controls="site-announcement-dialog"/);
   assert.match(chrome, /const SITE_ANNOUNCEMENTS = \[/);
-  assert.match(chrome, /title: "レクソナンスサーガ。"/);
+  assert.match(chrome, /title: "比較にならない最強の姿、レクソナンスサーガを発表。"/);
   assert.match(chrome, /sequence: "PRODUCT BRIEFING 03"/);
   assert.match(chrome, /image: "\/rider-saga-rexonance-thumbnail-20260827\.jpeg"/);
   assert.match(chrome, /value: "\+61\.6%"/);
   assert.match(chrome, /value: "\+55\.6%"/);
   assert.match(chrome, /value: "\+480\.6%"/);
   assert.match(chrome, /value: "−89\.5%"/);
+  assert.match(chrome, /ヴィンクルムサーガと比較して650%以上の反応速度/);
+  assert.match(chrome, /エクスプリームサーガと比較して最大900%高い機動力/);
   assert.match(chrome, /title: "Not Even Close\."/);
   assert.match(chrome, /image: "\/announcement-not-even-close\.jpeg"/);
   assert.match(chrome, /title: "Who Supreme\?"/);
