@@ -19,7 +19,6 @@ const POSTERS = [
   { src: "/poster-card-06.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレルムのキービジュアル 06" },
   { src: "/poster-card-07.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーローアのキービジュアル 07" },
   { src: "/poster-card-08.jpeg", pos: "50% 50%", fit: "contain", alt: "青い装甲のライダーのキービジュアル 08" },
-  { src: "/poster-card-09.jpeg", pos: "50% 30%", fit: "cover", alt: "仮面ライダーヴァンダールのキービジュアル 09" },
   { src: "/poster-card-10.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレディックのキービジュアル 10" },
   { src: "/poster-card-11.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーアルゲノムのキービジュアル 11" },
   { src: "/poster-card-12.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーオーバーゼッツのキービジュアル 12" },
@@ -44,6 +43,8 @@ const POSTERS = [
   { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
   { src: "/poster-card-32-20260825.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
   { src: "/poster-card-33.jpeg", pos: "50% 50%", fit: "cover", alt: "夜の遊園地に立つ紅黒の装甲ライダー" },
+  { src: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレクソナンスサーガのキービジュアル" },
+  { src: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 26%", fit: "cover", alt: "仮面ライダーヴァンダールの新キービジュアル" },
 ];
 
 const RIDERS = [

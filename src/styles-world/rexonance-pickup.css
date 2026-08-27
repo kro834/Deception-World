@@ -1298,6 +1298,18 @@
   100% { opacity: 0; translate: 0 -12px; }
 }
 
+@media (min-width: 701px) and (max-width: 1180px) {
+  .is-rexonance-pickup .form-pickup-copy h2 {
+    font-size: clamp(32px, 4.2vw, 46px);
+    line-height: 1.06;
+  }
+
+  .is-rexonance-dialog .form-pickup-heading h2 {
+    font-size: clamp(40px, 5.2vw, 62px);
+    line-height: 1.02;
+  }
+}
+
 @media (max-width: 900px) {
   .is-rexonance-pickup .form-pickup-card {
     grid-template-columns: minmax(250px, 0.82fr) minmax(0, 1.18fr);

@@ -23,3 +23,28 @@ test("long rider and pickup headings can wrap without affecting compact labels",
 
   assert.match(mobile, /\.hero h1 strong\s*\{[^}]*white-space:\s*nowrap;/s);
 });
+
+test("pickup headings use semantic lines and iPad-specific typography", async () => {
+  const [component, componentSource, addon, addonSource, rexonance] = await Promise.all([
+    read("src/components/world/manager-stub.tsx"),
+    read("source-parts/src/components/world/manager-stub.tsx/01.part"),
+    read("src/styles-world-addon.css"),
+    read("source-parts/src/styles-world-addon.css/02.part"),
+    read("src/styles-world/rexonance-pickup.css"),
+  ]);
+
+  const semanticHeading = /<h2>\s*<span>\{riderPrefix\}<\/span>\s*<b>\{rider\.name\}<\/b>\s*<\/h2>/s;
+  assert.match(component, semanticHeading);
+  assert.match(componentSource, semanticHeading);
+
+  const headingLines = /\.form-pickup-heading h2 > span,\s*\.form-pickup-heading h2 > b\s*\{[^}]*display:\s*block;[^}]*max-width:\s*100%;/s;
+  assert.match(addon, headingLines);
+  assert.match(addonSource, headingLines);
+
+  const ipadHeading = /@media \(min-width: 768px\) and \(max-width: 1180px\)[\s\S]*?\.form-pickup-heading h2\s*\{[^}]*font-size:\s*clamp\(34px, 4\.5vw, 50px\);/s;
+  assert.match(addon, ipadHeading);
+  assert.match(addonSource, ipadHeading);
+
+  const rexonanceTabletHeading = /@media \(min-width: 701px\) and \(max-width: 1180px\)[\s\S]*?\.is-rexonance-dialog \.form-pickup-heading h2\s*\{[^}]*font-size:\s*clamp\(40px, 5\.2vw, 62px\);/s;
+  assert.match(rexonance, rexonanceTabletHeading);
+});

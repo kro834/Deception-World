@@ -205,16 +205,8 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             </p>
             <small>{rider.system}</small>
             <h2>
-              {isRexonance ? (
-                <>
-                  <span>{riderPrefix}</span>
-                  <b>{rider.name}</b>
-                </>
-              ) : (
-                <>
-                  {riderPrefix} <b>{rider.name}</b>
-                </>
-              )}
+              <span>{riderPrefix}</span>
+              <b>{rider.name}</b>
             </h2>
             {rider.sub ? <em>{rider.sub}</em> : null}
             <div className="rider-call">

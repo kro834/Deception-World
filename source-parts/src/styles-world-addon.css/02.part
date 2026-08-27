@@ -89,6 +89,12 @@
   text-wrap: balance;
 }
 
+.form-pickup-heading h2 > span,
+.form-pickup-heading h2 > b {
+  display: block;
+  max-width: 100%;
+}
+
 .form-pickup-layout {
   display: grid;
   grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
@@ -205,6 +211,27 @@
   }
   .manager-portrait-frame { position: relative; top: auto; max-height: none; }
   .form-pickup { width: min(100% - 40px, 1000px); }
+  .form-pickup-copy h2 {
+    font-size: clamp(30px, 4vw, 44px);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+  .form-pickup-copy h2 span {
+    margin-bottom: 0.34em;
+    line-height: 1.35;
+  }
+  .form-pickup-heading h2 {
+    font-size: clamp(34px, 4.5vw, 50px);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+  .form-pickup-heading h2 > span { margin-bottom: 0.2em; }
+  .form-pickup-overview > div > p,
+  .form-pickup-sections p,
+  .rider-description {
+    line-break: strict;
+    text-wrap: pretty;
+  }
 }
 
 @media (max-width: 760px) {
