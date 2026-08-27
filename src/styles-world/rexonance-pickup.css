@@ -37,6 +37,13 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--rex-cyan), #fff, var(--rex-pink), transparent);
   box-shadow: 0 0 20px rgba(113, 231, 255, 0.52);
+  transform-origin: 50% 50%;
+  animation: rexonanceCrownline 4.8s ease-in-out infinite;
+}
+
+.is-rexonance-pickup .form-pickup-visual img {
+  transform-origin: 50% 46%;
+  animation: rexonancePortraitFloat 7.6s cubic-bezier(0.45, 0, 0.3, 1) infinite;
 }
 
 .is-rexonance-pickup .form-pickup-card {
@@ -873,8 +880,10 @@
     radial-gradient(circle at center, rgba(17, 29, 58, 0.66), rgba(2, 3, 10, 0.96) 54%, #010107 82%),
     #010107;
   isolation: isolate;
+  contain: layout paint style;
   pointer-events: all;
   touch-action: none;
+  transform: translateZ(0);
   animation: rexonanceGateLife 0.92s ease both;
 }
 
@@ -907,6 +916,93 @@
   display: grid;
   place-items: center;
   perspective: 900px;
+}
+
+.rexonance-gate-stars,
+.rexonance-gate-prism,
+.rexonance-gate-horizon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.rexonance-gate-stars i {
+  --star-angle: 0deg;
+  position: absolute;
+  width: 1px;
+  height: min(42vmax, 560px);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.92) 52%, var(--star-color, #72e7ff));
+  box-shadow: 0 0 10px var(--star-color, #72e7ff);
+  opacity: 0;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  animation: rexonanceStarConverge 0.92s cubic-bezier(0.12, 0.72, 0.16, 1) both;
+}
+
+.rexonance-gate-stars i:nth-child(1) { --star-angle: 0deg; --star-color: #72e7ff; }
+.rexonance-gate-stars i:nth-child(2) { --star-angle: 45deg; --star-color: #ff73d8; }
+.rexonance-gate-stars i:nth-child(3) { --star-angle: 90deg; --star-color: #e9c47b; }
+.rexonance-gate-stars i:nth-child(4) { --star-angle: 135deg; --star-color: #72e7ff; }
+.rexonance-gate-stars i:nth-child(5) { --star-angle: 180deg; --star-color: #ff73d8; }
+.rexonance-gate-stars i:nth-child(6) { --star-angle: 225deg; --star-color: #e9c47b; }
+.rexonance-gate-stars i:nth-child(7) { --star-angle: 270deg; --star-color: #72e7ff; }
+.rexonance-gate-stars i:nth-child(8) { --star-angle: 315deg; --star-color: #ff73d8; }
+
+.rexonance-gate-prism {
+  width: min(66vmin, 640px);
+  height: auto;
+  aspect-ratio: 1;
+  inset: auto;
+  animation: rexonancePrismConverge 0.92s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rexonance-gate-prism i {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow:
+    0 0 28px rgba(114, 231, 255, 0.14),
+    inset 0 0 24px rgba(255, 115, 216, 0.09);
+  rotate: 45deg;
+}
+
+.rexonance-gate-prism i.is-two {
+  inset: 19%;
+  border-color: rgba(233, 196, 123, 0.46);
+  rotate: 0deg;
+}
+
+.rexonance-gate-prism i.is-three {
+  inset: 35%;
+  border-color: rgba(255, 115, 216, 0.5);
+  rotate: 45deg;
+}
+
+.rexonance-gate-horizon span {
+  position: absolute;
+  top: 50%;
+  width: 48vw;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.96), var(--horizon-color));
+  box-shadow: 0 0 14px var(--horizon-color);
+  will-change: transform, opacity;
+}
+
+.rexonance-gate-horizon .is-cyan {
+  right: 50%;
+  --horizon-color: #72e7ff;
+  transform-origin: 100% 50%;
+  animation: rexonanceHorizonCyan 0.92s cubic-bezier(0.13, 0.7, 0.16, 1) both;
+}
+
+.rexonance-gate-horizon .is-pink {
+  left: 50%;
+  --horizon-color: #ff73d8;
+  transform: scaleX(-1);
+  transform-origin: 0 50%;
+  animation: rexonanceHorizonPink 0.92s cubic-bezier(0.13, 0.7, 0.16, 1) both;
 }
 
 .rexonance-gate-spiral {
@@ -1079,6 +1175,17 @@
   to { rotate: 360deg; }
 }
 
+@keyframes rexonanceCrownline {
+  0%, 100% { opacity: 0.48; transform: scaleX(0.64); }
+  48% { opacity: 1; transform: scaleX(1); }
+  62% { opacity: 0.74; transform: scaleX(0.86); }
+}
+
+@keyframes rexonancePortraitFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.015); }
+  50% { transform: translate3d(0, -4px, 0) scale(1.032); }
+}
+
 @keyframes rexonanceWeaponScan {
   0%, 16% { translate: 0 -30px; opacity: 0; }
   34%, 64% { opacity: 0.46; }
@@ -1101,6 +1208,38 @@
   0%, 68% { opacity: 0; transform: scale(0.02); }
   82% { opacity: 1; transform: scale(1.1); }
   100% { opacity: 0; transform: scale(4.2); }
+}
+
+@keyframes rexonanceStarConverge {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--star-angle)) translateY(-48vmax) scaleY(1.8);
+  }
+  24% { opacity: 0.82; }
+  66% { opacity: 0.44; }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--star-angle)) translateY(-2vmax) scaleY(0.06);
+  }
+}
+
+@keyframes rexonancePrismConverge {
+  0% { opacity: 0; transform: translateZ(-280px) rotate(-28deg) scale(1.8); }
+  30%, 68% { opacity: 0.8; }
+  82% { opacity: 1; transform: translateZ(0) rotate(8deg) scale(0.52); }
+  100% { opacity: 0; transform: translateZ(240px) rotate(24deg) scale(2.2); }
+}
+
+@keyframes rexonanceHorizonCyan {
+  0%, 24% { opacity: 0; transform: translateX(-42vw) scaleX(0.08); }
+  58% { opacity: 0.96; transform: translateX(0) scaleX(1); }
+  100% { opacity: 0; transform: translateX(54vw) scaleX(1.9); }
+}
+
+@keyframes rexonanceHorizonPink {
+  0%, 24% { opacity: 0; transform: translateX(42vw) scaleX(-0.08); }
+  58% { opacity: 0.96; transform: translateX(0) scaleX(-1); }
+  100% { opacity: 0; transform: translateX(-54vw) scaleX(-1.9); }
 }
 
 @keyframes rexonanceSpiralCyan {
@@ -1368,21 +1507,40 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .form-pickup.is-rexonance-pickup::after,
+  .is-rexonance-pickup .form-pickup-visual img,
   .rexonance-card-ornaments i,
   .rexonance-panel-ambient i,
   .rexonance-weapon-grid figure > div::after {
     animation: none !important;
   }
 
+  .rexonance-gate-stars,
+  .rexonance-gate-prism,
+  .rexonance-gate-horizon,
+  .rexonance-gate-spiral,
+  .rexonance-gate-orbit,
+  .rexonance-gate-rush {
+    display: none;
+  }
+
   .rexonance-gate,
   .rexonance-gate::before,
   .rexonance-gate::after,
-  .rexonance-gate-spiral,
-  .rexonance-gate-orbit,
-  .rexonance-gate-rush,
   .rexonance-gate-sigil,
   .rexonance-gate-copy {
     animation-duration: 90ms !important;
+  }
+}
+
+@media (pointer: coarse), (update: slow) {
+  .rexonance-gate-stars i:nth-child(even),
+  .rexonance-gate-prism i.is-three {
+    display: none;
+  }
+
+  .rexonance-gate::before {
+    opacity: 0.74;
   }
 }
 

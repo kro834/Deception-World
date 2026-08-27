@@ -6,7 +6,53 @@ import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 
+type SiteAnnouncementMetric = {
+  value: string;
+  label: string;
+  detail: string;
+};
+
+type SiteAnnouncement = {
+  id: string;
+  sequence: string;
+  date: string;
+  title: string;
+  image: string;
+  imageAlt: string;
+  width: number;
+  height: number;
+  eyebrow?: string;
+  lede?: string;
+  comparisonTitle?: string;
+  metrics?: readonly SiteAnnouncementMetric[];
+  body?: string;
+  note?: string;
+};
+
 const SITE_ANNOUNCEMENTS = [
+  {
+    id: "rexonance-saga-release",
+    sequence: "PRODUCT BRIEFING 03",
+    date: "2026.08.27",
+    title: "レクソナンスサーガ。",
+    image: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    imageAlt: "水色とピンクの星光をまとい、金色の神装を備えた仮面ライダーレクソナンスサーガ",
+    width: 680,
+    height: 906,
+    eyebrow: "The next generation of SA-GA.",
+    lede: "無限出力を、無限の攻撃へ。",
+    comparisonTitle: "エクスプリームサーガ標準値比",
+    metrics: [
+      { value: "+61.6%", label: "PUNCH POWER", detail: "332.2t / 205.6t" },
+      { value: "+55.6%", label: "KICK POWER", detail: "480.5t / 308.9t" },
+      { value: "+480.6%", label: "JUMP HEIGHT", detail: "6000m / 1033.5m" },
+      { value: "−89.5%", label: "100m TIME", detail: "0.00021s / 0.002s" },
+    ],
+    body:
+      "ゼウスの超自己進化、レックスの絶対秩序、そして月城悠真の意思を一つの共鳴へ束ね、エクスプリームが切り開いた無制限出力を実効攻撃へ変換。標準状態からエクスプリーム・ウルトラを上回る、サーガシステムの次世代到達点です。",
+    note:
+      "公開済みの標準カタログ値から算出。100mは所要時間の短縮率であり、最大出力ではなく標準値の比較です。",
+  },
   {
     id: "not-even-close",
     sequence: "TRANSMISSION 02",
@@ -27,7 +73,7 @@ const SITE_ANNOUNCEMENTS = [
     width: 960,
     height: 1441,
   },
-] as const;
+] as const satisfies readonly SiteAnnouncement[];
 
 type AnnouncementId = (typeof SITE_ANNOUNCEMENTS)[number]["id"];
 
@@ -98,7 +144,7 @@ export function SideMenuLayer({
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
   const close = () => onOpenChange?.(false);
-  const selectedAnnouncement =
+  const selectedAnnouncement: SiteAnnouncement | null =
     SITE_ANNOUNCEMENTS.find((notice) => notice.id === selectedAnnouncementId) ?? null;
 
   useEffect(() => {
@@ -522,7 +568,11 @@ export function SideMenuLayer({
           </header>
           <div ref={announcementStageRef} className="site-announcement-stage">
             {selectedAnnouncement ? (
-              <article className="site-announcement-detail">
+              <article
+                className={`site-announcement-detail${
+                  selectedAnnouncement.metrics?.length ? " is-product-release" : ""
+                }`}
+              >
                 <button
                   className="site-announcement-back"
                   type="button"
@@ -543,15 +593,49 @@ export function SideMenuLayer({
                   ) : null}
                 </figure>
                 <div className="site-announcement-copy">
-                  <p>
+                  <p className="site-announcement-meta">
                     NOTICE / {selectedAnnouncement.sequence}
                     <time dateTime={selectedAnnouncement.date.replaceAll(".", "-")}>
                       {selectedAnnouncement.date}
                     </time>
                   </p>
+                  {selectedAnnouncement.eyebrow ? (
+                    <span className="site-announcement-eyebrow">{selectedAnnouncement.eyebrow}</span>
+                  ) : null}
                   <h3 ref={announcementHeadingRef} tabIndex={-1}>
                     {selectedAnnouncement.title}
                   </h3>
+                  {selectedAnnouncement.lede ? (
+                    <p className="site-announcement-lede">{selectedAnnouncement.lede}</p>
+                  ) : null}
+                  {selectedAnnouncement.metrics?.length ? (
+                    <section
+                      className="site-announcement-release"
+                      aria-labelledby={`${selectedAnnouncement.id}-comparison-title`}
+                    >
+                      <p
+                        className="site-announcement-release-title"
+                        id={`${selectedAnnouncement.id}-comparison-title`}
+                      >
+                        {selectedAnnouncement.comparisonTitle}
+                      </p>
+                      <div className="site-announcement-metrics">
+                        {selectedAnnouncement.metrics.map((metric) => (
+                          <div className="site-announcement-metric" key={metric.label}>
+                            <b>{metric.value}</b>
+                            <span>{metric.label}</span>
+                            <small>{metric.detail}</small>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
+                  {selectedAnnouncement.body ? (
+                    <p className="site-announcement-body">{selectedAnnouncement.body}</p>
+                  ) : null}
+                  {selectedAnnouncement.note ? (
+                    <small className="site-announcement-note">{selectedAnnouncement.note}</small>
+                  ) : null}
                 </div>
               </article>
             ) : (

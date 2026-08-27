@@ -88,7 +88,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     }
     pointerOpened.current = source === "pointer";
     clearPointerFocus();
-    if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+    if (gateTimer.current !== null) return;
     setGateActive(true);
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
     gateTimer.current = window.setTimeout(
@@ -126,7 +126,11 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
     [],
   );
   return (
-    <section className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`} aria-label={`${riderPrefix}${rider.name}の記録`}>
+    <section
+      className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`}
+      aria-label={`${riderPrefix}${rider.name}の記録`}
+      aria-busy={gateActive}
+    >
       <article className="form-pickup-card">
         {isRexonance ? (
           <div className="rexonance-card-ornaments" aria-hidden="true">
@@ -352,6 +356,25 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 <i className="rexonance-gate-spiral is-pink" />
                 <i className="rexonance-gate-orbit is-outer" />
                 <i className="rexonance-gate-orbit is-inner" />
+                <div className="rexonance-gate-stars">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </div>
+                <div className="rexonance-gate-prism">
+                  <i className="is-one" />
+                  <i className="is-two" />
+                  <i className="is-three" />
+                </div>
+                <div className="rexonance-gate-horizon">
+                  <span className="is-cyan" />
+                  <span className="is-pink" />
+                </div>
                 <span className="rexonance-gate-rush is-left" />
                 <span className="rexonance-gate-rush is-right" />
                 <div className="rexonance-gate-sigil">

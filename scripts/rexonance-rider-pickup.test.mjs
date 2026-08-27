@@ -10,6 +10,10 @@ const pickup = readFileSync(
   new URL("../src/components/world/manager-stub.tsx", import.meta.url),
   "utf8",
 );
+const worldHome = readFileSync(
+  new URL("../src/components/world/world-home.tsx", import.meta.url),
+  "utf8",
+);
 const styles = readFileSync(
   new URL("../src/styles-world/rexonance-pickup.css", import.meta.url),
   "utf8",
@@ -19,6 +23,10 @@ const reconstructedRider = ["01.part", "04.part", "05.part"]
   .join("\n");
 const reconstructedPickup = readFileSync(
   new URL("../source-parts/src/components/world/manager-stub.tsx/01.part", import.meta.url),
+  "utf8",
+);
+const reconstructedHome = readFileSync(
+  new URL("../source-parts/src/components/world/world-home.tsx/01.part", import.meta.url),
   "utf8",
 );
 
@@ -59,6 +67,20 @@ test("all supplied Rexonance and linked-armament assets are present and mapped",
   }
 });
 
+test("Eight Riders uses the supplied Rexonance portrait for Saga", () => {
+  for (const source of [worldHome, reconstructedHome]) {
+    assert.match(
+      source,
+      /id: "saga"[\s\S]*?img: "\/rider-saga-rexonance-thumbnail-20260827\.jpeg"/,
+    );
+  }
+  const asset = new URL("../public/rider-saga-rexonance-thumbnail-20260827.jpeg", import.meta.url);
+  const bytes = readFileSync(asset);
+  assert.equal(bytes[0], 0xff);
+  assert.equal(bytes[1], 0xd8);
+  assert.ok(statSync(asset).size < 200_000, "Saga thumbnail should remain below 200 KB");
+});
+
 test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(pickup, /const isRexonance = rider\.theme === "rexonance"/);
   assert.match(pickup, /setGateActive\(true\)/);
@@ -67,12 +89,21 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
     /window\.setTimeout\(\s*\(\) => \{[\s\S]*?showDialog\(source\)[\s\S]*?\},\s*reducedMotion \? 90 : 920,\s*\)/,
   );
   assert.match(pickup, /createPortal\(/);
+  assert.match(pickup, /if \(gateTimer\.current !== null\) return/);
+  assert.match(pickup, /aria-busy=\{gateActive\}/);
   assert.match(pickup, /rexonance-gate-spiral is-cyan/);
   assert.match(pickup, /rexonance-gate-spiral is-pink/);
+  assert.match(pickup, /rexonance-gate-stars/);
+  assert.match(pickup, /rexonance-gate-prism/);
+  assert.match(pickup, /rexonance-gate-horizon/);
   assert.match(pickup, /className="rexonance-weapon-gallery"/);
   assert.match(styles, /\.is-rexonance-pickup/);
   assert.match(styles, /\.is-rexonance-dialog/);
   assert.match(styles, /\.rexonance-weapon-grid/);
+  assert.match(styles, /@keyframes rexonanceStarConverge/);
+  assert.match(styles, /@keyframes rexonancePrismConverge/);
+  assert.match(styles, /@keyframes rexonanceHorizonCyan/);
+  assert.match(styles, /@keyframes rexonancePortraitFloat/);
   assert.match(styles, /@media \(max-width: 700px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });

@@ -46,7 +46,7 @@ const POSTERS = [
 ];
 
 const RIDERS = [
-  { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga.jpeg", pos: "44% 14%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
+  { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 22%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
   { id: "realm", no: "02", name: "REALM", ja: "レルム", person: "ベル・アレイン", tone: "#f14a60", img: "/rider-realm.jpeg", pos: "50% 16%", desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。" },
   { id: "lore", no: "03", name: "LORE", ja: "ローア", person: "ローア", tone: "#67d8ff", img: "/rider-loa.jpeg", pos: "50% 12%", desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。" },
   { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandaal.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },

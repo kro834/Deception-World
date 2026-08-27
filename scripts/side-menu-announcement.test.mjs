@@ -10,6 +10,7 @@ const styles = readFileSync(new URL("../src/styles-world/23.css", import.meta.ur
 const menuStyles = readFileSync(new URL("../src/styles-world/19.css", import.meta.url), "utf8");
 const styleIndex = readFileSync(new URL("../src/styles-world.css", import.meta.url), "utf8");
 const announcementImages = [
+  new URL("../public/rider-saga-rexonance-thumbnail-20260827.jpeg", import.meta.url),
   new URL("../public/announcement-not-even-close.jpeg", import.meta.url),
   new URL("../public/announcement-who-supreme.jpeg", import.meta.url),
 ];
@@ -20,6 +21,13 @@ test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /<span>お知らせ<\/span>/);
   assert.match(chrome, /aria-controls="site-announcement-dialog"/);
   assert.match(chrome, /const SITE_ANNOUNCEMENTS = \[/);
+  assert.match(chrome, /title: "レクソナンスサーガ。"/);
+  assert.match(chrome, /sequence: "PRODUCT BRIEFING 03"/);
+  assert.match(chrome, /image: "\/rider-saga-rexonance-thumbnail-20260827\.jpeg"/);
+  assert.match(chrome, /value: "\+61\.6%"/);
+  assert.match(chrome, /value: "\+55\.6%"/);
+  assert.match(chrome, /value: "\+480\.6%"/);
+  assert.match(chrome, /value: "−89\.5%"/);
   assert.match(chrome, /title: "Not Even Close\."/);
   assert.match(chrome, /image: "\/announcement-not-even-close\.jpeg"/);
   assert.match(chrome, /title: "Who Supreme\?"/);
@@ -110,6 +118,10 @@ test("announcement glass is safe-area aware, internally scrollable, and responsi
   assert.match(styles, /@media \(orientation: landscape\) and \(max-height: 600px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(styles, /@media \(prefers-reduced-transparency: reduce\)/);
+  assert.match(styles, /\.site-announcement-detail\.is-product-release/);
+  assert.match(styles, /\.site-announcement-metrics/);
+  assert.match(styles, /\.site-announcement-metric/);
+  assert.match(styles, /\.site-announcement-lede/);
 });
 
 test("the supplied announcement image is shipped as an optimized local asset", () => {
@@ -122,6 +134,7 @@ test("the supplied announcement image is shipped as an optimized local asset", (
   }
   assert.match(chrome, /width: 900,[\s\S]*?height: 1125/);
   assert.match(chrome, /width: 960,[\s\S]*?height: 1441/);
+  assert.match(chrome, /width: 680,[\s\S]*?height: 906/);
   assert.match(chrome, /width=\{selectedAnnouncement\.width\}/);
   assert.match(chrome, /height=\{selectedAnnouncement\.height\}/);
   assert.match(chrome, /decoding="async"/);
