@@ -550,7 +550,20 @@ export function DreamChapter() {
       sequence[swapIndex] = swapValue;
     }
     const finalPoster = sequence.pop() ?? (posterIndex + 1) % DREAM_POSTERS.length;
-    const previews = sequence.slice(0, 9);
+    const previewPool = [
+      posterIndex,
+      previousPosterIndex ?? posterIndex,
+      (posterIndex + 1) % DREAM_POSTERS.length,
+      (posterIndex + 2) % DREAM_POSTERS.length,
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    for (let index = previewPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previews = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       selectPoster(finalPoster);
@@ -572,7 +585,7 @@ export function DreamChapter() {
           if (index === steps.length - 1) {
             await Promise.race([
               finalReady,
-              new Promise<void>((resolve) => window.setTimeout(resolve, 900)),
+              new Promise<void>((resolve) => window.setTimeout(resolve, 240)),
             ]);
           }
           if (!shuffleActive.current || shuffleRunId.current !== runId) return;
@@ -594,7 +607,7 @@ export function DreamChapter() {
         shuffleTimers.current.push(timer);
       },
     );
-  }, [cancelShuffle, posterIndex, selectPoster]);
+  }, [cancelShuffle, posterIndex, previousPosterIndex, selectPoster]);
 
   return (
     <main id="top" className="dream-page">

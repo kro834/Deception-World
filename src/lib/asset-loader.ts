@@ -6,7 +6,6 @@ const KNOWN_BYTES: Record<string, number> = {
   "/poster-card-06.jpeg": 535600,
   "/poster-card-07.jpeg": 343800,
   "/poster-card-08.jpeg": 453700,
-  "/poster-card-09.jpeg": 549000,
   "/poster-card-10.jpeg": 382400,
   "/episode-05-farce.jpeg": 320800,
   "/manager-lejas.jpeg": 283500,
@@ -42,6 +41,7 @@ export const MANAGER_ASSETS = {
 } as const;
 
 const warmed = new Set<string>();
+const inFlight = new Map<string, Promise<boolean>>();
 
 function browserHasAsset(url: string) {
   if (typeof window === "undefined" || typeof performance === "undefined") return false;
@@ -91,43 +91,49 @@ async function pullOne(
     emitProgress(received, totals, onProgress);
     return;
   }
-  try {
-    const res = await fetch(url, { cache: "force-cache" });
-    if (!res.ok) throw new Error(`Asset request failed: ${res.status}`);
-    const headerLen = Number(res.headers.get("content-length"));
-    if (Number.isFinite(headerLen) && headerLen > 0) totals[index] = headerLen;
-    if (!res.body) {
-      received[index] = totals[index];
-      emitProgress(received, totals, onProgress);
-    } else {
-      const reader = res.body.getReader();
-      let rec = 0;
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        rec += value.byteLength;
-        received[index] = rec;
-        if (rec > totals[index]) totals[index] = rec;
-        emitProgress(received, totals, onProgress);
+  const key = assetKey(url);
+  let request = inFlight.get(key);
+  if (!request) {
+    request = (async () => {
+      try {
+        const res = await fetch(url, { cache: "force-cache" });
+        if (!res.ok) throw new Error(`Asset request failed: ${res.status}`);
+        const headerLen = Number(res.headers.get("content-length"));
+        if (Number.isFinite(headerLen) && headerLen > 0) totals[index] = headerLen;
+        if (!res.body) {
+          received[index] = totals[index];
+          emitProgress(received, totals, onProgress);
+        } else {
+          const reader = res.body.getReader();
+          let rec = 0;
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            rec += value.byteLength;
+            received[index] = rec;
+            if (rec > totals[index]) totals[index] = rec;
+            emitProgress(received, totals, onProgress);
+          }
+          received[index] = Math.max(received[index], totals[index]);
+          emitProgress(received, totals, onProgress);
+        }
+        return true;
+      } catch {
+        return false;
       }
-      received[index] = Math.max(received[index], totals[index]);
-      emitProgress(received, totals, onProgress);
-    }
-    await new Promise<void>((resolve) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.fetchPriority = "high";
-      img.onload = () => {
-        void img.decode?.().catch(() => undefined).finally(resolve);
-      };
-      img.onerror = () => resolve();
-      img.src = url;
+    })();
+    inFlight.set(key, request);
+    void request.finally(() => {
+      if (inFlight.get(key) === request) inFlight.delete(key);
     });
+  }
+
+  const loaded = await request;
+  received[index] = totals[index];
+  emitProgress(received, totals, onProgress);
+  if (loaded) {
     warmed.add(url);
-    warmed.add(assetKey(url));
-  } catch {
-    received[index] = totals[index];
-    emitProgress(received, totals, onProgress);
+    warmed.add(key);
   }
 }
 
@@ -144,9 +150,5 @@ export async function preloadAssets(
   const totals = unique.map((u) => KNOWN_BYTES[assetKey(u)] ?? 400000);
   onProgress(0);
   await Promise.all(unique.map((url, i) => pullOne(url, i, received, totals, onProgress)));
-  unique.forEach((u) => {
-    warmed.add(u);
-    warmed.add(assetKey(u));
-  });
   onProgress(100);
 }

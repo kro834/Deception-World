@@ -551,7 +551,20 @@ export function WorldHome() {
       [posterSequence[index], posterSequence[swapIndex]] = [posterSequence[swapIndex], posterSequence[index]];
     }
     const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
-    const previewPosters = posterSequence.slice(0, 9);
+    const previewPool = [
+      poster,
+      prevPoster ?? poster,
+      (poster + 1) % POSTERS.length,
+      (poster + 2) % POSTERS.length,
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    for (let index = previewPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previewPosters = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
     const finalImage = new Image();
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";

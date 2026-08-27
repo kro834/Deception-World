@@ -493,7 +493,17 @@ export function GuardedLink({
   "aria-label"?: string;
 }) {
   const { go } = useLoadGate();
+  const router = useRouter();
+  const preloadedRoute = useRef<string | null>(null);
   const href = hash ? `${to}#${hash}` : to;
+
+  const preloadRoute = useCallback(() => {
+    if (preloadedRoute.current === to) return;
+    preloadedRoute.current = to;
+    void router.preloadRoute({ to }).catch(() => {
+      if (preloadedRoute.current === to) preloadedRoute.current = null;
+    });
+  }, [router, to]);
 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
@@ -506,7 +516,16 @@ export function GuardedLink({
   };
 
   return (
-    <a href={href} className={className} style={style} onClick={onClick} {...rest}>
+    <a
+      href={href}
+      className={className}
+      style={style}
+      onPointerEnter={preloadRoute}
+      onFocus={preloadRoute}
+      onTouchStart={preloadRoute}
+      onClick={onClick}
+      {...rest}
+    >
       {children}
     </a>
   );
