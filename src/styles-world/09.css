@@ -382,8 +382,10 @@
 
   .hero h1 strong {
     margin-top: 9px;
-    font-size: clamp(43px, 13.4vw, 66px);
+    font-size: clamp(32px, 10.5vw, 54px);
     line-height: 0.98;
+    letter-spacing: -0.08em;
+    white-space: nowrap;
   }
 
   .hero-lead {

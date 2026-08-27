@@ -108,7 +108,7 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
-test("Rexonance pickup title keeps the requested two-line Japanese break", () => {
+test("Rexonance pickup title keeps the requested two-line Japanese break and remains responsive", () => {
   for (const source of [pickup, reconstructedPickup]) {
     assert.match(
       source,
@@ -116,8 +116,8 @@ test("Rexonance pickup title keeps the requested two-line Japanese break", () =>
     );
   }
   assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 span,[\s\S]*?display: block/);
-  assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 b \{[\s\S]*?white-space: nowrap/);
-  assert.match(styles, /\.is-rexonance-pickup \.form-pickup-copy h2 b \{[\s\S]*?white-space: nowrap/);
+  assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 b \{[\s\S]*?white-space: normal[\s\S]*?overflow-wrap: anywhere/);
+  assert.match(styles, /\.is-rexonance-pickup \.form-pickup-copy h2 b \{[\s\S]*?white-space: normal[\s\S]*?overflow-wrap: anywhere/);
 });
 
 test("generated and reconstructable source retain the Rexonance feature markers", () => {

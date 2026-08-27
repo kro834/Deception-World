@@ -226,13 +226,29 @@ html[data-rail-lock] .world-column-dialog-card {
 .manager-pagination b,
 .manager-display-name,
 .manager-facts dd,
-.form-pickup-copy h2,
 .form-pickup-copy em,
-.rider-person,
-.rider-detail h3 {
+.rider-person {
   overflow-wrap: normal !important;
   word-break: keep-all;
   line-break: strict;
+}
+
+/* Long display names need to wrap independently from the compact UI labels
+   above. Keeping these headings in the same keep-all rule caused names to
+   overflow or collide with artwork on narrow screens. */
+.form-pickup-copy,
+.rider-copy-block,
+.rider-detail {
+  min-width: 0;
+}
+
+.form-pickup-copy h2,
+.rider-detail h3 {
+  max-width: 100%;
+  overflow-wrap: anywhere !important;
+  word-break: normal;
+  line-break: strict;
+  text-wrap: balance;
 }
 
 .manager-pagination-spacer,

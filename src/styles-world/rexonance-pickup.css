@@ -195,12 +195,16 @@
 
 .is-rexonance-pickup .form-pickup-copy h2 b {
   display: block;
+  max-width: 100%;
   color: transparent;
   background: linear-gradient(102deg, #eefcff 0 12%, var(--rex-cyan) 31%, #f7e3ef 52%, var(--rex-pink) 69%, var(--rex-gold) 94%);
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(0 0 18px rgba(114, 231, 255, 0.17));
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-wrap: balance;
 }
 
 .is-rexonance-pickup .form-pickup-copy em {
@@ -492,12 +496,16 @@
 }
 
 .is-rexonance-dialog .form-pickup-heading h2 b {
+  max-width: 100%;
   color: transparent;
   background: linear-gradient(106deg, #f8fdff 4%, var(--rex-cyan) 35%, #f3e8f0 55%, var(--rex-pink) 74%, var(--rex-gold) 98%);
   -webkit-background-clip: text;
   background-clip: text;
   filter: drop-shadow(0 0 24px rgba(114, 231, 255, 0.15));
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-wrap: balance;
 }
 
 .is-rexonance-dialog .form-pickup-heading > em {
