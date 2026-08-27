@@ -103,7 +103,12 @@
 .rider-copy-block {
   position: relative;
   z-index: 3;
-  width: min(57%, 640px);
+  /* Keep every copy line inside the left pane. The visual begins at 47%, so
+     reserve a small gutter instead of letting the old 57% width overlap the
+     portrait at wide landscape sizes. */
+  width: min(calc(47% - 8px), 640px);
+  min-width: 0;
+  max-width: 100%;
   animation: riderCopyIn 0.52s 0.08s cubic-bezier(0.2, 0.72, 0.2, 1) both;
 }
 
@@ -150,11 +155,15 @@
 }
 
 .rider-description {
+  width: 100%;
   max-width: 580px;
   margin: 24px 0 0;
   color: var(--muted);
   font-size: 13px;
   line-height: 1.95;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 /* The rider CTA is a standalone liquid-glass pressable. It carries the

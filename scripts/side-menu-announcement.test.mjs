@@ -124,6 +124,10 @@ test("announcement glass is safe-area aware, internally scrollable, and responsi
   assert.match(styles, /\.site-announcement-metrics/);
   assert.match(styles, /\.site-announcement-metric/);
   assert.match(styles, /\.site-announcement-lede/);
+  assert.match(
+    styles,
+    /@media \(max-width: 700px\)[\s\S]*?\.site-announcement-copy h3 \{[\s\S]*?max-width: 100%;[\s\S]*?overflow-wrap: anywhere;[\s\S]*?word-break: normal;/,
+  );
 });
 
 test("the supplied announcement image is shipped as an optimized local asset", () => {

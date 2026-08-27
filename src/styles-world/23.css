@@ -764,9 +764,14 @@
   }
 
   .site-announcement-copy h3 {
-    font-size: clamp(36px, 12.5vw, 54px);
-    overflow-wrap: normal;
-    word-break: keep-all;
+    max-width: 100%;
+    font-size: clamp(30px, 9.8vw, 42px);
+    line-height: 1.08;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-break: strict;
+    text-wrap: pretty;
   }
 
   .site-announcement-detail.is-product-release .site-announcement-visual {
@@ -782,7 +787,7 @@
   }
 
   .site-announcement-metric b {
-    font-size: clamp(27px, 9vw, 38px);
+    font-size: clamp(25px, 8vw, 34px);
   }
 }
 

@@ -45,6 +45,38 @@
   .episode-grid {
     grid-auto-columns: min(78%, 680px);
   }
+
+  /* The navigation rail still fits beside the record on iPad, but the record
+     itself no longer has enough room for a safe side-by-side copy/portrait
+     split. Stack those two panes before any text can cross the image edge. */
+  .rider-detail {
+    min-height: 0;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .rider-visual {
+    position: relative;
+    width: 100%;
+    height: clamp(430px, 58vw, 600px);
+    border-bottom: 1px solid color-mix(in srgb, var(--rider-tone) 26%, transparent);
+    border-left: 0;
+  }
+
+  .rider-visual::before {
+    background:
+      linear-gradient(0deg, rgba(5, 7, 11, 0.86), transparent 32%),
+      linear-gradient(90deg, rgba(5, 7, 11, 0.34), transparent 44%);
+  }
+
+  .rider-copy-block {
+    width: 100%;
+    padding: 38px 36px 48px;
+  }
+
+  .rider-monogram {
+    display: none;
+  }
 }
 
 @media (max-width: 840px) {
