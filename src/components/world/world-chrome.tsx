@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
-import { DREAM_CHAPTER_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import {
+  DREAM_CHAPTER_ENTER_ASSETS,
+  REXONANCE_SAGA_ENTER_ASSETS,
+  WORLD_ENTER_ASSETS,
+} from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
@@ -128,7 +132,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie";
+  context?: "world" | "archive" | "movie" | "rexonance";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -359,7 +363,9 @@ export function SideMenuLayer({
                 ? "FORM ARCHIVE"
                 : context === "movie"
                   ? "DREAM CHAPTER"
-                  : "DECEPTION WORLD"}
+                  : context === "rexonance"
+                    ? "REXONANCE SAGA"
+                    : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -391,7 +397,27 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            {context === "archive" ? (
+            {context === "rexonance" ? (
+              <>
+                {[
+                  ["top", "トップ", "TOP"],
+                  ["performance", "パフォーマンス", "PERFORMANCE"],
+                  ["stages", "三つの運用段階", "STAGES"],
+                  ["system", "トリニティ・レゾナンス", "SYSTEM"],
+                ].map(([hash, label, code]) => (
+                  <GuardedLink
+                    key={hash}
+                    to="/rexonance-saga"
+                    hash={hash}
+                    assets={[]}
+                    beforeNavigate={close}
+                  >
+                    <span>{label}</span>
+                    <i>{code}</i>
+                  </GuardedLink>
+                ))}
+              </>
+            ) : context === "archive" ? (
               <>
                 {[
                   ["top", "トップ", "TOP"],
@@ -464,6 +490,21 @@ export function SideMenuLayer({
                 </GuardedLink>
               </>
             )}
+          </div>
+        </div>
+        <div className="side-panel-group">
+          <p>SPECIAL</p>
+          <div className="side-panel-links">
+            <GuardedLink
+              to="/rexonance-saga"
+              hash="top"
+              assets={context === "rexonance" ? [] : REXONANCE_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "rexonance" ? "page" : undefined}
+            >
+              <span>レクソナンスサーガ</span>
+              <i>PERFORMANCE SITE</i>
+            </GuardedLink>
           </div>
         </div>
         <div className="side-panel-group">

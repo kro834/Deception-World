@@ -16,6 +16,7 @@ import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
+import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as ApiExportRouteImport } from './routes/api/export'
@@ -63,6 +64,11 @@ const LoginRoute = LoginRouteImport.update({
 const ManagersRoute = ManagersRouteImport.update({
   id: '/managers',
   path: '/managers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RexonanceSagaRoute = RexonanceSagaRouteImport.update({
+  id: '/rexonance-saga',
+  path: '/rexonance-saga',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RidersRoute = RidersRouteImport.update({
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/login'
     | '/managers'
+    | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/export'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/login'
     | '/managers'
+    | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/export'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/login'
     | '/managers'
+    | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/export'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   FormArchiveRoute: typeof FormArchiveRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
+  RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   WorldRoute: typeof WorldRoute
   ApiExportRoute: typeof ApiExportRoute
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/managers'
       fullPath: '/managers'
       preLoaderRoute: typeof ManagersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rexonance-saga': {
+      id: '/rexonance-saga'
+      path: '/rexonance-saga'
+      fullPath: '/rexonance-saga'
+      preLoaderRoute: typeof RexonanceSagaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/riders': {
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   FormArchiveRoute: FormArchiveRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
+  RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   WorldRoute: WorldRoute,
   ApiExportRoute: ApiExportRoute,
