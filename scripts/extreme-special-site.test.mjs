@@ -45,6 +45,12 @@ test("Extreme hero preserves the requested catchphrase and responsive visual tre
   assert.match(styles, /width: min\(124vw, 650px\)/);
 });
 
+test("large Extreme headings release iPhone vertical scrolling", () => {
+  assert.match(styles, /\.exs-page \.rxs-hero-copy,[\s\S]*?touch-action: pan-y/);
+  assert.match(styles, /\.exs-page \.rxs-hero h1,[\s\S]*?pointer-events: none/);
+  assert.match(styles, /\.exs-page \.rxs-section-heading h2[\s\S]*?-webkit-user-select: none/);
+});
+
 test("Extreme comparison keeps supplied Diluculum catalog values", () => {
   for (const value of [
     "120.8t（est.）",
