@@ -30,6 +30,8 @@ test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /value: "−89\.5%"/);
   assert.match(chrome, /ヴィンクルムサーガと比較して650%以上の反応速度/);
   assert.match(chrome, /エクスプリームサーガと比較して最大900%高い機動力/);
+  assert.match(chrome, /サーガシステムのウルトラハイエンドモデルに相応しい性能を備えています。/);
+  assert.doesNotMatch(chrome, /ウルトラハイエンドモデルに相応しい性能を発揮します。/);
   assert.match(chrome, /title: "Not Even Close\."/);
   assert.match(chrome, /image: "\/announcement-not-even-close\.jpeg"/);
   assert.match(chrome, /title: "Who Supreme\?"/);
