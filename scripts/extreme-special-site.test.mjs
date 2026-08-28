@@ -105,6 +105,8 @@ test("Extreme comparison preserves Vinculum values and calculated physical ratio
 test("Extreme P14 stays focused on its own expansion and fixation architecture", () => {
   assert.doesNotMatch(component, /レクソナンス/);
   assert.doesNotMatch(component, /to="\/rexonance-saga"/);
+  assert.match(component, /それすなわち、千里眼。/);
+  assert.doesNotMatch(component, /同じP14。|到達点は、異なる。/);
   assert.match(component, /P14 \/ EXPANSION/);
   assert.match(component, /P14 \/ FIXATION/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表/);

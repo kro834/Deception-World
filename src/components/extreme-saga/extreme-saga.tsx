@@ -541,11 +541,7 @@ export function ExtremeSaga() {
       <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>PROCESSING CORE / P14</p>
-          <h2 id="exs-p14-title">
-            同じP14。
-            <br />
-            到達点は、異なる。
-          </h2>
+          <h2 id="exs-p14-title">それすなわち、千里眼。</h2>
           <span>
             エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
             UltraとKOSMOS Ultraを統合し、増え続ける可能性を一つの実行可能な結果へ収束させます。
