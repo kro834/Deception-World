@@ -837,6 +837,9 @@
   background: none;
   font: inherit;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .rxs-p14-range-labels button:focus-visible {
@@ -922,6 +925,7 @@
   opacity: 0;
   cursor: pointer;
   touch-action: pan-x;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .rxs-p14-native-select {
@@ -1138,6 +1142,9 @@
   color: #9298a2;
   background: transparent;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
   transition:
     color 220ms ease,
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1627,6 +1634,40 @@
 
   .rxs-footer > a {
     font-size: 12px;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1024px) and (orientation: portrait) {
+  .rxs-hero {
+    padding-inline: 48px;
+  }
+
+  .rxs-hero-copy {
+    max-width: 720px;
+  }
+
+  .rxs-hero h1 {
+    font-size: clamp(62px, 8vw, 78px);
+    line-height: 1;
+  }
+
+  .rxs-hero-lede {
+    margin-top: 26px;
+  }
+
+  .rxs-hero-visual {
+    bottom: -24%;
+    width: min(82vw, 820px);
+  }
+
+  .rxs-hero-visual img {
+    object-position: 50% 3%;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 1024px) and (min-height: 1100px) and (orientation: portrait) {
+  .rxs-hero-visual {
+    bottom: -17%;
   }
 }
 

@@ -356,6 +356,11 @@ export function RexonanceSaga() {
   const activeStage = STAGES[stage];
   const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
+  const releaseControlFocus = (control: HTMLElement) => {
+    window.requestAnimationFrame(() => {
+      if (document.activeElement === control) control.blur();
+    });
+  };
 
   useEffect(() => {
     const isIOSDevice =
@@ -544,9 +549,11 @@ export function RexonanceSaga() {
             <select
               value={performanceBaseline}
               aria-label="レクソナンスの比較対象"
-              onChange={(event) =>
-                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline)
-              }
+              onChange={(event) => {
+                const control = event.currentTarget;
+                setPerformanceBaseline(control.value as PerformanceBaseline);
+                releaseControlFocus(control);
+              }}
             >
               <option value="vertex">ヴァーテックスサーガ</option>
               <option value="vinculum">ヴィンクルムサーガ</option>
@@ -700,6 +707,7 @@ export function RexonanceSaga() {
                 className={p14Baseline === "p1" ? "is-active" : undefined}
                 aria-pressed={p14Baseline === "p1"}
                 onClick={() => setP14Baseline("p1")}
+                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 P1比
               </button>
@@ -708,6 +716,7 @@ export function RexonanceSaga() {
                 className={p14Baseline === "p2" ? "is-active" : undefined}
                 aria-pressed={p14Baseline === "p2"}
                 onClick={() => setP14Baseline("p2")}
+                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 P2比
               </button>
@@ -719,7 +728,11 @@ export function RexonanceSaga() {
                   id="rxs-p14-baseline"
                   value={p14Baseline}
                   aria-label="P14の比較基準"
-                  onChange={(event) => setP14Baseline(event.currentTarget.value as P14Baseline)}
+                  onChange={(event) => {
+                    const control = event.currentTarget;
+                    setP14Baseline(control.value as P14Baseline);
+                    releaseControlFocus(control);
+                  }}
                 >
                   <option value="p1">P1比（P1＝100%）</option>
                   <option value="p2">P2比（P2＝100%）</option>
@@ -742,8 +755,14 @@ export function RexonanceSaga() {
                   aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
                   onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
                   onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                  onPointerUp={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                  onTouchEnd={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                  onPointerUp={(event) => {
+                    syncP14Baseline(event.currentTarget.valueAsNumber);
+                    releaseControlFocus(event.currentTarget);
+                  }}
+                  onTouchEnd={(event) => {
+                    syncP14Baseline(event.currentTarget.valueAsNumber);
+                    releaseControlFocus(event.currentTarget);
+                  }}
                 />
               </div>
             )}
@@ -819,6 +838,7 @@ export function RexonanceSaga() {
                 className={stage === key ? "is-active" : ""}
                 style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
                 onClick={() => setStage(key)}
+                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{STAGES[key].label}</span>
                 <small>{STAGES[key].code}</small>

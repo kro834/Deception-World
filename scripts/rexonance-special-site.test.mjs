@@ -132,6 +132,22 @@ test("catalog comparison separates baseline ratio, multiplier, and increase", ()
   assert.match(component, /所要時間 99\.79%短縮/);
 });
 
+test("iPad hero and touch sliders release transient emphasis", () => {
+  assert.match(styles, /orientation: portrait/);
+  assert.match(styles, /width: min\(82vw, 820px\)/);
+  assert.match(styles, /bottom: -24%/);
+  assert.match(styles, /min-height: 1100px/);
+  assert.match(styles, /bottom: -17%/);
+  assert.match(styles, /-webkit-tap-highlight-color: transparent/);
+  assert.match(styles, /-webkit-user-select: none/);
+  assert.match(component, /releaseControlFocus/);
+  assert.match(component, /document\.activeElement === control/);
+  assert.match(
+    component,
+    /onPointerUp=\{\(event\) => releaseControlFocus\(event\.currentTarget\)\}/,
+  );
+});
+
 test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {
   for (const value of [
     "100%",
@@ -172,7 +188,7 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /<select/);
   assert.match(component, /<option value="p1">P1比（P1＝100%）<\/option>/);
   assert.match(component, /<option value="p2">P2比（P2＝100%）<\/option>/);
-  assert.match(component, /currentTarget\.value as P14Baseline/);
+  assert.match(component, /control\.value as P14Baseline/);
   assert.match(component, /iOS標準選択/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
