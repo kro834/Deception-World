@@ -65,7 +65,7 @@ html[data-mode="world"] .site-shell > .site-update-control {
 }
 
 /* Shared Liquid Glass contact light for controls outside the swipe rails. */
-[data-liquid-pointer] {
+[data-liquid-pointer]:not(.side-panel) {
   position: relative;
   isolation: isolate;
   overflow: hidden;

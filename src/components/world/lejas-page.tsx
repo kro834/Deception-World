@@ -49,6 +49,7 @@ export function LejasPage() {
               width={1122}
               height={1402}
               style={{ objectFit: "cover", objectPosition: "50% 8%" }}
+              loading="eager"
               decoding="async"
               fetchPriority="high"
             />
@@ -59,8 +60,9 @@ export function LejasPage() {
               width={1500}
               height={1872}
               style={{ objectFit: "cover", objectPosition: "50% 8%" }}
+              loading="lazy"
               decoding="async"
-              fetchPriority="auto"
+              fetchPriority="low"
             />
             <div className="manager-portrait-shade" aria-hidden="true" />
             <span className="manager-numeral" aria-hidden="true">

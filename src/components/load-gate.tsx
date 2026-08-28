@@ -147,13 +147,14 @@ function holdRouteScrollMotion() {
   };
 }
 
-async function settleWorldHash(hash: string) {
+async function settleRouteHash(hash: string) {
   // TanStack restores the previous document position after the destination
   // route commits, and mobile WebKit can repeat that restoration after layout.
-  // Keep aligning briefly, but stop the moment the user starts interacting.
+  // Keep aligning briefly, but stop the moment the user starts scrolling.
   let userInteracted = false;
   const noteInteraction = (event: Event) => {
     if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+    if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0) return;
     userInteracted = true;
   };
   const align = () => {
@@ -161,8 +162,8 @@ async function settleWorldHash(hash: string) {
       document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
     }
   };
-  document.addEventListener("pointerdown", noteInteraction, true);
-  document.addEventListener("touchstart", noteInteraction, { capture: true, passive: true });
+  document.addEventListener("pointermove", noteInteraction, true);
+  document.addEventListener("touchmove", noteInteraction, { capture: true, passive: true });
   document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
   document.addEventListener("keydown", noteInteraction, true);
   try {
@@ -175,9 +176,13 @@ async function settleWorldHash(hash: string) {
     align();
     await wait(150);
     align();
+    await wait(240);
+    align();
+    await wait(420);
+    align();
   } finally {
-    document.removeEventListener("pointerdown", noteInteraction, true);
-    document.removeEventListener("touchstart", noteInteraction, true);
+    document.removeEventListener("pointermove", noteInteraction, true);
+    document.removeEventListener("touchmove", noteInteraction, true);
     document.removeEventListener("wheel", noteInteraction, true);
     document.removeEventListener("keydown", noteInteraction, true);
   }
@@ -405,11 +410,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const riderTransitionVariant = diveVariant ?? cutInVariant;
       if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
         const changesDocument = pathname !== to;
-        const releaseScrollMotion = changesDocument ? holdRouteScrollMotion() : null;
+        const releaseScrollMotion = changesDocument || hash ? holdRouteScrollMotion() : null;
+        const assetWarmup = assets.length
+          ? preloadAssets(assets, () => undefined).catch(() => undefined)
+          : null;
         try {
           await navigate({ to: to as never, hash });
-          if (changesDocument && to === "/world" && hash) await settleWorldHash(hash);
+          if (hash) await settleRouteHash(hash);
         } finally {
+          void assetWarmup;
           if (releaseScrollMotion) window.setTimeout(releaseScrollMotion, 360);
         }
         return;
@@ -430,6 +439,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         document.documentElement.dataset.loading = "true";
         setGate({ active: true, percent: 100, variant: riderTransitionVariant, phase: "covering" });
         try {
+          if (assets.length) {
+            void preloadAssets(assets, () => undefined).catch(() => undefined);
+          }
           // Mobile Safari may coalesce the state update with route/module work.
           // Give the Dream dive two paints so its first frame is always visible.
           if (diveVariant === "dream") {
@@ -437,8 +449,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await nextFrame();
             if (!isCurrent()) return;
           }
-          // Keep these cinematic cuts lightweight: warm only the route module.
-          // The destination remains the sole owner of its large image assets.
+          // Let the requested first-paint images keep warming while the route
+          // module loads, without delaying the cinematic cover on slow links.
           await Promise.race([
             router.preloadRoute({ to: to as never }).catch(() => undefined),
             wait(2400),
@@ -466,6 +478,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         document.documentElement.dataset.loading = "true";
         setGate({ active: true, percent: 0, variant: "zeus", phase: "covering" });
         try {
+          if (assets.length) {
+            void preloadAssets(assets, () => undefined).catch(() => undefined);
+          }
           await router.preloadRoute({ to: to as never }).catch(() => undefined);
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
@@ -729,19 +744,28 @@ export function GuardedLink({
   beforeNavigate?: () => void;
   children?: ReactNode;
   "aria-label"?: string;
+  "aria-current"?: "page";
 }) {
   const { go } = useLoadGate();
   const router = useRouter();
   const preloadedRoute = useRef<string | null>(null);
+  const preloadedAssetKey = useRef<string | null>(null);
   const href = hash ? `${to}#${hash}` : to;
 
-  const preloadRoute = useCallback(() => {
-    if (preloadedRoute.current === to) return;
-    preloadedRoute.current = to;
-    void router.preloadRoute({ to }).catch(() => {
-      if (preloadedRoute.current === to) preloadedRoute.current = null;
+  const preloadDestination = useCallback(() => {
+    if (preloadedRoute.current !== to) {
+      preloadedRoute.current = to;
+      void router.preloadRoute({ to }).catch(() => {
+        if (preloadedRoute.current === to) preloadedRoute.current = null;
+      });
+    }
+    const assetKey = assets.join("\n");
+    if (!assetKey || preloadedAssetKey.current === assetKey) return;
+    preloadedAssetKey.current = assetKey;
+    void preloadAssets(assets, () => undefined).catch(() => {
+      if (preloadedAssetKey.current === assetKey) preloadedAssetKey.current = null;
     });
-  }, [router, to]);
+  }, [assets, router, to]);
 
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
@@ -758,9 +782,9 @@ export function GuardedLink({
       href={href}
       className={className}
       style={style}
-      onPointerEnter={preloadRoute}
-      onFocus={preloadRoute}
-      onTouchStart={preloadRoute}
+      onPointerEnter={preloadDestination}
+      onFocus={preloadDestination}
+      onTouchStart={preloadDestination}
       onClick={onClick}
       {...rest}
     >
@@ -771,13 +795,18 @@ export function GuardedLink({
 
 export function AppGuards() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const locationHash = useRouterState({ select: (state) => state.location.hash });
 
   useLayoutEffect(() => {
-    if (!DETAIL_ROUTE.test(pathname)) return;
+    const resetRouteTop =
+      DETAIL_ROUTE.test(pathname) ||
+      (pathname === "/world" && (!locationHash || locationHash === "top"));
+    if (!resetRouteTop) return;
     const releaseScrollMotion = holdRouteScrollMotion();
     const timers: number[] = [];
     let firstFrame = 0;
     let finalFrame = 0;
+    let viewportFrame = 0;
     let userInteracted = false;
     let stopped = false;
 
@@ -790,35 +819,50 @@ export function AppGuards() {
       stopped = true;
       if (firstFrame) window.cancelAnimationFrame(firstFrame);
       if (finalFrame) window.cancelAnimationFrame(finalFrame);
+      if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
       timers.splice(0).forEach((timer) => window.clearTimeout(timer));
-      document.removeEventListener("pointerdown", noteInteraction, true);
-      document.removeEventListener("touchstart", noteInteraction, true);
+      document.removeEventListener("pointermove", noteInteraction, true);
+      document.removeEventListener("touchmove", noteInteraction, true);
       document.removeEventListener("wheel", noteInteraction, true);
       document.removeEventListener("keydown", noteInteraction, true);
+      window.removeEventListener("pageshow", alignAfterViewportChange);
+      window.removeEventListener("resize", alignAfterViewportChange);
+      window.visualViewport?.removeEventListener("resize", alignAfterViewportChange);
       releaseScrollMotion();
     };
     function noteInteraction(event: Event) {
       if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+      if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0) return;
       userInteracted = true;
       stopResetting();
+    }
+    function alignAfterViewportChange() {
+      if (stopped || userInteracted || viewportFrame) return;
+      viewportFrame = window.requestAnimationFrame(() => {
+        viewportFrame = 0;
+        resetDetailScroll();
+      });
     }
 
     // The router snapshots the outgoing world's position before this layout
     // effect runs. Keep smooth scrolling disabled until its delayed restoration
     // has settled, otherwise the outgoing world visibly races toward the top.
     resetDetailScroll();
-    document.addEventListener("pointerdown", noteInteraction, true);
-    document.addEventListener("touchstart", noteInteraction, { capture: true, passive: true });
+    document.addEventListener("pointermove", noteInteraction, true);
+    document.addEventListener("touchmove", noteInteraction, { capture: true, passive: true });
     document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
     document.addEventListener("keydown", noteInteraction, true);
+    window.addEventListener("pageshow", alignAfterViewportChange);
+    window.addEventListener("resize", alignAfterViewportChange);
+    window.visualViewport?.addEventListener("resize", alignAfterViewportChange);
     firstFrame = window.requestAnimationFrame(() => {
       resetDetailScroll();
       finalFrame = window.requestAnimationFrame(resetDetailScroll);
     });
-    [90, 240].forEach((delay) => {
+    [90, 240, 480, 900, 1500].forEach((delay) => {
       timers.push(window.setTimeout(resetDetailScroll, delay));
     });
-    timers.push(window.setTimeout(stopResetting, 360));
+    timers.push(window.setTimeout(stopResetting, 1800));
 
     return () => {
       // Cover browser-back and native history restoration as the detail route
@@ -827,7 +871,7 @@ export function AppGuards() {
       window.setTimeout(releaseExitMotion, 360);
       stopResetting();
     };
-  }, [pathname]);
+  }, [locationHash, pathname]);
 
   useEffect(() => {
     const editable = (t: EventTarget | null) => {

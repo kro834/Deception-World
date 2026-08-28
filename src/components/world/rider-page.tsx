@@ -961,7 +961,7 @@ export function RiderPage({ id }: { id: string }) {
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
-            <img src={rider.civilianImg} alt={`${rider.civilian.name}の変身前ビジュアル`} style={{ objectPosition: rider.civilianPos, objectFit: "cover" }} decoding="async" fetchPriority="high" />
+            <img src={rider.civilianImg} alt={`${rider.civilian.name}の変身前ビジュアル`} style={{ objectPosition: rider.civilianPos, objectFit: "cover" }} loading="eager" decoding="async" fetchPriority="high" />
             <span className="manager-numeral">{rider.no}</span>
           </div>
         </div>

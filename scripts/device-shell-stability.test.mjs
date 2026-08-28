@@ -9,6 +9,14 @@ const transitionStyles = readFileSync(
 );
 const worldStyles = readFileSync(new URL("../src/styles-world/18.css", import.meta.url), "utf8");
 const panelStyles = readFileSync(new URL("../src/styles-world/19.css", import.meta.url), "utf8");
+const interactionStyles = readFileSync(
+  new URL("../src/styles-world/21.css", import.meta.url),
+  "utf8",
+);
+const adaptiveStyles = readFileSync(
+  new URL("../src/styles-world/25.css", import.meta.url),
+  "utf8",
+);
 const announcementStyles = readFileSync(
   new URL("../src/styles-world/23.css", import.meta.url),
   "utf8",
@@ -43,13 +51,26 @@ test("the React side menu owns its state without a second vanilla controller", (
   assert.match(chrome, /data-react-controlled=\{controlled \? "true" : undefined\}/);
   assert.match(worldHome, /const \[sideMenuOpen, setSideMenuOpen\] = useState\(false\)/);
   assert.match(liquid, /panel\.dataset\.reactControlled === 'true'/);
-  assert.match(chrome, /href="#story" onClick=\{controlled \? close : undefined\}/);
+  assert.match(chrome, /to="\/world" hash="story" assets=\{\[\]\} beforeNavigate=\{close\}/);
   assert.match(chrome, /className="side-panel"[\s\S]*?data-liquid-pointer="true"/);
   assert.match(chrome, /<LiquidPointerGlow \/>[\s\S]*?className="side-panel-depth"/);
   assert.match(panelStyles, /\.side-panel > \.liquid-pointer-glow/);
   assert.match(panelStyles, /\.side-panel\[data-liquid-pointer\]\s*\{\s*position:\s*fixed/);
   assert.match(panelStyles, /\.side-panel-trigger\[aria-expanded="true"\]/);
   assert.match(panelStyles, /@media \(pointer: coarse\)[\s\S]*?\.side-panel > \.liquid-pointer-glow/);
+});
+
+test("the open side menu owns vertical panning without leaking to the page", () => {
+  assert.match(chrome, /root\.dataset\.sideMenuOpen = "true"/);
+  assert.match(chrome, /root\.style\.overflow = "hidden"/);
+  assert.match(chrome, /document\.addEventListener\("touchmove", containBackgroundScroll/);
+  assert.match(chrome, /panel\.contains\(event\.target\)/);
+  assert.match(chrome, /panel\.scrollTop = 0/);
+  assert.match(panelStyles, /\.side-panel \{[\s\S]*?overflow-y: auto;[\s\S]*?touch-action: pan-y pinch-zoom/);
+  assert.match(interactionStyles, /\[data-liquid-pointer\]:not\(\.side-panel\)/);
+  assert.match(adaptiveStyles, /html\[data-side-menu-open="true"\][\s\S]*?overflow: hidden !important/);
+  assert.match(adaptiveStyles, /\.side-panel\[data-open="true"\][\s\S]*?overflow-y: auto/);
+  assert.match(chrome, /assets=\{r\.assets\}[\s\S]*?beforeNavigate=\{close\}/);
 });
 
 test("Liquid rails release global gesture locks when their route unmounts", () => {

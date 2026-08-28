@@ -160,10 +160,29 @@ export function SideMenuLayer({
     if (!controlled || !isOpen) return;
     const panel = panelRef.current;
     if (!panel) return;
+    const root = document.documentElement;
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
+    const previousRootOverflow = root.style.overflow;
+    const previousRootOverscroll = root.style.overscrollBehavior;
+    panel.scrollTop = 0;
+    root.dataset.sideMenuOpen = "true";
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
     document.body.style.overflow = "hidden";
+    const containBackgroundScroll = (event: TouchEvent | WheelEvent) => {
+      if (event.target instanceof Node && panel.contains(event.target)) return;
+      event.preventDefault();
+    };
+    document.addEventListener("touchmove", containBackgroundScroll, {
+      capture: true,
+      passive: false,
+    });
+    document.addEventListener("wheel", containBackgroundScroll, {
+      capture: true,
+      passive: false,
+    });
     const frame = window.requestAnimationFrame(() => {
       const focusTarget = sideMenuRestoreFocusRef.current
         ? panel.querySelector<HTMLElement>(".side-panel-close")
@@ -172,7 +191,12 @@ export function SideMenuLayer({
     });
     return () => {
       window.cancelAnimationFrame(frame);
+      document.removeEventListener("touchmove", containBackgroundScroll, true);
+      document.removeEventListener("wheel", containBackgroundScroll, true);
       document.body.style.overflow = previousOverflow;
+      root.style.overflow = previousRootOverflow;
+      root.style.overscrollBehavior = previousRootOverscroll;
+      delete root.dataset.sideMenuOpen;
       if (sideMenuRestoreFocusRef.current) {
         previousFocus?.focus({ preventScroll: true });
       } else if (
@@ -390,49 +414,54 @@ export function SideMenuLayer({
               </>
             ) : context === "movie" ? (
               <>
-                <a href="#top" onClick={controlled ? close : undefined}>
+                <GuardedLink to="/dream-chapter" hash="top" assets={[]} beforeNavigate={close}>
                   <span>トップ</span>
                   <i>TOP</i>
-                </a>
-                <a href="#posters" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/dream-chapter" hash="posters" assets={[]} beforeNavigate={close}>
                   <span>ポスター</span>
                   <i>POSTERS</i>
-                </a>
-                <a href="#characters" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/dream-chapter" hash="characters" assets={[]} beforeNavigate={close}>
                   <span>キャラクター</span>
                   <i>CAST</i>
-                </a>
-                <a href="#dolminence" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/dream-chapter" hash="dolminence" assets={[]} beforeNavigate={close}>
                   <span>ドルミネンス</span>
                   <i>DOLMINENCE</i>
-                </a>
-                <a href="#cases" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/dream-chapter" hash="cases" assets={[]} beforeNavigate={close}>
                   <span>エピソード</span>
                   <i>CASES</i>
-                </a>
+                </GuardedLink>
               </>
             ) : (
               <>
-                <a href="#top" onClick={controlled ? close : undefined}>
+                <GuardedLink to="/world" hash="top" assets={[]} beforeNavigate={close}>
                   <span>トップ</span>
                   <i>TOP</i>
-                </a>
-                <a href="#story" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/world" hash="story" assets={[]} beforeNavigate={close}>
                   <span>ストーリー</span>
                   <i>STORY</i>
-                </a>
-                <a href="#riders" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/world" hash="riders" assets={[]} beforeNavigate={close}>
                   <span>八人のライダー</span>
                   <i>RIDERS</i>
-                </a>
-                <a href="#records" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink to="/world" hash="records" assets={[]} beforeNavigate={close}>
                   <span>レコード</span>
                   <i>RECORDS</i>
-                </a>
-                <a href="#manager-archive" onClick={controlled ? close : undefined}>
+                </GuardedLink>
+                <GuardedLink
+                  to="/world"
+                  hash="manager-archive"
+                  assets={[]}
+                  beforeNavigate={close}
+                >
                   <span>六詠</span>
                   <i>ARCHIVE</i>
-                </a>
+                </GuardedLink>
               </>
             )}
           </div>
@@ -442,10 +471,16 @@ export function SideMenuLayer({
           <div className="side-panel-links">
             {context === "movie" ? (
               <>
-                <a href="#top" aria-current="page" onClick={controlled ? close : undefined}>
+                <GuardedLink
+                  to="/dream-chapter"
+                  hash="top"
+                  assets={[]}
+                  beforeNavigate={close}
+                  aria-current="page"
+                >
                   <span>映画第一作「ドリームチャプター」</span>
                   <i>MOVIE 01</i>
-                </a>
+                </GuardedLink>
                 <GuardedLink
                   to="/world"
                   hash="top"
@@ -475,7 +510,12 @@ export function SideMenuLayer({
             <div className="side-panel-links">
               {RIDER_NAV.map((r, i) =>
                 r.href ? (
-                  <GuardedLink key={r.id} to={r.href} assets={r.assets}>
+                  <GuardedLink
+                    key={r.id}
+                    to={r.href}
+                    assets={r.assets}
+                    beforeNavigate={close}
+                  >
                     <span>{r.name}</span>
                     <i>{String(i + 1).padStart(2, "0")}</i>
                   </GuardedLink>
@@ -504,10 +544,16 @@ export function SideMenuLayer({
           <p>SYSTEM</p>
           <div className="side-panel-links">
             {context === "archive" ? (
-              <a href="#archive-switcher" aria-current="page" onClick={close}>
+              <GuardedLink
+                to="/form-archive"
+                hash="archive-switcher"
+                assets={[]}
+                beforeNavigate={close}
+                aria-current="page"
+              >
                 <span>フォームアーカイブ</span>
                 <i>SAGA / REALM</i>
-              </a>
+              </GuardedLink>
             ) : (
               <GuardedLink to="/form-archive" assets={[]} beforeNavigate={close}>
                 <span>フォームアーカイブ</span>
@@ -595,7 +641,9 @@ export function SideMenuLayer({
                       alt={selectedAnnouncement.imageAlt}
                       width={selectedAnnouncement.width}
                       height={selectedAnnouncement.height}
+                      loading="eager"
                       decoding="async"
+                      fetchPriority="high"
                     />
                   ) : null}
                 </figure>
@@ -667,7 +715,9 @@ export function SideMenuLayer({
                               alt=""
                               width={notice.width}
                               height={notice.height}
+                              loading="lazy"
                               decoding="async"
+                              fetchPriority="low"
                             />
                           ) : null}
                         </span>

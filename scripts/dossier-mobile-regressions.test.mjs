@@ -54,9 +54,14 @@ test("detail routes use per-location restoration without overwriting the world s
   assert.match(loadGate, /router snapshots the outgoing world's position/);
   assert.match(loadGate, /holdRouteScrollMotion/);
   assert.match(loadGate, /dataset\.routeScrollSettling = "true"/);
-  assert.match(loadGate, /\[90, 240\]/);
+  assert.match(loadGate, /\[90, 240, 480, 900, 1500\]/);
   assert.match(loadGate, /await wait\(90\);[\s\S]*?await wait\(150\)/);
   assert.match(loadGate, /document\.addEventListener\("wheel", noteInteraction/);
+  assert.match(loadGate, /document\.addEventListener\("touchmove", noteInteraction/);
+  assert.doesNotMatch(loadGate, /document\.addEventListener\("touchstart", noteInteraction/);
+  assert.match(loadGate, /window\.visualViewport\?\.addEventListener\("resize", alignAfterViewportChange\)/);
+  assert.match(loadGate, /window\.setTimeout\(stopResetting, 1800\)/);
+  assert.match(loadGate, /pathname === "\/world" && \(!locationHash \|\| locationHash === "top"\)/);
   assert.doesNotMatch(loadGate, /attributeFilter: \["data-loading"\]/);
   assert.doesNotMatch(loadGate, /document\.scrollingElement\?\.scrollTo/);
   assert.match(
@@ -89,6 +94,7 @@ test("the rider selected before opening a dossier is restored once on return", (
 
 test("the compact mobile return control keeps an accessible name", () => {
   assert.match(riderPage, /className="manager-back" aria-label="ライダー一覧へ戻る"/);
+  assert.match(riderPage, /loading="eager" decoding="async" fetchPriority="high"/);
 });
 
 test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", () => {

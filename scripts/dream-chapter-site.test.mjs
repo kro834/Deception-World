@@ -129,7 +129,7 @@ test("Dream Chapter route and side menu expose the movie navigation", () => {
   for (const anchor of ["top", "posters", "characters", "dolminence", "cases"]) {
     assert.match(
       menuSource,
-      new RegExp(`href=["']#${anchor}["']`),
+      new RegExp(`to=["']\\/dream-chapter["']\\s+hash=["']${anchor}["']`),
       `movie menu must link to #${anchor}`,
     );
     assert.match(pageSource, new RegExp(`id=["']${anchor}["']`));
@@ -140,7 +140,7 @@ test("Dream Chapter renders its movie logo and maps all four Dolminence records"
   assert.match(pageSource, /src=["']\/dream-chapter-logo\.jpeg["']/);
   assert.match(pageSource, /DREAM_DOLMINENCE\.map/);
   assert.match(pageSource, /id=["']dolminence["']/);
-  assert.match(menuSource, /href=["']#dolminence["']/);
+  assert.match(menuSource, /to=["']\/dream-chapter["']\s+hash=["']dolminence["']/);
   assert.match(menuSource, /DOLMINENCE/);
 });
 

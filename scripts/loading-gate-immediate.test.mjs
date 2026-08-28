@@ -43,7 +43,9 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");
   const directBranch = goBlock.slice(directIndex, directEnd);
   assert.match(directBranch, /await navigate\(\{ to: to as never, hash \}\)/);
-  assert.doesNotMatch(directBranch, /\bpreloadAssets\s*\(/);
+  assert.match(directBranch, /preloadAssets\(assets, \(\) => undefined\)/);
+  assert.match(gate, /const preloadDestination = useCallback/);
+  assert.match(gate, /onTouchStart=\{preloadDestination\}/);
   for (const route of ["saga", "realm", "lore", "vandal"]) {
     assert.match(gate, new RegExp(`"\\/riders\\/${route}": "${route}"`));
   }

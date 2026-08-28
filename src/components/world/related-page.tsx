@@ -213,6 +213,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               src={person.image}
               alt={`${person.name}のキャラクタービジュアル`}
               style={{ objectPosition: person.pos, objectFit: "cover" }}
+              loading="eager"
               decoding="async"
               fetchPriority="high"
             />

@@ -462,6 +462,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               src={profile.image}
               alt={`${profile.name}のキャラクタービジュアル`}
               style={{ objectPosition: profile.pos, objectFit: "cover" }}
+              loading="eager"
               decoding="async"
               fetchPriority="high"
             />
