@@ -4,13 +4,22 @@
   --rxs-gold: #e7bd69;
   --rxs-white: #f5f7fb;
   --rxs-muted: #9298a5;
+  --rxs-font-text:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Hiragino Sans",
+    "Yu Gothic", "Noto Sans JP", sans-serif;
+  --rxs-font-display:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Hiragino Sans",
+    "Yu Gothic", "Noto Sans JP", sans-serif;
   --rxs-hero-progress: 0;
   min-height: 100vh;
   overflow-x: clip;
   padding-top: 62px;
   color: var(--rxs-white);
   background: radial-gradient(circle at 50% 14%, rgb(48 61 91 / 28%), transparent 28rem), #000207;
-  font-family: Inter, "Helvetica Neue", "Noto Sans JP", sans-serif;
+  font-family: var(--rxs-font-text);
+  font-kerning: normal;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 .rxs-page *,
@@ -65,6 +74,7 @@
 .rxs-brand b {
   font-size: 14px;
   font-weight: 670;
+  line-height: 1.25;
 }
 
 .rxs-local-nav nav {
@@ -157,7 +167,7 @@
 .rxs-hero-copy {
   position: relative;
   z-index: 3;
-  max-width: 950px;
+  width: min(100%, 950px);
   text-align: center;
 }
 
@@ -172,9 +182,13 @@
 
 .rxs-hero h1 {
   margin: 0;
+  font-family: var(--rxs-font-display);
   font-size: clamp(45px, 7.5vw, 108px);
-  line-height: 0.98;
-  letter-spacing: -0.07em;
+  font-weight: 680;
+  font-feature-settings: "palt" 1;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
 }
 
 .rxs-hero h1 span {
@@ -189,10 +203,12 @@
 }
 
 .rxs-hero-lede {
-  margin: 26px auto 0;
+  max-width: 720px;
+  margin: 28px auto 0;
   color: #b6bac4;
   font-size: clamp(14px, 1.5vw, 19px);
-  line-height: 1.9;
+  line-height: 1.78;
+  text-wrap: pretty;
 }
 
 .rxs-hero-visual {
@@ -276,9 +292,13 @@
 
 .rxs-section-heading h2 {
   margin: 0;
+  font-family: var(--rxs-font-display);
   font-size: clamp(42px, 6.6vw, 92px);
-  line-height: 1.05;
-  letter-spacing: -0.065em;
+  font-weight: 670;
+  font-feature-settings: "palt" 1;
+  line-height: 1.09;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
 }
 
 .rxs-section-heading > span {
@@ -288,6 +308,7 @@
   color: var(--rxs-muted);
   font-size: 14px;
   line-height: 1.8;
+  text-wrap: pretty;
 }
 
 .rxs-performance {
@@ -590,16 +611,21 @@
 
 .rxs-stage-panel h3 {
   margin: 17px 0 24px;
+  font-family: var(--rxs-font-display);
   font-size: clamp(40px, 5vw, 72px);
-  line-height: 1.05;
-  letter-spacing: -0.06em;
+  font-weight: 670;
+  font-feature-settings: "palt" 1;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
 }
 
 .rxs-stage-panel > div > p {
   margin: 0;
   color: #a9aeba;
   font-size: 15px;
-  line-height: 2;
+  line-height: 1.9;
+  text-wrap: pretty;
 }
 
 .rxs-stage-panel ul {
@@ -664,8 +690,10 @@
 
 .rxs-system-grid h3 {
   margin: 92px 0 21px;
+  font-family: var(--rxs-font-display);
   font-size: clamp(27px, 2.7vw, 39px);
-  letter-spacing: -0.04em;
+  font-weight: 660;
+  letter-spacing: -0.025em;
 }
 
 .rxs-system-grid p {
@@ -673,6 +701,7 @@
   color: #9da2ad;
   font-size: 13px;
   line-height: 1.9;
+  text-wrap: pretty;
 }
 
 .rxs-specs {
@@ -740,8 +769,10 @@
   max-width: 580px;
   margin: 0;
   font-size: clamp(30px, 4vw, 54px);
-  line-height: 1.12;
-  letter-spacing: -0.05em;
+  font-weight: 660;
+  line-height: 1.16;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 .rxs-footer > a {
@@ -894,6 +925,49 @@
   }
 }
 
+@media (min-width: 681px) and (max-width: 1024px) {
+  .rxs-hero {
+    padding-inline: 40px;
+  }
+
+  .rxs-hero h1 {
+    font-size: clamp(58px, 7.3vw, 74px);
+  }
+
+  .rxs-hero-lede {
+    max-width: 700px;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  .rxs-section {
+    padding-inline: 32px;
+  }
+
+  .rxs-section-heading h2 {
+    font-size: clamp(50px, 6.2vw, 64px);
+    line-height: 1.1;
+  }
+
+  .rxs-section-heading > span {
+    max-width: 640px;
+    font-size: 15px;
+  }
+
+  .rxs-stage-panel > div > p {
+    font-size: 16px;
+    line-height: 1.85;
+  }
+
+  .rxs-system-grid p {
+    font-size: 14.5px;
+  }
+
+  .rxs-footer > a {
+    font-size: 12px;
+  }
+}
+
 @media (max-width: 680px) {
   .rxs-page {
     padding-top: calc(58px + env(safe-area-inset-top, 0px));
@@ -926,7 +1000,9 @@
   }
 
   .rxs-hero h1 {
-    font-size: clamp(42px, 13vw, 64px);
+    font-size: clamp(40px, 12vw, 52px);
+    line-height: 1.03;
+    letter-spacing: -0.04em;
   }
 
   .rxs-hero-copy > p:first-child {
@@ -934,9 +1010,9 @@
   }
 
   .rxs-hero-lede {
-    max-width: 330px;
-    font-size: 13px;
-    line-height: 1.75;
+    max-width: 342px;
+    font-size: 14px;
+    line-height: 1.72;
   }
 
   .rxs-hero-lede br {
@@ -957,7 +1033,9 @@
   }
 
   .rxs-section-heading h2 {
-    font-size: clamp(38px, 12vw, 58px);
+    font-size: clamp(36px, 10.2vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
   }
 
   .rxs-headline-metrics {
@@ -993,6 +1071,11 @@
     margin-bottom: 4px;
   }
 
+  .rxs-comparison-note {
+    font-size: 12px;
+    line-height: 1.75;
+  }
+
   .rxs-stage-tabs {
     gap: 4px;
   }
@@ -1004,6 +1087,7 @@
 
   .rxs-stage-tabs button span {
     font-size: 11px;
+    line-height: 1.3;
   }
 
   .rxs-stage-tabs button small {
@@ -1021,12 +1105,23 @@
   }
 
   .rxs-stage-panel h3 {
-    font-size: 42px;
+    font-size: 40px;
+    line-height: 1.12;
+  }
+
+  .rxs-stage-panel > div > p {
+    font-size: 15px;
+    line-height: 1.88;
   }
 
   .rxs-system-grid article {
     min-height: 280px;
     border-radius: 23px;
+  }
+
+  .rxs-system-grid p {
+    font-size: 14px;
+    line-height: 1.85;
   }
 
   .rxs-specs {
@@ -1045,6 +1140,25 @@
 
   .rxs-footer > a {
     width: 100%;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .rxs-brand b {
+    font-size: 12px;
+  }
+
+  .rxs-hero h1 {
+    font-size: 40px;
+  }
+
+  .rxs-stage-tabs button span {
+    font-size: 10px;
+  }
+
+  .rxs-stage-tabs button small {
+    letter-spacing: 0.07em;
   }
 }
 

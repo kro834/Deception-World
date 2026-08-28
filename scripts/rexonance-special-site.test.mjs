@@ -42,7 +42,13 @@ test("Rexonance page ships local optimized artwork and responsive motion fallbac
   assert.match(component, /fetchPriority="high"/);
   assert.match(component, /loading=\{stage === "standard" \? "eager" : "lazy"\}/);
   assert.match(styles, /@media \(max-width: 680px\)/);
+  assert.match(styles, /@media \(min-width: 681px\) and \(max-width: 1024px\)/);
+  assert.match(styles, /@media \(max-width: 360px\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(styles, /env\(safe-area-inset-top/);
   assert.match(styles, /env\(safe-area-inset-bottom/);
+  assert.match(styles, /-apple-system, BlinkMacSystemFont/);
+  assert.match(styles, /"Hiragino Sans"/);
+  assert.match(styles, /font-feature-settings: "palt" 1/);
+  assert.match(styles, /text-wrap: balance/);
 });
