@@ -407,13 +407,11 @@ export function ExtremeSaga() {
       <section id="performance" className="rxs-performance rxs-section">
         <header className="rxs-section-heading rxs-reveal">
           <p>PERFORMANCE COMPARISON</p>
-          <h2>
-            数字を揃えて、
-            <br />
-            正しく比べる。
-          </h2>
+          <h2>なんて戦闘力。</h2>
           <span>
-            ディルクルムサーガまたはヴィンクルムサーガを100%として、公開済みの標準カタログ値だけを換算しています。
+            肉弾戦に最適化したエクスプリーム。
+            <br />
+            既存の形態と比較してみましょう。
           </span>
         </header>
 
@@ -557,7 +555,7 @@ export function ExtremeSaga() {
         <div className="rxs-p14-overview rxs-reveal">
           <figure>
             <img
-              src="/rexonance-p14-core.jpg"
+              src="/extreme-p14-core.jpg"
               alt="青い回路に接続されたP14演算コア"
               width="1254"
               height="1254"

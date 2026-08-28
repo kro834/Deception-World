@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { test } from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -49,6 +49,13 @@ test("large Extreme headings release iPhone vertical scrolling", () => {
   assert.match(styles, /\.exs-page \.rxs-hero-copy,[\s\S]*?touch-action: pan-y/);
   assert.match(styles, /\.exs-page \.rxs-hero h1,[\s\S]*?pointer-events: none/);
   assert.match(styles, /\.exs-page \.rxs-section-heading h2[\s\S]*?-webkit-user-select: none/);
+});
+
+test("Extreme performance copy uses the requested physical-combat framing", () => {
+  assert.match(component, /なんて戦闘力。/);
+  assert.match(component, /肉弾戦に最適化したエクスプリーム。/);
+  assert.match(component, /既存の形態と比較してみましょう。/);
+  assert.doesNotMatch(component, /数字を揃えて/);
 });
 
 test("Extreme comparison keeps supplied Diluculum catalog values", () => {
@@ -104,6 +111,10 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   assert.match(component, /推測値では補いません/);
   assert.match(component, /20,000YOPS/);
   assert.match(component, /5,000TOPS/);
+  assert.match(component, /src="\/extreme-p14-core.jpg"/);
+  const p14Asset = new URL("../public/extreme-p14-core.jpg", import.meta.url);
+  assert.equal(existsSync(p14Asset), true);
+  assert.ok(statSync(p14Asset).size < 700_000, "Extreme P14 artwork should stay below 700 KB");
 });
 
 test("Extreme stage rail supports liquid long-press and swipe selection", () => {
