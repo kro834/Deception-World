@@ -20,7 +20,7 @@ import {
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets } from "@/lib/asset-loader";
 
-type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream";
+type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
@@ -52,6 +52,7 @@ const RIDER_DIVE_ROUTES = {
   "/riders/realm": "realm",
   "/riders/lore": "lore",
   "/riders/vandal": "vandal",
+  "/rexonance-saga": "rexonance",
 } as const satisfies Record<string, RiderDiveVariant>;
 
 const RIDER_CUT_IN_ROUTES = {
@@ -74,6 +75,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   lore: { cover: 520, reveal: 480 },
   vandal: { cover: 520, reveal: 480 },
   dream: { cover: 620, reveal: 520 },
+  rexonance: { cover: 560, reveal: 520 },
 };
 
 const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; label: string }> = {
@@ -82,10 +84,12 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   lore: { no: "03", name: "LORE", label: "ローア" },
   vandal: { no: "04", name: "VANDAL", label: "ヴァンダール" },
   dream: { no: "I", name: "DREAM CHAPTER", label: "ドリームチャプター" },
+  rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
-const nextFrame = () => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+const nextFrame = () =>
+  new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
 
 type Deferred<T> = {
   promise: Promise<T>;
@@ -130,7 +134,17 @@ function dispatchOpeningHandoffState(active: boolean) {
   );
 }
 const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
-const SCROLL_KEYS = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]);
+const SCROLL_KEYS = new Set([
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowUp",
+  "End",
+  "Home",
+  "PageDown",
+  "PageUp",
+  " ",
+]);
 let routeScrollMotionLocks = 0;
 
 function holdRouteScrollMotion() {
@@ -158,7 +172,8 @@ async function settleRouteHash(hash: string) {
   });
   const noteInteraction = (event: Event) => {
     if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
-    if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0) return;
+    if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0)
+      return;
     if (userInteracted) return;
     userInteracted = true;
     stopWaiting();
@@ -474,7 +489,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
-          setGate({ active: true, percent: 100, variant: riderTransitionVariant, phase: "revealing" });
+          setGate({
+            active: true,
+            percent: 100,
+            variant: riderTransitionVariant,
+            phase: "revealing",
+          });
           await wait(timings.reveal);
         } finally {
           window.setTimeout(releaseScrollMotion, 360);
@@ -559,11 +579,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   return (
     <LoadGateContext.Provider value={api}>
       {children}
-      <LoadOverlay
-        active={gate.active}
-        variant={gate.variant}
-        phase={gate.phase}
-      />
+      <LoadOverlay active={gate.active} variant={gate.variant} phase={gate.phase} />
       <OpeningHandoffLayer
         snapshot={openingSnapshot}
         onCovered={notifyOpeningHandoffCovered}
@@ -588,11 +604,16 @@ function LoadOverlay({
     variant === "realm" ||
     variant === "lore" ||
     variant === "vandal" ||
-    variant === "dream";
+    variant === "dream" ||
+    variant === "rexonance";
   if (isRiderDive) {
     return <RiderRouteDive variant={variant} phase={phase} />;
   }
-  const isRiderCutIn = variant === "leddic" || variant === "argenome" || variant === "over-zeztz" || variant === "cipher";
+  const isRiderCutIn =
+    variant === "leddic" ||
+    variant === "argenome" ||
+    variant === "over-zeztz" ||
+    variant === "cipher";
   if (isRiderCutIn) {
     return (
       <div
@@ -600,7 +621,11 @@ function LoadOverlay({
         role="status"
         aria-live="polite"
         aria-busy={phase === "covering"}
-        aria-label={phase === "revealing" ? `${cutInLabel(variant)}の個別資料を展開しました` : `${cutInLabel(variant)}の個別資料を展開中`}
+        aria-label={
+          phase === "revealing"
+            ? `${cutInLabel(variant)}の個別資料を展開しました`
+            : `${cutInLabel(variant)}の個別資料を展開中`
+        }
       >
         <RiderRouteCutIn variant={variant} />
       </div>
@@ -613,7 +638,9 @@ function LoadOverlay({
         role="status"
         aria-live="polite"
         aria-busy={phase === "covering"}
-        aria-label={phase === "revealing" ? "ゼウスの主権記録を開きました" : "ゼウスの主権記録を照合中"}
+        aria-label={
+          phase === "revealing" ? "ゼウスの主権記録を開きました" : "ゼウスの主権記録を照合中"
+        }
       >
         <div className="load-gate-inner">
           <span className="load-gate-mark" aria-hidden="true">
@@ -638,7 +665,10 @@ function LoadOverlay({
       aria-label="フォームアーカイブとの間を移動中"
     >
       <span className="archive-dive-space" aria-hidden="true" />
-      <span className="cine-dive-tunnel" aria-hidden="true"><i /><i /></span>
+      <span className="cine-dive-tunnel" aria-hidden="true">
+        <i />
+        <i />
+      </span>
       <span className="cine-dive-flash" aria-hidden="true" />
       <span className="cine-dive-status">
         <small>SAGA / REALM // FORM ARCHIVE</small>
@@ -648,7 +678,13 @@ function LoadOverlay({
   );
 }
 
-function RiderRouteDive({ variant, phase }: { variant: RiderDiveVariant; phase: GateState["phase"] }) {
+function RiderRouteDive({
+  variant,
+  phase,
+}: {
+  variant: RiderDiveVariant;
+  phase: GateState["phase"];
+}) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
   return (
@@ -657,16 +693,35 @@ function RiderRouteDive({ variant, phase }: { variant: RiderDiveVariant; phase: 
       role="status"
       aria-live="polite"
       aria-busy={!revealing}
-      aria-label={revealing ? `${meta.label}の個別資料へ到着しました` : `${meta.label}の個別資料へダイブ中`}
+      aria-label={
+        revealing ? `${meta.label}の個別資料へ到着しました` : `${meta.label}の個別資料へダイブ中`
+      }
     >
       <span className="archive-dive-space" aria-hidden="true" />
       <span className="rider-dive-vector-field" aria-hidden="true" />
-      <span className="cine-dive-tunnel" aria-hidden="true"><i /><i /></span>
-      <span className="rider-dive-mark" aria-hidden="true"><i>{meta.no}</i></span>
+      <span className="cine-dive-tunnel" aria-hidden="true">
+        <i />
+        <i />
+      </span>
+      <span className="rider-dive-mark" aria-hidden="true">
+        <i>{meta.no}</i>
+      </span>
       <span className="cine-dive-flash" aria-hidden="true" />
       <span className="cine-dive-status rider-dive-status">
-        <small>{meta.name} // RIDER {meta.no}</small>
-        <span>{revealing ? "個別資料へ到着" : "記録位相へダイブ中"}</span>
+        <small>
+          {variant === "rexonance"
+            ? "REXONANCE // PERFORMANCE SITE"
+            : `${meta.name} // RIDER ${meta.no}`}
+        </small>
+        <span>
+          {variant === "rexonance"
+            ? revealing
+              ? "共鳴位相へ到着"
+              : "P14共鳴位相へダイブ中"
+            : revealing
+              ? "個別資料へ到着"
+              : "記録位相へダイブ中"}
+        </span>
       </span>
     </div>
   );
@@ -685,11 +740,26 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
       <div className="rider-cutin-stage leddic-cutin-stage" aria-hidden="true">
         <span className="leddic-room-glow" />
         <span className="leddic-floor" />
-        <span className="leddic-motes">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</span>
-        <span className="leddic-shoji is-left"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
-        <span className="leddic-shoji is-right"><span className="leddic-paper" /><span className="leddic-kumiko" /><i /></span>
+        <span className="leddic-motes">
+          {Array.from({ length: 8 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </span>
+        <span className="leddic-shoji is-left">
+          <span className="leddic-paper" />
+          <span className="leddic-kumiko" />
+          <i />
+        </span>
+        <span className="leddic-shoji is-right">
+          <span className="leddic-paper" />
+          <span className="leddic-kumiko" />
+          <i />
+        </span>
         <span className="leddic-seam" />
-        <span className="rider-cutin-caption"><small>GREEN VEIL // OPEN</small><b>LEDDIC</b></span>
+        <span className="rider-cutin-caption">
+          <small>GREEN VEIL // OPEN</small>
+          <b>LEDDIC</b>
+        </span>
       </div>
     );
   }
@@ -705,8 +775,15 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
         <span className="argenome-slash is-echo-two" />
         <span className="argenome-slash is-main" />
         <span className="argenome-flare" />
-        <span className="argenome-sparks">{Array.from({ length: 14 }, (_, index) => <i key={index} />)}</span>
-        <span className="rider-cutin-caption"><small>SCARLET TRACE // SEVER</small><b>ARGENOME</b></span>
+        <span className="argenome-sparks">
+          {Array.from({ length: 14 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </span>
+        <span className="rider-cutin-caption">
+          <small>SCARLET TRACE // SEVER</small>
+          <b>ARGENOME</b>
+        </span>
       </div>
     );
   }
@@ -717,10 +794,21 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
         <span className="cipher-void" />
         <span className="cipher-scan-grid" />
         <span className="cipher-reticle" />
-        <span className="cipher-slash-field">{Array.from({ length: 20 }, (_, index) => <i key={index} />)}</span>
+        <span className="cipher-slash-field">
+          {Array.from({ length: 20 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </span>
         <span className="cipher-cross-flare" />
-        <span className="cipher-data-fragments">{Array.from({ length: 16 }, (_, index) => <i key={index} />)}</span>
-        <span className="rider-cutin-caption"><small>NO TRACE // DEAD DROP</small><b>CIPHER</b></span>
+        <span className="cipher-data-fragments">
+          {Array.from({ length: 16 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </span>
+        <span className="rider-cutin-caption">
+          <small>NO TRACE // DEAD DROP</small>
+          <b>CIPHER</b>
+        </span>
       </div>
     );
   }
@@ -728,12 +816,26 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
   return (
     <div className="rider-cutin-stage over-zeztz-cutin-stage" aria-hidden="true">
       <span className="over-zeztz-crack" />
-      <span className="over-zeztz-strike"><i /><i /></span>
+      <span className="over-zeztz-strike">
+        <i />
+        <i />
+      </span>
       <span className="over-zeztz-impact" />
       <span className="over-zeztz-pressure-ring" />
-      <span className="over-zeztz-shards">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</span>
-      <span className="over-zeztz-debris">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</span>
-      <span className="rider-cutin-caption"><small>BREAK LIMIT // COLLAPSE</small><b>OVER-ZEZTZ</b></span>
+      <span className="over-zeztz-shards">
+        {Array.from({ length: 12 }, (_, index) => (
+          <i key={index} />
+        ))}
+      </span>
+      <span className="over-zeztz-debris">
+        {Array.from({ length: 10 }, (_, index) => (
+          <i key={index} />
+        ))}
+      </span>
+      <span className="rider-cutin-caption">
+        <small>BREAK LIMIT // COLLAPSE</small>
+        <b>OVER-ZEZTZ</b>
+      </span>
     </div>
   );
 }
@@ -847,7 +949,8 @@ export function AppGuards() {
     };
     function noteInteraction(event: Event) {
       if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
-      if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0) return;
+      if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0)
+        return;
       userInteracted = true;
       stopResetting();
     }

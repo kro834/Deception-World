@@ -7,6 +7,8 @@ const component = read("src/components/rexonance-saga/rexonance-saga.tsx");
 const route = read("src/routes/rexonance-saga.tsx");
 const menu = read("src/components/world/world-chrome.tsx");
 const styles = read("src/styles-rexonance-saga.css");
+const transitions = read("src/styles-route-transitions.css");
+const loadGate = read("src/components/load-gate.tsx");
 const loader = read("src/lib/asset-loader.ts");
 
 test("Rexonance special site is reachable from every shared side menu", () => {
@@ -70,12 +72,28 @@ test("P14 comparison preserves every supplied value and uses a native range cont
   assert.match(component, /type="range"/);
   assert.match(component, /aria-valuetext=/);
   assert.match(component, /onInput=/);
+  assert.match(component, /valueAsNumber/);
+  assert.match(component, /onPointerUp=/);
+  assert.match(component, /rxs-p14-ios-slider/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
-  assert.match(styles, /accent-color: #0a84ff/);
+  assert.match(styles, /\.rxs-p14-ios-track/);
+  assert.match(styles, /\.rxs-p14-ios-thumb/);
+  assert.match(styles, /data-value="p2"/);
+  assert.match(styles, /background: #0a84ff/);
   const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
   assert.ok(statSync(p14Asset).size < 700_000, "P14 artwork should stay below 700 KB");
+});
+
+test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
+  assert.match(loadGate, /"\/rexonance-saga": "rexonance"/);
+  assert.match(loadGate, /rexonance:\s*\{ cover: 560, reveal: 520 \}/);
+  assert.match(loadGate, /REXONANCE \/\/ PERFORMANCE SITE/);
+  assert.match(loadGate, /P14共鳴位相へダイブ中/);
+  assert.match(transitions, /\.load-gate\.rider-route-dive\.is-rexonance-dive/);
+  assert.match(transitions, /--rider-dive-primary: 88 230 255/);
+  assert.match(transitions, /--rider-dive-secondary: 255 105 220/);
 });
 
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {

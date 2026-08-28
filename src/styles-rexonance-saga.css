@@ -673,7 +673,7 @@
   background: rgb(0 0 0 / 30%);
 }
 
-.rxs-p14-range-control > div {
+.rxs-p14-range-labels {
   display: flex;
   justify-content: space-between;
   color: #6f7885;
@@ -681,7 +681,7 @@
   font-weight: 700;
 }
 
-.rxs-p14-range-control > div button {
+.rxs-p14-range-labels button {
   padding: 4px 0;
   border: 0;
   color: inherit;
@@ -690,23 +690,99 @@
   cursor: pointer;
 }
 
-.rxs-p14-range-control > div button:focus-visible {
+.rxs-p14-range-labels button:focus-visible {
   border-radius: 6px;
   outline: 2px solid #0a84ff;
   outline-offset: 3px;
 }
 
-.rxs-p14-range-control > div .is-active {
+.rxs-p14-range-labels .is-active {
   color: #fff;
 }
 
-.rxs-p14-range-control input[type="range"] {
+.rxs-p14-ios-slider {
+  position: relative;
   width: 100%;
+  height: 36px;
+  margin-top: 2px;
+  border-radius: 18px;
+}
+
+.rxs-p14-ios-track {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 14px;
+  left: 14px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #3a3a3c;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 45%);
+  translate: 0 -50%;
+}
+
+.rxs-p14-ios-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #0a84ff;
+  box-shadow: 0 0 10px rgb(10 132 255 / 36%);
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rxs-p14-ios-slider[data-value="p2"] .rxs-p14-ios-track i {
+  width: 100%;
+}
+
+.rxs-p14-ios-thumb {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  width: 30px;
   height: 30px;
-  margin: 7px 0 0;
-  appearance: auto;
-  accent-color: #0a84ff;
+  border: 0.5px solid rgb(0 0 0 / 18%);
+  border-radius: 50%;
+  background: #f7f7f8;
+  box-shadow:
+    0 2px 7px rgb(0 0 0 / 46%),
+    0 0 0 0 rgb(10 132 255 / 0%);
+  translate: 0 -50%;
+  transition:
+    left 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 160ms ease;
+}
+
+.rxs-p14-ios-slider[data-value="p2"] .rxs-p14-ios-thumb {
+  left: 100%;
+  translate: -100% -50%;
+}
+
+.rxs-p14-ios-slider input[type="range"] {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  appearance: none;
+  opacity: 0;
+  cursor: pointer;
   touch-action: pan-x;
+}
+
+.rxs-p14-ios-slider:has(input:focus-visible) {
+  outline: 2px solid #0a84ff;
+  outline-offset: 3px;
+}
+
+.rxs-p14-ios-slider:active .rxs-p14-ios-thumb {
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 50%),
+    0 0 0 7px rgb(10 132 255 / 16%);
 }
 
 .rxs-p14-range-control > p {
@@ -721,6 +797,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  animation: rxsP14MetricsSwap 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .rxs-p14-metrics article {
@@ -764,7 +841,7 @@
 .rxs-p14-values strong {
   display: block;
   overflow-wrap: anywhere;
-  color: #858e9a;
+  color: #c0cad6;
   font-size: clamp(18px, 2.1vw, 26px);
   letter-spacing: -0.04em;
 }
@@ -1192,6 +1269,17 @@
   from {
     opacity: 0;
     translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rxsP14MetricsSwap {
+  from {
+    opacity: 0.36;
+    translate: 0 10px;
   }
   to {
     opacity: 1;

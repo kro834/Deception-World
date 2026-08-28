@@ -183,6 +183,7 @@ export function RexonanceSaga() {
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const activeStage = STAGES[stage];
+  const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
 
   useEffect(() => {
     const page = pageRef.current;
@@ -430,8 +431,8 @@ export function RexonanceSaga() {
             <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}</output>
           </header>
 
-          <div className="rxs-p14-range-control">
-            <div>
+          <div className="rxs-p14-range-control" data-baseline={p14Baseline}>
+            <div className="rxs-p14-range-labels">
               <button
                 type="button"
                 className={p14Baseline === "p1" ? "is-active" : undefined}
@@ -449,22 +450,36 @@ export function RexonanceSaga() {
                 P2
               </button>
             </div>
-            <input
-              id="rxs-p14-baseline"
-              type="range"
-              min="1"
-              max="2"
-              step="1"
-              value={p14Baseline === "p1" ? 1 : 2}
-              aria-label="P14の比較対象"
-              aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
-              onInput={(event) => setP14Baseline(event.currentTarget.value === "1" ? "p1" : "p2")}
-              onChange={(event) => setP14Baseline(event.currentTarget.value === "1" ? "p1" : "p2")}
-            />
+            <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
+              <span className="rxs-p14-ios-track" aria-hidden="true">
+                <i />
+              </span>
+              <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+              <input
+                id="rxs-p14-baseline"
+                type="range"
+                min="1"
+                max="2"
+                step="1"
+                value={p14Baseline === "p1" ? 1 : 2}
+                aria-label="P14の比較対象"
+                aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
+                onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                onPointerUp={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                onTouchEnd={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+              />
+            </div>
             <p>スライダーを動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。</p>
           </div>
 
-          <div className="rxs-p14-metrics" aria-live="polite">
+          <div
+            key={p14Baseline}
+            className="rxs-p14-metrics"
+            data-baseline={p14Baseline}
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {P14_METRICS.map((metric) => (
               <article key={metric.label}>
                 <small>{metric.label}</small>
