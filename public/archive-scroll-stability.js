@@ -34,9 +34,9 @@
     const scrim = root?.querySelector(".selector-sheet-scrim");
     const open = Boolean(
       root?.classList.contains("is-selector-sheet-open") &&
-        selector?.getAttribute("aria-modal") === "true" &&
-        scrim instanceof HTMLElement &&
-        !scrim.hidden,
+      selector?.getAttribute("aria-modal") === "true" &&
+      scrim instanceof HTMLElement &&
+      !scrim.hidden,
     );
     return { root, selector, scrim, open };
   };
@@ -62,8 +62,12 @@
     const states = selectorStates();
     if (states.some(({ open }) => open) || dialogIsOpen()) return false;
     clearDocumentLock();
-    states.forEach(({ root }) => {
-      root?.classList.remove("is-selector-sheet-closing");
+    states.forEach(({ root, selector, scrim }) => {
+      root?.classList.remove("is-selector-sheet-open", "is-selector-sheet-closing");
+      selector?.removeAttribute("aria-modal");
+      selector?.removeAttribute("role");
+      if (scrim instanceof HTMLElement) scrim.hidden = true;
+      root?.querySelector(".mobile-dock .dock-current")?.setAttribute("aria-expanded", "false");
       clearStaleInert(root);
     });
     return true;
@@ -75,9 +79,7 @@
       selector?.removeAttribute("aria-modal");
       selector?.removeAttribute("role");
       if (scrim instanceof HTMLElement) scrim.hidden = true;
-      root
-        ?.querySelector(".mobile-dock .dock-current")
-        ?.setAttribute("aria-expanded", "false");
+      root?.querySelector(".mobile-dock .dock-current")?.setAttribute("aria-expanded", "false");
       clearStaleInert(root);
     });
     document.querySelectorAll("dialog[open]").forEach((dialog) => {
@@ -95,7 +97,8 @@
   };
 
   const armClosingFallback = () => {
-    if (!archiveRoots().some((root) => root.classList.contains("is-selector-sheet-closing"))) return;
+    if (!archiveRoots().some((root) => root.classList.contains("is-selector-sheet-closing")))
+      return;
     window.clearTimeout(closeFallback);
     closeFallback = window.setTimeout(() => {
       closeFallback = 0;

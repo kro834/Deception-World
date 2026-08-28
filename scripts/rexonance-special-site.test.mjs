@@ -40,7 +40,7 @@ test("Rexonance hero keeps the requested catchphrase and readable contrast treat
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
 });
 
-test("P14 comparison preserves every value and uses the native iOS switch with a range fallback", () => {
+test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {
   for (const value of [
     "100%",
     "180%",
@@ -77,17 +77,17 @@ test("P14 comparison preserves every value and uses the native iOS switch with a
   assert.match(component, /rxs-p14-ios-slider/);
   assert.match(component, /iPad\|iPhone\|iPod/);
   assert.match(component, /navigator\.maxTouchPoints > 1/);
-  assert.match(component, /switch: ""/);
-  assert.match(component, /type="checkbox"/);
-  assert.match(component, /role="switch"/);
-  assert.match(component, /currentTarget\.checked \? "p2" : "p1"/);
-  assert.match(component, /iOS標準スイッチ/);
+  assert.match(component, /<select/);
+  assert.match(component, /<option value="p1">P1比<\/option>/);
+  assert.match(component, /<option value="p2">P2比<\/option>/);
+  assert.match(component, /currentTarget\.value as P14Baseline/);
+  assert.match(component, /iOS標準選択/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
   assert.match(styles, /\.rxs-p14-ios-track/);
   assert.match(styles, /\.rxs-p14-ios-thumb/);
   assert.match(styles, /data-value="p2"/);
-  assert.match(styles, /\.rxs-p14-native-switch\[type="checkbox"\]\[switch\]/);
+  assert.match(styles, /\.rxs-p14-native-select select/);
   assert.match(styles, /-webkit-appearance: auto/);
   assert.match(styles, /appearance: auto/);
   assert.match(styles, /color-scheme: dark/);

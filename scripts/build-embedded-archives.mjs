@@ -8,8 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
   '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r41">';
-const stabilityScript =
-  '<script src="/archive-scroll-stability.js?v=20260823-r41" defer></script>';
+const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260828-r44" defer></script>';
 const archives = [
   {
     kind: "saga",

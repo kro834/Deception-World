@@ -180,7 +180,7 @@ export function RexonanceSaga() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
-  const [nativeIOSRange, setNativeIOSRange] = useState(false);
+  const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const activeStage = STAGES[stage];
@@ -190,7 +190,7 @@ export function RexonanceSaga() {
     const isIOSDevice =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setNativeIOSRange(isIOSDevice);
+    setNativeIOSSelection(isIOSDevice);
   }, []);
 
   useEffect(() => {
@@ -434,9 +434,9 @@ export function RexonanceSaga() {
           <header>
             <div>
               <small>GENERATION COMPARISON</small>
-              <h3>P14と{p14Baseline.toUpperCase()}を比較</h3>
+              <h3>P14 / {p14Baseline.toUpperCase()}比</h3>
             </div>
-            <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}</output>
+            <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}比</output>
           </header>
 
           <div className="rxs-p14-range-control" data-baseline={p14Baseline}>
@@ -447,7 +447,7 @@ export function RexonanceSaga() {
                 aria-pressed={p14Baseline === "p1"}
                 onClick={() => setP14Baseline("p1")}
               >
-                P1
+                P1比
               </button>
               <button
                 type="button"
@@ -455,20 +455,22 @@ export function RexonanceSaga() {
                 aria-pressed={p14Baseline === "p2"}
                 onClick={() => setP14Baseline("p2")}
               >
-                P2
+                P2比
               </button>
             </div>
-            {nativeIOSRange ? (
-              <input
-                {...({ switch: "" } as Record<string, string>)}
-                id="rxs-p14-baseline"
-                className="rxs-p14-native-switch"
-                type="checkbox"
-                role="switch"
-                checked={p14Baseline === "p2"}
-                aria-label="P14の比較対象。オフでP1、オンでP2"
-                onChange={(event) => setP14Baseline(event.currentTarget.checked ? "p2" : "p1")}
-              />
+            {nativeIOSSelection ? (
+              <label className="rxs-p14-native-select">
+                <span>iOS標準選択</span>
+                <select
+                  id="rxs-p14-baseline"
+                  value={p14Baseline}
+                  aria-label="P14の比較基準"
+                  onChange={(event) => setP14Baseline(event.currentTarget.value as P14Baseline)}
+                >
+                  <option value="p1">P1比</option>
+                  <option value="p2">P2比</option>
+                </select>
+              </label>
             ) : (
               <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
                 <span className="rxs-p14-ios-track" aria-hidden="true">
@@ -492,8 +494,9 @@ export function RexonanceSaga() {
               </div>
             )}
             <p>
-              {nativeIOSRange ? "iOS標準スイッチ" : "スライダー"}
-              を動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。
+              {nativeIOSSelection
+                ? "iOS標準選択から、P14の比較基準をP1比またはP2比へ切り替えられます。"
+                : "スライダーを動かすか両端をタップして、P14の比較基準をP1比またはP2比へ切り替えられます。"}
             </p>
           </div>
 
@@ -509,7 +512,7 @@ export function RexonanceSaga() {
                 <small>{metric.label}</small>
                 <div className="rxs-p14-values">
                   <span>
-                    <i>{p14Baseline.toUpperCase()}</i>
+                    <i>{p14Baseline.toUpperCase()}比</i>
                     <b>{metric[p14Baseline]}</b>
                   </span>
                   <span>
@@ -525,7 +528,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p className="rxs-p14-method-note">
-            向上率は選択中の世代を基準に算出しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
+            向上率は選択中の比較基準（P1比／P2比）から算出しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
           </p>
         </div>
       </section>

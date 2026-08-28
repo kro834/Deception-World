@@ -53,10 +53,22 @@ html[data-embedded-archive="true"] :is(#edition-panel-saga, #edition-panel-realm
 /* Only the archive selected by this embedded document may own the modal
    scroll lock. This prevents an inactive edition retained by a source bundle
    from locking the active page through a broad :has() match. */
-html[data-embedded-archive="true"][data-archive-kind="saga"]:has(#saga-forms-performance-v5.is-selector-sheet-open),
-html[data-embedded-archive="true"][data-archive-kind="saga"]:has(#saga-forms-performance-v5.is-selector-sheet-open) body,
-html[data-embedded-archive="true"][data-archive-kind="realm"]:has(#realm--saga-forms-performance-v5.is-selector-sheet-open),
-html[data-embedded-archive="true"][data-archive-kind="realm"]:has(#realm--saga-forms-performance-v5.is-selector-sheet-open) body {
+html[data-embedded-archive="true"][data-archive-kind="saga"]:has(
+    #saga-forms-performance-v5.is-selector-sheet-open [id$="form-selector"][aria-modal="true"]
+  ),
+html[data-embedded-archive="true"][data-archive-kind="saga"]:has(
+    #saga-forms-performance-v5.is-selector-sheet-open [id$="form-selector"][aria-modal="true"]
+  )
+  body,
+html[data-embedded-archive="true"][data-archive-kind="realm"]:has(
+    #realm--saga-forms-performance-v5.is-selector-sheet-open
+      [id$="form-selector"][aria-modal="true"]
+  ),
+html[data-embedded-archive="true"][data-archive-kind="realm"]:has(
+    #realm--saga-forms-performance-v5.is-selector-sheet-open
+      [id$="form-selector"][aria-modal="true"]
+  )
+  body {
   overflow-y: hidden;
   touch-action: none;
 }
@@ -87,18 +99,15 @@ img {
 /* Horizontal archives must not become vertical dead zones. Android Chrome
    applies touch-action before script axis detection, so pan-x alone prevents
    the root document from ever receiving a vertical swipe that starts here. */
-[id$="saga-forms-performance-v5"] :is(
-  .compare-chip-slider,
-  .files-quick-scroll-v14,
-  .table-responsive,
-  .progression
-) {
+[id$="saga-forms-performance-v5"]
+  :is(.compare-chip-slider, .files-quick-scroll-v14, .table-responsive, .progression) {
   touch-action: pan-x pan-y pinch-zoom !important;
   overscroll-behavior-x: contain;
 }
 
 @supports (content-visibility: auto) {
-  [id$="saga-forms-performance-v5"] :is(.section:not(.selector-console):not(.detail-section), .archive-footer) {
+  [id$="saga-forms-performance-v5"]
+    :is(.section:not(.selector-console):not(.detail-section), .archive-footer) {
     content-visibility: auto;
     contain-intrinsic-block-size: auto 820px;
   }
@@ -112,37 +121,27 @@ img {
     isolation: isolate;
   }
 
-  [id$="saga-forms-performance-v5"] :is(
-    .v6s-ambient-grid,
-    .v6s-fx-orbit,
-    .v6s-fx-ray.is-secondary,
-    .v6s-fx-core,
-    .solo-cover-aura-v14,
-    .solo-cover-orbit-v14,
-    .solo-cover-scan-v14
-  ) {
+  [id$="saga-forms-performance-v5"]
+    :is(
+      .v6s-ambient-grid,
+      .v6s-fx-orbit,
+      .v6s-fx-ray.is-secondary,
+      .v6s-fx-core,
+      .solo-cover-aura-v14,
+      .solo-cover-orbit-v14,
+      .solo-cover-scan-v14
+    ) {
     display: none !important;
   }
 
-  [id$="saga-forms-performance-v5"] :is(
-    .section,
-    .stage,
-    .selector-console,
-    .detail-section,
-    .compare-side,
-    .compare-form-card
-  ) {
+  [id$="saga-forms-performance-v5"]
+    :is(.section, .stage, .selector-console, .detail-section, .compare-side, .compare-form-card) {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
 
-  [id$="saga-forms-performance-v5"] :is(
-    .archive-nav,
-    .selected-telemetry,
-    .mobile-dock,
-    .selector-sheet,
-    .offline-edition-switch
-  ),
+  [id$="saga-forms-performance-v5"]
+    :is(.archive-nav, .selected-telemetry, .mobile-dock, .selector-sheet, .offline-edition-switch),
   .edition-shell {
     -webkit-backdrop-filter: blur(6px) saturate(112%) !important;
     backdrop-filter: blur(6px) saturate(112%) !important;
@@ -180,20 +179,21 @@ img {
     scroll-padding-inline: 0.5rem;
   }
 
-  [id$="saga-forms-performance-v5"] :is(
-    .archive-hero,
-    .hero-topline,
-    .hero-grid,
-    .archive-nav,
-    .hero-copy,
-    .selector-title,
-    .selector-heading,
-    .selected-telemetry,
-    .telemetry-state,
-    .detail-toolbar-copy,
-    .detail-head,
-    .archive-workspace
-  ) {
+  [id$="saga-forms-performance-v5"]
+    :is(
+      .archive-hero,
+      .hero-topline,
+      .hero-grid,
+      .archive-nav,
+      .hero-copy,
+      .selector-title,
+      .selector-heading,
+      .selected-telemetry,
+      .telemetry-state,
+      .detail-toolbar-copy,
+      .detail-head,
+      .archive-workspace
+    ) {
     min-width: 0;
   }
 
@@ -201,13 +201,14 @@ img {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
-  [id$="saga-forms-performance-v5"] :is(
-    .telemetry-name,
-    .chip-name,
-    .detail-toolbar-copy strong,
-    .detail-head h2,
-    .detail-head h3
-  ) {
+  [id$="saga-forms-performance-v5"]
+    :is(
+      .telemetry-name,
+      .chip-name,
+      .detail-toolbar-copy strong,
+      .detail-head h2,
+      .detail-head h3
+    ) {
     overflow-wrap: anywhere;
   }
 
@@ -249,12 +250,8 @@ img {
 }
 
 @media (any-pointer: coarse) {
-  [id$="saga-forms-performance-v5"] :is(
-    .archive-wordmark,
-    .archive-nav a,
-    .selector-collapse,
-    .detail-nav button
-  ) {
+  [id$="saga-forms-performance-v5"]
+    :is(.archive-wordmark, .archive-nav a, .selector-collapse, .detail-nav button) {
     min-width: 44px;
     min-height: 44px;
   }

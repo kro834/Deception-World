@@ -774,17 +774,31 @@
   touch-action: pan-x;
 }
 
-.rxs-p14-native-switch[type="checkbox"][switch] {
-  display: block;
-  align-self: center;
-  justify-self: center;
-  min-width: 50px;
-  min-height: 32px;
-  margin: 2px auto;
+.rxs-p14-native-select {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  color: #858e9c;
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rxs-p14-native-select select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px;
+  border: 1px solid rgb(98 218 255 / 48%);
+  border-radius: 16px;
   -webkit-appearance: auto;
   appearance: auto;
+  color: #fff;
+  background: rgb(4 9 18 / 88%);
   accent-color: #0a84ff;
   color-scheme: dark;
+  font: 700 16px/1 var(--rxs-font-body);
 }
 
 .rxs-p14-ios-slider:active .rxs-p14-ios-thumb {
@@ -794,7 +808,7 @@
 }
 
 .rxs-p14-ios-slider:has(input:focus-visible),
-.rxs-p14-native-switch:focus-visible {
+.rxs-p14-native-select select:focus-visible {
   outline: 2px solid #0a84ff;
   outline-offset: 3px;
 }
