@@ -882,29 +882,6 @@
   color: #effaff;
 }
 
-.rxs-p14-source-values {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-top: 12px;
-  color: #626d7b;
-  font-size: 9px;
-  line-height: 1.5;
-}
-
-.rxs-p14-source-values span {
-  flex: 0 0 auto;
-  letter-spacing: 0.08em;
-}
-
-.rxs-p14-source-values b {
-  color: #84909e;
-  font-size: 10px;
-  font-weight: 650;
-  text-align: right;
-}
-
 .rxs-p14-metrics article > p {
   display: flex;
   gap: 10px;
@@ -970,6 +947,9 @@
     0 18px 46px rgb(0 0 0 / 32%);
   -webkit-backdrop-filter: blur(26px) saturate(165%);
   backdrop-filter: blur(26px) saturate(165%);
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .rxs-stage-tabs[data-stage="max"] {
@@ -1027,6 +1007,23 @@
   filter: blur(5px);
 }
 
+.rxs-stage-tabs[data-long-press-active="true"] {
+  border-color: rgb(111 224 255 / 48%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 18px 46px rgb(0 0 0 / 36%),
+    0 0 28px rgb(73 210 255 / 14%);
+  cursor: grabbing;
+}
+
+.rxs-stage-tabs[data-long-press-active="true"] .rxs-stage-liquid-indicator {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    0 8px 24px rgb(0 0 0 / 28%),
+    0 0 30px rgb(83 218 255 / 24%);
+  scale: 0.97;
+}
+
 .rxs-stage-tabs button {
   position: relative;
   z-index: 1;
@@ -1072,6 +1069,14 @@
 .rxs-stage-tabs button small {
   font-size: 8px;
   letter-spacing: 0.12em;
+}
+
+.rxs-stage-hint {
+  margin: -29px auto 38px;
+  color: #697584;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-align: center;
 }
 
 .rxs-stage-panel {

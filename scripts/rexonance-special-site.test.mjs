@@ -24,7 +24,7 @@ test("Rexonance special site preserves published performance and stage definitio
   for (const value of ["332.2t", "480.5t", "6000m", "0.00021秒", "650", "900"]) {
     assert.match(component, new RegExp(value.replace(".", "\\.")));
   }
-  for (const stage of ["スタンダード", "マックス", "ウルトラ", "単一実在収束", "60秒間"]) {
+  for (const stage of ["レクソナンス", "マックス", "ウルトラ", "単一実在収束", "60秒間"]) {
     assert.match(component, new RegExp(stage));
   }
   assert.match(component, /標準運用値/);
@@ -86,9 +86,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /setP14Baseline/);
   assert.match(component, /<b>100%<\/b>/);
   assert.match(component, /metric\.relative\[p14Baseline\]/);
-  assert.match(component, /rxs-p14-source-values/);
+  assert.match(component, /6\.5倍 \/ \+550%/);
   for (const normalizedP2Value of [
-    "500%",
+    "650%",
     "12.0%",
     "11.1%",
     "14.3%",
@@ -126,6 +126,7 @@ test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
 });
 
 test("Rexonance stage switching uses one animated Liquid Glass selector", () => {
+  assert.match(component, /label: "レクソナンス"/);
   assert.match(component, /data-liquid-glass="true"/);
   assert.match(component, /data-stage=\{stage\}/);
   assert.match(component, /rxs-stage-liquid-indicator/);
@@ -135,6 +136,16 @@ test("Rexonance stage switching uses one animated Liquid Glass selector", () => 
   assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
   assert.match(styles, /translateX\(calc\(var\(--rxs-stage-index\)/);
   assert.match(styles, /--rxs-stage-gap: 4px/);
+  assert.match(component, /onPointerDown=\{startStageLongPress\}/);
+  assert.match(component, /onPointerMove=\{moveStageLongPress\}/);
+  assert.match(component, /onPointerUp=\{endStageLongPress\}/);
+  assert.match(component, /setPointerCapture\(pointerId\)/);
+  assert.match(component, /\}, 220\)/);
+  assert.match(component, /onContextMenu=/);
+  assert.match(component, /長押ししたまま左右へ動かして切り替え/);
+  assert.match(styles, /-webkit-touch-callout: none/);
+  assert.match(styles, /touch-action: pan-y/);
+  assert.match(styles, /data-long-press-active="true"/);
 });
 
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {

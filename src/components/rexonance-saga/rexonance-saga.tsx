@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
@@ -20,7 +20,7 @@ const STAGES: Record<
   }
 > = {
   standard: {
-    label: "スタンダード",
+    label: "レクソナンス",
     code: "HIGH",
     image: "/rider-rexonance-saga-pickup.jpeg",
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
@@ -85,8 +85,8 @@ const P14_METRICS = [
     p1: "100%",
     p2: "180%",
     p14: "900%",
-    relative: { p1: "900%", p2: "500%" },
-    delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
+    relative: { p1: "900%", p2: "650%" },
+    delta: { p1: "9.0倍 / +800%", p2: "6.5倍 / +550%" },
     deltaLabel: "性能向上",
   },
   {
@@ -191,9 +191,98 @@ export function RexonanceSaga() {
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
+  const [stageLongPressActive, setStageLongPressActive] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
+  const stageTabsRef = useRef<HTMLDivElement | null>(null);
+  const stageGestureRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    latestX: number;
+    timer: number;
+    active: boolean;
+  } | null>(null);
+  const suppressStageClickRef = useRef(false);
   const activeStage = STAGES[stage];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
+
+  const setStageFromClientX = (clientX: number) => {
+    const tabs = stageTabsRef.current;
+    if (!tabs) return;
+    const buttons = [...tabs.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    if (!buttons.length) return;
+    const index = buttons.findIndex((button) => clientX <= button.getBoundingClientRect().right);
+    const targetIndex = index < 0 ? buttons.length - 1 : index;
+    const target = (Object.keys(STAGES) as RexonanceStage[])[targetIndex];
+    if (target) setStage(target);
+  };
+
+  const startStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    const pointerId = event.pointerId;
+    const gesture = {
+      pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      latestX: event.clientX,
+      timer: 0,
+      active: false,
+    };
+    gesture.timer = window.setTimeout(() => {
+      const current = stageGestureRef.current;
+      const tabs = stageTabsRef.current;
+      if (!current || current.pointerId !== pointerId || !tabs) return;
+      current.active = true;
+      setStageLongPressActive(true);
+      setStageFromClientX(current.latestX);
+      try {
+        tabs.setPointerCapture(pointerId);
+      } catch {
+        // Pointer capture can already be released when the OS ends a touch early.
+      }
+    }, 220);
+    stageGestureRef.current = gesture;
+  };
+
+  const moveStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = stageGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+    gesture.latestX = event.clientX;
+    if (!gesture.active) {
+      const distance = Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY);
+      if (distance > 14) {
+        window.clearTimeout(gesture.timer);
+        stageGestureRef.current = null;
+      }
+      return;
+    }
+    event.preventDefault();
+    setStageFromClientX(event.clientX);
+  };
+
+  const endStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = stageGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+    window.clearTimeout(gesture.timer);
+    if (gesture.active) {
+      event.preventDefault();
+      setStageFromClientX(event.clientX);
+      suppressStageClickRef.current = true;
+      window.setTimeout(() => {
+        suppressStageClickRef.current = false;
+      }, 400);
+    }
+    setStageLongPressActive(false);
+    stageGestureRef.current = null;
+  };
+
+  const cancelStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = stageGestureRef.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+    window.clearTimeout(gesture.timer);
+    setStageLongPressActive(false);
+    stageGestureRef.current = null;
+  };
 
   useEffect(() => {
     const isIOSDevice =
@@ -201,6 +290,14 @@ export function RexonanceSaga() {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     setNativeIOSSelection(isIOSDevice);
   }, []);
+
+  useEffect(
+    () => () => {
+      const gesture = stageGestureRef.current;
+      if (gesture) window.clearTimeout(gesture.timer);
+    },
+    [],
+  );
 
   useEffect(() => {
     const page = pageRef.current;
@@ -529,12 +626,6 @@ export function RexonanceSaga() {
                     <strong>{metric.relative[p14Baseline]}</strong>
                   </span>
                 </div>
-                <div className="rxs-p14-source-values">
-                  <span>原値</span>
-                  <b>
-                    {p14Baseline.toUpperCase()} {metric[p14Baseline]} / P14 {metric.p14}
-                  </b>
-                </div>
                 <p key={`${metric.label}-${p14Baseline}`}>
                   <span>{metric.deltaLabel}</span>
                   <b>{metric.delta[p14Baseline]}</b>
@@ -543,7 +634,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p className="rxs-p14-method-note">
-            選択したP1またはP2を100%として、P14を相対換算しています。原値も各項目に併記しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
+            選択したP1またはP2を100%として、P14を相対換算しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
           </p>
         </div>
       </section>
@@ -560,11 +651,20 @@ export function RexonanceSaga() {
 
         <div className="rxs-stage-switcher rxs-reveal">
           <div
+            ref={stageTabsRef}
             className="rxs-stage-tabs"
             role="tablist"
             aria-label="レクソナンスの運用段階"
+            aria-describedby="rxs-stage-hint"
             data-liquid-glass="true"
             data-stage={stage}
+            data-long-press-active={stageLongPressActive ? "true" : "false"}
+            onPointerDown={startStageLongPress}
+            onPointerMove={moveStageLongPress}
+            onPointerUp={endStageLongPress}
+            onPointerCancel={cancelStageLongPress}
+            onLostPointerCapture={cancelStageLongPress}
+            onContextMenu={(event) => event.preventDefault()}
           >
             <span className="rxs-stage-liquid-indicator" aria-hidden="true" />
             {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
@@ -574,13 +674,22 @@ export function RexonanceSaga() {
                 role="tab"
                 aria-selected={stage === key}
                 aria-controls="rxs-stage-panel"
-                onClick={() => setStage(key)}
+                onClick={(event) => {
+                  if (suppressStageClickRef.current) {
+                    event.preventDefault();
+                    return;
+                  }
+                  setStage(key);
+                }}
               >
                 <span>{STAGES[key].label}</span>
                 <small>{STAGES[key].code}</small>
               </button>
             ))}
           </div>
+          <p id="rxs-stage-hint" className="rxs-stage-hint">
+            タップ、または長押ししたまま左右へ動かして切り替え
+          </p>
 
           <div id="rxs-stage-panel" className="rxs-stage-panel" role="tabpanel" aria-live="polite">
             <figure key={stage}>
