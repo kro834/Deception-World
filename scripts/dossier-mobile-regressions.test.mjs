@@ -120,6 +120,9 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.doesNotMatch(reconstructedStyles, /\.form-pickup-plus\.ios-slide-open \{[^}]*contain:/s);
   assert.doesNotMatch(reconstructedStyles, /translate3d\(var\(--slide-offset[^)]*\), -50%/);
   assert.doesNotMatch(styles, /\.form-pickup-plus span \{/);
+  assert.match(slideControl, /const isThumbTap =/);
+  assert.match(slideControl, /if \(isThumbTap\) \{[\s\S]*?complete\("pointer"\)/);
+  assert.match(slideControl, /プラスをタップ、または右へスライドして開きます/);
 });
 
 test("every manager archive category remounts its panel animation", () => {

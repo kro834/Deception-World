@@ -26,6 +26,17 @@ const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.9, y: 0.82 };
 const LONG_PRESS_MS = 420;
 const MOVE_TOLERANCE = 9;
 const RETURN_IMAGE_MIN_MS = 360;
+const ZEUS_AVOID_SELECTOR = [
+  ".ios-slide-open",
+  ".episode-pickup-plus",
+  ".episode-controls button",
+  ".side-panel-trigger",
+  ".side-panel-close",
+  ".world-column-dialog-close",
+  ".form-pickup-close",
+  ".episode-pickup-close",
+  ".rider-nightmare-dialog-close",
+].join(",");
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
 function readPosition(): ZeusButtonPosition {
@@ -288,6 +299,63 @@ function ZeusButton({
     return { x: centerX, y: centerY };
   }, [getViewport]);
 
+  const avoidCriticalControls = useCallback(
+    (preferred: { x: number; y: number }) => {
+      const button = buttonRef.current;
+      if (!button) return preferred;
+      const viewport = getViewport();
+      const rect = button.getBoundingClientRect();
+      const localX = preferred.x - viewport.offsetLeft;
+      const localY = preferred.y - viewport.offsetTop;
+      const mirrorX = viewport.offsetLeft + viewport.width - localX;
+      const mirrorY = viewport.offsetTop + viewport.height - localY;
+      const lift = rect.height + 28;
+      const candidates = [
+        preferred,
+        { x: mirrorX, y: preferred.y },
+        { x: preferred.x, y: preferred.y - lift },
+        { x: mirrorX, y: preferred.y - lift },
+        { x: preferred.x, y: mirrorY },
+        { x: mirrorX, y: mirrorY },
+      ].map((candidate) => clampCenter(candidate.x, candidate.y));
+      const controls = Array.from(document.querySelectorAll<HTMLElement>(ZEUS_AVOID_SELECTOR))
+        .filter((control) => control !== button && !button.contains(control))
+        .filter((control) => !(control instanceof HTMLButtonElement && control.disabled))
+        .map((control) => ({ control, rect: control.getBoundingClientRect() }))
+        .filter(({ control, rect: controlRect }) => {
+          if (controlRect.width < 1 || controlRect.height < 1) return false;
+          if (
+            controlRect.right <= viewport.offsetLeft ||
+            controlRect.left >= viewport.offsetLeft + viewport.width ||
+            controlRect.bottom <= viewport.offsetTop ||
+            controlRect.top >= viewport.offsetTop + viewport.height
+          )
+            return false;
+          const style = window.getComputedStyle(control);
+          return style.visibility !== "hidden" && style.pointerEvents !== "none";
+        });
+      const gap = 10;
+
+      for (const candidate of candidates) {
+        const candidateRect = {
+          left: candidate.x - rect.width / 2,
+          right: candidate.x + rect.width / 2,
+          top: candidate.y - rect.height / 2,
+          bottom: candidate.y + rect.height / 2,
+        };
+        const obstructed = controls.some(({ rect: controlRect }) =>
+          candidateRect.left < controlRect.right + gap &&
+          candidateRect.right > controlRect.left - gap &&
+          candidateRect.top < controlRect.bottom + gap &&
+          candidateRect.bottom > controlRect.top - gap,
+        );
+        if (!obstructed) return candidate;
+      }
+      return candidates[0] ?? preferred;
+    },
+    [clampCenter, getViewport],
+  );
+
   const setVisualCenter = useCallback((targetX: number, targetY: number) => {
     const button = buttonRef.current;
     if (!button) return { x: targetX, y: targetY };
@@ -334,7 +402,8 @@ function ZeusButton({
         viewport.offsetLeft + next.x * viewport.width,
         viewport.offsetTop + next.y * viewport.height,
       );
-      const actual = setVisualCenter(centerX, centerY);
+      const safeCenter = avoidCriticalControls({ x: centerX, y: centerY });
+      const actual = setVisualCenter(safeCenter.x, safeCenter.y);
       const normalized = {
         x: (actual.x - viewport.offsetLeft) / viewport.width,
         y: (actual.y - viewport.offsetTop) / viewport.height,
@@ -342,7 +411,7 @@ function ZeusButton({
       pendingPosition.current = normalized;
       return normalized;
     },
-    [clampCenter, getViewport, setVisualCenter],
+    [avoidCriticalControls, clampCenter, getViewport, setVisualCenter],
   );
 
   useEffect(() => {
@@ -359,11 +428,13 @@ function ZeusButton({
       });
     };
     window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("scroll", onResize, { passive: true });
     window.addEventListener("orientationchange", onResize, { passive: true });
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
     window.visualViewport?.addEventListener("scroll", onResize, { passive: true });
     return () => {
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onResize);
       window.removeEventListener("orientationchange", onResize);
       window.visualViewport?.removeEventListener("resize", onResize);
       window.visualViewport?.removeEventListener("scroll", onResize);

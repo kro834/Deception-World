@@ -275,7 +275,21 @@ export function SlideOpenControl({
     if (activePointer.current !== event.pointerId) return;
 
     if (pointerIntent.current !== "horizontal") {
-      reset();
+      const deltaX = event.clientX - pointerStart.current.x;
+      const deltaY = event.clientY - pointerStart.current.y;
+      const isThumbTap =
+        pointerIntent.current === "pending" &&
+        Math.abs(deltaX) < POINTER_INTENT_THRESHOLD &&
+        Math.abs(deltaY) < POINTER_INTENT_THRESHOLD;
+
+      activePointer.current = null;
+      if (isThumbTap) {
+        event.preventDefault();
+        event.stopPropagation();
+        complete("pointer");
+      } else {
+        reset();
+      }
       return;
     }
 
@@ -317,7 +331,7 @@ export function SlideOpenControl({
       aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
       aria-expanded={opensDialog ? expanded : undefined}
-      aria-label={`${ariaLabel}。右へスライドして開きます`}
+      aria-label={`${ariaLabel}。プラスをタップ、または右へスライドして開きます`}
       onPointerDown={startDrag}
       onPointerMove={drag}
       onPointerUp={finishDrag}

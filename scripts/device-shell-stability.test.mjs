@@ -107,6 +107,16 @@ test("coarse-pointer controls preserve vertical scrolling and recover failed cap
   assert.match(slideControl, /window\.addEventListener\("pointercancel", cancelDanglingDrag\)/);
 });
 
+test("the floating Zeus control yields before it covers critical mobile actions", () => {
+  assert.match(zeusButton, /const ZEUS_AVOID_SELECTOR =/);
+  assert.match(zeusButton, /"\.ios-slide-open"/);
+  assert.match(zeusButton, /"\.episode-pickup-plus"/);
+  assert.match(zeusButton, /const avoidCriticalControls = useCallback/);
+  assert.match(zeusButton, /const safeCenter = avoidCriticalControls/);
+  assert.match(zeusButton, /window\.addEventListener\("scroll", onResize/);
+  assert.match(zeusButton, /window\.removeEventListener\("scroll", onResize\)/);
+});
+
 test("notched compact detail pages share one safe fixed-header measurement", () => {
   assert.match(
     worldStyles,

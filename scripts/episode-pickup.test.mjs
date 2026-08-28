@@ -5,9 +5,11 @@ import test from "node:test";
 const worldHomeUrl = new URL("../src/components/world/world-home.tsx", import.meta.url);
 const baseStylesUrl = new URL("../src/styles-world/07.css", import.meta.url);
 const mobileStylesUrl = new URL("../src/styles-world/09.css", import.meta.url);
+const interactionStylesUrl = new URL("../src/styles-world/21.css", import.meta.url);
 const worldHome = readFileSync(worldHomeUrl, "utf8");
 const baseStyles = readFileSync(baseStylesUrl, "utf8");
 const mobileStyles = readFileSync(mobileStylesUrl, "utf8");
+const interactionStyles = readFileSync(interactionStylesUrl, "utf8");
 
 const expectedPickups = [
   ["リームー/仮面ライダーフリート", "/manager-reemu-rider.jpeg", "/managers/reemu"],
@@ -100,6 +102,26 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
   assert.match(mobileStyles, /\.episode-pickup-grid \{[\s\S]*?scroll-snap-type: x mandatory/);
   assert.match(mobileStyles, /\.episode-pickup-item \{[\s\S]*?flex: 0 0 min\(76vw, 270px\)/);
   assert.match(mobileStyles, /\.episode-pickup-dialog::backdrop \{[\s\S]*?blur\(6px\)/);
+});
+
+test("the shared pointer light cannot displace episode or sticky dialog controls", () => {
+  const sharedHost = interactionStyles.indexOf('[data-liquid-pointer]:not(.side-panel)');
+  const episodeOverride = interactionStyles.indexOf('.episode-pickup-plus[data-liquid-pointer]');
+  const nightmareOverride = interactionStyles.indexOf(
+    '.rider-nightmare-dialog-close[data-liquid-pointer]',
+  );
+
+  assert.notEqual(sharedHost, -1);
+  assert.ok(episodeOverride > sharedHost, "episode controls must override the shared relative host");
+  assert.ok(nightmareOverride > sharedHost, "sticky close must override the shared relative host");
+  assert.match(
+    interactionStyles.slice(episodeOverride),
+    /\.episode-pickup-plus\[data-liquid-pointer\],[\s\S]*?\.episode-pickup-close\[data-liquid-pointer\][\s\S]*?position: absolute/,
+  );
+  assert.match(
+    interactionStyles.slice(nightmareOverride),
+    /\.rider-nightmare-dialog-close\[data-liquid-pointer\][\s\S]*?position: sticky/,
+  );
 });
 
 test("iPhone episode images stay inside their column and leave every title fully visible", () => {
