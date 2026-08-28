@@ -16,6 +16,8 @@ type SlideOpenControlProps = {
 const OPEN_THRESHOLD = 0.52;
 const POINTER_INTENT_THRESHOLD = 7;
 const TAP_TOLERANCE = 12;
+const HOLD_MOVE_TOLERANCE = 18;
+const HOLD_ACTIVATION_MS = 220;
 const HORIZONTAL_INTENT_RATIO = 1.08;
 const COARSE_HIT_PADDING = 36;
 
@@ -43,9 +45,13 @@ export function SlideOpenControl({
   const activePointer = useRef<number | null>(null);
   const pointerIntent = useRef<PointerIntent>("idle");
   const pointerStart = useRef({ x: 0, y: 0 });
+  const latestPointer = useRef({ x: 0, y: 0 });
+  const requiresHold = useRef(false);
+  const holdActivated = useRef(false);
   const grabOffset = useRef(0);
   const travel = useRef(0);
   const dragMetrics = useRef<SlideMetrics | null>(null);
+  const holdTimer = useRef<number | null>(null);
   const activateTimer = useRef<number | null>(null);
   const completingRef = useRef(false);
   const suppressFocusRing = useRef(false);
@@ -60,19 +66,26 @@ export function SlideOpenControl({
   );
 
   const clearTimers = useCallback(() => {
+    if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
+    holdTimer.current = null;
     if (activateTimer.current != null) window.clearTimeout(activateTimer.current);
     activateTimer.current = null;
   }, []);
 
   const reset = useCallback(() => {
+    clearTimers();
     activePointer.current = null;
     pointerIntent.current = "idle";
     pointerStart.current = { x: 0, y: 0 };
+    latestPointer.current = { x: 0, y: 0 };
+    requiresHold.current = false;
+    holdActivated.current = false;
     grabOffset.current = 0;
     dragMetrics.current = null;
     completingRef.current = false;
     const button = internalButtonRef.current;
     if (button) {
+      button.dataset.holding = "false";
       button.dataset.dragging = "false";
       button.dataset.completing = "false";
     }
@@ -80,7 +93,7 @@ export function SlideOpenControl({
     const thumbWidth = thumbRef.current?.getBoundingClientRect().width ?? 50;
     button?.style.setProperty("--slide-fill", `${thumbWidth}px`);
     button?.style.setProperty("--slide-label-opacity", "1");
-  }, []);
+  }, [clearTimers]);
 
   useEffect(() => {
     return () => clearTimers();
@@ -167,6 +180,7 @@ export function SlideOpenControl({
     const completedOffset = metrics?.distance ?? travel.current;
     const button = internalButtonRef.current;
     if (button) {
+      button.dataset.holding = "false";
       button.dataset.dragging = "false";
       button.dataset.completing = "true";
     }
@@ -227,11 +241,42 @@ export function SlideOpenControl({
     activePointer.current = event.pointerId;
     pointerIntent.current = "pending";
     pointerStart.current = { x: event.clientX, y: event.clientY };
+    latestPointer.current = { x: event.clientX, y: event.clientY };
+    requiresHold.current = event.pointerType !== "mouse";
+    holdActivated.current = false;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
+
+    if (requiresHold.current) {
+      const button = event.currentTarget;
+      const pointerId = event.pointerId;
+      button.dataset.holding = "true";
+      holdTimer.current = window.setTimeout(() => {
+        if (
+          activePointer.current !== pointerId ||
+          pointerIntent.current !== "pending" ||
+          !dragMetrics.current
+        )
+          return;
+        const currentMetrics = dragMetrics.current;
+        grabOffset.current =
+          latestPointer.current.x -
+          (currentMetrics.thumbRect.left + currentMetrics.thumbRect.width / 2);
+        holdActivated.current = true;
+        pointerIntent.current = "horizontal";
+        button.dataset.holding = "false";
+        button.dataset.dragging = "true";
+        try {
+          button.setPointerCapture(pointerId);
+        } catch {
+          // The window-level cleanup still terminates an uncaptured hold.
+        }
+      }, HOLD_ACTIVATION_MS);
+    }
   };
 
   const drag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (activePointer.current !== event.pointerId) return;
+    latestPointer.current = { x: event.clientX, y: event.clientY };
 
     if (pointerIntent.current === "pending") {
       const deltaX = event.clientX - pointerStart.current.x;
@@ -251,6 +296,14 @@ export function SlideOpenControl({
       // scrolling on iOS, Android and pointer-capable desktop devices.
       if (verticalDistance >= horizontalDistance) {
         reset();
+        return;
+      }
+
+      // Touch and pen input deliberately require a brief hold before the
+      // thumb captures the gesture. This keeps a normal vertical swipe native
+      // while making the intended hold-then-slide interaction dependable.
+      if (requiresHold.current) {
+        if (horizontalDistance >= HOLD_MOVE_TOLERANCE) reset();
         return;
       }
 
@@ -300,7 +353,8 @@ export function SlideOpenControl({
     const ratio = moveToPointer(event.clientX);
     const deltaX = Math.abs(event.clientX - pointerStart.current.x);
     const deltaY = Math.abs(event.clientY - pointerStart.current.y);
-    const isThumbTap = deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
+    const isThumbTap =
+      !holdActivated.current && deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
     activePointer.current = null;
     try {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -330,13 +384,14 @@ export function SlideOpenControl({
       ref={setButtonRef}
       type="button"
       className={`${className} ios-slide-open`.trim()}
+      data-holding="false"
       data-dragging="false"
       data-completing="false"
       data-keyboard-focus="false"
       aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
       aria-expanded={opensDialog ? expanded : undefined}
-      aria-label={`${ariaLabel}。プラスをタップ、または右へスライドして開きます`}
+      aria-label={`${ariaLabel}。プラスをタップ、または長押ししてから右へスライドして開きます`}
       onPointerDown={startDrag}
       onPointerMove={drag}
       onPointerUp={finishDrag}
@@ -363,7 +418,7 @@ export function SlideOpenControl({
     >
       <span className="ios-slide-open-fill" aria-hidden="true" />
       <span className="ios-slide-open-label" aria-hidden="true">
-        <small>SLIDE TO OPEN</small>
+        <small>HOLD + SLIDE</small>
         <b>{label}</b>
       </span>
       <span className="ios-slide-open-arrows" aria-hidden="true">

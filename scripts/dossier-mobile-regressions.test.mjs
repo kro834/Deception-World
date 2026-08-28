@@ -124,15 +124,22 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.doesNotMatch(styles, /\.form-pickup-plus span \{/);
   assert.match(slideControl, /const isThumbTap =/);
   assert.match(slideControl, /if \(isThumbTap\) \{[\s\S]*?complete\("pointer"\)/);
-  assert.match(slideControl, /プラスをタップ、または右へスライドして開きます/);
+  assert.match(slideControl, /プラスをタップ、または長押ししてから右へスライドして開きます/);
 });
 
-test("mobile slide controls acquire the thumb early and open near the midpoint", () => {
+test("mobile slide controls hold the thumb before opening near the midpoint", () => {
   assert.match(slideControl, /const OPEN_THRESHOLD = 0\.52/);
   assert.match(slideControl, /const POINTER_INTENT_THRESHOLD = 7/);
   assert.match(slideControl, /const TAP_TOLERANCE = 12/);
+  assert.match(slideControl, /const HOLD_MOVE_TOLERANCE = 18/);
+  assert.match(slideControl, /const HOLD_ACTIVATION_MS = 220/);
   assert.match(slideControl, /const HORIZONTAL_INTENT_RATIO = 1\.08/);
   assert.match(slideControl, /const COARSE_HIT_PADDING = 36/);
+  assert.match(slideControl, /button\.dataset\.holding = "true"/);
+  assert.match(slideControl, /holdTimer\.current = window\.setTimeout/);
+  assert.match(slideControl, /pointerIntent\.current = "horizontal"/);
+  assert.match(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
+  assert.match(styles, /\.ios-slide-open\[data-holding="true"\]/);
   assert.match(slideControl, /if \(ratio >= OPEN_THRESHOLD \|\| isThumbTap\) complete\("pointer"\)/);
 });
 
