@@ -52,14 +52,14 @@ test("Rexonance performance comparison uses a native iOS selector for three prio
   assert.match(component, /activePerformanceBaseline\.metrics\.map/);
   assert.match(component, /aria-live="polite"/);
   for (const value of [
-    "68t",
+    "68.0t",
     "172.4t",
     "100.0m",
     "0.6秒",
-    "98.8t〜",
-    "198.8t〜",
-    "188.8m",
-    "0.1秒",
+    "98.8t（est.）",
+    "198.8t（est.）",
+    "5000.0m（est.）",
+    "0.1秒（est.）",
     "205.6t〜",
     "308.9t〜",
     "1033.5m",
@@ -72,6 +72,30 @@ test("Rexonance performance comparison uses a native iOS selector for three prio
   assert.match(styles, /appearance: auto/);
   assert.match(styles, /color-scheme: dark/);
   assert.match(styles, /min-height: 56px/);
+});
+
+test("Vertex and Vinculum comparisons keep supplied processors and compare only like units", () => {
+  for (const value of [
+    "50,000〜TOPS / 200Core",
+    "URANUS X",
+    "TAMAYURA X（アクセラレータ）",
+    "P1",
+    "10,000YOPS / 500Core · KHAOS",
+    "300TOPS / 300Core · KOSMOS",
+    "P2",
+    "Paranormal Realizer Pro",
+    "Neural Resonancer Pro",
+    "50,000YOPS / ∞Core · KHAOS DeuX",
+    "9,000TOPS / 300Core · KOSMOS DeuX",
+    "P14",
+  ]) {
+    assert.match(component, new RegExp(value.replaceAll(".", "\\.")));
+  }
+  assert.match(component, /KHAOS系YOPSが5\.0倍、KOSMOS系TOPSが30\.0倍/);
+  assert.match(component, /単純換算は行わず/);
+  assert.match(component, /activePerformanceBaseline\.processing\.baseline\.map/);
+  assert.match(component, /activePerformanceBaseline\.processing\.rexonance\.map/);
+  assert.match(styles, /\.rxs-processing-comparison/);
 });
 
 test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {

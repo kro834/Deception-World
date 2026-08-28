@@ -67,27 +67,86 @@ const PERFORMANCE_BASELINES: Record<
       gain: string;
       bar: number;
     }[];
+    processing: {
+      baseline: readonly string[];
+      rexonance: readonly string[];
+      verdict: string;
+    };
   }
 > = {
   vertex: {
     label: "ヴァーテックス",
     code: "VERTEX STANDARD",
     metrics: [
-      { label: "パンチ力", current: "332.2t", previous: "68t", gain: "+388.5%", bar: 20.5 },
+      { label: "パンチ力", current: "332.2t", previous: "68.0t", gain: "+388.5%", bar: 20.5 },
       { label: "キック力", current: "480.5t", previous: "172.4t", gain: "+178.7%", bar: 35.9 },
       { label: "ジャンプ力", current: "6000m", previous: "100.0m", gain: "+5900%", bar: 1.7 },
-      { label: "100m走", current: "0.00021秒", previous: "0.6秒", gain: "−99.97%", bar: 0.04 },
+      {
+        label: "走力（100m）",
+        current: "0.00021秒",
+        previous: "0.6秒",
+        gain: "約99.97%短縮",
+        bar: 0.04,
+      },
     ],
+    processing: {
+      baseline: ["50,000〜TOPS / 200Core", "URANUS X", "TAMAYURA X（アクセラレータ）", "P1"],
+      rexonance: ["50,000YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      verdict:
+        "URANUS XのTOPS値とKHAOS DeuXのYOPS値は単位・演算系統が異なります。KOSMOS DeuXを含めた総合演算倍率への単純換算は行わず、公開スペックを並列表示しています。",
+    },
   },
   vinculum: {
     label: "ヴィンクルム",
     code: "VINCULUM STANDARD",
     metrics: [
-      { label: "パンチ力", current: "332.2t", previous: "98.8t〜", gain: "+236.2%", bar: 29.7 },
-      { label: "キック力", current: "480.5t", previous: "198.8t〜", gain: "+141.7%", bar: 41.4 },
-      { label: "ジャンプ力", current: "6000m", previous: "188.8m", gain: "+3078.0%", bar: 3.1 },
-      { label: "100m走", current: "0.00021秒", previous: "0.1秒", gain: "−99.79%", bar: 0.21 },
+      {
+        label: "パンチ力",
+        current: "332.2t",
+        previous: "98.8t（est.）",
+        gain: "+236.2%（推定値比）",
+        bar: 29.7,
+      },
+      {
+        label: "キック力",
+        current: "480.5t",
+        previous: "198.8t（est.）",
+        gain: "+141.7%（推定値比）",
+        bar: 41.4,
+      },
+      {
+        label: "ジャンプ力",
+        current: "6000m",
+        previous: "5000.0m（est.）",
+        gain: "+20.0%（推定値比）",
+        bar: 83.3,
+      },
+      {
+        label: "走力（100m）",
+        current: "0.00021秒",
+        previous: "0.1秒（est.）",
+        gain: "99.79%短縮（推定値比）",
+        bar: 0.21,
+      },
     ],
+    processing: {
+      baseline: [
+        "10,000YOPS / 500Core · KHAOS",
+        "300TOPS / 300Core · KOSMOS",
+        "P2",
+        "Paranormal Realizer Pro",
+        "Neural Resonancer Pro",
+      ],
+      rexonance: [
+        "50,000YOPS / ∞Core · KHAOS DeuX",
+        "9,000TOPS / 300Core · KOSMOS DeuX",
+        "P14",
+        "Paranormal Realizer Ultra",
+        "Neural Resonancer Ultra",
+      ],
+      verdict:
+        "同一単位・同系統の公開値では、KHAOS系YOPSが5.0倍、KOSMOS系TOPSが30.0倍です。Core数と補助機構は構成差として併記し、異なる指標を一つの倍率へ合算していません。",
+    },
   },
   extreme: {
     label: "エクスプリーム",
@@ -96,8 +155,20 @@ const PERFORMANCE_BASELINES: Record<
       { label: "パンチ力", current: "332.2t", previous: "205.6t〜", gain: "+61.6%", bar: 61.9 },
       { label: "キック力", current: "480.5t", previous: "308.9t〜", gain: "+55.6%", bar: 64.3 },
       { label: "ジャンプ力", current: "6000m", previous: "1033.5m", gain: "+480.6%", bar: 17.2 },
-      { label: "100m走", current: "0.00021秒", previous: "0.002秒", gain: "−89.5%", bar: 10.5 },
+      {
+        label: "走力（100m）",
+        current: "0.00021秒",
+        previous: "0.002秒",
+        gain: "89.5%短縮",
+        bar: 10.5,
+      },
     ],
+    processing: {
+      baseline: ["20,000YOPS / ∞Core · KHAOS Ultra", "5,000TOPS / 300Core · KOSMOS Ultra"],
+      rexonance: ["50,000YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      verdict:
+        "同一単位の公開値では、KHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。YOPSとTOPSを合算した総合倍率には換算していません。",
+    },
   },
 };
 
@@ -455,9 +526,38 @@ export function RexonanceSaga() {
               </article>
             ))}
           </div>
+          <section
+            key={`${performanceBaseline}-processing`}
+            className="rxs-processing-comparison"
+            aria-label={`${activePerformanceBaseline.label}とレクソナンスの演算構成比較`}
+          >
+            <header>
+              <small>PROCESSING ARCHITECTURE</small>
+              <h3>単位と系統を揃えて比較</h3>
+            </header>
+            <div>
+              <section>
+                <h4>{activePerformanceBaseline.label}</h4>
+                <ul>
+                  {activePerformanceBaseline.processing.baseline.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+              <section>
+                <h4>レクソナンス</h4>
+                <ul>
+                  {activePerformanceBaseline.processing.rexonance.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+            <p>{activePerformanceBaseline.processing.verdict}</p>
+          </section>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          選択した形態を基準として、レクソナンスの標準カタログ値との差を表示しています。100m走は所要時間の短縮率です。ヴィンクルム／エクスプリームの「〜」は公開値が下限値であることを示します。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
+          選択した形態を基準として、レクソナンスの標準カタログ値との差を表示しています。走力は100m所要時間の短縮率です。「est.」は推定値を示し、演算はYOPSとTOPSを別指標として比較しています。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
         </p>
       </section>
 
