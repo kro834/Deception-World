@@ -114,7 +114,9 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   assert.match(component, /src="\/extreme-p14-core.jpg"/);
   const p14Asset = new URL("../public/extreme-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
-  assert.ok(statSync(p14Asset).size < 700_000, "Extreme P14 artwork should stay below 700 KB");
+  assert.ok(statSync(p14Asset).size < 400_000, "Extreme P14 artwork should stay below 400 KB");
+  const ultraAsset = new URL("../public/saga-extreme-ultra.jpeg", import.meta.url);
+  assert.ok(statSync(ultraAsset).size < 450_000, "Extreme Ultra artwork should stay below 450 KB");
 });
 
 test("Extreme stage rail supports liquid long-press and swipe selection", () => {
@@ -127,6 +129,7 @@ test("Extreme stage rail supports liquid long-press and swipe selection", () => 
 
 test("special-site parallax only updates meaningful visible frames", () => {
   for (const source of [component, read("src/components/rexonance-saga/rexonance-saga.tsx")]) {
+    assert.match(source, /window\.matchMedia\("\(pointer: coarse\)"\)\.matches/);
     assert.match(source, /window\.visualViewport\?\.height/);
     assert.match(source, /Math\.abs\(progress - lastProgress\) < 0\.002/);
     assert.match(source, /document\.visibilityState === "visible"/);

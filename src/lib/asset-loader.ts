@@ -21,7 +21,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
   "/dream-chapter-logo.jpeg": 211523,
-  "/rider-rexonance-saga-pickup.jpeg": 1050644,
+  "/rider-rexonance-saga-pickup.jpeg": 564268,
   "/saga-extreme-middle.webp": 238554,
 };
 

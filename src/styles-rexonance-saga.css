@@ -2038,6 +2038,34 @@
   }
 }
 
+@media (pointer: coarse) {
+  .rxs-hero-ambient i,
+  .rxs-orbit,
+  .rxs-scroll-cue i,
+  .rxs-stage-panel figure > span {
+    animation: none;
+  }
+
+  .rxs-hero-copy::before {
+    filter: none;
+  }
+
+  .rxs-local-nav {
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    backdrop-filter: saturate(140%) blur(14px);
+  }
+
+  .rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+    -webkit-backdrop-filter: blur(14px) saturate(145%);
+    backdrop-filter: blur(14px) saturate(145%);
+  }
+
+  .rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
+    -webkit-backdrop-filter: blur(16px) saturate(155%);
+    backdrop-filter: blur(16px) saturate(155%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rxs-page *,
   .rxs-page *::before,

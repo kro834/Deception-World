@@ -226,7 +226,7 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(styles, /background: #0a84ff/);
   const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
-  assert.ok(statSync(p14Asset).size < 700_000, "P14 artwork should stay below 700 KB");
+  assert.ok(statSync(p14Asset).size < 400_000, "P14 artwork should stay below 400 KB");
 });
 
 test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
@@ -271,7 +271,16 @@ test("Rexonance page ships local optimized artwork and responsive motion fallbac
     assert.ok(statSync(url).size < 1_200_000, `${asset} should stay below 1.2 MB`);
   }
   assert.match(component, /fetchPriority="high"/);
+  assert.ok(
+    statSync(new URL("../public/rider-rexonance-saga-pickup.jpeg", import.meta.url)).size <
+      600_000,
+    "the eager hero should stay below 600 KB",
+  );
   assert.match(component, /loading=\{stage === "standard" \? "eager" : "lazy"\}/);
+  assert.match(component, /window\.matchMedia\("\(pointer: coarse\)"\)\.matches/);
+  assert.match(styles, /@media \(pointer: coarse\)/);
+  assert.match(styles, /\.rxs-hero-ambient i,[\s\S]*?animation: none/);
+  assert.match(styles, /backdrop-filter: blur\(14px\) saturate\(145%\)/);
   assert.match(styles, /@media \(max-width: 680px\)/);
   assert.match(styles, /@media \(min-width: 681px\) and \(max-width: 1024px\)/);
   assert.match(styles, /@media \(max-width: 360px\)/);

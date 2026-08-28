@@ -302,7 +302,7 @@ export function ExtremeSaga() {
   }, []);
 
   useEffect(() => {
-    if (!motionReady) return;
+    if (!motionReady || window.matchMedia("(pointer: coarse)").matches) return;
     const page = pageRef.current;
     if (!page) return;
     let frame = 0;
@@ -557,8 +557,8 @@ export function ExtremeSaga() {
             <img
               src="/extreme-p14-core.jpg"
               alt="青い回路に接続されたP14演算コア"
-              width="1254"
-              height="1254"
+              width="1000"
+              height="1000"
               loading="lazy"
               decoding="async"
             />
@@ -654,8 +654,8 @@ export function ExtremeSaga() {
               <img
                 src={activeStage.image}
                 alt={activeStage.alt}
-                width={stage === "middle" ? 851 : 993}
-                height={stage === "middle" ? 1280 : 1497}
+                width={stage === "middle" ? 851 : 796}
+                height={stage === "middle" ? 1280 : 1200}
                 loading={stage === "middle" ? "eager" : "lazy"}
                 decoding="async"
               />

@@ -423,7 +423,7 @@ export function RexonanceSaga() {
   }, []);
 
   useEffect(() => {
-    if (!motionReady) return;
+    if (!motionReady || window.matchMedia("(pointer: coarse)").matches) return;
     const page = pageRef.current;
     if (!page) return;
     let frame = 0;
@@ -513,8 +513,8 @@ export function RexonanceSaga() {
           <img
             src="/rider-rexonance-saga-pickup.jpeg"
             alt=""
-            width="1200"
-            height="1600"
+            width="1050"
+            height="1400"
             decoding="async"
             fetchPriority="high"
           />
@@ -675,8 +675,8 @@ export function RexonanceSaga() {
             <img
               src="/rexonance-p14-core.jpg"
               alt="青い回路に接続されたP14演算コア"
-              width="1254"
-              height="1254"
+              width="1000"
+              height="1000"
               loading="lazy"
               decoding="async"
             />
