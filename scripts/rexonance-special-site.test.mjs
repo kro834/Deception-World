@@ -7,6 +7,7 @@ const component = read("src/components/rexonance-saga/rexonance-saga.tsx");
 const route = read("src/routes/rexonance-saga.tsx");
 const menu = read("src/components/world/world-chrome.tsx");
 const styles = read("src/styles-rexonance-saga.css");
+const liquidStyles = read("src/styles-world/12.css");
 const transitions = read("src/styles-route-transitions.css");
 const loadGate = read("src/components/load-gate.tsx");
 const loader = read("src/lib/asset-loader.ts");
@@ -127,25 +128,23 @@ test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
 
 test("Rexonance stage switching uses one animated Liquid Glass selector", () => {
   assert.match(component, /label: "レクソナンス"/);
+  assert.match(component, /import \{ LiquidLens \}/);
+  assert.match(component, /import \{ initRail \}/);
   assert.match(component, /data-liquid-glass="true"/);
   assert.match(component, /data-stage=\{stage\}/);
-  assert.match(component, /rxs-stage-liquid-indicator/);
-  assert.match(styles, /\.rxs-stage-tabs\[data-stage="max"\]/);
-  assert.match(styles, /\.rxs-stage-tabs\[data-stage="ultra"\]/);
+  assert.match(component, /className="rxs-stage-tabs liquid-swipe-tabs"/);
+  assert.match(component, /<LiquidLens \/>/);
+  assert.match(component, /rail\.addEventListener\("railselect", onSelect\)/);
+  assert.match(component, /const dispose = initRail\(rail\)/);
+  assert.match(component, /--liquid-accent/);
+  assert.doesNotMatch(component, /rxs-stage-liquid-indicator/);
   assert.match(styles, /-webkit-backdrop-filter: blur\(26px\) saturate\(165%\)/);
   assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
-  assert.match(styles, /translateX\(calc\(var\(--rxs-stage-index\)/);
-  assert.match(styles, /--rxs-stage-gap: 4px/);
-  assert.match(component, /onPointerDown=\{startStageLongPress\}/);
-  assert.match(component, /onPointerMove=\{moveStageLongPress\}/);
-  assert.match(component, /onPointerUp=\{endStageLongPress\}/);
-  assert.match(component, /setPointerCapture\(pointerId\)/);
-  assert.match(component, /\}, 220\)/);
-  assert.match(component, /onContextMenu=/);
-  assert.match(component, /長押ししたまま左右へ動かして切り替え/);
-  assert.match(styles, /-webkit-touch-callout: none/);
-  assert.match(styles, /touch-action: pan-y/);
-  assert.match(styles, /data-long-press-active="true"/);
+  assert.match(styles, /data-liquid-held="true"/);
+  assert.match(styles, /data-liquid-dragging="true"/);
+  assert.match(component, /タップ、長押し、または左右へのスライドで切り替え/);
+  assert.match(liquidStyles, /-webkit-touch-callout: none/);
+  assert.match(liquidStyles, /touch-action: pan-y/);
 });
 
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {

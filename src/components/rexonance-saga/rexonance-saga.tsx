@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { initRail } from "@/lib/liquid/boot.js";
 
 type RexonanceStage = "standard" | "max" | "ultra";
 type P14Baseline = "p1" | "p2";
@@ -17,6 +19,7 @@ const STAGES: Record<
     title: string;
     lede: string;
     points: readonly string[];
+    accent: string;
   }
 > = {
   standard: {
@@ -27,6 +30,7 @@ const STAGES: Record<
     title: "無限出力を、実効攻撃へ。",
     lede: "超自己進化と絶対秩序をSA-GA OS 5.5で統合。標準運用の時点で、エクスプリーム・ウルトラ以上の実効戦闘性能を高い安定性で維持します。",
     points: ["高安定・高継戦", "REXONANCE DRIVE", "標準カタログ値を公開"],
+    accent: "#63e2ff",
   },
   max: {
     label: "マックス",
@@ -36,6 +40,7 @@ const STAGES: Record<
     title: "全身を、一撃のために。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
     points: ["P14完全加速", "SCALER《MAX》", "出力の連続再配分"],
+    accent: "#969cff",
   },
   ultra: {
     label: "ウルトラ",
@@ -45,6 +50,7 @@ const STAGES: Record<
     title: "ただ一つの実在へ、収束する。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
+    accent: "#ff72da",
   },
 };
 
@@ -191,98 +197,10 @@ export function RexonanceSaga() {
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
-  const [stageLongPressActive, setStageLongPressActive] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const stageGestureRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    latestX: number;
-    timer: number;
-    active: boolean;
-  } | null>(null);
-  const suppressStageClickRef = useRef(false);
   const activeStage = STAGES[stage];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
-
-  const setStageFromClientX = (clientX: number) => {
-    const tabs = stageTabsRef.current;
-    if (!tabs) return;
-    const buttons = [...tabs.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-    if (!buttons.length) return;
-    const index = buttons.findIndex((button) => clientX <= button.getBoundingClientRect().right);
-    const targetIndex = index < 0 ? buttons.length - 1 : index;
-    const target = (Object.keys(STAGES) as RexonanceStage[])[targetIndex];
-    if (target) setStage(target);
-  };
-
-  const startStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!event.isPrimary || event.button !== 0) return;
-    const pointerId = event.pointerId;
-    const gesture = {
-      pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      latestX: event.clientX,
-      timer: 0,
-      active: false,
-    };
-    gesture.timer = window.setTimeout(() => {
-      const current = stageGestureRef.current;
-      const tabs = stageTabsRef.current;
-      if (!current || current.pointerId !== pointerId || !tabs) return;
-      current.active = true;
-      setStageLongPressActive(true);
-      setStageFromClientX(current.latestX);
-      try {
-        tabs.setPointerCapture(pointerId);
-      } catch {
-        // Pointer capture can already be released when the OS ends a touch early.
-      }
-    }, 220);
-    stageGestureRef.current = gesture;
-  };
-
-  const moveStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const gesture = stageGestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) return;
-    gesture.latestX = event.clientX;
-    if (!gesture.active) {
-      const distance = Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY);
-      if (distance > 14) {
-        window.clearTimeout(gesture.timer);
-        stageGestureRef.current = null;
-      }
-      return;
-    }
-    event.preventDefault();
-    setStageFromClientX(event.clientX);
-  };
-
-  const endStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const gesture = stageGestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) return;
-    window.clearTimeout(gesture.timer);
-    if (gesture.active) {
-      event.preventDefault();
-      setStageFromClientX(event.clientX);
-      suppressStageClickRef.current = true;
-      window.setTimeout(() => {
-        suppressStageClickRef.current = false;
-      }, 400);
-    }
-    setStageLongPressActive(false);
-    stageGestureRef.current = null;
-  };
-
-  const cancelStageLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const gesture = stageGestureRef.current;
-    if (!gesture || gesture.pointerId !== event.pointerId) return;
-    window.clearTimeout(gesture.timer);
-    setStageLongPressActive(false);
-    stageGestureRef.current = null;
-  };
 
   useEffect(() => {
     const isIOSDevice =
@@ -291,13 +209,22 @@ export function RexonanceSaga() {
     setNativeIOSSelection(isIOSDevice);
   }, []);
 
-  useEffect(
-    () => () => {
-      const gesture = stageGestureRef.current;
-      if (gesture) window.clearTimeout(gesture.timer);
-    },
-    [],
-  );
+  useEffect(() => {
+    const rail = stageTabsRef.current;
+    if (!rail) return;
+    const stages = Object.keys(STAGES) as RexonanceStage[];
+    const onSelect = (event: Event) => {
+      const index = (event as CustomEvent<{ index?: number }>).detail?.index;
+      const nextStage = typeof index === "number" ? stages[index] : undefined;
+      if (nextStage) setStage(nextStage);
+    };
+    rail.addEventListener("railselect", onSelect);
+    const dispose = initRail(rail);
+    return () => {
+      rail.removeEventListener("railselect", onSelect);
+      dispose?.();
+    };
+  }, []);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -652,21 +579,14 @@ export function RexonanceSaga() {
         <div className="rxs-stage-switcher rxs-reveal">
           <div
             ref={stageTabsRef}
-            className="rxs-stage-tabs"
+            className="rxs-stage-tabs liquid-swipe-tabs"
             role="tablist"
             aria-label="レクソナンスの運用段階"
             aria-describedby="rxs-stage-hint"
             data-liquid-glass="true"
             data-stage={stage}
-            data-long-press-active={stageLongPressActive ? "true" : "false"}
-            onPointerDown={startStageLongPress}
-            onPointerMove={moveStageLongPress}
-            onPointerUp={endStageLongPress}
-            onPointerCancel={cancelStageLongPress}
-            onLostPointerCapture={cancelStageLongPress}
-            onContextMenu={(event) => event.preventDefault()}
           >
-            <span className="rxs-stage-liquid-indicator" aria-hidden="true" />
+            <LiquidLens />
             {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
               <button
                 key={key}
@@ -674,13 +594,10 @@ export function RexonanceSaga() {
                 role="tab"
                 aria-selected={stage === key}
                 aria-controls="rxs-stage-panel"
-                onClick={(event) => {
-                  if (suppressStageClickRef.current) {
-                    event.preventDefault();
-                    return;
-                  }
-                  setStage(key);
-                }}
+                tabIndex={stage === key ? 0 : -1}
+                className={stage === key ? "is-active" : ""}
+                style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
+                onClick={() => setStage(key)}
               >
                 <span>{STAGES[key].label}</span>
                 <small>{STAGES[key].code}</small>
@@ -688,7 +605,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p id="rxs-stage-hint" className="rxs-stage-hint">
-            タップ、または長押ししたまま左右へ動かして切り替え
+            タップ、長押し、または左右へのスライドで切り替え
           </p>
 
           <div id="rxs-stage-panel" className="rxs-stage-panel" role="tabpanel" aria-live="polite">
