@@ -774,6 +774,18 @@
   touch-action: pan-x;
 }
 
+.rxs-p14-ios-slider[data-native-ios="true"] .rxs-p14-ios-track,
+.rxs-p14-ios-slider[data-native-ios="true"] .rxs-p14-ios-thumb {
+  display: none;
+}
+
+.rxs-p14-ios-slider[data-native-ios="true"] input[type="range"] {
+  -webkit-appearance: auto;
+  appearance: auto;
+  opacity: 1;
+  accent-color: #0a84ff;
+}
+
 .rxs-p14-ios-slider:has(input:focus-visible) {
   outline: 2px solid #0a84ff;
   outline-offset: 3px;
@@ -783,6 +795,10 @@
   box-shadow:
     0 2px 8px rgb(0 0 0 / 50%),
     0 0 0 7px rgb(10 132 255 / 16%);
+}
+
+.rxs-p14-ios-slider[data-native-ios="true"]:has(input:focus-visible) {
+  outline: none;
 }
 
 .rxs-p14-range-control > p {

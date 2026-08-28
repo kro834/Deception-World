@@ -180,10 +180,18 @@ export function RexonanceSaga() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
+  const [nativeIOSRange, setNativeIOSRange] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const activeStage = STAGES[stage];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
+
+  useEffect(() => {
+    const isIOSDevice =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setNativeIOSRange(isIOSDevice);
+  }, []);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -450,7 +458,11 @@ export function RexonanceSaga() {
                 P2
               </button>
             </div>
-            <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
+            <div
+              className="rxs-p14-ios-slider"
+              data-native-ios={nativeIOSRange ? "true" : "false"}
+              data-value={p14Baseline}
+            >
               <span className="rxs-p14-ios-track" aria-hidden="true">
                 <i />
               </span>
@@ -470,7 +482,10 @@ export function RexonanceSaga() {
                 onTouchEnd={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
               />
             </div>
-            <p>スライダーを動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。</p>
+            <p>
+              {nativeIOSRange ? "iOS標準スライダー" : "スライダー"}
+              を動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。
+            </p>
           </div>
 
           <div
