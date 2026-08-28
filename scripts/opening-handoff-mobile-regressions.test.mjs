@@ -19,6 +19,10 @@ const transitionCss = readFileSync(
   "utf8",
 );
 
+test("completed handoff animations are released from the active set", () => {
+  assert.match(openingSource, /animation\.finished[\s\S]*?finally\(\(\) => running\.delete\(animation\)\)/);
+});
+
 function matchingBrace(source, openIndex) {
   let depth = 0;
   let quote = null;

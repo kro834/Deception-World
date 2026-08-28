@@ -245,6 +245,7 @@ function ZeusButton({
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
   const placementFrame = useRef<number | null>(null);
+  const placementTimer = useRef<number | null>(null);
 
   const getViewport = useCallback(() => {
     const viewport = window.visualViewport;
@@ -360,6 +361,13 @@ function ZeusButton({
     const button = buttonRef.current;
     if (!button) return { x: targetX, y: targetY };
 
+    const currentRect = button.getBoundingClientRect();
+    const currentX = currentRect.left + currentRect.width / 2;
+    const currentY = currentRect.top + currentRect.height / 2;
+    if (Math.abs(targetX - currentX) < 0.25 && Math.abs(targetY - currentY) < 0.25) {
+      return { x: currentX, y: currentY };
+    }
+
     let left = Number.parseFloat(button.style.left);
     let top = Number.parseFloat(button.style.top);
     if (!Number.isFinite(left)) left = button.offsetLeft;
@@ -420,24 +428,43 @@ function ZeusButton({
   }, [placeButton, position]);
 
   useEffect(() => {
-    const onResize = () => {
+    const schedulePlacement = () => {
       if (activePointer.current != null || placementFrame.current != null) return;
       placementFrame.current = window.requestAnimationFrame(() => {
         placementFrame.current = null;
         placeButton(pendingPosition.current);
       });
     };
+    const onResize = () => {
+      if (placementTimer.current != null) {
+        window.clearTimeout(placementTimer.current);
+        placementTimer.current = null;
+      }
+      schedulePlacement();
+    };
+    const onScroll = () => {
+      if (activePointer.current != null) return;
+      if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
+      // Collision checks read the geometry of every visible critical control.
+      // Run that work once scrolling settles instead of on every scroll frame.
+      placementTimer.current = window.setTimeout(() => {
+        placementTimer.current = null;
+        schedulePlacement();
+      }, 72);
+    };
     window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("scroll", onResize, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("orientationchange", onResize, { passive: true });
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
-    window.visualViewport?.addEventListener("scroll", onResize, { passive: true });
+    window.visualViewport?.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("scroll", onResize);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("orientationchange", onResize);
       window.visualViewport?.removeEventListener("resize", onResize);
-      window.visualViewport?.removeEventListener("scroll", onResize);
+      window.visualViewport?.removeEventListener("scroll", onScroll);
+      if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
+      placementTimer.current = null;
       if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
       placementFrame.current = null;
     };

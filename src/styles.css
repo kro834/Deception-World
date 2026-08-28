@@ -2586,7 +2586,7 @@ html[data-rail-lock] body {
     transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
     filter 0.26s ease,
     box-shadow 0.3s ease;
-  will-change: transform, filter;
+  will-change: transform;
   contain: layout paint style;
 }
 
@@ -2688,6 +2688,7 @@ html[data-rail-lock] body {
 .zeus-button[data-dragging="true"] {
   cursor: grabbing;
   filter: saturate(1.12) brightness(1.04);
+  will-change: transform, filter;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.9),
     0 0 0 4px rgb(14 29 28 / 0.82),

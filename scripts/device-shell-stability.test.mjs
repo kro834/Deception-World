@@ -113,8 +113,9 @@ test("the floating Zeus control yields before it covers critical mobile actions"
   assert.match(zeusButton, /"\.episode-pickup-plus"/);
   assert.match(zeusButton, /const avoidCriticalControls = useCallback/);
   assert.match(zeusButton, /const safeCenter = avoidCriticalControls/);
-  assert.match(zeusButton, /window\.addEventListener\("scroll", onResize/);
-  assert.match(zeusButton, /window\.removeEventListener\("scroll", onResize\)/);
+  assert.match(zeusButton, /window\.addEventListener\("scroll", onScroll/);
+  assert.match(zeusButton, /window\.removeEventListener\("scroll", onScroll\)/);
+  assert.match(zeusButton, /if \(Math\.abs\(targetX - currentX\) < 0\.25/);
 });
 
 test("notched compact detail pages share one safe fixed-header measurement", () => {

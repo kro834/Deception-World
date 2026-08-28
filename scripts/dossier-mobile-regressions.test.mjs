@@ -101,7 +101,9 @@ test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", ()
   assert.match(zeusButton, /const clampOffset =/);
   assert.match(zeusButton, /offsetTop: clampOffset\(viewport\?\.offsetTop \?\? 0, maxOffsetTop\)/);
   assert.match(zeusButton, /const placementFrame = useRef/);
+  assert.match(zeusButton, /const placementTimer = useRef/);
   assert.match(zeusButton, /activePointer\.current != null \|\| placementFrame\.current != null/);
+  assert.match(zeusButton, /window\.setTimeout\(\(\) => \{[\s\S]*?schedulePlacement\(\);[\s\S]*?\}, 72\)/);
 });
 
 test("form sliders size their fill from the rendered Liquid Glass thumb", () => {

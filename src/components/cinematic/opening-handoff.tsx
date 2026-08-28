@@ -136,6 +136,9 @@ function animateNode(
   if (!node || typeof node.animate !== "function") return null;
   const animation = node.animate(keyframes, options);
   running.add(animation);
+  void animation.finished
+    .catch(() => undefined)
+    .finally(() => running.delete(animation));
   return animation;
 }
 
