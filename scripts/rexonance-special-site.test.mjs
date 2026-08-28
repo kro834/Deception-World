@@ -91,6 +91,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(styles, /-webkit-appearance: auto/);
   assert.match(styles, /appearance: auto/);
   assert.match(styles, /color-scheme: dark/);
+  assert.match(styles, /min-height: 70px/);
+  assert.match(styles, /width: 46px/);
+  assert.match(styles, /height: 46px/);
   assert.match(styles, /background: #0a84ff/);
   const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
