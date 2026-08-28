@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const sagaArchivePath = resolve(root, "public/saga-form-archive-standalone.html");
+const sagaArchivePath = resolve(root, "archives/saga-form-archive-standalone.html");
 const realmMotionPath = resolve(root, "public/realm-archive-motion.js");
 
 const realmAccents = `const accents = {

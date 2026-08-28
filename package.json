@@ -22,7 +22,7 @@
     "fetch-source": "node scripts/fetch-source.mjs",
     "assemble-source": "node scripts/assemble-source.mjs",
     "postinstall": "node scripts/assemble-source.mjs --missing-only",
-    "predev": "node scripts/assemble-source.mjs --missing-only && node scripts/fetch-public-assets.mjs"
+    "predev": "node scripts/assemble-source.mjs --missing-only"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

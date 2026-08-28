@@ -137,8 +137,14 @@ const files = [
 ];
 
 async function main() {
+  if (process.env.DW_SKIP_ASSET_FETCH === "1") {
+    console.log("skip asset fetch");
+    return;
+  }
+  const timeoutMs = Number(process.env.DW_ASSET_FETCH_TIMEOUT_MS || 8000);
   let ok = 0;
   let skip = 0;
+  let fail = 0;
   for (const file of files) {
     const dest = join(root, file);
     try {
@@ -152,21 +158,36 @@ async function main() {
     }
     const url = `${BASE.replace(/\/$/, "")}/${file}`;
     process.stdout.write(`fetch ${file} ... `);
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.log(`fail ${res.status}`);
-      continue;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+      if (!res.ok) {
+        console.log(`fail ${res.status}`);
+        fail += 1;
+        if (fail >= 3) {
+          console.log("stop asset fetch after repeated failures");
+          break;
+        }
+        continue;
+      }
+      const buf = Buffer.from(await res.arrayBuffer());
+      await mkdir(dirname(dest), { recursive: true });
+      await writeFile(dest, buf);
+      console.log(`${buf.length} bytes`);
+      ok += 1;
+    } catch (err) {
+      const reason = err && typeof err === "object" && "name" in err ? err.name : "error";
+      console.log(`fail ${reason}`);
+      fail += 1;
+      if (fail >= 3) {
+        console.log("stop asset fetch after repeated failures");
+        break;
+      }
     }
-    const buf = Buffer.from(await res.arrayBuffer());
-    await mkdir(dirname(dest), { recursive: true });
-    await writeFile(dest, buf);
-    console.log(`${buf.length} bytes`);
-    ok += 1;
   }
-  console.log(`done fetched=${ok} kept=${skip}`);
+  console.log(`done fetched=${ok} kept=${skip} failed=${fail}`);
 }
 
 main().catch((err) => {
   console.error(err);
-  process.exit(1);
+  process.exit(0);
 });

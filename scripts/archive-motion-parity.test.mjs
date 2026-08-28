@@ -4,11 +4,11 @@ import test from "node:test";
 import { createRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 
 const sagaArchive = readFileSync(
-  new URL("../public/saga-form-archive-standalone.html", import.meta.url),
+  new URL("../archives/saga-form-archive-standalone.html", import.meta.url),
   "utf8",
 );
 const realmStandalone = readFileSync(
-  new URL("../public/realm-form-archive-standalone.html", import.meta.url),
+  new URL("../archives/realm-form-archive-standalone.html", import.meta.url),
   "utf8",
 );
 const realmEmbedded = readFileSync(

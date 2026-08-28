@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const standalone = readFileSync(
-  new URL("../public/realm-form-archive-standalone.html", import.meta.url),
+  new URL("../archives/realm-form-archive-standalone.html", import.meta.url),
   "utf8",
 );
 const embedded = readFileSync(

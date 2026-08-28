@@ -11,15 +11,15 @@ const comparisonJs = readFileSync(
   "utf8",
 );
 const archives = [
-  "saga-form-archive-standalone.html",
-  "realm-form-archive-standalone.html",
-  "saga-form-archive-embedded.html",
-  "realm-form-archive-embedded.html",
+  { file: "saga-form-archive-standalone.html", dir: "archives" },
+  { file: "realm-form-archive-standalone.html", dir: "archives" },
+  { file: "saga-form-archive-embedded.html", dir: "public" },
+  { file: "realm-form-archive-embedded.html", dir: "public" },
 ];
 
 test("Saga and Realm archives load one shared modern comparison layer", () => {
   for (const archive of archives) {
-    const html = readFileSync(new URL(`../public/${archive}`, import.meta.url), "utf8");
+    const html = readFileSync(new URL(`../${archive.dir}/${archive.file}`, import.meta.url), "utf8");
     assert.match(html, /archive-comparison-modern\.css\?v=20260826-r43/);
     assert.match(html, /archive-comparison-modern\.js\?v=20260826-r43/);
   }

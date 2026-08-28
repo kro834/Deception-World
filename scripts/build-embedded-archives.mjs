@@ -12,12 +12,12 @@ const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260828-r4
 const archives = [
   {
     kind: "saga",
-    source: resolve(root, "public/saga-form-archive-standalone.html"),
+    source: resolve(root, "archives/saga-form-archive-standalone.html"),
     output: resolve(root, "public/saga-form-archive-embedded.html"),
   },
   {
     kind: "realm",
-    source: resolve(root, "public/realm-form-archive-standalone.html"),
+    source: resolve(root, "archives/realm-form-archive-standalone.html"),
     output: resolve(root, "public/realm-form-archive-embedded.html"),
   },
 ];
