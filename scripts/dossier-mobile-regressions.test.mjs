@@ -129,17 +129,19 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.match(slideControl, /プラスをタップ、または長押ししてから右へスライドして開きます/);
 });
 
-test("mobile slide controls hold the thumb before opening near the midpoint", () => {
-  assert.match(slideControl, /const OPEN_THRESHOLD = 0\.52/);
-  assert.match(slideControl, /const POINTER_INTENT_THRESHOLD = 7/);
+test("mobile slide controls activate quickly and open before the midpoint", () => {
+  assert.match(slideControl, /const OPEN_THRESHOLD = 0\.4/);
+  assert.match(slideControl, /const POINTER_INTENT_THRESHOLD = 10/);
   assert.match(slideControl, /const TAP_TOLERANCE = 12/);
-  assert.match(slideControl, /const HOLD_MOVE_TOLERANCE = 18/);
-  assert.match(slideControl, /const HOLD_ACTIVATION_MS = 220/);
+  assert.match(slideControl, /const HOLD_MOVE_TOLERANCE = 28/);
+  assert.match(slideControl, /const HOLD_ACTIVATION_MS = 150/);
   assert.match(slideControl, /const COMPLETE_ANIMATION_MS = 260/);
   assert.match(slideControl, /const HORIZONTAL_INTENT_RATIO = 1\.08/);
   assert.match(slideControl, /const COARSE_HIT_PADDING = 36/);
   assert.match(slideControl, /button\.dataset\.holding = "true"/);
   assert.match(slideControl, /holdTimer\.current = window\.setTimeout/);
+  assert.match(slideControl, /moveToPointer\(latestPointer\.current\.x\)/);
+  assert.match(slideControl, /verticalDistance >= POINTER_INTENT_THRESHOLD/);
   assert.match(slideControl, /pointerIntent\.current = "horizontal"/);
   assert.match(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
   assert.match(styles, /\.ios-slide-open\[data-holding="true"\]/);

@@ -13,11 +13,11 @@ type SlideOpenControlProps = {
   onOpen: (source: "keyboard" | "pointer") => void;
 };
 
-const OPEN_THRESHOLD = 0.52;
-const POINTER_INTENT_THRESHOLD = 7;
+const OPEN_THRESHOLD = 0.4;
+const POINTER_INTENT_THRESHOLD = 10;
 const TAP_TOLERANCE = 12;
-const HOLD_MOVE_TOLERANCE = 18;
-const HOLD_ACTIVATION_MS = 220;
+const HOLD_MOVE_TOLERANCE = 28;
+const HOLD_ACTIVATION_MS = 150;
 const COMPLETE_ANIMATION_MS = 260;
 const HORIZONTAL_INTENT_RATIO = 1.08;
 const COARSE_HIT_PADDING = 36;
@@ -277,10 +277,6 @@ export function SlideOpenControl({
           !dragMetrics.current
         )
           return;
-        const currentMetrics = dragMetrics.current;
-        grabOffset.current =
-          latestPointer.current.x -
-          (currentMetrics.thumbRect.left + currentMetrics.thumbRect.width / 2);
         holdActivated.current = true;
         pointerIntent.current = "horizontal";
         button.dataset.holding = "false";
@@ -290,6 +286,10 @@ export function SlideOpenControl({
         } catch {
           // The window-level cleanup still terminates an uncaptured hold.
         }
+        // Preserve the distance already travelled during the short hold. A
+        // finger can begin easing right before activation without losing that
+        // movement or seeing the thumb jump back under it.
+        moveToPointer(latestPointer.current.x);
       }, HOLD_ACTIVATION_MS);
     }
   };
@@ -311,19 +311,26 @@ export function SlideOpenControl({
         return;
       }
 
-      // Once vertical movement wins, abandon the slider without cancelling
-      // the pointer event. The browser remains responsible for native page
-      // scrolling on iOS, Android and pointer-capable desktop devices.
-      if (verticalDistance >= horizontalDistance) {
-        reset();
+      // Touch and pen input deliberately require a brief hold before the
+      // thumb captures the gesture. Tolerate natural horizontal finger drift
+      // during that shorter hold, while yielding as soon as vertical scrolling
+      // clearly wins.
+      if (requiresHold.current) {
+        if (
+          (verticalDistance >= POINTER_INTENT_THRESHOLD &&
+            verticalDistance >= horizontalDistance) ||
+          horizontalDistance >= HOLD_MOVE_TOLERANCE
+        ) {
+          reset();
+        }
         return;
       }
 
-      // Touch and pen input deliberately require a brief hold before the
-      // thumb captures the gesture. This keeps a normal vertical swipe native
-      // while making the intended hold-then-slide interaction dependable.
-      if (requiresHold.current) {
-        if (horizontalDistance >= HOLD_MOVE_TOLERANCE) reset();
+      // Once vertical movement wins, abandon the slider without cancelling
+      // the pointer event. The browser remains responsible for native page
+      // scrolling on pointer-capable desktop devices.
+      if (verticalDistance >= horizontalDistance) {
+        reset();
         return;
       }
 
