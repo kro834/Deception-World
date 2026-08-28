@@ -208,15 +208,11 @@ export function RexonanceSaga() {
           <p>THE NEXT GENERATION OF SA-GA</p>
           <h1 id="rxs-title">
             <span>REXONANCE SAGA</span>
-            無限出力を、
+            限りなく、
             <br />
-            無限の攻撃へ。
+            限りない
           </h1>
-          <p className="rxs-hero-lede">
-            ゼウスの超自己進化、レックスの絶対秩序、そして月城悠真の意思。
-            <br />
-            三つの独立した存在を、一つの共鳴へ。
-          </p>
+          <p className="rxs-hero-lede">史上最強のサーガ</p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />

@@ -167,8 +167,25 @@
 .rxs-hero-copy {
   position: relative;
   z-index: 3;
+  isolation: isolate;
   width: min(100%, 950px);
   text-align: center;
+}
+
+.rxs-hero-copy::before {
+  position: absolute;
+  z-index: -1;
+  inset: -58px -80px -48px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgb(0 2 7 / 92%) 0 38%,
+    rgb(0 2 7 / 72%) 55%,
+    transparent 79%
+  );
+  filter: blur(8px);
+  content: "";
+  pointer-events: none;
 }
 
 .rxs-hero-copy > p:first-child,
@@ -178,6 +195,9 @@
   font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.26em;
+  text-shadow:
+    0 2px 12px #000,
+    0 0 20px rgb(0 0 0 / 86%);
 }
 
 .rxs-hero h1 {
@@ -188,27 +208,35 @@
   font-feature-settings: "palt" 1;
   line-height: 1.02;
   letter-spacing: -0.045em;
+  text-shadow:
+    0 3px 22px #000,
+    0 1px 3px #000;
   text-wrap: balance;
 }
 
 .rxs-hero h1 span {
   display: block;
   margin-bottom: 16px;
-  background: linear-gradient(100deg, var(--rxs-cyan), #e9d8ad 49%, var(--rxs-pink));
+  background: linear-gradient(100deg, #a9f4ff, #fff0c9 49%, #ffb1e9);
   background-clip: text;
   color: transparent;
-  font-size: 0.22em;
+  font-size: clamp(12px, 0.22em, 20px);
   font-weight: 760;
   letter-spacing: 0.24em;
+  filter: saturate(1.25) brightness(1.32) drop-shadow(0 2px 8px #000);
 }
 
 .rxs-hero-lede {
   max-width: 720px;
-  margin: 28px auto 0;
-  color: #b6bac4;
-  font-size: clamp(14px, 1.5vw, 19px);
-  line-height: 1.78;
-  text-wrap: pretty;
+  margin: 30px auto 0;
+  color: #f4f7fb;
+  font-size: clamp(16px, 1.7vw, 22px);
+  font-weight: 650;
+  line-height: 1.5;
+  letter-spacing: 0.12em;
+  text-shadow:
+    0 2px 12px #000,
+    0 0 24px #000;
 }
 
 .rxs-hero-visual {
@@ -936,8 +964,8 @@
 
   .rxs-hero-lede {
     max-width: 700px;
-    font-size: 16px;
-    line-height: 1.75;
+    font-size: 18px;
+    line-height: 1.5;
   }
 
   .rxs-section {
@@ -1006,17 +1034,16 @@
   }
 
   .rxs-hero-copy > p:first-child {
-    font-size: 9px;
+    font-size: 10px;
+    line-height: 1.5;
   }
 
   .rxs-hero-lede {
     max-width: 342px;
-    font-size: 14px;
-    line-height: 1.72;
-  }
-
-  .rxs-hero-lede br {
-    display: none;
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.45;
+    letter-spacing: 0.1em;
   }
 
   .rxs-hero-visual {

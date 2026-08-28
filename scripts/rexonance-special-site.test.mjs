@@ -29,6 +29,15 @@ test("Rexonance special site preserves published performance and stage definitio
   assert.match(component, /最大出力ではなく/);
 });
 
+test("Rexonance hero keeps the requested catchphrase and readable contrast treatment", () => {
+  assert.match(component, /限りなく、/);
+  assert.match(component, /限りない/);
+  assert.match(component, /史上最強のサーガ/);
+  assert.doesNotMatch(component, /無限の攻撃へ。/);
+  assert.match(styles, /\.rxs-hero-copy::before/);
+  assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
+});
+
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {
   for (const asset of [
     "public/rider-rexonance-saga-pickup.jpeg",
