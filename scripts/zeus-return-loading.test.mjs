@@ -12,6 +12,8 @@ test("Zeus navigation closes transient UI and uses the shared route controller",
   assert.match(source, /const \{ go \} = useLoadGate\(\)/);
   assert.match(source, /await go\(\{ to: "\/world", hash: "top" \}\)/);
   assert.match(source, /dialog\.close\("zeus-navigation"\)/);
+  assert.doesNotMatch(source, /scrollIntoView/);
+  assert.doesNotMatch(source, /behavior:\s*"smooth"/);
   assert.match(root, /<LoadGateProvider>[\s\S]*?<ZeusButtonProvider>/);
 });
 

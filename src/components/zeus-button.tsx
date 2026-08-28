@@ -159,14 +159,6 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
       });
 
       await go({ to: "/world", hash: "top" });
-      window.requestAnimationFrame(() => {
-        document.getElementById("top")?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ? "auto"
-            : "smooth",
-          block: "start",
-        });
-      });
     } finally {
       const remaining = RETURN_IMAGE_MIN_MS - (performance.now() - returnImageStartedAt);
       if (remaining > 0) {

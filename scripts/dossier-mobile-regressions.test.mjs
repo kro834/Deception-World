@@ -55,9 +55,11 @@ test("detail routes use per-location restoration without overwriting the world s
   assert.match(loadGate, /holdRouteScrollMotion/);
   assert.match(loadGate, /dataset\.routeScrollSettling = "true"/);
   assert.match(loadGate, /\[90, 240, 480, 900, 1500\]/);
-  assert.match(loadGate, /await wait\(90\);[\s\S]*?await wait\(150\)/);
   assert.match(loadGate, /document\.addEventListener\("wheel", noteInteraction/);
   assert.match(loadGate, /document\.addEventListener\("touchmove", noteInteraction/);
+  assert.equal((loadGate.match(/document\.addEventListener\("pointerdown", noteInteraction, true\)/g) ?? []).length, 2);
+  assert.match(loadGate, /Promise\.race\(\[wait\(duration\), userScrollIntent\]\)/);
+  assert.match(loadGate, /if \(!\(await waitUntilNextAlignment\(90\)\)\) return/);
   assert.doesNotMatch(loadGate, /document\.addEventListener\("touchstart", noteInteraction/);
   assert.match(loadGate, /window\.visualViewport\?\.addEventListener\("resize", alignAfterViewportChange\)/);
   assert.match(loadGate, /window\.setTimeout\(stopResetting, 1800\)/);
@@ -133,6 +135,7 @@ test("mobile slide controls hold the thumb before opening near the midpoint", ()
   assert.match(slideControl, /const TAP_TOLERANCE = 12/);
   assert.match(slideControl, /const HOLD_MOVE_TOLERANCE = 18/);
   assert.match(slideControl, /const HOLD_ACTIVATION_MS = 220/);
+  assert.match(slideControl, /const COMPLETE_ANIMATION_MS = 260/);
   assert.match(slideControl, /const HORIZONTAL_INTENT_RATIO = 1\.08/);
   assert.match(slideControl, /const COARSE_HIT_PADDING = 36/);
   assert.match(slideControl, /button\.dataset\.holding = "true"/);
@@ -141,6 +144,29 @@ test("mobile slide controls hold the thumb before opening near the midpoint", ()
   assert.match(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
   assert.match(styles, /\.ios-slide-open\[data-holding="true"\]/);
   assert.match(slideControl, /if \(ratio >= OPEN_THRESHOLD \|\| isThumbTap\) complete\("pointer"\)/);
+});
+
+test("slide controls spring in response to drag speed and completion", () => {
+  assert.match(slideControl, /const velocity = \(next - previous\.offset\) \/ elapsed/);
+  assert.match(slideControl, /const energy = Math\.min\(1, Math\.abs\(velocity\) \/ 1\.25\)/);
+  assert.match(slideControl, /--slide-thumb-scale-x/);
+  assert.match(slideControl, /--slide-thumb-scale-y/);
+  assert.match(slideControl, /--slide-thumb-tilt/);
+  assert.match(styles, /cubic-bezier\(0\.18, 1\.42, 0\.32, 1\)/);
+  assert.match(styles, /animation: iosSlideThumbDock 0\.26s/);
+  assert.doesNotMatch(
+    styles,
+    /\.ios-slide-open\[data-dragging="true"\][\s\S]{0,180}\.ios-slide-open\[data-completing="true"\][^{]*\{[^}]*animation:\s*iosSlideThumbDock/s,
+  );
+  assert.match(
+    styles,
+    /\.ios-slide-open\[data-completing="true"\] \.ios-slide-open-thumb\s*\{[^}]*animation:\s*iosSlideThumbDock/s,
+  );
+  assert.match(styles, /@keyframes iosSlideThumbDock/);
+  assert.match(styles, /@keyframes iosSlideFillDock/);
+  assert.match(reconstructedStyles, /--slide-thumb-scale-x/);
+  assert.match(reconstructedStyles, /@keyframes iosSlideThumbDock/);
+  assert.match(styles, /prefers-reduced-motion:[\s\S]*?iosSlideThumbDock|prefers-reduced-motion:[\s\S]*?animation: none !important/);
 });
 
 test("every manager archive category remounts its panel animation", () => {

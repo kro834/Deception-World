@@ -18,6 +18,7 @@ const POINTER_INTENT_THRESHOLD = 7;
 const TAP_TOLERANCE = 12;
 const HOLD_MOVE_TOLERANCE = 18;
 const HOLD_ACTIVATION_MS = 220;
+const COMPLETE_ANIMATION_MS = 260;
 const HORIZONTAL_INTENT_RATIO = 1.08;
 const COARSE_HIT_PADDING = 36;
 
@@ -49,6 +50,7 @@ export function SlideOpenControl({
   const requiresHold = useRef(false);
   const holdActivated = useRef(false);
   const grabOffset = useRef(0);
+  const motionSample = useRef({ offset: 0, at: 0 });
   const travel = useRef(0);
   const dragMetrics = useRef<SlideMetrics | null>(null);
   const holdTimer = useRef<number | null>(null);
@@ -81,6 +83,7 @@ export function SlideOpenControl({
     requiresHold.current = false;
     holdActivated.current = false;
     grabOffset.current = 0;
+    motionSample.current = { offset: 0, at: 0 };
     dragMetrics.current = null;
     completingRef.current = false;
     const button = internalButtonRef.current;
@@ -93,6 +96,9 @@ export function SlideOpenControl({
     const thumbWidth = thumbRef.current?.getBoundingClientRect().width ?? 50;
     button?.style.setProperty("--slide-fill", `${thumbWidth}px`);
     button?.style.setProperty("--slide-label-opacity", "1");
+    button?.style.removeProperty("--slide-thumb-scale-x");
+    button?.style.removeProperty("--slide-thumb-scale-y");
+    button?.style.removeProperty("--slide-thumb-tilt");
   }, [clearTimers]);
 
   useEffect(() => {
@@ -167,9 +173,19 @@ export function SlideOpenControl({
     );
     const ratio = metrics.distance > 0 ? next / metrics.distance : 0;
     const button = internalButtonRef.current;
+    const now = performance.now();
+    const previous = motionSample.current;
+    const elapsed = previous.at > 0 ? Math.max(16, now - previous.at) : 16;
+    const velocity = (next - previous.offset) / elapsed;
+    const energy = Math.min(1, Math.abs(velocity) / 1.25);
+    const direction = Math.sign(velocity || 1);
+    motionSample.current = { offset: next, at: now };
     button?.style.setProperty("--slide-offset", `${next}px`);
     button?.style.setProperty("--slide-fill", `${next + metrics.thumbRect.width}px`);
     button?.style.setProperty("--slide-label-opacity", String(Math.max(0.2, 1 - ratio * 0.8)));
+    button?.style.setProperty("--slide-thumb-scale-x", String(1 + energy * 0.09));
+    button?.style.setProperty("--slide-thumb-scale-y", String(1 - energy * 0.055));
+    button?.style.setProperty("--slide-thumb-tilt", `${direction * energy * 3.2}deg`);
     return ratio;
   };
 
@@ -190,6 +206,9 @@ export function SlideOpenControl({
       `${completedOffset + (metrics?.thumbRect.width ?? 50)}px`,
     );
     button?.style.setProperty("--slide-label-opacity", "0.2");
+    button?.style.removeProperty("--slide-thumb-scale-x");
+    button?.style.removeProperty("--slide-thumb-scale-y");
+    button?.style.removeProperty("--slide-thumb-tilt");
     clearTimers();
 
     // A pointer drag must not become the dialog's focus-return target. If the
@@ -213,7 +232,7 @@ export function SlideOpenControl({
         // modal has had a frame to cover the control.
         if (opensDialog) window.requestAnimationFrame(reset);
       },
-      reducedMotion ? 0 : 140,
+      reducedMotion ? 0 : COMPLETE_ANIMATION_MS,
     );
   };
 
@@ -245,6 +264,7 @@ export function SlideOpenControl({
     requiresHold.current = event.pointerType !== "mouse";
     holdActivated.current = false;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
+    motionSample.current = { offset: 0, at: performance.now() };
 
     if (requiresHold.current) {
       const button = event.currentTarget;

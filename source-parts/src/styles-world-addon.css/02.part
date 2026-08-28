@@ -404,7 +404,7 @@
   border-radius: 999px;
   background: linear-gradient(90deg, color-mix(in srgb, var(--slide-accent) 58%, rgba(255, 255, 255, 0.1)), color-mix(in srgb, var(--slide-accent) 28%, transparent));
   opacity: 0.72;
-  transition: width 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.44s cubic-bezier(0.18, 1.38, 0.32, 1);
 }
 
 .ios-slide-open-label {
@@ -508,8 +508,21 @@
     0 7px 22px color-mix(in srgb, var(--slide-accent) 24%, rgba(0, 0, 0, 0.64)),
     0 2px 5px rgba(0, 0, 0, 0.28);
   transform: translate3d(var(--slide-offset, 0px), 0, 0);
+  scale:
+    var(--slide-thumb-scale-x, var(--slide-thumb-press-scale, 1))
+    var(--slide-thumb-scale-y, var(--slide-thumb-press-scale, 1));
+  rotate: var(--slide-thumb-tilt, 0deg);
   pointer-events: none;
-  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  transition:
+    transform 0.44s cubic-bezier(0.18, 1.42, 0.32, 1),
+    scale 0.3s cubic-bezier(0.18, 1.5, 0.32, 1),
+    rotate 0.3s cubic-bezier(0.18, 1.5, 0.32, 1),
+    box-shadow 0.25s ease;
+}
+
+.ios-slide-open[data-holding="true"] {
+  --slide-thumb-press-scale: 0.92;
+  border-color: color-mix(in srgb, var(--slide-accent) 52%, #fff);
 }
 
 .ios-slide-open .ios-slide-open-thumb::before,
@@ -587,6 +600,14 @@
     inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 58%, rgba(255, 255, 255, 0.18)),
     inset 0 0 22px color-mix(in srgb, var(--slide-accent) 20%, transparent),
     0 9px 26px color-mix(in srgb, var(--slide-accent) 34%, rgba(0, 0, 0, 0.62));
+}
+
+.ios-slide-open[data-completing="true"] .ios-slide-open-thumb {
+  animation: iosSlideThumbDock 0.26s cubic-bezier(0.22, 0.82, 0.24, 1) both;
+}
+
+.ios-slide-open[data-completing="true"] .ios-slide-open-fill {
+  animation: iosSlideFillDock 0.26s ease-out both;
 }
 
 .ios-slide-open[data-dragging="true"] .ios-slide-open-thumb::after,
@@ -675,6 +696,10 @@
   }
 
   .ios-slide-open-arrows i { animation: none; }
+  .ios-slide-open[data-completing="true"] .ios-slide-open-thumb,
+  .ios-slide-open[data-completing="true"] .ios-slide-open-fill {
+    animation: none !important;
+  }
 }
 
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
@@ -707,6 +732,19 @@
 @keyframes iosSlideArrow {
   0%, 100% { opacity: 0.24; translate: -2px 0; }
   50% { opacity: 1; translate: 2px 0; }
+}
+
+@keyframes iosSlideThumbDock {
+  0% { scale: 1.08 0.94; rotate: 3deg; }
+  48% { scale: 0.95 1.08; rotate: -1.4deg; }
+  74% { scale: 1.035 0.98; rotate: 0.6deg; }
+  100% { scale: 1; rotate: 0deg; }
+}
+
+@keyframes iosSlideFillDock {
+  0% { filter: brightness(1); }
+  52% { filter: brightness(1.42); }
+  100% { filter: brightness(1.08); }
 }
 .world-column-dialog-copy-stack {
   display: grid;

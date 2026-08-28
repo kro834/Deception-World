@@ -152,16 +152,27 @@ async function settleRouteHash(hash: string) {
   // route commits, and mobile WebKit can repeat that restoration after layout.
   // Keep aligning briefly, but stop the moment the user starts scrolling.
   let userInteracted = false;
+  let stopWaiting: () => void = () => undefined;
+  const userScrollIntent = new Promise<void>((resolve) => {
+    stopWaiting = resolve;
+  });
   const noteInteraction = (event: Event) => {
     if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
     if (event instanceof PointerEvent && event.pointerType === "mouse" && event.buttons === 0) return;
+    if (userInteracted) return;
     userInteracted = true;
+    stopWaiting();
   };
   const align = () => {
     if (!userInteracted) {
       document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
     }
   };
+  const waitUntilNextAlignment = async (duration: number) => {
+    await Promise.race([wait(duration), userScrollIntent]);
+    return !userInteracted;
+  };
+  document.addEventListener("pointerdown", noteInteraction, true);
   document.addEventListener("pointermove", noteInteraction, true);
   document.addEventListener("touchmove", noteInteraction, { capture: true, passive: true });
   document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
@@ -169,18 +180,21 @@ async function settleRouteHash(hash: string) {
   try {
     align();
     await nextFrame();
+    if (userInteracted) return;
     align();
     await nextFrame();
+    if (userInteracted) return;
     align();
-    await wait(90);
+    if (!(await waitUntilNextAlignment(90))) return;
     align();
-    await wait(150);
+    if (!(await waitUntilNextAlignment(150))) return;
     align();
-    await wait(240);
+    if (!(await waitUntilNextAlignment(240))) return;
     align();
-    await wait(420);
+    if (!(await waitUntilNextAlignment(420))) return;
     align();
   } finally {
+    document.removeEventListener("pointerdown", noteInteraction, true);
     document.removeEventListener("pointermove", noteInteraction, true);
     document.removeEventListener("touchmove", noteInteraction, true);
     document.removeEventListener("wheel", noteInteraction, true);
@@ -822,6 +836,7 @@ export function AppGuards() {
       if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
       timers.splice(0).forEach((timer) => window.clearTimeout(timer));
       document.removeEventListener("pointermove", noteInteraction, true);
+      document.removeEventListener("pointerdown", noteInteraction, true);
       document.removeEventListener("touchmove", noteInteraction, true);
       document.removeEventListener("wheel", noteInteraction, true);
       document.removeEventListener("keydown", noteInteraction, true);
@@ -848,6 +863,7 @@ export function AppGuards() {
     // effect runs. Keep smooth scrolling disabled until its delayed restoration
     // has settled, otherwise the outgoing world visibly races toward the top.
     resetDetailScroll();
+    document.addEventListener("pointerdown", noteInteraction, true);
     document.addEventListener("pointermove", noteInteraction, true);
     document.addEventListener("touchmove", noteInteraction, { capture: true, passive: true });
     document.addEventListener("wheel", noteInteraction, { capture: true, passive: true });
