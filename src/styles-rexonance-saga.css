@@ -1671,6 +1671,53 @@
   }
 }
 
+@media (min-width: 681px) and (max-width: 1366px) and (max-height: 1024px) and (orientation: landscape) {
+  .rxs-hero {
+    place-items: start;
+    padding: 96px 46px 56px;
+    overflow: hidden;
+  }
+
+  .rxs-hero-copy {
+    width: min(52vw, 620px);
+    text-align: left;
+  }
+
+  .rxs-hero-copy::before {
+    inset: -48px -72px -54px;
+    background: radial-gradient(
+      ellipse at 34% 50%,
+      rgb(0 2 7 / 94%) 0 38%,
+      rgb(0 2 7 / 76%) 57%,
+      transparent 82%
+    );
+  }
+
+  .rxs-hero h1 {
+    font-size: clamp(54px, 6.4vw, 82px);
+    line-height: 1;
+  }
+
+  .rxs-hero-lede {
+    margin: 24px 0 0;
+  }
+
+  .rxs-hero-visual {
+    right: 28%;
+    bottom: -46%;
+    width: min(72vw, 900px);
+  }
+
+  .rxs-hero-visual img {
+    object-position: 50% 2%;
+  }
+
+  .rxs-scroll-cue {
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+
 @media (max-width: 680px) {
   .rxs-page {
     padding-top: calc(58px + env(safe-area-inset-top, 0px));
