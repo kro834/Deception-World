@@ -549,7 +549,8 @@ export function ExtremeSaga() {
             到達点は、異なる。
           </h2>
           <span>
-            エクスプリームのP14は、後発のレクソナンス用P14よりややスペックダウンした先行チューニングです。勝利経路の増殖と結果固定へ最適化され、同じ世代名でも運用目的が異なります。
+            エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
+            UltraとKOSMOS Ultraを統合し、増え続ける可能性を一つの実行可能な結果へ収束させます。
           </span>
         </header>
 
@@ -569,7 +570,7 @@ export function ExtremeSaga() {
             <h3>結果を選び、固定する。</h3>
             <p>
               KHAOS UltraとKOSMOS
-              Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。レクソナンス用P14の変換効率・応答・安定率に対する正確な低下率は未公表のため、推測値では補いません。
+              Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束。変換効率・応答・安定率の個別数値は未公表のため、推測値では補いません。
             </p>
             <dl aria-label="エクスプリームのP14構成">
               <div>
@@ -590,19 +591,19 @@ export function ExtremeSaga() {
 
         <div className="exs-p14-comparison rxs-reveal">
           <article>
-            <small>EXTREME / P14</small>
-            <h3>可能性増殖・結果固定</h3>
-            <p>先行チューニング。KHAOS Ultra 20,000YOPSとKOSMOS Ultra 5,000TOPSを接続。</p>
+            <small>P14 / EXPANSION</small>
+            <h3>可能性を増殖する</h3>
+            <p>KHAOS Ultra 20,000YOPSが戦況から成立可能な勝利経路を継続的に生成。</p>
           </article>
           <span aria-hidden="true">→</span>
           <article>
-            <small>REXONANCE / P14</small>
-            <h3>変換効率・応答・安定</h3>
-            <p>後発の再設計版。エクスプリーム用から性能を引き上げ、実効攻撃への変換を強化。</p>
+            <small>P14 / FIXATION</small>
+            <h3>結果を一つへ固定する</h3>
+            <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束。</p>
           </article>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          「ややスペックダウン」はP14自体の世代内差を示します。演算器の公開値だけでP14の変換効率を逆算せず、未公表の数値は未公表のまま扱っています。
+          P14は二つの演算系統を直列の役割として接続します。演算器の公開値だけで変換効率を逆算せず、未公表の数値は未公表のまま扱っています。
         </p>
       </section>
 
@@ -725,10 +726,6 @@ export function ExtremeSaga() {
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>人物・能力の詳細を見る</span>
           <i aria-hidden="true">↗</i>
-        </GuardedLink>
-        <GuardedLink to="/rexonance-saga" assets={[]}>
-          <span>次世代のレクソナンスへ</span>
-          <i aria-hidden="true">→</i>
         </GuardedLink>
       </footer>
     </main>

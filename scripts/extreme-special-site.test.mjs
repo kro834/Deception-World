@@ -89,9 +89,12 @@ test("Extreme comparison preserves Vinculum values and calculated physical ratio
   assert.match(component, /公開値不詳の項目は一つの倍率へ合算していません/);
 });
 
-test("Extreme P14 is distinct from the later Rexonance tuning without invented rates", () => {
-  assert.match(component, /レクソナンス用P14よりややスペックダウン/);
-  assert.match(component, /正確な低下率は未公表/);
+test("Extreme P14 stays focused on its own expansion and fixation architecture", () => {
+  assert.doesNotMatch(component, /レクソナンス/);
+  assert.doesNotMatch(component, /to="\/rexonance-saga"/);
+  assert.match(component, /P14 \/ EXPANSION/);
+  assert.match(component, /P14 \/ FIXATION/);
+  assert.match(component, /変換効率・応答・安定率の個別数値は未公表/);
   assert.match(component, /推測値では補いません/);
   assert.match(component, /20,000YOPS/);
   assert.match(component, /5,000TOPS/);
