@@ -309,7 +309,7 @@
 
 @media (max-width: 680px) {
   .exs-page .rxs-hero {
-    min-height: max(720px, calc(100svh - 58px));
+    min-height: max(820px, calc(100svh - 58px));
     padding-top: 74px;
   }
 
@@ -322,9 +322,9 @@
   }
 
   .exs-page .rxs-hero-visual {
-    top: 178px;
+    top: 205px;
     bottom: auto;
-    width: min(132vw, 690px);
+    width: min(124vw, 650px);
   }
 
   .exs-page .rxs-hero-visual img {

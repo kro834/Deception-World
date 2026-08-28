@@ -21,6 +21,17 @@ test("Extreme special site has a route, menu entry, warmup asset, and dedicated 
   assert.match(transitions, /\.is-extreme-dive/);
 });
 
+test("shared special navigation keeps Rexonance directly below Extreme", () => {
+  const specialNavigation = menu.slice(
+    menu.indexOf("<p>SPECIAL</p>"),
+    menu.indexOf("<p>STORIES</p>"),
+  );
+  const extremePosition = specialNavigation.indexOf("<span>エクスプリームサーガ</span>");
+  const rexonancePosition = specialNavigation.indexOf("<span>レクソナンスサーガ</span>");
+  assert.ok(extremePosition >= 0);
+  assert.ok(rexonancePosition > extremePosition);
+});
+
 test("Extreme hero preserves the requested catchphrase and responsive visual treatment", () => {
   assert.match(component, /至高、/);
   assert.match(component, /極まれり/);
@@ -29,6 +40,9 @@ test("Extreme hero preserves the requested catchphrase and responsive visual tre
   assert.match(styles, /orientation: portrait/);
   assert.match(styles, /orientation: landscape/);
   assert.match(styles, /object-position: 50% 0/);
+  assert.match(styles, /min-height: max\(820px, calc\(100svh - 58px\)\)/);
+  assert.match(styles, /top: 205px/);
+  assert.match(styles, /width: min\(124vw, 650px\)/);
 });
 
 test("Extreme comparison keeps supplied Diluculum catalog values", () => {

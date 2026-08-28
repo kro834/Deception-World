@@ -42,6 +42,11 @@ const assets = [
 test("Saga keeps Extreme and Rexonance as two dedicated pickup records", () => {
   assert.match(riderPage, /name: "エクスプリームサーガ"[\s\S]*?featuredPickup: true/);
   assert.match(riderPage, /name: "レクソナンスサーガ"[\s\S]*?featuredPickup: true,[\s\S]*?theme: "rexonance"/);
+  assert.ok(
+    riderPage.indexOf('displayName: "エクスプリームサーガ"') <
+      riderPage.indexOf('displayName: "レクソナンスサーガ"'),
+    "the collapsed Rexonance heading should follow the Extreme heading",
+  );
   assert.match(riderPage, /rider\.id === "saga"[\s\S]*?rider\.forms\.filter\(\(form\) => form\.featuredPickup\)/);
   assert.match(riderPage, /332\.2t/);
   assert.match(riderPage, /480\.5t/);

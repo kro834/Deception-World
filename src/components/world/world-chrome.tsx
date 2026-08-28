@@ -508,16 +508,6 @@ export function SideMenuLayer({
           <p>SPECIAL</p>
           <div className="side-panel-links">
             <GuardedLink
-              to="/rexonance-saga"
-              hash="top"
-              assets={context === "rexonance" ? [] : REXONANCE_SAGA_ENTER_ASSETS}
-              beforeNavigate={close}
-              aria-current={context === "rexonance" ? "page" : undefined}
-            >
-              <span>レクソナンスサーガ</span>
-              <i>PERFORMANCE SITE</i>
-            </GuardedLink>
-            <GuardedLink
               to="/extreme-saga"
               hash="top"
               assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
@@ -526,6 +516,16 @@ export function SideMenuLayer({
             >
               <span>エクスプリームサーガ</span>
               <i>SUPREME SITE</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/rexonance-saga"
+              hash="top"
+              assets={context === "rexonance" ? [] : REXONANCE_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "rexonance" ? "page" : undefined}
+            >
+              <span>レクソナンスサーガ</span>
+              <i>PERFORMANCE SITE</i>
             </GuardedLink>
           </div>
         </div>
