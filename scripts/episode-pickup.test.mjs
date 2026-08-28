@@ -68,7 +68,14 @@ test("the pickup dialog is modal, dismissible, and scroll-reset on every open", 
   assert.match(worldHome, /\.episode-pickup-close"\)\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(worldHome, /dialog\.focus\(\{ preventScroll: true \}\)/);
   assert.match(worldHome, /openEpisodePickup\(i, event\.currentTarget, event\.detail === 0\)/);
-  assert.match(worldHome, /window\.requestAnimationFrame\(\(\) => trigger\?\.blur\(\)\)/);
+  assert.match(worldHome, /data-pointer-focus-suppressed/);
+  assert.match(worldHome, /grid\?\.blur\(\)/);
+  assert.match(worldHome, /window\.requestAnimationFrame\(clearPointerFocus\)/);
+  assert.match(worldHome, /episodePointerFocusTimer\.current = window\.setTimeout/);
+  assert.match(
+    baseStyles,
+    /\.episode-grid\[data-pointer-focus-suppressed="true"\]:focus,[\s\S]*?outline: none/,
+  );
   assert.doesNotMatch(worldHome, /bootLiquidGlass\(dialog\)/);
   assert.match(worldHome, /onCancel=\{\(event\) => \{[\s\S]*?closeEpisodePickup\(\)/);
   assert.match(worldHome, /event\.target === episodePickupDialogRef\.current/);

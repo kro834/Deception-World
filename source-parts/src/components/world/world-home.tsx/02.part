@@ -281,6 +281,7 @@ export function WorldHome() {
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
   const episodePickupOpenedByKeyboard = useRef(false);
+  const episodePointerFocusTimer = useRef<number | null>(null);
   const episodeScrollTimer = useRef<number | null>(null);
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
@@ -557,6 +558,9 @@ export function WorldHome() {
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+      if (episodePointerFocusTimer.current != null) {
+        window.clearTimeout(episodePointerFocusTimer.current);
+      }
       cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
     };

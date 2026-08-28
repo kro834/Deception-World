@@ -8,6 +8,11 @@
   outline-offset: 5px;
 }
 
+.episode-grid[data-pointer-focus-suppressed="true"]:focus,
+.episode-grid[data-pointer-focus-suppressed="true"]:focus-visible {
+  outline: none;
+}
+
 .episode-card {
   --episode-tone: var(--cyan);
   position: relative;

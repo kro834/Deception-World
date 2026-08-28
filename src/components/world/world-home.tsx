@@ -374,6 +374,7 @@ export function WorldHome() {
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
   const episodePickupOpenedByKeyboard = useRef(false);
+  const episodePointerFocusTimer = useRef<number | null>(null);
   const episodeScrollTimer = useRef<number | null>(null);
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
@@ -650,6 +651,9 @@ export function WorldHome() {
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+      if (episodePointerFocusTimer.current != null) {
+        window.clearTimeout(episodePointerFocusTimer.current);
+      }
       cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
     };
@@ -763,6 +767,11 @@ export function WorldHome() {
   const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    if (episodePointerFocusTimer.current != null) {
+      window.clearTimeout(episodePointerFocusTimer.current);
+      episodePointerFocusTimer.current = null;
+    }
+    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
     goEpisode(index);
     episodePickupTriggerRef.current = trigger;
     episodePickupOpenedByKeyboard.current = openedByKeyboard;
@@ -1599,8 +1608,26 @@ export function WorldHome() {
           setEpisodePickup(null);
           if (!episodePickupOpenedByKeyboard.current) {
             const trigger = episodePickupTriggerRef.current;
-            trigger?.blur();
-            window.requestAnimationFrame(() => trigger?.blur());
+            const grid = episodeGridRef.current;
+            const clearPointerFocus = () => {
+              trigger?.blur();
+              grid?.blur();
+              const active = document.activeElement;
+              if (
+                active instanceof HTMLElement &&
+                (active === trigger || active === grid || grid?.contains(active))
+              ) {
+                active.blur();
+              }
+            };
+            grid?.setAttribute("data-pointer-focus-suppressed", "true");
+            clearPointerFocus();
+            window.requestAnimationFrame(clearPointerFocus);
+            episodePointerFocusTimer.current = window.setTimeout(() => {
+              clearPointerFocus();
+              grid?.removeAttribute("data-pointer-focus-suppressed");
+              episodePointerFocusTimer.current = null;
+            }, 240);
           }
           episodePickupTriggerRef.current = null;
           episodePickupOpenedByKeyboard.current = false;

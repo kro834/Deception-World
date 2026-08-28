@@ -108,8 +108,26 @@
           setEpisodePickup(null);
           if (!episodePickupOpenedByKeyboard.current) {
             const trigger = episodePickupTriggerRef.current;
-            trigger?.blur();
-            window.requestAnimationFrame(() => trigger?.blur());
+            const grid = episodeGridRef.current;
+            const clearPointerFocus = () => {
+              trigger?.blur();
+              grid?.blur();
+              const active = document.activeElement;
+              if (
+                active instanceof HTMLElement &&
+                (active === trigger || active === grid || grid?.contains(active))
+              ) {
+                active.blur();
+              }
+            };
+            grid?.setAttribute("data-pointer-focus-suppressed", "true");
+            clearPointerFocus();
+            window.requestAnimationFrame(clearPointerFocus);
+            episodePointerFocusTimer.current = window.setTimeout(() => {
+              clearPointerFocus();
+              grid?.removeAttribute("data-pointer-focus-suppressed");
+              episodePointerFocusTimer.current = null;
+            }, 240);
           }
           episodePickupTriggerRef.current = null;
           episodePickupOpenedByKeyboard.current = false;
