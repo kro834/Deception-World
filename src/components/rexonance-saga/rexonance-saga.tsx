@@ -64,7 +64,10 @@ const PERFORMANCE_BASELINES: Record<
       label: string;
       current: string;
       previous: string;
-      gain: string;
+      relative: string;
+      multiplier: string;
+      delta: string;
+      note?: string;
       bar: number;
     }[];
     processing: {
@@ -78,14 +81,41 @@ const PERFORMANCE_BASELINES: Record<
     label: "ヴァーテックス",
     code: "VERTEX STANDARD",
     metrics: [
-      { label: "パンチ力", current: "332.2t", previous: "68.0t", gain: "+388.5%", bar: 20.5 },
-      { label: "キック力", current: "480.5t", previous: "172.4t", gain: "+178.7%", bar: 35.9 },
-      { label: "ジャンプ力", current: "6000m", previous: "100.0m", gain: "+5900%", bar: 1.7 },
+      {
+        label: "パンチ力",
+        current: "332.2t",
+        previous: "68.0t",
+        relative: "488.5%",
+        multiplier: "4.89倍",
+        delta: "+388.5%",
+        bar: 20.5,
+      },
+      {
+        label: "キック力",
+        current: "480.5t",
+        previous: "172.4t",
+        relative: "278.7%",
+        multiplier: "2.79倍",
+        delta: "+178.7%",
+        bar: 35.9,
+      },
+      {
+        label: "ジャンプ力",
+        current: "6000m",
+        previous: "100.0m",
+        relative: "6000%",
+        multiplier: "60.0倍",
+        delta: "+5900%",
+        bar: 1.7,
+      },
       {
         label: "走力（100m）",
         current: "0.00021秒",
         previous: "0.6秒",
-        gain: "約99.97%短縮",
+        relative: "285,714.3%",
+        multiplier: "約2857.14倍",
+        delta: "+285,614.3%",
+        note: "所要時間 約99.97%短縮",
         bar: 0.04,
       },
     ],
@@ -104,28 +134,37 @@ const PERFORMANCE_BASELINES: Record<
         label: "パンチ力",
         current: "332.2t",
         previous: "98.8t（est.）",
-        gain: "+236.2%（推定値比）",
+        relative: "336.2%",
+        multiplier: "3.36倍",
+        delta: "+236.2%（推定値比）",
         bar: 29.7,
       },
       {
         label: "キック力",
         current: "480.5t",
         previous: "198.8t（est.）",
-        gain: "+141.7%（推定値比）",
+        relative: "241.7%",
+        multiplier: "2.42倍",
+        delta: "+141.7%（推定値比）",
         bar: 41.4,
       },
       {
         label: "ジャンプ力",
         current: "6000m",
         previous: "5000.0m（est.）",
-        gain: "+20.0%（推定値比）",
+        relative: "120.0%",
+        multiplier: "1.20倍",
+        delta: "+20.0%（推定値比）",
         bar: 83.3,
       },
       {
         label: "走力（100m）",
         current: "0.00021秒",
         previous: "0.1秒（est.）",
-        gain: "99.79%短縮（推定値比）",
+        relative: "47,619.0%",
+        multiplier: "約476.19倍",
+        delta: "+47,519.0%（推定値比）",
+        note: "所要時間 99.79%短縮",
         bar: 0.21,
       },
     ],
@@ -152,14 +191,41 @@ const PERFORMANCE_BASELINES: Record<
     label: "エクスプリーム",
     code: "EXTREME STANDARD",
     metrics: [
-      { label: "パンチ力", current: "332.2t", previous: "205.6t〜", gain: "+61.6%", bar: 61.9 },
-      { label: "キック力", current: "480.5t", previous: "308.9t〜", gain: "+55.6%", bar: 64.3 },
-      { label: "ジャンプ力", current: "6000m", previous: "1033.5m", gain: "+480.6%", bar: 17.2 },
+      {
+        label: "パンチ力",
+        current: "332.2t",
+        previous: "205.6t〜",
+        relative: "161.6%",
+        multiplier: "1.62倍",
+        delta: "+61.6%",
+        bar: 61.9,
+      },
+      {
+        label: "キック力",
+        current: "480.5t",
+        previous: "308.9t〜",
+        relative: "155.6%",
+        multiplier: "1.56倍",
+        delta: "+55.6%",
+        bar: 64.3,
+      },
+      {
+        label: "ジャンプ力",
+        current: "6000m",
+        previous: "1033.5m",
+        relative: "580.6%",
+        multiplier: "5.81倍",
+        delta: "+480.6%",
+        bar: 17.2,
+      },
       {
         label: "走力（100m）",
         current: "0.00021秒",
         previous: "0.002秒",
-        gain: "89.5%短縮",
+        relative: "952.4%",
+        multiplier: "9.52倍",
+        delta: "+852.4%",
+        note: "所要時間 89.5%短縮",
         bar: 10.5,
       },
     ],
@@ -487,6 +553,9 @@ export function RexonanceSaga() {
               <option value="extreme">エクスプリームサーガ</option>
             </select>
           </label>
+          <p className="rxs-comparison-formula">
+            比較基準：<b>{activePerformanceBaseline.label}＝100%</b>
+          </p>
           <div className="rxs-comparison-key" aria-hidden="true">
             <span>
               <i className="is-rexonance" />
@@ -511,17 +580,24 @@ export function RexonanceSaga() {
                     <small>{metric.label}</small>
                     <strong>{metric.current}</strong>
                   </div>
-                  <b>{metric.gain}</b>
+                  <span className="rxs-comparison-result">
+                    <i>基準比</i>
+                    <b>{metric.relative}</b>
+                    <em>
+                      {metric.multiplier} / {metric.delta}
+                    </em>
+                  </span>
                 </header>
                 <div
                   className="rxs-bars"
-                  aria-label={`${metric.label}、レクソナンス${metric.current}、${activePerformanceBaseline.label}${metric.previous}`}
+                  aria-label={`${metric.label}、${activePerformanceBaseline.label}を100%としたレクソナンスの性能は${metric.relative}、${metric.multiplier}、増加分${metric.delta}`}
                 >
                   <i className="is-rexonance" />
                   <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
                 </div>
                 <p>
                   {activePerformanceBaseline.code} / {metric.previous}
+                  {metric.note ? <span> / {metric.note}</span> : null}
                 </p>
               </article>
             ))}
@@ -557,7 +633,7 @@ export function RexonanceSaga() {
           </section>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          選択した形態を基準として、レクソナンスの標準カタログ値との差を表示しています。走力は100m所要時間の短縮率です。「est.」は推定値を示し、演算はYOPSとTOPSを別指標として比較しています。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
+          主表示は選択した形態を100%としたレクソナンスの性能比です。「+」は100%を超えた増加分を示します。走力は100m所要時間の逆数から速度性能を換算し、所要時間の短縮率を補足表示しています。「est.」は推定値を示し、演算はYOPSとTOPSを別指標として比較しています。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
         </p>
       </section>
 

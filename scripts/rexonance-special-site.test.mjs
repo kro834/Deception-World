@@ -98,6 +98,40 @@ test("Vertex and Vinculum comparisons keep supplied processors and compare only 
   assert.match(styles, /\.rxs-processing-comparison/);
 });
 
+test("catalog comparison separates baseline ratio, multiplier, and increase", () => {
+  for (const value of [
+    "488.5%",
+    "4.89倍",
+    "+388.5%",
+    "278.7%",
+    "2.79倍",
+    "6000%",
+    "60.0倍",
+    "285,714.3%",
+    "約2857.14倍",
+    "336.2%",
+    "3.36倍",
+    "120.0%",
+    "1.20倍",
+    "47,619.0%",
+    "約476.19倍",
+    "161.6%",
+    "580.6%",
+    "952.4%",
+    "9.52倍",
+  ]) {
+    assert.ok(component.includes(value), `${value} should be shown`);
+  }
+  assert.match(component, /比較基準：/);
+  assert.match(component, /activePerformanceBaseline\.label}＝100%/);
+  assert.match(component, /metric\.relative/);
+  assert.match(component, /metric\.multiplier/);
+  assert.match(component, /metric\.delta/);
+  assert.match(component, /100m所要時間の逆数から速度性能を換算/);
+  assert.match(component, /所要時間 約99\.97%短縮/);
+  assert.match(component, /所要時間 99\.79%短縮/);
+});
+
 test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {
   for (const value of [
     "100%",
