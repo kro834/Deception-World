@@ -131,19 +131,44 @@ test("the shared pointer light cannot displace episode or sticky dialog controls
 test("iPhone episode images stay inside their column and leave every title fully visible", () => {
   assert.match(
     mobileStyles,
-    /\.episode-card-surface \{[\s\S]*?min-height: 124px;[\s\S]*?height: auto;[\s\S]*?grid-template-columns: minmax\(104px, 0\.86fr\) minmax\(0, 1\.14fr\)/,
+    /--episode-mobile-card-height: clamp\(128px, 34vw, 140px\)/,
   );
   assert.match(
     mobileStyles,
-    /\.episode-thumbnail \{[\s\S]*?width: 100%;[\s\S]*?min-width: 0;[\s\S]*?aspect-ratio: auto/,
+    /\.episode-card \{[\s\S]*?height: var\(--episode-mobile-card-height\);[\s\S]*?align-self: start/,
   );
   assert.match(
     mobileStyles,
-    /\.episode-card-copy \{[\s\S]*?z-index: 2;[\s\S]*?min-width: 0;[\s\S]*?min-height: 124px/,
+    /\.episode-card-surface \{[\s\S]*?min-height: var\(--episode-mobile-card-height\);[\s\S]*?height: var\(--episode-mobile-card-height\);[\s\S]*?grid-template-columns: minmax\(104px, 0\.86fr\) minmax\(0, 1\.14fr\)/,
+  );
+  assert.match(
+    mobileStyles,
+    /\.episode-thumbnail \{[\s\S]*?width: 100%;[\s\S]*?min-width: 0;[\s\S]*?height: var\(--episode-mobile-card-height\);[\s\S]*?min-height: 0;[\s\S]*?aspect-ratio: auto/,
+  );
+  assert.match(
+    mobileStyles,
+    /\.episode-card-copy \{[\s\S]*?z-index: 2;[\s\S]*?min-width: 0;[\s\S]*?height: var\(--episode-mobile-card-height\);[\s\S]*?min-height: 0/,
   );
   assert.match(
     mobileStyles,
     /\.episode-card-copy h4 \{[\s\S]*?max-width: 100%;[\s\S]*?overflow: visible/,
   );
   assert.match(baseStyles, /\.episode-pickup-item h3 \{[\s\S]*?word-break: keep-all/);
+});
+
+test("iPhone episode cards remain centered from EP1 through EP5", () => {
+  assert.match(mobileStyles, /--episode-mobile-card-width: min\(84vw, 330px, 100%\)/);
+  assert.match(mobileStyles, /grid-auto-columns: var\(--episode-mobile-card-width\)/);
+  assert.match(
+    mobileStyles,
+    /padding-left: max\(1px, calc\(\(100% - var\(--episode-mobile-card-width\)\) \/ 2\)\)/,
+  );
+  assert.match(
+    mobileStyles,
+    /padding-right: max\(1px, calc\(\(100% - var\(--episode-mobile-card-width\)\) \/ 2\)\)/,
+  );
+  assert.match(
+    mobileStyles,
+    /scroll-padding-inline: max\(1px, calc\(\(100% - var\(--episode-mobile-card-width\)\) \/ 2\)\)/,
+  );
 });
