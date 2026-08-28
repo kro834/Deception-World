@@ -138,8 +138,8 @@ test("iPad hero and touch sliders release transient emphasis", () => {
   assert.match(styles, /bottom: -24%/);
   assert.match(styles, /min-height: 1100px/);
   assert.match(styles, /bottom: -17%/);
-  assert.match(styles, /max-width: 1366px/);
-  assert.match(styles, /max-height: 1024px/);
+  assert.match(styles, /max-width: 1440px/);
+  assert.match(styles, /max-height: 1100px/);
   assert.match(styles, /right: 28%/);
   assert.match(styles, /bottom: -46%/);
   assert.match(styles, /left: 50%/);
