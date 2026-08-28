@@ -13,9 +13,11 @@ type SlideOpenControlProps = {
   onOpen: (source: "keyboard" | "pointer") => void;
 };
 
-const OPEN_THRESHOLD = 0.68;
-const POINTER_INTENT_THRESHOLD = 10;
-const HORIZONTAL_INTENT_RATIO = 1.2;
+const OPEN_THRESHOLD = 0.52;
+const POINTER_INTENT_THRESHOLD = 7;
+const TAP_TOLERANCE = 12;
+const HORIZONTAL_INTENT_RATIO = 1.08;
+const COARSE_HIT_PADDING = 36;
 
 type PointerIntent = "idle" | "pending" | "horizontal";
 
@@ -215,7 +217,7 @@ export function SlideOpenControl({
     dragMetrics.current = metrics;
     // A finger obscures the glass thumb on compact screens. Give coarse
     // pointers a larger pickup area while keeping mouse targeting precise.
-    const hitPadding = event.pointerType === "mouse" ? 10 : 24;
+    const hitPadding = event.pointerType === "mouse" ? 10 : COARSE_HIT_PADDING;
     if (
       event.clientX < metrics.thumbRect.left - hitPadding ||
       event.clientX > metrics.thumbRect.right + hitPadding
@@ -279,8 +281,8 @@ export function SlideOpenControl({
       const deltaY = event.clientY - pointerStart.current.y;
       const isThumbTap =
         pointerIntent.current === "pending" &&
-        Math.abs(deltaX) < POINTER_INTENT_THRESHOLD &&
-        Math.abs(deltaY) < POINTER_INTENT_THRESHOLD;
+        Math.abs(deltaX) < TAP_TOLERANCE &&
+        Math.abs(deltaY) < TAP_TOLERANCE;
 
       activePointer.current = null;
       if (isThumbTap) {
@@ -296,6 +298,9 @@ export function SlideOpenControl({
     event.preventDefault();
     event.stopPropagation();
     const ratio = moveToPointer(event.clientX);
+    const deltaX = Math.abs(event.clientX - pointerStart.current.x);
+    const deltaY = Math.abs(event.clientY - pointerStart.current.y);
+    const isThumbTap = deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
     activePointer.current = null;
     try {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -304,7 +309,7 @@ export function SlideOpenControl({
     } catch {
       // Pointer capture can already be gone after an Android compositor handoff.
     }
-    if (ratio >= OPEN_THRESHOLD) complete("pointer");
+    if (ratio >= OPEN_THRESHOLD || isThumbTap) complete("pointer");
     else reset();
   };
 

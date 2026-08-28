@@ -127,6 +127,15 @@ test("form sliders size their fill from the rendered Liquid Glass thumb", () => 
   assert.match(slideControl, /プラスをタップ、または右へスライドして開きます/);
 });
 
+test("mobile slide controls acquire the thumb early and open near the midpoint", () => {
+  assert.match(slideControl, /const OPEN_THRESHOLD = 0\.52/);
+  assert.match(slideControl, /const POINTER_INTENT_THRESHOLD = 7/);
+  assert.match(slideControl, /const TAP_TOLERANCE = 12/);
+  assert.match(slideControl, /const HORIZONTAL_INTENT_RATIO = 1\.08/);
+  assert.match(slideControl, /const COARSE_HIT_PADDING = 36/);
+  assert.match(slideControl, /if \(ratio >= OPEN_THRESHOLD \|\| isThumbTap\) complete\("pointer"\)/);
+});
+
 test("every manager archive category remounts its panel animation", () => {
   assert.match(worldHome, /key="managers" className="manager-archive-panel is-managers"/);
   assert.match(worldHome, /key="unmanaged" className="manager-archive-panel is-unmanaged"/);
