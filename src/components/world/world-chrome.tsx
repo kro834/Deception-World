@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from
 import { Link } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
+  EXTREME_SAGA_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
@@ -132,7 +133,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance";
+  context?: "world" | "archive" | "movie" | "rexonance" | "extreme";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -365,7 +366,9 @@ export function SideMenuLayer({
                   ? "DREAM CHAPTER"
                   : context === "rexonance"
                     ? "REXONANCE SAGA"
-                    : "DECEPTION WORLD"}
+                    : context === "extreme"
+                      ? "EXTREME SAGA"
+                      : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -397,17 +400,26 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            {context === "rexonance" ? (
+            {context === "rexonance" || context === "extreme" ? (
               <>
-                {[
-                  ["top", "トップ", "TOP"],
-                  ["performance", "パフォーマンス", "PERFORMANCE"],
-                  ["stages", "三つの運用段階", "STAGES"],
-                  ["system", "トリニティ・レゾナンス", "SYSTEM"],
-                ].map(([hash, label, code]) => (
+                {(context === "rexonance"
+                  ? [
+                      ["top", "トップ", "TOP"],
+                      ["performance", "パフォーマンス", "PERFORMANCE"],
+                      ["stages", "三つの運用段階", "STAGES"],
+                      ["system", "トリニティ・レゾナンス", "SYSTEM"],
+                    ]
+                  : [
+                      ["top", "トップ", "TOP"],
+                      ["performance", "性能比較", "COMPARISON"],
+                      ["p14", "P14", "PROCESSOR"],
+                      ["stages", "二つの運用段階", "STAGES"],
+                      ["system", "中核システム", "SYSTEM"],
+                    ]
+                ).map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
-                    to="/rexonance-saga"
+                    to={context === "rexonance" ? "/rexonance-saga" : "/extreme-saga"}
                     hash={hash}
                     assets={[]}
                     beforeNavigate={close}
@@ -504,6 +516,16 @@ export function SideMenuLayer({
             >
               <span>レクソナンスサーガ</span>
               <i>PERFORMANCE SITE</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/extreme-saga"
+              hash="top"
+              assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "extreme" ? "page" : undefined}
+            >
+              <span>エクスプリームサーガ</span>
+              <i>SUPREME SITE</i>
             </GuardedLink>
           </div>
         </div>

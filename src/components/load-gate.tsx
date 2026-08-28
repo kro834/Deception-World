@@ -20,7 +20,7 @@ import {
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets } from "@/lib/asset-loader";
 
-type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance";
+type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
@@ -53,6 +53,7 @@ const RIDER_DIVE_ROUTES = {
   "/riders/lore": "lore",
   "/riders/vandal": "vandal",
   "/rexonance-saga": "rexonance",
+  "/extreme-saga": "extreme",
 } as const satisfies Record<string, RiderDiveVariant>;
 
 const RIDER_CUT_IN_ROUTES = {
@@ -76,6 +77,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   vandal: { cover: 520, reveal: 480 },
   dream: { cover: 620, reveal: 520 },
   rexonance: { cover: 560, reveal: 520 },
+  extreme: { cover: 540, reveal: 500 },
 };
 
 const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; label: string }> = {
@@ -85,6 +87,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   vandal: { no: "04", name: "VANDAL", label: "ヴァンダール" },
   dream: { no: "I", name: "DREAM CHAPTER", label: "ドリームチャプター" },
   rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
+  extreme: { no: "EX", name: "EXTREME", label: "エクスプリームサーガ" },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
@@ -605,7 +608,8 @@ function LoadOverlay({
     variant === "lore" ||
     variant === "vandal" ||
     variant === "dream" ||
-    variant === "rexonance";
+    variant === "rexonance" ||
+    variant === "extreme";
   if (isRiderDive) {
     return <RiderRouteDive variant={variant} phase={phase} />;
   }
@@ -711,16 +715,22 @@ function RiderRouteDive({
         <small>
           {variant === "rexonance"
             ? "REXONANCE // PERFORMANCE SITE"
-            : `${meta.name} // RIDER ${meta.no}`}
+            : variant === "extreme"
+              ? "EXTREME // SUPREME SITE"
+              : `${meta.name} // RIDER ${meta.no}`}
         </small>
         <span>
           {variant === "rexonance"
             ? revealing
               ? "共鳴位相へ到着"
               : "P14共鳴位相へダイブ中"
-            : revealing
-              ? "個別資料へ到着"
-              : "記録位相へダイブ中"}
+            : variant === "extreme"
+              ? revealing
+                ? "至高位相へ到着"
+                : "P14至高位相へダイブ中"
+              : revealing
+                ? "個別資料へ到着"
+                : "記録位相へダイブ中"}
         </span>
       </span>
     </div>
