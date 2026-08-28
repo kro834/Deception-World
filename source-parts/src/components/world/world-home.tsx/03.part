@@ -156,6 +156,11 @@
         /* already open */
       }
     }
+    // WebKit otherwise auto-focuses the first column tab for a frame after a
+    // pointer slide, making column 01 look selected even when another column
+    // is active. Move focus to the neutral dialog surface immediately; the
+    // rail remains keyboard-accessible when a user deliberately tabs into it.
+    dlg.focus({ preventScroll: true });
     setPickupOpen(true);
     syncRail(pickupRail.current, columnTab);
     cancelColumnPickupScrollReset.current = settlePickupScroll(dlg, [".world-column-dialog-card"], () => {

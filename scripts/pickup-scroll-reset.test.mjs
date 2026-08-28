@@ -41,3 +41,10 @@ test("every pickup family uses the shared settled reset and clears pending frame
   assert.match(home, /cancelEpisodePickupScrollReset\.current\?\.\(\)/);
   assert.match(home, /cancelColumnPickupScrollReset\.current\?\.\(\)/);
 });
+
+test("the column pickup suppresses WebKit's transient first-tab focus before settling", () => {
+  assert.match(
+    home,
+    /dlg\.showModal\(\);[\s\S]*?dlg\.focus\(\{ preventScroll: true \}\);[\s\S]*?setPickupOpen\(true\);[\s\S]*?syncRail\(pickupRail\.current, columnTab\)/,
+  );
+});
