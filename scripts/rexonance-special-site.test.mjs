@@ -78,12 +78,27 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /iPad\|iPhone\|iPod/);
   assert.match(component, /navigator\.maxTouchPoints > 1/);
   assert.match(component, /<select/);
-  assert.match(component, /<option value="p1">P1比<\/option>/);
-  assert.match(component, /<option value="p2">P2比<\/option>/);
+  assert.match(component, /<option value="p1">P1比（P1＝100%）<\/option>/);
+  assert.match(component, /<option value="p2">P2比（P2＝100%）<\/option>/);
   assert.match(component, /currentTarget\.value as P14Baseline/);
   assert.match(component, /iOS標準選択/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
+  assert.match(component, /<b>100%<\/b>/);
+  assert.match(component, /metric\.relative\[p14Baseline\]/);
+  assert.match(component, /rxs-p14-source-values/);
+  for (const normalizedP2Value of [
+    "500%",
+    "12.0%",
+    "11.1%",
+    "14.3%",
+    "約22.2%",
+    "約13.3%",
+    "122.7%",
+    "121.5%",
+  ]) {
+    assert.match(component, new RegExp(normalizedP2Value.replace(".", "\\.")));
+  }
   assert.match(styles, /\.rxs-p14-ios-track/);
   assert.match(styles, /\.rxs-p14-ios-thumb/);
   assert.match(styles, /data-value="p2"/);

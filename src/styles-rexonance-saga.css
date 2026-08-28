@@ -882,6 +882,29 @@
   color: #effaff;
 }
 
+.rxs-p14-source-values {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 12px;
+  color: #626d7b;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.rxs-p14-source-values span {
+  flex: 0 0 auto;
+  letter-spacing: 0.08em;
+}
+
+.rxs-p14-source-values b {
+  color: #84909e;
+  font-size: 10px;
+  font-weight: 650;
+  text-align: right;
+}
+
 .rxs-p14-metrics article > p {
   display: flex;
   gap: 10px;

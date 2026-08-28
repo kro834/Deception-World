@@ -85,6 +85,7 @@ const P14_METRICS = [
     p1: "100%",
     p2: "180%",
     p14: "900%",
+    relative: { p1: "900%", p2: "500%" },
     delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
     deltaLabel: "性能向上",
   },
@@ -93,6 +94,7 @@ const P14_METRICS = [
     p1: "10%",
     p2: "18%",
     p14: "90%",
+    relative: { p1: "900%", p2: "500%" },
     delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
     deltaLabel: "変換率向上",
   },
@@ -101,6 +103,7 @@ const P14_METRICS = [
     p1: "35%",
     p2: "25%",
     p14: "3%",
+    relative: { p1: "8.6%", p2: "12.0%" },
     delta: { p1: "−91.4%", p2: "−88.0%" },
     deltaLabel: "損失削減",
   },
@@ -109,6 +112,7 @@ const P14_METRICS = [
     p1: "25%",
     p2: "18%",
     p14: "2%",
+    relative: { p1: "8.0%", p2: "11.1%" },
     delta: { p1: "−92.0%", p2: "−88.9%" },
     deltaLabel: "損失削減",
   },
@@ -117,6 +121,7 @@ const P14_METRICS = [
     p1: "20%",
     p2: "14%",
     p14: "2%",
+    relative: { p1: "10.0%", p2: "14.3%" },
     delta: { p1: "−90.0%", p2: "−85.7%" },
     deltaLabel: "損失削減",
   },
@@ -125,6 +130,7 @@ const P14_METRICS = [
     p1: "約35%",
     p2: "約18%",
     p14: "約4%",
+    relative: { p1: "約11.4%", p2: "約22.2%" },
     delta: { p1: "約−88.6%", p2: "約−77.8%" },
     deltaLabel: "低下率削減",
   },
@@ -133,6 +139,7 @@ const P14_METRICS = [
     p1: "約1.0ms",
     p2: "約0.45ms",
     p14: "約0.06ms",
+    relative: { p1: "約6.0%", p2: "約13.3%" },
     delta: { p1: "約−94.0%", p2: "約−86.7%" },
     deltaLabel: "応答時間短縮",
   },
@@ -141,6 +148,7 @@ const P14_METRICS = [
     p1: "62%",
     p2: "81%",
     p14: "99.4%",
+    relative: { p1: "160.3%", p2: "122.7%" },
     delta: { p1: "+60.3%", p2: "+22.7%" },
     deltaLabel: "追従率向上",
   },
@@ -149,6 +157,7 @@ const P14_METRICS = [
     p1: "58%",
     p2: "79%",
     p14: "96%",
+    relative: { p1: "165.5%", p2: "121.5%" },
     delta: { p1: "+65.5%", p2: "+21.5%" },
     deltaLabel: "安定率向上",
   },
@@ -467,8 +476,8 @@ export function RexonanceSaga() {
                   aria-label="P14の比較基準"
                   onChange={(event) => setP14Baseline(event.currentTarget.value as P14Baseline)}
                 >
-                  <option value="p1">P1比</option>
-                  <option value="p2">P2比</option>
+                  <option value="p1">P1比（P1＝100%）</option>
+                  <option value="p2">P2比（P2＝100%）</option>
                 </select>
               </label>
             ) : (
@@ -485,7 +494,7 @@ export function RexonanceSaga() {
                   step="1"
                   value={p14Baseline === "p1" ? 1 : 2}
                   aria-label="P14の比較対象"
-                  aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
+                  aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
                   onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
                   onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
                   onPointerUp={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
@@ -495,8 +504,8 @@ export function RexonanceSaga() {
             )}
             <p>
               {nativeIOSSelection
-                ? "iOS標準選択から、P14の比較基準をP1比またはP2比へ切り替えられます。"
-                : "スライダーを動かすか両端をタップして、P14の比較基準をP1比またはP2比へ切り替えられます。"}
+                ? "iOS標準選択から、100%とする比較基準をP1またはP2へ切り替えられます。"
+                : "スライダーを動かすか両端をタップして、100%とする比較基準をP1またはP2へ切り替えられます。"}
             </p>
           </div>
 
@@ -512,13 +521,19 @@ export function RexonanceSaga() {
                 <small>{metric.label}</small>
                 <div className="rxs-p14-values">
                   <span>
-                    <i>{p14Baseline.toUpperCase()}比</i>
-                    <b>{metric[p14Baseline]}</b>
+                    <i>{p14Baseline.toUpperCase()}（基準）</i>
+                    <b>100%</b>
                   </span>
                   <span>
-                    <i>P14</i>
-                    <strong>{metric.p14}</strong>
+                    <i>P14（換算）</i>
+                    <strong>{metric.relative[p14Baseline]}</strong>
                   </span>
+                </div>
+                <div className="rxs-p14-source-values">
+                  <span>原値</span>
+                  <b>
+                    {p14Baseline.toUpperCase()} {metric[p14Baseline]} / P14 {metric.p14}
+                  </b>
                 </div>
                 <p key={`${metric.label}-${p14Baseline}`}>
                   <span>{metric.deltaLabel}</span>
@@ -528,7 +543,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p className="rxs-p14-method-note">
-            向上率は選択中の比較基準（P1比／P2比）から算出しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
+            選択したP1またはP2を100%として、P14を相対換算しています。原値も各項目に併記しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
           </p>
         </div>
       </section>
