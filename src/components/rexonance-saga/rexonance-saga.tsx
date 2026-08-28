@@ -458,32 +458,41 @@ export function RexonanceSaga() {
                 P2
               </button>
             </div>
-            <div
-              className="rxs-p14-ios-slider"
-              data-native-ios={nativeIOSRange ? "true" : "false"}
-              data-value={p14Baseline}
-            >
-              <span className="rxs-p14-ios-track" aria-hidden="true">
-                <i />
-              </span>
-              <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+            {nativeIOSRange ? (
               <input
+                {...({ switch: "" } as Record<string, string>)}
                 id="rxs-p14-baseline"
-                type="range"
-                min="1"
-                max="2"
-                step="1"
-                value={p14Baseline === "p1" ? 1 : 2}
-                aria-label="P14の比較対象"
-                aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
-                onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                onPointerUp={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                onTouchEnd={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                className="rxs-p14-native-switch"
+                type="checkbox"
+                role="switch"
+                checked={p14Baseline === "p2"}
+                aria-label="P14の比較対象。オフでP1、オンでP2"
+                onChange={(event) => setP14Baseline(event.currentTarget.checked ? "p2" : "p1")}
               />
-            </div>
+            ) : (
+              <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
+                <span className="rxs-p14-ios-track" aria-hidden="true">
+                  <i />
+                </span>
+                <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+                <input
+                  id="rxs-p14-baseline"
+                  type="range"
+                  min="1"
+                  max="2"
+                  step="1"
+                  value={p14Baseline === "p1" ? 1 : 2}
+                  aria-label="P14の比較対象"
+                  aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
+                  onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                  onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                  onPointerUp={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                  onTouchEnd={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+                />
+              </div>
+            )}
             <p>
-              {nativeIOSRange ? "iOS標準スライダー" : "スライダー"}
+              {nativeIOSRange ? "iOS標準スイッチ" : "スライダー"}
               を動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。
             </p>
           </div>
@@ -532,7 +541,14 @@ export function RexonanceSaga() {
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
-          <div className="rxs-stage-tabs" role="tablist" aria-label="レクソナンスの運用段階">
+          <div
+            className="rxs-stage-tabs"
+            role="tablist"
+            aria-label="レクソナンスの運用段階"
+            data-liquid-glass="true"
+            data-stage={stage}
+          >
+            <span className="rxs-stage-liquid-indicator" aria-hidden="true" />
             {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
               <button
                 key={key}

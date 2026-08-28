@@ -40,7 +40,7 @@ test("Rexonance hero keeps the requested catchphrase and readable contrast treat
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
 });
 
-test("P14 comparison preserves every supplied value and uses a native range control", () => {
+test("P14 comparison preserves every value and uses the native iOS switch with a range fallback", () => {
   for (const value of [
     "100%",
     "180%",
@@ -77,17 +77,20 @@ test("P14 comparison preserves every supplied value and uses a native range cont
   assert.match(component, /rxs-p14-ios-slider/);
   assert.match(component, /iPad\|iPhone\|iPod/);
   assert.match(component, /navigator\.maxTouchPoints > 1/);
-  assert.match(component, /data-native-ios=/);
-  assert.match(component, /iOS標準スライダー/);
+  assert.match(component, /switch: ""/);
+  assert.match(component, /type="checkbox"/);
+  assert.match(component, /role="switch"/);
+  assert.match(component, /currentTarget\.checked \? "p2" : "p1"/);
+  assert.match(component, /iOS標準スイッチ/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
   assert.match(styles, /\.rxs-p14-ios-track/);
   assert.match(styles, /\.rxs-p14-ios-thumb/);
   assert.match(styles, /data-value="p2"/);
-  assert.match(styles, /data-native-ios="true"/);
+  assert.match(styles, /\.rxs-p14-native-switch\[type="checkbox"\]\[switch\]/);
   assert.match(styles, /-webkit-appearance: auto/);
   assert.match(styles, /appearance: auto/);
-  assert.match(styles, /opacity: 1/);
+  assert.match(styles, /color-scheme: dark/);
   assert.match(styles, /background: #0a84ff/);
   const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
@@ -102,6 +105,18 @@ test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
   assert.match(transitions, /\.load-gate\.rider-route-dive\.is-rexonance-dive/);
   assert.match(transitions, /--rider-dive-primary: 88 230 255/);
   assert.match(transitions, /--rider-dive-secondary: 255 105 220/);
+});
+
+test("Rexonance stage switching uses one animated Liquid Glass selector", () => {
+  assert.match(component, /data-liquid-glass="true"/);
+  assert.match(component, /data-stage=\{stage\}/);
+  assert.match(component, /rxs-stage-liquid-indicator/);
+  assert.match(styles, /\.rxs-stage-tabs\[data-stage="max"\]/);
+  assert.match(styles, /\.rxs-stage-tabs\[data-stage="ultra"\]/);
+  assert.match(styles, /-webkit-backdrop-filter: blur\(26px\) saturate\(165%\)/);
+  assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
+  assert.match(styles, /translateX\(calc\(var\(--rxs-stage-index\)/);
+  assert.match(styles, /--rxs-stage-gap: 4px/);
 });
 
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {
