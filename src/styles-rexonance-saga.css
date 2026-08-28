@@ -528,6 +528,282 @@
   text-align: center;
 }
 
+.rxs-p14 {
+  background:
+    radial-gradient(circle at 14% 24%, rgb(0 126 255 / 20%), transparent 34rem),
+    radial-gradient(circle at 85% 68%, rgb(76 186 255 / 11%), transparent 30rem), #01050b;
+}
+
+.rxs-p14-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+  gap: clamp(32px, 6vw, 86px);
+  align-items: center;
+  max-width: 1180px;
+  margin: auto;
+}
+
+.rxs-p14-overview figure {
+  position: relative;
+  aspect-ratio: 1;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgb(117 204 255 / 24%);
+  border-radius: 38px;
+  background: #020913;
+  box-shadow:
+    0 34px 90px rgb(0 0 0 / 45%),
+    0 0 80px rgb(0 126 255 / 10%);
+}
+
+.rxs-p14-overview figure::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 54px rgb(0 6 18 / 48%);
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-p14-overview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rxs-p14-copy > small,
+.rxs-p14-comparator > header small {
+  color: #77d7ff;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.22em;
+}
+
+.rxs-p14-copy h3 {
+  max-width: 620px;
+  margin: 20px 0 28px;
+  font-family: var(--rxs-font-display);
+  font-size: clamp(46px, 5.7vw, 78px);
+  font-weight: 680;
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.rxs-p14-copy > p {
+  margin: 0;
+  color: #b7c0cc;
+  font-size: 15px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+.rxs-p14-copy dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 38px 0 0;
+}
+
+.rxs-p14-copy dl div {
+  min-width: 0;
+  padding: 18px 16px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.rxs-p14-copy dt {
+  min-height: 2.7em;
+  color: #7e8795;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.rxs-p14-copy dd {
+  margin: 10px 0 0;
+  color: #f4fbff;
+  font-size: clamp(20px, 2.1vw, 28px);
+  font-weight: 720;
+  letter-spacing: -0.04em;
+}
+
+.rxs-p14-comparator {
+  max-width: 1180px;
+  margin: clamp(76px, 10vw, 132px) auto 0;
+  padding: clamp(24px, 4.5vw, 56px);
+  border: 1px solid rgb(255 255 255 / 11%);
+  border-radius: 34px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%));
+  box-shadow: 0 30px 80px rgb(0 0 0 / 30%);
+}
+
+.rxs-p14-comparator > header {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.rxs-p14-comparator > header h3 {
+  margin: 9px 0 0;
+  font-family: var(--rxs-font-display);
+  font-size: clamp(30px, 4.2vw, 58px);
+  font-weight: 670;
+  letter-spacing: -0.045em;
+}
+
+.rxs-p14-comparator > header output {
+  min-width: 74px;
+  padding: 9px 15px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(10 132 255 / 24%);
+  font-size: 15px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.rxs-p14-range-control {
+  margin: 38px 0 46px;
+  padding: 20px 22px 17px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 22px;
+  background: rgb(0 0 0 / 30%);
+}
+
+.rxs-p14-range-control > div {
+  display: flex;
+  justify-content: space-between;
+  color: #6f7885;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rxs-p14-range-control > div button {
+  padding: 4px 0;
+  border: 0;
+  color: inherit;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.rxs-p14-range-control > div button:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid #0a84ff;
+  outline-offset: 3px;
+}
+
+.rxs-p14-range-control > div .is-active {
+  color: #fff;
+}
+
+.rxs-p14-range-control input[type="range"] {
+  width: 100%;
+  height: 30px;
+  margin: 7px 0 0;
+  appearance: auto;
+  accent-color: #0a84ff;
+  touch-action: pan-x;
+}
+
+.rxs-p14-range-control > p {
+  margin: 8px 0 0;
+  color: #697382;
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.rxs-p14-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.rxs-p14-metrics article {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 20px;
+  background: rgb(0 4 10 / 54%);
+}
+
+.rxs-p14-metrics article > small {
+  display: block;
+  min-height: 3.2em;
+  color: #98a2af;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.rxs-p14-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.rxs-p14-values span {
+  min-width: 0;
+}
+
+.rxs-p14-values i {
+  display: block;
+  margin-bottom: 4px;
+  color: #707987;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+
+.rxs-p14-values b,
+.rxs-p14-values strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #858e9a;
+  font-size: clamp(18px, 2.1vw, 26px);
+  letter-spacing: -0.04em;
+}
+
+.rxs-p14-values strong {
+  color: #effaff;
+}
+
+.rxs-p14-metrics article > p {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 20px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+  animation: rxsP14Delta 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rxs-p14-metrics article > p span {
+  color: #6f7986;
+  font-size: 9px;
+}
+
+.rxs-p14-metrics article > p b {
+  color: #71ddff;
+  font-size: 15px;
+  text-align: right;
+}
+
+.rxs-p14-method-note {
+  max-width: 820px;
+  margin: 30px auto 0;
+  color: #727c89;
+  font-size: 11px;
+  line-height: 1.8;
+  text-align: center;
+}
+
 .rxs-stages {
   background:
     radial-gradient(circle at 15% 45%, rgb(51 200 255 / 12%), transparent 32rem),
@@ -912,6 +1188,17 @@
   }
 }
 
+@keyframes rxsP14Delta {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @media (max-width: 900px) {
   .rxs-local-nav-inner {
     grid-template-columns: 1fr 42px;
@@ -942,6 +1229,24 @@
 
   .rxs-system-grid h3 {
     margin-top: 62px;
+  }
+
+  .rxs-p14-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .rxs-p14-overview figure {
+    width: min(100%, 680px);
+    margin: auto;
+  }
+
+  .rxs-p14-copy {
+    max-width: 680px;
+    margin: auto;
+  }
+
+  .rxs-p14-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .rxs-footer {
@@ -980,6 +1285,10 @@
   .rxs-section-heading > span {
     max-width: 640px;
     font-size: 15px;
+  }
+
+  .rxs-p14-metrics article:nth-child(even) > p {
+    padding-right: 72px;
   }
 
   .rxs-stage-panel > div > p {
@@ -1101,6 +1410,94 @@
   .rxs-comparison-note {
     font-size: 12px;
     line-height: 1.75;
+  }
+
+  .rxs-p14-overview {
+    gap: 38px;
+  }
+
+  .rxs-p14-overview figure {
+    border-radius: 26px;
+  }
+
+  .rxs-p14-copy h3 {
+    margin-top: 15px;
+    font-size: 42px;
+  }
+
+  .rxs-p14-copy > p {
+    font-size: 14px;
+    line-height: 1.85;
+  }
+
+  .rxs-p14-copy dl {
+    grid-template-columns: 1fr;
+    margin-top: 30px;
+  }
+
+  .rxs-p14-copy dl div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .rxs-p14-copy dt {
+    min-height: 0;
+    font-size: 11px;
+  }
+
+  .rxs-p14-copy dd {
+    margin: 0;
+  }
+
+  .rxs-p14-comparator {
+    margin-top: 74px;
+    padding: 24px 18px;
+    border-radius: 26px;
+  }
+
+  .rxs-p14-comparator > header {
+    align-items: center;
+  }
+
+  .rxs-p14-comparator > header h3 {
+    font-size: 30px;
+  }
+
+  .rxs-p14-comparator > header output {
+    min-width: 59px;
+    padding-inline: 11px;
+  }
+
+  .rxs-p14-range-control {
+    margin: 30px 0 34px;
+    padding-inline: 16px;
+  }
+
+  .rxs-p14-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .rxs-p14-metrics article {
+    padding: 20px;
+  }
+
+  .rxs-p14-metrics article > small {
+    min-height: 0;
+  }
+
+  .rxs-p14-metrics article > p {
+    padding-right: 58px;
+  }
+
+  .rxs-p14-values b,
+  .rxs-p14-values strong {
+    font-size: 24px;
+  }
+
+  .rxs-p14-method-note {
+    font-size: 10px;
+    text-align: left;
   }
 
   .rxs-stage-tabs {

@@ -5,6 +5,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 
 type RexonanceStage = "standard" | "max" | "ultra";
+type P14Baseline = "p1" | "p2";
 
 const STAGES: Record<
   RexonanceStage,
@@ -78,6 +79,81 @@ const COMPARISONS = [
   },
 ] as const;
 
+const P14_METRICS = [
+  {
+    label: "同じエーテル量で発揮する性能",
+    p1: "100%",
+    p2: "180%",
+    p14: "900%",
+    delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
+    deltaLabel: "性能向上",
+  },
+  {
+    label: "実効変換率",
+    p1: "10%",
+    p2: "18%",
+    p14: "90%",
+    delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
+    deltaLabel: "変換率向上",
+  },
+  {
+    label: "熱として失われる割合",
+    p1: "35%",
+    p2: "25%",
+    p14: "3%",
+    delta: { p1: "−91.4%", p2: "−88.0%" },
+    deltaLabel: "損失削減",
+  },
+  {
+    label: "位相ノイズとして失われる割合",
+    p1: "25%",
+    p2: "18%",
+    p14: "2%",
+    delta: { p1: "−92.0%", p2: "−88.9%" },
+    deltaLabel: "損失削減",
+  },
+  {
+    label: "能力間干渉による損失",
+    p1: "20%",
+    p2: "14%",
+    p14: "2%",
+    delta: { p1: "−90.0%", p2: "−85.7%" },
+    deltaLabel: "損失削減",
+  },
+  {
+    label: "高負荷時の出力低下",
+    p1: "約35%",
+    p2: "約18%",
+    p14: "約4%",
+    delta: { p1: "約−88.6%", p2: "約−77.8%" },
+    deltaLabel: "低下率削減",
+  },
+  {
+    label: "出力変更への応答時間",
+    p1: "約1.0ms",
+    p2: "約0.45ms",
+    p14: "約0.06ms",
+    delta: { p1: "約−94.0%", p2: "約−86.7%" },
+    deltaLabel: "応答時間短縮",
+  },
+  {
+    label: "瞬間的な負荷変動への追従率",
+    p1: "62%",
+    p2: "81%",
+    p14: "99.4%",
+    delta: { p1: "+60.3%", p2: "+22.7%" },
+    deltaLabel: "追従率向上",
+  },
+  {
+    label: "連続最大出力時の安定率",
+    p1: "58%",
+    p2: "79%",
+    p14: "96%",
+    delta: { p1: "+65.5%", p2: "+21.5%" },
+    deltaLabel: "安定率向上",
+  },
+] as const;
+
 const CORE_SYSTEMS = [
   {
     number: "01",
@@ -103,6 +179,7 @@ export function RexonanceSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
+  const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const activeStage = STAGES[stage];
@@ -185,6 +262,7 @@ export function RexonanceSaga() {
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>
+            <a href="#p14">P14</a>
             <a href="#stages">形態</a>
             <a href="#system">システム</a>
           </nav>
@@ -294,6 +372,123 @@ export function RexonanceSaga() {
         <p className="rxs-comparison-note rxs-reveal">
           100m走は所要時間の短縮率です。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
         </p>
+      </section>
+
+      <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
+        <header className="rxs-section-heading rxs-reveal">
+          <p>PROCESSING CORE / P14</p>
+          <h2 id="rxs-p14-title">
+            エーテルを、
+            <br />
+            ほぼそのまま力へ。
+          </h2>
+          <span>
+            P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
+          </span>
+        </header>
+
+        <div className="rxs-p14-overview rxs-reveal">
+          <figure>
+            <img
+              src="/rexonance-p14-core.jpg"
+              alt="青い回路に接続されたP14演算コア"
+              width="1254"
+              height="1254"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div className="rxs-p14-copy">
+            <small>P14 / FOURTEENTH GENERATION</small>
+            <h3>速く、強く、失わない。</h3>
+            <p>
+              入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
+            </p>
+            <dl aria-label="P14の主要指標">
+              <div>
+                <dt>実効変換率</dt>
+                <dd>90%</dd>
+              </div>
+              <div>
+                <dt>応答時間</dt>
+                <dd>約0.06ms</dd>
+              </div>
+              <div>
+                <dt>最大出力安定率</dt>
+                <dd>96%</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <div className="rxs-p14-comparator rxs-reveal">
+          <header>
+            <div>
+              <small>GENERATION COMPARISON</small>
+              <h3>P14と{p14Baseline.toUpperCase()}を比較</h3>
+            </div>
+            <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}</output>
+          </header>
+
+          <div className="rxs-p14-range-control">
+            <div>
+              <button
+                type="button"
+                className={p14Baseline === "p1" ? "is-active" : undefined}
+                aria-pressed={p14Baseline === "p1"}
+                onClick={() => setP14Baseline("p1")}
+              >
+                P1
+              </button>
+              <button
+                type="button"
+                className={p14Baseline === "p2" ? "is-active" : undefined}
+                aria-pressed={p14Baseline === "p2"}
+                onClick={() => setP14Baseline("p2")}
+              >
+                P2
+              </button>
+            </div>
+            <input
+              id="rxs-p14-baseline"
+              type="range"
+              min="1"
+              max="2"
+              step="1"
+              value={p14Baseline === "p1" ? 1 : 2}
+              aria-label="P14の比較対象"
+              aria-valuetext={`比較対象 ${p14Baseline.toUpperCase()}`}
+              onInput={(event) => setP14Baseline(event.currentTarget.value === "1" ? "p1" : "p2")}
+              onChange={(event) => setP14Baseline(event.currentTarget.value === "1" ? "p1" : "p2")}
+            />
+            <p>スライダーを動かすか両端をタップして、比較対象をP1またはP2へ切り替えられます。</p>
+          </div>
+
+          <div className="rxs-p14-metrics" aria-live="polite">
+            {P14_METRICS.map((metric) => (
+              <article key={metric.label}>
+                <small>{metric.label}</small>
+                <div className="rxs-p14-values">
+                  <span>
+                    <i>{p14Baseline.toUpperCase()}</i>
+                    <b>{metric[p14Baseline]}</b>
+                  </span>
+                  <span>
+                    <i>P14</i>
+                    <strong>{metric.p14}</strong>
+                  </span>
+                </div>
+                <p key={`${metric.label}-${p14Baseline}`}>
+                  <span>{metric.deltaLabel}</span>
+                  <b>{metric.delta[p14Baseline]}</b>
+                </p>
+              </article>
+            ))}
+          </div>
+          <p className="rxs-p14-method-note">
+            向上率は選択中の世代を基準に算出しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
+          </p>
+        </div>
       </section>
 
       <section id="stages" className="rxs-stages rxs-section">

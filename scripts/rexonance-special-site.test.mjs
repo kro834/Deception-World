@@ -38,6 +38,46 @@ test("Rexonance hero keeps the requested catchphrase and readable contrast treat
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
 });
 
+test("P14 comparison preserves every supplied value and uses a native range control", () => {
+  for (const value of [
+    "100%",
+    "180%",
+    "900%",
+    "10%",
+    "18%",
+    "90%",
+    "35%",
+    "25%",
+    "3%",
+    "2%",
+    "20%",
+    "14%",
+    "約35%",
+    "約18%",
+    "約4%",
+    "約1.0ms",
+    "約0.45ms",
+    "約0.06ms",
+    "62%",
+    "81%",
+    "99.4%",
+    "58%",
+    "79%",
+    "96%",
+  ]) {
+    assert.match(component, new RegExp(value.replace(".", "\\.")));
+  }
+  assert.match(component, /type="range"/);
+  assert.match(component, /aria-valuetext=/);
+  assert.match(component, /onInput=/);
+  assert.match(component, /aria-pressed=/);
+  assert.match(component, /setP14Baseline/);
+  assert.match(styles, /accent-color: #0a84ff/);
+  const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
+  assert.equal(existsSync(p14Asset), true);
+  assert.ok(statSync(p14Asset).size < 700_000, "P14 artwork should stay below 700 KB");
+});
+
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {
   for (const asset of [
     "public/rider-rexonance-saga-pickup.jpeg",
