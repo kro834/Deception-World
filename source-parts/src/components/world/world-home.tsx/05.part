@@ -1,7 +1,6 @@
-              <div className="manager-archive-panel is-other" role="tabpanel">
-                <p className="system-label is-other">RELATED / ALAIN</p>
-                <h3>その他</h3>
-                <div className="other-array" aria-label="その他">
+              <div key="other" className="manager-archive-panel is-other" role="tabpanel">
+                <p className="visually-hidden">その他の関連資料</p>
+                <div className="manager-slot-grid other-array" aria-label="その他">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
@@ -52,6 +51,9 @@
                       <i>レルム ムーンフォーム</i>
                     </span>
                   </GuardedLink>
+                  {Array.from({ length: 4 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 3} tone="other" />
+                  ))}
                 </div>
               </div>
             )}
@@ -64,11 +66,39 @@
               <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
-            <div className="world-column-copy" role="tabpanel">
-              <p className="world-column-number">コラム{column.no}</p>
-              <h3>{column.title}</h3>
-              <div>
-                <p>{column.body}</p>
+            <div className="world-column-copy" role="tabpanel" aria-label={`コラム${column.no} ${column.title}`}>
+              <div className="world-column-number-stack">
+                {COLUMNS.map((item, index) => (
+                  <p
+                    key={item.no}
+                    className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    コラム{item.no}
+                  </p>
+                ))}
+              </div>
+              <div className="world-column-heading-stack">
+                {COLUMNS.map((item, index) => (
+                  <h3
+                    key={item.no}
+                    className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    {item.title}
+                  </h3>
+                ))}
+              </div>
+              <div className="world-column-summary-stack">
+                {COLUMNS.map((item, index) => (
+                  <div
+                    key={item.no}
+                    className={`world-column-summary-pane world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    <p>{item.body}</p>
+                  </div>
+                ))}
               </div>
               <SlideOpenControl
                 ariaControls="world-column-pickup"
@@ -88,18 +118,18 @@
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index">
           <span>02</span>
-          <small>SEVEN RIDERS</small>
+          <small>EIGHT RIDERS</small>
         </div>
         <div className="section-title">
           <p className="eyebrow">
-            <span>SEVEN RIDERS / ONE WORLD</span>
+            <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>七人が、世界へ。</h2>
-          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント。七つの軌跡が同じ世界で交差する。</p>
+          <h2>八人が、世界へ。</h2>
+          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。</p>
         </div>
         <div className="rider-console">
-          <RiderRail ref={riderRail} />
+          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
             <div className="rider-visual fit-cover">
               {RIDERS.map((r, i) => (

@@ -1,5 +1,5 @@
       "伝説扱いされた瞬間に、その人物は「終わった物語」へ送られる。レジェンズはそれを拒否し、進行中の盤面へ自ら戻ってくる。",
-      "七人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
+      "八人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
     ],
   },
   {
@@ -13,9 +13,97 @@
   },
 ];
 
-const EPISODES = [
-  { no: "01", title: "HIDE-AND-SEEK", src: "/episode-01-hide-and-seek.jpeg", pos: "50% 30%", alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル" },
-  { no: "02", title: "LEGENDS", src: "/episode-02-legends.jpeg", pos: "50% 50%", alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル" },
+type EpisodePickup = {
+  label: string;
+  displayLines?: readonly string[];
+  src: string;
+  pos: string;
+  alt: string;
+  width: number;
+  height: number;
+  to: string;
+  assets: readonly string[];
+};
+
+type EpisodeRecord = {
+  no: string;
+  title: string;
+  src: string;
+  pos: string;
+  alt: string;
+  pickups?: EpisodePickup[];
+};
+
+const EPISODES: EpisodeRecord[] = [
+  {
+    no: "01",
+    title: "HIDE-AND-SEEK",
+    src: "/episode-01-hide-and-seek.jpeg",
+    pos: "50% 30%",
+    alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル",
+    pickups: [
+      {
+        label: "リームー/仮面ライダーフリート",
+        src: "/manager-reemu-rider.jpeg",
+        pos: "50% 12%",
+        alt: "リームーが変身した仮面ライダーフリート",
+        width: 1086,
+        height: 1448,
+        to: "/managers/reemu",
+        assets: MANAGER_ASSETS.reemu,
+      },
+      {
+        label: "紅城真守/仮面ライダーアルゲノム",
+        src: "/rider-profile-argenome.jpeg",
+        pos: "50% 8%",
+        alt: "紅城真守が変身した仮面ライダーアルゲノム",
+        width: 1350,
+        height: 1800,
+        to: "/riders/argenome",
+        assets: RIDER_NAV.find((item) => item.id === "argenome")?.assets ?? ["/civilian-argenome.jpeg"],
+      },
+    ],
+  },
+  {
+    no: "02",
+    title: "LEGENDS",
+    src: "/episode-02-legends.jpeg",
+    pos: "50% 50%",
+    alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダーレルムレジェンズ",
+        displayLines: ["仮面ライダーレルム", "レジェンズ"],
+        src: "/rider-profile-realm.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーレルムレジェンズ",
+        width: 1221,
+        height: 1800,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? ["/civilian-bell-20260826.jpeg"],
+      },
+      {
+        label: "仮面ライダーレルム　アースフォーム",
+        src: "/rider-realm-earth.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーレルム アースフォーム",
+        width: 1026,
+        height: 1533,
+        to: "/characters/terra",
+        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
+      },
+      {
+        label: "仮面ライダーレルム　ムーンフォーム",
+        src: "/rider-realm-moon.jpeg",
+        pos: "50% 10%",
+        alt: "仮面ライダーレルム ムーンフォーム",
+        width: 1024,
+        height: 1536,
+        to: "/characters/luna",
+        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
+      },
+    ],
+  },
   { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "50% 18%", alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル" },
   { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
   { no: "05", title: "FARCE", src: "/episode-05-farce.jpeg", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
@@ -41,6 +129,17 @@ function syncRail(rail: HTMLElement | null, index: number) {
     tab.setAttribute("aria-selected", String(i === index));
   });
   rail.dispatchEvent(new Event("liquidrelayout"));
+}
+
+function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" | "other" }) {
+  return (
+    <div className={`archive-placeholder is-${tone}`} role="img" aria-label={`未判明の資料スロット ${index}`}>
+      <span>{String(index).padStart(2, "0")}</span>
+      <i aria-hidden="true" />
+      <small>UNRESOLVED</small>
+      <b>？？？</b>
+    </div>
+  );
 }
 
 /* Rails are memoized so poster autoplay / tab-panel state cannot reset
@@ -119,17 +218,17 @@ const PickupRail = memo(
 );
 
 const RiderRail = memo(
-  forwardRef<HTMLDivElement>(function RiderRail(_props, ref) {
+  forwardRef<HTMLDivElement, { initialIndex: number }>(function RiderRail({ initialIndex }, ref) {
     return (
-      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="七人のメインライダー">
+      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="八人のメインライダー">
         <LiquidLens />
         {RIDERS.map((r, i) => (
           <button
             key={r.id}
             type="button"
             role="tab"
-            className={i === 0 ? "is-active" : ""}
-            aria-selected={i === 0}
+            className={i === initialIndex ? "is-active" : ""}
+            aria-selected={i === initialIndex}
             style={{
               ["--tab-tone" as string]: r.tone,
               ["--liquid-accent" as string]: r.tone,
@@ -147,22 +246,43 @@ const RiderRail = memo(
 
 export function WorldHome() {
   useWorldMode();
-  const { go } = useLoadGate();
+  const { go, notifyOpeningDestination } = useLoadGate();
   const shellRef = useRef<HTMLDivElement>(null);
+  const openingBrandRef = useRef<HTMLAnchorElement>(null);
+  const openingSigilRef = useRef<HTMLSpanElement>(null);
+  const openingHeroRef = useRef<HTMLElement>(null);
+  const openingBackdropRef = useRef<HTMLDivElement>(null);
+  const openingFocusRef = useRef<HTMLHeadingElement>(null);
+  const [initialRiderTab] = useState(() => {
+    const returnId = readRiderReturn();
+    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
+    return returnIndex >= 0 ? returnIndex : 0;
+  });
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
   const [shuffling, setShuffling] = useState(false);
+  const [ambientPaused, setAmbientPaused] = useState(() =>
+    typeof document !== "undefined"
+      && (document.hidden || document.documentElement.hasAttribute("data-opening-handoff-active")),
+  );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
-  const [riderTab, setRiderTab] = useState(0);
+  const [riderTab, setRiderTab] = useState(initialRiderTab);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
+  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
   const riderRail = useRef<HTMLDivElement>(null);
   const episodeGridRef = useRef<HTMLDivElement>(null);
+  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
+  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const episodePickupOpenedByKeyboard = useRef(false);
+  const episodeScrollTimer = useRef<number | null>(null);
+  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const danteDialogRef = useRef<HTMLDialogElement>(null);
@@ -174,8 +294,92 @@ export function WorldHome() {
   const danteOpenTimer = useRef<number | null>(null);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
-  const riderTabRef = useRef(0);
+  const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
+  const pausedAmbientAnimations = useRef<Animation[]>([]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",
+        brand: openingBrandRef.current,
+        sigil: openingSigilRef.current,
+        hero: openingHeroRef.current,
+        backdrop: openingBackdropRef.current,
+        focus: openingFocusRef.current,
+      };
+      const targets = [
+        destination.brand,
+        destination.sigil,
+        destination.hero,
+        destination.backdrop,
+        destination.focus,
+      ];
+
+      if (
+        window.location.pathname === destination.path
+        && targets.every((target) => target?.isConnected)
+      ) {
+        notifyOpeningDestination(destination);
+        return;
+      }
+
+      if (window.performance.now() < destinationReadyDeadline) {
+        retryFrame = window.requestAnimationFrame(announceDestination);
+      }
+    };
+
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        announceDestination();
+      });
+    });
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+      window.cancelAnimationFrame(retryFrame);
+    };
+  }, [notifyOpeningDestination]);
+
+  useEffect(() => {
+    let handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+    const syncAmbientPause = () => {
+      setAmbientPaused(document.hidden || handoffActive);
+    };
+    const handleVisibilityChange = () => {
+      handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    const handleOpeningHandoff = (event: Event) => {
+      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
+      handoffActive = typeof detail?.active === "boolean"
+        ? detail.active
+        : document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    syncAmbientPause();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
+
+  useEffect(() => {
+    clearRiderReturn();
+  }, []);
 
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
@@ -195,18 +399,22 @@ export function WorldHome() {
     const off2 = bindRail(columnRail.current, setColumnTab);
     const off3 = bindRail(riderRail.current, selectRider);
     const off4 = bindRail(pickupRail.current, setColumnTab);
-    const id = requestAnimationFrame(() => bootLiquidGlass(document));
+    let disposeGlass: (() => void) | undefined;
+    const id = requestAnimationFrame(() => {
+      disposeGlass = bootLiquidGlass(document);
+    });
     return () => {
       off1();
       off2();
       off3();
       off4();
       cancelAnimationFrame(id);
+      disposeGlass?.();
     };
   }, [selectRider]);
 
   useEffect(() => {
-    if (locked) return;
+    if (locked || ambientPaused) return;
     const t = window.setInterval(() => {
       setPoster((p) => {
         setPrevPoster(p);
@@ -214,9 +422,10 @@ export function WorldHome() {
       });
     }, 5200);
     return () => window.clearInterval(t);
-  }, [locked]);
+  }, [ambientPaused, locked]);
 
   useEffect(() => {
+    if (ambientPaused) return;
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
     const timer = window.setTimeout(() => {
@@ -226,7 +435,47 @@ export function WorldHome() {
       image.src = POSTERS[(poster + 2) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [poster]);
+  }, [ambientPaused, poster]);
+
+  useEffect(() => {
+    if (!ambientPaused) {
+      const paused = pausedAmbientAnimations.current;
+      pausedAmbientAnimations.current = [];
+      paused.forEach((animation) => {
+        if (animation.playState !== "paused") return;
+        try {
+          animation.play();
+        } catch {
+          // A route handoff can detach one animated node while the remaining
+          // ambient loops are still valid. Resume each loop independently.
+        }
+      });
+      return;
+    }
+    const pauseInfiniteAnimations = () => {
+      const shell = shellRef.current;
+      if (!shell || typeof shell.getAnimations !== "function") return;
+      const runningLoops = shell.getAnimations({ subtree: true }).filter((animation) => (
+        animation.playState === "running" && animation.effect?.getTiming().iterations === Infinity
+      ));
+      runningLoops.forEach((animation) => animation.pause());
+      pausedAmbientAnimations.current = Array.from(new Set([
+        ...pausedAmbientAnimations.current,
+        ...runningLoops,
+      ]));
+    };
+    pauseInfiniteAnimations();
+    const frame = window.requestAnimationFrame(pauseInfiniteAnimations);
+    return () => window.cancelAnimationFrame(frame);
+  }, [ambientPaused]);
+
+  useEffect(() => {
+    if (!ambientPaused || !shuffleActive.current) return;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setShuffling(false);
+  }, [ambientPaused]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -296,6 +545,8 @@ export function WorldHome() {
       if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
       if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+      if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+      cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
     };
   }, []);

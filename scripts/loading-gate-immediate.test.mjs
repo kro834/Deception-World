@@ -12,14 +12,38 @@ const transitionCss = readFileSync(
   "utf8",
 );
 
-test("standard routes stay immediate while rider dossiers use scoped dives and cut-ins", () => {
+test("covered opening navigation is selected before immediate routes while rider transitions stay scoped", () => {
+  const goStart = gate.indexOf("const go = useCallback");
+  const goEnd = gate.indexOf("\n\n  const api = useMemo", goStart);
+  assert.notEqual(goStart, -1, "go callback must exist");
+  assert.notEqual(goEnd, -1, "go callback must end before the provider API");
+  const goBlock = gate.slice(goStart, goEnd);
+  const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
+  const directIndex = goBlock.search(
+    /if \(!isArchiveTransition && !isZeusTransition && !riderTransitionVariant\) \{/,
+  );
+  assert.notEqual(coveredIndex, -1, "go must handle a shared transition before routing");
+  assert.notEqual(directIndex, -1, "go must retain the immediate-route branch");
+  assert.ok(
+    coveredIndex < directIndex,
+    "covered opening navigation must win before the ordinary direct branch",
+  );
+  assert.match(
+    goBlock,
+    /async\s*\(\s*\{[^}]*\btransitionCovered\b[^}]*\}\s*:\s*GoOptions/,
+  );
+
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
   assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
   assert.match(
     gate,
     /if \(!isArchiveTransition && !isZeusTransition && !riderTransitionVariant\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
-  assert.doesNotMatch(gate, /preloadAssets/);
+  const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
+  assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");
+  const directBranch = goBlock.slice(directIndex, directEnd);
+  assert.match(directBranch, /await navigate\(\{ to: to as never, hash \}\)/);
+  assert.doesNotMatch(directBranch, /\bpreloadAssets\s*\(/);
   for (const route of ["saga", "realm", "lore", "vandal"]) {
     assert.match(gate, new RegExp(`"\\/riders\\/${route}": "${route}"`));
   }
@@ -92,7 +116,8 @@ test("the form archive dive keeps its cinematic status without a numeric percent
   );
 });
 
-test("the title dive declares that it already covers the transition", () => {
+test("the title dive hands asset warming to the covered shared transition", () => {
   assert.match(gate, /transitionCovered\?: boolean/);
-  assert.match(title, /transitionCovered: true/);
+  assert.match(title, /assets:\s*WORLD_ENTER_ASSETS/);
+  assert.match(title, /transitionCovered:\s*true/);
 });

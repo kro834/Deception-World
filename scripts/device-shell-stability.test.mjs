@@ -44,6 +44,12 @@ test("the React side menu owns its state without a second vanilla controller", (
   assert.match(worldHome, /const \[sideMenuOpen, setSideMenuOpen\] = useState\(false\)/);
   assert.match(liquid, /panel\.dataset\.reactControlled === 'true'/);
   assert.match(chrome, /href="#story" onClick=\{controlled \? close : undefined\}/);
+  assert.match(chrome, /className="side-panel"[\s\S]*?data-liquid-pointer="true"/);
+  assert.match(chrome, /<LiquidPointerGlow \/>[\s\S]*?className="side-panel-depth"/);
+  assert.match(panelStyles, /\.side-panel > \.liquid-pointer-glow/);
+  assert.match(panelStyles, /\.side-panel\[data-liquid-pointer\]\s*\{\s*position:\s*fixed/);
+  assert.match(panelStyles, /\.side-panel-trigger\[aria-expanded="true"\]/);
+  assert.match(panelStyles, /@media \(pointer: coarse\)[\s\S]*?\.side-panel > \.liquid-pointer-glow/);
 });
 
 test("Liquid rails release global gesture locks when their route unmounts", () => {

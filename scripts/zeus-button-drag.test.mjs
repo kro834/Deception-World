@@ -17,3 +17,16 @@ test("the long-press activation frame keeps the latest finger position", () => {
   assert.match(source, /latestPointer\.current = \{ x: event\.clientX, y: event\.clientY \}/);
   assert.match(source, /moveToPointer\(latestPointer\.current\.x, latestPointer\.current\.y\)/);
 });
+
+test("normal taps and vertical scroll keep native ownership until long-press activates", () => {
+  const pointerDown = source.match(
+    /onPointerDown=\{\(event\) => \{([\s\S]*?)\n\s*\}\}\n\s*onPointerMove=/,
+  )?.[1];
+  assert.ok(pointerDown, "Zeus must keep an explicit pointer-down handler");
+  const beforeTimer = pointerDown.slice(0, pointerDown.indexOf("holdTimer.current = window.setTimeout"));
+  assert.doesNotMatch(beforeTimer, /event\.preventDefault\(\)/);
+  assert.doesNotMatch(beforeTimer, /setPointerCapture\(/);
+  assert.match(pointerDown, /held\.current = true;[\s\S]*?setPointerCapture\(event\.pointerId\)/);
+  assert.match(source, /document\.addEventListener\("visibilitychange", cancelWhenHidden\)/);
+  assert.match(source, /document\.removeEventListener\("visibilitychange", cancelWhenHidden\)/);
+});

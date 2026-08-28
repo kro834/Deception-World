@@ -37,7 +37,7 @@ export interface PeerInfo {
   connectionState: RTCPeerConnectionState;
   /** Selected local ICE candidate type: host | srflx | prflx | relay. */
   candidateType: string | null;
-  /** Data-channel ping RTT (ms), measured every 2s once connected. */
+  /** Data-channel ping RTT (ms), measured every 2s while visible once connected. */
   rttMs: number | null;
 }
 
@@ -77,6 +77,7 @@ interface PeerSlot {
 const FAST_POLL_MS = 400;
 const IDLE_POLL_MS = 2000;
 const PING_INTERVAL_MS = 2000;
+const HIDDEN_PING_INTERVAL_MS = 10_000;
 const STALL_MS = 10_000;
 const MAX_RECOVERY_ATTEMPTS = 3;
 const SIGNAL_RETRY_DELAYS_MS = [250, 750];
@@ -102,8 +103,14 @@ export class P2PRoom {
   private readonly signalQueues = new Map<string, Promise<void>>();
   private cursor = 0;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
-  private pingTimer: ReturnType<typeof setInterval> | null = null;
+  private pingTimer: ReturnType<typeof setTimeout> | null = null;
+  private pollInFlight = false;
+  private pollAfterCurrent = false;
+  private pollAbortController: AbortController | null = null;
+  private visibilityListenerAttached = false;
   private closed = false;
+  private joined = false;
+  private joinPromise: Promise<void> | null = null;
   private everPolled = false;
   private lastPeersFingerprint = "";
 
@@ -117,23 +124,43 @@ export class P2PRoom {
    * room: the loop and timers start regardless and the next poll retries.
    */
   async join(): Promise<void> {
+    if (this.closed || this.joined) return;
+    if (this.joinPromise) return this.joinPromise;
+
+    const joinPromise = this.performJoin();
+    this.joinPromise = joinPromise;
+    try {
+      await joinPromise;
+    } finally {
+      if (this.joinPromise === joinPromise) this.joinPromise = null;
+    }
+  }
+
+  private async performJoin(): Promise<void> {
     try {
       await this.pollOnce();
     } catch {
       // First poll can fail transiently; the scheduled loop below retries.
     }
     if (this.closed) return;
-    this.schedulePoll(this.anyPairConnecting() ? FAST_POLL_MS : IDLE_POLL_MS);
-    this.pingTimer = setInterval(() => {
-      this.pingAll();
-      this.watchdog();
-    }, PING_INTERVAL_MS);
+    this.attachVisibilityListener();
+    this.joined = true;
+    this.schedulePoll(this.nextPollDelay());
+    this.scheduleMaintenance(this.pageIsHidden() ? HIDDEN_PING_INTERVAL_MS : PING_INTERVAL_MS);
   }
 
   close(): void {
+    if (this.closed) return;
     this.closed = true;
-    if (this.pollTimer) clearTimeout(this.pollTimer);
-    if (this.pingTimer) clearInterval(this.pingTimer);
+    this.joined = false;
+    this.pollAfterCurrent = false;
+    this.pollAbortController?.abort();
+    this.pollAbortController = null;
+    if (this.pollTimer !== null) clearTimeout(this.pollTimer);
+    if (this.pingTimer !== null) clearTimeout(this.pingTimer);
+    this.pollTimer = null;
+    this.pingTimer = null;
+    this.detachVisibilityListener();
     for (const slot of this.peers.values()) slot.pc.close();
     this.peers.clear();
     // Leaving the roster is the teardown broadcast: everyone's next poll
@@ -169,10 +196,59 @@ export class P2PRoom {
 
   // ── signaling loop ─────────────────────────────────────────────────────────
 
+  private pageIsHidden(): boolean {
+    return typeof document !== "undefined" && document.visibilityState === "hidden";
+  }
+
+  private nextPollDelay(): number {
+    return this.anyPairConnecting() ? FAST_POLL_MS : IDLE_POLL_MS;
+  }
+
+  private readonly onVisibilityChange = (): void => {
+    if (this.closed) return;
+    if (this.pageIsHidden()) {
+      // Keep the relay registration at its existing 2s idle cadence so an
+      // app-specific roster TTL is not weakened, while avoiding the 400ms
+      // connection-recovery loop and 2s data-channel wakeups in the background.
+      this.schedulePoll(this.nextPollDelay());
+      this.scheduleMaintenance(HIDDEN_PING_INTERVAL_MS);
+      return;
+    }
+
+    // Browser timer throttling can make a healthy suspended pair look stalled.
+    // Give every pair a fresh watchdog window, expire any old ping, then ask
+    // both the direct channel and signaling relay for current state immediately.
+    const now = Date.now();
+    for (const slot of this.peers.values()) {
+      slot.lastProgressAt = now;
+      slot.pingSentAt = undefined;
+    }
+    this.pingAll();
+    this.scheduleMaintenance(PING_INTERVAL_MS);
+    if (this.pollInFlight) this.pollAfterCurrent = true;
+    else this.schedulePoll(0);
+  };
+
+  private attachVisibilityListener(): void {
+    if (this.visibilityListenerAttached || typeof document === "undefined") return;
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
+    this.visibilityListenerAttached = true;
+  }
+
+  private detachVisibilityListener(): void {
+    if (!this.visibilityListenerAttached || typeof document === "undefined") return;
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
+    this.visibilityListenerAttached = false;
+  }
+
   private schedulePoll(delay: number): void {
     if (this.closed) return;
-    if (this.pollTimer) clearTimeout(this.pollTimer);
-    this.pollTimer = setTimeout(() => void this.poll(), delay);
+    if (this.pollTimer !== null) clearTimeout(this.pollTimer);
+    const effectiveDelay = this.pageIsHidden() ? Math.max(delay, IDLE_POLL_MS) : delay;
+    this.pollTimer = setTimeout(() => {
+      this.pollTimer = null;
+      void this.poll();
+    }, effectiveDelay);
   }
 
   private anyPairConnecting(): boolean {
@@ -192,32 +268,49 @@ export class P2PRoom {
       name: this.opts.name ?? "",
       since: String(this.cursor),
     });
-    const res = await fetch(`/api/rtc?${params}`);
-    if (this.closed) return;
-    if (!res.ok) throw new Error(`signaling poll failed: ${res.status}`);
-    const body = (await res.json()) as RtcPollResponse;
-    if (this.closed) return;
-    if (!this.everPolled) {
-      this.everPolled = true;
-      this.opts.onConnected?.();
-    }
-    this.reconcileRoster(body.peers);
-    const roster = new Set(body.peers.map((p) => p.id));
-    for (const sig of body.signals) {
-      this.cursor = Math.max(this.cursor, sig.id);
-      await this.onSignal(sig.from, sig.kind, sig.payload, roster);
+    const controller = new AbortController();
+    this.pollAbortController = controller;
+    try {
+      const res = await fetch(`/api/rtc?${params}`, { signal: controller.signal });
       if (this.closed) return;
+      if (!res.ok) throw new Error(`signaling poll failed: ${res.status}`);
+      const body = (await res.json()) as RtcPollResponse;
+      if (this.closed) return;
+      if (!this.everPolled) {
+        this.everPolled = true;
+        this.opts.onConnected?.();
+      }
+      this.reconcileRoster(body.peers);
+      const roster = new Set(body.peers.map((p) => p.id));
+      for (const sig of body.signals) {
+        this.cursor = Math.max(this.cursor, sig.id);
+        await this.onSignal(sig.from, sig.kind, sig.payload, roster);
+        if (this.closed) return;
+      }
+    } finally {
+      if (this.pollAbortController === controller) this.pollAbortController = null;
     }
   }
 
   private async poll(): Promise<void> {
     if (this.closed) return;
+    if (this.pollInFlight) {
+      this.pollAfterCurrent = true;
+      return;
+    }
+    this.pollInFlight = true;
     try {
       await this.pollOnce();
     } catch {
       // Transient poll failures are expected (tab sleep, deploy roll); retry.
+    } finally {
+      this.pollInFlight = false;
+      if (!this.closed) {
+        const pollImmediately = this.pollAfterCurrent;
+        this.pollAfterCurrent = false;
+        this.schedulePoll(pollImmediately ? 0 : this.nextPollDelay());
+      }
     }
-    this.schedulePoll(this.anyPairConnecting() ? FAST_POLL_MS : IDLE_POLL_MS);
   }
 
   private reconcileRoster(peers: { id: string; name: string }[]): void {
@@ -475,6 +568,25 @@ export class P2PRoom {
   }
 
   // ── diagnostics + recovery ─────────────────────────────────────────────────
+
+  private scheduleMaintenance(delay: number): void {
+    if (this.closed) return;
+    if (this.pingTimer !== null) clearTimeout(this.pingTimer);
+    this.pingTimer = setTimeout(() => {
+      this.pingTimer = null;
+      this.maintenanceTick();
+    }, delay);
+  }
+
+  private maintenanceTick(): void {
+    if (this.closed) return;
+    const hidden = this.pageIsHidden();
+    this.pingAll();
+    // A hidden page is commonly timer-throttled or frozen entirely. Running
+    // the stall watchdog there would turn suspension into false recovery.
+    if (!hidden) this.watchdog();
+    this.scheduleMaintenance(hidden ? HIDDEN_PING_INTERVAL_MS : PING_INTERVAL_MS);
+  }
 
   private pingAll(): void {
     const wire = JSON.stringify({ t: "ping" });

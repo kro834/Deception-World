@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 
 const loadGate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
@@ -40,10 +40,20 @@ const titleSequenceSourcePart = readFileSync(
   ),
   "utf8",
 );
-const diveVelocity = readFileSync(
-  new URL("../src/components/cinematic/dive-velocity-canvas.tsx", import.meta.url),
+const openingHandoff = readFileSync(
+  new URL("../src/components/cinematic/opening-handoff.tsx", import.meta.url),
   "utf8",
 );
+const worldHomeSourcePartsUrl = new URL(
+  "../source-parts/src/components/world/world-home.tsx/",
+  import.meta.url,
+);
+const worldHomeSourcePartNames = readdirSync(worldHomeSourcePartsUrl)
+  .filter((name) => name.endsWith(".part"))
+  .sort();
+const worldHomeSourceParts = worldHomeSourcePartNames
+  .map((name) => readFileSync(new URL(name, worldHomeSourcePartsUrl), "utf8"))
+  .join("");
 
 test("the iPhone archive entry closes its menu and never waits for the full standalone document", () => {
   assert.match(
@@ -88,34 +98,39 @@ test("title and archive routes ship the same deployment-safe dive animation", ()
   assert.doesNotMatch(transitionStyles, /150vmax/);
 });
 
-test("the opening dive adds an adaptive, mobile-bounded perspective layer", () => {
-  assert.match(titleSequence, /createPortal/);
+test("the opening dive uses the shared mobile-safe handoff layer", () => {
+  assert.match(titleSequence, /beginOpeningHandoff\(\{/);
   assert.match(titleSequence, /waitForVisualPaint/);
-  assert.match(titleSequence, /title-world-dive-overlay is-diving/);
-  assert.match(titleSequence, /data-dive-version="ios-portal-v2"/);
-  assert.match(titleSequence, /<DiveVelocityCanvas active arriving=/);
-  assert.match(titleSequence, /window\.scrollTo\(\{ top: 0, left: 0, behavior: "auto" \}\)/);
-  assert.match(titleSequence, /WORLD_DIVE_REDUCED_MIN_MS = 520/);
-  assert.match(titleSequence, /WORLD_DIVE_REDUCED_EXIT_MS = 340/);
-  assert.match(titleSequence, /is-reduced-dive/);
-  assert.match(diveVelocity, /maxPixels = compact \? 1_350_000 : 3_200_000/);
-  assert.match(diveVelocity, /device\.connection\?\.saveData/);
-  assert.match(diveVelocity, /slowFrames >= 7/);
-  assert.match(diveVelocity, /cancelAnimationFrame\(frame\)/);
-  assert.match(diveVelocity, /prefers-reduced-motion: reduce/);
-  assert.match(diveVelocity, /context \?\?= canvas\.getContext\("2d"\)/);
-  assert.match(transitionStyles, /\.cine-stage\.is-diving \.cine-dive-velocity/);
-  assert.match(transitionStyles, /\.cine-stage\.is-arriving \.cine-dive-velocity/);
-  assert.match(transitionStyles, /\.cine-stage\.is-arriving \.cine-dive-flash \{\s*inset: -8vh 0;/);
-  assert.match(transitionStyles, /\.cine-dive-velocity \{\s*display: none;/);
-  assert.match(transitionStyles, /\.cine-stage\.is-reduced-dive\.is-diving \.cine-dive-tunnel/);
-  assert.match(transitionStyles, /dw-dive-reduced-light/);
-  assert.match(transitionStyles, /\.title-world-dive-overlay \{/);
-  assert.match(transitionStyles, /z-index: 2147483000/);
+  assert.match(titleSequence, /transitionCovered:\s*true/);
+  assert.doesNotMatch(
+    titleSequence,
+    /createPortal|title-world-dive-overlay|DiveVelocityCanvas|window\.scrollTo/,
+  );
+  assert.match(openingHandoff, /createPortal/);
+  assert.match(openingHandoff, /data-opening-handoff-root/);
+  assert.match(openingHandoff, /window\.visualViewport/);
+  assert.match(transitionStyles, /\[data-opening-handoff-root\]\s*\{/);
+  assert.match(
+    transitionStyles,
+    /\[data-opening-handoff-root\]\s*\{[\s\S]{0,700}?z-index:\s*2147483200/,
+  );
+  assert.match(
+    transitionStyles,
+    /@media \(max-width: 640px\)[\s\S]*?\[data-opening-handoff-root\]/,
+  );
+  assert.match(
+    transitionStyles,
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-opening-handoff-root\]/,
+  );
 });
 
-test("the deployment assembler preserves the iPhone title dive implementation", () => {
+test("the deployment assembler preserves the shared title handoff implementation", () => {
   assert.equal(titleSequenceSourcePart, titleSequence);
+});
+
+test("the deployment assembler preserves the complete WorldHome implementation", () => {
+  assert.ok(worldHomeSourcePartNames.length > 0);
+  assert.equal(worldHomeSourceParts, worldHome);
 });
 
 test("the shortened opening keeps heavy startup work off the first paint", () => {

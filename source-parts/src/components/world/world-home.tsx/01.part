@@ -1,4 +1,4 @@
-import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -9,6 +9,7 @@ import { RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
   { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
@@ -50,10 +51,11 @@ const RIDERS = [
   { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 22%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
   { id: "realm", no: "02", name: "REALM", ja: "レルム", person: "ベル・アレイン", tone: "#f14a60", img: "/rider-realm.jpeg", pos: "50% 16%", desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。" },
   { id: "lore", no: "03", name: "LORE", ja: "ローア", person: "ローア", tone: "#67d8ff", img: "/rider-loa.jpeg", pos: "50% 12%", desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。" },
-  { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandaal.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },
+  { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },
   { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
   { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
   { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
+  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail-20260825.jpeg", pos: "50% 8%", desc: "最期の死者" },
 ];
 
 const COLUMNS = [

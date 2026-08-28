@@ -423,15 +423,20 @@ function ZeusButton({
       }
     };
     const cancelOnBlur = () => cancelDanglingPointer();
+    const cancelWhenHidden = () => {
+      if (document.hidden) cancelDanglingPointer();
+    };
     window.addEventListener("pointerup", cancelDanglingPointer);
     window.addEventListener("pointercancel", cancelDanglingPointer);
     window.addEventListener("blur", cancelOnBlur);
     window.addEventListener("pagehide", cancelOnBlur);
+    document.addEventListener("visibilitychange", cancelWhenHidden);
     return () => {
       window.removeEventListener("pointerup", cancelDanglingPointer);
       window.removeEventListener("pointercancel", cancelDanglingPointer);
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
+      document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
   }, [clearHoldTimer]);
 
@@ -494,7 +499,6 @@ function ZeusButton({
       onPointerDown={(event) => {
         if (navigating) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
-        event.preventDefault();
         const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
@@ -506,17 +510,17 @@ function ZeusButton({
         };
         moved.current = false;
         held.current = false;
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          /* Continue with the normal pointer stream when capture is unavailable. */
-        }
         clearHoldTimer();
         holdTimer.current = window.setTimeout(() => {
           if (activePointer.current !== event.pointerId) return;
           held.current = true;
           target.dataset.dragging = "true";
           target.setAttribute("aria-grabbed", "true");
+          try {
+            target.setPointerCapture(event.pointerId);
+          } catch {
+            /* The document-wide guards still terminate an uncaptured drag. */
+          }
           moveToPointer(latestPointer.current.x, latestPointer.current.y);
         }, LONG_PRESS_MS);
       }}

@@ -1130,3 +1130,531 @@ html[data-route-scroll-settling="true"] {
     opacity: 0;
   }
 }
+
+/* Persistent opening handoff ------------------------------------------------ */
+
+[data-opening-handoff-root] {
+  --opening-vv-left: 0px;
+  --opening-vv-top: 0px;
+  --opening-vv-width: 100vw;
+  --opening-vv-height: 100vh;
+  --opening-handoff-blue: 102 225 255;
+  --opening-handoff-pink: 255 83 203;
+  --opening-handoff-gold: 236 198 116;
+  position: fixed;
+  opacity: 1;
+  transform: translateZ(0);
+  z-index: 2147483200;
+  left: var(--opening-vv-left);
+  top: var(--opening-vv-top);
+  width: var(--opening-vv-width);
+  height: var(--opening-vv-height);
+  overflow: hidden;
+  isolation: isolate;
+  contain: strict;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+  overscroll-behavior: none;
+  color: rgb(222 246 255);
+  background:
+    radial-gradient(circle at 50% 50%, rgb(21 50 72 / 0.76), transparent 44%),
+    linear-gradient(145deg, #020610 0%, #061323 48%, #02040a 100%);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-opening-handoff-root]::before,
+[data-opening-handoff-root]::after {
+  position: absolute;
+  z-index: 4;
+  inset: -24%;
+  content: "";
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+[data-opening-handoff-root]::before {
+  background: conic-gradient(
+    from 218deg at 50% 50%,
+    transparent 0 12%,
+    rgb(var(--opening-handoff-blue) / 0.12) 17%,
+    transparent 27% 51%,
+    rgb(var(--opening-handoff-pink) / 0.1) 58%,
+    transparent 68% 100%
+  );
+  filter: blur(30px);
+  opacity: 0.86;
+  animation: opening-handoff-ambient-spin 7.2s linear infinite;
+}
+
+[data-opening-handoff-root]::after {
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 18%,
+      rgb(0 0 0 / 0.2) 58%,
+      rgb(0 0 0 / 0.78) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(var(--opening-handoff-blue) / 0.08),
+      transparent 30% 70%,
+      rgb(var(--opening-handoff-pink) / 0.08)
+    );
+  mix-blend-mode: screen;
+  opacity: 0.76;
+}
+
+[data-opening-handoff-backdrop] {
+  position: absolute;
+  z-index: 2;
+  inset: -18%;
+  background:
+    repeating-conic-gradient(
+      from 22deg at 50% 50%,
+      transparent 0deg 7deg,
+      rgb(var(--opening-handoff-blue) / 0.045) 8deg 8.7deg,
+      transparent 9deg 18deg
+    ),
+    radial-gradient(ellipse at 50% 54%, rgb(var(--opening-handoff-blue) / 0.22), transparent 34%),
+    conic-gradient(
+      from 64deg,
+      transparent,
+      rgb(var(--opening-handoff-pink) / 0.2),
+      transparent 34%,
+      rgb(var(--opening-handoff-blue) / 0.22),
+      transparent 72%
+    );
+  filter: saturate(1.15);
+  opacity: 1;
+  transform: translateZ(0);
+  will-change: transform, opacity, filter;
+  animation: opening-handoff-backdrop-drift 4.8s ease-in-out infinite alternate;
+}
+
+[data-opening-handoff-video] {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  min-width: 1px;
+  min-height: 1px;
+  border: 0;
+  object-fit: cover;
+  object-position: 50% 50%;
+  background: #02050b;
+  opacity: 0.8;
+  transform-origin: 0 0;
+  will-change: transform, opacity, filter, clip-path;
+  backface-visibility: hidden;
+}
+
+[data-opening-handoff-grid] {
+  position: absolute;
+  z-index: 3;
+  inset: -12%;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgb(var(--opening-handoff-blue) / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--opening-handoff-blue) / 0.08) 1px, transparent 1px);
+  background-size: clamp(28px, 4vw, 72px) clamp(28px, 4vw, 72px);
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    #000 0 18%,
+    rgb(0 0 0 / 0.6) 45%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(circle at 50% 50%, #000 0 18%, rgb(0 0 0 / 0.6) 45%, transparent 78%);
+  opacity: 0.58;
+  transform: perspective(900px) rotateX(58deg) scale(1.42) translate3d(0, 14%, 0);
+  transform-origin: 50% 72%;
+  will-change: background-position, opacity, transform;
+  animation: opening-handoff-grid-run 1.25s linear infinite;
+}
+
+[data-opening-handoff-grid] > i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 120vmax;
+  background: linear-gradient(transparent, rgb(var(--opening-handoff-blue) / 0.74), transparent);
+  box-shadow: 0 0 16px rgb(var(--opening-handoff-blue) / 0.64);
+  opacity: 0.34;
+  transform-origin: 50% 0;
+}
+
+[data-opening-handoff-grid] > i:nth-child(1) {
+  transform: rotate(34deg);
+}
+
+[data-opening-handoff-grid] > i:nth-child(2) {
+  background: linear-gradient(transparent, rgb(var(--opening-handoff-pink) / 0.66), transparent);
+  box-shadow: 0 0 16px rgb(var(--opening-handoff-pink) / 0.58);
+  transform: rotate(152deg);
+}
+
+[data-opening-handoff-grid] > i:nth-child(3) {
+  background: linear-gradient(transparent, rgb(var(--opening-handoff-gold) / 0.56), transparent);
+  box-shadow: 0 0 15px rgb(var(--opening-handoff-gold) / 0.48);
+  transform: rotate(268deg);
+}
+
+[data-opening-handoff-hud] {
+  position: absolute;
+  z-index: 5;
+  min-width: 1px;
+  min-height: 1px;
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.28);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      transparent 48%,
+      rgb(var(--opening-handoff-blue) / 0.06) 49% 50%,
+      transparent 51%
+    ),
+    repeating-conic-gradient(
+      from 0deg,
+      rgb(var(--opening-handoff-blue) / 0.32) 0deg 0.55deg,
+      transparent 0.65deg 7.5deg
+    );
+  box-shadow:
+    inset 0 0 40px rgb(var(--opening-handoff-blue) / 0.06),
+    0 0 54px rgb(var(--opening-handoff-blue) / 0.1);
+  opacity: 0.82;
+  transform-origin: 0 0;
+  will-change: transform, opacity, filter;
+  animation: opening-handoff-hud-pulse 1.8s ease-in-out infinite alternate;
+}
+
+[data-opening-handoff-hud] > span,
+[data-opening-handoff-hud] > b {
+  position: absolute;
+  left: 50%;
+  display: block;
+  width: min(72%, 360px);
+  overflow: hidden;
+  color: rgb(216 247 255 / 0.76);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(7px, 0.72vw, 11px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 12px rgb(var(--opening-handoff-blue) / 0.68);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+[data-opening-handoff-hud] > span {
+  top: 15%;
+}
+
+[data-opening-handoff-hud] > b {
+  bottom: 15%;
+  color: rgb(var(--opening-handoff-gold) / 0.76);
+  letter-spacing: 0.36em;
+}
+
+[data-opening-handoff-hud] > i {
+  position: absolute;
+  inset: 9%;
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.21);
+  border-right-color: rgb(var(--opening-handoff-pink) / 0.62);
+  border-radius: 50%;
+  animation: opening-handoff-ring-spin 4.2s linear infinite;
+}
+
+[data-opening-handoff-hud] > i:nth-of-type(2) {
+  inset: 19%;
+  border-color: rgb(var(--opening-handoff-pink) / 0.22);
+  border-left-color: rgb(var(--opening-handoff-blue) / 0.7);
+  animation-direction: reverse;
+  animation-duration: 3.1s;
+}
+
+[data-opening-handoff-hud] > i:nth-of-type(3) {
+  inset: 31%;
+  border-style: dashed;
+  border-color: rgb(var(--opening-handoff-gold) / 0.38);
+  animation-duration: 5.8s;
+}
+
+[data-opening-handoff-line] {
+  position: absolute;
+  z-index: 5;
+  min-width: 1px;
+  min-height: 2px;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--opening-handoff-blue) / 0.9) 22%,
+    rgb(var(--opening-handoff-gold) / 0.8) 50%,
+    rgb(var(--opening-handoff-pink) / 0.9) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 7px rgb(var(--opening-handoff-blue) / 0.72),
+    0 0 18px rgb(var(--opening-handoff-pink) / 0.36);
+  opacity: 1;
+  transform-origin: 0 0;
+  will-change: transform, opacity, filter, clip-path;
+}
+
+[data-opening-handoff-line] > i {
+  position: absolute;
+  inset: -4px auto -4px -28%;
+  width: 24%;
+  background: linear-gradient(90deg, transparent, #fff, transparent);
+  filter: blur(1px);
+  animation: opening-handoff-line-scan 0.86s ease-in-out infinite;
+}
+
+[data-opening-handoff-logo] {
+  position: absolute;
+  z-index: 6;
+  min-width: 1px;
+  min-height: 1px;
+  overflow: visible;
+  border-radius: clamp(8px, 1.4vw, 24px);
+  opacity: 1;
+  transform-origin: 0 0;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+[data-opening-handoff-logo] > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: contain;
+  object-position: 50% 50%;
+  filter: drop-shadow(0 0 8px rgb(var(--opening-handoff-blue) / 0.52))
+    drop-shadow(0 0 22px rgb(var(--opening-handoff-pink) / 0.26));
+}
+
+[data-opening-handoff-logo-flare] {
+  position: absolute;
+  z-index: -1;
+  inset: -38%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgb(255 255 255 / 0.52),
+      rgb(var(--opening-handoff-blue) / 0.2) 20%,
+      transparent 58%
+    ),
+    conic-gradient(
+      from 0deg,
+      transparent,
+      rgb(var(--opening-handoff-pink) / 0.34),
+      transparent 34% 70%,
+      rgb(var(--opening-handoff-blue) / 0.32),
+      transparent
+    );
+  filter: blur(12px);
+  opacity: 0.74;
+  animation: opening-handoff-logo-breathe 1.4s ease-in-out infinite alternate;
+}
+
+[data-opening-handoff-logo-orbit] {
+  position: absolute;
+  z-index: 1;
+  inset: -22%;
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.42);
+  border-top-color: rgb(var(--opening-handoff-pink) / 0.82);
+  border-bottom-color: rgb(var(--opening-handoff-gold) / 0.62);
+  border-radius: 50%;
+  opacity: 0.66;
+  animation: opening-handoff-ring-spin 2.6s linear infinite;
+}
+
+[data-opening-handoff-focus] {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  top: 50%;
+  width: clamp(84px, 18vmin, 220px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.68);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fff 0 2%, rgb(var(--opening-handoff-blue) / 0.58) 5%, transparent 32%),
+    conic-gradient(
+      from 0deg,
+      transparent,
+      rgb(var(--opening-handoff-pink) / 0.54),
+      transparent 30% 70%,
+      rgb(var(--opening-handoff-blue) / 0.56),
+      transparent
+    );
+  box-shadow:
+    inset 0 0 38px rgb(var(--opening-handoff-blue) / 0.22),
+    0 0 18px rgb(var(--opening-handoff-blue) / 0.72),
+    0 0 70px rgb(var(--opening-handoff-pink) / 0.34);
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.24);
+  will-change: transform, opacity;
+}
+
+[data-opening-handoff-letterbox] {
+  position: absolute;
+  z-index: 9;
+  left: 0;
+  width: 100%;
+  height: clamp(24px, 7.2vh, 84px);
+  background: linear-gradient(#000, rgb(0 0 0 / 0.94));
+  box-shadow: 0 0 30px rgb(0 0 0 / 0.9);
+  will-change: transform;
+}
+
+[data-opening-handoff-letterbox="top"] {
+  top: 0;
+  transform-origin: 50% 0;
+}
+
+[data-opening-handoff-letterbox="bottom"] {
+  bottom: 0;
+  background: linear-gradient(rgb(0 0 0 / 0.94), #000);
+  transform-origin: 50% 100%;
+}
+
+[data-opening-handoff-root][data-opening-handoff-mode="economy"],
+[data-opening-handoff-root][data-opening-handoff-mode="economy"]::before,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"]::after,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] *,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] *::before,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] *::after {
+  animation: none !important;
+}
+
+[data-opening-handoff-root][data-opening-handoff-mode="economy"]::before,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] [data-opening-handoff-backdrop] {
+  filter: none;
+}
+
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] [data-opening-handoff-grid] > i,
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] [data-opening-handoff-logo-flare] {
+  display: none;
+}
+
+[data-opening-handoff-root][data-opening-handoff-mode="economy"] [data-opening-handoff-grid] {
+  opacity: 0.34;
+}
+
+[data-opening-handoff-focus-target]:focus {
+  outline: none;
+}
+
+@keyframes opening-handoff-ambient-spin {
+  to {
+    transform: rotate(360deg) scale(1.04);
+  }
+}
+
+@keyframes opening-handoff-backdrop-drift {
+  from {
+    transform: translate3d(-1.8%, -1%, 0) scale(1.02) rotate(-1deg);
+  }
+  to {
+    transform: translate3d(1.8%, 1%, 0) scale(1.08) rotate(1.2deg);
+  }
+}
+
+@keyframes opening-handoff-grid-run {
+  to {
+    background-position:
+      0 clamp(28px, 4vw, 72px),
+      clamp(28px, 4vw, 72px) 0;
+  }
+}
+
+@keyframes opening-handoff-hud-pulse {
+  from {
+    box-shadow:
+      inset 0 0 32px rgb(var(--opening-handoff-blue) / 0.05),
+      0 0 38px rgb(var(--opening-handoff-blue) / 0.08);
+  }
+  to {
+    box-shadow:
+      inset 0 0 52px rgb(var(--opening-handoff-blue) / 0.11),
+      0 0 72px rgb(var(--opening-handoff-pink) / 0.14);
+  }
+}
+
+@keyframes opening-handoff-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes opening-handoff-line-scan {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(530%, 0, 0);
+  }
+}
+
+@keyframes opening-handoff-logo-breathe {
+  from {
+    opacity: 0.48;
+    transform: scale(0.9) rotate(-4deg);
+  }
+  to {
+    opacity: 0.88;
+    transform: scale(1.08) rotate(4deg);
+  }
+}
+
+@media (max-width: 640px) {
+  [data-opening-handoff-root] {
+    --opening-handoff-blue: 110 229 255;
+  }
+
+  [data-opening-handoff-hud] > span,
+  [data-opening-handoff-hud] > b {
+    width: 62%;
+    font-size: 7px;
+    letter-spacing: 0.16em;
+  }
+
+  [data-opening-handoff-letterbox] {
+    height: max(20px, calc(env(safe-area-inset-top) * 0.72));
+  }
+
+  [data-opening-handoff-letterbox="bottom"] {
+    height: max(20px, calc(env(safe-area-inset-bottom) * 0.72));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-opening-handoff-root],
+  [data-opening-handoff-root] *,
+  [data-opening-handoff-root]::before,
+  [data-opening-handoff-root]::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-opening-handoff-root]::before,
+  [data-opening-handoff-grid],
+  [data-opening-handoff-logo-flare],
+  [data-opening-handoff-logo-orbit] {
+    display: none !important;
+  }
+
+  [data-opening-handoff-backdrop] {
+    filter: none !important;
+  }
+}

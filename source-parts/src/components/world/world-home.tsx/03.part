@@ -2,6 +2,7 @@
   const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
+  const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];
 
   const goPoster = (next: number | ((p: number) => number)) => {
     setPoster((p) => {
@@ -13,7 +14,7 @@
   };
 
   const shufflePoster = () => {
-    if (shuffleActive.current) return;
+    if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
     setLocked(true);
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -95,9 +96,42 @@
     const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
     episodeProgrammatic.current = true;
     scrollAxisX(episodeGridRef.current, card ?? null);
-    window.setTimeout(() => {
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
       episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
     }, 520);
+  };
+
+  const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
+    const dialog = episodePickupDialogRef.current;
+    if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
+    setEpisodePickup(index);
+    cancelEpisodePickupScrollReset.current?.();
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
+    cancelEpisodePickupScrollReset.current = settlePickupScroll(dialog, [".episode-pickup-panel"], () => {
+      if (episodePickupOpenedByKeyboard.current) {
+        dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
+      } else {
+        dialog.focus({ preventScroll: true });
+      }
+    });
+  };
+
+  const closeEpisodePickup = () => {
+    cancelEpisodePickupScrollReset.current?.();
+    cancelEpisodePickupScrollReset.current = null;
+    const dialog = episodePickupDialogRef.current;
+    if (dialog?.open) dialog.close();
   };
 
   const openPickup = () => {
@@ -152,7 +186,7 @@
 
   return (
     <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
-      <SideMenuLayer />
+      <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
         <div className="ambient-orb orb-a" />
@@ -162,8 +196,8 @@
 
       <header className="topbar">
         <div className="topbar-leading">
-          <a className="brand" href="#top" aria-label="Deception World トップへ">
-            <span className="brand-sigil">
+          <a ref={openingBrandRef} className="brand" href="#top" aria-label="Deception World トップへ">
+            <span ref={openingSigilRef} className="brand-sigil">
               <i>DW</i>
             </span>
             <span>
@@ -178,11 +212,11 @@
           <a href="#records">RECORDS</a>
         </nav>
         <div className="topbar-actions">
-          <SideMenuTrigger />
+          <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
-      <section className="hero" id="top" data-performance-region>
-        <div className="hero-backdrop" aria-hidden="true">
+      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
+        <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
               <img src={previous.src} alt="" style={{ objectPosition: previous.pos }} decoding="async" />
@@ -203,14 +237,14 @@
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
           <p className="hero-lead">
             救うべきものは、夢の向こうにはない。
             <br />
-            6人の最上位管理人と、7人のライダーが同じ世界で交差する。
+            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
           </p>
           <div className="hero-actions">
             <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">

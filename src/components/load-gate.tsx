@@ -12,6 +12,13 @@ import {
   type ReactNode,
 } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import {
+  OpeningHandoffLayer,
+  type OpeningHandoffDestination,
+  type OpeningHandoffSnapshot,
+  type OpeningHandoffSource,
+} from "@/components/cinematic/opening-handoff";
+import { preloadAssets } from "@/lib/asset-loader";
 
 type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
@@ -34,6 +41,8 @@ type GoOptions = {
 
 type LoadGateApi = {
   go: (opts: GoOptions) => Promise<void>;
+  beginOpeningHandoff: (source: OpeningHandoffSource) => boolean;
+  notifyOpeningDestination: (destination: OpeningHandoffDestination) => void;
 };
 
 const LoadGateContext = createContext<LoadGateApi | null>(null);
@@ -77,6 +86,49 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 const nextFrame = () => new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+
+type Deferred<T> = {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  settled: boolean;
+};
+
+type OpeningHandoffRuntime = {
+  token: number;
+  source: OpeningHandoffSource;
+  covered: Deferred<void>;
+  destination: Deferred<OpeningHandoffDestination | null>;
+  animation: Deferred<void>;
+  destinationValue?: OpeningHandoffDestination;
+};
+
+function createDeferred<T>(): Deferred<T> {
+  let settle: (value: T) => void = () => undefined;
+  const deferred: Deferred<T> = {
+    promise: new Promise<T>((resolve) => {
+      settle = resolve;
+    }),
+    resolve: () => undefined,
+    settled: false,
+  };
+  deferred.resolve = (value) => {
+    if (deferred.settled) return;
+    deferred.settled = true;
+    settle(value);
+  };
+  return deferred;
+}
+
+function dispatchOpeningHandoffState(active: boolean) {
+  if (active) {
+    document.documentElement.dataset.openingHandoffActive = "true";
+  } else {
+    document.documentElement.removeAttribute("data-opening-handoff-active");
+  }
+  document.dispatchEvent(
+    new CustomEvent("deception-world:opening-handoff", { detail: { active } }),
+  );
+}
 const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
 const SCROLL_KEYS = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]);
 let routeScrollMotionLocks = 0;
@@ -149,20 +201,198 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   });
   const busy = useRef(false);
   const transitionId = useRef(0);
+  const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
+  const openingFocusFrames = useRef<number[]>([]);
+  const pathnameRef = useRef(pathname);
+  const [openingSnapshot, setOpeningSnapshot] = useState<OpeningHandoffSnapshot | null>(null);
+
+  pathnameRef.current = pathname;
+
+  const finishOpeningHandoff = useCallback((token: number, restoreFocus = true) => {
+    const runtime = openingHandoff.current;
+    if (!runtime || runtime.token !== token) return;
+    const destination = runtime.destinationValue;
+    for (const frame of openingFocusFrames.current) {
+      window.cancelAnimationFrame(frame);
+    }
+    openingFocusFrames.current = [];
+    runtime.covered.resolve(undefined);
+    runtime.destination.resolve(null);
+    runtime.animation.resolve(undefined);
+    openingHandoff.current = null;
+    setOpeningSnapshot(null);
+    document.documentElement.removeAttribute("data-loading");
+    dispatchOpeningHandoffState(false);
+    busy.current = false;
+
+    if (
+      !restoreFocus ||
+      destination?.path !== "/world" ||
+      !destination.focus?.isConnected ||
+      pathnameRef.current !== "/world" ||
+      document.visibilityState !== "visible"
+    ) {
+      return;
+    }
+
+    const focusTarget = destination.focus;
+    const firstFrame = window.requestAnimationFrame(() => {
+      const secondFrame = window.requestAnimationFrame(() => {
+        openingFocusFrames.current = [];
+        if (
+          transitionId.current === token &&
+          pathnameRef.current === "/world" &&
+          focusTarget.isConnected &&
+          document.visibilityState === "visible"
+        ) {
+          focusTarget.focus({ preventScroll: true });
+        }
+      });
+      openingFocusFrames.current.push(secondFrame);
+    });
+    openingFocusFrames.current.push(firstFrame);
+  }, []);
+
+  const beginOpeningHandoff = useCallback((source: OpeningHandoffSource) => {
+    if (busy.current || openingHandoff.current) return false;
+    busy.current = true;
+    const token = ++transitionId.current;
+    const runtime: OpeningHandoffRuntime = {
+      token,
+      source,
+      covered: createDeferred<void>(),
+      destination: createDeferred<OpeningHandoffDestination | null>(),
+      animation: createDeferred<void>(),
+    };
+    openingHandoff.current = runtime;
+    document.documentElement.dataset.loading = "true";
+    dispatchOpeningHandoffState(true);
+    setOpeningSnapshot({ token, phase: "covering", source });
+    return true;
+  }, []);
+
+  const notifyOpeningHandoffCovered = useCallback((token: number) => {
+    const runtime = openingHandoff.current;
+    if (!runtime || runtime.token !== token) return;
+    runtime.covered.resolve(undefined);
+  }, []);
+
+  const notifyOpeningDestination = useCallback((destination: OpeningHandoffDestination) => {
+    const runtime = openingHandoff.current;
+    if (!runtime || runtime.destination.settled) return;
+    if (destination.path !== "/world" || pathnameRef.current !== "/world") return;
+
+    const targets = [
+      destination.brand,
+      destination.sigil,
+      destination.hero,
+      destination.backdrop,
+      destination.focus,
+    ];
+    if (targets.some((target) => !target?.isConnected)) return;
+
+    runtime.destinationValue = destination;
+    runtime.destination.resolve(destination);
+  }, []);
+
+  const completeOpeningHandoff = useCallback((token: number) => {
+    const runtime = openingHandoff.current;
+    if (!runtime || runtime.token !== token) return;
+    runtime.animation.resolve(undefined);
+  }, []);
 
   useEffect(() => {
     const cancelTransition = () => {
       transitionId.current += 1;
+      for (const frame of openingFocusFrames.current) {
+        window.cancelAnimationFrame(frame);
+      }
+      openingFocusFrames.current = [];
+      const runtime = openingHandoff.current;
+      runtime?.covered.resolve(undefined);
+      runtime?.destination.resolve(null);
+      runtime?.animation.resolve(undefined);
+      openingHandoff.current = null;
+      setOpeningSnapshot(null);
+      dispatchOpeningHandoffState(false);
       busy.current = false;
       document.documentElement.removeAttribute("data-loading");
       setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
     };
     document.addEventListener("deception-world:cancel-route-transition", cancelTransition);
-    return () => document.removeEventListener("deception-world:cancel-route-transition", cancelTransition);
+    window.addEventListener("pagehide", cancelTransition);
+    return () => {
+      document.removeEventListener("deception-world:cancel-route-transition", cancelTransition);
+      window.removeEventListener("pagehide", cancelTransition);
+      for (const frame of openingFocusFrames.current) {
+        window.cancelAnimationFrame(frame);
+      }
+      openingFocusFrames.current = [];
+      const runtime = openingHandoff.current;
+      runtime?.covered.resolve(undefined);
+      runtime?.destination.resolve(null);
+      runtime?.animation.resolve(undefined);
+      openingHandoff.current = null;
+      document.documentElement.removeAttribute("data-loading");
+      dispatchOpeningHandoffState(false);
+      busy.current = false;
+    };
   }, []);
 
   const go = useCallback(
-    async ({ to, hash, transition }: GoOptions) => {
+    async ({ to, hash, assets = [], transition, transitionCovered }: GoOptions) => {
+      if (transitionCovered) {
+        const runtime = openingHandoff.current;
+        if (!runtime || to !== "/world") return;
+        const requestId = runtime.token;
+        const isCurrent = () =>
+          transitionId.current === requestId && openingHandoff.current?.token === requestId;
+
+        try {
+          // Build both warmups inside the guarded region. Besides turning a
+          // synchronous router/preloader failure into a handled rejection,
+          // this guarantees the shared handoff is released by `finally`.
+          const routeWarmup = Promise.resolve()
+            .then(() => router.preloadRoute({ to: to as never }))
+            .catch(() => undefined);
+          const assetWarmup = assets.length
+            ? Promise.resolve()
+                .then(() => preloadAssets(assets, () => undefined))
+                .catch(() => undefined)
+            : Promise.resolve();
+
+          // The opening owns the screen until the shared layer has painted its
+          // complete cover. A fail-safe prevents a permanently stuck route if
+          // the browser aborts animation callbacks while backgrounded.
+          await Promise.race([runtime.covered.promise, wait(1400)]);
+          if (!isCurrent()) return;
+          await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
+          if (!isCurrent()) return;
+          await navigate({ to: to as never, hash });
+          if (!isCurrent()) return;
+          const destination = await Promise.race([
+            runtime.destination.promise,
+            wait(2200).then(() => null),
+          ]);
+          if (!isCurrent() || !destination) return;
+          setOpeningSnapshot({
+            token: requestId,
+            phase: "arriving",
+            source: runtime.source,
+            destination,
+          });
+          // The destination must paint twice before FLIP reads its geometry.
+          // This prevents zero-sized target rects during iOS viewport changes.
+          await nextFrame();
+          await nextFrame();
+          if (!isCurrent()) return;
+          await Promise.race([runtime.animation.promise, wait(1800)]);
+          if (!isCurrent()) return;
+        } finally {
+          if (isCurrent()) finishOpeningHandoff(requestId);
+        }
+        return;
+      }
       if (busy.current) return;
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
       const isZeusTransition = to === "/managers/zeus";
@@ -289,10 +519,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [navigate, pathname, router],
+    [finishOpeningHandoff, navigate, pathname, router],
   );
 
-  const api = useMemo(() => ({ go }), [go]);
+  const api = useMemo(
+    () => ({ go, beginOpeningHandoff, notifyOpeningDestination }),
+    [beginOpeningHandoff, go, notifyOpeningDestination],
+  );
 
   return (
     <LoadGateContext.Provider value={api}>
@@ -301,6 +534,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         active={gate.active}
         variant={gate.variant}
         phase={gate.phase}
+      />
+      <OpeningHandoffLayer
+        snapshot={openingSnapshot}
+        onCovered={notifyOpeningHandoffCovered}
+        onComplete={completeOpeningHandoff}
       />
     </LoadGateContext.Provider>
   );

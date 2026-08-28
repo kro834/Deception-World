@@ -307,6 +307,7 @@ export function SideMenuLayer({
         ref={panelRef}
         id="site-side-panel"
         className="side-panel"
+        data-liquid-pointer="true"
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
@@ -320,6 +321,12 @@ export function SideMenuLayer({
         }}
         onKeyDown={controlled ? onPanelKeyDown : undefined}
       >
+        <LiquidPointerGlow />
+        <span className="side-panel-depth" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         <div className="side-panel-head">
           <div>
             <p>NAVIGATION</p>

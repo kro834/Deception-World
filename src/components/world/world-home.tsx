@@ -1,4 +1,4 @@
-import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -339,8 +339,13 @@ const RiderRail = memo(
 
 export function WorldHome() {
   useWorldMode();
-  const { go } = useLoadGate();
+  const { go, notifyOpeningDestination } = useLoadGate();
   const shellRef = useRef<HTMLDivElement>(null);
+  const openingBrandRef = useRef<HTMLAnchorElement>(null);
+  const openingSigilRef = useRef<HTMLSpanElement>(null);
+  const openingHeroRef = useRef<HTMLElement>(null);
+  const openingBackdropRef = useRef<HTMLDivElement>(null);
+  const openingFocusRef = useRef<HTMLHeadingElement>(null);
   const [initialRiderTab] = useState(() => {
     const returnId = readRiderReturn();
     const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
@@ -350,6 +355,10 @@ export function WorldHome() {
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
   const [shuffling, setShuffling] = useState(false);
+  const [ambientPaused, setAmbientPaused] = useState(() =>
+    typeof document !== "undefined"
+      && (document.hidden || document.documentElement.hasAttribute("data-opening-handoff-active")),
+  );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(initialRiderTab);
@@ -380,6 +389,86 @@ export function WorldHome() {
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
+  const pausedAmbientAnimations = useRef<Animation[]>([]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",
+        brand: openingBrandRef.current,
+        sigil: openingSigilRef.current,
+        hero: openingHeroRef.current,
+        backdrop: openingBackdropRef.current,
+        focus: openingFocusRef.current,
+      };
+      const targets = [
+        destination.brand,
+        destination.sigil,
+        destination.hero,
+        destination.backdrop,
+        destination.focus,
+      ];
+
+      if (
+        window.location.pathname === destination.path
+        && targets.every((target) => target?.isConnected)
+      ) {
+        notifyOpeningDestination(destination);
+        return;
+      }
+
+      if (window.performance.now() < destinationReadyDeadline) {
+        retryFrame = window.requestAnimationFrame(announceDestination);
+      }
+    };
+
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        announceDestination();
+      });
+    });
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+      window.cancelAnimationFrame(retryFrame);
+    };
+  }, [notifyOpeningDestination]);
+
+  useEffect(() => {
+    let handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+    const syncAmbientPause = () => {
+      setAmbientPaused(document.hidden || handoffActive);
+    };
+    const handleVisibilityChange = () => {
+      handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    const handleOpeningHandoff = (event: Event) => {
+      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
+      handoffActive = typeof detail?.active === "boolean"
+        ? detail.active
+        : document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    syncAmbientPause();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
 
   useEffect(() => {
     clearRiderReturn();
@@ -418,7 +507,7 @@ export function WorldHome() {
   }, [selectRider]);
 
   useEffect(() => {
-    if (locked) return;
+    if (locked || ambientPaused) return;
     const t = window.setInterval(() => {
       setPoster((p) => {
         setPrevPoster(p);
@@ -426,9 +515,10 @@ export function WorldHome() {
       });
     }, 5200);
     return () => window.clearInterval(t);
-  }, [locked]);
+  }, [ambientPaused, locked]);
 
   useEffect(() => {
+    if (ambientPaused) return;
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
     const timer = window.setTimeout(() => {
@@ -438,7 +528,47 @@ export function WorldHome() {
       image.src = POSTERS[(poster + 2) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [poster]);
+  }, [ambientPaused, poster]);
+
+  useEffect(() => {
+    if (!ambientPaused) {
+      const paused = pausedAmbientAnimations.current;
+      pausedAmbientAnimations.current = [];
+      paused.forEach((animation) => {
+        if (animation.playState !== "paused") return;
+        try {
+          animation.play();
+        } catch {
+          // A route handoff can detach one animated node while the remaining
+          // ambient loops are still valid. Resume each loop independently.
+        }
+      });
+      return;
+    }
+    const pauseInfiniteAnimations = () => {
+      const shell = shellRef.current;
+      if (!shell || typeof shell.getAnimations !== "function") return;
+      const runningLoops = shell.getAnimations({ subtree: true }).filter((animation) => (
+        animation.playState === "running" && animation.effect?.getTiming().iterations === Infinity
+      ));
+      runningLoops.forEach((animation) => animation.pause());
+      pausedAmbientAnimations.current = Array.from(new Set([
+        ...pausedAmbientAnimations.current,
+        ...runningLoops,
+      ]));
+    };
+    pauseInfiniteAnimations();
+    const frame = window.requestAnimationFrame(pauseInfiniteAnimations);
+    return () => window.cancelAnimationFrame(frame);
+  }, [ambientPaused]);
+
+  useEffect(() => {
+    if (!ambientPaused || !shuffleActive.current) return;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setShuffling(false);
+  }, [ambientPaused]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -530,7 +660,7 @@ export function WorldHome() {
   };
 
   const shufflePoster = () => {
-    if (shuffleActive.current) return;
+    if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
     setLocked(true);
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -712,8 +842,8 @@ export function WorldHome() {
 
       <header className="topbar">
         <div className="topbar-leading">
-          <a className="brand" href="#top" aria-label="Deception World トップへ">
-            <span className="brand-sigil">
+          <a ref={openingBrandRef} className="brand" href="#top" aria-label="Deception World トップへ">
+            <span ref={openingSigilRef} className="brand-sigil">
               <i>DW</i>
             </span>
             <span>
@@ -731,8 +861,8 @@ export function WorldHome() {
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
-      <section className="hero" id="top" data-performance-region>
-        <div className="hero-backdrop" aria-hidden="true">
+      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
+        <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
               <img src={previous.src} alt="" style={{ objectPosition: previous.pos }} decoding="async" />
@@ -753,7 +883,7 @@ export function WorldHome() {
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>

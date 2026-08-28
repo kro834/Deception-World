@@ -54,7 +54,7 @@
               <span>劇場版第二作</span>
             </p>
             <p>世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。</p>
-            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ。異なる立場を背負った七人は、ひとつの結末へ向けて交差する。</p>
+            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。</p>
           </div>
         </div>
 
@@ -72,8 +72,8 @@
             <ManagerRail ref={managerRail} />
 
             {managerTab === 0 ? (
-              <div className="manager-archive-panel is-managers" role="tabpanel">
-                <div className="signal-array" aria-label="六詠を示す6つのシグナル">
+              <div key="managers" className="manager-archive-panel is-managers" role="tabpanel">
+                <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
                   <GuardedLink
                     className="signal has-visual is-accessible is-face-safe zeus-signal"
                     to="/managers/zeus"
@@ -165,13 +165,9 @@
                 </div>
               </div>
             ) : managerTab === 1 ? (
-              <div className="manager-archive-panel is-unmanaged" role="tabpanel">
-                <p className="system-label">UNMANAGED / REVERSE</p>
-                <h3 className="unmanaged-heading">
-                  管理外
-                </h3>
-                <p>個体情報へのアクセスは制限されています。</p>
-                <div className="unmanaged-array" aria-label="管理外">
+              <div key="unmanaged" className="manager-archive-panel is-unmanaged" role="tabpanel">
+                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
+                <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
                   <button
                     className="dante-archive"
                     type="button"
@@ -220,6 +216,9 @@
                       <i>ACCESS //</i>
                     </span>
                   </button>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
+                  ))}
                 </div>
               </div>
             ) : (

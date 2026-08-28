@@ -6,16 +6,7 @@
             {EPISODES.map((ep, i) => (
               <article
                 key={ep.no}
-                className={i === episode ? "episode-card is-active" : "episode-card"}
-                role="button"
-                tabIndex={0}
-                aria-pressed={i === episode}
-                onClick={() => goEpisode(i)}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  goEpisode(i);
-                }}
+                className={`episode-card${i === episode ? " is-active" : ""}${ep.pickups?.length ? " has-pickup" : ""}`}
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
@@ -32,6 +23,33 @@
                     <small>IDENTIFIED RECORD</small>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  className="episode-card-select"
+                  aria-label={`EP.${ep.no} ${ep.title}を選択`}
+                  aria-pressed={i === episode}
+                  onClick={() => goEpisode(i)}
+                />
+                {ep.pickups?.length ? (
+                  <button
+                    type="button"
+                    className="episode-pickup-plus ios26-glass"
+                    data-liquid-pointer="true"
+                    aria-haspopup="dialog"
+                    aria-controls="episode-pickup-dialog"
+                    aria-label={`EP.${ep.no}のピックアップを開く`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      openEpisodePickup(i, event.currentTarget, event.detail === 0);
+                    }}
+                  >
+                    <LiquidPointerGlow />
+                    <span className="episode-pickup-plus-icon" aria-hidden="true">
+                      <UiVectorIcon kind="plus" size={23} />
+                    </span>
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>
@@ -66,6 +84,94 @@
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
+
+      <dialog
+        ref={episodePickupDialogRef}
+        id="episode-pickup-dialog"
+        className="episode-pickup-dialog"
+        tabIndex={-1}
+        aria-labelledby="episode-pickup-title"
+        onClose={() => {
+          const dialog = episodePickupDialogRef.current;
+          if (dialog) resetPickupScroll(dialog, [".episode-pickup-panel"]);
+          setEpisodePickup(null);
+          if (!episodePickupOpenedByKeyboard.current) {
+            const trigger = episodePickupTriggerRef.current;
+            trigger?.blur();
+            window.requestAnimationFrame(() => trigger?.blur());
+          }
+          episodePickupTriggerRef.current = null;
+          episodePickupOpenedByKeyboard.current = false;
+        }}
+        onCancel={(event) => {
+          event.preventDefault();
+          closeEpisodePickup();
+        }}
+        onClick={(event) => {
+          if (event.target === episodePickupDialogRef.current) closeEpisodePickup();
+        }}
+      >
+        <div className="episode-pickup-panel">
+          <button
+            type="button"
+            className="episode-pickup-close ios26-glass"
+            data-liquid-pointer="true"
+            onClick={closeEpisodePickup}
+            aria-label="エピソードのピックアップを閉じる"
+          >
+            <LiquidPointerGlow />
+            <span className="episode-pickup-close-icon" aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </span>
+          </button>
+          <header className="episode-pickup-heading">
+            <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
+            <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>
+            <p>IDENTIFIED CHARACTER / RIDER RECORDS</p>
+          </header>
+          <div className="episode-pickup-grid">
+            {selectedEpisodePickup?.pickups
+              ? selectedEpisodePickup.pickups.map((item, index) => (
+                  <GuardedLink
+                    className="episode-pickup-item"
+                    key={item.label}
+                    to={item.to}
+                    assets={item.assets}
+                    beforeNavigate={closeEpisodePickup}
+                    aria-label={`${item.label}の個別ページを開く`}
+                  >
+                    <figure>
+                      <img
+                        src={item.src}
+                        alt={item.alt}
+                        style={{ objectPosition: item.pos }}
+                        width={item.width}
+                        height={item.height}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index === 0 ? "high" : "low"}
+                      />
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    </figure>
+                    <div>
+                      <small>EP.{selectedEpisodePickup.no} / PICKUP</small>
+                      <h3>
+                        {item.displayLines?.map((line) => (
+                          <span className="episode-pickup-name-line" key={line}>
+                            <NameText value={line} />
+                          </span>
+                        )) ?? <NameText value={item.label} />}
+                      </h3>
+                      <span className="episode-pickup-open" aria-hidden="true">
+                        OPEN DOSSIER <UiVectorIcon kind="arrow-right" size={15} />
+                      </span>
+                    </div>
+                  </GuardedLink>
+                ))
+              : null}
+          </div>
+        </div>
+      </dialog>
 
       <dialog
         ref={pickupDialogRef}
