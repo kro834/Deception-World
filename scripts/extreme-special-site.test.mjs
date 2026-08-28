@@ -123,6 +123,8 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
 
 test("Extreme stage rail supports liquid long-press and swipe selection", () => {
   assert.match(component, /className="rxs-stage-tabs liquid-swipe-tabs exs-stage-tabs"/);
+  assert.match(component, /middle: \{[\s\S]*?label: "ミドル"/);
+  assert.match(component, /ultra: \{[\s\S]*?label: "ウルトラ"/);
   assert.match(component, /initRail\(rail\)/);
   assert.match(component, /railselect/);
   assert.match(component, /タップ、長押し、または左右へのスライドで切り替え/);

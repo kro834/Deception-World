@@ -35,7 +35,7 @@ const EXTREME_STAGES: Record<
   }
 > = {
   middle: {
-    label: "エクスプリーム",
+    label: "ミドル",
     code: "MIDDLE",
     image: "/saga-extreme-middle.webp",
     alt: "仮面ライダーエクスプリームサーガの全身ビジュアル",
