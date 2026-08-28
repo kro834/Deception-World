@@ -8,6 +8,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 
 type RexonanceStage = "standard" | "max" | "ultra";
 type P14Baseline = "p1" | "p2";
+type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
 
 const STAGES: Record<
   RexonanceStage,
@@ -54,36 +55,51 @@ const STAGES: Record<
   },
 };
 
-const COMPARISONS = [
+const PERFORMANCE_BASELINES: Record<
+  PerformanceBaseline,
   {
-    label: "パンチ力",
-    current: "332.2t",
-    previous: "205.6t",
-    gain: "+61.6%",
-    bar: 62,
+    label: string;
+    code: string;
+    metrics: readonly {
+      label: string;
+      current: string;
+      previous: string;
+      gain: string;
+      bar: number;
+    }[];
+  }
+> = {
+  vertex: {
+    label: "ヴァーテックス",
+    code: "VERTEX STANDARD",
+    metrics: [
+      { label: "パンチ力", current: "332.2t", previous: "68t", gain: "+388.5%", bar: 20.5 },
+      { label: "キック力", current: "480.5t", previous: "172.4t", gain: "+178.7%", bar: 35.9 },
+      { label: "ジャンプ力", current: "6000m", previous: "100.0m", gain: "+5900%", bar: 1.7 },
+      { label: "100m走", current: "0.00021秒", previous: "0.6秒", gain: "−99.97%", bar: 0.04 },
+    ],
   },
-  {
-    label: "キック力",
-    current: "480.5t",
-    previous: "308.9t",
-    gain: "+55.6%",
-    bar: 64,
+  vinculum: {
+    label: "ヴィンクルム",
+    code: "VINCULUM STANDARD",
+    metrics: [
+      { label: "パンチ力", current: "332.2t", previous: "98.8t〜", gain: "+236.2%", bar: 29.7 },
+      { label: "キック力", current: "480.5t", previous: "198.8t〜", gain: "+141.7%", bar: 41.4 },
+      { label: "ジャンプ力", current: "6000m", previous: "188.8m", gain: "+3078.0%", bar: 3.1 },
+      { label: "100m走", current: "0.00021秒", previous: "0.1秒", gain: "−99.79%", bar: 0.21 },
+    ],
   },
-  {
-    label: "ジャンプ力",
-    current: "6000m",
-    previous: "1033.5m",
-    gain: "+480.6%",
-    bar: 17,
+  extreme: {
+    label: "エクスプリーム",
+    code: "EXTREME STANDARD",
+    metrics: [
+      { label: "パンチ力", current: "332.2t", previous: "205.6t〜", gain: "+61.6%", bar: 61.9 },
+      { label: "キック力", current: "480.5t", previous: "308.9t〜", gain: "+55.6%", bar: 64.3 },
+      { label: "ジャンプ力", current: "6000m", previous: "1033.5m", gain: "+480.6%", bar: 17.2 },
+      { label: "100m走", current: "0.00021秒", previous: "0.002秒", gain: "−89.5%", bar: 10.5 },
+    ],
   },
-  {
-    label: "100m走",
-    current: "0.00021秒",
-    previous: "0.002秒",
-    gain: "−89.5%",
-    bar: 11,
-  },
-] as const;
+};
 
 const P14_METRICS = [
   {
@@ -194,12 +210,14 @@ export function RexonanceSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
+  const [performanceBaseline, setPerformanceBaseline] = useState<PerformanceBaseline>("extreme");
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
+  const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
 
   useEffect(() => {
@@ -360,7 +378,10 @@ export function RexonanceSaga() {
             <br />
             それが、標準状態。
           </h2>
-          <span>公開済みの標準カタログ値で、エクスプリームサーガ標準値と比較しています。</span>
+          <span>
+            公開済みの標準カタログ値で、{activePerformanceBaseline.label}
+            サーガ標準値と比較しています。
+          </span>
         </header>
 
         <div className="rxs-headline-metrics">
@@ -381,6 +402,20 @@ export function RexonanceSaga() {
         </div>
 
         <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
+          <label className="rxs-comparison-selector">
+            <span>iOS標準選択</span>
+            <select
+              value={performanceBaseline}
+              aria-label="レクソナンスの比較対象"
+              onChange={(event) =>
+                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline)
+              }
+            >
+              <option value="vertex">ヴァーテックスサーガ</option>
+              <option value="vinculum">ヴィンクルムサーガ</option>
+              <option value="extreme">エクスプリームサーガ</option>
+            </select>
+          </label>
           <div className="rxs-comparison-key" aria-hidden="true">
             <span>
               <i className="is-rexonance" />
@@ -388,31 +423,41 @@ export function RexonanceSaga() {
             </span>
             <span>
               <i className="is-extreme" />
-              エクスプリーム
+              {activePerformanceBaseline.label}
             </span>
           </div>
-          {COMPARISONS.map((metric) => (
-            <article key={metric.label}>
-              <header>
-                <div>
-                  <small>{metric.label}</small>
-                  <strong>{metric.current}</strong>
+          <div
+            key={performanceBaseline}
+            className="rxs-comparison-metrics"
+            data-baseline={performanceBaseline}
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {activePerformanceBaseline.metrics.map((metric) => (
+              <article key={metric.label}>
+                <header>
+                  <div>
+                    <small>{metric.label}</small>
+                    <strong>{metric.current}</strong>
+                  </div>
+                  <b>{metric.gain}</b>
+                </header>
+                <div
+                  className="rxs-bars"
+                  aria-label={`${metric.label}、レクソナンス${metric.current}、${activePerformanceBaseline.label}${metric.previous}`}
+                >
+                  <i className="is-rexonance" />
+                  <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
                 </div>
-                <b>{metric.gain}</b>
-              </header>
-              <div
-                className="rxs-bars"
-                aria-label={`${metric.label}、レクソナンス${metric.current}、エクスプリーム${metric.previous}`}
-              >
-                <i className="is-rexonance" />
-                <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
-              </div>
-              <p>EXTREME STANDARD / {metric.previous}</p>
-            </article>
-          ))}
+                <p>
+                  {activePerformanceBaseline.code} / {metric.previous}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          100m走は所要時間の短縮率です。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
+          選択した形態を基準として、レクソナンスの標準カタログ値との差を表示しています。100m走は所要時間の短縮率です。ヴィンクルム／エクスプリームの「〜」は公開値が下限値であることを示します。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
         </p>
       </section>
 

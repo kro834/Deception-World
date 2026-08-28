@@ -246,7 +246,7 @@
   bottom: -27%;
   width: min(78vw, 940px);
   aspect-ratio: 3 / 4;
-  translate: 50% calc(var(--rxs-hero-progress) * 5%);
+  translate: 50% calc(18px + var(--rxs-hero-progress) * 5%);
   scale: calc(1 + var(--rxs-hero-progress) * 0.035);
   transform-origin: 50% 40%;
   pointer-events: none;
@@ -424,6 +424,44 @@
   background: rgb(0 0 0 / 34%);
 }
 
+.rxs-comparison-selector {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 18px 20px;
+  border: 1px solid rgb(255 255 255 / 11%);
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgb(105 234 255 / 8%), rgb(255 121 220 / 7%));
+}
+
+.rxs-comparison-selector > span {
+  color: #8b96a4;
+  font-size: 10px;
+  font-weight: 720;
+  letter-spacing: 0.16em;
+}
+
+.rxs-comparison-selector select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid rgb(132 220 255 / 28%);
+  border-radius: 14px;
+  color: #f6f9ff;
+  background: #111721;
+  font: 650 15px/1 var(--rxs-font-text);
+  color-scheme: dark;
+  -webkit-appearance: auto;
+  appearance: auto;
+}
+
+.rxs-comparison-selector select:focus-visible {
+  outline: 2px solid rgb(105 234 255 / 82%);
+  outline-offset: 3px;
+}
+
 .rxs-comparison-key {
   display: flex;
   gap: 22px;
@@ -453,8 +491,12 @@
   background: #414854;
 }
 
-.rxs-comparison article + article {
+.rxs-comparison-metrics article + article {
   margin-top: 42px;
+}
+
+.rxs-comparison-metrics {
+  animation: rxsComparisonSwap 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .rxs-comparison article header {
@@ -505,6 +547,7 @@
 }
 
 .rxs-bars .is-extreme {
+  min-width: 2px;
   background: #333945;
 }
 
@@ -1535,7 +1578,7 @@
   }
 
   .rxs-hero-visual {
-    bottom: -15%;
+    bottom: -18%;
     width: min(134vw, 760px);
   }
 
@@ -1575,6 +1618,17 @@
 
   .rxs-comparison-key {
     justify-content: flex-start;
+  }
+
+  .rxs-comparison-selector {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 15px;
+  }
+
+  .rxs-comparison-selector select {
+    min-height: 56px;
+    font-size: 16px;
   }
 
   .rxs-comparison article header div {
@@ -1776,8 +1830,20 @@
   }
 
   .rxs-hero-visual {
-    translate: 50% 0;
+    translate: 50% 18px;
     scale: 1;
+  }
+}
+
+@keyframes rxsComparisonSwap {
+  from {
+    opacity: 0.4;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

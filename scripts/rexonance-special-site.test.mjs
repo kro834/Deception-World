@@ -39,6 +39,39 @@ test("Rexonance hero keeps the requested catchphrase and readable contrast treat
   assert.doesNotMatch(component, /無限の攻撃へ。/);
   assert.match(styles, /\.rxs-hero-copy::before/);
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
+  assert.match(styles, /translate: 50% calc\(18px \+ var\(--rxs-hero-progress\) \* 5%\)/);
+  assert.match(styles, /bottom: -18%/);
+});
+
+test("Rexonance performance comparison uses a native iOS selector for three prior forms", () => {
+  assert.match(component, /type PerformanceBaseline = "vertex" \| "vinculum" \| "extreme"/);
+  assert.match(component, /aria-label="レクソナンスの比較対象"/);
+  assert.match(component, /<option value="vertex">ヴァーテックスサーガ<\/option>/);
+  assert.match(component, /<option value="vinculum">ヴィンクルムサーガ<\/option>/);
+  assert.match(component, /<option value="extreme">エクスプリームサーガ<\/option>/);
+  assert.match(component, /activePerformanceBaseline\.metrics\.map/);
+  assert.match(component, /aria-live="polite"/);
+  for (const value of [
+    "68t",
+    "172.4t",
+    "100.0m",
+    "0.6秒",
+    "98.8t〜",
+    "198.8t〜",
+    "188.8m",
+    "0.1秒",
+    "205.6t〜",
+    "308.9t〜",
+    "1033.5m",
+    "0.002秒",
+  ]) {
+    assert.match(component, new RegExp(value.replace(".", "\\.")));
+  }
+  assert.match(styles, /\.rxs-comparison-selector select/);
+  assert.match(styles, /-webkit-appearance: auto/);
+  assert.match(styles, /appearance: auto/);
+  assert.match(styles, /color-scheme: dark/);
+  assert.match(styles, /min-height: 56px/);
 });
 
 test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {
