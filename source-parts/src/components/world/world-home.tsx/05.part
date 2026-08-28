@@ -232,7 +232,7 @@
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
                 </button>
-                <output>{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
+                <output aria-live="polite">{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
                 <button
                   type="button"
                   className="ios26-glass"

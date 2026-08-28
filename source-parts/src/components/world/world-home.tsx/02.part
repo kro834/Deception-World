@@ -497,6 +497,13 @@ export function WorldHome() {
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    const releaseProgrammaticScroll = () => {
+      episodeProgrammatic.current = false;
+      if (episodeScrollTimer.current != null) {
+        window.clearTimeout(episodeScrollTimer.current);
+        episodeScrollTimer.current = null;
+      }
+    };
     const syncFromScroll = () => {
       frame = 0;
       if (episodeProgrammatic.current) return;
@@ -519,10 +526,14 @@ export function WorldHome() {
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
     grid.addEventListener("scrollend", syncFromScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
+      grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
       grid.removeEventListener("scrollend", syncFromScroll);
     };

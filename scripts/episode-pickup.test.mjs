@@ -51,6 +51,10 @@ test("episode selection and the single-tap plus remain sibling controls", () => 
     worldHome,
     /<article\s+[\s\S]{0,220}?role="button"[\s\S]{0,500}?episode-pickup-plus/,
   );
+  assert.match(worldHome, /openEpisodePickup[\s\S]*?goEpisode\(index\)/);
+  assert.match(worldHome, /tabIndex=\{0\}[\s\S]*?event\.key === "ArrowRight"/);
+  assert.match(worldHome, /<output aria-live="polite">/);
+  assert.match(worldHome, /releaseProgrammaticScroll[\s\S]*?"pointerdown"[\s\S]*?"wheel"/);
 });
 
 test("the pickup dialog is modal, dismissible, and scroll-reset on every open", () => {
@@ -141,4 +145,5 @@ test("iPhone episode images stay inside their column and leave every title fully
     mobileStyles,
     /\.episode-card-copy h4 \{[\s\S]*?max-width: 100%;[\s\S]*?overflow: visible/,
   );
+  assert.match(baseStyles, /\.episode-pickup-item h3 \{[\s\S]*?word-break: keep-all/);
 });

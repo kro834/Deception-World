@@ -590,6 +590,13 @@ export function WorldHome() {
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    const releaseProgrammaticScroll = () => {
+      episodeProgrammatic.current = false;
+      if (episodeScrollTimer.current != null) {
+        window.clearTimeout(episodeScrollTimer.current);
+        episodeScrollTimer.current = null;
+      }
+    };
     const syncFromScroll = () => {
       frame = 0;
       if (episodeProgrammatic.current) return;
@@ -612,10 +619,14 @@ export function WorldHome() {
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
     grid.addEventListener("scrollend", syncFromScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
+      grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
       grid.removeEventListener("scrollend", syncFromScroll);
     };
@@ -752,6 +763,7 @@ export function WorldHome() {
   const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    goEpisode(index);
     episodePickupTriggerRef.current = trigger;
     episodePickupOpenedByKeyboard.current = openedByKeyboard;
     setEpisodePickup(index);
@@ -1464,7 +1476,7 @@ export function WorldHome() {
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
                 </button>
-                <output>{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
+                <output aria-live="polite">{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
                 <button
                   type="button"
                   className="ios26-glass"
@@ -1481,7 +1493,18 @@ export function WorldHome() {
               </div>
             </div>
           </div>
-          <div className="episode-grid" ref={episodeGridRef} role="region" aria-label="判明済みエピソードのハイライト">
+          <div
+            className="episode-grid"
+            ref={episodeGridRef}
+            role="region"
+            tabIndex={0}
+            aria-label="判明済みエピソードのハイライト。左右キーでも切り替えられます"
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+              event.preventDefault();
+              goEpisode(episode + (event.key === "ArrowRight" ? 1 : -1));
+            }}
+          >
             {EPISODES.map((ep, i) => (
               <article
                 key={ep.no}

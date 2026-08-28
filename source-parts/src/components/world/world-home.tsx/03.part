@@ -106,6 +106,7 @@
   const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    goEpisode(index);
     episodePickupTriggerRef.current = trigger;
     episodePickupOpenedByKeyboard.current = openedByKeyboard;
     setEpisodePickup(index);
