@@ -4,6 +4,7 @@ import {
   normalizeArchiveModelPreferences,
   type ArchiveModelPreferences,
 } from "@/lib/archive-model-config";
+import { resolveArchiveViewportOffset } from "@/lib/archive-viewport";
 import { ArchiveModelSelector } from "./archive-model-selector";
 import { ArchiveIntelligenceWorkspace } from "./archive-oracle";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
@@ -90,14 +91,10 @@ export function ArchiveIntelligencePage() {
           !focused && page.dataset.keyboard === "closing" && stableHeight - height > 120;
         const keyboardOpening = focused && width <= 760 && performance.now() - focusStartedAt < 600;
         const viewportLeft = viewport
-          ? Number.isFinite(viewport.pageLeft - window.scrollX)
-            ? viewport.pageLeft - window.scrollX
-            : viewport.offsetLeft
+          ? resolveArchiveViewportOffset(viewport.offsetLeft, viewport.pageLeft, window.scrollX)
           : 0;
         const viewportTop = viewport
-          ? Number.isFinite(viewport.pageTop - window.scrollY)
-            ? viewport.pageTop - window.scrollY
-            : viewport.offsetTop
+          ? resolveArchiveViewportOffset(viewport.offsetTop, viewport.pageTop, window.scrollY)
           : 0;
         page.style.setProperty("--archive-viewport-width", `${width}px`);
         page.style.setProperty("--archive-viewport-height", `${height}px`);
@@ -121,14 +118,16 @@ export function ArchiveIntelligencePage() {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = performance.now();
       if ((viewport?.width ?? window.innerWidth) <= 760) page.dataset.keyboard = "opening";
-      scheduleSync([0, 80, 180, 320, 650]);
+      // iOS can publish offsetTop one frame before or after the viewport resize.
+      // Keep a late pass so the shell settles after the keyboard animation.
+      scheduleSync([0, 80, 180, 320, 650, 1000]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = 0;
       page.dataset.keyboard = "closing";
-      scheduleSync([0, 80, 240, 500]);
+      scheduleSync([0, 80, 240, 500, 900]);
     };
 
     const handleOrientationChange = () => {

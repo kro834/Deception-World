@@ -13,6 +13,7 @@ function mockOutputFor(body) {
       reply: "検索結果です。",
       suggestions: ["続きを探す"],
       focusCandidateId: "",
+      referenceCandidateIds: [],
     };
   }
   return {

@@ -683,6 +683,8 @@ function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
     typeof reply.reply === "string" &&
     Array.isArray(reply.suggestions) &&
     (reply.focusCandidateId === undefined || typeof reply.focusCandidateId === "string") &&
+    Array.isArray(reply.referenceCandidateIds) &&
+    reply.referenceCandidateIds.every((id) => typeof id === "string") &&
     (reply.source === "openai" || reply.source === "local")
   );
 }
@@ -892,13 +894,23 @@ export function ArchiveIntelligenceWorkspace({
                 : 0,
           )
         : results;
+      const resultById = new Map(orderedResults.map((result) => [result.entry.id, result]));
+      const referencedResults = reply.referenceCandidateIds
+        .map((id) => resultById.get(id))
+        .filter((result): result is ArchiveOracleResult => Boolean(result));
+      const displayedReferences =
+        referencedResults.length > 0
+          ? referencedResults
+          : reply.focusCandidateId
+            ? orderedResults.filter(({ entry }) => entry.id === reply.focusCandidateId).slice(0, 1)
+            : [];
       setSearchMessages((current) => [
         ...current,
         {
           id: searchMessageId("search-assistant"),
           role: "assistant",
           text: reply.reply,
-          results: orderedResults,
+          results: displayedReferences,
           suggestions: reply.suggestions,
           source: reply.source,
           model: reply.model,
@@ -1092,32 +1104,35 @@ export function ArchiveIntelligenceWorkspace({
                   <small className="archive-search-notice">{message.notice}</small>
                 ) : null}
                 {message.role === "assistant" && message.results?.length ? (
-                  <ol className="archive-oracle-results" aria-label="見つかったページ">
-                    {message.results.map(({ entry }, index) => (
-                      <li key={entry.id}>
-                        <GuardedLink
-                          to={entry.to}
-                          hash={entry.hash}
-                          assets={entry.assets}
-                          className="archive-oracle-result"
-                          beforeNavigate={onNavigate}
-                          aria-label={`${entry.label}を開く。${entry.description}`}
-                        >
-                          <span className="archive-oracle-result-index">
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
-                          <span className="archive-oracle-result-copy">
-                            <small>{entry.kicker}</small>
-                            <b>{entry.label}</b>
-                            <span>{entry.description}</span>
-                          </span>
-                          <i className="archive-oracle-result-arrow" aria-hidden="true">
-                            ↗
-                          </i>
-                        </GuardedLink>
-                      </li>
-                    ))}
-                  </ol>
+                  <div className="archive-search-references">
+                    <p>参照したページ</p>
+                    <ol className="archive-oracle-results" aria-label="回答で参照したページ">
+                      {message.results.map(({ entry }, index) => (
+                        <li key={entry.id}>
+                          <GuardedLink
+                            to={entry.to}
+                            hash={entry.hash}
+                            assets={entry.assets}
+                            className="archive-oracle-result"
+                            beforeNavigate={onNavigate}
+                            aria-label={`${entry.label}を開く。${entry.description}`}
+                          >
+                            <span className="archive-oracle-result-index">
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
+                            <span className="archive-oracle-result-copy">
+                              <small>{entry.kicker}</small>
+                              <b>{entry.label}</b>
+                              <span>{entry.description}</span>
+                            </span>
+                            <i className="archive-oracle-result-arrow" aria-hidden="true">
+                              ↗
+                            </i>
+                          </GuardedLink>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
                 ) : null}
               </article>
             ))

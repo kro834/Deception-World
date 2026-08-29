@@ -56,7 +56,8 @@ test("follow-up search retains visible candidate order and named references", ()
   assert.match(searchContract, /compareRequested/);
   assert.match(searchContract, /anotherRequested/);
   assert.match(searchContract, /reasonRequested/);
-  assert.match(searchContract, /focusCandidateId: top\?\.id/);
+  assert.match(searchContract, /referenceCandidateIds/);
+  assert.match(searchContract, /focusCandidateId: anotherRequested/);
 });
 
 test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fallback", () => {
@@ -76,12 +77,17 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /name: "deception_world_search_reply"/);
   assert.match(searchServer, /SEARCH PRO:/);
   assert.match(searchServer, /focusCandidateId must be the id/);
+  assert.match(searchServer, /answer the user's question directly from referenceExcerpt/);
+  assert.match(searchServer, /180-450 Japanese characters/);
+  assert.match(searchServer, /referenceCandidateIds must contain only/);
   assert.match(searchServer, /trustedCandidates\.some/);
   assert.match(searchServer, /safety_identifier: safetyIdentifier/);
   assert.match(searchServer, /serializeUntrustedArchiveConversation\(messages\)/);
   assert.doesNotMatch(searchServer, /input: messages\.map/);
   assert.match(searchServer, /canonicalizeArchiveSearchCandidates\(candidates\)/);
   assert.match(searchCatalog, /const ARCHIVE_SEARCH_CATALOG/);
+  assert.match(searchCatalog, /ARCHIVE_SEARCH_REFERENCE_EXCERPTS/);
+  assert.match(searchCatalog, /referenceExcerpt: ARCHIVE_SEARCH_REFERENCE_EXCERPTS/);
   assert.match(searchCatalog, /"rider-over-zeztz"/);
   assert.match(searchCatalog, /catalogById\.get\(candidate\.id\)/);
 
@@ -239,6 +245,23 @@ test("the AI app is internally scrollable, mobile-first, and motion-aware", () =
   assert.match(modelSelector, /RadioGroup\.Root/);
   assert.match(modelSelector, /onCloseAutoFocus/);
   assert.match(modelSelector, /Search Pro/);
+  assert.match(oracle, /参照したページ/);
+  assert.match(oracle, /reply\.referenceCandidateIds/);
+});
+
+test("visual viewport offsets cannot pull the AI shell above the iPhone viewport", async () => {
+  const { resolveArchiveViewportOffset } = await import(
+    new URL("../src/lib/archive-viewport.ts", import.meta.url)
+  );
+
+  assert.equal(resolveArchiveViewportOffset(0, 0, 642), 0);
+  assert.equal(resolveArchiveViewportOffset(86, 0, 642), 86);
+  assert.equal(resolveArchiveViewportOffset(undefined, 728, 642), 86);
+  assert.equal(resolveArchiveViewportOffset(undefined, 0, 642), 0);
+  assert.equal(resolveArchiveViewportOffset(Number.NaN, Number.NaN, 0), 0);
+  assert.match(intelligencePage, /resolveArchiveViewportOffset\(viewport\.offsetTop/);
+  assert.match(intelligencePage, /650, 1000/);
+  assert.match(intelligenceStyles, /top: max\(0px, var\(--archive-viewport-top, 0px\)\)/);
 });
 
 test("the opening keeps its editorial motion contract", () => {

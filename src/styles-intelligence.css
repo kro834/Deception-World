@@ -1,7 +1,7 @@
 .archive-intelligence-page {
   position: fixed;
-  top: var(--archive-viewport-top, 0px);
-  left: var(--archive-viewport-left, 0px);
+  top: max(0px, var(--archive-viewport-top, 0px));
+  left: max(0px, var(--archive-viewport-left, 0px));
   display: grid;
   box-sizing: border-box;
   width: var(--archive-viewport-width, 100%);
