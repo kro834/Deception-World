@@ -89,6 +89,17 @@ test("the nested announcement does not take ownership of an existing body scroll
   );
 });
 
+test("the side-menu scroll guard lets the announcement stage handle touch and wheel input", () => {
+  assert.match(
+    chrome,
+    /const announcementDialog = announcementRef\.current;[\s\S]*?announcementDialog\?\.open && announcementDialog\.contains\(event\.target\)[\s\S]*?return;/,
+  );
+  assert.match(
+    styles,
+    /\.site-announcement-stage \{[\s\S]*?overflow-y: auto;[\s\S]*?touch-action: pan-y;[\s\S]*?-webkit-overflow-scrolling: touch;/,
+  );
+});
+
 test("the announcement archive opens an index before a selected transmission", () => {
   assert.match(chrome, /selectedAnnouncementId/);
   assert.match(chrome, /data-view=\{selectedAnnouncement \? "detail" : "index"\}/);

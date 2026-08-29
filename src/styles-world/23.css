@@ -213,6 +213,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
 

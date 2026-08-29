@@ -228,7 +228,13 @@ export function SideMenuLayer({
     root.style.overscrollBehavior = "none";
     document.body.style.overflow = "hidden";
     const containBackgroundScroll = (event: TouchEvent | WheelEvent) => {
-      if (event.target instanceof Node && panel.contains(event.target)) return;
+      if (!(event.target instanceof Node)) {
+        event.preventDefault();
+        return;
+      }
+      if (panel.contains(event.target)) return;
+      const announcementDialog = announcementRef.current;
+      if (announcementDialog?.open && announcementDialog.contains(event.target)) return;
       event.preventDefault();
     };
     document.addEventListener("touchmove", containBackgroundScroll, {
