@@ -6,6 +6,14 @@ import {
 } from "./archive-search";
 import { canonicalizeArchiveSearchCandidates } from "./archive-search-catalog.server";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import {
+  ARCHIVE_SEARCH_EFFORTS,
+  ARCHIVE_SEARCH_EXECUTIONS,
+  ARCHIVE_SEARCH_MODELS,
+  DEFAULT_ARCHIVE_MODEL_PREFERENCES,
+  resolveArchiveSearchRoute,
+  type ArchiveSearchPreference,
+} from "./archive-model-config";
 
 const searchTurnSchema = z
   .object({
@@ -23,11 +31,33 @@ const candidateSchema = z
   })
   .strict();
 
+const searchPreferenceSchema = z
+  .object({
+    model: z.enum(ARCHIVE_SEARCH_MODELS),
+    effort: z.enum(ARCHIVE_SEARCH_EFFORTS),
+    execution: z.enum(ARCHIVE_SEARCH_EXECUTIONS),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.execution === "pro" &&
+      (value.model !== "gpt-5.6-terra" || value.effort !== "xhigh")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Search Pro requires the fixed GPT-5.6 Terra XHigh profile.",
+      });
+    }
+  });
+
 export const archiveSearchRequestSchema = z
   .object({
     query: z.string().trim().min(1).max(180),
     messages: z.array(searchTurnSchema).min(1).max(10),
     candidates: z.array(candidateSchema).max(3),
+    // Keep already-open clients compatible during a rolling deployment while
+    // still validating every supplied value through the strict allow-list.
+    modelPreference: searchPreferenceSchema.default(DEFAULT_ARCHIVE_MODEL_PREFERENCES.search),
   })
   .strict()
   .superRefine((value, context) => {
@@ -50,7 +80,7 @@ export const archiveSearchRequestSchema = z
 
 const generatedSearchReplySchema = z
   .object({
-    reply: z.string().trim().min(1).max(1400),
+    reply: z.string().trim().min(1).max(2600),
     suggestions: z.array(z.string().trim().min(1).max(90)).max(3),
     focusCandidateId: z.string().trim().max(80),
   })
@@ -87,7 +117,10 @@ function extractResponseText(payload: unknown): string {
   return "";
 }
 
-function buildSearchInstructions(candidates: readonly ArchiveSearchCandidate[]): string {
+function buildSearchInstructions(
+  candidates: readonly ArchiveSearchCandidate[],
+  proConversation: boolean,
+): string {
   const candidateData = candidates.map(({ id, label, kicker, description }) => ({
     id,
     label,
@@ -105,6 +138,15 @@ function buildSearchInstructions(candidates: readonly ArchiveSearchCandidate[]):
     "focusCandidateId must be the id of the single supplied candidate your answer centers on, or an empty string when clarification is needed. Never invent an id.",
     "Do not output Markdown headings, URLs, HTML, code, or hidden reasoning. Ask at most one follow-up question.",
     "Return exactly three short suggestions the user could send next.",
+    ...(proConversation
+      ? [
+          "SEARCH PRO:",
+          "Reconstruct the user's intent across the entire quoted conversation, including pronouns, corrections, comparisons, and changes of direction.",
+          "Distinguish close candidates by the user's likely comparison axis and explain the decisive clue in natural dialogue.",
+          "When the clue remains insufficient, ask one precise question that maximally reduces ambiguity instead of guessing.",
+          "Be more thoughtful and nuanced than standard search, but stay conversational and never exceed the supplied allow-list.",
+        ]
+      : []),
     `CURRENT ALLOW-LIST CANDIDATES: ${JSON.stringify(candidateData)}`,
   ].join("\n");
 }
@@ -112,19 +154,23 @@ function buildSearchInstructions(candidates: readonly ArchiveSearchCandidate[]):
 export async function requestOpenAiArchiveSearch({
   messages,
   candidates,
+  modelPreference,
   safetyIdentifier,
 }: {
   messages: readonly ArchiveSearchConversationTurn[];
   candidates: readonly ArchiveSearchCandidate[];
+  modelPreference: ArchiveSearchPreference;
   safetyIdentifier?: string;
 }): Promise<ArchiveSearchReply | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const model = process.env.ARCHIVE_SEARCH_MODEL?.trim() || "gpt-5.6-luna";
+  const route = resolveArchiveSearchRoute(modelPreference);
+  const model = route.model;
+  const proConversation = route.preference.execution === "pro";
   const trustedCandidates = canonicalizeArchiveSearchCandidates(candidates);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const timeout = setTimeout(() => controller.abort(), route.timeoutMs);
 
   try {
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -138,10 +184,10 @@ export async function requestOpenAiArchiveSearch({
         safety_identifier: safetyIdentifier,
         store: false,
         tools: [],
-        reasoning: { effort: "low", context: "current_turn" },
-        max_output_tokens: 2400,
-        prompt_cache_key: "deception-world-search-v1",
-        instructions: buildSearchInstructions(trustedCandidates),
+        reasoning: route.reasoning,
+        max_output_tokens: route.maxOutputTokens,
+        prompt_cache_key: `deception-world-search-v2-${route.preference.model}-${route.preference.effort}-${route.preference.execution}`,
+        instructions: buildSearchInstructions(trustedCandidates, proConversation),
         input: [
           {
             role: "user",
@@ -149,7 +195,7 @@ export async function requestOpenAiArchiveSearch({
           },
         ],
         text: {
-          verbosity: "low",
+          verbosity: route.verbosity,
           format: {
             type: "json_schema",
             name: "deception_world_search_reply",
@@ -172,7 +218,7 @@ export async function requestOpenAiArchiveSearch({
       ? generated.focusCandidateId
       : undefined;
     return {
-      reply: generated.reply.slice(0, 1200),
+      reply: generated.reply.slice(0, proConversation ? 2200 : 1400),
       suggestions: generated.suggestions.slice(0, 3),
       focusCandidateId,
       source: "openai",

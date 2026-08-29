@@ -465,17 +465,24 @@
   letter-spacing: 0.22em;
 }
 
-.archive-oracle-input-shell input {
+.archive-oracle-input-shell input,
+.archive-oracle-input-shell textarea {
   min-width: 0;
-  height: 48px;
+  min-height: 48px;
+  max-height: 124px;
+  padding: 13px 0 11px;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 0;
   outline: 0;
+  resize: none;
   background: transparent;
   color: #f6fbff;
   font: inherit;
   font-size: 14px;
   letter-spacing: 0.025em;
   appearance: none;
+  field-sizing: content;
 }
 
 .archive-oracle-input-shell input::-webkit-search-cancel-button {
@@ -483,7 +490,8 @@
   opacity: 0.52;
 }
 
-.archive-oracle-input-shell input::placeholder {
+.archive-oracle-input-shell input::placeholder,
+.archive-oracle-input-shell textarea::placeholder {
   color: rgba(210, 226, 238, 0.38);
 }
 
@@ -884,8 +892,9 @@
     display: none;
   }
 
-  .archive-oracle-input-shell input {
-    height: 48px;
+  .archive-oracle-input-shell input,
+  .archive-oracle-input-shell textarea {
+    min-height: 48px;
     padding-inline: 12px 4px;
     font-size: 16px;
   }
@@ -1725,8 +1734,9 @@ html[data-world-effects="economy"] .archive-oracle-aura {
     border-radius: 17px;
   }
 
-  .archive-search-conversation .archive-oracle-input-shell input {
-    height: 44px;
+  .archive-search-conversation .archive-oracle-input-shell input,
+  .archive-search-conversation .archive-oracle-input-shell textarea {
+    min-height: 44px;
     font-size: 16px;
   }
 

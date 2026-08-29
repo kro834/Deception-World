@@ -8,6 +8,7 @@ const readSource = (relativePath) =>
 const characters = readSource("src/lib/archive-characters.ts");
 const fallback = readSource("src/lib/archive-roleplay-fallback.ts");
 const intelligenceServer = readSource("src/lib/archive-intelligence.server.ts");
+const modelConfig = readSource("src/lib/archive-model-config.ts");
 const conversationBoundary = readSource("src/lib/archive-conversation.server.ts");
 const rateLimitServer = readSource("src/lib/archive-ai-rate-limit.server.ts");
 const intelligenceRoute = readSource("src/routes/api/archive-intelligence.ts");
@@ -97,8 +98,9 @@ test("normal and pro modes keep distinct response and human conversation contrac
   assert.match(roleplay, /role="radiogroup"[\s\S]{0,120}?aria-label="なりきりモード"/);
   assert.match(roleplay, /<span>NORMAL<\/span>[\s\S]*?セリフ＋軽い描写/);
   assert.match(roleplay, /<span>PRO<\/span>[\s\S]*?自然な対話・深い理解/);
-  assert.match(roleplay, /GPT-5\.6 SOL \/ PRO MAX/);
-  assert.match(roleplay, /AIが会話の流れ・感情・人格記録を深く考えています/);
+  assert.match(roleplay, /archivePersonaProfileLabel\(pendingProProfile \?\? proProfile\)/);
+  assert.match(roleplay, /会話の流れ・感情・人格記録を深く考えています/);
+  assert.match(roleplay, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(roleplay, /<TacticalHud tactical=\{message\.tactical\} \/>/);
   assert.match(
     fallback,
@@ -112,7 +114,7 @@ test("normal and pro modes keep distinct response and human conversation contrac
 test("the provider key and upstream endpoint stay in the server-only boundary", () => {
   assert.match(intelligenceRoute, /from "@\/lib\/archive-intelligence\.server"/);
   assert.match(intelligenceServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
-  assert.match(intelligenceServer, /"gpt-5\.6-sol"/);
+  assert.match(modelConfig, /"gpt-5\.6-sol"/);
   assert.match(intelligenceServer, /"gpt-5\.6-luna"/);
   assert.match(intelligenceServer, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(intelligenceServer, /authorization: `Bearer \$\{apiKey\}`/);
@@ -134,17 +136,42 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(intelligenceServer, /name:\s*"deception_world_persona_reply"/);
   assert.match(intelligenceServer, /strict:\s*true/);
   assert.match(intelligenceServer, /generatedReplySchema\.parse\(JSON\.parse\(outputText\)\)/);
+  assert.match(modelConfig, /profile === "instant"[\s\S]*?effort: "none"/);
+  assert.match(modelConfig, /profile === "max"[\s\S]*?effort: "max"/);
+  assert.match(modelConfig, /effort: "max", mode: "pro", context: "current_turn"/);
+  assert.match(intelligenceServer, /resolveArchivePersonaProRoute\(proProfile\)/);
+  assert.match(intelligenceServer, /effort: "low", context: "current_turn"/);
   assert.match(
     intelligenceServer,
-    /mode === "pro"[\s\S]*?effort: "max", mode: "pro", context: "current_turn"/,
+    /max_output_tokens: mode === "pro" \? proExecution\.maxOutputTokens : 2400/,
   );
-  assert.match(intelligenceServer, /effort: "low", context: "current_turn"/);
-  assert.match(intelligenceServer, /max_output_tokens: mode === "pro" \? 12_000 : 2400/);
-  assert.match(intelligenceServer, /mode === "pro" \? 110_000 : 30_000/);
-  assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v2-/);
+  assert.match(intelligenceServer, /mode === "pro" \? proExecution\.timeoutMs : 30_000/);
+  assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v3-/);
+  assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 2400/);
   assert.match(intelligenceServer, /controller\.abort\(\)/);
   assert.match(intelligenceServer, /finally \{[\s\S]*?clearTimeout\(timeout\)/);
   assert.doesNotMatch(intelligenceServer, /previous_response_id|encrypted_content/);
+});
+
+test("persona model profiles resolve to fixed runtime routes", async () => {
+  const { archivePersonaCostClass, resolveArchivePersonaProRoute } = await import(
+    new URL("../src/lib/archive-model-config.ts", import.meta.url)
+  );
+  const instant = resolveArchivePersonaProRoute("instant");
+  const max = resolveArchivePersonaProRoute("max");
+  const pro = resolveArchivePersonaProRoute("pro");
+  assert.equal(instant.model, "gpt-5.6-sol");
+  assert.equal(instant.reasoning.effort, "none");
+  assert.equal("mode" in instant.reasoning, false);
+  assert.equal(max.reasoning.effort, "max");
+  assert.equal("mode" in max.reasoning, false);
+  assert.equal(pro.reasoning.effort, "max");
+  assert.equal(pro.reasoning.mode, "pro");
+  assert.deepEqual(
+    ["instant", "max", "pro"].map((profile) => archivePersonaCostClass("pro", profile)),
+    ["standard", "advanced", "pro"],
+  );
+  assert.equal(archivePersonaCostClass("normal", "pro"), "standard");
 });
 
 test("the API enforces browser origin, bounded input, and shared production budgets", () => {
@@ -155,10 +182,10 @@ test("the API enforces browser origin, bounded input, and shared production budg
   );
   assert.match(intelligenceRoute, /new URL\(origin\)\.origin !== new URL\(request\.url\)\.origin/);
   assert.match(intelligenceRoute, /fetchSite === "same-origin"/);
-  assert.match(intelligenceRoute, /const MAX_BODY_BYTES = 32_000/);
+  assert.match(intelligenceRoute, /const MAX_BODY_BYTES = 65_536/);
   assert.match(intelligenceRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
   assert.match(intelligenceRoute, /request_too_large/);
-  assert.match(intelligenceRoute, /await checkArchiveAiAccess\(request, mode\)/);
+  assert.match(intelligenceRoute, /await checkArchiveAiAccess\(request, costClass\)/);
   assert.match(intelligenceRoute, /cache-control": "no-store, max-age=0/);
   assert.match(intelligenceRoute, /x-content-type-options": "nosniff/);
 
@@ -174,7 +201,7 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /if \(dbSource !== "neon"\)/);
   assert.match(rateLimitServer, /process\.env\.NODE_ENV === "production"/);
   assert.match(rateLimitServer, /process\.env\.VERCEL_ENV !== "production"/);
-  assert.match(rateLimitServer, /mode === "pro" \? 3 : 1/);
+  assert.match(rateLimitServer, /costClass === "pro" \? 3 : costClass === "advanced" \? 2 : 1/);
   assert.match(rateLimitServer, /safetyIdentifier: allowed \? clientKey : undefined/);
   assert.match(intelligenceServer, /safety_identifier: safetyIdentifier/);
   assert.match(intelligenceServer, /serializeUntrustedArchiveConversation\(messages\)/);
@@ -194,6 +221,19 @@ test("the API enforces browser origin, bounded input, and shared production budg
   );
   assert.match(intelligenceServer, /value\.messages\.at\(-1\)\?\.role !== "user"/);
   assert.match(intelligenceServer, /if \(total > 12_000\)/);
+});
+
+test("the persona byte envelope accepts its full Japanese character budget", () => {
+  const payload = JSON.stringify({
+    characterId: "ciel",
+    mode: "pro",
+    proProfile: "pro",
+    messages: Array.from({ length: 4 }, (_, index) => ({
+      role: index % 2 ? "assistant" : "user",
+      content: "界".repeat(3000),
+    })),
+  });
+  assert.ok(Buffer.byteLength(payload, "utf8") < 65_536);
 });
 
 test("local persona fallback covers every character and all remote failure paths", () => {

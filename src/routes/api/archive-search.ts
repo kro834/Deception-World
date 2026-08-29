@@ -11,8 +11,12 @@ import {
   readArchiveRequestBody,
 } from "@/lib/archive-request-body.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
+import { resolveArchiveSearchRoute } from "@/lib/archive-model-config";
 
-const MAX_BODY_BYTES = 18_000;
+// Search Pro keeps a longer Japanese transcript. The schema still owns the
+// strict character budget; this byte ceiling only prevents valid UTF-8 input
+// from being rejected before validation.
+const MAX_BODY_BYTES = 65_536;
 
 function noStoreJson(payload: unknown, status = 200): Response {
   return Response.json(payload, {
@@ -60,9 +64,12 @@ export const Route = createFileRoute("/api/archive-search")({
 
         const parsed = archiveSearchRequestSchema.safeParse(raw);
         if (!parsed.success) return noStoreJson({ error: "invalid_request" }, 400);
-        const { query, messages } = parsed.data;
+        const { query, messages, modelPreference } = parsed.data;
         const candidates = canonicalizeArchiveSearchCandidates(parsed.data.candidates);
-        const remoteAccess = await checkArchiveAiAccess(request, "normal");
+        const remoteAccess = await checkArchiveAiAccess(
+          request,
+          resolveArchiveSearchRoute(modelPreference).costClass,
+        );
 
         if (!remoteAccess.allowed) {
           const notice =
@@ -76,6 +83,7 @@ export const Route = createFileRoute("/api/archive-search")({
           const remoteReply = await requestOpenAiArchiveSearch({
             messages,
             candidates,
+            modelPreference,
             safetyIdentifier: remoteAccess.safetyIdentifier,
           });
           if (remoteReply) return noStoreJson(remoteReply);

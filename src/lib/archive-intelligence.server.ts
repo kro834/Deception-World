@@ -7,6 +7,11 @@ import {
 } from "./archive-characters";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
 import {
+  ARCHIVE_PERSONA_PRO_PROFILES,
+  resolveArchivePersonaProRoute,
+  type ArchivePersonaProProfile,
+} from "./archive-model-config";
+import {
   isExplicitFictionalCombatInput,
   type ArchiveConversationTurn,
   type ArchiveIntelligenceReply,
@@ -23,6 +28,7 @@ export const archiveIntelligenceRequestSchema = z
   .object({
     characterId: z.enum(ARCHIVE_CHARACTER_IDS),
     mode: z.enum(["normal", "pro"]),
+    proProfile: z.enum(ARCHIVE_PERSONA_PRO_PROFILES).default("pro"),
     messages: z.array(conversationTurnSchema).min(1).max(12),
   })
   .strict()
@@ -188,23 +194,29 @@ function normalizeGeneratedReply(
 export async function requestOpenAiArchiveReply({
   characterId,
   mode,
+  proProfile,
   messages,
   safetyIdentifier,
 }: {
   characterId: ArchiveCharacterId;
   mode: ArchiveRoleplayMode;
+  proProfile: ArchivePersonaProProfile;
   messages: readonly ArchiveConversationTurn[];
   safetyIdentifier?: string;
 }): Promise<ArchiveIntelligenceReply | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
 
+  const proExecution = resolveArchivePersonaProRoute(proProfile);
   const model =
     mode === "pro"
-      ? process.env.ARCHIVE_PRO_MODEL?.trim() || "gpt-5.6-sol"
+      ? proExecution.model
       : process.env.ARCHIVE_NORMAL_MODEL?.trim() || "gpt-5.6-luna";
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), mode === "pro" ? 110_000 : 30_000);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    mode === "pro" ? proExecution.timeoutMs : 30_000,
+  );
   const latestUserInput = [...messages]
     .reverse()
     .find((message) => message.role === "user")?.content;
@@ -223,11 +235,9 @@ export async function requestOpenAiArchiveReply({
         store: false,
         tools: [],
         reasoning:
-          mode === "pro"
-            ? { effort: "max", mode: "pro", context: "current_turn" }
-            : { effort: "low", context: "current_turn" },
-        max_output_tokens: mode === "pro" ? 12_000 : 2400,
-        prompt_cache_key: `deception-world-persona-v2-${characterId}-${mode}`,
+          mode === "pro" ? proExecution.reasoning : { effort: "low", context: "current_turn" },
+        max_output_tokens: mode === "pro" ? proExecution.maxOutputTokens : 2400,
+        prompt_cache_key: `deception-world-persona-v3-${characterId}-${mode}-${proProfile}`,
         instructions: buildSystemPrompt(characterId, mode),
         input: [
           {

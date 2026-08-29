@@ -23,6 +23,11 @@ import {
   type ArchiveIntelligenceReply,
   type ArchiveTacticalSnapshot,
 } from "@/lib/archive-roleplay-fallback";
+import {
+  archivePersonaProfileLabel,
+  waitForArchiveThinkingFloor,
+  type ArchivePersonaProProfile,
+} from "@/lib/archive-model-config";
 
 type RoleplaySearchEntry = {
   id: string;
@@ -49,6 +54,7 @@ type RoleplayMessage = {
   navigationQuery?: string;
   source?: "openai" | "local";
   model?: string;
+  modelLabel?: string;
   notice?: string;
 };
 
@@ -56,6 +62,7 @@ type ArchiveRoleplayProps = {
   active: boolean;
   onNavigate?: () => void;
   searchArchive: (query: string, limit?: number) => RoleplaySearchResult[];
+  proProfile: ArchivePersonaProProfile;
 };
 
 const MAX_VISIBLE_MESSAGES = 36;
@@ -160,12 +167,18 @@ function TacticalHud({ tactical }: { tactical: ArchiveTacticalSnapshot }) {
   );
 }
 
-export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRoleplayProps) {
+export function ArchiveRoleplay({
+  active,
+  onNavigate,
+  searchArchive,
+  proProfile,
+}: ArchiveRoleplayProps) {
   const [characterId, setCharacterId] = useState<ArchiveCharacterId>("ciel");
   const [mode, setMode] = useState<ArchiveRoleplayMode>("normal");
   const [draft, setDraft] = useState("");
   const [sessions, setSessions] = useState<Record<string, RoleplayMessage[]>>({});
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [pendingProProfile, setPendingProProfile] = useState<ArchivePersonaProProfile | null>(null);
   const [liveMessage, setLiveMessage] = useState("人格回線を選択できます。");
   const abortRef = useRef<AbortController | null>(null);
   const requestSequenceRef = useRef(0);
@@ -194,6 +207,7 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
     abortRef.current?.abort();
     abortRef.current = null;
     setPendingKey(null);
+    setPendingProProfile(null);
     if (announce) setLiveMessage("応答生成を停止しました。");
   }, []);
 
@@ -220,6 +234,25 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
       composerRef.current?.focus({ preventScroll: true }),
     );
     return () => window.cancelAnimationFrame(frame);
+  }, [active, activeSessionKey]);
+
+  useEffect(() => {
+    const log = logRef.current;
+    if (!active || !log || typeof ResizeObserver === "undefined") return;
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      if (!followLatestRef.current) return;
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        log.scrollTop = log.scrollHeight;
+      });
+    });
+    observer.observe(log);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [active, activeSessionKey]);
 
   const updateSession = useCallback(
@@ -265,6 +298,7 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
     const keyAtRequest = activeSessionKey;
     const characterAtRequest = characterId;
     const modeAtRequest = mode;
+    const proProfileAtRequest = proProfile;
     const userMessage: RoleplayMessage = {
       id: messageId("user"),
       role: "user",
@@ -274,12 +308,14 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
     setSessions((current) => ({ ...current, [keyAtRequest]: nextMessages }));
     setDraft("");
     setPendingKey(keyAtRequest);
+    setPendingProProfile(proProfileAtRequest);
     setLiveMessage(`${profile.name}が応答を生成しています。`);
     followLatestRef.current = true;
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    const thinkingStartedAt = performance.now();
     const sequence = requestSequenceRef.current + 1;
     requestSequenceRef.current = sequence;
     const conversationHistory = historyFrom(nextMessages);
@@ -296,6 +332,7 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
         body: JSON.stringify({
           characterId: characterAtRequest,
           mode: modeAtRequest,
+          proProfile: proProfileAtRequest,
           messages: conversationHistory,
         }),
         signal: controller.signal,
@@ -318,6 +355,8 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
       });
     }
 
+    await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
+
     if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
     const assistantMessage: RoleplayMessage = {
       id: messageId("assistant"),
@@ -329,10 +368,13 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
       navigationQuery: reply.navigationQuery,
       source: reply.source,
       model: reply.model,
+      modelLabel:
+        modeAtRequest === "pro" ? archivePersonaProfileLabel(proProfileAtRequest) : "GPT-5.6 LUNA",
       notice: reply.notice,
     };
     updateSession(keyAtRequest, (current) => [...current, assistantMessage]);
     setPendingKey((current) => (current === keyAtRequest ? null : current));
+    setPendingProProfile(null);
     abortRef.current = null;
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
   };
@@ -574,7 +616,9 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
                           : "YOU / INPUT"}
                       </small>
                       {message.role === "assistant" ? (
-                        <i>{message.source === "openai" ? "NEURAL" : "LOCAL"}</i>
+                        <i>
+                          {message.source === "openai" ? (message.modelLabel ?? "NEURAL") : "LOCAL"}
+                        </i>
                       ) : null}
                     </div>
                   </header>
@@ -622,12 +666,14 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
               </span>
               <div>
                 <small>
-                  {mode === "pro" ? "GPT-5.6 SOL / PRO MAX" : "GPT-5.6 LUNA / RESPONDING"}
+                  {mode === "pro"
+                    ? `${archivePersonaProfileLabel(pendingProProfile ?? proProfile)} / 思考中`
+                    : "GPT-5.6 LUNA / 思考中"}
                 </small>
                 <p>
                   {mode === "pro"
-                    ? "AIが会話の流れ・感情・人格記録を深く考えています"
-                    : "AIが言葉と人格記録をつないでいます"}
+                    ? "会話の流れ・感情・人格記録を深く考えています"
+                    : "言葉と人格記録をつないでいます"}
                 </p>
               </div>
             </div>

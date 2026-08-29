@@ -10,8 +10,11 @@ import {
 } from "@/lib/archive-request-body.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { createLocalArchiveReply } from "@/lib/archive-roleplay-fallback";
+import { archivePersonaCostClass } from "@/lib/archive-model-config";
 
-const MAX_BODY_BYTES = 32_000;
+// The character limits below are measured in Unicode code units. Reserve
+// enough UTF-8 space for a full Japanese conversation plus its JSON envelope.
+const MAX_BODY_BYTES = 65_536;
 
 function noStoreJson(payload: unknown, status = 200): Response {
   return Response.json(payload, {
@@ -62,9 +65,10 @@ export const Route = createFileRoute("/api/archive-intelligence")({
         const parsed = archiveIntelligenceRequestSchema.safeParse(raw);
         if (!parsed.success) return noStoreJson({ error: "invalid_request" }, 400);
 
-        const { characterId, mode, messages } = parsed.data;
+        const { characterId, mode, proProfile, messages } = parsed.data;
         const latestMessage = messages.at(-1)?.content ?? "";
-        const remoteAccess = await checkArchiveAiAccess(request, mode);
+        const costClass = archivePersonaCostClass(mode, proProfile);
+        const remoteAccess = await checkArchiveAiAccess(request, costClass);
 
         if (!remoteAccess.allowed) {
           const notice =
@@ -88,6 +92,7 @@ export const Route = createFileRoute("/api/archive-intelligence")({
           const remoteReply = await requestOpenAiArchiveReply({
             characterId,
             mode,
+            proProfile,
             messages,
             safetyIdentifier: remoteAccess.safetyIdentifier,
           });

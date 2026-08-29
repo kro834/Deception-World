@@ -1,6 +1,9 @@
 import { createHmac } from "node:crypto";
 import { isIP } from "node:net";
 import { dbSource, getSql } from "./db";
+import type { ArchiveAiCostClass } from "./archive-model-config";
+
+export type { ArchiveAiCostClass } from "./archive-model-config";
 
 const MINUTE_MS = 60_000;
 const DAY_MS = 86_400_000;
@@ -147,7 +150,7 @@ async function checkSharedBuckets(clientKey: string, now: number, units: number)
  */
 export async function checkArchiveAiAccess(
   request: Request,
-  mode: "normal" | "pro",
+  costClass: ArchiveAiCostClass,
 ): Promise<ArchiveAiAccess> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return { allowed: false, reason: "unconfigured" };
@@ -155,7 +158,7 @@ export async function checkArchiveAiAccess(
   const now = Date.now();
   const clientKey = clientDigest(request, apiKey);
   if (!clientKey) return { allowed: false, reason: "shared_limit_unavailable" };
-  const units = mode === "pro" ? 3 : 1;
+  const units = costClass === "pro" ? 3 : costClass === "advanced" ? 2 : 1;
   if (process.env.VERCEL && process.env.VERCEL_ENV !== "production") {
     return { allowed: false, reason: "shared_limit_unavailable" };
   }

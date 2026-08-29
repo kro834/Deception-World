@@ -361,3 +361,1047 @@
     background: #03080d;
   }
 }
+
+/* AI application refinement -------------------------------------------------
+   The conversation stays visually primary, with compact navigation and a
+   floating composer inspired by the ergonomics of native iOS chat apps. */
+
+html.archive-intelligence-active,
+body.archive-intelligence-active {
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+.archive-intelligence-page-models {
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.archive-intelligence-page-models > svg {
+  margin-left: 2px;
+  color: rgba(183, 219, 239, 0.5);
+}
+
+.archive-intelligence-page-models:focus-visible,
+.archive-oracle-model-trigger:focus-visible,
+.archive-model-dialog button:focus-visible {
+  outline: 2px solid rgba(126, 225, 255, 0.9);
+  outline-offset: 3px;
+}
+
+.archive-intelligence-page .archive-intelligence-workspace {
+  border: 1px solid rgba(184, 229, 255, 0.1);
+  background: rgba(2, 6, 11, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 30px 80px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(26px) saturate(125%);
+  backdrop-filter: blur(26px) saturate(125%);
+}
+
+.archive-intelligence-page .archive-oracle-header {
+  min-height: 72px;
+  padding-block: 12px;
+  background: rgba(3, 8, 14, 0.58);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+  backdrop-filter: blur(22px) saturate(135%);
+}
+
+.archive-intelligence-page .archive-oracle-view-switch {
+  border-color: rgba(206, 235, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.archive-intelligence-page .archive-oracle-view-tab[aria-selected="true"] {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(218, 240, 255, 0.115);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 7px 20px rgba(0, 0, 0, 0.18);
+}
+
+.archive-oracle-model-trigger {
+  min-height: 38px;
+  max-width: 210px;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease;
+}
+
+.archive-oracle-model-trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archive-intelligence-page .archive-search-message:not(.is-user),
+.archive-intelligence-page .archive-roleplay-message:not(.is-user) {
+  width: min(100%, 860px);
+  padding-right: 2px;
+  padding-left: 2px;
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-message.is-user,
+.archive-intelligence-page .archive-roleplay-message.is-user {
+  width: fit-content;
+  max-width: min(82%, 680px);
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 22px 22px 7px 22px;
+  background: rgba(220, 237, 248, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.archive-intelligence-page .archive-search-log,
+.archive-intelligence-page .archive-roleplay-log {
+  scroll-padding-bottom: 18px;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell,
+.archive-intelligence-page .archive-roleplay-composer > div {
+  border-color: rgba(215, 239, 255, 0.14);
+  border-radius: 24px;
+  background: rgba(18, 27, 36, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 12px 34px rgba(0, 0, 0, 0.22);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+
+.archive-intelligence-page .archive-roleplay-composer {
+  border-top-color: transparent;
+  background: linear-gradient(180deg, transparent, rgba(2, 7, 13, 0.9) 36%);
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button,
+.archive-intelligence-page .archive-roleplay-composer > button {
+  border-radius: 50%;
+}
+
+/* Liquid model router ------------------------------------------------------- */
+
+.archive-model-overlay {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(73, 188, 239, 0.11), transparent 36%),
+    rgba(0, 2, 6, 0.7);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  animation: archive-model-overlay-in 0.18s ease-out both;
+}
+
+.archive-model-dialog {
+  position: fixed;
+  z-index: 10001;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  box-sizing: border-box;
+  width: min(920px, calc(100vw - 28px));
+  max-height: min(900px, calc(100dvh - 28px));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid rgba(184, 230, 255, 0.2);
+  border-radius: 32px;
+  outline: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.075), transparent 32%), rgba(3, 9, 16, 0.78);
+  color: #f5faff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -1px 0 rgba(79, 191, 239, 0.08),
+    0 42px 120px rgba(0, 0, 0, 0.58);
+  isolation: isolate;
+  transform: translate3d(-50%, -50%, 0);
+  -webkit-backdrop-filter: blur(30px) saturate(165%);
+  backdrop-filter: blur(30px) saturate(165%);
+  animation: archive-model-dialog-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.archive-model-dialog-aura {
+  position: absolute;
+  z-index: -1;
+  width: 420px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(10px);
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.archive-model-dialog-aura.is-cyan {
+  top: -260px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(71, 202, 255, 0.42), transparent 68%);
+}
+
+.archive-model-dialog-aura.is-violet {
+  right: -180px;
+  bottom: -300px;
+  background: radial-gradient(circle, rgba(191, 78, 219, 0.32), transparent 70%);
+}
+
+.archive-model-dialog-header {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px 18px;
+  border-bottom: 1px solid rgba(190, 229, 255, 0.1);
+  background: rgba(3, 8, 14, 0.36);
+}
+
+.archive-model-dialog-mark {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(107, 218, 255, 0.28);
+  border-radius: 16px;
+  color: #8de6ff;
+  background: rgba(103, 216, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.archive-model-dialog-header p,
+.archive-model-dialog-header h2,
+.archive-model-dialog-header .archive-model-dialog-description {
+  margin: 0;
+}
+
+.archive-model-dialog-header p:not(.archive-model-dialog-description) {
+  color: rgba(117, 224, 255, 0.68);
+  font-family: var(--font-display);
+  font-size: 7px;
+  letter-spacing: 0.22em;
+}
+
+.archive-model-dialog-header h2 {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: 0.07em;
+}
+
+.archive-model-dialog-header .archive-model-dialog-description {
+  margin-top: 5px;
+  color: rgba(211, 229, 240, 0.56);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.archive-model-dialog-close {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(210, 237, 255, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(236, 247, 255, 0.78);
+  cursor: pointer;
+}
+
+.archive-model-dialog-scroll {
+  display: grid;
+  min-height: 0;
+  gap: 14px;
+  padding: 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(105, 215, 255, 0.28) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.archive-model-channel {
+  display: grid;
+  min-width: 0;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgba(190, 229, 255, 0.11);
+  border-radius: 24px;
+  background:
+    linear-gradient(125deg, rgba(99, 211, 255, 0.045), transparent 38%), rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.archive-model-channel > header {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.archive-model-channel > header > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 13px;
+  color: #8be5ff;
+  background: rgba(101, 215, 255, 0.08);
+}
+
+.archive-model-channel > header p,
+.archive-model-channel > header h3 {
+  margin: 0;
+}
+
+.archive-model-channel > header p {
+  color: rgba(125, 222, 255, 0.6);
+  font-family: var(--font-display);
+  font-size: 6px;
+  letter-spacing: 0.2em;
+}
+
+.archive-model-channel > header h3 {
+  margin-top: 3px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.archive-model-channel > header > b {
+  min-width: 0;
+  padding: 7px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(112, 224, 255, 0.13);
+  border-radius: 999px;
+  color: rgba(157, 231, 255, 0.72);
+  background: rgba(101, 215, 255, 0.045);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-model-search-grid,
+.archive-model-persona-grid {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+}
+
+.archive-model-search-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.archive-model-persona-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.archive-model-search-grid > button,
+.archive-model-persona-grid > button,
+.archive-model-pro-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 126px;
+  align-content: start;
+  gap: 6px;
+  padding: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(206, 235, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(231, 243, 251, 0.74);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease,
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-model-search-grid > button::before,
+.archive-model-persona-grid > button::before,
+.archive-model-pro-card::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
+  content: "";
+  background: #73dbff;
+  box-shadow: 0 0 16px rgba(87, 212, 255, 0.68);
+  opacity: 0;
+  transform: scaleY(0.35);
+  transition:
+    opacity 0.2s ease,
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-model-search-grid > button.is-selected,
+.archive-model-persona-grid > button.is-selected,
+.archive-model-pro-card.is-selected {
+  border-color: rgba(117, 221, 255, 0.42);
+  background:
+    radial-gradient(circle at 0 0, rgba(105, 215, 255, 0.13), transparent 48%),
+    rgba(255, 255, 255, 0.05);
+  color: #f5fbff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.archive-model-search-grid > button.is-selected::before,
+.archive-model-persona-grid > button.is-selected::before,
+.archive-model-pro-card.is-selected::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.archive-model-search-grid small,
+.archive-model-persona-grid small,
+.archive-model-pro-card small {
+  color: rgba(111, 218, 255, 0.64);
+  font-family: var(--font-display);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.archive-model-search-grid strong,
+.archive-model-persona-grid strong,
+.archive-model-pro-card strong {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.archive-model-search-grid button > span,
+.archive-model-persona-grid button > span,
+.archive-model-pro-card p {
+  margin: 0;
+  color: rgba(211, 228, 239, 0.58);
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.archive-model-search-grid button > i,
+.archive-model-persona-grid button > i {
+  margin-top: auto;
+  color: rgba(205, 229, 242, 0.38);
+  font-family: var(--font-display);
+  font-size: 6px;
+  font-style: normal;
+  letter-spacing: 0.12em;
+}
+
+.archive-model-search-grid button > em,
+.archive-model-persona-grid button > em,
+.archive-model-pro-card > em {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid rgba(128, 225, 255, 0.18);
+  border-radius: 50%;
+  color: #9ae9ff;
+  background: rgba(103, 216, 255, 0.06);
+  font-style: normal;
+}
+
+.archive-model-effort {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 12px;
+  border: 1px solid rgba(202, 232, 250, 0.08);
+  border-radius: 17px;
+  background: rgba(0, 4, 9, 0.26);
+}
+
+.archive-model-effort p,
+.archive-model-effort span {
+  margin: 0;
+}
+
+.archive-model-effort p {
+  color: rgba(126, 220, 251, 0.64);
+  font-family: var(--font-display);
+  font-size: 6px;
+  letter-spacing: 0.17em;
+}
+
+.archive-model-effort span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(207, 225, 237, 0.46);
+  font-size: 9px;
+}
+
+.archive-model-effort > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(58px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.archive-model-effort button {
+  min-height: 44px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(213, 231, 242, 0.48);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.archive-model-effort button.is-selected {
+  border-color: rgba(117, 220, 255, 0.24);
+  background: rgba(103, 216, 255, 0.11);
+  color: #eaf9ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.archive-model-pro-card {
+  min-height: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  border-color: rgba(207, 89, 215, 0.16);
+  background:
+    linear-gradient(120deg, rgba(187, 64, 215, 0.065), transparent 50%), rgba(255, 255, 255, 0.022);
+}
+
+.archive-model-pro-card > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 14px;
+  color: #ed9aff;
+  background: rgba(200, 79, 222, 0.09);
+}
+
+.archive-model-pro-card > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.archive-model-pro-card > b {
+  margin-right: 35px;
+  color: rgba(239, 173, 255, 0.7);
+  font-family: var(--font-display);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.archive-model-pro-card.is-selected {
+  border-color: rgba(221, 111, 240, 0.45);
+  background:
+    radial-gradient(circle at 0 0, rgba(216, 92, 239, 0.15), transparent 50%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.archive-model-pro-card.is-selected::before {
+  background: #e27bf5;
+  box-shadow: 0 0 16px rgba(221, 94, 243, 0.7);
+}
+
+.archive-model-persona-grid > button::before {
+  background: #d7ab51;
+  box-shadow: 0 0 16px rgba(215, 171, 81, 0.6);
+}
+
+.archive-model-persona-grid > button.is-selected {
+  border-color: rgba(215, 171, 81, 0.4);
+  background:
+    radial-gradient(circle at 0 0, rgba(215, 171, 81, 0.13), transparent 48%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.archive-model-dialog-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 18px max(14px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(190, 229, 255, 0.1);
+  background: rgba(3, 8, 14, 0.72);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+.archive-model-dialog-footer small,
+.archive-model-dialog-footer p {
+  margin: 0;
+}
+
+.archive-model-dialog-footer small {
+  color: rgba(119, 219, 252, 0.52);
+  font-family: var(--font-display);
+  font-size: 6px;
+  letter-spacing: 0.18em;
+}
+
+.archive-model-dialog-footer p {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: rgba(220, 236, 246, 0.58);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-model-dialog-footer p > i {
+  color: rgba(116, 218, 251, 0.42);
+  font-style: normal;
+}
+
+.archive-model-dialog-footer > button {
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid rgba(204, 232, 249, 0.12);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(232, 243, 250, 0.68);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.archive-model-dialog-footer > button.is-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-color: rgba(104, 218, 255, 0.34);
+  background: linear-gradient(135deg, rgba(104, 218, 255, 0.2), rgba(104, 218, 255, 0.08));
+  color: #f4fbff;
+  font-weight: 700;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .archive-intelligence-page-models:hover > span,
+  .archive-oracle-model-trigger:hover {
+    border-color: rgba(119, 220, 255, 0.32);
+    background: rgba(103, 216, 255, 0.07);
+    color: rgba(238, 248, 255, 0.82);
+  }
+
+  .archive-model-search-grid > button:hover,
+  .archive-model-persona-grid > button:hover,
+  .archive-model-pro-card:hover {
+    border-color: rgba(132, 220, 252, 0.28);
+    background-color: rgba(255, 255, 255, 0.045);
+    transform: translate3d(0, -1px, 0);
+  }
+}
+
+@keyframes archive-model-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes archive-model-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, calc(-50% + 10px), 0) scale(0.985);
+  }
+}
+
+@media (max-width: 760px) {
+  .archive-intelligence-page-models {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid rgba(143, 216, 255, 0.12);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .archive-intelligence-page-models > span {
+    display: none;
+  }
+
+  .archive-intelligence-page-models > svg {
+    margin: 0;
+  }
+
+  .archive-intelligence-page-header {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .archive-intelligence-page .archive-oracle-header {
+    row-gap: 8px;
+  }
+
+  .archive-oracle-model-trigger {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .archive-oracle-model-trigger > span,
+  .archive-oracle-model-trigger > i {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .archive-intelligence-page .archive-search-message.is-user,
+  .archive-intelligence-page .archive-roleplay-message.is-user {
+    max-width: 88%;
+  }
+
+  .archive-model-dialog {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: min(92dvh, 920px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 28px 28px 0 0;
+    transform: none;
+    animation-name: archive-model-sheet-in;
+  }
+
+  .archive-model-dialog-header {
+    padding: 16px 16px 14px;
+  }
+
+  .archive-model-dialog-mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  .archive-model-dialog-description {
+    display: none;
+  }
+
+  .archive-model-dialog-scroll {
+    gap: 11px;
+    padding: 12px;
+  }
+
+  .archive-model-channel {
+    padding: 13px;
+    border-radius: 21px;
+  }
+
+  .archive-model-search-grid,
+  .archive-model-persona-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archive-model-search-grid > button,
+  .archive-model-persona-grid > button {
+    min-height: 108px;
+  }
+
+  .archive-model-effort {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .archive-model-effort > div:last-child {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .archive-model-pro-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .archive-model-pro-card > b {
+    display: none;
+  }
+
+  .archive-model-dialog-footer {
+    grid-template-columns: 1fr 1.5fr;
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .archive-model-dialog-footer > div {
+    display: none;
+  }
+
+  .archive-model-dialog-footer > button {
+    min-height: 50px;
+    padding-inline: 10px;
+  }
+}
+
+@keyframes archive-model-sheet-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.99);
+  }
+}
+
+/* A compact visual viewport keeps the transcript and composer available while
+   the iPhone keyboard animates in or out. */
+.archive-intelligence-page:is(
+  [data-keyboard="opening"],
+  [data-keyboard="open"],
+  [data-keyboard="closing"]
+) {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-intelligence-page-header {
+  display: none;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-intelligence-page-stage {
+  padding: max(3px, env(safe-area-inset-top, 0px)) 0 0;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-intelligence-workspace {
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-oracle-header {
+  min-height: 52px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 4px 8px;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-oracle-header
+  > div:first-child {
+  display: none;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-oracle-view-switch {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-oracle-status {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-search-conversation {
+  grid-template-rows: minmax(120px, 1fr) auto;
+  gap: 5px;
+  padding: 5px 7px 6px;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  :is(.archive-search-heading, .archive-oracle-suggestions, .archive-oracle-privacy) {
+  display: none;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-roleplay {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  :is(
+    .archive-roleplay-identity,
+    .archive-roleplay-console-header,
+    .archive-roleplay-mode-row,
+    .archive-roleplay-quick-replies,
+    .archive-roleplay-privacy
+  ) {
+  display: none;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-roleplay-console {
+  grid-template-rows: minmax(120px, 1fr) auto;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  :is(.archive-search-log, .archive-roleplay-log) {
+  padding-block: 7px;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  :is(.archive-roleplay-composer, .archive-oracle-form) {
+  padding-bottom: 5px;
+}
+
+@media (max-width: 430px) and (max-height: 560px) {
+  .archive-model-dialog {
+    inset: 0;
+    width: 100%;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-model-overlay,
+  .archive-model-dialog,
+  .archive-model-search-grid > button,
+  .archive-model-persona-grid > button,
+  .archive-model-pro-card,
+  .archive-model-search-grid > button::before,
+  .archive-model-persona-grid > button::before,
+  .archive-model-pro-card::before {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .archive-model-overlay,
+  .archive-model-dialog,
+  .archive-model-dialog-footer,
+  .archive-intelligence-page .archive-intelligence-workspace,
+  .archive-intelligence-page .archive-oracle-header,
+  .archive-intelligence-page .archive-oracle-input-shell,
+  .archive-intelligence-page .archive-roleplay-composer > div {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .archive-model-dialog {
+    background: #050b12;
+  }
+}
+
+@media (forced-colors: active) {
+  .archive-model-dialog,
+  .archive-model-channel,
+  .archive-model-search-grid > button,
+  .archive-model-persona-grid > button,
+  .archive-model-pro-card,
+  .archive-model-effort button {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .archive-model-search-grid > button.is-selected,
+  .archive-model-persona-grid > button.is-selected,
+  .archive-model-pro-card.is-selected,
+  .archive-model-effort button.is-selected {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .archive-model-search-grid > button.is-selected :is(small, strong, span, i, em),
+  .archive-model-persona-grid > button.is-selected :is(small, strong, span, i, em),
+  .archive-model-pro-card.is-selected :is(small, strong, span, p, b, em) {
+    color: inherit;
+  }
+}

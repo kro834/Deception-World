@@ -6,8 +6,17 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
+import { SlidersHorizontal } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
 import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
+import {
+  archivePersonaProfileLabel,
+  archiveSearchModelName,
+  archiveSearchPreferenceLabel,
+  waitForArchiveThinkingFloor,
+  type ArchiveModelPreferences,
+  type ArchiveSearchPreference,
+} from "@/lib/archive-model-config";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -653,6 +662,7 @@ type SearchMessage = {
   suggestions?: string[];
   source?: ArchiveSearchReply["source"];
   model?: string;
+  modelLabel?: string;
   notice?: string;
 };
 
@@ -706,11 +716,18 @@ function resolveConversationalSearchQuery(
 export function ArchiveIntelligenceWorkspace({
   active = true,
   onNavigate,
+  modelPreferences,
+  modelSelectorOpen,
+  onOpenModelSelector,
 }: {
   active?: boolean;
   onNavigate?: () => void;
+  modelPreferences: ArchiveModelPreferences;
+  modelSelectorOpen: boolean;
+  onOpenModelSelector: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const searchComposingRef = useRef(false);
   const searchLogRef = useRef<HTMLDivElement>(null);
   const searchFollowLatestRef = useRef(true);
   const searchAbortRef = useRef<AbortController | null>(null);
@@ -719,6 +736,8 @@ export function ArchiveIntelligenceWorkspace({
   const [question, setQuestion] = useState("");
   const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
   const [searchPending, setSearchPending] = useState(false);
+  const [pendingSearchPreference, setPendingSearchPreference] =
+    useState<ArchiveSearchPreference | null>(null);
 
   const latestSearchAssistant = [...searchMessages]
     .reverse()
@@ -732,6 +751,7 @@ export function ArchiveIntelligenceWorkspace({
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
     setSearchPending(false);
+    setPendingSearchPreference(null);
   }, []);
 
   useEffect(() => () => stopSearch(), [stopSearch]);
@@ -759,12 +779,37 @@ export function ArchiveIntelligenceWorkspace({
     return () => window.cancelAnimationFrame(frame);
   }, [searchMessages, searchPending, surface]);
 
+  useEffect(() => {
+    const log = searchLogRef.current;
+    if (!log || typeof ResizeObserver === "undefined") return;
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      if (!searchFollowLatestRef.current || surface !== "search") return;
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        log.scrollTop = log.scrollHeight;
+      });
+    });
+    observer.observe(log);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [surface]);
+
   const ask = useCallback(
     async (value: string) => {
-      const nextQuestion = value.trim().slice(0, 180);
+      const searchPreferenceAtRequest = modelPreferences.search;
+      const nextQuestion = value
+        .trim()
+        .slice(0, searchPreferenceAtRequest.execution === "pro" ? 1200 : 600);
       if (!nextQuestion || searchPending) return;
 
-      const resolvedQuery = resolveConversationalSearchQuery(nextQuestion, searchMessages);
+      const resolvedQuery = resolveConversationalSearchQuery(nextQuestion, searchMessages).slice(
+        0,
+        180,
+      );
       const results = searchArchiveOracle(resolvedQuery, 3);
       searchFollowLatestRef.current = true;
       const userMessage: SearchMessage = {
@@ -776,10 +821,12 @@ export function ArchiveIntelligenceWorkspace({
       setSearchMessages(nextMessages);
       setQuestion("");
       setSearchPending(true);
+      setPendingSearchPreference(searchPreferenceAtRequest);
 
       searchAbortRef.current?.abort();
       const controller = new AbortController();
       searchAbortRef.current = controller;
+      const thinkingStartedAt = performance.now();
       const sequence = searchSequenceRef.current + 1;
       searchSequenceRef.current = sequence;
 
@@ -811,6 +858,7 @@ export function ArchiveIntelligenceWorkspace({
               kicker: entry.kicker,
               description: entry.description,
             })),
+            modelPreference: searchPreferenceAtRequest,
           }),
           signal: controller.signal,
         });
@@ -832,6 +880,8 @@ export function ArchiveIntelligenceWorkspace({
         });
       }
 
+      await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
+
       if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
       const orderedResults = reply.focusCandidateId
         ? [...results].sort((left, right) =>
@@ -852,18 +902,32 @@ export function ArchiveIntelligenceWorkspace({
           suggestions: reply.suggestions,
           source: reply.source,
           model: reply.model,
+          modelLabel: archiveSearchPreferenceLabel(searchPreferenceAtRequest),
           notice: reply.notice,
         },
       ]);
       setSearchPending(false);
+      setPendingSearchPreference(null);
       searchAbortRef.current = null;
     },
-    [searchMessages, searchPending],
+    [modelPreferences.search, searchMessages, searchPending],
   );
 
   const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     void ask(question);
+  };
+
+  const handleSearchComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing &&
+      !searchComposingRef.current
+    ) {
+      event.preventDefault();
+      void ask(question);
+    }
   };
 
   const handleSurfaceKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -929,15 +993,33 @@ export function ArchiveIntelligenceWorkspace({
             <small>PERSONA</small>
           </button>
         </div>
-        <span className="archive-oracle-status">
+        <button
+          type="button"
+          className="archive-oracle-status archive-oracle-model-trigger"
+          aria-label={`モデルを変更。現在は${
+            surface === "search"
+              ? archiveSearchPreferenceLabel(modelPreferences.search)
+              : archivePersonaProfileLabel(modelPreferences.personaProProfile)
+          }`}
+          aria-haspopup="dialog"
+          aria-expanded={modelSelectorOpen}
+          aria-controls="archive-model-selector"
+          onClick={onOpenModelSelector}
+        >
           <i aria-hidden="true" />
-          {surface === "search" ? "LUNA" : "PERSONA"}
-        </span>
+          <span>
+            {surface === "search"
+              ? archiveSearchPreferenceLabel(modelPreferences.search)
+              : archivePersonaProfileLabel(modelPreferences.personaProProfile)}
+          </span>
+          <SlidersHorizontal size={13} strokeWidth={1.6} aria-hidden="true" />
+        </button>
       </header>
 
       <div
         id="archive-oracle-search-panel"
         className="archive-oracle-stage archive-oracle-guide archive-search-conversation"
+        data-search-execution={modelPreferences.search.execution}
         role="tabpanel"
         aria-labelledby="archive-oracle-search-tab"
         hidden={surface !== "search"}
@@ -993,7 +1075,16 @@ export function ArchiveIntelligenceWorkspace({
                 <header>
                   <span>{message.role === "assistant" ? "AI" : "YOU"}</span>
                   {message.role === "assistant" && message.source ? (
-                    <small>{message.source === "openai" ? "LUNA" : "LOCAL"}</small>
+                    <small>
+                      {message.source === "openai"
+                        ? (message.modelLabel ??
+                          (message.model === "gpt-5.6-terra"
+                            ? "TERRA"
+                            : message.model === "gpt-5.5"
+                              ? "GPT-5.5"
+                              : "NEURAL"))
+                        : "LOCAL"}
+                    </small>
                   ) : null}
                 </header>
                 <p>{message.text}</p>
@@ -1040,15 +1131,34 @@ export function ArchiveIntelligenceWorkspace({
                 <i />
               </span>
               <div>
-                <small>GPT-5.6 LUNA / SEARCHING</small>
-                <p>AIが記録と会話の流れを照合しています</p>
+                <small>
+                  {archiveSearchModelName(
+                    (pendingSearchPreference ?? modelPreferences.search).model,
+                  )}{" "}
+                  /{" "}
+                  {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
+                    ? "PRO"
+                    : (
+                        pendingSearchPreference ?? modelPreferences.search
+                      ).effort.toUpperCase()}{" "}
+                  / 思考中
+                </small>
+                <p>
+                  {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
+                    ? "会話全体の意図と候補の違いを深く考えています"
+                    : "記録と会話の流れを照合しています"}
+                </p>
               </div>
             </div>
           ) : null}
         </div>
 
         <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
-          {searchPending ? "AIが記録と会話の流れを照合しています" : ""}
+          {searchPending
+            ? (pendingSearchPreference ?? modelPreferences.search).execution === "pro"
+              ? "AIが会話全体の意図と候補の違いを思考中です"
+              : "AIが記録と会話の流れを思考中です"
+            : ""}
         </p>
 
         <div className="archive-oracle-suggestions" aria-label="次のサーチ候補">
@@ -1076,17 +1186,28 @@ export function ArchiveIntelligenceWorkspace({
           </label>
           <div className="archive-oracle-input-shell">
             <span aria-hidden="true">ASK</span>
-            <input
+            <textarea
               ref={inputRef}
               id="archive-oracle-question"
               name="question"
-              type="search"
+              rows={1}
               value={question}
-              maxLength={180}
+              maxLength={modelPreferences.search.execution === "pro" ? 1200 : 600}
               autoComplete="off"
               enterKeyHint="send"
-              placeholder="例：レクソナンスの性能を見たい"
+              placeholder={
+                modelPreferences.search.execution === "pro"
+                  ? "探したい内容や、覚えている場面を詳しく話す…"
+                  : "記録について話しかける…"
+              }
+              onCompositionStart={() => {
+                searchComposingRef.current = true;
+              }}
+              onCompositionEnd={() => {
+                searchComposingRef.current = false;
+              }}
               onChange={(event) => setQuestion(event.currentTarget.value)}
+              onKeyDown={handleSearchComposerKeyDown}
             />
             <button type="submit" disabled={!question.trim() || searchPending}>
               送信
@@ -1111,6 +1232,7 @@ export function ArchiveIntelligenceWorkspace({
           active={active && surface === "roleplay"}
           searchArchive={searchArchiveOracle}
           onNavigate={onNavigate}
+          proProfile={modelPreferences.personaProProfile}
         />
       </div>
     </section>
