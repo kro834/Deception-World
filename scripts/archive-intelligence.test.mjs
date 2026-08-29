@@ -8,6 +8,8 @@ const readSource = (relativePath) =>
 const characters = readSource("src/lib/archive-characters.ts");
 const fallback = readSource("src/lib/archive-roleplay-fallback.ts");
 const intelligenceServer = readSource("src/lib/archive-intelligence.server.ts");
+const openAiTransport = readSource("src/lib/archive-openai-transport.server.ts");
+const archiveApiClient = readSource("src/lib/archive-api-client.ts");
 const modelConfig = readSource("src/lib/archive-model-config.ts");
 const conversationBoundary = readSource("src/lib/archive-conversation.server.ts");
 const rateLimitServer = readSource("src/lib/archive-ai-rate-limit.server.ts");
@@ -134,9 +136,10 @@ test("the provider key and upstream endpoint stay in the server-only boundary", 
   assert.match(intelligenceServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
   assert.match(modelConfig, /"gpt-5\.6-sol"/);
   assert.match(modelConfig, /model: "gpt-5\.6-luna"/);
-  assert.match(intelligenceServer, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
-  assert.match(intelligenceServer, /authorization: `Bearer \$\{apiKey\}`/);
-  assert.doesNotMatch(intelligenceServer, /import\.meta\.env|VITE_OPENAI/);
+  assert.match(intelligenceServer, /requestOpenAiStructuredResponse\(\{/);
+  assert.match(openAiTransport, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(openAiTransport, /authorization: `Bearer \$\{apiKey\}`/);
+  assert.doesNotMatch(`${intelligenceServer}\n${openAiTransport}`, /import\.meta\.env|VITE_OPENAI/);
 
   for (const [name, clientSource] of [
     ["character manifest", characters],
@@ -160,12 +163,13 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(intelligenceServer, /resolveArchivePersonaRoute\(mode, proProfile\)/);
   assert.match(intelligenceServer, /reasoning: execution\.reasoning/);
   assert.match(intelligenceServer, /max_output_tokens: execution\.maxOutputTokens/);
-  assert.match(intelligenceServer, /controller\.abort\(\), execution\.timeoutMs/);
+  assert.match(intelligenceServer, /timeoutMs: execution\.timeoutMs/);
   assert.doesNotMatch(intelligenceServer, /ARCHIVE_NORMAL_MODEL/);
   assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v3-/);
   assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 2400/);
-  assert.match(intelligenceServer, /controller\.abort\(\)/);
-  assert.match(intelligenceServer, /finally \{[\s\S]*?clearTimeout\(timeout\)/);
+  assert.match(openAiTransport, /const controller = new AbortController\(\)/);
+  assert.match(openAiTransport, /controller\.abort\(/);
+  assert.match(openAiTransport, /finally \{[\s\S]*?clearTimeout\(timeout\)/);
   assert.doesNotMatch(intelligenceServer, /previous_response_id|encrypted_content/);
 });
 
@@ -208,9 +212,11 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(intelligenceRoute, /cache-control": "no-store, max-age=0/);
   assert.match(intelligenceRoute, /x-content-type-options": "nosniff/);
 
-  assert.match(rateLimitServer, /const CLIENT_MINUTE_UNITS = 6/);
-  assert.match(rateLimitServer, /const CLIENT_DAILY_UNITS = 40/);
+  assert.match(rateLimitServer, /const DEFAULT_CLIENT_MINUTE_UNITS = 12/);
+  assert.match(rateLimitServer, /const DEFAULT_CLIENT_DAILY_UNITS = 120/);
   assert.match(rateLimitServer, /const DEFAULT_GLOBAL_DAILY_UNITS = 250/);
+  assert.match(rateLimitServer, /"ARCHIVE_AI_CLIENT_MINUTE_LIMIT"/);
+  assert.match(rateLimitServer, /"ARCHIVE_AI_CLIENT_DAILY_LIMIT"/);
   assert.match(rateLimitServer, /x-vercel-forwarded-for/);
   assert.match(rateLimitServer, /if \(process\.env\.NODE_ENV === "production"\) return null/);
   assert.match(rateLimitServer, /isIP\(vercelAddress\)/);
@@ -299,13 +305,18 @@ test("the composer sends only by button, stays abortable and stale-response safe
 
   assert.match(roleplay, /const abortRef = useRef<AbortController \| null>\(null\)/);
   assert.match(roleplay, /abortRef\.current\?\.abort\(\)/);
+  assert.match(roleplay, /if \(!value \|\| abortRef\.current\) return/);
+  assert.match(roleplay, /if \(abortRef\.current === controller\) abortRef\.current = null/);
   assert.match(roleplay, /signal: controller\.signal/);
   assert.match(roleplay, /requestSequenceRef\.current !== sequence/);
   assert.match(roleplay, /useEffect\(\(\) => \(\) => stopResponse\(false\)/);
-  assert.match(roleplay, /credentials:\s*"same-origin"/);
-  assert.match(roleplay, /"x-archive-client": "persona-v1"/);
-  assert.match(roleplay, /if \(!response\.ok\)/);
-  assert.match(roleplay, /if \(!isArchiveReply\(payload\)\)/);
+  assert.match(roleplay, /postArchiveApi\(\{/);
+  assert.match(roleplay, /url: "\/api\/archive-intelligence"/);
+  assert.match(roleplay, /client: "persona-v1"/);
+  assert.match(roleplay, /validate: isArchiveReply/);
+  assert.match(archiveApiClient, /credentials:\s*"same-origin"/);
+  assert.match(archiveApiClient, /"x-archive-client": client/);
+  assert.match(archiveApiClient, /if \(!response\.ok\)/);
 
   assert.match(
     roleplay,

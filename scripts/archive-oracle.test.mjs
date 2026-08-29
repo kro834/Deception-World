@@ -9,6 +9,8 @@ const oracle = readSource("src/components/world/archive-oracle.tsx");
 const roleplay = readSource("src/components/world/archive-roleplay.tsx");
 const searchContract = readSource("src/lib/archive-search.ts");
 const searchServer = readSource("src/lib/archive-search.server.ts");
+const openAiTransport = readSource("src/lib/archive-openai-transport.server.ts");
+const archiveApiClient = readSource("src/lib/archive-api-client.ts");
 const searchCatalog = readSource("src/lib/archive-search-catalog.server.ts");
 const searchRoute = readSource("src/routes/api/archive-search.ts");
 const requestBody = readSource("src/lib/archive-request-body.server.ts");
@@ -29,9 +31,12 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /export const ARCHIVE_ORACLE_ENTRIES/);
   assert.match(oracle, /function searchArchiveOracle/);
   assert.match(oracle, /\.slice\(0, Math\.min\(limit, 3\)\)/);
-  assert.match(oracle, /fetch\("\/api\/archive-search"/);
-  assert.match(oracle, /"x-archive-client": "search-v1"/);
-  assert.match(oracle, /credentials: "same-origin"/);
+  assert.match(oracle, /postArchiveApi\(\{/);
+  assert.match(oracle, /url: "\/api\/archive-search"/);
+  assert.match(oracle, /client: "search-v1"/);
+  assert.match(oracle, /validate: isArchiveSearchReply/);
+  assert.match(archiveApiClient, /"x-archive-client": client/);
+  assert.match(archiveApiClient, /credentials: "same-origin"/);
   assert.match(oracle, /className="archive-search-log"/);
   assert.match(oracle, /role="log"/);
   assert.match(oracle, /AIが質問の意図と会話の流れを思考中です/);
@@ -71,7 +76,8 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /modelPreference: searchPreferenceSchema/);
   assert.match(searchServer, /value\.model !== "gpt-5\.6-terra"/);
   assert.match(searchServer, /value\.effort !== "xhigh"/);
-  assert.match(searchServer, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(searchServer, /requestOpenAiStructuredResponse\(\{/);
+  assert.match(openAiTransport, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(searchServer, /store: false/);
   assert.match(searchServer, /tools: \[\]/);
   assert.match(modelConfig, /effort: "xhigh", mode: "pro", context: "current_turn"/);
@@ -178,6 +184,8 @@ test("Search answers lightweight general conversation locally without inventing 
 });
 
 test("both AI composers send only from their explicit send buttons", () => {
+  const arrowPattern =
+    /<ArrowUp\s+className="archive-send-icon"\s+size=\{20\}\s+strokeWidth=\{2\.4\}\s+aria-hidden="true"\s+focusable="false"\s*\/>/;
   for (const [name, source] of [
     ["Search", oracle],
     ["Persona", roleplay],
@@ -186,6 +194,8 @@ test("both AI composers send only from their explicit send buttons", () => {
     assert.doesNotMatch(source, /onComposition(?:Start|End)/, name);
     assert.doesNotMatch(source, /type="submit"/, name);
     assert.match(source, /enterKeyHint="enter"/, name);
+    assert.match(source, arrowPattern, `${name} must use the shared Lucide ArrowUp geometry`);
+    assert.doesNotMatch(source, /↑/, `${name} must not depend on a platform font arrow glyph`);
   }
   assert.match(oracle, /type="button"[\s\S]*?onClick=\{\(\) => void ask\(question\)\}/);
   assert.match(roleplay, /type="button"[\s\S]*?onClick=\{\(\) => void sendMessage\(\)\}/);
@@ -193,11 +203,35 @@ test("both AI composers send only from their explicit send buttons", () => {
   assert.match(roleplay, /setDraft\(starter\)/);
   assert.match(oracle, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
   assert.match(roleplay, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
+  assert.match(oracle, /if \(!nextQuestion \|\| searchAbortRef\.current\) return/);
+  assert.match(
+    oracle,
+    /if \(searchAbortRef\.current === controller\) searchAbortRef\.current = null/,
+  );
   assert.match(oracle, /const displayedReferences = referencedResults/);
   assert.match(oracle, /SEARCH_TOPIC_CHANGE_PATTERN/);
   assert.match(oracle, /data-surface-transition=\{surfaceTransition \?\? undefined\}/);
   assert.doesNotMatch(oracle, /surface !== "search"\) stopSearch\(\)/);
   assert.doesNotMatch(roleplay, /if \(!active\) stopResponse\(false\)/);
+
+  const iconRule = intelligenceStyles.match(/\.archive-send-icon\s*\{([^}]*)\}/);
+  assert.ok(iconRule, "the shared send icon needs a stable CSS box");
+  assert.match(iconRule[1], /display:\s*block/);
+  assert.match(iconRule[1], /width:\s*20px/);
+  assert.match(iconRule[1], /height:\s*20px/);
+  assert.match(iconRule[1], /flex:\s*none/);
+
+  const actionRules = [
+    ...intelligenceStyles.matchAll(
+      /\.archive-intelligence-page \.archive-oracle-input-shell > button,\s*\.archive-intelligence-page \.archive-roleplay-composer > button \{([^}]*)\}/g,
+    ),
+  ];
+  const centeredAction = actionRules.find((match) => /width:\s*44px/.test(match[1]));
+  assert.ok(centeredAction, "both composer actions need the shared 44px rule");
+  assert.match(centeredAction[1], /display:\s*inline-grid/);
+  assert.match(centeredAction[1], /place-items:\s*center/);
+  assert.match(centeredAction[1], /width:\s*44px/);
+  assert.match(centeredAction[1], /height:\s*44px/);
 });
 
 test("model preferences normalize and resolve every Search runtime route", async () => {
@@ -362,19 +396,31 @@ test("Archive Intelligence has a dedicated reduced-motion-aware route handoff", 
   );
 });
 
-test("visual viewport offsets cannot pull the AI shell above the iPhone viewport", async () => {
-  const { resolveArchiveViewportOffset } = await import(
-    new URL("../src/lib/archive-viewport.ts", import.meta.url)
+test("focused composers stay position-stable during visual viewport scrolling", () => {
+  assert.doesNotMatch(intelligencePage, /viewport\?\.addEventListener\("scroll"/);
+  assert.doesNotMatch(intelligencePage, /--archive-viewport-(?:left|top)/);
+  assert.doesNotMatch(intelligencePage, /resolveArchiveViewportOffset/);
+  assert.match(
+    intelligencePage,
+    /page\.dataset\.composerFocus\s*=\s*"true"|page\.setAttribute\("data-composer-focus",\s*"true"\)/,
   );
+  assert.match(
+    intelligencePage,
+    /requestAnimationFrame\([\s\S]*?(?:delete page\.dataset\.composerFocus|removeAttribute\("data-composer-focus"\))/,
+  );
+  assert.match(
+    intelligenceStyles,
+    /\.archive-intelligence-page\s*\{(?=[^}]*\btop:\s*0;)(?=[^}]*\bleft:\s*0;)[^}]*\}/,
+  );
+  assert.doesNotMatch(intelligenceStyles, /var\(--archive-viewport-(?:left|top)/);
 
-  assert.equal(resolveArchiveViewportOffset(0, 0, 642), 0);
-  assert.equal(resolveArchiveViewportOffset(86, 0, 642), 86);
-  assert.equal(resolveArchiveViewportOffset(undefined, 728, 642), 86);
-  assert.equal(resolveArchiveViewportOffset(undefined, 0, 642), 0);
-  assert.equal(resolveArchiveViewportOffset(Number.NaN, Number.NaN, 0), 0);
-  assert.match(intelligencePage, /resolveArchiveViewportOffset\(viewport\.offsetTop/);
-  assert.match(intelligencePage, /650, 1000/);
-  assert.match(intelligenceStyles, /top: max\(0px, var\(--archive-viewport-top, 0px\)\)/);
+  const fixedTextareaRule = [
+    ...intelligenceStyles.matchAll(/[^{}]*textarea[^{}]*\{([^}]*)\}/g),
+  ].find((match) => /field-sizing:\s*fixed/.test(match[1]));
+  assert.ok(fixedTextareaRule, "route CSS must override intrinsic textarea field sizing");
+  assert.match(fixedTextareaRule[1], /height:\s*44px/);
+  assert.match(fixedTextareaRule[1], /min-height:\s*44px/);
+  assert.match(fixedTextareaRule[1], /overflow-y:\s*auto/);
 });
 
 test("the opening keeps its editorial motion contract", () => {

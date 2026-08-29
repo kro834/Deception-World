@@ -1,10 +1,10 @@
 .archive-intelligence-page {
   position: fixed;
-  top: max(0px, var(--archive-viewport-top, 0px));
-  left: max(0px, var(--archive-viewport-left, 0px));
+  top: 0;
+  left: 0;
   display: grid;
   box-sizing: border-box;
-  width: var(--archive-viewport-width, 100%);
+  width: 100%;
   min-height: 0;
   height: 100vh;
   height: 100dvh;
@@ -1692,9 +1692,13 @@ body.archive-intelligence-active {
 .archive-intelligence-page .archive-oracle-input-shell textarea,
 .archive-intelligence-page .archive-roleplay-composer textarea {
   box-sizing: border-box;
+  width: 100%;
+  height: 44px;
   min-height: 44px;
-  max-height: 126px;
+  max-height: 44px;
   padding: 10px 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 0;
   border-radius: 0;
   outline: 0;
@@ -1705,6 +1709,10 @@ body.archive-intelligence-active {
   line-height: 1.4;
   caret-color: rgba(255, 255, 255, 0.94);
   cursor: text;
+  resize: none;
+  field-sizing: fixed;
+  transform: none;
+  transition: none;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -1727,6 +1735,7 @@ body.archive-intelligence-active {
 
 .archive-intelligence-page .archive-oracle-input-shell > button,
 .archive-intelligence-page .archive-roleplay-composer > button {
+  display: inline-grid;
   width: 44px;
   min-width: 44px;
   height: 44px;
@@ -1739,15 +1748,400 @@ body.archive-intelligence-active {
   background: #ffffff;
   box-shadow: none;
   font-size: 0;
+  place-items: center;
 }
 
 .archive-intelligence-page .archive-roleplay-composer > button {
   margin-bottom: 8px;
 }
 
-.archive-intelligence-page .archive-oracle-input-shell > button > span,
-.archive-intelligence-page .archive-roleplay-composer > button > svg {
-  font-size: 19px;
+.archive-intelligence-page .archive-composer-send > span,
+.archive-intelligence-page .archive-composer-stop > span {
+  display: none;
+}
+
+.archive-intelligence-page .archive-send-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > .archive-composer-plus,
+.archive-intelligence-page .archive-roleplay-composer > div > .archive-composer-plus {
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 44px;
+  min-height: 44px;
+  align-self: end;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.archive-intelligence-page .archive-composer-plus > span {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  font-size: 30px;
+  font-weight: 250;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.archive-intelligence-page .archive-composer-plus[aria-expanded="true"],
+.archive-intelligence-page .archive-composer-plus:focus-visible {
+  color: #050505;
+  background: #ffffff;
+  outline: 0;
+}
+
+.archive-intelligence-page .archive-composer-model-row {
+  display: flex;
+  min-width: 0;
+  grid-column: 1 / -1;
+  align-items: center;
+  padding: 0 9px 7px;
+}
+
+.archive-intelligence-page .archive-composer-model-trigger {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 30px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  font: inherit;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
+  backdrop-filter: blur(18px) saturate(115%);
+  touch-action: manipulation;
+}
+
+.archive-intelligence-page .archive-composer-model-trigger > span {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+}
+
+.archive-intelligence-page .archive-composer-model-trigger > b {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-intelligence-page[data-composer-focus="true"] .archive-intelligence-workspace,
+.archive-intelligence-page[data-composer-focus="true"]
+  :is(.archive-oracle-guide, .archive-oracle-roleplay-panel) {
+  animation: none !important;
+  transform: none !important;
+}
+
+.archive-composer-popover {
+  z-index: 11000;
+  width: min(332px, calc(100vw - 24px));
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(19, 19, 21, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 54px rgba(0, 0, 0, 0.58);
+  -webkit-backdrop-filter: blur(32px) saturate(125%);
+  backdrop-filter: blur(32px) saturate(125%);
+  transform-origin: var(--radix-popover-content-transform-origin);
+  animation: archive-composer-popover-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.archive-composer-popover > header {
+  display: grid;
+  gap: 3px;
+  padding: 4px 6px 9px;
+}
+
+.archive-composer-popover > header small,
+.archive-composer-tools-popover > small {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+}
+
+.archive-composer-popover > header p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.archive-composer-model-options {
+  display: grid;
+  gap: 3px;
+}
+
+.archive-composer-model-options > button,
+.archive-composer-model-details,
+.archive-composer-tools-popover > button {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 13px;
+  color: rgba(255, 255, 255, 0.74);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.archive-composer-model-options > button > span,
+.archive-composer-tools-popover > button > span {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.archive-composer-model-options > button b,
+.archive-composer-tools-popover > button b {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.archive-composer-model-options > button small,
+.archive-composer-tools-popover > button small {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10px;
+}
+
+.archive-composer-model-options > button.is-active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.archive-composer-model-options > button > svg {
+  margin-left: auto;
+  flex: none;
+}
+
+.archive-composer-model-details {
+  min-height: 40px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0 0 13px 13px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+}
+
+.archive-composer-tools-popover {
+  width: min(304px, calc(100vw - 24px));
+  padding-top: 14px;
+}
+
+.archive-composer-tools-popover > small {
+  display: block;
+  padding: 0 8px 7px;
+}
+
+.archive-composer-tools-popover > button > svg {
+  flex: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.archive-composer-popover-arrow {
+  fill: rgba(19, 19, 21, 0.96);
+}
+
+@keyframes archive-composer-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.98);
+  }
+}
+
+/* Liquid command surfaces: restrained refraction on a black foundation. */
+.archive-intelligence-page .archive-oracle-view-switch {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.115), rgba(255, 255, 255, 0.025) 46%),
+    rgba(19, 19, 21, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 12px 34px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+  backdrop-filter: blur(26px) saturate(135%);
+}
+
+.archive-intelligence-page .archive-oracle-view-switch::before {
+  position: absolute;
+  z-index: 0;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  width: calc(50% - 7px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.18), transparent 48%),
+    linear-gradient(145deg, rgba(35, 39, 45, 0.96), rgba(7, 8, 11, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 10px -10px 26px rgba(0, 0, 0, 0.18),
+    0 7px 18px rgba(0, 0, 0, 0.42),
+    0 0 22px rgba(126, 220, 255, 0.045);
+  content: "";
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-intelligence-workspace[data-surface="roleplay"] .archive-oracle-view-switch::before {
+  transform: translateX(calc(100% + 4px));
+}
+
+.archive-intelligence-page .archive-oracle-view-switch::after {
+  position: absolute;
+  z-index: 3;
+  inset: 1px 16% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  content: "";
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.archive-intelligence-page .archive-oracle-view-tab {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  transition:
+    color 0.24s ease,
+    text-shadow 0.24s ease,
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-intelligence-page .archive-oracle-view-tab[aria-selected="true"] {
+  color: #ffffff;
+  background: transparent;
+  box-shadow: none;
+  text-shadow: 0 0 18px rgba(202, 238, 255, 0.2);
+}
+
+.archive-intelligence-page .archive-oracle-status {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.17);
+  background:
+    radial-gradient(circle at 30% 16%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(145deg, rgba(35, 36, 40, 0.88), rgba(12, 13, 16, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.48),
+    0 10px 28px rgba(0, 0, 0, 0.34);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+  backdrop-filter: blur(24px) saturate(125%);
+}
+
+.archive-intelligence-page .archive-oracle-status::after {
+  position: absolute;
+  z-index: -1;
+  inset: 3px;
+  border: 1px solid rgba(126, 220, 255, 0.055);
+  border-radius: inherit;
+  content: "";
+}
+
+.archive-intelligence-page :is(.archive-oracle-input-shell, .archive-roleplay-composer > div) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255, 255, 255, 0.16);
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.08), transparent 38%), rgba(24, 24, 27, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 14px 38px rgba(0, 0, 0, 0.36);
+  -webkit-backdrop-filter: blur(28px) saturate(125%);
+  backdrop-filter: blur(28px) saturate(125%);
+}
+
+.archive-intelligence-page
+  :is(.archive-oracle-input-shell, .archive-roleplay-composer > div)::before {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 11%;
+  width: 48%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.36), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.archive-intelligence-page :is(.archive-oracle-input-shell, .archive-roleplay-composer > div) > * {
+  position: relative;
+  z-index: 1;
+}
+
+.archive-intelligence-page .archive-composer-model-trigger {
+  border-color: rgba(191, 236, 255, 0.13);
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.09), rgba(110, 217, 255, 0.025)),
+    rgba(24, 24, 27, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 7px 18px rgba(0, 0, 0, 0.2);
+}
+
+.archive-intelligence-page .archive-composer-model-trigger > span {
+  background: #bfeeff;
+  box-shadow:
+    0 0 10px rgba(137, 225, 255, 0.65),
+    0 0 22px rgba(137, 225, 255, 0.2);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .archive-intelligence-page .archive-oracle-view-tab:not([aria-selected="true"]):hover {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .archive-intelligence-page .archive-oracle-status:hover,
+  .archive-intelligence-page .archive-composer-model-trigger:hover {
+    border-color: rgba(203, 241, 255, 0.3);
+  }
+
+  .archive-composer-model-options > button:hover,
+  .archive-composer-tools-popover > button:hover,
+  .archive-composer-model-details:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.075);
+  }
 }
 
 .archive-intelligence-page .archive-oracle-input-shell > button:disabled,
@@ -2381,6 +2775,7 @@ body.archive-intelligence-active {
   .archive-model-search-grid > button,
   .archive-model-persona-grid > button,
   .archive-model-pro-card,
+  .archive-composer-popover,
   .archive-model-search-grid > button::before,
   .archive-model-persona-grid > button::before,
   .archive-model-pro-card::before {
@@ -2393,6 +2788,7 @@ body.archive-intelligence-active {
   .archive-model-overlay,
   .archive-model-dialog,
   .archive-model-dialog-footer,
+  .archive-composer-popover,
   .archive-intelligence-page .archive-intelligence-workspace,
   .archive-intelligence-page .archive-oracle-header,
   .archive-intelligence-page .archive-oracle-input-shell,
@@ -2413,6 +2809,16 @@ body.archive-intelligence-active {
   .archive-model-persona-grid > button,
   .archive-model-pro-card,
   .archive-model-effort button {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .archive-composer-popover,
+  .archive-composer-model-options > button,
+  .archive-composer-model-details,
+  .archive-composer-tools-popover > button {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;

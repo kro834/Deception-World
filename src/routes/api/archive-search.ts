@@ -85,6 +85,7 @@ export const Route = createFileRoute("/api/archive-search")({
             candidates,
             modelPreference,
             safetyIdentifier: remoteAccess.safetyIdentifier,
+            signal: request.signal,
           });
           if (remoteReply) return noStoreJson(remoteReply);
         } catch {

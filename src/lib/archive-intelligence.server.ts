@@ -6,6 +6,7 @@ import {
   type ArchiveRoleplayMode,
 } from "./archive-characters";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
 import {
   ARCHIVE_PERSONA_PRO_PROFILES,
   resolveArchivePersonaRoute,
@@ -203,12 +204,14 @@ export async function requestOpenAiArchiveReply({
   proProfile,
   messages,
   safetyIdentifier,
+  signal,
 }: {
   characterId: ArchiveCharacterId;
   mode: ArchiveRoleplayMode;
   proProfile: ArchivePersonaProProfile;
   messages: readonly ArchiveConversationTurn[];
   safetyIdentifier?: string;
+  signal?: AbortSignal;
 }): Promise<ArchiveIntelligenceReply | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
@@ -217,59 +220,49 @@ export async function requestOpenAiArchiveReply({
   // model/reasoning payload sent to the Responses API.
   const execution = resolveArchivePersonaRoute(mode, proProfile);
   const model = execution.model;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), execution.timeoutMs);
   const latestUserInput = [...messages]
     .reverse()
     .find((message) => message.role === "user")?.content;
   const combatRequested = isExplicitFictionalCombatInput(latestUserInput ?? "");
 
-  try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        safety_identifier: safetyIdentifier,
-        store: false,
-        tools: [],
-        reasoning: execution.reasoning,
-        max_output_tokens: execution.maxOutputTokens,
-        prompt_cache_key: `deception-world-persona-v3-${characterId}-${mode}-${proProfile}`,
-        instructions: buildSystemPrompt(characterId, mode),
-        input: [
-          {
-            role: "user",
-            content: serializeUntrustedArchiveConversation(messages),
-          },
-        ],
-        text: {
-          verbosity: mode === "pro" ? "medium" : "low",
-          format: {
-            type: "json_schema",
-            name: "deception_world_persona_reply",
-            strict: true,
-            schema: responseTextSchema,
-          },
-        },
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) throw new Error(`OpenAI request failed with ${response.status}`);
-    const payload: unknown = await response.json();
-    const outputText = extractResponseText(payload);
-    if (!outputText) throw new Error("OpenAI response did not contain output text");
-    const generated = generatedReplySchema.parse(JSON.parse(outputText));
-    return {
-      ...normalizeGeneratedReply(generated, mode, combatRequested),
-      source: "openai",
+  return requestOpenAiStructuredResponse({
+    apiKey,
+    timeoutMs: execution.timeoutMs,
+    signal,
+    body: {
       model,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+      safety_identifier: safetyIdentifier,
+      store: false,
+      tools: [],
+      reasoning: execution.reasoning,
+      max_output_tokens: execution.maxOutputTokens,
+      prompt_cache_key: `deception-world-persona-v3-${characterId}-${mode}-${proProfile}`,
+      instructions: buildSystemPrompt(characterId, mode),
+      input: [
+        {
+          role: "user",
+          content: serializeUntrustedArchiveConversation(messages),
+        },
+      ],
+      text: {
+        verbosity: mode === "pro" ? "medium" : "low",
+        format: {
+          type: "json_schema",
+          name: "deception_world_persona_reply",
+          strict: true,
+          schema: responseTextSchema,
+        },
+      },
+    },
+    parse: (payload) => {
+      const outputText = extractResponseText(payload);
+      if (!outputText) throw new Error("OpenAI response did not contain output text");
+      const generated = generatedReplySchema.parse(JSON.parse(outputText));
+      return {
+        ...normalizeGeneratedReply(generated, mode, combatRequested),
+        source: "openai" as const,
+        model,
+      };
+    },
+  });
 }

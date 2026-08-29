@@ -1,12 +1,14 @@
-import { ArrowUp, Plus, RotateCcw, Sparkles, Square } from "lucide-react";
+import { ArrowUp, RotateCcw, Sparkles, Square } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { postArchiveApi } from "@/lib/archive-api-client";
 import {
   ARCHIVE_CHARACTERS,
   ARCHIVE_CHARACTER_BY_ID,
   type ArchiveCharacterId,
   type ArchiveRoleplayMode,
 } from "@/lib/archive-characters";
+import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
 import {
   createLocalArchiveReply,
   hasTacticalSnapshot,
@@ -19,6 +21,7 @@ import {
   waitForArchiveThinkingFloor,
   type ArchivePersonaProProfile,
 } from "@/lib/archive-model-config";
+import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
 
 type RoleplaySearchEntry = {
   id: string;
@@ -54,6 +57,8 @@ type ArchiveRoleplayProps = {
   onNavigate?: () => void;
   searchArchive: (query: string, limit?: number) => RoleplaySearchResult[];
   proProfile: ArchivePersonaProProfile;
+  onProProfileChange: (profile: ArchivePersonaProProfile) => void;
+  onOpenModelSelector: () => void;
 };
 
 const MAX_VISIBLE_MESSAGES = 36;
@@ -87,16 +92,16 @@ function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
 }
 
 function historyFrom(messages: readonly RoleplayMessage[]): ArchiveConversationTurn[] {
-  return messages
-    .map((message) => ({
+  return trimArchiveConversation(
+    messages.map((message) => ({
       role: message.role,
       content:
         message.role === "assistant" && message.narration
           ? `${message.text}\n[描写] ${message.narration}`
           : message.text,
-    }))
-    .filter((message) => message.content.trim())
-    .slice(-12);
+    })),
+    { maxTurns: 12, maxTotalChars: 12_000, maxCharsPerTurn: 3_000 },
+  );
 }
 
 function ArchiveHints({
@@ -163,6 +168,8 @@ export function ArchiveRoleplay({
   onNavigate,
   searchArchive,
   proProfile,
+  onProProfileChange,
+  onOpenModelSelector,
 }: ArchiveRoleplayProps) {
   const [characterId, setCharacterId] = useState<ArchiveCharacterId>("ciel");
   const [mode, setMode] = useState<ArchiveRoleplayMode>("normal");
@@ -270,7 +277,7 @@ export function ArchiveRoleplay({
   const sendMessage = async (input = draft) => {
     const maxLength = mode === "pro" ? 1600 : 900;
     const value = input.trim().slice(0, maxLength);
-    if (!value || pending) return;
+    if (!value || abortRef.current) return;
 
     const keyAtRequest = activeSessionKey;
     const characterAtRequest = characterId;
@@ -289,7 +296,6 @@ export function ArchiveRoleplay({
     setLiveMessage(`${profile.name}が応答を生成しています。`);
     followLatestRef.current = true;
 
-    abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     const thinkingStartedAt = performance.now();
@@ -299,25 +305,18 @@ export function ArchiveRoleplay({
 
     let reply: ArchiveIntelligenceReply;
     try {
-      const response = await fetch("/api/archive-intelligence", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "content-type": "application/json",
-          "x-archive-client": "persona-v1",
-        },
-        body: JSON.stringify({
+      reply = await postArchiveApi({
+        url: "/api/archive-intelligence",
+        client: "persona-v1",
+        body: {
           characterId: characterAtRequest,
           mode: modeAtRequest,
           proProfile: proProfileAtRequest,
           messages: conversationHistory,
-        }),
+        },
         signal: controller.signal,
+        validate: isArchiveReply,
       });
-      if (!response.ok) throw new Error("archive intelligence request failed");
-      const payload: unknown = await response.json();
-      if (!isArchiveReply(payload)) throw new Error("archive intelligence response was invalid");
-      reply = payload;
     } catch (error) {
       if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
       reply = createLocalArchiveReply({
@@ -352,8 +351,22 @@ export function ArchiveRoleplay({
     updateSession(keyAtRequest, (current) => [...current, assistantMessage]);
     setPendingKey((current) => (current === keyAtRequest ? null : current));
     setPendingProProfile(null);
-    abortRef.current = null;
+    if (abortRef.current === controller) abortRef.current = null;
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
+  };
+
+  const attachPersonaArchive = () => {
+    const maxLength = mode === "pro" ? 1600 : 900;
+    setDraft((current) => {
+      const marker = "[公開記録を参照] ";
+      return current.startsWith(marker) ? current : `${marker}${current}`.slice(0, maxLength);
+    });
+    window.requestAnimationFrame(() => {
+      const editor = composerRef.current;
+      if (!editor) return;
+      editor.focus({ preventScroll: true });
+      editor.setSelectionRange(editor.value.length, editor.value.length);
+    });
   };
 
   const quickReplies = latestAssistant?.suggestions?.length
@@ -676,10 +689,45 @@ export function ArchiveRoleplay({
           <label className="visually-hidden" htmlFor="archive-roleplay-message">
             {profile.name}へ送るメッセージ
           </label>
+          <section className="archive-composer-model-row" aria-label="現在の人格会話モデル">
+            <ArchiveComposerModelMenu
+              label={mode === "normal" ? "5.6 LUNA" : archivePersonaProfileLabel(proProfile)}
+              eyebrow="PERSONA MODEL"
+              editorRef={composerRef}
+              onOpenDetailed={onOpenModelSelector}
+              options={[
+                {
+                  id: "luna-normal",
+                  label: "5.6 LUNA",
+                  detail: "自然で軽快なノーマル会話",
+                  active: mode === "normal",
+                  onSelect: () => selectMode("normal"),
+                },
+                ...(["instant", "max", "pro"] as const).map((profileId) => ({
+                  id: `sol-${profileId}`,
+                  label: archivePersonaProfileLabel(profileId),
+                  detail:
+                    profileId === "instant"
+                      ? "テンポを保つプロ会話"
+                      : profileId === "max"
+                        ? "最大思考量で深く応答"
+                        : "最高品質を優先する会話",
+                  active: mode === "pro" && proProfile === profileId,
+                  onSelect: () => {
+                    onProProfileChange(profileId);
+                    selectMode("pro");
+                  },
+                })),
+              ]}
+            />
+          </section>
           <div>
-            <span className="archive-composer-leading" aria-hidden="true">
-              <Plus size={22} strokeWidth={1.6} />
-            </span>
+            <ArchiveComposerTools
+              editorRef={composerRef}
+              onNewConversation={clearConversation}
+              onAttachArchive={attachPersonaArchive}
+              onOpenDetailed={onOpenModelSelector}
+            />
             <textarea
               ref={composerRef}
               id="archive-roleplay-message"
@@ -695,7 +743,7 @@ export function ArchiveRoleplay({
           {pending ? (
             <button
               type="button"
-              className="is-stop"
+              className="archive-composer-stop is-stop"
               onClick={() => stopResponse()}
               aria-label="応答生成を停止"
             >
@@ -705,11 +753,18 @@ export function ArchiveRoleplay({
           ) : (
             <button
               type="button"
+              className="archive-composer-send"
               disabled={!draft.trim()}
               aria-label={`${profile.name}へ送信`}
               onClick={() => void sendMessage()}
             >
-              <ArrowUp size={17} strokeWidth={2} aria-hidden="true" />
+              <ArrowUp
+                className="archive-send-icon"
+                size={20}
+                strokeWidth={2.4}
+                aria-hidden="true"
+                focusable="false"
+              />
               <span>送信</span>
             </button>
           )}

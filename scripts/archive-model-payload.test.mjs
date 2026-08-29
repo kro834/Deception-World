@@ -6,6 +6,12 @@ import { createServer } from "vite";
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 
 const SEARCH_EFFORTS = ["low", "medium", "high", "xhigh"];
+const SEARCH_RUNTIME = {
+  low: { maxOutputTokens: 4_000, timeoutMs: 60_000 },
+  medium: { maxOutputTokens: 6_000, timeoutMs: 75_000 },
+  high: { maxOutputTokens: 9_000, timeoutMs: 95_000 },
+  xhigh: { maxOutputTokens: 12_000, timeoutMs: 110_000 },
+};
 
 function mockOutputFor(body) {
   if (body.text?.format?.name === "deception_world_search_reply") {
@@ -60,7 +66,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           expected: {
             model,
             reasoning: { effort, context: "current_turn" },
-            maxOutputTokens: 3600,
+            ...SEARCH_RUNTIME[effort],
             verbosity: "low",
             costClass:
               model === "gpt-5.5" || effort === "high" || effort === "xhigh"
@@ -75,7 +81,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         expected: {
           model: "gpt-5.6-terra",
           reasoning: { effort: "xhigh", mode: "pro", context: "current_turn" },
-          maxOutputTokens: 10_000,
+          maxOutputTokens: 14_000,
+          timeoutMs: 110_000,
           verbosity: "medium",
           costClass: "pro",
         },
@@ -105,7 +112,9 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(body.safety_identifier, "search-safety-id", name);
       assert.equal(body.store, false, name);
       assert.deepEqual(body.tools, [], name);
-      assert.equal(modelConfig.resolveArchiveSearchRoute(preference).costClass, expected.costClass);
+      const resolvedRoute = modelConfig.resolveArchiveSearchRoute(preference);
+      assert.equal(resolvedRoute.costClass, expected.costClass);
+      assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
     }
@@ -118,7 +127,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         expected: {
           model: "gpt-5.6-luna",
           reasoning: { effort: "low", context: "current_turn" },
-          maxOutputTokens: 2400,
+          maxOutputTokens: 3600,
+          timeoutMs: 45_000,
           verbosity: "low",
           costClass: "standard",
         },
@@ -131,6 +141,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-sol",
           reasoning: { effort: "none", context: "current_turn" },
           maxOutputTokens: 3600,
+          timeoutMs: 45_000,
           verbosity: "medium",
           costClass: "standard",
         },
@@ -142,7 +153,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         expected: {
           model: "gpt-5.6-sol",
           reasoning: { effort: "max", context: "current_turn" },
-          maxOutputTokens: 12_000,
+          maxOutputTokens: 14_000,
+          timeoutMs: 110_000,
           verbosity: "medium",
           costClass: "advanced",
         },
@@ -154,7 +166,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         expected: {
           model: "gpt-5.6-sol",
           reasoning: { effort: "max", mode: "pro", context: "current_turn" },
-          maxOutputTokens: 12_000,
+          maxOutputTokens: 14_000,
+          timeoutMs: 110_000,
           verbosity: "medium",
           costClass: "pro",
         },
@@ -185,7 +198,9 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(body.safety_identifier, "persona-safety-id", name);
       assert.equal(body.store, false, name);
       assert.deepEqual(body.tools, [], name);
-      assert.equal(modelConfig.archivePersonaCostClass(mode, profile), expected.costClass);
+      const resolvedRoute = modelConfig.resolveArchivePersonaRoute(mode, profile);
+      assert.equal(resolvedRoute.costClass, expected.costClass);
+      assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
     }

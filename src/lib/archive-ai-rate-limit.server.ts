@@ -7,8 +7,8 @@ export type { ArchiveAiCostClass } from "./archive-model-config";
 
 const MINUTE_MS = 60_000;
 const DAY_MS = 86_400_000;
-const CLIENT_MINUTE_UNITS = 6;
-const CLIENT_DAILY_UNITS = 40;
+const DEFAULT_CLIENT_MINUTE_UNITS = 12;
+const DEFAULT_CLIENT_DAILY_UNITS = 120;
 const DEFAULT_GLOBAL_DAILY_UNITS = 250;
 
 type AccessReason = "allowed" | "unconfigured" | "rate_limited" | "shared_limit_unavailable";
@@ -25,11 +25,11 @@ const globalRef = globalThis as typeof globalThis & {
 };
 const memoryBuckets = (globalRef.__archiveAiRateBuckets__ ??= new Map());
 
-function boundedDailyLimit(): number {
-  const configured = Number(process.env.ARCHIVE_AI_GLOBAL_DAILY_LIMIT);
-  return Number.isSafeInteger(configured) && configured >= 1 && configured <= 10_000
+function boundedLimit(name: string, fallback: number, maximum: number): number {
+  const configured = Number(process.env[name]);
+  return Number.isSafeInteger(configured) && configured >= 1 && configured <= maximum
     ? configured
-    : DEFAULT_GLOBAL_DAILY_UNITS;
+    : fallback;
 }
 
 function clientAddress(request: Request): string | null {
@@ -76,18 +76,33 @@ function consumeMemoryBucket(
   return bucket.count <= limit;
 }
 
-function checkDevelopmentBuckets(clientKey: string, now: number, units: number): boolean {
+function checkMemoryBuckets(clientKey: string, now: number, units: number): boolean {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
+  const clientMinuteLimit = boundedLimit(
+    "ARCHIVE_AI_CLIENT_MINUTE_LIMIT",
+    DEFAULT_CLIENT_MINUTE_UNITS,
+    120,
+  );
+  const clientDailyLimit = boundedLimit(
+    "ARCHIVE_AI_CLIENT_DAILY_LIMIT",
+    DEFAULT_CLIENT_DAILY_UNITS,
+    2_000,
+  );
+  const globalDailyLimit = boundedLimit(
+    "ARCHIVE_AI_GLOBAL_DAILY_LIMIT",
+    DEFAULT_GLOBAL_DAILY_UNITS,
+    10_000,
+  );
   return (
     consumeMemoryBucket(
       `minute:${minute}:${clientKey}`,
-      CLIENT_MINUTE_UNITS,
+      clientMinuteLimit,
       (minute + 1) * MINUTE_MS,
       units,
     ) &&
-    consumeMemoryBucket(`day:${day}:${clientKey}`, CLIENT_DAILY_UNITS, (day + 1) * DAY_MS, units) &&
-    consumeMemoryBucket(`global:${day}`, boundedDailyLimit(), (day + 1) * DAY_MS, units)
+    consumeMemoryBucket(`day:${day}:${clientKey}`, clientDailyLimit, (day + 1) * DAY_MS, units) &&
+    consumeMemoryBucket(`global:${day}`, globalDailyLimit, (day + 1) * DAY_MS, units)
   );
 }
 
@@ -115,9 +130,24 @@ async function consumeSharedBucket(
 async function checkSharedBuckets(clientKey: string, now: number, units: number): Promise<boolean> {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
+  const clientMinuteLimit = boundedLimit(
+    "ARCHIVE_AI_CLIENT_MINUTE_LIMIT",
+    DEFAULT_CLIENT_MINUTE_UNITS,
+    120,
+  );
+  const clientDailyLimit = boundedLimit(
+    "ARCHIVE_AI_CLIENT_DAILY_LIMIT",
+    DEFAULT_CLIENT_DAILY_UNITS,
+    2_000,
+  );
+  const globalDailyLimit = boundedLimit(
+    "ARCHIVE_AI_GLOBAL_DAILY_LIMIT",
+    DEFAULT_GLOBAL_DAILY_UNITS,
+    10_000,
+  );
   const minuteResult = await consumeSharedBucket(
     `minute:${minute}:${clientKey}`,
-    CLIENT_MINUTE_UNITS,
+    clientMinuteLimit,
     (minute + 1) * MINUTE_MS,
     units,
   );
@@ -125,7 +155,7 @@ async function checkSharedBuckets(clientKey: string, now: number, units: number)
 
   const clientDayResult = await consumeSharedBucket(
     `day:${day}:${clientKey}`,
-    CLIENT_DAILY_UNITS,
+    clientDailyLimit,
     (day + 1) * DAY_MS,
     units,
   );
@@ -133,7 +163,7 @@ async function checkSharedBuckets(clientKey: string, now: number, units: number)
 
   const globalDayResult = await consumeSharedBucket(
     `global:${day}`,
-    boundedDailyLimit(),
+    globalDailyLimit,
     (day + 1) * DAY_MS,
     units,
   );
@@ -145,8 +175,8 @@ async function checkSharedBuckets(clientKey: string, now: number, units: number)
 }
 
 /**
- * Remote inference is fail-closed in production unless a shared Postgres rate
- * limit is available. Local development keeps a bounded in-memory equivalent.
+ * Production remains fail-closed unless the shared Postgres limit is healthy.
+ * Development keeps a bounded in-memory equivalent.
  */
 export async function checkArchiveAiAccess(
   request: Request,
@@ -166,7 +196,7 @@ export async function checkArchiveAiAccess(
     if (process.env.NODE_ENV === "production") {
       return { allowed: false, reason: "shared_limit_unavailable" };
     }
-    const allowed = checkDevelopmentBuckets(clientKey, now, units);
+    const allowed = checkMemoryBuckets(clientKey, now, units);
     return {
       allowed,
       reason: allowed ? "allowed" : "rate_limited",

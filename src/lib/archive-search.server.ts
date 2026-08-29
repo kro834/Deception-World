@@ -6,6 +6,7 @@ import {
 } from "./archive-search";
 import { canonicalizeArchiveSearchCandidates } from "./archive-search-catalog.server";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
 import {
   ARCHIVE_SEARCH_EFFORTS,
   ARCHIVE_SEARCH_EXECUTIONS,
@@ -169,11 +170,13 @@ export async function requestOpenAiArchiveSearch({
   candidates,
   modelPreference,
   safetyIdentifier,
+  signal,
 }: {
   messages: readonly ArchiveSearchConversationTurn[];
   candidates: readonly ArchiveSearchCandidate[];
   modelPreference: ArchiveSearchPreference;
   safetyIdentifier?: string;
+  signal?: AbortSignal;
 }): Promise<ArchiveSearchReply | null> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
@@ -182,67 +185,56 @@ export async function requestOpenAiArchiveSearch({
   const model = route.model;
   const proConversation = route.preference.execution === "pro";
   const trustedCandidates = canonicalizeArchiveSearchCandidates(candidates);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), route.timeoutMs);
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        safety_identifier: safetyIdentifier,
-        store: false,
-        tools: [],
-        reasoning: route.reasoning,
-        max_output_tokens: route.maxOutputTokens,
-        prompt_cache_key: `deception-world-search-v2-${route.preference.model}-${route.preference.effort}-${route.preference.execution}`,
-        instructions: buildSearchInstructions(trustedCandidates, proConversation),
-        input: [
-          {
-            role: "user",
-            content: serializeUntrustedArchiveConversation(messages),
-          },
-        ],
-        text: {
-          verbosity: route.verbosity,
-          format: {
-            type: "json_schema",
-            name: "deception_world_search_reply",
-            strict: true,
-            schema: searchResponseTextSchema,
-          },
-        },
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) throw new Error(`OpenAI search request failed with ${response.status}`);
-    const payload: unknown = await response.json();
-    const outputText = extractResponseText(payload);
-    if (!outputText) throw new Error("OpenAI search response did not contain output text");
-    const generated = generatedSearchReplySchema.parse(JSON.parse(outputText));
-    const focusCandidateId = trustedCandidates.some(
-      (candidate) => candidate.id === generated.focusCandidateId,
-    )
-      ? generated.focusCandidateId
-      : undefined;
-    const referenceCandidateIds = generated.referenceCandidateIds.filter(
-      (id, index, ids) =>
-        ids.indexOf(id) === index && trustedCandidates.some((candidate) => candidate.id === id),
-    );
-    return {
-      reply: generated.reply.slice(0, proConversation ? 3600 : 2400),
-      suggestions: generated.suggestions.slice(0, 3),
-      focusCandidateId,
-      referenceCandidateIds,
-      source: "openai",
+  return requestOpenAiStructuredResponse({
+    apiKey,
+    timeoutMs: route.timeoutMs,
+    signal,
+    body: {
       model,
-    };
-  } finally {
-    clearTimeout(timeout);
-  }
+      safety_identifier: safetyIdentifier,
+      store: false,
+      tools: [],
+      reasoning: route.reasoning,
+      max_output_tokens: route.maxOutputTokens,
+      prompt_cache_key: `deception-world-search-v2-${route.preference.model}-${route.preference.effort}-${route.preference.execution}`,
+      instructions: buildSearchInstructions(trustedCandidates, proConversation),
+      input: [
+        {
+          role: "user",
+          content: serializeUntrustedArchiveConversation(messages),
+        },
+      ],
+      text: {
+        verbosity: route.verbosity,
+        format: {
+          type: "json_schema",
+          name: "deception_world_search_reply",
+          strict: true,
+          schema: searchResponseTextSchema,
+        },
+      },
+    },
+    parse: (payload) => {
+      const outputText = extractResponseText(payload);
+      if (!outputText) throw new Error("OpenAI search response did not contain output text");
+      const generated = generatedSearchReplySchema.parse(JSON.parse(outputText));
+      const focusCandidateId = trustedCandidates.some(
+        (candidate) => candidate.id === generated.focusCandidateId,
+      )
+        ? generated.focusCandidateId
+        : undefined;
+      const referenceCandidateIds = generated.referenceCandidateIds.filter(
+        (id, index, ids) =>
+          ids.indexOf(id) === index && trustedCandidates.some((candidate) => candidate.id === id),
+      );
+      return {
+        reply: generated.reply.slice(0, proConversation ? 3600 : 2400),
+        suggestions: generated.suggestions.slice(0, 3),
+        focusCandidateId,
+        referenceCandidateIds,
+        source: "openai" as const,
+        model,
+      };
+    },
+  });
 }

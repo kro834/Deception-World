@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Plus, SlidersHorizontal } from "lucide-react";
+import { ArrowUp, SlidersHorizontal, Square } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
+import { postArchiveApi } from "@/lib/archive-api-client";
+import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
 import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
 import {
   archivePersonaProfileLabel,
@@ -17,6 +19,7 @@ import {
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, type DossierLink } from "./dossier-nav";
+import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
 import { ArchiveRoleplay } from "./archive-roleplay";
 
 export type ArchiveOracleEntry = {
@@ -715,12 +718,14 @@ export function ArchiveIntelligenceWorkspace({
   active = true,
   onNavigate,
   modelPreferences,
+  onModelPreferencesChange,
   modelSelectorOpen,
   onOpenModelSelector,
 }: {
   active?: boolean;
   onNavigate?: () => void;
   modelPreferences: ArchiveModelPreferences;
+  onModelPreferencesChange: (value: ArchiveModelPreferences) => void;
   modelSelectorOpen: boolean;
   onOpenModelSelector: () => void;
 }) {
@@ -802,7 +807,7 @@ export function ArchiveIntelligenceWorkspace({
       const nextQuestion = value
         .trim()
         .slice(0, searchPreferenceAtRequest.execution === "pro" ? 1200 : 600);
-      if (!nextQuestion || searchPending) return;
+      if (!nextQuestion || searchAbortRef.current) return;
 
       const resolvedQuery = resolveConversationalSearchQuery(nextQuestion, searchMessages).slice(
         0,
@@ -821,7 +826,6 @@ export function ArchiveIntelligenceWorkspace({
       setSearchPending(true);
       setPendingSearchPreference(searchPreferenceAtRequest);
 
-      searchAbortRef.current?.abort();
       const controller = new AbortController();
       searchAbortRef.current = controller;
       const thinkingStartedAt = performance.now();
@@ -830,17 +834,13 @@ export function ArchiveIntelligenceWorkspace({
 
       let reply: ArchiveSearchReply;
       try {
-        const response = await fetch("/api/archive-search", {
-          method: "POST",
-          credentials: "same-origin",
-          headers: {
-            "content-type": "application/json",
-            "x-archive-client": "search-v1",
-          },
-          body: JSON.stringify({
+        reply = await postArchiveApi({
+          url: "/api/archive-search",
+          client: "search-v1",
+          body: {
             query: resolvedQuery,
-            messages: nextMessages
-              .map((message) => ({
+            messages: trimArchiveConversation(
+              nextMessages.map((message) => ({
                 role: message.role,
                 content: (message.role === "assistant" && message.results?.length
                   ? `${message.text}\n表示候補: ${message.results
@@ -848,8 +848,9 @@ export function ArchiveIntelligenceWorkspace({
                       .join(" / ")}`
                   : message.text
                 ).slice(0, 1600),
-              }))
-              .slice(-10),
+              })),
+              { maxTurns: 10, maxTotalChars: 8_000, maxCharsPerTurn: 1_600 },
+            ),
             candidates: results.map(({ entry }) => ({
               id: entry.id,
               label: entry.label,
@@ -857,13 +858,10 @@ export function ArchiveIntelligenceWorkspace({
               description: entry.description,
             })),
             modelPreference: searchPreferenceAtRequest,
-          }),
+          },
           signal: controller.signal,
+          validate: isArchiveSearchReply,
         });
-        if (!response.ok) throw new Error("archive search request failed");
-        const payload: unknown = await response.json();
-        if (!isArchiveSearchReply(payload)) throw new Error("archive search response was invalid");
-        reply = payload;
       } catch {
         if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
         reply = createLocalArchiveSearchReply({
@@ -911,10 +909,31 @@ export function ArchiveIntelligenceWorkspace({
       ]);
       setSearchPending(false);
       setPendingSearchPreference(null);
-      searchAbortRef.current = null;
+      if (searchAbortRef.current === controller) searchAbortRef.current = null;
     },
-    [modelPreferences.search, searchMessages, searchPending],
+    [modelPreferences.search, searchMessages],
   );
+
+  const clearSearchConversation = useCallback(() => {
+    stopSearch();
+    setSearchMessages([]);
+    setQuestion("");
+    window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+  }, [stopSearch]);
+
+  const attachSearchArchive = useCallback(() => {
+    const maxLength = modelPreferences.search.execution === "pro" ? 1200 : 600;
+    setQuestion((current) => {
+      const marker = "[公開記録を参照] ";
+      return current.startsWith(marker) ? current : `${marker}${current}`.slice(0, maxLength);
+    });
+    window.requestAnimationFrame(() => {
+      const editor = inputRef.current;
+      if (!editor) return;
+      editor.focus({ preventScroll: true });
+      editor.setSelectionRange(editor.value.length, editor.value.length);
+    });
+  }, [modelPreferences.search.execution]);
 
   const selectSurface = useCallback(
     (nextSurface: "search" | "roleplay") => {
@@ -1041,9 +1060,7 @@ export function ArchiveIntelligenceWorkspace({
             <button
               type="button"
               onClick={() => {
-                stopSearch();
-                setSearchMessages([]);
-                setQuestion("");
+                clearSearchConversation();
               }}
             >
               新しいサーチ
@@ -1199,10 +1216,80 @@ export function ArchiveIntelligenceWorkspace({
           <label className="visually-hidden" htmlFor="archive-oracle-question">
             サーチへメッセージを送る
           </label>
+          <section className="archive-composer-model-row" aria-label="現在のサーチモデル">
+            <ArchiveComposerModelMenu
+              label={archiveSearchPreferenceLabel(modelPreferences.search)}
+              eyebrow="SEARCH MODEL"
+              editorRef={inputRef}
+              onOpenDetailed={onOpenModelSelector}
+              options={[
+                {
+                  id: "terra-low",
+                  label: "5.6 TERRA LOW",
+                  detail: "軽快な日常会話とサーチ",
+                  active:
+                    modelPreferences.search.model === "gpt-5.6-terra" &&
+                    modelPreferences.search.effort === "low" &&
+                    modelPreferences.search.execution === "standard",
+                  onSelect: () =>
+                    onModelPreferencesChange({
+                      ...modelPreferences,
+                      search: { model: "gpt-5.6-terra", effort: "low", execution: "standard" },
+                    }),
+                },
+                {
+                  id: "terra-xhigh",
+                  label: "5.6 TERRA XHIGH",
+                  detail: "複雑な照合を深く考える",
+                  active:
+                    modelPreferences.search.model === "gpt-5.6-terra" &&
+                    modelPreferences.search.effort === "xhigh" &&
+                    modelPreferences.search.execution === "standard",
+                  onSelect: () =>
+                    onModelPreferencesChange({
+                      ...modelPreferences,
+                      search: {
+                        model: "gpt-5.6-terra",
+                        effort: "xhigh",
+                        execution: "standard",
+                      },
+                    }),
+                },
+                {
+                  id: "gpt55-high",
+                  label: "GPT-5.5 HIGH",
+                  detail: "自然さと精度のバランス",
+                  active:
+                    modelPreferences.search.model === "gpt-5.5" &&
+                    modelPreferences.search.effort === "high" &&
+                    modelPreferences.search.execution === "standard",
+                  onSelect: () =>
+                    onModelPreferencesChange({
+                      ...modelPreferences,
+                      search: { model: "gpt-5.5", effort: "high", execution: "standard" },
+                    }),
+                },
+                {
+                  id: "search-pro",
+                  label: "5.6 TERRA PRO",
+                  detail: "最も高度な会話型サーチ",
+                  active: modelPreferences.search.execution === "pro",
+                  onSelect: () =>
+                    onModelPreferencesChange({
+                      ...modelPreferences,
+                      search: { model: "gpt-5.6-terra", effort: "xhigh", execution: "pro" },
+                    }),
+                },
+              ]}
+            />
+          </section>
           <div className="archive-oracle-input-shell">
-            <span className="archive-composer-leading" aria-hidden="true">
-              <Plus size={22} strokeWidth={1.6} />
-            </span>
+            <ArchiveComposerTools
+              editorRef={inputRef}
+              onNewConversation={clearSearchConversation}
+              onAttachArchive={attachSearchArchive}
+              onOpenDetailed={onOpenModelSelector}
+            />
             <textarea
               ref={inputRef}
               id="archive-oracle-question"
@@ -1219,15 +1306,34 @@ export function ArchiveIntelligenceWorkspace({
               }
               onChange={(event) => setQuestion(event.currentTarget.value)}
             />
-            <button
-              type="button"
-              disabled={!question.trim() || searchPending}
-              aria-label="サーチへ送信"
-              onClick={() => void ask(question)}
-            >
-              送信
-              <span aria-hidden="true">↑</span>
-            </button>
+            {searchPending ? (
+              <button
+                type="button"
+                className="archive-composer-stop is-stop"
+                aria-label="サーチの応答生成を停止"
+                onClick={stopSearch}
+              >
+                <Square size={15} fill="currentColor" strokeWidth={1.4} aria-hidden="true" />
+                <span>停止</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="archive-composer-send"
+                disabled={!question.trim()}
+                aria-label="サーチへ送信"
+                onClick={() => void ask(question)}
+              >
+                <ArrowUp
+                  className="archive-send-icon"
+                  size={20}
+                  strokeWidth={2.4}
+                  aria-hidden="true"
+                  focusable="false"
+                />
+                <span>送信</span>
+              </button>
+            )}
           </div>
         </form>
 
@@ -1248,6 +1354,10 @@ export function ArchiveIntelligenceWorkspace({
           searchArchive={searchArchiveOracle}
           onNavigate={onNavigate}
           proProfile={modelPreferences.personaProProfile}
+          onProProfileChange={(personaProProfile) =>
+            onModelPreferencesChange({ ...modelPreferences, personaProProfile })
+          }
+          onOpenModelSelector={onOpenModelSelector}
         />
       </div>
     </section>

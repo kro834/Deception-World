@@ -37,15 +37,17 @@ export async function waitForArchiveThinkingFloor(
   const remaining = Math.max(0, ARCHIVE_MIN_THINKING_MS - (performance.now() - startedAt));
   if (!remaining || signal.aborted) return;
   await new Promise<void>((resolve) => {
-    const timer = setTimeout(resolve, remaining);
-    signal.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        resolve();
-      },
-      { once: true },
-    );
+    const cleanup = () => signal.removeEventListener("abort", onAbort);
+    const onAbort = () => {
+      clearTimeout(timer);
+      cleanup();
+      resolve();
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, remaining);
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 }
 
@@ -104,9 +106,20 @@ export function archivePersonaProfileLabel(profile: ArchivePersonaProProfile): s
 
 export type ArchiveAiCostClass = "standard" | "advanced" | "pro";
 
+const ARCHIVE_SEARCH_STANDARD_RUNTIME: Record<
+  ArchiveSearchEffort,
+  { maxOutputTokens: number; timeoutMs: number }
+> = {
+  low: { maxOutputTokens: 4_000, timeoutMs: 60_000 },
+  medium: { maxOutputTokens: 6_000, timeoutMs: 75_000 },
+  high: { maxOutputTokens: 9_000, timeoutMs: 95_000 },
+  xhigh: { maxOutputTokens: 12_000, timeoutMs: 110_000 },
+};
+
 export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
   const preference = normalizeArchiveSearchPreference(value);
   const pro = preference.execution === "pro";
+  const runtime = ARCHIVE_SEARCH_STANDARD_RUNTIME[preference.effort];
   const costClass: ArchiveAiCostClass = pro
     ? "pro"
     : preference.model === "gpt-5.5" ||
@@ -120,8 +133,8 @@ export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
     reasoning: pro
       ? ({ effort: "xhigh", mode: "pro", context: "current_turn" } as const)
       : ({ effort: preference.effort, context: "current_turn" } as const),
-    maxOutputTokens: pro ? 10_000 : 3600,
-    timeoutMs: pro ? 110_000 : 60_000,
+    maxOutputTokens: pro ? 14_000 : runtime.maxOutputTokens,
+    timeoutMs: pro ? 110_000 : runtime.timeoutMs,
     verbosity: pro ? ("medium" as const) : ("low" as const),
     costClass,
   };
@@ -141,7 +154,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
     return {
       model: "gpt-5.6-sol" as const,
       reasoning: { effort: "max", context: "current_turn" } as const,
-      maxOutputTokens: 12_000,
+      maxOutputTokens: 14_000,
       timeoutMs: 110_000,
       costClass: "advanced" as const,
     };
@@ -149,7 +162,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
   return {
     model: "gpt-5.6-sol" as const,
     reasoning: { effort: "max", mode: "pro", context: "current_turn" } as const,
-    maxOutputTokens: 12_000,
+    maxOutputTokens: 14_000,
     timeoutMs: 110_000,
     costClass: "pro" as const,
   };
@@ -163,8 +176,8 @@ export function resolveArchivePersonaRoute(
     return {
       model: "gpt-5.6-luna" as const,
       reasoning: { effort: "low", context: "current_turn" } as const,
-      maxOutputTokens: 2400,
-      timeoutMs: 30_000,
+      maxOutputTokens: 3600,
+      timeoutMs: 45_000,
       costClass: "standard" as const,
     };
   }

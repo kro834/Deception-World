@@ -95,6 +95,7 @@ export const Route = createFileRoute("/api/archive-intelligence")({
             proProfile,
             messages,
             safetyIdentifier: remoteAccess.safetyIdentifier,
+            signal: request.signal,
           });
           if (remoteReply) return noStoreJson(remoteReply);
           return noStoreJson(

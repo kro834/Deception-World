@@ -4,7 +4,6 @@ import {
   normalizeArchiveModelPreferences,
   type ArchiveModelPreferences,
 } from "@/lib/archive-model-config";
-import { resolveArchiveViewportOffset } from "@/lib/archive-viewport";
 import { ArchiveModelSelector } from "./archive-model-selector";
 import { ArchiveIntelligenceWorkspace } from "./archive-oracle";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
@@ -93,24 +92,16 @@ export function ArchiveIntelligencePage() {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        const width = viewport?.width ?? window.innerWidth;
+        const layoutWidth = window.innerWidth;
         const height = viewport?.height ?? window.innerHeight;
         const focused = document.activeElement?.matches(editableSelector) ?? false;
         if (!focused && height > stableHeight - 72) stableHeight = height;
         const keyboardOpen = focused && stableHeight - height > Math.max(120, stableHeight * 0.18);
         const keyboardClosing =
           !focused && page.dataset.keyboard === "closing" && stableHeight - height > 120;
-        const keyboardOpening = focused && width <= 760 && performance.now() - focusStartedAt < 600;
-        const viewportLeft = viewport
-          ? resolveArchiveViewportOffset(viewport.offsetLeft, viewport.pageLeft, window.scrollX)
-          : 0;
-        const viewportTop = viewport
-          ? resolveArchiveViewportOffset(viewport.offsetTop, viewport.pageTop, window.scrollY)
-          : 0;
-        page.style.setProperty("--archive-viewport-width", `${width}px`);
+        const keyboardOpening =
+          focused && layoutWidth <= 760 && performance.now() - focusStartedAt < 600;
         page.style.setProperty("--archive-viewport-height", `${height}px`);
-        page.style.setProperty("--archive-viewport-left", `${viewportLeft}px`);
-        page.style.setProperty("--archive-viewport-top", `${viewportTop}px`);
         page.style.setProperty(
           "--archive-keyboard-inset",
           `${Math.max(0, stableHeight - height)}px`,
@@ -128,16 +119,22 @@ export function ArchiveIntelligencePage() {
     const handleFocusIn = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = performance.now();
+      page.dataset.composerFocus = "true";
       if ((viewport?.width ?? window.innerWidth) <= 760) page.dataset.keyboard = "opening";
-      // iOS can publish offsetTop one frame before or after the viewport resize.
-      // Keep a late pass so the shell settles after the keyboard animation.
-      scheduleSync([0, 80, 180, 320, 650, 1000]);
+      // Sample height only. Moving a focused ancestor with visualViewport offsets
+      // makes WebKit's caret and selection handles drift during keyboard animation.
+      scheduleSync([0, 120, 360, 720]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = 0;
       page.dataset.keyboard = "closing";
+      window.requestAnimationFrame(() => {
+        if (!(document.activeElement?.matches(editableSelector) ?? false)) {
+          delete page.dataset.composerFocus;
+        }
+      });
       scheduleSync([0, 80, 240, 500, 900]);
     };
 
@@ -153,7 +150,6 @@ export function ArchiveIntelligencePage() {
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
     viewport?.addEventListener("resize", syncViewport, { passive: true });
-    viewport?.addEventListener("scroll", syncViewport, { passive: true });
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       for (const timer of recoveryTimers) window.clearTimeout(timer);
@@ -163,7 +159,6 @@ export function ArchiveIntelligencePage() {
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
       viewport?.removeEventListener("resize", syncViewport);
-      viewport?.removeEventListener("scroll", syncViewport);
     };
   }, []);
 
@@ -203,6 +198,7 @@ export function ArchiveIntelligencePage() {
         <ArchiveIntelligenceWorkspace
           active
           modelPreferences={modelPreferences}
+          onModelPreferencesChange={setModelPreferences}
           modelSelectorOpen={modelSelectorOpen}
           onOpenModelSelector={openModelSelector}
         />
