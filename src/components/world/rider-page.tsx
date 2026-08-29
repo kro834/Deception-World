@@ -649,8 +649,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       ],
       forms: [
         {
-          img: "/rider-leddic-hoko-pending.svg",
-          pos: "50% 50%",
+          img: "/rider-leddic-hoko.jpeg",
+          pos: "50% 8%",
           system: "レディックウォッチ × 戈フォーム",
           name: "レディック",
           sub: "戈フォーム",

@@ -73,16 +73,16 @@ test("Hanaka's Ishihen and Chigiri's Hoko and Rekka forms preserve every supplie
     assert.ok(rider.includes(value), `${value} should remain in Chigiri's form records`);
   }
   assert.match(rider, /partnerForms\.map/);
-  assert.match(rider, /rider-leddic-hoko-pending\.svg/);
+  assert.match(rider, /rider-leddic-hoko\.jpeg/);
   assert.match(rider, /rider-leddic-rekka\.jpeg/);
-  assert.doesNotMatch(rider, /rider-leddic-rekka-pending\.svg/);
+  assert.doesNotMatch(rider, /rider-leddic-(?:hoko|rekka)-pending\.svg/);
   assert.match(rider, /rider\.id === "leddic" \? rider\.forms/);
 });
 
 test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", () => {
   for (const [file, limit] of [
     ["public/civilian-naikami-chigiri.jpeg", 350_000],
-    ["public/rider-leddic-hoko-pending.svg", 15_000],
+    ["public/rider-leddic-hoko.jpeg", 450_000],
     ["public/rider-leddic-ishihen.jpeg", 350_000],
     ["public/rider-leddic-rekka.jpeg", 450_000],
   ]) {
@@ -92,6 +92,7 @@ test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", 
   }
   assert.match(navigation, /civilian-naikami-chigiri\.jpeg/);
   assert.match(navigation, /rider-leddic-ishihen\.jpeg/);
+  assert.match(navigation, /rider-leddic-hoko\.jpeg/);
   assert.match(navigation, /rider-leddic-rekka\.jpeg/);
 });
 
