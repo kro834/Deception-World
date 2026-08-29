@@ -9,6 +9,25 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { rememberRiderReturn } from "./rider-return-state";
 
+type RiderDossierForm = {
+  img: string;
+  pos: string;
+  system: string;
+  name: string;
+  displayName?: string;
+  sub?: string;
+  calls: string[];
+  quote?: string;
+  overview?: string[];
+  featuredPickup?: boolean;
+  theme?: "rexonance";
+  stats?: { dt: string; dd: string }[];
+  abilities?: { name: string; body: string }[];
+  arsenal?: { name: string; body: string }[];
+  finishers?: { name: string; body: string }[];
+  weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
+};
+
 type RiderDossier = {
   id: string;
   no: string;
@@ -26,25 +45,20 @@ type RiderDossier = {
   quotes: string[];
   facts: { dt: string; dd: string }[];
   sections: { no: string; kicker: string; title: string; body: string[] }[];
-  forms: {
-    img: string;
-    pos: string;
-    system: string;
-    name: string;
-    displayName?: string;
-    sub?: string;
-    calls: string[];
-    quote?: string;
-    overview?: string[];
-    featuredPickup?: boolean;
-    theme?: "rexonance";
-    stats?: { dt: string; dd: string }[];
-    abilities?: { name: string; body: string }[];
-    arsenal?: { name: string; body: string }[];
-    finishers?: { name: string; body: string }[];
-    weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
-  }[];
+  forms: RiderDossierForm[];
   civilian: { name: string; kicker: string; body: string; cv?: string };
+  partner?: {
+    name: string;
+    enName: string;
+    image: string;
+    pos: string;
+    kicker: string;
+    tag: string;
+    call: string;
+    body: string[];
+    facts: { dt: string; dd: string }[];
+    forms: RiderDossierForm[];
+  };
   nightmare?: {
     name: string;
     kicker: string;
@@ -585,6 +599,89 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       body: "変身前ビジュアル // CONFIRMED。捜査一課・警部補。",
       cv: "悠木碧",
     },
+    partner: {
+      name: "無神 千桐",
+      enName: "CHIGIRI NAIKAMI",
+      image: "/civilian-naikami-chigiri.jpeg",
+      pos: "50% 16%",
+      kicker: "SKILLED DUO / POLICE INSPECTOR",
+      tag: "#敏腕コンビ",
+      call: "レディック！！！ LETS GO！！！！！！！",
+      body: [
+        "熱血でやかましい一方、物事の本質を捉え、自分の中へきちんと落とし込んでから発言する警部。非常にまっすぐな性格で、その実直さゆえに損をすることも少なくない。",
+        "幹部候補生だったが、まっすぐ過ぎる姿勢から上司と衝突し、出世街道から早々に外された。本人はほとんど気にしておらず、元幹部候補として培った高水準の頭脳と、ボクシングで鍛えた体術を現場で発揮する。在原華火以外には一度も負けたことがない。",
+      ],
+      facts: [
+        { dt: "READING", dd: "ないかみ ちぎり" },
+        { dt: "AGE", dd: "28歳" },
+        { dt: "GENDER", dd: "男性" },
+        { dt: "HEIGHT", dd: "198cm" },
+        { dt: "WEIGHT", dd: "98kg" },
+        { dt: "OCCUPATION", dd: "警察官（警部）" },
+        { dt: "CV", dd: "谷山紀章" },
+        { dt: "PRONOUN", dd: "俺／自分　君／アンタ／お前" },
+      ],
+      forms: [
+        {
+          img: "/rider-leddic-hoko.jpeg",
+          pos: "50% 8%",
+          system: "レディックウォッチ × 戈フォーム",
+          name: "レディック",
+          sub: "戈フォーム",
+          calls: ["戈フォーム！！！", "BREAK & Destroy！！！"],
+          quote: "火力を突き詰め、華火の支援を突破力へ変える。",
+          overview: [
+            "無神千桐が変身する第一形態。在原華火とコンビを組むため、支援系を名目とする彼女と対になるよう、火力を突き詰めたフォームとなっている。",
+          ],
+          stats: [
+            { dt: "HEIGHT", dd: "209.6cm" },
+            { dt: "WEIGHT", dd: "99.8kg" },
+            { dt: "PUNCH", dd: "2t" },
+            { dt: "KICK", dd: "15t" },
+            { dt: "JUMP", dd: "58.3m" },
+            { dt: "100m", dd: "4.7秒" },
+          ],
+          abilities: [
+            { name: "戦", body: "『戦』の文字を書き出し、変身状態のスペックを1.35倍へ引き上げる。円龍幻月刀の使用中に限り、必殺技ヴァルキリーを放てる。" },
+            { name: "戒", body: "敵の攻撃へ備え、カウンターを当てる。一度以上見た、または受けた技に限って実行できる。" },
+          ],
+          arsenal: [
+            { name: "円龍幻月刀", body: "関雲長が用いた青龍刀に酷似する大型武器。読みは『えんりゅうげんげつとう』。" },
+          ],
+          finishers: [
+            { name: "ヴァルキリー", body: "『戦』による強化中、円龍幻月刀から放つ戈フォームの必殺技。" },
+          ],
+        },
+        {
+          img: "/rider-leddic-rekka-pending.svg",
+          pos: "50% 50%",
+          system: "レディックウォッチ × 灬フォーム",
+          name: "レディック",
+          sub: "灬フォーム",
+          calls: ["灬フォーム！！！！", "Frame To BURST！！！！"],
+          quote: "炎と脚力を、一瞬の突破へ。",
+          overview: [
+            "無神千桐が変身する第二形態。『れっか』の名どおり脚の速さを突き詰め、灬が火を表す字であることから炎系の部首も扱う。二つのフォームでありながら、実質的には三つのフォームに相当する運用幅を持つ。",
+            "添付データ内に三枚目の画像が存在しなかったため、ビジュアル欄は画像記録未提供としている。",
+          ],
+          stats: [
+            { dt: "HEIGHT", dd: "199cm" },
+            { dt: "WEIGHT", dd: "72kg" },
+            { dt: "PUNCH", dd: "0.2t" },
+            { dt: "KICK", dd: "68.2t" },
+            { dt: "JUMP", dd: "88m" },
+            { dt: "100m", dd: "0.5秒" },
+          ],
+          abilities: [
+            { name: "無", body: "一度の変身につき一度だけ、どのような攻撃も受けない。" },
+            { name: "烈", body: "炎爪の炎をさらに熱くし、勢いを数倍へ引き上げる。脚部の噴出口からガスとして放ち、移動速度を高めることもできる。" },
+          ],
+          arsenal: [
+            { name: "炎爪", body: "読みは『えんそう』。握り込むと爪が飛び出す紅い鉤爪で、刃同士を擦り合わせて炎を起こす。" },
+          ],
+        },
+      ],
+    },
   },
   {
     id: "argenome",
@@ -925,6 +1022,7 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  const partnerForms = rider.partner?.forms ?? [];
   const pickupForms =
     rider.id === "saga"
       ? rider.forms.filter((form) => form.featuredPickup)
@@ -991,7 +1089,10 @@ export function RiderPage({ id }: { id: string }) {
           </dl>
         </div>
       </section>
-      <section className={rider.nightmare ? "rider-archive-identity-records has-nightmare" : "rider-archive-identity-records"} aria-label="変身前記録">
+      <section
+        className={`rider-archive-identity-records${rider.nightmare ? " has-nightmare" : ""}${rider.partner ? " has-partner" : ""}`}
+        aria-label={rider.partner ? "変身前記録と相棒記録" : "変身前記録"}
+      >
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
             <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} loading="lazy" decoding="async" fetchPriority="low" />
@@ -1006,6 +1107,44 @@ export function RiderPage({ id }: { id: string }) {
             {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}
           </figcaption>
         </figure>
+        {rider.partner ? (
+          <figure className="rider-archive-civilian rider-partner-card">
+            <div className="rider-archive-civilian-visual">
+              <img
+                src={rider.partner.image}
+                alt={`${rider.partner.name}の人物ビジュアル`}
+                style={{ objectPosition: rider.partner.pos }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <span>PARTNER</span>
+              <i className="rider-archive-civilian-shade" />
+            </div>
+            <figcaption>
+              <p>{rider.partner.kicker}</p>
+              <small>{rider.partner.tag}</small>
+              <h2>
+                <NameText value={rider.partner.name} />
+              </h2>
+              <p className="rider-partner-en-name">{rider.partner.enName}</p>
+              <q className="rider-partner-call">{rider.partner.call}</q>
+              <div className="rider-partner-copy">
+                {rider.partner.body.map((paragraph) => (
+                  <p key={paragraph.slice(0, 24)}>{paragraph}</p>
+                ))}
+              </div>
+              <dl>
+                {rider.partner.facts.map((fact) => (
+                  <div key={fact.dt}>
+                    <dt>{fact.dt}</dt>
+                    <dd>{fact.dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </figcaption>
+          </figure>
+        ) : null}
         {rider.nightmare ? (
           <article className="rider-nightmare-card">
             <div className="rider-nightmare-card-visual">
@@ -1084,6 +1223,37 @@ export function RiderPage({ id }: { id: string }) {
             />
           ))}
         </div>
+      ) : null}
+      {rider.partner && partnerForms.length ? (
+        <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">
+          <header>
+            <p>SKILLED DUO / SECOND RIDER RECORD</p>
+            <h2 id="rider-partner-forms-title">
+              <NameText value={rider.partner.name} />の変身記録
+            </h2>
+          </header>
+          <div className="rider-form-pickup-stack">
+            {partnerForms.map((form) => (
+              <FormPickup
+                key={`${form.name}-${form.sub ?? "base"}`}
+                rider={{
+                  img: form.img,
+                  pos: form.pos,
+                  system: form.system,
+                  name: form.name,
+                  sub: form.sub,
+                  calls: form.calls,
+                  quote: form.quote,
+                  overview: form.overview,
+                  stats: form.stats,
+                  abilities: form.abilities,
+                  arsenal: form.arsenal,
+                  finishers: form.finishers,
+                }}
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
       <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="EIGHT RIDERS" />
       {rider.nightmare ? (

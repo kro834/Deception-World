@@ -94,6 +94,7 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  const partnerForms = rider.partner?.forms ?? [];
   const pickupForms =
     rider.id === "saga"
       ? rider.forms.filter((form) => form.featuredPickup)
@@ -160,7 +161,10 @@ export function RiderPage({ id }: { id: string }) {
           </dl>
         </div>
       </section>
-      <section className={rider.nightmare ? "rider-archive-identity-records has-nightmare" : "rider-archive-identity-records"} aria-label="変身前記録">
+      <section
+        className={`rider-archive-identity-records${rider.nightmare ? " has-nightmare" : ""}${rider.partner ? " has-partner" : ""}`}
+        aria-label={rider.partner ? "変身前記録と相棒記録" : "変身前記録"}
+      >
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
             <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} loading="lazy" decoding="async" fetchPriority="low" />
@@ -175,6 +179,44 @@ export function RiderPage({ id }: { id: string }) {
             {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}
           </figcaption>
         </figure>
+        {rider.partner ? (
+          <figure className="rider-archive-civilian rider-partner-card">
+            <div className="rider-archive-civilian-visual">
+              <img
+                src={rider.partner.image}
+                alt={`${rider.partner.name}の人物ビジュアル`}
+                style={{ objectPosition: rider.partner.pos }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <span>PARTNER</span>
+              <i className="rider-archive-civilian-shade" />
+            </div>
+            <figcaption>
+              <p>{rider.partner.kicker}</p>
+              <small>{rider.partner.tag}</small>
+              <h2>
+                <NameText value={rider.partner.name} />
+              </h2>
+              <p className="rider-partner-en-name">{rider.partner.enName}</p>
+              <q className="rider-partner-call">{rider.partner.call}</q>
+              <div className="rider-partner-copy">
+                {rider.partner.body.map((paragraph) => (
+                  <p key={paragraph.slice(0, 24)}>{paragraph}</p>
+                ))}
+              </div>
+              <dl>
+                {rider.partner.facts.map((fact) => (
+                  <div key={fact.dt}>
+                    <dt>{fact.dt}</dt>
+                    <dd>{fact.dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </figcaption>
+          </figure>
+        ) : null}
         {rider.nightmare ? (
           <article className="rider-nightmare-card">
             <div className="rider-nightmare-card-visual">

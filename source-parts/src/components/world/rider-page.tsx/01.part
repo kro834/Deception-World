@@ -8,6 +8,25 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 
+type RiderDossierForm = {
+  img: string;
+  pos: string;
+  system: string;
+  name: string;
+  displayName?: string;
+  sub?: string;
+  calls: string[];
+  quote?: string;
+  overview?: string[];
+  featuredPickup?: boolean;
+  theme?: "rexonance";
+  stats?: { dt: string; dd: string }[];
+  abilities?: { name: string; body: string }[];
+  arsenal?: { name: string; body: string }[];
+  finishers?: { name: string; body: string }[];
+  weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
+};
+
 type RiderDossier = {
   id: string;
   no: string;
@@ -25,25 +44,20 @@ type RiderDossier = {
   quotes: string[];
   facts: { dt: string; dd: string }[];
   sections: { no: string; kicker: string; title: string; body: string[] }[];
-  forms: {
-    img: string;
-    pos: string;
-    system: string;
-    name: string;
-    displayName?: string;
-    sub?: string;
-    calls: string[];
-    quote?: string;
-    overview?: string[];
-    featuredPickup?: boolean;
-    theme?: "rexonance";
-    stats?: { dt: string; dd: string }[];
-    abilities?: { name: string; body: string }[];
-    arsenal?: { name: string; body: string }[];
-    finishers?: { name: string; body: string }[];
-    weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
-  }[];
+  forms: RiderDossierForm[];
   civilian: { name: string; kicker: string; body: string; cv?: string };
+  partner?: {
+    name: string;
+    enName: string;
+    image: string;
+    pos: string;
+    kicker: string;
+    tag: string;
+    call: string;
+    body: string[];
+    facts: { dt: string; dd: string }[];
+    forms: RiderDossierForm[];
+  };
   nightmare?: {
     name: string;
     kicker: string;

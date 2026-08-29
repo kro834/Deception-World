@@ -54,7 +54,7 @@
   transform: translate3d(-50%, calc(-50% - 10px), 0) scale(1.03);
 }
 
-/* LEDDIC — green shoji doors opening from the centre. */
+/* LEDDIC — crimson and green shoji doors opening from the centre. */
 .leddic-cutin-stage {
   background: transparent;
   perspective: 1200px;
@@ -72,8 +72,9 @@
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 42%, rgba(196, 255, 216, 0.46), rgba(48, 182, 104, 0.2) 18%, transparent 48%),
-    linear-gradient(90deg, #020805, #092d19 48%, #092d19 52%, #020805);
+    radial-gradient(ellipse at 28% 42%, rgba(255, 183, 176, 0.36), rgba(190, 35, 50, 0.18) 19%, transparent 47%),
+    radial-gradient(ellipse at 72% 42%, rgba(196, 255, 216, 0.4), rgba(48, 182, 104, 0.18) 19%, transparent 47%),
+    linear-gradient(90deg, #0b0203, #341015 49.7%, #0b321d 50.3%, #020805);
   box-shadow: inset 0 0 18vmax rgba(0, 7, 3, 0.82);
 }
 
@@ -111,7 +112,7 @@
   background:
     repeating-linear-gradient(90deg, transparent 0 15.8%, rgba(128, 213, 153, 0.17) 16% 16.2%),
     repeating-linear-gradient(6deg, rgba(196, 255, 210, 0.08) 0 1px, transparent 1px 6px),
-    linear-gradient(180deg, rgba(24, 92, 51, 0.4), rgba(3, 18, 9, 0.94));
+    linear-gradient(90deg, rgba(112, 19, 31, 0.54), rgba(44, 8, 13, 0.88) 49.7%, rgba(8, 49, 27, 0.86) 50.3%, rgba(24, 92, 51, 0.4));
   clip-path: polygon(27% 0, 73% 0, 100% 100%, 0 100%);
   opacity: 0.82;
   transform: rotateX(62deg) translateY(26%);
@@ -218,11 +219,35 @@
 
 .leddic-shoji.is-left {
   left: 0;
-  border-right: 1px solid rgba(203, 255, 219, 0.48);
+  border-right: 1px solid rgba(255, 211, 207, 0.48);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(12.5% - 3px), rgba(48, 4, 10, 0.94) calc(12.5% - 3px) 12.5%),
+    repeating-linear-gradient(0deg, transparent 0 calc(16.666% - 3px), rgba(48, 4, 10, 0.92) calc(16.666% - 3px) 16.666%),
+    radial-gradient(circle at 50% 40%, rgba(255, 116, 105, 0.3), transparent 38%),
+    linear-gradient(112deg, rgba(255, 239, 235, 0.92), rgba(173, 69, 75, 0.66) 50%, rgba(69, 7, 15, 0.96));
+  box-shadow:
+    inset 0 0 76px rgba(25, 1, 4, 0.92),
+    inset 0 0 0 1px rgba(255, 223, 219, 0.18),
+    0 0 42px rgba(255, 69, 83, 0.18);
 }
 
 .leddic-shoji.is-left::after {
   right: 0;
+  background: linear-gradient(90deg, #3a070d, #922f3b 50%, #250307);
+  box-shadow: 0 0 22px rgba(255, 91, 99, 0.24);
+}
+
+.leddic-shoji.is-left::before {
+  border-color: rgba(66, 5, 13, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 225, 221, 0.3),
+    0 0 0 1px rgba(17, 0, 2, 0.58);
+}
+
+.leddic-shoji.is-left .leddic-kumiko {
+  background:
+    linear-gradient(30deg, transparent 48.6%, rgba(108, 12, 24, 0.5) 49% 51%, transparent 51.4%) 0 0 / clamp(44px, 5.6vw, 88px) clamp(70px, 8.8vw, 138px),
+    linear-gradient(-30deg, transparent 48.6%, rgba(108, 12, 24, 0.5) 49% 51%, transparent 51.4%) 0 0 / clamp(44px, 5.6vw, 88px) clamp(70px, 8.8vw, 138px);
 }
 
 .leddic-shoji.is-right {
@@ -257,12 +282,12 @@
   bottom: 0;
   left: calc(50% - 1px);
   width: 2px;
-  background: #d8ffe3;
-  box-shadow: 0 0 18px 5px rgba(87, 255, 153, 0.52), 0 0 80px 20px rgba(33, 218, 115, 0.2);
+  background: linear-gradient(180deg, #ff655e, #fff7d9 48%, #66ff9f);
+  box-shadow: -5px 0 28px rgba(255, 73, 82, 0.42), 5px 0 28px rgba(87, 255, 153, 0.42), 0 0 80px 20px rgba(255, 235, 196, 0.14);
   transition: opacity 0.12s ease-out, transform 0.3s ease-out;
 }
 
-.is-leddic-cutin .rider-cutin-caption small { color: #a5ffc4; }
+.is-leddic-cutin .rider-cutin-caption small { color: #f4ffed; }
 .is-leddic-cutin .rider-cutin-caption b { color: #effff3; }
 
 .is-leddic-cutin.is-revealing .leddic-shoji.is-left {

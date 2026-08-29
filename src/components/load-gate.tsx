@@ -767,7 +767,7 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
         </span>
         <span className="leddic-seam" />
         <span className="rider-cutin-caption">
-          <small>GREEN VEIL // OPEN</small>
+          <small>CRIMSON × GREEN // OPEN</small>
           <b>LEDDIC</b>
         </span>
       </div>

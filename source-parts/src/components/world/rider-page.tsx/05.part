@@ -34,6 +34,37 @@
           }}
         />
       ))}
+      {rider.partner && partnerForms.length ? (
+        <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">
+          <header>
+            <p>SKILLED DUO / SECOND RIDER RECORD</p>
+            <h2 id="rider-partner-forms-title">
+              <NameText value={rider.partner.name} />の変身記録
+            </h2>
+          </header>
+          <div className="rider-form-pickup-stack">
+            {partnerForms.map((form) => (
+              <FormPickup
+                key={`${form.name}-${form.sub ?? "base"}`}
+                rider={{
+                  img: form.img,
+                  pos: form.pos,
+                  system: form.system,
+                  name: form.name,
+                  sub: form.sub,
+                  calls: form.calls,
+                  quote: form.quote,
+                  overview: form.overview,
+                  stats: form.stats,
+                  abilities: form.abilities,
+                  arsenal: form.arsenal,
+                  finishers: form.finishers,
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
       <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="SEVEN RIDERS" />
       {rider.nightmare ? (
         <dialog
