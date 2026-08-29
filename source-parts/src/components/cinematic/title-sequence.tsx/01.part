@@ -105,6 +105,41 @@ function CinematicDepthField() {
   );
 }
 
+function CinematicEditorialFrame() {
+  return (
+    <div className="cine-editorial" aria-hidden="true">
+      <div className="cine-editorial-frame">
+        <i className="cine-editorial-frame-top" />
+        <i className="cine-editorial-frame-right" />
+        <i className="cine-editorial-frame-bottom" />
+        <i className="cine-editorial-frame-left" />
+      </div>
+      <div className="cine-editorial-type">
+        <p className="cine-editorial-kicker">
+          <span>KAMEN RIDER SAGA</span>
+          <i />
+          <span>WORLD FILE / 02</span>
+        </p>
+        <div className="cine-editorial-word" aria-hidden="true">
+          <span>
+            <b>DECEPTION</b>
+          </span>
+          <span>
+            <b>WORLD</b>
+          </span>
+        </div>
+        <p className="cine-editorial-caption">THE WORLD IS MADE OF DECEPTION.</p>
+      </div>
+      <span className="cine-editorial-coordinate cine-editorial-coordinate-left">
+        35°41′ // REALITY
+      </span>
+      <span className="cine-editorial-coordinate cine-editorial-coordinate-right">
+        SIGNAL 07 // LOCKED
+      </span>
+    </div>
+  );
+}
+
 export function TitleSequence() {
   const [phase, setPhase] = useState<SequencePhase>("idle");
   const [muted, setMuted] = useState(false);
@@ -414,6 +449,7 @@ export function TitleSequence() {
         <div className="cine-light-field" />
         <CinematicDepthField />
       </div>
+      <CinematicEditorialFrame />
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings rootRef={hudRef} />

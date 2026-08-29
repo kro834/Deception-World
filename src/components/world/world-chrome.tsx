@@ -8,6 +8,7 @@ import {
 } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
+import { ArchiveOracle } from "./archive-oracle";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -189,6 +190,9 @@ export function SideMenuLayer({
   onOpenChange?: (open: boolean) => void;
 } = {}) {
   const panelRef = useRef<HTMLElement>(null);
+  const oracleRef = useRef<HTMLDialogElement>(null);
+  const oracleTriggerRef = useRef<HTMLButtonElement>(null);
+  const oracleOpenedByKeyboardRef = useRef(false);
   const announcementRef = useRef<HTMLDialogElement>(null);
   const announcementTriggerRef = useRef<HTMLButtonElement>(null);
   const announcementStageRef = useRef<HTMLDivElement>(null);
@@ -196,6 +200,7 @@ export function SideMenuLayer({
   const announcementOpenedByKeyboardRef = useRef(false);
   const sideMenuRestoreFocusRef = useRef(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
+  const [oracleOpen, setOracleOpen] = useState(false);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
@@ -235,6 +240,8 @@ export function SideMenuLayer({
       if (panel.contains(event.target)) return;
       const announcementDialog = announcementRef.current;
       if (announcementDialog?.open && announcementDialog.contains(event.target)) return;
+      const oracleDialog = oracleRef.current;
+      if (oracleDialog?.open && oracleDialog.contains(event.target)) return;
       event.preventDefault();
     };
     document.addEventListener("touchmove", containBackgroundScroll, {
@@ -327,6 +334,19 @@ export function SideMenuLayer({
     if (!openedByKeyboard) event.currentTarget.blur();
     setSelectedAnnouncementId(null);
     setAnnouncementOpen(true);
+  };
+
+  const openOracle = (event: MouseEvent<HTMLButtonElement>) => {
+    const openedByKeyboard = event.detail === 0;
+    oracleOpenedByKeyboardRef.current = openedByKeyboard;
+    if (!openedByKeyboard) event.currentTarget.blur();
+    setAnnouncementOpen(false);
+    setOracleOpen(true);
+  };
+
+  const closeForOracleNavigation = () => {
+    sideMenuRestoreFocusRef.current = false;
+    close();
   };
 
   const closeAnnouncement = (restoreFocus = announcementOpenedByKeyboardRef.current) => {
@@ -453,6 +473,35 @@ export function SideMenuLayer({
               />
             </svg>
           </button>
+        </div>
+        <div className="side-panel-oracle-card">
+          <button
+            ref={oracleTriggerRef}
+            className="side-panel-oracle-trigger"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="site-archive-oracle-dialog"
+            aria-expanded={oracleOpen}
+            onClick={openOracle}
+          >
+            <span className="side-panel-oracle-sigil" aria-hidden="true">
+              <i />
+              <i />
+              <b>AI</b>
+            </span>
+            <span className="side-panel-oracle-copy">
+              <small>ARCHIVE GUIDE / LOCAL</small>
+              <b>AIに聞く</b>
+              <span>探している人物・能力・物語へ案内</span>
+            </span>
+            <span className="side-panel-oracle-arrow" aria-hidden="true">
+              ↗
+            </span>
+          </button>
+          <p>
+            <span>ON-DEVICE</span>
+            質問は外部へ送信されません
+          </p>
         </div>
         <div className="side-panel-group">
           <p>SECTIONS</p>
@@ -688,6 +737,13 @@ export function SideMenuLayer({
           </div>
         </div>
       </aside>
+      <ArchiveOracle
+        ref={oracleRef}
+        open={oracleOpen}
+        onOpenChange={setOracleOpen}
+        onNavigate={closeForOracleNavigation}
+        returnFocusRef={oracleOpenedByKeyboardRef.current ? oracleTriggerRef : undefined}
+      />
       <dialog
         ref={announcementRef}
         id="site-announcement-dialog"
