@@ -20,6 +20,7 @@ import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
+import { Route as ApiArchiveIntelligenceRouteImport } from './routes/api/archive-intelligence'
 import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
@@ -85,6 +86,11 @@ const RidersRoute = RidersRouteImport.update({
 const WorldRoute = WorldRouteImport.update({
   id: '/world',
   path: '/world',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiArchiveIntelligenceRoute = ApiArchiveIntelligenceRouteImport.update({
+  id: '/api/archive-intelligence',
+  path: '/api/archive-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiExportRoute = ApiExportRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
+  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
+  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
+  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/rexonance-saga'
     | '/riders'
     | '/world'
+    | '/api/archive-intelligence'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/rexonance-saga'
     | '/riders'
     | '/world'
+    | '/api/archive-intelligence'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/rexonance-saga'
     | '/riders'
     | '/world'
+    | '/api/archive-intelligence'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -303,6 +315,7 @@ export interface RootRouteChildren {
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   WorldRoute: typeof WorldRoute
+  ApiArchiveIntelligenceRoute: typeof ApiArchiveIntelligenceRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/world'
       fullPath: '/world'
       preLoaderRoute: typeof WorldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/archive-intelligence': {
+      id: '/api/archive-intelligence'
+      path: '/api/archive-intelligence'
+      fullPath: '/api/archive-intelligence'
+      preLoaderRoute: typeof ApiArchiveIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export': {
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   WorldRoute: WorldRoute,
+  ApiArchiveIntelligenceRoute: ApiArchiveIntelligenceRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

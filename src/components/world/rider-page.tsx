@@ -1013,7 +1013,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     tone: "#32e1d0",
     img: "/rider-profile-over-zeztz.jpeg",
     pos: "50% 8%",
-    civilianImg: "/civilian-over-zeztz.jpeg",
+    civilianImg: "/archive-ai-james-20260829.jpg",
     civilianPos: "50% 8%",
     title: "英国支部から派遣された、最強のエージェント。",
     quotes: [

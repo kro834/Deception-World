@@ -490,17 +490,17 @@ export function SideMenuLayer({
               <b>AI</b>
             </span>
             <span className="side-panel-oracle-copy">
-              <small>ARCHIVE GUIDE / LOCAL</small>
+              <small>ARCHIVE INTELLIGENCE / HYBRID</small>
               <b>AIに聞く</b>
-              <span>探している人物・能力・物語へ案内</span>
+              <span>記録検索と、8つの人格回線</span>
             </span>
             <span className="side-panel-oracle-arrow" aria-hidden="true">
               ↗
             </span>
           </button>
           <p>
-            <span>ON-DEVICE</span>
-            質問は外部へ送信されません
+            <span>GUIDE + PERSONA</span>
+            検索は端末内、会話は保護された回線
           </p>
         </div>
         <div className="side-panel-group">

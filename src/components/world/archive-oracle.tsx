@@ -7,6 +7,7 @@ import {
   useState,
   type FormEvent,
   type ForwardedRef,
+  type KeyboardEvent,
   type RefObject,
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
@@ -17,6 +18,7 @@ import {
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, type DossierLink } from "./dossier-nav";
+import { ArchiveRoleplay } from "./archive-roleplay";
 
 export type ArchiveOracleEntry = {
   id: string;
@@ -679,6 +681,7 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const restoreFocusRef = useRef(true);
+    const [surface, setSurface] = useState<"guide" | "roleplay">("guide");
     const [question, setQuestion] = useState("");
     const [submittedQuestion, setSubmittedQuestion] = useState("");
     const results = useMemo(() => searchArchiveOracle(submittedQuestion, 3), [submittedQuestion]);
@@ -712,10 +715,15 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
         }
       }
       const frame = window.requestAnimationFrame(() => {
-        inputRef.current?.focus({ preventScroll: true });
+        if (
+          surface === "guide" &&
+          window.matchMedia("(hover: hover) and (pointer: fine)").matches
+        ) {
+          inputRef.current?.focus({ preventScroll: true });
+        }
       });
       return () => window.cancelAnimationFrame(frame);
-    }, [onOpenChange, open]);
+    }, [onOpenChange, open, surface]);
 
     const closeOracle = useCallback(() => {
       restoreFocusRef.current = true;
@@ -731,6 +739,20 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
     const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       ask(question);
+    };
+
+    const handleSurfaceKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const nextSurface = event.key === "ArrowLeft" || event.key === "Home" ? "guide" : "roleplay";
+      setSurface(nextSurface);
+      window.requestAnimationFrame(() => {
+        document
+          .getElementById(
+            nextSurface === "guide" ? "archive-oracle-guide-tab" : "archive-oracle-roleplay-tab",
+          )
+          ?.focus({ preventScroll: true });
+      });
     };
 
     const beforeResultNavigation = () => {
@@ -760,16 +782,52 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
           if (event.target === event.currentTarget) closeOracle();
         }}
       >
-        <section className="archive-oracle-shell">
+        <section className="archive-oracle-shell" data-surface={surface}>
           <span className="archive-oracle-aura" aria-hidden="true" />
+          <p id="archive-oracle-description" className="visually-hidden">
+            公開記録を端末内で探す案内と、8つのキャラクター人格で会話できる知能端末です。
+          </p>
           <header className="archive-oracle-header">
             <div>
-              <p>LOCAL ARCHIVE INTELLIGENCE</p>
+              <p>ARCHIVE INTELLIGENCE CONSOLE</p>
               <h2 id="archive-oracle-title">AIに聞く</h2>
+            </div>
+            <div
+              className="archive-oracle-view-switch"
+              role="tablist"
+              aria-label="AI機能を選択"
+              onKeyDown={handleSurfaceKeyDown}
+            >
+              <button
+                id="archive-oracle-guide-tab"
+                className="archive-oracle-view-tab"
+                type="button"
+                role="tab"
+                aria-selected={surface === "guide"}
+                aria-controls="archive-oracle-guide-panel"
+                tabIndex={surface === "guide" ? 0 : -1}
+                onClick={() => setSurface("guide")}
+              >
+                <span>記録を探す</span>
+                <small>GUIDE</small>
+              </button>
+              <button
+                id="archive-oracle-roleplay-tab"
+                className="archive-oracle-view-tab"
+                type="button"
+                role="tab"
+                aria-selected={surface === "roleplay"}
+                aria-controls="archive-oracle-roleplay-panel"
+                tabIndex={surface === "roleplay" ? 0 : -1}
+                onClick={() => setSurface("roleplay")}
+              >
+                <span>なりきり</span>
+                <small>PERSONA</small>
+              </button>
             </div>
             <span className="archive-oracle-status">
               <i aria-hidden="true" />
-              LOCAL
+              HYBRID
             </span>
             <button
               className="archive-oracle-close ios26-glass"
@@ -789,8 +847,14 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
             </button>
           </header>
 
-          <div className="archive-oracle-stage">
-            <p id="archive-oracle-description" className="archive-oracle-introduction">
+          <div
+            id="archive-oracle-guide-panel"
+            className="archive-oracle-stage archive-oracle-guide"
+            role="tabpanel"
+            aria-labelledby="archive-oracle-guide-tab"
+            hidden={surface !== "guide"}
+          >
+            <p className="archive-oracle-introduction">
               探している人物、能力、物語を言葉で質問してください。公開中の記録から、近いページを案内します。
             </p>
 
@@ -883,6 +947,20 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
             <p className="archive-oracle-privacy">
               この案内はサイト内の公開記録だけを端末上で検索します。質問が外部へ送信されることはありません。
             </p>
+          </div>
+
+          <div
+            id="archive-oracle-roleplay-panel"
+            className="archive-oracle-roleplay-panel"
+            role="tabpanel"
+            aria-labelledby="archive-oracle-roleplay-tab"
+            hidden={surface !== "roleplay"}
+          >
+            <ArchiveRoleplay
+              active={open && surface === "roleplay"}
+              searchArchive={searchArchiveOracle}
+              onNavigate={beforeResultNavigation}
+            />
           </div>
         </section>
       </dialog>
