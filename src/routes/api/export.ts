@@ -1,18 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+
+const MAIN_ARCHIVE_URL = "https://github.com/kro834/Deception-World/archive/refs/heads/main.zip";
 
 export const Route = createFileRoute("/api/export")({
   server: {
     handlers: {
       GET: async () => {
-        const file = join(process.cwd(), "public/Deception-World.zip");
-        const buf = await readFile(file);
-        return new Response(buf, {
+        return new Response(null, {
+          status: 302,
           headers: {
-            "content-type": "application/zip",
-            "content-disposition": 'attachment; filename="Deception-World.zip"',
-            "content-length": String(buf.byteLength),
+            location: MAIN_ARCHIVE_URL,
             "cache-control": "no-store",
           },
         });

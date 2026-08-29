@@ -36,8 +36,14 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
   assert.equal((ep1.match(/label: "/g) ?? []).length, 2);
   assert.equal((ep2.match(/label: "/g) ?? []).length, 3);
   assert.match(ep2, /displayLines: \["仮面ライダーレルム", "レジェンズ"\]/);
-  assert.match(ep2, /label: "仮面ライダーレルム\u3000アースフォーム"[\s\S]*?to: "\/characters\/terra"/);
-  assert.match(ep2, /label: "仮面ライダーレルム\u3000ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/);
+  assert.match(
+    ep2,
+    /label: "仮面ライダーレルム\u3000アースフォーム"[\s\S]*?to: "\/characters\/terra"/,
+  );
+  assert.match(
+    ep2,
+    /label: "仮面ライダーレルム\u3000ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/,
+  );
 });
 
 test("episode selection and the single-tap plus remain sibling controls", () => {
@@ -61,11 +67,14 @@ test("the pickup dialog is modal, dismissible, and scroll-reset on every open", 
   assert.match(worldHome, /ref=\{episodePickupDialogRef\}/);
   assert.match(worldHome, /id="episode-pickup-dialog"/);
   assert.match(worldHome, /dialog\.showModal\(\)/);
-  assert.match(worldHome, /settlePickupScroll\(dialog, \["\.episode-pickup-panel"\]/);
+  assert.match(worldHome, /settlePickupScroll\(\s*dialog,\s*\["\.episode-pickup-panel"\]/);
   assert.match(worldHome, /cancelEpisodePickupScrollReset\.current\?\.\(\)/);
-  assert.match(worldHome, /resetPickupScroll\(dialog, \["\.episode-pickup-panel"\]\)/);
+  assert.match(worldHome, /resetPickupScroll\(\s*dialog,\s*\["\.episode-pickup-panel"\]\s*\)/);
   assert.match(worldHome, /episodePickupOpenedByKeyboard\.current/);
-  assert.match(worldHome, /\.episode-pickup-close"\)\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(
+    worldHome,
+    /\.querySelector(?:<HTMLButtonElement>)?\("\.episode-pickup-close"\)[\s\S]*?\?\.focus\(\{\s*preventScroll:\s*true\s*\}\)/,
+  );
   assert.match(worldHome, /dialog\.focus\(\{ preventScroll: true \}\)/);
   assert.match(worldHome, /openEpisodePickup\(i, event\.currentTarget, event\.detail === 0\)/);
   assert.match(worldHome, /data-pointer-focus-suppressed/);
@@ -102,7 +111,7 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
     baseStyles,
     /\.episode-pickup-dialog:focus,[\s\S]*?\.episode-pickup-dialog:focus-visible \{[\s\S]*?outline: none !important/,
   );
-  assert.match(baseStyles, /html:has\(\.episode-pickup-dialog\[open\]\)/);
+  assert.match(baseStyles, /:is\(html, body\):has\(\.episode-pickup-dialog\[open\]\)/);
   assert.match(
     baseStyles,
     /\.episode-pickup-grid \{[\s\S]*?repeat\(auto-fit, minmax\(210px, 1fr\)\)/,
@@ -116,14 +125,17 @@ test("the plus and dialog include desktop and iPhone-specific Liquid Glass layou
 });
 
 test("the shared pointer light cannot displace episode or sticky dialog controls", () => {
-  const sharedHost = interactionStyles.indexOf('[data-liquid-pointer]:not(.side-panel)');
-  const episodeOverride = interactionStyles.indexOf('.episode-pickup-plus[data-liquid-pointer]');
+  const sharedHost = interactionStyles.indexOf("[data-liquid-pointer]:not(.side-panel)");
+  const episodeOverride = interactionStyles.indexOf(".episode-pickup-plus[data-liquid-pointer]");
   const nightmareOverride = interactionStyles.indexOf(
-    '.rider-nightmare-dialog-close[data-liquid-pointer]',
+    ".rider-nightmare-dialog-close[data-liquid-pointer]",
   );
 
   assert.notEqual(sharedHost, -1);
-  assert.ok(episodeOverride > sharedHost, "episode controls must override the shared relative host");
+  assert.ok(
+    episodeOverride > sharedHost,
+    "episode controls must override the shared relative host",
+  );
   assert.ok(nightmareOverride > sharedHost, "sticky close must override the shared relative host");
   assert.match(
     interactionStyles.slice(episodeOverride),
@@ -136,10 +148,7 @@ test("the shared pointer light cannot displace episode or sticky dialog controls
 });
 
 test("iPhone episode images stay inside their column and leave every title fully visible", () => {
-  assert.match(
-    mobileStyles,
-    /--episode-mobile-card-height: clamp\(128px, 34vw, 140px\)/,
-  );
+  assert.match(mobileStyles, /--episode-mobile-card-height: clamp\(128px, 34vw, 140px\)/);
   assert.match(
     mobileStyles,
     /\.episode-card \{[\s\S]*?height: var\(--episode-mobile-card-height\);[\s\S]*?align-self: start/,

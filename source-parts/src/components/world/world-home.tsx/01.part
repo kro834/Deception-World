@@ -12,50 +12,295 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
-  { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
-  { src: "/poster-card-03.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 03" },
-  { src: "/poster-card-04.jpeg", pos: "50% 30%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 04" },
-  { src: "/poster-card-05.jpeg", pos: "50% 32%", fit: "cover", alt: "Deception Worldのキービジュアル 05" },
-  { src: "/poster-card-06.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレルムのキービジュアル 06" },
-  { src: "/poster-card-07.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーローアのキービジュアル 07" },
-  { src: "/poster-card-08.jpeg", pos: "50% 50%", fit: "contain", alt: "青い装甲のライダーのキービジュアル 08" },
-  { src: "/poster-card-10.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレディックのキービジュアル 10" },
-  { src: "/poster-card-11.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーアルゲノムのキービジュアル 11" },
-  { src: "/poster-card-12.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーオーバーゼッツのキービジュアル 12" },
-  { src: "/poster-card-13.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーフリートのキービジュアル 13" },
-  { src: "/poster-card-14.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダールーラーのキービジュアル 14" },
-  { src: "/poster-card-15.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーサーガ Deception Worldのタイトルポスター" },
-  { src: "/poster-card-16.jpeg", pos: "50% 50%", fit: "contain", alt: "二人のライダーが並ぶDeception Worldのキービジュアル" },
-  { src: "/poster-card-17.jpeg", pos: "50% 46%", fit: "cover", alt: "夜空の下で佇む青と金の仮面ライダーサーガ" },
-  { src: "/poster-card-18.jpeg", pos: "50% 44%", fit: "cover", alt: "星の装甲をまとい座る仮面ライダーのキービジュアル" },
-  { src: "/poster-card-19.jpeg", pos: "50% 50%", fit: "contain", alt: "雪原で赤い剣を振るうライダーの戦闘キービジュアル" },
-  { src: "/poster-card-20.jpeg", pos: "50% 46%", fit: "cover", alt: "赤いライダーと白緑のライダーが並ぶキービジュアル" },
-  { src: "/poster-card-21.jpeg", pos: "50% 50%", fit: "contain", alt: "白緑と青金のライダーが対峙するキービジュアル" },
-  { src: "/poster-card-22.jpeg", pos: "50% 42%", fit: "cover", alt: "星空を宿す装甲のライダーのキービジュアル" },
-  { src: "/poster-card-23.jpeg", pos: "50% 48%", fit: "cover", alt: "青と金の仮面ライダーサーガが構えるキービジュアル" },
-  { src: "/poster-card-24.jpeg", pos: "50% 46%", fit: "cover", alt: "星の装甲をまとったライダーが低く構えるキービジュアル" },
-  { src: "/poster-card-25.jpeg", pos: "50% 43%", fit: "cover", alt: "荒野で大剣を構える赤いライダーのキービジュアル" },
-  { src: "/poster-card-26.jpeg", pos: "50% 48%", fit: "cover", alt: "森で向き合うライダーとレックス・ロワのキービジュアル" },
-  { src: "/poster-card-27.jpeg", pos: "50% 42%", fit: "cover", alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル" },
-  { src: "/poster-card-28.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ多色の神装ライダー" },
-  { src: "/poster-card-29.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ星光のライダー" },
-  { src: "/poster-card-30.jpeg", pos: "50% 34%", fit: "cover", alt: "紅い光を宿すヴェール姿の人物" },
-  { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
-  { src: "/poster-card-32-20260825.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
-  { src: "/poster-card-33.jpeg", pos: "50% 50%", fit: "cover", alt: "夜の遊園地に立つ紅黒の装甲ライダー" },
-  { src: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレクソナンスサーガのキービジュアル" },
-  { src: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 26%", fit: "cover", alt: "仮面ライダーヴァンダールの新キービジュアル" },
+  {
+    src: "/deception-world-poster.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
+  },
+  {
+    src: "/poster-card-03.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーサーガのキービジュアル 03",
+  },
+  {
+    src: "/poster-card-04.jpeg",
+    pos: "50% 30%",
+    fit: "cover",
+    alt: "仮面ライダーサーガのキービジュアル 04",
+  },
+  {
+    src: "/poster-card-05.jpeg",
+    pos: "50% 32%",
+    fit: "cover",
+    alt: "Deception Worldのキービジュアル 05",
+  },
+  {
+    src: "/poster-card-06.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレルムのキービジュアル 06",
+  },
+  {
+    src: "/poster-card-07.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "仮面ライダーローアのキービジュアル 07",
+  },
+  {
+    src: "/poster-card-08.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "青い装甲のライダーのキービジュアル 08",
+  },
+  {
+    src: "/poster-card-10.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレディックのキービジュアル 10",
+  },
+  {
+    src: "/poster-card-11.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーアルゲノムのキービジュアル 11",
+  },
+  {
+    src: "/poster-card-12.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーオーバーゼッツのキービジュアル 12",
+  },
+  {
+    src: "/poster-card-13.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーフリートのキービジュアル 13",
+  },
+  {
+    src: "/poster-card-14.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダールーラーのキービジュアル 14",
+  },
+  {
+    src: "/poster-card-15.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "仮面ライダーサーガ Deception Worldのタイトルポスター",
+  },
+  {
+    src: "/poster-card-16.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "二人のライダーが並ぶDeception Worldのキービジュアル",
+  },
+  {
+    src: "/poster-card-17.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "夜空の下で佇む青と金の仮面ライダーサーガ",
+  },
+  {
+    src: "/poster-card-18.jpeg",
+    pos: "50% 44%",
+    fit: "cover",
+    alt: "星の装甲をまとい座る仮面ライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-19.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "雪原で赤い剣を振るうライダーの戦闘キービジュアル",
+  },
+  {
+    src: "/poster-card-20.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "赤いライダーと白緑のライダーが並ぶキービジュアル",
+  },
+  {
+    src: "/poster-card-21.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "白緑と青金のライダーが対峙するキービジュアル",
+  },
+  {
+    src: "/poster-card-22.jpeg",
+    pos: "50% 42%",
+    fit: "cover",
+    alt: "星空を宿す装甲のライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-23.jpeg",
+    pos: "50% 48%",
+    fit: "cover",
+    alt: "青と金の仮面ライダーサーガが構えるキービジュアル",
+  },
+  {
+    src: "/poster-card-24.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "星の装甲をまとったライダーが低く構えるキービジュアル",
+  },
+  {
+    src: "/poster-card-25.jpeg",
+    pos: "50% 43%",
+    fit: "cover",
+    alt: "荒野で大剣を構える赤いライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-26.jpeg",
+    pos: "50% 48%",
+    fit: "cover",
+    alt: "森で向き合うライダーとレックス・ロワのキービジュアル",
+  },
+  {
+    src: "/poster-card-27.jpeg",
+    pos: "50% 42%",
+    fit: "cover",
+    alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル",
+  },
+  {
+    src: "/poster-card-28.jpeg",
+    pos: "50% 38%",
+    fit: "cover",
+    alt: "夕焼けの廃都に立つ多色の神装ライダー",
+  },
+  {
+    src: "/poster-card-29.jpeg",
+    pos: "50% 38%",
+    fit: "cover",
+    alt: "夕焼けの廃都に立つ星光のライダー",
+  },
+  {
+    src: "/poster-card-30.jpeg",
+    pos: "50% 34%",
+    fit: "cover",
+    alt: "紅い光を宿すヴェール姿の人物",
+  },
+  {
+    src: "/poster-card-31.jpeg",
+    pos: "50% 40%",
+    fit: "cover",
+    alt: "アーマードライダーモスコのキービジュアル",
+  },
+  {
+    src: "/poster-card-32-20260825.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "青と桃色の光をまとった仮面ライダーサイファー",
+  },
+  {
+    src: "/poster-card-33.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "夜の遊園地に立つ紅黒の装甲ライダー",
+  },
+  {
+    src: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレクソナンスサーガのキービジュアル",
+  },
+  {
+    src: "/rider-vandal-thumbnail-20260827.jpeg",
+    pos: "50% 26%",
+    fit: "cover",
+    alt: "仮面ライダーヴァンダールの新キービジュアル",
+  },
 ];
 
 const RIDERS = [
-  { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 22%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
-  { id: "realm", no: "02", name: "REALM", ja: "レルム", person: "ベル・アレイン", tone: "#f14a60", img: "/rider-realm.jpeg", pos: "50% 16%", desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。" },
-  { id: "lore", no: "03", name: "LORE", ja: "ローア", person: "ローア", tone: "#67d8ff", img: "/rider-loa.jpeg", pos: "50% 12%", desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。" },
-  { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },
-  { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
-  { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
-  { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
-  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail-20260825.jpeg", pos: "50% 8%", desc: "最期の死者" },
+  {
+    id: "saga",
+    no: "01",
+    name: "SAGA",
+    ja: "サーガ",
+    person: "シエル ／ 月城悠真",
+    tone: "#248cff",
+    img: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    pos: "50% 22%",
+    desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。",
+  },
+  {
+    id: "realm",
+    no: "02",
+    name: "REALM",
+    ja: "レルム",
+    person: "ベル・アレイン",
+    tone: "#f14a60",
+    img: "/rider-realm.jpeg",
+    pos: "50% 16%",
+    desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。",
+  },
+  {
+    id: "lore",
+    no: "03",
+    name: "LORE",
+    ja: "ローア",
+    person: "ローア",
+    tone: "#67d8ff",
+    img: "/rider-loa.jpeg",
+    pos: "50% 12%",
+    desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。",
+  },
+  {
+    id: "vandal",
+    no: "04",
+    name: "VANDAL",
+    ja: "ヴァンダール",
+    person: "レックス・ロワ",
+    tone: "#e71a9c",
+    img: "/rider-vandal-thumbnail-20260827.jpeg",
+    pos: "50% 14%",
+    desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。",
+  },
+  {
+    id: "leddic",
+    no: "05",
+    name: "LEDDIC",
+    ja: "レディック",
+    person: "在原華火 ／ 捜査一課・警部補",
+    tone: "#69df74",
+    img: "/rider-leddic-home.jpeg",
+    pos: "50% 18%",
+    desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。",
+  },
+  {
+    id: "argenome",
+    no: "06",
+    name: "ARGENOME",
+    ja: "アルゲノム",
+    person: "紅城真守",
+    tone: "#d71920",
+    img: "/rider-algenome.jpeg",
+    pos: "50% 16%",
+    desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。",
+  },
+  {
+    id: "over-zeztz",
+    no: "07",
+    name: "OVER ZEZTZ",
+    ja: "オーバーゼッツ",
+    person: "コードナンバー：セヴン ／ ジェームズ・スミス",
+    tone: "#32e1d0",
+    img: "/rider-over-zeztz-home.jpeg",
+    pos: "50% 12%",
+    desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。",
+  },
+  {
+    id: "cipher",
+    no: "08",
+    name: "CIPHER",
+    ja: "サイファー",
+    person: "リュシアン・ヴァレール ／ SCARS特務情報官",
+    tone: "#f05bcf",
+    img: "/rider-cipher-thumbnail-20260825.jpeg",
+    pos: "50% 8%",
+    desc: "最期の死者",
+  },
 ];
 
 const COLUMNS = [
@@ -91,3 +336,74 @@ const COLUMNS = [
     pickup: [
       "過去作から帰還するライダーと、この世界で新たに名乗りを上げる者たち。伝説は記録ではなく、いま現在進行形の干渉である。",
       "仮面ライダーレルム、ベル・アレインの復活はその象徴だ。失われた信号が再び名前を持ったとき、周囲の因果は追記ではなく上書きされる。",
+      "伝説扱いされた瞬間に、その人物は「終わった物語」へ送られる。レジェンズはそれを拒否し、進行中の盤面へ自ら戻ってくる。",
+      "八人のライダーが交差するこの世界では、誰が伝説で誰が新参か、観測する側の権限によってすら揺らぐ。",
+    ],
+  },
+  {
+    no: "04",
+    title: "ゼウス",
+    kicker: "ZEUS",
+    body: "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
+    pickup: [
+      "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
+    ],
+  },
+];
+
+type EpisodePickup = {
+  label: string;
+  displayLines?: readonly string[];
+  src: string;
+  pos: string;
+  alt: string;
+  width: number;
+  height: number;
+  to: string;
+  assets: readonly string[];
+};
+
+type EpisodeRecord = {
+  no: string;
+  title: string;
+  src: string;
+  pos: string;
+  alt: string;
+  pickups?: EpisodePickup[];
+};
+
+const EPISODES: EpisodeRecord[] = [
+  {
+    no: "01",
+    title: "HIDE-AND-SEEK",
+    src: "/episode-01-hide-and-seek.jpeg",
+    pos: "50% 30%",
+    alt: "紫と金の装甲をまとった仮面ライダーが剣を構えるEP1のサムネイル",
+    pickups: [
+      {
+        label: "リームー/仮面ライダーフリート",
+        src: "/manager-reemu-rider.jpeg",
+        pos: "50% 12%",
+        alt: "リームーが変身した仮面ライダーフリート",
+        width: 1086,
+        height: 1448,
+        to: "/managers/reemu",
+        assets: MANAGER_ASSETS.reemu,
+      },
+      {
+        label: "紅城真守/仮面ライダーアルゲノム",
+        src: "/rider-profile-argenome.jpeg",
+        pos: "50% 8%",
+        alt: "紅城真守が変身した仮面ライダーアルゲノム",
+        width: 1350,
+        height: 1800,
+        to: "/riders/argenome",
+        assets: RIDER_NAV.find((item) => item.id === "argenome")?.assets ?? [
+          "/civilian-argenome.jpeg",
+        ],
+      },
+    ],
+  },
+  {
+    no: "02",
+    title: "LEGENDS",

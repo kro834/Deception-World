@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { DossierTopbar } from "./world-chrome";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -20,12 +20,12 @@ export type RiderForm = {
   calls: string[];
   quote?: string;
   overview?: string[];
-  theme?: "rexonance";
   stats?: { dt: string; dd: string }[];
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
   extraForms?: { img: string; pos: string; name: string; sub?: string }[];
+  theme?: "rexonance";
   weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
 };
 
@@ -208,7 +208,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               <span />
             </div>
           ) : null}
-          <button type="button" className="form-pickup-close" data-liquid-pointer="true" onClick={close} aria-label="閉じる">
+          <button
+            type="button"
+            className="form-pickup-close"
+            data-liquid-pointer="true"
+            onClick={close}
+            aria-label="閉じる"
+          >
             <LiquidPointerGlow />
             <span>CLOSE</span>
             <i aria-hidden="true">
@@ -318,7 +324,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 <div className="form-pickup-gallery">
                   {extraForms.map((f) => (
                     <figure key={`${f.name}-${f.sub ?? ""}`}>
-                      <img src={f.img} alt="" style={{ objectPosition: f.pos }} decoding="async" loading="lazy" />
+                      <img
+                        src={f.img}
+                        alt=""
+                        style={{ objectPosition: f.pos }}
+                        decoding="async"
+                        loading="lazy"
+                      />
                       <figcaption>
                         <span>{f.sub ?? "FORM"}</span>
                         <b>{f.name}</b>
@@ -340,203 +352,4 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               </header>
               <div className="rexonance-weapon-grid">
                 {weaponGallery.map((weapon, index) => (
-                  <figure key={weapon.name} className={index === weaponGallery.length - 1 ? "is-wide" : undefined}>
-                    <div>
-                      <img
-                        src={weapon.img}
-                        alt={`${weapon.name}の武装ビジュアル`}
-                        style={{ objectPosition: weapon.pos ?? "50% 50%" }}
-                        decoding="async"
-                        loading="lazy"
-                        fetchPriority="low"
-                      />
-                    </div>
-                    <figcaption>
-                      <small>{weapon.label}</small>
-                      <b>{weapon.name}</b>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </dialog>
-      {gateActive && typeof document !== "undefined"
-        ? createPortal(
-            <div
-              className="rexonance-gate"
-              role="status"
-              aria-live="polite"
-              aria-label="レクソナンスサーガの記録を展開中"
-              onAnimationEnd={(event) => {
-                if (event.currentTarget !== event.target || event.animationName !== "rexonanceGateLife") return;
-                finishGate();
-              }}
-            >
-              <div className="rexonance-gate-field" aria-hidden="true">
-                <i className="rexonance-gate-spiral is-cyan" />
-                <i className="rexonance-gate-spiral is-pink" />
-                <i className="rexonance-gate-orbit is-outer" />
-                <i className="rexonance-gate-orbit is-inner" />
-                <div className="rexonance-gate-stars">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div className="rexonance-gate-prism">
-                  <i className="is-one" />
-                  <i className="is-two" />
-                  <i className="is-three" />
-                </div>
-                <div className="rexonance-gate-horizon">
-                  <span className="is-cyan" />
-                  <span className="is-pink" />
-                </div>
-                <span className="rexonance-gate-rush is-left" />
-                <span className="rexonance-gate-rush is-right" />
-                <div className="rexonance-gate-sigil">
-                  <i />
-                  <b>R</b>
-                </div>
-              </div>
-              <div className="rexonance-gate-copy">
-                <small>ORDER × DIVINITY × WILL</small>
-                <strong>REXONANCE</strong>
-                <span>TRINITY SOVEREIGN LINK ESTABLISHED</span>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
-    </section>
-  );
-}
-
-function ManagerDossier({ profile }: { profile: Profile }) {
-  useWorldMode();
-  return (
-    <main
-      className={`manager-page${profile.sovereign ? " is-sovereign" : ""}`}
-      style={{ ["--manager-accent" as string]: profile.accent, ["--manager-accent-soft" as string]: profile.accent }}
-    >
-      <div className="manager-ambient" aria-hidden="true">
-        <div className="manager-grid" />
-        <div className="manager-glow" />
-        {profile.sovereign ? (
-          <div className="sovereign-aura">
-            <i />
-            <i />
-            <i />
-            <span>I</span>
-          </div>
-        ) : null}
-      </div>
-      <header className="manager-topbar">
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand">
-          <span className="brand-sigil">
-            <i>DW</i>
-          </span>
-          <span>
-            <b>DECEPTION WORLD</b>
-            <small>MANAGER ARCHIVE / {profile.numeral}</small>
-          </span>
-        </GuardedLink>
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
-          <span>六詠一覧へ戻る</span>
-          <i aria-hidden="true">
-            <UiVectorIcon kind="arrow-down-left" size={14} />
-          </i>
-        </GuardedLink>
-      </header>
-      <section className="manager-hero">
-        <div className="manager-portrait-column">
-          <div className="manager-portrait-frame">
-            <img
-              src={profile.image}
-              alt={`${profile.name}のキャラクタービジュアル`}
-              style={{ objectPosition: profile.pos, objectFit: "cover" }}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-            {profile.sovereign ? (
-              <div className="sovereign-portrait-effects" aria-hidden="true">
-                <i />
-                <i />
-              </div>
-            ) : null}
-            {profile.sovereign ? (
-              <div className="sovereign-apex-seal" role="img" aria-label="六詠第一位、主権の管理人">
-                <small>SOVEREIGNTY</small>
-                <strong>I</strong>
-                <span>RIKUEI // PRIMARY</span>
-              </div>
-            ) : null}
-            <span className="manager-numeral">{profile.numeral}</span>
-          </div>
-        </div>
-        <div className="manager-introduction">
-          {profile.sovereign ? (
-            <p className="sovereign-dominance">
-              <span>AUTHORITY TRACE</span>
-              <b>主権</b>
-            </p>
-          ) : null}
-          <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
-          <h1>
-            <small>RIKUEI {profile.numeral}</small>
-            <span className="manager-display-name">
-              <NameText value={profile.name} />
-            </span>
-          </h1>
-          <p className="manager-title"># {profile.title}</p>
-          {profile.sovereign ? (
-            <section className="sovereign-status" aria-label="六詠第一位・主権の管理人">
-              <div className="sovereign-emblem" aria-hidden="true">
-                <i />
-                <span>I</span>
-              </div>
-              <div className="sovereign-status-copy">
-                <small>AUTHORITY PROTOCOL // RANK I</small>
-                <strong>第一位</strong>
-                <p>SOVEREIGNTY CONFIRMED</p>
-              </div>
-              <div className="sovereign-scale" aria-hidden="true">
-                <span><i /><b>VI</b></span>
-                <span><i /><b>V</b></span>
-                <span><i /><b>IV</b></span>
-                <span><i /><b>III</b></span>
-                <span><i /><b>II</b></span>
-                <span className="is-apex"><i /><b>I</b></span>
-              </div>
-            </section>
-          ) : null}
-          <div className="manager-quotes" aria-label={`${profile.name}の台詞`}>
-            {profile.quotes.map((q) => (
-              <q key={q}>{q}</q>
-            ))}
-          </div>
-          <dl className="manager-facts">
-            {profile.facts.map((f) => (
-              <div key={f.dt}>
-                <dt>{f.dt}</dt>
-                <dd>
-                  <NameText value={f.dd} />
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-      <section className="manager-dossier" aria-label={`${profile.name}の人物資料`}>
-        <div className="manager-section-index">
-          <span>{profile.numeral}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
+                  <figure

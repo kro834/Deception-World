@@ -12,50 +12,295 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
-  { src: "/deception-world-poster.jpeg", pos: "50% 50%", fit: "cover", alt: "仮面ライダーサーガ Deception Worldの集合ポスター" },
-  { src: "/poster-card-03.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 03" },
-  { src: "/poster-card-04.jpeg", pos: "50% 30%", fit: "cover", alt: "仮面ライダーサーガのキービジュアル 04" },
-  { src: "/poster-card-05.jpeg", pos: "50% 32%", fit: "cover", alt: "Deception Worldのキービジュアル 05" },
-  { src: "/poster-card-06.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレルムのキービジュアル 06" },
-  { src: "/poster-card-07.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーローアのキービジュアル 07" },
-  { src: "/poster-card-08.jpeg", pos: "50% 50%", fit: "contain", alt: "青い装甲のライダーのキービジュアル 08" },
-  { src: "/poster-card-10.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレディックのキービジュアル 10" },
-  { src: "/poster-card-11.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーアルゲノムのキービジュアル 11" },
-  { src: "/poster-card-12.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーオーバーゼッツのキービジュアル 12" },
-  { src: "/poster-card-13.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーフリートのキービジュアル 13" },
-  { src: "/poster-card-14.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダールーラーのキービジュアル 14" },
-  { src: "/poster-card-15.jpeg", pos: "50% 50%", fit: "contain", alt: "仮面ライダーサーガ Deception Worldのタイトルポスター" },
-  { src: "/poster-card-16.jpeg", pos: "50% 50%", fit: "contain", alt: "二人のライダーが並ぶDeception Worldのキービジュアル" },
-  { src: "/poster-card-17.jpeg", pos: "50% 46%", fit: "cover", alt: "夜空の下で佇む青と金の仮面ライダーサーガ" },
-  { src: "/poster-card-18.jpeg", pos: "50% 44%", fit: "cover", alt: "星の装甲をまとい座る仮面ライダーのキービジュアル" },
-  { src: "/poster-card-19.jpeg", pos: "50% 50%", fit: "contain", alt: "雪原で赤い剣を振るうライダーの戦闘キービジュアル" },
-  { src: "/poster-card-20.jpeg", pos: "50% 46%", fit: "cover", alt: "赤いライダーと白緑のライダーが並ぶキービジュアル" },
-  { src: "/poster-card-21.jpeg", pos: "50% 50%", fit: "contain", alt: "白緑と青金のライダーが対峙するキービジュアル" },
-  { src: "/poster-card-22.jpeg", pos: "50% 42%", fit: "cover", alt: "星空を宿す装甲のライダーのキービジュアル" },
-  { src: "/poster-card-23.jpeg", pos: "50% 48%", fit: "cover", alt: "青と金の仮面ライダーサーガが構えるキービジュアル" },
-  { src: "/poster-card-24.jpeg", pos: "50% 46%", fit: "cover", alt: "星の装甲をまとったライダーが低く構えるキービジュアル" },
-  { src: "/poster-card-25.jpeg", pos: "50% 43%", fit: "cover", alt: "荒野で大剣を構える赤いライダーのキービジュアル" },
-  { src: "/poster-card-26.jpeg", pos: "50% 48%", fit: "cover", alt: "森で向き合うライダーとレックス・ロワのキービジュアル" },
-  { src: "/poster-card-27.jpeg", pos: "50% 42%", fit: "cover", alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル" },
-  { src: "/poster-card-28.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ多色の神装ライダー" },
-  { src: "/poster-card-29.jpeg", pos: "50% 38%", fit: "cover", alt: "夕焼けの廃都に立つ星光のライダー" },
-  { src: "/poster-card-30.jpeg", pos: "50% 34%", fit: "cover", alt: "紅い光を宿すヴェール姿の人物" },
-  { src: "/poster-card-31.jpeg", pos: "50% 40%", fit: "cover", alt: "アーマードライダーモスコのキービジュアル" },
-  { src: "/poster-card-32-20260825.jpeg", pos: "50% 50%", fit: "cover", alt: "青と桃色の光をまとった仮面ライダーサイファー" },
-  { src: "/poster-card-33.jpeg", pos: "50% 50%", fit: "cover", alt: "夜の遊園地に立つ紅黒の装甲ライダー" },
-  { src: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 28%", fit: "cover", alt: "仮面ライダーレクソナンスサーガのキービジュアル" },
-  { src: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 26%", fit: "cover", alt: "仮面ライダーヴァンダールの新キービジュアル" },
+  {
+    src: "/deception-world-poster.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
+  },
+  {
+    src: "/poster-card-03.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーサーガのキービジュアル 03",
+  },
+  {
+    src: "/poster-card-04.jpeg",
+    pos: "50% 30%",
+    fit: "cover",
+    alt: "仮面ライダーサーガのキービジュアル 04",
+  },
+  {
+    src: "/poster-card-05.jpeg",
+    pos: "50% 32%",
+    fit: "cover",
+    alt: "Deception Worldのキービジュアル 05",
+  },
+  {
+    src: "/poster-card-06.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレルムのキービジュアル 06",
+  },
+  {
+    src: "/poster-card-07.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "仮面ライダーローアのキービジュアル 07",
+  },
+  {
+    src: "/poster-card-08.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "青い装甲のライダーのキービジュアル 08",
+  },
+  {
+    src: "/poster-card-10.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレディックのキービジュアル 10",
+  },
+  {
+    src: "/poster-card-11.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーアルゲノムのキービジュアル 11",
+  },
+  {
+    src: "/poster-card-12.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーオーバーゼッツのキービジュアル 12",
+  },
+  {
+    src: "/poster-card-13.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーフリートのキービジュアル 13",
+  },
+  {
+    src: "/poster-card-14.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダールーラーのキービジュアル 14",
+  },
+  {
+    src: "/poster-card-15.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "仮面ライダーサーガ Deception Worldのタイトルポスター",
+  },
+  {
+    src: "/poster-card-16.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "二人のライダーが並ぶDeception Worldのキービジュアル",
+  },
+  {
+    src: "/poster-card-17.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "夜空の下で佇む青と金の仮面ライダーサーガ",
+  },
+  {
+    src: "/poster-card-18.jpeg",
+    pos: "50% 44%",
+    fit: "cover",
+    alt: "星の装甲をまとい座る仮面ライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-19.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "雪原で赤い剣を振るうライダーの戦闘キービジュアル",
+  },
+  {
+    src: "/poster-card-20.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "赤いライダーと白緑のライダーが並ぶキービジュアル",
+  },
+  {
+    src: "/poster-card-21.jpeg",
+    pos: "50% 50%",
+    fit: "contain",
+    alt: "白緑と青金のライダーが対峙するキービジュアル",
+  },
+  {
+    src: "/poster-card-22.jpeg",
+    pos: "50% 42%",
+    fit: "cover",
+    alt: "星空を宿す装甲のライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-23.jpeg",
+    pos: "50% 48%",
+    fit: "cover",
+    alt: "青と金の仮面ライダーサーガが構えるキービジュアル",
+  },
+  {
+    src: "/poster-card-24.jpeg",
+    pos: "50% 46%",
+    fit: "cover",
+    alt: "星の装甲をまとったライダーが低く構えるキービジュアル",
+  },
+  {
+    src: "/poster-card-25.jpeg",
+    pos: "50% 43%",
+    fit: "cover",
+    alt: "荒野で大剣を構える赤いライダーのキービジュアル",
+  },
+  {
+    src: "/poster-card-26.jpeg",
+    pos: "50% 48%",
+    fit: "cover",
+    alt: "森で向き合うライダーとレックス・ロワのキービジュアル",
+  },
+  {
+    src: "/poster-card-27.jpeg",
+    pos: "50% 42%",
+    fit: "cover",
+    alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル",
+  },
+  {
+    src: "/poster-card-28.jpeg",
+    pos: "50% 38%",
+    fit: "cover",
+    alt: "夕焼けの廃都に立つ多色の神装ライダー",
+  },
+  {
+    src: "/poster-card-29.jpeg",
+    pos: "50% 38%",
+    fit: "cover",
+    alt: "夕焼けの廃都に立つ星光のライダー",
+  },
+  {
+    src: "/poster-card-30.jpeg",
+    pos: "50% 34%",
+    fit: "cover",
+    alt: "紅い光を宿すヴェール姿の人物",
+  },
+  {
+    src: "/poster-card-31.jpeg",
+    pos: "50% 40%",
+    fit: "cover",
+    alt: "アーマードライダーモスコのキービジュアル",
+  },
+  {
+    src: "/poster-card-32-20260825.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "青と桃色の光をまとった仮面ライダーサイファー",
+  },
+  {
+    src: "/poster-card-33.jpeg",
+    pos: "50% 50%",
+    fit: "cover",
+    alt: "夜の遊園地に立つ紅黒の装甲ライダー",
+  },
+  {
+    src: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    pos: "50% 28%",
+    fit: "cover",
+    alt: "仮面ライダーレクソナンスサーガのキービジュアル",
+  },
+  {
+    src: "/rider-vandal-thumbnail-20260827.jpeg",
+    pos: "50% 26%",
+    fit: "cover",
+    alt: "仮面ライダーヴァンダールの新キービジュアル",
+  },
 ];
 
 const RIDERS = [
-  { id: "saga", no: "01", name: "SAGA", ja: "サーガ", person: "シエル ／ 月城悠真", tone: "#248cff", img: "/rider-saga-rexonance-thumbnail-20260827.jpeg", pos: "50% 22%", desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。" },
-  { id: "realm", no: "02", name: "REALM", ja: "レルム", person: "ベル・アレイン", tone: "#f14a60", img: "/rider-realm.jpeg", pos: "50% 16%", desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。" },
-  { id: "lore", no: "03", name: "LORE", ja: "ローア", person: "ローア", tone: "#67d8ff", img: "/rider-loa.jpeg", pos: "50% 12%", desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。" },
-  { id: "vandal", no: "04", name: "VANDAL", ja: "ヴァンダール", person: "レックス・ロワ", tone: "#e71a9c", img: "/rider-vandal-thumbnail-20260827.jpeg", pos: "50% 14%", desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。" },
-  { id: "leddic", no: "05", name: "LEDDIC", ja: "レディック", person: "在原華火 ／ 捜査一課・警部補", tone: "#69df74", img: "/rider-leddic-home.jpeg", pos: "50% 18%", desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。" },
-  { id: "argenome", no: "06", name: "ARGENOME", ja: "アルゲノム", person: "紅城真守", tone: "#d71920", img: "/rider-algenome.jpeg", pos: "50% 16%", desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。" },
-  { id: "over-zeztz", no: "07", name: "OVER ZEZTZ", ja: "オーバーゼッツ", person: "コードナンバー：セヴン ／ ジェームズ・スミス", tone: "#32e1d0", img: "/rider-over-zeztz-home.jpeg", pos: "50% 12%", desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。" },
-  { id: "cipher", no: "08", name: "CIPHER", ja: "サイファー", person: "リュシアン・ヴァレール ／ SCARS特務情報官", tone: "#f05bcf", img: "/rider-cipher-thumbnail-20260825.jpeg", pos: "50% 8%", desc: "最期の死者" },
+  {
+    id: "saga",
+    no: "01",
+    name: "SAGA",
+    ja: "サーガ",
+    person: "シエル ／ 月城悠真",
+    tone: "#248cff",
+    img: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    pos: "50% 22%",
+    desc: "最も弱い地点から、それでも世界の結末へ踏み込む第一のライダー。",
+  },
+  {
+    id: "realm",
+    no: "02",
+    name: "REALM",
+    ja: "レルム",
+    person: "ベル・アレイン",
+    tone: "#f14a60",
+    img: "/rider-realm.jpeg",
+    pos: "50% 16%",
+    desc: "サーガ世界の歴史を継承し、再び戦場へ帰還した第二のライダー。",
+  },
+  {
+    id: "lore",
+    no: "03",
+    name: "LORE",
+    ja: "ローア",
+    person: "ローア",
+    tone: "#67d8ff",
+    img: "/rider-loa.jpeg",
+    pos: "50% 12%",
+    desc: "サーガ世界を管轄し、二人と並び立つ第三のライダー。",
+  },
+  {
+    id: "vandal",
+    no: "04",
+    name: "VANDAL",
+    ja: "ヴァンダール",
+    person: "レックス・ロワ",
+    tone: "#e71a9c",
+    img: "/rider-vandal-thumbnail-20260827.jpeg",
+    pos: "50% 14%",
+    desc: "『六詠』のレックス・ロワが変身し、肉弾戦特化の力で戦場へ立つ第四のライダー。",
+  },
+  {
+    id: "leddic",
+    no: "05",
+    name: "LEDDIC",
+    ja: "レディック",
+    person: "在原華火 ／ 捜査一課・警部補",
+    tone: "#69df74",
+    img: "/rider-leddic-home.jpeg",
+    pos: "50% 18%",
+    desc: "規格外の幸運と無敗の体術で、本人も気付かぬまま事件の核心へ辿り着く警部補。",
+  },
+  {
+    id: "argenome",
+    no: "06",
+    name: "ARGENOME",
+    ja: "アルゲノム",
+    person: "紅城真守",
+    tone: "#d71920",
+    img: "/rider-algenome.jpeg",
+    pos: "50% 16%",
+    desc: "幻想郷を救った紅魔館の執事。高速機動と無音の接近を両立し、ガシャコンエッジで異常を切り分ける。",
+  },
+  {
+    id: "over-zeztz",
+    no: "07",
+    name: "OVER ZEZTZ",
+    ja: "オーバーゼッツ",
+    person: "コードナンバー：セヴン ／ ジェームズ・スミス",
+    tone: "#32e1d0",
+    img: "/rider-over-zeztz-home.jpeg",
+    pos: "50% 12%",
+    desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。",
+  },
+  {
+    id: "cipher",
+    no: "08",
+    name: "CIPHER",
+    ja: "サイファー",
+    person: "リュシアン・ヴァレール ／ SCARS特務情報官",
+    tone: "#f05bcf",
+    img: "/rider-cipher-thumbnail-20260825.jpeg",
+    pos: "50% 8%",
+    desc: "最期の死者",
+  },
 ];
 
 const COLUMNS = [
@@ -153,7 +398,9 @@ const EPISODES: EpisodeRecord[] = [
         width: 1350,
         height: 1800,
         to: "/riders/argenome",
-        assets: RIDER_NAV.find((item) => item.id === "argenome")?.assets ?? ["/civilian-argenome.jpeg"],
+        assets: RIDER_NAV.find((item) => item.id === "argenome")?.assets ?? [
+          "/civilian-argenome.jpeg",
+        ],
       },
     ],
   },
@@ -173,7 +420,9 @@ const EPISODES: EpisodeRecord[] = [
         width: 1221,
         height: 1800,
         to: "/riders/realm",
-        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? ["/civilian-bell-20260826.jpeg"],
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
+          "/civilian-bell-20260826.jpeg",
+        ],
       },
       {
         label: "仮面ライダーレルム　アースフォーム",
@@ -197,15 +446,36 @@ const EPISODES: EpisodeRecord[] = [
       },
     ],
   },
-  { no: "03", title: "DECEPTION WORLD", src: "/episode-03-deception-world.jpeg", pos: "50% 18%", alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル" },
-  { no: "04", title: "殺す", src: "/episode-04-kill.jpeg", pos: "50% 16%", alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル" },
-  { no: "05", title: "FARCE", src: "/episode-05-farce.jpeg", pos: "50% 44%", alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル" },
+  {
+    no: "03",
+    title: "DECEPTION WORLD",
+    src: "/episode-03-deception-world.jpeg",
+    pos: "50% 18%",
+    alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル",
+  },
+  {
+    no: "04",
+    title: "殺す",
+    src: "/episode-04-kill.jpeg",
+    pos: "50% 16%",
+    alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
+  },
+  {
+    no: "05",
+    title: "FARCE",
+    src: "/episode-05-farce.jpeg",
+    pos: "50% 44%",
+    alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
+  },
 ];
 
 function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
   if (!scroller || !child) return;
   const left = child.offsetLeft - (scroller.clientWidth - child.clientWidth) / 2;
-  scroller.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth";
+  scroller.scrollTo({ left: Math.max(0, left), behavior });
 }
 
 function bindRail(el: HTMLElement | null, onIndex: (i: number) => void) {
@@ -220,13 +490,18 @@ function syncRail(rail: HTMLElement | null, index: number) {
   rail.querySelectorAll<HTMLElement>('button[role="tab"]').forEach((tab, i) => {
     tab.classList.toggle("is-active", i === index);
     tab.setAttribute("aria-selected", String(i === index));
+    tab.tabIndex = i === index ? 0 : -1;
   });
   rail.dispatchEvent(new Event("liquidrelayout"));
 }
 
 function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" | "other" }) {
   return (
-    <div className={`archive-placeholder is-${tone}`} role="img" aria-label={`未判明の資料スロット ${index}`}>
+    <div
+      className={`archive-placeholder is-${tone}`}
+      role="img"
+      aria-label={`未判明の資料スロット ${index}`}
+    >
       <span>{String(index).padStart(2, "0")}</span>
       <i aria-hidden="true" />
       <small>UNRESOLVED</small>
@@ -240,17 +515,46 @@ function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" 
 const ManagerRail = memo(
   forwardRef<HTMLDivElement>(function ManagerRail(_props, ref) {
     return (
-      <div ref={ref} className="manager-archive-tabs liquid-swipe-tabs" role="tablist" aria-label="キャラクター分類">
+      <div
+        ref={ref}
+        className="manager-archive-tabs liquid-swipe-tabs"
+        role="tablist"
+        aria-label="キャラクター分類"
+      >
         <LiquidLens />
-        <button type="button" role="tab" className="is-active" aria-selected="true" style={{ ["--liquid-accent" as string]: "var(--cyan)" }}>
+        <button
+          id="manager-tab-0"
+          type="button"
+          role="tab"
+          className="is-active"
+          aria-selected="true"
+          aria-controls="manager-panel-0"
+          style={{ ["--liquid-accent" as string]: "var(--cyan)" }}
+        >
           <small>FRONT / 01</small>
           <b>六詠</b>
         </button>
-        <button type="button" role="tab" aria-selected="false" style={{ ["--liquid-accent" as string]: "var(--red)" }}>
+        <button
+          id="manager-tab-1"
+          type="button"
+          role="tab"
+          tabIndex={-1}
+          aria-selected="false"
+          aria-controls="manager-panel-1"
+          style={{ ["--liquid-accent" as string]: "var(--red)" }}
+        >
           <small>REVERSE / 02</small>
           <b>管理外</b>
         </button>
-        <button type="button" role="tab" aria-selected="false" style={{ ["--liquid-accent" as string]: "#69df74" }}>
+        <button
+          id="manager-tab-2"
+          type="button"
+          role="tab"
+          tabIndex={-1}
+          aria-selected="false"
+          aria-controls="manager-panel-2"
+          style={{ ["--liquid-accent" as string]: "#69df74" }}
+        >
           <small>RELATED / 03</small>
           <b>その他</b>
         </button>
@@ -262,19 +566,37 @@ const ManagerRail = memo(
 const ColumnRail = memo(
   forwardRef<HTMLDivElement>(function ColumnRail(_props, ref) {
     return (
-      <div ref={ref} className="world-column-tabs liquid-swipe-tabs" role="tablist" aria-label="コラムを選択">
+      <div
+        ref={ref}
+        className="world-column-tabs liquid-swipe-tabs"
+        role="tablist"
+        aria-label="コラムを選択"
+      >
         <LiquidLens />
         {COLUMNS.map((c, i) => (
           <button
             key={c.no}
             type="button"
             role="tab"
+            id={`column-tab-${i}`}
+            aria-controls="world-column-panel"
             className={i === 0 ? "is-active" : ""}
             aria-selected={i === 0}
+            tabIndex={i === 0 ? 0 : -1}
             style={{ ["--liquid-accent" as string]: "var(--gold)" }}
           >
             <small>{c.no}</small>
-            <b>{c.title === "脚本制と採録制" ? <>脚本制と<br className="tab-br" />採録制</> : c.title}</b>
+            <b>
+              {c.title === "脚本制と採録制" ? (
+                <>
+                  脚本制と
+                  <br className="tab-br" />
+                  採録制
+                </>
+              ) : (
+                c.title
+              )}
+            </b>
           </button>
         ))}
       </div>
@@ -297,12 +619,25 @@ const PickupRail = memo(
             key={c.no}
             type="button"
             role="tab"
+            id={`column-dialog-tab-${i}`}
+            aria-controls={`column-dialog-panel-${i}`}
             className={i === 0 ? "is-active" : ""}
             aria-selected={i === 0}
+            tabIndex={i === 0 ? 0 : -1}
             style={{ ["--liquid-accent" as string]: "var(--gold)" }}
           >
             <small>{c.no}</small>
-            <b>{c.title === "脚本制と採録制" ? <>脚本制と<br className="tab-br" />採録制</> : c.title}</b>
+            <b>
+              {c.title === "脚本制と採録制" ? (
+                <>
+                  脚本制と
+                  <br className="tab-br" />
+                  採録制
+                </>
+              ) : (
+                c.title
+              )}
+            </b>
           </button>
         ))}
       </div>
@@ -313,22 +648,40 @@ const PickupRail = memo(
 const RiderRail = memo(
   forwardRef<HTMLDivElement, { initialIndex: number }>(function RiderRail({ initialIndex }, ref) {
     return (
-      <div ref={ref} className="rider-tabs liquid-swipe-tabs" role="tablist" aria-label="八人のメインライダー">
+      <div
+        ref={ref}
+        className="rider-tabs liquid-swipe-tabs"
+        role="tablist"
+        aria-label="八人のメインライダー"
+      >
         <LiquidLens />
         {RIDERS.map((r, i) => (
           <button
             key={r.id}
             type="button"
             role="tab"
+            id={`rider-tab-${r.id}`}
+            aria-controls="rider-active-panel"
             className={i === initialIndex ? "is-active" : ""}
             aria-selected={i === initialIndex}
+            tabIndex={i === initialIndex ? 0 : -1}
             style={{
               ["--tab-tone" as string]: r.tone,
               ["--liquid-accent" as string]: r.tone,
             }}
           >
             <small>{r.no}</small>
-            <span>{r.name === "OVER ZEZTZ" ? <>OVER<br className="tab-br" />ZEZTZ</> : r.name}</span>
+            <span>
+              {r.name === "OVER ZEZTZ" ? (
+                <>
+                  OVER
+                  <br className="tab-br" />
+                  ZEZTZ
+                </>
+              ) : (
+                r.name
+              )}
+            </span>
             <i />
           </button>
         ))}
@@ -346,27 +699,27 @@ export function WorldHome() {
   const openingHeroRef = useRef<HTMLElement>(null);
   const openingBackdropRef = useRef<HTMLDivElement>(null);
   const openingFocusRef = useRef<HTMLHeadingElement>(null);
-  const [initialRiderTab] = useState(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    return returnIndex >= 0 ? returnIndex : 0;
-  });
+  const [initialRiderTab, setInitialRiderTab] = useState(0);
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
   const [shuffling, setShuffling] = useState(false);
-  const [ambientPaused, setAmbientPaused] = useState(() =>
-    typeof document !== "undefined"
-      && (document.hidden || document.documentElement.hasAttribute("data-opening-handoff-active")),
+  const [ambientPaused, setAmbientPaused] = useState(
+    () =>
+      typeof document !== "undefined" &&
+      (document.hidden || document.documentElement.hasAttribute("data-opening-handoff-active")),
   );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
-  const [riderTab, setRiderTab] = useState(initialRiderTab);
+  const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
+  const [motionReduced, setMotionReduced] = useState(false);
+  const [activeSection, setActiveSection] = useState<"story" | "riders" | "records" | null>(null);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
   const riderRail = useRef<HTMLDivElement>(null);
@@ -385,12 +738,22 @@ export function WorldHome() {
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
+  const shuffleRunId = useRef(0);
   const danteOpenTimer = useRef<number | null>(null);
   const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
+
+  useLayoutEffect(() => {
+    const returnId = readRiderReturn();
+    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
+    if (returnIndex < 0) return;
+    riderTabRef.current = returnIndex;
+    setInitialRiderTab(returnIndex);
+    setRiderTab(returnIndex);
+  }, []);
 
   useLayoutEffect(() => {
     let firstFrame = 0;
@@ -421,8 +784,8 @@ export function WorldHome() {
       ];
 
       if (
-        window.location.pathname === destination.path
-        && targets.every((target) => target?.isConnected)
+        window.location.pathname === destination.path &&
+        targets.every((target) => target?.isConnected)
       ) {
         notifyOpeningDestination(destination);
         return;
@@ -457,9 +820,10 @@ export function WorldHome() {
     };
     const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive = typeof detail?.active === "boolean"
-        ? detail.active
-        : document.documentElement.hasAttribute("data-opening-handoff-active");
+      handoffActive =
+        typeof detail?.active === "boolean"
+          ? detail.active
+          : document.documentElement.hasAttribute("data-opening-handoff-active");
       syncAmbientPause();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -469,6 +833,14 @@ export function WorldHome() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
     };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
   useEffect(() => {
@@ -508,7 +880,7 @@ export function WorldHome() {
   }, [selectRider]);
 
   useEffect(() => {
-    if (locked || ambientPaused) return;
+    if (locked || ambientPaused || motionReduced || !heroVisible) return;
     const t = window.setInterval(() => {
       setPoster((p) => {
         setPrevPoster(p);
@@ -516,12 +888,19 @@ export function WorldHome() {
       });
     }, 5200);
     return () => window.clearInterval(t);
-  }, [ambientPaused, locked]);
+  }, [ambientPaused, heroVisible, locked, motionReduced]);
 
   useEffect(() => {
-    if (ambientPaused) return;
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-    if (connection?.saveData || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
+    if (ambientPaused || motionReduced || !heroVisible) return;
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    if (
+      connection?.saveData ||
+      connection?.effectiveType === "slow-2g" ||
+      connection?.effectiveType === "2g"
+    )
+      return;
     const timer = window.setTimeout(() => {
       const image = new Image();
       image.decoding = "async";
@@ -529,7 +908,7 @@ export function WorldHome() {
       image.src = POSTERS[(poster + 2) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, poster]);
+  }, [ambientPaused, heroVisible, motionReduced, poster]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -549,14 +928,17 @@ export function WorldHome() {
     const pauseInfiniteAnimations = () => {
       const shell = shellRef.current;
       if (!shell || typeof shell.getAnimations !== "function") return;
-      const runningLoops = shell.getAnimations({ subtree: true }).filter((animation) => (
-        animation.playState === "running" && animation.effect?.getTiming().iterations === Infinity
-      ));
+      const runningLoops = shell
+        .getAnimations({ subtree: true })
+        .filter(
+          (animation) =>
+            animation.playState === "running" &&
+            animation.effect?.getTiming().iterations === Infinity,
+        );
       runningLoops.forEach((animation) => animation.pause());
-      pausedAmbientAnimations.current = Array.from(new Set([
-        ...pausedAmbientAnimations.current,
-        ...runningLoops,
-      ]));
+      pausedAmbientAnimations.current = Array.from(
+        new Set([...pausedAmbientAnimations.current, ...runningLoops]),
+      );
     };
     pauseInfiniteAnimations();
     const frame = window.requestAnimationFrame(pauseInfiniteAnimations);
@@ -564,12 +946,13 @@ export function WorldHome() {
   }, [ambientPaused]);
 
   useEffect(() => {
-    if (!ambientPaused || !shuffleActive.current) return;
+    if ((!ambientPaused && !motionReduced) || !shuffleActive.current) return;
+    shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
     setShuffling(false);
-  }, [ambientPaused]);
+  }, [ambientPaused, motionReduced]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -579,12 +962,50 @@ export function WorldHome() {
       (entries) => {
         entries.forEach((entry) => {
           (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
+          if (entry.target === openingHeroRef.current) setHeroVisible(entry.isIntersecting);
         });
       },
       { rootMargin: "240px 0px" },
     );
     regions.forEach((region) => observer.observe(region));
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const sections = (["story", "riders", "records"] as const)
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section != null);
+    if (!sections.length) return;
+    let frame = 0;
+    const syncActiveSection = () => {
+      frame = 0;
+      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
+      let current: "story" | "riders" | "records" | null = null;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= marker) {
+          current = section.id as "story" | "riders" | "records";
+        }
+      });
+      setActiveSection(current);
+    };
+    const requestSectionSync = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncActiveSection);
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
+    sections.forEach((section) => resizeObserver?.observe(section));
+    window.addEventListener("scroll", requestSectionSync, { passive: true });
+    window.addEventListener("resize", requestSectionSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
+    syncActiveSection();
+    return () => {
+      window.removeEventListener("scroll", requestSectionSync);
+      window.removeEventListener("resize", requestSectionSync);
+      window.visualViewport?.removeEventListener("resize", requestSectionSync);
+      resizeObserver?.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -645,6 +1066,7 @@ export function WorldHome() {
   useEffect(() => {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+      shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
       if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
@@ -678,6 +1100,7 @@ export function WorldHome() {
     if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
     setLocked(true);
+    const runId = ++shuffleRunId.current;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
 
@@ -695,7 +1118,10 @@ export function WorldHome() {
     const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
     for (let index = posterSequence.length - 1; index > 0; index -= 1) {
       const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [posterSequence[swapIndex], posterSequence[index]];
+      [posterSequence[index], posterSequence[swapIndex]] = [
+        posterSequence[swapIndex],
+        posterSequence[index],
+      ];
     }
     const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
     const previewPool = [
@@ -716,20 +1142,37 @@ export function WorldHome() {
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
     finalImage.src = POSTERS[finalPoster].src;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      goPoster(finalPoster);
-      shuffleActive.current = false;
+    const finalReady =
+      finalImage
+        .decode?.()
+        .then(() => true)
+        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
+      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
+    const waitForFinalImage = () =>
+      Promise.race([
+        finalReady,
+        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
+      ]);
+    if (motionReduced) {
+      void waitForFinalImage().then((ready) => {
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
+        shuffleActive.current = false;
+      });
       return;
     }
 
     setShuffling(true);
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
-      const timer = window.setTimeout(() => {
-        const next = index === steps.length - 1
-          ? finalPoster
-          : previewPosters[index % previewPosters.length];
-        goPoster(next);
-        if (index === steps.length - 1) {
+      const timer = window.setTimeout(async () => {
+        const isFinalStep = index === steps.length - 1;
+        const ready = isFinalStep ? await waitForFinalImage() : true;
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];
+        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {
+          goPoster(next);
+        }
+        if (isFinalStep) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
             shuffleActive.current = false;
@@ -764,7 +1207,11 @@ export function WorldHome() {
     }, 520);
   };
 
-  const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
+  const openEpisodePickup = (
+    index: number,
+    trigger: HTMLButtonElement,
+    openedByKeyboard: boolean,
+  ) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
     if (episodePointerFocusTimer.current != null) {
@@ -785,13 +1232,19 @@ export function WorldHome() {
       }
     }
     if (!openedByKeyboard) dialog.focus({ preventScroll: true });
-    cancelEpisodePickupScrollReset.current = settlePickupScroll(dialog, [".episode-pickup-panel"], () => {
-      if (episodePickupOpenedByKeyboard.current) {
-        dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
-      } else {
-        dialog.focus({ preventScroll: true });
-      }
-    });
+    cancelEpisodePickupScrollReset.current = settlePickupScroll(
+      dialog,
+      [".episode-pickup-panel"],
+      () => {
+        if (episodePickupOpenedByKeyboard.current) {
+          dialog
+            .querySelector<HTMLButtonElement>(".episode-pickup-close")
+            ?.focus({ preventScroll: true });
+        } else {
+          dialog.focus({ preventScroll: true });
+        }
+      },
+    );
   };
 
   const closeEpisodePickup = () => {
@@ -824,11 +1277,15 @@ export function WorldHome() {
     dlg.focus({ preventScroll: true });
     setPickupOpen(true);
     syncRail(pickupRail.current, columnTab);
-    cancelColumnPickupScrollReset.current = settlePickupScroll(dlg, [".world-column-dialog-card"], () => {
-      bootLiquidGlass(dlg);
-      pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
-      dlg.focus({ preventScroll: true });
-    });
+    cancelColumnPickupScrollReset.current = settlePickupScroll(
+      dlg,
+      [".world-column-dialog-card"],
+      () => {
+        bootLiquidGlass(dlg);
+        pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        dlg.focus({ preventScroll: true });
+      },
+    );
   };
 
   const closePickup = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
@@ -844,20 +1301,23 @@ export function WorldHome() {
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    pickupCloseTimer.current = window.setTimeout(() => {
-      try {
-        dlg.close();
-      } catch {
-        /* already closed */
-      }
-      delete dlg.dataset.closing;
-      pickupCloseTimer.current = null;
-      setPickupOpen(false);
-    }, reducedMotion ? 0 : 360);
+    pickupCloseTimer.current = window.setTimeout(
+      () => {
+        try {
+          dlg.close();
+        } catch {
+          /* already closed */
+        }
+        delete dlg.dataset.closing;
+        pickupCloseTimer.current = null;
+        setPickupOpen(false);
+      },
+      reducedMotion ? 0 : 360,
+    );
   };
 
   return (
-    <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -868,7 +1328,12 @@ export function WorldHome() {
 
       <header className="topbar">
         <div className="topbar-leading">
-          <a ref={openingBrandRef} className="brand" href="#top" aria-label="Deception World トップへ">
+          <a
+            ref={openingBrandRef}
+            className="brand"
+            href="#top"
+            aria-label="Deception World トップへ"
+          >
             <span ref={openingSigilRef} className="brand-sigil">
               <i>DW</i>
             </span>
@@ -879,9 +1344,15 @@ export function WorldHome() {
           </a>
         </div>
         <nav aria-label="メインメニュー">
-          <a href="#story">STORY</a>
-          <a href="#riders">RIDERS</a>
-          <a href="#records">RECORDS</a>
+          <a href="#story" aria-current={activeSection === "story" ? "location" : undefined}>
+            STORY
+          </a>
+          <a href="#riders" aria-current={activeSection === "riders" ? "location" : undefined}>
+            RIDERS
+          </a>
+          <a href="#records" aria-current={activeSection === "records" ? "location" : undefined}>
+            RECORDS
+          </a>
         </nav>
         <div className="topbar-actions">
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
@@ -890,8 +1361,16 @@ export function WorldHome() {
       <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
         <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
           {previous ? (
-            <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
-              <img src={previous.src} alt="" style={{ objectPosition: previous.pos }} decoding="async" />
+            <span
+              className="hero-backdrop-layer hero-backdrop-previous"
+              key={`hb-prev-${prevPoster}`}
+            >
+              <img
+                src={previous.src}
+                alt=""
+                style={{ objectPosition: previous.pos }}
+                decoding="async"
+              />
             </span>
           ) : null}
           <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
@@ -947,9 +1426,18 @@ export function WorldHome() {
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
-          <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
+          <div
+            className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
+            aria-busy={shuffling}
+          >
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
-              <img src={nextPoster.src} alt="" decoding="async" fetchPriority="low" />
+              <img
+                src={nextPoster.src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
               <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
@@ -969,16 +1457,26 @@ export function WorldHome() {
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
                     alt=""
-                    style={{ objectPosition: previous.pos, objectFit: previous.fit === "contain" ? "contain" : "cover" }}
+                    style={{
+                      objectPosition: previous.pos,
+                      objectFit: previous.fit === "contain" ? "contain" : "cover",
+                    }}
                     onAnimationEnd={() => setPrevPoster(null)}
                   />
                 ) : null}
                 <img
-                  className={current.fit === "contain" ? "poster-image poster-image-current is-contain" : "poster-image poster-image-current"}
+                  className={
+                    current.fit === "contain"
+                      ? "poster-image poster-image-current is-contain"
+                      : "poster-image poster-image-current"
+                  }
                   key={`poster-${poster}`}
                   src={current.src}
                   alt={current.alt}
-                  style={{ objectPosition: current.pos, objectFit: current.fit === "contain" ? "contain" : "cover" }}
+                  style={{
+                    objectPosition: current.pos,
+                    objectFit: current.fit === "contain" ? "contain" : "cover",
+                  }}
                   fetchPriority="high"
                   decoding="async"
                 />
@@ -1027,10 +1525,16 @@ export function WorldHome() {
               </button>
               <button
                 type="button"
-                className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
+                className={
+                  locked
+                    ? "poster-lock ios26-glass is-locked"
+                    : "poster-lock ios26-glass is-unlocked"
+                }
                 data-liquid-pointer="true"
                 aria-pressed={locked}
-                aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
+                aria-label={
+                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
+                }
                 disabled={shuffling}
                 onClick={() => setLocked((v) => !v)}
               >
@@ -1038,13 +1542,43 @@ export function WorldHome() {
                 <span aria-hidden="true">
                   {locked ? (
                     <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                      <path
+                        d="M8 10V8a4 4 0 0 1 8 0v2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path d="M8 10V8a4 4 0 0 1 7.5-2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                      <path
+                        d="M8 10V8a4 4 0 0 1 7.5-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
                     </svg>
                   )}
                 </span>
@@ -1087,8 +1621,12 @@ export function WorldHome() {
               <span>『ドリームチャプター』に続く</span>
               <span>劇場版第二作</span>
             </p>
-            <p>世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。</p>
-            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。</p>
+            <p>
+              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+            </p>
+            <p>
+              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            </p>
           </div>
         </div>
 
@@ -1106,8 +1644,17 @@ export function WorldHome() {
             <ManagerRail ref={managerRail} />
 
             {managerTab === 0 ? (
-              <div key="managers" className="manager-archive-panel is-managers" role="tabpanel">
-                <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
+              <div
+                id="manager-panel-0"
+                key="managers"
+                className="manager-archive-panel is-managers"
+                role="tabpanel"
+                aria-labelledby="manager-tab-0"
+              >
+                <div
+                  className="manager-slot-grid signal-array"
+                  aria-label="六詠を示す6つのシグナル"
+                >
                   <GuardedLink
                     className="signal has-visual is-accessible is-face-safe zeus-signal"
                     to="/managers/zeus"
@@ -1115,7 +1662,15 @@ export function WorldHome() {
                     style={{ ["--delay" as string]: "0s" }}
                     aria-label="六詠I ゼウスの個別資料を開く"
                   >
-                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/manager-zeus-thumb.jpeg"
+                      alt="ゼウスのキャラクタービジュアル"
+                      width={640}
+                      height={497}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>I</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1132,7 +1687,15 @@ export function WorldHome() {
                     assets={MANAGER_ASSETS["rex-loi"]}
                     style={{ ["--delay" as string]: "0.16s" }}
                   >
-                    <img src="/manager-rex-loi.jpeg" alt="レックス・ロワのキャラクタービジュアル" width={1024} height={1536} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/manager-rex-loi-thumb.jpeg"
+                      alt="レックス・ロワのキャラクタービジュアル"
+                      width={640}
+                      height={960}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>II</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1144,7 +1707,15 @@ export function WorldHome() {
                     assets={MANAGER_ASSETS.shuza}
                     style={{ ["--delay" as string]: "0.32s" }}
                   >
-                    <img src="/manager-shuza.jpeg" alt="シュザのキャラクタービジュアル" width={1050} height={1498} style={{ objectPosition: "50% 16%" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/manager-shuza-thumb.jpeg"
+                      alt="シュザのキャラクタービジュアル"
+                      width={640}
+                      height={913}
+                      style={{ objectPosition: "50% 16%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>III</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1158,10 +1729,10 @@ export function WorldHome() {
                     aria-label="六詠IV レジャスの個別資料を開く"
                   >
                     <img
-                      src="/manager-lejas-portrait.jpeg"
+                      src="/manager-lejas-portrait-thumb.jpeg"
                       alt="レジャスの顔アップ"
-                      width={1500}
-                      height={1872}
+                      width={640}
+                      height={799}
                       style={{ objectPosition: "50% 8%", objectFit: "cover" }}
                       loading="lazy"
                       decoding="async"
@@ -1178,7 +1749,15 @@ export function WorldHome() {
                     style={{ ["--delay" as string]: "0.64s" }}
                     aria-label="六詠V オパスの個別資料を開く"
                   >
-                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/manager-opus-thumb.jpeg"
+                      alt="オパスのキャラクタービジュアル"
+                      width={640}
+                      height={851}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>V</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1190,7 +1769,15 @@ export function WorldHome() {
                     assets={MANAGER_ASSETS.reemu}
                     style={{ ["--delay" as string]: "0.8s" }}
                   >
-                    <img src="/manager-reemu.jpeg" alt="リームーのキャラクタービジュアル" width={941} height={1672} style={{ objectPosition: "50% 14%" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/manager-reemu-thumb.jpeg"
+                      alt="リームーのキャラクタービジュアル"
+                      width={540}
+                      height={960}
+                      style={{ objectPosition: "50% 14%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span>VI</span>
                     <i />
                     <small>OPEN DOSSIER</small>
@@ -1199,7 +1786,13 @@ export function WorldHome() {
                 </div>
               </div>
             ) : managerTab === 1 ? (
-              <div key="unmanaged" className="manager-archive-panel is-unmanaged" role="tabpanel">
+              <div
+                id="manager-panel-1"
+                key="unmanaged"
+                className="manager-archive-panel is-unmanaged"
+                role="tabpanel"
+                aria-labelledby="manager-tab-1"
+              >
                 <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
                 <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
                   <button
@@ -1215,7 +1808,8 @@ export function WorldHome() {
                         host.classList.remove("is-glitching");
                         const dlg = danteDialogRef.current;
                         if (!dlg) return;
-                        if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
+                        if (danteCloseTimer.current != null)
+                          window.clearTimeout(danteCloseTimer.current);
                         try {
                           dlg.showModal();
                         } catch {
@@ -1256,13 +1850,23 @@ export function WorldHome() {
                 </div>
               </div>
             ) : (
-              <div key="other" className="manager-archive-panel is-other" role="tabpanel">
+              <div
+                id="manager-panel-2"
+                key="other"
+                className="manager-archive-panel is-other"
+                role="tabpanel"
+                aria-labelledby="manager-tab-2"
+              >
                 <p className="visually-hidden">その他の関連資料</p>
                 <div className="manager-slot-grid other-array" aria-label="その他">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
-                    assets={["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"]}
+                    assets={[
+                      "/character-terra.jpeg",
+                      "/character-terra-thumb.jpeg",
+                      "/rider-realm-earth.jpeg",
+                    ]}
                     aria-label="テラ・アレインの個別資料を開く"
                   >
                     <img
@@ -1287,7 +1891,11 @@ export function WorldHome() {
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/luna"
-                    assets={["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"]}
+                    assets={[
+                      "/character-luna.jpeg",
+                      "/character-luna-thumb.jpeg",
+                      "/rider-realm-moon.jpeg",
+                    ]}
                     aria-label="ルナ・アレインの個別資料を開く"
                   >
                     <img
@@ -1324,7 +1932,13 @@ export function WorldHome() {
               <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
-            <div className="world-column-copy" role="tabpanel" aria-label={`コラム${column.no} ${column.title}`}>
+            <div
+              id="world-column-panel"
+              className="world-column-copy"
+              role="tabpanel"
+              aria-labelledby={`column-tab-${columnTab}`}
+              aria-label={`コラム${column.no} ${column.title}`}
+            >
               <div className="world-column-number-stack">
                 {COLUMNS.map((item, index) => (
                   <p
@@ -1384,13 +1998,21 @@ export function WorldHome() {
             <i />
           </p>
           <h2>八人が、世界へ。</h2>
-          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。</p>
+          <p>
+            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+          </p>
         </div>
         <div className="rider-console">
           <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
+          <div
+            id="rider-active-panel"
+            className="rider-detail"
+            role="tabpanel"
+            aria-labelledby={`rider-tab-${rider.id}`}
+            style={{ ["--rider-tone" as string]: rider.tone }}
+          >
             <div className="rider-visual fit-cover">
-              {RIDERS.map((r, i) => (
+              {RIDERS.map((r, i) =>
                 i === riderTab || i === previousRiderTab ? (
                   <img
                     key={r.id}
@@ -1403,8 +2025,8 @@ export function WorldHome() {
                     fetchPriority={i === riderTab ? "auto" : "low"}
                     draggable={false}
                   />
-                ) : null
-              ))}
+                ) : null,
+              )}
             </div>
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
@@ -1490,7 +2112,10 @@ export function WorldHome() {
                     <UiVectorIcon kind="arrow-left" size={17} />
                   </span>
                 </button>
-                <output aria-live="polite">{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
+                <output aria-live="polite">
+                  {String(episode + 1).padStart(2, "0")} /{" "}
+                  {String(EPISODES.length).padStart(2, "0")}
+                </output>
                 <button
                   type="button"
                   className="ios26-glass"
@@ -1526,7 +2151,13 @@ export function WorldHome() {
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
-                    <img src={ep.src} alt={ep.alt} style={{ objectPosition: ep.pos }} loading="lazy" decoding="async" />
+                    <img
+                      src={ep.src}
+                      alt={ep.alt}
+                      style={{ objectPosition: ep.pos }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span aria-hidden="true">EP.{ep.no}</span>
                     <i aria-hidden="true" />
                   </div>
@@ -1731,42 +2362,42 @@ export function WorldHome() {
           if (e.target === pickupDialogRef.current) closePickup();
         }}
       >
+        <button
+          type="button"
+          className="world-column-dialog-close"
+          data-liquid-pointer="true"
+          onPointerUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closePickup(e);
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closePickup(e);
+          }}
+          aria-label="ピックアップを閉じる"
+        >
+          <LiquidPointerGlow />
+          <span>CLOSE</span>
+          <i aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path
+                d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </i>
+        </button>
         <div className="world-column-dialog-card">
           <div className="world-column-dialog-toolbar">
             <p>
               WORLD COLUMN
               <i>FIELD NOTES</i>
             </p>
-            <button
-              type="button"
-              className="world-column-dialog-close"
-              data-liquid-pointer="true"
-              onPointerUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closePickup(e);
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closePickup(e);
-              }}
-              aria-label="ピックアップを閉じる"
-            >
-              <LiquidPointerGlow />
-              <span>CLOSE</span>
-              <i aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="14" height="14">
-                  <path
-                    d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </i>
-            </button>
           </div>
           <div className="world-column-dialog-heading">
             <small>ARCHIVE / {column.kicker}</small>
@@ -1777,8 +2408,10 @@ export function WorldHome() {
             {COLUMNS.map((item, index) => (
               <div
                 key={item.no}
+                id={`column-dialog-panel-${index}`}
                 className={`world-column-dialog-copy world-column-dialog-copy-pane${index === columnTab ? " is-active" : ""}`}
                 role="tabpanel"
+                aria-labelledby={`column-dialog-tab-${index}`}
                 aria-hidden={index !== columnTab}
               >
                 <p className="world-column-dialog-number">コラム{item.no}</p>
@@ -1817,6 +2450,6 @@ export function WorldHome() {
           <p className="dante-denied-note">管理外 ／ 対象外記録</p>
         </div>
       </dialog>
-    </div>
+    </main>
   );
 }

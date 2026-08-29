@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 
 const riderPage = readFileSync(
@@ -18,17 +18,18 @@ const styles = readFileSync(
   new URL("../src/styles-world/rexonance-pickup.css", import.meta.url),
   "utf8",
 );
-const reconstructedRider = ["01.part", "04.part", "05.part"]
-  .map((part) => readFileSync(new URL(`../source-parts/src/components/world/rider-page.tsx/${part}`, import.meta.url), "utf8"))
-  .join("\n");
-const reconstructedPickup = readFileSync(
-  new URL("../source-parts/src/components/world/manager-stub.tsx/01.part", import.meta.url),
-  "utf8",
-);
-const reconstructedHome = readFileSync(
-  new URL("../source-parts/src/components/world/world-home.tsx/01.part", import.meta.url),
-  "utf8",
-);
+function readParts(path) {
+  const directory = new URL(`../source-parts/${path}/`, import.meta.url);
+  return readdirSync(directory)
+    .filter((part) => part.endsWith(".part"))
+    .sort()
+    .map((part) => readFileSync(new URL(part, directory), "utf8"))
+    .join("");
+}
+
+const reconstructedRider = readParts("src/components/world/rider-page.tsx");
+const reconstructedPickup = readParts("src/components/world/manager-stub.tsx");
+const reconstructedHome = readParts("src/components/world/world-home.tsx");
 
 const assets = [
   "rider-rexonance-saga-pickup.jpeg",

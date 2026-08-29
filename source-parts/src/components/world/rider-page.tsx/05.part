@@ -1,3 +1,172 @@
+          : primaryForm
+            ? [primaryForm]
+            : [];
+  return (
+    <main
+      className="manager-page rider-dossier-page"
+      style={{
+        ["--manager-accent" as string]: rider.tone,
+        ["--rider-tone" as string]: rider.tone,
+        ["--archive-accent" as string]: rider.tone,
+        ["--archive-accent-soft" as string]: rider.tone,
+      }}
+    >
+      <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      <DossierTopbar
+        fileLabel={`CHARACTER FILE // ${rider.no}`}
+        returnHash="riders-return"
+        returnLabel="ライダー一覧へ戻る"
+      />
+      <section className="manager-hero">
+        <div className="manager-portrait-column">
+          <div className="manager-portrait-frame">
+            <img
+              src={rider.civilianImg}
+              alt={`${rider.civilian.name}の変身前ビジュアル`}
+              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            <span className="manager-numeral">{rider.no}</span>
+          </div>
+        </div>
+        <div className="manager-introduction">
+          <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
+          <h1>
+            <small>{rider.enPerson}</small>
+            <span className="manager-display-name">
+              <NameText value={rider.civilian.name} />
+            </span>
+          </h1>
+          <p className="manager-title"># {rider.epithet}</p>
+          <div className="manager-quotes">
+            {rider.quotes.map((q) => (
+              <q key={q}>{q}</q>
+            ))}
+          </div>
+          <dl className="manager-facts">
+            {rider.facts.map((f) => (
+              <div key={f.dt}>
+                <dt>{f.dt}</dt>
+                <dd>
+                  <NameText value={f.dd} />
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+      <section
+        className={`rider-archive-identity-records${rider.nightmare ? " has-nightmare" : ""}${rider.partner ? " has-partner" : ""}`}
+        aria-label={rider.partner ? "変身前記録と相棒記録" : "変身前記録"}
+      >
+        <figure className="rider-archive-civilian">
+          <div className="rider-archive-civilian-visual">
+            <img
+              src={rider.civilianImg}
+              alt=""
+              style={{ objectPosition: rider.civilianPos }}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+            />
+            <span>BEFORE</span>
+            <i className="rider-archive-civilian-shade" />
+          </div>
+          <figcaption>
+            <p>{rider.civilian.kicker}</p>
+            <small>変身前ビジュアル // CONFIRMED</small>
+            <h2>{rider.civilian.name}</h2>
+            <p>{rider.civilian.body}</p>
+            {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}
+          </figcaption>
+        </figure>
+        {rider.partner ? (
+          <figure className="rider-archive-civilian rider-partner-card">
+            <div className="rider-archive-civilian-visual">
+              <img
+                src={rider.partner.image}
+                alt={`${rider.partner.name}の人物ビジュアル`}
+                style={{ objectPosition: rider.partner.pos }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <span>PARTNER</span>
+              <i className="rider-archive-civilian-shade" />
+            </div>
+            <figcaption>
+              <p>{rider.partner.kicker}</p>
+              <small>{rider.partner.tag}</small>
+              <h2>
+                <NameText value={rider.partner.name} />
+              </h2>
+              <p className="rider-partner-en-name">{rider.partner.enName}</p>
+              <q className="rider-partner-call">{rider.partner.call}</q>
+              <div className="rider-partner-copy">
+                {rider.partner.body.map((paragraph) => (
+                  <p key={paragraph.slice(0, 24)}>{paragraph}</p>
+                ))}
+              </div>
+              <dl>
+                {rider.partner.facts.map((fact) => (
+                  <div key={fact.dt}>
+                    <dt>{fact.dt}</dt>
+                    <dd>{fact.dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </figcaption>
+          </figure>
+        ) : null}
+        {rider.nightmare ? (
+          <article className="rider-nightmare-card">
+            <div className="rider-nightmare-card-visual">
+              <img
+                src={rider.nightmare.img}
+                alt={`${rider.nightmare.name}のビジュアル`}
+                style={{ objectPosition: rider.nightmare.pos }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <span>NIGHTMARE</span>
+              <i className="rider-nightmare-card-shade" />
+            </div>
+            <div className="rider-nightmare-card-copy">
+              <p>{rider.nightmare.kicker}</p>
+              <small>PICKUP</small>
+              <h2>
+                <span>{rider.nightmare.name}</span>
+              </h2>
+              <q>{rider.nightmare.quote}</q>
+              <SlideOpenControl
+                className="rider-nightmare-pickup-button"
+                ariaLabel={`${rider.nightmare.name}をピックアップ`}
+                label="記録を開く"
+                onOpen={openNightmare}
+              />
+            </div>
+          </article>
+        ) : null}
+      </section>
+      <section className="manager-dossier">
+        <div className="manager-section-index">
+          <span>{rider.no}</span>
+          <small>CHARACTER DOSSIER</small>
+        </div>
+        <div className="manager-sections">
+          {rider.sections.map((s) => (
+            <article className="manager-copy-section" key={s.no}>
+              <div className="manager-copy-heading">
+                <span>{s.no}</span>
+                <p>{s.kicker}</p>
+                <h2>{s.title}</h2>
+              </div>
               <div className="manager-copy-body">
                 {s.body.map((p) => (
                   <p key={p.slice(0, 24)}>{p}</p>
@@ -7,39 +176,48 @@
           ))}
         </div>
       </section>
-      {pickupForms.map((form) => (
-        <FormPickup
-          key={`${rider.id}-${form.name}`}
-          rider={{
-            img: form.img,
-            pos: form.pos,
-            system: form.system,
-            name: form.displayName ?? rider.ja,
-            sub: form.sub ?? (form.name !== rider.ja ? form.name : undefined),
-            calls: form.calls,
-            quote: form.quote,
-            overview: form.overview,
-            theme: form.theme,
-            stats: form.stats,
-            abilities: form.abilities,
-            arsenal: form.arsenal,
-            finishers: form.finishers,
-            weaponGallery: form.weaponGallery,
-            extraForms:
-              rider.id === "saga"
-                ? form.theme === "rexonance"
-                  ? undefined
-                  : rider.forms.filter((candidate) => !candidate.featuredPickup || candidate === form)
-                : rider.forms,
-          }}
-        />
-      ))}
+      {pickupForms.length ? (
+        <div className="rider-form-pickup-stack">
+          {pickupForms.map((form, index) => (
+            <FormPickup
+              key={`${form.name}-${form.sub ?? "base"}`}
+              rider={{
+                img: form.img,
+                pos: form.pos,
+                system: form.system,
+                name: form.displayName ?? (index === 0 ? rider.ja : form.name),
+                sub: form.sub ?? (index === 0 && form.name !== rider.ja ? form.name : undefined),
+                calls: form.calls,
+                quote: form.quote,
+                overview: form.overview,
+                theme: form.theme,
+                stats: form.stats,
+                abilities: form.abilities,
+                arsenal: form.arsenal,
+                finishers: form.finishers,
+                weaponGallery: form.weaponGallery,
+                extraForms:
+                  rider.id === "saga"
+                    ? form.theme === "rexonance"
+                      ? undefined
+                      : rider.forms.filter(
+                          (candidate) => !candidate.featuredPickup || candidate === form,
+                        )
+                    : index === 0
+                      ? rider.forms
+                      : undefined,
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
       {rider.partner && partnerForms.length ? (
         <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">
           <header>
             <p>SKILLED DUO / SECOND RIDER RECORD</p>
             <h2 id="rider-partner-forms-title">
-              <NameText value={rider.partner.name} />の変身記録
+              <NameText value={rider.partner.name} />
+              の変身記録
             </h2>
           </header>
           <div className="rider-form-pickup-stack">
@@ -65,7 +243,7 @@
           </div>
         </section>
       ) : null}
-      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="SEVEN RIDERS" />
+      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="EIGHT RIDERS" />
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}
@@ -82,7 +260,13 @@
           }}
         >
           <div className="rider-nightmare-dialog-panel">
-            <button type="button" className="rider-nightmare-dialog-close" data-liquid-pointer="true" onClick={closeNightmare} aria-label="閉じる">
+            <button
+              type="button"
+              className="rider-nightmare-dialog-close"
+              data-liquid-pointer="true"
+              onClick={closeNightmare}
+              aria-label="閉じる"
+            >
               <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
@@ -101,7 +285,14 @@
             </div>
             <div className="rider-nightmare-dialog-layout">
               <figure>
-                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
+                <img
+                  src={rider.nightmare.img}
+                  alt=""
+                  style={{ objectPosition: rider.nightmare.pos }}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
+                />
                 <figcaption>
                   <span>FORM VISUAL</span>
                   <b>MACHIAVEL GORE NIGHTMARE</b>

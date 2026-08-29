@@ -1,13 +1,18 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const readParts = async (path) => {
+  const directory = new URL(`../source-parts/${path}/`, import.meta.url);
+  const files = (await readdir(directory)).filter((file) => file.endsWith(".part")).sort();
+  return (await Promise.all(files.map((file) => readFile(new URL(file, directory), "utf8")))).join("");
+};
 
 test("long rider and pickup headings can wrap without affecting compact labels", async () => {
   const [addon, sourcePart, rexonance, mobile] = await Promise.all([
     read("src/styles-world-addon.css"),
-    read("source-parts/src/styles-world-addon.css/01.part"),
+    readParts("src/styles-world-addon.css"),
     read("src/styles-world/rexonance-pickup.css"),
     read("src/styles-world/09.css"),
   ]);
@@ -27,9 +32,9 @@ test("long rider and pickup headings can wrap without affecting compact labels",
 test("pickup headings use semantic lines and iPad-specific typography", async () => {
   const [component, componentSource, addon, addonSource, rexonance] = await Promise.all([
     read("src/components/world/manager-stub.tsx"),
-    read("source-parts/src/components/world/manager-stub.tsx/01.part"),
+    readParts("src/components/world/manager-stub.tsx"),
     read("src/styles-world-addon.css"),
-    read("source-parts/src/styles-world-addon.css/02.part"),
+    readParts("src/styles-world-addon.css"),
     read("src/styles-world/rexonance-pickup.css"),
   ]);
 

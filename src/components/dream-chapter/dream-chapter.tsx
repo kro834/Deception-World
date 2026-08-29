@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
@@ -14,6 +14,50 @@ import {
   type DreamCharacter,
   type DreamDolminence,
 } from "./dream-chapter-data";
+
+type DreamSectionId = "posters" | "characters" | "dolminence" | "cases";
+
+const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string }[] = [
+  { id: "posters", label: "POSTERS" },
+  { id: "characters", label: "CHARACTERS" },
+  { id: "dolminence", label: "DOLMINENCE" },
+  { id: "cases", label: "CASES" },
+];
+
+function lockDreamViewport() {
+  const root = document.documentElement;
+  const body = document.body;
+  const scrollY = window.scrollY;
+  const previous = {
+    rootOverflow: root.style.overflow,
+    rootOverscroll: root.style.overscrollBehavior,
+    rootScrollBehavior: root.style.scrollBehavior,
+    bodyOverflow: body.style.overflow,
+    bodyPosition: body.style.position,
+    bodyTop: body.style.top,
+    bodyWidth: body.style.width,
+  };
+  root.dataset.dreamDialogOpen = "true";
+  root.style.overflow = "hidden";
+  root.style.overscrollBehavior = "none";
+  body.style.overflow = "hidden";
+  body.style.position = "fixed";
+  body.style.top = `-${scrollY}px`;
+  body.style.width = "100%";
+
+  return () => {
+    root.style.overflow = previous.rootOverflow;
+    root.style.overscrollBehavior = previous.rootOverscroll;
+    body.style.overflow = previous.bodyOverflow;
+    body.style.position = previous.bodyPosition;
+    body.style.top = previous.bodyTop;
+    body.style.width = previous.bodyWidth;
+    delete root.dataset.dreamDialogOpen;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
+    root.style.scrollBehavior = previous.rootScrollBehavior;
+  };
+}
 
 function DossierContent({ character }: { character: DreamCharacter }) {
   return (
@@ -118,9 +162,8 @@ function CharacterDialog({
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog || !character) return;
-    const previousOverflow = document.body.style.overflow;
     if (!dialog.open) dialog.showModal();
-    document.body.style.overflow = "hidden";
+    const unlockViewport = lockDreamViewport();
     const stopSettling = settlePickupScroll(
       dialog,
       [
@@ -138,8 +181,8 @@ function CharacterDialog({
     }
     return () => {
       stopSettling();
-      document.body.style.overflow = previousOverflow;
       if (dialog.open) dialog.close();
+      unlockViewport();
       if (openedByKeyboard) {
         window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
       } else {
@@ -289,9 +332,8 @@ function DolminenceDialog({
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog || !record) return;
-    const previousOverflow = document.body.style.overflow;
     if (!dialog.open) dialog.showModal();
-    document.body.style.overflow = "hidden";
+    const unlockViewport = lockDreamViewport();
     const stopSettling = settlePickupScroll(
       dialog,
       [
@@ -309,8 +351,8 @@ function DolminenceDialog({
     }
     return () => {
       stopSettling();
-      document.body.style.overflow = previousOverflow;
       if (dialog.open) dialog.close();
+      unlockViewport();
       if (openedByKeyboard) {
         window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
       } else {
@@ -363,11 +405,13 @@ function DolminenceDialog({
 export function DreamChapter() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<DreamSectionId | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
   const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
   const [posterLocked, setPosterLocked] = useState(false);
   const [posterShuffling, setPosterShuffling] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
+  const [heroVisible, setHeroVisible] = useState(true);
   const [posterMotionEnabled, setPosterMotionEnabled] = useState(true);
   const [character, setCharacter] = useState<DreamCharacter | null>(null);
   const [dolminenceRecord, setDolminenceRecord] = useState<DreamDolminence | null>(null);
@@ -375,13 +419,14 @@ export function DreamChapter() {
   const [dolminenceOpenedByKeyboard, setDolminenceOpenedByKeyboard] = useState(false);
   const characterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const dolminenceTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const pageRef = useRef<HTMLElement | null>(null);
+  const heroRef = useRef<HTMLElement | null>(null);
   const posterSectionRef = useRef<HTMLElement | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
   const activePoster = DREAM_POSTERS[posterIndex];
-  const previousPoster =
-    previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
+  const previousPoster = previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
 
   const cancelShuffle = useCallback(() => {
     shuffleRunId.current += 1;
@@ -404,11 +449,80 @@ export function DreamChapter() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+    const html = document.documentElement;
+    const reveals = Array.from(page.querySelectorAll<HTMLElement>("[data-dream-reveal]"));
+    html.dataset.dreamRevealReady = "true";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion || typeof IntersectionObserver === "undefined") {
+      reveals.forEach((element) => {
+        element.dataset.dreamVisible = "true";
+      });
+      return () => {
+        delete html.dataset.dreamRevealReady;
+      };
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          (entry.target as HTMLElement).dataset.dreamVisible = "true";
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -12%", threshold: 0.08 },
+    );
+    reveals.forEach((element) => observer.observe(element));
+    return () => {
+      observer.disconnect();
+      delete html.dataset.dreamRevealReady;
+    };
+  }, []);
+
+  useEffect(() => {
+    const sections = DREAM_SECTION_LINKS.map(({ id }) => document.getElementById(id)).filter(
+      (section): section is HTMLElement => section != null,
+    );
+    if (!sections.length) return;
+    let frame = 0;
+    const syncActiveSection = () => {
+      frame = 0;
+      const marker = Math.max(140, Math.min(320, window.innerHeight * 0.36));
+      let current: DreamSectionId | null = null;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= marker) current = section.id as DreamSectionId;
+      });
+      setActiveSection(current);
+    };
+    const requestSectionSync = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncActiveSection);
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
+    sections.forEach((section) => resizeObserver?.observe(section));
+    window.addEventListener("scroll", requestSectionSync, { passive: true });
+    window.addEventListener("resize", requestSectionSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
+    syncActiveSection();
+    return () => {
+      window.removeEventListener("scroll", requestSectionSync);
+      window.removeEventListener("resize", requestSectionSync);
+      window.visualViewport?.removeEventListener("resize", requestSectionSync);
+      resizeObserver?.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    }).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
     const sync = () => {
       const constrained =
         connection?.saveData ||
@@ -426,12 +540,22 @@ export function DreamChapter() {
   }, []);
 
   useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting), {
+      rootMargin: "160px 0px",
+      threshold: 0,
+    });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const section = posterSectionRef.current;
     if (!section || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setPosterVisible(entry.isIntersecting),
-      { rootMargin: "240px 0px" },
-    );
+    const observer = new IntersectionObserver(([entry]) => setPosterVisible(entry.isIntersecting), {
+      rootMargin: "240px 0px",
+    });
     observer.observe(section);
     return () => observer.disconnect();
   }, []);
@@ -439,10 +563,7 @@ export function DreamChapter() {
   useEffect(() => {
     if (previousPosterIndex == null) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(
-      () => setPreviousPosterIndex(null),
-      reduced ? 0 : 720,
-    );
+    const timer = window.setTimeout(() => setPreviousPosterIndex(null), reduced ? 0 : 720);
     return () => window.clearTimeout(timer);
   }, [previousPosterIndex]);
 
@@ -463,7 +584,8 @@ export function DreamChapter() {
       menuOpen ||
       character != null ||
       dolminenceRecord != null
-    ) return;
+    )
+      return;
     const timer = window.setTimeout(() => {
       setPosterIndex((current) => {
         const next = (current + 1) % DREAM_POSTERS.length;
@@ -504,14 +626,7 @@ export function DreamChapter() {
     ) {
       cancelShuffle();
     }
-  }, [
-    cancelShuffle,
-    character,
-    dolminenceRecord,
-    menuOpen,
-    posterMotionEnabled,
-    posterVisible,
-  ]);
+  }, [cancelShuffle, character, dolminenceRecord, menuOpen, posterMotionEnabled, posterVisible]);
 
   useEffect(
     () => () => {
@@ -579,38 +694,36 @@ export function DreamChapter() {
     finalImage.fetchPriority = "high";
     finalImage.src = DREAM_POSTERS[finalPoster].src;
     const finalReady = finalImage.decode?.().catch(() => undefined) ?? Promise.resolve();
-    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach(
-      (delay, index, steps) => {
-        const timer = window.setTimeout(async () => {
-          if (index === steps.length - 1) {
-            await Promise.race([
-              finalReady,
-              new Promise<void>((resolve) => window.setTimeout(resolve, 240)),
-            ]);
-          }
-          if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-          const next =
-            index === steps.length - 1
-              ? finalPoster
-              : previews[index % Math.max(previews.length, 1)] ?? finalPoster;
-          selectPoster(next);
-          if (index === steps.length - 1) {
-            const settleTimer = window.setTimeout(() => {
-              if (shuffleRunId.current !== runId) return;
-              setPosterShuffling(false);
-              shuffleActive.current = false;
-              shuffleTimers.current = [];
-            }, 300);
-            shuffleTimers.current.push(settleTimer);
-          }
-        }, delay);
-        shuffleTimers.current.push(timer);
-      },
-    );
+    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
+      const timer = window.setTimeout(async () => {
+        if (index === steps.length - 1) {
+          await Promise.race([
+            finalReady,
+            new Promise<void>((resolve) => window.setTimeout(resolve, 240)),
+          ]);
+        }
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        const next =
+          index === steps.length - 1
+            ? finalPoster
+            : (previews[index % Math.max(previews.length, 1)] ?? finalPoster);
+        selectPoster(next);
+        if (index === steps.length - 1) {
+          const settleTimer = window.setTimeout(() => {
+            if (shuffleRunId.current !== runId) return;
+            setPosterShuffling(false);
+            shuffleActive.current = false;
+            shuffleTimers.current = [];
+          }, 300);
+          shuffleTimers.current.push(settleTimer);
+        }
+      }, delay);
+      shuffleTimers.current.push(timer);
+    });
   }, [cancelShuffle, posterIndex, previousPosterIndex, selectPoster]);
 
   return (
-    <main id="top" className="dream-page">
+    <main ref={pageRef} id="top" className="dream-page">
       <header className="dream-site-header">
         <GuardedLink
           className="dream-back-link"
@@ -634,7 +747,21 @@ export function DreamChapter() {
 
       <SideMenuLayer context="movie" open={menuOpen} onOpenChange={setMenuOpen} />
 
-      <section className="dream-hero" aria-labelledby="dream-title">
+      <nav className="dream-chapter-nav" aria-label="DREAM CHAPTER セクション">
+        {DREAM_SECTION_LINKS.map(({ id, label }, index) => (
+          <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
+            <small>{String(index + 1).padStart(2, "0")}</small>
+            <span>{label}</span>
+          </a>
+        ))}
+      </nav>
+
+      <section
+        ref={heroRef}
+        className="dream-hero"
+        aria-labelledby="dream-title"
+        data-dream-hero-active={heroVisible ? "true" : "false"}
+      >
         <div className="dream-hero-field" aria-hidden="true">
           <span className="dream-aurora dream-aurora-blue" />
           <span className="dream-aurora dream-aurora-gold" />
@@ -664,6 +791,18 @@ export function DreamChapter() {
             <b>ドリームチャプター</b>
             <span>夢と現実の境界が、明ける。</span>
           </div>
+          <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
+            <a href="#posters">
+              <small>01</small>
+              <span>記録を見る</span>
+              <b>POSTERS</b>
+            </a>
+            <a href="#characters">
+              <small>02</small>
+              <span>人物資料へ</span>
+              <b>CHARACTERS</b>
+            </a>
+          </nav>
         </div>
         <a className="dream-scroll-cue" href="#posters">
           <span>ENTER THE RECORD</span>
@@ -677,13 +816,16 @@ export function DreamChapter() {
         className="dream-section dream-poster-section"
         aria-labelledby="poster-title"
       >
-        <header className="dream-section-heading">
+        <header className="dream-section-heading" data-dream-reveal>
           <p>KEY VISUAL ARCHIVE</p>
           <h2 id="poster-title">POSTERS</h2>
           <span>01 — 08</span>
         </header>
 
-        <div className={`dream-poster-stage${posterShuffling ? " is-shuffling" : ""}`}>
+        <div
+          className={`dream-poster-stage${posterShuffling ? " is-shuffling" : ""}`}
+          data-dream-reveal
+        >
           {previousPoster ? (
             <figure className="dream-poster-previous" aria-hidden="true">
               <img
@@ -700,7 +842,10 @@ export function DreamChapter() {
             </figure>
           ) : null}
           <figure
+            id="dream-poster-panel"
             className="dream-poster-current"
+            role="tabpanel"
+            aria-labelledby={`dream-poster-tab-${posterIndex}`}
             onAnimationEnd={() => setPreviousPosterIndex(null)}
           >
             <img
@@ -727,7 +872,10 @@ export function DreamChapter() {
                 key={poster.src}
                 type="button"
                 role="tab"
+                id={`dream-poster-tab-${index}`}
+                aria-controls="dream-poster-panel"
                 aria-selected={posterIndex === index}
+                tabIndex={posterIndex === index ? 0 : -1}
                 className={`ios26-glass${posterIndex === index ? " is-active" : ""}`}
                 data-liquid-pointer="true"
                 onClick={(event) => {
@@ -810,12 +958,12 @@ export function DreamChapter() {
         className="dream-section dream-character-section"
         aria-labelledby="character-title"
       >
-        <header className="dream-section-heading">
+        <header className="dream-section-heading" data-dream-reveal>
           <p>CAST / OBSERVED SUBJECTS</p>
           <h2 id="character-title">CHARACTERS</h2>
           <span>03 FILES</span>
         </header>
-        <div className="dream-character-grid">
+        <div className="dream-character-grid" data-dream-reveal>
           {DREAM_CHARACTERS.map((item) => (
             <article key={item.id} style={{ ["--dream-accent" as string]: item.accent }}>
               <button
@@ -860,15 +1008,15 @@ export function DreamChapter() {
         className="dream-section dream-dolminence-section"
         aria-labelledby="dolminence-title"
       >
-        <header className="dream-section-heading">
+        <header className="dream-section-heading" data-dream-reveal>
           <p>CLASSIFIED ORGANIZATION / AGENT DISGUISE RECORD</p>
           <h2 id="dolminence-title">DOLMINENCE</h2>
           <span>04 FILES</span>
         </header>
-        <p className="dream-dolminence-intro">
+        <p className="dream-dolminence-intro" data-dream-reveal>
           夢と現実の境界で作戦を遂行する機密組織「ドルミネンス」。擬装システムと既存の変身装置を用いる、四つの記録を開示する。
         </p>
-        <div className="dream-dolminence-grid">
+        <div className="dream-dolminence-grid" data-dream-reveal>
           {DREAM_DOLMINENCE.map((record) => (
             <article key={record.id} style={{ ["--dream-accent" as string]: record.accent }}>
               <button
@@ -909,12 +1057,12 @@ export function DreamChapter() {
       </section>
 
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
-        <header className="dream-section-heading">
+        <header className="dream-section-heading" data-dream-reveal>
           <p>EPISODE / CASE RECORD</p>
           <h2 id="case-title">CASES</h2>
           <span>NO THUMBNAILS</span>
         </header>
-        <ol className="dream-case-list">
+        <ol className="dream-case-list" data-dream-reveal>
           {DREAM_CASES.map((episode) => (
             <li key={episode.no}>
               <span>CASE</span>

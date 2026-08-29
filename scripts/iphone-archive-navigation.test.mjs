@@ -34,10 +34,7 @@ const titleSequence = readFileSync(
   "utf8",
 );
 const titleSequenceSourcePart = readFileSync(
-  new URL(
-    "../source-parts/src/components/cinematic/title-sequence.tsx/01.part",
-    import.meta.url,
-  ),
+  new URL("../source-parts/src/components/cinematic/title-sequence.tsx/01.part", import.meta.url),
   "utf8",
 );
 const openingHandoff = readFileSync(
@@ -146,14 +143,13 @@ test("the shortened opening keeps heavy startup work off the first paint", () =>
   assert.match(reconstructedOpeningStyles, /progress-marker 0\.4s ease 5\.4s forwards/);
 });
 
-test("opening the side menu keeps the Zeus control full-size and draggable", () => {
+test("opening the side menu yields the top layer to its navigation controls", () => {
   assert.match(zeusButton, /data-menu-open=\{String\(sideMenuOpen\)\}/);
   assert.doesNotMatch(zeusButton, /panelLeft/);
-  assert.doesNotMatch(
+  assert.match(
     styles,
-    /body:has\(\.side-panel\[data-open="true"\]\) > \.zeus-button[\s\S]*?scale\(0\.66\)/,
+    /\.zeus-button\[data-menu-open="true"\] \{[\s\S]*?visibility: hidden;[\s\S]*?pointer-events: none;/,
   );
-  assert.match(styles, /\.zeus-button\[data-menu-open="true"\]::before/);
 });
 
 test("the world no longer renders the manual update button", () => {

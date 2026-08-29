@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -8,6 +7,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { rememberRiderReturn } from "./rider-return-state";
+import { DossierTopbar } from "./world-chrome";
 
 type RiderDossierForm = {
   img: string;
@@ -140,17 +140,38 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "0.002sec" },
         ],
         abilities: [
-          { name: "LEARNING", body: "一撃から重心、意図、発動条件、夢界接続、精神状態、因果の揺らぎを解析する。" },
-          { name: "DARK MATTER CHARGING", body: "宇宙と夢に混在するダークマターを負荷なく集積し、分離、接続、構造解析、矛盾結果の保持能力を高める。" },
-          { name: "HIGH SUPREME", body: "MIDDLEで生んだ可能性をULTRAの裁定へ繋ぎ、史上最高の戦闘力を発揮する。" },
+          {
+            name: "LEARNING",
+            body: "一撃から重心、意図、発動条件、夢界接続、精神状態、因果の揺らぎを解析する。",
+          },
+          {
+            name: "DARK MATTER CHARGING",
+            body: "宇宙と夢に混在するダークマターを負荷なく集積し、分離、接続、構造解析、矛盾結果の保持能力を高める。",
+          },
+          {
+            name: "HIGH SUPREME",
+            body: "MIDDLEで生んだ可能性をULTRAの裁定へ繋ぎ、史上最高の戦闘力を発揮する。",
+          },
         ],
         arsenal: [
-          { name: "フェイタルエッジ／レルムスレイヤー／アクシスレイカー", body: "悠真が継続して使用する三種の追加武装。デュアルエクスコアは外部武装へ実在・非実在の定義を供給する。" },
-          { name: "ユナイトエッジ", body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。" },
+          {
+            name: "フェイタルエッジ／レルムスレイヤー／アクシスレイカー",
+            body: "悠真が継続して使用する三種の追加武装。デュアルエクスコアは外部武装へ実在・非実在の定義を供給する。",
+          },
+          {
+            name: "ユナイトエッジ",
+            body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。",
+          },
         ],
         finishers: [
-          { name: "ハイグリーム・エッジ", body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。" },
-          { name: "エクスプリームビッグバン", body: "対象を残すべきものと終わらせるべきものへ分岐し、完全な悪夢は存在可能性ごと消す。" },
+          {
+            name: "ハイグリーム・エッジ",
+            body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。",
+          },
+          {
+            name: "エクスプリームビッグバン",
+            body: "対象を残すべきものと終わらせるべきものへ分岐し、完全な悪夢は存在可能性ごと消す。",
+          },
         ],
       },
       {
@@ -198,35 +219,114 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           "ゼウス由来の超自己進化は、現在の装甲、演算、出力、攻撃形式を次世代状態へ更新し続ける。レックス由来の絶対秩序は、その進化結果へ境界と役割を与え、破綻のない一つの戦闘体系へ即座に固定する。進化によって秩序を失わず、秩序によって進化を止めない循環こそがレクソナンスの核であり、スリムな外形に反して、全身は一つの巨大な攻撃機関として機能する。",
         ],
         abilities: [
-          { name: "SA-GA OS 5.5", body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。" },
-          { name: "超自己進化 × 絶対秩序", body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。" },
-          { name: "REXONANCE NANO ARMOR", body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。" },
-          { name: "REXONANCE DRIVE", body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。" },
-          { name: "REXONANCE DEUS", body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。" },
-          { name: "ラーニング／拒絶／Exception World", body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。" },
+          {
+            name: "SA-GA OS 5.5",
+            body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。",
+          },
+          {
+            name: "超自己進化 × 絶対秩序",
+            body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。",
+          },
+          {
+            name: "REXONANCE NANO ARMOR",
+            body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。",
+          },
+          {
+            name: "REXONANCE DRIVE",
+            body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。",
+          },
+          {
+            name: "REXONANCE DEUS",
+            body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。",
+          },
+          {
+            name: "ラーニング／拒絶／Exception World",
+            body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。",
+          },
         ],
         arsenal: [
-          { name: "レルムスレイヤー・マークⅥ", body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。" },
-          { name: "レルムスレイヤー・マークXIV", body: "より高い権限干渉と構造切断へ対応する次世代仕様。" },
-          { name: "アクシスレイカー・マークⅦ", body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。" },
-          { name: "ユナイトエッジ・ランサーモード", body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。" },
-          { name: "共鳴武装群", body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。" },
+          {
+            name: "レルムスレイヤー・マークⅥ",
+            body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。",
+          },
+          {
+            name: "レルムスレイヤー・マークXIV",
+            body: "より高い権限干渉と構造切断へ対応する次世代仕様。",
+          },
+          {
+            name: "アクシスレイカー・マークⅦ",
+            body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。",
+          },
+          {
+            name: "ユナイトエッジ・ランサーモード",
+            body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。",
+          },
+          {
+            name: "共鳴武装群",
+            body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。",
+          },
         ],
         finishers: [
-          { name: "ハイグリーム・エッジ／レクソナンスレイド", body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。" },
-          { name: "スクワッドビッグバン／レクソナンス・エクスラッシュ", body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。" },
-          { name: "レクソナンスプロージョン", body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。" },
-          { name: "レクソナンスメテオ", body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。" },
-          { name: "レクソナンスリボルト", body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。" },
-          { name: "レクソナンスストライク", body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。" },
-          { name: "デウスシフト・レクソナンスパーク", body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。" },
+          {
+            name: "ハイグリーム・エッジ／レクソナンスレイド",
+            body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。",
+          },
+          {
+            name: "スクワッドビッグバン／レクソナンス・エクスラッシュ",
+            body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。",
+          },
+          {
+            name: "レクソナンスプロージョン",
+            body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。",
+          },
+          {
+            name: "レクソナンスメテオ",
+            body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。",
+          },
+          {
+            name: "レクソナンスリボルト",
+            body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。",
+          },
+          {
+            name: "レクソナンスストライク",
+            body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。",
+          },
+          {
+            name: "デウスシフト・レクソナンスパーク",
+            body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。",
+          },
         ],
         weaponGallery: [
-          { img: "/weapon-realm-slayer-mark-vi.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークⅥ", label: "ORDER BREAKER / MARK VI" },
-          { img: "/weapon-realm-slayer-mark-xiv.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークXIV", label: "ORDER BREAKER / MARK XIV" },
-          { img: "/weapon-axis-raker-mark-vii-arcs.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　アークスモード", label: "AXIS RAKER / ARCS MODE" },
-          { img: "/weapon-axis-raker-mark-vii-launcher.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　ランチャーモード", label: "AXIS RAKER / LAUNCHER MODE" },
-          { img: "/weapon-unite-edge-lancer.jpeg", pos: "50% 50%", name: "ユナイトエッジ　ランサーモード", label: "UNITE EDGE / LANCER MODE" },
+          {
+            img: "/weapon-realm-slayer-mark-vi.jpeg",
+            pos: "50% 50%",
+            name: "レルムスレイヤー・マークⅥ",
+            label: "ORDER BREAKER / MARK VI",
+          },
+          {
+            img: "/weapon-realm-slayer-mark-xiv.jpeg",
+            pos: "50% 50%",
+            name: "レルムスレイヤー・マークXIV",
+            label: "ORDER BREAKER / MARK XIV",
+          },
+          {
+            img: "/weapon-axis-raker-mark-vii-arcs.jpeg",
+            pos: "50% 50%",
+            name: "アクシスレイカー・マークⅦ　アークスモード",
+            label: "AXIS RAKER / ARCS MODE",
+          },
+          {
+            img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
+            pos: "50% 50%",
+            name: "アクシスレイカー・マークⅦ　ランチャーモード",
+            label: "AXIS RAKER / LAUNCHER MODE",
+          },
+          {
+            img: "/weapon-unite-edge-lancer.jpeg",
+            pos: "50% 50%",
+            name: "ユナイトエッジ　ランサーモード",
+            label: "UNITE EDGE / LANCER MODE",
+          },
         ],
       },
     ],
@@ -336,7 +436,13 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         name: "レルム",
         displayName: "レルムレジェンズ",
         sub: "レジェンズ",
-        calls: ["ROULETTE ON!", "JARAMM… LEGENDS! HIT!", "Rollout!", "JACKPOT!!", "RIDER! REALM! LEGENDS!!"],
+        calls: [
+          "ROULETTE ON!",
+          "JARAMM… LEGENDS! HIT!",
+          "Rollout!",
+          "JACKPOT!!",
+          "RIDER! REALM! LEGENDS!!",
+        ],
         stats: [
           { dt: "HEIGHT", dd: "218.8cm" },
           { dt: "WEIGHT", dd: "103.6kg" },
@@ -346,18 +452,42 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "0.06sec" },
         ],
         abilities: [
-          { name: "レジェンズルーレット", body: "敵、戦場、目的、許容損害から方策を抽出する混合戦略生成器。勝率、EMP、被害、ベルの倫理で重み付けする。" },
-          { name: "LEGENDS", body: "伝説から人物の力ではなく、勝利の開始条件、方策、終了条件を抽出する。" },
-          { name: "JACKPOT", body: "IDENTIFY、REACH、SAFE、CLOSEの四証明で、全経路を同じ勝利条件へ収束させる。" },
+          {
+            name: "レジェンズルーレット",
+            body: "敵、戦場、目的、許容損害から方策を抽出する混合戦略生成器。勝率、EMP、被害、ベルの倫理で重み付けする。",
+          },
+          {
+            name: "LEGENDS",
+            body: "伝説から人物の力ではなく、勝利の開始条件、方策、終了条件を抽出する。",
+          },
+          {
+            name: "JACKPOT",
+            body: "IDENTIFY、REACH、SAFE、CLOSEの四証明で、全経路を同じ勝利条件へ収束させる。",
+          },
         ],
         arsenal: [
-          { name: "メビウスネイバー", body: "矢で装甲処理、損傷転嫁、再生、権限経路を観測する弩。" },
-          { name: "レルムスレイヤー", body: "防御と回避を観測しながら逃走、転嫁、再生、時間回帰、分身交換を順に閉じる銃。" },
-          { name: "レジェンズエッジ", body: "一撃の刃長、角度、位相、軌道を更新し、斬撃を刺突、柄打ち、追撃へ組み替える長剣。" },
+          {
+            name: "メビウスネイバー",
+            body: "矢で装甲処理、損傷転嫁、再生、権限経路を観測する弩。",
+          },
+          {
+            name: "レルムスレイヤー",
+            body: "防御と回避を観測しながら逃走、転嫁、再生、時間回帰、分身交換を順に閉じる銃。",
+          },
+          {
+            name: "レジェンズエッジ",
+            body: "一撃の刃長、角度、位相、軌道を更新し、斬撃を刺突、柄打ち、追撃へ組み替える長剣。",
+          },
         ],
         finishers: [
-          { name: "レジェンズモディフィカーレ", body: "敵本体、管理構造、再生中枢へ攻撃可能だと実証する高速キック。" },
-          { name: "ジャックポット・レジェンズフィナーレ", body: "四証明の完了後、観測楔、敗北回避経路の封鎖、最終行動へ最適化したキックを順に実行する。" },
+          {
+            name: "レジェンズモディフィカーレ",
+            body: "敵本体、管理構造、再生中枢へ攻撃可能だと実証する高速キック。",
+          },
+          {
+            name: "ジャックポット・レジェンズフィナーレ",
+            body: "四証明の完了後、観測楔、敗北回避経路の封鎖、最終行動へ最適化したキックを順に実行する。",
+          },
         ],
       },
     ],
@@ -381,7 +511,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilianImg: "/civilian-lore.jpeg",
     civilianPos: "50% 8%",
     title: "管理人の側から、世界へ踏み込む第三のライダー。",
-    quotes: ["命の終わり際に向けられる最後の眼差しが好きだった", "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった"],
+    quotes: [
+      "命の終わり際に向けられる最後の眼差しが好きだった",
+      "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった",
+    ],
     facts: [
       { dt: "NAME", dd: "ローア" },
       { dt: "AGE", dd: "不明" },
@@ -426,16 +559,34 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "0.05sec" },
         ],
         abilities: [
-          { name: "LIQUID", body: "肉体と装甲を流動位相へ変換し、物理攻撃の衝撃を一点で受け止めず全身へ分散する。" },
-          { name: "REPAIR", body: "破損した空間、精神、夢界接続を流動的に補修する。崩壊を一時的に止める応急処置を得意とする。" },
-          { name: "SOLID", body: "対象の位置、動作、能力発動、位相変動を一時的に固定する。高速移動、空間転移、夢界潜行を大幅に制限する。" },
+          {
+            name: "LIQUID",
+            body: "肉体と装甲を流動位相へ変換し、物理攻撃の衝撃を一点で受け止めず全身へ分散する。",
+          },
+          {
+            name: "REPAIR",
+            body: "破損した空間、精神、夢界接続を流動的に補修する。崩壊を一時的に止める応急処置を得意とする。",
+          },
+          {
+            name: "SOLID",
+            body: "対象の位置、動作、能力発動、位相変動を一時的に固定する。高速移動、空間転移、夢界潜行を大幅に制限する。",
+          },
         ],
         arsenal: [
-          { name: "ローアライズコア", body: "リキッドとソリッドの位相を切り替える中核。EMPは無制限。" },
+          {
+            name: "ローアライズコア",
+            body: "リキッドとソリッドの位相を切り替える中核。EMPは無制限。",
+          },
         ],
         finishers: [
-          { name: "FLOW ENDER", body: "対象周囲の空間を流動化し、流動位相エネルギーを収束した蹴撃で内部構造を液状情報へ分解する。" },
-          { name: "PRESS ENDER", body: "対象周囲の空間を固定し、高密度位相エネルギーを収束したライダーキックを叩き込む。" },
+          {
+            name: "FLOW ENDER",
+            body: "対象周囲の空間を流動化し、流動位相エネルギーを収束した蹴撃で内部構造を液状情報へ分解する。",
+          },
+          {
+            name: "PRESS ENDER",
+            body: "対象周囲の空間を固定し、高密度位相エネルギーを収束したライダーキックを叩き込む。",
+          },
         ],
       },
     ],
@@ -460,7 +611,11 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilianImg: "/civilian-vandal.jpeg",
     civilianPos: "50% 10%",
     title: "六詠第二位が、肉弾戦へ権限を変換する。",
-    quotes: ["世界は、今日も選択を許されて居ます", "生者には生を。死者には静寂を", "今日も又、道を閉ざす物だけを壊しましょう"],
+    quotes: [
+      "世界は、今日も選択を許されて居ます",
+      "生者には生を。死者には静寂を",
+      "今日も又、道を閉ざす物だけを壊しましょう",
+    ],
     facts: [
       { dt: "NAME", dd: "レックス・ロワ" },
       { dt: "AGE", dd: "不明" },
@@ -503,15 +658,30 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "0.01sec" },
         ],
         abilities: [
-          { name: "SCANNING", body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。" },
-          { name: "SPECIAL", body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。" },
+          {
+            name: "SCANNING",
+            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
+          },
+          {
+            name: "SPECIAL",
+            body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
+          },
         ],
         arsenal: [
-          { name: "サーパスアタノール", body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。" },
-          { name: "デアグローブ／デアブーツ", body: "対象を破壊に適した組成へ変え、飛行・潜航を含む推進機能を錬成する。" },
+          {
+            name: "サーパスアタノール",
+            body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。",
+          },
+          {
+            name: "デアグローブ／デアブーツ",
+            body: "対象を破壊に適した組成へ変え、飛行・潜航を含む推進機能を錬成する。",
+          },
         ],
         finishers: [
-          { name: "DEAD END", body: "光で対象の全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳撃または蹴撃を中枢へ叩き込む。" },
+          {
+            name: "DEAD END",
+            body: "光で対象の全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳撃または蹴撃を中枢へ叩き込む。",
+          },
         ],
       },
     ],
@@ -580,14 +750,26 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "5.4秒" },
         ],
         abilities: [
-          { name: "草", body: "文字を書き出すことで生えている草を操作し、成長させて足止め用の罠を作る。引き抜いて鞭として振るい、対象へ括り付けて拘束する。" },
-          { name: "薬", body: "患者や負傷者の状態に適した回復用の薬を生み出す。怪我の度合いが大きいほど、精製に必要な時間も延びる。" },
+          {
+            name: "草",
+            body: "文字を書き出すことで生えている草を操作し、成長させて足止め用の罠を作る。引き抜いて鞭として振るい、対象へ括り付けて拘束する。",
+          },
+          {
+            name: "薬",
+            body: "患者や負傷者の状態に適した回復用の薬を生み出す。怪我の度合いが大きいほど、精製に必要な時間も延びる。",
+          },
         ],
         arsenal: [
-          { name: "草薙刀", body: "全長150cm、緑色の柄の両端に約25cmずつの刃を備えた薙刀。危険だからという理由で折り、二刀流として扱う。" },
+          {
+            name: "草薙刀",
+            body: "全長150cm、緑色の柄の両端に約25cmずつの刃を備えた薙刀。危険だからという理由で折り、二刀流として扱う。",
+          },
         ],
         finishers: [
-          { name: "SUPPORT To GRASS", body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。" },
+          {
+            name: "SUPPORT To GRASS",
+            body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。",
+          },
         ],
       },
       {
@@ -612,7 +794,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         ],
         abilities: [
           { name: "堅", body: "『堅』の文字を書き出し、防御力をさらに数倍へ高める。" },
-          { name: "壊", body: "自身や護りたい対象へ飛来する危険物を空中でばらばらに破壊する。気体の場合は原子同士の結合を無理矢理破壊し、無毒化する。" },
+          {
+            name: "壊",
+            body: "自身や護りたい対象へ飛来する危険物を空中でばらばらに破壊する。気体の場合は原子同士の結合を無理矢理破壊し、無毒化する。",
+          },
         ],
         arsenal: [
           { name: "岩山盾", body: "読みは『がんざんじゅん』。高さ約150cm、重量約480kgの大盾。" },
@@ -668,14 +853,26 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
             { dt: "100m", dd: "4.7秒" },
           ],
           abilities: [
-            { name: "戦", body: "『戦』の文字を書き出し、変身状態のスペックを1.35倍へ引き上げる。円龍幻月刀の使用中に限り、必殺技ヴァルキリーを放てる。" },
-            { name: "戒", body: "敵の攻撃へ備え、カウンターを当てる。一度以上見た、または受けた技に限って実行できる。" },
+            {
+              name: "戦",
+              body: "『戦』の文字を書き出し、変身状態のスペックを1.35倍へ引き上げる。円龍幻月刀の使用中に限り、必殺技ヴァルキリーを放てる。",
+            },
+            {
+              name: "戒",
+              body: "敵の攻撃へ備え、カウンターを当てる。一度以上見た、または受けた技に限って実行できる。",
+            },
           ],
           arsenal: [
-            { name: "円龍幻月刀", body: "関雲長が用いた青龍刀に酷似する大型武器。読みは『えんりゅうげんげつとう』。" },
+            {
+              name: "円龍幻月刀",
+              body: "関雲長が用いた青龍刀に酷似する大型武器。読みは『えんりゅうげんげつとう』。",
+            },
           ],
           finishers: [
-            { name: "ヴァルキリー", body: "『戦』による強化中、円龍幻月刀から放つ戈フォームの必殺技。" },
+            {
+              name: "ヴァルキリー",
+              body: "『戦』による強化中、円龍幻月刀から放つ戈フォームの必殺技。",
+            },
           ],
         },
         {
@@ -699,10 +896,16 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           ],
           abilities: [
             { name: "無", body: "一度の変身につき一度だけ、どのような攻撃も受けない。" },
-            { name: "烈", body: "炎爪の炎をさらに熱くし、勢いを数倍へ引き上げる。脚部の噴出口からガスとして放ち、移動速度を高めることもできる。" },
+            {
+              name: "烈",
+              body: "炎爪の炎をさらに熱くし、勢いを数倍へ引き上げる。脚部の噴出口からガスとして放ち、移動速度を高めることもできる。",
+            },
           ],
           arsenal: [
-            { name: "炎爪", body: "読みは『えんそう』。握り込むと爪が飛び出す紅い鉤爪で、刃同士を擦り合わせて炎を起こす。" },
+            {
+              name: "炎爪",
+              body: "読みは『えんそう』。握り込むと爪が飛び出す紅い鉤爪で、刃同士を擦り合わせて炎を起こす。",
+            },
           ],
         },
       ],
@@ -766,17 +969,30 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "1.0秒" },
         ],
         abilities: [
-          { name: "Xギアスーツ", body: "真守の動作を補助・強化し、装着者の技量を戦闘力へ反映する。" },
-          { name: "メックライフガード", body: "急所への損傷を全身へ分散し、残存体力が少ないほど防御力を上昇させる。" },
-          { name: "クイックファイト", body: "グローブがガシャコンウェポンと通信して攻撃を最適化し、攻撃と同時に駆除プログラムを流し込む。" },
+          {
+            name: "Xギアスーツ",
+            body: "真守の動作を補助・強化し、装着者の技量を戦闘力へ反映する。",
+          },
+          {
+            name: "メックライフガード",
+            body: "急所への損傷を全身へ分散し、残存体力が少ないほど防御力を上昇させる。",
+          },
+          {
+            name: "クイックファイト",
+            body: "グローブがガシャコンウェポンと通信して攻撃を最適化し、攻撃と同時に駆除プログラムを流し込む。",
+          },
         ],
         arsenal: [
-          { name: "ガシャコンエッジ", body: "高速戦闘に適したナイフ型ガシャコンウェポン。分離パルス発生装置『パルスプリッター』により、バグスターと感染者を分離する。" },
-          { name: "ファントムローブ", body: "防弾加工された首元のマント。防火、耐水、絶縁性に優れ、風による揺らぎの音まで消す。" },
+          {
+            name: "ガシャコンエッジ",
+            body: "高速戦闘に適したナイフ型ガシャコンウェポン。分離パルス発生装置『パルスプリッター』により、バグスターと感染者を分離する。",
+          },
+          {
+            name: "ファントムローブ",
+            body: "防弾加工された首元のマント。防火、耐水、絶縁性に優れ、風による揺らぎの音まで消す。",
+          },
         ],
-        finishers: [
-          { name: "クリティカルストライク", body: "仮面ライダーアルゲノムの必殺技。" },
-        ],
+        finishers: [{ name: "クリティカルストライク", body: "仮面ライダーアルゲノムの必殺技。" }],
       },
     ],
     civilian: {
@@ -800,7 +1016,11 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilianImg: "/civilian-over-zeztz.jpeg",
     civilianPos: "50% 8%",
     title: "英国支部から派遣された、最強のエージェント。",
-    quotes: ["My name is Code Number Seven.", "Nice to meet you… but I’m about to erase you.", "So, goodbye. I'm on it."],
+    quotes: [
+      "My name is Code Number Seven.",
+      "Nice to meet you… but I’m about to erase you.",
+      "So, goodbye. I'm on it.",
+    ],
     facts: [
       { dt: "NAME", dd: "James Smith" },
       { dt: "CODE", dd: "セヴン" },
@@ -845,9 +1065,18 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "1.7秒" },
         ],
         abilities: [
-          { name: "フィジカムマスク", body: "オブザームロッドで環境観測、レッドオプチカムで視力強化、レッドシグナムで生体測定を行う。" },
-          { name: "クラッシャム", body: "濃酸素吸入で疲労回復、集中力、判断力、睡眠を向上させる。" },
-          { name: "インパクトレムアーム／レッグ", body: "腕で強力パンチ、脚で衝撃波を伝播させ崩壊攻撃を行う。" },
+          {
+            name: "フィジカムマスク",
+            body: "オブザームロッドで環境観測、レッドオプチカムで視力強化、レッドシグナムで生体測定を行う。",
+          },
+          {
+            name: "クラッシャム",
+            body: "濃酸素吸入で疲労回復、集中力、判断力、睡眠を向上させる。",
+          },
+          {
+            name: "インパクトレムアーム／レッグ",
+            body: "腕で強力パンチ、脚で衝撃波を伝播させ崩壊攻撃を行う。",
+          },
         ],
         arsenal: [
           { name: "ブレイカムゼッツァー", body: "可変武器。さまざまな形態に切り替える。" },
@@ -966,13 +1195,28 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "EMP", dd: "2400E" },
         ],
         abilities: [
-          { name: "SPOOF", body: "対象の認証信号、通信形式、権限署名を解析し、限定的な偽装信号を生成する。管理権限そのものをコピーせず、《敵側システムから何者として認識されるか》だけを偽装する。" },
-          { name: "TRACE", body: "敵が能力や命令を行使した際、処理の発生源と対象までの経路を追跡する。通信、エネルギー、管理権限、戦闘命令を流れとして捉え、攻撃すべき中継点や情報源を特定する。" },
-          { name: "PROXY", body: "自身の位置情報、敵対判定、通信発信点へ複数の偽信号を混入する。分身ではなく、《どの情報が本人を示すのか》を曖昧化し、高度な解析能力を持つ敵ほど判断負荷を増大させる。" },
-          { name: "DEAD DROP", body: "戦闘中に取得した情報を周囲へ微細な暗号情報として分散保存する。リュシアン本人が捕縛・死亡した場合でもREALMS側が後から回収でき、SCARS内部で得た情報の多くをベルへ届けている。" },
+          {
+            name: "SPOOF",
+            body: "対象の認証信号、通信形式、権限署名を解析し、限定的な偽装信号を生成する。管理権限そのものをコピーせず、《敵側システムから何者として認識されるか》だけを偽装する。",
+          },
+          {
+            name: "TRACE",
+            body: "敵が能力や命令を行使した際、処理の発生源と対象までの経路を追跡する。通信、エネルギー、管理権限、戦闘命令を流れとして捉え、攻撃すべき中継点や情報源を特定する。",
+          },
+          {
+            name: "PROXY",
+            body: "自身の位置情報、敵対判定、通信発信点へ複数の偽信号を混入する。分身ではなく、《どの情報が本人を示すのか》を曖昧化し、高度な解析能力を持つ敵ほど判断負荷を増大させる。",
+          },
+          {
+            name: "DEAD DROP",
+            body: "戦闘中に取得した情報を周囲へ微細な暗号情報として分散保存する。リュシアン本人が捕縛・死亡した場合でもREALMS側が後から回収でき、SCARS内部で得た情報の多くをベルへ届けている。",
+          },
         ],
         finishers: [
-          { name: "サイファーエンター", body: "『TRACE』で対象の視線、照準、攻撃予測を解析した後、『PROXY』によって複数方向へ偽の突入情報を生成して発動。敵の認識上では複数のライダーキックが同時に接近する中、本体は側方を通過するように跳躍し、空中で身体を反転させながら背後方向へ蹴撃を放つ。接触直前に『NO TRACE』で偽信号を一斉消去し、本物の位置を再認識される前に命中させる。" },
+          {
+            name: "サイファーエンター",
+            body: "『TRACE』で対象の視線、照準、攻撃予測を解析した後、『PROXY』によって複数方向へ偽の突入情報を生成して発動。敵の認識上では複数のライダーキックが同時に接近する中、本体は側方を通過するように跳躍し、空中で身体を反転させながら背後方向へ蹴撃を放つ。接触直前に『NO TRACE』で偽信号を一斉消去し、本物の位置を再認識される前に命中させる。",
+          },
         ],
       },
       {
@@ -981,7 +1225,14 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         system: "サイファードライバー × プライムコア",
         name: "サイファー・ブラックサイト",
         sub: "BLACKSITE",
-        calls: ["CIPHER IN!", "BLACKSITE!", "ROLLOUT!", "ERASE THE TRACE!", "CIPHER BLACK!", "FOCUS ON!"],
+        calls: [
+          "CIPHER IN!",
+          "BLACKSITE!",
+          "ROLLOUT!",
+          "ERASE THE TRACE!",
+          "CIPHER BLACK!",
+          "FOCUS ON!",
+        ],
         overview: [
           "リュシアンがREALMSフランス本部で極秘開発された『サイファードライバー』と『プライムコア』を使用して変身する仮面ライダー。潜入継続が不可能となった場合、または対象を確実に排除しなければ任務を達成できない場合に移行する強襲戦闘形態である。",
           "通常サイファーが《正体を隠しながら仕事を終える》形態なら、ブラックサイトは《正体が露見した後でも仕事だけは終わらせる》ための形態である。",
@@ -999,11 +1250,20 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "EMP", dd: "5200E" },
         ],
         abilities: [
-          { name: "BLACKOUT", body: "敵の視覚、通信、照準、能力発動補助へ流入する情報を一時的に分断する。完全な能力封印ではなく、情報入力と出力の間へ僅かな遅延を生じさせ、数瞬だけで致命的な間合いへ侵入する。" },
-          { name: "BURN NOTICE", body: "潜入任務中に取得した対象の戦闘情報を一括解放し、現在の敵へ特化した戦闘プロファイルを構築する。長期間観測した相手ほど攻略精度が高い一方、未観測の敵への恩恵は少なく、未知への適応力はレルムレジェンズなどに劣る。" },
+          {
+            name: "BLACKOUT",
+            body: "敵の視覚、通信、照準、能力発動補助へ流入する情報を一時的に分断する。完全な能力封印ではなく、情報入力と出力の間へ僅かな遅延を生じさせ、数瞬だけで致命的な間合いへ侵入する。",
+          },
+          {
+            name: "BURN NOTICE",
+            body: "潜入任務中に取得した対象の戦闘情報を一括解放し、現在の敵へ特化した戦闘プロファイルを構築する。長期間観測した相手ほど攻略精度が高い一方、未観測の敵への恩恵は少なく、未知への適応力はレルムレジェンズなどに劣る。",
+          },
         ],
         finishers: [
-          { name: "サイファーコンカー", body: "『BURN NOTICE』で対象の攻撃認識条件を解析し、『BLACKOUT』によって自身の加速、敵対信号、必殺技反応を通常動作として誤認させて発動。真正面から高速接近した後、間合い寸前で垂直に跳躍し、対象の頭上を越えながら身体を前方へ反転する。逆さの姿勢から斜め下へ高出力の回転蹴りを叩き込み、接触直前まで防御及び回避判断を遅延させた状態で命中させる。" },
+          {
+            name: "サイファーコンカー",
+            body: "『BURN NOTICE』で対象の攻撃認識条件を解析し、『BLACKOUT』によって自身の加速、敵対信号、必殺技反応を通常動作として誤認させて発動。真正面から高速接近した後、間合い寸前で垂直に跳躍し、対象の頭上を越えながら身体を前方へ反転する。逆さの姿勢から斜め下へ高出力の回転蹴りを叩き込み、接触直前まで防御及び回避判断を遅延させた状態で命中させる。",
+          },
         ],
       },
     ],
@@ -1024,6 +1284,13 @@ export function RiderPage({ id }: { id: string }) {
   useEffect(() => {
     rememberRiderReturn(rider.id);
   }, [rider.id]);
+  useEffect(
+    () => () => {
+      cancelNightmareScrollReset.current?.();
+      cancelNightmareScrollReset.current = null;
+    },
+    [],
+  );
   const resetNightmareScroll = () => {
     const dialog = nightmareRef.current;
     if (dialog) resetPickupScroll(dialog, [".rider-nightmare-dialog-panel"]);
@@ -1037,9 +1304,13 @@ export function RiderPage({ id }: { id: string }) {
     } catch {
       /* already open */
     }
-    cancelNightmareScrollReset.current = settlePickupScroll(dlg, [".rider-nightmare-dialog-panel"], () => {
-      dlg.focus({ preventScroll: true });
-    });
+    cancelNightmareScrollReset.current = settlePickupScroll(
+      dlg,
+      [".rider-nightmare-dialog-panel"],
+      () => {
+        dlg.focus({ preventScroll: true });
+      },
+    );
   };
   const closeNightmare = () => {
     cancelNightmareScrollReset.current?.();
@@ -1051,41 +1322,43 @@ export function RiderPage({ id }: { id: string }) {
   const pickupForms =
     rider.id === "saga"
       ? rider.forms.filter((form) => form.featuredPickup)
-      : rider.id === "cipher" ? rider.forms
-        : rider.id === "leddic" ? rider.forms
+      : rider.id === "cipher"
+        ? rider.forms
+        : rider.id === "leddic"
+          ? rider.forms
           : primaryForm
             ? [primaryForm]
             : [];
   return (
     <main
       className="manager-page rider-dossier-page"
-      style={{ ["--manager-accent" as string]: rider.tone, ["--rider-tone" as string]: rider.tone, ["--archive-accent" as string]: rider.tone, ["--archive-accent-soft" as string]: rider.tone }}
+      style={{
+        ["--manager-accent" as string]: rider.tone,
+        ["--rider-tone" as string]: rider.tone,
+        ["--archive-accent" as string]: rider.tone,
+        ["--archive-accent-soft" as string]: rider.tone,
+      }}
     >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
-      <header className="manager-topbar">
-        <GuardedLink to="/world" hash="riders-return" assets={[]} className="brand">
-          <span className="brand-sigil">
-            <i>DW</i>
-          </span>
-          <span>
-            <b>DECEPTION WORLD</b>
-            <small>CHARACTER FILE // {rider.no}</small>
-          </span>
-        </GuardedLink>
-        <GuardedLink to="/world" hash="riders-return" assets={[]} className="manager-back" aria-label="ライダー一覧へ戻る">
-          <span>ライダー一覧へ戻る</span>
-          <i aria-hidden="true">
-            <UiVectorIcon kind="arrow-down-left" size={14} />
-          </i>
-        </GuardedLink>
-      </header>
+      <DossierTopbar
+        fileLabel={`CHARACTER FILE // ${rider.no}`}
+        returnHash="riders-return"
+        returnLabel="ライダー一覧へ戻る"
+      />
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
-            <img src={rider.civilianImg} alt={`${rider.civilian.name}の変身前ビジュアル`} style={{ objectPosition: rider.civilianPos, objectFit: "cover" }} loading="eager" decoding="async" fetchPriority="high" />
+            <img
+              src={rider.civilianImg}
+              alt={`${rider.civilian.name}の変身前ビジュアル`}
+              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
             <span className="manager-numeral">{rider.no}</span>
           </div>
         </div>
@@ -1121,7 +1394,14 @@ export function RiderPage({ id }: { id: string }) {
       >
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
-            <img src={rider.civilianImg} alt="" style={{ objectPosition: rider.civilianPos }} loading="lazy" decoding="async" fetchPriority="low" />
+            <img
+              src={rider.civilianImg}
+              alt=""
+              style={{ objectPosition: rider.civilianPos }}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+            />
             <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
@@ -1174,7 +1454,14 @@ export function RiderPage({ id }: { id: string }) {
         {rider.nightmare ? (
           <article className="rider-nightmare-card">
             <div className="rider-nightmare-card-visual">
-              <img src={rider.nightmare.img} alt={`${rider.nightmare.name}のビジュアル`} style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={rider.nightmare.img}
+                alt={`${rider.nightmare.name}のビジュアル`}
+                style={{ objectPosition: rider.nightmare.pos }}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
               <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
             </div>
@@ -1241,7 +1528,9 @@ export function RiderPage({ id }: { id: string }) {
                   rider.id === "saga"
                     ? form.theme === "rexonance"
                       ? undefined
-                      : rider.forms.filter((candidate) => !candidate.featuredPickup || candidate === form)
+                      : rider.forms.filter(
+                          (candidate) => !candidate.featuredPickup || candidate === form,
+                        )
                     : index === 0
                       ? rider.forms
                       : undefined,
@@ -1255,7 +1544,8 @@ export function RiderPage({ id }: { id: string }) {
           <header>
             <p>SKILLED DUO / SECOND RIDER RECORD</p>
             <h2 id="rider-partner-forms-title">
-              <NameText value={rider.partner.name} />の変身記録
+              <NameText value={rider.partner.name} />
+              の変身記録
             </h2>
           </header>
           <div className="rider-form-pickup-stack">
@@ -1298,7 +1588,13 @@ export function RiderPage({ id }: { id: string }) {
           }}
         >
           <div className="rider-nightmare-dialog-panel">
-            <button type="button" className="rider-nightmare-dialog-close" data-liquid-pointer="true" onClick={closeNightmare} aria-label="閉じる">
+            <button
+              type="button"
+              className="rider-nightmare-dialog-close"
+              data-liquid-pointer="true"
+              onClick={closeNightmare}
+              aria-label="閉じる"
+            >
               <LiquidPointerGlow />
               <span>CLOSE</span>
               <i aria-hidden="true">
@@ -1317,7 +1613,14 @@ export function RiderPage({ id }: { id: string }) {
             </div>
             <div className="rider-nightmare-dialog-layout">
               <figure>
-                <img src={rider.nightmare.img} alt="" style={{ objectPosition: rider.nightmare.pos }} loading="lazy" decoding="async" fetchPriority="low" />
+                <img
+                  src={rider.nightmare.img}
+                  alt=""
+                  style={{ objectPosition: rider.nightmare.pos }}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority="low"
+                />
                 <figcaption>
                   <span>FORM VISUAL</span>
                   <b>MACHIAVEL GORE NIGHTMARE</b>

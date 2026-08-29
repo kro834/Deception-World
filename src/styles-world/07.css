@@ -700,11 +700,14 @@ footer a {
   }
 }
 
-html:has(.world-column-dialog[open]),
-html:has(.poster-dialog[open]),
-html:has(.episode-pickup-dialog[open]),
-html:has(.rider-nightmare-dialog[open]) {
+:is(html, body):has(.world-column-dialog[open]),
+:is(html, body):has(.poster-dialog[open]),
+:is(html, body):has(.episode-pickup-dialog[open]),
+:is(html, body):has(.rider-nightmare-dialog[open]),
+:is(html, body):has(.dante-denied-dialog[open]),
+:is(html, body):has(.form-pickup-dialog[open]) {
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .world-column-dialog {

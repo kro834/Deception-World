@@ -10,6 +10,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
+import { UiVectorIcon } from "./ui-vector-icon";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -53,10 +54,8 @@ const SITE_ANNOUNCEMENTS = [
       { value: "+480.6%", label: "JUMP HEIGHT", detail: "6000m / 1033.5m" },
       { value: "−89.5%", label: "100m TIME", detail: "0.00021s / 0.002s" },
     ],
-    body:
-      "ゼウスの超自己進化、レックスの絶対秩序、そして月城悠真の意思を一つの共鳴へ束ね、エクスプリームが切り開いた無制限出力を実効攻撃へ変換。標準状態からエクスプリーム・ウルトラを上回る、サーガシステムの次世代到達点です。ヴィンクルムサーガと比較して650%以上の反応速度と、エクスプリームサーガと比較して最大900%高い機動力を発揮。サーガシステムのウルトラハイエンドモデルに相応しい性能を備えています。",
-    note:
-      "公開済みの標準カタログ値から算出。100mは所要時間の短縮率であり、最大出力ではなく標準値の比較です。",
+    body: "ゼウスの超自己進化、レックスの絶対秩序、そして月城悠真の意思を一つの共鳴へ束ね、エクスプリームが切り開いた無制限出力を実効攻撃へ変換。標準状態からエクスプリーム・ウルトラを上回る、サーガシステムの次世代到達点です。ヴィンクルムサーガと比較して650%以上の反応速度と、エクスプリームサーガと比較して最大900%高い機動力を発揮。サーガシステムのウルトラハイエンドモデルに相応しい性能を備えています。",
+    note: "公開済みの標準カタログ値から算出。100mは所要時間の短縮率であり、最大出力ではなく標準値の比較です。",
   },
   {
     id: "not-even-close",
@@ -125,6 +124,58 @@ export function SideMenuTrigger({
         <i />
       </span>
     </button>
+  );
+}
+
+export function DossierTopbar({
+  fileLabel,
+  returnHash,
+  returnLabel,
+  returnAriaLabel = returnLabel,
+}: {
+  fileLabel: string;
+  returnHash: string;
+  returnLabel: string;
+  returnAriaLabel?: string;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <>
+      <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
+      <header className="manager-topbar">
+        <GuardedLink
+          to="/world"
+          hash={returnHash}
+          assets={[]}
+          className="brand"
+          aria-label={`${fileLabel}からDeception Worldへ戻る`}
+        >
+          <span className="brand-sigil">
+            <i>DW</i>
+          </span>
+          <span>
+            <b>DECEPTION WORLD</b>
+            <small>{fileLabel}</small>
+          </span>
+        </GuardedLink>
+        <div className="detail-topbar-actions">
+          <GuardedLink
+            to="/world"
+            hash={returnHash}
+            assets={[]}
+            className="manager-back"
+            aria-label={returnAriaLabel}
+          >
+            <span>{returnLabel}</span>
+            <i aria-hidden="true">
+              <UiVectorIcon kind="arrow-down-left" size={14} />
+            </i>
+          </GuardedLink>
+          <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
+        </div>
+      </header>
+    </>
   );
 }
 
@@ -460,11 +511,21 @@ export function SideMenuLayer({
                   <span>ポスター</span>
                   <i>POSTERS</i>
                 </GuardedLink>
-                <GuardedLink to="/dream-chapter" hash="characters" assets={[]} beforeNavigate={close}>
+                <GuardedLink
+                  to="/dream-chapter"
+                  hash="characters"
+                  assets={[]}
+                  beforeNavigate={close}
+                >
                   <span>キャラクター</span>
                   <i>CAST</i>
                 </GuardedLink>
-                <GuardedLink to="/dream-chapter" hash="dolminence" assets={[]} beforeNavigate={close}>
+                <GuardedLink
+                  to="/dream-chapter"
+                  hash="dolminence"
+                  assets={[]}
+                  beforeNavigate={close}
+                >
                   <span>ドルミネンス</span>
                   <i>DOLMINENCE</i>
                 </GuardedLink>
@@ -491,12 +552,7 @@ export function SideMenuLayer({
                   <span>レコード</span>
                   <i>RECORDS</i>
                 </GuardedLink>
-                <GuardedLink
-                  to="/world"
-                  hash="manager-archive"
-                  assets={[]}
-                  beforeNavigate={close}
-                >
+                <GuardedLink to="/world" hash="manager-archive" assets={[]} beforeNavigate={close}>
                   <span>六詠</span>
                   <i>ARCHIVE</i>
                 </GuardedLink>
@@ -573,12 +629,7 @@ export function SideMenuLayer({
             <div className="side-panel-links">
               {RIDER_NAV.map((r, i) =>
                 r.href ? (
-                  <GuardedLink
-                    key={r.id}
-                    to={r.href}
-                    assets={r.assets}
-                    beforeNavigate={close}
-                  >
+                  <GuardedLink key={r.id} to={r.href} assets={r.assets} beforeNavigate={close}>
                     <span>{r.name}</span>
                     <i>{String(i + 1).padStart(2, "0")}</i>
                   </GuardedLink>
@@ -718,7 +769,9 @@ export function SideMenuLayer({
                     </time>
                   </p>
                   {selectedAnnouncement.eyebrow ? (
-                    <span className="site-announcement-eyebrow">{selectedAnnouncement.eyebrow}</span>
+                    <span className="site-announcement-eyebrow">
+                      {selectedAnnouncement.eyebrow}
+                    </span>
                   ) : null}
                   <h3 ref={announcementHeadingRef} tabIndex={-1}>
                     {selectedAnnouncement.title}

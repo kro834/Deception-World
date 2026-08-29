@@ -36,6 +36,8 @@ const ZEUS_AVOID_SELECTOR = [
   ".form-pickup-close",
   ".episode-pickup-close",
   ".rider-nightmare-dialog-close",
+  ".dream-hero-actions a",
+  ".dream-dossier-close",
 ].join(",");
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
@@ -262,35 +264,38 @@ function ZeusButton({
     holdTimer.current = null;
   }, []);
 
-  const clampCenter = useCallback((clientX: number, clientY: number) => {
-    const button = buttonRef.current;
-    if (!button) return { x: clientX, y: clientY };
-    const rect = button.getBoundingClientRect();
-    const viewport = getViewport();
-    const computed = window.getComputedStyle(button);
-    const safeInset = (name: string) => {
-      const value = Number.parseFloat(computed.getPropertyValue(name));
-      return Number.isFinite(value) ? Math.max(0, value) : 0;
-    };
-    const safe = 12;
-    const safeTop = Math.max(safe, safeInset("--zeus-safe-top"));
-    const safeRight = Math.max(safe, safeInset("--zeus-safe-right"));
-    const safeBottom = Math.max(safe, safeInset("--zeus-safe-bottom"));
-    const safeLeft = Math.max(safe, safeInset("--zeus-safe-left"));
-    const minX = viewport.offsetLeft + rect.width / 2 + safeLeft;
-    const maxX = Math.max(
-      minX,
-      viewport.offsetLeft + viewport.width - rect.width / 2 - safeRight,
-    );
-    const minY = viewport.offsetTop + rect.height / 2 + safeTop;
-    const maxY = Math.max(
-      minY,
-      viewport.offsetTop + viewport.height - rect.height / 2 - safeBottom,
-    );
-    const centerX = Math.max(minX, Math.min(maxX, clientX));
-    const centerY = Math.max(minY, Math.min(maxY, clientY));
-    return { x: centerX, y: centerY };
-  }, [getViewport]);
+  const clampCenter = useCallback(
+    (clientX: number, clientY: number) => {
+      const button = buttonRef.current;
+      if (!button) return { x: clientX, y: clientY };
+      const rect = button.getBoundingClientRect();
+      const viewport = getViewport();
+      const computed = window.getComputedStyle(button);
+      const safeInset = (name: string) => {
+        const value = Number.parseFloat(computed.getPropertyValue(name));
+        return Number.isFinite(value) ? Math.max(0, value) : 0;
+      };
+      const safe = 12;
+      const safeTop = Math.max(safe, safeInset("--zeus-safe-top"));
+      const safeRight = Math.max(safe, safeInset("--zeus-safe-right"));
+      const safeBottom = Math.max(safe, safeInset("--zeus-safe-bottom"));
+      const safeLeft = Math.max(safe, safeInset("--zeus-safe-left"));
+      const minX = viewport.offsetLeft + rect.width / 2 + safeLeft;
+      const maxX = Math.max(
+        minX,
+        viewport.offsetLeft + viewport.width - rect.width / 2 - safeRight,
+      );
+      const minY = viewport.offsetTop + rect.height / 2 + safeTop;
+      const maxY = Math.max(
+        minY,
+        viewport.offsetTop + viewport.height - rect.height / 2 - safeBottom,
+      );
+      const centerX = Math.max(minX, Math.min(maxX, clientX));
+      const centerY = Math.max(minY, Math.min(maxY, clientY));
+      return { x: centerX, y: centerY };
+    },
+    [getViewport],
+  );
 
   const avoidCriticalControls = useCallback(
     (preferred: { x: number; y: number }) => {
@@ -336,11 +341,12 @@ function ZeusButton({
           top: candidate.y - rect.height / 2,
           bottom: candidate.y + rect.height / 2,
         };
-        const obstructed = controls.some(({ rect: controlRect }) =>
-          candidateRect.left < controlRect.right + gap &&
-          candidateRect.right > controlRect.left - gap &&
-          candidateRect.top < controlRect.bottom + gap &&
-          candidateRect.bottom > controlRect.top - gap,
+        const obstructed = controls.some(
+          ({ rect: controlRect }) =>
+            candidateRect.left < controlRect.right + gap &&
+            candidateRect.right > controlRect.left - gap &&
+            candidateRect.top < controlRect.bottom + gap &&
+            candidateRect.bottom > controlRect.top - gap,
         );
         if (!obstructed) return candidate;
       }
@@ -491,10 +497,7 @@ function ZeusButton({
      fallback a no-op. */
   useEffect(() => {
     const cancelDanglingPointer = (event?: PointerEvent) => {
-      if (
-        activePointer.current == null ||
-        (event && event.pointerId !== activePointer.current)
-      )
+      if (activePointer.current == null || (event && event.pointerId !== activePointer.current))
         return;
       const button = buttonRef.current;
       const pointerId = activePointer.current;

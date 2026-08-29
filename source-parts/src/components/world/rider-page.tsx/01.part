@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { GuardedLink } from "@/components/load-gate";
+import { useEffect, useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -7,6 +6,8 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { rememberRiderReturn } from "./rider-return-state";
+import { DossierTopbar } from "./world-chrome";
 
 type RiderDossierForm = {
   img: string;
@@ -81,7 +82,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     tone: "#248cff",
     img: "/rider-profile-saga.jpeg",
     pos: "50% 10%",
-    civilianImg: "/civilian-saga.jpeg",
+    civilianImg: "/civilian-yuma-20260826.jpeg",
     civilianPos: "50% 12%",
     title: "最も弱い地点から、結末へ踏み込む第一のライダー。",
     quotes: ["俺たちが夢を叶えるんだ。", "世界を変える", "俺達の世界を返せ…！"],
@@ -139,17 +140,38 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "0.002sec" },
         ],
         abilities: [
-          { name: "LEARNING", body: "一撃から重心、意図、発動条件、夢界接続、精神状態、因果の揺らぎを解析する。" },
-          { name: "DARK MATTER CHARGING", body: "宇宙と夢に混在するダークマターを負荷なく集積し、分離、接続、構造解析、矛盾結果の保持能力を高める。" },
-          { name: "HIGH SUPREME", body: "MIDDLEで生んだ可能性をULTRAの裁定へ繋ぎ、史上最高の戦闘力を発揮する。" },
+          {
+            name: "LEARNING",
+            body: "一撃から重心、意図、発動条件、夢界接続、精神状態、因果の揺らぎを解析する。",
+          },
+          {
+            name: "DARK MATTER CHARGING",
+            body: "宇宙と夢に混在するダークマターを負荷なく集積し、分離、接続、構造解析、矛盾結果の保持能力を高める。",
+          },
+          {
+            name: "HIGH SUPREME",
+            body: "MIDDLEで生んだ可能性をULTRAの裁定へ繋ぎ、史上最高の戦闘力を発揮する。",
+          },
         ],
         arsenal: [
-          { name: "フェイタルエッジ／レルムスレイヤー／アクシスレイカー", body: "悠真が継続して使用する三種の追加武装。デュアルエクスコアは外部武装へ実在・非実在の定義を供給する。" },
-          { name: "ユナイトエッジ", body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。" },
+          {
+            name: "フェイタルエッジ／レルムスレイヤー／アクシスレイカー",
+            body: "悠真が継続して使用する三種の追加武装。デュアルエクスコアは外部武装へ実在・非実在の定義を供給する。",
+          },
+          {
+            name: "ユナイトエッジ",
+            body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。",
+          },
         ],
         finishers: [
-          { name: "ハイグリーム・エッジ", body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。" },
-          { name: "エクスプリームビッグバン", body: "対象を残すべきものと終わらせるべきものへ分岐し、完全な悪夢は存在可能性ごと消す。" },
+          {
+            name: "ハイグリーム・エッジ",
+            body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。",
+          },
+          {
+            name: "エクスプリームビッグバン",
+            body: "対象を残すべきものと終わらせるべきものへ分岐し、完全な悪夢は存在可能性ごと消す。",
+          },
         ],
       },
       {
@@ -197,104 +219,114 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           "ゼウス由来の超自己進化は、現在の装甲、演算、出力、攻撃形式を次世代状態へ更新し続ける。レックス由来の絶対秩序は、その進化結果へ境界と役割を与え、破綻のない一つの戦闘体系へ即座に固定する。進化によって秩序を失わず、秩序によって進化を止めない循環こそがレクソナンスの核であり、スリムな外形に反して、全身は一つの巨大な攻撃機関として機能する。",
         ],
         abilities: [
-          { name: "SA-GA OS 5.5", body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。" },
-          { name: "超自己進化 × 絶対秩序", body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。" },
-          { name: "REXONANCE NANO ARMOR", body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。" },
-          { name: "REXONANCE DRIVE", body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。" },
-          { name: "REXONANCE DEUS", body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。" },
-          { name: "ラーニング／拒絶／Exception World", body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。" },
+          {
+            name: "SA-GA OS 5.5",
+            body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。",
+          },
+          {
+            name: "超自己進化 × 絶対秩序",
+            body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。",
+          },
+          {
+            name: "REXONANCE NANO ARMOR",
+            body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。",
+          },
+          {
+            name: "REXONANCE DRIVE",
+            body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。",
+          },
+          {
+            name: "REXONANCE DEUS",
+            body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。",
+          },
+          {
+            name: "ラーニング／拒絶／Exception World",
+            body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。",
+          },
         ],
         arsenal: [
-          { name: "レルムスレイヤー・マークⅥ", body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。" },
-          { name: "レルムスレイヤー・マークXIV", body: "より高い権限干渉と構造切断へ対応する次世代仕様。" },
-          { name: "アクシスレイカー・マークⅦ", body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。" },
-          { name: "ユナイトエッジ・ランサーモード", body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。" },
-          { name: "共鳴武装群", body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。" },
+          {
+            name: "レルムスレイヤー・マークⅥ",
+            body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。",
+          },
+          {
+            name: "レルムスレイヤー・マークXIV",
+            body: "より高い権限干渉と構造切断へ対応する次世代仕様。",
+          },
+          {
+            name: "アクシスレイカー・マークⅦ",
+            body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。",
+          },
+          {
+            name: "ユナイトエッジ・ランサーモード",
+            body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。",
+          },
+          {
+            name: "共鳴武装群",
+            body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。",
+          },
         ],
         finishers: [
-          { name: "ハイグリーム・エッジ／レクソナンスレイド", body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。" },
-          { name: "スクワッドビッグバン／レクソナンス・エクスラッシュ", body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。" },
-          { name: "レクソナンスプロージョン", body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。" },
-          { name: "レクソナンスメテオ", body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。" },
-          { name: "レクソナンスリボルト", body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。" },
-          { name: "レクソナンスストライク", body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。" },
-          { name: "デウスシフト・レクソナンスパーク", body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。" },
+          {
+            name: "ハイグリーム・エッジ／レクソナンスレイド",
+            body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。",
+          },
+          {
+            name: "スクワッドビッグバン／レクソナンス・エクスラッシュ",
+            body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。",
+          },
+          {
+            name: "レクソナンスプロージョン",
+            body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。",
+          },
+          {
+            name: "レクソナンスメテオ",
+            body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。",
+          },
+          {
+            name: "レクソナンスリボルト",
+            body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。",
+          },
+          {
+            name: "レクソナンスストライク",
+            body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。",
+          },
+          {
+            name: "デウスシフト・レクソナンスパーク",
+            body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。",
+          },
         ],
         weaponGallery: [
-          { img: "/weapon-realm-slayer-mark-vi.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークⅥ", label: "ORDER BREAKER / MARK VI" },
-          { img: "/weapon-realm-slayer-mark-xiv.jpeg", pos: "50% 50%", name: "レルムスレイヤー・マークXIV", label: "ORDER BREAKER / MARK XIV" },
-          { img: "/weapon-axis-raker-mark-vii-arcs.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　アークスモード", label: "AXIS RAKER / ARCS MODE" },
-          { img: "/weapon-axis-raker-mark-vii-launcher.jpeg", pos: "50% 50%", name: "アクシスレイカー・マークⅦ　ランチャーモード", label: "AXIS RAKER / LAUNCHER MODE" },
-          { img: "/weapon-unite-edge-lancer.jpeg", pos: "50% 50%", name: "ユナイトエッジ　ランサーモード", label: "UNITE EDGE / LANCER MODE" },
+          {
+            img: "/weapon-realm-slayer-mark-vi.jpeg",
+            pos: "50% 50%",
+            name: "レルムスレイヤー・マークⅥ",
+            label: "ORDER BREAKER / MARK VI",
+          },
+          {
+            img: "/weapon-realm-slayer-mark-xiv.jpeg",
+            pos: "50% 50%",
+            name: "レルムスレイヤー・マークXIV",
+            label: "ORDER BREAKER / MARK XIV",
+          },
+          {
+            img: "/weapon-axis-raker-mark-vii-arcs.jpeg",
+            pos: "50% 50%",
+            name: "アクシスレイカー・マークⅦ　アークスモード",
+            label: "AXIS RAKER / ARCS MODE",
+          },
+          {
+            img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
+            pos: "50% 50%",
+            name: "アクシスレイカー・マークⅦ　ランチャーモード",
+            label: "AXIS RAKER / LAUNCHER MODE",
+          },
+          {
+            img: "/weapon-unite-edge-lancer.jpeg",
+            pos: "50% 50%",
+            name: "ユナイトエッジ　ランサーモード",
+            label: "UNITE EDGE / LANCER MODE",
+          },
         ],
       },
     ],
-    civilian: {
-      name: "月城 悠真",
-      kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
-      cv: "坂田将吾",
-    },
-    nightmare: {
-      name: "マキャベル ゴアナイトメア",
-      kicker: "NIGHTMARE PICKUP 01 / MACHIAVEL GORE NIGHTMARE",
-      quote: "アナタは、ワタシの主人公でしょ？",
-      img: "/nightmare-machiavel-gore.jpeg",
-      pos: "48% 8%",
-      facts: [
-        { dt: "FORM", dd: "マキャベル ゴアナイトメア" },
-        { dt: "HOST", dd: "シエル（月城悠真）" },
-        { dt: "HEIGHT", dd: "219.8cm（est.）" },
-        { dt: "WEIGHT", dd: "75.8kg（est.）" },
-        { dt: "NIGHTMARE", dd: "拒絶" },
-        { dt: "CV", dd: "上田麗奈" },
-      ],
-      sections: [
-        {
-          no: "01",
-          kicker: "ORIGIN / ANOTHER CIEL",
-          title: "シエルの魂から生まれた、もう一人のシエル。",
-          body: [
-            "『仮面ライダーサーガ ドリームチャプター』Case 1では声のみで現れ、Case 2で姿と正体を明かした特別なナイトメア。通常のナイトメアが夢主の深層心理へ侵入して悪夢を生むのに対し、彼女はシエルの魂に引き寄せられて誕生した。",
-          ],
-        },
-        {
-          no: "02",
-          kicker: "APPEARANCE / PERSONA",
-          title: "慈愛と嘲笑を、同じ穏やかさで語る脚本家。",
-          body: [
-            "青い巨大な衣装を纏う女性型の大柄なナイトメア。ドレス、喪服、花嫁衣装、舞台衣装のいずれにも見える装いには、白銀のレース、赤と青の薔薇が刻まれる。フードの内側に人の顔はなく、花弁のように開閉する赤黒い発光体の中心へ白い瞳が一つだけ浮かぶ。",
-          ],
-        },
-        {
-          no: "03",
-          kicker: "NIGHTMARE / REJECTION",
-          title: "現象ではなく、届いたという結果を拒絶する。",
-          body: [
-            "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
-          ],
-        },
-      ],
-    },
-  },
-  {
-    id: "realm",
-    no: "02",
-    name: "REALM",
-    ja: "レルム",
-    person: "ベル・アレイン",
-    enPerson: "BELL ALAIN",
-    epithet: "完成品",
-    tone: "#f14a60",
-    img: "/rider-profile-realm.jpeg",
-    pos: "50% 8%",
-    civilianImg: "/civilian-realm.jpeg",
-    civilianPos: "50% 10%",
-    title: "失われた信号が、名前を持って帰還する。",
-    quotes: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
-    facts: [
-      { dt: "NAME", dd: "ベル・アレイン" },
-      { dt: "AGE", dd: "26歳" },
-      { dt: "GENDER", dd: "男性" },
-      { dt: "NATIONALITY", dd: "フランス" },
-      { dt: "HEIGHT", dd: "183cm" },

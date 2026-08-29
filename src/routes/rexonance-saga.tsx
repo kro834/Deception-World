@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
-import "@/styles-world.css";
-import "@/styles-world-addon.css";
-import "@/styles-rexonance-saga.css";
+import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 
 export const Route = createFileRoute("/rexonance-saga")({
   component: RexonanceSaga,
@@ -22,6 +21,8 @@ export const Route = createFileRoute("/rexonance-saga")({
       { property: "og:image", content: "/rider-saga-rexonance-thumbnail-20260827.jpeg" },
     ],
     links: [
+      ...WORLD_STYLESHEET_LINKS,
+      { rel: "stylesheet", href: rexonanceSagaCssUrl },
       {
         rel: "preload",
         as: "image",

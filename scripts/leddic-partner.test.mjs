@@ -77,7 +77,7 @@ test("Hanaka's Ishihen and Chigiri's Hoko and Rekka forms preserve every supplie
   assert.match(rider, /rider-leddic-rekka-20260829\.jpeg/);
   assert.doesNotMatch(rider, /rider-leddic-rekka\.jpeg/);
   assert.doesNotMatch(rider, /rider-leddic-(?:hoko|rekka)-pending\.svg/);
-  assert.match(rider, /rider\.id === "leddic" \? rider\.forms/);
+  assert.match(rider, /rider\.id === "leddic"\s*\?\s*rider\.forms/);
 });
 
 test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", () => {

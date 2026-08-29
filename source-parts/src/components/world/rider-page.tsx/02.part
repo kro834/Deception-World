@@ -1,3 +1,72 @@
+    civilian: {
+      name: "月城 悠真",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
+      cv: "坂田将吾",
+    },
+    nightmare: {
+      name: "マキャベル ゴアナイトメア",
+      kicker: "NIGHTMARE PICKUP 01 / MACHIAVEL GORE NIGHTMARE",
+      quote: "アナタは、ワタシの主人公でしょ？",
+      img: "/nightmare-machiavel-gore.jpeg",
+      pos: "48% 8%",
+      facts: [
+        { dt: "FORM", dd: "マキャベル ゴアナイトメア" },
+        { dt: "HOST", dd: "シエル（月城悠真）" },
+        { dt: "HEIGHT", dd: "219.8cm（est.）" },
+        { dt: "WEIGHT", dd: "75.8kg（est.）" },
+        { dt: "NIGHTMARE", dd: "拒絶" },
+        { dt: "CV", dd: "上田麗奈" },
+      ],
+      sections: [
+        {
+          no: "01",
+          kicker: "ORIGIN / ANOTHER CIEL",
+          title: "シエルの魂から生まれた、もう一人のシエル。",
+          body: [
+            "『仮面ライダーサーガ ドリームチャプター』Case 1では声のみで現れ、Case 2で姿と正体を明かした特別なナイトメア。通常のナイトメアが夢主の深層心理へ侵入して悪夢を生むのに対し、彼女はシエルの魂に引き寄せられて誕生した。",
+          ],
+        },
+        {
+          no: "02",
+          kicker: "APPEARANCE / PERSONA",
+          title: "慈愛と嘲笑を、同じ穏やかさで語る脚本家。",
+          body: [
+            "青い巨大な衣装を纏う女性型の大柄なナイトメア。ドレス、喪服、花嫁衣装、舞台衣装のいずれにも見える装いには、白銀のレース、赤と青の薔薇が刻まれる。フードの内側に人の顔はなく、花弁のように開閉する赤黒い発光体の中心へ白い瞳が一つだけ浮かぶ。",
+          ],
+        },
+        {
+          no: "03",
+          kicker: "NIGHTMARE / REJECTION",
+          title: "現象ではなく、届いたという結果を拒絶する。",
+          body: [
+            "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: "realm",
+    no: "02",
+    name: "REALM",
+    ja: "レルム",
+    person: "ベル・アレイン",
+    enPerson: "BELL ALAIN",
+    epithet: "完成品",
+    tone: "#f14a60",
+    img: "/rider-profile-realm.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/civilian-bell-20260826.jpeg",
+    civilianPos: "50% 10%",
+    title: "失われた信号が、名前を持って帰還する。",
+    quotes: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
+    facts: [
+      { dt: "NAME", dd: "ベル・アレイン" },
+      { dt: "AGE", dd: "26歳" },
+      { dt: "GENDER", dd: "男性" },
+      { dt: "NATIONALITY", dd: "フランス" },
+      { dt: "HEIGHT", dd: "183cm" },
       { dt: "WEIGHT", dd: "76kg" },
     ],
     sections: [
@@ -35,7 +104,13 @@
         name: "レルム",
         displayName: "レルムレジェンズ",
         sub: "レジェンズ",
-        calls: ["ROULETTE ON!", "JARAMM… LEGENDS! HIT!", "Rollout!", "JACKPOT!!", "RIDER! REALM! LEGENDS!!"],
+        calls: [
+          "ROULETTE ON!",
+          "JARAMM… LEGENDS! HIT!",
+          "Rollout!",
+          "JACKPOT!!",
+          "RIDER! REALM! LEGENDS!!",
+        ],
         stats: [
           { dt: "HEIGHT", dd: "218.8cm" },
           { dt: "WEIGHT", dd: "103.6kg" },
@@ -45,18 +120,42 @@
           { dt: "100m", dd: "0.06sec" },
         ],
         abilities: [
-          { name: "レジェンズルーレット", body: "敵、戦場、目的、許容損害から方策を抽出する混合戦略生成器。勝率、EMP、被害、ベルの倫理で重み付けする。" },
-          { name: "LEGENDS", body: "伝説から人物の力ではなく、勝利の開始条件、方策、終了条件を抽出する。" },
-          { name: "JACKPOT", body: "IDENTIFY、REACH、SAFE、CLOSEの四証明で、全経路を同じ勝利条件へ収束させる。" },
+          {
+            name: "レジェンズルーレット",
+            body: "敵、戦場、目的、許容損害から方策を抽出する混合戦略生成器。勝率、EMP、被害、ベルの倫理で重み付けする。",
+          },
+          {
+            name: "LEGENDS",
+            body: "伝説から人物の力ではなく、勝利の開始条件、方策、終了条件を抽出する。",
+          },
+          {
+            name: "JACKPOT",
+            body: "IDENTIFY、REACH、SAFE、CLOSEの四証明で、全経路を同じ勝利条件へ収束させる。",
+          },
         ],
         arsenal: [
-          { name: "メビウスネイバー", body: "矢で装甲処理、損傷転嫁、再生、権限経路を観測する弩。" },
-          { name: "レルムスレイヤー", body: "防御と回避を観測しながら逃走、転嫁、再生、時間回帰、分身交換を順に閉じる銃。" },
-          { name: "レジェンズエッジ", body: "一撃の刃長、角度、位相、軌道を更新し、斬撃を刺突、柄打ち、追撃へ組み替える長剣。" },
+          {
+            name: "メビウスネイバー",
+            body: "矢で装甲処理、損傷転嫁、再生、権限経路を観測する弩。",
+          },
+          {
+            name: "レルムスレイヤー",
+            body: "防御と回避を観測しながら逃走、転嫁、再生、時間回帰、分身交換を順に閉じる銃。",
+          },
+          {
+            name: "レジェンズエッジ",
+            body: "一撃の刃長、角度、位相、軌道を更新し、斬撃を刺突、柄打ち、追撃へ組み替える長剣。",
+          },
         ],
         finishers: [
-          { name: "レジェンズモディフィカーレ", body: "敵本体、管理構造、再生中枢へ攻撃可能だと実証する高速キック。" },
-          { name: "ジャックポット・レジェンズフィナーレ", body: "四証明の完了後、観測楔、敗北回避経路の封鎖、最終行動へ最適化したキックを順に実行する。" },
+          {
+            name: "レジェンズモディフィカーレ",
+            body: "敵本体、管理構造、再生中枢へ攻撃可能だと実証する高速キック。",
+          },
+          {
+            name: "ジャックポット・レジェンズフィナーレ",
+            body: "四証明の完了後、観測楔、敗北回避経路の封鎖、最終行動へ最適化したキックを順に実行する。",
+          },
         ],
       },
     ],
@@ -80,7 +179,10 @@
     civilianImg: "/civilian-lore.jpeg",
     civilianPos: "50% 8%",
     title: "管理人の側から、世界へ踏み込む第三のライダー。",
-    quotes: ["命の終わり際に向けられる最後の眼差しが好きだった", "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった"],
+    quotes: [
+      "命の終わり際に向けられる最後の眼差しが好きだった",
+      "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった",
+    ],
     facts: [
       { dt: "NAME", dd: "ローア" },
       { dt: "AGE", dd: "不明" },
@@ -125,16 +227,34 @@
           { dt: "100m", dd: "0.05sec" },
         ],
         abilities: [
-          { name: "LIQUID", body: "肉体と装甲を流動位相へ変換し、物理攻撃の衝撃を一点で受け止めず全身へ分散する。" },
-          { name: "REPAIR", body: "破損した空間、精神、夢界接続を流動的に補修する。崩壊を一時的に止める応急処置を得意とする。" },
-          { name: "SOLID", body: "対象の位置、動作、能力発動、位相変動を一時的に固定する。高速移動、空間転移、夢界潜行を大幅に制限する。" },
+          {
+            name: "LIQUID",
+            body: "肉体と装甲を流動位相へ変換し、物理攻撃の衝撃を一点で受け止めず全身へ分散する。",
+          },
+          {
+            name: "REPAIR",
+            body: "破損した空間、精神、夢界接続を流動的に補修する。崩壊を一時的に止める応急処置を得意とする。",
+          },
+          {
+            name: "SOLID",
+            body: "対象の位置、動作、能力発動、位相変動を一時的に固定する。高速移動、空間転移、夢界潜行を大幅に制限する。",
+          },
         ],
         arsenal: [
-          { name: "ローアライズコア", body: "リキッドとソリッドの位相を切り替える中核。EMPは無制限。" },
+          {
+            name: "ローアライズコア",
+            body: "リキッドとソリッドの位相を切り替える中核。EMPは無制限。",
+          },
         ],
         finishers: [
-          { name: "FLOW ENDER", body: "対象周囲の空間を流動化し、流動位相エネルギーを収束した蹴撃で内部構造を液状情報へ分解する。" },
-          { name: "PRESS ENDER", body: "対象周囲の空間を固定し、高密度位相エネルギーを収束したライダーキックを叩き込む。" },
+          {
+            name: "FLOW ENDER",
+            body: "対象周囲の空間を流動化し、流動位相エネルギーを収束した蹴撃で内部構造を液状情報へ分解する。",
+          },
+          {
+            name: "PRESS ENDER",
+            body: "対象周囲の空間を固定し、高密度位相エネルギーを収束したライダーキックを叩き込む。",
+          },
         ],
       },
     ],
@@ -154,12 +274,16 @@
     enPerson: "VANDAL",
     epithet: "秩序の大口と裁定者の仮面",
     tone: "#e71a9c",
-    img: "/rider-profile-vandal.jpeg",
+    img: "/rider-vandal-20260826.jpeg",
     pos: "50% 8%",
     civilianImg: "/civilian-vandal.jpeg",
     civilianPos: "50% 10%",
     title: "六詠第二位が、肉弾戦へ権限を変換する。",
-    quotes: ["世界は、今日も選択を許されて居ます", "生者には生を。死者には静寂を", "今日も又、道を閉ざす物だけを壊しましょう"],
+    quotes: [
+      "世界は、今日も選択を許されて居ます",
+      "生者には生を。死者には静寂を",
+      "今日も又、道を閉ざす物だけを壊しましょう",
+    ],
     facts: [
       { dt: "NAME", dd: "レックス・ロワ" },
       { dt: "AGE", dd: "不明" },
@@ -188,7 +312,21 @@
     ],
     forms: [
       {
-        img: "/rider-profile-vandal.jpeg",
+        img: "/rider-vandal-20260826.jpeg",
         pos: "50% 8%",
         system: "ヴァンダールドライバー × スペシャルコア",
         name: "ヴァンダール",
+        calls: ["RIDE IN!", "SPECIAL!", "ROLLOUT!", "NONE SHALL TRANSCEND IT!", "VANDAL!"],
+        stats: [
+          { dt: "HEIGHT", dd: "203.6cm" },
+          { dt: "WEIGHT", dd: "113.2kg" },
+          { dt: "PUNCH", dd: "262.9t" },
+          { dt: "KICK", dd: "372.2t" },
+          { dt: "JUMP", dd: "5000m" },
+          { dt: "100m", dd: "0.01sec" },
+        ],
+        abilities: [
+          {
+            name: "SCANNING",
+            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
+          },

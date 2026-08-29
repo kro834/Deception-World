@@ -184,3 +184,27 @@ class GlassRenderer {
       if (this.activeRoot) { this.activeRoot.dataset.liquidWebgl = 'false'; this.activeRoot.dataset.liquidWebglActive = 'false'; }
       this.activeRoot = root; root.appendChild(this.canvas);
       this.phase = 0; this.targetPhase = 0; this.phaseVelocity = 0; this.releasing = false;
+      this.geometry = null; this.targetGeometry = null; this.lastTime = 0;
+    }
+    const lens = root.querySelector(':scope > .liquid-selection-lens');
+    const r = lens ? parseFloat(getComputedStyle(lens).borderTopLeftRadius) : 18;
+    this.cornerRadius = isFinite(r) ? Math.max(r, 0) : 18;
+    this.resize(root);
+    const src = railTexture(root, this.dpr);
+    if (!src) { root.dataset.liquidWebgl = 'fallback'; return false; }
+    this.source = src;
+    const gl = this.gl;
+    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    root.dataset.liquidWebgl = 'true'; root.dataset.liquidWebglActive = 'false';
+    return true;
+  }
+  isActive(root) { return this.activeRoot === root; }
+  detach(root) {
+    if (this.activeRoot !== root) return;
+    this.stop(); this.canvas.remove();
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }

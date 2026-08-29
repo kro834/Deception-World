@@ -1,16 +1,357 @@
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
+    cancelEpisodePickupScrollReset.current = settlePickupScroll(
+      dialog,
+      [".episode-pickup-panel"],
+      () => {
+        if (episodePickupOpenedByKeyboard.current) {
+          dialog
+            .querySelector<HTMLButtonElement>(".episode-pickup-close")
+            ?.focus({ preventScroll: true });
+        } else {
+          dialog.focus({ preventScroll: true });
+        }
+      },
+    );
+  };
+
+  const closeEpisodePickup = () => {
+    cancelEpisodePickupScrollReset.current?.();
+    cancelEpisodePickupScrollReset.current = null;
+    const dialog = episodePickupDialogRef.current;
+    if (dialog?.open) dialog.close();
+  };
+
+  const openPickup = () => {
+    const dlg = pickupDialogRef.current;
+    if (!dlg) return;
+    if (pickupCloseTimer.current != null) {
+      window.clearTimeout(pickupCloseTimer.current);
+      pickupCloseTimer.current = null;
+    }
+    delete dlg.dataset.closing;
+    cancelColumnPickupScrollReset.current?.();
+    if (!dlg.open) {
+      try {
+        dlg.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    // WebKit otherwise auto-focuses the first column tab for a frame after a
+    // pointer slide, making column 01 look selected even when another column
+    // is active. Move focus to the neutral dialog surface immediately; the
+    // rail remains keyboard-accessible when a user deliberately tabs into it.
+    dlg.focus({ preventScroll: true });
+    setPickupOpen(true);
+    syncRail(pickupRail.current, columnTab);
+    cancelColumnPickupScrollReset.current = settlePickupScroll(
+      dlg,
+      [".world-column-dialog-card"],
+      () => {
+        bootLiquidGlass(dlg);
+        pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        dlg.focus({ preventScroll: true });
+      },
+    );
+  };
+
+  const closePickup = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
+    event?.stopPropagation?.();
+    const dlg = pickupDialogRef.current;
+    if (!dlg?.open) {
+      setPickupOpen(false);
+      return;
+    }
+    if (dlg.dataset.closing === "true") return;
+    cancelColumnPickupScrollReset.current?.();
+    cancelColumnPickupScrollReset.current = null;
+    dlg.dataset.closing = "true";
+    if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    pickupCloseTimer.current = window.setTimeout(
+      () => {
+        try {
+          dlg.close();
+        } catch {
+          /* already closed */
+        }
+        delete dlg.dataset.closing;
+        pickupCloseTimer.current = null;
+        setPickupOpen(false);
+      },
+      reducedMotion ? 0 : 360,
+    );
+  };
+
+  return (
+    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+      <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
+      <div className="ambient" aria-hidden="true">
+        <div className="ambient-grid" />
+        <div className="ambient-orb orb-a" />
+        <div className="ambient-orb orb-b" />
+        <div className="grain" />
+      </div>
+
+      <header className="topbar">
+        <div className="topbar-leading">
+          <a
+            ref={openingBrandRef}
+            className="brand"
+            href="#top"
+            aria-label="Deception World トップへ"
+          >
+            <span ref={openingSigilRef} className="brand-sigil">
+              <i>DW</i>
+            </span>
+            <span>
+              <b>DECEPTION WORLD</b>
+              <small>KAMEN RIDER SAGA</small>
+            </span>
+          </a>
+        </div>
+        <nav aria-label="メインメニュー">
+          <a href="#story" aria-current={activeSection === "story" ? "location" : undefined}>
+            STORY
+          </a>
+          <a href="#riders" aria-current={activeSection === "riders" ? "location" : undefined}>
+            RIDERS
+          </a>
+          <a href="#records" aria-current={activeSection === "records" ? "location" : undefined}>
+            RECORDS
+          </a>
+        </nav>
+        <div className="topbar-actions">
+          <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
+        </div>
+      </header>
+      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
+        <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
+          {previous ? (
+            <span
+              className="hero-backdrop-layer hero-backdrop-previous"
+              key={`hb-prev-${prevPoster}`}
+            >
+              <img
+                src={previous.src}
+                alt=""
+                style={{ objectPosition: previous.pos }}
+                decoding="async"
+              />
+            </span>
+          ) : null}
+          <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
+            <img
+              src={current.src}
+              alt=""
+              style={{ objectPosition: current.pos }}
+              fetchPriority="high"
+              decoding="async"
+            />
+          </span>
+        </div>
+        <div className="hero-copy">
+          <p className="eyebrow">
+            <span>THE SECOND SAGA</span>
+            <i />
+          </p>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
+            <span>世界は、</span>
+            <strong>欺瞞でできている。</strong>
+          </h1>
+          <p className="hero-lead">
+            救うべきものは、夢の向こうにはない。
+            <br />
+            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
+          </p>
+          <div className="hero-actions">
+            <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
+              <LiquidPointerGlow />
+              <span>ENTER THE WORLD</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h13M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a className="text-action" href="#poster-stage">
+              POSTER
+            </a>
+          </div>
+          <div className="hero-metadata" aria-label="作品情報">
+            <span>
+              <small>FORMAT</small>
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
+          </div>
+        </div>
+
+        <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
+          <div
+            className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
+            aria-busy={shuffling}
+          >
+            <div className="poster-back-card poster-back-card-1" aria-hidden="true">
+              <img
+                src={nextPoster.src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+            </div>
+            <div className="poster-back-card poster-back-card-2" aria-hidden="true">
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+            </div>
+            <div className="poster-back-card poster-back-card-3" aria-hidden="true">
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+            </div>
+            <div className="poster-back-card poster-back-card-4" aria-hidden="true">
+              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+            </div>
+            <div className="poster-frame">
+              <span className="poster-holo-ring" aria-hidden="true" />
+              <div className="poster-media">
+                {previous ? (
+                  <img
+                    className="poster-image poster-image-previous"
+                    key={`poster-prev-${prevPoster}`}
+                    src={previous.src}
+                    alt=""
+                    style={{
+                      objectPosition: previous.pos,
+                      objectFit: previous.fit === "contain" ? "contain" : "cover",
+                    }}
+                    onAnimationEnd={() => setPrevPoster(null)}
+                  />
+                ) : null}
+                <img
+                  className={
+                    current.fit === "contain"
+                      ? "poster-image poster-image-current is-contain"
+                      : "poster-image poster-image-current"
+                  }
+                  key={`poster-${poster}`}
+                  src={current.src}
+                  alt={current.alt}
+                  style={{
+                    objectPosition: current.pos,
+                    objectFit: current.fit === "contain" ? "contain" : "cover",
+                  }}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                <span className="poster-sheen" aria-hidden="true" />
+              </div>
+              <span className="corner corner-tl" aria-hidden="true" />
+              <span className="corner corner-tr" aria-hidden="true" />
+              <span className="corner corner-bl" aria-hidden="true" />
+              <span className="corner corner-br" aria-hidden="true" />
+            </div>
+          </div>
+          <div className="orbit" aria-hidden="true" />
+          <div className="orbit orbit-two" aria-hidden="true" />
+          <div className="poster-index">
+            <span>KEY VISUAL</span>
+            <b>{String(poster + 1).padStart(2, "0")}</b>
+          </div>
+          <div className="poster-controls">
+            <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
+              <button
+                type="button"
+                className="poster-shuffle ios26-glass"
+                data-liquid-pointer="true"
+                disabled={shuffling}
+                aria-busy={shuffling}
+                onClick={shufflePoster}
+              >
+                <LiquidPointerGlow />
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="shuffle" size={18} />
+                </span>
+                <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+              </button>
+              <button
+                type="button"
+                className="poster-reset ios26-glass"
+                data-liquid-pointer="true"
+                disabled={poster === 0 || shuffling}
+                onClick={() => goPoster(0)}
+              >
+                <LiquidPointerGlow />
+                <span aria-hidden="true">
+                  <UiVectorIcon kind="reset" size={17} />
+                </span>
+                <b>RESET</b>
+              </button>
+              <button
+                type="button"
+                className={
+                  locked
+                    ? "poster-lock ios26-glass is-locked"
+                    : "poster-lock ios26-glass is-unlocked"
+                }
+                data-liquid-pointer="true"
+                aria-pressed={locked}
+                aria-label={
+                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
+                }
+                disabled={shuffling}
                 onClick={() => setLocked((v) => !v)}
               >
                 <LiquidPointerGlow />
                 <span aria-hidden="true">
                   {locked ? (
                     <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                      <path
+                        d="M8 10V8a4 4 0 0 1 8 0v2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path d="M8 10V8a4 4 0 0 1 7.5-2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                      <path
+                        d="M8 10V8a4 4 0 0 1 7.5-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
                     </svg>
                   )}
                 </span>
@@ -53,8 +394,12 @@
               <span>『ドリームチャプター』に続く</span>
               <span>劇場版第二作</span>
             </p>
-            <p>世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。</p>
-            <p>シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。</p>
+            <p>
+              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+            </p>
+            <p>
+              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            </p>
           </div>
         </div>
 
@@ -62,163 +407,3 @@
           <div className="threat-copy">
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
-              SIX SIGNALS
-              <br />
-              ABOVE THE WORLD.
-            </h3>
-            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
-          </div>
-          <div className="signal-column">
-            <ManagerRail ref={managerRail} />
-
-            {managerTab === 0 ? (
-              <div key="managers" className="manager-archive-panel is-managers" role="tabpanel">
-                <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
-                  <GuardedLink
-                    className="signal has-visual is-accessible is-face-safe zeus-signal"
-                    to="/managers/zeus"
-                    assets={MANAGER_ASSETS.zeus}
-                    style={{ ["--delay" as string]: "0s" }}
-                    aria-label="六詠I ゼウスの個別資料を開く"
-                  >
-                    <img src="/manager-zeus.jpeg" alt="ゼウスのキャラクタービジュアル" width={1424} height={1105} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
-                    <span>I</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>ゼウス</b>
-                    <em className="signal-apex" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" focusable="false">
-                        <path d="M12 1.5 14.4 9.6 22.5 12l-8.1 2.4L12 22.5l-2.4-8.1L1.5 12l8.1-2.4L12 1.5Z" />
-                      </svg>
-                    </em>
-                  </GuardedLink>
-                  <GuardedLink
-                    className="signal has-visual is-accessible"
-                    to="/managers/rex-loi"
-                    assets={MANAGER_ASSETS["rex-loi"]}
-                    style={{ ["--delay" as string]: "0.16s" }}
-                  >
-                    <img src="/manager-rex-loi.jpeg" alt="レックス・ロワのキャラクタービジュアル" width={1024} height={1536} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
-                    <span>II</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>レックス・ロワ</b>
-                  </GuardedLink>
-                  <GuardedLink
-                    className="signal has-visual is-accessible"
-                    to="/managers/shuza"
-                    assets={MANAGER_ASSETS.shuza}
-                    style={{ ["--delay" as string]: "0.32s" }}
-                  >
-                    <img src="/manager-shuza.jpeg" alt="シュザのキャラクタービジュアル" width={1050} height={1498} style={{ objectPosition: "50% 16%" }} loading="lazy" decoding="async" />
-                    <span>III</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>シュザ</b>
-                  </GuardedLink>
-                  <GuardedLink
-                    className="signal has-visual is-accessible lejas-signal"
-                    to="/managers/lejas"
-                    assets={MANAGER_ASSETS.lejas}
-                    style={{ ["--delay" as string]: "0.48s" }}
-                    aria-label="六詠IV レジャスの個別資料を開く"
-                  >
-                    <img
-                      src="/manager-lejas-portrait.jpeg"
-                      alt="レジャスの顔アップ"
-                      width={1500}
-                      height={1872}
-                      style={{ objectPosition: "50% 8%", objectFit: "cover" }}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <span>IV</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>レジャス</b>
-                  </GuardedLink>
-                  <GuardedLink
-                    className="signal has-visual is-accessible is-face-safe"
-                    to="/managers/opus"
-                    assets={MANAGER_ASSETS.opus}
-                    style={{ ["--delay" as string]: "0.64s" }}
-                    aria-label="六詠V オパスの個別資料を開く"
-                  >
-                    <img src="/manager-opus.jpeg" alt="オパスのキャラクタービジュアル" width={1088} height={1446} style={{ objectPosition: "50% 0%" }} loading="lazy" decoding="async" />
-                    <span>V</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>オパス</b>
-                  </GuardedLink>
-                  <GuardedLink
-                    className="signal has-visual is-accessible"
-                    to="/managers/reemu"
-                    assets={MANAGER_ASSETS.reemu}
-                    style={{ ["--delay" as string]: "0.8s" }}
-                  >
-                    <img src="/manager-reemu.jpeg" alt="リームーのキャラクタービジュアル" width={941} height={1672} style={{ objectPosition: "50% 14%" }} loading="lazy" decoding="async" />
-                    <span>VI</span>
-                    <i />
-                    <small>OPEN DOSSIER</small>
-                    <b>リームー</b>
-                  </GuardedLink>
-                </div>
-              </div>
-            ) : managerTab === 1 ? (
-              <div key="unmanaged" className="manager-archive-panel is-unmanaged" role="tabpanel">
-                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
-                <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
-                  <button
-                    className="dante-archive"
-                    type="button"
-                    aria-label="管理人殺し ダンテへのアクセスを試みる"
-                    onClick={(e) => {
-                      if (danteOpenTimer.current != null) return;
-                      const host = e.currentTarget;
-                      host.classList.add("is-glitching");
-                      danteOpenTimer.current = window.setTimeout(() => {
-                        danteOpenTimer.current = null;
-                        host.classList.remove("is-glitching");
-                        const dlg = danteDialogRef.current;
-                        if (!dlg) return;
-                        if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
-                        try {
-                          dlg.showModal();
-                        } catch {
-                          /* already open */
-                        }
-                        (document.activeElement as HTMLElement | null)?.blur();
-                        const inner = dlg.querySelector(".dante-denied-inner");
-                        inner?.classList.remove("is-slam");
-                        void (inner as HTMLElement | null)?.offsetWidth;
-                        inner?.classList.add("is-slam");
-                        danteCloseTimer.current = window.setTimeout(() => {
-                          danteCloseTimer.current = null;
-                          if (dlg.open) dlg.close();
-                        }, 2600);
-                      }, 420);
-                    }}
-                  >
-                    <span className="dante-visual">
-                      <img
-                        src="/manager-killer-dante.jpeg"
-                        alt="ダンテのキャラクタービジュアル"
-                        width={1416}
-                        height={1756}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </span>
-                    <span className="dante-copy">
-                      <small>ANOMALOUS RECORD</small>
-                      <b>DANTE</b>
-                      <em>管理人殺し</em>
-                      <i>ACCESS //</i>
-                    </span>
-                  </button>
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
-                  ))}
-                </div>
-              </div>
-            ) : (

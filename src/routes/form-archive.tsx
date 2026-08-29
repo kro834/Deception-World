@@ -4,8 +4,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { initRail } from "@/lib/liquid/boot.js";
-import "@/styles-world.css";
-import "@/styles-world-addon.css";
+import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 
 export const Route = createFileRoute("/form-archive")({
   component: FormArchive,
@@ -17,6 +16,7 @@ export const Route = createFileRoute("/form-archive")({
         content: "仮面ライダーサーガと仮面ライダーレルムのフォーム一覧・スペック・比較アーカイブ。",
       },
     ],
+    links: WORLD_STYLESHEET_LINKS,
   }),
 });
 

@@ -1,10 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { RiderPage } from "@/components/world/rider-page";
-import "@/styles-world.css";
-import "@/styles-world-addon.css";
+import { createRiderHead, isRiderRouteId } from "@/lib/world-head";
 
 export const Route = createFileRoute("/riders/$id")({
+  beforeLoad: ({ params }) => {
+    if (!isRiderRouteId(params.id)) throw notFound();
+  },
   component: RiderRoute,
+  head: ({ params }) => createRiderHead(params.id),
 });
 
 function RiderRoute() {

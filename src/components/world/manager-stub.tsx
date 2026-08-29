@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
+import { DossierTopbar } from "./world-chrome";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -208,7 +208,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               <span />
             </div>
           ) : null}
-          <button type="button" className="form-pickup-close" data-liquid-pointer="true" onClick={close} aria-label="閉じる">
+          <button
+            type="button"
+            className="form-pickup-close"
+            data-liquid-pointer="true"
+            onClick={close}
+            aria-label="閉じる"
+          >
             <LiquidPointerGlow />
             <span>CLOSE</span>
             <i aria-hidden="true">
@@ -318,7 +324,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 <div className="form-pickup-gallery">
                   {extraForms.map((f) => (
                     <figure key={`${f.name}-${f.sub ?? ""}`}>
-                      <img src={f.img} alt="" style={{ objectPosition: f.pos }} decoding="async" loading="lazy" />
+                      <img
+                        src={f.img}
+                        alt=""
+                        style={{ objectPosition: f.pos }}
+                        decoding="async"
+                        loading="lazy"
+                      />
                       <figcaption>
                         <span>{f.sub ?? "FORM"}</span>
                         <b>{f.name}</b>
@@ -340,7 +352,10 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               </header>
               <div className="rexonance-weapon-grid">
                 {weaponGallery.map((weapon, index) => (
-                  <figure key={weapon.name} className={index === weaponGallery.length - 1 ? "is-wide" : undefined}>
+                  <figure
+                    key={weapon.name}
+                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
+                  >
                     <div>
                       <img
                         src={weapon.img}
@@ -371,7 +386,11 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               aria-live="polite"
               aria-label="レクソナンスサーガの記録を展開中"
               onAnimationEnd={(event) => {
-                if (event.currentTarget !== event.target || event.animationName !== "rexonanceGateLife") return;
+                if (
+                  event.currentTarget !== event.target ||
+                  event.animationName !== "rexonanceGateLife"
+                )
+                  return;
                 finishGate();
               }}
             >
@@ -424,7 +443,10 @@ function ManagerDossier({ profile }: { profile: Profile }) {
   return (
     <main
       className={`manager-page${profile.sovereign ? " is-sovereign" : ""}`}
-      style={{ ["--manager-accent" as string]: profile.accent, ["--manager-accent-soft" as string]: profile.accent }}
+      style={{
+        ["--manager-accent" as string]: profile.accent,
+        ["--manager-accent-soft" as string]: profile.accent,
+      }}
     >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
@@ -438,23 +460,11 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           </div>
         ) : null}
       </div>
-      <header className="manager-topbar">
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand">
-          <span className="brand-sigil">
-            <i>DW</i>
-          </span>
-          <span>
-            <b>DECEPTION WORLD</b>
-            <small>MANAGER ARCHIVE / {profile.numeral}</small>
-          </span>
-        </GuardedLink>
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
-          <span>六詠一覧へ戻る</span>
-          <i aria-hidden="true">
-            <UiVectorIcon kind="arrow-down-left" size={14} />
-          </i>
-        </GuardedLink>
-      </header>
+      <DossierTopbar
+        fileLabel={`MANAGER ARCHIVE / ${profile.numeral}`}
+        returnHash="manager-archive"
+        returnLabel="六詠一覧へ戻る"
+      />
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -509,12 +519,30 @@ function ManagerDossier({ profile }: { profile: Profile }) {
                 <p>SOVEREIGNTY CONFIRMED</p>
               </div>
               <div className="sovereign-scale" aria-hidden="true">
-                <span><i /><b>VI</b></span>
-                <span><i /><b>V</b></span>
-                <span><i /><b>IV</b></span>
-                <span><i /><b>III</b></span>
-                <span><i /><b>II</b></span>
-                <span className="is-apex"><i /><b>I</b></span>
+                <span>
+                  <i />
+                  <b>VI</b>
+                </span>
+                <span>
+                  <i />
+                  <b>V</b>
+                </span>
+                <span>
+                  <i />
+                  <b>IV</b>
+                </span>
+                <span>
+                  <i />
+                  <b>III</b>
+                </span>
+                <span>
+                  <i />
+                  <b>II</b>
+                </span>
+                <span className="is-apex">
+                  <i />
+                  <b>I</b>
+                </span>
               </div>
             </section>
           ) : null}
@@ -631,15 +659,30 @@ export const REX_LOI: Profile = {
       { dt: "100m", dd: "0.01sec" },
     ],
     abilities: [
-      { name: "SCANNING", body: "一撃を見た時点で、重心、意図、発動条件、癖、精神状態、さらに相手の未来まで読み取り、最適な戦法を提示する。" },
-      { name: "SPECIAL", body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない攻撃と防御へ転用する。" },
+      {
+        name: "SCANNING",
+        body: "一撃を見た時点で、重心、意図、発動条件、癖、精神状態、さらに相手の未来まで読み取り、最適な戦法を提示する。",
+      },
+      {
+        name: "SPECIAL",
+        body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない攻撃と防御へ転用する。",
+      },
     ],
     arsenal: [
-      { name: "サーパスアタノール", body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。" },
-      { name: "デアグローブ／デアブーツ", body: "接触対象を拳撃が最も通る組成へ変性し、飛行・潜航を錬成して深海から宇宙まで対応する。" },
+      {
+        name: "サーパスアタノール",
+        body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。",
+      },
+      {
+        name: "デアグローブ／デアブーツ",
+        body: "接触対象を拳撃が最も通る組成へ変性し、飛行・潜航を錬成して深海から宇宙まで対応する。",
+      },
     ],
     finishers: [
-      { name: "DEAD END", body: "光で全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳または蹴りを中枢へ叩き込んで裁定を完遂する。" },
+      {
+        name: "DEAD END",
+        body: "光で全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳または蹴りを中枢へ叩き込んで裁定を完遂する。",
+      },
     ],
   },
 };
@@ -706,16 +749,34 @@ export const SHUZA: Profile = {
       { dt: "100m", dd: "0.8sec" },
     ],
     abilities: [
-      { name: "DESIRE SIGHT", body: "対象が『攻撃したい』と思った段階で次の行動を察知し、その動きを生じさせた欲望まで視覚化する。" },
-      { name: "GREED CELL", body: "周囲の欲望を糧に増殖と微小破裂を加速。膂力、速度、防御、再生、戦闘継続能力を際限なく高める。" },
+      {
+        name: "DESIRE SIGHT",
+        body: "対象が『攻撃したい』と思った段階で次の行動を察知し、その動きを生じさせた欲望まで視覚化する。",
+      },
+      {
+        name: "GREED CELL",
+        body: "周囲の欲望を糧に増殖と微小破裂を加速。膂力、速度、防御、再生、戦闘継続能力を際限なく高める。",
+      },
     ],
     arsenal: [
-      { name: "グリードセル", body: "微小な破裂を同期させ、欲望が強いほど身体能力を増幅する。変形する刃、自己再形成する外殻、欲望誘発波を放つローブを備える。" },
-      { name: "フィニッシャー", body: "破損した破片さえ短剣、遠隔刃、拘束用の棘へ変化するハルバード。" },
+      {
+        name: "グリードセル",
+        body: "微小な破裂を同期させ、欲望が強いほど身体能力を増幅する。変形する刃、自己再形成する外殻、欲望誘発波を放つローブを備える。",
+      },
+      {
+        name: "フィニッシャー",
+        body: "破損した破片さえ短剣、遠隔刃、拘束用の棘へ変化するハルバード。",
+      },
     ],
     finishers: [
-      { name: "PHOBOS CRACK", body: "全身のグリードセルを脚部へ集約し、支配権限を右脚へ重ねて放つ、紅紫色の衝撃を伴うライダーキック。" },
-      { name: "PHOBOS DESTROY", body: "フィニッシャーへ巨大な紅紫色の刃を形成し、既に支配している能力、武器、法則を一斉に対象へ集中させる。" },
+      {
+        name: "PHOBOS CRACK",
+        body: "全身のグリードセルを脚部へ集約し、支配権限を右脚へ重ねて放つ、紅紫色の衝撃を伴うライダーキック。",
+      },
+      {
+        name: "PHOBOS DESTROY",
+        body: "フィニッシャーへ巨大な紅紫色の刃を形成し、既に支配している能力、武器、法則を一斉に対象へ集中させる。",
+      },
     ],
   },
 };
@@ -782,16 +843,28 @@ export const REEMU: Profile = {
       { dt: "100m", dd: "0.003sec" },
     ],
     abilities: [
-      { name: "KIJIN SWORD", body: "天智による高速近接戦闘へ全装備を最適化。知覚、防御、体捌き、弱点解析を統合し、瞬殺へ収束させる。" },
-      { name: "DUAL ON", body: "既存バックルと組み合わせ、キジンソードを中心とする追加能力と装備構成を実行する。" },
+      {
+        name: "KIJIN SWORD",
+        body: "天智による高速近接戦闘へ全装備を最適化。知覚、防御、体捌き、弱点解析を統合し、瞬殺へ収束させる。",
+      },
+      {
+        name: "DUAL ON",
+        body: "既存バックルと組み合わせ、キジンソードを中心とする追加能力と装備構成を実行する。",
+      },
     ],
     arsenal: [
       { name: "天智", body: "愛刀。キジンクグツも生成できる。" },
       { name: "マーダーグラス", body: "構造的弱点と最適打撃点を即座に発見する。" },
     ],
     finishers: [
-      { name: "KIJIN SWORD STRIKE", body: "バットウトリガーを一度引き、紅い月を背に円月殺法の斬撃を放つ。" },
-      { name: "KIJIN SWORD VICTORY", body: "トリガーを二度引き、黄金の墨を思わせる回転斬撃を放つ。紫色のライダーキックへも派生する。" },
+      {
+        name: "KIJIN SWORD STRIKE",
+        body: "バットウトリガーを一度引き、紅い月を背に円月殺法の斬撃を放つ。",
+      },
+      {
+        name: "KIJIN SWORD VICTORY",
+        body: "トリガーを二度引き、黄金の墨を思わせる回転斬撃を放つ。紫色のライダーキックへも派生する。",
+      },
     ],
   },
 };
@@ -925,7 +998,15 @@ export const OPUS: Profile = {
     system: "戦極ドライバー × ディバインロックシード／極超ロックシード",
     name: "モスコ",
     sub: "ディバインアームズ",
-    calls: ["INFERNO BASKET！", "DIVINE！", "LOCK ON！", "ソイヤッ！", "LOCK OPEN！", "DIVINE ARMS！", "AMBITIOUS！"],
+    calls: [
+      "INFERNO BASKET！",
+      "DIVINE！",
+      "LOCK ON！",
+      "ソイヤッ！",
+      "LOCK OPEN！",
+      "DIVINE ARMS！",
+      "AMBITIOUS！",
+    ],
     quote: "祈らないでください。私は、叶えてしまう",
     stats: [
       { dt: "HEIGHT", dd: "216.8cm" },

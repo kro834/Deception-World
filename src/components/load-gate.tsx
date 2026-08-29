@@ -1002,29 +1002,5 @@ export function AppGuards() {
     };
   }, [locationHash, pathname]);
 
-  useEffect(() => {
-    const editable = (t: EventTarget | null) => {
-      if (!(t instanceof Element)) return false;
-      return Boolean(t.closest("input, textarea, [contenteditable='true']"));
-    };
-    const block = (e: Event) => {
-      if (!editable(e.target)) e.preventDefault();
-    };
-    const blockAlways = (e: Event) => e.preventDefault();
-    document.addEventListener("copy", block);
-    document.addEventListener("cut", block);
-    document.addEventListener("paste", block);
-    document.addEventListener("contextmenu", block);
-    document.addEventListener("selectstart", block);
-    document.addEventListener("dragstart", blockAlways);
-    return () => {
-      document.removeEventListener("copy", block);
-      document.removeEventListener("cut", block);
-      document.removeEventListener("paste", block);
-      document.removeEventListener("contextmenu", block);
-      document.removeEventListener("selectstart", block);
-      document.removeEventListener("dragstart", blockAlways);
-    };
-  }, []);
   return null;
 }

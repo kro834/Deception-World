@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExtremeSaga } from "@/components/extreme-saga/extreme-saga";
-import "@/styles-world.css";
-import "@/styles-world-addon.css";
-import "@/styles-rexonance-saga.css";
-import "@/styles-extreme-saga.css";
+import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
+import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   component: ExtremeSaga,
@@ -23,6 +22,9 @@ export const Route = createFileRoute("/extreme-saga")({
       { property: "og:image", content: "/saga-extreme-middle.jpeg" },
     ],
     links: [
+      ...WORLD_STYLESHEET_LINKS,
+      { rel: "stylesheet", href: rexonanceSagaCssUrl },
+      { rel: "stylesheet", href: extremeSagaCssUrl },
       {
         rel: "preload",
         as: "image",

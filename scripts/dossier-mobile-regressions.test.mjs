@@ -6,13 +6,14 @@ const worldHome = readFileSync(
   new URL("../src/components/world/world-home.tsx", import.meta.url),
   "utf8",
 );
-const loadGate = readFileSync(
-  new URL("../src/components/load-gate.tsx", import.meta.url),
-  "utf8",
-);
+const loadGate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 const router = readFileSync(new URL("../src/router.tsx", import.meta.url), "utf8");
 const riderPage = readFileSync(
   new URL("../src/components/world/rider-page.tsx", import.meta.url),
+  "utf8",
+);
+const worldChrome = readFileSync(
+  new URL("../src/components/world/world-chrome.tsx", import.meta.url),
   "utf8",
 );
 const transitionStyles = readFileSync(
@@ -44,7 +45,8 @@ const reconstructedStyles = readFileSync(
 test("Cipher uses the supplied dedicated thumbnail without replacing its dossier art", () => {
   assert.match(worldHome, /id: "cipher"[\s\S]*?img: "\/rider-cipher-thumbnail-20260825\.jpeg"/);
   assert.ok(
-    statSync(new URL("../public/rider-cipher-thumbnail-20260825.jpeg", import.meta.url)).size > 100_000,
+    statSync(new URL("../public/rider-cipher-thumbnail-20260825.jpeg", import.meta.url)).size >
+      100_000,
   );
 });
 
@@ -57,11 +59,18 @@ test("detail routes use per-location restoration without overwriting the world s
   assert.match(loadGate, /\[90, 240, 480, 900, 1500\]/);
   assert.match(loadGate, /document\.addEventListener\("wheel", noteInteraction/);
   assert.match(loadGate, /document\.addEventListener\("touchmove", noteInteraction/);
-  assert.equal((loadGate.match(/document\.addEventListener\("pointerdown", noteInteraction, true\)/g) ?? []).length, 2);
+  assert.equal(
+    (loadGate.match(/document\.addEventListener\("pointerdown", noteInteraction, true\)/g) ?? [])
+      .length,
+    2,
+  );
   assert.match(loadGate, /Promise\.race\(\[wait\(duration\), userScrollIntent\]\)/);
   assert.match(loadGate, /if \(!\(await waitUntilNextAlignment\(90\)\)\) return/);
   assert.doesNotMatch(loadGate, /document\.addEventListener\("touchstart", noteInteraction/);
-  assert.match(loadGate, /window\.visualViewport\?\.addEventListener\("resize", alignAfterViewportChange\)/);
+  assert.match(
+    loadGate,
+    /window\.visualViewport\?\.addEventListener\("resize", alignAfterViewportChange\)/,
+  );
   assert.match(loadGate, /window\.setTimeout\(stopResetting, 1800\)/);
   assert.match(loadGate, /pathname === "\/world" && \(!locationHash \|\| locationHash === "top"\)/);
   assert.doesNotMatch(loadGate, /attributeFilter: \["data-loading"\]/);
@@ -74,8 +83,8 @@ test("detail routes use per-location restoration without overwriting the world s
 });
 
 test("all rider dossiers return deeper without a doubled fixed-header inset", () => {
-  assert.equal((riderPage.match(/hash="riders-return"/g) ?? []).length, 2);
-  assert.equal((riderPage.match(/<GuardedLink/g) ?? []).length >= 2, true);
+  assert.match(riderPage, /<DossierTopbar[\s\S]*?returnHash="riders-return"/);
+  assert.equal((worldChrome.match(/hash=\{returnHash\}/g) ?? []).length, 2);
   assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
   assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*clamp\(64px, 6vw, 88px\)/);
   assert.match(worldPolishStyles, /#riders-return[\s\S]*?scroll-margin-top:\s*0/);
@@ -85,7 +94,12 @@ test("the rider selected before opening a dossier is restored once on return", (
   assert.match(riderPage, /rememberRiderReturn\(rider\.id\)/);
   assert.match(worldHome, /const returnId = readRiderReturn\(\)/);
   assert.match(worldHome, /RIDERS\.findIndex\(\(rider\) => rider\.id === returnId\)/);
-  assert.match(worldHome, /useState\(initialRiderTab\)/);
+  assert.match(worldHome, /const \[initialRiderTab, setInitialRiderTab\] = useState\(0\)/);
+  assert.match(
+    worldHome,
+    /useLayoutEffect\(\(\) => \{[\s\S]*?setInitialRiderTab\(returnIndex\)[\s\S]*?setRiderTab\(returnIndex\)/,
+  );
+  assert.match(worldHome, /const \[riderTab, setRiderTab\] = useState\(0\)/);
   assert.match(worldHome, /useRef\(riderTab\)/);
   assert.match(worldHome, /<RiderRail ref=\{riderRail\} initialIndex=\{initialRiderTab\} \/>/);
   assert.match(worldHome, /aria-selected=\{i === initialIndex\}/);
@@ -95,8 +109,12 @@ test("the rider selected before opening a dossier is restored once on return", (
 });
 
 test("the compact mobile return control keeps an accessible name", () => {
-  assert.match(riderPage, /className="manager-back" aria-label="ライダー一覧へ戻る"/);
-  assert.match(riderPage, /loading="eager" decoding="async" fetchPriority="high"/);
+  assert.match(riderPage, /returnLabel="ライダー一覧へ戻る"/);
+  assert.match(worldChrome, /className="manager-back"[\s\S]*?aria-label=\{returnAriaLabel\}/);
+  assert.match(
+    riderPage,
+    /loading="eager"[\s\S]{0,100}?decoding="async"[\s\S]{0,100}?fetchPriority="high"/,
+  );
 });
 
 test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", () => {
@@ -105,15 +123,24 @@ test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", ()
   assert.match(zeusButton, /const placementFrame = useRef/);
   assert.match(zeusButton, /const placementTimer = useRef/);
   assert.match(zeusButton, /activePointer\.current != null \|\| placementFrame\.current != null/);
-  assert.match(zeusButton, /window\.setTimeout\(\(\) => \{[\s\S]*?schedulePlacement\(\);[\s\S]*?\}, 72\)/);
+  assert.match(
+    zeusButton,
+    /window\.setTimeout\(\(\) => \{[\s\S]*?schedulePlacement\(\);[\s\S]*?\}, 72\)/,
+  );
 });
 
 test("form sliders size their fill from the rendered Liquid Glass thumb", () => {
-  assert.match(slideControl, /const thumbWidth = thumbRef\.current\?\.getBoundingClientRect\(\)\.width/);
+  assert.match(
+    slideControl,
+    /const thumbWidth = thumbRef\.current\?\.getBoundingClientRect\(\)\.width/,
+  );
   assert.match(slideControl, /next \+ metrics\.thumbRect\.width/);
   assert.match(styles, /--slide-thumb-size: 50px/);
   assert.match(styles, /--slide-thumb-size: 46px/);
-  assert.match(styles, /\.ios-slide-open \.ios-slide-open-thumb \{[\s\S]*?top: 3px;[\s\S]*?bottom: 3px;[\s\S]*?height: auto/);
+  assert.match(
+    styles,
+    /\.ios-slide-open \.ios-slide-open-thumb \{[\s\S]*?top: 3px;[\s\S]*?bottom: 3px;[\s\S]*?height: auto/,
+  );
   assert.match(styles, /translate3d\(var\(--slide-offset, 0px\), 0, 0\)/);
   assert.doesNotMatch(styles, /\.form-pickup-plus\.ios-slide-open \{[^}]*contain:/s);
   assert.doesNotMatch(styles, /translate3d\(var\(--slide-offset[^)]*\), -50%/);
@@ -145,7 +172,10 @@ test("mobile slide controls activate quickly and open before the midpoint", () =
   assert.match(slideControl, /pointerIntent\.current = "horizontal"/);
   assert.match(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
   assert.match(styles, /\.ios-slide-open\[data-holding="true"\]/);
-  assert.match(slideControl, /if \(ratio >= OPEN_THRESHOLD \|\| isThumbTap\) complete\("pointer"\)/);
+  assert.match(
+    slideControl,
+    /if \(ratio >= OPEN_THRESHOLD \|\| isThumbTap\) complete\("pointer"\)/,
+  );
 });
 
 test("slide controls spring in response to drag speed and completion", () => {
@@ -168,11 +198,20 @@ test("slide controls spring in response to drag speed and completion", () => {
   assert.match(styles, /@keyframes iosSlideFillDock/);
   assert.match(reconstructedStyles, /--slide-thumb-scale-x/);
   assert.match(reconstructedStyles, /@keyframes iosSlideThumbDock/);
-  assert.match(styles, /prefers-reduced-motion:[\s\S]*?iosSlideThumbDock|prefers-reduced-motion:[\s\S]*?animation: none !important/);
+  assert.match(
+    styles,
+    /prefers-reduced-motion:[\s\S]*?iosSlideThumbDock|prefers-reduced-motion:[\s\S]*?animation: none !important/,
+  );
 });
 
 test("every manager archive category remounts its panel animation", () => {
-  assert.match(worldHome, /key="managers" className="manager-archive-panel is-managers"/);
-  assert.match(worldHome, /key="unmanaged" className="manager-archive-panel is-unmanaged"/);
-  assert.match(worldHome, /key="other" className="manager-archive-panel is-other"/);
+  assert.match(
+    worldHome,
+    /key="managers"[\s\S]{0,120}?className="manager-archive-panel is-managers"/,
+  );
+  assert.match(
+    worldHome,
+    /key="unmanaged"[\s\S]{0,120}?className="manager-archive-panel is-unmanaged"/,
+  );
+  assert.match(worldHome, /key="other"[\s\S]{0,120}?className="manager-archive-panel is-other"/);
 });

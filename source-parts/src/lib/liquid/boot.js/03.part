@@ -1,48 +1,19 @@
-      if (k === i) t.setAttribute('data-liquid-contact', 'true');
-      else t.removeAttribute('data-liquid-contact');
-    });
-  };
-  const contact = (cx, cy) => {
-    if (!gesture) return;
-    const r = gesture.rect;
-    const sx = r.width / Math.max(root.offsetWidth, 1) || 1;
-    const sy = r.height / Math.max(root.offsetHeight, 1) || 1;
-    const lx = (cx - r.left) / sx, ly = (cy - r.top) / sy;
-    if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
-    if (root.dataset.liquidWebglActive === 'true' || !glow) return;
-    glow.style.transform = 'translate3d(' + (lx - 66).toFixed(1) + 'px,' + (ly - 66).toFixed(1) + 'px,0)';
-    if (reflection) {
-      const tilt = clamp(gesture.vx * 7, -9, 9);
-      reflection.style.transform = 'translate3d(' + (lx - 38).toFixed(1) + 'px,' + (ly - 14).toFixed(1) + 'px,0) rotate(' + tilt.toFixed(1) + 'deg)';
-    }
-    if (lensReflection && lensGeometry) {
-      lensReflection.style.transform = 'translate3d(' + (lx - lensGeometry.x - 34).toFixed(1) + 'px,' + (ly - lensGeometry.y - 11).toFixed(1) + 'px,0)';
-    }
-  };
-  const reset = () => {
-    root.dataset.liquidDragging = 'false';
-    root.dataset.liquidPressed = 'false';
-    root.dataset.liquidHeld = 'false';
-    setContact(null);
-    if (getRenderer().isActive(root)) getRenderer().setPhase('rest');
-    clearTimeout(holdTimer);
-  };
-  const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
-  let pageLocked = false;
-  const blockPageScroll = (e) => { e.preventDefault(); };
-  const lockPage = () => {
-    if (!lockScroll || pageLocked) return;
-    pageLocked = true;
-    document.documentElement.dataset.railLock = 'true';
-    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
-  };
   const unlockPage = () => {
     if (!pageLocked) return;
     pageLocked = false;
     delete document.documentElement.dataset.railLock;
     window.removeEventListener('touchmove', blockPageScroll, { capture: true });
   };
-  const cancel = () => { if (!gesture) return; gesture = null; reset(); unlockPage(); settle(active); };
+  const cancel = () => {
+    const wasActive = Boolean(gesture);
+    gesture = null;
+    pending = null;
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    reset();
+    unlockPage();
+    if (wasActive) settle(active);
+  };
 
   const process = () => {
     moveFrame = null;
@@ -151,7 +122,7 @@
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
       lockPage();
-      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
+      try { root.setPointerCapture(gesture.pointerId); } catch { /* Native gesture takeover is safe. */ }
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');
     }, 105);
   });
@@ -178,7 +149,7 @@
       lockPage();
       root.dataset.liquidDragging = 'true'; root.dataset.liquidHeld = 'true';
       if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
-      try { root.setPointerCapture(gesture.pointerId); } catch (err) { /* Native gesture takeover is safe. */ }
+      try { root.setPointerCapture(gesture.pointerId); } catch { /* Native gesture takeover is safe. */ }
     }
     e.preventDefault();
     pending = { x: e.clientX, y: e.clientY, t: e.timeStamp };
@@ -212,3 +183,28 @@
     gesture = null; reset(); unlockPage(); select(idx);
     requestAnimationFrame(() => settle(idx));
   };
+  root.addEventListener('pointerup', finish);
+  root.addEventListener('pointercancel', () => cancel());
+  root.addEventListener('lostpointercapture', (e) => {
+    // Touch pointers are implicitly captured by the pressed tab on Android.
+    // Moving capture to the rail emits a bubbling lostpointercapture from that
+    // child; only cancel when the rail itself actually loses capture.
+    if (e.target === root && gesture) cancel();
+  });
+  root.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // Pointer capture is not guaranteed in Samsung Internet and embedded
+  // Android WebViews. Finish/cancel at the window boundary as well so a lift
+  // outside the rail, app backgrounding or route transition can never leave
+  // the document-wide touchmove lock behind.
+  window.addEventListener('pointerup', finish, true);
+  window.addEventListener('pointercancel', cancel, true);
+  window.addEventListener('blur', cancel);
+  window.addEventListener('pagehide', cancel);
+  const handleVisibilityChange = () => {
+    if (document.hidden) cancel();
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  let swallowClick = false;
+  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {

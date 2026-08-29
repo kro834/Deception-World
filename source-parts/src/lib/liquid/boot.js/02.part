@@ -1,27 +1,3 @@
-      this.geometry = null; this.targetGeometry = null; this.lastTime = 0;
-    }
-    const lens = root.querySelector(':scope > .liquid-selection-lens');
-    const r = lens ? parseFloat(getComputedStyle(lens).borderTopLeftRadius) : 18;
-    this.cornerRadius = isFinite(r) ? Math.max(r, 0) : 18;
-    this.resize(root);
-    const src = railTexture(root, this.dpr);
-    if (!src) { root.dataset.liquidWebgl = 'fallback'; return false; }
-    this.source = src;
-    const gl = this.gl;
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
-    root.dataset.liquidWebgl = 'true'; root.dataset.liquidWebglActive = 'false';
-    return true;
-  }
-  isActive(root) { return this.activeRoot === root; }
-  detach(root) {
-    if (this.activeRoot !== root) return;
-    this.stop(); this.canvas.remove();
-    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
-    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
-  }
-  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
   setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
   setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
   setPhase(phase) {
@@ -140,7 +116,8 @@ function getRenderer() {
 
 // ── Swipe rail ───────────────────────────────────────────────────────────────
 function initRail(root) {
-  if (!root || root.dataset.liquidBound === "true") return;
+  if (!root) return function () {};
+  if (root.dataset.liquidBound === "true") return root.__liquidDispose || function () {};
   root.dataset.liquidBound = "true";
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
@@ -194,3 +171,41 @@ function initRail(root) {
   };
   const setContact = (i) => {
     tabs().forEach((t, k) => {
+      if (k === i) t.setAttribute('data-liquid-contact', 'true');
+      else t.removeAttribute('data-liquid-contact');
+    });
+  };
+  const contact = (cx, cy) => {
+    if (!gesture) return;
+    const r = gesture.rect;
+    const sx = r.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = r.height / Math.max(root.offsetHeight, 1) || 1;
+    const lx = (cx - r.left) / sx, ly = (cy - r.top) / sy;
+    if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
+    if (root.dataset.liquidWebglActive === 'true' || !glow) return;
+    glow.style.transform = 'translate3d(' + (lx - 66).toFixed(1) + 'px,' + (ly - 66).toFixed(1) + 'px,0)';
+    if (reflection) {
+      const tilt = clamp(gesture.vx * 7, -9, 9);
+      reflection.style.transform = 'translate3d(' + (lx - 38).toFixed(1) + 'px,' + (ly - 14).toFixed(1) + 'px,0) rotate(' + tilt.toFixed(1) + 'deg)';
+    }
+    if (lensReflection && lensGeometry) {
+      lensReflection.style.transform = 'translate3d(' + (lx - lensGeometry.x - 34).toFixed(1) + 'px,' + (ly - lensGeometry.y - 11).toFixed(1) + 'px,0)';
+    }
+  };
+  const reset = () => {
+    root.dataset.liquidDragging = 'false';
+    root.dataset.liquidPressed = 'false';
+    root.dataset.liquidHeld = 'false';
+    setContact(null);
+    if (getRenderer().isActive(root)) getRenderer().setPhase('rest');
+    clearTimeout(holdTimer);
+  };
+  const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  let pageLocked = false;
+  const blockPageScroll = (e) => { e.preventDefault(); };
+  const lockPage = () => {
+    if (!lockScroll || pageLocked) return;
+    pageLocked = true;
+    document.documentElement.dataset.railLock = 'true';
+    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
+  };

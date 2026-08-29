@@ -51,20 +51,8 @@ export const MANAGER_ASSETS = {
 const warmed = new Set<string>();
 const inFlight = new Map<string, Promise<boolean>>();
 
-function browserHasAsset(url: string) {
-  if (typeof window === "undefined" || typeof performance === "undefined") return false;
-  const key = assetKey(url);
-  let absolute = key;
-  try {
-    absolute = new URL(key, window.location.href).href;
-  } catch {
-    /* keep the original key */
-  }
-  return performance.getEntriesByName(absolute, "resource").length > 0;
-}
-
 function assetReady(url: string) {
-  return warmed.has(url) || warmed.has(assetKey(url)) || browserHasAsset(url);
+  return warmed.has(url) || warmed.has(assetKey(url));
 }
 
 export function assetsWarmed(urls: readonly string[]) {
@@ -73,6 +61,31 @@ export function assetsWarmed(urls: readonly string[]) {
 
 function assetKey(url: string) {
   return url.split("?")[0];
+}
+
+const IMAGE_ASSET_PATTERN = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i;
+
+async function decodeImageAsset(url: string) {
+  if (!IMAGE_ASSET_PATTERN.test(url) || typeof Image === "undefined") return true;
+
+  const image = new Image();
+  image.decoding = "async";
+
+  if (typeof image.decode === "function") {
+    image.src = url;
+    try {
+      await image.decode();
+      return image.naturalWidth > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  return new Promise<boolean>((resolve) => {
+    image.onload = () => resolve(image.naturalWidth > 0);
+    image.onerror = () => resolve(false);
+    image.src = url;
+  });
 }
 
 function emitProgress(
@@ -94,8 +107,6 @@ async function pullOne(
 ) {
   if (assetReady(url)) {
     received[index] = totals[index];
-    warmed.add(url);
-    warmed.add(assetKey(url));
     emitProgress(received, totals, onProgress);
     return;
   }
@@ -125,7 +136,8 @@ async function pullOne(
           received[index] = Math.max(received[index], totals[index]);
           emitProgress(received, totals, onProgress);
         }
-        return true;
+        const decoded = await decodeImageAsset(url);
+        return decoded;
       } catch {
         return false;
       }

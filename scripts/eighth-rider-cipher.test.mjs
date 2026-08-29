@@ -31,7 +31,7 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
   assert.match(dossier, /title: "最期の死者"/);
   assert.match(dossier, /name: "サイファー"/);
   assert.match(dossier, /name: "サイファー・ブラックサイト"/);
-  assert.match(dossier, /rider\.id === "cipher" \? rider\.forms/);
+  assert.match(dossier, /rider\.id === "cipher"\s*\?\s*rider\.forms/);
   assert.match(dossier, /name: "SPOOF"/);
   assert.match(dossier, /name: "DEAD DROP"/);
   assert.match(dossier, /name: "BLACKOUT"/);

@@ -1,8 +1,7 @@
-import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
-import { UiVectorIcon } from "./ui-vector-icon";
+import { DossierTopbar } from "./world-chrome";
 
 type Related = {
   id: string;
@@ -62,13 +61,22 @@ const RELATED: Related[] = [
         { dt: "100m", dd: "0.24sec" },
       ],
       abilities: [
-        { name: "EARTH", body: "位置、速度、質量、重力方向、構造状態の基準値を設定する。幻覚や座標偽装では変更前後を比較して検出し、根拠のない位置改変を著しく不安定化させる。" },
+        {
+          name: "EARTH",
+          body: "位置、速度、質量、重力方向、構造状態の基準値を設定する。幻覚や座標偽装では変更前後を比較して検出し、根拠のない位置改変を著しく不安定化させる。",
+        },
       ],
       arsenal: [
-        { name: "アストラルエッジ", body: "ルナと共用するライズコア二基対応の剣銃複合武装。斬撃と量子射撃を変形なしで連続使用する。" },
+        {
+          name: "アストラルエッジ",
+          body: "ルナと共用するライズコア二基対応の剣銃複合武装。斬撃と量子射撃を変形なしで連続使用する。",
+        },
       ],
       finishers: [
-        { name: "アースモディフィカーレ", body: "足場、重心、回避方向を一つの基準座標へ収束させ、保存した慣性エネルギーを脚部へ集中するライダーキック。" },
+        {
+          name: "アースモディフィカーレ",
+          body: "足場、重心、回避方向を一つの基準座標へ収束させ、保存した慣性エネルギーを脚部へ集中するライダーキック。",
+        },
       ],
     },
     sections: [
@@ -140,13 +148,22 @@ const RELATED: Related[] = [
         { dt: "100m", dd: "0.09sec" },
       ],
       abilities: [
-        { name: "LUNAR", body: "回転運動へ補正を加える。盾を正面へ残したまま側面へ回り込み、視線を一方向へ固定して死角を作るなど、相手の防御姿勢そのものを弱点へ変換する。" },
+        {
+          name: "LUNAR",
+          body: "回転運動へ補正を加える。盾を正面へ残したまま側面へ回り込み、視線を一方向へ固定して死角を作るなど、相手の防御姿勢そのものを弱点へ変換する。",
+        },
       ],
       arsenal: [
-        { name: "アストラルエッジ", body: "テラと共用するライズコア二基対応の剣銃複合武装。斬撃と量子射撃を同一動作体系として繋ぐ。" },
+        {
+          name: "アストラルエッジ",
+          body: "テラと共用するライズコア二基対応の剣銃複合武装。斬撃と量子射撃を同一動作体系として繋ぐ。",
+        },
       ],
       finishers: [
-        { name: "ムーンモディフィカーレ", body: "対象の移動、回避、反撃を一つの周回軌道として演算し、ムーンフォームへ最接近する近地点で放つライダーキック。" },
+        {
+          name: "ムーンモディフィカーレ",
+          body: "対象の移動、回避、反撃を一つの周回軌道として演算し、ムーンフォームへ最接近する近地点で放つライダーキック。",
+        },
       ],
     },
     sections: [
@@ -189,23 +206,11 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
-      <header className="manager-topbar">
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand">
-          <span className="brand-sigil">
-            <i>DW</i>
-          </span>
-          <span>
-            <b>DECEPTION WORLD</b>
-            <small>RELATED / {person.code}</small>
-          </span>
-        </GuardedLink>
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
-          <span>その他へ戻る</span>
-          <i aria-hidden="true">
-            <UiVectorIcon kind="arrow-down-left" size={14} />
-          </i>
-        </GuardedLink>
-      </header>
+      <DossierTopbar
+        fileLabel={`RELATED / ${person.code}`}
+        returnHash="manager-archive"
+        returnLabel="その他へ戻る"
+      />
       <section className="manager-hero">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -271,7 +276,11 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         </div>
       </section>
       <FormPickup rider={person.rider} />
-      <DossierNav items={RELATED_NAV} currentHref={`/characters/${person.id}`} indexLabel="RELATED" />
+      <DossierNav
+        items={RELATED_NAV}
+        currentHref={`/characters/${person.id}`}
+        indexLabel="RELATED"
+      />
     </main>
   );
 }

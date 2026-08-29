@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const DEFAULT_APP_NAME = "Grok App";
-export const DISPLAY_APP_NAME = "Deception World";
+export const SITE_APP_NAME = "Deception World";
 export const OG_SERVICE_URL_DEFAULT = "https://og.grok.me";
 export const OG_SITE_REL_PATH = "src/lib/og/site.json";
 
@@ -31,21 +31,21 @@ const SHARE_META_KEYS = new Set([
 
 export function escapeHtml(value) {
   return String(value)
-    .replaceAll("&", "&" + "amp;")
-    .replaceAll("<", "&" + "lt;")
-    .replaceAll(">", "&" + "gt;")
-    .replaceAll('"', "&" + "quot;")
-    .replaceAll("'", "&#" + "39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 /** Inverse of escapeHtml. Decode &amp; last so a single pass undoes one encode. */
 function unescapeHtml(value) {
   return String(value)
-    .replaceAll("&" + "lt;", "<")
-    .replaceAll("&" + "gt;", ">")
-    .replaceAll("&" + "quot;", '"')
-    .replaceAll("&#" + "39;", "'")
-    .replaceAll("&" + "amp;", "&");
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&amp;", "&");
 }
 
 /** 6-digit hex for the og.grok.me placeholder, or "" if site.color is missing/invalid. */
@@ -135,14 +135,18 @@ export function stripInstallParams(url) {
   return rest ? `${path}?${rest}` : path;
 }
 
-export function renderInstallPageHtml(template, { host, url } = {}) {
+export function renderInstallPageHtml(template, { host: _host, url } = {}) {
   return String(template)
-    .replaceAll("{{APP_NAME}}", escapeHtml(DISPLAY_APP_NAME))
+    .replaceAll("{{APP_NAME}}", escapeHtml(SITE_APP_NAME))
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
 export function renderWebManifest(hostHeader) {
-  const name = DISPLAY_APP_NAME;
+  // The publishing host is an opaque deployment slug, not the product name.
+  // Keep appNameFromHost() available for platform utilities, but never expose
+  // that slug as this site's iOS/Android Home Screen identity.
+  void hostHeader;
+  const name = SITE_APP_NAME;
   return JSON.stringify(
     {
       name,
@@ -250,46 +254,3 @@ export function snapshotOgIdentity(cwd = process.cwd()) {
   }
   if (existsSync(join(cwd, "public/x-banner.jpg"))) {
     site.banner = site.banner || "/x-banner.jpg";
-  }
-  return { site };
-}
-
-export function customOgAssetPath(cwd = process.cwd()) {
-  if (existsSync(join(cwd, "public/og.png")) && !existsSync(join(cwd, "public/og.jpg"))) {
-    return "/og.png";
-  }
-  return "/og.jpg";
-}
-
-export function ogServiceUrl() {
-  const fromEnv = String(process.env?.VITE_OG_SERVICE_URL ?? "").trim();
-  return (fromEnv || OG_SERVICE_URL_DEFAULT).replace(/\/+$/, "");
-}
-
-export function titleFromDocument(html) {
-  const match = String(html ?? "").match(/<title\b[^>]*>([^<]*)<\/title>/i);
-  return match ? unescapeHtml(match[1]).trim() : "";
-}
-
-export function resolveOgTitle(
-  site = {},
-  appName = DEFAULT_APP_NAME,
-  host = "",
-  documentTitle = "",
-) {
-  const fromSite = String(site.title ?? "").trim();
-  if (fromSite) return fromSite;
-  const fromDoc = String(documentTitle ?? "").trim();
-  if (fromDoc) return fromDoc;
-  const fromHost = appNameFromHost(host);
-  if (fromHost && fromHost !== DEFAULT_APP_NAME) return fromHost;
-  const fromArg = String(appName ?? "").trim();
-  return fromArg || DEFAULT_APP_NAME;
-}
-
-export function siteHasCustomCard(site = {}) {
-  return String(site.card ?? "").toLowerCase() === "custom";
-}
-
-export function grokOgHeadTags({
-  host = "",

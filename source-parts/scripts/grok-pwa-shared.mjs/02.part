@@ -1,3 +1,46 @@
+  }
+  return { site };
+}
+
+export function customOgAssetPath(cwd = process.cwd()) {
+  if (existsSync(join(cwd, "public/og.png")) && !existsSync(join(cwd, "public/og.jpg"))) {
+    return "/og.png";
+  }
+  return "/og.jpg";
+}
+
+export function ogServiceUrl() {
+  const fromEnv = String(process.env?.VITE_OG_SERVICE_URL ?? "").trim();
+  return (fromEnv || OG_SERVICE_URL_DEFAULT).replace(/\/+$/, "");
+}
+
+export function titleFromDocument(html) {
+  const match = String(html ?? "").match(/<title\b[^>]*>([^<]*)<\/title>/i);
+  return match ? unescapeHtml(match[1]).trim() : "";
+}
+
+export function resolveOgTitle(
+  site = {},
+  appName = DEFAULT_APP_NAME,
+  host = "",
+  documentTitle = "",
+) {
+  const fromSite = String(site.title ?? "").trim();
+  if (fromSite) return fromSite;
+  const fromDoc = String(documentTitle ?? "").trim();
+  if (fromDoc) return fromDoc;
+  const fromHost = appNameFromHost(host);
+  if (fromHost && fromHost !== DEFAULT_APP_NAME) return fromHost;
+  const fromArg = String(appName ?? "").trim();
+  return fromArg || DEFAULT_APP_NAME;
+}
+
+export function siteHasCustomCard(site = {}) {
+  return String(site.card ?? "").toLowerCase() === "custom";
+}
+
+export function grokOgHeadTags({
+  host = "",
   appName = DEFAULT_APP_NAME,
   site = {},
   documentTitle = "",
@@ -63,6 +106,7 @@ function insertBeforeHeadClose(html, snippet) {
 }
 
 export function normalizeHeadContext(ctx = {}) {
+  if (typeof ctx === "string") ctx = { appName: ctx };
   const cwd = ctx.cwd ?? process.cwd();
   const site = ctx.site !== undefined ? ctx.site : snapshotOgIdentity(cwd).site;
   const appName = resolveOgTitle(site, ctx.appName ?? DEFAULT_APP_NAME, ctx.host ?? "");
@@ -77,17 +121,38 @@ export function normalizeHeadContext(ctx = {}) {
   };
 }
 
-export function injectGrokPwaHead(html, ctx = {}) {
+export function injectGrokPwaHead(
+  html,
+  ctx = {},
+  legacyProjectId,
+  legacyCreator,
+  legacyCreatorId,
+) {
   if (typeof html !== "string") return html;
-  const { site, projectId, creator, creatorId, host } = normalizeHeadContext(ctx);
+  const context =
+    typeof ctx === "string"
+      ? {
+          appName: ctx,
+          projectId: legacyProjectId,
+          creator: legacyCreator,
+          creatorId: legacyCreatorId,
+        }
+      : ctx;
+  const { site, projectId, creator, creatorId, host } = normalizeHeadContext(context);
   const documentTitle = titleFromDocument(html);
   const appName = resolveOgTitle(
     site,
-    ctx.appName ?? DEFAULT_APP_NAME,
+    context.appName ?? DEFAULT_APP_NAME,
     host,
     documentTitle,
   );
-  let next = stripShareMetaTags(html);
+  // A production caller opts into canonical share metadata by supplying its
+  // request host or a baked site identity. Legacy positional calls only ask
+  // for platform/PWA chrome and must preserve author-provided social tags.
+  const hasExplicitShareIdentity =
+    typeof ctx !== "string" &&
+    Boolean(context.host || context.site !== undefined || context.cwd !== undefined);
+  let next = hasExplicitShareIdentity ? stripShareMetaTags(html) : html;
 
   const missing = grokPwaHeadTags(appName)
     .filter(([key]) => {
@@ -97,10 +162,20 @@ export function injectGrokPwaHead(html, ctx = {}) {
     })
     .map(([, tag]) => tag);
 
-  next = insertAfterHeadOpen(
-    next,
-    grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
-  );
+  if (hasExplicitShareIdentity) {
+    next = insertAfterHeadOpen(
+      next,
+      grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
+    );
+  } else if (
+    !next.includes('name="twitter:card"') &&
+    !next.includes("name='twitter:card'")
+  ) {
+    next = insertAfterHeadOpen(
+      next,
+      '<meta name="twitter:card" content="summary_large_image">',
+    );
+  }
 
   if (!next.includes("/grok-app-builder/extensions.js")) {
     missing.push(...grokExtensionsHeadTags(projectId));

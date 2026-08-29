@@ -1,10 +1,236 @@
-              <div key="other" className="manager-archive-panel is-other" role="tabpanel">
+              SIX SIGNALS
+              <br />
+              ABOVE THE WORLD.
+            </h3>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
+          </div>
+          <div className="signal-column">
+            <ManagerRail ref={managerRail} />
+
+            {managerTab === 0 ? (
+              <div
+                id="manager-panel-0"
+                key="managers"
+                className="manager-archive-panel is-managers"
+                role="tabpanel"
+                aria-labelledby="manager-tab-0"
+              >
+                <div
+                  className="manager-slot-grid signal-array"
+                  aria-label="六詠を示す6つのシグナル"
+                >
+                  <GuardedLink
+                    className="signal has-visual is-accessible is-face-safe zeus-signal"
+                    to="/managers/zeus"
+                    assets={MANAGER_ASSETS.zeus}
+                    style={{ ["--delay" as string]: "0s" }}
+                    aria-label="六詠I ゼウスの個別資料を開く"
+                  >
+                    <img
+                      src="/manager-zeus-thumb.jpeg"
+                      alt="ゼウスのキャラクタービジュアル"
+                      width={640}
+                      height={497}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>I</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>ゼウス</b>
+                    <em className="signal-apex" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 1.5 14.4 9.6 22.5 12l-8.1 2.4L12 22.5l-2.4-8.1L1.5 12l8.1-2.4L12 1.5Z" />
+                      </svg>
+                    </em>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/rex-loi"
+                    assets={MANAGER_ASSETS["rex-loi"]}
+                    style={{ ["--delay" as string]: "0.16s" }}
+                  >
+                    <img
+                      src="/manager-rex-loi-thumb.jpeg"
+                      alt="レックス・ロワのキャラクタービジュアル"
+                      width={640}
+                      height={960}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>II</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>レックス・ロワ</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/shuza"
+                    assets={MANAGER_ASSETS.shuza}
+                    style={{ ["--delay" as string]: "0.32s" }}
+                  >
+                    <img
+                      src="/manager-shuza-thumb.jpeg"
+                      alt="シュザのキャラクタービジュアル"
+                      width={640}
+                      height={913}
+                      style={{ objectPosition: "50% 16%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>III</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>シュザ</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible lejas-signal"
+                    to="/managers/lejas"
+                    assets={MANAGER_ASSETS.lejas}
+                    style={{ ["--delay" as string]: "0.48s" }}
+                    aria-label="六詠IV レジャスの個別資料を開く"
+                  >
+                    <img
+                      src="/manager-lejas-portrait-thumb.jpeg"
+                      alt="レジャスの顔アップ"
+                      width={640}
+                      height={799}
+                      style={{ objectPosition: "50% 8%", objectFit: "cover" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>IV</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>レジャス</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible is-face-safe"
+                    to="/managers/opus"
+                    assets={MANAGER_ASSETS.opus}
+                    style={{ ["--delay" as string]: "0.64s" }}
+                    aria-label="六詠V オパスの個別資料を開く"
+                  >
+                    <img
+                      src="/manager-opus-thumb.jpeg"
+                      alt="オパスのキャラクタービジュアル"
+                      width={640}
+                      height={851}
+                      style={{ objectPosition: "50% 0%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>V</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>オパス</b>
+                  </GuardedLink>
+                  <GuardedLink
+                    className="signal has-visual is-accessible"
+                    to="/managers/reemu"
+                    assets={MANAGER_ASSETS.reemu}
+                    style={{ ["--delay" as string]: "0.8s" }}
+                  >
+                    <img
+                      src="/manager-reemu-thumb.jpeg"
+                      alt="リームーのキャラクタービジュアル"
+                      width={540}
+                      height={960}
+                      style={{ objectPosition: "50% 14%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>VI</span>
+                    <i />
+                    <small>OPEN DOSSIER</small>
+                    <b>リームー</b>
+                  </GuardedLink>
+                </div>
+              </div>
+            ) : managerTab === 1 ? (
+              <div
+                id="manager-panel-1"
+                key="unmanaged"
+                className="manager-archive-panel is-unmanaged"
+                role="tabpanel"
+                aria-labelledby="manager-tab-1"
+              >
+                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
+                <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
+                  <button
+                    className="dante-archive"
+                    type="button"
+                    aria-label="管理人殺し ダンテへのアクセスを試みる"
+                    onClick={(e) => {
+                      if (danteOpenTimer.current != null) return;
+                      const host = e.currentTarget;
+                      host.classList.add("is-glitching");
+                      danteOpenTimer.current = window.setTimeout(() => {
+                        danteOpenTimer.current = null;
+                        host.classList.remove("is-glitching");
+                        const dlg = danteDialogRef.current;
+                        if (!dlg) return;
+                        if (danteCloseTimer.current != null)
+                          window.clearTimeout(danteCloseTimer.current);
+                        try {
+                          dlg.showModal();
+                        } catch {
+                          /* already open */
+                        }
+                        (document.activeElement as HTMLElement | null)?.blur();
+                        const inner = dlg.querySelector(".dante-denied-inner");
+                        inner?.classList.remove("is-slam");
+                        void (inner as HTMLElement | null)?.offsetWidth;
+                        inner?.classList.add("is-slam");
+                        danteCloseTimer.current = window.setTimeout(() => {
+                          danteCloseTimer.current = null;
+                          if (dlg.open) dlg.close();
+                        }, 2600);
+                      }, 420);
+                    }}
+                  >
+                    <span className="dante-visual">
+                      <img
+                        src="/manager-killer-dante.jpeg"
+                        alt="ダンテのキャラクタービジュアル"
+                        width={1416}
+                        height={1756}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                    <span className="dante-copy">
+                      <small>ANOMALOUS RECORD</small>
+                      <b>DANTE</b>
+                      <em>管理人殺し</em>
+                      <i>ACCESS //</i>
+                    </span>
+                  </button>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                id="manager-panel-2"
+                key="other"
+                className="manager-archive-panel is-other"
+                role="tabpanel"
+                aria-labelledby="manager-tab-2"
+              >
                 <p className="visually-hidden">その他の関連資料</p>
                 <div className="manager-slot-grid other-array" aria-label="その他">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
-                    assets={["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"]}
+                    assets={[
+                      "/character-terra.jpeg",
+                      "/character-terra-thumb.jpeg",
+                      "/rider-realm-earth.jpeg",
+                    ]}
                     aria-label="テラ・アレインの個別資料を開く"
                   >
                     <img
@@ -29,7 +255,11 @@
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/luna"
-                    assets={["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"]}
+                    assets={[
+                      "/character-luna.jpeg",
+                      "/character-luna-thumb.jpeg",
+                      "/rider-realm-moon.jpeg",
+                    ]}
                     aria-label="ルナ・アレインの個別資料を開く"
                   >
                     <img
@@ -66,7 +296,13 @@
               <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
-            <div className="world-column-copy" role="tabpanel" aria-label={`コラム${column.no} ${column.title}`}>
+            <div
+              id="world-column-panel"
+              className="world-column-copy"
+              role="tabpanel"
+              aria-labelledby={`column-tab-${columnTab}`}
+              aria-label={`コラム${column.no} ${column.title}`}
+            >
               <div className="world-column-number-stack">
                 {COLUMNS.map((item, index) => (
                   <p
@@ -126,13 +362,21 @@
             <i />
           </p>
           <h2>八人が、世界へ。</h2>
-          <p>主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。</p>
+          <p>
+            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+          </p>
         </div>
         <div className="rider-console">
           <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          <div className="rider-detail" role="tabpanel" style={{ ["--rider-tone" as string]: rider.tone }}>
+          <div
+            id="rider-active-panel"
+            className="rider-detail"
+            role="tabpanel"
+            aria-labelledby={`rider-tab-${rider.id}`}
+            style={{ ["--rider-tone" as string]: rider.tone }}
+          >
             <div className="rider-visual fit-cover">
-              {RIDERS.map((r, i) => (
+              {RIDERS.map((r, i) =>
                 i === riderTab || i === previousRiderTab ? (
                   <img
                     key={r.id}
@@ -145,8 +389,8 @@
                     fetchPriority={i === riderTab ? "auto" : "low"}
                     draggable={false}
                   />
-                ) : null
-              ))}
+                ) : null,
+              )}
             </div>
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
@@ -163,85 +407,3 @@
               </h3>
               <p className="rider-description">{rider.desc}</p>
               <div className="rider-line">
-                <span />
-                <b>{rider.name}</b>
-              </div>
-              <SlideOpenControl
-                className="rider-dossier-open"
-                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
-                label="個別資料"
-                opensDialog={false}
-                onOpen={() => {
-                  void go({
-                    to: `/riders/${rider.id}`,
-                    assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
-                  });
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="records-section" id="records" data-performance-region>
-        <div className="section-index">
-          <span>03</span>
-          <small>NEW RECORDS</small>
-        </div>
-        <div className="records-heading">
-          <p className="eyebrow">
-            <span>POWER BEYOND THE BORDER</span>
-            <i />
-          </p>
-          <h2>
-            到達点は、
-            <br />
-            ひとつではない。
-          </h2>
-        </div>
-        <div className="return-strip">
-          <div>
-            <span>RETURNING SIGNAL</span>
-            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
-          </div>
-          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
-          <i aria-hidden="true" />
-        </div>
-        <section className="episode-archive" aria-labelledby="episode-archive-title">
-          <div className="episode-archive-heading">
-            <div>
-              <span>EPISODE ARCHIVE</span>
-              <h3 id="episode-archive-title">判明済みエピソード</h3>
-            </div>
-            <div className="episode-archive-meta">
-              <p>
-                <strong>{String(EPISODES.length).padStart(2, "0")}</strong>
-                <span>RECORDS FOUND</span>
-              </p>
-              <div className="episode-controls" aria-label="エピソードの表示操作">
-                <button
-                  type="button"
-                  className="ios26-glass"
-                  data-liquid-pointer="true"
-                  disabled={episode === 0}
-                  onClick={() => goEpisode(episode - 1)}
-                  aria-label="前のエピソードへ"
-                >
-                  <LiquidPointerGlow />
-                  <span aria-hidden="true">
-                    <UiVectorIcon kind="arrow-left" size={17} />
-                  </span>
-                </button>
-                <output aria-live="polite">{String(episode + 1).padStart(2, "0")} / {String(EPISODES.length).padStart(2, "0")}</output>
-                <button
-                  type="button"
-                  className="ios26-glass"
-                  data-liquid-pointer="true"
-                  disabled={episode === EPISODES.length - 1}
-                  onClick={() => goEpisode(episode + 1)}
-                  aria-label="次のエピソードへ"
-                >
-                  <LiquidPointerGlow />
-                  <span aria-hidden="true">
-                    <UiVectorIcon kind="arrow-right" size={17} />
-                  </span>

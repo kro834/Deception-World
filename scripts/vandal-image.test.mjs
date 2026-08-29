@@ -26,9 +26,9 @@ const dossierImage = new URL(
 test("Vandal uses the dedicated thumbnail in the rider index", () => {
   assert.match(
     worldHome,
-    /id: "vandal"[^\n]+img: "\/rider-vandal-thumbnail-20260827\.jpeg"/,
+    /id: "vandal"[\s\S]{0,320}?img: "\/rider-vandal-thumbnail-20260827\.jpeg"/,
   );
-  assert.doesNotMatch(worldHome, /id: "vandal"[^\n]+img: "\/rider-vandal-20260826\.jpeg"/);
+  assert.doesNotMatch(worldHome, /id: "vandal"[\s\S]{0,320}?img: "\/rider-vandal-20260826\.jpeg"/);
 });
 
 test("Vandal keeps the full visual across both dossiers", () => {

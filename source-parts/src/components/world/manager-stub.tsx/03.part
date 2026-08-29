@@ -1,3 +1,101 @@
+      no: "01",
+      kicker: "AUTHORITY / COMBAT MATH",
+      title: "戦場は、解を出すための計算空間になる。",
+      body: [
+        "六詠第三位。戦闘そのものを演算として処理し、相手の行動を手番として先読みする。最上位クラスの戦闘能力を持ちながら、勝敗を『予測の検証』として扱う。",
+        "レジャスが盤面で相手を誤らせるのに対し、シュザは正しい計算で相手を詰ませる。嘘は不要で、最適解がそのまま圧力になる。",
+      ],
+    },
+    {
+      no: "02",
+      kicker: "PERSONALITY / COLD FIRE",
+      title: "熱を持たない炎は、消えない。",
+      body: [
+        "会話は短い。不要な慰めを返さず、結果だけを置く。冷酷というより、演算結果を改ざんしない誠実さに近い。",
+      ],
+    },
+    {
+      no: "03",
+      kicker: "BATTLE / EXECUTION",
+      title: "手を出す前に、終わり方が決まっている。",
+      body: [
+        "シュザの戦闘は開幕が遅いように見える。実際は開始前に終了条件が決まっており、開幕後はそれを実行しているだけだ。",
+      ],
+    },
+  ],
+  rider: {
+    img: "/manager-shuza-rider.jpeg",
+    pos: "50% 10%",
+    system: "フィフスセプションガヴ × グリードゴチゾウ",
+    name: "ルーラー",
+    calls: ["GREED!", "GAVV GAVV GAVV GAVV", "DOMINATE!"],
+    quote: "演算は終わっている。あとは実行するだけだ",
+    stats: [
+      { dt: "HEIGHT", dd: "209.6cm" },
+      { dt: "WEIGHT", dd: "108.8kg" },
+      { dt: "PUNCH", dd: "29.8t" },
+      { dt: "KICK", dd: "39.4t" },
+      { dt: "JUMP", dd: "58m" },
+      { dt: "100m", dd: "0.8sec" },
+    ],
+    abilities: [
+      {
+        name: "DESIRE SIGHT",
+        body: "対象が『攻撃したい』と思った段階で次の行動を察知し、その動きを生じさせた欲望まで視覚化する。",
+      },
+      {
+        name: "GREED CELL",
+        body: "周囲の欲望を糧に増殖と微小破裂を加速。膂力、速度、防御、再生、戦闘継続能力を際限なく高める。",
+      },
+    ],
+    arsenal: [
+      {
+        name: "グリードセル",
+        body: "微小な破裂を同期させ、欲望が強いほど身体能力を増幅する。変形する刃、自己再形成する外殻、欲望誘発波を放つローブを備える。",
+      },
+      {
+        name: "フィニッシャー",
+        body: "破損した破片さえ短剣、遠隔刃、拘束用の棘へ変化するハルバード。",
+      },
+    ],
+    finishers: [
+      {
+        name: "PHOBOS CRACK",
+        body: "全身のグリードセルを脚部へ集約し、支配権限を右脚へ重ねて放つ、紅紫色の衝撃を伴うライダーキック。",
+      },
+      {
+        name: "PHOBOS DESTROY",
+        body: "フィニッシャーへ巨大な紅紫色の刃を形成し、既に支配している能力、武器、法則を一斉に対象へ集中させる。",
+      },
+    ],
+  },
+};
+
+export const REEMU: Profile = {
+  id: "reemu",
+  numeral: "VI",
+  name: "リームー",
+  title: "責任から逃れる観測者",
+  image: "/manager-reemu.jpeg",
+  pos: "50% 14%",
+  accent: "#d7ab51",
+  quotes: [
+    "見ていないことにすれば、責任は発生しない",
+    "観測しない世界は、まだ終わっていない",
+    "私は関与していない。ただ、そこにいただけだ",
+  ],
+  facts: [
+    { dt: "NAME", dd: "リームー" },
+    { dt: "RANK", dd: "六詠・第六位" },
+    { dt: "AUTHORITY", dd: "観測／非介入" },
+    { dt: "STATUS", dd: "ACCESS GRANTED" },
+  ],
+  sections: [
+    {
+      no: "01",
+      kicker: "AUTHORITY / UNOBSERVED",
+      title: "見なければ、因果は確定しない。",
+      body: [
         "六詠第六位。観測そのものを権限として持ち、同時に『観測しない』ことで責任を回避する。リームーが見た瞬間、その出来事は記録され、見ていない出来事は未確定のまま残る。",
         "他の六詠が干渉で世界を動かすのに対し、リームーは動かないことで世界の穴を維持する。",
       ],
@@ -35,16 +133,28 @@
       { dt: "100m", dd: "0.003sec" },
     ],
     abilities: [
-      { name: "KIJIN SWORD", body: "天智による高速近接戦闘へ全装備を最適化。知覚、防御、体捌き、弱点解析を統合し、瞬殺へ収束させる。" },
-      { name: "DUAL ON", body: "既存バックルと組み合わせ、キジンソードを中心とする追加能力と装備構成を実行する。" },
+      {
+        name: "KIJIN SWORD",
+        body: "天智による高速近接戦闘へ全装備を最適化。知覚、防御、体捌き、弱点解析を統合し、瞬殺へ収束させる。",
+      },
+      {
+        name: "DUAL ON",
+        body: "既存バックルと組み合わせ、キジンソードを中心とする追加能力と装備構成を実行する。",
+      },
     ],
     arsenal: [
       { name: "天智", body: "愛刀。キジンクグツも生成できる。" },
       { name: "マーダーグラス", body: "構造的弱点と最適打撃点を即座に発見する。" },
     ],
     finishers: [
-      { name: "KIJIN SWORD STRIKE", body: "バットウトリガーを一度引き、紅い月を背に円月殺法の斬撃を放つ。" },
-      { name: "KIJIN SWORD VICTORY", body: "トリガーを二度引き、黄金の墨を思わせる回転斬撃を放つ。紫色のライダーキックへも派生する。" },
+      {
+        name: "KIJIN SWORD STRIKE",
+        body: "バットウトリガーを一度引き、紅い月を背に円月殺法の斬撃を放つ。",
+      },
+      {
+        name: "KIJIN SWORD VICTORY",
+        body: "トリガーを二度引き、黄金の墨を思わせる回転斬撃を放つ。紫色のライダーキックへも派生する。",
+      },
     ],
   },
 };
@@ -54,7 +164,7 @@ export const ZEUS: Profile = {
   numeral: "I",
   name: "ゼウス",
   title: "主権を継いだ六詠第一位",
-  image: "/manager-zeus-detail.jpeg",
+  image: "/manager-zeus-detail.jpeg?v=20260823-2",
   pos: "50% 42%",
   accent: "#e6c58b",
   sovereign: true,
@@ -178,7 +288,15 @@ export const OPUS: Profile = {
     system: "戦極ドライバー × ディバインロックシード／極超ロックシード",
     name: "モスコ",
     sub: "ディバインアームズ",
-    calls: ["INFERNO BASKET！", "DIVINE！", "LOCK ON！", "ソイヤッ！", "LOCK OPEN！", "DIVINE ARMS！", "AMBITIOUS！"],
+    calls: [
+      "INFERNO BASKET！",
+      "DIVINE！",
+      "LOCK ON！",
+      "ソイヤッ！",
+      "LOCK OPEN！",
+      "DIVINE ARMS！",
+      "AMBITIOUS！",
+    ],
     quote: "祈らないでください。私は、叶えてしまう",
     stats: [
       { dt: "HEIGHT", dd: "216.8cm" },

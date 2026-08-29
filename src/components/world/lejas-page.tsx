@@ -1,37 +1,30 @@
 import { useState } from "react";
-import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
-import { UiVectorIcon } from "./ui-vector-icon";
+import { DossierTopbar } from "./world-chrome";
 
 export function LejasPage() {
   useWorldMode();
   const [closeUp, setCloseUp] = useState(false);
 
   return (
-    <main className="manager-page" style={{ ["--manager-accent" as string]: "#78b69b", ["--manager-accent-soft" as string]: "#d7ab51" }}>
+    <main
+      className="manager-page"
+      style={{
+        ["--manager-accent" as string]: "#78b69b",
+        ["--manager-accent-soft" as string]: "#d7ab51",
+      }}
+    >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
-      <header className="manager-topbar">
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="brand" aria-label="Deception Worldの六詠一覧へ戻る">
-          <span className="brand-sigil">
-            <i>DW</i>
-          </span>
-          <span>
-            <b>DECEPTION WORLD</b>
-            <small>MANAGER ARCHIVE / IV</small>
-          </span>
-        </GuardedLink>
-        <GuardedLink to="/world" hash="manager-archive" assets={[]} className="manager-back">
-          <span>六詠一覧へ戻る</span>
-          <i aria-hidden="true">
-            <UiVectorIcon kind="arrow-down-left" size={14} />
-          </i>
-        </GuardedLink>
-      </header>
+      <DossierTopbar
+        fileLabel="MANAGER ARCHIVE / IV"
+        returnHash="manager-archive"
+        returnLabel="六詠一覧へ戻る"
+      />
 
       <section className="manager-hero" id="top">
         <div className="manager-portrait-column">
@@ -73,7 +66,9 @@ export function LejasPage() {
               <b>RIKUEI / IV</b>
             </div>
             <i className="manager-scanline" aria-hidden="true" />
-            <span className="lejas-tap-hint">{closeUp ? "タップで引きショット" : "タップで顔アップ"}</span>
+            <span className="lejas-tap-hint">
+              {closeUp ? "タップで引きショット" : "タップで顔アップ"}
+            </span>
           </button>
         </div>
         <div className="manager-introduction">
@@ -179,7 +174,14 @@ export function LejasPage() {
           pos: "50% 8%",
           system: "ゲーマドライバー × グランドマスターガシャット／ゲームマスターガシャット",
           name: "ファルス",
-          calls: ["GAME MASTER SYSTEM!", "ガシャット!", "ガッチャーン!", "レベルアップ!!", "TRUE! FALSE! CHECKMATE!", "KAMEN RIDER FALS!"],
+          calls: [
+            "GAME MASTER SYSTEM!",
+            "ガシャット!",
+            "ガッチャーン!",
+            "レベルアップ!!",
+            "TRUE! FALSE! CHECKMATE!",
+            "KAMEN RIDER FALS!",
+          ],
           quote: "選んだのは君だ。私が並べた選択肢の中から",
           stats: [
             { dt: "HEIGHT", dd: "214.4cm" },
@@ -190,20 +192,50 @@ export function LejasPage() {
             { dt: "100m", dd: "0.0014sec" },
           ],
           abilities: [
-            { name: "FALSE BOARD", body: "異なる目的を持つ二名以上がいる時だけ盤面を成立させ、人物、武器、建造物、能力、関係性までを駒や地形として登録する。" },
-            { name: "RULE INSTALL", body: "敵味方と自身へ適用されるルールを最大四つ設定する。完全に解読した者はそのルールを逆用できる。" },
-            { name: "ROLE ASSIGN", body: "現実の能力、立場、関係性を基に、キング、クイーン、ルーク、ビショップ、ナイト、ポーンなどの役割を与える。" },
-            { name: "TRUE DISPLAY", body: "虚偽を含まない盤面情報を提示する一方、順番、範囲、主語、時間軸を選び、その先に生じる別の結果を伏せる。" },
-            { name: "SAVE / RETRY", body: "配置、損傷、能力使用状況を一度だけ保存・復元する。全員の記憶は維持される。" },
-            { name: "CHECKMATE PROCESS", body: "重要な選択を四手記録し、勝利へ至る合法手を閉鎖する。" },
+            {
+              name: "FALSE BOARD",
+              body: "異なる目的を持つ二名以上がいる時だけ盤面を成立させ、人物、武器、建造物、能力、関係性までを駒や地形として登録する。",
+            },
+            {
+              name: "RULE INSTALL",
+              body: "敵味方と自身へ適用されるルールを最大四つ設定する。完全に解読した者はそのルールを逆用できる。",
+            },
+            {
+              name: "ROLE ASSIGN",
+              body: "現実の能力、立場、関係性を基に、キング、クイーン、ルーク、ビショップ、ナイト、ポーンなどの役割を与える。",
+            },
+            {
+              name: "TRUE DISPLAY",
+              body: "虚偽を含まない盤面情報を提示する一方、順番、範囲、主語、時間軸を選び、その先に生じる別の結果を伏せる。",
+            },
+            {
+              name: "SAVE / RETRY",
+              body: "配置、損傷、能力使用状況を一度だけ保存・復元する。全員の記憶は維持される。",
+            },
+            {
+              name: "CHECKMATE PROCESS",
+              body: "重要な選択を四手記録し、勝利へ至る合法手を閉鎖する。",
+            },
           ],
           arsenal: [
-            { name: "ノー・リーガムーブ", body: "大剣。対象の合法手を斬り、直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。" },
-            { name: "チェックメイト・バスティオン", body: "盾。受けた攻撃を一手として記録し、同系統を自動減衰する。" },
+            {
+              name: "ノー・リーガムーブ",
+              body: "大剣。対象の合法手を斬り、直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。",
+            },
+            {
+              name: "チェックメイト・バスティオン",
+              body: "盾。受けた攻撃を一手として記録し、同系統を自動減衰する。",
+            },
           ],
           finishers: [
-            { name: "FALS CRITICAL STRIKE", body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。" },
-            { name: "CHECKMATE CRITICAL END", body: "盤面を一枚の白黒区画へ圧縮し、一点へ収束したライダーキックで終局へ導く。" },
+            {
+              name: "FALS CRITICAL STRIKE",
+              body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。",
+            },
+            {
+              name: "CHECKMATE CRITICAL END",
+              body: "盤面を一枚の白黒区画へ圧縮し、一点へ収束したライダーキックで終局へ導く。",
+            },
           ],
         }}
       />

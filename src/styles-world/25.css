@@ -36,6 +36,62 @@ html[data-side-menu-open="true"] body {
     0 14px 36px rgba(0, 0, 0, 0.22);
 }
 
+.topbar,
+.manager-topbar {
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-right: max(clamp(20px, 4vw, 72px), env(safe-area-inset-right));
+  padding-left: max(clamp(20px, 4vw, 72px), env(safe-area-inset-left));
+}
+
+.detail-topbar-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.manager-topbar .side-panel-trigger {
+  flex: 0 0 44px;
+  border-color: color-mix(in srgb, var(--manager-accent, var(--cyan)) 34%, transparent);
+  color: color-mix(in srgb, var(--manager-accent, var(--cyan)) 76%, white);
+}
+
+:is(
+  .side-panel-trigger,
+  .side-panel-close,
+  .primary-action,
+  .poster-shuffle,
+  .poster-reset,
+  .poster-lock,
+  .site-update-button,
+  .manager-back,
+  .episode-controls button,
+  .form-pickup-close,
+  .rider-nightmare-dialog-close
+):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--manager-accent, var(--cyan)) 76%, white);
+  outline-offset: 4px;
+}
+
+/* Long dossier dialogs keep their primary escape control inside the viewport.
+   The negative margins preserve the original overlay geometry. */
+.form-pickup-dialog .form-pickup-close[data-liquid-pointer] {
+  position: sticky;
+  z-index: 50;
+  top: max(12px, env(safe-area-inset-top));
+  right: auto;
+  margin: -12px -8px -32px auto;
+  background: rgb(7 9 14 / 0.84);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.34);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+}
+
+.site-update-button {
+  min-height: 44px;
+}
+
 .section-index {
   position: relative;
   min-height: 34px;
@@ -85,8 +141,7 @@ html[data-side-menu-open="true"] body {
 .rider-console {
   background:
     linear-gradient(145deg, rgba(103, 216, 255, 0.04), transparent 28%),
-    linear-gradient(320deg, rgba(215, 171, 81, 0.025), transparent 32%),
-    rgba(8, 13, 20, 0.9);
+    linear-gradient(320deg, rgba(215, 171, 81, 0.025), transparent 32%), rgba(8, 13, 20, 0.9);
 }
 
 /* Repeated records get a consistent modular cadence. Geometry and reserved
@@ -123,8 +178,7 @@ html[data-side-menu-open="true"] body {
 
 .manager-facts > div {
   background:
-    linear-gradient(135deg, rgba(103, 216, 255, 0.035), transparent 58%),
-    rgba(255, 255, 255, 0.012);
+    linear-gradient(135deg, rgba(103, 216, 255, 0.035), transparent 58%), rgba(255, 255, 255, 0.012);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
@@ -166,11 +220,20 @@ html[data-side-menu-open="true"] body {
   contain-intrinsic-size: auto 1200px;
 }
 
+:is(.world-column, .episode-archive, .manager-archive-identity-records, .rider-form-pickup-stack) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 960px;
+}
+
 /* Background tabs and low-capability devices should never spend time
    repainting decorative loops. Interactive transitions remain available. */
 html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *,
-html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *::before,
-html[data-world-page-visible="false"] :is(.site-shell, .manager-page, .rider-archive-page) *::after {
+html[data-world-page-visible="false"]
+  :is(.site-shell, .manager-page, .rider-archive-page)
+  *::before,
+html[data-world-page-visible="false"]
+  :is(.site-shell, .manager-page, .rider-archive-page)
+  *::after {
   animation-play-state: paused !important;
 }
 
@@ -228,6 +291,96 @@ html[data-world-effects="economy"] .grain {
     height: 112px;
     filter: none;
   }
+
+  .poster-back-card-3,
+  .poster-back-card-4 {
+    display: none;
+  }
+}
+
+@media (max-width: 840px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 5px;
+    min-height: 116px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-right: max(14px, env(safe-area-inset-right));
+    padding-bottom: 6px;
+    padding-left: max(14px, env(safe-area-inset-left));
+  }
+
+  .topbar nav {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 4px;
+    padding-top: 4px;
+    border-top: 1px solid color-mix(in srgb, var(--cyan) 12%, transparent);
+  }
+
+  .topbar nav a {
+    min-height: 44px;
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  .topbar nav a::after {
+    right: 14%;
+    bottom: 2px;
+    left: 14%;
+  }
+
+  .hero {
+    padding-top: calc(164px + env(safe-area-inset-top));
+  }
+
+  .manager-back {
+    font-size: 10px;
+  }
+
+  .manager-archive-tabs b {
+    font-size: clamp(9px, 2.8vw, 11px);
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 560px) {
+  .manager-topbar {
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+
+  .detail-topbar-actions {
+    gap: 7px;
+  }
+
+  .manager-back,
+  .manager-topbar .side-panel-trigger {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .poster-lock b,
+  .manager-archive-tabs small,
+  .episode-card-copy small {
+    font-size: 9px;
+    line-height: 1.35;
+  }
+
+  .manager-archive-tabs small {
+    letter-spacing: 0.1em;
+  }
+
+  .story-copy p,
+  .section-title > p,
+  .manager-copy-body p {
+    line-height: 1.95;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -237,7 +390,13 @@ html[data-world-effects="economy"] .grain {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :is(.threat-panel, .rider-console, .episode-archive, .world-column-content, .manager-copy-section) {
+  :is(
+    .threat-panel,
+    .rider-console,
+    .episode-archive,
+    .world-column-content,
+    .manager-copy-section
+  ) {
     background-color: #09101a;
     background-image: none;
   }

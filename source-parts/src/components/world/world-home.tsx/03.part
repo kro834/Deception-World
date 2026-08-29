@@ -1,3 +1,268 @@
+      syncAmbientPause();
+    };
+    const handleOpeningHandoff = (event: Event) => {
+      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
+      handoffActive =
+        typeof detail?.active === "boolean"
+          ? detail.active
+          : document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    syncAmbientPause();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    clearRiderReturn();
+  }, []);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
+    if (current === next) return;
+    if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+    setPreviousRiderTab(current);
+    riderTabRef.current = next;
+    setRiderTab(next);
+    riderTransitionTimer.current = window.setTimeout(() => {
+      setPreviousRiderTab(null);
+      riderTransitionTimer.current = null;
+    }, 220);
+  }, []);
+
+  useEffect(() => {
+    const off1 = bindRail(managerRail.current, setManagerTab);
+    const off2 = bindRail(columnRail.current, setColumnTab);
+    const off3 = bindRail(riderRail.current, selectRider);
+    const off4 = bindRail(pickupRail.current, setColumnTab);
+    let disposeGlass: (() => void) | undefined;
+    const id = requestAnimationFrame(() => {
+      disposeGlass = bootLiquidGlass(document);
+    });
+    return () => {
+      off1();
+      off2();
+      off3();
+      off4();
+      cancelAnimationFrame(id);
+      disposeGlass?.();
+    };
+  }, [selectRider]);
+
+  useEffect(() => {
+    if (locked || ambientPaused || motionReduced || !heroVisible) return;
+    const t = window.setInterval(() => {
+      setPoster((p) => {
+        setPrevPoster(p);
+        return (p + 1) % POSTERS.length;
+      });
+    }, 5200);
+    return () => window.clearInterval(t);
+  }, [ambientPaused, heroVisible, locked, motionReduced]);
+
+  useEffect(() => {
+    if (ambientPaused || motionReduced || !heroVisible) return;
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    if (
+      connection?.saveData ||
+      connection?.effectiveType === "slow-2g" ||
+      connection?.effectiveType === "2g"
+    )
+      return;
+    const timer = window.setTimeout(() => {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [ambientPaused, heroVisible, motionReduced, poster]);
+
+  useEffect(() => {
+    if (!ambientPaused) {
+      const paused = pausedAmbientAnimations.current;
+      pausedAmbientAnimations.current = [];
+      paused.forEach((animation) => {
+        if (animation.playState !== "paused") return;
+        try {
+          animation.play();
+        } catch {
+          // A route handoff can detach one animated node while the remaining
+          // ambient loops are still valid. Resume each loop independently.
+        }
+      });
+      return;
+    }
+    const pauseInfiniteAnimations = () => {
+      const shell = shellRef.current;
+      if (!shell || typeof shell.getAnimations !== "function") return;
+      const runningLoops = shell
+        .getAnimations({ subtree: true })
+        .filter(
+          (animation) =>
+            animation.playState === "running" &&
+            animation.effect?.getTiming().iterations === Infinity,
+        );
+      runningLoops.forEach((animation) => animation.pause());
+      pausedAmbientAnimations.current = Array.from(
+        new Set([...pausedAmbientAnimations.current, ...runningLoops]),
+      );
+    };
+    pauseInfiniteAnimations();
+    const frame = window.requestAnimationFrame(pauseInfiniteAnimations);
+    return () => window.cancelAnimationFrame(frame);
+  }, [ambientPaused]);
+
+  useEffect(() => {
+    if ((!ambientPaused && !motionReduced) || !shuffleActive.current) return;
+    shuffleRunId.current += 1;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setShuffling(false);
+  }, [ambientPaused, motionReduced]);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell || typeof IntersectionObserver === "undefined") return;
+    const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
+          if (entry.target === openingHeroRef.current) setHeroVisible(entry.isIntersecting);
+        });
+      },
+      { rootMargin: "240px 0px" },
+    );
+    regions.forEach((region) => observer.observe(region));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const sections = (["story", "riders", "records"] as const)
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section != null);
+    if (!sections.length) return;
+    let frame = 0;
+    const syncActiveSection = () => {
+      frame = 0;
+      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
+      let current: "story" | "riders" | "records" | null = null;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= marker) {
+          current = section.id as "story" | "riders" | "records";
+        }
+      });
+      setActiveSection(current);
+    };
+    const requestSectionSync = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncActiveSection);
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
+    sections.forEach((section) => resizeObserver?.observe(section));
+    window.addEventListener("scroll", requestSectionSync, { passive: true });
+    window.addEventListener("resize", requestSectionSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
+    syncActiveSection();
+    return () => {
+      window.removeEventListener("scroll", requestSectionSync);
+      window.removeEventListener("resize", requestSectionSync);
+      window.visualViewport?.removeEventListener("resize", requestSectionSync);
+      resizeObserver?.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
+    const grid = episodeGridRef.current;
+    if (!grid) return;
+    let frame = 0;
+    const releaseProgrammaticScroll = () => {
+      episodeProgrammatic.current = false;
+      if (episodeScrollTimer.current != null) {
+        window.clearTimeout(episodeScrollTimer.current);
+        episodeScrollTimer.current = null;
+      }
+    };
+    const syncFromScroll = () => {
+      frame = 0;
+      if (episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      if (!cards.length) return;
+      const mid = grid.scrollLeft + grid.clientWidth / 2;
+      let best = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
+      cards.forEach((card, i) => {
+        const center = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(center - mid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+      setEpisode((cur) => (cur === best ? cur : best));
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(syncFromScroll);
+    };
+    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("scroll", onScroll, { passive: true });
+    grid.addEventListener("scrollend", syncFromScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
+      grid.removeEventListener("wheel", releaseProgrammaticScroll);
+      grid.removeEventListener("scroll", onScroll);
+      grid.removeEventListener("scrollend", syncFromScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    syncRail(columnRail.current, columnTab);
+    syncRail(pickupRail.current, columnTab);
+  }, [columnTab]);
+
+  useEffect(() => {
+    syncRail(riderRail.current, riderTab);
+  }, [riderTab]);
+
+  useEffect(() => {
+    return () => {
+      if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+      shuffleRunId.current += 1;
+      shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+      shuffleActive.current = false;
+      if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
+      if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
+      if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+      if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+      if (episodePointerFocusTimer.current != null) {
+        window.clearTimeout(episodePointerFocusTimer.current);
+      }
+      cancelEpisodePickupScrollReset.current?.();
+      cancelColumnPickupScrollReset.current?.();
+    };
+  }, []);
+  const current = POSTERS[poster];
   const previous = prevPoster != null ? POSTERS[prevPoster] : null;
   const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
@@ -17,6 +282,7 @@
     if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
     setLocked(true);
+    const runId = ++shuffleRunId.current;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
 
@@ -34,7 +300,10 @@
     const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
     for (let index = posterSequence.length - 1; index > 0; index -= 1) {
       const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [posterSequence[swapIndex], posterSequence[index]];
+      [posterSequence[index], posterSequence[swapIndex]] = [
+        posterSequence[swapIndex],
+        posterSequence[index],
+      ];
     }
     const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
     const previewPool = [
@@ -55,20 +324,37 @@
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
     finalImage.src = POSTERS[finalPoster].src;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      goPoster(finalPoster);
-      shuffleActive.current = false;
+    const finalReady =
+      finalImage
+        .decode?.()
+        .then(() => true)
+        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
+      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
+    const waitForFinalImage = () =>
+      Promise.race([
+        finalReady,
+        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
+      ]);
+    if (motionReduced) {
+      void waitForFinalImage().then((ready) => {
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
+        shuffleActive.current = false;
+      });
       return;
     }
 
     setShuffling(true);
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
-      const timer = window.setTimeout(() => {
-        const next = index === steps.length - 1
-          ? finalPoster
-          : previewPosters[index % previewPosters.length];
-        goPoster(next);
-        if (index === steps.length - 1) {
+      const timer = window.setTimeout(async () => {
+        const isFinalStep = index === steps.length - 1;
+        const ready = isFinalStep ? await waitForFinalImage() : true;
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];
+        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {
+          goPoster(next);
+        }
+        if (isFinalStep) {
           const settleTimer = window.setTimeout(() => {
             setShuffling(false);
             shuffleActive.current = false;
@@ -103,7 +389,11 @@
     }, 520);
   };
 
-  const openEpisodePickup = (index: number, trigger: HTMLButtonElement, openedByKeyboard: boolean) => {
+  const openEpisodePickup = (
+    index: number,
+    trigger: HTMLButtonElement,
+    openedByKeyboard: boolean,
+  ) => {
     const dialog = episodePickupDialogRef.current;
     if (!dialog || !EPISODES[index]?.pickups?.length) return;
     if (episodePointerFocusTimer.current != null) {
@@ -117,257 +407,3 @@
     setEpisodePickup(index);
     cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
-      try {
-        dialog.showModal();
-      } catch {
-        /* already open */
-      }
-    }
-    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
-    cancelEpisodePickupScrollReset.current = settlePickupScroll(dialog, [".episode-pickup-panel"], () => {
-      if (episodePickupOpenedByKeyboard.current) {
-        dialog.querySelector<HTMLButtonElement>(".episode-pickup-close")?.focus({ preventScroll: true });
-      } else {
-        dialog.focus({ preventScroll: true });
-      }
-    });
-  };
-
-  const closeEpisodePickup = () => {
-    cancelEpisodePickupScrollReset.current?.();
-    cancelEpisodePickupScrollReset.current = null;
-    const dialog = episodePickupDialogRef.current;
-    if (dialog?.open) dialog.close();
-  };
-
-  const openPickup = () => {
-    const dlg = pickupDialogRef.current;
-    if (!dlg) return;
-    if (pickupCloseTimer.current != null) {
-      window.clearTimeout(pickupCloseTimer.current);
-      pickupCloseTimer.current = null;
-    }
-    delete dlg.dataset.closing;
-    cancelColumnPickupScrollReset.current?.();
-    if (!dlg.open) {
-      try {
-        dlg.showModal();
-      } catch {
-        /* already open */
-      }
-    }
-    // WebKit otherwise auto-focuses the first column tab for a frame after a
-    // pointer slide, making column 01 look selected even when another column
-    // is active. Move focus to the neutral dialog surface immediately; the
-    // rail remains keyboard-accessible when a user deliberately tabs into it.
-    dlg.focus({ preventScroll: true });
-    setPickupOpen(true);
-    syncRail(pickupRail.current, columnTab);
-    cancelColumnPickupScrollReset.current = settlePickupScroll(dlg, [".world-column-dialog-card"], () => {
-      bootLiquidGlass(dlg);
-      pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
-      dlg.focus({ preventScroll: true });
-    });
-  };
-
-  const closePickup = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
-    event?.stopPropagation?.();
-    const dlg = pickupDialogRef.current;
-    if (!dlg?.open) {
-      setPickupOpen(false);
-      return;
-    }
-    if (dlg.dataset.closing === "true") return;
-    cancelColumnPickupScrollReset.current?.();
-    cancelColumnPickupScrollReset.current = null;
-    dlg.dataset.closing = "true";
-    if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    pickupCloseTimer.current = window.setTimeout(() => {
-      try {
-        dlg.close();
-      } catch {
-        /* already closed */
-      }
-      delete dlg.dataset.closing;
-      pickupCloseTimer.current = null;
-      setPickupOpen(false);
-    }, reducedMotion ? 0 : 360);
-  };
-
-  return (
-    <div ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
-      <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
-      <div className="ambient" aria-hidden="true">
-        <div className="ambient-grid" />
-        <div className="ambient-orb orb-a" />
-        <div className="ambient-orb orb-b" />
-        <div className="grain" />
-      </div>
-
-      <header className="topbar">
-        <div className="topbar-leading">
-          <a ref={openingBrandRef} className="brand" href="#top" aria-label="Deception World トップへ">
-            <span ref={openingSigilRef} className="brand-sigil">
-              <i>DW</i>
-            </span>
-            <span>
-              <b>DECEPTION WORLD</b>
-              <small>KAMEN RIDER SAGA</small>
-            </span>
-          </a>
-        </div>
-        <nav aria-label="メインメニュー">
-          <a href="#story">STORY</a>
-          <a href="#riders">RIDERS</a>
-          <a href="#records">RECORDS</a>
-        </nav>
-        <div className="topbar-actions">
-          <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
-        </div>
-      </header>
-      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
-        <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
-          {previous ? (
-            <span className="hero-backdrop-layer hero-backdrop-previous" key={`hb-prev-${prevPoster}`}>
-              <img src={previous.src} alt="" style={{ objectPosition: previous.pos }} decoding="async" />
-            </span>
-          ) : null}
-          <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
-            <img
-              src={current.src}
-              alt=""
-              style={{ objectPosition: current.pos }}
-              fetchPriority="high"
-              decoding="async"
-            />
-          </span>
-        </div>
-        <div className="hero-copy">
-          <p className="eyebrow">
-            <span>THE SECOND SAGA</span>
-            <i />
-          </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
-            <span>世界は、</span>
-            <strong>欺瞞でできている。</strong>
-          </h1>
-          <p className="hero-lead">
-            救うべきものは、夢の向こうにはない。
-            <br />
-            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
-          </p>
-          <div className="hero-actions">
-            <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
-              <LiquidPointerGlow />
-              <span>ENTER THE WORLD</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12h13M13 6l6 6-6 6" />
-              </svg>
-            </a>
-            <a className="text-action" href="#poster-stage">
-              POSTER
-            </a>
-          </div>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>
-            </span>
-            <span>
-              <small>WORLD</small>
-              <b>SAGA / REALITY</b>
-            </span>
-            <span>
-              <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
-            </span>
-          </div>
-        </div>
-
-        <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
-          <div className={shuffling ? "poster-deck is-shuffling" : "poster-deck"} aria-busy={shuffling}>
-            <div className="poster-back-card poster-back-card-1" aria-hidden="true">
-              <img src={nextPoster.src} alt="" decoding="async" fetchPriority="low" />
-            </div>
-            <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
-            </div>
-            <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
-            </div>
-            <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
-            </div>
-            <div className="poster-frame">
-              <span className="poster-holo-ring" aria-hidden="true" />
-              <div className="poster-media">
-                {previous ? (
-                  <img
-                    className="poster-image poster-image-previous"
-                    key={`poster-prev-${prevPoster}`}
-                    src={previous.src}
-                    alt=""
-                    style={{ objectPosition: previous.pos, objectFit: previous.fit === "contain" ? "contain" : "cover" }}
-                    onAnimationEnd={() => setPrevPoster(null)}
-                  />
-                ) : null}
-                <img
-                  className={current.fit === "contain" ? "poster-image poster-image-current is-contain" : "poster-image poster-image-current"}
-                  key={`poster-${poster}`}
-                  src={current.src}
-                  alt={current.alt}
-                  style={{ objectPosition: current.pos, objectFit: current.fit === "contain" ? "contain" : "cover" }}
-                  fetchPriority="high"
-                  decoding="async"
-                />
-                <span className="poster-sheen" aria-hidden="true" />
-              </div>
-              <span className="corner corner-tl" aria-hidden="true" />
-              <span className="corner corner-tr" aria-hidden="true" />
-              <span className="corner corner-bl" aria-hidden="true" />
-              <span className="corner corner-br" aria-hidden="true" />
-            </div>
-          </div>
-          <div className="orbit" aria-hidden="true" />
-          <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-index">
-            <span>KEY VISUAL</span>
-            <b>{String(poster + 1).padStart(2, "0")}</b>
-          </div>
-          <div className="poster-controls">
-            <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
-              <button
-                type="button"
-                className="poster-shuffle ios26-glass"
-                data-liquid-pointer="true"
-                disabled={shuffling}
-                aria-busy={shuffling}
-                onClick={shufflePoster}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  <UiVectorIcon kind="shuffle" size={18} />
-                </span>
-                <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
-              </button>
-              <button
-                type="button"
-                className="poster-reset ios26-glass"
-                data-liquid-pointer="true"
-                disabled={poster === 0 || shuffling}
-                onClick={() => goPoster(0)}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  <UiVectorIcon kind="reset" size={17} />
-                </span>
-                <b>RESET</b>
-              </button>
-              <button
-                type="button"
-                className={locked ? "poster-lock ios26-glass is-locked" : "poster-lock ios26-glass is-unlocked"}
-                data-liquid-pointer="true"
-                aria-pressed={locked}
-                aria-label={locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"}
-                disabled={shuffling}

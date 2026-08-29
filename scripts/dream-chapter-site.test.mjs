@@ -14,9 +14,7 @@ const menuSource = readProjectFile("src/components/world/world-chrome.tsx");
 const styleSource = readProjectFile("src/styles-dream-chapter.css");
 const loadGateSource = readProjectFile("src/components/load-gate.tsx");
 const routeTransitionStyleSource = readProjectFile("src/styles-route-transitions.css");
-const pickupScrollResetSource = readProjectFile(
-  "src/components/world/pickup-scroll-reset.ts",
-);
+const pickupScrollResetSource = readProjectFile("src/components/world/pickup-scroll-reset.ts");
 
 const routePath = "src/routes/dream-chapter.tsx";
 const posterAssets = Array.from(
@@ -25,8 +23,7 @@ const posterAssets = Array.from(
 );
 const posterThumbnailAssets = Array.from(
   { length: 8 },
-  (_, index) =>
-    `public/dream-chapter-poster-thumb-${String(index + 1).padStart(2, "0")}.jpeg`,
+  (_, index) => `public/dream-chapter-poster-thumb-${String(index + 1).padStart(2, "0")}.jpeg`,
 );
 const characterAssets = [
   "public/dream-chapter-ciel.jpeg",
@@ -340,7 +337,8 @@ test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", 
 });
 
 test("Dream Chapter hero uses a non-character ambient background", () => {
-  const heroStart = pageSource.indexOf('<section className="dream-hero"');
+  const heroClass = pageSource.indexOf('className="dream-hero"');
+  const heroStart = pageSource.lastIndexOf("<section", heroClass);
   const heroEnd = pageSource.indexOf("</section>", heroStart);
   assert.notEqual(heroStart, -1, "Dream Chapter must retain its hero section");
   assert.notEqual(heroEnd, -1, "Dream Chapter hero section must be bounded");

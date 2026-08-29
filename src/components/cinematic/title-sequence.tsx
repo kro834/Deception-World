@@ -292,11 +292,7 @@ export function TitleSequence() {
       // The covered route contract deliberately resolves cancellation and
       // timeout paths without throwing. If the title is still mounted, restore
       // its controls instead of leaving an inert `diving` frame behind.
-      if (
-        mountedRef.current &&
-        phaseRef.current === "diving" &&
-        window.location.pathname === "/"
-      ) {
+      if (mountedRef.current && phaseRef.current === "diving" && window.location.pathname === "/") {
         phaseRef.current = "complete";
         setPhase("complete");
       }
@@ -310,11 +306,7 @@ export function TitleSequence() {
 
   useEffect(() => {
     const restoreTitleIfNeeded = () => {
-      if (
-        mountedRef.current &&
-        phaseRef.current === "diving" &&
-        window.location.pathname === "/"
-      ) {
+      if (mountedRef.current && phaseRef.current === "diving" && window.location.pathname === "/") {
         phaseRef.current = "complete";
         setPhase("complete");
       }
@@ -401,10 +393,9 @@ export function TitleSequence() {
   const isWorldTransitioning = phase === "diving";
 
   return (
-    <section
+    <main
       className={stageClass}
       onPointerDown={phase === "playing" ? unlockAudio : undefined}
-      role="region"
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
     >
@@ -552,6 +543,6 @@ export function TitleSequence() {
           </span>
         </button>
       </div>
-    </section>
+    </main>
   );
 }

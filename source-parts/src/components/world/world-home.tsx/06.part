@@ -1,3 +1,88 @@
+                <span />
+                <b>{rider.name}</b>
+              </div>
+              <SlideOpenControl
+                className="rider-dossier-open"
+                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
+                label="個別資料"
+                opensDialog={false}
+                onOpen={() => {
+                  void go({
+                    to: `/riders/${rider.id}`,
+                    assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
+                  });
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="records-section" id="records" data-performance-region>
+        <div className="section-index">
+          <span>03</span>
+          <small>NEW RECORDS</small>
+        </div>
+        <div className="records-heading">
+          <p className="eyebrow">
+            <span>POWER BEYOND THE BORDER</span>
+            <i />
+          </p>
+          <h2>
+            到達点は、
+            <br />
+            ひとつではない。
+          </h2>
+        </div>
+        <div className="return-strip">
+          <div>
+            <span>RETURNING SIGNAL</span>
+            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
+          </div>
+          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
+          <i aria-hidden="true" />
+        </div>
+        <section className="episode-archive" aria-labelledby="episode-archive-title">
+          <div className="episode-archive-heading">
+            <div>
+              <span>EPISODE ARCHIVE</span>
+              <h3 id="episode-archive-title">判明済みエピソード</h3>
+            </div>
+            <div className="episode-archive-meta">
+              <p>
+                <strong>{String(EPISODES.length).padStart(2, "0")}</strong>
+                <span>RECORDS FOUND</span>
+              </p>
+              <div className="episode-controls" aria-label="エピソードの表示操作">
+                <button
+                  type="button"
+                  className="ios26-glass"
+                  data-liquid-pointer="true"
+                  disabled={episode === 0}
+                  onClick={() => goEpisode(episode - 1)}
+                  aria-label="前のエピソードへ"
+                >
+                  <LiquidPointerGlow />
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-left" size={17} />
+                  </span>
+                </button>
+                <output aria-live="polite">
+                  {String(episode + 1).padStart(2, "0")} /{" "}
+                  {String(EPISODES.length).padStart(2, "0")}
+                </output>
+                <button
+                  type="button"
+                  className="ios26-glass"
+                  data-liquid-pointer="true"
+                  disabled={episode === EPISODES.length - 1}
+                  onClick={() => goEpisode(episode + 1)}
+                  aria-label="次のエピソードへ"
+                >
+                  <LiquidPointerGlow />
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="arrow-right" size={17} />
+                  </span>
                 </button>
               </div>
             </div>
@@ -21,7 +106,13 @@
               >
                 <div className="episode-card-surface">
                   <div className="episode-thumbnail">
-                    <img src={ep.src} alt={ep.alt} style={{ objectPosition: ep.pos }} loading="lazy" decoding="async" />
+                    <img
+                      src={ep.src}
+                      alt={ep.alt}
+                      style={{ objectPosition: ep.pos }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span aria-hidden="true">EP.{ep.no}</span>
                     <i aria-hidden="true" />
                   </div>
@@ -226,42 +317,42 @@
           if (e.target === pickupDialogRef.current) closePickup();
         }}
       >
+        <button
+          type="button"
+          className="world-column-dialog-close"
+          data-liquid-pointer="true"
+          onPointerUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closePickup(e);
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closePickup(e);
+          }}
+          aria-label="ピックアップを閉じる"
+        >
+          <LiquidPointerGlow />
+          <span>CLOSE</span>
+          <i aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path
+                d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </i>
+        </button>
         <div className="world-column-dialog-card">
           <div className="world-column-dialog-toolbar">
             <p>
               WORLD COLUMN
               <i>FIELD NOTES</i>
             </p>
-            <button
-              type="button"
-              className="world-column-dialog-close"
-              data-liquid-pointer="true"
-              onPointerUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closePickup(e);
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closePickup(e);
-              }}
-              aria-label="ピックアップを閉じる"
-            >
-              <LiquidPointerGlow />
-              <span>CLOSE</span>
-              <i aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="14" height="14">
-                  <path
-                    d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </i>
-            </button>
           </div>
           <div className="world-column-dialog-heading">
             <small>ARCHIVE / {column.kicker}</small>
@@ -272,8 +363,10 @@
             {COLUMNS.map((item, index) => (
               <div
                 key={item.no}
+                id={`column-dialog-panel-${index}`}
                 className={`world-column-dialog-copy world-column-dialog-copy-pane${index === columnTab ? " is-active" : ""}`}
                 role="tabpanel"
+                aria-labelledby={`column-dialog-tab-${index}`}
                 aria-hidden={index !== columnTab}
               >
                 <p className="world-column-dialog-number">コラム{item.no}</p>
@@ -312,6 +405,6 @@
           <p className="dante-denied-note">管理外 ／ 対象外記録</p>
         </div>
       </dialog>
-    </div>
+    </main>
   );
 }

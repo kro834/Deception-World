@@ -10,6 +10,8 @@ export function useWorldMode() {
     const previousOneUi = html.dataset.oneUiRenderer;
     const previousEffects = html.dataset.worldEffects;
     const previousVisibility = html.dataset.worldPageVisible;
+    const previousPageScrolled = html.dataset.pageScrolled;
+    const previousPageProgress = html.style.getPropertyValue("--page-progress");
     html.dataset.mode = "world";
     html.dataset.scrollMotionReady = "true";
     const userAgent = navigator.userAgent;
@@ -33,8 +35,30 @@ export function useWorldMode() {
     };
     syncVisibility();
     document.addEventListener("visibilitychange", syncVisibility);
+
+    let progressFrame = 0;
+    const syncPageProgress = () => {
+      progressFrame = 0;
+      const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+      html.style.setProperty("--page-progress", progress.toFixed(4));
+      if (window.scrollY > 20) html.dataset.pageScrolled = "true";
+      else delete html.dataset.pageScrolled;
+    };
+    const requestProgressSync = () => {
+      if (progressFrame) return;
+      progressFrame = window.requestAnimationFrame(syncPageProgress);
+    };
+    syncPageProgress();
+    window.addEventListener("scroll", requestProgressSync, { passive: true });
+    window.addEventListener("resize", requestProgressSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestProgressSync, { passive: true });
     return () => {
       document.removeEventListener("visibilitychange", syncVisibility);
+      window.removeEventListener("scroll", requestProgressSync);
+      window.removeEventListener("resize", requestProgressSync);
+      window.visualViewport?.removeEventListener("resize", requestProgressSync);
+      if (progressFrame) window.cancelAnimationFrame(progressFrame);
       if (prev) html.dataset.mode = prev;
       else delete html.dataset.mode;
       if (previousAndroid) html.dataset.androidRenderer = previousAndroid;
@@ -45,6 +69,10 @@ export function useWorldMode() {
       else delete html.dataset.worldEffects;
       if (previousVisibility) html.dataset.worldPageVisible = previousVisibility;
       else delete html.dataset.worldPageVisible;
+      if (previousPageScrolled) html.dataset.pageScrolled = previousPageScrolled;
+      else delete html.dataset.pageScrolled;
+      if (previousPageProgress) html.style.setProperty("--page-progress", previousPageProgress);
+      else html.style.removeProperty("--page-progress");
     };
   }, []);
 }
