@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   archiveIntelligenceRequestSchema,
-  requestXaiArchiveReply,
+  requestOpenAiArchiveReply,
 } from "@/lib/archive-intelligence.server";
 import { checkArchiveAiAccess } from "@/lib/archive-ai-rate-limit.server";
+import {
+  ArchiveRequestTooLargeError,
+  readArchiveRequestBody,
+} from "@/lib/archive-request-body.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { createLocalArchiveReply } from "@/lib/archive-roleplay-fallback";
 
@@ -44,19 +48,14 @@ export const Route = createFileRoute("/api/archive-intelligence")({
           return noStoreJson({ error: "forbidden" }, 403);
         }
 
-        const declaredLength = Number(request.headers.get("content-length") || 0);
-        if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
-          return noStoreJson({ error: "request_too_large" }, 413);
-        }
-
         let raw: unknown;
         try {
-          const body = await request.text();
-          if (new TextEncoder().encode(body).byteLength > MAX_BODY_BYTES) {
+          const body = await readArchiveRequestBody(request, MAX_BODY_BYTES);
+          raw = JSON.parse(body) as unknown;
+        } catch (error) {
+          if (error instanceof ArchiveRequestTooLargeError) {
             return noStoreJson({ error: "request_too_large" }, 413);
           }
-          raw = JSON.parse(body) as unknown;
-        } catch {
           return noStoreJson({ error: "invalid_json" }, 400);
         }
 
@@ -86,7 +85,12 @@ export const Route = createFileRoute("/api/archive-intelligence")({
         }
 
         try {
-          const remoteReply = await requestXaiArchiveReply({ characterId, mode, messages });
+          const remoteReply = await requestOpenAiArchiveReply({
+            characterId,
+            mode,
+            messages,
+            safetyIdentifier: remoteAccess.safetyIdentifier,
+          });
           if (remoteReply) return noStoreJson(remoteReply);
           return noStoreJson(
             createLocalArchiveReply({

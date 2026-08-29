@@ -47,7 +47,7 @@ type RoleplayMessage = {
   tactical?: ArchiveTacticalSnapshot;
   suggestions?: string[];
   navigationQuery?: string;
-  source?: "xai" | "local";
+  source?: "openai" | "local";
   model?: string;
   notice?: string;
 };
@@ -60,8 +60,8 @@ type ArchiveRoleplayProps = {
 
 const MAX_VISIBLE_MESSAGES = 36;
 
-function sessionKey(characterId: ArchiveCharacterId, mode: ArchiveRoleplayMode): string {
-  return `${characterId}:${mode}`;
+function sessionKey(characterId: ArchiveCharacterId): string {
+  return characterId;
 }
 
 function messageId(prefix: string): string {
@@ -77,7 +77,7 @@ function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
   return (
     typeof reply.reply === "string" &&
     typeof reply.narration === "string" &&
-    (reply.source === "xai" || reply.source === "local") &&
+    (reply.source === "openai" || reply.source === "local") &&
     Array.isArray(reply.suggestions) &&
     typeof reply.navigationQuery === "string" &&
     Boolean(reply.tactical) &&
@@ -175,13 +175,13 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
   const followLatestRef = useRef(true);
 
   const profile = ARCHIVE_CHARACTER_BY_ID[characterId];
-  const activeSessionKey = sessionKey(characterId, mode);
+  const activeSessionKey = sessionKey(characterId);
   const messages = useMemo(() => sessions[activeSessionKey] ?? [], [activeSessionKey, sessions]);
   const pending = pendingKey === activeSessionKey;
   const latestAssistant = [...messages].reverse().find((message) => message.role === "assistant");
   const connectionLabel = pending
     ? "SYNCHRONIZING"
-    : latestAssistant?.source === "xai"
+    : latestAssistant?.source === "openai"
       ? "NEURAL ONLINE"
       : latestAssistant?.source === "local"
         ? "LOCAL CORE"
@@ -245,7 +245,6 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
     if (nextMode === mode) return;
     stopResponse(false);
     setMode(nextMode);
-    setDraft("");
     followLatestRef.current = true;
     setLiveMessage(`${nextMode === "pro" ? "プロ" : "ノーマル"}モードへ切り替えました。`);
   };
@@ -425,7 +424,7 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
           }}
         >
           {ARCHIVE_CHARACTERS.map((character) => {
-            const key = sessionKey(character.id, mode);
+            const key = sessionKey(character.id);
             const count = sessions[key]?.length ?? 0;
             return (
               <button
@@ -516,12 +515,12 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
               onClick={() => selectMode("pro")}
             >
               <span>PRO</span>
-              <small>戦闘・拡張思考</small>
+              <small>自然な対話・深い理解</small>
             </button>
           </div>
           <p>
             {mode === "pro"
-              ? "戦況を読み、能力・代償・反撃余地まで扱います。"
+              ? "言葉の含みと会話の流れを汲み、人物らしい間や感情まで含めて応答します。"
               : "短いセリフと、必要最小限の描写で応答します。"}
           </p>
         </div>
@@ -575,7 +574,7 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
                           : "YOU / INPUT"}
                       </small>
                       {message.role === "assistant" ? (
-                        <i>{message.source === "xai" ? "NEURAL" : "LOCAL"}</i>
+                        <i>{message.source === "openai" ? "NEURAL" : "LOCAL"}</i>
                       ) : null}
                     </div>
                   </header>
@@ -615,23 +614,33 @@ export function ArchiveRoleplay({ active, onNavigate, searchArchive }: ArchiveRo
           )}
 
           {pending ? (
-            <div className="archive-roleplay-thinking" role="status">
+            <div className="archive-roleplay-thinking" data-mode={mode} aria-hidden="true">
               <span aria-hidden="true">
                 <i />
                 <i />
                 <i />
               </span>
               <div>
-                <small>COGNITION IN PROGRESS</small>
+                <small>
+                  {mode === "pro" ? "GPT-5.6 SOL / PRO MAX" : "GPT-5.6 LUNA / RESPONDING"}
+                </small>
                 <p>
                   {mode === "pro"
-                    ? "戦況と人格記録を多層照合しています"
-                    : "人格回線を同期しています"}
+                    ? "AIが会話の流れ・感情・人格記録を深く考えています"
+                    : "AIが言葉と人格記録をつないでいます"}
                 </p>
               </div>
             </div>
           ) : null}
         </div>
+
+        <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+          {pending
+            ? mode === "pro"
+              ? "AIが会話の流れ、感情、人格記録を深く考えています"
+              : "AIが言葉と人格記録をつないでいます"
+            : ""}
+        </p>
 
         {messages.length && !pending ? (
           <div className="archive-roleplay-quick-replies" aria-label="次の会話候補">

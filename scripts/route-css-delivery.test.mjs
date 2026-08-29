@@ -38,6 +38,7 @@ const routeSources = Object.fromEntries(
       "src/routes/rexonance-saga.tsx",
       "src/routes/extreme-saga.tsx",
       "src/routes/form-archive.tsx",
+      "src/routes/intelligence.tsx",
       "src/routes/download.tsx",
     ].map(async (path) => [path, await read(path)]),
   ),
@@ -85,6 +86,7 @@ test("special routes append their CSS after world base and addon styles", () => 
   const rexonance = routeSources["src/routes/rexonance-saga.tsx"];
   const extreme = routeSources["src/routes/extreme-saga.tsx"];
   const archive = routeSources["src/routes/form-archive.tsx"];
+  const intelligence = routeSources["src/routes/intelligence.tsx"];
   const download = routeSources["src/routes/download.tsx"];
 
   assert.ok(
@@ -101,5 +103,9 @@ test("special routes append their CSS after world base and addon styles", () => 
     extreme.indexOf("...WORLD_STYLESHEET_LINKS") < rexonanceLink && rexonanceLink < extremeLink,
   );
   assert.match(archive, /links:\s*WORLD_STYLESHEET_LINKS/);
+  assert.ok(
+    intelligence.indexOf("...WORLD_STYLESHEET_LINKS") <
+      intelligence.indexOf('{ rel: "stylesheet", href: intelligenceCssUrl }'),
+  );
   assert.match(download, /stylesheetLinks:\s*\[WORLD_ADDON_STYLESHEET_LINK\]/);
 });

@@ -286,8 +286,8 @@ const RIDERS = [
     ja: "オーバーゼッツ",
     person: "コードナンバー：セヴン ／ ジェームズ・スミス",
     tone: "#32e1d0",
-    img: "/archive-ai-james-20260829.jpg",
-    pos: "50% 12%",
+    img: "/rider-over-zeztz-thumbnail-20260829.jpg",
+    pos: "50% 30%",
     desc: "陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆るCODE英国支部の最強エージェント。",
   },
   {

@@ -15,12 +15,14 @@ import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
+import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as ApiArchiveIntelligenceRouteImport } from './routes/api/archive-intelligence'
+import { Route as ApiArchiveSearchRouteImport } from './routes/api/archive-search'
 import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
@@ -63,6 +65,11 @@ const FormArchiveRoute = FormArchiveRouteImport.update({
   path: '/form-archive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IntelligenceRoute = IntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -91,6 +98,11 @@ const WorldRoute = WorldRouteImport.update({
 const ApiArchiveIntelligenceRoute = ApiArchiveIntelligenceRouteImport.update({
   id: '/api/archive-intelligence',
   path: '/api/archive-intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiArchiveSearchRoute = ApiArchiveSearchRouteImport.update({
+  id: '/api/archive-search',
+  path: '/api/archive-search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiExportRoute = ApiExportRouteImport.update({
@@ -156,12 +168,14 @@ export interface FileRoutesByFullPath {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
+  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
+  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -181,12 +195,14 @@ export interface FileRoutesByTo {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
+  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
+  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -207,12 +223,14 @@ export interface FileRoutesById {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
+  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
+  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -234,12 +252,14 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
+    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/archive-intelligence'
+    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -259,12 +279,14 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
+    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/archive-intelligence'
+    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -284,12 +306,14 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
+    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
     | '/api/archive-intelligence'
+    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -310,12 +334,14 @@ export interface RootRouteChildren {
   DreamChapterRoute: typeof DreamChapterRoute
   ExtremeSagaRoute: typeof ExtremeSagaRoute
   FormArchiveRoute: typeof FormArchiveRoute
+  IntelligenceRoute: typeof IntelligenceRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   WorldRoute: typeof WorldRoute
   ApiArchiveIntelligenceRoute: typeof ApiArchiveIntelligenceRoute
+  ApiArchiveSearchRoute: typeof ApiArchiveSearchRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -364,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/intelligence': {
+      id: '/intelligence'
+      path: '/intelligence'
+      fullPath: '/intelligence'
+      preLoaderRoute: typeof IntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -404,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/api/archive-intelligence'
       fullPath: '/api/archive-intelligence'
       preLoaderRoute: typeof ApiArchiveIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/archive-search': {
+      id: '/api/archive-search'
+      path: '/api/archive-search'
+      fullPath: '/api/archive-search'
+      preLoaderRoute: typeof ApiArchiveSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export': {
@@ -540,12 +580,14 @@ const rootRouteChildren: RootRouteChildren = {
   DreamChapterRoute: DreamChapterRoute,
   ExtremeSagaRoute: ExtremeSagaRoute,
   FormArchiveRoute: FormArchiveRoute,
+  IntelligenceRoute: IntelligenceRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   WorldRoute: WorldRoute,
   ApiArchiveIntelligenceRoute: ApiArchiveIntelligenceRoute,
+  ApiArchiveSearchRoute: ApiArchiveSearchRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

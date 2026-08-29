@@ -13,6 +13,7 @@ type AccessReason = "allowed" | "unconfigured" | "rate_limited" | "shared_limit_
 export type ArchiveAiAccess = {
   allowed: boolean;
   reason: AccessReason;
+  safetyIdentifier?: string;
 };
 
 type MemoryBucket = { expiresAt: number; count: number };
@@ -35,6 +36,8 @@ function clientAddress(request: Request): string | null {
       ? vercelAddress.toLowerCase()
       : null;
   }
+
+  if (process.env.NODE_ENV === "production") return null;
 
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return (forwarded || request.headers.get("x-real-ip")?.trim() || "local-client")
@@ -146,7 +149,7 @@ export async function checkArchiveAiAccess(
   request: Request,
   mode: "normal" | "pro",
 ): Promise<ArchiveAiAccess> {
-  const apiKey = process.env.XAI_API_KEY?.trim();
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return { allowed: false, reason: "unconfigured" };
 
   const now = Date.now();
@@ -164,12 +167,17 @@ export async function checkArchiveAiAccess(
     return {
       allowed,
       reason: allowed ? "allowed" : "rate_limited",
+      safetyIdentifier: allowed ? clientKey : undefined,
     };
   }
 
   try {
     const allowed = await checkSharedBuckets(clientKey, now, units);
-    return { allowed, reason: allowed ? "allowed" : "rate_limited" };
+    return {
+      allowed,
+      reason: allowed ? "allowed" : "rate_limited",
+      safetyIdentifier: allowed ? clientKey : undefined,
+    };
   } catch {
     return { allowed: false, reason: "shared_limit_unavailable" };
   }

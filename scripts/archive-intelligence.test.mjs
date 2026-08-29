@@ -8,8 +8,10 @@ const readSource = (relativePath) =>
 const characters = readSource("src/lib/archive-characters.ts");
 const fallback = readSource("src/lib/archive-roleplay-fallback.ts");
 const intelligenceServer = readSource("src/lib/archive-intelligence.server.ts");
+const conversationBoundary = readSource("src/lib/archive-conversation.server.ts");
 const rateLimitServer = readSource("src/lib/archive-ai-rate-limit.server.ts");
 const intelligenceRoute = readSource("src/routes/api/archive-intelligence.ts");
+const requestBody = readSource("src/lib/archive-request-body.server.ts");
 const roleplay = readSource("src/components/world/archive-roleplay.tsx");
 const dossierNav = readSource("src/components/world/dossier-nav.tsx");
 const riderPage = readSource("src/components/world/rider-page.tsx");
@@ -68,50 +70,60 @@ test("archive intelligence exposes exactly the requested eight character persona
   assert.equal((characters.match(/^ {6}normal:\s*\[/gm) ?? []).length, 8);
   assert.equal((characters.match(/^ {6}pro:\s*\[/gm) ?? []).length, 8);
   assert.equal((characters.match(/^ {4}constraints:\s*\[/gm) ?? []).length, 8);
+  assert.equal((characters.match(/^ {4}innerLife:\s*/gm) ?? []).length, 8);
+  assert.equal((characters.match(/^ {4}relationships:\s*/gm) ?? []).length, 8);
   assert.equal((characters.match(/^ {4}local:\s*\{/gm) ?? []).length, 8);
   assert.match(characters, /export const ARCHIVE_CHARACTER_BY_ID = Object\.fromEntries/);
 });
 
-test("normal and pro modes keep distinct response and combat contracts", () => {
+test("normal and pro modes keep distinct response and human conversation contracts", () => {
   assert.match(characters, /export type ArchiveRoleplayMode = "normal" \| "pro"/);
   assert.match(intelligenceServer, /NORMAL MODE:/);
   assert.match(intelligenceServer, /one to three short spoken lines plus one light action/);
   assert.match(intelligenceServer, /Every tactical field must be an empty string/);
   assert.match(intelligenceServer, /PRO MODE:/);
-  assert.match(intelligenceServer, /distance, timing, counterplay, powers, costs, and terrain/);
-  assert.match(intelligenceServer, /reasoning:\s*\{ effort: mode === "pro" \? "high" : "low" \}/);
+  assert.match(intelligenceServer, /deep, natural character conversation, not a combat mode/);
+  assert.match(intelligenceServer, /Preserve the character's human irregularities/);
   assert.match(
     intelligenceServer,
-    /tactical:\s*normal\s*\?[\s\S]*?range: "", tempo: "", threat: "", objective: ""/,
+    /Only when the user explicitly presents an active fictional combat scene/,
+  );
+  assert.match(
+    intelligenceServer,
+    /mode === "pro" && combatRequested[\s\S]*?range: "", tempo: "", threat: "", objective: ""/,
   );
 
   assert.match(roleplay, /useState<ArchiveRoleplayMode>\("normal"\)/);
   assert.match(roleplay, /role="radiogroup"[\s\S]{0,120}?aria-label="なりきりモード"/);
   assert.match(roleplay, /<span>NORMAL<\/span>[\s\S]*?セリフ＋軽い描写/);
-  assert.match(roleplay, /<span>PRO<\/span>[\s\S]*?戦闘・拡張思考/);
+  assert.match(roleplay, /<span>PRO<\/span>[\s\S]*?自然な対話・深い理解/);
+  assert.match(roleplay, /GPT-5\.6 SOL \/ PRO MAX/);
+  assert.match(roleplay, /AIが会話の流れ・感情・人格記録を深く考えています/);
   assert.match(roleplay, /<TacticalHud tactical=\{message\.tactical\} \/>/);
-  assert.match(fallback, /const PRO_REFLECTIONS: Record<ArchiveCharacterId, string>/);
   assert.match(
     fallback,
-    /mode === "pro"[\s\S]*?combatDetected \? PRO_METHODS\[characterId\] : PRO_REFLECTIONS\[characterId\]/,
+    /const PRO_DIALOGUE: Record<ArchiveCharacterId, Record<LocalIntent, string>>/,
   );
+  assert.match(fallback, /isExplicitFictionalCombatInput/);
+  assert.doesNotMatch(fallback, /PRO_METHODS|PRO_REFLECTIONS/);
   assert.match(fallback, /mode === "pro" && combatDetected/);
 });
 
 test("the provider key and upstream endpoint stay in the server-only boundary", () => {
   assert.match(intelligenceRoute, /from "@\/lib\/archive-intelligence\.server"/);
-  assert.match(intelligenceServer, /process\.env\.XAI_API_KEY\?\.trim\(\)/);
-  assert.match(intelligenceServer, /process\.env\.XAI_CHAT_MODEL\?\.trim\(\)/);
-  assert.match(intelligenceServer, /fetch\("https:\/\/api\.x\.ai\/v1\/responses"/);
+  assert.match(intelligenceServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
+  assert.match(intelligenceServer, /"gpt-5\.6-sol"/);
+  assert.match(intelligenceServer, /"gpt-5\.6-luna"/);
+  assert.match(intelligenceServer, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(intelligenceServer, /authorization: `Bearer \$\{apiKey\}`/);
-  assert.doesNotMatch(intelligenceServer, /import\.meta\.env|VITE_XAI/);
+  assert.doesNotMatch(intelligenceServer, /import\.meta\.env|VITE_OPENAI/);
 
   for (const [name, clientSource] of [
     ["character manifest", characters],
     ["local fallback", fallback],
     ["roleplay UI", roleplay],
   ]) {
-    assert.doesNotMatch(clientSource, /XAI_API_KEY|api\.x\.ai|Bearer \$\{apiKey\}/, name);
+    assert.doesNotMatch(clientSource, /OPENAI_API_KEY|api\.openai\.com|Bearer \$\{apiKey\}/, name);
   }
 });
 
@@ -122,8 +134,14 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(intelligenceServer, /name:\s*"deception_world_persona_reply"/);
   assert.match(intelligenceServer, /strict:\s*true/);
   assert.match(intelligenceServer, /generatedReplySchema\.parse\(JSON\.parse\(outputText\)\)/);
-  assert.match(intelligenceServer, /max_output_tokens: mode === "pro" \? 3200 : 1400/);
-  assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v1-/);
+  assert.match(
+    intelligenceServer,
+    /mode === "pro"[\s\S]*?effort: "max", mode: "pro", context: "current_turn"/,
+  );
+  assert.match(intelligenceServer, /effort: "low", context: "current_turn"/);
+  assert.match(intelligenceServer, /max_output_tokens: mode === "pro" \? 12_000 : 2400/);
+  assert.match(intelligenceServer, /mode === "pro" \? 110_000 : 30_000/);
+  assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v2-/);
   assert.match(intelligenceServer, /controller\.abort\(\)/);
   assert.match(intelligenceServer, /finally \{[\s\S]*?clearTimeout\(timeout\)/);
   assert.doesNotMatch(intelligenceServer, /previous_response_id|encrypted_content/);
@@ -138,7 +156,7 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(intelligenceRoute, /new URL\(origin\)\.origin !== new URL\(request\.url\)\.origin/);
   assert.match(intelligenceRoute, /fetchSite === "same-origin"/);
   assert.match(intelligenceRoute, /const MAX_BODY_BYTES = 32_000/);
-  assert.match(intelligenceRoute, /declaredLength > MAX_BODY_BYTES/);
+  assert.match(intelligenceRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
   assert.match(intelligenceRoute, /request_too_large/);
   assert.match(intelligenceRoute, /await checkArchiveAiAccess\(request, mode\)/);
   assert.match(intelligenceRoute, /cache-control": "no-store, max-age=0/);
@@ -148,6 +166,7 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /const CLIENT_DAILY_UNITS = 40/);
   assert.match(rateLimitServer, /const DEFAULT_GLOBAL_DAILY_UNITS = 250/);
   assert.match(rateLimitServer, /x-vercel-forwarded-for/);
+  assert.match(rateLimitServer, /if \(process\.env\.NODE_ENV === "production"\) return null/);
   assert.match(rateLimitServer, /isIP\(vercelAddress\)/);
   assert.match(rateLimitServer, /createHmac\("sha256", apiKey\)/);
   assert.match(rateLimitServer, /INSERT INTO archive_ai_rate_limits/);
@@ -156,6 +175,13 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /process\.env\.NODE_ENV === "production"/);
   assert.match(rateLimitServer, /process\.env\.VERCEL_ENV !== "production"/);
   assert.match(rateLimitServer, /mode === "pro" \? 3 : 1/);
+  assert.match(rateLimitServer, /safetyIdentifier: allowed \? clientKey : undefined/);
+  assert.match(intelligenceServer, /safety_identifier: safetyIdentifier/);
+  assert.match(intelligenceServer, /serializeUntrustedArchiveConversation\(messages\)/);
+  assert.doesNotMatch(intelligenceServer, /input: messages\.map/);
+  assert.match(conversationBoundary, /UNVERIFIED PRIOR REPLY/);
+  assert.match(requestBody, /request\.body\.getReader\(\)/);
+  assert.match(requestBody, /received > maxBytes/);
   assert.match(rateLimitServer, /reason: "shared_limit_unavailable"/);
   assert.match(rateLimitServer, /catch \{[\s\S]*?shared_limit_unavailable/);
   assert.match(rateLimitMigration, /bucket_key TEXT PRIMARY KEY/);
@@ -171,12 +197,17 @@ test("the API enforces browser origin, bounded input, and shared production budg
 });
 
 test("local persona fallback covers every character and all remote failure paths", () => {
-  for (const tableName of ["PRO_METHODS", "PRO_REFLECTIONS", "TACTICS", "CRISIS_OPENERS"]) {
-    const table = fallback.match(
-      new RegExp(`const ${tableName}: Record<ArchiveCharacterId, [^>]+> = \\{([\\s\\S]*?)\\n\\};`),
+  for (const [tableName, nextMarker] of [
+    ["PRO_DIALOGUE", "const TACTICS"],
+    ["TACTICS", "const EMPTY_TACTICAL"],
+    ["CRISIS_OPENERS", "function createCrisisReply"],
+  ]) {
+    const start = fallback.indexOf(`const ${tableName}`);
+    const end = fallback.indexOf(nextMarker, start + 1);
+    assert.ok(start >= 0 && end > start, `${tableName} should remain reviewable`);
+    const tableIds = [...fallback.slice(start, end).matchAll(/^ {2}([a-z]+):/gm)].map(
+      (match) => match[1],
     );
-    assert.ok(table, `${tableName} should remain an explicit persona allow-list`);
-    const tableIds = [...table[1].matchAll(/^ {2}([a-z]+):/gm)].map((match) => match[1]);
     assert.deepEqual(
       [...new Set(tableIds)].sort(),
       [...CHARACTER_IDS].sort(),
@@ -267,12 +298,15 @@ test("all persona portraits are real local JPEGs with useful accessible text", (
   }
 });
 
-test("the new James portrait replaces the old civilian artwork at every character-facing entry", () => {
+test("the Over Zeztz rider thumbnail stays distinct from James persona artwork", () => {
   assert.match(
     dossierNav,
     /id: "over-zeztz"[\s\S]{0,300}?assets: \["\/archive-ai-james-20260829\.jpg"\]/,
   );
-  assert.match(worldHome, /id: "over-zeztz"[\s\S]{0,900}?img: "\/archive-ai-james-20260829\.jpg"/);
+  assert.match(
+    worldHome,
+    /id: "over-zeztz"[\s\S]{0,900}?img: "\/rider-over-zeztz-thumbnail-20260829\.jpg"/,
+  );
   assert.match(
     riderPage,
     /id: "over-zeztz"[\s\S]{0,1600}?civilianImg: "\/archive-ai-james-20260829\.jpg"/,
@@ -281,4 +315,12 @@ test("the new James portrait replaces the old civilian artwork at every characte
   assert.doesNotMatch(dossierNav, /rider-over-zeztz-home\.jpeg/);
   assert.doesNotMatch(worldHome, /rider-over-zeztz-home\.jpeg/);
   assert.doesNotMatch(riderPage, /civilian-over-zeztz\.jpeg/);
+
+  const riderThumbnail = new URL(
+    "../public/rider-over-zeztz-thumbnail-20260829.jpg",
+    import.meta.url,
+  );
+  assert.ok(existsSync(riderThumbnail));
+  assert.ok(statSync(riderThumbnail).size > 100_000);
+  assert.deepEqual([...readFileSync(riderThumbnail).subarray(0, 2)], [0xff, 0xd8]);
 });

@@ -1,16 +1,13 @@
 import {
-  forwardRef,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type FormEvent,
-  type ForwardedRef,
   type KeyboardEvent,
-  type RefObject,
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -648,276 +645,371 @@ function searchArchiveOracle(query: string, limit = 3): ArchiveOracleResult[] {
     .slice(0, Math.min(limit, 3));
 }
 
-function archiveOracleAnswer(query: string, results: readonly ArchiveOracleResult[]) {
-  const trimmed = query.trim();
-  if (!trimmed) return "探したい人物、能力、作品、場面を質問してください。";
-  if (!results.length) {
-    return "該当する記録を特定できませんでした。人物名、ライダー名、能力、作品名など、手がかりを少し変えて質問してください。";
-  }
-  const top = results[0].entry;
-  if (results.length === 1) {
-    return `「${trimmed}」に最も近いのは『${top.label}』です。${top.description}`;
-  }
-  return `「${trimmed}」から、近い記録を${results.length}件見つけました。まずは『${top.label}』がよさそうです。`;
-}
-
-export type ArchiveOracleProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onNavigate?: () => void;
-  returnFocusRef?: RefObject<HTMLElement | null>;
+type SearchMessage = {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  results?: ArchiveOracleResult[];
+  suggestions?: string[];
+  source?: ArchiveSearchReply["source"];
+  model?: string;
+  notice?: string;
 };
 
-function setForwardedRef(
-  forwardedRef: ForwardedRef<HTMLDialogElement>,
-  node: HTMLDialogElement | null,
-) {
-  if (typeof forwardedRef === "function") forwardedRef(node);
-  else if (forwardedRef) forwardedRef.current = node;
+const SEARCH_FOLLOW_UP_PATTERN =
+  /^(それ|その|あれ|これ|一つ目|1つ目|最初|一番上|二つ目|2つ目|2番|二番|後者|前者|三つ目|3つ目|3番|三番|最後|ほか|他|もっと|詳しく|違い|では|じゃあ|なら)/u;
+
+function searchMessageId(prefix: string): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
-  function ArchiveOracle({ open, onOpenChange, onNavigate, returnFocusRef }, forwardedRef) {
-    const dialogRef = useRef<HTMLDialogElement | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const restoreFocusRef = useRef(true);
-    const [surface, setSurface] = useState<"guide" | "roleplay">("guide");
-    const [question, setQuestion] = useState("");
-    const [submittedQuestion, setSubmittedQuestion] = useState("");
-    const results = useMemo(() => searchArchiveOracle(submittedQuestion, 3), [submittedQuestion]);
-    const answer = useMemo(
-      () => archiveOracleAnswer(submittedQuestion, results),
-      [results, submittedQuestion],
-    );
+function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
+  if (!value || typeof value !== "object") return false;
+  const reply = value as Partial<ArchiveSearchReply>;
+  return (
+    typeof reply.reply === "string" &&
+    Array.isArray(reply.suggestions) &&
+    (reply.focusCandidateId === undefined || typeof reply.focusCandidateId === "string") &&
+    (reply.source === "openai" || reply.source === "local")
+  );
+}
 
-    const connectDialogRef = useCallback(
-      (node: HTMLDialogElement | null) => {
-        dialogRef.current = node;
-        setForwardedRef(forwardedRef, node);
-      },
-      [forwardedRef],
-    );
+function resolveConversationalSearchQuery(
+  question: string,
+  messages: readonly SearchMessage[],
+): string {
+  const trimmed = question.trim();
+  const previous = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant" && message.results?.length);
+  const results = previous?.results ?? [];
+  const normalizedQuestion = normalizeArchiveOracleText(trimmed);
+  const explicit = results.find(({ entry }) =>
+    normalizedQuestion.includes(normalizeArchiveOracleText(entry.label)),
+  );
+  if (explicit) return `${explicit.entry.label} ${trimmed}`.slice(0, 180);
+  if (!SEARCH_FOLLOW_UP_PATTERN.test(trimmed)) return trimmed;
+  const requestedIndex = /二つ目|2つ目|2番|二番|後者/u.test(trimmed)
+    ? 1
+    : /三つ目|3つ目|3番|三番|最後/u.test(trimmed)
+      ? 2
+      : /ほか|他/u.test(trimmed)
+        ? 1
+        : 0;
+  const label = (results[requestedIndex] ?? results.at(-1))?.entry.label;
+  return label ? `${label} ${trimmed}`.slice(0, 180) : trimmed;
+}
 
-    useEffect(() => {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      if (!open) {
-        if (dialog.open) dialog.close();
-        return;
+export function ArchiveIntelligenceWorkspace({
+  active = true,
+  onNavigate,
+}: {
+  active?: boolean;
+  onNavigate?: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchLogRef = useRef<HTMLDivElement>(null);
+  const searchFollowLatestRef = useRef(true);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const searchSequenceRef = useRef(0);
+  const [surface, setSurface] = useState<"search" | "roleplay">("search");
+  const [question, setQuestion] = useState("");
+  const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
+  const [searchPending, setSearchPending] = useState(false);
+
+  const latestSearchAssistant = [...searchMessages]
+    .reverse()
+    .find((message) => message.role === "assistant");
+  const searchSuggestions = latestSearchAssistant?.suggestions?.length
+    ? latestSearchAssistant.suggestions
+    : ARCHIVE_ORACLE_SUGGESTIONS;
+
+  const stopSearch = useCallback(() => {
+    searchSequenceRef.current += 1;
+    searchAbortRef.current?.abort();
+    searchAbortRef.current = null;
+    setSearchPending(false);
+  }, []);
+
+  useEffect(() => () => stopSearch(), [stopSearch]);
+
+  useEffect(() => {
+    if (!active || surface !== "search") stopSearch();
+  }, [active, stopSearch, surface]);
+
+  useEffect(() => {
+    if (!active || surface !== "search") return;
+    const frame = window.requestAnimationFrame(() => {
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        inputRef.current?.focus({ preventScroll: true });
       }
-      restoreFocusRef.current = true;
-      if (!dialog.open) {
-        try {
-          dialog.showModal();
-        } catch {
-          onOpenChange(false);
-          return;
-        }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [active, surface]);
+
+  useEffect(() => {
+    const log = searchLogRef.current;
+    if (!log || surface !== "search" || !searchFollowLatestRef.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      log.scrollTop = log.scrollHeight;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [searchMessages, searchPending, surface]);
+
+  const ask = useCallback(
+    async (value: string) => {
+      const nextQuestion = value.trim().slice(0, 180);
+      if (!nextQuestion || searchPending) return;
+
+      const resolvedQuery = resolveConversationalSearchQuery(nextQuestion, searchMessages);
+      const results = searchArchiveOracle(resolvedQuery, 3);
+      searchFollowLatestRef.current = true;
+      const userMessage: SearchMessage = {
+        id: searchMessageId("search-user"),
+        role: "user",
+        text: nextQuestion,
+      };
+      const nextMessages = [...searchMessages, userMessage].slice(-18);
+      setSearchMessages(nextMessages);
+      setQuestion("");
+      setSearchPending(true);
+
+      searchAbortRef.current?.abort();
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
+      const sequence = searchSequenceRef.current + 1;
+      searchSequenceRef.current = sequence;
+
+      let reply: ArchiveSearchReply;
+      try {
+        const response = await fetch("/api/archive-search", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "content-type": "application/json",
+            "x-archive-client": "search-v1",
+          },
+          body: JSON.stringify({
+            query: resolvedQuery,
+            messages: nextMessages
+              .map((message) => ({
+                role: message.role,
+                content: (message.role === "assistant" && message.results?.length
+                  ? `${message.text}\n表示候補: ${message.results
+                      .map(({ entry }, index) => `${index + 1}. ${entry.label} [${entry.id}]`)
+                      .join(" / ")}`
+                  : message.text
+                ).slice(0, 1600),
+              }))
+              .slice(-10),
+            candidates: results.map(({ entry }) => ({
+              id: entry.id,
+              label: entry.label,
+              kicker: entry.kicker,
+              description: entry.description,
+            })),
+          }),
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("archive search request failed");
+        const payload: unknown = await response.json();
+        if (!isArchiveSearchReply(payload)) throw new Error("archive search response was invalid");
+        reply = payload;
+      } catch {
+        if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+        reply = createLocalArchiveSearchReply({
+          query: resolvedQuery,
+          candidates: results.map(({ entry }) => ({
+            id: entry.id,
+            label: entry.label,
+            kicker: entry.kicker,
+            description: entry.description,
+          })),
+          notice: "通信が安定しなかったため、ローカルサーチで案内しています。",
+        });
       }
-      const frame = window.requestAnimationFrame(() => {
-        if (
-          surface === "guide" &&
-          window.matchMedia("(hover: hover) and (pointer: fine)").matches
-        ) {
-          inputRef.current?.focus({ preventScroll: true });
-        }
-      });
-      return () => window.cancelAnimationFrame(frame);
-    }, [onOpenChange, open, surface]);
 
-    const closeOracle = useCallback(() => {
-      restoreFocusRef.current = true;
-      onOpenChange(false);
-    }, [onOpenChange]);
-
-    const ask = useCallback((value: string) => {
-      const nextQuestion = value.trim().slice(0, 120);
-      setQuestion(nextQuestion);
-      setSubmittedQuestion(nextQuestion);
-    }, []);
-
-    const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      ask(question);
-    };
-
-    const handleSurfaceKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-      event.preventDefault();
-      const nextSurface = event.key === "ArrowLeft" || event.key === "Home" ? "guide" : "roleplay";
-      setSurface(nextSurface);
-      window.requestAnimationFrame(() => {
-        document
-          .getElementById(
-            nextSurface === "guide" ? "archive-oracle-guide-tab" : "archive-oracle-roleplay-tab",
+      if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+      const orderedResults = reply.focusCandidateId
+        ? [...results].sort((left, right) =>
+            left.entry.id === reply.focusCandidateId
+              ? -1
+              : right.entry.id === reply.focusCandidateId
+                ? 1
+                : 0,
           )
-          ?.focus({ preventScroll: true });
-      });
-    };
+        : results;
+      setSearchMessages((current) => [
+        ...current,
+        {
+          id: searchMessageId("search-assistant"),
+          role: "assistant",
+          text: reply.reply,
+          results: orderedResults,
+          suggestions: reply.suggestions,
+          source: reply.source,
+          model: reply.model,
+          notice: reply.notice,
+        },
+      ]);
+      setSearchPending(false);
+      searchAbortRef.current = null;
+    },
+    [searchMessages, searchPending],
+  );
 
-    const beforeResultNavigation = () => {
-      restoreFocusRef.current = false;
-      onOpenChange(false);
-      onNavigate?.();
-    };
+  const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void ask(question);
+  };
 
-    return (
-      <dialog
-        ref={connectDialogRef}
-        id="site-archive-oracle-dialog"
-        className="archive-oracle-dialog"
-        aria-labelledby="archive-oracle-title"
-        aria-describedby="archive-oracle-description"
-        onCancel={(event) => {
-          event.preventDefault();
-          closeOracle();
-        }}
-        onClose={() => {
-          if (open) onOpenChange(false);
-          if (restoreFocusRef.current) {
-            returnFocusRef?.current?.focus({ preventScroll: true });
-          }
-        }}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) closeOracle();
-        }}
-      >
-        <section className="archive-oracle-shell" data-surface={surface}>
-          <span className="archive-oracle-aura" aria-hidden="true" />
-          <p id="archive-oracle-description" className="visually-hidden">
-            公開記録を端末内で探す案内と、8つのキャラクター人格で会話できる知能端末です。
-          </p>
-          <header className="archive-oracle-header">
-            <div>
-              <p>ARCHIVE INTELLIGENCE CONSOLE</p>
-              <h2 id="archive-oracle-title">AIに聞く</h2>
-            </div>
-            <div
-              className="archive-oracle-view-switch"
-              role="tablist"
-              aria-label="AI機能を選択"
-              onKeyDown={handleSurfaceKeyDown}
-            >
-              <button
-                id="archive-oracle-guide-tab"
-                className="archive-oracle-view-tab"
-                type="button"
-                role="tab"
-                aria-selected={surface === "guide"}
-                aria-controls="archive-oracle-guide-panel"
-                tabIndex={surface === "guide" ? 0 : -1}
-                onClick={() => setSurface("guide")}
-              >
-                <span>記録を探す</span>
-                <small>GUIDE</small>
-              </button>
-              <button
-                id="archive-oracle-roleplay-tab"
-                className="archive-oracle-view-tab"
-                type="button"
-                role="tab"
-                aria-selected={surface === "roleplay"}
-                aria-controls="archive-oracle-roleplay-panel"
-                tabIndex={surface === "roleplay" ? 0 : -1}
-                onClick={() => setSurface("roleplay")}
-              >
-                <span>なりきり</span>
-                <small>PERSONA</small>
-              </button>
-            </div>
-            <span className="archive-oracle-status">
-              <i aria-hidden="true" />
-              HYBRID
-            </span>
-            <button
-              className="archive-oracle-close ios26-glass"
-              type="button"
-              aria-label="AI案内を閉じる"
-              onClick={closeOracle}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path
-                  d="M6.2 6.2l11.6 11.6M17.8 6.2L6.2 17.8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          </header>
+  const handleSurfaceKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const nextSurface = event.key === "ArrowLeft" || event.key === "Home" ? "search" : "roleplay";
+    setSurface(nextSurface);
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById(
+          nextSurface === "search" ? "archive-oracle-search-tab" : "archive-oracle-roleplay-tab",
+        )
+        ?.focus({ preventScroll: true });
+    });
+  };
 
-          <div
-            id="archive-oracle-guide-panel"
-            className="archive-oracle-stage archive-oracle-guide"
-            role="tabpanel"
-            aria-labelledby="archive-oracle-guide-tab"
-            hidden={surface !== "guide"}
+  return (
+    <section
+      className="archive-oracle-shell archive-intelligence-workspace"
+      data-surface={surface}
+      aria-labelledby="archive-oracle-title"
+      aria-describedby="archive-oracle-description"
+    >
+      <span className="archive-oracle-aura" aria-hidden="true" />
+      <p id="archive-oracle-description" className="visually-hidden">
+        公開記録を会話で探すサーチと、8つのキャラクター人格で対話できる知能端末です。
+      </p>
+      <header className="archive-oracle-header">
+        <div>
+          <p>ARCHIVE INTELLIGENCE</p>
+          <h2 id="archive-oracle-title">AIに聞く</h2>
+        </div>
+        <div
+          className="archive-oracle-view-switch"
+          role="tablist"
+          aria-label="AI機能を選択"
+          onKeyDown={handleSurfaceKeyDown}
+        >
+          <button
+            id="archive-oracle-search-tab"
+            className="archive-oracle-view-tab"
+            type="button"
+            role="tab"
+            aria-selected={surface === "search"}
+            aria-controls="archive-oracle-search-panel"
+            tabIndex={surface === "search" ? 0 : -1}
+            onClick={() => setSurface("search")}
           >
-            <p className="archive-oracle-introduction">
-              探している人物、能力、物語を言葉で質問してください。公開中の記録から、近いページを案内します。
-            </p>
+            <span>サーチ</span>
+            <small>SEARCH</small>
+          </button>
+          <button
+            id="archive-oracle-roleplay-tab"
+            className="archive-oracle-view-tab"
+            type="button"
+            role="tab"
+            aria-selected={surface === "roleplay"}
+            aria-controls="archive-oracle-roleplay-panel"
+            tabIndex={surface === "roleplay" ? 0 : -1}
+            onClick={() => setSurface("roleplay")}
+          >
+            <span>なりきり</span>
+            <small>PERSONA</small>
+          </button>
+        </div>
+        <span className="archive-oracle-status">
+          <i aria-hidden="true" />
+          {surface === "search" ? "LUNA" : "PERSONA"}
+        </span>
+      </header>
 
-            <form className="archive-oracle-form" role="search" onSubmit={submitQuestion}>
-              <label className="visually-hidden" htmlFor="archive-oracle-question">
-                探しているページについて質問する
-              </label>
-              <div className="archive-oracle-input-shell">
-                <span aria-hidden="true">ASK</span>
-                <input
-                  ref={inputRef}
-                  id="archive-oracle-question"
-                  name="question"
-                  type="search"
-                  value={question}
-                  maxLength={120}
-                  autoComplete="off"
-                  enterKeyHint="search"
-                  placeholder="例：レクソナンスの性能を見たい"
-                  onChange={(event) => setQuestion(event.currentTarget.value)}
-                />
-                <button type="submit" disabled={!question.trim()}>
-                  探す
-                  <span aria-hidden="true">↗</span>
-                </button>
-              </div>
-            </form>
+      <div
+        id="archive-oracle-search-panel"
+        className="archive-oracle-stage archive-oracle-guide archive-search-conversation"
+        role="tabpanel"
+        aria-labelledby="archive-oracle-search-tab"
+        hidden={surface !== "search"}
+      >
+        <div className="archive-search-heading">
+          <div>
+            <small>CONVERSATIONAL ARCHIVE SEARCH</small>
+            <h3>知りたいことから、記録へ。</h3>
+          </div>
+          {searchMessages.length ? (
+            <button
+              type="button"
+              onClick={() => {
+                stopSearch();
+                setSearchMessages([]);
+                setQuestion("");
+              }}
+            >
+              新しいサーチ
+            </button>
+          ) : null}
+        </div>
 
-            <div className="archive-oracle-suggestions" aria-label="質問の例">
-              <p>QUICK QUESTIONS</p>
+        <div
+          ref={searchLogRef}
+          className="archive-search-log"
+          role="log"
+          aria-label="サーチとの会話"
+          aria-busy={searchPending}
+          onScroll={(event) => {
+            const log = event.currentTarget;
+            searchFollowLatestRef.current =
+              log.scrollHeight - log.scrollTop - log.clientHeight < 140;
+          }}
+        >
+          {!searchMessages.length ? (
+            <div className="archive-search-welcome">
+              <span aria-hidden="true">AI</span>
               <div>
-                {ARCHIVE_ORACLE_SUGGESTIONS.map((suggestion) => (
-                  <button key={suggestion} type="button" onClick={() => ask(suggestion)}>
-                    {suggestion}
-                  </button>
-                ))}
+                <small>SEARCH CHANNEL READY</small>
+                <p>
+                  人物、能力、作品、覚えている場面をそのまま話してください。曖昧でも、会話を続けながら近い記録へ絞ります。
+                </p>
               </div>
             </div>
-
-            <div
-              className="archive-oracle-response"
-              data-has-results={String(Boolean(submittedQuestion && results.length))}
-            >
-              <p
-                className="archive-oracle-answer"
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
+          ) : (
+            searchMessages.map((message) => (
+              <article
+                key={message.id}
+                className={`archive-search-message is-${message.role}`}
+                data-source={message.source}
               >
-                {answer}
-              </p>
-
-              {submittedQuestion ? (
-                results.length ? (
+                <header>
+                  <span>{message.role === "assistant" ? "AI" : "YOU"}</span>
+                  {message.role === "assistant" && message.source ? (
+                    <small>{message.source === "openai" ? "LUNA" : "LOCAL"}</small>
+                  ) : null}
+                </header>
+                <p>{message.text}</p>
+                {message.notice ? (
+                  <small className="archive-search-notice">{message.notice}</small>
+                ) : null}
+                {message.role === "assistant" && message.results?.length ? (
                   <ol className="archive-oracle-results" aria-label="見つかったページ">
-                    {results.map(({ entry }, index) => (
+                    {message.results.map(({ entry }, index) => (
                       <li key={entry.id}>
                         <GuardedLink
                           to={entry.to}
                           hash={entry.hash}
                           assets={entry.assets}
                           className="archive-oracle-result"
-                          beforeNavigate={beforeResultNavigation}
+                          beforeNavigate={onNavigate}
                           aria-label={`${entry.label}を開く。${entry.description}`}
                         >
                           <span className="archive-oracle-result-index">
@@ -935,37 +1027,92 @@ export const ArchiveOracle = forwardRef<HTMLDialogElement, ArchiveOracleProps>(
                       </li>
                     ))}
                   </ol>
-                ) : (
-                  <div className="archive-oracle-empty">
-                    <span aria-hidden="true">NO MATCH</span>
-                    <p>例の質問を試すか、固有名詞を一つ加えてみてください。</p>
-                  </div>
-                )
-              ) : null}
+                ) : null}
+              </article>
+            ))
+          )}
+
+          {searchPending ? (
+            <div className="archive-search-thinking" aria-hidden="true">
+              <span aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <div>
+                <small>GPT-5.6 LUNA / SEARCHING</small>
+                <p>AIが記録と会話の流れを照合しています</p>
+              </div>
             </div>
+          ) : null}
+        </div>
 
-            <p className="archive-oracle-privacy">
-              この案内はサイト内の公開記録だけを端末上で検索します。質問が外部へ送信されることはありません。
-            </p>
+        <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+          {searchPending ? "AIが記録と会話の流れを照合しています" : ""}
+        </p>
+
+        <div className="archive-oracle-suggestions" aria-label="次のサーチ候補">
+          <p>{searchMessages.length ? "CONTINUE SEARCH" : "QUICK QUESTIONS"}</p>
+          <div>
+            {searchSuggestions.slice(0, 5).map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                disabled={searchPending}
+                onClick={() => {
+                  setQuestion(suggestion);
+                  inputRef.current?.focus({ preventScroll: true });
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div
-            id="archive-oracle-roleplay-panel"
-            className="archive-oracle-roleplay-panel"
-            role="tabpanel"
-            aria-labelledby="archive-oracle-roleplay-tab"
-            hidden={surface !== "roleplay"}
-          >
-            <ArchiveRoleplay
-              active={open && surface === "roleplay"}
-              searchArchive={searchArchiveOracle}
-              onNavigate={beforeResultNavigation}
+        <form className="archive-oracle-form" role="search" onSubmit={submitQuestion}>
+          <label className="visually-hidden" htmlFor="archive-oracle-question">
+            探している記録について話しかける
+          </label>
+          <div className="archive-oracle-input-shell">
+            <span aria-hidden="true">ASK</span>
+            <input
+              ref={inputRef}
+              id="archive-oracle-question"
+              name="question"
+              type="search"
+              value={question}
+              maxLength={180}
+              autoComplete="off"
+              enterKeyHint="send"
+              placeholder="例：レクソナンスの性能を見たい"
+              onChange={(event) => setQuestion(event.currentTarget.value)}
             />
+            <button type="submit" disabled={!question.trim() || searchPending}>
+              送信
+              <span aria-hidden="true">↑</span>
+            </button>
           </div>
-        </section>
-      </dialog>
-    );
-  },
-);
+        </form>
 
-ArchiveOracle.displayName = "ArchiveOracle";
+        <p className="archive-oracle-privacy">
+          サーチは許可済みの公開記録だけを候補にします。会話はサーバー経由でAIへ送信される場合がありますが、API保存は無効です。
+        </p>
+      </div>
+
+      <div
+        id="archive-oracle-roleplay-panel"
+        className="archive-oracle-roleplay-panel"
+        role="tabpanel"
+        aria-labelledby="archive-oracle-roleplay-tab"
+        hidden={surface !== "roleplay"}
+      >
+        <ArchiveRoleplay
+          active={active && surface === "roleplay"}
+          searchArchive={searchArchiveOracle}
+          onNavigate={onNavigate}
+        />
+      </div>
+    </section>
+  );
+}

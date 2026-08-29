@@ -24,6 +24,8 @@ npm run dev
 
 ### 「AIに聞く」の会話機能
 
-`XAI_API_KEY` と共有Postgres用の `DATABASE_URL` を設定すると、8つの人格回線の会話応答にxAIを使用します。モデルは既定で `grok-4.6`、必要な場合だけ `XAI_CHAT_MODEL` で変更できます。キーはサーバー側だけで参照され、会話APIは保存を無効化して呼び出します。本番の外部AI接続は共有レート制限を必須とし、上限を確認できない場合は安全側でローカル人格コアへ切り替わります。全体の日次上限は `ARCHIVE_AI_GLOBAL_DAILY_LIMIT`（既定250単位、Normal=1／Pro=3）で調整できます。
+`OPENAI_API_KEY` と共有Postgres用の `DATABASE_URL` を設定すると、8つの人格回線と会話型サーチにOpenAI Responses APIを使用します。NormalとSearchは既定で `gpt-5.6-luna`、Proは `gpt-5.6-sol` のPro mode／reasoning effort `max` を使用します。必要な場合だけ、サーバー側の `ARCHIVE_NORMAL_MODEL`、`ARCHIVE_PRO_MODEL`、`ARCHIVE_SEARCH_MODEL` で各モデルを変更できます。
 
-キーがない場合や通信が不安定な場合も、サイト内のローカル人格コアへ自動で切り替わります。従来の公開記録検索は引き続き完全に端末内で動作します。
+キーとモデル設定はサーバー側だけで参照され、Responses APIは `store: false` かつツール無効で呼び出します。本番の外部AI接続は共有レート制限を必須とし、上限を確認できない場合はローカル人格コア／ローカルサーチへ切り替わります。全体の日次上限は `ARCHIVE_AI_GLOBAL_DAILY_LIMIT`（既定250単位、Normal／Search=1、Pro=3）で調整できます。
+
+キーがない場合や通信が不安定な場合も、会話はローカル人格コアまたは決定論的なローカルサーチへ自動で切り替わります。ページ遷移は常にサイト内の許可済み記録だけへ限定されます。

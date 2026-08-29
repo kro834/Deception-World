@@ -8,7 +8,6 @@ import {
 } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
-import { ArchiveOracle } from "./archive-oracle";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -185,14 +184,11 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance" | "extreme";
+  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "intelligence";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
   const panelRef = useRef<HTMLElement>(null);
-  const oracleRef = useRef<HTMLDialogElement>(null);
-  const oracleTriggerRef = useRef<HTMLButtonElement>(null);
-  const oracleOpenedByKeyboardRef = useRef(false);
   const announcementRef = useRef<HTMLDialogElement>(null);
   const announcementTriggerRef = useRef<HTMLButtonElement>(null);
   const announcementStageRef = useRef<HTMLDivElement>(null);
@@ -200,7 +196,6 @@ export function SideMenuLayer({
   const announcementOpenedByKeyboardRef = useRef(false);
   const sideMenuRestoreFocusRef = useRef(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
-  const [oracleOpen, setOracleOpen] = useState(false);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
@@ -240,8 +235,6 @@ export function SideMenuLayer({
       if (panel.contains(event.target)) return;
       const announcementDialog = announcementRef.current;
       if (announcementDialog?.open && announcementDialog.contains(event.target)) return;
-      const oracleDialog = oracleRef.current;
-      if (oracleDialog?.open && oracleDialog.contains(event.target)) return;
       event.preventDefault();
     };
     document.addEventListener("touchmove", containBackgroundScroll, {
@@ -334,19 +327,6 @@ export function SideMenuLayer({
     if (!openedByKeyboard) event.currentTarget.blur();
     setSelectedAnnouncementId(null);
     setAnnouncementOpen(true);
-  };
-
-  const openOracle = (event: MouseEvent<HTMLButtonElement>) => {
-    const openedByKeyboard = event.detail === 0;
-    oracleOpenedByKeyboardRef.current = openedByKeyboard;
-    if (!openedByKeyboard) event.currentTarget.blur();
-    setAnnouncementOpen(false);
-    setOracleOpen(true);
-  };
-
-  const closeForOracleNavigation = () => {
-    sideMenuRestoreFocusRef.current = false;
-    close();
   };
 
   const closeAnnouncement = (restoreFocus = announcementOpenedByKeyboardRef.current) => {
@@ -445,7 +425,9 @@ export function SideMenuLayer({
                     ? "REXONANCE SAGA"
                     : context === "extreme"
                       ? "EXTREME SAGA"
-                      : "DECEPTION WORLD"}
+                      : context === "intelligence"
+                        ? "ARCHIVE INTELLIGENCE"
+                        : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -475,14 +457,13 @@ export function SideMenuLayer({
           </button>
         </div>
         <div className="side-panel-oracle-card">
-          <button
-            ref={oracleTriggerRef}
+          <GuardedLink
+            to="/intelligence"
+            assets={[]}
             className="side-panel-oracle-trigger"
-            type="button"
-            aria-haspopup="dialog"
-            aria-controls="site-archive-oracle-dialog"
-            aria-expanded={oracleOpen}
-            onClick={openOracle}
+            beforeNavigate={close}
+            aria-current={context === "intelligence" ? "page" : undefined}
+            aria-label="AIに聞く専用ページを開く"
           >
             <span className="side-panel-oracle-sigil" aria-hidden="true">
               <i />
@@ -492,15 +473,15 @@ export function SideMenuLayer({
             <span className="side-panel-oracle-copy">
               <small>ARCHIVE INTELLIGENCE / HYBRID</small>
               <b>AIに聞く</b>
-              <span>記録検索と、8つの人格回線</span>
+              <span>会話型サーチと、8つの人格回線</span>
             </span>
             <span className="side-panel-oracle-arrow" aria-hidden="true">
               ↗
             </span>
-          </button>
+          </GuardedLink>
           <p>
-            <span>GUIDE + PERSONA</span>
-            検索は端末内、会話は保護された回線
+            <span>GPT-5.6 LUNA + SOL</span>
+            記録を会話で探し、人格と深く話す
           </p>
         </div>
         <div className="side-panel-group">
@@ -737,13 +718,6 @@ export function SideMenuLayer({
           </div>
         </div>
       </aside>
-      <ArchiveOracle
-        ref={oracleRef}
-        open={oracleOpen}
-        onOpenChange={setOracleOpen}
-        onNavigate={closeForOracleNavigation}
-        returnFocusRef={oracleOpenedByKeyboardRef.current ? oracleTriggerRef : undefined}
-      />
       <dialog
         ref={announcementRef}
         id="site-announcement-dialog"
