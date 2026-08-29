@@ -582,14 +582,40 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         abilities: [
           { name: "草", body: "文字を書き出すことで生えている草を操作し、成長させて足止め用の罠を作る。引き抜いて鞭として振るい、対象へ括り付けて拘束する。" },
           { name: "薬", body: "患者や負傷者の状態に適した回復用の薬を生み出す。怪我の度合いが大きいほど、精製に必要な時間も延びる。" },
-          { name: "堅／壊", body: "土偏フォームでは防御力を数倍へ高め、飛来する危険物を空中でばらばらに破壊する。" },
         ],
         arsenal: [
           { name: "草薙刀", body: "全長150cm、緑色の柄の両端に約25cmずつの刃を備えた薙刀。危険だからという理由で折り、二刀流として扱う。" },
-          { name: "岩山盾", body: "高さ約150cm、重量約480kgの大盾。華火は重いと言って、すぐに放り投げてしまう。" },
         ],
         finishers: [
           { name: "SUPPORT To GRASS", body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。" },
+        ],
+      },
+      {
+        img: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 8%",
+        system: "四八式腕時計型偏装甲装置 × レディックウォッチ",
+        name: "レディック",
+        sub: "石偏フォーム",
+        calls: ["石偏！！！！", "GUARD By ROCK！！"],
+        quote: "他者を護る盾として、圧倒的な頑強さを。",
+        overview: [
+          "在原華火が変身する第二形態。草かんむりフォームと同じタイミングで与えられていたが、華火が存在ごと忘れていたため、登場は少し遅れる。",
+          "後に登場するフォームを含めても頭3つほど抜き出た圧倒的な頑強さを誇り、他者を護る盾として存分に力を発揮する。武器の岩山盾は『重い』と言いながら、華火がすぐに放り投げてしまう。",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "230cm" },
+          { dt: "WEIGHT", dd: "308kg" },
+          { dt: "PUNCH", dd: "10.6t" },
+          { dt: "KICK", dd: "30.4t" },
+          { dt: "JUMP", dd: "0.5m" },
+          { dt: "100m", dd: "15秒" },
+        ],
+        abilities: [
+          { name: "堅", body: "『堅』の文字を書き出し、防御力をさらに数倍へ高める。" },
+          { name: "壊", body: "自身や護りたい対象へ飛来する危険物を空中でばらばらに破壊する。気体の場合は原子同士の結合を無理矢理破壊し、無毒化する。" },
+        ],
+        arsenal: [
+          { name: "岩山盾", body: "読みは『がんざんじゅん』。高さ約150cm、重量約480kgの大盾。" },
         ],
       },
     ],
@@ -623,8 +649,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       ],
       forms: [
         {
-          img: "/rider-leddic-hoko.jpeg",
-          pos: "50% 8%",
+          img: "/rider-leddic-hoko-pending.svg",
+          pos: "50% 50%",
           system: "レディックウォッチ × 戈フォーム",
           name: "レディック",
           sub: "戈フォーム",
@@ -653,8 +679,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           ],
         },
         {
-          img: "/rider-leddic-rekka-pending.svg",
-          pos: "50% 50%",
+          img: "/rider-leddic-rekka.jpeg",
+          pos: "50% 8%",
           system: "レディックウォッチ × 灬フォーム",
           name: "レディック",
           sub: "灬フォーム",
@@ -662,7 +688,6 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           quote: "炎と脚力を、一瞬の突破へ。",
           overview: [
             "無神千桐が変身する第二形態。『れっか』の名どおり脚の速さを突き詰め、灬が火を表す字であることから炎系の部首も扱う。二つのフォームでありながら、実質的には三つのフォームに相当する運用幅を持つ。",
-            "添付データ内に三枚目の画像が存在しなかったため、ビジュアル欄は画像記録未提供としている。",
           ],
           stats: [
             { dt: "HEIGHT", dd: "199cm" },
@@ -1027,9 +1052,10 @@ export function RiderPage({ id }: { id: string }) {
     rider.id === "saga"
       ? rider.forms.filter((form) => form.featuredPickup)
       : rider.id === "cipher" ? rider.forms
-        : primaryForm
-          ? [primaryForm]
-          : [];
+        : rider.id === "leddic" ? rider.forms
+          : primaryForm
+            ? [primaryForm]
+            : [];
   return (
     <main
       className="manager-page rider-dossier-page"

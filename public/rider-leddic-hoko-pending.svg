@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
-  <title id="title">灬フォーム画像記録未提供</title>
-  <desc id="desc">赤と緑の記録線で構成した灬フォームの一時表示</desc>
+  <title id="title">戈フォーム画像記録未提供</title>
+  <desc id="desc">赤と緑の記録線で構成した戈フォームの一時表示</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#080b0a"/>
@@ -23,7 +23,7 @@
   <path d="M450 118v964M118 600h664" stroke="#fff" stroke-opacity=".08"/>
   <path d="M450 220c-148 0-268 120-268 268s120 268 268 268 268-120 268-268-120-268-268-268Z" fill="none" stroke="#ff5849" stroke-opacity=".34" stroke-width="3"/>
   <path d="M450 268c-121 0-220 99-220 220s99 220 220 220 220-99 220-220-99-220-220-220Z" fill="none" stroke="#61ff9f" stroke-opacity=".28" stroke-width="2"/>
-  <text x="450" y="585" fill="#f6fff9" font-family="sans-serif" font-size="248" font-weight="700" text-anchor="middle">灬</text>
+  <text x="450" y="585" fill="#f6fff9" font-family="sans-serif" font-size="248" font-weight="700" text-anchor="middle">戈</text>
   <text x="450" y="860" fill="#f4fff8" font-family="sans-serif" font-size="34" font-weight="700" letter-spacing="12" text-anchor="middle">FORM VISUAL</text>
   <text x="450" y="922" fill="#a8b7ae" font-family="sans-serif" font-size="22" letter-spacing="8" text-anchor="middle">IMAGE RECORD PENDING</text>
   <path d="M220 982h460" stroke="#ffffff" stroke-opacity=".14"/>

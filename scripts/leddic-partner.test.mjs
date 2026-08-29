@@ -35,8 +35,20 @@ test("Leddic adds Chigiri Naikami as Hanaka's skilled-duo partner", () => {
   }
 });
 
-test("Chigiri's Hoko and Rekka forms preserve every supplied catalog value", () => {
+test("Hanaka's Ishihen and Chigiri's Hoko and Rekka forms preserve every supplied catalog value", () => {
   for (const value of [
+    "石偏フォーム",
+    "GUARD By ROCK！！",
+    "230cm",
+    "308kg",
+    "10.6t",
+    "30.4t",
+    "0.5m",
+    "15秒",
+    "草かんむりフォームと同じタイミング",
+    "原子同士の結合を無理矢理破壊",
+    "岩山盾",
+    "480kg",
     "戈フォーム",
     "BREAK & Destroy！！！",
     "209.6cm",
@@ -61,21 +73,26 @@ test("Chigiri's Hoko and Rekka forms preserve every supplied catalog value", () 
     assert.ok(rider.includes(value), `${value} should remain in Chigiri's form records`);
   }
   assert.match(rider, /partnerForms\.map/);
-  assert.match(rider, /rider-leddic-rekka-pending\.svg/);
+  assert.match(rider, /rider-leddic-hoko-pending\.svg/);
+  assert.match(rider, /rider-leddic-rekka\.jpeg/);
+  assert.doesNotMatch(rider, /rider-leddic-rekka-pending\.svg/);
+  assert.match(rider, /rider\.id === "leddic" \? rider\.forms/);
 });
 
 test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", () => {
   for (const [file, limit] of [
     ["public/civilian-naikami-chigiri.jpeg", 350_000],
-    ["public/rider-leddic-hoko.jpeg", 450_000],
-    ["public/rider-leddic-rekka-pending.svg", 15_000],
+    ["public/rider-leddic-hoko-pending.svg", 15_000],
+    ["public/rider-leddic-ishihen.jpeg", 350_000],
+    ["public/rider-leddic-rekka.jpeg", 450_000],
   ]) {
     const asset = new URL(`../${file}`, import.meta.url);
     assert.equal(existsSync(asset), true, `${file} should exist`);
     assert.ok(statSync(asset).size < limit, `${file} should stay below ${limit} bytes`);
   }
   assert.match(navigation, /civilian-naikami-chigiri\.jpeg/);
-  assert.match(navigation, /rider-leddic-hoko\.jpeg/);
+  assert.match(navigation, /rider-leddic-ishihen\.jpeg/);
+  assert.match(navigation, /rider-leddic-rekka\.jpeg/);
 });
 
 test("Leddic opens through distinct crimson and green shoji doors", () => {

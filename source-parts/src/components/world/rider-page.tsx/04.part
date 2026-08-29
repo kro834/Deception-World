@@ -99,9 +99,10 @@ export function RiderPage({ id }: { id: string }) {
     rider.id === "saga"
       ? rider.forms.filter((form) => form.featuredPickup)
       : rider.id === "cipher" ? rider.forms
-        : primaryForm
-          ? [primaryForm]
-          : [];
+        : rider.id === "leddic" ? rider.forms
+          : primaryForm
+            ? [primaryForm]
+            : [];
   return (
     <main
       className="manager-page rider-dossier-page"
