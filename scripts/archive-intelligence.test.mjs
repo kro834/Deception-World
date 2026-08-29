@@ -291,12 +291,11 @@ test("local persona fallback covers every character and all remote failure paths
   assert.match(roleplay, /latestAssistant\?\.source === "local"[\s\S]*?"LOCAL CORE"/);
 });
 
-test("the composer is IME-safe, abortable, stale-response safe, and links only to allow-listed results", () => {
-  assert.match(roleplay, /const composingRef = useRef\(false\)/);
-  assert.match(roleplay, /!event\.nativeEvent\.isComposing/);
-  assert.match(roleplay, /!composingRef\.current/);
-  assert.match(roleplay, /onCompositionStart=\{\(\) => \{[\s\S]*?composingRef\.current = true/);
-  assert.match(roleplay, /onCompositionEnd=\{\(\) => \{[\s\S]*?composingRef\.current = false/);
+test("the composer sends only by button, stays abortable and stale-response safe, and links only to allow-listed results", () => {
+  assert.doesNotMatch(roleplay, /handleComposerKeyDown|onCompositionStart|onCompositionEnd/);
+  assert.doesNotMatch(roleplay, /type="submit"/);
+  assert.match(roleplay, /enterKeyHint="enter"/);
+  assert.match(roleplay, /type="button"[\s\S]*?onClick=\{\(\) => void sendMessage\(\)\}/);
 
   assert.match(roleplay, /const abortRef = useRef<AbortController \| null>\(null\)/);
   assert.match(roleplay, /abortRef\.current\?\.abort\(\)/);

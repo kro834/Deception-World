@@ -1,14 +1,5 @@
-import { ArrowUp, RotateCcw, Sparkles, Square } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
+import { ArrowUp, Plus, RotateCcw, Sparkles, Square } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import {
   ARCHIVE_CHARACTERS,
@@ -184,7 +175,6 @@ export function ArchiveRoleplay({
   const requestSequenceRef = useRef(0);
   const logRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
-  const composingRef = useRef(false);
   const followLatestRef = useRef(true);
 
   const profile = ARCHIVE_CHARACTER_BY_ID[characterId];
@@ -214,10 +204,6 @@ export function ArchiveRoleplay({
   useEffect(() => () => stopResponse(false), [stopResponse]);
 
   useEffect(() => {
-    if (!active) stopResponse(false);
-  }, [active, stopResponse]);
-
-  useEffect(() => {
     if (!active) return;
     const log = logRef.current;
     if (!log || !followLatestRef.current) return;
@@ -226,15 +212,6 @@ export function ArchiveRoleplay({
     });
     return () => window.cancelAnimationFrame(frame);
   }, [active, messages, pending]);
-
-  useEffect(() => {
-    if (!active || typeof window === "undefined") return;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    const frame = window.requestAnimationFrame(() =>
-      composerRef.current?.focus({ preventScroll: true }),
-    );
-    return () => window.cancelAnimationFrame(frame);
-  }, [active, activeSessionKey]);
 
   useEffect(() => {
     const log = logRef.current;
@@ -377,23 +354,6 @@ export function ArchiveRoleplay({
     setPendingProProfile(null);
     abortRef.current = null;
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
-  };
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void sendMessage();
-  };
-
-  const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey &&
-      !event.nativeEvent.isComposing &&
-      !composingRef.current
-    ) {
-      event.preventDefault();
-      void sendMessage();
-    }
   };
 
   const quickReplies = latestAssistant?.suggestions?.length
@@ -589,9 +549,16 @@ export function ArchiveRoleplay({
               <p>{profile.summary}</p>
               <div aria-label="会話を始める例">
                 {profile.starters[mode].map((starter) => (
-                  <button key={starter} type="button" onClick={() => void sendMessage(starter)}>
+                  <button
+                    key={starter}
+                    type="button"
+                    onClick={() => {
+                      setDraft(starter);
+                      composerRef.current?.focus({ preventScroll: true });
+                    }}
+                  >
                     {starter}
-                    <i aria-hidden="true">↗</i>
+                    <i aria-hidden="true">＋</i>
                   </button>
                 ))}
               </div>
@@ -705,28 +672,23 @@ export function ArchiveRoleplay({
           </div>
         ) : null}
 
-        <form className="archive-roleplay-composer" onSubmit={submit}>
+        <form className="archive-roleplay-composer" onSubmit={(event) => event.preventDefault()}>
           <label className="visually-hidden" htmlFor="archive-roleplay-message">
             {profile.name}へ送るメッセージ
           </label>
           <div>
-            <span aria-hidden="true">＋</span>
+            <span className="archive-composer-leading" aria-hidden="true">
+              <Plus size={22} strokeWidth={1.6} />
+            </span>
             <textarea
               ref={composerRef}
               id="archive-roleplay-message"
               rows={1}
               value={draft}
               maxLength={mode === "pro" ? 1600 : 900}
-              enterKeyHint="send"
+              enterKeyHint="enter"
               placeholder={`${profile.name}へ話しかける…`}
-              onCompositionStart={() => {
-                composingRef.current = true;
-              }}
-              onCompositionEnd={() => {
-                composingRef.current = false;
-              }}
               onChange={(event) => setDraft(event.currentTarget.value)}
-              onKeyDown={handleComposerKeyDown}
             />
             <small aria-label={`${draft.length}文字`}>{draft.length}</small>
           </div>
@@ -741,7 +703,12 @@ export function ArchiveRoleplay({
               <span>停止</span>
             </button>
           ) : (
-            <button type="submit" disabled={!draft.trim()} aria-label={`${profile.name}へ送信`}>
+            <button
+              type="button"
+              disabled={!draft.trim()}
+              aria-label={`${profile.name}へ送信`}
+              onClick={() => void sendMessage()}
+            >
               <ArrowUp size={17} strokeWidth={2} aria-hidden="true" />
               <span>送信</span>
             </button>

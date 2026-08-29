@@ -6,6 +6,7 @@ const readSource = (relativePath) =>
   readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
 
 const oracle = readSource("src/components/world/archive-oracle.tsx");
+const roleplay = readSource("src/components/world/archive-roleplay.tsx");
 const searchContract = readSource("src/lib/archive-search.ts");
 const searchServer = readSource("src/lib/archive-search.server.ts");
 const searchCatalog = readSource("src/lib/archive-search-catalog.server.ts");
@@ -21,6 +22,8 @@ const oracleStyles = readSource("src/styles-world/27.css");
 const worldStyleIndex = readSource("src/styles-world.css");
 const title = readSource("src/components/cinematic/title-sequence.tsx");
 const globalStyles = readSource("src/styles.css");
+const loadGate = readSource("src/components/load-gate.tsx");
+const routeTransitionStyles = readSource("src/styles-route-transitions.css");
 
 test("search is conversational while navigation stays on a deterministic allow-list", () => {
   assert.match(oracle, /export const ARCHIVE_ORACLE_ENTRIES/);
@@ -31,7 +34,7 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /credentials: "same-origin"/);
   assert.match(oracle, /className="archive-search-log"/);
   assert.match(oracle, /role="log"/);
-  assert.match(oracle, /AIが記録と会話の流れを思考中です/);
+  assert.match(oracle, /AIが質問の意図と会話の流れを思考中です/);
   assert.match(oracle, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(
     oracle,
@@ -77,9 +80,12 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /name: "deception_world_search_reply"/);
   assert.match(searchServer, /SEARCH PRO:/);
   assert.match(searchServer, /focusCandidateId must be the id/);
-  assert.match(searchServer, /answer the user's question directly from referenceExcerpt/);
-  assert.match(searchServer, /180-450 Japanese characters/);
-  assert.match(searchServer, /referenceCandidateIds must contain only/);
+  assert.match(searchServer, /capable general-purpose conversational AI/);
+  assert.match(searchServer, /Handle greetings, casual conversation/);
+  assert.match(searchServer, /Do not force every turn into archive search/);
+  assert.match(searchServer, /A candidate's mere presence never proves relevance/);
+  assert.match(searchServer, /referenceCandidateIds is the only signal/);
+  assert.match(searchServer, /leave all candidate ids empty/);
   assert.match(searchServer, /trustedCandidates\.some/);
   assert.match(searchServer, /safety_identifier: safetyIdentifier/);
   assert.match(searchServer, /serializeUntrustedArchiveConversation\(messages\)/);
@@ -108,6 +114,90 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(requestBody, /request\.body\.getReader\(\)/);
   assert.match(requestBody, /received > maxBytes/);
   assert.match(requestBody, /await reader\.cancel\(\)/);
+});
+
+test("Search answers lightweight general conversation locally without inventing archive links", async () => {
+  const { createLocalArchiveSearchReply } = await import(
+    new URL("../src/lib/archive-search.ts", import.meta.url)
+  );
+  const misleadingMovieCandidate = {
+    id: "movie",
+    label: "劇場版",
+    kicker: "MOVIE",
+    description: "Deception Worldの劇場版記録です。",
+  };
+
+  const greeting = createLocalArchiveSearchReply({
+    query: "おはよう",
+    candidates: [],
+    notice: "offline",
+  });
+  assert.match(greeting.reply, /おはようございます/);
+  assert.deepEqual(greeting.referenceCandidateIds, []);
+  assert.equal(greeting.notice, undefined);
+
+  const general = createLocalArchiveSearchReply({
+    query: "おすすめの映画を教えて",
+    candidates: [misleadingMovieCandidate],
+    notice: "offline",
+  });
+  assert.match(general.reply, /公開記録に限らず普通の質問や相談/);
+  assert.deepEqual(general.referenceCandidateIds, []);
+
+  const archive = createLocalArchiveSearchReply({
+    query: "シエルの記録を教えて",
+    candidates: [
+      {
+        id: "rider-saga",
+        label: "仮面ライダーサーガ",
+        kicker: "RIDER 01",
+        description: "シエルとサーガの公開記録です。",
+      },
+    ],
+  });
+  assert.deepEqual(archive.referenceCandidateIds, ["rider-saga"]);
+  assert.match(archive.reply, /仮面ライダーサーガ/);
+
+  const genericAbility = createLocalArchiveSearchReply({
+    query: "自分の能力を伸ばす方法を教えて",
+    candidates: [misleadingMovieCandidate],
+    notice: "offline",
+  });
+  assert.deepEqual(genericAbility.referenceCandidateIds, []);
+  assert.doesNotMatch(genericAbility.reply, /Deception Worldの公開記録について/);
+
+  const crisis = createLocalArchiveSearchReply({
+    query: "今すぐ自分を傷つけそう",
+    candidates: [],
+    notice: "offline",
+  });
+  assert.match(crisis.reply, /安全が最優先/);
+  assert.match(crisis.reply, /緊急通報/);
+  assert.deepEqual(crisis.referenceCandidateIds, []);
+  assert.equal(crisis.notice, undefined);
+});
+
+test("both AI composers send only from their explicit send buttons", () => {
+  for (const [name, source] of [
+    ["Search", oracle],
+    ["Persona", roleplay],
+  ]) {
+    assert.doesNotMatch(source, /handle(?:Search)?ComposerKeyDown/, name);
+    assert.doesNotMatch(source, /onComposition(?:Start|End)/, name);
+    assert.doesNotMatch(source, /type="submit"/, name);
+    assert.match(source, /enterKeyHint="enter"/, name);
+  }
+  assert.match(oracle, /type="button"[\s\S]*?onClick=\{\(\) => void ask\(question\)\}/);
+  assert.match(roleplay, /type="button"[\s\S]*?onClick=\{\(\) => void sendMessage\(\)\}/);
+  assert.doesNotMatch(roleplay, /sendMessage\(starter\)/);
+  assert.match(roleplay, /setDraft\(starter\)/);
+  assert.match(oracle, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
+  assert.match(roleplay, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
+  assert.match(oracle, /const displayedReferences = referencedResults/);
+  assert.match(oracle, /SEARCH_TOPIC_CHANGE_PATTERN/);
+  assert.match(oracle, /data-surface-transition=\{surfaceTransition \?\? undefined\}/);
+  assert.doesNotMatch(oracle, /surface !== "search"\) stopSearch\(\)/);
+  assert.doesNotMatch(roleplay, /if \(!active\) stopResponse\(false\)/);
 });
 
 test("model preferences normalize and resolve every Search runtime route", async () => {
@@ -203,7 +293,11 @@ test("Archive Intelligence is an independent route reached from the shared side 
   assert.match(intelligencePage, /<ArchiveIntelligenceWorkspace[\s\S]*?modelPreferences=/);
   assert.match(intelligencePage, /<ArchiveModelSelector/);
   assert.match(intelligencePage, /<SideMenuLayer context="intelligence"/);
-  assert.match(intelligencePage, /<h1 className="visually-hidden">Archive Intelligence/);
+  assert.match(
+    intelligencePage,
+    /<h1 ref=\{headingRef\} className="visually-hidden" tabIndex=\{-1\}>/,
+  );
+  assert.match(intelligencePage, /headingRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(intelligencePage, /window\.visualViewport/);
   assert.match(intelligencePage, /--archive-viewport-height/);
   assert.match(intelligencePage, /focusout/);
@@ -247,6 +341,25 @@ test("the AI app is internally scrollable, mobile-first, and motion-aware", () =
   assert.match(modelSelector, /Search Pro/);
   assert.match(oracle, /参照したページ/);
   assert.match(oracle, /reply\.referenceCandidateIds/);
+  assert.match(intelligenceStyles, /caret-color: rgba\(255, 255, 255, 0\.94\)/);
+  assert.match(intelligenceStyles, /textarea:focus::placeholder/);
+  assert.match(intelligenceStyles, /\.archive-composer-leading/);
+  assert.match(intelligenceStyles, /min-height: 60px/);
+  assert.match(intelligenceStyles, /archive-ai-search-surface-in/);
+  assert.match(intelligenceStyles, /archive-ai-persona-surface-in/);
+});
+
+test("Archive Intelligence has a dedicated reduced-motion-aware route handoff", () => {
+  assert.match(loadGate, /variant: "archive" \| "intelligence" \| "zeus"/);
+  assert.match(loadGate, /to === "\/intelligence"/);
+  assert.match(loadGate, /variant: "intelligence", phase: "covering"/);
+  assert.match(loadGate, /archive-ai-route-transition/);
+  assert.match(routeTransitionStyles, /\.load-gate\.archive-ai-route-transition/);
+  assert.match(routeTransitionStyles, /@keyframes archive-ai-route-core-in/);
+  assert.match(
+    routeTransitionStyles,
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?archive-ai-route-transition/,
+  );
 });
 
 test("visual viewport offsets cannot pull the AI shell above the iPhone viewport", async () => {

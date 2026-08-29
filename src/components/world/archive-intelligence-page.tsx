@@ -19,6 +19,7 @@ export function ArchiveIntelligencePage() {
   );
   const [preferencesReady, setPreferencesReady] = useState(false);
   const pageRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const modelReturnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -28,6 +29,16 @@ export function ArchiveIntelligencePage() {
       document.documentElement.classList.remove("archive-intelligence-active");
       document.body.classList.remove("archive-intelligence-active");
     };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && focused !== document.body && focused.isConnected)
+        return;
+      headingRef.current?.focus({ preventScroll: true });
+    }, 380);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -176,7 +187,9 @@ export function ArchiveIntelligencePage() {
 
   return (
     <main ref={pageRef} className="archive-intelligence-page">
-      <h1 className="visually-hidden">Archive Intelligence — AIに聞く</h1>
+      <h1 ref={headingRef} className="visually-hidden" tabIndex={-1}>
+        Archive Intelligence — AIに聞く
+      </h1>
 
       <header className="archive-intelligence-page-header">
         <SideMenuTrigger

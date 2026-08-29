@@ -20,7 +20,7 @@ test("covered opening navigation is selected before immediate routes while rider
   const goBlock = gate.slice(goStart, goEnd);
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if \(!isArchiveTransition && !isZeusTransition && !riderTransitionVariant\) \{/,
+    /if \(\s*!isArchiveTransition &&\s*!isIntelligenceTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{/,
   );
   assert.notEqual(coveredIndex, -1, "go must handle a shared transition before routing");
   assert.notEqual(directIndex, -1, "go must retain the immediate-route branch");
@@ -28,16 +28,14 @@ test("covered opening navigation is selected before immediate routes while rider
     coveredIndex < directIndex,
     "covered opening navigation must win before the ordinary direct branch",
   );
-  assert.match(
-    goBlock,
-    /async\s*\(\s*\{[^}]*\btransitionCovered\b[^}]*\}\s*:\s*GoOptions/,
-  );
+  assert.match(goBlock, /async\s*\(\s*\{[^}]*\btransitionCovered\b[^}]*\}\s*:\s*GoOptions/);
 
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
+  assert.match(gate, /const isIntelligenceTransition = pathname !== to && to === "\/intelligence"/);
   assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
   assert.match(
     gate,
-    /if \(!isArchiveTransition && !isZeusTransition && !riderTransitionVariant\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isIntelligenceTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
   const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");

@@ -1,12 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
 import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
 import {
@@ -584,11 +577,11 @@ export const ARCHIVE_ORACLE_ENTRIES: readonly ArchiveOracleEntry[] = [
 ] as const;
 
 export const ARCHIVE_ORACLE_SUGGESTIONS = [
-  "レクソナンスの性能を見たい",
-  "8人目のライダーは？",
-  "六詠第一位について知りたい",
-  "映画の登場人物を見たい",
-  "フォームを比較したい",
+  "このサイトについて教えて",
+  "今日の相談に乗って",
+  "シエルについて知りたい",
+  "文章を一緒に考えて",
+  "サーガのフォームを比較したい",
 ] as const;
 
 function normalizeArchiveOracleText(value: string) {
@@ -668,6 +661,8 @@ type SearchMessage = {
 
 const SEARCH_FOLLOW_UP_PATTERN =
   /^(それ|その|あれ|これ|一つ目|1つ目|最初|一番上|二つ目|2つ目|2番|二番|後者|前者|三つ目|3つ目|3番|三番|最後|ほか|他|もっと|詳しく|違い|では|じゃあ|なら)/u;
+const SEARCH_TOPIC_CHANGE_PATTERN =
+  /^(?:それとは別に|それはさておき|別の話(?:だけど|ですが)?|話は変わる(?:けど|が)?|ところで)/u;
 
 function searchMessageId(prefix: string): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -699,6 +694,7 @@ function resolveConversationalSearchQuery(
     .find((message) => message.role === "assistant" && message.results?.length);
   const results = previous?.results ?? [];
   const normalizedQuestion = normalizeArchiveOracleText(trimmed);
+  if (SEARCH_TOPIC_CHANGE_PATTERN.test(trimmed)) return trimmed;
   const explicit = results.find(({ entry }) =>
     normalizedQuestion.includes(normalizeArchiveOracleText(entry.label)),
   );
@@ -729,12 +725,13 @@ export function ArchiveIntelligenceWorkspace({
   onOpenModelSelector: () => void;
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const searchComposingRef = useRef(false);
   const searchLogRef = useRef<HTMLDivElement>(null);
   const searchFollowLatestRef = useRef(true);
   const searchAbortRef = useRef<AbortController | null>(null);
   const searchSequenceRef = useRef(0);
+  const surfaceTransitionTimerRef = useRef<number | null>(null);
   const [surface, setSurface] = useState<"search" | "roleplay">("search");
+  const [surfaceTransition, setSurfaceTransition] = useState<"search" | "roleplay" | null>(null);
   const [question, setQuestion] = useState("");
   const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
   const [searchPending, setSearchPending] = useState(false);
@@ -759,18 +756,17 @@ export function ArchiveIntelligenceWorkspace({
   useEffect(() => () => stopSearch(), [stopSearch]);
 
   useEffect(() => {
-    if (!active || surface !== "search") stopSearch();
-  }, [active, stopSearch, surface]);
+    if (!active) stopSearch();
+  }, [active, stopSearch]);
 
-  useEffect(() => {
-    if (!active || surface !== "search") return;
-    const frame = window.requestAnimationFrame(() => {
-      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-        inputRef.current?.focus({ preventScroll: true });
+  useEffect(
+    () => () => {
+      if (surfaceTransitionTimerRef.current !== null) {
+        window.clearTimeout(surfaceTransitionTimerRef.current);
       }
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [active, surface]);
+    },
+    [],
+  );
 
   useEffect(() => {
     const log = searchLogRef.current;
@@ -898,12 +894,7 @@ export function ArchiveIntelligenceWorkspace({
       const referencedResults = reply.referenceCandidateIds
         .map((id) => resultById.get(id))
         .filter((result): result is ArchiveOracleResult => Boolean(result));
-      const displayedReferences =
-        referencedResults.length > 0
-          ? referencedResults
-          : reply.focusCandidateId
-            ? orderedResults.filter(({ entry }) => entry.id === reply.focusCandidateId).slice(0, 1)
-            : [];
+      const displayedReferences = referencedResults;
       setSearchMessages((current) => [
         ...current,
         {
@@ -925,28 +916,32 @@ export function ArchiveIntelligenceWorkspace({
     [modelPreferences.search, searchMessages, searchPending],
   );
 
-  const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void ask(question);
-  };
-
-  const handleSearchComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (
-      event.key === "Enter" &&
-      !event.shiftKey &&
-      !event.nativeEvent.isComposing &&
-      !searchComposingRef.current
-    ) {
-      event.preventDefault();
-      void ask(question);
-    }
-  };
+  const selectSurface = useCallback(
+    (nextSurface: "search" | "roleplay") => {
+      if (nextSurface === surface) return;
+      const page = inputRef.current?.closest<HTMLElement>(".archive-intelligence-page");
+      const keyboardActive = Boolean(page?.dataset.keyboard && page.dataset.keyboard !== "closed");
+      if (surfaceTransitionTimerRef.current !== null) {
+        window.clearTimeout(surfaceTransitionTimerRef.current);
+        surfaceTransitionTimerRef.current = null;
+      }
+      setSurface(nextSurface);
+      setSurfaceTransition(keyboardActive ? null : nextSurface);
+      if (!keyboardActive) {
+        surfaceTransitionTimerRef.current = window.setTimeout(() => {
+          surfaceTransitionTimerRef.current = null;
+          setSurfaceTransition(null);
+        }, 320);
+      }
+    },
+    [surface],
+  );
 
   const handleSurfaceKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
     const nextSurface = event.key === "ArrowLeft" || event.key === "Home" ? "search" : "roleplay";
-    setSurface(nextSurface);
+    selectSurface(nextSurface);
     window.requestAnimationFrame(() => {
       document
         .getElementById(
@@ -960,6 +955,7 @@ export function ArchiveIntelligenceWorkspace({
     <section
       className="archive-oracle-shell archive-intelligence-workspace"
       data-surface={surface}
+      data-surface-transition={surfaceTransition ?? undefined}
       aria-labelledby="archive-oracle-title"
       aria-describedby="archive-oracle-description"
     >
@@ -986,7 +982,7 @@ export function ArchiveIntelligenceWorkspace({
             aria-selected={surface === "search"}
             aria-controls="archive-oracle-search-panel"
             tabIndex={surface === "search" ? 0 : -1}
-            onClick={() => setSurface("search")}
+            onClick={() => selectSurface("search")}
           >
             <span>サーチ</span>
             <small>SEARCH</small>
@@ -999,7 +995,7 @@ export function ArchiveIntelligenceWorkspace({
             aria-selected={surface === "roleplay"}
             aria-controls="archive-oracle-roleplay-panel"
             tabIndex={surface === "roleplay" ? 0 : -1}
-            onClick={() => setSurface("roleplay")}
+            onClick={() => selectSurface("roleplay")}
           >
             <span>なりきり</span>
             <small>PERSONA</small>
@@ -1073,7 +1069,7 @@ export function ArchiveIntelligenceWorkspace({
               <div>
                 <small>SEARCH CHANNEL READY</small>
                 <p>
-                  人物、能力、作品、覚えている場面をそのまま話してください。曖昧でも、会話を続けながら近い記録へ絞ります。
+                  挨拶や相談、文章づくり、一般的な質問まで、そのまま話してください。作品の話なら、回答に使った公開記録も一緒に案内します。
                 </p>
               </div>
             </div>
@@ -1160,8 +1156,8 @@ export function ArchiveIntelligenceWorkspace({
                 </small>
                 <p>
                   {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-                    ? "会話全体の意図と候補の違いを深く考えています"
-                    : "記録と会話の流れを照合しています"}
+                    ? "会話全体の意図と必要な情報を深く考えています"
+                    : "質問の意図と会話の流れを整理しています"}
                 </p>
               </div>
             </div>
@@ -1171,8 +1167,8 @@ export function ArchiveIntelligenceWorkspace({
         <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
           {searchPending
             ? (pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-              ? "AIが会話全体の意図と候補の違いを思考中です"
-              : "AIが記録と会話の流れを思考中です"
+              ? "AIが会話全体の意図と必要な情報を思考中です"
+              : "AIが質問の意図と会話の流れを思考中です"
             : ""}
         </p>
 
@@ -1195,12 +1191,18 @@ export function ArchiveIntelligenceWorkspace({
           </div>
         </div>
 
-        <form className="archive-oracle-form" role="search" onSubmit={submitQuestion}>
+        <form
+          className="archive-oracle-form"
+          role="search"
+          onSubmit={(event) => event.preventDefault()}
+        >
           <label className="visually-hidden" htmlFor="archive-oracle-question">
-            探している記録について話しかける
+            サーチへメッセージを送る
           </label>
           <div className="archive-oracle-input-shell">
-            <span aria-hidden="true">＋</span>
+            <span className="archive-composer-leading" aria-hidden="true">
+              <Plus size={22} strokeWidth={1.6} />
+            </span>
             <textarea
               ref={inputRef}
               id="archive-oracle-question"
@@ -1209,22 +1211,20 @@ export function ArchiveIntelligenceWorkspace({
               value={question}
               maxLength={modelPreferences.search.execution === "pro" ? 1200 : 600}
               autoComplete="off"
-              enterKeyHint="send"
+              enterKeyHint="enter"
               placeholder={
                 modelPreferences.search.execution === "pro"
-                  ? "記録について詳しく聞く…"
-                  : "記録について聞く…"
+                  ? "何でも、詳しく聞いてください…"
+                  : "何でも聞いてください…"
               }
-              onCompositionStart={() => {
-                searchComposingRef.current = true;
-              }}
-              onCompositionEnd={() => {
-                searchComposingRef.current = false;
-              }}
               onChange={(event) => setQuestion(event.currentTarget.value)}
-              onKeyDown={handleSearchComposerKeyDown}
             />
-            <button type="submit" disabled={!question.trim() || searchPending}>
+            <button
+              type="button"
+              disabled={!question.trim() || searchPending}
+              aria-label="サーチへ送信"
+              onClick={() => void ask(question)}
+            >
               送信
               <span aria-hidden="true">↑</span>
             </button>
@@ -1232,7 +1232,7 @@ export function ArchiveIntelligenceWorkspace({
         </form>
 
         <p className="archive-oracle-privacy">
-          サーチは許可済みの公開記録だけを候補にします。会話はサーバー経由でAIへ送信される場合がありますが、API保存は無効です。
+          一般的な会話にも対応し、作品情報の参照先は許可済みの公開記録だけを表示します。会話はサーバー経由でAIへ送信される場合がありますが、API保存は無効です。
         </p>
       </div>
 

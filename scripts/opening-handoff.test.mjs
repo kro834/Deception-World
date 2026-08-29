@@ -96,23 +96,26 @@ test("the title recovers cancellation, BFCache, and background video state", () 
   assert.match(title, /window\.addEventListener\("pageshow", handlePageShow\)/);
   assert.match(title, /window\.removeEventListener\("pageshow", handlePageShow\)/);
   assert.match(title, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
-  assert.match(title, /document\.removeEventListener\("visibilitychange", handleVisibilityChange\)/);
-  assert.match(title, /if \(!economyOpening\) \{[\s\S]*?videoStartTimerRef\.current/);
   assert.match(
     title,
-    /document\.visibilityState === "visible"[\s\S]*?video\.play\(\)\.catch/,
+    /document\.removeEventListener\("visibilitychange", handleVisibilityChange\)/,
   );
+  assert.match(title, /if \(!economyOpening\) \{[\s\S]*?videoStartTimerRef\.current/);
+  assert.match(title, /document\.visibilityState === "visible"[\s\S]*?video\.play\(\)\.catch/);
 });
 
 test("covered navigation waits for destination readiness and is cancellation-safe", () => {
   const goBlock = sliceBetween(gate, "const go = useCallback", "\n\n  const api = useMemo", "go");
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
+    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isIntelligenceTransition\s*&&\s*!isZeusTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
   );
   assert.notEqual(coveredIndex, -1, "go must have a transitionCovered branch");
   assert.notEqual(directIndex, -1, "go must retain the ordinary direct-navigation branch");
-  assert.ok(coveredIndex < directIndex, "covered navigation must be selected before direct navigation");
+  assert.ok(
+    coveredIndex < directIndex,
+    "covered navigation must be selected before direct navigation",
+  );
 
   const coveredBranch = goBlock.slice(coveredIndex, directIndex);
   const guardedTryIndex = coveredBranch.indexOf("try {");
@@ -182,10 +185,7 @@ test("covered navigation waits for destination readiness and is cancellation-saf
 
 test("WorldHome notifies arrival after a layout effect and two painted frames", () => {
   assert.match(world, /\buseLayoutEffect\b/);
-  assert.match(
-    world,
-    /const\s*\{[^}]*\bnotifyOpeningDestination\b[^}]*\}\s*=\s*useLoadGate\(\)/,
-  );
+  assert.match(world, /const\s*\{[^}]*\bnotifyOpeningDestination\b[^}]*\}\s*=\s*useLoadGate\(\)/);
   const notifyIndex = world.search(/\bnotifyOpeningDestination\s*\(/);
   assert.notEqual(notifyIndex, -1, "WorldHome must notify LoadGate when its hero is ready");
   const effectIndex = world.lastIndexOf("useLayoutEffect(", notifyIndex);
