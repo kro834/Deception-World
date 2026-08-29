@@ -1184,6 +1184,959 @@ body.archive-intelligence-active {
   }
 }
 
+/* Monochrome native conversation shell --------------------------------------
+   The archive keeps its own language and models, while the interface follows
+   the calm hierarchy of a native iOS conversation: one toolbar, one scroll
+   region and one composer on a true-black canvas. */
+
+.archive-intelligence-page {
+  --archive-black: #000000;
+  --archive-surface: #1c1c1e;
+  --archive-surface-raised: #242426;
+  --archive-line: rgba(255, 255, 255, 0.11);
+  --archive-line-strong: rgba(255, 255, 255, 0.18);
+  --archive-text: rgba(255, 255, 255, 0.96);
+  --archive-text-secondary: rgba(235, 235, 245, 0.62);
+  --archive-text-tertiary: rgba(235, 235, 245, 0.36);
+  grid-template-rows: minmax(0, 1fr);
+  background: var(--archive-black);
+  color: var(--archive-text);
+}
+
+.archive-intelligence-page-grid,
+.archive-intelligence-page-orbit,
+.archive-oracle-aura,
+.archive-oracle-shell::before,
+.archive-oracle-shell::after,
+.archive-roleplay::before {
+  display: none;
+}
+
+.archive-intelligence-page-header {
+  position: absolute;
+  z-index: 31;
+  top: max(16px, env(safe-area-inset-top, 0px));
+  left: max(20px, env(safe-area-inset-left, 0px));
+  display: block;
+  width: 52px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.archive-intelligence-page .archive-intelligence-page-menu {
+  width: 52px;
+  height: 52px;
+  border-color: var(--archive-line);
+  background: linear-gradient(180deg, #202022, #171719);
+  color: rgba(255, 255, 255, 0.93);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(18px) saturate(110%);
+  backdrop-filter: blur(18px) saturate(110%);
+  pointer-events: auto;
+}
+
+.archive-intelligence-page .archive-intelligence-page-menu::before,
+.archive-intelligence-page .archive-intelligence-page-menu .side-panel-trigger-ring {
+  display: none;
+}
+
+.archive-intelligence-page .archive-intelligence-page-menu .side-panel-trigger-glyph {
+  gap: 6px;
+}
+
+.archive-intelligence-page .archive-intelligence-page-menu .side-panel-trigger-glyph i {
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: none;
+}
+
+.archive-intelligence-page
+  .archive-intelligence-page-menu
+  .side-panel-trigger-glyph
+  i:nth-child(2) {
+  width: 14px;
+}
+
+.archive-intelligence-page
+  .archive-intelligence-page-menu
+  .side-panel-trigger-glyph
+  i:nth-child(3) {
+  display: none;
+}
+
+.archive-intelligence-page .archive-intelligence-page-menu[aria-expanded="true"] {
+  border-color: var(--archive-line-strong);
+  background: #252527;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.archive-intelligence-page
+  .archive-intelligence-page-menu[aria-expanded="true"]
+  .side-panel-trigger-glyph
+  i:nth-child(1) {
+  width: 19px;
+  translate: 0 4px;
+}
+
+.archive-intelligence-page
+  .archive-intelligence-page-menu[aria-expanded="true"]
+  .side-panel-trigger-glyph
+  i:nth-child(2) {
+  width: 19px;
+  translate: 0 -4px;
+  rotate: -45deg;
+}
+
+.archive-intelligence-page-stage {
+  grid-row: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+.archive-intelligence-page .archive-intelligence-workspace,
+.archive-intelligence-page .archive-oracle-shell[data-surface="roleplay"] {
+  width: min(100%, 1120px);
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: var(--archive-black);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.archive-intelligence-page .archive-oracle-header {
+  position: relative;
+  z-index: 22;
+  display: grid;
+  min-height: 84px;
+  grid-template-columns: 52px minmax(190px, 244px) 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(12px, 3vw, 28px);
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 12px
+    max(20px, env(safe-area-inset-left, 0px));
+  border: 0;
+  background: var(--archive-black);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.archive-intelligence-page .archive-oracle-header > div:first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.archive-intelligence-page .archive-oracle-view-switch {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 52px;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--archive-line);
+  border-radius: 999px;
+  background: var(--archive-surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.075);
+}
+
+.archive-intelligence-page .archive-oracle-view-tab {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--archive-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.archive-intelligence-page .archive-oracle-view-tab::after,
+.archive-intelligence-page .archive-oracle-view-tab > small {
+  display: none;
+}
+
+.archive-intelligence-page .archive-oracle-view-tab > span {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.archive-intelligence-page .archive-oracle-view-tab[aria-selected="true"] {
+  border: 0;
+  color: var(--archive-text);
+  background: #0c0c0d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 5px 14px rgba(0, 0, 0, 0.28);
+}
+
+.archive-intelligence-page .archive-oracle-status {
+  grid-column: 3;
+  display: grid;
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  min-height: 52px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--archive-line);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, #202022, #171719);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.archive-intelligence-page .archive-oracle-status > i,
+.archive-intelligence-page .archive-oracle-status > span {
+  display: none;
+}
+
+.archive-intelligence-page .archive-oracle-status > svg {
+  width: 20px;
+  height: 20px;
+}
+
+.archive-intelligence-page
+  :is(
+    .archive-intelligence-page-menu,
+    .archive-oracle-view-tab,
+    .archive-oracle-model-trigger,
+    .archive-oracle-suggestions button,
+    .archive-roleplay button,
+    .archive-oracle-result
+  ):focus-visible,
+.archive-model-dialog button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.88);
+  outline-offset: 3px;
+}
+
+.archive-intelligence-page
+  :is(.archive-oracle-input-shell textarea, .archive-roleplay-composer textarea):focus-visible {
+  outline: 0;
+}
+
+.archive-intelligence-page .archive-search-conversation {
+  width: min(100%, 900px);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  margin: 0 auto;
+  padding: 0 clamp(22px, 4vw, 42px) max(14px, env(safe-area-inset-bottom, 0px));
+  background: var(--archive-black);
+}
+
+.archive-intelligence-page .archive-search-heading,
+.archive-intelligence-page .archive-oracle-privacy {
+  display: none;
+}
+
+.archive-intelligence-page .archive-search-log,
+.archive-intelligence-page .archive-roleplay-log {
+  gap: 18px;
+  padding: clamp(26px, 5vh, 54px) 2px 8px;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  scrollbar-gutter: auto;
+}
+
+.archive-intelligence-page .archive-search-welcome {
+  width: min(100%, 720px);
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: end;
+  gap: 14px;
+  margin: auto 0 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-welcome > span {
+  width: 28px;
+  border: 0;
+  color: #ffffff;
+  background: #171719;
+  font-family: inherit;
+  font-size: 8px;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-welcome small {
+  color: var(--archive-text-tertiary);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.archive-intelligence-page .archive-search-welcome p {
+  margin-top: 7px;
+  color: var(--archive-text-secondary);
+  font-size: clamp(15px, 1.7vw, 18px);
+  letter-spacing: 0;
+  line-height: 1.65;
+}
+
+.archive-intelligence-page .archive-search-message:not(.is-user),
+.archive-intelligence-page .archive-roleplay-message:not(.is-user) {
+  width: min(100%, 820px);
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-message.is-user,
+.archive-intelligence-page .archive-roleplay-message.is-user {
+  width: fit-content;
+  max-width: min(82%, 680px);
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 22px 22px 7px 22px;
+  background: #29292b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.archive-intelligence-page .archive-search-message > header > span,
+.archive-intelligence-page .archive-search-message > header > small,
+.archive-intelligence-page .archive-roleplay-message > header span,
+.archive-intelligence-page .archive-roleplay-message > header small {
+  color: var(--archive-text-tertiary);
+}
+
+.archive-intelligence-page .archive-search-message > p,
+.archive-intelligence-page .archive-roleplay-message-body > p {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 15px;
+  letter-spacing: 0;
+  line-height: 1.72;
+}
+
+.archive-intelligence-page .archive-search-thinking,
+.archive-intelligence-page .archive-roleplay-thinking {
+  width: min(100%, 820px);
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.archive-intelligence-page .archive-search-thinking::after,
+.archive-intelligence-page .archive-roleplay-thinking::after {
+  display: none;
+}
+
+.archive-intelligence-page .archive-search-thinking > span > i,
+.archive-intelligence-page .archive-roleplay-thinking > span > i {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-thinking small,
+.archive-intelligence-page .archive-roleplay-thinking small {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: inherit;
+  letter-spacing: 0.06em;
+}
+
+.archive-intelligence-page .archive-search-thinking p,
+.archive-intelligence-page .archive-roleplay-thinking p {
+  color: var(--archive-text-secondary);
+}
+
+.archive-intelligence-page .archive-oracle-suggestions {
+  padding: 0 4px;
+}
+
+.archive-intelligence-page .archive-oracle-suggestions > p {
+  display: none;
+}
+
+.archive-intelligence-page .archive-oracle-suggestions > div {
+  display: flex;
+  gap: 2px 20px;
+  padding: 0;
+}
+
+.archive-intelligence-page .archive-oracle-suggestions button,
+.archive-intelligence-page .archive-roleplay-quick-replies > button {
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--archive-text-secondary);
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  text-align: left;
+}
+
+.archive-intelligence-page .archive-oracle-suggestions button::before,
+.archive-intelligence-page .archive-roleplay-quick-replies > button::before {
+  margin-right: 9px;
+  color: var(--archive-text-tertiary);
+  content: "↳";
+}
+
+.archive-intelligence-page .archive-oracle-form,
+.archive-intelligence-page .archive-roleplay-composer {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell,
+.archive-intelligence-page .archive-roleplay-composer > div {
+  min-height: 68px;
+  align-items: end;
+  gap: 8px;
+  padding: 8px 9px 8px 12px;
+  border: 1px solid var(--archive-line);
+  border-radius: 28px;
+  background: var(--archive-surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 12px 36px rgba(0, 0, 0, 0.34);
+  -webkit-backdrop-filter: blur(20px) saturate(105%);
+  backdrop-filter: blur(20px) saturate(105%);
+}
+
+.archive-intelligence-page .archive-oracle-input-shell {
+  grid-template-columns: 38px minmax(0, 1fr) 44px;
+}
+
+.archive-intelligence-page .archive-roleplay-composer {
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 8px;
+}
+
+.archive-intelligence-page .archive-roleplay-composer > div {
+  grid-template-columns: 38px minmax(0, 1fr);
+}
+
+.archive-intelligence-page .archive-oracle-input-shell:focus-within,
+.archive-intelligence-page .archive-roleplay-composer > div:focus-within {
+  border-color: rgba(255, 255, 255, 0.23);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.045),
+    0 12px 36px rgba(0, 0, 0, 0.34);
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > span,
+.archive-intelligence-page .archive-roleplay-composer > div > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  align-self: end;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: inherit;
+  font-size: 29px;
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell textarea,
+.archive-intelligence-page .archive-roleplay-composer textarea {
+  min-height: 42px;
+  max-height: 126px;
+  padding: 10px 0 8px;
+  color: var(--archive-text);
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell textarea::placeholder,
+.archive-intelligence-page .archive-roleplay-composer textarea::placeholder {
+  color: var(--archive-text-tertiary);
+}
+
+.archive-intelligence-page .archive-roleplay-composer > div > small {
+  display: none;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button,
+.archive-intelligence-page .archive-roleplay-composer > button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  align-self: end;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #050505;
+  background: #ffffff;
+  box-shadow: none;
+  font-size: 0;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button > span,
+.archive-intelligence-page .archive-roleplay-composer > button > svg {
+  font-size: 19px;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button:disabled,
+.archive-intelligence-page .archive-roleplay-composer > button:disabled {
+  color: rgba(255, 255, 255, 0.3);
+  background: #343436;
+  opacity: 1;
+}
+
+.archive-intelligence-page .archive-roleplay-composer > button.is-stop {
+  color: #ffffff;
+  background: #3a2424;
+}
+
+.archive-intelligence-page .archive-search-message .archive-oracle-result,
+.archive-intelligence-page .archive-roleplay-hints a {
+  border-color: var(--archive-line);
+  background: #151517;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-search-message .archive-oracle-result-index,
+.archive-intelligence-page .archive-search-message .archive-oracle-result-copy > small,
+.archive-intelligence-page .archive-search-message .archive-oracle-result-arrow {
+  color: var(--archive-text-tertiary);
+}
+
+.archive-intelligence-page .archive-search-message .archive-oracle-result-copy > b,
+.archive-intelligence-page .archive-roleplay-hints a b {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.archive-intelligence-page .archive-search-message .archive-oracle-result-copy > span {
+  color: var(--archive-text-secondary);
+}
+
+/* Persona remains fully featured, but sheds the dossier-like framing. */
+.archive-intelligence-page .archive-roleplay {
+  background: var(--archive-black);
+}
+
+.archive-intelligence-page .archive-roleplay-identity,
+.archive-intelligence-page .archive-roleplay-console,
+.archive-intelligence-page .archive-roleplay-console-header,
+.archive-intelligence-page .archive-roleplay-mode-row,
+.archive-intelligence-page .archive-roleplay-privacy {
+  border-color: var(--archive-line);
+  background: var(--archive-black);
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-roleplay-portrait {
+  border-color: var(--archive-line);
+  background: #09090a;
+}
+
+.archive-intelligence-page .archive-roleplay-character-rail > button,
+.archive-intelligence-page .archive-roleplay-mode-switch,
+.archive-intelligence-page .archive-roleplay-mode-switch > button,
+.archive-intelligence-page .archive-roleplay-reset,
+.archive-intelligence-page .archive-roleplay-connection {
+  border-color: var(--archive-line);
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-roleplay-character-rail > button.is-active,
+.archive-intelligence-page .archive-roleplay-character-rail > button[aria-checked="true"],
+.archive-intelligence-page .archive-roleplay-mode-switch > button[aria-checked="true"] {
+  border-color: var(--archive-line-strong);
+  color: #ffffff;
+  background: var(--archive-surface-raised);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.archive-intelligence-page .archive-roleplay-log::before {
+  display: none;
+}
+
+.archive-intelligence-page .archive-roleplay-quick-replies {
+  gap: 4px;
+  padding-block: 4px;
+  border: 0;
+  background: transparent;
+}
+
+.archive-intelligence-page .archive-roleplay-privacy {
+  display: none;
+}
+
+/* The model sheet uses the same neutral glass, with selection conveyed by
+   luminance and shape instead of blue/violet decoration. */
+.archive-model-overlay {
+  background: rgba(0, 0, 0, 0.76);
+  -webkit-backdrop-filter: blur(20px) saturate(100%);
+  backdrop-filter: blur(20px) saturate(100%);
+}
+
+.archive-model-dialog {
+  border-color: rgba(255, 255, 255, 0.13);
+  background: rgba(15, 15, 17, 0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 30px 90px rgba(0, 0, 0, 0.7);
+}
+
+.archive-model-dialog-aura {
+  display: none;
+}
+
+.archive-model-dialog-header,
+.archive-model-dialog-footer {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(18, 18, 20, 0.94);
+}
+
+.archive-model-dialog-mark,
+.archive-model-dialog-close,
+.archive-model-channel,
+.archive-model-search-grid > button,
+.archive-model-persona-grid > button,
+.archive-model-pro-card,
+.archive-model-effort,
+.archive-model-effort button,
+.archive-model-dialog-footer > button {
+  border-color: rgba(255, 255, 255, 0.11);
+  background: #19191b;
+  box-shadow: none;
+}
+
+.archive-model-dialog-mark,
+.archive-model-dialog-close,
+.archive-model-channel > header > span,
+.archive-model-pro-card > span {
+  border-color: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.82);
+  background: #242426;
+  box-shadow: none;
+}
+
+.archive-model-channel > header > b,
+.archive-model-search-grid button > em,
+.archive-model-persona-grid button > em,
+.archive-model-pro-card > em {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.82);
+  background: #242426;
+  box-shadow: none;
+}
+
+.archive-model-dialog-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.archive-model-search-grid > button::before,
+.archive-model-persona-grid > button::before,
+.archive-model-pro-card::before {
+  display: none;
+}
+
+.archive-model-dialog-header p:not(.archive-model-dialog-description),
+.archive-model-channel > header p,
+.archive-model-search-grid small,
+.archive-model-persona-grid small,
+.archive-model-pro-card small,
+.archive-model-search-grid button > i,
+.archive-model-persona-grid button > i,
+.archive-model-dialog-footer small {
+  color: rgba(235, 235, 245, 0.42);
+}
+
+.archive-model-dialog-header .archive-model-dialog-description,
+.archive-model-search-grid button > span,
+.archive-model-persona-grid button > span,
+.archive-model-pro-card p,
+.archive-model-effort span {
+  color: rgba(235, 235, 245, 0.58);
+}
+
+.archive-model-search-grid > button.is-selected,
+.archive-model-persona-grid > button.is-selected,
+.archive-model-pro-card.is-selected {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: #29292c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.archive-model-effort button.is-selected,
+.archive-model-dialog-footer > button.is-primary {
+  border-color: #ffffff;
+  color: #050505;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+@media (max-width: 760px) {
+  .archive-intelligence-page-header {
+    top: max(12px, env(safe-area-inset-top, 0px));
+    left: max(14px, env(safe-area-inset-left, 0px));
+    width: 50px;
+    padding: 0;
+  }
+
+  .archive-intelligence-page .archive-intelligence-page-menu {
+    width: 50px;
+    height: 50px;
+  }
+
+  .archive-intelligence-page .archive-oracle-header {
+    min-height: 76px;
+    grid-template-columns: 50px minmax(164px, 218px) 50px;
+    gap: 10px;
+    padding: max(12px, env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px))
+      10px max(14px, env(safe-area-inset-left, 0px));
+  }
+
+  .archive-intelligence-page .archive-oracle-view-switch {
+    height: 50px;
+    padding: 4px;
+  }
+
+  .archive-intelligence-page .archive-oracle-view-tab {
+    min-height: 40px;
+    padding-inline: 8px;
+  }
+
+  .archive-intelligence-page .archive-oracle-status {
+    width: 50px;
+    min-width: 50px;
+    height: 50px;
+    min-height: 50px;
+  }
+
+  .archive-intelligence-page .archive-search-conversation {
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    padding: 0 max(14px, env(safe-area-inset-right, 0px))
+      max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  }
+
+  .archive-intelligence-page .archive-search-log,
+  .archive-intelligence-page .archive-roleplay-log {
+    padding: 18px 2px 6px;
+  }
+
+  .archive-intelligence-page .archive-search-welcome {
+    margin-bottom: 4px;
+  }
+
+  .archive-intelligence-page .archive-search-welcome p {
+    font-size: 15px;
+    line-height: 1.62;
+  }
+
+  .archive-intelligence-page .archive-oracle-suggestions > div {
+    display: grid;
+    gap: 0;
+    overflow: visible;
+  }
+
+  .archive-intelligence-page .archive-oracle-suggestions button {
+    width: 100%;
+    min-height: 42px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .archive-intelligence-page .archive-oracle-suggestions button:nth-child(n + 3) {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-oracle-input-shell,
+  .archive-intelligence-page .archive-roleplay-composer > div {
+    min-height: 72px;
+  }
+
+  .archive-intelligence-page .archive-roleplay {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .archive-intelligence-page .archive-roleplay-identity {
+    display: block;
+    min-height: auto;
+    overflow: visible;
+    border: 0;
+  }
+
+  .archive-intelligence-page .archive-roleplay-portrait {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail {
+    display: flex;
+    gap: 7px;
+    padding: 7px max(14px, env(safe-area-inset-right, 0px)) 6px
+      max(14px, env(safe-area-inset-left, 0px));
+    overflow-x: auto;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: #000000;
+    scrollbar-width: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button {
+    width: auto;
+    min-width: 64px;
+    min-height: 40px;
+    flex: 0 0 auto;
+    grid-template-columns: 1fr;
+    padding: 0 13px;
+    border: 0;
+    border-radius: 999px;
+    color: rgba(235, 235, 245, 0.52);
+    background: transparent;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button > span,
+  .archive-intelligence-page .archive-roleplay-character-rail > button > small,
+  .archive-intelligence-page .archive-roleplay-character-rail > button > i,
+  .archive-intelligence-page .archive-roleplay-character-rail > button::before {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button > b {
+    overflow: visible;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-overflow: clip;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button.is-active,
+  .archive-intelligence-page .archive-roleplay-character-rail > button[aria-checked="true"] {
+    color: #050505;
+    background: #ffffff;
+  }
+
+  .archive-intelligence-page .archive-roleplay-console {
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  }
+
+  .archive-intelligence-page .archive-roleplay-console-header {
+    min-height: 48px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    padding: 5px 14px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .archive-intelligence-page .archive-roleplay-console-header > div:first-child > small,
+  .archive-intelligence-page .archive-roleplay-console-header p {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-console-header h3 {
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .archive-intelligence-page .archive-roleplay-connection {
+    min-height: 30px;
+    padding-inline: 9px;
+    color: var(--archive-text-tertiary);
+  }
+
+  .archive-intelligence-page .archive-roleplay-reset {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .archive-intelligence-page .archive-roleplay-reset > svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-row {
+    gap: 8px;
+    padding: 5px 14px 7px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-row > p {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-switch {
+    width: 100%;
+    flex-basis: auto;
+    border: 0;
+    border-radius: 999px;
+    background: #151517;
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-switch > button {
+    min-height: 38px;
+    justify-items: center;
+    border: 0;
+    border-radius: 999px;
+    text-align: center;
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-switch > button > small {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-mode-switch > button > span {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .archive-intelligence-page .archive-roleplay-quick-replies {
+    padding: 2px 14px;
+  }
+
+  .archive-intelligence-page .archive-roleplay-quick-replies > button:nth-child(n + 3) {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-composer {
+    padding: 0 max(14px, env(safe-area-inset-right, 0px))
+      max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  }
+
+  .archive-model-dialog {
+    background: rgba(13, 13, 15, 0.985);
+  }
+}
+
 /* A compact visual viewport keeps the transcript and composer available while
    the iPhone keyboard animates in or out. */
 .archive-intelligence-page:is(
@@ -1200,7 +2153,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-intelligence-page-header {
-  display: none;
+  display: block;
 }
 
 .archive-intelligence-page:is(
@@ -1231,7 +2184,8 @@ body.archive-intelligence-active {
   )
   .archive-oracle-header {
   min-height: 52px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 50px minmax(164px, 218px) 50px;
+  gap: 10px;
   padding: 4px 8px;
 }
 
@@ -1251,7 +2205,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-oracle-view-switch {
-  grid-column: 1;
+  grid-column: 2;
   grid-row: 1;
 }
 
@@ -1261,7 +2215,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-oracle-status {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
 }
 
@@ -1333,7 +2287,16 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   :is(.archive-roleplay-composer, .archive-oracle-form) {
-  padding-bottom: 5px;
+  padding-bottom: 10px;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  :is(.archive-oracle-input-shell, .archive-roleplay-composer > div) {
+  min-height: 60px;
 }
 
 @media (max-width: 430px) and (max-height: 560px) {

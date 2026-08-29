@@ -155,9 +155,25 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
   };
 }
 
+export function resolveArchivePersonaRoute(
+  mode: "normal" | "pro",
+  profile: ArchivePersonaProProfile,
+) {
+  if (mode === "normal") {
+    return {
+      model: "gpt-5.6-luna" as const,
+      reasoning: { effort: "low", context: "current_turn" } as const,
+      maxOutputTokens: 2400,
+      timeoutMs: 30_000,
+      costClass: "standard" as const,
+    };
+  }
+  return resolveArchivePersonaProRoute(profile);
+}
+
 export function archivePersonaCostClass(
   mode: "normal" | "pro",
   profile: ArchivePersonaProProfile,
 ): ArchiveAiCostClass {
-  return mode === "normal" ? "standard" : resolveArchivePersonaProRoute(profile).costClass;
+  return resolveArchivePersonaRoute(mode, profile).costClass;
 }

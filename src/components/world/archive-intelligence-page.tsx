@@ -1,10 +1,6 @@
-import { SlidersHorizontal } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GuardedLink } from "@/components/load-gate";
 import {
   DEFAULT_ARCHIVE_MODEL_PREFERENCES,
-  archivePersonaProfileLabel,
-  archiveSearchPreferenceLabel,
   normalizeArchiveModelPreferences,
   type ArchiveModelPreferences,
 } from "@/lib/archive-model-config";
@@ -22,7 +18,6 @@ export function ArchiveIntelligencePage() {
   );
   const [preferencesReady, setPreferencesReady] = useState(false);
   const pageRef = useRef<HTMLElement>(null);
-  const modelButtonRef = useRef<HTMLButtonElement>(null);
   const modelReturnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -168,7 +163,7 @@ export function ArchiveIntelligencePage() {
       focused instanceof HTMLElement &&
       !focused.matches("input, textarea, [contenteditable='true']")
         ? focused
-        : modelButtonRef.current;
+        : (pageRef.current?.querySelector<HTMLElement>(".archive-oracle-model-trigger") ?? null);
     if (
       focused instanceof HTMLElement &&
       focused.matches("input, textarea, [contenteditable='true']")
@@ -182,47 +177,9 @@ export function ArchiveIntelligencePage() {
 
   return (
     <main ref={pageRef} className="archive-intelligence-page">
-      <span className="archive-intelligence-page-grid" aria-hidden="true" />
-      <span className="archive-intelligence-page-orbit is-one" aria-hidden="true" />
-      <span className="archive-intelligence-page-orbit is-two" aria-hidden="true" />
       <h1 className="visually-hidden">Archive Intelligence — AIに聞く</h1>
 
       <header className="archive-intelligence-page-header">
-        <GuardedLink
-          to="/world"
-          hash="top"
-          assets={[]}
-          className="archive-intelligence-page-brand"
-          aria-label="Deception Worldへ戻る"
-        >
-          <span aria-hidden="true">DW</span>
-          <div>
-            <b>DECEPTION WORLD</b>
-            <small>ARCHIVE INTELLIGENCE</small>
-          </div>
-        </GuardedLink>
-
-        <button
-          ref={modelButtonRef}
-          type="button"
-          className="archive-intelligence-page-models"
-          aria-label="AIモデルを選択"
-          aria-haspopup="dialog"
-          aria-expanded={modelSelectorOpen}
-          aria-controls="archive-model-selector"
-          onClick={openModelSelector}
-        >
-          <span>
-            <i aria-hidden="true" /> SEARCH{" "}
-            <b>{archiveSearchPreferenceLabel(modelPreferences.search)}</b>
-          </span>
-          <span>
-            <i aria-hidden="true" /> PERSONA{" "}
-            <b>{archivePersonaProfileLabel(modelPreferences.personaProProfile)}</b>
-          </span>
-          <SlidersHorizontal size={15} strokeWidth={1.55} aria-hidden="true" />
-        </button>
-
         <SideMenuTrigger
           open={menuOpen}
           onOpenChange={setMenuOpen}

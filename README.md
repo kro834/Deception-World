@@ -24,7 +24,7 @@ npm run dev
 
 ### 「AIに聞く」の会話機能
 
-`OPENAI_API_KEY` と共有Postgres用の `DATABASE_URL` を設定すると、8つの人格回線と会話型サーチにOpenAI Responses APIを使用します。サーチは専用画面から `gpt-5.5` または `gpt-5.6-terra`（reasoning effort Low／Medium／High／XHigh）を選べ、Search ProはTerra XHighのPro modeを使用します。なりきりProは `gpt-5.6-sol` のInstant（effort none）／Max（effort max）／Pro（effort max + Pro mode）を選択できます。Normal人格だけは従来どおり `gpt-5.6-luna` を使用し、必要な場合に限り `ARCHIVE_NORMAL_MODEL` で変更できます。
+`OPENAI_API_KEY` と共有Postgres用の `DATABASE_URL` を設定すると、8つの人格回線と会話型サーチにOpenAI Responses APIを使用します。サーチは専用画面から `gpt-5.5` または `gpt-5.6-terra`（reasoning effort Low／Medium／High／XHigh）を選べ、Search ProはTerra XHighのPro modeを使用します。なりきりProは `gpt-5.6-sol` のInstant（effort none）／Max（effort max）／Pro（effort max + Pro mode）を選択できます。Normal人格は表示と実際の送信先が一致するよう `gpt-5.6-luna` に固定しています。
 
 キーと実モデルの対応はサーバー側だけで参照され、ブラウザからの選択値は固定allow-listで再検証します。Responses APIは `store: false` かつツール無効で呼び出します。本番の外部AI接続は共有レート制限を必須とし、上限を確認できない場合はローカル人格コア／ローカルサーチへ切り替わります。全体の日次上限は `ARCHIVE_AI_GLOBAL_DAILY_LIMIT`（既定250単位、standard=1、advanced=2、pro=3）で調整できます。
 

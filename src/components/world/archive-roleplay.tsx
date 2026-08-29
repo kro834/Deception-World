@@ -710,7 +710,7 @@ export function ArchiveRoleplay({
             {profile.name}へ送るメッセージ
           </label>
           <div>
-            <span aria-hidden="true">{mode === "pro" ? "PRO" : "ASK"}</span>
+            <span aria-hidden="true">＋</span>
             <textarea
               ref={composerRef}
               id="archive-roleplay-message"

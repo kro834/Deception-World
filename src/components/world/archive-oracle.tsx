@@ -1185,7 +1185,7 @@ export function ArchiveIntelligenceWorkspace({
             探している記録について話しかける
           </label>
           <div className="archive-oracle-input-shell">
-            <span aria-hidden="true">ASK</span>
+            <span aria-hidden="true">＋</span>
             <textarea
               ref={inputRef}
               id="archive-oracle-question"
@@ -1197,8 +1197,8 @@ export function ArchiveIntelligenceWorkspace({
               enterKeyHint="send"
               placeholder={
                 modelPreferences.search.execution === "pro"
-                  ? "探したい内容や、覚えている場面を詳しく話す…"
-                  : "記録について話しかける…"
+                  ? "記録について詳しく聞く…"
+                  : "記録について聞く…"
               }
               onCompositionStart={() => {
                 searchComposingRef.current = true;

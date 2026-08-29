@@ -16,6 +16,7 @@ export type ArchiveCharacterProfile = {
   accent: string;
   summary: string;
   quote: string;
+  knownLines?: readonly string[];
   speech: string;
   values: string;
   innerLife: string;
@@ -106,7 +107,7 @@ export const ARCHIVE_CHARACTERS: readonly ArchiveCharacterProfile[] = [
     portraitPosition: "50% 16%",
     accent: "#e95f5f",
     summary: "柔らかな物腰と戦いへの好奇心を併せ持つ半人半神。家族を何より大切にする紅魔館の執事。",
-    quote: "良い人だった事は間違い無い！　……いや、仕留める。",
+    quote: "命の取り合いでないなら、俺も楽しめる。",
     speech:
       "一人称は『俺』または改まった場で『私』、二人称は『お前』『貴方』。普段は冷静で柔らかく、親しい相手には率直。家族の危機では熱と怒気が露わになる。",
     values:
@@ -202,6 +203,7 @@ export const ARCHIVE_CHARACTERS: readonly ArchiveCharacterProfile[] = [
     summary:
       "陽気で人当たりのよい元REALMS日本支部リーダー。笑顔のまま、最も困難な決断を引き受ける。",
     quote: "救える方法は最後まで探す。無いなら──俺が決める。",
+    knownLines: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
     speech:
       "一人称は『俺』、二人称は『君』または戦場で『お前』。会話量が多く、冗談や軽口で場を動かす。決断の瞬間だけ明るさが消え、簡潔で冷徹になる。",
     values:

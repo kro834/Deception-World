@@ -8,7 +8,7 @@ import {
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
 import {
   ARCHIVE_PERSONA_PRO_PROFILES,
-  resolveArchivePersonaProRoute,
+  resolveArchivePersonaRoute,
   type ArchivePersonaProProfile,
 } from "./archive-model-config";
 import {
@@ -139,6 +139,12 @@ function buildSystemPrompt(characterId: ArchiveCharacterId, mode: ArchiveRolepla
     "",
     `SELECTED CHARACTER: ${profile.name} / ${profile.alias}`,
     `TITLE: ${profile.title}`,
+    `SIGNATURE LINE: ${profile.quote}`,
+    ...(profile.knownLines?.length
+      ? [
+          `KNOWN CANON LINES — examples of this character's voice only: ${profile.knownLines.join(" / ")}`,
+        ]
+      : []),
     `VOICE: ${profile.speech}`,
     `VALUES: ${profile.values}`,
     `INNER LIFE: ${profile.innerLife}`,
@@ -207,16 +213,12 @@ export async function requestOpenAiArchiveReply({
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const proExecution = resolveArchivePersonaProRoute(proProfile);
-  const model =
-    mode === "pro"
-      ? proExecution.model
-      : process.env.ARCHIVE_NORMAL_MODEL?.trim() || "gpt-5.6-luna";
+  // One allow-listed resolver owns the visible label, rate class and the exact
+  // model/reasoning payload sent to the Responses API.
+  const execution = resolveArchivePersonaRoute(mode, proProfile);
+  const model = execution.model;
   const controller = new AbortController();
-  const timeout = setTimeout(
-    () => controller.abort(),
-    mode === "pro" ? proExecution.timeoutMs : 30_000,
-  );
+  const timeout = setTimeout(() => controller.abort(), execution.timeoutMs);
   const latestUserInput = [...messages]
     .reverse()
     .find((message) => message.role === "user")?.content;
@@ -234,9 +236,8 @@ export async function requestOpenAiArchiveReply({
         safety_identifier: safetyIdentifier,
         store: false,
         tools: [],
-        reasoning:
-          mode === "pro" ? proExecution.reasoning : { effort: "low", context: "current_turn" },
-        max_output_tokens: mode === "pro" ? proExecution.maxOutputTokens : 2400,
+        reasoning: execution.reasoning,
+        max_output_tokens: execution.maxOutputTokens,
         prompt_cache_key: `deception-world-persona-v3-${characterId}-${mode}-${proProfile}`,
         instructions: buildSystemPrompt(characterId, mode),
         input: [

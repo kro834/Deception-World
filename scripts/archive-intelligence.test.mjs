@@ -77,6 +77,24 @@ test("archive intelligence exposes exactly the requested eight character persona
   assert.match(characters, /export const ARCHIVE_CHARACTER_BY_ID = Object\.fromEntries/);
 });
 
+test("Bell's known lines are never attributed to Keiya", () => {
+  const keiyaStart = characters.indexOf('id: "keiya"');
+  const bellStart = characters.indexOf('id: "bell"');
+  const keiyaEnd = characters.indexOf('id: "ayashisaku"', keiyaStart);
+  const bellEnd = characters.indexOf('id: "lore"', bellStart);
+  assert.ok(keiyaStart >= 0 && keiyaEnd > keiyaStart);
+  assert.ok(bellStart >= 0 && bellEnd > bellStart);
+
+  const keiyaProfile = characters.slice(keiyaStart, keiyaEnd);
+  const bellProfile = characters.slice(bellStart, bellEnd);
+  for (const line of ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"]) {
+    assert.doesNotMatch(keiyaProfile, new RegExp(line));
+    assert.match(bellProfile, new RegExp(line));
+    assert.match(riderPage, new RegExp(line));
+  }
+  assert.match(intelligenceServer, /KNOWN CANON LINES/);
+});
+
 test("normal and pro modes keep distinct response and human conversation contracts", () => {
   assert.match(characters, /export type ArchiveRoleplayMode = "normal" \| "pro"/);
   assert.match(intelligenceServer, /NORMAL MODE:/);
@@ -115,7 +133,7 @@ test("the provider key and upstream endpoint stay in the server-only boundary", 
   assert.match(intelligenceRoute, /from "@\/lib\/archive-intelligence\.server"/);
   assert.match(intelligenceServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
   assert.match(modelConfig, /"gpt-5\.6-sol"/);
-  assert.match(intelligenceServer, /"gpt-5\.6-luna"/);
+  assert.match(modelConfig, /model: "gpt-5\.6-luna"/);
   assert.match(intelligenceServer, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(intelligenceServer, /authorization: `Bearer \$\{apiKey\}`/);
   assert.doesNotMatch(intelligenceServer, /import\.meta\.env|VITE_OPENAI/);
@@ -139,13 +157,11 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(modelConfig, /profile === "instant"[\s\S]*?effort: "none"/);
   assert.match(modelConfig, /profile === "max"[\s\S]*?effort: "max"/);
   assert.match(modelConfig, /effort: "max", mode: "pro", context: "current_turn"/);
-  assert.match(intelligenceServer, /resolveArchivePersonaProRoute\(proProfile\)/);
-  assert.match(intelligenceServer, /effort: "low", context: "current_turn"/);
-  assert.match(
-    intelligenceServer,
-    /max_output_tokens: mode === "pro" \? proExecution\.maxOutputTokens : 2400/,
-  );
-  assert.match(intelligenceServer, /mode === "pro" \? proExecution\.timeoutMs : 30_000/);
+  assert.match(intelligenceServer, /resolveArchivePersonaRoute\(mode, proProfile\)/);
+  assert.match(intelligenceServer, /reasoning: execution\.reasoning/);
+  assert.match(intelligenceServer, /max_output_tokens: execution\.maxOutputTokens/);
+  assert.match(intelligenceServer, /controller\.abort\(\), execution\.timeoutMs/);
+  assert.doesNotMatch(intelligenceServer, /ARCHIVE_NORMAL_MODEL/);
   assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v3-/);
   assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 2400/);
   assert.match(intelligenceServer, /controller\.abort\(\)/);
@@ -154,12 +170,15 @@ test("remote generation disables storage and validates a bounded structured resp
 });
 
 test("persona model profiles resolve to fixed runtime routes", async () => {
-  const { archivePersonaCostClass, resolveArchivePersonaProRoute } = await import(
-    new URL("../src/lib/archive-model-config.ts", import.meta.url)
-  );
+  const { archivePersonaCostClass, resolveArchivePersonaProRoute, resolveArchivePersonaRoute } =
+    await import(new URL("../src/lib/archive-model-config.ts", import.meta.url));
+  const normal = resolveArchivePersonaRoute("normal", "pro");
   const instant = resolveArchivePersonaProRoute("instant");
   const max = resolveArchivePersonaProRoute("max");
   const pro = resolveArchivePersonaProRoute("pro");
+  assert.equal(normal.model, "gpt-5.6-luna");
+  assert.equal(normal.reasoning.effort, "low");
+  assert.equal("mode" in normal.reasoning, false);
   assert.equal(instant.model, "gpt-5.6-sol");
   assert.equal(instant.reasoning.effort, "none");
   assert.equal("mode" in instant.reasoning, false);
