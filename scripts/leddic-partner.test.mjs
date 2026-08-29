@@ -74,7 +74,8 @@ test("Hanaka's Ishihen and Chigiri's Hoko and Rekka forms preserve every supplie
   }
   assert.match(rider, /partnerForms\.map/);
   assert.match(rider, /rider-leddic-hoko\.jpeg/);
-  assert.match(rider, /rider-leddic-rekka\.jpeg/);
+  assert.match(rider, /rider-leddic-rekka-20260829\.jpeg/);
+  assert.doesNotMatch(rider, /rider-leddic-rekka\.jpeg/);
   assert.doesNotMatch(rider, /rider-leddic-(?:hoko|rekka)-pending\.svg/);
   assert.match(rider, /rider\.id === "leddic" \? rider\.forms/);
 });
@@ -84,7 +85,7 @@ test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", 
     ["public/civilian-naikami-chigiri.jpeg", 350_000],
     ["public/rider-leddic-hoko.jpeg", 450_000],
     ["public/rider-leddic-ishihen.jpeg", 350_000],
-    ["public/rider-leddic-rekka.jpeg", 450_000],
+    ["public/rider-leddic-rekka-20260829.jpeg", 450_000],
   ]) {
     const asset = new URL(`../${file}`, import.meta.url);
     assert.equal(existsSync(asset), true, `${file} should exist`);
@@ -93,7 +94,7 @@ test("supplied Chigiri artwork is optimized, preloaded, and deployment-stable", 
   assert.match(navigation, /civilian-naikami-chigiri\.jpeg/);
   assert.match(navigation, /rider-leddic-ishihen\.jpeg/);
   assert.match(navigation, /rider-leddic-hoko\.jpeg/);
-  assert.match(navigation, /rider-leddic-rekka\.jpeg/);
+  assert.match(navigation, /rider-leddic-rekka-20260829\.jpeg/);
 });
 
 test("Leddic opens through distinct crimson and green shoji doors", () => {

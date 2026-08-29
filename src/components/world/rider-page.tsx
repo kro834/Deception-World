@@ -679,7 +679,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           ],
         },
         {
-          img: "/rider-leddic-rekka.jpeg",
+          img: "/rider-leddic-rekka-20260829.jpeg",
           pos: "50% 8%",
           system: "レディックウォッチ × 灬フォーム",
           name: "レディック",

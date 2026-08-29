@@ -24,7 +24,7 @@ export const RIDER_NAV: DossierLink[] = [
   { id: "realm", name: "レルム", href: "/riders/realm", assets: ["/civilian-bell-20260826.jpeg"], kicker: "RIDER 02" },
   { id: "lore", name: "ローア", href: "/riders/lore", assets: ["/civilian-lore.jpeg"], kicker: "RIDER 03" },
   { id: "vandal", name: "ヴァンダール", href: "/riders/vandal", assets: ["/civilian-vandal.jpeg"], kicker: "RIDER 04" },
-  { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg", "/civilian-naikami-chigiri.jpeg", "/rider-leddic-ishihen.jpeg", "/rider-leddic-hoko.jpeg", "/rider-leddic-rekka.jpeg"], kicker: "RIDER 05" },
+  { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg", "/civilian-naikami-chigiri.jpeg", "/rider-leddic-ishihen.jpeg", "/rider-leddic-hoko.jpeg", "/rider-leddic-rekka-20260829.jpeg"], kicker: "RIDER 05" },
   { id: "argenome", name: "アルゲノム", href: "/riders/argenome", assets: ["/civilian-argenome.jpeg"], kicker: "RIDER 06" },
   { id: "over-zeztz", name: "オーバーゼッツ", href: "/riders/over-zeztz", assets: ["/civilian-over-zeztz.jpeg"], kicker: "RIDER 07" },
   { id: "cipher", name: "サイファー", href: "/riders/cipher", assets: ["/civilian-cipher.jpeg", "/rider-cipher.jpeg", "/rider-cipher-blacksite.jpeg"], kicker: "RIDER 08" },
