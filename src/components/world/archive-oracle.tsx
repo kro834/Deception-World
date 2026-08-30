@@ -639,14 +639,28 @@ function similarity(left: string, right: string) {
   return (2 * shared) / (leftPairs.size + rightPairs.size);
 }
 
+function focusArchiveOracleQuery(value: string) {
+  return value
+    .replace(
+      /(?:ニツイテ|ニカンスル|ニタイスル)?(?:オシエテ|シリタイ|オモシエ|ッテナニ|トハナニ|ナンデスカ|デスカ|ダロウカ|カナ)$/u,
+      "",
+    )
+    .replace(/^(?:ソレデハ|ジャア|デモ|トコロデ|コノ|ソノ|アノ)/u, "");
+}
+
 function matchScore(query: string, candidate: string) {
   const term = normalizeArchiveOracleText(candidate);
   if (!term) return 0;
   if (query === term) return 180;
-  if (term.length >= 2 && query.includes(term)) return 76 + Math.min(term.length * 2, 28);
+  const focused = focusArchiveOracleQuery(query);
+  if (focused && focused === term) return 170;
+  if (term.length >= 2 && (query.includes(term) || focused.includes(term))) {
+    return 76 + Math.min(term.length * 2, 28);
+  }
   if (query.length >= 2 && term.includes(query)) return 50 + Math.min(query.length, 18);
-  const fuzzy = similarity(query, term);
-  return fuzzy >= 0.46 ? Math.round(fuzzy * 42) : 0;
+  if (focused.length >= 2 && term.includes(focused)) return 48 + Math.min(focused.length, 18);
+  const fuzzy = Math.max(similarity(query, term), similarity(focused, term));
+  return fuzzy >= 0.4 ? Math.round(fuzzy * 48) : 0;
 }
 
 function searchArchiveOracle(query: string, limit = 3): ArchiveOracleResult[] {
@@ -664,7 +678,7 @@ function searchArchiveOracle(query: string, limit = 3): ArchiveOracleResult[] {
       (entry.priority ?? 0) * 0.05;
     return { entry, score };
   })
-    .filter((result) => result.score >= 30)
+    .filter((result) => result.score >= 24)
     .sort(
       (left, right) =>
         right.score - left.score ||
@@ -905,9 +919,8 @@ export function ArchiveIntelligenceWorkspace({
     const started = Date.now();
     const pendingUserId = searchPendingUserIdRef.current;
     const tick = () => {
-      if (Date.now() - started < 1_500) return;
-      setSearchPending(false);
-      setSearchLifecycle(null);
+      const elapsed = Date.now() - started;
+      let posted = false;
       setSearchMessages((current) => {
         const userIndex = pendingUserId
           ? current.findIndex((message) => message.id === pendingUserId)
@@ -916,8 +929,11 @@ export function ArchiveIntelligenceWorkspace({
         if (current.slice(userIndex + 1).some((message) => message.role === "assistant")) {
           return current;
         }
-        const query = current[userIndex]?.text ?? "";
+        const rawQuery = current[userIndex]?.text ?? "";
+        const query = resolveConversationalSearchQuery(rawQuery, current.slice(0, userIndex));
         const results = searchArchiveOracle(query, 3);
+        if (results.length && elapsed < 2_000) return current;
+        if (!results.length && elapsed < 12_000) return current;
         const local = createLocalArchiveSearchReply({
           query,
           candidates: results.map(({ entry }) => ({
@@ -927,10 +943,12 @@ export function ArchiveIntelligenceWorkspace({
             description: entry.description,
             referenceExcerpt: entry.description,
           })),
+          forceArchive: results.length > 0,
         });
         const referenced = (local.referenceCandidateIds ?? [])
           .map((id) => results.find((result) => result.entry.id === id))
           .filter((result): result is ArchiveOracleResult => Boolean(result));
+        posted = true;
         return [
           ...current,
           {
@@ -945,6 +963,10 @@ export function ArchiveIntelligenceWorkspace({
           },
         ];
       });
+      if (posted) {
+        setSearchPending(false);
+        setSearchLifecycle(null);
+      }
     };
     const interval = window.setInterval(tick, 400);
     window.visualViewport?.addEventListener("resize", tick);
@@ -1113,6 +1135,7 @@ export function ArchiveIntelligenceWorkspace({
             description: entry.description,
             referenceExcerpt: entry.description,
           })),
+          forceArchive: results.length > 0,
         });
         const referenced = (local.referenceCandidateIds ?? [])
           .map((id) => results.find((result) => result.entry.id === id))

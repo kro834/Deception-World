@@ -119,8 +119,8 @@ function createLocalGeneralSearchReply(
   }
   return {
     reply:
-      "もちろん、公開記録に限らず普通の質問や相談にも答えられます。いまの内容は作品記録と直接は結びつかないため、一般の受け答えとして扱います。Deception Worldについてなら、世界観・ライダー・事件の公開ページから要点と参照先を出します。知りたい人物名、能力、場面、あるいは相談の目的を一つ足してください。",
-    suggestions: ["このサイトについて教えて", "ライダー一覧を見る", "相談の目的を書く"],
+      `もちろん、公開記録に限らず普通の質問や相談にも答えられます。「${classified.slice(0, 40)}」には作品記録の直接の参照先はありませんでした。続きの目的か、知りたい人物・場面を一つ足してください。`,
+    suggestions: ["このサイトについて教えて", "ライダー一覧を見る", "もう少し具体的に書く"],
     referenceCandidateIds: [],
     source: "local",
     notice,
@@ -133,11 +133,13 @@ export function createLocalArchiveSearchReply({
   candidates,
   notice,
   deliveryReason = "client_network",
+  forceArchive = false,
 }: {
   query: string;
   candidates: readonly ArchiveSearchCandidate[];
   notice?: string;
   deliveryReason?: ArchiveDeliveryReason;
+  forceArchive?: boolean;
 }): ArchiveSearchReply {
   const trimmed = normalizeArchiveClassifierText(query);
   const delivery = localArchiveDelivery(deliveryReason);
@@ -156,7 +158,7 @@ export function createLocalArchiveSearchReply({
         return term.length >= 2 && (trimmed.includes(term) || term.includes(trimmed));
       }),
   );
-  if (!archiveIntent && !strongLabelHit) {
+  if (!archiveIntent && !strongLabelHit && !forceArchive) {
     return createLocalGeneralSearchReply(query, notice, deliveryReason);
   }
   if (!top) {
