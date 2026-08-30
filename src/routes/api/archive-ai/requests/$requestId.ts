@@ -13,7 +13,7 @@ import {
   getArchiveAiRequest,
 } from "@/lib/archive-ai-ledger.server";
 import { readArchiveRequestIdentity } from "@/lib/archive-ai-crypto.server";
-import { ARCHIVE_AI_REQUEST_ID_PATTERN } from "@/lib/archive-ai-request";
+import { archiveAiApiKey } from "@/lib/archive-ai-credentials.server";
 import { logArchiveAiEvent } from "@/lib/archive-ai-observability.server";
 import { cancelOpenAiBackgroundResponse } from "@/lib/archive-openai-transport.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
@@ -87,7 +87,7 @@ export const Route = createFileRoute("/api/archive-ai/requests/$requestId")({
           if (identity.requestId !== requestId) return hiddenNotFound();
           const existing = await getArchiveAiRequest(requestId, identity.sessionHashes);
           await cancelArchiveAiRequest(requestId, existing.session_hash);
-          const apiKey = process.env.OPENAI_API_KEY?.trim();
+          const apiKey = archiveAiApiKey();
           if (
             apiKey &&
             existing.provider_response_id &&

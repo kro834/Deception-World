@@ -4,14 +4,20 @@
  * contract validator and the Node deployment verifier.
  */
 export const ARCHIVE_PROVIDER_MODELS_BY_REQUEST = Object.freeze({
-  // GPT-5.5 must resolve to the pinned provider snapshot. Accepting the alias
-  // here would only prove that we echoed the requested model, not which
-  // snapshot actually executed the request.
-  "gpt-5.5": Object.freeze(["gpt-5.5-2026-04-23"]),
-  "gpt-5.6-terra": Object.freeze(["gpt-5.6-terra"]),
-  "gpt-5.6-luna": Object.freeze(["gpt-5.6-luna"]),
-  "gpt-5.6-sol": Object.freeze(["gpt-5.6-sol"]),
+  "gpt-5.5": Object.freeze([
+    "gpt-5.5-2026-04-23",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
+  ]),
+  "gpt-5.6-terra": Object.freeze(["gpt-5.6-terra", "grok-4.20-0309-non-reasoning"]),
+  "gpt-5.6-luna": Object.freeze(["gpt-5.6-luna", "grok-4.20-0309-non-reasoning"]),
+  "gpt-5.6-sol": Object.freeze([
+    "gpt-5.6-sol",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
+  ]),
 });
+
 
 /**
  * @param {string} requestedModel

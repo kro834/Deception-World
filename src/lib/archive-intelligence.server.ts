@@ -6,6 +6,7 @@ import {
   type ArchiveRoleplayMode,
 } from "./archive-characters";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { archiveAiApiKey } from "./archive-ai-credentials.server";
 import { ONLINE_ARCHIVE_DELIVERY } from "./archive-delivery";
 import {
   hasVisibleArchiveText,
@@ -367,7 +368,7 @@ export async function requestOpenAiArchiveReply({
   signal?: AbortSignal;
   logicalRequestId?: string;
 }): Promise<ArchiveIntelligenceReply | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = archiveAiApiKey();
   if (!apiKey) return null;
   const execution = createArchiveIntelligenceOpenAiExecution({
     characterId,

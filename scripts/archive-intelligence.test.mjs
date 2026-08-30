@@ -143,11 +143,11 @@ test("normal and pro modes keep distinct response and human conversation contrac
 
 test("the provider key and upstream endpoint stay in the server-only boundary", () => {
   assert.match(intelligenceRoute, /from "@\/lib\/archive-intelligence\.server"/);
-  assert.match(intelligenceServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
+  assert.match(intelligenceServer, /archiveAiApiKey\(/);
   assert.match(modelConfig, /"gpt-5\.6-sol"/);
   assert.match(modelConfig, /model: "gpt-5\.6-luna"/);
   assert.match(intelligenceServer, /requestOpenAiStructuredResponse\(\{/);
-  assert.match(openAiTransport, /url:\s*"https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(openAiTransport, /archiveAiBaseUrl\(\)/);
   assert.match(openAiTransport, /authorization: `Bearer \$\{apiKey\}`/);
   assert.doesNotMatch(`${intelligenceServer}\n${openAiTransport}`, /import\.meta\.env|VITE_OPENAI/);
 
@@ -176,7 +176,7 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(intelligenceServer, /timeoutMs: execution\.timeoutMs/);
   assert.doesNotMatch(intelligenceServer, /ARCHIVE_NORMAL_MODEL/);
   assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v3-/);
-  assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 2400/);
+  assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 180/);
   assert.match(openAiTransport, /const controller = new AbortController\(\)/);
   assert.match(openAiTransport, /controller\.abort\(/);
   assert.match(openAiTransport, /finally \{[\s\S]*?clearTimeout\(timeout\)/);

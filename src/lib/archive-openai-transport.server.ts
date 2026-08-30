@@ -5,6 +5,7 @@ import {
   ARCHIVE_PROVIDER_MODELS_BY_REQUEST,
   isAllowedArchiveProviderModel,
 } from "./archive-provider-models.js";
+import { archiveAiBaseUrl, archiveAiProviderModel } from "./archive-ai-credentials.server.ts";
 
 export { isAllowedArchiveProviderModel } from "./archive-provider-models.js";
 
@@ -276,7 +277,7 @@ function parseMetadata(
     throw new ArchiveOpenAiPayloadError("OpenAI response envelope was missing");
   }
   const root = payload as { id?: unknown; model?: unknown; status?: unknown };
-  if (typeof root.id !== "string" || !root.id.startsWith("resp_")) {
+  if (typeof root.id !== "string" || root.id.length < 8) {
     throw new ArchiveOpenAiPayloadError("OpenAI response id was missing");
   }
   if (typeof root.model !== "string") {
@@ -483,11 +484,15 @@ export async function requestOpenAiStructuredResponse<T>({
   parse: (payload: unknown, metadata?: ArchiveOpenAiMetadata) => T;
 }): Promise<T> {
   const requestedModel = requestedModelOverride?.trim() || requestedModelFromBody(body);
+  const requestBody =
+    body && typeof body === "object"
+      ? { ...(body as Record<string, unknown>), model: archiveAiProviderModel(requestedModel) }
+      : body;
   const { payload, response } = await requestOpenAiJson({
     apiKey,
     method: "POST",
-    url: "https://api.openai.com/v1/responses",
-    body,
+    url: `${archiveAiBaseUrl()}/responses`,
+    body: requestBody,
     timeoutMs,
     signal,
     logicalRequestId,
@@ -538,8 +543,12 @@ export async function createOpenAiBackgroundResponse({
     ({ payload, response } = await requestOpenAiJson({
       apiKey,
       method: "POST",
-      url: "https://api.openai.com/v1/responses",
-      body: { ...body, background: true, store: false },
+      url: `${archiveAiBaseUrl()}/responses`,
+      body: {
+        ...body,
+        model: archiveAiProviderModel(requestedModel),
+        store: false,
+      },
       timeoutMs,
       logicalRequestId,
       // Only responses known not to have created work are retried here.
@@ -568,7 +577,7 @@ export async function createOpenAiBackgroundResponse({
   } catch (cause) {
     const root =
       payload && typeof payload === "object" ? (payload as { id?: unknown; model?: unknown }) : {};
-    if (typeof root.id === "string" && /^resp_[A-Za-z0-9_-]{8,}$/u.test(root.id)) {
+    if (typeof root.id === "string" && root.id.length >= 8) {
       throw new ArchiveOpenAiCreateResultError(
         "OpenAI create identity was confirmed but its metadata was invalid",
         {
@@ -608,13 +617,13 @@ export async function retrieveOpenAiBackgroundResponse({
   attemptOffset?: number;
   timeoutMs?: number;
 }): Promise<ArchiveOpenAiBackgroundResponse> {
-  if (!/^resp_[A-Za-z0-9_-]{8,}$/u.test(responseId)) {
+  if (typeof responseId !== "string" || responseId.length < 8) {
     throw new ArchiveOpenAiPayloadError("Stored OpenAI response id was invalid");
   }
   const { payload, response } = await requestOpenAiJson({
     apiKey,
     method: "GET",
-    url: `https://api.openai.com/v1/responses/${encodeURIComponent(responseId)}`,
+    url: `${archiveAiBaseUrl()}/responses/${encodeURIComponent(responseId)}`,
     timeoutMs,
     logicalRequestId,
     attemptOffset,
@@ -648,7 +657,7 @@ export async function cancelOpenAiBackgroundResponse({
   await requestOpenAiJson({
     apiKey,
     method: "POST",
-    url: `https://api.openai.com/v1/responses/${encodeURIComponent(responseId)}/cancel`,
+    url: `${archiveAiBaseUrl()}/responses/${encodeURIComponent(responseId)}/cancel`,
     timeoutMs,
     logicalRequestId,
     attemptOffset,

@@ -7,10 +7,10 @@ const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 
 const SEARCH_EFFORTS = ["low", "medium", "high", "xhigh"];
 const SEARCH_RUNTIME = {
-  low: { maxOutputTokens: 4_000, timeoutMs: 60_000 },
-  medium: { maxOutputTokens: 6_000, timeoutMs: 75_000 },
-  high: { maxOutputTokens: 9_000, timeoutMs: 95_000 },
-  xhigh: { maxOutputTokens: 12_000, timeoutMs: 110_000 },
+  low: { maxOutputTokens: 2_400, timeoutMs: 20_000 },
+  medium: { maxOutputTokens: 3_200, timeoutMs: 22_000 },
+  high: { maxOutputTokens: 4_000, timeoutMs: 25_000 },
+  xhigh: { maxOutputTokens: 4_800, timeoutMs: 28_000 },
 };
 
 function providerModelFor(requestedModel) {
@@ -50,6 +50,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
   });
   const originalFetch = globalThis.fetch;
   const originalApiKey = process.env.OPENAI_API_KEY;
+  const originalXaiKey = process.env.XAI_API_KEY;
   const calls = [];
 
   try {
@@ -61,6 +62,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       ]);
 
     process.env.OPENAI_API_KEY = "archive-payload-test-key";
+    delete process.env.XAI_API_KEY;
     globalThis.fetch = async (input, init = {}) => {
       const body = JSON.parse(String(init.body));
       calls.push({ input: String(input), init, body });
@@ -98,8 +100,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         expected: {
           model: "gpt-5.6-terra",
           reasoning: { effort: "xhigh", mode: "pro", context: "current_turn" },
-          maxOutputTokens: 14_000,
-          timeoutMs: 110_000,
+          maxOutputTokens: 4_800,
+          timeoutMs: 28_000,
           verbosity: "medium",
           costClass: "pro",
         },
@@ -152,7 +154,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-luna",
           reasoning: { effort: "low", context: "current_turn" },
           maxOutputTokens: 3600,
-          timeoutMs: 45_000,
+          timeoutMs: 20_000,
           verbosity: "low",
           costClass: "standard",
         },
@@ -165,7 +167,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-sol",
           reasoning: { effort: "none", context: "current_turn" },
           maxOutputTokens: 3600,
-          timeoutMs: 45_000,
+          timeoutMs: 20_000,
           verbosity: "medium",
           costClass: "standard",
         },
@@ -178,7 +180,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-sol",
           reasoning: { effort: "max", context: "current_turn" },
           maxOutputTokens: 14_000,
-          timeoutMs: 110_000,
+          timeoutMs: 28_000,
           verbosity: "medium",
           costClass: "advanced",
         },
@@ -191,7 +193,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-sol",
           reasoning: { effort: "max", mode: "pro", context: "current_turn" },
           maxOutputTokens: 14_000,
-          timeoutMs: 110_000,
+          timeoutMs: 28_000,
           verbosity: "medium",
           costClass: "pro",
         },
@@ -259,6 +261,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
     globalThis.fetch = originalFetch;
     if (originalApiKey === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = originalApiKey;
+    if (originalXaiKey === undefined) delete process.env.XAI_API_KEY;
+    else process.env.XAI_API_KEY = originalXaiKey;
     await vite.close();
   }
 });

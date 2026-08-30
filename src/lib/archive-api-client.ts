@@ -49,7 +49,7 @@ export type ArchiveApiTiming = {
 };
 
 const CLIENT_DELAYS_MS = [1_000, 2_000, 4_000, 5_000] as const;
-const REQUEST_TTL_MS = 24 * 60 * 60 * 1_000;
+const REQUEST_TTL_MS = 45_000;
 const FETCH_ATTEMPT_TIMEOUT_MS = 20_000;
 const MAX_LEDGER_POST_ATTEMPTS = 3;
 

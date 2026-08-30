@@ -123,6 +123,6 @@ test("embedded archives use one root scroller and recover stale locks throughout
 
 test("production builds regenerate embedded archives without blocking the site on AI secrets", () => {
   assert.equal(packageJson.scripts["archive:embed"], "node scripts/build-embedded-archives.mjs");
-  assert.equal(packageJson.scripts.prebuild, "pnpm run archive:embed");
+  assert.equal(packageJson.scripts.prebuild, "npm run archive:embed");
   assert.equal(packageJson.scripts["verify:archive-ai-env"], "node scripts/assert-production-ai-env.mjs");
 });

@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "vite dev --host 0.0.0.0 --port 8080",
     "archive:embed": "node scripts/build-embedded-archives.mjs",
-    "prebuild": "pnpm run archive:embed",
-    "build": "vite build && pnpm run db:migrate",
+    "prebuild": "npm run archive:embed",
+    "build": "vite build && npm run db:migrate",
     "db:migrate": "node scripts/migrate.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --host 0.0.0.0 --port 8080",

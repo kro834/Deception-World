@@ -50,12 +50,15 @@ function isSearchResult(value) {
   return Boolean(value && typeof value === "object" && value.source === "openai");
 }
 
-test("the shared provider contract accepts the official GPT-5.5 snapshot only for GPT-5.5", () => {
+test("the shared provider contract accepts the official GPT-5.5 snapshot and Grok 4.20", () => {
   assert.deepEqual(ARCHIVE_PROVIDER_MODELS_BY_REQUEST["gpt-5.5"], [
     "gpt-5.5-2026-04-23",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
   ]);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "gpt-5.5"), false);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "gpt-5.5-2026-04-23"), true);
+  assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "grok-4.20-0309-non-reasoning"), true);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.6-terra", "gpt-5.5-2026-04-23"), false);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "gpt-5.5-2099-01-01"), false);
 });

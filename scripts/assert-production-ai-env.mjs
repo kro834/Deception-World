@@ -34,12 +34,18 @@ export function assertProductionArchiveAiEnvironment(environment = process.env) 
   const required =
     environment.VERCEL_ENV === "production" || environment.ARCHIVE_AI_REQUIRED === "1";
   if (!required) {
-    return { required: false, configured: Boolean(environment.OPENAI_API_KEY?.trim()) };
+    return {
+      required: false,
+      configured: Boolean(environment.XAI_API_KEY?.trim() || environment.OPENAI_API_KEY?.trim()),
+    };
   }
   const failures = [];
-  const apiKey = environment.OPENAI_API_KEY?.trim() ?? "";
-  if (!/^sk-[A-Za-z0-9_-]{16,}$/u.test(apiKey)) {
-    failures.push("OPENAI_API_KEY must be a non-empty OpenAI secret key");
+  const openaiKey = environment.OPENAI_API_KEY?.trim() ?? "";
+  const xaiKey = environment.XAI_API_KEY?.trim() ?? "";
+  const openaiOk = /^sk-[A-Za-z0-9_-]{16,}$/u.test(openaiKey);
+  const xaiOk = /^xai-[A-Za-z0-9_-]{16,}$/u.test(xaiKey);
+  if (!openaiOk && !xaiOk) {
+    failures.push("XAI_API_KEY or OPENAI_API_KEY must be a valid remote inference key");
   }
   const databaseUrl = environment.DATABASE_URL?.trim() ?? "";
   try {

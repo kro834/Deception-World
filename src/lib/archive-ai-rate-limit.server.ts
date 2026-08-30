@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import { isIP } from "node:net";
+import { archiveAiApiKey } from "./archive-ai-credentials.server.ts";
 import { archiveRateLimitSecret, archiveSecretsEqual } from "./archive-ai-crypto.server.ts";
 import type { ArchiveAiCostClass } from "./archive-model-config.ts";
 import type { Sql } from "./db.ts";
@@ -370,7 +371,7 @@ export async function chargeArchiveAiAccessInTransaction(
   environment: NodeJS.ProcessEnv = process.env,
   now = Date.now(),
 ): Promise<ArchiveAiAccess | undefined> {
-  const apiKey = environment.OPENAI_API_KEY?.trim();
+  const apiKey = archiveAiApiKey(environment);
   if (!apiKey || (!environment.DATABASE_URL?.trim() && sharedDatabaseRequired(environment))) {
     return undefined;
   }
@@ -469,7 +470,7 @@ export async function checkArchiveAiAccess(
   requestId?: string,
   trustedSessionHash?: string,
 ): Promise<ArchiveAiAccess> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = archiveAiApiKey();
   if (!apiKey) return { allowed: false, reason: "unconfigured" };
   const environment = process.env;
   if (trustedSessionHash && /^[0-9a-f]{64}$/u.test(trustedSessionHash)) {

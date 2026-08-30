@@ -72,7 +72,7 @@ test("follow-up search retains visible candidate order and named references", ()
 });
 
 test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fallback", () => {
-  assert.match(searchServer, /process\.env\.OPENAI_API_KEY\?\.trim\(\)/);
+  assert.match(searchServer, /archiveAiApiKey\(/);
   assert.match(modelConfig, /ARCHIVE_SEARCH_MODELS = \["gpt-5\.6-terra", "gpt-5\.5"\]/);
   assert.match(modelConfig, /ARCHIVE_SEARCH_EFFORTS = \["low", "medium", "high", "xhigh"\]/);
   assert.match(modelConfig, /ARCHIVE_SEARCH_EXECUTIONS = \["standard", "pro"\]/);
@@ -80,7 +80,7 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /value\.model !== "gpt-5\.6-terra"/);
   assert.match(searchServer, /value\.effort !== "xhigh"/);
   assert.match(searchServer, /requestOpenAiStructuredResponse\(\{/);
-  assert.match(openAiTransport, /url:\s*"https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(openAiTransport, /archiveAiBaseUrl\(\)/);
   assert.match(searchServer, /store: false/);
   assert.match(searchServer, /tools: \[\]/);
   assert.match(modelConfig, /effort: "xhigh", mode: "pro", context: "current_turn"/);

@@ -1,4 +1,5 @@
 import { waitUntil } from "@vercel/functions";
+import { archiveAiApiKey } from "./archive-ai-credentials.server.ts";
 import {
   acquireArchiveAiCircuit,
   recordArchiveAiCircuitOutcome,
@@ -384,7 +385,7 @@ async function advanceArchiveAiRequestFromRow(
   if (!row) return latestState(existing);
 
   const breakerKey = circuitKey(row);
-  const apiKey = process.env.OPENAI_API_KEY?.trim() ?? "";
+  const apiKey = archiveAiApiKey();
   let decryptedPayload: unknown;
   let providerCreateAttempt: number | null = null;
   let providerResponseStarted = false;
@@ -802,5 +803,6 @@ export function continueArchiveAiRequestInBackground(
       reason: error instanceof Error ? error.name : "unknown",
     });
   });
+  void observedWork;
   if (process.env.VERCEL) waitUntil(observedWork);
 }

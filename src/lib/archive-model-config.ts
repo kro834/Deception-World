@@ -28,7 +28,7 @@ export const DEFAULT_ARCHIVE_MODEL_PREFERENCES: ArchiveModelPreferences = {
   personaProProfile: "pro",
 };
 
-export const ARCHIVE_MIN_THINKING_MS = 2400;
+export const ARCHIVE_MIN_THINKING_MS = 180;
 
 // GPT-5.5 is intentionally pinned. The UI and request ledger keep the stable
 // logical model name while the provider receives this exact snapshot, so an
@@ -116,10 +116,10 @@ const ARCHIVE_SEARCH_STANDARD_RUNTIME: Record<
   ArchiveSearchEffort,
   { maxOutputTokens: number; timeoutMs: number }
 > = {
-  low: { maxOutputTokens: 4_000, timeoutMs: 60_000 },
-  medium: { maxOutputTokens: 6_000, timeoutMs: 75_000 },
-  high: { maxOutputTokens: 9_000, timeoutMs: 95_000 },
-  xhigh: { maxOutputTokens: 12_000, timeoutMs: 110_000 },
+  low: { maxOutputTokens: 2_400, timeoutMs: 20_000 },
+  medium: { maxOutputTokens: 3_200, timeoutMs: 22_000 },
+  high: { maxOutputTokens: 4_000, timeoutMs: 25_000 },
+  xhigh: { maxOutputTokens: 4_800, timeoutMs: 28_000 },
 };
 
 export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
@@ -141,8 +141,8 @@ export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
     reasoning: pro
       ? ({ effort: "xhigh", mode: "pro", context: "current_turn" } as const)
       : ({ effort: preference.effort, context: "current_turn" } as const),
-    maxOutputTokens: pro ? 14_000 : runtime.maxOutputTokens,
-    timeoutMs: pro ? 110_000 : runtime.timeoutMs,
+    maxOutputTokens: pro ? 4_800 : runtime.maxOutputTokens,
+    timeoutMs: pro ? 28_000 : runtime.timeoutMs,
     verbosity: pro ? ("medium" as const) : ("low" as const),
     costClass,
   };
@@ -154,7 +154,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
       model: "gpt-5.6-sol" as const,
       reasoning: { effort: "none", context: "current_turn" } as const,
       maxOutputTokens: 3600,
-      timeoutMs: 45_000,
+      timeoutMs: 20_000,
       costClass: "standard" as const,
     };
   }
@@ -163,7 +163,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
       model: "gpt-5.6-sol" as const,
       reasoning: { effort: "max", context: "current_turn" } as const,
       maxOutputTokens: 14_000,
-      timeoutMs: 110_000,
+      timeoutMs: 28_000,
       costClass: "advanced" as const,
     };
   }
@@ -171,7 +171,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
     model: "gpt-5.6-sol" as const,
     reasoning: { effort: "max", mode: "pro", context: "current_turn" } as const,
     maxOutputTokens: 14_000,
-    timeoutMs: 110_000,
+    timeoutMs: 28_000,
     costClass: "pro" as const,
   };
 }
@@ -185,7 +185,7 @@ export function resolveArchivePersonaRoute(
       model: "gpt-5.6-luna" as const,
       reasoning: { effort: "low", context: "current_turn" } as const,
       maxOutputTokens: 3600,
-      timeoutMs: 45_000,
+      timeoutMs: 20_000,
       costClass: "standard" as const,
     };
   }

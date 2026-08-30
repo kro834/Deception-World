@@ -64,6 +64,7 @@ export const Route = createFileRoute("/api/internal/archive-ai-health")({
         }
         const configured = {
           openaiKey: /^sk-[A-Za-z0-9_-]{16,}$/u.test(process.env.OPENAI_API_KEY?.trim() ?? ""),
+          grokKey: /^xai-[A-Za-z0-9_-]{16,}$/u.test(process.env.XAI_API_KEY?.trim() ?? ""),
           databaseUrl:
             dbSource === "neon" && validDatabaseUrl(process.env.DATABASE_URL?.trim() ?? ""),
           strict: process.env.ARCHIVE_AI_REQUIRED === "1",

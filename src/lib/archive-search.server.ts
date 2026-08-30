@@ -6,6 +6,7 @@ import {
 } from "./archive-search";
 import { canonicalizeArchiveSearchCandidates } from "./archive-search-catalog.server";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { archiveAiApiKey } from "./archive-ai-credentials.server";
 import { ONLINE_ARCHIVE_DELIVERY } from "./archive-delivery";
 import {
   hasVisibleArchiveText,
@@ -341,7 +342,7 @@ export async function requestOpenAiArchiveSearch({
   signal?: AbortSignal;
   logicalRequestId?: string;
 }): Promise<ArchiveSearchReply | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = archiveAiApiKey();
   if (!apiKey) return null;
   const execution = createArchiveSearchOpenAiExecution({
     messages,
