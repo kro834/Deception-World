@@ -518,7 +518,7 @@ export function archiveAiRequestState<T>(row: ArchiveAiRequestRow): ArchiveAiReq
     return {
       requestId: row.request_id,
       state: row.state,
-      retryAfterMs: row.state === "queued" ? 700 : 1_100,
+      retryAfterMs: row.state === "queued" ? 250 : 300,
       requestedModel: row.requested_model,
       expiresAt: row.expires_at_text,
     };

@@ -178,7 +178,7 @@ test("remote generation disables storage and validates a bounded structured resp
   assert.match(intelligenceServer, /timeoutMs: execution\.timeoutMs/);
   assert.doesNotMatch(intelligenceServer, /ARCHIVE_NORMAL_MODEL/);
   assert.match(intelligenceServer, /prompt_cache_key: `deception-world-persona-v3-/);
-  assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 180/);
+  assert.match(modelConfig, /ARCHIVE_MIN_THINKING_MS = 80/);
   assert.match(openAiTransport, /const controller = new AbortController\(\)/);
   assert.match(openAiTransport, /controller\.abort\(/);
   assert.match(openAiTransport, /finally \{[\s\S]*?clearTimeout\(timeout\)/);

@@ -52,7 +52,7 @@ export type ArchiveApiTiming = {
 const CLIENT_DELAYS_MS = [200, 350, 500, 700] as const;
 const REQUEST_TTL_MS = 32_000;
 const RESUME_TTL_MS = 32_000;
-const FETCH_ATTEMPT_TIMEOUT_MS = 12_000;
+const FETCH_ATTEMPT_TIMEOUT_MS = 8_000;
 const MAX_LEDGER_POST_ATTEMPTS = 3;
 
 function abortError(signal: AbortSignal): unknown {
@@ -316,7 +316,7 @@ export async function postArchiveApi<T>({
     "x-archive-request-id": requestId,
     "x-archive-session-id": sessionId,
   };
-  await rememberArchiveAiPending({
+  void rememberArchiveAiPending({
     requestId,
     sessionId,
     url,

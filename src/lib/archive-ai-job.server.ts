@@ -63,7 +63,7 @@ export type ArchiveAiWireState = ArchiveAiRequestState<ArchiveAiResult>;
 
 type SearchStoredPayload = Omit<ArchiveSearchRequest, "requestId">;
 type PersonaStoredPayload = Omit<ArchiveIntelligenceRequest, "requestId">;
-const BACKGROUND_POLL_STAGGER_MS = 350;
+const BACKGROUND_POLL_STAGGER_MS = 80;
 
 function requestMatchesBody(requestId: string, bodyRequestId: string | undefined): boolean {
   return Boolean(bodyRequestId && requestId === bodyRequestId.toLowerCase());
@@ -784,7 +784,7 @@ export function continueArchiveAiRequestInBackground(
       // delaying an already-finished answer by a full extra polling interval.
       const delay = Math.min(
         5_000,
-        Math.max(700, current.retryAfterMs) + BACKGROUND_POLL_STAGGER_MS,
+        Math.max(200, current.retryAfterMs) + BACKGROUND_POLL_STAGGER_MS,
       );
       await new Promise<void>((resolve) => setTimeout(resolve, delay));
       try {

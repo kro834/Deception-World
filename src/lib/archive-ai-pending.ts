@@ -229,40 +229,32 @@ function saveLocalSessionId(sessionId: string): void {
  */
 export async function getArchiveAiSessionId(): Promise<string> {
   if (memorySessionId) return memorySessionId;
+  const local = localSessionId();
+  if (local) {
+    memorySessionId = local;
+    void withDeadline(writeSessionIdIndexedDb(local)).catch(() => undefined);
+    return local;
+  }
   if (resolvingSessionId) return resolvingSessionId;
   resolvingSessionId = (async () => {
-    const local = localSessionId();
-    if (local) {
-      memorySessionId = local;
-      try {
-        await withDeadline(writeSessionIdIndexedDb(local));
-      } catch {
-        // localStorage remains durable; retry IndexedDB persistence on the next cold start.
-      }
-      return local;
-    }
     try {
-      const durable = await readSessionIdAfterColdStart();
+      const durable = await withDeadline(readSessionIdAfterColdStart(), 200);
       if (durable) {
         memorySessionId = durable;
         saveLocalSessionId(durable);
         return durable;
       }
     } catch {
-      // Generate a secure identity when IndexedDB is genuinely unavailable.
+      // Generate immediately instead of stalling the first send on IndexedDB.
     }
     const created = newUuid();
     memorySessionId = created;
     saveLocalSessionId(created);
-    try {
-      await withDeadline(writeSessionIdIndexedDb(created));
-    } catch {
-      // The pending record below also carries this identity and may finish writing later.
-    }
+    void withDeadline(writeSessionIdIndexedDb(created)).catch(() => undefined);
     return created;
   })();
   try {
-    return await withDeadline(resolvingSessionId, 1_200);
+    return await withDeadline(resolvingSessionId, 250);
   } catch {
     if (memorySessionId) return memorySessionId;
     const created = newUuid();

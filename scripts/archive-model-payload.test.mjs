@@ -7,10 +7,10 @@ const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 
 const SEARCH_EFFORTS = ["low", "medium", "high", "xhigh"];
 const SEARCH_RUNTIME = {
-  low: { maxOutputTokens: 2_400, timeoutMs: 20_000 },
-  medium: { maxOutputTokens: 3_200, timeoutMs: 22_000 },
-  high: { maxOutputTokens: 4_000, timeoutMs: 25_000 },
-  xhigh: { maxOutputTokens: 4_800, timeoutMs: 28_000 },
+  low: { maxOutputTokens: 1_600, timeoutMs: 10_000 },
+  medium: { maxOutputTokens: 2_000, timeoutMs: 12_000 },
+  high: { maxOutputTokens: 2_400, timeoutMs: 14_000 },
+  xhigh: { maxOutputTokens: 3_200, timeoutMs: 16_000 },
 };
 
 function providerModelFor(requestedModel) {
@@ -154,7 +154,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-luna",
           reasoning: { effort: "low", context: "current_turn" },
           maxOutputTokens: 3600,
-          timeoutMs: 20_000,
+          timeoutMs: 10_000,
           verbosity: "low",
           costClass: "standard",
         },
@@ -167,7 +167,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
           model: "gpt-5.6-sol",
           reasoning: { effort: "none", context: "current_turn" },
           maxOutputTokens: 3600,
-          timeoutMs: 20_000,
+          timeoutMs: 10_000,
           verbosity: "medium",
           costClass: "standard",
         },

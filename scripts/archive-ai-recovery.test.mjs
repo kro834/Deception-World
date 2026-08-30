@@ -102,10 +102,10 @@ test("initial requests reuse admission state and stagger background polling behi
     searchStart,
     /advanceArchiveAiRequestFromRow\([\s\S]*?admission\.row[\s\S]*?admission\.access[\s\S]*?execution/u,
   );
-  assert.match(jobSource, /const BACKGROUND_POLL_STAGGER_MS = 350/u);
+  assert.match(jobSource, /const BACKGROUND_POLL_STAGGER_MS = 80/u);
   assert.match(
     jobSource,
-    /Math\.max\(700, current\.retryAfterMs\) \+ BACKGROUND_POLL_STAGGER_MS/u,
+    /Math\.max\(200, current\.retryAfterMs\) \+ BACKGROUND_POLL_STAGGER_MS/u,
   );
 });
 
