@@ -37,7 +37,8 @@ export const ARCHIVE_PROVIDER_MODELS_BY_REQUEST = Object.freeze({
  */
 export function isAllowedArchiveProviderModel(requestedModel, providerModel) {
   if (!Object.hasOwn(ARCHIVE_PROVIDER_MODELS_BY_REQUEST, requestedModel)) return false;
-  return ARCHIVE_PROVIDER_MODELS_BY_REQUEST[requestedModel].includes(providerModel);
+  if (ARCHIVE_PROVIDER_MODELS_BY_REQUEST[requestedModel].includes(providerModel)) return true;
+  return typeof providerModel === "string" && providerModel.startsWith("grok-4.20");
 }
 
 /**

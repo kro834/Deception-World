@@ -159,7 +159,7 @@ function parseCompletedResponse(
           response.metadata,
           row.processing_context as ArchiveIntelligenceProcessingContext,
         );
-  return { ...result, requestId: row.request_id };
+  return { ...result, requestId: row.request_id, requestedModel: row.requested_model };
 }
 
 function circuitKey(row: ArchiveAiRequestRow): string {

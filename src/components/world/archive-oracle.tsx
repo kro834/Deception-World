@@ -1051,7 +1051,7 @@ export function ArchiveIntelligenceWorkspace({
           onState: setSearchLifecycle,
         });
       } catch (error) {
-        if (searchSequenceRef.current !== sequence) return;
+        if (searchAbortRef.current !== controller) return;
         const deliveryReason =
           error instanceof ArchiveApiClientError ? error.reason : "client_network";
         setSearchMessages((current) => [
@@ -1078,15 +1078,18 @@ export function ArchiveIntelligenceWorkspace({
             trimmed: conversationHistory.length < nextMessages.length,
           }),
         );
-        setSearchPending(false);
-        setSearchLifecycle(null);
-        setPendingSearchPreference(null);
-        if (searchAbortRef.current === controller) searchAbortRef.current = null;
-        if (searchRequestIdRef.current === requestId) {
-          searchRequestIdRef.current = null;
-          searchRequestSessionIdRef.current = undefined;
-        }
         return;
+      } finally {
+        if (searchAbortRef.current === controller) {
+          searchAbortRef.current = null;
+          setSearchPending(false);
+          setSearchLifecycle(null);
+          setPendingSearchPreference(null);
+          if (searchRequestIdRef.current === requestId) {
+            searchRequestIdRef.current = null;
+            searchRequestSessionIdRef.current = undefined;
+          }
+        }
       }
 
       await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);

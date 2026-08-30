@@ -624,7 +624,7 @@ export function ArchiveRoleplay({
         },
       });
     } catch (error) {
-      if (requestSequenceRef.current !== sequence) return;
+      if (abortRef.current !== controller) return;
       const deliveryReason =
         error instanceof ArchiveApiClientError ? error.reason : "client_network";
       updateSession(keyAtRequest, (current) => [
@@ -651,16 +651,19 @@ export function ArchiveRoleplay({
           trimmed: conversationHistory.length < nextMessages.length,
         }),
       );
-      foregroundPendingKeyRef.current = null;
-      setPendingKey(recoveryPendingKeyRef.current);
-      setPendingProProfile(null);
-      if (abortRef.current === controller) abortRef.current = null;
-      if (activeRequestIdRef.current === requestId) {
-        activeRequestIdRef.current = null;
-        activeRequestSessionIdRef.current = undefined;
-      }
       setLiveMessage("オンライン回答を回収できませんでした。再送信できます。");
       return;
+    } finally {
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+        foregroundPendingKeyRef.current = null;
+        setPendingKey(recoveryPendingKeyRef.current);
+        setPendingProProfile(null);
+        if (activeRequestIdRef.current === requestId) {
+          activeRequestIdRef.current = null;
+          activeRequestSessionIdRef.current = undefined;
+        }
+      }
     }
 
     await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);

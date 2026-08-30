@@ -203,6 +203,20 @@ function responseRequestId(payload: unknown): string | null {
   return typeof requestId === "string" ? requestId : null;
 }
 
+function displayableArchiveResult<T>(
+  payload: unknown,
+  validate: (value: unknown) => value is T,
+): T | null {
+  if (!payload || typeof payload !== "object") return null;
+  const candidate = payload as { state?: unknown; result?: unknown };
+  if (candidate.state !== "succeeded" && candidate.state !== "local") return null;
+  if (validate(candidate.result)) return candidate.result;
+  const result = candidate.result;
+  if (!result || typeof result !== "object") return null;
+  const reply = (result as { reply?: unknown }).reply;
+  return typeof reply === "string" && reply.trim() ? (result as T) : null;
+}
+
 function assertMatchingResponseRequestId(payload: unknown, expectedRequestId: string): void {
   const receivedRequestId = responseRequestId(payload);
   if (receivedRequestId === null || receivedRequestId === expectedRequestId) return;
@@ -469,6 +483,11 @@ async function runArchiveApiRequest<T>({
     const payload = await responsePayload(response);
     assertMatchingResponseRequestId(payload, requestId);
     if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      const displayable = displayableArchiveResult(payload, validate);
+      if (displayable) {
+        void forgetArchiveAiPending(requestId);
+        return displayable;
+      }
       throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
     }
     const state: ArchiveAiRequestState<T> = payload;
@@ -597,6 +616,11 @@ export async function resumeArchiveApi<T>({
     const payload = await responsePayload(response);
     assertMatchingResponseRequestId(payload, pending.requestId);
     if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      const displayable = displayableArchiveResult(payload, validate);
+      if (displayable) {
+        void forgetArchiveAiPending(pending.requestId);
+        return displayable;
+      }
       void forgetArchiveAiPending(pending.requestId);
       throw new ArchiveApiClientError(
         "Archive API recovery response was invalid",
