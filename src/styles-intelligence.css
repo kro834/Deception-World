@@ -520,6 +520,8 @@ body.archive-intelligence-active {
 
 .archive-intelligence-page .archive-oracle-input-shell > button,
 .archive-intelligence-page .archive-roleplay-composer > div > button {
+  z-index: 3;
+  pointer-events: auto;
   /* Keep the real pointer box square; the visible control stays circular in
      ::before so even near-corner taps belong to the 56px action target. */
   border-radius: 0;
@@ -1792,13 +1794,13 @@ body.archive-intelligence-active {
 
 .archive-intelligence-page .archive-oracle-input-shell textarea,
 .archive-intelligence-page .archive-roleplay-composer textarea {
-  position: absolute;
+  position: relative;
   z-index: 0;
-  inset: -1px;
+  inset: auto;
   box-sizing: border-box;
-  width: auto;
-  height: auto;
-  min-height: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 44px;
   max-height: none;
   overflow-x: hidden;
   overflow-y: auto;
@@ -1821,11 +1823,15 @@ body.archive-intelligence-active {
 }
 
 .archive-intelligence-page .archive-oracle-input-shell textarea {
-  padding: 16px 58px 16px 48px;
+  padding: 12px 6px;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .archive-intelligence-page .archive-roleplay-composer textarea {
-  padding: 16px 58px 16px 48px;
+  padding: 12px 6px;
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .archive-intelligence-page .archive-oracle-input-shell textarea::placeholder,

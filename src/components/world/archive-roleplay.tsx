@@ -542,7 +542,11 @@ export function ArchiveRoleplay({
   ) => {
     const maxLength = mode === "pro" ? 1600 : 900;
     const value = normalizeArchiveInput(input).trim();
-    if (!hasVisibleArchiveText(value) || value.length > maxLength || abortRef.current) return;
+    if (!hasVisibleArchiveText(value) || value.length > maxLength) return;
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
 
     const keyAtRequest = activeSessionKey;
     const characterAtRequest = characterId;
@@ -1192,13 +1196,13 @@ export function ArchiveRoleplay({
               <button
                 type="button"
                 className="archive-composer-send"
-                tabIndex={-1}
                 disabled={
                   !hasVisibleArchiveText(draft) ||
                   draft.length > messageMaxLength ||
                   messageEditOverLimit
                 }
                 aria-label={messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`}
+                onPointerDown={(event) => event.stopPropagation()}
                 onClick={() =>
                   void sendMessage(
                     draft,

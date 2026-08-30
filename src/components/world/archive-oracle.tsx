@@ -1002,12 +1002,12 @@ export function ArchiveIntelligenceWorkspace({
       const searchPreferenceAtRequest = modelPreferences.search;
       const maxLength = searchPreferenceAtRequest.execution === "pro" ? 1200 : 600;
       const nextQuestion = normalizeArchiveInput(value).trim();
-      if (
-        !hasVisibleArchiveText(nextQuestion) ||
-        nextQuestion.length > maxLength ||
-        searchAbortRef.current
-      ) {
+      if (!hasVisibleArchiveText(nextQuestion) || nextQuestion.length > maxLength) {
         return;
+      }
+      if (searchAbortRef.current) {
+        searchAbortRef.current.abort();
+        searchAbortRef.current = null;
       }
 
       const existingMessage = options.replaceMessageId
@@ -1629,13 +1629,13 @@ export function ArchiveIntelligenceWorkspace({
               <button
                 type="button"
                 className="archive-composer-send"
-                tabIndex={-1}
                 disabled={
                   !hasVisibleArchiveText(question) ||
                   question.length > searchMaxLength ||
                   searchEditOverLimit
                 }
                 aria-label={searchEdit ? "編集してサーチへ再送信" : "サーチへ送信"}
+                onPointerDown={(event) => event.stopPropagation()}
                 onClick={() =>
                   void ask(
                     question,

@@ -601,7 +601,7 @@ test("the composer sends only by button, stays abortable and stale-response safe
   assert.match(roleplay, /abortRef\.current\?\.abort\(\)/);
   assert.match(
     roleplay,
-    /if \(!hasVisibleArchiveText\(value\) \|\| value\.length > maxLength \|\| abortRef\.current\) return/,
+    /if \(abortRef\.current\) \{[\s\S]*?abortRef\.current\.abort\(\)/,
   );
   assert.match(roleplay, /if \(abortRef\.current === controller\) abortRef\.current = null/);
   assert.match(roleplay, /signal: controller\.signal/);

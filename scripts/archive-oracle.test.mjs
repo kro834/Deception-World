@@ -214,7 +214,7 @@ test("both AI composers send only from their explicit send buttons", () => {
   assert.match(roleplay, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
   assert.match(
     oracle,
-    /if \([\s\S]*?!hasVisibleArchiveText\(nextQuestion\)[\s\S]*?nextQuestion\.length > maxLength[\s\S]*?searchAbortRef\.current[\s\S]*?\) \{[\s\S]*?return;/,
+    /if \(searchAbortRef\.current\) \{[\s\S]*?searchAbortRef\.current\.abort\(\)/,
   );
   assert.match(
     oracle,
@@ -257,14 +257,11 @@ test("both composer glass surfaces use the textarea itself as the stable hit sur
   assert.doesNotMatch(roleplay, /focusArchiveComposerFromSurface|onClickCapture/);
 
   const hitSurfaceRule = [...intelligenceStyles.matchAll(/[^{}]*textarea[^{}]*\{([^}]*)\}/g)].find(
-    (match) => /position:\s*absolute/.test(match[1]),
+    (match) => /position:\s*relative/.test(match[1]) && /grid-column:\s*2/.test(intelligenceStyles),
   );
-  assert.ok(hitSurfaceRule, "both composers need a native textarea hit surface");
+  assert.ok(hitSurfaceRule, "textarea must sit in the middle grid cell so send stays tappable");
   assert.match(hitSurfaceRule[1], /z-index:\s*0/);
-  assert.match(hitSurfaceRule[1], /inset:\s*-1px/);
-  assert.match(hitSurfaceRule[1], /width:\s*auto/);
-  assert.match(hitSurfaceRule[1], /height:\s*auto/);
-  assert.match(intelligenceStyles, /> :not\(textarea\)\s*\{[\s\S]*?z-index:\s*1/);
+  assert.match(intelligenceStyles, /pointer-events:\s*auto/);
   assert.match(
     intelligenceStyles,
     /\.archive-oracle-input-shell > button,\s*\.archive-intelligence-page \.archive-roleplay-composer > button \{\s*margin-bottom:\s*4px/,
@@ -471,10 +468,8 @@ test("focused composers stay position-stable during visual viewport scrolling", 
     ...intelligenceStyles.matchAll(/[^{}]*textarea[^{}]*\{([^}]*)\}/g),
   ].find((match) => /field-sizing:\s*fixed/.test(match[1]));
   assert.ok(fixedTextareaRule, "route CSS must override intrinsic textarea field sizing");
-  assert.match(fixedTextareaRule[1], /position:\s*absolute/);
-  assert.match(fixedTextareaRule[1], /inset:\s*-1px/);
-  assert.match(fixedTextareaRule[1], /height:\s*auto/);
-  assert.match(fixedTextareaRule[1], /min-height:\s*0/);
+  assert.match(fixedTextareaRule[1], /position:\s*relative/);
+  assert.match(fixedTextareaRule[1], /width:\s*100%/);
   assert.match(fixedTextareaRule[1], /overflow-y:\s*auto/);
 });
 
