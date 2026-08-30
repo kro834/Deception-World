@@ -171,6 +171,7 @@ export function ArchiveComposerTools({
         type="button"
         className="archive-composer-leading archive-composer-plus"
         aria-label="会話ツールを開く"
+        tabIndex={-1}
         onPointerDown={preserve}
       >
         <span aria-hidden="true">＋</span>

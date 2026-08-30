@@ -148,6 +148,8 @@ test("the provider key and upstream endpoint stay in the server-only boundary", 
   assert.match(modelConfig, /model: "gpt-5\.6-luna"/);
   assert.match(intelligenceServer, /requestOpenAiStructuredResponse\(\{/);
   assert.match(openAiTransport, /archiveAiBaseUrl\(\)/);
+  assert.match(openAiTransport, /buildArchiveAiProviderBody\(/);
+  assert.match(openAiTransport, /delete next\.reasoning/);
   assert.match(openAiTransport, /authorization: `Bearer \$\{apiKey\}`/);
   assert.doesNotMatch(`${intelligenceServer}\n${openAiTransport}`, /import\.meta\.env|VITE_OPENAI/);
 

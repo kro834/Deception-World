@@ -51,11 +51,19 @@ export function ArchiveIntelligencePage() {
       }
     };
 
+    const resetDocumentScroll = () => {
+      if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+      if (document.documentElement.scrollTop) document.documentElement.scrollTop = 0;
+      if (document.body.scrollTop) document.body.scrollTop = 0;
+    };
+
     const syncViewport = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
+        resetDocumentScroll();
         const layoutWidth = window.innerWidth;
+        const offsetTop = viewport?.offsetTop ?? 0;
         const height = viewport?.height ?? window.innerHeight;
         const focused = document.activeElement?.matches(editableSelector) ?? false;
         if (!focused && height > stableHeight - 72) stableHeight = height;
@@ -64,10 +72,13 @@ export function ArchiveIntelligencePage() {
           !focused && page.dataset.keyboard === "closing" && stableHeight - height > 120;
         const keyboardOpening =
           focused && layoutWidth <= 760 && performance.now() - focusStartedAt < 600;
-        page.style.setProperty("--archive-viewport-height", `${height}px`);
+        // Cover the visual viewport only. If WebKit also pans (offsetTop > 0),
+        // shrinking without locking scroll used to leave a black void with the
+        // composer stuck at the top of the screen.
+        page.style.setProperty("--archive-viewport-height", `${Math.round(height)}px`);
         page.style.setProperty(
           "--archive-keyboard-inset",
-          `${Math.max(0, stableHeight - height)}px`,
+          `${Math.max(0, Math.round(stableHeight - height - offsetTop))}px`,
         );
         page.dataset.keyboard = keyboardOpen
           ? "open"
@@ -84,9 +95,10 @@ export function ArchiveIntelligencePage() {
       focusStartedAt = performance.now();
       page.dataset.composerFocus = "true";
       if ((viewport?.width ?? window.innerWidth) <= 760) page.dataset.keyboard = "opening";
+      window.scrollTo(0, 0);
       // Sample height only. Moving a focused ancestor with visualViewport offsets
       // makes WebKit's caret and selection handles drift during keyboard animation.
-      scheduleSync([0, 120, 360, 720]);
+      scheduleSync([0, 50, 120, 280, 520, 900]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
@@ -113,6 +125,7 @@ export function ArchiveIntelligencePage() {
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
     viewport?.addEventListener("resize", syncViewport, { passive: true });
+    viewport?.addEventListener("scroll", syncViewport, { passive: true });
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       for (const timer of recoveryTimers) window.clearTimeout(timer);
@@ -122,6 +135,7 @@ export function ArchiveIntelligencePage() {
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
       viewport?.removeEventListener("resize", syncViewport);
+      viewport?.removeEventListener("scroll", syncViewport);
     };
   }, []);
 

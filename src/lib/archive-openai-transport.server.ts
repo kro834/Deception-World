@@ -5,7 +5,7 @@ import {
   ARCHIVE_PROVIDER_MODELS_BY_REQUEST,
   isAllowedArchiveProviderModel,
 } from "./archive-provider-models.js";
-import { archiveAiBaseUrl, archiveAiProviderModel } from "./archive-ai-credentials.server.ts";
+import { archiveAiBaseUrl, archiveAiProviderModel, archiveAiUsesXai } from "./archive-ai-credentials.server.ts";
 
 export { isAllowedArchiveProviderModel } from "./archive-provider-models.js";
 
@@ -268,6 +268,21 @@ function requestedModelFromBody(body: unknown): string {
   return typeof model === "string" ? model : "";
 }
 
+export function buildArchiveAiProviderBody(
+  body: Record<string, unknown>,
+  requestedModel: string,
+): Record<string, unknown> {
+  const next: Record<string, unknown> = {
+    ...body,
+    model: archiveAiProviderModel(requestedModel),
+    store: false,
+  };
+  // Grok 4.20 rejects OpenAI `reasoning.effort` on both snapshots. Sending it
+  // makes every Archive turn 400 and the composer stays on 思考中.
+  if (archiveAiUsesXai()) delete next.reasoning;
+  return next;
+}
+
 function parseMetadata(
   payload: unknown,
   requestedModel: string,
@@ -486,7 +501,7 @@ export async function requestOpenAiStructuredResponse<T>({
   const requestedModel = requestedModelOverride?.trim() || requestedModelFromBody(body);
   const requestBody =
     body && typeof body === "object"
-      ? { ...(body as Record<string, unknown>), model: archiveAiProviderModel(requestedModel) }
+      ? buildArchiveAiProviderBody(body as Record<string, unknown>, requestedModel)
       : body;
   const { payload, response } = await requestOpenAiJson({
     apiKey,
@@ -544,11 +559,7 @@ export async function createOpenAiBackgroundResponse({
       apiKey,
       method: "POST",
       url: `${archiveAiBaseUrl()}/responses`,
-      body: {
-        ...body,
-        model: archiveAiProviderModel(requestedModel),
-        store: false,
-      },
+      body: buildArchiveAiProviderBody(body, requestedModel),
       timeoutMs,
       logicalRequestId,
       // Only responses known not to have created work are retried here.

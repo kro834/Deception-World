@@ -392,10 +392,13 @@
 
 html.archive-intelligence-active,
 body.archive-intelligence-active {
+  position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden !important;
   overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 .archive-intelligence-page-models {
@@ -3282,6 +3285,15 @@ body.archive-intelligence-active {
   )
   :is(.archive-roleplay-composer, .archive-oracle-form) {
   padding-bottom: 8px;
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
+  .archive-composer-model-row {
+  display: none;
 }
 
 .archive-intelligence-page:is(

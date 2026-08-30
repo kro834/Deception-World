@@ -1583,6 +1583,7 @@ export function ArchiveIntelligenceWorkspace({
               <button
                 type="button"
                 className="archive-composer-send"
+                tabIndex={-1}
                 disabled={
                   !hasVisibleArchiveText(question) ||
                   question.length > searchMaxLength ||

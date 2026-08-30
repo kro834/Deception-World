@@ -1173,6 +1173,7 @@ export function ArchiveRoleplay({
             <button
               type="button"
               className="archive-composer-send"
+              tabIndex={-1}
               disabled={
                 !hasVisibleArchiveText(draft) ||
                 draft.length > messageMaxLength ||
