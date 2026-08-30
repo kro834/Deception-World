@@ -483,9 +483,24 @@ export function ArchiveRoleplay({
     return () => {
       disposed = true;
       controller.abort();
-      if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
+      if (recoveryAbortRef.current === controller) {
+        recoveryAbortRef.current = null;
+        recoveryRequestIdRef.current = null;
+        recoveryRequestSessionIdRef.current = undefined;
+        recoveryPendingKeyRef.current = null;
+        if (!foregroundPendingKeyRef.current) setPendingKey(null);
+      }
     };
   }, [recoveryWake, updateSession]);
+
+  useEffect(() => {
+    if (!pendingKey) return;
+    const timer = window.setTimeout(() => {
+      if (abortRef.current || recoveryAbortRef.current) return;
+      setPendingKey(null);
+    }, 8_000);
+    return () => window.clearTimeout(timer);
+  }, [pendingKey]);
 
   const selectCharacter = (nextCharacter: ArchiveCharacterId) => {
     if (nextCharacter === characterId) return;

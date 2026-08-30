@@ -276,7 +276,24 @@ export async function getArchiveAiSessionId(): Promise<string> {
 
 export function subscribeArchiveAiRecoveryWake(listener: () => void): () => void {
   if (typeof window === "undefined") return () => undefined;
-  const wake = () => listener();
+  const composerFocused = () => {
+    try {
+      if (typeof document === "undefined") return false;
+      const focused = document.activeElement;
+      if (!focused || typeof (focused as { matches?: unknown }).matches !== "function") {
+        return false;
+      }
+      return (focused as HTMLElement).matches("input, textarea, [contenteditable='true']");
+    } catch {
+      return false;
+    }
+  };
+  const wake = () => {
+    // iOS keyboard / WKWebView focus can fire pageshow and visibilitychange.
+    // Recovering then aborts the in-flight loop and leaves 思考中 stuck.
+    if (composerFocused()) return;
+    listener();
+  };
   const visibilityWake = () => {
     if (typeof document === "undefined" || document.visibilityState === "visible") wake();
   };

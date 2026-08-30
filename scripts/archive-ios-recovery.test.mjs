@@ -427,6 +427,7 @@ test("surface recovery failures remain reconnecting and persona modes keep isola
   );
   assert.match(oracle, /subscribeArchiveAiRecoveryWake/);
   assert.match(oracle, /setSearchPending\(true\)[\s\S]*?setSearchLifecycle\("reconnecting"\)[\s\S]*?firstFailedIndex[\s\S]*?setSearchPending\(false\)/);
+  assert.match(oracle, /searchRecoveryAbortRef\.current === controller[\s\S]*?setSearchPending\(false\)/);
   assert.match(oracle, /if \(disposed \|\| searchAbortRef\.current \|\| !pendingRecords\.length\) return/);
   assert.match(oracle, /const searchAbortRef[\s\S]*?const searchRecoveryAbortRef/);
   assert.match(oracle, /<ArchiveRoleplay[\s\S]*?active=\{active && surface === "roleplay"\}/);

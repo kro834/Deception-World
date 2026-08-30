@@ -41,8 +41,8 @@ export function ArchiveIntelligencePage() {
     const viewport = window.visualViewport;
     let frame = 0;
     let lockedHeight: number | null = null;
-    let settleHeight = 0;
-    let settleHits = 0;
+    let lockedOffset = 0;
+    let frozen = false;
     const recoveryTimers = new Set<number>();
     const editableSelector =
       "input:not([disabled]), textarea:not([disabled]), [contenteditable='true']";
@@ -88,13 +88,26 @@ export function ArchiveIntelligencePage() {
       setChromeInert(state !== "closed");
     };
 
-    const applyViewport = (source: "layout" | "scroll" = "layout") => {
-      resetDocumentScroll();
+    const applyViewport = (_source: "layout" | "scroll" = "layout") => {
       const compact = window.innerWidth <= ARCHIVE_IOS_KEYBOARD_COMPACT_MAX;
+      const focused = document.activeElement?.matches(editableSelector) ?? false;
+
+      if (!compact || !focused) {
+        frozen = false;
+        lockedHeight = null;
+        lockedOffset = 0;
+        applyFrame(null, 0, "closed");
+        return;
+      }
+
+      // After the keyboard has settled, ignore visualViewport rubber-banding.
+      // Following offsetTop here is what made the composer jitter.
+      if (frozen) return;
+
+      resetDocumentScroll();
       const layoutHeight = window.innerHeight;
       const visualHeight = viewport?.height ?? layoutHeight;
       const offsetTop = viewport?.offsetTop ?? 0;
-      const focused = document.activeElement?.matches(editableSelector) ?? false;
       const frameNow = resolveArchiveIosKeyboardFrame({
         focused,
         compact,
@@ -103,28 +116,15 @@ export function ArchiveIntelligencePage() {
         offsetTop,
       });
 
-      if (frameNow.state === "closed") {
-        lockedHeight = null;
-        settleHeight = 0;
-        settleHits = 0;
-        applyFrame(null, 0, "closed");
+      if (frameNow.state === "open") {
+        frozen = true;
+        lockedHeight = frameNow.heightPx;
+        lockedOffset = frameNow.offsetPx;
+        applyFrame(lockedHeight, lockedOffset, "open");
         return;
       }
 
-      if (source !== "scroll") {
-        if (Math.abs(frameNow.heightPx! - settleHeight) <= 2) settleHits += 1;
-        else {
-          settleHeight = frameNow.heightPx!;
-          settleHits = 1;
-        }
-        if (lockedHeight == null && (frameNow.state === "open" || settleHits >= 2)) {
-          lockedHeight = frameNow.heightPx;
-        } else if (lockedHeight != null && Math.abs(frameNow.heightPx! - lockedHeight) >= 80) {
-          lockedHeight = frameNow.heightPx;
-        }
-      }
-
-      applyFrame(lockedHeight ?? frameNow.heightPx, frameNow.offsetPx, frameNow.state);
+      applyFrame(frameNow.heightPx, frameNow.offsetPx, frameNow.state);
     };
 
     const syncViewport = (source: "layout" | "scroll" = "layout") => {
@@ -159,7 +159,9 @@ export function ArchiveIntelligencePage() {
 
     const handleFocusOut = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
+      frozen = false;
       lockedHeight = null;
+      lockedOffset = 0;
       applyFrame(null, 0, "closed");
       window.requestAnimationFrame(() => {
         if (!(document.activeElement?.matches(editableSelector) ?? false)) {
@@ -171,7 +173,9 @@ export function ArchiveIntelligencePage() {
     };
 
     const handleOrientationChange = () => {
+      frozen = false;
       lockedHeight = null;
+      lockedOffset = 0;
       scheduleSync([0, 180, 420]);
     };
 

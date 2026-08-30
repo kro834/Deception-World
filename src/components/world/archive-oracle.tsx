@@ -911,9 +911,27 @@ export function ArchiveIntelligenceWorkspace({
     return () => {
       disposed = true;
       controller.abort();
-      if (searchRecoveryAbortRef.current === controller) searchRecoveryAbortRef.current = null;
+      if (searchRecoveryAbortRef.current === controller) {
+        searchRecoveryAbortRef.current = null;
+        if (!searchAbortRef.current) {
+          searchRequestIdRef.current = null;
+          searchRequestSessionIdRef.current = undefined;
+          setSearchPending(false);
+          setSearchLifecycle(null);
+        }
+      }
     };
   }, [active, searchRecoveryWake]);
+
+  useEffect(() => {
+    if (!searchPending) return;
+    const timer = window.setTimeout(() => {
+      if (searchAbortRef.current || searchRecoveryAbortRef.current) return;
+      setSearchPending(false);
+      setSearchLifecycle(null);
+    }, 8_000);
+    return () => window.clearTimeout(timer);
+  }, [searchPending]);
 
   useEffect(() => {
     if (!active) stopSearch();
