@@ -1061,7 +1061,7 @@ export function ArchiveIntelligenceWorkspace({
           onState: setSearchLifecycle,
         });
       } catch (error) {
-        if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+        if (searchSequenceRef.current !== sequence) return;
         const deliveryReason =
           error instanceof ArchiveApiClientError ? error.reason : "client_network";
         setSearchMessages((current) => [
@@ -1359,6 +1359,7 @@ export function ArchiveIntelligenceWorkspace({
         role="tabpanel"
         aria-labelledby="archive-oracle-search-tab"
         hidden={surface !== "search"}
+        inert={surface !== "search" ? true : undefined}
       >
         <div className="archive-search-heading">
           <div>
@@ -1567,6 +1568,7 @@ export function ArchiveIntelligenceWorkspace({
               autoComplete="off"
               enterKeyHint="enter"
               inputMode="text"
+              disabled={surface !== "search"}
               placeholder={
                 modelPreferences.search.execution === "pro"
                   ? "何でも、詳しく聞いてください…"
@@ -1629,6 +1631,7 @@ export function ArchiveIntelligenceWorkspace({
         role="tabpanel"
         aria-labelledby="archive-oracle-roleplay-tab"
         hidden={surface !== "roleplay"}
+        inert={surface !== "roleplay" ? true : undefined}
       >
         <ArchiveRoleplay
           key={personaEpoch}

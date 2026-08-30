@@ -616,7 +616,7 @@ export function ArchiveRoleplay({
         },
       });
     } catch (error) {
-      if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
+      if (requestSequenceRef.current !== sequence) return;
       const deliveryReason =
         error instanceof ArchiveApiClientError ? error.reason : "client_network";
       updateSession(keyAtRequest, (current) => [
@@ -1161,6 +1161,7 @@ export function ArchiveRoleplay({
               autoComplete="off"
               enterKeyHint="enter"
               inputMode="text"
+              disabled={!active}
               placeholder={`${profile.name}へ話しかける…`}
               onChange={(event) => setDraft(event.currentTarget.value)}
             />

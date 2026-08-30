@@ -14,6 +14,7 @@
   overflow: clip;
   overscroll-behavior: none;
   isolation: isolate;
+  transform: translateZ(0);
   transition: none;
   background:
     radial-gradient(circle at 13% 14%, rgba(103, 216, 255, 0.16), transparent 31%),
@@ -3387,8 +3388,8 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-roleplay-console {
-  grid-template-rows: minmax(0, 1fr);
-  padding-bottom: calc(96px + var(--archive-keyboard-inset, 0px));
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding-bottom: 0;
 }
 
 .archive-intelligence-page:is(
@@ -3397,10 +3398,9 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-search-conversation {
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 8px;
-  padding: 5px max(10px, env(safe-area-inset-right, 0px))
-    calc(96px + var(--archive-keyboard-inset, 0px))
+  padding: 5px max(10px, env(safe-area-inset-right, 0px)) 8px
     max(10px, env(safe-area-inset-left, 0px));
 }
 
@@ -3453,14 +3453,13 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   :is(.archive-roleplay-composer, .archive-oracle-form) {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: var(--archive-keyboard-inset, 0px);
-  z-index: 30;
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: 8;
   margin: 0;
-  padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px
-    max(12px, env(safe-area-inset-left, 0px));
+  padding: 0 10px 8px;
   background: #000000;
 }
 

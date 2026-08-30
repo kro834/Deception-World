@@ -46,3 +46,35 @@ export function measureArchiveIosKeyboardInset(
 export function archiveIosVisualViewportPanned(offsetTop: number): boolean {
   return offsetTop > ARCHIVE_IOS_KEYBOARD_PAN_PX;
 }
+
+export type ArchiveIosKeyboardFrame = {
+  heightPx: number | null;
+  offsetPx: number;
+  state: "closed" | "opening" | "open";
+};
+
+/**
+ * Glue the AI shell to the visual viewport. iOS pans the layout when a
+ * textarea focuses; following offsetTop with position:fixed on the composer
+ * double-shifts it off-screen (black void + accessory bar). Fill the visual
+ * viewport instead and keep the composer in document flow.
+ */
+export function resolveArchiveIosKeyboardFrame(input: {
+  focused: boolean;
+  compact: boolean;
+  layoutHeight: number;
+  visualHeight: number;
+  offsetTop: number;
+}): ArchiveIosKeyboardFrame {
+  if (!input.focused || !input.compact) {
+    return { heightPx: null, offsetPx: 0, state: "closed" };
+  }
+  const visualHeight = Math.max(1, Math.round(input.visualHeight));
+  const offsetPx = Math.max(0, Math.round(input.offsetTop));
+  const occluded = Math.max(0, Math.round(input.layoutHeight - visualHeight));
+  return {
+    heightPx: visualHeight,
+    offsetPx,
+    state: occluded > 80 || offsetPx > ARCHIVE_IOS_KEYBOARD_PAN_PX ? "open" : "opening",
+  };
+}

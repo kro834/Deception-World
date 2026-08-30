@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { DEFAULT_ARCHIVE_MODEL_PREFERENCES } from "@/lib/archive-model-config";
 import {
   ARCHIVE_IOS_KEYBOARD_COMPACT_MAX,
-  archiveIosVisualViewportPanned,
-  estimateArchiveIosKeyboardInset,
-  measureArchiveIosKeyboardInset,
+  resolveArchiveIosKeyboardFrame,
 } from "@/lib/archive-viewport";
 import { ArchiveIntelligenceWorkspace } from "./archive-oracle";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
@@ -42,10 +40,12 @@ export function ArchiveIntelligencePage() {
 
     const viewport = window.visualViewport;
     let frame = 0;
-    let lockedInset: number | null = null;
-    let restLayoutHeight = window.innerHeight;
+    let lockedHeight: number | null = null;
+    let settleHeight = 0;
+    let settleHits = 0;
     const recoveryTimers = new Set<number>();
-    const editableSelector = "input, textarea, [contenteditable='true']";
+    const editableSelector =
+      "input:not([disabled]), textarea:not([disabled]), [contenteditable='true']";
 
     const scheduleSync = (delays: readonly number[]) => {
       for (const delay of delays) {
@@ -70,12 +70,22 @@ export function ArchiveIntelligencePage() {
       else chrome.removeAttribute("inert");
     };
 
-    const applyInset = (inset: number, state: "opening" | "open" | "closing" | "closed") => {
-      page.style.removeProperty("--archive-viewport-height");
+    const applyFrame = (
+      heightPx: number | null,
+      offsetPx: number,
+      state: "opening" | "open" | "closed",
+    ) => {
+      page.style.setProperty("--archive-keyboard-inset", "0px");
       page.style.setProperty("--archive-vv-offset", "0px");
-      page.style.setProperty("--archive-keyboard-inset", `${Math.max(0, Math.round(inset))}px`);
+      if (heightPx == null) {
+        page.style.removeProperty("--archive-viewport-height");
+        page.style.transform = "";
+      } else {
+        page.style.setProperty("--archive-viewport-height", `${heightPx}px`);
+        page.style.transform = offsetPx ? `translate3d(0, ${offsetPx}px, 0)` : "";
+      }
       page.dataset.keyboard = state;
-      setChromeInert(state === "opening" || state === "open");
+      setChromeInert(state !== "closed");
     };
 
     const applyViewport = (source: "layout" | "scroll" = "layout") => {
@@ -85,30 +95,36 @@ export function ArchiveIntelligencePage() {
       const visualHeight = viewport?.height ?? layoutHeight;
       const offsetTop = viewport?.offsetTop ?? 0;
       const focused = document.activeElement?.matches(editableSelector) ?? false;
+      const frameNow = resolveArchiveIosKeyboardFrame({
+        focused,
+        compact,
+        layoutHeight,
+        visualHeight,
+        offsetTop,
+      });
 
-      if (!compact || !focused) {
-        lockedInset = null;
-        if (layoutHeight > restLayoutHeight - 40) restLayoutHeight = layoutHeight;
-        applyInset(0, "closed");
+      if (frameNow.state === "closed") {
+        lockedHeight = null;
+        settleHeight = 0;
+        settleHits = 0;
+        applyFrame(null, 0, "closed");
         return;
       }
 
-      if (source === "scroll") return;
-
-      const layoutShrunk = restLayoutHeight - layoutHeight > 80;
-      const estimate = estimateArchiveIosKeyboardInset(restLayoutHeight);
-      const measured = measureArchiveIosKeyboardInset(layoutHeight, visualHeight);
-      const panned = archiveIosVisualViewportPanned(offsetTop);
-
-      if (layoutShrunk) {
-        lockedInset = 0;
-      } else if (lockedInset == null) {
-        lockedInset = measured > 80 && !panned ? measured : estimate;
-      } else if (measured > 80 && !panned && Math.abs(measured - lockedInset) > 96) {
-        lockedInset = measured;
+      if (source !== "scroll") {
+        if (Math.abs(frameNow.heightPx! - settleHeight) <= 2) settleHits += 1;
+        else {
+          settleHeight = frameNow.heightPx!;
+          settleHits = 1;
+        }
+        if (lockedHeight == null && (frameNow.state === "open" || settleHits >= 2)) {
+          lockedHeight = frameNow.heightPx;
+        } else if (lockedHeight != null && Math.abs(frameNow.heightPx! - lockedHeight) >= 80) {
+          lockedHeight = frameNow.heightPx;
+        }
       }
 
-      applyInset(lockedInset, layoutShrunk || measured > 80 ? "open" : "opening");
+      applyFrame(lockedHeight ?? frameNow.heightPx, frameNow.offsetPx, frameNow.state);
     };
 
     const syncViewport = (source: "layout" | "scroll" = "layout") => {
@@ -130,8 +146,7 @@ export function ArchiveIntelligencePage() {
       if (!(target instanceof Element) || !target.matches(editableSelector)) return;
       if (window.innerWidth > ARCHIVE_IOS_KEYBOARD_COMPACT_MAX) return;
       page.dataset.composerFocus = "true";
-      if (lockedInset == null) lockedInset = estimateArchiveIosKeyboardInset(restLayoutHeight);
-      applyInset(lockedInset, "opening");
+      applyViewport("layout");
     };
 
     const handleFocusIn = (event: FocusEvent) => {
@@ -139,25 +154,24 @@ export function ArchiveIntelligencePage() {
       page.dataset.composerFocus = "true";
       window.scrollTo(0, 0);
       applyViewport("layout");
-      scheduleSync([280, 480]);
+      scheduleSync([180, 360, 640]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
-      lockedInset = null;
-      page.dataset.keyboard = "closing";
-      applyInset(0, "closing");
+      lockedHeight = null;
+      applyFrame(null, 0, "closed");
       window.requestAnimationFrame(() => {
         if (!(document.activeElement?.matches(editableSelector) ?? false)) {
           delete page.dataset.composerFocus;
-          applyInset(0, "closed");
+          applyFrame(null, 0, "closed");
         }
       });
-      scheduleSync([240, 520]);
+      scheduleSync([160, 400]);
     };
 
     const handleOrientationChange = () => {
-      lockedInset = null;
+      lockedHeight = null;
       scheduleSync([0, 180, 420]);
     };
 
@@ -181,6 +195,8 @@ export function ArchiveIntelligencePage() {
       document.removeEventListener("focusout", handleFocusOut);
       viewport?.removeEventListener("resize", syncLayout);
       viewport?.removeEventListener("scroll", syncVisualScroll);
+      page.style.transform = "";
+      page.style.removeProperty("--archive-viewport-height");
     };
   }, []);
 
