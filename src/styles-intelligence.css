@@ -15,6 +15,7 @@
   overflow: clip;
   overscroll-behavior: none;
   isolation: isolate;
+  transition: none;
   background:
     radial-gradient(circle at 13% 14%, rgba(103, 216, 255, 0.16), transparent 31%),
     radial-gradient(circle at 87% 86%, rgba(231, 26, 156, 0.1), transparent 34%),

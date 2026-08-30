@@ -438,7 +438,8 @@ test("focused composers stay position-stable during visual viewport scrolling", 
   assert.match(intelligencePage, /viewport\?\.addEventListener\("scroll"/);
   assert.match(intelligencePage, /window\.scrollTo\(0, 0\)/);
   assert.match(intelligencePage, /--archive-vv-offset/);
-  assert.match(intelligencePage, /applyViewport\(\)/);
+  assert.match(intelligencePage, /lockedHeight/);
+  assert.match(intelligencePage, /syncVisualScroll/);
   assert.match(intelligencePage, /pointerdown/);
   assert.match(intelligenceStyles, /--archive-vv-offset/);
   assert.match(intelligenceStyles, /var\(--archive-vv-offset, 0px\)/);

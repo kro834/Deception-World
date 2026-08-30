@@ -38,9 +38,17 @@ export function ArchiveIntelligencePage() {
     let frame = 0;
     let stableHeight = window.innerHeight;
     let focusStartedAt = 0;
+    let lockedHeight: number | null = null;
+    let lockedOffset = 0;
+    let settleHeight = 0;
+    let settleOffset = 0;
+    let settleHits = 0;
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
     const COMPACT_BREAKPOINT = 760;
+    const SETTLE_PX = 3;
+    const LOCK_AFTER = 2;
+    const RELAYOUT_PX = 56;
 
     const scheduleSync = (delays: readonly number[]) => {
       for (const delay of delays) {
@@ -58,12 +66,12 @@ export function ArchiveIntelligencePage() {
       if (document.body.scrollTop) document.body.scrollTop = 0;
     };
 
-    const applyViewport = () => {
+    const applyViewport = (source: "layout" | "scroll" = "layout") => {
       resetDocumentScroll();
       const compact = window.innerWidth <= COMPACT_BREAKPOINT;
       const layoutHeight = window.innerHeight;
-      const visualHeight = viewport?.height ?? layoutHeight;
-      const offsetTop = viewport?.offsetTop ?? 0;
+      const visualHeight = Math.round(viewport?.height ?? layoutHeight);
+      const offsetTop = Math.round(viewport?.offsetTop ?? 0);
       const focused = document.activeElement?.matches(editableSelector) ?? false;
       if (!focused && visualHeight > stableHeight - 72) {
         stableHeight = Math.max(visualHeight, layoutHeight);
@@ -74,32 +82,74 @@ export function ArchiveIntelligencePage() {
       const sinceFocus = focusStartedAt ? performance.now() - focusStartedAt : Number.POSITIVE_INFINITY;
       const keyboardOpening = focused && compact && sinceFocus < 900 && !keyboardOpen;
       const keyboardClosing = !focused && page.dataset.keyboard === "closing" && keyboardGap > 80;
-
-      // Match ChatGPT: the shell covers the visual viewport only. Composer stays
-      // in document flow at the bottom, so it sits on the keyboard.
-      page.style.setProperty("--archive-viewport-height", `${Math.round(visualHeight)}px`);
-      page.style.setProperty("--archive-vv-offset", `${Math.round(offsetTop)}px`);
-      page.style.setProperty("--archive-keyboard-inset", "0px");
-      page.dataset.keyboard = keyboardOpen
-        ? "open"
-        : keyboardOpening
-          ? "opening"
-          : keyboardClosing
-            ? "closing"
-            : "closed";
-
+      const keyboardActive = focused && compact;
       const chrome = page.querySelector(".archive-oracle-header");
+
+      if (!keyboardActive) {
+        lockedHeight = null;
+        lockedOffset = 0;
+        settleHeight = 0;
+        settleOffset = 0;
+        settleHits = 0;
+        page.style.setProperty("--archive-viewport-height", `${visualHeight}px`);
+        page.style.setProperty("--archive-vv-offset", "0px");
+        page.style.setProperty("--archive-keyboard-inset", "0px");
+        page.dataset.keyboard = keyboardClosing ? "closing" : "closed";
+        if (chrome instanceof HTMLElement) chrome.removeAttribute("inert");
+        return;
+      }
+
+      if (source === "scroll" && lockedHeight != null) return;
+
+      if (
+        Math.abs(visualHeight - settleHeight) <= SETTLE_PX &&
+        Math.abs(offsetTop - settleOffset) <= SETTLE_PX
+      ) {
+        settleHits += 1;
+      } else {
+        settleHeight = visualHeight;
+        settleOffset = offsetTop;
+        settleHits = 1;
+      }
+
+      if (lockedHeight == null && (keyboardOpen || settleHits >= LOCK_AFTER)) {
+        lockedHeight = settleHeight;
+        lockedOffset = settleOffset;
+      } else if (
+        lockedHeight != null &&
+        (Math.abs(visualHeight - lockedHeight) >= RELAYOUT_PX ||
+          Math.abs(offsetTop - lockedOffset) >= RELAYOUT_PX)
+      ) {
+        lockedHeight = visualHeight;
+        lockedOffset = offsetTop;
+      }
+
+      const height = lockedHeight ?? visualHeight;
+      const offset = lockedHeight != null ? lockedOffset : 0;
+      const currentHeight = Number.parseFloat(page.style.getPropertyValue("--archive-viewport-height")) || 0;
+      const currentOffset = Number.parseFloat(page.style.getPropertyValue("--archive-vv-offset")) || 0;
+      if (Math.abs(height - currentHeight) >= SETTLE_PX || currentHeight === 0) {
+        page.style.setProperty("--archive-viewport-height", `${height}px`);
+      }
+      if (Math.abs(offset - currentOffset) >= SETTLE_PX || (offset === 0 && currentOffset !== 0)) {
+        page.style.setProperty("--archive-vv-offset", `${offset}px`);
+      }
+      page.style.setProperty("--archive-keyboard-inset", "0px");
+      page.dataset.keyboard = keyboardOpen ? "open" : keyboardOpening ? "opening" : "closed";
       if (chrome instanceof HTMLElement) {
         if (keyboardOpen || keyboardOpening) chrome.setAttribute("inert", "");
         else chrome.removeAttribute("inert");
       }
     };
 
-    const syncViewport = () => {
+    const syncLayout = () => syncViewport("layout");
+    const syncVisualScroll = () => syncViewport("scroll");
+
+    const syncViewport = (source: "layout" | "scroll" = "layout") => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        applyViewport();
+        applyViewport(source);
       });
     };
 
@@ -120,7 +170,7 @@ export function ArchiveIntelligencePage() {
       if (window.innerWidth <= COMPACT_BREAKPOINT) page.dataset.keyboard = "opening";
       window.scrollTo(0, 0);
       applyViewport();
-      scheduleSync([0, 50, 120, 280, 520, 900]);
+      scheduleSync([160, 420]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
@@ -140,26 +190,26 @@ export function ArchiveIntelligencePage() {
       scheduleSync([0, 160, 420]);
     };
 
-    syncViewport();
-    window.addEventListener("resize", syncViewport, { passive: true });
-    window.addEventListener("pageshow", syncViewport, { passive: true });
+    syncViewport("layout");
+    window.addEventListener("resize", syncLayout, { passive: true });
+    window.addEventListener("pageshow", syncLayout, { passive: true });
     window.addEventListener("orientationchange", handleOrientationChange, { passive: true });
     document.addEventListener("pointerdown", armKeyboard, { capture: true, passive: true });
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
-    viewport?.addEventListener("resize", syncViewport, { passive: true });
-    viewport?.addEventListener("scroll", syncViewport, { passive: true });
+    viewport?.addEventListener("resize", syncLayout, { passive: true });
+    viewport?.addEventListener("scroll", syncVisualScroll, { passive: true });
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       for (const timer of recoveryTimers) window.clearTimeout(timer);
-      window.removeEventListener("resize", syncViewport);
-      window.removeEventListener("pageshow", syncViewport);
+      window.removeEventListener("resize", syncLayout);
+      window.removeEventListener("pageshow", syncLayout);
       window.removeEventListener("orientationchange", handleOrientationChange);
       document.removeEventListener("pointerdown", armKeyboard, true);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
-      viewport?.removeEventListener("resize", syncViewport);
-      viewport?.removeEventListener("scroll", syncViewport);
+      viewport?.removeEventListener("resize", syncLayout);
+      viewport?.removeEventListener("scroll", syncVisualScroll);
     };
   }, []);
 
