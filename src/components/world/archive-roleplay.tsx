@@ -495,26 +495,6 @@ export function ArchiveRoleplay({
     };
   }, [recoveryWake, updateSession]);
 
-  useEffect(() => {
-    if (!pendingKey) return;
-    const started = Date.now();
-    let raf = 0;
-    const expire = () => stopResponse(false, true);
-    const tick = () => {
-      if (Date.now() - started >= 8_000) {
-        expire();
-        return;
-      }
-      raf = window.requestAnimationFrame(tick);
-    };
-    raf = window.requestAnimationFrame(tick);
-    const timer = window.setTimeout(expire, 8_000);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(timer);
-    };
-  }, [pendingKey, stopResponse]);
-
   const selectCharacter = (nextCharacter: ArchiveCharacterId) => {
     if (nextCharacter === characterId) return;
     rememberActiveViewport();

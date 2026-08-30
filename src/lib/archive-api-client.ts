@@ -49,7 +49,7 @@ export type ArchiveApiTiming = {
   status?: number;
 };
 
-const CLIENT_DELAYS_MS = [1_000, 2_000, 4_000, 5_000] as const;
+const CLIENT_DELAYS_MS = [200, 350, 500, 700] as const;
 const REQUEST_TTL_MS = 32_000;
 const RESUME_TTL_MS = 32_000;
 const FETCH_ATTEMPT_TIMEOUT_MS = 12_000;
@@ -112,7 +112,7 @@ function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<
     window.addEventListener("pageshow", wake, { once: true });
     document.addEventListener("visibilitychange", visibilityWake);
     signal.addEventListener("abort", abort, { once: true });
-    timer = window.setTimeout(finish, Math.max(250, Math.min(5_000, delayMs)));
+    timer = window.setTimeout(finish, Math.max(200, Math.min(400, delayMs)));
   });
 }
 
@@ -121,7 +121,7 @@ function retryDelay(attempt: number, serverDelay?: number): number {
     // A healthy pending response already carries the server's lease-aware next
     // poll window. Adding client jitter here only makes a completed answer sit
     // unseen for longer; transient transport failures still use jitter below.
-    return Math.max(250, Math.min(5_000, serverDelay));
+    return Math.max(200, Math.min(400, serverDelay));
   }
   const base = CLIENT_DELAYS_MS[Math.min(attempt, CLIENT_DELAYS_MS.length - 1)];
   return base + Math.floor(Math.random() * 180);

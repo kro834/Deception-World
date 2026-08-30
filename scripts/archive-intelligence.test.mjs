@@ -621,7 +621,7 @@ test("the composer sends only by button, stays abortable and stale-response safe
   assert.match(archiveApiClient, /const RESUME_TTL_MS = 32_000/);
   assert.match(
     archiveApiClient,
-    /timer = window\.setTimeout\(finish, Math\.max\(250, Math\.min\(5_000, delayMs\)\)\)/,
+    /timer = window\.setTimeout\(finish, Math\.max\(200, Math\.min\(400, delayMs\)\)\)/,
   );
   assert.doesNotMatch(
     archiveApiClient,
