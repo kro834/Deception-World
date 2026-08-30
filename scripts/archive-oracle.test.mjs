@@ -104,8 +104,7 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchCatalog, /catalogById\.get\(candidate\.id\)/);
 
   assert.match(searchRoute, /assertSameSiteRequest\(\)/);
-  assert.match(searchRoute, /x-archive-client"\) !== "search-v1"/);
-  assert.match(searchRoute, /new URL\(origin\)\.origin !== new URL\(request\.url\)\.origin/);
+  assert.match(searchRoute, /isAllowedArchiveBrowserRequest\(request, "search-v1"\)/);
   assert.match(searchRoute, /const MAX_BODY_BYTES = 65_536/);
   assert.match(searchRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
   assert.match(searchRoute, /canonicalizeArchiveSearchCandidates\(parsed\.data\.candidates\)/);
@@ -226,18 +225,24 @@ test("both AI composers send only from their explicit send buttons", () => {
   assert.match(iconRule[1], /width:\s*20px/);
   assert.match(iconRule[1], /height:\s*20px/);
   assert.match(iconRule[1], /flex:\s*none/);
+  assert.match(iconRule[1], /pointer-events:\s*none/);
 
   const actionRules = [
     ...intelligenceStyles.matchAll(
       /\.archive-intelligence-page \.archive-oracle-input-shell > button,\s*\.archive-intelligence-page \.archive-roleplay-composer > button \{([^}]*)\}/g,
     ),
   ];
-  const centeredAction = actionRules.find((match) => /width:\s*44px/.test(match[1]));
-  assert.ok(centeredAction, "both composer actions need the shared 44px rule");
+  const centeredAction = actionRules.find((match) => /width:\s*56px/.test(match[1]));
+  assert.ok(centeredAction, "both composer actions need the shared 56px hit target");
   assert.match(centeredAction[1], /display:\s*inline-grid/);
   assert.match(centeredAction[1], /place-items:\s*center/);
-  assert.match(centeredAction[1], /width:\s*44px/);
-  assert.match(centeredAction[1], /height:\s*44px/);
+  assert.match(centeredAction[1], /width:\s*56px/);
+  assert.match(centeredAction[1], /height:\s*56px/);
+  assert.match(centeredAction[1], /touch-action:\s*manipulation/);
+  assert.match(
+    intelligenceStyles,
+    /> button::before,[\s\S]*?> button::before \{[\s\S]*?inset:\s*6px/,
+  );
 });
 
 test("model preferences normalize and resolve every Search runtime route", async () => {

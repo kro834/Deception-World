@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 
+import {
+  checkArchiveAiAccessWithDependencies,
+  resolveArchiveRateIdentity,
+} from "../src/lib/archive-ai-rate-limit.server.ts";
+
 const readSource = (relativePath) =>
   readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
 
@@ -197,14 +202,143 @@ test("persona model profiles resolve to fixed runtime routes", async () => {
   assert.equal(archivePersonaCostClass("normal", "pro"), "standard");
 });
 
+test("archive rate identity trusts Vercel headers in verified priority order", () => {
+  const request = new Request("https://archive.example/api/archive-intelligence", {
+    headers: {
+      "x-vercel-forwarded-for": "2001:db8::7",
+      "x-forwarded-for": "203.0.113.8, 198.51.100.9",
+      "x-real-ip": "192.0.2.10",
+    },
+  });
+  assert.equal(resolveArchiveRateIdentity(request, { VERCEL: "1" }), "2001:db8::7");
+
+  const invalidVercel = new Request(request.url, {
+    headers: {
+      "x-vercel-forwarded-for": "not-an-ip",
+      "x-forwarded-for": "203.0.113.8, 198.51.100.9",
+      "x-real-ip": "192.0.2.10",
+    },
+  });
+  assert.equal(resolveArchiveRateIdentity(invalidVercel, { VERCEL: "1" }), "203.0.113.8");
+
+  const onlyRealIp = new Request(request.url, {
+    headers: {
+      "x-vercel-forwarded-for": "unknown",
+      "x-forwarded-for": "also-unknown",
+      "x-real-ip": "192.0.2.10",
+    },
+  });
+  assert.equal(resolveArchiveRateIdentity(onlyRealIp, { VERCEL: "1" }), "192.0.2.10");
+  assert.equal(
+    resolveArchiveRateIdentity(new Request(request.url), { VERCEL: "1" }),
+    "anonymous-vercel",
+  );
+});
+
+test("unknown production proxies share an anonymous bucket instead of disabling AI", () => {
+  const spoofed = new Request("https://archive.example/api/archive-search", {
+    headers: { "x-forwarded-for": "203.0.113.77", "x-real-ip": "192.0.2.4" },
+  });
+  assert.equal(
+    resolveArchiveRateIdentity(spoofed, { NODE_ENV: "production" }),
+    "anonymous-production",
+  );
+  assert.equal(resolveArchiveRateIdentity(spoofed, { NODE_ENV: "development" }), "203.0.113.77");
+});
+
+test("configured shared limits remain authoritative", async () => {
+  const sharedCalls = [];
+  const fallbackReasons = [];
+  const result = await checkArchiveAiAccessWithDependencies(
+    new Request("https://archive.example/api/archive-intelligence", {
+      headers: { "x-vercel-forwarded-for": "203.0.113.31" },
+    }),
+    "pro",
+    {
+      apiKey: "shared-limit-test-key",
+      databaseSource: "neon",
+      environment: { NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview" },
+      now: Date.UTC(2040, 0, 1),
+      checkShared: async (...args) => {
+        sharedCalls.push(args);
+        return true;
+      },
+      reportFallback: (reason) => fallbackReasons.push(reason),
+    },
+  );
+
+  assert.equal(result.allowed, true);
+  assert.equal(result.reason, "allowed");
+  assert.equal(result.safetyIdentifier?.length, 40);
+  assert.equal(sharedCalls.length, 1);
+  assert.equal(sharedCalls[0][2], 3, "pro requests retain their weighted shared cost");
+  assert.deepEqual(fallbackReasons, []);
+});
+
+test("missing or failed shared storage falls back to conservative memory limits", async () => {
+  const request = new Request("https://archive.example/api/archive-search", {
+    headers: { "x-vercel-forwarded-for": "203.0.113.41" },
+  });
+  const fallbackReasons = [];
+  const base = {
+    apiKey: "memory-fallback-test-key",
+    environment: {
+      NODE_ENV: "production",
+      VERCEL: "1",
+      VERCEL_ENV: "preview",
+      ARCHIVE_AI_CLIENT_MINUTE_LIMIT: "3",
+      ARCHIVE_AI_CLIENT_DAILY_LIMIT: "3",
+      ARCHIVE_AI_GLOBAL_DAILY_LIMIT: "3",
+    },
+    now: Date.UTC(2040, 0, 2),
+    checkShared: async () => {
+      throw new Error("simulated shared store outage");
+    },
+    reportFallback: (reason) => fallbackReasons.push(reason),
+  };
+
+  const databaseMissing = await checkArchiveAiAccessWithDependencies(request, "standard", {
+    ...base,
+    databaseSource: "pglite",
+  });
+  assert.equal(databaseMissing.allowed, true);
+  assert.equal(databaseMissing.reason, "allowed");
+  assert.equal(databaseMissing.safetyIdentifier?.length, 40);
+  assert.deepEqual(fallbackReasons, ["database_unconfigured"]);
+
+  const sharedFailure = await checkArchiveAiAccessWithDependencies(request, "pro", {
+    ...base,
+    databaseSource: "neon",
+  });
+  assert.equal(sharedFailure.allowed, false, "the bounded fallback still enforces unit limits");
+  assert.equal(sharedFailure.reason, "rate_limited");
+  assert.deepEqual(fallbackReasons, ["database_unconfigured", "shared_store_error"]);
+});
+
+test("a missing API key remains the only configuration state that immediately disables AI", async () => {
+  let sharedCalled = false;
+  const result = await checkArchiveAiAccessWithDependencies(
+    new Request("https://archive.example/api/archive-search"),
+    "standard",
+    {
+      apiKey: "  ",
+      databaseSource: "neon",
+      environment: { NODE_ENV: "production" },
+      now: Date.UTC(2040, 0, 3),
+      checkShared: async () => {
+        sharedCalled = true;
+        return true;
+      },
+      reportFallback: () => assert.fail("fallback should not run without a provider key"),
+    },
+  );
+  assert.deepEqual(result, { allowed: false, reason: "unconfigured" });
+  assert.equal(sharedCalled, false);
+});
+
 test("the API enforces browser origin, bounded input, and shared production budgets", () => {
   assert.match(intelligenceRoute, /assertSameSiteRequest\(\)/);
-  assert.match(
-    intelligenceRoute,
-    /!origin \|\| request\.headers\.get\("x-archive-client"\) !== "persona-v1"/,
-  );
-  assert.match(intelligenceRoute, /new URL\(origin\)\.origin !== new URL\(request\.url\)\.origin/);
-  assert.match(intelligenceRoute, /fetchSite === "same-origin"/);
+  assert.match(intelligenceRoute, /isAllowedArchiveBrowserRequest\(request, "persona-v1"\)/);
   assert.match(intelligenceRoute, /const MAX_BODY_BYTES = 65_536/);
   assert.match(intelligenceRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
   assert.match(intelligenceRoute, /request_too_large/);
@@ -218,14 +352,18 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /"ARCHIVE_AI_CLIENT_MINUTE_LIMIT"/);
   assert.match(rateLimitServer, /"ARCHIVE_AI_CLIENT_DAILY_LIMIT"/);
   assert.match(rateLimitServer, /x-vercel-forwarded-for/);
-  assert.match(rateLimitServer, /if \(process\.env\.NODE_ENV === "production"\) return null/);
-  assert.match(rateLimitServer, /isIP\(vercelAddress\)/);
+  assert.match(rateLimitServer, /"x-forwarded-for"/);
+  assert.match(rateLimitServer, /"x-real-ip"/);
+  assert.match(rateLimitServer, /isIP\(address\)/);
+  assert.match(rateLimitServer, /"anonymous-vercel"/);
+  assert.match(rateLimitServer, /"anonymous-production"/);
   assert.match(rateLimitServer, /createHmac\("sha256", apiKey\)/);
   assert.match(rateLimitServer, /INSERT INTO archive_ai_rate_limits/);
   assert.match(rateLimitServer, /ON CONFLICT \(bucket_key\) DO UPDATE/);
-  assert.match(rateLimitServer, /if \(dbSource !== "neon"\)/);
-  assert.match(rateLimitServer, /process\.env\.NODE_ENV === "production"/);
-  assert.match(rateLimitServer, /process\.env\.VERCEL_ENV !== "production"/);
+  assert.match(rateLimitServer, /databaseSource === "neon"/);
+  assert.match(rateLimitServer, /checkMemoryBuckets\(clientKey, now, units, environment\)/);
+  assert.match(rateLimitServer, /shared rate limit unavailable; using bounded memory fallback/);
+  assert.doesNotMatch(rateLimitServer, /VERCEL_ENV !== "production"/);
   assert.match(rateLimitServer, /costClass === "pro" \? 3 : costClass === "advanced" \? 2 : 1/);
   assert.match(rateLimitServer, /safetyIdentifier: allowed \? clientKey : undefined/);
   assert.match(intelligenceServer, /safety_identifier: safetyIdentifier/);
@@ -234,8 +372,8 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(conversationBoundary, /UNVERIFIED PRIOR REPLY/);
   assert.match(requestBody, /request\.body\.getReader\(\)/);
   assert.match(requestBody, /received > maxBytes/);
-  assert.match(rateLimitServer, /reason: "shared_limit_unavailable"/);
-  assert.match(rateLimitServer, /catch \{[\s\S]*?shared_limit_unavailable/);
+  assert.match(rateLimitServer, /reportFallback\("shared_store_error"\)/);
+  assert.match(rateLimitServer, /reportFallback\("database_unconfigured"\)/);
   assert.match(rateLimitMigration, /bucket_key TEXT PRIMARY KEY/);
   assert.match(rateLimitMigration, /expires_at TIMESTAMPTZ NOT NULL/);
 

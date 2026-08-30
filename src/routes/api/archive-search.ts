@@ -13,6 +13,7 @@ import {
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { resolveArchiveSearchRoute } from "@/lib/archive-model-config";
 import { archiveProviderFailureReason } from "@/lib/archive-openai-transport.server";
+import { isAllowedArchiveBrowserRequest } from "@/lib/archive-api-origin.server";
 
 // Search Pro keeps a longer Japanese transcript. The schema still owns the
 // strict character budget; this byte ceiling only prevents valid UTF-8 input
@@ -29,18 +30,6 @@ function noStoreJson(payload: unknown, status = 200): Response {
   });
 }
 
-function isAllowedBrowserRequest(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin || request.headers.get("x-archive-client") !== "search-v1") return false;
-  try {
-    if (new URL(origin).origin !== new URL(request.url).origin) return false;
-    const fetchSite = request.headers.get("sec-fetch-site");
-    return !fetchSite || fetchSite === "same-origin";
-  } catch {
-    return false;
-  }
-}
-
 export const Route = createFileRoute("/api/archive-search")({
   server: {
     handlers: {
@@ -50,7 +39,9 @@ export const Route = createFileRoute("/api/archive-search")({
         } catch {
           return noStoreJson({ error: "forbidden" }, 403);
         }
-        if (!isAllowedBrowserRequest(request)) return noStoreJson({ error: "forbidden" }, 403);
+        if (!isAllowedArchiveBrowserRequest(request, "search-v1")) {
+          return noStoreJson({ error: "forbidden" }, 403);
+        }
 
         let raw: unknown;
         try {

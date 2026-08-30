@@ -12,6 +12,7 @@ import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { createLocalArchiveReply } from "@/lib/archive-roleplay-fallback";
 import { archivePersonaCostClass } from "@/lib/archive-model-config";
 import { archiveProviderFailureReason } from "@/lib/archive-openai-transport.server";
+import { isAllowedArchiveBrowserRequest } from "@/lib/archive-api-origin.server";
 
 // The character limits below are measured in Unicode code units. Reserve
 // enough UTF-8 space for a full Japanese conversation plus its JSON envelope.
@@ -27,18 +28,6 @@ function noStoreJson(payload: unknown, status = 200): Response {
   });
 }
 
-function isAllowedBrowserRequest(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin || request.headers.get("x-archive-client") !== "persona-v1") return false;
-  try {
-    if (new URL(origin).origin !== new URL(request.url).origin) return false;
-    const fetchSite = request.headers.get("sec-fetch-site");
-    return !fetchSite || fetchSite === "same-origin";
-  } catch {
-    return false;
-  }
-}
-
 export const Route = createFileRoute("/api/archive-intelligence")({
   server: {
     handlers: {
@@ -48,7 +37,7 @@ export const Route = createFileRoute("/api/archive-intelligence")({
         } catch {
           return noStoreJson({ error: "forbidden" }, 403);
         }
-        if (!isAllowedBrowserRequest(request)) {
+        if (!isAllowedArchiveBrowserRequest(request, "persona-v1")) {
           return noStoreJson({ error: "forbidden" }, 403);
         }
 

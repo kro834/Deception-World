@@ -1,9 +1,8 @@
 import { createHmac } from "node:crypto";
 import { isIP } from "node:net";
-import { dbSource, getSql } from "./db";
-import type { ArchiveAiCostClass } from "./archive-model-config";
+import type { ArchiveAiCostClass } from "./archive-model-config.ts";
 
-export type { ArchiveAiCostClass } from "./archive-model-config";
+export type { ArchiveAiCostClass } from "./archive-model-config.ts";
 
 const MINUTE_MS = 60_000;
 const DAY_MS = 86_400_000;
@@ -20,38 +19,65 @@ export type ArchiveAiAccess = {
 };
 
 type MemoryBucket = { expiresAt: number; count: number };
+type ArchiveDatabaseSource = "neon" | "pglite";
+type MemoryFallbackReason = "database_unconfigured" | "shared_store_error";
+
 const globalRef = globalThis as typeof globalThis & {
   __archiveAiRateBuckets__?: Map<string, MemoryBucket>;
+  __archiveAiFallbackWarnings__?: Set<MemoryFallbackReason>;
 };
 const memoryBuckets = (globalRef.__archiveAiRateBuckets__ ??= new Map());
+const emittedFallbackWarnings = (globalRef.__archiveAiFallbackWarnings__ ??= new Set());
 
-function boundedLimit(name: string, fallback: number, maximum: number): number {
-  const configured = Number(process.env[name]);
+function boundedLimit(
+  environment: NodeJS.ProcessEnv,
+  name: string,
+  fallback: number,
+  maximum: number,
+): number {
+  const configured = Number(environment[name]);
   return Number.isSafeInteger(configured) && configured >= 1 && configured <= maximum
     ? configured
     : fallback;
 }
 
-function clientAddress(request: Request): string | null {
-  const vercelAddress = request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
-  if (process.env.VERCEL) {
-    return vercelAddress && vercelAddress.length <= 96 && isIP(vercelAddress)
-      ? vercelAddress.toLowerCase()
-      : null;
+function firstValidForwardedAddress(request: Request, headerNames: readonly string[]) {
+  for (const headerName of headerNames) {
+    const address = request.headers.get(headerName)?.split(",", 1)[0]?.trim();
+    if (address && address.length <= 96 && isIP(address)) return address.toLowerCase();
   }
-
-  if (process.env.NODE_ENV === "production") return null;
-
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return (forwarded || request.headers.get("x-real-ip")?.trim() || "local-client")
-    .slice(0, 96)
-    .toLowerCase();
+  return undefined;
 }
 
-function clientDigest(request: Request, apiKey: string): string | null {
-  const address = clientAddress(request);
-  if (!address) return null;
-  return createHmac("sha256", apiKey).update(address).digest("hex").slice(0, 40);
+/**
+ * Resolve only addresses asserted by a known trusted edge. A generic production
+ * proxy can pass a user-controlled `x-forwarded-for`, so unknown hosts share a
+ * deliberately conservative anonymous bucket instead of trusting that value or
+ * disabling remote AI altogether.
+ */
+export function resolveArchiveRateIdentity(
+  request: Request,
+  environment: NodeJS.ProcessEnv = process.env,
+): string {
+  if (environment.VERCEL) {
+    return (
+      firstValidForwardedAddress(request, [
+        "x-vercel-forwarded-for",
+        "x-forwarded-for",
+        "x-real-ip",
+      ]) ?? "anonymous-vercel"
+    );
+  }
+
+  if (environment.NODE_ENV === "production") return "anonymous-production";
+  return firstValidForwardedAddress(request, ["x-forwarded-for", "x-real-ip"]) ?? "local-client";
+}
+
+function clientDigest(request: Request, apiKey: string, environment: NodeJS.ProcessEnv): string {
+  return createHmac("sha256", apiKey)
+    .update(resolveArchiveRateIdentity(request, environment))
+    .digest("hex")
+    .slice(0, 40);
 }
 
 function consumeMemoryBucket(
@@ -59,8 +85,8 @@ function consumeMemoryBucket(
   limit: number,
   expiresAt: number,
   units: number,
+  now: number,
 ): boolean {
-  const now = Date.now();
   const bucket = memoryBuckets.get(key);
   if (!bucket || bucket.expiresAt <= now) {
     memoryBuckets.set(key, { expiresAt, count: units });
@@ -69,27 +95,35 @@ function consumeMemoryBucket(
         if (value.expiresAt <= now) memoryBuckets.delete(bucketKey);
       }
     }
-    return true;
+    return units <= limit;
   }
 
   bucket.count = Math.min(bucket.count + units, limit + 1);
   return bucket.count <= limit;
 }
 
-function checkMemoryBuckets(clientKey: string, now: number, units: number): boolean {
+function checkMemoryBuckets(
+  clientKey: string,
+  now: number,
+  units: number,
+  environment: NodeJS.ProcessEnv,
+): boolean {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
   const clientMinuteLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_CLIENT_MINUTE_LIMIT",
     DEFAULT_CLIENT_MINUTE_UNITS,
     120,
   );
   const clientDailyLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_CLIENT_DAILY_LIMIT",
     DEFAULT_CLIENT_DAILY_UNITS,
     2_000,
   );
   const globalDailyLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_GLOBAL_DAILY_LIMIT",
     DEFAULT_GLOBAL_DAILY_UNITS,
     10_000,
@@ -100,9 +134,16 @@ function checkMemoryBuckets(clientKey: string, now: number, units: number): bool
       clientMinuteLimit,
       (minute + 1) * MINUTE_MS,
       units,
+      now,
     ) &&
-    consumeMemoryBucket(`day:${day}:${clientKey}`, clientDailyLimit, (day + 1) * DAY_MS, units) &&
-    consumeMemoryBucket(`global:${day}`, globalDailyLimit, (day + 1) * DAY_MS, units)
+    consumeMemoryBucket(
+      `day:${day}:${clientKey}`,
+      clientDailyLimit,
+      (day + 1) * DAY_MS,
+      units,
+      now,
+    ) &&
+    consumeMemoryBucket(`global:${day}`, globalDailyLimit, (day + 1) * DAY_MS, units, now)
   );
 }
 
@@ -112,6 +153,7 @@ async function consumeSharedBucket(
   expiresAt: number,
   units: number,
 ): Promise<{ allowed: boolean; count: number }> {
+  const { getSql } = await import("./db.ts");
   const sql = await getSql();
   const rows = await sql.query<{ request_count: number }>(
     `INSERT INTO archive_ai_rate_limits (bucket_key, request_count, expires_at, updated_at)
@@ -127,20 +169,28 @@ async function consumeSharedBucket(
   return { allowed: count <= limit, count };
 }
 
-async function checkSharedBuckets(clientKey: string, now: number, units: number): Promise<boolean> {
+async function checkSharedBuckets(
+  clientKey: string,
+  now: number,
+  units: number,
+  environment: NodeJS.ProcessEnv,
+): Promise<boolean> {
   const minute = Math.floor(now / MINUTE_MS);
   const day = Math.floor(now / DAY_MS);
   const clientMinuteLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_CLIENT_MINUTE_LIMIT",
     DEFAULT_CLIENT_MINUTE_UNITS,
     120,
   );
   const clientDailyLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_CLIENT_DAILY_LIMIT",
     DEFAULT_CLIENT_DAILY_UNITS,
     2_000,
   );
   const globalDailyLimit = boundedLimit(
+    environment,
     "ARCHIVE_AI_GLOBAL_DAILY_LIMIT",
     DEFAULT_GLOBAL_DAILY_UNITS,
     10_000,
@@ -168,15 +218,68 @@ async function checkSharedBuckets(clientKey: string, now: number, units: number)
     units,
   );
   if (globalDayResult.count === units) {
+    const { getSql } = await import("./db.ts");
     const sql = await getSql();
     await sql.query("DELETE FROM archive_ai_rate_limits WHERE expires_at < NOW()");
   }
   return globalDayResult.allowed;
 }
 
+function warnMemoryFallback(reason: MemoryFallbackReason): void {
+  if (emittedFallbackWarnings.has(reason)) return;
+  emittedFallbackWarnings.add(reason);
+  console.warn("[archive-ai] shared rate limit unavailable; using bounded memory fallback", {
+    reason,
+  });
+}
+
+type ArchiveAiAccessDependencies = {
+  apiKey: string;
+  databaseSource: ArchiveDatabaseSource;
+  environment: NodeJS.ProcessEnv;
+  now: number;
+  checkShared: (clientKey: string, now: number, units: number) => Promise<boolean>;
+  reportFallback: (reason: MemoryFallbackReason) => void;
+};
+
+/** Dependency-injected core used by environment-matrix tests. */
+export async function checkArchiveAiAccessWithDependencies(
+  request: Request,
+  costClass: ArchiveAiCostClass,
+  dependencies: ArchiveAiAccessDependencies,
+): Promise<ArchiveAiAccess> {
+  const { apiKey, databaseSource, environment, now, checkShared, reportFallback } = dependencies;
+  if (!apiKey.trim()) return { allowed: false, reason: "unconfigured" };
+
+  const clientKey = clientDigest(request, apiKey, environment);
+  const units = costClass === "pro" ? 3 : costClass === "advanced" ? 2 : 1;
+  if (databaseSource === "neon") {
+    try {
+      const allowed = await checkShared(clientKey, now, units);
+      return {
+        allowed,
+        reason: allowed ? "allowed" : "rate_limited",
+        safetyIdentifier: allowed ? clientKey : undefined,
+      };
+    } catch {
+      reportFallback("shared_store_error");
+    }
+  } else if (environment.NODE_ENV === "production" || environment.VERCEL) {
+    reportFallback("database_unconfigured");
+  }
+
+  const allowed = checkMemoryBuckets(clientKey, now, units, environment);
+  return {
+    allowed,
+    reason: allowed ? "allowed" : "rate_limited",
+    safetyIdentifier: allowed ? clientKey : undefined,
+  };
+}
+
 /**
- * Production remains fail-closed unless the shared Postgres limit is healthy.
- * Development keeps a bounded in-memory equivalent.
+ * Prefer the shared Postgres limit whenever it is configured and healthy. An
+ * unavailable limiter must not make a valid OpenAI connection appear offline:
+ * production and preview requests fall back to bounded process-local buckets.
  */
 export async function checkArchiveAiAccess(
   request: Request,
@@ -184,34 +287,13 @@ export async function checkArchiveAiAccess(
 ): Promise<ArchiveAiAccess> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return { allowed: false, reason: "unconfigured" };
-
-  const now = Date.now();
-  const clientKey = clientDigest(request, apiKey);
-  if (!clientKey) return { allowed: false, reason: "shared_limit_unavailable" };
-  const units = costClass === "pro" ? 3 : costClass === "advanced" ? 2 : 1;
-  if (process.env.VERCEL && process.env.VERCEL_ENV !== "production") {
-    return { allowed: false, reason: "shared_limit_unavailable" };
-  }
-  if (dbSource !== "neon") {
-    if (process.env.NODE_ENV === "production") {
-      return { allowed: false, reason: "shared_limit_unavailable" };
-    }
-    const allowed = checkMemoryBuckets(clientKey, now, units);
-    return {
-      allowed,
-      reason: allowed ? "allowed" : "rate_limited",
-      safetyIdentifier: allowed ? clientKey : undefined,
-    };
-  }
-
-  try {
-    const allowed = await checkSharedBuckets(clientKey, now, units);
-    return {
-      allowed,
-      reason: allowed ? "allowed" : "rate_limited",
-      safetyIdentifier: allowed ? clientKey : undefined,
-    };
-  } catch {
-    return { allowed: false, reason: "shared_limit_unavailable" };
-  }
+  const environment = process.env;
+  return checkArchiveAiAccessWithDependencies(request, costClass, {
+    apiKey,
+    databaseSource: environment.DATABASE_URL?.trim() ? "neon" : "pglite",
+    environment,
+    now: Date.now(),
+    checkShared: (clientKey, now, units) => checkSharedBuckets(clientKey, now, units, environment),
+    reportFallback: warnMemoryFallback,
+  });
 }

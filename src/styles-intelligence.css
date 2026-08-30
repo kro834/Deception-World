@@ -515,7 +515,9 @@ body.archive-intelligence-active {
 
 .archive-intelligence-page .archive-oracle-input-shell > button,
 .archive-intelligence-page .archive-roleplay-composer > button {
-  border-radius: 50%;
+  /* Keep the real pointer box square; the visible control stays circular in
+     ::before so even near-corner taps belong to the 56px action target. */
+  border-radius: 0;
 }
 
 /* Liquid model router ------------------------------------------------------- */
@@ -1636,8 +1638,8 @@ body.archive-intelligence-active {
 .archive-intelligence-page .archive-roleplay-composer > div {
   min-height: 64px;
   align-items: end;
-  column-gap: 12px;
-  padding: 7px 8px;
+  column-gap: 10px;
+  padding: 4px 6px;
   border: 1px solid var(--archive-line);
   border-radius: 24px;
   background: var(--archive-surface);
@@ -1649,11 +1651,11 @@ body.archive-intelligence-active {
 }
 
 .archive-intelligence-page .archive-oracle-input-shell {
-  grid-template-columns: 32px minmax(0, 1fr) 44px;
+  grid-template-columns: 32px minmax(0, 1fr) 56px;
 }
 
 .archive-intelligence-page .archive-roleplay-composer {
-  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-columns: minmax(0, 1fr) 56px;
   align-items: end;
   gap: 8px;
 }
@@ -1735,24 +1737,45 @@ body.archive-intelligence-active {
 
 .archive-intelligence-page .archive-oracle-input-shell > button,
 .archive-intelligence-page .archive-roleplay-composer > button {
+  position: relative;
+  isolation: isolate;
   display: inline-grid;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  min-height: 56px;
   align-self: end;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  /* The pointer box remains square; ::before draws the 44px visible circle. */
+  border-radius: 0;
   color: #050505;
-  background: #ffffff;
+  background: transparent;
   box-shadow: none;
   font-size: 0;
+  cursor: pointer;
   place-items: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button::before,
+.archive-intelligence-page .archive-roleplay-composer > button::before {
+  position: absolute;
+  z-index: -1;
+  inset: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+  content: "";
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease;
 }
 
 .archive-intelligence-page .archive-roleplay-composer > button {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .archive-intelligence-page .archive-composer-send > span,
@@ -1761,10 +1784,13 @@ body.archive-intelligence-active {
 }
 
 .archive-intelligence-page .archive-send-icon {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 20px;
   height: 20px;
   flex: none;
+  pointer-events: none;
 }
 
 .archive-intelligence-page .archive-oracle-input-shell > .archive-composer-plus,
@@ -2147,12 +2173,25 @@ body.archive-intelligence-active {
 .archive-intelligence-page .archive-oracle-input-shell > button:disabled,
 .archive-intelligence-page .archive-roleplay-composer > button:disabled {
   color: rgba(255, 255, 255, 0.3);
-  background: #343436;
+  background: transparent;
   opacity: 1;
+  cursor: default;
 }
 
+.archive-intelligence-page .archive-oracle-input-shell > button:disabled::before,
+.archive-intelligence-page .archive-roleplay-composer > button:disabled::before {
+  background: #343436;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button.is-stop,
 .archive-intelligence-page .archive-roleplay-composer > button.is-stop {
   color: #ffffff;
+  background: transparent;
+}
+
+.archive-intelligence-page .archive-oracle-input-shell > button.is-stop::before,
+.archive-intelligence-page .archive-roleplay-composer > button.is-stop::before {
   background: #3a2424;
 }
 
