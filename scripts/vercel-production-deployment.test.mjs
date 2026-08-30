@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolveVercelProductionDeployment } from "./vercel-production-deployment.mjs";
+import {
+  assertVercelProductionSnapshot,
+  resolveVercelProductionDeployment,
+} from "./vercel-production-deployment.mjs";
 
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const PROJECT_ID = "prj_archive";
@@ -166,5 +169,79 @@ test("Production lookup accepts the nested project shape but rejects conflicting
       fetchImpl,
     }),
     /conflicting project identities/,
+  );
+});
+
+test("Production snapshot fence accepts only the exact captured URL and SHA", async () => {
+  const fetchImpl = async (input) => {
+    const url = new URL(input);
+    if (url.pathname.startsWith("/v4/aliases/")) {
+      return Response.json({ deploymentId: "dpl_previous" });
+    }
+    return Response.json({
+      projectId: PROJECT_ID,
+      url: "immutable-previous.vercel.app",
+      meta: { githubCommitSha: SHA },
+    });
+  };
+  const options = {
+    baseUrl: "https://archive.example",
+    token: "secret",
+    teamId: "team_example",
+    projectId: PROJECT_ID,
+    fetchImpl,
+  };
+
+  const current = await assertVercelProductionSnapshot({
+    ...options,
+    expectedUrl: "https://immutable-previous.vercel.app",
+    expectedSha: SHA.toUpperCase(),
+  });
+  assert.deepEqual(current, {
+    id: "dpl_previous",
+    url: "https://immutable-previous.vercel.app",
+    sha: SHA,
+  });
+
+  await assert.rejects(
+    assertVercelProductionSnapshot({
+      ...options,
+      expectedUrl: "https://another-deployment.vercel.app",
+      expectedSha: SHA,
+    }),
+    /Production changed after the release snapshot was captured/u,
+  );
+  await assert.rejects(
+    assertVercelProductionSnapshot({
+      ...options,
+      expectedUrl: "https://immutable-previous.vercel.app",
+      expectedSha: "fedcba9876543210fedcba9876543210fedcba98",
+    }),
+    /Production changed after the release snapshot was captured/u,
+  );
+  await assert.rejects(
+    assertVercelProductionSnapshot({
+      ...options,
+      expectedUrl: "https://immutable-previous.vercel.app/not-an-origin",
+      expectedSha: SHA,
+    }),
+    /not an immutable deployment origin/u,
+  );
+});
+
+test("Production snapshot fence rejects an invalid captured SHA before lookup", async () => {
+  await assert.rejects(
+    assertVercelProductionSnapshot({
+      expectedUrl: "https://immutable-previous.vercel.app",
+      expectedSha: "not-a-sha",
+      baseUrl: "https://archive.example",
+      token: "secret",
+      teamId: "team_example",
+      projectId: PROJECT_ID,
+      fetchImpl: async () => {
+        throw new Error("fetch must not run for invalid snapshot input");
+      },
+    }),
+    /valid commit SHA/u,
   );
 });

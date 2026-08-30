@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -61,17 +61,6 @@ jobs:
           npm run typecheck
           npm run build
 
-      - name: Choose verification depth
-        id: depth
-        shell: bash
-        run: |
-          set -euo pipefail
-          rounds=1
-          if git diff --name-only HEAD^ HEAD | grep -Eq '(^migrations/|^src/lib/archive-|^src/routes/api/(archive|internal/archive)|^src/components/world/archive-|^scripts/(assert-production-ai-env|verify-archive-ai-deployment|vercel-production-deployment|archive-ai-monitor-verdict|archive-.*test)|^\.github/workflows/(deploy-main|archive-ai-monitor)|^vercel\.json$|^package(-lock)?\.json$)'; then
-            rounds=3
-          fi
-          echo "rounds=$rounds" >> "$GITHUB_OUTPUT"
-
       - name: Capture exact previous Production deployment
         id: previous
         shell: bash
@@ -93,6 +82,30 @@ jobs:
           });
           appendFileSync(output, `url=${deployment.url}\nsha=${deployment.sha}\n`);
           NODE
+
+      - name: Verify previous Production commit belongs to main history
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous_sha="${{ steps.previous.outputs.sha }}"
+          test -n "$previous_sha"
+          git cat-file -e "$previous_sha^{commit}"
+          if ! git merge-base --is-ancestor "$previous_sha" "$GITHUB_SHA"; then
+            echo "::error title=Unsafe Production ancestry::The captured Production SHA is not in the current main history. Refusing to create a release candidate."
+            exit 1
+          fi
+
+      - name: Choose verification depth across the complete release diff
+        id: depth
+        shell: bash
+        run: |
+          set -euo pipefail
+          rounds=1
+          previous_sha="${{ steps.previous.outputs.sha }}"
+          if git diff --name-only "$previous_sha" "$GITHUB_SHA" | grep -Eq '(^migrations/|^src/lib/archive-|^src/routes/api/(archive|internal/archive)|^src/components/world/archive-|^scripts/(assert-production-ai-env|verify-archive-ai-deployment|vercel-production-deployment|archive-ai-monitor-verdict|archive-.*test)|^\.github/workflows/(deploy-main|archive-ai-monitor)|^vercel\.json$|^package(-lock)?\.json$)'; then
+            rounds=3
+          fi
+          echo "rounds=$rounds" >> "$GITHUB_OUTPUT"
 
       - name: Create staged Production candidate
         id: candidate
@@ -130,6 +143,18 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
+          node --input-type=module - "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
+          import { assertVercelProductionSnapshot } from "./scripts/vercel-production-deployment.mjs";
+          const [expectedUrl, expectedSha] = process.argv.slice(2);
+          await assertVercelProductionSnapshot({
+            expectedUrl,
+            expectedSha,
+            baseUrl: process.env.PUBLIC_BASE_URL,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
+          NODE
           echo "attempted=true" >> "$GITHUB_OUTPUT"
           vercel promote "${{ steps.candidate.outputs.url }}" --yes --timeout "5 m" --token "$VERCEL_TOKEN"
 
@@ -248,8 +273,8 @@ jobs:
           node scripts/archive-ai-monitor-verdict.mjs "${args[@]}"
 
       - name: Fail release after rollback
-        if: always() && steps.promote.outputs.attempted == 'true' && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success' || steps.previous_probe.outcome == 'failure' || steps.rollback.outcome == 'failure')
+        if: always() && (steps.promote.outcome != 'success' || (steps.promote.outputs.attempted == 'true' && (steps.production_probe.outcome != 'success' || steps.previous_probe.outcome == 'failure' || steps.rollback.outcome == 'failure')))
         shell: bash
         run: |
-          echo "::error title=Archive AI release verification failed::Deterministic candidate failures are rolled back; a provider-wide transient incident keeps the current Production deployment and raises this alert."
+          echo "::error title=Archive AI release verification failed::A stale Production snapshot is never promoted. Deterministic post-promotion failures are rolled back; a provider-wide transient incident keeps the current Production deployment and raises this alert."
           exit 1

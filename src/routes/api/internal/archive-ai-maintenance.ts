@@ -27,6 +27,7 @@ export const Route = createFileRoute("/api/internal/archive-ai-maintenance")({
           const recovery = await recoverArchiveAiPendingRequests(request);
           return archiveAiJson(
             {
+              contractVersion: 1,
               cleaned,
               recovery,
               deploymentSha: archiveDeploymentSha(),

@@ -94,6 +94,14 @@ test("signed maintenance runs recovery and the monitor revisits it every five mi
     monitorWorkflow,
     /--phase control-plane[\s\S]*?--monitor-token "\$ARCHIVE_MONITOR_TOKEN"/u,
   );
+  assert.match(
+    monitorWorkflow,
+    /Recover pending answers through the stable maintenance v1 contract[\s\S]*?node scripts\/archive-ai-maintenance-v1\.mjs/u,
+  );
+  assert.match(
+    monitorWorkflow,
+    /steps\.identity\.outputs\.durable == 'true' && steps\.identity\.outputs\.current != 'true'/u,
+  );
 });
 
 test("control-plane verification fails closed on a partial recovery batch", async () => {

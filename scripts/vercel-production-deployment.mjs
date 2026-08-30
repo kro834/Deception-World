@@ -85,3 +85,31 @@ export async function resolveVercelProductionDeployment({
   }
   return { id: deploymentId, url, sha };
 }
+
+/**
+ * Fail closed unless the public Production alias still points at the exact
+ * immutable deployment snapshot captured before candidate verification.
+ */
+export async function assertVercelProductionSnapshot({
+  expectedUrl,
+  expectedSha,
+  ...resolveOptions
+}) {
+  const expectedUrlValue = String(expectedUrl).trim();
+  const normalizedExpectedUrl = new URL(expectedUrlValue).origin;
+  if (normalizedExpectedUrl !== expectedUrlValue) {
+    throw new Error("Expected Production snapshot URL was not an immutable deployment origin");
+  }
+  const normalizedExpectedSha = String(expectedSha).trim().toLowerCase();
+  if (!/^[0-9a-f]{40}$/u.test(normalizedExpectedSha)) {
+    throw new Error("Expected Production snapshot did not include a valid commit SHA");
+  }
+
+  const current = await resolveVercelProductionDeployment(resolveOptions);
+  if (current.url !== normalizedExpectedUrl || current.sha !== normalizedExpectedSha) {
+    throw new Error(
+      "Production changed after the release snapshot was captured; refusing promotion",
+    );
+  }
+  return current;
+}

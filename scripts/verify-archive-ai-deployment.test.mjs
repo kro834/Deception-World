@@ -293,11 +293,16 @@ test("main deployment records and restores the exact previous URL and SHA", () =
     deploymentWorkflow.indexOf("- name: Attest every selectable model route on candidate"),
     deploymentWorkflow.indexOf("- name: Promote attested candidate"),
   );
+  const promote = deploymentWorkflow.slice(
+    deploymentWorkflow.indexOf("- name: Promote attested candidate"),
+    deploymentWorkflow.indexOf("- name: Verify Production after promotion"),
+  );
   const rollback = deploymentWorkflow.slice(
     deploymentWorkflow.indexOf("- name: Roll back ambiguous or failed promotion"),
     deploymentWorkflow.indexOf("- name: Fail release after rollback"),
   );
   assert.match(deploymentWorkflow, /branches: \[main\]/u);
+  assert.match(deploymentWorkflow, /fetch-depth: 0/u);
   assert.doesNotMatch(jobPreamble, /\$\{\{ secrets\./u);
   assert.match(
     deploymentWorkflow,
@@ -306,9 +311,29 @@ test("main deployment records and restores the exact previous URL and SHA", () =
   assert.doesNotMatch(deploymentWorkflow, /npx --yes/u);
   assert.match(deploymentWorkflow, /npm run lint/u);
   assert.match(deploymentWorkflow, /id: previous/u);
+  assert.match(
+    deploymentWorkflow,
+    /Verify previous Production commit belongs to main history[\s\S]*?git cat-file -e "\$previous_sha\^\{commit\}"[\s\S]*?git merge-base --is-ancestor "\$previous_sha" "\$GITHUB_SHA"/u,
+  );
+  assert.match(
+    deploymentWorkflow,
+    /Choose verification depth across the complete release diff[\s\S]*?git diff --name-only "\$previous_sha" "\$GITHUB_SHA"/u,
+  );
+  assert.doesNotMatch(deploymentWorkflow, /git diff --name-only HEAD\^ HEAD/u);
   assert.match(deploymentWorkflow, /githubCommitSha/u);
   assert.match(deploymentWorkflow, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
   assert.match(deploymentWorkflow, /id: promote[\s\S]*?continue-on-error: true/u);
+  assert.match(promote, /assertVercelProductionSnapshot/u);
+  assert.match(promote, /expectedUrl,[\s\S]*?expectedSha,/u);
+  assert.match(promote, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
+  assert.ok(
+    promote.indexOf("assertVercelProductionSnapshot") < promote.indexOf('echo "attempted=true"'),
+    "the stale snapshot fence must run before promotion is marked as attempted",
+  );
+  assert.ok(
+    promote.indexOf('echo "attempted=true"') < promote.indexOf("vercel promote"),
+    "promotion must start only after the snapshot fence succeeds",
+  );
   assert.match(
     deploymentWorkflow,
     /id: previous_probe[\s\S]*?steps\.production_probe\.outputs\.verdict == 'alert_only'/u,
@@ -321,10 +346,17 @@ test("main deployment records and restores the exact previous URL and SHA", () =
   assert.match(rollback, /resolveVercelProductionDeployment/u);
   assert.match(rollback, /candidateMatches[\s\S]*?previousMatches/u);
   assert.match(rollback, /third deployment; refusing rollback/u);
-  assert.match(rollback, /if \[ "\$rollback_state" = "candidate" \][\s\S]*?rollback "\$previous_url"/u);
+  assert.match(
+    rollback,
+    /if \[ "\$rollback_state" = "candidate" \][\s\S]*?rollback "\$previous_url"/u,
+  );
   assert.match(rollback, /elif \[ "\$rollback_state" = "previous" \]/u);
   assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$previous_sha"/u);
   assert.match(deploymentWorkflow, /steps\.promote\.outputs\.attempted == 'true'/u);
+  assert.match(
+    deploymentWorkflow,
+    /Fail release after rollback[\s\S]*?if: always\(\) && \(steps\.promote\.outcome != 'success' \|\| \(steps\.promote\.outputs\.attempted == 'true'/u,
+  );
   assert.doesNotMatch(deploymentWorkflow, /rollback\s+--timeout/u);
   assert.doesNotMatch(deploymentWorkflow, /inspect[^\n]+--json/u);
 });
@@ -355,10 +387,11 @@ test("synthetic monitor requires explicit production identity and authenticated 
   assert.match(monitorWorkflow, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
   assert.match(monitorWorkflow, /git merge-base --is-ancestor "\$production_sha" "\$GITHUB_SHA"/u);
   assert.match(monitorWorkflow, /if \[ "\$production_sha" = "\$GITHUB_SHA" \]/u);
-  assert.match(
-    monitorWorkflow,
-    /steps\.identity\.outputs\.current == 'true'/u,
-  );
+  assert.match(monitorWorkflow, /echo "durable=true" >> "\$GITHUB_OUTPUT"/u);
+  assert.match(monitorWorkflow, /node scripts\/archive-ai-maintenance-v1\.mjs/u);
+  assert.match(monitorWorkflow, /id: ancestor_control[\s\S]*?--control-plane-only/u);
+  assert.match(monitorWorkflow, /id: ancestor_routes[\s\S]*?--phase all-routes/u);
+  assert.match(monitorWorkflow, /steps\.identity\.outputs\.current == 'true'/u);
   assert.match(
     monitorWorkflow,
     /--phase control-plane[\s\S]*?--expected-sha "\$\{\{ steps\.production\.outputs\.sha \}\}"/u,

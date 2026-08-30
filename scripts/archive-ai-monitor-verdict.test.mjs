@@ -181,13 +181,32 @@ test("monitor rollback is main-only, stale-safe, and excludes alert-only verdict
   const rollbackIf = workflow.match(/if: always\(\) && steps\.production[^\n]+/u)?.[0] ?? "";
   assert.match(rollbackIf, /outputs\.verdict == 'rollback'/u);
   assert.doesNotMatch(rollbackIf, /alert_only/u);
+  assert.doesNotMatch(rollbackIf, /steps\.maintenance/u);
   assert.match(workflow, /if \[ "\$production_sha" = "\$GITHUB_SHA" \]/u);
   assert.match(workflow, /echo "current=false" >> "\$GITHUB_OUTPUT"/u);
+  assert.match(workflow, /echo "durable=true" >> "\$GITHUB_OUTPUT"/u);
+  assert.match(
+    workflow,
+    /steps\.identity\.outcome == 'success' && steps\.identity\.outputs\.durable == 'true' && steps\.identity\.outputs\.current != 'true'/u,
+  );
+  assert.match(workflow, /node scripts\/archive-ai-maintenance-v1\.mjs/u);
+  assert.match(
+    workflow,
+    /Verify an older durable Production control plane without rollback authority[\s\S]*?--control-plane-only/u,
+  );
+  assert.match(
+    workflow,
+    /Verify older durable Production model routes without rollback authority[\s\S]*?--phase all-routes/u,
+  );
   assert.match(
     workflow,
     /steps\.identity\.outcome == 'success' && steps\.identity\.outputs\.current == 'true'/u,
   );
-  assert.match(workflow, /steps\.identity\.outputs\.current != 'true'/u);
+  const failureGate = workflow.match(/if: always\(\) && \(steps\.credentials[^\n]+/u)?.[0] ?? "";
+  assert.match(failureGate, /steps\.maintenance\.outcome == 'failure'/u);
+  assert.match(failureGate, /steps\.ancestor_control\.outcome == 'failure'/u);
+  assert.match(failureGate, /steps\.ancestor_routes\.outcome == 'failure'/u);
+  assert.doesNotMatch(failureGate, /current != 'true'/u);
   assert.match(workflow, /restored\.url === failedUrl \|\| restored\.sha === failedSha/u);
   assert.match(rollback, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
   assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$restored_sha"/u);
