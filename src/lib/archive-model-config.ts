@@ -115,10 +115,10 @@ const ARCHIVE_SEARCH_STANDARD_RUNTIME: Record<
   ArchiveSearchEffort,
   { maxOutputTokens: number; timeoutMs: number }
 > = {
-  low: { maxOutputTokens: 1_600, timeoutMs: 10_000 },
-  medium: { maxOutputTokens: 2_000, timeoutMs: 12_000 },
-  high: { maxOutputTokens: 2_400, timeoutMs: 14_000 },
-  xhigh: { maxOutputTokens: 3_200, timeoutMs: 16_000 },
+  low: { maxOutputTokens: 1_600, timeoutMs: 12_000 },
+  medium: { maxOutputTokens: 2_000, timeoutMs: 14_000 },
+  high: { maxOutputTokens: 2_400, timeoutMs: 16_000 },
+  xhigh: { maxOutputTokens: 3_200, timeoutMs: 18_000 },
 };
 
 export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
@@ -153,7 +153,7 @@ export function resolveArchivePersonaProRoute(profile: ArchivePersonaProProfile)
       model: "gpt-5.6-sol" as const,
       reasoning: { effort: "none", context: "current_turn" } as const,
       maxOutputTokens: 3600,
-      timeoutMs: 10_000,
+      timeoutMs: 12_000,
       costClass: "standard" as const,
     };
   }
@@ -184,7 +184,7 @@ export function resolveArchivePersonaRoute(
       model: "gpt-5.6-luna" as const,
       reasoning: { effort: "low", context: "current_turn" } as const,
       maxOutputTokens: 3600,
-      timeoutMs: 10_000,
+      timeoutMs: 12_000,
       costClass: "standard" as const,
     };
   }

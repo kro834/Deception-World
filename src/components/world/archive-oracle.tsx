@@ -843,7 +843,7 @@ export function ArchiveIntelligenceWorkspace({
         (record) =>
           record.client === "search-v1" &&
           record.url === "/api/archive-search" &&
-          Date.now() - record.startedAt < 32_000,
+          Date.now() - record.startedAt < 45_000,
       );
       // A user can start a foreground request while a cold WebKit database is
       // still opening. Never attach a second resume loop to that same request.

@@ -50,9 +50,9 @@ export type ArchiveApiTiming = {
 };
 
 const CLIENT_DELAYS_MS = [200, 350, 500, 700] as const;
-const REQUEST_TTL_MS = 32_000;
-const RESUME_TTL_MS = 32_000;
-const FETCH_ATTEMPT_TIMEOUT_MS = 8_000;
+const REQUEST_TTL_MS = 45_000;
+const RESUME_TTL_MS = 45_000;
+const FETCH_ATTEMPT_TIMEOUT_MS = 22_000;
 const MAX_LEDGER_POST_ATTEMPTS = 3;
 
 function abortError(signal: AbortSignal): unknown {
@@ -238,17 +238,18 @@ async function fetchWithAttemptTimeout(
   const controller = new AbortController();
   const abortFromParent = () => controller.abort(abortError(parentSignal));
   parentSignal.addEventListener("abort", abortFromParent, { once: true });
+  const method = typeof init.method === "string" ? init.method.toUpperCase() : "GET";
   let timer = 0;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       const error = new DOMException("Archive API attempt timed out", "TimeoutError");
-      controller.abort(error);
+      // Aborting a POST kills the in-flight Grok job on iPhone, so the
+      // composer never leaves 考えています. GET attempts can abort.
+      if (method !== "POST") controller.abort(error);
       reject(error);
     }, timeoutMs) as unknown as number;
   });
   try {
-    // iOS WebKit can ignore AbortController on fetch. Race the timer so 送信中
-    // cannot block the composer after the attempt budget.
     return await Promise.race([
       fetch(input, { ...init, signal: controller.signal }),
       timeout,

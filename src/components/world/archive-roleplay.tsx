@@ -408,7 +408,7 @@ export function ArchiveRoleplay({
         (record) =>
           record.client === "persona-v1" &&
           record.url === "/api/archive-intelligence" &&
-          Date.now() - record.startedAt < 32_000,
+          Date.now() - record.startedAt < 45_000,
       );
       if (disposed || abortRef.current || !pendingRecords.length) return;
       recoveryRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
