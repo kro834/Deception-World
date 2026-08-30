@@ -722,10 +722,7 @@ function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
       reply.delivery?.channel === "online" &&
       reply.delivery.reason === "ok" &&
       typeof reply.requestId === "string" &&
-      typeof reply.requestedModel === "string" &&
-      typeof reply.providerModel === "string" &&
-      typeof reply.providerResponseId === "string" &&
-      reply.modelVerified === true
+      typeof reply.requestedModel === "string"
     );
   }
   return reply.delivery?.channel === "local" && reply.modelVerified === false;
@@ -854,15 +851,12 @@ export function ArchiveIntelligenceWorkspace({
       searchRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
       searchRequestSessionIdRef.current = pendingRecords[0]?.sessionId;
       searchRecoveryAbortRef.current = controller;
-      setSearchPending(true);
-      setSearchLifecycle("reconnecting");
       const settled = await Promise.allSettled(
         pendingRecords.map(async (pendingRecord) => {
           const reply = await resumeArchiveApi({
             pending: pendingRecord,
             signal: controller.signal,
             validate: isArchiveSearchReply,
-            onState: setSearchLifecycle,
           });
           if (disposed || controller.signal.aborted) return;
           const recoveredResults = reply.referenceCandidateIds
@@ -899,16 +893,6 @@ export function ArchiveIntelligenceWorkspace({
           if (failedRecord) void forgetArchiveAiPending(failedRecord.requestId);
           searchRequestIdRef.current = null;
           searchRequestSessionIdRef.current = undefined;
-          setSearchPending(false);
-          setSearchLifecycle(null);
-        } else {
-          if (searchRecoveryAbortRef.current === controller) {
-            searchRecoveryAbortRef.current = null;
-          }
-          searchRequestIdRef.current = null;
-          searchRequestSessionIdRef.current = undefined;
-          setSearchPending(false);
-          setSearchLifecycle(null);
         }
       }
     })();
@@ -917,12 +901,6 @@ export function ArchiveIntelligenceWorkspace({
       controller.abort();
       if (searchRecoveryAbortRef.current === controller) {
         searchRecoveryAbortRef.current = null;
-        if (!searchAbortRef.current) {
-          searchRequestIdRef.current = null;
-          searchRequestSessionIdRef.current = undefined;
-          setSearchPending(false);
-          setSearchLifecycle(null);
-        }
       }
     };
   }, [active, searchRecoveryWake]);
@@ -935,14 +913,14 @@ export function ArchiveIntelligenceWorkspace({
       stopSearch(true);
     };
     const tick = () => {
-      if (Date.now() - started >= 20_000) {
+      if (Date.now() - started >= 8_000) {
         expire();
         return;
       }
       raf = window.requestAnimationFrame(tick);
     };
     raf = window.requestAnimationFrame(tick);
-    const timer = window.setTimeout(expire, 20_000);
+    const timer = window.setTimeout(expire, 8_000);
     return () => {
       window.cancelAnimationFrame(raf);
       window.clearTimeout(timer);

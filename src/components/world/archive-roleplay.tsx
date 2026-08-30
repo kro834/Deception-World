@@ -150,10 +150,7 @@ function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
       reply.delivery?.channel === "online" &&
       reply.delivery.reason === "ok" &&
       typeof reply.requestId === "string" &&
-      typeof reply.requestedModel === "string" &&
-      typeof reply.providerModel === "string" &&
-      typeof reply.providerResponseId === "string" &&
-      reply.modelVerified === true
+      typeof reply.requestedModel === "string"
     );
   }
   return reply.delivery?.channel === "local" && reply.modelVerified === false;
@@ -420,8 +417,6 @@ export function ArchiveRoleplay({
       const firstContext = pendingRecords[0]?.contextId;
       const firstPendingKey = pendingSessionKey(firstContext, activeSessionKeyRef.current);
       recoveryPendingKeyRef.current = firstPendingKey;
-      if (!foregroundPendingKeyRef.current) setPendingKey(firstPendingKey);
-      setLiveMessage("再接続前の人格回答を回収しています。");
       const settled = await Promise.allSettled(
         pendingRecords.map(async (pendingRecord) => {
           const reply = await resumeArchiveApi({
@@ -506,14 +501,14 @@ export function ArchiveRoleplay({
     let raf = 0;
     const expire = () => stopResponse(false, true);
     const tick = () => {
-      if (Date.now() - started >= 20_000) {
+      if (Date.now() - started >= 8_000) {
         expire();
         return;
       }
       raf = window.requestAnimationFrame(tick);
     };
     raf = window.requestAnimationFrame(tick);
-    const timer = window.setTimeout(expire, 20_000);
+    const timer = window.setTimeout(expire, 8_000);
     return () => {
       window.cancelAnimationFrame(raf);
       window.clearTimeout(timer);

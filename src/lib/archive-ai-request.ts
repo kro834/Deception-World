@@ -21,7 +21,9 @@ export function isArchiveProviderResponseId(value: unknown): value is string {
     typeof value === "string" &&
     value.length >= 8 &&
     value.length <= 128 &&
-    (ARCHIVE_OPENAI_RESPONSE_ID_PATTERN.test(value) || ARCHIVE_UUID_ID_PATTERN.test(value))
+    (ARCHIVE_OPENAI_RESPONSE_ID_PATTERN.test(value) ||
+      ARCHIVE_UUID_ID_PATTERN.test(value) ||
+      /^[A-Za-z0-9._:-]{8,}$/u.test(value))
   );
 }
 
