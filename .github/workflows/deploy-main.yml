@@ -1,0 +1,255 @@
+name: Deploy verified main to Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deception-world-production-main
+  cancel-in-progress: false
+
+jobs:
+  verify-stage-promote:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+      VERCEL_CLI_VERSION: 59.10.0
+    steps:
+      - name: Check out exact main commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install pinned Vercel CLI without deployment secrets
+        run: npm install --global "vercel@$VERCEL_CLI_VERSION" --ignore-scripts
+
+      - name: Validate deployment credentials
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          ARCHIVE_MONITOR_TOKEN: ${{ secrets.ARCHIVE_MONITOR_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test -n "$VERCEL_ORG_ID"
+          test -n "$VERCEL_PROJECT_ID"
+          test -n "$PUBLIC_BASE_URL"
+          test "${#ARCHIVE_MONITOR_TOKEN}" -ge 32
+          node -e 'const value = new URL(process.env.PUBLIC_BASE_URL); if (value.protocol !== "https:") process.exit(1)'
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Repository gates
+        run: |
+          npm run lint
+          npm test
+          npm run typecheck
+          npm run build
+
+      - name: Choose verification depth
+        id: depth
+        shell: bash
+        run: |
+          set -euo pipefail
+          rounds=1
+          if git diff --name-only HEAD^ HEAD | grep -Eq '(^migrations/|^src/lib/archive-|^src/routes/api/(archive|internal/archive)|^src/components/world/archive-|^scripts/(assert-production-ai-env|verify-archive-ai-deployment|vercel-production-deployment|archive-ai-monitor-verdict|archive-.*test)|^\.github/workflows/(deploy-main|archive-ai-monitor)|^vercel\.json$|^package(-lock)?\.json$)'; then
+            rounds=3
+          fi
+          echo "rounds=$rounds" >> "$GITHUB_OUTPUT"
+
+      - name: Capture exact previous Production deployment
+        id: previous
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          node --input-type=module - "$GITHUB_OUTPUT" <<'NODE'
+          import { appendFileSync } from "node:fs";
+          import { resolveVercelProductionDeployment } from "./scripts/vercel-production-deployment.mjs";
+          const [output] = process.argv.slice(2);
+          const deployment = await resolveVercelProductionDeployment({
+            baseUrl: process.env.PUBLIC_BASE_URL,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
+          appendFileSync(output, `url=${deployment.url}\nsha=${deployment.sha}\n`);
+          NODE
+
+      - name: Create staged Production candidate
+        id: candidate
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          candidate_url="$(vercel deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN" --meta "githubCommitSha=$GITHUB_SHA" --build-env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA" --env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA")"
+          node -e 'const value = new URL(process.argv[1]); if (value.protocol !== "https:") process.exit(1)' "$candidate_url"
+          echo "url=$candidate_url" >> "$GITHUB_OUTPUT"
+
+      - name: Attest every selectable model route on candidate
+        shell: bash
+        env:
+          ARCHIVE_MONITOR_TOKEN: ${{ secrets.ARCHIVE_MONITOR_TOKEN }}
+          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
+        run: |
+          set -euo pipefail
+          args=(--base-url "${{ steps.candidate.outputs.url }}" --expected-sha "$GITHUB_SHA" --rounds "${{ steps.depth.outputs.rounds }}" --monitor-token "$ARCHIVE_MONITOR_TOKEN")
+          if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
+            args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
+          fi
+          npm run verify:archive-ai -- "${args[@]}"
+
+      - name: Promote attested candidate
+        id: promote
+        continue-on-error: true
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          echo "attempted=true" >> "$GITHUB_OUTPUT"
+          vercel promote "${{ steps.candidate.outputs.url }}" --yes --timeout "5 m" --token "$VERCEL_TOKEN"
+
+      - name: Verify Production after promotion
+        id: production_probe
+        if: steps.promote.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        env:
+          ARCHIVE_MONITOR_TOKEN: ${{ secrets.ARCHIVE_MONITOR_TOKEN }}
+          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
+        run: |
+          set -euo pipefail
+          args=(--phase all-routes --base-url "$PUBLIC_BASE_URL" --expected-sha "$GITHUB_SHA" --monitor-token "$ARCHIVE_MONITOR_TOKEN" --github-output "$GITHUB_OUTPUT")
+          if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
+            args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
+          fi
+          node scripts/archive-ai-monitor-verdict.mjs "${args[@]}"
+
+      - name: Compare an ambiguous provider incident with the previous deployment
+        id: previous_probe
+        if: steps.production_probe.outputs.verdict == 'alert_only'
+        continue-on-error: true
+        shell: bash
+        env:
+          ARCHIVE_MONITOR_TOKEN: ${{ secrets.ARCHIVE_MONITOR_TOKEN }}
+          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
+        run: |
+          set -euo pipefail
+          args=(--phase all-routes --base-url "${{ steps.previous.outputs.url }}" --expected-sha "${{ steps.previous.outputs.sha }}" --monitor-token "$ARCHIVE_MONITOR_TOKEN" --github-output "$GITHUB_OUTPUT")
+          if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
+            args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
+          fi
+          node scripts/archive-ai-monitor-verdict.mjs "${args[@]}"
+
+      - name: Roll back ambiguous or failed promotion to exact previous deployment
+        id: rollback
+        if: always() && steps.promote.outputs.attempted == 'true' && (steps.promote.outcome != 'success' || steps.production_probe.outputs.verdict == 'rollback' || steps.production_probe.outputs.verdict == '' || (steps.production_probe.outputs.verdict == 'alert_only' && steps.previous_probe.outputs.verdict == 'pass'))
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          ARCHIVE_MONITOR_TOKEN: ${{ secrets.ARCHIVE_MONITOR_TOKEN }}
+          VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
+        run: |
+          set -euo pipefail
+          previous_url="${{ steps.previous.outputs.url }}"
+          previous_sha="${{ steps.previous.outputs.sha }}"
+          candidate_url="${{ steps.candidate.outputs.url }}"
+          candidate_sha="$GITHUB_SHA"
+          test -n "$previous_url"
+          test -n "$previous_sha"
+          test -n "$candidate_url"
+
+          rollback_state="$(node --input-type=module - "$candidate_url" "$candidate_sha" "$previous_url" "$previous_sha" <<'NODE'
+          import { resolveVercelProductionDeployment } from "./scripts/vercel-production-deployment.mjs";
+          const [candidateUrl, candidateSha, previousUrl, previousSha] = process.argv.slice(2);
+          const current = await resolveVercelProductionDeployment({
+            baseUrl: process.env.PUBLIC_BASE_URL,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
+          const candidateMatches =
+            current.url === new URL(candidateUrl).origin && current.sha === candidateSha.toLowerCase();
+          const previousMatches =
+            current.url === new URL(previousUrl).origin && current.sha === previousSha.toLowerCase();
+          if (candidateMatches) process.stdout.write("candidate");
+          else if (previousMatches) process.stdout.write("previous");
+          else throw new Error("Production points to a third deployment; refusing rollback");
+          NODE
+          )"
+
+          if [ "$rollback_state" = "candidate" ]; then
+            vercel rollback "$previous_url" --timeout "5 m" --token "$VERCEL_TOKEN"
+            vercel rollback status --timeout "5 m" --token "$VERCEL_TOKEN"
+          elif [ "$rollback_state" = "previous" ]; then
+            echo "Production is already on the exact previous deployment; no rollback mutation needed"
+          else
+            echo "Unexpected rollback fence state" >&2
+            exit 1
+          fi
+
+          restored=false
+          for attempt in $(seq 1 12); do
+            if node --input-type=module - "$previous_url" "$previous_sha" <<'NODE'
+          import { resolveVercelProductionDeployment } from "./scripts/vercel-production-deployment.mjs";
+          const [expectedUrl, expectedSha] = process.argv.slice(2);
+          const deployment = await resolveVercelProductionDeployment({
+            baseUrl: process.env.PUBLIC_BASE_URL,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
+          if (deployment.url !== new URL(expectedUrl).origin || deployment.sha !== expectedSha.toLowerCase()) {
+            process.exit(1);
+          }
+          NODE
+            then
+              echo "Production restored to $previous_url at $previous_sha"
+              restored=true
+              break
+            fi
+            sleep 5
+          done
+          if [ "$restored" != "true" ]; then
+            echo "Production did not return to the exact previous deployment" >&2
+            exit 1
+          fi
+
+          args=(--phase all-routes --base-url "$PUBLIC_BASE_URL" --expected-sha "$previous_sha" --monitor-token "$ARCHIVE_MONITOR_TOKEN")
+          if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
+            args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
+          fi
+          node scripts/archive-ai-monitor-verdict.mjs "${args[@]}"
+
+      - name: Fail release after rollback
+        if: always() && steps.promote.outputs.attempted == 'true' && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success' || steps.previous_probe.outcome == 'failure' || steps.rollback.outcome == 'failure')
+        shell: bash
+        run: |
+          echo "::error title=Archive AI release verification failed::Deterministic candidate failures are rolled back; a provider-wide transient incident keeps the current Production deployment and raises this alert."
+          exit 1
