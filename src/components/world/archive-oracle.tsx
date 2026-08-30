@@ -655,7 +655,7 @@ function searchArchiveOracle(query: string, limit = 3): ArchiveOracleResult[] {
   if (normalizedQuery.length < 2 || limit < 1) return [];
 
   return ARCHIVE_ORACLE_ENTRIES.map((entry) => {
-    const fieldScores = [entry.label, entry.kicker, ...entry.aliases]
+    const fieldScores = [entry.label, entry.kicker, entry.description, ...entry.aliases]
       .map((candidate) => matchScore(normalizedQuery, candidate))
       .sort((left, right) => right - left);
     const score =
@@ -914,23 +914,34 @@ export function ArchiveIntelligenceWorkspace({
     if (!searchPending) return;
     const started = Date.now();
     const tick = () => {
-      if (Date.now() - started < 5_000) return;
+      if (Date.now() - started < 1_500) return;
       setSearchPending(false);
       setSearchLifecycle(null);
       setSearchMessages((current) => {
         if (current.some((message) => message.role === "assistant")) return current;
         const lastUser = [...current].reverse().find((message) => message.role === "user");
+        const query = lastUser?.text ?? "";
+        const results = searchArchiveOracle(query, 3);
         const local = createLocalArchiveSearchReply({
-          query: lastUser?.text ?? "",
-          candidates: [],
-          notice: "応答に時間がかかったため、先に表示しています。続きが届き次第、追加します。",
+          query,
+          candidates: results.map(({ entry }) => ({
+            id: entry.id,
+            label: entry.label,
+            kicker: entry.kicker,
+            description: entry.description,
+            referenceExcerpt: entry.description,
+          })),
         });
+        const referenced = local.referenceCandidateIds
+          .map((id) => results.find((result) => result.entry.id === id))
+          .filter((result): result is ArchiveOracleResult => Boolean(result));
         return [
           ...current,
           {
             id: searchMessageId("search-local-wait"),
             role: "assistant",
             text: local.reply,
+            results: referenced,
             suggestions: local.suggestions,
             source: "local",
             modelLabel: "LOCAL",

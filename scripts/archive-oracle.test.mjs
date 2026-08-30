@@ -48,6 +48,8 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(oracle, /search-local-wait/);
   assert.match(oracle, /createLocalArchiveSearchReply/);
+  assert.match(oracle, /searchArchiveOracle\(query, 3\)/);
+  assert.doesNotMatch(oracle, /応答に時間がかかったため/);
   assert.match(
     oracle,
     /<GuardedLink[\s\S]*?to=\{entry\.to\}[\s\S]*?hash=\{entry\.hash\}[\s\S]*?assets=\{entry\.assets\}/,
@@ -177,6 +179,20 @@ test("Search answers lightweight general conversation locally without inventing 
   });
   assert.deepEqual(genericAbility.referenceCandidateIds, []);
   assert.doesNotMatch(genericAbility.reply, /Deception Worldの公開記録について/);
+
+  const riders = createLocalArchiveSearchReply({
+    query: "ライダー一覧を見せて",
+    candidates: [
+      {
+        id: "world-riders",
+        label: "八人のライダー一覧",
+        kicker: "WORLD / RIDERS",
+        description: "八人のライダーを見比べ、それぞれの個別資料へ進める一覧です。",
+      },
+    ],
+  });
+  assert.deepEqual(riders.referenceCandidateIds, ["world-riders"]);
+  assert.match(riders.reply, /八人のライダー一覧/);
 
   const crisis = createLocalArchiveSearchReply({
     query: "今すぐ自分を傷つけそう",

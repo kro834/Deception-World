@@ -48,7 +48,7 @@ const LOCAL_ASSISTANT_WELLBEING_PATTERN =
   /^(?:元気(?:ですか)?|調子(?:は|どう)(?:ですか)?)[\s、。!！?？〜～]*$/u;
 const LOCAL_DISTRESS_PATTERN = /(?:疲れた|しんどい|つらい|辛い|苦しい|落ち込|不安|眠れない)/u;
 const LOCAL_ARCHIVE_INTENT_PATTERN =
-  /(?:Deception World|デセプションワールド|このサイト|サイト内|公開記録|記録ページ|この作品|仮面ライダーサーガ|仮面ライダーレルム|ローア|ヴァンダール|レディック|アルゲノム|オーバーゼッツ|サイファー|シエル|月城悠真|東風谷慶弥|暁慶弥|怪作|ベル・アレイン|無神千桐|ジェームズ・スミス|マキャベル|拒絶の悪夢|レクソナンス|ドリームチャプター|六詠)/iu;
+  /(?:Deception World|デセプションワールド|このサイト|サイト内|公開記録|記録ページ|この作品|この世界|世界観|ストーリー|あらすじ|登場人物|ライダー|変身|フォーム|エピソード|仮面ライダーサーガ|仮面ライダーレルム|ローア|ヴァンダール|レディック|アルゲノム|オーバーゼッツ|サイファー|シエル|月城悠真|東風谷慶弥|暁慶弥|怪作|ベル・アレイン|無神千桐|ジェームズ・スミス|マキャベル|拒絶の悪夢|レクソナンス|ドリームチャプター|六詠)/iu;
 
 function createLocalGeneralSearchReply(
   query: string,
@@ -119,8 +119,8 @@ function createLocalGeneralSearchReply(
   }
   return {
     reply:
-      "もちろん、公開記録に限らず普通の質問や相談にも答えられます。ただ、現在はAI回線を利用できないため、この内容へ正確な一般回答を生成できませんでした。少し時間を置いて同じ質問をもう一度送るか、考えたい背景や目的を一つ添えてください。接続が戻り次第、会話の流れを踏まえて答えます。",
-    suggestions: ["もう一度聞く", "目的を補足する", "サイトの記録を探す"],
+      "もちろん、公開記録に限らず普通の質問や相談にも答えられます。いまの内容は作品記録と直接は結びつかないため、一般の受け答えとして扱います。Deception Worldについてなら、世界観・ライダー・事件の公開ページから要点と参照先を出します。知りたい人物名、能力、場面、あるいは相談の目的を一つ足してください。",
+    suggestions: ["このサイトについて教えて", "ライダー一覧を見る", "相談の目的を書く"],
     referenceCandidateIds: [],
     source: "local",
     notice,
@@ -149,12 +149,21 @@ export function createLocalArchiveSearchReply({
   const topReference = top?.referenceExcerpt ?? top?.description;
   const secondReference = second?.referenceExcerpt ?? second?.description;
   const archiveIntent = LOCAL_ARCHIVE_INTENT_PATTERN.test(trimmed);
-  if (!archiveIntent) return createLocalGeneralSearchReply(query, notice, deliveryReason);
+  const strongLabelHit = Boolean(
+    top &&
+      [top.label, top.kicker, top.id].some((field) => {
+        const term = normalizeArchiveClassifierText(field);
+        return term.length >= 2 && (trimmed.includes(term) || term.includes(trimmed));
+      }),
+  );
+  if (!archiveIntent && !strongLabelHit) {
+    return createLocalGeneralSearchReply(query, notice, deliveryReason);
+  }
   if (!top) {
     return {
       reply:
-        "Deception Worldの公開記録についての質問として受け取りましたが、今の手掛かりだけでは参照先を一つに絞れませんでした。人物名、作品名、能力、覚えている台詞や場面のうち、分かるものを一つだけ足してください。確認できる記録だけを使って、要点と参照ページをまとめます。",
-      suggestions: ["人物名を補足する", "能力名を補足する", "覚えている場面を書く"],
+        "Deception Worldの公開記録を横断して確認しました。今の手掛かりだけでは一件に絞れませんが、世界観（脚本制・採録制・六詠）、八人のライダー、判明済みエピソードを起点に調べられます。人物名、能力名、覚えている場面のうち一つを足せば、該当ページの要点と参照先をまとめます。",
+      suggestions: ["ストーリーと世界観", "ライダー一覧", "判明済みエピソード"],
       referenceCandidateIds: [],
       source: "local",
       notice,
