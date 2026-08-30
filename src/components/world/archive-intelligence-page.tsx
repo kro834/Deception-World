@@ -43,6 +43,10 @@ export function ArchiveIntelligencePage() {
     let lockedHeight: number | null = null;
     let lockedOffset = 0;
     let frozen = false;
+    let focusStartedAt = 0;
+    let settleHeight = 0;
+    let settleOffset = 0;
+    let settleHits = 0;
     const recoveryTimers = new Set<number>();
     const editableSelector =
       "input:not([disabled]), textarea:not([disabled]), [contenteditable='true']";
@@ -55,12 +59,6 @@ export function ArchiveIntelligencePage() {
         }, delay);
         recoveryTimers.add(timer);
       }
-    };
-
-    const resetDocumentScroll = () => {
-      if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
-      if (document.documentElement.scrollTop) document.documentElement.scrollTop = 0;
-      if (document.body.scrollTop) document.body.scrollTop = 0;
     };
 
     const setChromeInert = (inert: boolean) => {
@@ -96,15 +94,16 @@ export function ArchiveIntelligencePage() {
         frozen = false;
         lockedHeight = null;
         lockedOffset = 0;
+        settleHits = 0;
         applyFrame(null, 0, "closed");
         return;
       }
 
-      // After the keyboard has settled, ignore visualViewport rubber-banding.
-      // Following offsetTop here is what made the composer jitter.
-      if (frozen) return;
+      if (frozen && lockedHeight != null) {
+        applyFrame(lockedHeight, lockedOffset, "open");
+        return;
+      }
 
-      resetDocumentScroll();
       const layoutHeight = window.innerHeight;
       const visualHeight = viewport?.height ?? layoutHeight;
       const offsetTop = viewport?.offsetTop ?? 0;
@@ -116,12 +115,29 @@ export function ArchiveIntelligencePage() {
         offsetTop,
       });
 
-      if (frameNow.state === "open") {
-        frozen = true;
-        lockedHeight = frameNow.heightPx;
-        lockedOffset = frameNow.offsetPx;
-        applyFrame(lockedHeight, lockedOffset, "open");
-        return;
+      const elapsed = focusStartedAt ? performance.now() - focusStartedAt : 0;
+      if (
+        frameNow.state === "open" &&
+        elapsed >= 360 &&
+        frameNow.heightPx != null
+      ) {
+        if (
+          Math.abs(frameNow.heightPx - settleHeight) <= 1 &&
+          Math.abs(frameNow.offsetPx - settleOffset) <= 1
+        ) {
+          settleHits += 1;
+        } else {
+          settleHeight = frameNow.heightPx;
+          settleOffset = frameNow.offsetPx;
+          settleHits = 1;
+        }
+        if (settleHits >= 3) {
+          frozen = true;
+          lockedHeight = settleHeight;
+          lockedOffset = settleOffset;
+          applyFrame(lockedHeight, lockedOffset, "open");
+          return;
+        }
       }
 
       applyFrame(frameNow.heightPx, frameNow.offsetPx, frameNow.state);
@@ -137,7 +153,6 @@ export function ArchiveIntelligencePage() {
 
     const syncLayout = () => syncViewport("layout");
     const syncVisualScroll = () => {
-      resetDocumentScroll();
       syncViewport("scroll");
     };
 
@@ -145,16 +160,19 @@ export function ArchiveIntelligencePage() {
       const target = event.target;
       if (!(target instanceof Element) || !target.matches(editableSelector)) return;
       if (window.innerWidth > ARCHIVE_IOS_KEYBOARD_COMPACT_MAX) return;
+      focusStartedAt = performance.now();
       page.dataset.composerFocus = "true";
       applyViewport("layout");
     };
 
     const handleFocusIn = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
+      focusStartedAt = performance.now();
+      frozen = false;
       page.dataset.composerFocus = "true";
       window.scrollTo(0, 0);
       applyViewport("layout");
-      scheduleSync([180, 360, 640]);
+      scheduleSync([180, 360, 520, 720]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
@@ -162,6 +180,8 @@ export function ArchiveIntelligencePage() {
       frozen = false;
       lockedHeight = null;
       lockedOffset = 0;
+      settleHits = 0;
+      focusStartedAt = 0;
       applyFrame(null, 0, "closed");
       window.requestAnimationFrame(() => {
         if (!(document.activeElement?.matches(editableSelector) ?? false)) {

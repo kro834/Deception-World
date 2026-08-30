@@ -53,6 +53,8 @@ export type ArchiveIosKeyboardFrame = {
   state: "closed" | "opening" | "open";
 };
 
+export const ARCHIVE_IOS_KEYBOARD_OPEN_PX = 200;
+
 /**
  * Glue the AI shell to the visual viewport. iOS pans the layout when a
  * textarea focuses; following offsetTop with position:fixed on the composer
@@ -75,6 +77,8 @@ export function resolveArchiveIosKeyboardFrame(input: {
   return {
     heightPx: visualHeight,
     offsetPx,
-    state: occluded > 80 || offsetPx > ARCHIVE_IOS_KEYBOARD_PAN_PX ? "open" : "opening",
+    state: occluded >= ARCHIVE_IOS_KEYBOARD_OPEN_PX || offsetPx >= ARCHIVE_IOS_KEYBOARD_OPEN_PX
+      ? "open"
+      : "opening",
   };
 }

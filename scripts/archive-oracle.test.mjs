@@ -438,6 +438,7 @@ test("focused composers stay position-stable during visual viewport scrolling", 
   assert.match(intelligencePage, /viewport\?\.addEventListener\("scroll"/);
   assert.match(intelligencePage, /window\.scrollTo\(0, 0\)/);
   assert.match(intelligencePage, /lockedHeight/);
+  assert.match(intelligencePage, /settleHits/);
   assert.match(intelligencePage, /frozen/);
   assert.match(intelligencePage, /resolveArchiveIosKeyboardFrame/);
   assert.match(intelligencePage, /syncVisualScroll/);

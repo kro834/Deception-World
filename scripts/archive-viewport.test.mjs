@@ -32,6 +32,14 @@ test("the AI shell fills the visual viewport instead of lifting a fixed composer
   assert.equal(open.heightPx, 508);
   assert.equal(open.offsetPx, 336);
   assert.equal(open.state, "open");
+  const opening = resolveArchiveIosKeyboardFrame({
+    focused: true,
+    compact: true,
+    layoutHeight: 844,
+    visualHeight: 780,
+    offsetTop: 48,
+  });
+  assert.equal(opening.state, "opening");
   const closed = resolveArchiveIosKeyboardFrame({
     focused: false,
     compact: true,
