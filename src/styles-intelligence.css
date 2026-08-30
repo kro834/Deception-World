@@ -3221,10 +3221,21 @@ body.archive-intelligence-active {
     [data-keyboard="open"],
     [data-keyboard="closing"]
   )
+  .archive-roleplay-console {
+  grid-template-rows: minmax(0, 1fr);
+  padding-bottom: calc(76px + var(--archive-keyboard-inset, 0px));
+}
+
+.archive-intelligence-page:is(
+    [data-keyboard="opening"],
+    [data-keyboard="open"],
+    [data-keyboard="closing"]
+  )
   .archive-search-conversation {
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr);
   gap: 5px;
-  padding: 5px max(7px, env(safe-area-inset-right, 0px)) 0 max(7px, env(safe-area-inset-left, 0px));
+  padding: 5px max(7px, env(safe-area-inset-right, 0px))
+    calc(76px + var(--archive-keyboard-inset, 0px)) max(7px, env(safe-area-inset-left, 0px));
 }
 
 .archive-intelligence-page:is(
@@ -3265,15 +3276,6 @@ body.archive-intelligence-active {
     [data-keyboard="open"],
     [data-keyboard="closing"]
   )
-  .archive-roleplay-console {
-  grid-template-rows: minmax(0, 1fr) auto;
-}
-
-.archive-intelligence-page:is(
-    [data-keyboard="opening"],
-    [data-keyboard="open"],
-    [data-keyboard="closing"]
-  )
   :is(.archive-search-log, .archive-roleplay-log) {
   min-height: 0;
   padding-block: 7px;
@@ -3285,11 +3287,14 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   :is(.archive-roleplay-composer, .archive-oracle-form) {
-  position: sticky;
-  bottom: 0;
-  z-index: 8;
-  margin-top: auto;
-  padding-bottom: 8px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--archive-keyboard-inset, 0px);
+  z-index: 30;
+  margin: 0;
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px
+    max(12px, env(safe-area-inset-left, 0px));
   background: #000000;
 }
 

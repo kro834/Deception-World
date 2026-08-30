@@ -36,7 +36,7 @@ export function ArchiveIntelligencePage() {
 
     const viewport = window.visualViewport;
     let frame = 0;
-    let stableHeight = viewport?.height ?? window.innerHeight;
+    let stableHeight = window.innerHeight;
     let focusStartedAt = 0;
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
@@ -61,30 +61,36 @@ export function ArchiveIntelligencePage() {
 
     const applyViewport = () => {
       resetDocumentScroll();
-      const layoutWidth = window.innerWidth;
+      const compact = window.innerWidth <= COMPACT_BREAKPOINT;
+      const layoutHeight = window.innerHeight;
+      const visualHeight = viewport?.height ?? layoutHeight;
       const offsetTop = viewport?.offsetTop ?? 0;
-      const visualHeight = viewport?.height ?? window.innerHeight;
       const focused = document.activeElement?.matches(editableSelector) ?? false;
-      if (!focused && visualHeight > stableHeight - 72) stableHeight = visualHeight;
-      const compact = layoutWidth <= COMPACT_BREAKPOINT;
-      const measuredInset = Math.max(0, stableHeight - visualHeight - offsetTop);
-      const keyboardOpen = focused && measuredInset > Math.max(120, stableHeight * 0.18);
-      const keyboardClosing =
-        !focused && page.dataset.keyboard === "closing" && measuredInset > 120;
-      const sinceFocus = performance.now() - focusStartedAt;
-      const keyboardOpening = focused && compact && sinceFocus < 900;
-      const awaitingMeasuredKeyboard = keyboardOpening && !keyboardOpen;
+      if (!focused && layoutHeight > stableHeight - 72) stableHeight = layoutHeight;
+
+      const measuredInset = Math.max(0, Math.round(layoutHeight - visualHeight - offsetTop));
+      const layoutAlreadyShrunk = stableHeight - layoutHeight > 100;
+      const keyboardOpen = focused && compact && measuredInset > Math.max(100, stableHeight * 0.15);
+      const sinceFocus = focusStartedAt ? performance.now() - focusStartedAt : Number.POSITIVE_INFINITY;
+      const armed = page.dataset.keyboard === "opening" || page.dataset.keyboard === "open";
+      const keyboardOpening = compact && (focused || armed) && sinceFocus < 1200 && !keyboardOpen;
+      const keyboardClosing = !focused && page.dataset.keyboard === "closing" && measuredInset > 80;
       const fallbackInset = Math.round(
-        Math.min(430, Math.max(KEYBOARD_FALLBACK_PX, stableHeight * 0.36)),
+        Math.min(440, Math.max(KEYBOARD_FALLBACK_PX, stableHeight * 0.4)),
       );
-      const height = awaitingMeasuredKeyboard
-        ? Math.max(280, Math.round(stableHeight - fallbackInset))
-        : Math.round(visualHeight);
-      page.style.setProperty("--archive-viewport-height", `${height}px`);
-      page.style.setProperty(
-        "--archive-keyboard-inset",
-        `${awaitingMeasuredKeyboard ? fallbackInset : Math.round(measuredInset)}px`,
-      );
+      // Keep the page at the layout height. Shrinking the whole shell to the
+      // visual viewport is what put the composer at the top of the iPhone
+      // screen. Only the composer is docked to the keyboard.
+      const inset = layoutAlreadyShrunk
+        ? 0
+        : keyboardOpen || keyboardClosing
+          ? measuredInset
+          : keyboardOpening
+            ? Math.max(measuredInset, fallbackInset)
+            : 0;
+
+      page.style.removeProperty("--archive-viewport-height");
+      page.style.setProperty("--archive-keyboard-inset", `${inset}px`);
       page.dataset.keyboard = keyboardOpen
         ? "open"
         : keyboardOpening
@@ -102,13 +108,21 @@ export function ArchiveIntelligencePage() {
       });
     };
 
+    const armKeyboard = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.matches(editableSelector)) return;
+      if (window.innerWidth > COMPACT_BREAKPOINT) return;
+      focusStartedAt = performance.now();
+      page.dataset.composerFocus = "true";
+      page.dataset.keyboard = "opening";
+      applyViewport();
+    };
+
     const handleFocusIn = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = performance.now();
       page.dataset.composerFocus = "true";
-      if ((viewport?.width ?? window.innerWidth) <= COMPACT_BREAKPOINT) {
-        page.dataset.keyboard = "opening";
-      }
+      if (window.innerWidth <= COMPACT_BREAKPOINT) page.dataset.keyboard = "opening";
       window.scrollTo(0, 0);
       applyViewport();
       scheduleSync([0, 50, 120, 280, 520, 900]);
@@ -127,7 +141,7 @@ export function ArchiveIntelligencePage() {
     };
 
     const handleOrientationChange = () => {
-      stableHeight = viewport?.height ?? window.innerHeight;
+      stableHeight = window.innerHeight;
       scheduleSync([0, 160, 420]);
     };
 
@@ -135,6 +149,7 @@ export function ArchiveIntelligencePage() {
     window.addEventListener("resize", syncViewport, { passive: true });
     window.addEventListener("pageshow", syncViewport, { passive: true });
     window.addEventListener("orientationchange", handleOrientationChange, { passive: true });
+    document.addEventListener("pointerdown", armKeyboard, { capture: true, passive: true });
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
     viewport?.addEventListener("resize", syncViewport, { passive: true });
@@ -145,6 +160,7 @@ export function ArchiveIntelligencePage() {
       window.removeEventListener("resize", syncViewport);
       window.removeEventListener("pageshow", syncViewport);
       window.removeEventListener("orientationchange", handleOrientationChange);
+      document.removeEventListener("pointerdown", armKeyboard, true);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
       viewport?.removeEventListener("resize", syncViewport);
