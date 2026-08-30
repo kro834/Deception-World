@@ -11,8 +11,30 @@ export const ARCHIVE_AI_REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 export const ARCHIVE_AI_SESSION_ID_PATTERN = ARCHIVE_AI_REQUEST_ID_PATTERN;
-const ARCHIVE_PROVIDER_RESPONSE_ID_PATTERN = /^resp_[A-Za-z0-9_-]{8,}$/u;
+const ARCHIVE_OPENAI_RESPONSE_ID_PATTERN = /^resp_[A-Za-z0-9_-]{8,}$/u;
 const ARCHIVE_OPENAI_REQUEST_ID_PATTERN = /^req_[A-Za-z0-9_-]{8,}$/u;
+const ARCHIVE_UUID_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+
+export function isArchiveProviderResponseId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length >= 8 &&
+    value.length <= 128 &&
+    (ARCHIVE_OPENAI_RESPONSE_ID_PATTERN.test(value) || ARCHIVE_UUID_ID_PATTERN.test(value))
+  );
+}
+
+export function isArchiveProviderRequestId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length >= 8 &&
+    value.length <= 128 &&
+    (ARCHIVE_OPENAI_REQUEST_ID_PATTERN.test(value) ||
+      ARCHIVE_UUID_ID_PATTERN.test(value) ||
+      /^[A-Za-z0-9._-]{8,}$/u.test(value))
+  );
+}
 const ARCHIVE_MAX_PENDING_TTL_MS = 25 * 60 * 60 * 1_000;
 const ARCHIVE_PENDING_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
@@ -111,10 +133,9 @@ export function isArchiveAiRequestEnvelope<T>(
           candidate.requestedModel as string,
           candidate.providerModel as string,
         ) &&
-        typeof candidate.providerResponseId === "string" &&
-        ARCHIVE_PROVIDER_RESPONSE_ID_PATTERN.test(candidate.providerResponseId) &&
-        typeof candidate.openaiRequestId === "string" &&
-        ARCHIVE_OPENAI_REQUEST_ID_PATTERN.test(candidate.openaiRequestId) &&
+        isArchiveProviderResponseId(candidate.providerResponseId) &&
+        (candidate.openaiRequestId === undefined ||
+          isArchiveProviderRequestId(candidate.openaiRequestId)) &&
         result.source === "openai" &&
         result.modelVerified === true &&
         result.providerModel === candidate.providerModel &&

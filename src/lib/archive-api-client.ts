@@ -14,6 +14,7 @@ import {
 
 export {
   createArchiveAiRequestId,
+  forgetArchiveAiPending,
   listArchiveAiPending,
   subscribeArchiveAiRecoveryWake,
 } from "./archive-ai-pending.ts";
@@ -360,6 +361,7 @@ export async function postArchiveApi<T>({
     const payload = await responsePayload(response);
     assertMatchingResponseRequestId(payload, requestId);
     if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      void forgetArchiveAiPending(requestId);
       throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
     }
     const state: ArchiveAiRequestState<T> = payload;
@@ -420,7 +422,7 @@ export async function resumeArchiveApi<T>({
       onState?.("reconnecting");
       await waitForConnectionWindow(5_000, signal);
     }
-    onState?.("reconnecting");
+    onState?.("running");
     let response: Response;
     const fetchStartedAt = monotonicNow();
     const fetchAttempt = ++transportAttempt;
@@ -475,6 +477,7 @@ export async function resumeArchiveApi<T>({
     const payload = await responsePayload(response);
     assertMatchingResponseRequestId(payload, pending.requestId);
     if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      void forgetArchiveAiPending(pending.requestId);
       throw new ArchiveApiClientError(
         "Archive API recovery response was invalid",
         "client_invalid_payload",

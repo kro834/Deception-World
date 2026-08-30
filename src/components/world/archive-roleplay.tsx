@@ -19,6 +19,7 @@ import {
   ArchiveApiClientError,
   cancelArchiveApi,
   createArchiveAiRequestId,
+  forgetArchiveAiPending,
   listArchiveAiPending,
   postArchiveApi,
   resumeArchiveApi,
@@ -462,15 +463,13 @@ export function ArchiveRoleplay({
         const firstFailedIndex = settled.findIndex((result) => result.status === "rejected");
         if (firstFailedIndex >= 0) {
           const failedRecord = pendingRecords[firstFailedIndex];
-          recoveryRequestIdRef.current = failedRecord?.requestId ?? null;
-          recoveryRequestSessionIdRef.current = failedRecord?.sessionId;
-          const failedPendingKey = pendingSessionKey(
-            failedRecord?.contextId,
-            activeSessionKeyRef.current,
-          );
-          recoveryPendingKeyRef.current = failedPendingKey;
-          if (!foregroundPendingKeyRef.current) setPendingKey(failedPendingKey);
-          setLiveMessage("再接続中。同じ回答を引き続き回収できます。");
+          if (failedRecord) void forgetArchiveAiPending(failedRecord.requestId);
+          if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
+          recoveryRequestIdRef.current = null;
+          recoveryRequestSessionIdRef.current = undefined;
+          recoveryPendingKeyRef.current = null;
+          setPendingKey(foregroundPendingKeyRef.current);
+          setLiveMessage("オンライン回答を回収できませんでした。同じメッセージを再送してください。");
         } else {
           if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
           recoveryRequestIdRef.current = null;

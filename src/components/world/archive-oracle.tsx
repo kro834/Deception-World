@@ -11,6 +11,7 @@ import {
   ArchiveApiClientError,
   cancelArchiveApi,
   createArchiveAiRequestId,
+  forgetArchiveAiPending,
   listArchiveAiPending,
   postArchiveApi,
   resumeArchiveApi,
@@ -890,10 +891,11 @@ export function ArchiveIntelligenceWorkspace({
         const firstFailedIndex = settled.findIndex((result) => result.status === "rejected");
         if (firstFailedIndex >= 0) {
           const failedRecord = pendingRecords[firstFailedIndex];
-          searchRequestIdRef.current = failedRecord?.requestId ?? null;
-          searchRequestSessionIdRef.current = failedRecord?.sessionId;
-          setSearchPending(true);
-          setSearchLifecycle("reconnecting");
+          if (failedRecord) void forgetArchiveAiPending(failedRecord.requestId);
+          searchRequestIdRef.current = null;
+          searchRequestSessionIdRef.current = undefined;
+          setSearchPending(false);
+          setSearchLifecycle(null);
         } else {
           if (searchRecoveryAbortRef.current === controller) {
             searchRecoveryAbortRef.current = null;

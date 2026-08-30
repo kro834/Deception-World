@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isArchiveAiRequestEnvelope } from "../src/lib/archive-ai-request.ts";
+import {
+  isArchiveAiRequestEnvelope,
+  isArchiveProviderRequestId,
+  isArchiveProviderResponseId,
+} from "../src/lib/archive-ai-request.ts";
 import {
   ARCHIVE_PROVIDER_MODELS_BY_REQUEST,
   isAllowedArchiveProviderModel,
@@ -61,6 +65,43 @@ test("the shared provider contract accepts the official GPT-5.5 snapshot and Gro
   assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "grok-4.20-0309-non-reasoning"), true);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.6-terra", "gpt-5.5-2026-04-23"), false);
   assert.equal(isAllowedArchiveProviderModel("gpt-5.5", "gpt-5.5-2099-01-01"), false);
+});
+
+test("the browser envelope accepts Grok 4.20 UUIDs as well as OpenAI resp_/req_ ids", () => {
+  const requestId = crypto.randomUUID();
+  const grokResponseId = "23f3a044-8554-9a22-b4d6-e31fac4dfad2";
+  const grokRequestId = "xai-request-9f3a2c1b0e";
+  assert.equal(isArchiveProviderResponseId(`resp_${requestId.replaceAll("-", "")}`), true);
+  assert.equal(isArchiveProviderResponseId(grokResponseId), true);
+  assert.equal(isArchiveProviderResponseId("short"), false);
+  assert.equal(isArchiveProviderRequestId(`req_${requestId.replaceAll("-", "")}`), true);
+  assert.equal(isArchiveProviderRequestId(grokRequestId), true);
+  const grokEnvelope = {
+    requestId,
+    state: "succeeded",
+    requestedModel: "gpt-5.6-terra",
+    providerModel: "grok-4.20-0309-non-reasoning",
+    providerResponseId: grokResponseId,
+    openaiRequestId: grokRequestId,
+    result: {
+      requestId,
+      reply: "接続確認済みです。",
+      suggestions: [],
+      referenceCandidateIds: [],
+      source: "openai",
+      requestedModel: "gpt-5.6-terra",
+      providerModel: "grok-4.20-0309-non-reasoning",
+      providerResponseId: grokResponseId,
+      openaiRequestId: grokRequestId,
+      modelVerified: true,
+      delivery: { channel: "online", reason: "ok" },
+    },
+  };
+  assert.equal(isArchiveAiRequestEnvelope(grokEnvelope, isSearchResult), true);
+  assert.equal(
+    isArchiveAiRequestEnvelope({ ...grokEnvelope, openaiRequestId: undefined }, isSearchResult),
+    false,
+  );
 });
 
 test("the browser envelope accepts the allowed GPT-5.5 snapshot and rejects unknown snapshots", () => {

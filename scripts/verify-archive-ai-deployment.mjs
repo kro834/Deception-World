@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { isAllowedArchiveProviderModel } from "../src/lib/archive-provider-models.js";
+import {
+  isArchiveProviderRequestId,
+  isArchiveProviderResponseId,
+} from "../src/lib/archive-ai-request.ts";
 
 const DEFAULT_TIMEOUT_MS = 180_000;
 const SEARCH_EFFORTS = ["low", "medium", "high", "xhigh"];
@@ -413,8 +417,8 @@ async function verifyCase({
         summary.modelVerified &&
         requestedModel === deploymentCase.expectedModel &&
         isAllowedArchiveProviderModel(deploymentCase.expectedModel, providerModel) &&
-        /^resp_[A-Za-z0-9_-]{8,}$/u.test(providerResponseId) &&
-        /^req_[A-Za-z0-9_-]{8,}$/u.test(openaiRequestId) &&
+        isArchiveProviderResponseId(providerResponseId) &&
+        (openaiRequestId === "missing" || isArchiveProviderRequestId(openaiRequestId)) &&
         summary.requestId === requestId &&
         summary.openaiRequestId === openaiRequestId &&
         summary.providerResponseId === providerResponseId;

@@ -662,7 +662,7 @@ export async function cancelOpenAiBackgroundResponse({
   timeoutMs?: number;
   attemptOffset?: number;
 }): Promise<void> {
-  if (!/^resp_[A-Za-z0-9_-]{8,}$/u.test(responseId)) {
+  if (typeof responseId !== "string" || responseId.length < 8) {
     throw new ArchiveOpenAiPayloadError("Stored OpenAI response id was invalid");
   }
   await requestOpenAiJson({
