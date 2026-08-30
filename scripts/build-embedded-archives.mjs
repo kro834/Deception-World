@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
@@ -32,9 +32,20 @@ const extensions = new Map([
 ]);
 
 mkdirSync(mediaDirectory, { recursive: true });
-buildRealmArchiveMotion();
+if (existsSync(resolve(root, "archives/saga-form-archive-standalone.html"))) {
+  buildRealmArchiveMotion();
+} else {
+  console.log("[embedded-archive] source archives missing; keeping committed embedded HTML");
+}
 
 for (const archive of archives) {
+  if (!existsSync(archive.source)) {
+    if (!existsSync(archive.output)) {
+      throw new Error(`Missing archive source and output for ${archive.kind}`);
+    }
+    console.log(`[embedded-archive] ${archive.kind}: skipped (source not in deploy context)`);
+    continue;
+  }
   const source = readFileSync(archive.source, "utf8");
   let imageCount = 0;
   const output = source.replace(
