@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_ARCHIVE_MODEL_PREFERENCES } from "@/lib/archive-model-config";
+import {
+  ARCHIVE_IOS_KEYBOARD_COMPACT_MAX,
+  archiveIosVisualViewportPanned,
+  estimateArchiveIosKeyboardInset,
+  measureArchiveIosKeyboardInset,
+} from "@/lib/archive-viewport";
 import { ArchiveIntelligenceWorkspace } from "./archive-oracle";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { useWorldMode } from "./use-world-mode";
@@ -36,19 +42,9 @@ export function ArchiveIntelligencePage() {
 
     const viewport = window.visualViewport;
     let frame = 0;
-    let stableHeight = window.innerHeight;
-    let focusStartedAt = 0;
-    let lockedHeight: number | null = null;
-    let lockedOffset = 0;
-    let settleHeight = 0;
-    let settleOffset = 0;
-    let settleHits = 0;
+    let lockedInset: number | null = null;
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
-    const COMPACT_BREAKPOINT = 760;
-    const SETTLE_PX = 3;
-    const LOCK_AFTER = 2;
-    const RELAYOUT_PX = 56;
 
     const scheduleSync = (delays: readonly number[]) => {
       for (const delay of delays) {
@@ -66,84 +62,54 @@ export function ArchiveIntelligencePage() {
       if (document.body.scrollTop) document.body.scrollTop = 0;
     };
 
+    const setChromeInert = (inert: boolean) => {
+      const chrome = page.querySelector(".archive-oracle-header");
+      if (!(chrome instanceof HTMLElement)) return;
+      if (inert) chrome.setAttribute("inert", "");
+      else chrome.removeAttribute("inert");
+    };
+
+    const applyInset = (inset: number, state: "opening" | "open" | "closing" | "closed") => {
+      page.style.removeProperty("--archive-viewport-height");
+      page.style.setProperty("--archive-vv-offset", "0px");
+      page.style.setProperty("--archive-keyboard-inset", `${Math.max(0, Math.round(inset))}px`);
+      page.dataset.keyboard = state;
+      setChromeInert(state === "opening" || state === "open");
+    };
+
     const applyViewport = (source: "layout" | "scroll" = "layout") => {
       resetDocumentScroll();
-      const compact = window.innerWidth <= COMPACT_BREAKPOINT;
+      const compact = window.innerWidth <= ARCHIVE_IOS_KEYBOARD_COMPACT_MAX;
       const layoutHeight = window.innerHeight;
-      const visualHeight = Math.round(viewport?.height ?? layoutHeight);
-      const offsetTop = Math.round(viewport?.offsetTop ?? 0);
+      const visualHeight = viewport?.height ?? layoutHeight;
+      const offsetTop = viewport?.offsetTop ?? 0;
       const focused = document.activeElement?.matches(editableSelector) ?? false;
-      if (!focused && visualHeight > stableHeight - 72) {
-        stableHeight = Math.max(visualHeight, layoutHeight);
-      }
 
-      const keyboardGap = Math.max(0, layoutHeight - visualHeight - offsetTop);
-      const keyboardOpen = focused && compact && keyboardGap > 80;
-      const sinceFocus = focusStartedAt ? performance.now() - focusStartedAt : Number.POSITIVE_INFINITY;
-      const keyboardOpening = focused && compact && sinceFocus < 900 && !keyboardOpen;
-      const keyboardClosing = !focused && page.dataset.keyboard === "closing" && keyboardGap > 80;
-      const keyboardActive = focused && compact;
-      const chrome = page.querySelector(".archive-oracle-header");
-
-      if (!keyboardActive) {
-        lockedHeight = null;
-        lockedOffset = 0;
-        settleHeight = 0;
-        settleOffset = 0;
-        settleHits = 0;
-        page.style.setProperty("--archive-viewport-height", `${visualHeight}px`);
-        page.style.setProperty("--archive-vv-offset", "0px");
-        page.style.setProperty("--archive-keyboard-inset", "0px");
-        page.dataset.keyboard = keyboardClosing ? "closing" : "closed";
-        if (chrome instanceof HTMLElement) chrome.removeAttribute("inert");
+      if (!compact || !focused) {
+        lockedInset = null;
+        applyInset(0, !focused && page.dataset.keyboard === "closing" ? "closing" : "closed");
+        if (!focused) page.dataset.keyboard = "closed";
         return;
       }
 
-      if (source === "scroll" && lockedHeight != null) return;
+      // visualViewport.scroll is Safari hunting the caret. Restyling here is
+      // what made the composer jitter, so only cancel the pan.
+      if (source === "scroll") return;
 
-      if (
-        Math.abs(visualHeight - settleHeight) <= SETTLE_PX &&
-        Math.abs(offsetTop - settleOffset) <= SETTLE_PX
-      ) {
-        settleHits += 1;
-      } else {
-        settleHeight = visualHeight;
-        settleOffset = offsetTop;
-        settleHits = 1;
-      }
+      const estimate = estimateArchiveIosKeyboardInset(layoutHeight);
+      const measured = measureArchiveIosKeyboardInset(layoutHeight, visualHeight);
+      const panned = archiveIosVisualViewportPanned(offsetTop);
+      const keyboardOpen = measured > 80 && !panned;
 
-      if (lockedHeight == null && (keyboardOpen || settleHits >= LOCK_AFTER)) {
-        lockedHeight = settleHeight;
-        lockedOffset = settleOffset;
-      } else if (
-        lockedHeight != null &&
-        (Math.abs(visualHeight - lockedHeight) >= RELAYOUT_PX ||
-          Math.abs(offsetTop - lockedOffset) >= RELAYOUT_PX)
-      ) {
-        lockedHeight = visualHeight;
-        lockedOffset = offsetTop;
+      if (lockedInset == null) {
+        if (keyboardOpen) lockedInset = measured;
+        else lockedInset = estimate;
+      } else if (keyboardOpen && Math.abs(measured - lockedInset) > 96 && !panned) {
+        lockedInset = measured;
       }
 
-      const height = lockedHeight ?? visualHeight;
-      const offset = lockedHeight != null ? lockedOffset : 0;
-      const currentHeight = Number.parseFloat(page.style.getPropertyValue("--archive-viewport-height")) || 0;
-      const currentOffset = Number.parseFloat(page.style.getPropertyValue("--archive-vv-offset")) || 0;
-      if (Math.abs(height - currentHeight) >= SETTLE_PX || currentHeight === 0) {
-        page.style.setProperty("--archive-viewport-height", `${height}px`);
-      }
-      if (Math.abs(offset - currentOffset) >= SETTLE_PX || (offset === 0 && currentOffset !== 0)) {
-        page.style.setProperty("--archive-vv-offset", `${offset}px`);
-      }
-      page.style.setProperty("--archive-keyboard-inset", "0px");
-      page.dataset.keyboard = keyboardOpen ? "open" : keyboardOpening ? "opening" : "closed";
-      if (chrome instanceof HTMLElement) {
-        if (keyboardOpen || keyboardOpening) chrome.setAttribute("inert", "");
-        else chrome.removeAttribute("inert");
-      }
+      applyInset(lockedInset, keyboardOpen ? "open" : "opening");
     };
-
-    const syncLayout = () => syncViewport("layout");
-    const syncVisualScroll = () => syncViewport("scroll");
 
     const syncViewport = (source: "layout" | "scroll" = "layout") => {
       if (frame) return;
@@ -153,41 +119,46 @@ export function ArchiveIntelligencePage() {
       });
     };
 
+    const syncLayout = () => syncViewport("layout");
+    const syncVisualScroll = () => {
+      resetDocumentScroll();
+      syncViewport("scroll");
+    };
+
     const armKeyboard = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Element) || !target.matches(editableSelector)) return;
-      if (window.innerWidth > COMPACT_BREAKPOINT) return;
-      focusStartedAt = performance.now();
+      if (window.innerWidth > ARCHIVE_IOS_KEYBOARD_COMPACT_MAX) return;
       page.dataset.composerFocus = "true";
-      page.dataset.keyboard = "opening";
-      applyViewport();
+      if (lockedInset == null) lockedInset = estimateArchiveIosKeyboardInset(window.innerHeight);
+      applyInset(lockedInset, "opening");
     };
 
     const handleFocusIn = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
-      focusStartedAt = performance.now();
       page.dataset.composerFocus = "true";
-      if (window.innerWidth <= COMPACT_BREAKPOINT) page.dataset.keyboard = "opening";
       window.scrollTo(0, 0);
-      applyViewport();
-      scheduleSync([160, 420]);
+      applyViewport("layout");
+      scheduleSync([280, 480]);
     };
 
     const handleFocusOut = (event: FocusEvent) => {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
-      focusStartedAt = 0;
+      lockedInset = null;
       page.dataset.keyboard = "closing";
+      applyInset(0, "closing");
       window.requestAnimationFrame(() => {
         if (!(document.activeElement?.matches(editableSelector) ?? false)) {
           delete page.dataset.composerFocus;
+          applyInset(0, "closed");
         }
       });
-      scheduleSync([0, 80, 240, 500, 900]);
+      scheduleSync([240, 520]);
     };
 
     const handleOrientationChange = () => {
-      stableHeight = window.innerHeight;
-      scheduleSync([0, 160, 420]);
+      lockedInset = null;
+      scheduleSync([0, 180, 420]);
     };
 
     syncViewport("layout");
