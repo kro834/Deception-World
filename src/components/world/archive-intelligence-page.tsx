@@ -43,6 +43,7 @@ export function ArchiveIntelligencePage() {
     const viewport = window.visualViewport;
     let frame = 0;
     let lockedInset: number | null = null;
+    let restLayoutHeight = window.innerHeight;
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
 
@@ -87,28 +88,27 @@ export function ArchiveIntelligencePage() {
 
       if (!compact || !focused) {
         lockedInset = null;
-        applyInset(0, !focused && page.dataset.keyboard === "closing" ? "closing" : "closed");
-        if (!focused) page.dataset.keyboard = "closed";
+        if (layoutHeight > restLayoutHeight - 40) restLayoutHeight = layoutHeight;
+        applyInset(0, "closed");
         return;
       }
 
-      // visualViewport.scroll is Safari hunting the caret. Restyling here is
-      // what made the composer jitter, so only cancel the pan.
       if (source === "scroll") return;
 
-      const estimate = estimateArchiveIosKeyboardInset(layoutHeight);
+      const layoutShrunk = restLayoutHeight - layoutHeight > 80;
+      const estimate = estimateArchiveIosKeyboardInset(restLayoutHeight);
       const measured = measureArchiveIosKeyboardInset(layoutHeight, visualHeight);
       const panned = archiveIosVisualViewportPanned(offsetTop);
-      const keyboardOpen = measured > 80 && !panned;
 
-      if (lockedInset == null) {
-        if (keyboardOpen) lockedInset = measured;
-        else lockedInset = estimate;
-      } else if (keyboardOpen && Math.abs(measured - lockedInset) > 96 && !panned) {
+      if (layoutShrunk) {
+        lockedInset = 0;
+      } else if (lockedInset == null) {
+        lockedInset = measured > 80 && !panned ? measured : estimate;
+      } else if (measured > 80 && !panned && Math.abs(measured - lockedInset) > 96) {
         lockedInset = measured;
       }
 
-      applyInset(lockedInset, keyboardOpen ? "open" : "opening");
+      applyInset(lockedInset, layoutShrunk || measured > 80 ? "open" : "opening");
     };
 
     const syncViewport = (source: "layout" | "scroll" = "layout") => {
@@ -130,7 +130,7 @@ export function ArchiveIntelligencePage() {
       if (!(target instanceof Element) || !target.matches(editableSelector)) return;
       if (window.innerWidth > ARCHIVE_IOS_KEYBOARD_COMPACT_MAX) return;
       page.dataset.composerFocus = "true";
-      if (lockedInset == null) lockedInset = estimateArchiveIosKeyboardInset(window.innerHeight);
+      if (lockedInset == null) lockedInset = estimateArchiveIosKeyboardInset(restLayoutHeight);
       applyInset(lockedInset, "opening");
     };
 

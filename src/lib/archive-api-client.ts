@@ -178,15 +178,24 @@ async function fetchWithAttemptTimeout(
   if (parentSignal.aborted) throw abortError(parentSignal);
   const controller = new AbortController();
   const abortFromParent = () => controller.abort(abortError(parentSignal));
-  const timer = setTimeout(
-    () => controller.abort(new DOMException("Archive API attempt timed out", "TimeoutError")),
-    timeoutMs,
-  );
   parentSignal.addEventListener("abort", abortFromParent, { once: true });
+  let timer = 0;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      const error = new DOMException("Archive API attempt timed out", "TimeoutError");
+      controller.abort(error);
+      reject(error);
+    }, timeoutMs) as unknown as number;
+  });
   try {
-    return await fetch(input, { ...init, signal: controller.signal });
+    // iOS WebKit can ignore AbortController on fetch. Race the timer so 送信中
+    // cannot block the composer after the attempt budget.
+    return await Promise.race([
+      fetch(input, { ...init, signal: controller.signal }),
+      timeout,
+    ]);
   } finally {
-    clearTimeout(timer);
+    if (timer) clearTimeout(timer);
     parentSignal.removeEventListener("abort", abortFromParent);
   }
 }

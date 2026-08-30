@@ -262,7 +262,13 @@ export async function getArchiveAiSessionId(): Promise<string> {
     return created;
   })();
   try {
-    return await resolvingSessionId;
+    return await withDeadline(resolvingSessionId, 1_200);
+  } catch {
+    if (memorySessionId) return memorySessionId;
+    const created = newUuid();
+    memorySessionId = created;
+    saveLocalSessionId(created);
+    return created;
   } finally {
     resolvingSessionId = null;
   }

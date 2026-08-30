@@ -604,7 +604,7 @@ export function ArchiveRoleplay({
         onState: (state) => {
           const label =
             state === "submitting"
-              ? "送信中"
+              ? "思考中"
               : state === "queued"
                 ? "接続待機中"
                 : state === "reconnecting"

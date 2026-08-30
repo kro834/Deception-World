@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, MessageSquarePlus, Square } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
 import {
   recordArchiveAiHealth,
@@ -732,7 +732,7 @@ function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
 }
 
 function archiveLifecycleText(state: ArchiveApiLifecycle | null): string {
-  if (state === "submitting") return "送信中";
+  if (state === "submitting") return "思考中";
   if (state === "queued") return "接続待機中";
   if (state === "unknown") return "回答を確認中";
   if (state === "reconnecting") return "再接続中";
@@ -798,6 +798,7 @@ export function ArchiveIntelligenceWorkspace({
   const [pendingSearchPreference, setPendingSearchPreference] =
     useState<ArchiveSearchPreference | null>(null);
   const [searchRecoveryWake, setSearchRecoveryWake] = useState(0);
+  const [personaEpoch, setPersonaEpoch] = useState(0);
 
   const latestSearchAssistant = [...searchMessages]
     .reverse()
@@ -1171,6 +1172,11 @@ export function ArchiveIntelligenceWorkspace({
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   }, [stopSearch]);
 
+  const startNewConversation = useCallback(() => {
+    clearSearchConversation();
+    setPersonaEpoch((value) => value + 1);
+  }, [clearSearchConversation]);
+
   const beginSearchEdit = useCallback(
     (message: SearchMessage) => {
       if (message.role !== "user") return;
@@ -1335,10 +1341,15 @@ export function ArchiveIntelligenceWorkspace({
             <small>PERSONA</small>
           </button>
         </div>
-        <p className="archive-oracle-status" aria-label="使用モデル Grok 4.20">
-          <i aria-hidden="true" />
-          <span>{ARCHIVE_RUNTIME_MODEL_LABEL}</span>
-        </p>
+        <button
+          type="button"
+          className="archive-oracle-status"
+          tabIndex={-1}
+          aria-label="新しい会話。現在のモデルは Grok 4.20"
+          onClick={startNewConversation}
+        >
+          <MessageSquarePlus size={18} strokeWidth={1.8} aria-hidden="true" />
+        </button>
       </header>
 
       <div
@@ -1489,9 +1500,7 @@ export function ArchiveIntelligenceWorkspace({
                 <p>
                   {searchLifecycle === "reconnecting"
                     ? "接続を確認しています"
-                    : searchLifecycle === "submitting"
-                      ? "送信しています"
-                      : "考えています"}
+                    : "考えています"}
                 </p>
               </div>
             </div>
@@ -1622,6 +1631,7 @@ export function ArchiveIntelligenceWorkspace({
         hidden={surface !== "roleplay"}
       >
         <ArchiveRoleplay
+          key={personaEpoch}
           active={active && surface === "roleplay"}
           searchArchive={searchArchiveOracle}
           onNavigate={onNavigate}
