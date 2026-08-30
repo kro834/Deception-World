@@ -433,6 +433,9 @@ test("Archive Intelligence has a dedicated reduced-motion-aware route handoff", 
 test("focused composers stay position-stable during visual viewport scrolling", () => {
   assert.match(intelligencePage, /viewport\?\.addEventListener\("scroll"/);
   assert.match(intelligencePage, /window\.scrollTo\(0, 0\)/);
+  assert.match(intelligencePage, /KEYBOARD_FALLBACK_PX/);
+  assert.match(intelligencePage, /applyViewport\(\)/);
+  assert.match(intelligenceStyles, /position:\s*sticky/);
   assert.doesNotMatch(intelligencePage, /--archive-viewport-(?:left|top)/);
   assert.doesNotMatch(intelligencePage, /resolveArchiveViewportOffset/);
   assert.match(

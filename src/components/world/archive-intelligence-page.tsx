@@ -40,6 +40,8 @@ export function ArchiveIntelligencePage() {
     let focusStartedAt = 0;
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
+    const COMPACT_BREAKPOINT = 760;
+    const KEYBOARD_FALLBACK_PX = 336;
 
     const scheduleSync = (delays: readonly number[]) => {
       for (const delay of delays) {
@@ -57,36 +59,46 @@ export function ArchiveIntelligencePage() {
       if (document.body.scrollTop) document.body.scrollTop = 0;
     };
 
+    const applyViewport = () => {
+      resetDocumentScroll();
+      const layoutWidth = window.innerWidth;
+      const offsetTop = viewport?.offsetTop ?? 0;
+      const visualHeight = viewport?.height ?? window.innerHeight;
+      const focused = document.activeElement?.matches(editableSelector) ?? false;
+      if (!focused && visualHeight > stableHeight - 72) stableHeight = visualHeight;
+      const compact = layoutWidth <= COMPACT_BREAKPOINT;
+      const measuredInset = Math.max(0, stableHeight - visualHeight - offsetTop);
+      const keyboardOpen = focused && measuredInset > Math.max(120, stableHeight * 0.18);
+      const keyboardClosing =
+        !focused && page.dataset.keyboard === "closing" && measuredInset > 120;
+      const sinceFocus = performance.now() - focusStartedAt;
+      const keyboardOpening = focused && compact && sinceFocus < 900;
+      const awaitingMeasuredKeyboard = keyboardOpening && !keyboardOpen;
+      const fallbackInset = Math.round(
+        Math.min(430, Math.max(KEYBOARD_FALLBACK_PX, stableHeight * 0.36)),
+      );
+      const height = awaitingMeasuredKeyboard
+        ? Math.max(280, Math.round(stableHeight - fallbackInset))
+        : Math.round(visualHeight);
+      page.style.setProperty("--archive-viewport-height", `${height}px`);
+      page.style.setProperty(
+        "--archive-keyboard-inset",
+        `${awaitingMeasuredKeyboard ? fallbackInset : Math.round(measuredInset)}px`,
+      );
+      page.dataset.keyboard = keyboardOpen
+        ? "open"
+        : keyboardOpening
+          ? "opening"
+          : keyboardClosing
+            ? "closing"
+            : "closed";
+    };
+
     const syncViewport = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        resetDocumentScroll();
-        const layoutWidth = window.innerWidth;
-        const offsetTop = viewport?.offsetTop ?? 0;
-        const height = viewport?.height ?? window.innerHeight;
-        const focused = document.activeElement?.matches(editableSelector) ?? false;
-        if (!focused && height > stableHeight - 72) stableHeight = height;
-        const keyboardOpen = focused && stableHeight - height > Math.max(120, stableHeight * 0.18);
-        const keyboardClosing =
-          !focused && page.dataset.keyboard === "closing" && stableHeight - height > 120;
-        const keyboardOpening =
-          focused && layoutWidth <= 760 && performance.now() - focusStartedAt < 600;
-        // Cover the visual viewport only. If WebKit also pans (offsetTop > 0),
-        // shrinking without locking scroll used to leave a black void with the
-        // composer stuck at the top of the screen.
-        page.style.setProperty("--archive-viewport-height", `${Math.round(height)}px`);
-        page.style.setProperty(
-          "--archive-keyboard-inset",
-          `${Math.max(0, Math.round(stableHeight - height - offsetTop))}px`,
-        );
-        page.dataset.keyboard = keyboardOpen
-          ? "open"
-          : keyboardOpening
-            ? "opening"
-            : keyboardClosing
-              ? "closing"
-              : "closed";
+        applyViewport();
       });
     };
 
@@ -94,10 +106,11 @@ export function ArchiveIntelligencePage() {
       if (!(event.target instanceof Element) || !event.target.matches(editableSelector)) return;
       focusStartedAt = performance.now();
       page.dataset.composerFocus = "true";
-      if ((viewport?.width ?? window.innerWidth) <= 760) page.dataset.keyboard = "opening";
+      if ((viewport?.width ?? window.innerWidth) <= COMPACT_BREAKPOINT) {
+        page.dataset.keyboard = "opening";
+      }
       window.scrollTo(0, 0);
-      // Sample height only. Moving a focused ancestor with visualViewport offsets
-      // makes WebKit's caret and selection handles drift during keyboard animation.
+      applyViewport();
       scheduleSync([0, 50, 120, 280, 520, 900]);
     };
 

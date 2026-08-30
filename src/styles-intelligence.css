@@ -3222,7 +3222,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-search-conversation {
-  grid-template-rows: minmax(120px, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: 5px;
   padding: 5px max(7px, env(safe-area-inset-right, 0px)) 0 max(7px, env(safe-area-inset-left, 0px));
 }
@@ -3266,7 +3266,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   .archive-roleplay-console {
-  grid-template-rows: minmax(120px, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .archive-intelligence-page:is(
@@ -3275,6 +3275,7 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   :is(.archive-search-log, .archive-roleplay-log) {
+  min-height: 0;
   padding-block: 7px;
 }
 
@@ -3284,7 +3285,12 @@ body.archive-intelligence-active {
     [data-keyboard="closing"]
   )
   :is(.archive-roleplay-composer, .archive-oracle-form) {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  margin-top: auto;
   padding-bottom: 8px;
+  background: #000000;
 }
 
 .archive-intelligence-page:is(
