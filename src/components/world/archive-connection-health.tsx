@@ -12,10 +12,18 @@ const REASON_LABELS = {
   ok: "正常",
   unconfigured: "AI接続未設定",
   rate_limited: "利用集中",
-  shared_limit_unavailable: "利用上限を確認できません",
+  shared_state_unavailable: "共有状態を確認できません",
   provider_timeout: "AI応答待ち時間超過",
   provider_unavailable: "AI回線を一時利用できません",
   provider_invalid_response: "AI応答の再検証に失敗",
+  provider_authentication: "AI認証エラー",
+  provider_permission: "AI権限エラー",
+  provider_model_unavailable: "指定モデルを利用できません",
+  provider_quota: "AI利用枠を確認してください",
+  provider_rate_limited: "AI回線が混み合っています",
+  provider_model_mismatch: "実モデルの検証不一致",
+  request_expired: "回答の保持期限切れ",
+  request_cancelled: "回答生成を停止",
   client_network: "端末側の通信中断",
   client_http_4xx: "送信内容の検証不一致",
   client_http_5xx: "サイト回線の一時エラー",
@@ -42,7 +50,9 @@ export function ArchiveConnectionHealth({
       ? "NEURAL ONLINE"
       : summary.lastChannel === "local"
         ? "LOCAL CORE"
-        : "HYBRID READY";
+        : summary.lastChannel === "failed"
+          ? "RECONNECT NEEDED"
+          : "HYBRID READY";
   return (
     <div className="archive-connection-health" data-open={open || undefined}>
       <button
@@ -71,8 +81,8 @@ export function ArchiveConnectionHealth({
               <dd>{summary.local}</dd>
             </div>
             <div>
-              <dt>HANDOFF</dt>
-              <dd>{summary.transitions}</dd>
+              <dt>ERROR</dt>
+              <dd>{summary.failed}</dd>
             </div>
             <div>
               <dt>CONTEXT</dt>

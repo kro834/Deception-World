@@ -1,19 +1,189 @@
+import {
+  isArchiveAiRequestEnvelope,
+  type ArchiveAiLifecycleState,
+  type ArchiveAiRequestState,
+} from "./archive-ai-request.ts";
 import type { ArchiveDeliveryReason } from "./archive-delivery.ts";
+import {
+  createArchiveAiRequestId,
+  forgetArchiveAiPending,
+  getArchiveAiSessionId,
+  rememberArchiveAiPending,
+  type ArchiveAiPendingRecord,
+} from "./archive-ai-pending.ts";
+
+export { createArchiveAiRequestId, listArchiveAiPending } from "./archive-ai-pending.ts";
 
 export class ArchiveApiClientError extends Error {
-  readonly reason: Extract<
-    ArchiveDeliveryReason,
-    "client_network" | "client_http_4xx" | "client_http_5xx" | "client_invalid_payload"
-  >;
+  readonly reason: ArchiveDeliveryReason;
+  readonly retryable: boolean;
 
   constructor(
     message: string,
-    reason: ArchiveApiClientError["reason"],
-    options?: { cause?: unknown },
+    reason: ArchiveDeliveryReason,
+    options?: { cause?: unknown; retryable?: boolean },
   ) {
-    super(message, options);
+    super(message, options?.cause === undefined ? undefined : { cause: options.cause });
     this.name = "ArchiveApiClientError";
     this.reason = reason;
+    this.retryable = options?.retryable ?? false;
+  }
+}
+
+export type ArchiveApiLifecycle =
+  | Extract<ArchiveAiLifecycleState, "queued" | "running" | "unknown">
+  | "submitting"
+  | "reconnecting";
+
+const CLIENT_DELAYS_MS = [1_000, 2_000, 4_000, 5_000] as const;
+const REQUEST_TTL_MS = 24 * 60 * 60 * 1_000;
+const FETCH_ATTEMPT_TIMEOUT_MS = 20_000;
+const MAX_LEDGER_POST_ATTEMPTS = 3;
+
+function abortError(signal: AbortSignal): unknown {
+  return signal.reason ?? new DOMException("Aborted", "AbortError");
+}
+
+function browserCanAttempt(): boolean {
+  if (typeof document !== "undefined" && document.visibilityState === "hidden") return false;
+  return typeof navigator === "undefined" || navigator.onLine !== false;
+}
+
+function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.reject(abortError(signal));
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        clearTimeout(timer);
+        signal.removeEventListener("abort", abort);
+      };
+      const abort = () => {
+        cleanup();
+        reject(abortError(signal));
+      };
+      const timer = setTimeout(() => {
+        cleanup();
+        resolve();
+      }, delayMs);
+      signal.addEventListener("abort", abort, { once: true });
+    });
+  }
+  return new Promise<void>((resolve, reject) => {
+    let timer = 0;
+    const cleanup = () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("online", wake);
+      window.removeEventListener("pageshow", wake);
+      document.removeEventListener("visibilitychange", visibilityWake);
+      signal.removeEventListener("abort", abort);
+    };
+    const finish = () => {
+      cleanup();
+      resolve();
+    };
+    const wake = () => {
+      if (browserCanAttempt()) finish();
+    };
+    const visibilityWake = () => {
+      if (document.visibilityState === "visible" && browserCanAttempt()) finish();
+    };
+    const abort = () => {
+      cleanup();
+      reject(abortError(signal));
+    };
+    window.addEventListener("online", wake, { once: true });
+    window.addEventListener("pageshow", wake, { once: true });
+    document.addEventListener("visibilitychange", visibilityWake);
+    signal.addEventListener("abort", abort, { once: true });
+    if (browserCanAttempt()) timer = window.setTimeout(finish, delayMs);
+  });
+}
+
+function retryDelay(attempt: number, serverDelay?: number): number {
+  const base =
+    typeof serverDelay === "number" && Number.isFinite(serverDelay)
+      ? Math.max(250, Math.min(5_000, serverDelay))
+      : CLIENT_DELAYS_MS[Math.min(attempt, CLIENT_DELAYS_MS.length - 1)];
+  return base + Math.floor(Math.random() * 180);
+}
+
+async function responsePayload(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch (cause) {
+    throw new ArchiveApiClientError("Archive API response was not JSON", "client_invalid_payload", {
+      cause,
+    });
+  }
+}
+
+function responseRequestId(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const requestId = (payload as { requestId?: unknown }).requestId;
+  return typeof requestId === "string" ? requestId : null;
+}
+
+function assertMatchingResponseRequestId(payload: unknown, expectedRequestId: string): void {
+  const receivedRequestId = responseRequestId(payload);
+  if (receivedRequestId === null || receivedRequestId === expectedRequestId) return;
+  // Never accept a response from another logical request. Keep our own pending record so a
+  // later clean GET can still recover it after a stale proxy/cache response disappears.
+  throw new ArchiveApiClientError(
+    "Archive API response request id did not match",
+    "client_invalid_payload",
+  );
+}
+
+async function fetchWithAttemptTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  parentSignal: AbortSignal,
+  timeoutMs = FETCH_ATTEMPT_TIMEOUT_MS,
+): Promise<Response> {
+  if (parentSignal.aborted) throw abortError(parentSignal);
+  const controller = new AbortController();
+  const abortFromParent = () => controller.abort(abortError(parentSignal));
+  const timer = setTimeout(
+    () => controller.abort(new DOMException("Archive API attempt timed out", "TimeoutError")),
+    timeoutMs,
+  );
+  parentSignal.addEventListener("abort", abortFromParent, { once: true });
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+    parentSignal.removeEventListener("abort", abortFromParent);
+  }
+}
+
+export async function cancelArchiveApi({
+  client,
+  requestId,
+}: {
+  client: "search-v1" | "persona-v1";
+  requestId: string;
+}): Promise<void> {
+  const controller = new AbortController();
+  try {
+    const response = await fetchWithAttemptTimeout(
+      `/api/archive-ai/requests/${encodeURIComponent(requestId)}`,
+      {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: {
+          "x-archive-client": client,
+          "x-archive-request-id": requestId,
+          "x-archive-session-id": getArchiveAiSessionId(),
+        },
+      },
+      controller.signal,
+      8_000,
+    );
+    if (response.ok || response.status === 404 || response.status === 410) {
+      await forgetArchiveAiPending(requestId);
+    }
+  } catch {
+    // Cancellation is best-effort. A completed result remains recoverable by request ID.
   }
 }
 
@@ -23,53 +193,230 @@ export async function postArchiveApi<T>({
   body,
   signal,
   validate,
+  requestId = createArchiveAiRequestId(),
+  pendingContext,
+  onState,
 }: {
   url: "/api/archive-search" | "/api/archive-intelligence";
   client: "search-v1" | "persona-v1";
   body: unknown;
   signal: AbortSignal;
   validate: (payload: unknown) => payload is T;
+  requestId?: string;
+  pendingContext?: Pick<ArchiveAiPendingRecord, "contextId" | "userMessageId">;
+  onState?: (state: ArchiveApiLifecycle) => void;
 }): Promise<T> {
-  // Generation POSTs are intentionally single-attempt here. If the browser
-  // loses an already-completed response, replaying it could charge the shared
-  // budget and generate twice. Transient provider failures are retried inside
-  // the server boundary, where one browser request and one rate-limit charge
-  // remain authoritative.
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "content-type": "application/json",
-        "x-archive-client": client,
-      },
-      body: JSON.stringify(body),
-      signal,
-    });
-  } catch (error) {
-    if (signal.aborted) throw error;
-    throw new ArchiveApiClientError("Archive API network request failed", "client_network", {
-      cause: error,
-    });
-  }
-
-  if (!response.ok) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new ArchiveApiClientError(
-      `Archive API request failed with ${response.status}`,
-      response.status >= 500 ? "client_http_5xx" : "client_http_4xx",
+      "Archive API request body was invalid",
+      "client_invalid_payload",
     );
   }
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    throw new ArchiveApiClientError("Archive API response was not JSON", "client_invalid_payload", {
-      cause: error,
-    });
+  const startedAt = Date.now();
+  const deadline = startedAt + REQUEST_TTL_MS;
+  const sessionId = getArchiveAiSessionId();
+  const requestBody = { ...(body as Record<string, unknown>), requestId };
+  const headers = {
+    "content-type": "application/json",
+    "x-archive-client": client,
+    "x-archive-request-id": requestId,
+    "x-archive-session-id": sessionId,
+  };
+  void rememberArchiveAiPending({ requestId, url, client, startedAt, ...pendingContext });
+
+  let postAttempted = false;
+  let postAttempts = 0;
+  let pollAttempt = 0;
+  let serverDelay: number | undefined;
+  let reconnecting = false;
+
+  while (Date.now() < deadline) {
+    if (signal.aborted) throw abortError(signal);
+    if (!browserCanAttempt()) {
+      reconnecting = true;
+      onState?.("reconnecting");
+      await waitForConnectionWindow(5_000, signal);
+    }
+    const method = postAttempted ? "GET" : "POST";
+    const endpoint =
+      method === "POST" ? url : `/api/archive-ai/requests/${encodeURIComponent(requestId)}`;
+    if (method === "POST") postAttempts += 1;
+    onState?.(method === "POST" ? "submitting" : reconnecting ? "reconnecting" : "running");
+
+    let response: Response;
+    try {
+      response = await fetchWithAttemptTimeout(
+        endpoint,
+        {
+          method,
+          credentials: "same-origin",
+          headers,
+          body: method === "POST" ? JSON.stringify(requestBody) : undefined,
+        },
+        signal,
+      );
+      reconnecting = false;
+    } catch {
+      if (signal.aborted) throw abortError(signal);
+      postAttempted = true;
+      reconnecting = true;
+      onState?.("reconnecting");
+      await waitForConnectionWindow(retryDelay(pollAttempt++), signal);
+      continue;
+    }
+
+    if (
+      response.status === 404 &&
+      postAttempted &&
+      postAttempts < MAX_LEDGER_POST_ATTEMPTS
+    ) {
+      postAttempted = false;
+      await waitForConnectionWindow(retryDelay(pollAttempt++), signal);
+      continue;
+    }
+    if (response.status === 410) {
+      void forgetArchiveAiPending(requestId);
+      throw new ArchiveApiClientError("Archive AI request expired", "request_expired");
+    }
+    if (response.status >= 500) {
+      postAttempted = true;
+      reconnecting = true;
+      onState?.("reconnecting");
+      await waitForConnectionWindow(retryDelay(pollAttempt++), signal);
+      continue;
+    }
+    if (!response.ok) {
+      void forgetArchiveAiPending(requestId);
+      throw new ArchiveApiClientError(
+        `Archive API request failed with ${response.status}`,
+        response.status >= 500 ? "client_http_5xx" : "client_http_4xx",
+      );
+    }
+
+    const payload = await responsePayload(response);
+    assertMatchingResponseRequestId(payload, requestId);
+    if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
+    }
+    const state: ArchiveAiRequestState<T> = payload;
+    if (state.state === "succeeded" || state.state === "local") {
+      void forgetArchiveAiPending(requestId);
+      return state.result;
+    }
+    if (state.state === "failed" || state.state === "expired" || state.state === "cancelled") {
+      void forgetArchiveAiPending(requestId);
+      throw new ArchiveApiClientError(`Archive AI request ended in ${state.state}`, state.reason, {
+        retryable: state.retryable,
+      });
+    }
+
+    if (state.state === "queued" || state.state === "running" || state.state === "unknown") {
+      postAttempted = true;
+      serverDelay = state.retryAfterMs;
+      onState?.(state.state);
+      await waitForConnectionWindow(retryDelay(pollAttempt++, serverDelay), signal);
+      continue;
+    }
+    throw new ArchiveApiClientError(
+      "Archive API response state was invalid",
+      "client_invalid_payload",
+    );
   }
-  if (!validate(payload)) {
-    throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
+
+  void forgetArchiveAiPending(requestId);
+  throw new ArchiveApiClientError("Archive AI request expired", "request_expired");
+}
+
+export async function resumeArchiveApi<T>({
+  pending,
+  signal,
+  validate,
+  onState,
+}: {
+  pending: ArchiveAiPendingRecord;
+  signal: AbortSignal;
+  validate: (payload: unknown) => payload is T;
+  onState?: (state: ArchiveApiLifecycle) => void;
+}): Promise<T> {
+  const sessionId = getArchiveAiSessionId();
+  const headers = {
+    "x-archive-client": pending.client,
+    "x-archive-request-id": pending.requestId,
+    "x-archive-session-id": sessionId,
+  };
+  let attempt = 0;
+  let serverDelay: number | undefined;
+
+  while (Date.now() < pending.expiresAt) {
+    if (signal.aborted) throw abortError(signal);
+    if (!browserCanAttempt()) {
+      onState?.("reconnecting");
+      await waitForConnectionWindow(5_000, signal);
+    }
+    onState?.("reconnecting");
+    let response: Response;
+    try {
+      response = await fetchWithAttemptTimeout(
+        `/api/archive-ai/requests/${encodeURIComponent(pending.requestId)}`,
+        {
+          method: "GET",
+          credentials: "same-origin",
+          headers,
+        },
+        signal,
+      );
+    } catch {
+      if (signal.aborted) throw abortError(signal);
+      await waitForConnectionWindow(retryDelay(attempt++), signal);
+      continue;
+    }
+    if (response.status === 410) {
+      void forgetArchiveAiPending(pending.requestId);
+      throw new ArchiveApiClientError("Archive AI request expired", "request_expired");
+    }
+    if (response.status >= 500) {
+      await waitForConnectionWindow(retryDelay(attempt++), signal);
+      continue;
+    }
+    if (!response.ok) {
+      void forgetArchiveAiPending(pending.requestId);
+      throw new ArchiveApiClientError(
+        `Archive API request recovery failed with ${response.status}`,
+        "client_http_4xx",
+      );
+    }
+
+    const payload = await responsePayload(response);
+    assertMatchingResponseRequestId(payload, pending.requestId);
+    if (!isArchiveAiRequestEnvelope(payload, validate)) {
+      throw new ArchiveApiClientError(
+        "Archive API recovery response was invalid",
+        "client_invalid_payload",
+      );
+    }
+    const state: ArchiveAiRequestState<T> = payload;
+    if (state.state === "succeeded" || state.state === "local") {
+      void forgetArchiveAiPending(pending.requestId);
+      return state.result;
+    }
+    if (state.state === "failed" || state.state === "expired" || state.state === "cancelled") {
+      void forgetArchiveAiPending(pending.requestId);
+      throw new ArchiveApiClientError(`Archive AI request ended in ${state.state}`, state.reason, {
+        retryable: state.retryable,
+      });
+    }
+    if (state.state === "queued" || state.state === "running" || state.state === "unknown") {
+      serverDelay = state.retryAfterMs;
+      onState?.(state.state);
+      await waitForConnectionWindow(retryDelay(attempt++, serverDelay), signal);
+      continue;
+    }
+    throw new ArchiveApiClientError(
+      "Archive API recovery state was invalid",
+      "client_invalid_payload",
+    );
   }
-  return payload;
+
+  void forgetArchiveAiPending(pending.requestId);
+  throw new ArchiveApiClientError("Archive AI request expired", "request_expired");
 }

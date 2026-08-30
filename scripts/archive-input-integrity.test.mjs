@@ -92,6 +92,7 @@ test("connection health contains only bounded operational metadata", () => {
   assert.deepEqual(summarizeArchiveAiHealth("search", events), {
     online: 1,
     local: 1,
+    failed: 0,
     transitions: 1,
     successRate: 50,
     lastChannel: "local",

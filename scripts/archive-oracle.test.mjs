@@ -13,6 +13,8 @@ const openAiTransport = readSource("src/lib/archive-openai-transport.server.ts")
 const archiveApiClient = readSource("src/lib/archive-api-client.ts");
 const searchCatalog = readSource("src/lib/archive-search-catalog.server.ts");
 const searchRoute = readSource("src/routes/api/archive-search.ts");
+const aiJob = readSource("src/lib/archive-ai-job.server.ts");
+const aiHttp = readSource("src/lib/archive-ai-http.server.ts");
 const requestBody = readSource("src/lib/archive-request-body.server.ts");
 const chrome = readSource("src/components/world/world-chrome.tsx");
 const intelligencePage = readSource("src/components/world/archive-intelligence-page.tsx");
@@ -39,7 +41,8 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(archiveApiClient, /credentials: "same-origin"/);
   assert.match(oracle, /className="archive-search-log"/);
   assert.match(oracle, /role="log"/);
-  assert.match(oracle, /AIが質問の意図と会話の流れを思考中です/);
+  assert.match(oracle, /archiveLifecycleText\(searchLifecycle\)/);
+  assert.match(oracle, /回線復帰後に同じ回答を回収します/);
   assert.match(oracle, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(
     oracle,
@@ -77,7 +80,7 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /value\.model !== "gpt-5\.6-terra"/);
   assert.match(searchServer, /value\.effort !== "xhigh"/);
   assert.match(searchServer, /requestOpenAiStructuredResponse\(\{/);
-  assert.match(openAiTransport, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(openAiTransport, /url:\s*"https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(searchServer, /store: false/);
   assert.match(searchServer, /tools: \[\]/);
   assert.match(modelConfig, /effort: "xhigh", mode: "pro", context: "current_turn"/);
@@ -92,7 +95,7 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /A candidate's mere presence never proves relevance/);
   assert.match(searchServer, /referenceCandidateIds is the only signal/);
   assert.match(searchServer, /leave all candidate ids empty/);
-  assert.match(searchServer, /trustedCandidates\.some/);
+  assert.match(searchServer, /allowedCandidateIds\.has/);
   assert.match(searchServer, /safety_identifier: safetyIdentifier/);
   assert.match(searchServer, /serializeUntrustedArchiveConversation\(messages\)/);
   assert.doesNotMatch(searchServer, /input: messages\.map/);
@@ -107,11 +110,11 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchRoute, /isAllowedArchiveBrowserRequest\(request, "search-v1"\)/);
   assert.match(searchRoute, /const MAX_BODY_BYTES = 65_536/);
   assert.match(searchRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
-  assert.match(searchRoute, /canonicalizeArchiveSearchCandidates\(parsed\.data\.candidates\)/);
-  assert.match(searchRoute, /resolveArchiveSearchRoute\(modelPreference\)\.costClass/);
-  assert.match(searchRoute, /cache-control": "no-store, max-age=0/);
-  assert.match(searchRoute, /createLocalArchiveSearchReply/);
-  assert.match(searchRoute, /ローカルサーチへ切り替えました/);
+  assert.match(aiJob, /canonicalizeArchiveSearchCandidates\(input\.candidates\)/);
+  assert.match(aiJob, /initialExecution\.costClass/);
+  assert.match(aiHttp, /cache-control": "no-store, max-age=0/);
+  assert.match(aiJob, /createLocalArchiveSearchReply/);
+  assert.match(aiJob, /return finishLocal\(row, decryptedPayload, reason\)/);
   assert.match(
     searchServer,
     /searchPreferenceSchema\.default\(DEFAULT_ARCHIVE_MODEL_PREFERENCES\.search\)/,
@@ -242,6 +245,25 @@ test("both AI composers send only from their explicit send buttons", () => {
   assert.match(
     intelligenceStyles,
     /> button::before,[\s\S]*?> button::before \{[\s\S]*?inset:\s*6px/,
+  );
+});
+
+test("both composer glass surfaces use the textarea itself as the stable hit surface", () => {
+  assert.doesNotMatch(oracle, /focusArchiveComposerFromSurface|onClickCapture/);
+  assert.doesNotMatch(roleplay, /focusArchiveComposerFromSurface|onClickCapture/);
+
+  const hitSurfaceRule = [...intelligenceStyles.matchAll(/[^{}]*textarea[^{}]*\{([^}]*)\}/g)].find(
+    (match) => /position:\s*absolute/.test(match[1]),
+  );
+  assert.ok(hitSurfaceRule, "both composers need a native textarea hit surface");
+  assert.match(hitSurfaceRule[1], /z-index:\s*0/);
+  assert.match(hitSurfaceRule[1], /inset:\s*-1px/);
+  assert.match(hitSurfaceRule[1], /width:\s*auto/);
+  assert.match(hitSurfaceRule[1], /height:\s*auto/);
+  assert.match(intelligenceStyles, /> :not\(textarea\)\s*\{[\s\S]*?z-index:\s*1/);
+  assert.match(
+    intelligenceStyles,
+    /\.archive-oracle-input-shell > button,\s*\.archive-intelligence-page \.archive-roleplay-composer > button \{\s*margin-bottom:\s*4px/,
   );
 });
 
@@ -429,8 +451,10 @@ test("focused composers stay position-stable during visual viewport scrolling", 
     ...intelligenceStyles.matchAll(/[^{}]*textarea[^{}]*\{([^}]*)\}/g),
   ].find((match) => /field-sizing:\s*fixed/.test(match[1]));
   assert.ok(fixedTextareaRule, "route CSS must override intrinsic textarea field sizing");
-  assert.match(fixedTextareaRule[1], /height:\s*44px/);
-  assert.match(fixedTextareaRule[1], /min-height:\s*44px/);
+  assert.match(fixedTextareaRule[1], /position:\s*absolute/);
+  assert.match(fixedTextareaRule[1], /inset:\s*-1px/);
+  assert.match(fixedTextareaRule[1], /height:\s*auto/);
+  assert.match(fixedTextareaRule[1], /min-height:\s*0/);
   assert.match(fixedTextareaRule[1], /overflow-y:\s*auto/);
 });
 

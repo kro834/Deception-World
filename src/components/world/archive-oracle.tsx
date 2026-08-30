@@ -7,7 +7,15 @@ import {
   summarizeArchiveAiHealth,
   type ArchiveHealthAction,
 } from "@/lib/archive-ai-health";
-import { ArchiveApiClientError, postArchiveApi } from "@/lib/archive-api-client";
+import {
+  ArchiveApiClientError,
+  cancelArchiveApi,
+  createArchiveAiRequestId,
+  listArchiveAiPending,
+  postArchiveApi,
+  resumeArchiveApi,
+  type ArchiveApiLifecycle,
+} from "@/lib/archive-api-client";
 import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
 import { isArchiveDelivery } from "@/lib/archive-delivery";
 import {
@@ -16,7 +24,7 @@ import {
   truncateArchiveInput,
 } from "@/lib/archive-input";
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
-import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
+import type { ArchiveSearchReply } from "@/lib/archive-search";
 import {
   archivePersonaProfileLabel,
   archiveSearchModelName,
@@ -672,10 +680,11 @@ type SearchMessage = {
   text: string;
   results?: ArchiveOracleResult[];
   suggestions?: string[];
-  source?: ArchiveSearchReply["source"];
+  source?: ArchiveSearchReply["source"] | "error";
   model?: string;
   modelLabel?: string;
   notice?: string;
+  requestId?: string;
 };
 
 type SearchEditState = {
@@ -698,15 +707,36 @@ function searchMessageId(prefix: string): string {
 function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
   if (!value || typeof value !== "object") return false;
   const reply = value as Partial<ArchiveSearchReply>;
-  return (
+  const common =
     typeof reply.reply === "string" &&
     Array.isArray(reply.suggestions) &&
     (reply.focusCandidateId === undefined || typeof reply.focusCandidateId === "string") &&
     Array.isArray(reply.referenceCandidateIds) &&
     reply.referenceCandidateIds.every((id) => typeof id === "string") &&
     (reply.source === "openai" || reply.source === "local") &&
-    (reply.delivery === undefined || isArchiveDelivery(reply.delivery))
-  );
+    Boolean(reply.delivery) &&
+    isArchiveDelivery(reply.delivery);
+  if (!common) return false;
+  if (reply.source === "openai") {
+    return (
+      reply.delivery?.channel === "online" &&
+      reply.delivery.reason === "ok" &&
+      typeof reply.requestId === "string" &&
+      typeof reply.requestedModel === "string" &&
+      typeof reply.providerModel === "string" &&
+      typeof reply.providerResponseId === "string" &&
+      reply.modelVerified === true
+    );
+  }
+  return reply.delivery?.channel === "local" && reply.modelVerified === false;
+}
+
+function archiveLifecycleText(state: ArchiveApiLifecycle | null): string {
+  if (state === "submitting") return "送信中";
+  if (state === "queued") return "接続待機中";
+  if (state === "unknown") return "回答を確認中";
+  if (state === "reconnecting") return "再接続中";
+  return "思考中";
 }
 
 function resolveConversationalSearchQuery(
@@ -755,6 +785,7 @@ export function ArchiveIntelligenceWorkspace({
   const searchLogRef = useRef<HTMLDivElement>(null);
   const searchFollowLatestRef = useRef(true);
   const searchAbortRef = useRef<AbortController | null>(null);
+  const searchRequestIdRef = useRef<string | null>(null);
   const searchSequenceRef = useRef(0);
   const surfaceTransitionTimerRef = useRef<number | null>(null);
   const [surface, setSurface] = useState<"search" | "roleplay">("search");
@@ -762,6 +793,7 @@ export function ArchiveIntelligenceWorkspace({
   const [question, setQuestion] = useState("");
   const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
   const [searchPending, setSearchPending] = useState(false);
+  const [searchLifecycle, setSearchLifecycle] = useState<ArchiveApiLifecycle | null>(null);
   const [selectedSearchMessageId, setSelectedSearchMessageId] = useState<string | null>(null);
   const [searchEdit, setSearchEdit] = useState<SearchEditState | null>(null);
   const [searchHealth, setSearchHealth] = useState(() => summarizeArchiveAiHealth("search", []));
@@ -775,11 +807,17 @@ export function ArchiveIntelligenceWorkspace({
     ? latestSearchAssistant.suggestions
     : ARCHIVE_ORACLE_SUGGESTIONS;
 
-  const stopSearch = useCallback(() => {
+  const stopSearch = useCallback((cancelServer = false) => {
     searchSequenceRef.current += 1;
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
+    const requestId = searchRequestIdRef.current;
+    searchRequestIdRef.current = null;
+    if (cancelServer && requestId) {
+      void cancelArchiveApi({ client: "search-v1", requestId });
+    }
     setSearchPending(false);
+    setSearchLifecycle(null);
     setPendingSearchPreference(null);
   }, []);
 
@@ -788,6 +826,69 @@ export function ArchiveIntelligenceWorkspace({
   useEffect(() => {
     setSearchHealth(summarizeArchiveAiHealth("search"));
   }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    const controller = new AbortController();
+    let disposed = false;
+    void (async () => {
+      const pendingRecords = (await listArchiveAiPending()).filter(
+        (record) => record.client === "search-v1" && record.url === "/api/archive-search",
+      );
+      if (disposed || !pendingRecords.length) return;
+      searchRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
+      if (!searchAbortRef.current) searchAbortRef.current = controller;
+      setSearchPending(true);
+      setSearchLifecycle("reconnecting");
+      await Promise.allSettled(
+        pendingRecords.map(async (pendingRecord) => {
+          const reply = await resumeArchiveApi({
+            pending: pendingRecord,
+            signal: controller.signal,
+            validate: isArchiveSearchReply,
+            onState: setSearchLifecycle,
+          });
+          if (disposed || controller.signal.aborted) return;
+          const recoveredResults = reply.referenceCandidateIds
+            .map((id) => ARCHIVE_ORACLE_ENTRIES.find((entry) => entry.id === id))
+            .filter((entry): entry is ArchiveOracleEntry => Boolean(entry))
+            .map((entry) => ({ entry, score: 1 }));
+          setSearchMessages((current) =>
+            reply.requestId && current.some((message) => message.requestId === reply.requestId)
+              ? current
+              : [
+                  ...current,
+                  {
+                    id: searchMessageId("search-recovered"),
+                    role: "assistant",
+                    text: reply.reply,
+                    results: recoveredResults,
+                    suggestions: reply.suggestions,
+                    source: reply.source,
+                    model: reply.providerModel ?? reply.model,
+                    modelLabel: reply.providerModel
+                      ? `${reply.providerModel.toUpperCase()} · VERIFIED`
+                      : "LOCAL",
+                    notice: reply.notice ?? "再接続前に生成された回答を復元しました。",
+                    requestId: reply.requestId,
+                  },
+                ],
+          );
+        }),
+      );
+      if (!disposed) {
+        if (searchAbortRef.current === controller) searchAbortRef.current = null;
+        searchRequestIdRef.current = null;
+        setSearchPending(false);
+        setSearchLifecycle(null);
+      }
+    })();
+    return () => {
+      disposed = true;
+      controller.abort();
+      if (searchAbortRef.current === controller) searchAbortRef.current = null;
+    };
+  }, [active]);
 
   useEffect(() => {
     if (!active) stopSearch();
@@ -875,10 +976,13 @@ export function ArchiveIntelligenceWorkspace({
       setSearchEdit(null);
       setSelectedSearchMessageId(null);
       setSearchPending(true);
+      setSearchLifecycle("submitting");
       setPendingSearchPreference(searchPreferenceAtRequest);
 
       const controller = new AbortController();
+      const requestId = createArchiveAiRequestId();
       searchAbortRef.current = controller;
+      searchRequestIdRef.current = requestId;
       const thinkingStartedAt = performance.now();
       const sequence = searchSequenceRef.current + 1;
       searchSequenceRef.current = sequence;
@@ -921,22 +1025,47 @@ export function ArchiveIntelligenceWorkspace({
           },
           signal: controller.signal,
           validate: isArchiveSearchReply,
+          pendingContext: {
+            contextId: "search",
+            userMessageId: nextMessages.at(-1)?.id,
+          },
+          requestId,
+          onState: setSearchLifecycle,
         });
       } catch (error) {
         if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
         const deliveryReason =
           error instanceof ArchiveApiClientError ? error.reason : "client_network";
-        reply = createLocalArchiveSearchReply({
-          query: resolvedQuery,
-          candidates: results.map(({ entry }) => ({
-            id: entry.id,
-            label: entry.label,
-            kicker: entry.kicker,
-            description: entry.description,
-          })),
-          notice: "通信が安定しなかったため、ローカルサーチで案内しています。",
-          deliveryReason,
-        });
+        setSearchMessages((current) => [
+          ...current,
+          {
+            id: searchMessageId("search-error"),
+            role: "assistant",
+            text: "オンライン回答を回収できませんでした。ローカル回答へは置き換えていません。接続を確認し、同じメッセージを再送してください。",
+            source: "error",
+            modelLabel: "RECONNECT",
+            notice: `通信状態: ${deliveryReason}`,
+            requestId,
+          },
+        ]);
+        setSearchHealth(
+          recordArchiveAiHealth({
+            surface: "search",
+            action: healthAction,
+            channel: "failed",
+            reason: deliveryReason,
+            latencyMs: performance.now() - thinkingStartedAt,
+            turnCount: nextMessages.length,
+            context: sentCharacters >= 6_400 ? "high" : sentCharacters >= 4_000 ? "medium" : "low",
+            trimmed: conversationHistory.length < nextMessages.length,
+          }),
+        );
+        setSearchPending(false);
+        setSearchLifecycle(null);
+        setPendingSearchPreference(null);
+        if (searchAbortRef.current === controller) searchAbortRef.current = null;
+        if (searchRequestIdRef.current === requestId) searchRequestIdRef.current = null;
+        return;
       }
 
       await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
@@ -972,29 +1101,38 @@ export function ArchiveIntelligenceWorkspace({
         .map((id) => resultById.get(id))
         .filter((result): result is ArchiveOracleResult => Boolean(result));
       const displayedReferences = referencedResults;
-      setSearchMessages((current) => [
-        ...current,
-        {
-          id: searchMessageId("search-assistant"),
-          role: "assistant",
-          text: reply.reply,
-          results: displayedReferences,
-          suggestions: reply.suggestions,
-          source: reply.source,
-          model: reply.model,
-          modelLabel: archiveSearchPreferenceLabel(searchPreferenceAtRequest),
-          notice: reply.notice,
-        },
-      ]);
+      setSearchMessages((current) =>
+        reply.requestId && current.some((message) => message.requestId === reply.requestId)
+          ? current
+          : [
+              ...current,
+              {
+                id: searchMessageId("search-assistant"),
+                role: "assistant",
+                text: reply.reply,
+                results: displayedReferences,
+                suggestions: reply.suggestions,
+                source: reply.source,
+                model: reply.providerModel ?? reply.model,
+                modelLabel: reply.providerModel
+                  ? `${reply.providerModel.toUpperCase()} · VERIFIED`
+                  : archiveSearchPreferenceLabel(searchPreferenceAtRequest),
+                notice: reply.notice,
+                requestId: reply.requestId,
+              },
+            ],
+      );
       setSearchPending(false);
+      setSearchLifecycle(null);
       setPendingSearchPreference(null);
       if (searchAbortRef.current === controller) searchAbortRef.current = null;
+      if (searchRequestIdRef.current === requestId) searchRequestIdRef.current = null;
     },
     [modelPreferences.search, searchMessages],
   );
 
   const clearSearchConversation = useCallback(() => {
-    stopSearch();
+    stopSearch(true);
     setSearchMessages([]);
     setQuestion("");
     setSearchEdit(null);
@@ -1005,7 +1143,7 @@ export function ArchiveIntelligenceWorkspace({
   const beginSearchEdit = useCallback(
     (message: SearchMessage) => {
       if (message.role !== "user") return;
-      if (searchPending) stopSearch();
+      if (searchPending) stopSearch(true);
       setSearchEdit({ messageId: message.id, draftBeforeEdit: question });
       setSelectedSearchMessageId(null);
       setQuestion(message.text);
@@ -1028,7 +1166,7 @@ export function ArchiveIntelligenceWorkspace({
   const resendSearchMessage = useCallback(
     (message: SearchMessage) => {
       if (message.role !== "user") return;
-      if (searchPending) stopSearch();
+      if (searchPending) stopSearch(true);
       setSearchEdit(null);
       setSelectedSearchMessageId(null);
       void ask(message.text, {
@@ -1264,7 +1402,9 @@ export function ArchiveIntelligenceWorkspace({
                               : message.model === "gpt-5.5"
                                 ? "GPT-5.5"
                                 : "NEURAL"))
-                          : "LOCAL"}
+                          : message.source === "local"
+                            ? "LOCAL"
+                            : (message.modelLabel ?? "RECONNECT")}
                       </small>
                     ) : null}
                   </header>
@@ -1351,12 +1491,16 @@ export function ArchiveIntelligenceWorkspace({
                     : (
                         pendingSearchPreference ?? modelPreferences.search
                       ).effort.toUpperCase()}{" "}
-                  / 思考中
+                  / {archiveLifecycleText(searchLifecycle)}
                 </small>
                 <p>
                   {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-                    ? "会話全体の意図と必要な情報を深く考えています"
-                    : "質問の意図と会話の流れを整理しています"}
+                    ? searchLifecycle === "reconnecting"
+                      ? "回線復帰後に同じ回答を回収します"
+                      : "会話全体の意図と必要な情報を深く考えています"
+                    : searchLifecycle === "reconnecting"
+                      ? "通信を復旧し、同じ回答を確認しています"
+                      : "質問の意図と会話の流れを整理しています"}
                 </p>
               </div>
             </div>
@@ -1366,8 +1510,8 @@ export function ArchiveIntelligenceWorkspace({
         <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
           {searchPending
             ? (pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-              ? "AIが会話全体の意図と必要な情報を思考中です"
-              : "AIが質問の意図と会話の流れを思考中です"
+              ? `AIが${archiveLifecycleText(searchLifecycle)}です`
+              : `AIが${archiveLifecycleText(searchLifecycle)}です`
             : ""}
         </p>
 
@@ -1499,7 +1643,7 @@ export function ArchiveIntelligenceWorkspace({
                 type="button"
                 className="archive-composer-stop is-stop"
                 aria-label="サーチの応答生成を停止"
-                onClick={stopSearch}
+                onClick={() => stopSearch(true)}
               >
                 <Square size={15} fill="currentColor" strokeWidth={1.4} aria-hidden="true" />
                 <span>停止</span>

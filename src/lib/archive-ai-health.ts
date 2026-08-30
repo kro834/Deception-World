@@ -7,7 +7,7 @@ export type ArchiveLatencyBucket = "under_3s" | "3_to_8s" | "8_to_20s" | "over_2
 export type ArchiveAiHealthEvent = {
   surface: ArchiveHealthSurface;
   action: ArchiveHealthAction;
-  channel: "online" | "local";
+  channel: "online" | "local" | "failed";
   reason: ArchiveDeliveryReason;
   latency: ArchiveLatencyBucket;
   turns: "1_to_4" | "5_to_8" | "9_to_12" | "over_12";
@@ -19,9 +19,10 @@ export type ArchiveAiHealthEvent = {
 export type ArchiveAiHealthSummary = {
   online: number;
   local: number;
+  failed: number;
   transitions: number;
   successRate: number;
-  lastChannel: "online" | "local" | "ready";
+  lastChannel: "online" | "local" | "failed" | "ready";
   lastReason?: ArchiveDeliveryReason;
   lastLatency?: ArchiveLatencyBucket;
   highContext: boolean;
@@ -37,7 +38,7 @@ function isHealthEvent(value: unknown): value is ArchiveAiHealthEvent {
   return (
     (event.surface === "search" || event.surface === "persona") &&
     (event.action === "send" || event.action === "edit_resend" || event.action === "retry") &&
-    (event.channel === "online" || event.channel === "local") &&
+    (event.channel === "online" || event.channel === "local" || event.channel === "failed") &&
     typeof event.reason === "string" &&
     typeof event.latency === "string" &&
     typeof event.turns === "string" &&
@@ -100,7 +101,8 @@ export function summarizeArchiveAiHealth(
 ): ArchiveAiHealthSummary {
   const filtered = events.filter((event) => event.surface === surface);
   const online = filtered.filter((event) => event.channel === "online").length;
-  const local = filtered.length - online;
+  const local = filtered.filter((event) => event.channel === "local").length;
+  const failed = filtered.filter((event) => event.channel === "failed").length;
   const transitions = filtered.reduce(
     (count, event, index) =>
       index > 0 && filtered[index - 1].channel !== event.channel ? count + 1 : count,
@@ -110,6 +112,7 @@ export function summarizeArchiveAiHealth(
   return {
     online,
     local,
+    failed,
     transitions,
     successRate: filtered.length ? Math.round((online / filtered.length) * 100) : 100,
     lastChannel: latest?.channel ?? "ready",

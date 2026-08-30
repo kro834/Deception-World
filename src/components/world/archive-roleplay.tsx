@@ -7,7 +7,14 @@ import {
   summarizeArchiveAiHealth,
   type ArchiveHealthAction,
 } from "@/lib/archive-ai-health";
-import { ArchiveApiClientError, postArchiveApi } from "@/lib/archive-api-client";
+import {
+  ArchiveApiClientError,
+  cancelArchiveApi,
+  createArchiveAiRequestId,
+  listArchiveAiPending,
+  postArchiveApi,
+  resumeArchiveApi,
+} from "@/lib/archive-api-client";
 import {
   ARCHIVE_CHARACTERS,
   ARCHIVE_CHARACTER_BY_ID,
@@ -23,7 +30,6 @@ import {
 } from "@/lib/archive-input";
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
 import {
-  createLocalArchiveReply,
   hasTacticalSnapshot,
   type ArchiveConversationTurn,
   type ArchiveIntelligenceReply,
@@ -62,10 +68,11 @@ type RoleplayMessage = {
   tactical?: ArchiveTacticalSnapshot;
   suggestions?: string[];
   navigationQuery?: string;
-  source?: "openai" | "local";
+  source?: "openai" | "local" | "error";
   model?: string;
   modelLabel?: string;
   notice?: string;
+  requestId?: string;
 };
 
 type RoleplayEditState = {
@@ -98,7 +105,7 @@ function messageId(prefix: string): string {
 function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
   if (!value || typeof value !== "object") return false;
   const reply = value as Partial<ArchiveIntelligenceReply>;
-  return (
+  const common =
     typeof reply.reply === "string" &&
     typeof reply.narration === "string" &&
     (reply.source === "openai" || reply.source === "local") &&
@@ -109,8 +116,21 @@ function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
     typeof reply.tactical?.tempo === "string" &&
     typeof reply.tactical?.threat === "string" &&
     typeof reply.tactical?.objective === "string" &&
-    (reply.delivery === undefined || isArchiveDelivery(reply.delivery))
-  );
+    Boolean(reply.delivery) &&
+    isArchiveDelivery(reply.delivery);
+  if (!common) return false;
+  if (reply.source === "openai") {
+    return (
+      reply.delivery?.channel === "online" &&
+      reply.delivery.reason === "ok" &&
+      typeof reply.requestId === "string" &&
+      typeof reply.requestedModel === "string" &&
+      typeof reply.providerModel === "string" &&
+      typeof reply.providerResponseId === "string" &&
+      reply.modelVerified === true
+    );
+  }
+  return reply.delivery?.channel === "local" && reply.modelVerified === false;
 }
 
 function historyFrom(messages: readonly RoleplayMessage[]): ArchiveConversationTurn[] {
@@ -206,6 +226,7 @@ export function ArchiveRoleplay({
   );
   const [liveMessage, setLiveMessage] = useState("人格回線を選択できます。");
   const abortRef = useRef<AbortController | null>(null);
+  const activeRequestIdRef = useRef<string | null>(null);
   const requestSequenceRef = useRef(0);
   const logRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -219,10 +240,15 @@ export function ArchiveRoleplay({
 
   const characterStyle = { "--oracle-character-accent": profile.accent } as CSSProperties;
 
-  const stopResponse = useCallback((announce = true) => {
+  const stopResponse = useCallback((announce = true, cancelServer = false) => {
     requestSequenceRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
+    const requestId = activeRequestIdRef.current;
+    activeRequestIdRef.current = null;
+    if (cancelServer && requestId) {
+      void cancelArchiveApi({ client: "persona-v1", requestId });
+    }
     setPendingKey(null);
     setPendingProProfile(null);
     if (announce) setLiveMessage("応答生成を停止しました。");
@@ -273,9 +299,85 @@ export function ArchiveRoleplay({
     [],
   );
 
+  useEffect(() => {
+    const controller = new AbortController();
+    let disposed = false;
+    void (async () => {
+      const pendingRecords = (await listArchiveAiPending()).filter(
+        (record) => record.client === "persona-v1" && record.url === "/api/archive-intelligence",
+      );
+      if (disposed || !pendingRecords.length) return;
+      activeRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
+      if (!abortRef.current) abortRef.current = controller;
+      const firstContext = pendingRecords[0]?.contextId;
+      setPendingKey(
+        firstContext && firstContext in ARCHIVE_CHARACTER_BY_ID
+          ? sessionKey(firstContext as ArchiveCharacterId)
+          : activeSessionKey,
+      );
+      setLiveMessage("再接続前の人格回答を回収しています。");
+      await Promise.allSettled(
+        pendingRecords.map(async (pendingRecord) => {
+          const reply = await resumeArchiveApi({
+            pending: pendingRecord,
+            signal: controller.signal,
+            validate: isArchiveReply,
+            onState: (state) => {
+              setLiveMessage(
+                state === "reconnecting"
+                  ? "再接続中。同じ回答を回収しています。"
+                  : "回答を確認中です。",
+              );
+            },
+          });
+          if (disposed || controller.signal.aborted) return;
+          const contextId = pendingRecord.contextId;
+          const targetKey =
+            contextId && contextId in ARCHIVE_CHARACTER_BY_ID
+              ? sessionKey(contextId as ArchiveCharacterId)
+              : activeSessionKey;
+          updateSession(targetKey, (current) =>
+            reply.requestId && current.some((message) => message.requestId === reply.requestId)
+              ? current
+              : [
+                  ...current,
+                  {
+                    id: messageId("assistant-recovered"),
+                    role: "assistant",
+                    text: reply.reply,
+                    narration: reply.narration,
+                    tactical: reply.tactical,
+                    suggestions: reply.suggestions,
+                    navigationQuery: reply.navigationQuery,
+                    source: reply.source,
+                    model: reply.providerModel ?? reply.model,
+                    modelLabel: reply.providerModel
+                      ? `${reply.providerModel.toUpperCase()} · VERIFIED`
+                      : "LOCAL",
+                    notice: reply.notice ?? "再接続前に生成された回答を復元しました。",
+                    requestId: reply.requestId,
+                  },
+                ],
+          );
+        }),
+      );
+      if (!disposed) {
+        if (abortRef.current === controller) abortRef.current = null;
+        activeRequestIdRef.current = null;
+        setPendingKey(null);
+        setLiveMessage("再接続前の回答を復元しました。");
+      }
+    })();
+    return () => {
+      disposed = true;
+      controller.abort();
+      if (abortRef.current === controller) abortRef.current = null;
+    };
+  }, [activeSessionKey, updateSession]);
+
   const selectCharacter = (nextCharacter: ArchiveCharacterId) => {
     if (nextCharacter === characterId) return;
-    stopResponse(false);
+    stopResponse(false, true);
     setCharacterId(nextCharacter);
     setDraft("");
     setMessageEdit(null);
@@ -287,7 +389,7 @@ export function ArchiveRoleplay({
   const selectMode = useCallback(
     (nextMode: ArchiveRoleplayMode) => {
       if (nextMode === mode) return;
-      stopResponse(false);
+      stopResponse(false, true);
       setMode(nextMode);
       setSelectedUserMessageId(null);
       followLatestRef.current = true;
@@ -297,7 +399,7 @@ export function ArchiveRoleplay({
   );
 
   const clearConversation = () => {
-    stopResponse(false);
+    stopResponse(false, true);
     setSessions((current) => ({ ...current, [activeSessionKey]: [] }));
     setDraft("");
     setMessageEdit(null);
@@ -343,7 +445,9 @@ export function ArchiveRoleplay({
     followLatestRef.current = true;
 
     const controller = new AbortController();
+    const requestId = createArchiveAiRequestId();
     abortRef.current = controller;
+    activeRequestIdRef.current = requestId;
     const thinkingStartedAt = performance.now();
     const sequence = requestSequenceRef.current + 1;
     requestSequenceRef.current = sequence;
@@ -367,22 +471,59 @@ export function ArchiveRoleplay({
         },
         signal: controller.signal,
         validate: isArchiveReply,
+        pendingContext: {
+          contextId: characterAtRequest,
+          userMessageId: nextMessages.at(-1)?.id,
+        },
+        requestId,
+        onState: (state) => {
+          const label =
+            state === "submitting"
+              ? "送信中"
+              : state === "queued"
+                ? "接続待機中"
+                : state === "reconnecting"
+                  ? "再接続中。同じ回答を回収しています"
+                  : state === "unknown"
+                    ? "回答を確認中"
+                    : "思考中";
+          setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name} / ${label}`);
+        },
       });
     } catch (error) {
       if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
       const deliveryReason =
         error instanceof ArchiveApiClientError ? error.reason : "client_network";
-      reply = createLocalArchiveReply({
-        characterId: characterAtRequest,
-        mode: modeAtRequest,
-        message: value,
-        messages: conversationHistory,
-        notice:
-          error instanceof Error
-            ? "通信が安定しなかったため、ローカル人格コアで応答しました。"
-            : "ローカル人格コアで応答しました。",
-        deliveryReason,
-      });
+      updateSession(keyAtRequest, (current) => [
+        ...current,
+        {
+          id: messageId("assistant-error"),
+          role: "assistant",
+          text: "オンライン回答を回収できませんでした。ローカル回答へは置き換えていません。接続を確認し、同じメッセージを再送してください。",
+          source: "error",
+          modelLabel: "RECONNECT",
+          notice: `通信状態: ${deliveryReason}`,
+          requestId,
+        },
+      ]);
+      setConnectionHealth(
+        recordArchiveAiHealth({
+          surface: "persona",
+          action: healthAction,
+          channel: "failed",
+          reason: deliveryReason,
+          latencyMs: performance.now() - thinkingStartedAt,
+          turnCount: nextMessages.length,
+          context: sentCharacters >= 9_600 ? "high" : sentCharacters >= 6_000 ? "medium" : "low",
+          trimmed: conversationHistory.length < nextMessages.length,
+        }),
+      );
+      setPendingKey((current) => (current === keyAtRequest ? null : current));
+      setPendingProProfile(null);
+      if (abortRef.current === controller) abortRef.current = null;
+      if (activeRequestIdRef.current === requestId) activeRequestIdRef.current = null;
+      setLiveMessage("オンライン回答を回収できませんでした。再送信できます。");
+      return;
     }
 
     await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
@@ -413,21 +554,30 @@ export function ArchiveRoleplay({
       suggestions: reply.suggestions,
       navigationQuery: reply.navigationQuery,
       source: reply.source,
-      model: reply.model,
-      modelLabel:
-        modeAtRequest === "pro" ? archivePersonaProfileLabel(proProfileAtRequest) : "GPT-5.6 LUNA",
+      model: reply.providerModel ?? reply.model,
+      modelLabel: reply.providerModel
+        ? `${reply.providerModel.toUpperCase()} · VERIFIED`
+        : modeAtRequest === "pro"
+          ? archivePersonaProfileLabel(proProfileAtRequest)
+          : "GPT-5.6 LUNA",
       notice: reply.notice,
+      requestId: reply.requestId,
     };
-    updateSession(keyAtRequest, (current) => [...current, assistantMessage]);
+    updateSession(keyAtRequest, (current) =>
+      reply.requestId && current.some((message) => message.requestId === reply.requestId)
+        ? current
+        : [...current, assistantMessage],
+    );
     setPendingKey((current) => (current === keyAtRequest ? null : current));
     setPendingProProfile(null);
     if (abortRef.current === controller) abortRef.current = null;
+    if (activeRequestIdRef.current === requestId) activeRequestIdRef.current = null;
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
   };
 
   const beginMessageEdit = (message: RoleplayMessage) => {
     if (message.role !== "user") return;
-    if (pending) stopResponse(false);
+    if (pending) stopResponse(false, true);
     setMessageEdit({ messageId: message.id, draftBeforeEdit: draft });
     setSelectedUserMessageId(null);
     setDraft(message.text);
@@ -447,7 +597,7 @@ export function ArchiveRoleplay({
 
   const resendMessage = (message: RoleplayMessage) => {
     if (message.role !== "user") return;
-    if (pending) stopResponse(false);
+    if (pending) stopResponse(false, true);
     setMessageEdit(null);
     setSelectedUserMessageId(null);
     void sendMessage(message.text, {
@@ -737,7 +887,11 @@ export function ArchiveRoleplay({
                       </small>
                       {message.role === "assistant" ? (
                         <i>
-                          {message.source === "openai" ? (message.modelLabel ?? "NEURAL") : "LOCAL"}
+                          {message.source === "openai"
+                            ? (message.modelLabel ?? "NEURAL")
+                            : message.source === "local"
+                              ? "LOCAL"
+                              : (message.modelLabel ?? "RECONNECT")}
                         </i>
                       ) : null}
                     </div>
@@ -915,7 +1069,7 @@ export function ArchiveRoleplay({
             <button
               type="button"
               className="archive-composer-stop is-stop"
-              onClick={() => stopResponse()}
+              onClick={() => stopResponse(true, true)}
               aria-label="応答生成を停止"
             >
               <Square size={15} fill="currentColor" strokeWidth={1.4} aria-hidden="true" />
