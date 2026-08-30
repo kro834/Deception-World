@@ -1,3 +1,22 @@
+import type { ArchiveDeliveryReason } from "./archive-delivery.ts";
+
+export class ArchiveApiClientError extends Error {
+  readonly reason: Extract<
+    ArchiveDeliveryReason,
+    "client_network" | "client_http_4xx" | "client_http_5xx" | "client_invalid_payload"
+  >;
+
+  constructor(
+    message: string,
+    reason: ArchiveApiClientError["reason"],
+    options?: { cause?: unknown },
+  ) {
+    super(message, options);
+    this.name = "ArchiveApiClientError";
+    this.reason = reason;
+  }
+}
+
 export async function postArchiveApi<T>({
   url,
   client,
@@ -16,19 +35,41 @@ export async function postArchiveApi<T>({
   // budget and generate twice. Transient provider failures are retried inside
   // the server boundary, where one browser request and one rate-limit charge
   // remain authoritative.
-  const response = await fetch(url, {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      "content-type": "application/json",
-      "x-archive-client": client,
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "content-type": "application/json",
+        "x-archive-client": client,
+      },
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (error) {
+    if (signal.aborted) throw error;
+    throw new ArchiveApiClientError("Archive API network request failed", "client_network", {
+      cause: error,
+    });
+  }
 
-  if (!response.ok) throw new Error(`Archive API request failed with ${response.status}`);
-  const payload: unknown = await response.json();
-  if (!validate(payload)) throw new Error("Archive API response was invalid");
+  if (!response.ok) {
+    throw new ArchiveApiClientError(
+      `Archive API request failed with ${response.status}`,
+      response.status >= 500 ? "client_http_5xx" : "client_http_4xx",
+    );
+  }
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    throw new ArchiveApiClientError("Archive API response was not JSON", "client_invalid_payload", {
+      cause: error,
+    });
+  }
+  if (!validate(payload)) {
+    throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
+  }
   return payload;
 }

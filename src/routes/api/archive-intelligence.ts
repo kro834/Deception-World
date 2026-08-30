@@ -11,6 +11,7 @@ import {
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { createLocalArchiveReply } from "@/lib/archive-roleplay-fallback";
 import { archivePersonaCostClass } from "@/lib/archive-model-config";
+import { archiveProviderFailureReason } from "@/lib/archive-openai-transport.server";
 
 // The character limits below are measured in Unicode code units. Reserve
 // enough UTF-8 space for a full Japanese conversation plus its JSON envelope.
@@ -84,6 +85,12 @@ export const Route = createFileRoute("/api/archive-intelligence")({
               message: latestMessage,
               messages,
               notice,
+              deliveryReason:
+                remoteAccess.reason === "unconfigured"
+                  ? "unconfigured"
+                  : remoteAccess.reason === "shared_limit_unavailable"
+                    ? "shared_limit_unavailable"
+                    : "rate_limited",
             }),
           );
         }
@@ -105,9 +112,10 @@ export const Route = createFileRoute("/api/archive-intelligence")({
               message: latestMessage,
               messages,
               notice: "AI接続を利用できないため、ローカル人格コアで応答しています。",
+              deliveryReason: "provider_unavailable",
             }),
           );
-        } catch {
+        } catch (error) {
           return noStoreJson(
             createLocalArchiveReply({
               characterId,
@@ -115,6 +123,7 @@ export const Route = createFileRoute("/api/archive-intelligence")({
               message: latestMessage,
               messages,
               notice: "AI接続を一時的に利用できないため、ローカル人格コアへ切り替えました。",
+              deliveryReason: archiveProviderFailureReason(error),
             }),
           );
         }

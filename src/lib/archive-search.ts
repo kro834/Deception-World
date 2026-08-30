@@ -1,3 +1,10 @@
+import {
+  localArchiveDelivery,
+  type ArchiveDelivery,
+  type ArchiveDeliveryReason,
+} from "./archive-delivery.ts";
+import { normalizeArchiveClassifierText } from "./archive-input.ts";
+
 export type ArchiveSearchCandidate = {
   id: string;
   label: string;
@@ -20,12 +27,13 @@ export type ArchiveSearchReply = {
   source: "openai" | "local";
   model?: string;
   notice?: string;
+  delivery?: ArchiveDelivery;
 };
 
 const LOCAL_GREETING_PATTERN =
-  /^(?:おは(?:よう)?(?:ございます)?|こんにちは|こんばんは|やあ|よう|はじめまして|ただいま)[\s、。!！?？〜～]*$/u;
+  /^[\s\p{P}\p{S}]*(?:おは(?:よう)?(?:ございます)?|こんにちは|こんばんは|やあ|よう|はじめまして|ただいま)[\s\p{P}\p{S}]*$/u;
 const LOCAL_THANKS_PATTERN =
-  /^(?:ありがとう(?:ございます)?|どうも|助かった|感謝)[\s、。!！?？〜～]*$/u;
+  /^[\s\p{P}\p{S}]*(?:ありがとう(?:ございます)?|どうも|助かった|感謝)[\s\p{P}\p{S}]*$/u;
 const LOCAL_CAPABILITY_PATTERN =
   /(?:何ができる|なにができる|できること|使い方|あなたは誰|君は誰|きみは誰|サーチとは)/u;
 const LOCAL_SELF_HARM_PATTERN =
@@ -36,60 +44,71 @@ const LOCAL_DISTRESS_PATTERN = /(?:疲れた|しんどい|つらい|辛い|苦�
 const LOCAL_ARCHIVE_INTENT_PATTERN =
   /(?:Deception World|デセプションワールド|このサイト|サイト内|公開記録|記録ページ|この作品|仮面ライダーサーガ|仮面ライダーレルム|ローア|ヴァンダール|レディック|アルゲノム|オーバーゼッツ|サイファー|シエル|月城悠真|東風谷慶弥|暁慶弥|怪作|ベル・アレイン|無神千桐|ジェームズ・スミス|マキャベル|拒絶の悪夢|レクソナンス|ドリームチャプター|六詠)/iu;
 
-function createLocalGeneralSearchReply(query: string, notice?: string): ArchiveSearchReply {
-  const trimmed = query.trim();
-  if (LOCAL_GREETING_PATTERN.test(trimmed)) {
+function createLocalGeneralSearchReply(
+  query: string,
+  notice?: string,
+  deliveryReason: ArchiveDeliveryReason = "client_network",
+): ArchiveSearchReply {
+  const classified = normalizeArchiveClassifierText(query);
+  const delivery = localArchiveDelivery(deliveryReason);
+  if (LOCAL_GREETING_PATTERN.test(classified)) {
     return {
       reply:
         "おはようございます。今日は何を一緒に考えましょうか？　ちょっとした雑談や相談、文章づくり、一般的な質問でも大丈夫です。Deception Worldについてなら、答えに使った公開記録もあわせて案内できます。",
       suggestions: ["今日の相談に乗って", "このサイトについて教えて", "文章を一緒に考えて"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
-  if (LOCAL_THANKS_PATTERN.test(trimmed)) {
+  if (LOCAL_THANKS_PATTERN.test(classified)) {
     return {
       reply:
         "どういたしまして。話の続きでも、まったく別の質問でも構いません。思いついた言葉のまま送ってください。",
       suggestions: ["もう少し続ける", "別の質問をする", "作品の記録を探す"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
-  if (LOCAL_CAPABILITY_PATTERN.test(trimmed)) {
+  if (LOCAL_CAPABILITY_PATTERN.test(classified)) {
     return {
       reply:
         "私はこのサイトの会話AIです。普段の質問、考えの整理、文章案、雑談や相談に答えられます。Deception Worldの人物・能力・作品を尋ねられたときは、公開記録を確認して要点をまとめ、実際に参照したページだけを回答の下へ表示します。",
       suggestions: ["相談に乗って", "文章を考えて", "シエルについて教えて"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
-  if (LOCAL_SELF_HARM_PATTERN.test(trimmed)) {
+  if (LOCAL_SELF_HARM_PATTERN.test(classified)) {
     return {
       reply:
         "今は一人で抱えず、まず危険な物や場所から離れて、近くにいる信頼できる人へ『今すぐそばにいてほしい』と伝えてください。今すぐ自分を傷つける可能性があるなら、この会話を待たずに地域の緊急通報・救急へ連絡するか、近くの人に代わりに連絡してもらってください。あなたの安全が最優先です。可能なら、今ひとりか、すぐ手を伸ばせる危険な物があるかだけ教えてください。",
       suggestions: ["今ひとりです", "近くの人に連絡します", "危険な物から離れました"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
-  if (LOCAL_ASSISTANT_WELLBEING_PATTERN.test(trimmed)) {
+  if (LOCAL_ASSISTANT_WELLBEING_PATTERN.test(classified)) {
     return {
       reply:
         "元気です。声をかけてくれてありがとうございます。今日は雑談でも、相談でも、調べたいことでも大丈夫です。何から話しましょうか？",
       suggestions: ["少し雑談したい", "相談に乗って", "質問がある"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
-  if (LOCAL_DISTRESS_PATTERN.test(trimmed)) {
+  if (LOCAL_DISTRESS_PATTERN.test(classified)) {
     return {
       reply:
         "話してくれてありがとうございます。すぐに結論を出さなくても大丈夫です。何があったのか、いちばん負担になっているところから少しずつ聞かせてください。考えの整理や、次にできそうな小さな一歩を一緒に探します。",
       suggestions: ["少し話を聞いて", "状況を整理したい", "気分転換を考えたい"],
       referenceCandidateIds: [],
       source: "local",
+      delivery,
     };
   }
   return {
@@ -99,6 +118,7 @@ function createLocalGeneralSearchReply(query: string, notice?: string): ArchiveS
     referenceCandidateIds: [],
     source: "local",
     notice,
+    delivery,
   };
 }
 
@@ -106,12 +126,15 @@ export function createLocalArchiveSearchReply({
   query,
   candidates,
   notice,
+  deliveryReason = "client_network",
 }: {
   query: string;
   candidates: readonly ArchiveSearchCandidate[];
   notice?: string;
+  deliveryReason?: ArchiveDeliveryReason;
 }): ArchiveSearchReply {
-  const trimmed = query.trim();
+  const trimmed = normalizeArchiveClassifierText(query);
+  const delivery = localArchiveDelivery(deliveryReason);
   const [top] = candidates;
   const compareRequested = /違い|比較|どちら|どっち/u.test(trimmed);
   const anotherRequested = /ほか|他|別の|別候補/u.test(trimmed);
@@ -120,7 +143,7 @@ export function createLocalArchiveSearchReply({
   const topReference = top?.referenceExcerpt ?? top?.description;
   const secondReference = second?.referenceExcerpt ?? second?.description;
   const archiveIntent = LOCAL_ARCHIVE_INTENT_PATTERN.test(trimmed);
-  if (!archiveIntent) return createLocalGeneralSearchReply(trimmed, notice);
+  if (!archiveIntent) return createLocalGeneralSearchReply(query, notice, deliveryReason);
   if (!top) {
     return {
       reply:
@@ -129,6 +152,7 @@ export function createLocalArchiveSearchReply({
       referenceCandidateIds: [],
       source: "local",
       notice,
+      delivery,
     };
   }
 
@@ -159,5 +183,6 @@ export function createLocalArchiveSearchReply({
     referenceCandidateIds,
     source: "local",
     notice,
+    delivery,
   };
 }

@@ -3,6 +3,12 @@ import {
   type ArchiveCharacterId,
   type ArchiveRoleplayMode,
 } from "./archive-characters";
+import {
+  localArchiveDelivery,
+  type ArchiveDelivery,
+  type ArchiveDeliveryReason,
+} from "./archive-delivery";
+import { normalizeArchiveClassifierText, truncateArchiveInput } from "./archive-input";
 
 export type ArchiveConversationTurn = {
   role: "user" | "assistant";
@@ -25,14 +31,15 @@ export type ArchiveIntelligenceReply = {
   source: "openai" | "local";
   model?: string;
   notice?: string;
+  delivery?: ArchiveDelivery;
 };
 
 type LocalIntent = "greeting" | "identity" | "comfort" | "combat" | "default";
 
 const EXPLICIT_COMBAT_PATTERN =
-  /戦闘(?:開始|を始|にな|へ入|を強)|戦おう|戦って|戦うぞ|模擬戦|組手|交戦|迎撃|応戦|奇襲|攻撃(?:する|して|された|が来|を受け)|敵(?:が|を|へ|との)|相手が襲|斬りかか|撃って|撃たれ|殴って|蹴って|間合い(?:は|を)|回避して|防御して|変身して(?:戦|倒)|必殺技を|銃撃|剣撃|戦場/u;
+  /戦闘(?:中|開始|を始|にな|へ入|を強)|戦おう|戦って|戦うぞ|模擬戦|組手|交戦|迎撃|応戦|奇襲|攻撃(?:する|して|された|が来|を受け)|敵(?:が|を|へ|との)|相手が襲|斬りかか|撃って|撃たれ|殴って|蹴って|間合い(?:は|を)|回避して|防御して|変身して(?:戦|倒)|必殺技を|銃撃|剣撃|戦場/u;
 const GREETING_PATTERN =
-  /^(やあ|よう|こんにちは|こんばんは|おはよう|初めまして|はじめまして|hi|hello)[!！。．…\s]*$/iu;
+  /^[\s\p{P}\p{S}]*(やあ|よう|こんにちは|こんばんは|おはよう|初めまして|はじめまして|hi|hello)[\s\p{P}\p{S}]*$/iu;
 const IDENTITY_PATTERN = /誰|何者|名前|正体|自己紹介|お前は|あなたは|アナタは/u;
 const COMFORT_PATTERN = /怖|辛|つら|苦し|悲し|泣|不安|寂し|助け|死にたい|消えたい|疲れ|しんど/u;
 const CRISIS_PATTERN = /死にたい|消えたい|自殺|自傷|終わりにしたい|命を絶ちたい/u;
@@ -223,7 +230,10 @@ const CRISIS_OPENERS: Record<ArchiveCharacterId, string> = {
     "それが現実のアナタ自身のことなら、アナタが消える結末はいらない。今は一人で幕を下ろさないで。",
 };
 
-function createCrisisReply(characterId: ArchiveCharacterId): ArchiveIntelligenceReply {
+function createCrisisReply(
+  characterId: ArchiveCharacterId,
+  deliveryReason: ArchiveDeliveryReason,
+): ArchiveIntelligenceReply {
   return {
     reply: `${CRISIS_OPENERS[characterId]}\n\n今すぐ自分を傷つける可能性があるなら、危険な物から距離を取り、近くの信頼できる人へこの画面を見せてください。日本では119（救急）または110へ、国外では地域の緊急番号や危機支援窓口へ連絡してください。`,
     narration: "その場の演出が静まり、声は現実の安全を確かめる方へ変わる。",
@@ -232,19 +242,21 @@ function createCrisisReply(characterId: ArchiveCharacterId): ArchiveIntelligence
     navigationQuery: "",
     source: "local",
     notice: "生命に関わる相談では、なりきりより現実の安全を優先します。",
+    delivery: localArchiveDelivery(deliveryReason),
   };
 }
 
 function detectIntent(input: string): LocalIntent {
-  if (GREETING_PATTERN.test(input.trim())) return "greeting";
-  if (IDENTITY_PATTERN.test(input)) return "identity";
-  if (COMFORT_PATTERN.test(input)) return "comfort";
-  if (isExplicitFictionalCombatInput(input)) return "combat";
+  const classified = normalizeArchiveClassifierText(input);
+  if (GREETING_PATTERN.test(classified)) return "greeting";
+  if (IDENTITY_PATTERN.test(classified)) return "identity";
+  if (COMFORT_PATTERN.test(classified)) return "comfort";
+  if (isExplicitFictionalCombatInput(classified)) return "combat";
   return "default";
 }
 
 export function isExplicitFictionalCombatInput(input: string): boolean {
-  return EXPLICIT_COMBAT_PATTERN.test(input);
+  return EXPLICIT_COMBAT_PATTERN.test(normalizeArchiveClassifierText(input));
 }
 
 function previousUserTopic(
@@ -256,7 +268,7 @@ function previousUserTopic(
     .reverse()
     .find((turn) => turn.role === "user");
   if (!previous) return null;
-  const topic = previous.content.replace(/\s+/gu, " ").trim().slice(0, 48);
+  const topic = truncateArchiveInput(previous.content.replace(/\s+/gu, " ").trim(), 48);
   return topic || null;
 }
 
@@ -266,22 +278,25 @@ export function createLocalArchiveReply({
   message,
   messages,
   notice,
+  deliveryReason = "client_network",
 }: {
   characterId: ArchiveCharacterId;
   mode: ArchiveRoleplayMode;
   message: string;
   messages?: readonly ArchiveConversationTurn[];
   notice?: string;
+  deliveryReason?: ArchiveDeliveryReason;
 }): ArchiveIntelligenceReply {
   const profile = ARCHIVE_CHARACTER_BY_ID[characterId];
-  const trimmed = message.trim().slice(0, mode === "pro" ? 1600 : 900);
-  if (CRISIS_PATTERN.test(trimmed)) {
-    return createCrisisReply(characterId);
+  const trimmed = truncateArchiveInput(message.trim(), mode === "pro" ? 1600 : 900);
+  const classified = normalizeArchiveClassifierText(trimmed);
+  if (CRISIS_PATTERN.test(classified)) {
+    return createCrisisReply(characterId, deliveryReason);
   }
   const intent = detectIntent(trimmed);
   const base = profile.local[intent];
   const combatDetected = intent === "combat";
-  const previousTopic = FOLLOW_UP_PATTERN.test(trimmed) ? previousUserTopic(messages) : null;
+  const previousTopic = FOLLOW_UP_PATTERN.test(classified) ? previousUserTopic(messages) : null;
   const continuity = previousTopic ? CONTINUITY_LINES[characterId](previousTopic) : "";
   const reply =
     mode === "pro"
@@ -295,10 +310,11 @@ export function createLocalArchiveReply({
       mode === "pro" && combatDetected ? { ...TACTICS[characterId] } : { ...EMPTY_TACTICAL },
     suggestions: [...profile.starters[mode]].slice(0, 3),
     navigationQuery: NAVIGATION_PATTERN.test(trimmed)
-      ? `${profile.name} ${trimmed}`.slice(0, 160)
+      ? truncateArchiveInput(`${profile.name} ${trimmed}`, 160)
       : "",
     source: "local",
     notice,
+    delivery: localArchiveDelivery(deliveryReason),
   };
 }
 

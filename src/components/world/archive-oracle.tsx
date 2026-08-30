@@ -1,8 +1,21 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowUp, SlidersHorizontal, Square } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
-import { postArchiveApi } from "@/lib/archive-api-client";
+import {
+  recordArchiveAiHealth,
+  resetArchiveAiHealth,
+  summarizeArchiveAiHealth,
+  type ArchiveHealthAction,
+} from "@/lib/archive-ai-health";
+import { ArchiveApiClientError, postArchiveApi } from "@/lib/archive-api-client";
 import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
+import { isArchiveDelivery } from "@/lib/archive-delivery";
+import {
+  hasVisibleArchiveText,
+  normalizeArchiveInput,
+  truncateArchiveInput,
+} from "@/lib/archive-input";
+import { branchArchiveMessages } from "@/lib/archive-message-branch";
 import { createLocalArchiveSearchReply, type ArchiveSearchReply } from "@/lib/archive-search";
 import {
   archivePersonaProfileLabel,
@@ -20,7 +33,10 @@ import {
 } from "@/lib/asset-loader";
 import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, type DossierLink } from "./dossier-nav";
 import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
+import { ArchiveConnectionHealth } from "./archive-connection-health";
+import { ArchiveComposerEditNotice, ArchiveMessageActions } from "./archive-message-actions";
 import { ArchiveRoleplay } from "./archive-roleplay";
+import { useLiquidSegmentedDrag } from "./use-liquid-segmented-drag";
 
 export type ArchiveOracleEntry = {
   id: string;
@@ -662,6 +678,11 @@ type SearchMessage = {
   notice?: string;
 };
 
+type SearchEditState = {
+  messageId: string;
+  draftBeforeEdit: string;
+};
+
 const SEARCH_FOLLOW_UP_PATTERN =
   /^(それ|その|あれ|これ|一つ目|1つ目|最初|一番上|二つ目|2つ目|2番|二番|後者|前者|三つ目|3つ目|3番|三番|最後|ほか|他|もっと|詳しく|違い|では|じゃあ|なら)/u;
 const SEARCH_TOPIC_CHANGE_PATTERN =
@@ -683,7 +704,8 @@ function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
     (reply.focusCandidateId === undefined || typeof reply.focusCandidateId === "string") &&
     Array.isArray(reply.referenceCandidateIds) &&
     reply.referenceCandidateIds.every((id) => typeof id === "string") &&
-    (reply.source === "openai" || reply.source === "local")
+    (reply.source === "openai" || reply.source === "local") &&
+    (reply.delivery === undefined || isArchiveDelivery(reply.delivery))
   );
 }
 
@@ -701,7 +723,7 @@ function resolveConversationalSearchQuery(
   const explicit = results.find(({ entry }) =>
     normalizedQuestion.includes(normalizeArchiveOracleText(entry.label)),
   );
-  if (explicit) return `${explicit.entry.label} ${trimmed}`.slice(0, 180);
+  if (explicit) return truncateArchiveInput(`${explicit.entry.label} ${trimmed}`, 180);
   if (!SEARCH_FOLLOW_UP_PATTERN.test(trimmed)) return trimmed;
   const requestedIndex = /二つ目|2つ目|2番|二番|後者/u.test(trimmed)
     ? 1
@@ -711,7 +733,7 @@ function resolveConversationalSearchQuery(
         ? 1
         : 0;
   const label = (results[requestedIndex] ?? results.at(-1))?.entry.label;
-  return label ? `${label} ${trimmed}`.slice(0, 180) : trimmed;
+  return label ? truncateArchiveInput(`${label} ${trimmed}`, 180) : trimmed;
 }
 
 export function ArchiveIntelligenceWorkspace({
@@ -740,6 +762,9 @@ export function ArchiveIntelligenceWorkspace({
   const [question, setQuestion] = useState("");
   const [searchMessages, setSearchMessages] = useState<SearchMessage[]>([]);
   const [searchPending, setSearchPending] = useState(false);
+  const [selectedSearchMessageId, setSelectedSearchMessageId] = useState<string | null>(null);
+  const [searchEdit, setSearchEdit] = useState<SearchEditState | null>(null);
+  const [searchHealth, setSearchHealth] = useState(() => summarizeArchiveAiHealth("search", []));
   const [pendingSearchPreference, setPendingSearchPreference] =
     useState<ArchiveSearchPreference | null>(null);
 
@@ -759,6 +784,10 @@ export function ArchiveIntelligenceWorkspace({
   }, []);
 
   useEffect(() => () => stopSearch(), [stopSearch]);
+
+  useEffect(() => {
+    setSearchHealth(summarizeArchiveAiHealth("search"));
+  }, []);
 
   useEffect(() => {
     if (!active) stopSearch();
@@ -802,27 +831,49 @@ export function ArchiveIntelligenceWorkspace({
   }, [surface]);
 
   const ask = useCallback(
-    async (value: string) => {
+    async (
+      value: string,
+      options: {
+        replaceMessageId?: string;
+        action?: ArchiveHealthAction;
+        preserveDraft?: boolean;
+      } = {},
+    ) => {
       const searchPreferenceAtRequest = modelPreferences.search;
-      const nextQuestion = value
-        .trim()
-        .slice(0, searchPreferenceAtRequest.execution === "pro" ? 1200 : 600);
-      if (!nextQuestion || searchAbortRef.current) return;
+      const maxLength = searchPreferenceAtRequest.execution === "pro" ? 1200 : 600;
+      const nextQuestion = normalizeArchiveInput(value).trim();
+      if (
+        !hasVisibleArchiveText(nextQuestion) ||
+        nextQuestion.length > maxLength ||
+        searchAbortRef.current
+      ) {
+        return;
+      }
 
-      const resolvedQuery = resolveConversationalSearchQuery(nextQuestion, searchMessages).slice(
-        0,
+      const existingMessage = options.replaceMessageId
+        ? searchMessages.find((message) => message.id === options.replaceMessageId)
+        : undefined;
+      const nextMessages = options.replaceMessageId
+        ? branchArchiveMessages(searchMessages, options.replaceMessageId, nextQuestion)?.slice(-18)
+        : [
+            ...searchMessages,
+            {
+              id: searchMessageId("search-user"),
+              role: "user" as const,
+              text: nextQuestion,
+            },
+          ].slice(-18);
+      if (!nextMessages) return;
+      const resolvedQuery = truncateArchiveInput(
+        resolveConversationalSearchQuery(nextQuestion, nextMessages.slice(0, -1)),
         180,
       );
       const results = searchArchiveOracle(resolvedQuery, 3);
       searchFollowLatestRef.current = true;
-      const userMessage: SearchMessage = {
-        id: searchMessageId("search-user"),
-        role: "user",
-        text: nextQuestion,
-      };
-      const nextMessages = [...searchMessages, userMessage].slice(-18);
       setSearchMessages(nextMessages);
-      setQuestion("");
+      if (!options.preserveDraft) setQuestion("");
+      setSearchEdit(null);
+      setSelectedSearchMessageId(null);
       setSearchPending(true);
       setPendingSearchPreference(searchPreferenceAtRequest);
 
@@ -832,6 +883,26 @@ export function ArchiveIntelligenceWorkspace({
       const sequence = searchSequenceRef.current + 1;
       searchSequenceRef.current = sequence;
 
+      const conversationHistory = trimArchiveConversation(
+        nextMessages.map((message) => ({
+          role: message.role,
+          content: truncateArchiveInput(
+            message.role === "assistant" && message.results?.length
+              ? `${message.text}\n表示候補: ${message.results
+                  .map(({ entry }, index) => `${index + 1}. ${entry.label} [${entry.id}]`)
+                  .join(" / ")}`
+              : message.text,
+            1600,
+          ),
+        })),
+        { maxTurns: 10, maxTotalChars: 8_000, maxCharsPerTurn: 1_600 },
+      );
+      const sentCharacters = conversationHistory.reduce(
+        (total, message) => total + message.content.length,
+        0,
+      );
+      const healthAction = options.action ?? (existingMessage ? "edit_resend" : "send");
+
       let reply: ArchiveSearchReply;
       try {
         reply = await postArchiveApi({
@@ -839,18 +910,7 @@ export function ArchiveIntelligenceWorkspace({
           client: "search-v1",
           body: {
             query: resolvedQuery,
-            messages: trimArchiveConversation(
-              nextMessages.map((message) => ({
-                role: message.role,
-                content: (message.role === "assistant" && message.results?.length
-                  ? `${message.text}\n表示候補: ${message.results
-                      .map(({ entry }, index) => `${index + 1}. ${entry.label} [${entry.id}]`)
-                      .join(" / ")}`
-                  : message.text
-                ).slice(0, 1600),
-              })),
-              { maxTurns: 10, maxTotalChars: 8_000, maxCharsPerTurn: 1_600 },
-            ),
+            messages: conversationHistory,
             candidates: results.map(({ entry }) => ({
               id: entry.id,
               label: entry.label,
@@ -862,8 +922,10 @@ export function ArchiveIntelligenceWorkspace({
           signal: controller.signal,
           validate: isArchiveSearchReply,
         });
-      } catch {
+      } catch (error) {
         if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+        const deliveryReason =
+          error instanceof ArchiveApiClientError ? error.reason : "client_network";
         reply = createLocalArchiveSearchReply({
           query: resolvedQuery,
           candidates: results.map(({ entry }) => ({
@@ -873,12 +935,29 @@ export function ArchiveIntelligenceWorkspace({
             description: entry.description,
           })),
           notice: "通信が安定しなかったため、ローカルサーチで案内しています。",
+          deliveryReason,
         });
       }
 
       await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
 
       if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+      const delivery = reply.delivery ?? {
+        channel: reply.source === "openai" ? ("online" as const) : ("local" as const),
+        reason: reply.source === "openai" ? ("ok" as const) : ("client_network" as const),
+      };
+      setSearchHealth(
+        recordArchiveAiHealth({
+          surface: "search",
+          action: healthAction,
+          channel: delivery.channel,
+          reason: delivery.reason,
+          latencyMs: performance.now() - thinkingStartedAt,
+          turnCount: nextMessages.length,
+          context: sentCharacters >= 6_400 ? "high" : sentCharacters >= 4_000 ? "medium" : "low",
+          trimmed: conversationHistory.length < nextMessages.length,
+        }),
+      );
       const orderedResults = reply.focusCandidateId
         ? [...results].sort((left, right) =>
             left.entry.id === reply.focusCandidateId
@@ -918,14 +997,56 @@ export function ArchiveIntelligenceWorkspace({
     stopSearch();
     setSearchMessages([]);
     setQuestion("");
+    setSearchEdit(null);
+    setSelectedSearchMessageId(null);
     window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   }, [stopSearch]);
+
+  const beginSearchEdit = useCallback(
+    (message: SearchMessage) => {
+      if (message.role !== "user") return;
+      if (searchPending) stopSearch();
+      setSearchEdit({ messageId: message.id, draftBeforeEdit: question });
+      setSelectedSearchMessageId(null);
+      setQuestion(message.text);
+      window.requestAnimationFrame(() => {
+        const editor = inputRef.current;
+        if (!editor) return;
+        editor.focus({ preventScroll: true });
+        editor.setSelectionRange(editor.value.length, editor.value.length);
+      });
+    },
+    [question, searchPending, stopSearch],
+  );
+
+  const cancelSearchEdit = useCallback(() => {
+    setQuestion(searchEdit?.draftBeforeEdit ?? "");
+    setSearchEdit(null);
+    setSelectedSearchMessageId(null);
+  }, [searchEdit]);
+
+  const resendSearchMessage = useCallback(
+    (message: SearchMessage) => {
+      if (message.role !== "user") return;
+      if (searchPending) stopSearch();
+      setSearchEdit(null);
+      setSelectedSearchMessageId(null);
+      void ask(message.text, {
+        replaceMessageId: message.id,
+        action: "retry",
+        preserveDraft: true,
+      });
+    },
+    [ask, searchPending, stopSearch],
+  );
 
   const attachSearchArchive = useCallback(() => {
     const maxLength = modelPreferences.search.execution === "pro" ? 1200 : 600;
     setQuestion((current) => {
       const marker = "[公開記録を参照] ";
-      return current.startsWith(marker) ? current : `${marker}${current}`.slice(0, maxLength);
+      return current.startsWith(marker)
+        ? current
+        : truncateArchiveInput(`${marker}${current}`, maxLength);
     });
     window.requestAnimationFrame(() => {
       const editor = inputRef.current;
@@ -970,6 +1091,14 @@ export function ArchiveIntelligenceWorkspace({
     });
   };
 
+  const surfaceDrag = useLiquidSegmentedDrag({
+    values: ["search", "roleplay"] as const,
+    value: surface,
+    onCommit: selectSurface,
+  });
+  const searchMaxLength = modelPreferences.search.execution === "pro" ? 1200 : 600;
+  const searchEditOverLimit = Boolean(searchEdit && question.length > searchMaxLength);
+
   return (
     <section
       className="archive-oracle-shell archive-intelligence-workspace"
@@ -982,15 +1111,20 @@ export function ArchiveIntelligenceWorkspace({
       <p id="archive-oracle-description" className="visually-hidden">
         公開記録を会話で探すサーチと、8つのキャラクター人格で対話できる知能端末です。
       </p>
+      <p id="archive-oracle-drag-help" className="visually-hidden">
+        タップで切り替え。長押しして左右へ動かせます。キーボードは左右矢印を使えます。
+      </p>
       <header className="archive-oracle-header">
         <div>
           <p>ARCHIVE INTELLIGENCE</p>
           <h2 id="archive-oracle-title">AIに聞く</h2>
         </div>
         <div
+          {...surfaceDrag.railProps}
           className="archive-oracle-view-switch"
           role="tablist"
           aria-label="AI機能を選択"
+          aria-describedby="archive-oracle-drag-help"
           onKeyDown={handleSurfaceKeyDown}
         >
           <button
@@ -1001,7 +1135,13 @@ export function ArchiveIntelligenceWorkspace({
             aria-selected={surface === "search"}
             aria-controls="archive-oracle-search-panel"
             tabIndex={surface === "search" ? 0 : -1}
-            onClick={() => selectSurface("search")}
+            onClick={(event) => {
+              if (surfaceDrag.shouldSuppressClick()) {
+                event.preventDefault();
+                return;
+              }
+              selectSurface("search");
+            }}
           >
             <span>サーチ</span>
             <small>SEARCH</small>
@@ -1014,7 +1154,13 @@ export function ArchiveIntelligenceWorkspace({
             aria-selected={surface === "roleplay"}
             aria-controls="archive-oracle-roleplay-panel"
             tabIndex={surface === "roleplay" ? 0 : -1}
-            onClick={() => selectSurface("roleplay")}
+            onClick={(event) => {
+              if (surfaceDrag.shouldSuppressClick()) {
+                event.preventDefault();
+                return;
+              }
+              selectSurface("roleplay");
+            }}
           >
             <span>なりきり</span>
             <small>PERSONA</small>
@@ -1080,6 +1226,13 @@ export function ArchiveIntelligenceWorkspace({
               log.scrollHeight - log.scrollTop - log.clientHeight < 140;
           }}
         >
+          <ArchiveConnectionHealth
+            summary={searchHealth}
+            pending={searchPending}
+            turnCount={searchMessages.length}
+            turnLimit={10}
+            onReset={() => setSearchHealth(resetArchiveAiHealth("search"))}
+          />
           {!searchMessages.length ? (
             <div className="archive-search-welcome">
               <span aria-hidden="true">AI</span>
@@ -1091,64 +1244,93 @@ export function ArchiveIntelligenceWorkspace({
               </div>
             </div>
           ) : (
-            searchMessages.map((message) => (
-              <article
-                key={message.id}
-                className={`archive-search-message is-${message.role}`}
-                data-source={message.source}
-              >
-                <header>
-                  <span>{message.role === "assistant" ? "AI" : "YOU"}</span>
-                  {message.role === "assistant" && message.source ? (
-                    <small>
-                      {message.source === "openai"
-                        ? (message.modelLabel ??
-                          (message.model === "gpt-5.6-terra"
-                            ? "TERRA"
-                            : message.model === "gpt-5.5"
-                              ? "GPT-5.5"
-                              : "NEURAL"))
-                        : "LOCAL"}
-                    </small>
+            searchMessages.map((message) => {
+              const actionsOpen = selectedSearchMessageId === message.id;
+              return (
+                <article
+                  key={message.id}
+                  className={`archive-search-message is-${message.role}`}
+                  data-source={message.source}
+                  data-actions-open={actionsOpen || undefined}
+                >
+                  <header>
+                    <span>{message.role === "assistant" ? "AI" : "YOU"}</span>
+                    {message.role === "assistant" && message.source ? (
+                      <small>
+                        {message.source === "openai"
+                          ? (message.modelLabel ??
+                            (message.model === "gpt-5.6-terra"
+                              ? "TERRA"
+                              : message.model === "gpt-5.5"
+                                ? "GPT-5.5"
+                                : "NEURAL"))
+                          : "LOCAL"}
+                      </small>
+                    ) : null}
+                  </header>
+                  {message.role === "user" ? (
+                    <>
+                      <button
+                        type="button"
+                        className="archive-message-text-button"
+                        aria-expanded={actionsOpen}
+                        onClick={() =>
+                          setSelectedSearchMessageId((current) =>
+                            current === message.id ? null : message.id,
+                          )
+                        }
+                      >
+                        <span>{message.text}</span>
+                        <small>タップして編集・再送信</small>
+                      </button>
+                      {actionsOpen ? (
+                        <ArchiveMessageActions
+                          onEdit={() => beginSearchEdit(message)}
+                          onResend={() => resendSearchMessage(message)}
+                          onClose={() => setSelectedSearchMessageId(null)}
+                        />
+                      ) : null}
+                    </>
+                  ) : (
+                    <p>{message.text}</p>
+                  )}
+                  {message.notice ? (
+                    <small className="archive-search-notice">{message.notice}</small>
                   ) : null}
-                </header>
-                <p>{message.text}</p>
-                {message.notice ? (
-                  <small className="archive-search-notice">{message.notice}</small>
-                ) : null}
-                {message.role === "assistant" && message.results?.length ? (
-                  <div className="archive-search-references">
-                    <p>参照したページ</p>
-                    <ol className="archive-oracle-results" aria-label="回答で参照したページ">
-                      {message.results.map(({ entry }, index) => (
-                        <li key={entry.id}>
-                          <GuardedLink
-                            to={entry.to}
-                            hash={entry.hash}
-                            assets={entry.assets}
-                            className="archive-oracle-result"
-                            beforeNavigate={onNavigate}
-                            aria-label={`${entry.label}を開く。${entry.description}`}
-                          >
-                            <span className="archive-oracle-result-index">
-                              {String(index + 1).padStart(2, "0")}
-                            </span>
-                            <span className="archive-oracle-result-copy">
-                              <small>{entry.kicker}</small>
-                              <b>{entry.label}</b>
-                              <span>{entry.description}</span>
-                            </span>
-                            <i className="archive-oracle-result-arrow" aria-hidden="true">
-                              ↗
-                            </i>
-                          </GuardedLink>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                ) : null}
-              </article>
-            ))
+                  {message.role === "assistant" && message.results?.length ? (
+                    <div className="archive-search-references">
+                      <p>参照したページ</p>
+                      <ol className="archive-oracle-results" aria-label="回答で参照したページ">
+                        {message.results.map(({ entry }, index) => (
+                          <li key={entry.id}>
+                            <GuardedLink
+                              to={entry.to}
+                              hash={entry.hash}
+                              assets={entry.assets}
+                              className="archive-oracle-result"
+                              beforeNavigate={onNavigate}
+                              aria-label={`${entry.label}を開く。${entry.description}`}
+                            >
+                              <span className="archive-oracle-result-index">
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                              <span className="archive-oracle-result-copy">
+                                <small>{entry.kicker}</small>
+                                <b>{entry.label}</b>
+                                <span>{entry.description}</span>
+                              </span>
+                              <i className="archive-oracle-result-arrow" aria-hidden="true">
+                                ↗
+                              </i>
+                            </GuardedLink>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })
           )}
 
           {searchPending ? (
@@ -1216,6 +1398,12 @@ export function ArchiveIntelligenceWorkspace({
           <label className="visually-hidden" htmlFor="archive-oracle-question">
             サーチへメッセージを送る
           </label>
+          {searchEdit ? (
+            <ArchiveComposerEditNotice
+              overLimit={searchEditOverLimit}
+              onCancel={cancelSearchEdit}
+            />
+          ) : null}
           <section className="archive-composer-model-row" aria-label="現在のサーチモデル">
             <ArchiveComposerModelMenu
               label={archiveSearchPreferenceLabel(modelPreferences.search)}
@@ -1296,7 +1484,7 @@ export function ArchiveIntelligenceWorkspace({
               name="question"
               rows={1}
               value={question}
-              maxLength={modelPreferences.search.execution === "pro" ? 1200 : 600}
+              maxLength={searchEdit ? undefined : searchMaxLength}
               autoComplete="off"
               enterKeyHint="enter"
               placeholder={
@@ -1320,9 +1508,20 @@ export function ArchiveIntelligenceWorkspace({
               <button
                 type="button"
                 className="archive-composer-send"
-                disabled={!question.trim()}
-                aria-label="サーチへ送信"
-                onClick={() => void ask(question)}
+                disabled={
+                  !hasVisibleArchiveText(question) ||
+                  question.length > searchMaxLength ||
+                  searchEditOverLimit
+                }
+                aria-label={searchEdit ? "編集してサーチへ再送信" : "サーチへ送信"}
+                onClick={() =>
+                  void ask(
+                    question,
+                    searchEdit
+                      ? { replaceMessageId: searchEdit.messageId, action: "edit_resend" }
+                      : undefined,
+                  )
+                }
               >
                 <ArrowUp
                   className="archive-send-icon"

@@ -239,7 +239,10 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitMigration, /bucket_key TEXT PRIMARY KEY/);
   assert.match(rateLimitMigration, /expires_at TIMESTAMPTZ NOT NULL/);
 
-  assert.match(intelligenceServer, /content: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(3000\)/);
+  assert.match(
+    intelligenceServer,
+    /content: z[\s\S]*?\.string\(\)[\s\S]*?\.transform\(normalizeArchiveInput\)[\s\S]*?\.refine\(hasVisibleArchiveText\)[\s\S]*?value\.length <= 3000/,
+  );
   assert.match(
     intelligenceServer,
     /messages: z\.array\(conversationTurnSchema\)\.min\(1\)\.max\(12\)/,
@@ -280,11 +283,11 @@ test("local persona fallback covers every character and all remote failure paths
     );
   }
   assert.match(fallback, /source:\s*"local"/);
-  assert.match(fallback, /if \(CRISIS_PATTERN\.test\(trimmed\)\)/);
-  assert.match(fallback, /return createCrisisReply\(characterId\)/);
+  assert.match(fallback, /if \(CRISIS_PATTERN\.test\(classified\)\)/);
+  assert.match(fallback, /return createCrisisReply\(characterId, deliveryReason\)/);
   assert.match(fallback, /生命に関わる相談では、なりきりより現実の安全を優先します/);
   assert.match(fallback, /NAVIGATION_PATTERN\.test\(trimmed\)/);
-  assert.match(fallback, /navigationQuery:[\s\S]*?\.slice\(0, 160\)/);
+  assert.match(fallback, /navigationQuery:[\s\S]*?truncateArchiveInput\([\s\S]*?, 160\)/);
   assert.match(fallback, /const CONTINUITY_LINES: Record<ArchiveCharacterId/);
   assert.match(fallback, /previousUserTopic\(messages\)/);
   assert.match(fallback, /export function hasTacticalSnapshot/);
@@ -294,18 +297,25 @@ test("local persona fallback covers every character and all remote failure paths
   assert.match(intelligenceRoute, /AI接続が未設定のため、ローカル人格コア/);
   assert.match(intelligenceRoute, /catch \{[\s\S]*?ローカル人格コアへ切り替え/);
   assert.match(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
-  assert.match(roleplay, /latestAssistant\?\.source === "local"[\s\S]*?"LOCAL CORE"/);
+  assert.match(roleplay, /<ArchiveConnectionHealth/);
+  assert.match(roleplay, /recordArchiveAiHealth\(\{/);
 });
 
 test("the composer sends only by button, stays abortable and stale-response safe, and links only to allow-listed results", () => {
   assert.doesNotMatch(roleplay, /handleComposerKeyDown|onCompositionStart|onCompositionEnd/);
   assert.doesNotMatch(roleplay, /type="submit"/);
   assert.match(roleplay, /enterKeyHint="enter"/);
-  assert.match(roleplay, /type="button"[\s\S]*?onClick=\{\(\) => void sendMessage\(\)\}/);
+  assert.match(
+    roleplay,
+    /type="button"[\s\S]*?onClick=\{\(\) =>[\s\S]*?void sendMessage\(\s*draft/,
+  );
 
   assert.match(roleplay, /const abortRef = useRef<AbortController \| null>\(null\)/);
   assert.match(roleplay, /abortRef\.current\?\.abort\(\)/);
-  assert.match(roleplay, /if \(!value \|\| abortRef\.current\) return/);
+  assert.match(
+    roleplay,
+    /if \(!hasVisibleArchiveText\(value\) \|\| value\.length > maxLength \|\| abortRef\.current\) return/,
+  );
   assert.match(roleplay, /if \(abortRef\.current === controller\) abortRef\.current = null/);
   assert.match(roleplay, /signal: controller\.signal/);
   assert.match(roleplay, /requestSequenceRef\.current !== sequence/);

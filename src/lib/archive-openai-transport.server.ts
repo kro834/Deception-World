@@ -27,6 +27,23 @@ export class ArchiveOpenAiTransportError extends Error {
   }
 }
 
+export class ArchiveOpenAiPayloadError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "ArchiveOpenAiPayloadError";
+  }
+}
+
+export function archiveProviderFailureReason(
+  error: unknown,
+): "provider_timeout" | "provider_unavailable" | "provider_invalid_response" {
+  if (error instanceof ArchiveOpenAiPayloadError) return "provider_invalid_response";
+  if (error instanceof ArchiveOpenAiTransportError && /timed out/iu.test(error.message)) {
+    return "provider_timeout";
+  }
+  return "provider_unavailable";
+}
+
 function errorCode(payload: unknown): string | undefined {
   if (!payload || typeof payload !== "object") return undefined;
   const code = (payload as OpenAiErrorPayload).error?.code;
@@ -130,6 +147,7 @@ export async function requestOpenAiStructuredResponse<T>({
     timeoutMs,
   );
   let lastError: unknown;
+  let payloadRetryUsed = false;
 
   try {
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
@@ -192,7 +210,21 @@ export async function requestOpenAiStructuredResponse<T>({
         await waitForNextAttempt(300, deadline, controller.signal, lastError);
         continue;
       }
-      return parse(payload);
+      try {
+        return parse(payload);
+      } catch (error) {
+        lastError = new ArchiveOpenAiPayloadError(
+          "OpenAI response did not match the expected structured payload",
+          { cause: error },
+        );
+        if (payloadRetryUsed || attempt === MAX_ATTEMPTS - 1) throw lastError;
+        payloadRetryUsed = true;
+        console.warn("[archive-ai] retrying one invalid structured response", {
+          attempt: attempt + 1,
+          requestId: response.headers.get("x-request-id") ?? undefined,
+        });
+        await waitForNextAttempt(320, deadline, controller.signal, lastError);
+      }
     }
   } finally {
     clearTimeout(timeout);

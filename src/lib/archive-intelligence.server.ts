@@ -6,6 +6,12 @@ import {
   type ArchiveRoleplayMode,
 } from "./archive-characters";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { ONLINE_ARCHIVE_DELIVERY } from "./archive-delivery";
+import {
+  hasVisibleArchiveText,
+  normalizeArchiveInput,
+  truncateArchiveInput,
+} from "./archive-input";
 import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
 import {
   ARCHIVE_PERSONA_PRO_PROFILES,
@@ -21,7 +27,11 @@ import {
 const conversationTurnSchema = z
   .object({
     role: z.enum(["user", "assistant"]),
-    content: z.string().trim().min(1).max(3000),
+    content: z
+      .string()
+      .transform(normalizeArchiveInput)
+      .refine(hasVisibleArchiveText)
+      .refine((value) => value.length <= 3000),
   })
   .strict();
 
@@ -55,20 +65,20 @@ export type ArchiveIntelligenceRequest = z.infer<typeof archiveIntelligenceReque
 
 const tacticalSchema = z
   .object({
-    range: z.string().max(80),
-    tempo: z.string().max(80),
-    threat: z.string().max(100),
-    objective: z.string().max(120),
+    range: z.string(),
+    tempo: z.string(),
+    threat: z.string(),
+    objective: z.string(),
   })
   .strict();
 
 const generatedReplySchema = z
   .object({
-    reply: z.string().trim().min(1).max(4200),
-    narration: z.string().max(800),
+    reply: z.string().trim().min(1),
+    narration: z.string(),
     tactical: tacticalSchema,
-    suggestions: z.array(z.string().trim().min(1).max(90)).max(3),
-    navigationQuery: z.string().max(160),
+    suggestions: z.array(z.string().trim().min(1)).max(3),
+    navigationQuery: z.string(),
   })
   .strict();
 
@@ -180,6 +190,25 @@ function extractResponseText(payload: unknown): string {
   return "";
 }
 
+function extractResponseRefusal(payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const output = (payload as { output?: unknown }).output;
+  if (!Array.isArray(output)) return "";
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const content = (item as { content?: unknown }).content;
+    if (!Array.isArray(content)) continue;
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const candidate = part as { type?: unknown; refusal?: unknown };
+      if (candidate.type === "refusal" && typeof candidate.refusal === "string") {
+        return candidate.refusal;
+      }
+    }
+  }
+  return "";
+}
+
 function normalizeGeneratedReply(
   generated: GeneratedReply,
   mode: ArchiveRoleplayMode,
@@ -187,14 +216,22 @@ function normalizeGeneratedReply(
 ): GeneratedReply {
   const normal = mode === "normal";
   return {
-    reply: generated.reply.slice(0, normal ? 700 : 3000),
-    narration: generated.narration.slice(0, normal ? 220 : 700),
+    reply: truncateArchiveInput(generated.reply, normal ? 700 : 3000),
+    narration: truncateArchiveInput(generated.narration, normal ? 220 : 700),
     tactical:
       mode === "pro" && combatRequested
-        ? generated.tactical
+        ? {
+            range: truncateArchiveInput(generated.tactical.range, 80),
+            tempo: truncateArchiveInput(generated.tactical.tempo, 80),
+            threat: truncateArchiveInput(generated.tactical.threat, 100),
+            objective: truncateArchiveInput(generated.tactical.objective, 120),
+          }
         : { range: "", tempo: "", threat: "", objective: "" },
-    suggestions: generated.suggestions.slice(0, 3),
-    navigationQuery: generated.navigationQuery.slice(0, 160),
+    suggestions: generated.suggestions
+      .map((item) => truncateArchiveInput(item, 90))
+      .filter(hasVisibleArchiveText)
+      .slice(0, 3),
+    navigationQuery: truncateArchiveInput(generated.navigationQuery, 160),
   };
 }
 
@@ -256,12 +293,32 @@ export async function requestOpenAiArchiveReply({
     },
     parse: (payload) => {
       const outputText = extractResponseText(payload);
-      if (!outputText) throw new Error("OpenAI response did not contain output text");
+      if (!outputText) {
+        const refusal = extractResponseRefusal(payload);
+        if (refusal) {
+          return {
+            reply: truncateArchiveInput(refusal, mode === "normal" ? 700 : 3000),
+            narration: "",
+            tactical: { range: "", tempo: "", threat: "", objective: "" },
+            suggestions: [],
+            navigationQuery: "",
+            source: "openai" as const,
+            model,
+            delivery: ONLINE_ARCHIVE_DELIVERY,
+          };
+        }
+        throw new Error("OpenAI response did not contain output text");
+      }
       const generated = generatedReplySchema.parse(JSON.parse(outputText));
+      const normalized = normalizeGeneratedReply(generated, mode, combatRequested);
+      if (!hasVisibleArchiveText(normalized.reply)) {
+        throw new Error("OpenAI response did not contain visible reply text");
+      }
       return {
-        ...normalizeGeneratedReply(generated, mode, combatRequested),
+        ...normalized,
         source: "openai" as const,
         model,
+        delivery: ONLINE_ARCHIVE_DELIVERY,
       };
     },
   });

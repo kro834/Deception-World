@@ -1,3 +1,5 @@
+import { truncateArchiveInput } from "./archive-input.ts";
+
 export type BoundedConversationTurn = {
   role: "user" | "assistant";
   content: string;
@@ -23,7 +25,7 @@ export function trimArchiveConversation(
   const bounded = messages
     .map((message) => ({
       role: message.role,
-      content: message.content.trim().slice(0, perTurnLimit),
+      content: truncateArchiveInput(message.content.trim(), perTurnLimit),
     }))
     .filter((message) => message.content)
     .slice(-turnLimit);
@@ -32,7 +34,7 @@ export function trimArchiveConversation(
 
   for (let index = bounded.length - 1; index >= 0 && remaining > 0; index -= 1) {
     const message = bounded[index];
-    const content = message.content.slice(0, remaining);
+    const content = truncateArchiveInput(message.content, remaining);
     if (!content) continue;
     result.unshift({ ...message, content });
     remaining -= content.length;

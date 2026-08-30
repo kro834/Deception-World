@@ -16,17 +16,22 @@ const SEARCH_RUNTIME = {
 function mockOutputFor(body) {
   if (body.text?.format?.name === "deception_world_search_reply") {
     return {
-      reply: "検索結果です。",
-      suggestions: ["続きを探す"],
+      reply: "検".repeat(5_000),
+      suggestions: ["続".repeat(140)],
       focusCandidateId: "",
       referenceCandidateIds: [],
     };
   }
   return {
-    reply: "応答です。",
-    narration: "",
-    tactical: { range: "", tempo: "", threat: "", objective: "" },
-    suggestions: ["続きを話す"],
+    reply: "応".repeat(4_000),
+    narration: "描".repeat(1_000),
+    tactical: {
+      range: "間".repeat(140),
+      tempo: "速".repeat(140),
+      threat: "脅".repeat(160),
+      objective: "目".repeat(180),
+    },
+    suggestions: ["続".repeat(140)],
     navigationQuery: "",
   };
 }
@@ -117,6 +122,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
+      assert.equal(reply?.reply.length, preference.execution === "pro" ? 3_600 : 2_400, name);
+      assert.equal(reply?.suggestions[0]?.length, 90, name);
     }
 
     const personaCases = [
@@ -180,7 +187,15 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         characterId: "ciel",
         mode,
         proProfile: profile,
-        messages: [{ role: "user", content: `persona payload ${name}` }],
+        messages: [
+          {
+            role: "user",
+            content:
+              mode === "pro"
+                ? `フィクションの戦闘中です。相手の攻撃へ対応して。persona payload ${name}`
+                : `persona payload ${name}`,
+          },
+        ],
         safetyIdentifier: "persona-safety-id",
       });
       assert.equal(calls.length, callIndex + 1, `${name} should perform exactly one fetch`);
@@ -203,6 +218,20 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
+      assert.equal(reply?.reply.length, mode === "normal" ? 700 : 3_000, name);
+      assert.equal(reply?.narration.length, mode === "normal" ? 220 : 700, name);
+      assert.equal(reply?.suggestions[0]?.length, 90, name);
+      if (mode === "normal") {
+        assert.deepEqual(reply?.tactical, { range: "", tempo: "", threat: "", objective: "" });
+      } else {
+        assert.deepEqual(
+          Object.fromEntries(
+            Object.entries(reply?.tactical ?? {}).map(([key, value]) => [key, value.length]),
+          ),
+          { range: 80, tempo: 80, threat: 100, objective: 120 },
+          name,
+        );
+      }
     }
 
     assert.equal(calls.length, 13, "the full Search and Persona model matrix should be exercised");

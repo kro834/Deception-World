@@ -197,13 +197,19 @@ test("both AI composers send only from their explicit send buttons", () => {
     assert.match(source, arrowPattern, `${name} must use the shared Lucide ArrowUp geometry`);
     assert.doesNotMatch(source, /↑/, `${name} must not depend on a platform font arrow glyph`);
   }
-  assert.match(oracle, /type="button"[\s\S]*?onClick=\{\(\) => void ask\(question\)\}/);
-  assert.match(roleplay, /type="button"[\s\S]*?onClick=\{\(\) => void sendMessage\(\)\}/);
+  assert.match(oracle, /type="button"[\s\S]*?onClick=\{\(\) =>[\s\S]*?void ask\(\s*question/);
+  assert.match(
+    roleplay,
+    /type="button"[\s\S]*?onClick=\{\(\) =>[\s\S]*?void sendMessage\(\s*draft/,
+  );
   assert.doesNotMatch(roleplay, /sendMessage\(starter\)/);
   assert.match(roleplay, /setDraft\(starter\)/);
   assert.match(oracle, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
   assert.match(roleplay, /onSubmit=\{\(event\) => event\.preventDefault\(\)\}/);
-  assert.match(oracle, /if \(!nextQuestion \|\| searchAbortRef\.current\) return/);
+  assert.match(
+    oracle,
+    /if \([\s\S]*?!hasVisibleArchiveText\(nextQuestion\)[\s\S]*?nextQuestion\.length > maxLength[\s\S]*?searchAbortRef\.current[\s\S]*?\) \{[\s\S]*?return;/,
+  );
   assert.match(
     oracle,
     /if \(searchAbortRef\.current === controller\) searchAbortRef\.current = null/,

@@ -203,6 +203,39 @@ test("requestOpenAiStructuredResponse retries a 503 and returns the next valid r
   assert.equal(timers.size, 0, "deadline and retry timers must be cleared");
 });
 
+test("requestOpenAiStructuredResponse retries one invalid structured payload", async (t) => {
+  let fetchCalls = 0;
+  const timers = installOpenAiHarness(t, async () => {
+    fetchCalls += 1;
+    return Response.json(fetchCalls === 1 ? { malformed: true } : { answer: "remote" });
+  });
+  const pending = openAiRequest({
+    parse: (payload) => {
+      if (!payload || typeof payload !== "object" || !("answer" in payload)) {
+        throw new Error("invalid structured payload");
+      }
+      return payload;
+    },
+  });
+
+  for (
+    let step = 0;
+    step < 8 && ![...timers.values()].some((timer) => timer.delay === 320);
+    step += 1
+  ) {
+    await Promise.resolve();
+  }
+  const retryEntry = [...timers.entries()].find(([, timer]) => timer.delay === 320);
+  assert.ok(retryEntry, "the invalid payload should schedule one bounded retry");
+  const [retryId, retryTimer] = retryEntry;
+  timers.delete(retryId);
+  retryTimer.callback(...retryTimer.args);
+
+  assert.deepEqual(await pending, { answer: "remote" });
+  assert.equal(fetchCalls, 2);
+  assert.equal(timers.size, 0);
+});
+
 test("requestOpenAiStructuredResponse never retries a terminal 400", async (t) => {
   let fetchCalls = 0;
   const timers = installOpenAiHarness(t, async () => {

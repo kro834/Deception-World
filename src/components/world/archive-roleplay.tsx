@@ -1,7 +1,13 @@
 import { ArrowUp, RotateCcw, Sparkles, Square } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { postArchiveApi } from "@/lib/archive-api-client";
+import {
+  recordArchiveAiHealth,
+  resetArchiveAiHealth,
+  summarizeArchiveAiHealth,
+  type ArchiveHealthAction,
+} from "@/lib/archive-ai-health";
+import { ArchiveApiClientError, postArchiveApi } from "@/lib/archive-api-client";
 import {
   ARCHIVE_CHARACTERS,
   ARCHIVE_CHARACTER_BY_ID,
@@ -9,6 +15,13 @@ import {
   type ArchiveRoleplayMode,
 } from "@/lib/archive-characters";
 import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
+import { isArchiveDelivery } from "@/lib/archive-delivery";
+import {
+  hasVisibleArchiveText,
+  normalizeArchiveInput,
+  truncateArchiveInput,
+} from "@/lib/archive-input";
+import { branchArchiveMessages } from "@/lib/archive-message-branch";
 import {
   createLocalArchiveReply,
   hasTacticalSnapshot,
@@ -22,6 +35,9 @@ import {
   type ArchivePersonaProProfile,
 } from "@/lib/archive-model-config";
 import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
+import { ArchiveConnectionHealth } from "./archive-connection-health";
+import { ArchiveComposerEditNotice, ArchiveMessageActions } from "./archive-message-actions";
+import { useLiquidSegmentedDrag } from "./use-liquid-segmented-drag";
 
 type RoleplaySearchEntry = {
   id: string;
@@ -50,6 +66,11 @@ type RoleplayMessage = {
   model?: string;
   modelLabel?: string;
   notice?: string;
+};
+
+type RoleplayEditState = {
+  messageId: string;
+  draftBeforeEdit: string;
 };
 
 type ArchiveRoleplayProps = {
@@ -87,7 +108,8 @@ function isArchiveReply(value: unknown): value is ArchiveIntelligenceReply {
     typeof reply.tactical?.range === "string" &&
     typeof reply.tactical?.tempo === "string" &&
     typeof reply.tactical?.threat === "string" &&
-    typeof reply.tactical?.objective === "string"
+    typeof reply.tactical?.objective === "string" &&
+    (reply.delivery === undefined || isArchiveDelivery(reply.delivery))
   );
 }
 
@@ -177,6 +199,11 @@ export function ArchiveRoleplay({
   const [sessions, setSessions] = useState<Record<string, RoleplayMessage[]>>({});
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [pendingProProfile, setPendingProProfile] = useState<ArchivePersonaProProfile | null>(null);
+  const [selectedUserMessageId, setSelectedUserMessageId] = useState<string | null>(null);
+  const [messageEdit, setMessageEdit] = useState<RoleplayEditState | null>(null);
+  const [connectionHealth, setConnectionHealth] = useState(() =>
+    summarizeArchiveAiHealth("persona", []),
+  );
   const [liveMessage, setLiveMessage] = useState("人格回線を選択できます。");
   const abortRef = useRef<AbortController | null>(null);
   const requestSequenceRef = useRef(0);
@@ -189,13 +216,6 @@ export function ArchiveRoleplay({
   const messages = useMemo(() => sessions[activeSessionKey] ?? [], [activeSessionKey, sessions]);
   const pending = pendingKey === activeSessionKey;
   const latestAssistant = [...messages].reverse().find((message) => message.role === "assistant");
-  const connectionLabel = pending
-    ? "SYNCHRONIZING"
-    : latestAssistant?.source === "openai"
-      ? "NEURAL ONLINE"
-      : latestAssistant?.source === "local"
-        ? "LOCAL CORE"
-        : "HYBRID READY";
 
   const characterStyle = { "--oracle-character-accent": profile.accent } as CSSProperties;
 
@@ -209,6 +229,10 @@ export function ArchiveRoleplay({
   }, []);
 
   useEffect(() => () => stopResponse(false), [stopResponse]);
+
+  useEffect(() => {
+    setConnectionHealth(summarizeArchiveAiHealth("persona"));
+  }, []);
 
   useEffect(() => {
     if (!active) return;
@@ -254,43 +278,65 @@ export function ArchiveRoleplay({
     stopResponse(false);
     setCharacterId(nextCharacter);
     setDraft("");
+    setMessageEdit(null);
+    setSelectedUserMessageId(null);
     followLatestRef.current = true;
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[nextCharacter].name}へ人格回線を切り替えました。`);
   };
 
-  const selectMode = (nextMode: ArchiveRoleplayMode) => {
-    if (nextMode === mode) return;
-    stopResponse(false);
-    setMode(nextMode);
-    followLatestRef.current = true;
-    setLiveMessage(`${nextMode === "pro" ? "プロ" : "ノーマル"}モードへ切り替えました。`);
-  };
+  const selectMode = useCallback(
+    (nextMode: ArchiveRoleplayMode) => {
+      if (nextMode === mode) return;
+      stopResponse(false);
+      setMode(nextMode);
+      setSelectedUserMessageId(null);
+      followLatestRef.current = true;
+      setLiveMessage(`${nextMode === "pro" ? "プロ" : "ノーマル"}モードへ切り替えました。`);
+    },
+    [mode, stopResponse],
+  );
 
   const clearConversation = () => {
     stopResponse(false);
     setSessions((current) => ({ ...current, [activeSessionKey]: [] }));
     setDraft("");
+    setMessageEdit(null);
+    setSelectedUserMessageId(null);
     followLatestRef.current = true;
     setLiveMessage(`${profile.name}との現在の会話を初期化しました。`);
   };
 
-  const sendMessage = async (input = draft) => {
+  const sendMessage = async (
+    input = draft,
+    options: {
+      replaceMessageId?: string;
+      action?: ArchiveHealthAction;
+      preserveDraft?: boolean;
+    } = {},
+  ) => {
     const maxLength = mode === "pro" ? 1600 : 900;
-    const value = input.trim().slice(0, maxLength);
-    if (!value || abortRef.current) return;
+    const value = normalizeArchiveInput(input).trim();
+    if (!hasVisibleArchiveText(value) || value.length > maxLength || abortRef.current) return;
 
     const keyAtRequest = activeSessionKey;
     const characterAtRequest = characterId;
     const modeAtRequest = mode;
     const proProfileAtRequest = proProfile;
-    const userMessage: RoleplayMessage = {
-      id: messageId("user"),
-      role: "user",
-      text: value,
-    };
-    const nextMessages = [...messages, userMessage].slice(-MAX_VISIBLE_MESSAGES);
+    const existingMessage = options.replaceMessageId
+      ? messages.find((message) => message.id === options.replaceMessageId)
+      : undefined;
+    const nextMessages = options.replaceMessageId
+      ? branchArchiveMessages(messages, options.replaceMessageId, value)?.slice(
+          -MAX_VISIBLE_MESSAGES,
+        )
+      : [...messages, { id: messageId("user"), role: "user" as const, text: value }].slice(
+          -MAX_VISIBLE_MESSAGES,
+        );
+    if (!nextMessages) return;
     setSessions((current) => ({ ...current, [keyAtRequest]: nextMessages }));
-    setDraft("");
+    if (!options.preserveDraft) setDraft("");
+    setMessageEdit(null);
+    setSelectedUserMessageId(null);
     setPendingKey(keyAtRequest);
     setPendingProProfile(proProfileAtRequest);
     setLiveMessage(`${profile.name}が応答を生成しています。`);
@@ -302,6 +348,11 @@ export function ArchiveRoleplay({
     const sequence = requestSequenceRef.current + 1;
     requestSequenceRef.current = sequence;
     const conversationHistory = historyFrom(nextMessages);
+    const sentCharacters = conversationHistory.reduce(
+      (total, message) => total + message.content.length,
+      0,
+    );
+    const healthAction = options.action ?? (existingMessage ? "edit_resend" : "send");
 
     let reply: ArchiveIntelligenceReply;
     try {
@@ -319,6 +370,8 @@ export function ArchiveRoleplay({
       });
     } catch (error) {
       if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
+      const deliveryReason =
+        error instanceof ArchiveApiClientError ? error.reason : "client_network";
       reply = createLocalArchiveReply({
         characterId: characterAtRequest,
         mode: modeAtRequest,
@@ -328,12 +381,29 @@ export function ArchiveRoleplay({
           error instanceof Error
             ? "通信が安定しなかったため、ローカル人格コアで応答しました。"
             : "ローカル人格コアで応答しました。",
+        deliveryReason,
       });
     }
 
     await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
 
     if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
+    const delivery = reply.delivery ?? {
+      channel: reply.source === "openai" ? ("online" as const) : ("local" as const),
+      reason: reply.source === "openai" ? ("ok" as const) : ("client_network" as const),
+    };
+    setConnectionHealth(
+      recordArchiveAiHealth({
+        surface: "persona",
+        action: healthAction,
+        channel: delivery.channel,
+        reason: delivery.reason,
+        latencyMs: performance.now() - thinkingStartedAt,
+        turnCount: nextMessages.length,
+        context: sentCharacters >= 9_600 ? "high" : sentCharacters >= 6_000 ? "medium" : "low",
+        trimmed: conversationHistory.length < nextMessages.length,
+      }),
+    );
     const assistantMessage: RoleplayMessage = {
       id: messageId("assistant"),
       role: "assistant",
@@ -355,11 +425,45 @@ export function ArchiveRoleplay({
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
   };
 
+  const beginMessageEdit = (message: RoleplayMessage) => {
+    if (message.role !== "user") return;
+    if (pending) stopResponse(false);
+    setMessageEdit({ messageId: message.id, draftBeforeEdit: draft });
+    setSelectedUserMessageId(null);
+    setDraft(message.text);
+    window.requestAnimationFrame(() => {
+      const editor = composerRef.current;
+      if (!editor) return;
+      editor.focus({ preventScroll: true });
+      editor.setSelectionRange(editor.value.length, editor.value.length);
+    });
+  };
+
+  const cancelMessageEdit = () => {
+    setDraft(messageEdit?.draftBeforeEdit ?? "");
+    setMessageEdit(null);
+    setSelectedUserMessageId(null);
+  };
+
+  const resendMessage = (message: RoleplayMessage) => {
+    if (message.role !== "user") return;
+    if (pending) stopResponse(false);
+    setMessageEdit(null);
+    setSelectedUserMessageId(null);
+    void sendMessage(message.text, {
+      replaceMessageId: message.id,
+      action: "retry",
+      preserveDraft: true,
+    });
+  };
+
   const attachPersonaArchive = () => {
     const maxLength = mode === "pro" ? 1600 : 900;
     setDraft((current) => {
       const marker = "[公開記録を参照] ";
-      return current.startsWith(marker) ? current : `${marker}${current}`.slice(0, maxLength);
+      return current.startsWith(marker)
+        ? current
+        : truncateArchiveInput(`${marker}${current}`, maxLength);
     });
     window.requestAnimationFrame(() => {
       const editor = composerRef.current;
@@ -372,6 +476,13 @@ export function ArchiveRoleplay({
   const quickReplies = latestAssistant?.suggestions?.length
     ? latestAssistant.suggestions
     : profile.starters[mode];
+  const modeDrag = useLiquidSegmentedDrag({
+    values: ["normal", "pro"] as const,
+    value: mode,
+    onCommit: selectMode,
+  });
+  const messageMaxLength = mode === "pro" ? 1600 : 900;
+  const messageEditOverLimit = Boolean(messageEdit && draft.length > messageMaxLength);
 
   return (
     <section
@@ -382,6 +493,9 @@ export function ArchiveRoleplay({
     >
       <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
         {liveMessage}
+      </p>
+      <p id="archive-roleplay-mode-drag-help" className="visually-hidden">
+        タップで切り替え。長押しして左右へ動かせます。キーボードは左右矢印を使えます。
       </p>
 
       <aside className="archive-roleplay-identity" aria-label="なりきりキャラクター選択">
@@ -471,13 +585,13 @@ export function ArchiveRoleplay({
             <h3>{profile.name}</h3>
             <p>{profile.title}</p>
           </div>
-          <div
-            className="archive-roleplay-connection"
-            data-state={connectionLabel.toLowerCase().replaceAll(" ", "-")}
-          >
-            <i aria-hidden="true" />
-            <span>{connectionLabel}</span>
-          </div>
+          <ArchiveConnectionHealth
+            summary={connectionHealth}
+            pending={pending}
+            turnCount={messages.length}
+            turnLimit={12}
+            onReset={() => setConnectionHealth(resetArchiveAiHealth("persona"))}
+          />
           <button
             type="button"
             className="archive-roleplay-reset"
@@ -491,15 +605,28 @@ export function ArchiveRoleplay({
 
         <div className="archive-roleplay-mode-row">
           <div
+            {...modeDrag.railProps}
             className="archive-roleplay-mode-switch"
             role="radiogroup"
             aria-label="なりきりモード"
+            aria-describedby="archive-roleplay-mode-drag-help"
             onKeyDown={(event) => {
-              if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+              if (
+                !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(
+                  event.key,
+                )
+              ) {
                 return;
               }
               event.preventDefault();
-              const nextMode = mode === "normal" ? "pro" : "normal";
+              const nextMode =
+                event.key === "Home"
+                  ? "normal"
+                  : event.key === "End"
+                    ? "pro"
+                    : mode === "normal"
+                      ? "pro"
+                      : "normal";
               selectMode(nextMode);
               window.requestAnimationFrame(() => {
                 document
@@ -515,7 +642,13 @@ export function ArchiveRoleplay({
               aria-checked={mode === "normal"}
               tabIndex={mode === "normal" ? 0 : -1}
               className={mode === "normal" ? "is-active" : undefined}
-              onClick={() => selectMode("normal")}
+              onClick={(event) => {
+                if (modeDrag.shouldSuppressClick()) {
+                  event.preventDefault();
+                  return;
+                }
+                selectMode("normal");
+              }}
             >
               <span>NORMAL</span>
               <small>セリフ＋軽い描写</small>
@@ -527,7 +660,13 @@ export function ArchiveRoleplay({
               aria-checked={mode === "pro"}
               tabIndex={mode === "pro" ? 0 : -1}
               className={mode === "pro" ? "is-active" : undefined}
-              onClick={() => selectMode("pro")}
+              onClick={(event) => {
+                if (modeDrag.shouldSuppressClick()) {
+                  event.preventDefault();
+                  return;
+                }
+                selectMode("pro");
+              }}
             >
               <span>PRO</span>
               <small>自然な対話・深い理解</small>
@@ -584,6 +723,7 @@ export function ArchiveRoleplay({
                   key={message.id}
                   className={`archive-roleplay-message is-${message.role}`}
                   data-source={message.source}
+                  data-actions-open={selectedUserMessageId === message.id || undefined}
                 >
                   <header>
                     <span aria-hidden="true">
@@ -603,15 +743,40 @@ export function ArchiveRoleplay({
                     </div>
                   </header>
                   <div className="archive-roleplay-message-body">
-                    {message.text
-                      .split("\n")
-                      .map((line, lineIndex) =>
-                        line ? (
-                          <p key={`${message.id}-${lineIndex}`}>{line}</p>
-                        ) : (
-                          <span key={`${message.id}-${lineIndex}`} aria-hidden="true" />
-                        ),
-                      )}
+                    {message.role === "user" ? (
+                      <>
+                        <button
+                          type="button"
+                          className="archive-message-text-button"
+                          aria-expanded={selectedUserMessageId === message.id}
+                          onClick={() =>
+                            setSelectedUserMessageId((current) =>
+                              current === message.id ? null : message.id,
+                            )
+                          }
+                        >
+                          <span>{message.text}</span>
+                          <small>タップして編集・再送信</small>
+                        </button>
+                        {selectedUserMessageId === message.id ? (
+                          <ArchiveMessageActions
+                            onEdit={() => beginMessageEdit(message)}
+                            onResend={() => resendMessage(message)}
+                            onClose={() => setSelectedUserMessageId(null)}
+                          />
+                        ) : null}
+                      </>
+                    ) : (
+                      message.text
+                        .split("\n")
+                        .map((line, lineIndex) =>
+                          line ? (
+                            <p key={`${message.id}-${lineIndex}`}>{line}</p>
+                          ) : (
+                            <span key={`${message.id}-${lineIndex}`} aria-hidden="true" />
+                          ),
+                        )
+                    )}
                     {message.narration ? (
                       <p className="archive-roleplay-narration">
                         <span className="visually-hidden">描写：</span>
@@ -689,6 +854,12 @@ export function ArchiveRoleplay({
           <label className="visually-hidden" htmlFor="archive-roleplay-message">
             {profile.name}へ送るメッセージ
           </label>
+          {messageEdit ? (
+            <ArchiveComposerEditNotice
+              overLimit={messageEditOverLimit}
+              onCancel={cancelMessageEdit}
+            />
+          ) : null}
           <section className="archive-composer-model-row" aria-label="現在の人格会話モデル">
             <ArchiveComposerModelMenu
               label={mode === "normal" ? "5.6 LUNA" : archivePersonaProfileLabel(proProfile)}
@@ -733,7 +904,7 @@ export function ArchiveRoleplay({
               id="archive-roleplay-message"
               rows={1}
               value={draft}
-              maxLength={mode === "pro" ? 1600 : 900}
+              maxLength={messageEdit ? undefined : messageMaxLength}
               enterKeyHint="enter"
               placeholder={`${profile.name}へ話しかける…`}
               onChange={(event) => setDraft(event.currentTarget.value)}
@@ -754,9 +925,20 @@ export function ArchiveRoleplay({
             <button
               type="button"
               className="archive-composer-send"
-              disabled={!draft.trim()}
-              aria-label={`${profile.name}へ送信`}
-              onClick={() => void sendMessage()}
+              disabled={
+                !hasVisibleArchiveText(draft) ||
+                draft.length > messageMaxLength ||
+                messageEditOverLimit
+              }
+              aria-label={messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`}
+              onClick={() =>
+                void sendMessage(
+                  draft,
+                  messageEdit
+                    ? { replaceMessageId: messageEdit.messageId, action: "edit_resend" }
+                    : undefined,
+                )
+              }
             >
               <ArrowUp
                 className="archive-send-icon"

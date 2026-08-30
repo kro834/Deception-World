@@ -6,6 +6,12 @@ import {
 } from "./archive-search";
 import { canonicalizeArchiveSearchCandidates } from "./archive-search-catalog.server";
 import { serializeUntrustedArchiveConversation } from "./archive-conversation.server";
+import { ONLINE_ARCHIVE_DELIVERY } from "./archive-delivery";
+import {
+  hasVisibleArchiveText,
+  normalizeArchiveInput,
+  truncateArchiveInput,
+} from "./archive-input";
 import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
 import {
   ARCHIVE_SEARCH_EFFORTS,
@@ -19,7 +25,11 @@ import {
 const searchTurnSchema = z
   .object({
     role: z.enum(["user", "assistant"]),
-    content: z.string().trim().min(1).max(1600),
+    content: z
+      .string()
+      .transform(normalizeArchiveInput)
+      .refine(hasVisibleArchiveText)
+      .refine((value) => value.length <= 1600),
   })
   .strict();
 
@@ -53,7 +63,11 @@ const searchPreferenceSchema = z
 
 export const archiveSearchRequestSchema = z
   .object({
-    query: z.string().trim().min(1).max(180),
+    query: z
+      .string()
+      .transform(normalizeArchiveInput)
+      .refine(hasVisibleArchiveText)
+      .refine((value) => value.length <= 180),
     messages: z.array(searchTurnSchema).min(1).max(10),
     candidates: z.array(candidateSchema).max(3),
     // Keep already-open clients compatible during a rolling deployment while
@@ -81,10 +95,10 @@ export const archiveSearchRequestSchema = z
 
 const generatedSearchReplySchema = z
   .object({
-    reply: z.string().trim().min(1).max(4200),
-    suggestions: z.array(z.string().trim().min(1).max(90)).max(3),
-    focusCandidateId: z.string().trim().max(80),
-    referenceCandidateIds: z.array(z.string().trim().min(1).max(80)).max(3),
+    reply: z.string().trim().min(1),
+    suggestions: z.array(z.string().trim().min(1)).max(3),
+    focusCandidateId: z.string().trim(),
+    referenceCandidateIds: z.array(z.string().trim().min(1)).max(3),
   })
   .strict();
 
@@ -118,6 +132,25 @@ function extractResponseText(payload: unknown): string {
       const candidate = part as { type?: unknown; text?: unknown };
       if (candidate.type === "output_text" && typeof candidate.text === "string") {
         return candidate.text;
+      }
+    }
+  }
+  return "";
+}
+
+function extractResponseRefusal(payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const output = (payload as { output?: unknown }).output;
+  if (!Array.isArray(output)) return "";
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const content = (item as { content?: unknown }).content;
+    if (!Array.isArray(content)) continue;
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const candidate = part as { type?: unknown; refusal?: unknown };
+      if (candidate.type === "refusal" && typeof candidate.refusal === "string") {
+        return candidate.refusal;
       }
     }
   }
@@ -216,7 +249,20 @@ export async function requestOpenAiArchiveSearch({
     },
     parse: (payload) => {
       const outputText = extractResponseText(payload);
-      if (!outputText) throw new Error("OpenAI search response did not contain output text");
+      if (!outputText) {
+        const refusal = extractResponseRefusal(payload);
+        if (refusal) {
+          return {
+            reply: truncateArchiveInput(refusal, proConversation ? 3600 : 2400),
+            suggestions: [],
+            referenceCandidateIds: [],
+            source: "openai" as const,
+            model,
+            delivery: ONLINE_ARCHIVE_DELIVERY,
+          };
+        }
+        throw new Error("OpenAI search response did not contain output text");
+      }
       const generated = generatedSearchReplySchema.parse(JSON.parse(outputText));
       const focusCandidateId = trustedCandidates.some(
         (candidate) => candidate.id === generated.focusCandidateId,
@@ -227,13 +273,21 @@ export async function requestOpenAiArchiveSearch({
         (id, index, ids) =>
           ids.indexOf(id) === index && trustedCandidates.some((candidate) => candidate.id === id),
       );
+      const normalizedReply = truncateArchiveInput(generated.reply, proConversation ? 3600 : 2400);
+      if (!hasVisibleArchiveText(normalizedReply)) {
+        throw new Error("OpenAI search response did not contain visible reply text");
+      }
       return {
-        reply: generated.reply.slice(0, proConversation ? 3600 : 2400),
-        suggestions: generated.suggestions.slice(0, 3),
+        reply: normalizedReply,
+        suggestions: generated.suggestions
+          .map((item) => truncateArchiveInput(item, 90))
+          .filter(hasVisibleArchiveText)
+          .slice(0, 3),
         focusCandidateId,
         referenceCandidateIds,
         source: "openai" as const,
         model,
+        delivery: ONLINE_ARCHIVE_DELIVERY,
       };
     },
   });

@@ -12,6 +12,7 @@ import {
 } from "@/lib/archive-request-body.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import { resolveArchiveSearchRoute } from "@/lib/archive-model-config";
+import { archiveProviderFailureReason } from "@/lib/archive-openai-transport.server";
 
 // Search Pro keeps a longer Japanese transcript. The schema still owns the
 // strict character budget; this byte ceiling only prevents valid UTF-8 input
@@ -76,7 +77,19 @@ export const Route = createFileRoute("/api/archive-search")({
             remoteAccess.reason === "unconfigured"
               ? "AI接続が未設定のため、ローカルサーチで案内しています。"
               : "AI回線が混み合っているため、ローカルサーチで案内しています。";
-          return noStoreJson(createLocalArchiveSearchReply({ query, candidates, notice }));
+          return noStoreJson(
+            createLocalArchiveSearchReply({
+              query,
+              candidates,
+              notice,
+              deliveryReason:
+                remoteAccess.reason === "unconfigured"
+                  ? "unconfigured"
+                  : remoteAccess.reason === "shared_limit_unavailable"
+                    ? "shared_limit_unavailable"
+                    : "rate_limited",
+            }),
+          );
         }
 
         try {
@@ -88,8 +101,15 @@ export const Route = createFileRoute("/api/archive-search")({
             signal: request.signal,
           });
           if (remoteReply) return noStoreJson(remoteReply);
-        } catch {
-          // Deterministic local search remains available below.
+        } catch (error) {
+          return noStoreJson(
+            createLocalArchiveSearchReply({
+              query,
+              candidates,
+              notice: "AI回線へ接続できなかったため、ローカルサーチへ切り替えました。",
+              deliveryReason: archiveProviderFailureReason(error),
+            }),
+          );
         }
 
         return noStoreJson(
@@ -97,6 +117,7 @@ export const Route = createFileRoute("/api/archive-search")({
             query,
             candidates,
             notice: "AI回線へ接続できなかったため、ローカルサーチへ切り替えました。",
+            deliveryReason: "provider_unavailable",
           }),
         );
       },

@@ -2337,6 +2337,432 @@ body.archive-intelligence-active {
   box-shadow: none;
 }
 
+/* Tactile Liquid Glass controls and conversation branching ---------------- */
+.archive-intelligence-page .archive-intelligence-workspace .archive-oracle-view-switch::before {
+  transform: translate3d(calc(var(--liquid-segment-index, 0) * (100% + 4px)), 0, 0);
+}
+
+.archive-intelligence-page
+  .archive-intelligence-workspace
+  .archive-oracle-view-switch[data-liquid-dragging]::before {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 12px -12px 28px rgba(0, 0, 0, 0.22),
+    0 9px 28px rgba(0, 0, 0, 0.54),
+    0 0 30px rgba(155, 228, 255, 0.14);
+  transform: translate3d(calc(var(--liquid-segment-index, 0) * (100% + 4px)), 0, 0) scale(1.018);
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-intelligence-page .archive-oracle-view-switch,
+.archive-intelligence-page .archive-roleplay-mode-switch {
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.archive-intelligence-page
+  :is(.archive-oracle-view-switch, .archive-roleplay-mode-switch)[data-liquid-dragging] {
+  cursor: grabbing;
+}
+
+.archive-intelligence-page .archive-roleplay-mode-switch {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 19px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent 44%), rgba(21, 21, 24, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 9px 24px rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(24px) saturate(128%);
+  backdrop-filter: blur(24px) saturate(128%);
+}
+
+.archive-intelligence-page .archive-roleplay-mode-switch::before {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(255, 255, 255, 0.2), transparent 45%),
+    linear-gradient(145deg, rgba(47, 48, 53, 0.94), rgba(12, 12, 15, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 6px 18px rgba(0, 0, 0, 0.42);
+  content: "";
+  transform: translate3d(calc(var(--liquid-segment-index, 0) * 100%), 0, 0);
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.archive-intelligence-page .archive-roleplay-mode-switch[data-liquid-dragging]::before {
+  transform: translate3d(calc(var(--liquid-segment-index, 0) * 100%), 0, 0) scale(1.018);
+  transition-duration: 0.12s;
+}
+
+.archive-intelligence-page .archive-roleplay-mode-switch > button,
+.archive-intelligence-page .archive-roleplay-mode-switch > button[aria-checked="true"] {
+  position: relative;
+  z-index: 1;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.archive-intelligence-page .archive-message-text-button {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  justify-items: start;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.archive-intelligence-page .archive-message-text-button > span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.archive-intelligence-page .archive-message-text-button > small {
+  color: rgba(235, 235, 245, 0.38);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.archive-intelligence-page
+  :is(.archive-search-message, .archive-roleplay-message)[data-actions-open]
+  .archive-message-text-button
+  > small,
+.archive-intelligence-page .archive-message-text-button:focus-visible > small {
+  opacity: 1;
+}
+
+.archive-intelligence-page
+  :is(.archive-search-message, .archive-roleplay-message)[data-actions-open] {
+  border-color: rgba(211, 241, 255, 0.22);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.1), transparent 48%),
+    rgba(42, 42, 46, 0.9);
+}
+
+.archive-message-actions {
+  display: grid;
+  width: max-content;
+  max-width: 100%;
+  grid-template-columns: auto auto 36px;
+  gap: 4px;
+  margin-top: 9px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.09), transparent 48%), rgba(15, 15, 18, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 12px 26px rgba(0, 0, 0, 0.34);
+  -webkit-backdrop-filter: blur(26px) saturate(125%);
+  backdrop-filter: blur(26px) saturate(125%);
+  animation: archive-message-actions-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.archive-message-actions > button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.76);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+}
+
+.archive-message-actions > button:last-child {
+  width: 36px;
+  padding: 0;
+}
+
+.archive-message-actions > button:active {
+  color: #050505;
+  background: #ffffff;
+  transform: scale(0.97);
+}
+
+.archive-composer-edit-notice {
+  display: flex;
+  min-width: 0;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 8px 6px;
+  padding: 7px 9px 7px 11px;
+  border: 1px solid rgba(187, 233, 255, 0.14);
+  border-radius: 15px;
+  color: rgba(255, 255, 255, 0.68);
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.08), transparent 50%), rgba(20, 20, 23, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(22px) saturate(120%);
+  backdrop-filter: blur(22px) saturate(120%);
+}
+
+.archive-composer-edit-notice > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-composer-edit-notice > button {
+  min-height: 34px;
+  flex: none;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 11px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.09);
+  font: inherit;
+  font-size: 10px;
+}
+
+.archive-connection-health {
+  position: relative;
+  z-index: 18;
+  justify-self: end;
+}
+
+.archive-search-log > .archive-connection-health {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  margin: -12px 0 -34px auto;
+}
+
+.archive-connection-health-trigger {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.58);
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent 48%), rgba(18, 18, 21, 0.76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  font: inherit;
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+  backdrop-filter: blur(24px) saturate(125%);
+}
+
+.archive-connection-health-trigger > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ef4c4;
+  box-shadow: 0 0 10px rgba(110, 255, 180, 0.58);
+}
+
+.archive-connection-health[data-open] .archive-connection-health-trigger {
+  border-color: rgba(220, 244, 255, 0.28);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.archive-connection-health-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: min(310px, calc(100vw - 28px));
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 22px;
+  color: rgba(255, 255, 255, 0.78);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(167, 231, 255, 0.1), transparent 44%),
+    rgba(14, 14, 17, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 24px 70px rgba(0, 0, 0, 0.62);
+  -webkit-backdrop-filter: blur(34px) saturate(130%);
+  backdrop-filter: blur(34px) saturate(130%);
+  animation: archive-message-actions-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.archive-connection-health-panel > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.archive-connection-health-panel > header small {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+}
+
+.archive-connection-health-panel > header b {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.archive-connection-health-panel dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+}
+
+.archive-connection-health-panel dl > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  text-align: center;
+}
+
+.archive-connection-health-panel dt {
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+
+.archive-connection-health-panel dd {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.archive-connection-health-panel > p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.archive-connection-health-panel > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.archive-connection-health-panel > footer span {
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.archive-connection-health-panel > footer button {
+  min-height: 34px;
+  flex: none;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 11px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.08);
+  font: inherit;
+  font-size: 9px;
+}
+
+@keyframes archive-message-actions-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 5px, 0) scale(0.98);
+  }
+}
+
+/* iPad mini/Air portrait: use the same direct manipulation model as mobile,
+   without shrinking the desktop two-column persona console. */
+@media (min-width: 761px) and (max-width: 920px) {
+  .archive-intelligence-page .archive-roleplay {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .archive-intelligence-page .archive-roleplay-identity {
+    display: block;
+    min-height: auto;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .archive-intelligence-page .archive-roleplay-portrait {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail {
+    display: flex;
+    gap: 8px;
+    padding: 8px 18px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button {
+    width: auto;
+    min-width: 92px;
+    min-height: 48px;
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 17px;
+  }
+
+  .archive-intelligence-page .archive-roleplay-character-rail > button > span,
+  .archive-intelligence-page .archive-roleplay-character-rail > button > small,
+  .archive-intelligence-page .archive-roleplay-character-rail > button > i {
+    display: none;
+  }
+
+  .archive-model-dialog {
+    width: min(680px, calc(100vw - 28px));
+    max-height: min(86dvh, 920px);
+  }
+}
+
 @media (max-width: 760px) {
   .archive-intelligence-page-header {
     top: max(12px, env(safe-area-inset-top, 0px));
@@ -2382,9 +2808,13 @@ body.archive-intelligence-active {
       max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
   }
 
-  .archive-intelligence-page .archive-search-log,
-  .archive-intelligence-page .archive-roleplay-log {
+  .archive-intelligence-page .archive-search-log {
     padding: 18px 2px 6px;
+  }
+
+  .archive-intelligence-page .archive-roleplay-log {
+    padding: 18px max(14px, env(safe-area-inset-right, 0px)) 6px
+      max(14px, env(safe-area-inset-left, 0px));
   }
 
   .archive-intelligence-page .archive-search-welcome {
@@ -2540,9 +2970,12 @@ body.archive-intelligence-active {
   .archive-intelligence-page .archive-roleplay-mode-switch {
     width: 100%;
     flex-basis: auto;
-    border: 0;
+    border: 1px solid rgba(255, 255, 255, 0.13);
     border-radius: 999px;
-    background: #151517;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.1), transparent 46%), rgba(21, 21, 24, 0.82);
+    -webkit-backdrop-filter: blur(22px) saturate(128%);
+    backdrop-filter: blur(22px) saturate(128%);
   }
 
   .archive-intelligence-page .archive-roleplay-mode-switch > button {
@@ -2574,6 +3007,51 @@ body.archive-intelligence-active {
   .archive-intelligence-page .archive-roleplay-composer {
     padding: 0 max(14px, env(safe-area-inset-right, 0px))
       max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px));
+  }
+
+  .archive-intelligence-page .archive-message-text-button {
+    min-height: 48px;
+  }
+
+  .archive-message-actions {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+  }
+
+  .archive-message-actions > button {
+    min-height: 44px;
+  }
+
+  .archive-composer-edit-notice {
+    margin-inline: 2px;
+  }
+
+  .archive-composer-edit-notice > span {
+    font-size: 9px;
+  }
+
+  .archive-connection-health-trigger {
+    min-width: 38px;
+    min-height: 38px;
+    justify-content: center;
+    padding: 0 10px;
+  }
+
+  .archive-roleplay-console-header .archive-connection-health-trigger > span {
+    display: none;
+  }
+
+  .archive-connection-health-panel {
+    position: fixed;
+    top: auto;
+    right: max(14px, env(safe-area-inset-right, 0px));
+    bottom: max(126px, calc(env(safe-area-inset-bottom, 0px) + 116px));
+    left: max(14px, env(safe-area-inset-left, 0px));
+    width: auto;
+  }
+
+  .archive-search-log > .archive-connection-health {
+    margin-top: -8px;
   }
 
   .archive-model-dialog {
@@ -2776,6 +3254,11 @@ body.archive-intelligence-active {
   .archive-model-persona-grid > button,
   .archive-model-pro-card,
   .archive-composer-popover,
+  .archive-message-actions,
+  .archive-connection-health-panel,
+  .archive-composer-edit-notice,
+  .archive-intelligence-page .archive-oracle-view-switch::before,
+  .archive-intelligence-page .archive-roleplay-mode-switch::before,
   .archive-model-search-grid > button::before,
   .archive-model-persona-grid > button::before,
   .archive-model-pro-card::before {
@@ -2792,7 +3275,13 @@ body.archive-intelligence-active {
   .archive-intelligence-page .archive-intelligence-workspace,
   .archive-intelligence-page .archive-oracle-header,
   .archive-intelligence-page .archive-oracle-input-shell,
-  .archive-intelligence-page .archive-roleplay-composer > div {
+  .archive-intelligence-page .archive-roleplay-composer > div,
+  .archive-message-actions,
+  .archive-connection-health-trigger,
+  .archive-connection-health-panel,
+  .archive-composer-edit-notice,
+  .archive-intelligence-page .archive-oracle-view-switch,
+  .archive-intelligence-page .archive-roleplay-mode-switch {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -2818,7 +3307,14 @@ body.archive-intelligence-active {
   .archive-composer-popover,
   .archive-composer-model-options > button,
   .archive-composer-model-details,
-  .archive-composer-tools-popover > button {
+  .archive-composer-tools-popover > button,
+  .archive-message-actions,
+  .archive-message-actions > button,
+  .archive-connection-health-trigger,
+  .archive-connection-health-panel,
+  .archive-composer-edit-notice,
+  .archive-intelligence-page .archive-oracle-view-switch,
+  .archive-intelligence-page .archive-roleplay-mode-switch {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;
