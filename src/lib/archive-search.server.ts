@@ -12,7 +12,10 @@ import {
   normalizeArchiveInput,
   truncateArchiveInput,
 } from "./archive-input";
-import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
+import {
+  requestOpenAiStructuredResponse,
+  type ArchiveOpenAiMetadata,
+} from "./archive-openai-transport.server";
 import {
   ARCHIVE_SEARCH_EFFORTS,
   ARCHIVE_SEARCH_EXECUTIONS,
@@ -63,6 +66,7 @@ const searchPreferenceSchema = z
 
 export const archiveSearchRequestSchema = z
   .object({
+    requestId: z.string().uuid().optional(),
     query: z
       .string()
       .transform(normalizeArchiveInput)
@@ -92,6 +96,8 @@ export const archiveSearchRequestSchema = z
       });
     }
   });
+
+export type ArchiveSearchRequest = z.infer<typeof archiveSearchRequestSchema>;
 
 const generatedSearchReplySchema = z
   .object({
@@ -198,31 +204,87 @@ function buildSearchInstructions(
   ].join("\n");
 }
 
-export async function requestOpenAiArchiveSearch({
+export type ArchiveSearchProcessingContext = {
+  candidateIds: string[];
+  proConversation: boolean;
+};
+
+export function parseArchiveSearchOpenAiPayload(
+  payload: unknown,
+  metadata: ArchiveOpenAiMetadata | undefined,
+  context: ArchiveSearchProcessingContext,
+): ArchiveSearchReply {
+  const model = metadata?.requestedModel ?? "";
+  const allowedCandidateIds = new Set(context.candidateIds);
+  const outputText = extractResponseText(payload);
+  if (!outputText) {
+    const refusal = extractResponseRefusal(payload);
+    if (refusal) {
+      return {
+        reply: truncateArchiveInput(refusal, context.proConversation ? 3600 : 2400),
+        suggestions: [],
+        referenceCandidateIds: [],
+        source: "openai",
+        model,
+        requestedModel: model,
+        providerModel: metadata?.providerModel,
+        providerResponseId: metadata?.providerResponseId,
+        openaiRequestId: metadata?.openaiRequestId,
+        modelVerified: Boolean(metadata),
+        delivery: ONLINE_ARCHIVE_DELIVERY,
+      };
+    }
+    throw new Error("OpenAI search response did not contain output text");
+  }
+  const generated = generatedSearchReplySchema.parse(JSON.parse(outputText));
+  const focusCandidateId = allowedCandidateIds.has(generated.focusCandidateId)
+    ? generated.focusCandidateId
+    : undefined;
+  const referenceCandidateIds = generated.referenceCandidateIds.filter(
+    (id, index, ids) => ids.indexOf(id) === index && allowedCandidateIds.has(id),
+  );
+  const normalizedReply = truncateArchiveInput(
+    generated.reply,
+    context.proConversation ? 3600 : 2400,
+  );
+  if (!hasVisibleArchiveText(normalizedReply)) {
+    throw new Error("OpenAI search response did not contain visible reply text");
+  }
+  return {
+    reply: normalizedReply,
+    suggestions: generated.suggestions
+      .map((item) => truncateArchiveInput(item, 90))
+      .filter(hasVisibleArchiveText)
+      .slice(0, 3),
+    focusCandidateId,
+    referenceCandidateIds,
+    source: "openai",
+    model,
+    requestedModel: model,
+    providerModel: metadata?.providerModel,
+    providerResponseId: metadata?.providerResponseId,
+    openaiRequestId: metadata?.openaiRequestId,
+    modelVerified: Boolean(metadata),
+    delivery: ONLINE_ARCHIVE_DELIVERY,
+  };
+}
+
+export function createArchiveSearchOpenAiExecution({
   messages,
   candidates,
   modelPreference,
   safetyIdentifier,
-  signal,
 }: {
   messages: readonly ArchiveSearchConversationTurn[];
   candidates: readonly ArchiveSearchCandidate[];
   modelPreference: ArchiveSearchPreference;
   safetyIdentifier?: string;
-  signal?: AbortSignal;
-}): Promise<ArchiveSearchReply | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
-
+}) {
   const route = resolveArchiveSearchRoute(modelPreference);
   const model = route.model;
   const proConversation = route.preference.execution === "pro";
   const trustedCandidates = canonicalizeArchiveSearchCandidates(candidates);
-  return requestOpenAiStructuredResponse({
-    apiKey,
-    timeoutMs: route.timeoutMs,
-    signal,
-    body: {
+  const body = {
       model,
       safety_identifier: safetyIdentifier,
       store: false,
@@ -246,49 +308,52 @@ export async function requestOpenAiArchiveSearch({
           schema: searchResponseTextSchema,
         },
       },
-    },
-    parse: (payload) => {
-      const outputText = extractResponseText(payload);
-      if (!outputText) {
-        const refusal = extractResponseRefusal(payload);
-        if (refusal) {
-          return {
-            reply: truncateArchiveInput(refusal, proConversation ? 3600 : 2400),
-            suggestions: [],
-            referenceCandidateIds: [],
-            source: "openai" as const,
-            model,
-            delivery: ONLINE_ARCHIVE_DELIVERY,
-          };
-        }
-        throw new Error("OpenAI search response did not contain output text");
-      }
-      const generated = generatedSearchReplySchema.parse(JSON.parse(outputText));
-      const focusCandidateId = trustedCandidates.some(
-        (candidate) => candidate.id === generated.focusCandidateId,
-      )
-        ? generated.focusCandidateId
-        : undefined;
-      const referenceCandidateIds = generated.referenceCandidateIds.filter(
-        (id, index, ids) =>
-          ids.indexOf(id) === index && trustedCandidates.some((candidate) => candidate.id === id),
-      );
-      const normalizedReply = truncateArchiveInput(generated.reply, proConversation ? 3600 : 2400);
-      if (!hasVisibleArchiveText(normalizedReply)) {
-        throw new Error("OpenAI search response did not contain visible reply text");
-      }
-      return {
-        reply: normalizedReply,
-        suggestions: generated.suggestions
-          .map((item) => truncateArchiveInput(item, 90))
-          .filter(hasVisibleArchiveText)
-          .slice(0, 3),
-        focusCandidateId,
-        referenceCandidateIds,
-        source: "openai" as const,
-        model,
-        delivery: ONLINE_ARCHIVE_DELIVERY,
-      };
-    },
+    };
+  const processingContext: ArchiveSearchProcessingContext = {
+    candidateIds: trustedCandidates.map((candidate) => candidate.id),
+    proConversation,
+  };
+  const parse = (payload: unknown, metadata?: ArchiveOpenAiMetadata): ArchiveSearchReply =>
+    parseArchiveSearchOpenAiPayload(payload, metadata, processingContext);
+  return {
+    requestedModel: model,
+    timeoutMs: route.timeoutMs,
+    costClass: route.costClass,
+    body,
+    processingContext,
+    parse,
+  };
+}
+
+export async function requestOpenAiArchiveSearch({
+  messages,
+  candidates,
+  modelPreference,
+  safetyIdentifier,
+  signal,
+  logicalRequestId,
+}: {
+  messages: readonly ArchiveSearchConversationTurn[];
+  candidates: readonly ArchiveSearchCandidate[];
+  modelPreference: ArchiveSearchPreference;
+  safetyIdentifier?: string;
+  signal?: AbortSignal;
+  logicalRequestId?: string;
+}): Promise<ArchiveSearchReply | null> {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const execution = createArchiveSearchOpenAiExecution({
+    messages,
+    candidates,
+    modelPreference,
+    safetyIdentifier,
+  });
+  return requestOpenAiStructuredResponse({
+    apiKey,
+    timeoutMs: execution.timeoutMs,
+    signal,
+    logicalRequestId,
+    body: execution.body,
+    parse: execution.parse,
   });
 }

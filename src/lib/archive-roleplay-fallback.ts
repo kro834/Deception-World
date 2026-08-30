@@ -29,6 +29,12 @@ export type ArchiveIntelligenceReply = {
   suggestions: string[];
   navigationQuery: string;
   source: "openai" | "local";
+  requestId?: string;
+  requestedModel?: string;
+  providerModel?: string;
+  providerResponseId?: string;
+  openaiRequestId?: string;
+  modelVerified?: boolean;
   model?: string;
   notice?: string;
   delivery?: ArchiveDelivery;

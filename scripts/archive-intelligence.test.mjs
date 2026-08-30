@@ -3,6 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 
 import {
+  chargeArchiveAiAccessInTransaction,
   checkArchiveAiAccessWithDependencies,
   resolveArchiveRateIdentity,
 } from "../src/lib/archive-ai-rate-limit.server.ts";
@@ -19,6 +20,9 @@ const modelConfig = readSource("src/lib/archive-model-config.ts");
 const conversationBoundary = readSource("src/lib/archive-conversation.server.ts");
 const rateLimitServer = readSource("src/lib/archive-ai-rate-limit.server.ts");
 const intelligenceRoute = readSource("src/routes/api/archive-intelligence.ts");
+const aiJob = readSource("src/lib/archive-ai-job.server.ts");
+const aiLedger = readSource("src/lib/archive-ai-ledger.server.ts");
+const aiHttp = readSource("src/lib/archive-ai-http.server.ts");
 const requestBody = readSource("src/lib/archive-request-body.server.ts");
 const roleplay = readSource("src/components/world/archive-roleplay.tsx");
 const dossierNav = readSource("src/components/world/dossier-nav.tsx");
@@ -26,6 +30,7 @@ const riderPage = readSource("src/components/world/rider-page.tsx");
 const worldHome = readSource("src/components/world/world-home.tsx");
 const worldStyles = readSource("src/styles-world/27.css");
 const rateLimitMigration = readSource("migrations/0002_archive_ai_rate_limits.sql");
+const requestLedgerMigration = readSource("migrations/0003_archive_ai_requests.sql");
 
 const CHARACTER_IDS = [
   "ciel",
@@ -142,7 +147,7 @@ test("the provider key and upstream endpoint stay in the server-only boundary", 
   assert.match(modelConfig, /"gpt-5\.6-sol"/);
   assert.match(modelConfig, /model: "gpt-5\.6-luna"/);
   assert.match(intelligenceServer, /requestOpenAiStructuredResponse\(\{/);
-  assert.match(openAiTransport, /fetch\("https:\/\/api\.openai\.com\/v1\/responses"/);
+  assert.match(openAiTransport, /url:\s*"https:\/\/api\.openai\.com\/v1\/responses"/);
   assert.match(openAiTransport, /authorization: `Bearer \$\{apiKey\}`/);
   assert.doesNotMatch(`${intelligenceServer}\n${openAiTransport}`, /import\.meta\.env|VITE_OPENAI/);
 
@@ -257,7 +262,12 @@ test("configured shared limits remain authoritative", async () => {
     {
       apiKey: "shared-limit-test-key",
       databaseSource: "neon",
-      environment: { NODE_ENV: "production", VERCEL: "1", VERCEL_ENV: "preview" },
+      environment: {
+        NODE_ENV: "production",
+        VERCEL: "1",
+        VERCEL_ENV: "preview",
+        ARCHIVE_RATE_LIMIT_SECRET: "shared-rate-limit-secret-at-least-32-bytes",
+      },
       now: Date.UTC(2040, 0, 1),
       checkShared: async (...args) => {
         sharedCalls.push(args);
@@ -275,7 +285,124 @@ test("configured shared limits remain authoritative", async () => {
   assert.deepEqual(fallbackReasons, []);
 });
 
-test("missing or failed shared storage falls back to conservative memory limits", async () => {
+test("a rejected logical request rolls all three SQL buckets back and never recharges", async () => {
+  const { PGlite } = await import("@electric-sql/pglite");
+  const pg = new PGlite();
+  await pg.waitReady;
+  await pg.exec(rateLimitMigration);
+  await pg.exec(requestLedgerMigration);
+  const sqlSurface = (run, transact) => {
+    const sql = async () => {
+      throw new Error("tagged SQL is not used by this test");
+    };
+    sql.query = run;
+    sql.transaction = transact ?? ((callback) => callback(sql));
+    return sql;
+  };
+  const sql = sqlSurface(
+    async (text, params = []) => (await pg.query(text, params)).rows,
+    (callback) =>
+      pg.transaction((transaction) =>
+        callback(
+          sqlSurface(async (text, params = []) => (await transaction.query(text, params)).rows),
+        ),
+      ),
+  );
+  const now = Date.UTC(2042, 3, 5, 6, 7, 8);
+  const minute = Math.floor(now / 60_000);
+  const day = Math.floor(now / 86_400_000);
+  const sessionHash = "b".repeat(64);
+  const firstRequestId = crypto.randomUUID();
+  const deniedRequestId = crypto.randomUUID();
+  const environment = {
+    NODE_ENV: "development",
+    OPENAI_API_KEY: "atomic-admission-test-key",
+    ARCHIVE_RATE_LIMIT_SECRET: "atomic-rate-limit-secret-at-least-32-bytes",
+    ARCHIVE_AI_CLIENT_MINUTE_LIMIT: "100",
+    ARCHIVE_AI_CLIENT_DAILY_LIMIT: "100",
+    ARCHIVE_AI_GLOBAL_DAILY_LIMIT: "1",
+  };
+  const request = new Request("http://localhost/api/archive-search");
+  const charge = (requestId) =>
+    sql.transaction((transaction) =>
+      chargeArchiveAiAccessInTransaction(
+        transaction,
+        request,
+        "standard",
+        requestId,
+        sessionHash,
+        environment,
+        now,
+      ),
+    );
+
+  try {
+    assert.equal((await charge(firstRequestId))?.allowed, true);
+    assert.equal((await charge(deniedRequestId))?.allowed, false);
+    assert.equal((await charge(deniedRequestId))?.allowed, false, "same ID stays denied");
+
+    const keys = [`minute:${minute}:${sessionHash}`, `day:${day}:${sessionHash}`, `global:${day}`];
+    const buckets = await sql.query(
+      `SELECT bucket_key, request_count
+     FROM archive_ai_rate_limits
+     WHERE bucket_key = ANY($1::text[])
+     ORDER BY bucket_key`,
+      [keys],
+    );
+    assert.equal(buckets.length, 3);
+    assert.deepEqual(
+      buckets.map((bucket) => bucket.request_count),
+      [1, 1, 1],
+      "minute and daily increments before the global denial must be rolled back",
+    );
+    const charges = await sql.query(
+      `SELECT request_id::text, allowed
+     FROM archive_ai_rate_charges
+     WHERE request_id = ANY($1::uuid[])
+     ORDER BY request_id`,
+      [[firstRequestId, deniedRequestId]],
+    );
+    assert.equal(charges.length, 2);
+    assert.deepEqual(charges.map((chargeRow) => chargeRow.allowed).sort(), [false, true]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("fallback identity ignores browser session headers without a trusted ledger hash", async () => {
+  const clientKeys = [];
+  const baseDependencies = {
+    apiKey: "shared-limit-test-key",
+    databaseSource: "neon",
+    environment: {
+      NODE_ENV: "production",
+      VERCEL: "1",
+      ARCHIVE_RATE_LIMIT_SECRET: "shared-rate-limit-secret-at-least-32-bytes",
+    },
+    now: Date.UTC(2040, 0, 1),
+    checkShared: async (clientKey) => {
+      clientKeys.push(clientKey);
+      return true;
+    },
+    reportFallback: () => {},
+  };
+  for (const sessionId of [crypto.randomUUID(), crypto.randomUUID()]) {
+    await checkArchiveAiAccessWithDependencies(
+      new Request("https://archive.example/api/archive-search", {
+        headers: {
+          "x-vercel-forwarded-for": "203.0.113.88",
+          "x-archive-session-id": sessionId,
+        },
+      }),
+      "standard",
+      baseDependencies,
+    );
+  }
+  assert.equal(clientKeys.length, 2);
+  assert.equal(clientKeys[0], clientKeys[1]);
+});
+
+test("production fails closed when shared storage is missing or unavailable", async () => {
   const request = new Request("https://archive.example/api/archive-search", {
     headers: { "x-vercel-forwarded-for": "203.0.113.41" },
   });
@@ -289,6 +416,7 @@ test("missing or failed shared storage falls back to conservative memory limits"
       ARCHIVE_AI_CLIENT_MINUTE_LIMIT: "3",
       ARCHIVE_AI_CLIENT_DAILY_LIMIT: "3",
       ARCHIVE_AI_GLOBAL_DAILY_LIMIT: "3",
+      ARCHIVE_RATE_LIMIT_SECRET: "shared-rate-limit-secret-at-least-32-bytes",
     },
     now: Date.UTC(2040, 0, 2),
     checkShared: async () => {
@@ -301,17 +429,16 @@ test("missing or failed shared storage falls back to conservative memory limits"
     ...base,
     databaseSource: "pglite",
   });
-  assert.equal(databaseMissing.allowed, true);
-  assert.equal(databaseMissing.reason, "allowed");
-  assert.equal(databaseMissing.safetyIdentifier?.length, 40);
+  assert.equal(databaseMissing.allowed, false);
+  assert.equal(databaseMissing.reason, "shared_state_unavailable");
   assert.deepEqual(fallbackReasons, ["database_unconfigured"]);
 
   const sharedFailure = await checkArchiveAiAccessWithDependencies(request, "pro", {
     ...base,
     databaseSource: "neon",
   });
-  assert.equal(sharedFailure.allowed, false, "the bounded fallback still enforces unit limits");
-  assert.equal(sharedFailure.reason, "rate_limited");
+  assert.equal(sharedFailure.allowed, false);
+  assert.equal(sharedFailure.reason, "shared_state_unavailable");
   assert.deepEqual(fallbackReasons, ["database_unconfigured", "shared_store_error"]);
 });
 
@@ -342,9 +469,9 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(intelligenceRoute, /const MAX_BODY_BYTES = 65_536/);
   assert.match(intelligenceRoute, /readArchiveRequestBody\(request, MAX_BODY_BYTES\)/);
   assert.match(intelligenceRoute, /request_too_large/);
-  assert.match(intelligenceRoute, /await checkArchiveAiAccess\(request, costClass\)/);
-  assert.match(intelligenceRoute, /cache-control": "no-store, max-age=0/);
-  assert.match(intelligenceRoute, /x-content-type-options": "nosniff/);
+  assert.match(aiJob, /await checkArchiveAiAccess\(/);
+  assert.match(aiHttp, /cache-control": "no-store, max-age=0/);
+  assert.match(aiHttp, /x-content-type-options": "nosniff/);
 
   assert.match(rateLimitServer, /const DEFAULT_CLIENT_MINUTE_UNITS = 12/);
   assert.match(rateLimitServer, /const DEFAULT_CLIENT_DAILY_UNITS = 120/);
@@ -357,12 +484,15 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /isIP\(address\)/);
   assert.match(rateLimitServer, /"anonymous-vercel"/);
   assert.match(rateLimitServer, /"anonymous-production"/);
-  assert.match(rateLimitServer, /createHmac\("sha256", apiKey\)/);
+  assert.match(rateLimitServer, /archiveRateLimitSecret\(environment\)/);
+  assert.match(rateLimitServer, /createHmac\("sha256", identitySecret\)/);
+  assert.match(rateLimitServer, /trustedSessionHash && \/\^\[0-9a-f\]\{64\}\$\//);
+  assert.match(aiJob, /row\.request_id,\s*row\.session_hash,/);
   assert.match(rateLimitServer, /INSERT INTO archive_ai_rate_limits/);
   assert.match(rateLimitServer, /ON CONFLICT \(bucket_key\) DO UPDATE/);
   assert.match(rateLimitServer, /databaseSource === "neon"/);
-  assert.match(rateLimitServer, /checkMemoryBuckets\(clientKey, now, units, environment\)/);
-  assert.match(rateLimitServer, /shared rate limit unavailable; using bounded memory fallback/);
+  assert.match(rateLimitServer, /shared_state_unavailable/);
+  assert.match(rateLimitServer, /environment\.ARCHIVE_AI_REQUIRED === "1"/);
   assert.doesNotMatch(rateLimitServer, /VERCEL_ENV !== "production"/);
   assert.match(rateLimitServer, /costClass === "pro" \? 3 : costClass === "advanced" \? 2 : 1/);
   assert.match(rateLimitServer, /safetyIdentifier: allowed \? clientKey : undefined/);
@@ -376,6 +506,18 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /reportFallback\("database_unconfigured"\)/);
   assert.match(rateLimitMigration, /bucket_key TEXT PRIMARY KEY/);
   assert.match(rateLimitMigration, /expires_at TIMESTAMPTZ NOT NULL/);
+  assert.match(requestLedgerMigration, /archive_ai_rate_charges/);
+  assert.match(requestLedgerMigration, /archive_ai_requests/);
+  assert.match(aiLedger, /return sql\.transaction\(async \(transaction\) =>/);
+  assert.match(aiLedger, /chargeArchiveAiAccessInTransaction\(\s*transaction,/);
+  assert.match(rateLimitServer, /const savepoint = "archive_ai_rate_buckets"/);
+  assert.match(rateLimitServer, /SAVEPOINT \$\{savepoint\}/);
+  assert.match(rateLimitServer, /ROLLBACK TO SAVEPOINT/);
+  assert.match(rateLimitServer, /RELEASE SAVEPOINT/);
+  assert.match(
+    rateLimitServer,
+    /INSERT INTO archive_ai_rate_charges[\s\S]*?ON CONFLICT \(request_id\) DO NOTHING/,
+  );
 
   assert.match(
     intelligenceServer,
@@ -402,7 +544,7 @@ test("the persona byte envelope accepts its full Japanese character budget", () 
   assert.ok(Buffer.byteLength(payload, "utf8") < 65_536);
 });
 
-test("local persona fallback covers every character and all remote failure paths", () => {
+test("server-confirmed local persona fallback covers every character without client-side fabrication", () => {
   for (const [tableName, nextMarker] of [
     ["PRO_DIALOGUE", "const TACTICS"],
     ["TACTICS", "const EMPTY_TACTICAL"],
@@ -430,11 +572,13 @@ test("local persona fallback covers every character and all remote failure paths
   assert.match(fallback, /previousUserTopic\(messages\)/);
   assert.match(fallback, /export function hasTacticalSnapshot/);
 
-  assert.match(intelligenceRoute, /if \(!remoteAccess\.allowed\)[\s\S]*?createLocalArchiveReply/);
-  assert.match(intelligenceRoute, /if \(remoteReply\) return noStoreJson\(remoteReply\)/);
-  assert.match(intelligenceRoute, /AI接続が未設定のため、ローカル人格コア/);
-  assert.match(intelligenceRoute, /catch \{[\s\S]*?ローカル人格コアへ切り替え/);
-  assert.match(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
+  assert.match(aiJob, /if \(!access\.allowed\)/);
+  assert.match(aiJob, /return finishLocal\(row, decryptedPayload, reason\)/);
+  assert.match(aiJob, /AI接続が未設定のため、\$\{noun\}/);
+  assert.match(aiJob, /archiveProviderFailureReason\(error\)/);
+  assert.doesNotMatch(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
+  assert.match(roleplay, /ローカル回答へは置き換えていません/);
+  assert.match(roleplay, /cancelArchiveApi\(\{ client: "persona-v1", requestId \}\)/);
   assert.match(roleplay, /<ArchiveConnectionHealth/);
   assert.match(roleplay, /recordArchiveAiHealth\(\{/);
 });

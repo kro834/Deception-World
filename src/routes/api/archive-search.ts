@@ -1,34 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { checkArchiveAiAccess } from "@/lib/archive-ai-rate-limit.server";
+import { archiveAiJson, archiveAiStateResponse } from "@/lib/archive-ai-http.server";
 import {
-  archiveSearchRequestSchema,
-  requestOpenAiArchiveSearch,
-} from "@/lib/archive-search.server";
-import { createLocalArchiveSearchReply } from "@/lib/archive-search";
-import { canonicalizeArchiveSearchCandidates } from "@/lib/archive-search-catalog.server";
+  attachArchiveAiIdentityCookie,
+  resolveArchiveAiCookieIdentity,
+} from "@/lib/archive-ai-identity.server";
+import {
+  continueArchiveAiRequestInBackground,
+  startArchiveSearchAiRequest,
+} from "@/lib/archive-ai-job.server";
+import {
+  ArchiveAiRequestConflictError,
+  ArchiveAiRequestNotFoundError,
+} from "@/lib/archive-ai-ledger.server";
+import { logArchiveAiEvent } from "@/lib/archive-ai-observability.server";
+import { archiveSearchRequestSchema } from "@/lib/archive-search.server";
 import {
   ArchiveRequestTooLargeError,
   readArchiveRequestBody,
 } from "@/lib/archive-request-body.server";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
-import { resolveArchiveSearchRoute } from "@/lib/archive-model-config";
-import { archiveProviderFailureReason } from "@/lib/archive-openai-transport.server";
 import { isAllowedArchiveBrowserRequest } from "@/lib/archive-api-origin.server";
 
-// Search Pro keeps a longer Japanese transcript. The schema still owns the
-// strict character budget; this byte ceiling only prevents valid UTF-8 input
-// from being rejected before validation.
 const MAX_BODY_BYTES = 65_536;
-
-function noStoreJson(payload: unknown, status = 200): Response {
-  return Response.json(payload, {
-    status,
-    headers: {
-      "cache-control": "no-store, max-age=0",
-      "x-content-type-options": "nosniff",
-    },
-  });
-}
 
 export const Route = createFileRoute("/api/archive-search")({
   server: {
@@ -37,80 +30,61 @@ export const Route = createFileRoute("/api/archive-search")({
         try {
           assertSameSiteRequest();
         } catch {
-          return noStoreJson({ error: "forbidden" }, 403);
+          return archiveAiJson({ error: "forbidden" }, 403);
         }
         if (!isAllowedArchiveBrowserRequest(request, "search-v1")) {
-          return noStoreJson({ error: "forbidden" }, 403);
+          return archiveAiJson({ error: "forbidden" }, 403);
         }
-
+        let cookieIdentity;
+        try {
+          cookieIdentity = resolveArchiveAiCookieIdentity(request);
+        } catch {
+          return archiveAiJson({ error: "shared_state_unavailable" }, 503);
+        }
+        const respond = (response: Response) =>
+          attachArchiveAiIdentityCookie(response, cookieIdentity);
         let raw: unknown;
         try {
-          const body = await readArchiveRequestBody(request, MAX_BODY_BYTES);
-          raw = JSON.parse(body) as unknown;
+          raw = JSON.parse(await readArchiveRequestBody(request, MAX_BODY_BYTES)) as unknown;
         } catch (error) {
-          if (error instanceof ArchiveRequestTooLargeError) {
-            return noStoreJson({ error: "request_too_large" }, 413);
-          }
-          return noStoreJson({ error: "invalid_json" }, 400);
+          return respond(
+            archiveAiJson(
+              {
+                error:
+                  error instanceof ArchiveRequestTooLargeError
+                    ? "request_too_large"
+                    : "invalid_json",
+              },
+              error instanceof ArchiveRequestTooLargeError ? 413 : 400,
+            ),
+          );
         }
-
         const parsed = archiveSearchRequestSchema.safeParse(raw);
-        if (!parsed.success) return noStoreJson({ error: "invalid_request" }, 400);
-        const { query, messages, modelPreference } = parsed.data;
-        const candidates = canonicalizeArchiveSearchCandidates(parsed.data.candidates);
-        const remoteAccess = await checkArchiveAiAccess(
-          request,
-          resolveArchiveSearchRoute(modelPreference).costClass,
-        );
-
-        if (!remoteAccess.allowed) {
-          const notice =
-            remoteAccess.reason === "unconfigured"
-              ? "AI接続が未設定のため、ローカルサーチで案内しています。"
-              : "AI回線が混み合っているため、ローカルサーチで案内しています。";
-          return noStoreJson(
-            createLocalArchiveSearchReply({
-              query,
-              candidates,
-              notice,
-              deliveryReason:
-                remoteAccess.reason === "unconfigured"
-                  ? "unconfigured"
-                  : remoteAccess.reason === "shared_limit_unavailable"
-                    ? "shared_limit_unavailable"
-                    : "rate_limited",
-            }),
-          );
+        if (!parsed.success || !parsed.data.requestId) {
+          return respond(archiveAiJson({ error: "invalid_request" }, 400));
         }
-
         try {
-          const remoteReply = await requestOpenAiArchiveSearch({
-            messages,
-            candidates,
-            modelPreference,
-            safetyIdentifier: remoteAccess.safetyIdentifier,
-            signal: request.signal,
-          });
-          if (remoteReply) return noStoreJson(remoteReply);
-        } catch (error) {
-          return noStoreJson(
-            createLocalArchiveSearchReply({
-              query,
-              candidates,
-              notice: "AI回線へ接続できなかったため、ローカルサーチへ切り替えました。",
-              deliveryReason: archiveProviderFailureReason(error),
-            }),
+          const state = await startArchiveSearchAiRequest(
+            request,
+            parsed.data,
+            cookieIdentity.rateLimitHash,
           );
+          continueArchiveAiRequestInBackground(request, state, cookieIdentity.rateLimitHash);
+          return respond(archiveAiStateResponse(state));
+        } catch (error) {
+          if (error instanceof ArchiveAiRequestConflictError) {
+            return respond(archiveAiJson({ error: "request_id_conflict" }, 409));
+          }
+          if (error instanceof ArchiveAiRequestNotFoundError) {
+            return respond(archiveAiJson({ error: "not_found" }, 404));
+          }
+          logArchiveAiEvent("request_admission_failed", {
+            requestId: parsed.data.requestId,
+            surface: "search",
+            reason: error instanceof Error ? error.name : "unknown",
+          });
+          return respond(archiveAiJson({ error: "shared_state_unavailable" }, 503));
         }
-
-        return noStoreJson(
-          createLocalArchiveSearchReply({
-            query,
-            candidates,
-            notice: "AI回線へ接続できなかったため、ローカルサーチへ切り替えました。",
-            deliveryReason: "provider_unavailable",
-          }),
-        );
       },
     },
   },

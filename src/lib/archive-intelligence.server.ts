@@ -12,7 +12,10 @@ import {
   normalizeArchiveInput,
   truncateArchiveInput,
 } from "./archive-input";
-import { requestOpenAiStructuredResponse } from "./archive-openai-transport.server";
+import {
+  requestOpenAiStructuredResponse,
+  type ArchiveOpenAiMetadata,
+} from "./archive-openai-transport.server";
 import {
   ARCHIVE_PERSONA_PRO_PROFILES,
   resolveArchivePersonaRoute,
@@ -37,6 +40,7 @@ const conversationTurnSchema = z
 
 export const archiveIntelligenceRequestSchema = z
   .object({
+    requestId: z.string().uuid().optional(),
     characterId: z.enum(ARCHIVE_CHARACTER_IDS),
     mode: z.enum(["normal", "pro"]),
     proProfile: z.enum(ARCHIVE_PERSONA_PRO_PROFILES).default("pro"),
@@ -235,24 +239,70 @@ function normalizeGeneratedReply(
   };
 }
 
-export async function requestOpenAiArchiveReply({
+export type ArchiveIntelligenceProcessingContext = {
+  mode: ArchiveRoleplayMode;
+  combatRequested: boolean;
+};
+
+export function parseArchiveIntelligenceOpenAiPayload(
+  payload: unknown,
+  metadata: ArchiveOpenAiMetadata | undefined,
+  context: ArchiveIntelligenceProcessingContext,
+): ArchiveIntelligenceReply {
+  const model = metadata?.requestedModel ?? "";
+  const outputText = extractResponseText(payload);
+  if (!outputText) {
+    const refusal = extractResponseRefusal(payload);
+    if (refusal) {
+      return {
+        reply: truncateArchiveInput(refusal, context.mode === "normal" ? 700 : 3000),
+        narration: "",
+        tactical: { range: "", tempo: "", threat: "", objective: "" },
+        suggestions: [],
+        navigationQuery: "",
+        source: "openai",
+        model,
+        requestedModel: model,
+        providerModel: metadata?.providerModel,
+        providerResponseId: metadata?.providerResponseId,
+        openaiRequestId: metadata?.openaiRequestId,
+        modelVerified: Boolean(metadata),
+        delivery: ONLINE_ARCHIVE_DELIVERY,
+      };
+    }
+    throw new Error("OpenAI response did not contain output text");
+  }
+  const generated = generatedReplySchema.parse(JSON.parse(outputText));
+  const normalized = normalizeGeneratedReply(generated, context.mode, context.combatRequested);
+  if (!hasVisibleArchiveText(normalized.reply)) {
+    throw new Error("OpenAI response did not contain visible reply text");
+  }
+  return {
+    ...normalized,
+    source: "openai",
+    model,
+    requestedModel: model,
+    providerModel: metadata?.providerModel,
+    providerResponseId: metadata?.providerResponseId,
+    openaiRequestId: metadata?.openaiRequestId,
+    modelVerified: Boolean(metadata),
+    delivery: ONLINE_ARCHIVE_DELIVERY,
+  };
+}
+
+export function createArchiveIntelligenceOpenAiExecution({
   characterId,
   mode,
   proProfile,
   messages,
   safetyIdentifier,
-  signal,
 }: {
   characterId: ArchiveCharacterId;
   mode: ArchiveRoleplayMode;
   proProfile: ArchivePersonaProProfile;
   messages: readonly ArchiveConversationTurn[];
   safetyIdentifier?: string;
-  signal?: AbortSignal;
-}): Promise<ArchiveIntelligenceReply | null> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
-
+}) {
   // One allow-listed resolver owns the visible label, rate class and the exact
   // model/reasoning payload sent to the Responses API.
   const execution = resolveArchivePersonaRoute(mode, proProfile);
@@ -262,11 +312,7 @@ export async function requestOpenAiArchiveReply({
     .find((message) => message.role === "user")?.content;
   const combatRequested = isExplicitFictionalCombatInput(latestUserInput ?? "");
 
-  return requestOpenAiStructuredResponse({
-    apiKey,
-    timeoutMs: execution.timeoutMs,
-    signal,
-    body: {
+  const body = {
       model,
       safety_identifier: safetyIdentifier,
       store: false,
@@ -290,36 +336,52 @@ export async function requestOpenAiArchiveReply({
           schema: responseTextSchema,
         },
       },
-    },
-    parse: (payload) => {
-      const outputText = extractResponseText(payload);
-      if (!outputText) {
-        const refusal = extractResponseRefusal(payload);
-        if (refusal) {
-          return {
-            reply: truncateArchiveInput(refusal, mode === "normal" ? 700 : 3000),
-            narration: "",
-            tactical: { range: "", tempo: "", threat: "", objective: "" },
-            suggestions: [],
-            navigationQuery: "",
-            source: "openai" as const,
-            model,
-            delivery: ONLINE_ARCHIVE_DELIVERY,
-          };
-        }
-        throw new Error("OpenAI response did not contain output text");
-      }
-      const generated = generatedReplySchema.parse(JSON.parse(outputText));
-      const normalized = normalizeGeneratedReply(generated, mode, combatRequested);
-      if (!hasVisibleArchiveText(normalized.reply)) {
-        throw new Error("OpenAI response did not contain visible reply text");
-      }
-      return {
-        ...normalized,
-        source: "openai" as const,
-        model,
-        delivery: ONLINE_ARCHIVE_DELIVERY,
-      };
-    },
+    };
+  const processingContext: ArchiveIntelligenceProcessingContext = { mode, combatRequested };
+  const parse = (payload: unknown, metadata?: ArchiveOpenAiMetadata): ArchiveIntelligenceReply =>
+    parseArchiveIntelligenceOpenAiPayload(payload, metadata, processingContext);
+  return {
+    requestedModel: model,
+    timeoutMs: execution.timeoutMs,
+    costClass: execution.costClass,
+    body,
+    processingContext,
+    parse,
+  };
+}
+
+export async function requestOpenAiArchiveReply({
+  characterId,
+  mode,
+  proProfile,
+  messages,
+  safetyIdentifier,
+  signal,
+  logicalRequestId,
+}: {
+  characterId: ArchiveCharacterId;
+  mode: ArchiveRoleplayMode;
+  proProfile: ArchivePersonaProProfile;
+  messages: readonly ArchiveConversationTurn[];
+  safetyIdentifier?: string;
+  signal?: AbortSignal;
+  logicalRequestId?: string;
+}): Promise<ArchiveIntelligenceReply | null> {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const execution = createArchiveIntelligenceOpenAiExecution({
+    characterId,
+    mode,
+    proProfile,
+    messages,
+    safetyIdentifier,
+  });
+  return requestOpenAiStructuredResponse({
+    apiKey,
+    timeoutMs: execution.timeoutMs,
+    signal,
+    logicalRequestId,
+    body: execution.body,
+    parse: execution.parse,
   });
 }

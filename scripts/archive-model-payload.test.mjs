@@ -13,6 +13,10 @@ const SEARCH_RUNTIME = {
   xhigh: { maxOutputTokens: 12_000, timeoutMs: 110_000 },
 };
 
+function providerModelFor(requestedModel) {
+  return requestedModel === "gpt-5.5" ? "gpt-5.5-2026-04-23" : requestedModel;
+}
+
 function mockOutputFor(body) {
   if (body.text?.format?.name === "deception_world_search_reply") {
     return {
@@ -60,7 +64,15 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
     globalThis.fetch = async (input, init = {}) => {
       const body = JSON.parse(String(init.body));
       calls.push({ input: String(input), init, body });
-      return Response.json({ output_text: JSON.stringify(mockOutputFor(body)) });
+      return Response.json(
+        {
+          id: `resp_payload_${calls.length}`,
+          model: providerModelFor(body.model),
+          status: "completed",
+          output_text: JSON.stringify(mockOutputFor(body)),
+        },
+        { headers: { "x-request-id": `req_payload_${calls.length}` } },
+      );
     };
 
     const searchCases = [
@@ -122,6 +134,9 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
+      assert.equal(reply?.providerModel, providerModelFor(expected.model), name);
+      assert.equal(reply?.openaiRequestId, `req_payload_${callIndex + 1}`, name);
+      assert.equal(reply?.modelVerified, true, name);
       assert.equal(reply?.reply.length, preference.execution === "pro" ? 3_600 : 2_400, name);
       assert.equal(reply?.suggestions[0]?.length, 90, name);
     }
@@ -218,6 +233,9 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);
       assert.equal(reply?.model, expected.model, name);
+      assert.equal(reply?.providerModel, providerModelFor(expected.model), name);
+      assert.equal(reply?.openaiRequestId, `req_payload_${callIndex + 1}`, name);
+      assert.equal(reply?.modelVerified, true, name);
       assert.equal(reply?.reply.length, mode === "normal" ? 700 : 3_000, name);
       assert.equal(reply?.narration.length, mode === "normal" ? 220 : 700, name);
       assert.equal(reply?.suggestions[0]?.length, 90, name);

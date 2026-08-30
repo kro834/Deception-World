@@ -41,10 +41,12 @@ export function isAllowedArchiveBrowserRequest(
   expectedClient: ArchiveBrowserClient,
 ): boolean {
   const origin = normalizedHttpOrigin(request.headers.get("origin") ?? "");
-  if (!origin || request.headers.get("x-archive-client") !== expectedClient) return false;
+  if (request.headers.get("x-archive-client") !== expectedClient) return false;
 
   const fetchSite = request.headers.get("sec-fetch-site");
   if (fetchSite && fetchSite !== "same-origin") return false;
+
+  if (!origin) return request.method === "GET" && fetchSite === "same-origin";
 
   const acceptedOrigins = new Set<string>();
   const directOrigin = normalizedHttpOrigin(request.url);

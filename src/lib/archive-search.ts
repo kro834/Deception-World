@@ -25,6 +25,12 @@ export type ArchiveSearchReply = {
   focusCandidateId?: string;
   referenceCandidateIds: string[];
   source: "openai" | "local";
+  requestId?: string;
+  requestedModel?: string;
+  providerModel?: string;
+  providerResponseId?: string;
+  openaiRequestId?: string;
+  modelVerified?: boolean;
   model?: string;
   notice?: string;
   delivery?: ArchiveDelivery;

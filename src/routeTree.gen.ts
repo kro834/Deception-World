@@ -34,6 +34,9 @@ import { Route as ManagersShuzaRouteImport } from './routes/managers/shuza'
 import { Route as ManagersZeusRouteImport } from './routes/managers/zeus'
 import { Route as RidersIdRouteImport } from './routes/riders/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiInternalArchiveAiHealthRouteImport } from './routes/api/internal/archive-ai-health'
+import { Route as ApiInternalArchiveAiMaintenanceRouteImport } from './routes/api/internal/archive-ai-maintenance'
+import { Route as ApiArchiveAiRequestsRequestIdRouteImport } from './routes/api/archive-ai/requests/$requestId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -160,6 +163,24 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInternalArchiveAiHealthRoute =
+  ApiInternalArchiveAiHealthRouteImport.update({
+    id: '/api/internal/archive-ai-health',
+    path: '/api/internal/archive-ai-health',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiInternalArchiveAiMaintenanceRoute =
+  ApiInternalArchiveAiMaintenanceRouteImport.update({
+    id: '/api/internal/archive-ai-maintenance',
+    path: '/api/internal/archive-ai-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiArchiveAiRequestsRequestIdRoute =
+  ApiArchiveAiRequestsRequestIdRouteImport.update({
+    id: '/api/archive-ai/requests/$requestId',
+    path: '/api/archive-ai/requests/$requestId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -187,6 +208,9 @@ export interface FileRoutesByFullPath {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
+  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
+  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -214,6 +238,9 @@ export interface FileRoutesByTo {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
+  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
+  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -242,6 +269,9 @@ export interface FileRoutesById {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
+  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
+  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -271,6 +301,9 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
+    | '/api/internal/archive-ai-health'
+    | '/api/internal/archive-ai-maintenance'
+    | '/api/archive-ai/requests/$requestId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -298,6 +331,9 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
+    | '/api/internal/archive-ai-health'
+    | '/api/internal/archive-ai-maintenance'
+    | '/api/archive-ai/requests/$requestId'
   id:
     | '__root__'
     | '/'
@@ -325,6 +361,9 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
+    | '/api/internal/archive-ai-health'
+    | '/api/internal/archive-ai-maintenance'
+    | '/api/archive-ai/requests/$requestId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -344,6 +383,9 @@ export interface RootRouteChildren {
   ApiArchiveSearchRoute: typeof ApiArchiveSearchRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiInternalArchiveAiHealthRoute: typeof ApiInternalArchiveAiHealthRoute
+  ApiInternalArchiveAiMaintenanceRoute: typeof ApiInternalArchiveAiMaintenanceRoute
+  ApiArchiveAiRequestsRequestIdRoute: typeof ApiArchiveAiRequestsRequestIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -523,6 +565,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/internal/archive-ai-health': {
+      id: '/api/internal/archive-ai-health'
+      path: '/api/internal/archive-ai-health'
+      fullPath: '/api/internal/archive-ai-health'
+      preLoaderRoute: typeof ApiInternalArchiveAiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/internal/archive-ai-maintenance': {
+      id: '/api/internal/archive-ai-maintenance'
+      path: '/api/internal/archive-ai-maintenance'
+      fullPath: '/api/internal/archive-ai-maintenance'
+      preLoaderRoute: typeof ApiInternalArchiveAiMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/archive-ai/requests/$requestId': {
+      id: '/api/archive-ai/requests/$requestId'
+      path: '/api/archive-ai/requests/$requestId'
+      fullPath: '/api/archive-ai/requests/$requestId'
+      preLoaderRoute: typeof ApiArchiveAiRequestsRequestIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -590,6 +653,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiArchiveSearchRoute: ApiArchiveSearchRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiInternalArchiveAiHealthRoute: ApiInternalArchiveAiHealthRoute,
+  ApiInternalArchiveAiMaintenanceRoute: ApiInternalArchiveAiMaintenanceRoute,
+  ApiArchiveAiRequestsRequestIdRoute: ApiArchiveAiRequestsRequestIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
