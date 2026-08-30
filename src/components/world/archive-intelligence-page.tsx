@@ -41,7 +41,6 @@ export function ArchiveIntelligencePage() {
     const recoveryTimers = new Set<number>();
     const editableSelector = "input, textarea, [contenteditable='true']";
     const COMPACT_BREAKPOINT = 760;
-    const KEYBOARD_FALLBACK_PX = 336;
 
     const scheduleSync = (delays: readonly number[]) => {
       for (const delay of delays) {
@@ -66,31 +65,21 @@ export function ArchiveIntelligencePage() {
       const visualHeight = viewport?.height ?? layoutHeight;
       const offsetTop = viewport?.offsetTop ?? 0;
       const focused = document.activeElement?.matches(editableSelector) ?? false;
-      if (!focused && layoutHeight > stableHeight - 72) stableHeight = layoutHeight;
+      if (!focused && visualHeight > stableHeight - 72) {
+        stableHeight = Math.max(visualHeight, layoutHeight);
+      }
 
-      const measuredInset = Math.max(0, Math.round(layoutHeight - visualHeight - offsetTop));
-      const layoutAlreadyShrunk = stableHeight - layoutHeight > 100;
-      const keyboardOpen = focused && compact && measuredInset > Math.max(100, stableHeight * 0.15);
+      const keyboardGap = Math.max(0, layoutHeight - visualHeight - offsetTop);
+      const keyboardOpen = focused && compact && keyboardGap > 80;
       const sinceFocus = focusStartedAt ? performance.now() - focusStartedAt : Number.POSITIVE_INFINITY;
-      const armed = page.dataset.keyboard === "opening" || page.dataset.keyboard === "open";
-      const keyboardOpening = compact && (focused || armed) && sinceFocus < 1200 && !keyboardOpen;
-      const keyboardClosing = !focused && page.dataset.keyboard === "closing" && measuredInset > 80;
-      const fallbackInset = Math.round(
-        Math.min(440, Math.max(KEYBOARD_FALLBACK_PX, stableHeight * 0.4)),
-      );
-      // Keep the page at the layout height. Shrinking the whole shell to the
-      // visual viewport is what put the composer at the top of the iPhone
-      // screen. Only the composer is docked to the keyboard.
-      const inset = layoutAlreadyShrunk
-        ? 0
-        : keyboardOpen || keyboardClosing
-          ? measuredInset
-          : keyboardOpening
-            ? Math.max(measuredInset, fallbackInset)
-            : 0;
+      const keyboardOpening = focused && compact && sinceFocus < 900 && !keyboardOpen;
+      const keyboardClosing = !focused && page.dataset.keyboard === "closing" && keyboardGap > 80;
 
-      page.style.removeProperty("--archive-viewport-height");
-      page.style.setProperty("--archive-keyboard-inset", `${inset}px`);
+      // Match ChatGPT: the shell covers the visual viewport only. Composer stays
+      // in document flow at the bottom, so it sits on the keyboard.
+      page.style.setProperty("--archive-viewport-height", `${Math.round(visualHeight)}px`);
+      page.style.setProperty("--archive-vv-offset", `${Math.round(offsetTop)}px`);
+      page.style.setProperty("--archive-keyboard-inset", "0px");
       page.dataset.keyboard = keyboardOpen
         ? "open"
         : keyboardOpening
@@ -98,6 +87,12 @@ export function ArchiveIntelligencePage() {
           : keyboardClosing
             ? "closing"
             : "closed";
+
+      const chrome = page.querySelector(".archive-oracle-header");
+      if (chrome instanceof HTMLElement) {
+        if (keyboardOpen || keyboardOpening) chrome.setAttribute("inert", "");
+        else chrome.removeAttribute("inert");
+      }
     };
 
     const syncViewport = () => {

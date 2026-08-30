@@ -18,7 +18,7 @@ import {
   subscribeArchiveAiRecoveryWake,
   type ArchiveApiLifecycle,
 } from "@/lib/archive-api-client";
-import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
+import { absorbArchiveUserIntent, archiveMemoryNoteTexts } from "@/lib/archive-user-memory";
 import { isArchiveDelivery } from "@/lib/archive-delivery";
 import {
   hasVisibleArchiveText,
@@ -996,6 +996,7 @@ export function ArchiveIntelligenceWorkspace({
       const results = searchArchiveOracle(resolvedQuery, 3);
       searchFollowLatestRef.current = true;
       setSearchMessages(nextMessages);
+      absorbArchiveUserIntent({ userText: nextQuestion, surface: "search" });
       if (!options.preserveDraft) setQuestion("");
       setSearchEdit(null);
       setSelectedSearchMessageId(null);
@@ -1047,6 +1048,7 @@ export function ArchiveIntelligenceWorkspace({
               description: entry.description,
             })),
             modelPreference: searchPreferenceAtRequest,
+            memoryNotes: archiveMemoryNoteTexts(),
           },
           signal: controller.signal,
           validate: isArchiveSearchReply,
@@ -1555,6 +1557,7 @@ export function ArchiveIntelligenceWorkspace({
               maxLength={searchEdit ? undefined : searchMaxLength}
               autoComplete="off"
               enterKeyHint="enter"
+              inputMode="text"
               placeholder={
                 modelPreferences.search.execution === "pro"
                   ? "何でも、詳しく聞いてください…"
@@ -1566,6 +1569,7 @@ export function ArchiveIntelligenceWorkspace({
               <button
                 type="button"
                 className="archive-composer-stop is-stop"
+                tabIndex={-1}
                 aria-label="サーチの応答生成を停止"
                 onClick={() => stopSearch(true)}
               >

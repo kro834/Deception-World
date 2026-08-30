@@ -353,6 +353,7 @@ async function executionForRow(
       messages: parsed.messages,
       candidates: canonicalizeArchiveSearchCandidates(parsed.candidates),
       modelPreference: parsed.modelPreference,
+      memoryNotes: parsed.memoryNotes,
       safetyIdentifier,
     });
   }
@@ -362,6 +363,7 @@ async function executionForRow(
     mode: parsed.mode,
     proProfile: parsed.proProfile,
     messages: parsed.messages,
+    memoryNotes: parsed.memoryNotes,
     safetyIdentifier,
   });
 }
@@ -663,11 +665,13 @@ export async function startArchiveSearchAiRequest(
     messages: input.messages,
     candidates: canonicalCandidates,
     modelPreference: input.modelPreference,
+    memoryNotes: input.memoryNotes ?? [],
   };
   const execution = createArchiveSearchOpenAiExecution({
     messages: storedPayload.messages,
     candidates: canonicalCandidates,
     modelPreference: storedPayload.modelPreference,
+    memoryNotes: storedPayload.memoryNotes,
   });
   const admission = await admitArchiveAiRequest({
     request,
@@ -709,6 +713,7 @@ export async function startArchiveIntelligenceAiRequest(
     mode: input.mode,
     proProfile: input.proProfile,
     messages: input.messages,
+    memoryNotes: input.memoryNotes ?? [],
   };
   const execution = createArchiveIntelligenceOpenAiExecution(storedPayload);
   const admission = await admitArchiveAiRequest({

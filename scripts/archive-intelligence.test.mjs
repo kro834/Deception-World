@@ -499,7 +499,7 @@ test("the API enforces browser origin, bounded input, and shared production budg
   assert.match(rateLimitServer, /costClass === "pro" \? 3 : costClass === "advanced" \? 2 : 1/);
   assert.match(rateLimitServer, /safetyIdentifier: allowed \? clientKey : undefined/);
   assert.match(intelligenceServer, /safety_identifier: safetyIdentifier/);
-  assert.match(intelligenceServer, /serializeUntrustedArchiveConversation\(messages\)/);
+  assert.match(intelligenceServer, /serializeUntrustedArchiveConversation\(messages, memoryNotes\)/);
   assert.doesNotMatch(intelligenceServer, /input: messages\.map/);
   assert.match(conversationBoundary, /UNVERIFIED PRIOR REPLY/);
   assert.match(requestBody, /request\.body\.getReader\(\)/);

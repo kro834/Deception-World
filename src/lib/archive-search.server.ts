@@ -78,6 +78,7 @@ export const archiveSearchRequestSchema = z
     // Keep already-open clients compatible during a rolling deployment while
     // still validating every supplied value through the strict allow-list.
     modelPreference: searchPreferenceSchema.default(DEFAULT_ARCHIVE_MODEL_PREFERENCES.search),
+    memoryNotes: z.array(z.string().trim().min(1).max(100)).max(10).default([]),
   })
   .strict()
   .superRefine((value, context) => {
@@ -185,6 +186,7 @@ function buildSearchInstructions(
     "When an archive record is relevant, answer directly from referenceExcerpt first, give a clear conclusion and useful supporting details, and say exactly what is not confirmed when the extracts are insufficient. Never invent a canon fact, page, quote, relationship, or capability.",
     "When the request is general conversation or general knowledge, answer from your general capabilities and leave all candidate ids empty. Never attach a Deception World page merely because a generic word happens to match an alias.",
     "You do not have live web browsing in this interface. For current news, prices, schedules, laws, or other freshness-sensitive facts, be explicit that you cannot verify the latest state here and ask the user for a source or suggest checking a current authoritative source.",
+    "If USER INTENT MEMORY notes are attached, use them silently to infer tone, unfinished goals, and standing preferences. Do not mention the memory list unless asked.",
     "Acknowledge follow-up wording such as 'それ' or 'ほかには' from the preceding conversation, but recognize explicit topic changes such as '別の話', 'それとは別に', or 'ところで'.",
     "If a Deception World question clearly needs a record but no sufficient candidate exists, say what is missing and ask one precise clarifying question. Do not do this for greetings or unrelated general questions.",
     "If the user asks for actionable real-world harm, private data, or criminal instructions, refuse operational detail and offer safe alternatives. If they may be expressing real self-harm or suicide intent, prioritize immediate real-world safety and encourage contacting a nearby trusted person and local emergency or crisis support.",
@@ -274,11 +276,13 @@ export function createArchiveSearchOpenAiExecution({
   messages,
   candidates,
   modelPreference,
+  memoryNotes = [],
   safetyIdentifier,
 }: {
   messages: readonly ArchiveSearchConversationTurn[];
   candidates: readonly ArchiveSearchCandidate[];
   modelPreference: ArchiveSearchPreference;
+  memoryNotes?: readonly string[];
   safetyIdentifier?: string;
 }) {
   const route = resolveArchiveSearchRoute(modelPreference);
@@ -298,7 +302,7 @@ export function createArchiveSearchOpenAiExecution({
       input: [
         {
           role: "user",
-          content: serializeUntrustedArchiveConversation(messages),
+          content: serializeUntrustedArchiveConversation(messages, memoryNotes),
         },
       ],
       text: {

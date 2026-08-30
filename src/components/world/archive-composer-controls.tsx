@@ -1,6 +1,10 @@
 import * as Popover from "@radix-ui/react-popover";
-import { Check, ChevronDown, FileSearch, MessageSquarePlus, SlidersHorizontal } from "lucide-react";
-import { useRef, type PointerEvent, type RefObject } from "react";
+import { Brain, Check, ChevronDown, FileSearch, MessageSquarePlus, SlidersHorizontal } from "lucide-react";
+import { useRef, useState, type PointerEvent, type RefObject } from "react";
+import {
+  clearArchiveUserMemory,
+  readArchiveUserMemory,
+} from "@/lib/archive-user-memory";
 
 type ComposerModelOption = {
   id: string;
@@ -238,9 +242,73 @@ export function ArchiveComposerTools({
             </button>
           </Popover.Close>
           ) : null}
+          <ArchiveMemoryTool restore={restore} preserve={preserve} />
           <Popover.Arrow className="archive-composer-popover-arrow" aria-hidden="true" />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+function ArchiveMemoryTool({
+  preserve,
+  restore,
+}: {
+  preserve: (event?: PointerEvent<HTMLElement>) => void;
+  restore: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const notes = readArchiveUserMemory().notes;
+
+  if (open) {
+    return (
+      <div className="archive-memory-panel">
+        <small>MEMORY</small>
+        {notes.length ? (
+          <ul>
+            {notes.map((note) => (
+              <li key={note.id}>{note.text}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>まだ覚えていません。会話から好みや調べたいことを静かに拾います。</p>
+        )}
+        <div>
+          <button
+            type="button"
+            onPointerDown={preserve}
+            onClick={() => {
+              setOpen(false);
+              restore();
+            }}
+          >
+            閉じる
+          </button>
+          {notes.length ? (
+            <button
+              type="button"
+              onPointerDown={preserve}
+              onClick={() => {
+                clearArchiveUserMemory();
+                setOpen(false);
+                restore();
+              }}
+            >
+              記憶を消す
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button type="button" onPointerDown={preserve} onClick={() => setOpen(true)}>
+      <Brain size={16} strokeWidth={1.7} aria-hidden="true" />
+      <span>
+        <b>記憶</b>
+        <small>{notes.length ? `${notes.length}件の意図を保持` : "会話は消えても意図は残る"}</small>
+      </span>
+    </button>
   );
 }

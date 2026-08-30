@@ -33,7 +33,9 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /export const ARCHIVE_ORACLE_ENTRIES/);
   assert.match(oracle, /function searchArchiveOracle/);
   assert.match(oracle, /\.slice\(0, Math\.min\(limit, 3\)\)/);
-  assert.match(oracle, /postArchiveApi\(\{/);
+  assert.match(oracle, /memoryNotes: archiveMemoryNoteTexts\(\)/);
+  assert.match(searchServer, /memoryNotes/);
+  assert.match(searchServer, /USER INTENT MEMORY/);
   assert.match(oracle, /url: "\/api\/archive-search"/);
   assert.match(oracle, /client: "search-v1"/);
   assert.match(oracle, /validate: isArchiveSearchReply/);
@@ -97,7 +99,7 @@ test("Search exposes validated GPT-5.5, Terra, and Terra Pro routes with safe fa
   assert.match(searchServer, /leave all candidate ids empty/);
   assert.match(searchServer, /allowedCandidateIds\.has/);
   assert.match(searchServer, /safety_identifier: safetyIdentifier/);
-  assert.match(searchServer, /serializeUntrustedArchiveConversation\(messages\)/);
+  assert.match(searchServer, /serializeUntrustedArchiveConversation\(messages, memoryNotes\)/);
   assert.doesNotMatch(searchServer, /input: messages\.map/);
   assert.match(searchServer, /canonicalizeArchiveSearchCandidates\(candidates\)/);
   assert.match(searchCatalog, /const ARCHIVE_SEARCH_CATALOG/);
@@ -412,7 +414,7 @@ test("the AI app is internally scrollable, mobile-first, and motion-aware", () =
   assert.match(intelligenceStyles, /caret-color: rgba\(255, 255, 255, 0\.94\)/);
   assert.match(intelligenceStyles, /textarea:focus::placeholder/);
   assert.match(intelligenceStyles, /\.archive-composer-leading/);
-  assert.match(intelligenceStyles, /min-height: 60px/);
+  assert.match(intelligenceStyles, /min-height: 88px/);
   assert.match(intelligenceStyles, /archive-ai-search-surface-in/);
   assert.match(intelligenceStyles, /archive-ai-persona-surface-in/);
   assert.match(oracle, /今日は何を調べますか/);
@@ -435,14 +437,11 @@ test("Archive Intelligence has a dedicated reduced-motion-aware route handoff", 
 test("focused composers stay position-stable during visual viewport scrolling", () => {
   assert.match(intelligencePage, /viewport\?\.addEventListener\("scroll"/);
   assert.match(intelligencePage, /window\.scrollTo\(0, 0\)/);
-  assert.match(intelligencePage, /KEYBOARD_FALLBACK_PX/);
+  assert.match(intelligencePage, /--archive-vv-offset/);
   assert.match(intelligencePage, /applyViewport\(\)/);
   assert.match(intelligencePage, /pointerdown/);
-  assert.match(intelligenceStyles, /--archive-keyboard-inset/);
-  assert.match(
-    intelligenceStyles,
-    /position:\s*fixed;[\s\S]*bottom:\s*var\(--archive-keyboard-inset/,
-  );
+  assert.match(intelligenceStyles, /--archive-vv-offset/);
+  assert.match(intelligenceStyles, /var\(--archive-vv-offset, 0px\)/);
   assert.doesNotMatch(intelligencePage, /--archive-viewport-(?:left|top)/);
   assert.doesNotMatch(intelligencePage, /resolveArchiveViewportOffset/);
   assert.match(

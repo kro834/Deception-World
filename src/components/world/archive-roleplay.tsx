@@ -31,7 +31,7 @@ import {
   type ArchiveCharacterId,
   type ArchiveRoleplayMode,
 } from "@/lib/archive-characters";
-import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
+import { absorbArchiveUserIntent, archiveMemoryNoteTexts } from "@/lib/archive-user-memory";
 import { isArchiveDelivery } from "@/lib/archive-delivery";
 import {
   hasVisibleArchiveText,
@@ -552,6 +552,11 @@ export function ArchiveRoleplay({
         );
     if (!nextMessages) return;
     setSessions((current) => ({ ...current, [keyAtRequest]: nextMessages }));
+    absorbArchiveUserIntent({
+      userText: value,
+      surface: "persona",
+      characterName: profile.name,
+    });
     if (!options.preserveDraft) setDraft("");
     setMessageEdit(null);
     setSelectedUserMessageId(null);
@@ -587,6 +592,7 @@ export function ArchiveRoleplay({
           mode: modeAtRequest,
           proProfile: proProfileAtRequest,
           messages: conversationHistory,
+          memoryNotes: archiveMemoryNoteTexts(),
         },
         signal: controller.signal,
         validate: isArchiveReply,
@@ -1152,52 +1158,55 @@ export function ArchiveRoleplay({
               rows={1}
               value={draft}
               maxLength={messageEdit ? undefined : messageMaxLength}
+              autoComplete="off"
               enterKeyHint="enter"
+              inputMode="text"
               placeholder={`${profile.name}へ話しかける…`}
               onChange={(event) => setDraft(event.currentTarget.value)}
             />
             <small aria-label={`${draft.length}文字`}>{draft.length}</small>
+            {pending ? (
+              <button
+                type="button"
+                className="archive-composer-stop is-stop"
+                tabIndex={-1}
+                onClick={() => stopResponse(true, true)}
+                aria-label="応答生成を停止"
+              >
+                <Square size={15} fill="currentColor" strokeWidth={1.4} aria-hidden="true" />
+                <span>停止</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="archive-composer-send"
+                tabIndex={-1}
+                disabled={
+                  !hasVisibleArchiveText(draft) ||
+                  draft.length > messageMaxLength ||
+                  messageEditOverLimit
+                }
+                aria-label={messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`}
+                onClick={() =>
+                  void sendMessage(
+                    draft,
+                    messageEdit
+                      ? { replaceMessageId: messageEdit.messageId, action: "edit_resend" }
+                      : undefined,
+                  )
+                }
+              >
+                <ArrowUp
+                  className="archive-send-icon"
+                  size={20}
+                  strokeWidth={2.4}
+                  aria-hidden="true"
+                  focusable="false"
+                />
+                <span>送信</span>
+              </button>
+            )}
           </div>
-          {pending ? (
-            <button
-              type="button"
-              className="archive-composer-stop is-stop"
-              onClick={() => stopResponse(true, true)}
-              aria-label="応答生成を停止"
-            >
-              <Square size={15} fill="currentColor" strokeWidth={1.4} aria-hidden="true" />
-              <span>停止</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="archive-composer-send"
-              tabIndex={-1}
-              disabled={
-                !hasVisibleArchiveText(draft) ||
-                draft.length > messageMaxLength ||
-                messageEditOverLimit
-              }
-              aria-label={messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`}
-              onClick={() =>
-                void sendMessage(
-                  draft,
-                  messageEdit
-                    ? { replaceMessageId: messageEdit.messageId, action: "edit_resend" }
-                    : undefined,
-                )
-              }
-            >
-              <ArrowUp
-                className="archive-send-icon"
-                size={20}
-                strokeWidth={2.4}
-                aria-hidden="true"
-                focusable="false"
-              />
-              <span>送信</span>
-            </button>
-          )}
         </form>
 
         <footer className="archive-roleplay-privacy">
