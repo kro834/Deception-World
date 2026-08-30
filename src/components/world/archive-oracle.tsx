@@ -1385,13 +1385,8 @@ export function ArchiveIntelligenceWorkspace({
           />
           {!searchMessages.length ? (
             <div className="archive-search-welcome">
-              <span aria-hidden="true">AI</span>
-              <div>
-                <small>SEARCH CHANNEL READY</small>
-                <p>
-                  挨拶や相談、文章づくり、一般的な質問まで、そのまま話してください。作品の話なら、回答に使った公開記録も一緒に案内します。
-                </p>
-              </div>
+              <p>今日は何を調べますか</p>
+              <small>挨拶でも、相談でも、作品の記録でも。そのまま聞いてください。</small>
             </div>
           ) : (
             searchMessages.map((message) => {
@@ -1488,17 +1483,13 @@ export function ArchiveIntelligenceWorkspace({
                 <i />
               </span>
               <div>
-                <small>
-                  {ARCHIVE_RUNTIME_MODEL_LABEL} / {archiveLifecycleText(searchLifecycle)}
-                </small>
+                <small>{ARCHIVE_RUNTIME_MODEL_LABEL}</small>
                 <p>
-                  {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-                    ? searchLifecycle === "reconnecting"
-                      ? "回線復帰後に同じ回答を回収します"
-                      : "会話全体の意図と必要な情報を深く考えています"
-                    : searchLifecycle === "reconnecting"
-                      ? "通信を復旧し、同じ回答を確認しています"
-                      : "質問の意図と会話の流れを整理しています"}
+                  {searchLifecycle === "reconnecting"
+                    ? "接続を確認しています"
+                    : searchLifecycle === "submitting"
+                      ? "送信しています"
+                      : "考えています"}
                 </p>
               </div>
             </div>

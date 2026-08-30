@@ -1091,11 +1091,11 @@ export function ArchiveRoleplay({
                 <i />
               </span>
               <div>
-                <small>{ARCHIVE_RUNTIME_MODEL_LABEL} / 思考中</small>
+                <small>{ARCHIVE_RUNTIME_MODEL_LABEL}</small>
                 <p>
-                  {mode === "pro"
-                    ? "会話の流れ・感情・人格記録を深く考えています"
-                    : "言葉と人格記録をつないでいます"}
+                  {liveMessage.includes("再接続")
+                    ? "接続を確認しています"
+                    : "考えています"}
                 </p>
               </div>
             </div>

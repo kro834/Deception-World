@@ -42,7 +42,7 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /className="archive-search-log"/);
   assert.match(oracle, /role="log"/);
   assert.match(oracle, /archiveLifecycleText\(searchLifecycle\)/);
-  assert.match(oracle, /回線復帰後に同じ回答を回収します/);
+  assert.match(oracle, /接続を確認しています/);
   assert.match(oracle, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(
     oracle,
@@ -415,6 +415,8 @@ test("the AI app is internally scrollable, mobile-first, and motion-aware", () =
   assert.match(intelligenceStyles, /min-height: 60px/);
   assert.match(intelligenceStyles, /archive-ai-search-surface-in/);
   assert.match(intelligenceStyles, /archive-ai-persona-surface-in/);
+  assert.match(oracle, /今日は何を調べますか/);
+  assert.match(intelligenceStyles, /archive-think-shimmer/);
 });
 
 test("Archive Intelligence has a dedicated reduced-motion-aware route handoff", () => {
