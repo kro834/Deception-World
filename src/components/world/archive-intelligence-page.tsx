@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DEFAULT_ARCHIVE_MODEL_PREFERENCES,
-  normalizeArchiveModelPreferences,
-  type ArchiveModelPreferences,
-} from "@/lib/archive-model-config";
-import { ArchiveModelSelector } from "./archive-model-selector";
+import { useEffect, useRef, useState } from "react";
+import { DEFAULT_ARCHIVE_MODEL_PREFERENCES } from "@/lib/archive-model-config";
 import { ArchiveIntelligenceWorkspace } from "./archive-oracle";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
 import { useWorldMode } from "./use-world-mode";
@@ -12,14 +7,9 @@ import { useWorldMode } from "./use-world-mode";
 export function ArchiveIntelligencePage() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
-  const [modelPreferences, setModelPreferences] = useState<ArchiveModelPreferences>(
-    DEFAULT_ARCHIVE_MODEL_PREFERENCES,
-  );
-  const [preferencesReady, setPreferencesReady] = useState(false);
+  const [modelPreferences, setModelPreferences] = useState(DEFAULT_ARCHIVE_MODEL_PREFERENCES);
   const pageRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const modelReturnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     document.documentElement.classList.add("archive-intelligence-active");
@@ -39,33 +29,6 @@ export function ArchiveIntelligencePage() {
     }, 380);
     return () => window.clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("deception-world:archive-models:v2");
-      setModelPreferences(
-        stored
-          ? normalizeArchiveModelPreferences(JSON.parse(stored) as unknown)
-          : DEFAULT_ARCHIVE_MODEL_PREFERENCES,
-      );
-    } catch {
-      setModelPreferences(DEFAULT_ARCHIVE_MODEL_PREFERENCES);
-    } finally {
-      setPreferencesReady(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!preferencesReady) return;
-    try {
-      window.localStorage.setItem(
-        "deception-world:archive-models:v2",
-        JSON.stringify(modelPreferences),
-      );
-    } catch {
-      // Private browsing can deny persistent storage; the in-memory choice remains usable.
-    }
-  }, [modelPreferences, preferencesReady]);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -162,24 +125,6 @@ export function ArchiveIntelligencePage() {
     };
   }, []);
 
-  const openModelSelector = useCallback(() => {
-    const focused = document.activeElement;
-    modelReturnFocusRef.current =
-      focused instanceof HTMLElement &&
-      !focused.matches("input, textarea, [contenteditable='true']")
-        ? focused
-        : (pageRef.current?.querySelector<HTMLElement>(".archive-oracle-model-trigger") ?? null);
-    if (
-      focused instanceof HTMLElement &&
-      focused.matches("input, textarea, [contenteditable='true']")
-    ) {
-      focused.blur();
-      window.setTimeout(() => setModelSelectorOpen(true), 140);
-      return;
-    }
-    setModelSelectorOpen(true);
-  }, []);
-
   return (
     <main ref={pageRef} className="archive-intelligence-page">
       <h1 ref={headingRef} className="visually-hidden" tabIndex={-1}>
@@ -199,23 +144,10 @@ export function ArchiveIntelligencePage() {
           active
           modelPreferences={modelPreferences}
           onModelPreferencesChange={setModelPreferences}
-          modelSelectorOpen={modelSelectorOpen}
-          onOpenModelSelector={openModelSelector}
         />
       </div>
 
       <SideMenuLayer context="intelligence" open={menuOpen} onOpenChange={setMenuOpen} />
-      <ArchiveModelSelector
-        open={modelSelectorOpen}
-        onOpenChange={setModelSelectorOpen}
-        value={modelPreferences}
-        onApply={setModelPreferences}
-        onReturnFocus={() => {
-          window.requestAnimationFrame(() =>
-            modelReturnFocusRef.current?.focus({ preventScroll: true }),
-          );
-        }}
-      />
     </main>
   );
 }

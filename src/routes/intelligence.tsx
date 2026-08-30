@@ -9,7 +9,7 @@ export const Route = createFileRoute("/intelligence")({
     createWorldHead({
       title: "AIに聞く｜Deception World",
       description:
-        "GPT-5.5／GPT-5.6 Terraの会話型サーチと、GPT-5.6 Solによる8つの人格回線を備えたDeception World公式アーカイブ知能。",
+        "Grok 4.20による会話型サーチと、8つの人格回線を備えたDeception World公式アーカイブ知能。",
       stylesheetLinks: [...WORLD_STYLESHEET_LINKS, { rel: "stylesheet", href: intelligenceCssUrl }],
     }),
 });

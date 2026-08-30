@@ -128,7 +128,7 @@ test("normal and pro modes keep distinct response and human conversation contrac
   assert.match(roleplay, /role="radiogroup"[\s\S]{0,120}?aria-label="なりきりモード"/);
   assert.match(roleplay, /<span>NORMAL<\/span>[\s\S]*?セリフ＋軽い描写/);
   assert.match(roleplay, /<span>PRO<\/span>[\s\S]*?自然な対話・深い理解/);
-  assert.match(roleplay, /archivePersonaProfileLabel\(pendingProProfile \?\? proProfile\)/);
+  assert.match(roleplay, /ARCHIVE_RUNTIME_MODEL_LABEL/);
   assert.match(roleplay, /会話の流れ・感情・人格記録を深く考えています/);
   assert.match(roleplay, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
   assert.match(roleplay, /<TacticalHud tactical=\{message\.tactical\} \/>/);

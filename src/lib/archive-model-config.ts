@@ -91,23 +91,22 @@ export function normalizeArchiveModelPreferences(value: unknown): ArchiveModelPr
   };
 }
 
-export function archiveSearchModelName(model: ArchiveSearchModel): string {
-  return model === "gpt-5.6-terra" ? "GPT-5.6 TERRA" : "GPT-5.5";
-}
+export const ARCHIVE_RUNTIME_MODEL_LABEL = "Grok 4.20";
 
 export function archiveEffortName(effort: ArchiveSearchEffort): string {
   return effort.toUpperCase();
 }
 
-export function archiveSearchPreferenceLabel(preference: ArchiveSearchPreference): string {
-  if (preference.execution === "pro") return "5.6 TERRA PRO";
-  return `${preference.model === "gpt-5.6-terra" ? "5.6 TERRA" : "5.5"} ${archiveEffortName(preference.effort)}`;
+export function archiveSearchModelName(_model: ArchiveSearchModel): string {
+  return ARCHIVE_RUNTIME_MODEL_LABEL;
 }
 
-export function archivePersonaProfileLabel(profile: ArchivePersonaProProfile): string {
-  if (profile === "instant") return "5.6 SOL INSTANT";
-  if (profile === "max") return "5.6 SOL MAX";
-  return "5.6 SOL PRO";
+export function archiveSearchPreferenceLabel(_preference: ArchiveSearchPreference): string {
+  return ARCHIVE_RUNTIME_MODEL_LABEL;
+}
+
+export function archivePersonaProfileLabel(_profile: ArchivePersonaProProfile): string {
+  return ARCHIVE_RUNTIME_MODEL_LABEL;
 }
 
 export type ArchiveAiCostClass = "standard" | "advanced" | "pro";

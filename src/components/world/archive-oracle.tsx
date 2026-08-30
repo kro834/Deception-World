@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowUp, SlidersHorizontal, Square } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { GuardedLink } from "@/components/load-gate";
 import {
   recordArchiveAiHealth,
@@ -27,9 +27,7 @@ import {
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
 import type { ArchiveSearchReply } from "@/lib/archive-search";
 import {
-  archivePersonaProfileLabel,
-  archiveSearchModelName,
-  archiveSearchPreferenceLabel,
+  ARCHIVE_RUNTIME_MODEL_LABEL,
   waitForArchiveThinkingFloor,
   type ArchiveModelPreferences,
   type ArchiveSearchPreference,
@@ -41,7 +39,7 @@ import {
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, type DossierLink } from "./dossier-nav";
-import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
+import { ArchiveComposerModelBadge, ArchiveComposerTools } from "./archive-composer-controls";
 import { ArchiveConnectionHealth } from "./archive-connection-health";
 import { ArchiveComposerEditNotice, ArchiveMessageActions } from "./archive-message-actions";
 import { ArchiveRoleplay } from "./archive-roleplay";
@@ -772,15 +770,11 @@ export function ArchiveIntelligenceWorkspace({
   onNavigate,
   modelPreferences,
   onModelPreferencesChange,
-  modelSelectorOpen,
-  onOpenModelSelector,
 }: {
   active?: boolean;
   onNavigate?: () => void;
   modelPreferences: ArchiveModelPreferences;
   onModelPreferencesChange: (value: ArchiveModelPreferences) => void;
-  modelSelectorOpen: boolean;
-  onOpenModelSelector: () => void;
 }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const searchLogRef = useRef<HTMLDivElement>(null);
@@ -1146,9 +1140,7 @@ export function ArchiveIntelligenceWorkspace({
                 suggestions: reply.suggestions,
                 source: reply.source,
                 model: reply.providerModel ?? reply.model,
-                modelLabel: reply.providerModel
-                  ? `${reply.providerModel.toUpperCase()} · VERIFIED`
-                  : archiveSearchPreferenceLabel(searchPreferenceAtRequest),
+                modelLabel: ARCHIVE_RUNTIME_MODEL_LABEL,
                 notice: reply.notice,
                 requestId: reply.requestId,
               },
@@ -1339,27 +1331,10 @@ export function ArchiveIntelligenceWorkspace({
             <small>PERSONA</small>
           </button>
         </div>
-        <button
-          type="button"
-          className="archive-oracle-status archive-oracle-model-trigger"
-          aria-label={`モデルを変更。現在は${
-            surface === "search"
-              ? archiveSearchPreferenceLabel(modelPreferences.search)
-              : archivePersonaProfileLabel(modelPreferences.personaProProfile)
-          }`}
-          aria-haspopup="dialog"
-          aria-expanded={modelSelectorOpen}
-          aria-controls="archive-model-selector"
-          onClick={onOpenModelSelector}
-        >
+        <p className="archive-oracle-status" aria-label="使用モデル Grok 4.20">
           <i aria-hidden="true" />
-          <span>
-            {surface === "search"
-              ? archiveSearchPreferenceLabel(modelPreferences.search)
-              : archivePersonaProfileLabel(modelPreferences.personaProProfile)}
-          </span>
-          <SlidersHorizontal size={13} strokeWidth={1.6} aria-hidden="true" />
-        </button>
+          <span>{ARCHIVE_RUNTIME_MODEL_LABEL}</span>
+        </p>
       </header>
 
       <div
@@ -1431,12 +1406,7 @@ export function ArchiveIntelligenceWorkspace({
                     {message.role === "assistant" && message.source ? (
                       <small>
                         {message.source === "openai"
-                          ? (message.modelLabel ??
-                            (message.model === "gpt-5.6-terra"
-                              ? "TERRA"
-                              : message.model === "gpt-5.5"
-                                ? "GPT-5.5"
-                                : "NEURAL"))
+                          ? (message.modelLabel ?? ARCHIVE_RUNTIME_MODEL_LABEL)
                           : message.source === "local"
                             ? "LOCAL"
                             : (message.modelLabel ?? "RECONNECT")}
@@ -1517,16 +1487,7 @@ export function ArchiveIntelligenceWorkspace({
               </span>
               <div>
                 <small>
-                  {archiveSearchModelName(
-                    (pendingSearchPreference ?? modelPreferences.search).model,
-                  )}{" "}
-                  /{" "}
-                  {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
-                    ? "PRO"
-                    : (
-                        pendingSearchPreference ?? modelPreferences.search
-                      ).effort.toUpperCase()}{" "}
-                  / {archiveLifecycleText(searchLifecycle)}
+                  {ARCHIVE_RUNTIME_MODEL_LABEL} / {archiveLifecycleText(searchLifecycle)}
                 </small>
                 <p>
                   {(pendingSearchPreference ?? modelPreferences.search).execution === "pro"
@@ -1584,78 +1545,13 @@ export function ArchiveIntelligenceWorkspace({
             />
           ) : null}
           <section className="archive-composer-model-row" aria-label="現在のサーチモデル">
-            <ArchiveComposerModelMenu
-              label={archiveSearchPreferenceLabel(modelPreferences.search)}
-              eyebrow="SEARCH MODEL"
-              editorRef={inputRef}
-              onOpenDetailed={onOpenModelSelector}
-              options={[
-                {
-                  id: "terra-low",
-                  label: "5.6 TERRA LOW",
-                  detail: "軽快な日常会話とサーチ",
-                  active:
-                    modelPreferences.search.model === "gpt-5.6-terra" &&
-                    modelPreferences.search.effort === "low" &&
-                    modelPreferences.search.execution === "standard",
-                  onSelect: () =>
-                    onModelPreferencesChange({
-                      ...modelPreferences,
-                      search: { model: "gpt-5.6-terra", effort: "low", execution: "standard" },
-                    }),
-                },
-                {
-                  id: "terra-xhigh",
-                  label: "5.6 TERRA XHIGH",
-                  detail: "複雑な照合を深く考える",
-                  active:
-                    modelPreferences.search.model === "gpt-5.6-terra" &&
-                    modelPreferences.search.effort === "xhigh" &&
-                    modelPreferences.search.execution === "standard",
-                  onSelect: () =>
-                    onModelPreferencesChange({
-                      ...modelPreferences,
-                      search: {
-                        model: "gpt-5.6-terra",
-                        effort: "xhigh",
-                        execution: "standard",
-                      },
-                    }),
-                },
-                {
-                  id: "gpt55-high",
-                  label: "GPT-5.5 HIGH",
-                  detail: "自然さと精度のバランス",
-                  active:
-                    modelPreferences.search.model === "gpt-5.5" &&
-                    modelPreferences.search.effort === "high" &&
-                    modelPreferences.search.execution === "standard",
-                  onSelect: () =>
-                    onModelPreferencesChange({
-                      ...modelPreferences,
-                      search: { model: "gpt-5.5", effort: "high", execution: "standard" },
-                    }),
-                },
-                {
-                  id: "search-pro",
-                  label: "5.6 TERRA PRO",
-                  detail: "最も高度な会話型サーチ",
-                  active: modelPreferences.search.execution === "pro",
-                  onSelect: () =>
-                    onModelPreferencesChange({
-                      ...modelPreferences,
-                      search: { model: "gpt-5.6-terra", effort: "xhigh", execution: "pro" },
-                    }),
-                },
-              ]}
-            />
+            <ArchiveComposerModelBadge label={ARCHIVE_RUNTIME_MODEL_LABEL} />
           </section>
           <div className="archive-oracle-input-shell">
             <ArchiveComposerTools
               editorRef={inputRef}
               onNewConversation={clearSearchConversation}
               onAttachArchive={attachSearchArchive}
-              onOpenDetailed={onOpenModelSelector}
             />
             <textarea
               ref={inputRef}
@@ -1735,7 +1631,6 @@ export function ArchiveIntelligenceWorkspace({
           onProProfileChange={(personaProProfile) =>
             onModelPreferencesChange({ ...modelPreferences, personaProProfile })
           }
-          onOpenModelSelector={onOpenModelSelector}
         />
       </div>
     </section>

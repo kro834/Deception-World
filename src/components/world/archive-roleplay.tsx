@@ -45,11 +45,11 @@ import {
   type ArchiveTacticalSnapshot,
 } from "@/lib/archive-roleplay-fallback";
 import {
-  archivePersonaProfileLabel,
+  ARCHIVE_RUNTIME_MODEL_LABEL,
   waitForArchiveThinkingFloor,
   type ArchivePersonaProProfile,
 } from "@/lib/archive-model-config";
-import { ArchiveComposerModelMenu, ArchiveComposerTools } from "./archive-composer-controls";
+import { ArchiveComposerModelBadge, ArchiveComposerTools } from "./archive-composer-controls";
 import { ArchiveConnectionHealth } from "./archive-connection-health";
 import { ArchiveComposerEditNotice, ArchiveMessageActions } from "./archive-message-actions";
 import { useLiquidSegmentedDrag } from "./use-liquid-segmented-drag";
@@ -95,7 +95,6 @@ type ArchiveRoleplayProps = {
   searchArchive: (query: string, limit?: number) => RoleplaySearchResult[];
   proProfile: ArchivePersonaProProfile;
   onProProfileChange: (profile: ArchivePersonaProProfile) => void;
-  onOpenModelSelector: () => void;
 };
 
 const MAX_VISIBLE_MESSAGES = 36;
@@ -236,8 +235,7 @@ export function ArchiveRoleplay({
   onNavigate,
   searchArchive,
   proProfile,
-  onProProfileChange,
-  onOpenModelSelector,
+  onProProfileChange: _onProProfileChange,
 }: ArchiveRoleplayProps) {
   const [characterId, setCharacterId] = useState<ArchiveCharacterId>("ciel");
   const [mode, setMode] = useState<ArchiveRoleplayMode>("normal");
@@ -681,11 +679,7 @@ export function ArchiveRoleplay({
       navigationQuery: reply.navigationQuery,
       source: reply.source,
       model: reply.providerModel ?? reply.model,
-      modelLabel: reply.providerModel
-        ? `${reply.providerModel.toUpperCase()} · VERIFIED`
-        : modeAtRequest === "pro"
-          ? archivePersonaProfileLabel(proProfileAtRequest)
-          : "GPT-5.6 LUNA",
+      modelLabel: ARCHIVE_RUNTIME_MODEL_LABEL,
       notice: reply.notice,
       requestId: reply.requestId,
     };
@@ -1098,11 +1092,7 @@ export function ArchiveRoleplay({
                 <i />
               </span>
               <div>
-                <small>
-                  {mode === "pro"
-                    ? `${archivePersonaProfileLabel(pendingProProfile ?? proProfile)} / 思考中`
-                    : "GPT-5.6 LUNA / 思考中"}
-                </small>
+                <small>{ARCHIVE_RUNTIME_MODEL_LABEL} / 思考中</small>
                 <p>
                   {mode === "pro"
                     ? "会話の流れ・感情・人格記録を深く考えています"
@@ -1149,43 +1139,13 @@ export function ArchiveRoleplay({
             />
           ) : null}
           <section className="archive-composer-model-row" aria-label="現在の人格会話モデル">
-            <ArchiveComposerModelMenu
-              label={mode === "normal" ? "5.6 LUNA" : archivePersonaProfileLabel(proProfile)}
-              eyebrow="PERSONA MODEL"
-              editorRef={composerRef}
-              onOpenDetailed={onOpenModelSelector}
-              options={[
-                {
-                  id: "luna-normal",
-                  label: "5.6 LUNA",
-                  detail: "自然で軽快なノーマル会話",
-                  active: mode === "normal",
-                  onSelect: () => selectMode("normal"),
-                },
-                ...(["instant", "max", "pro"] as const).map((profileId) => ({
-                  id: `sol-${profileId}`,
-                  label: archivePersonaProfileLabel(profileId),
-                  detail:
-                    profileId === "instant"
-                      ? "テンポを保つプロ会話"
-                      : profileId === "max"
-                        ? "最大思考量で深く応答"
-                        : "最高品質を優先する会話",
-                  active: mode === "pro" && proProfile === profileId,
-                  onSelect: () => {
-                    onProProfileChange(profileId);
-                    selectMode("pro");
-                  },
-                })),
-              ]}
-            />
+            <ArchiveComposerModelBadge label={ARCHIVE_RUNTIME_MODEL_LABEL} />
           </section>
           <div>
             <ArchiveComposerTools
               editorRef={composerRef}
               onNewConversation={clearConversation}
               onAttachArchive={attachPersonaArchive}
-              onOpenDetailed={onOpenModelSelector}
             />
             <textarea
               ref={composerRef}

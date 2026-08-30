@@ -1872,6 +1872,11 @@ body.archive-intelligence-active {
   touch-action: manipulation;
 }
 
+.archive-intelligence-page .archive-composer-model-trigger.is-static {
+  cursor: default;
+  pointer-events: none;
+}
+
 .archive-intelligence-page .archive-composer-model-trigger > span {
   width: 6px;
   height: 6px;
@@ -2178,7 +2183,7 @@ body.archive-intelligence-active {
   }
 
   .archive-intelligence-page .archive-oracle-status:hover,
-  .archive-intelligence-page .archive-composer-model-trigger:hover {
+  .archive-intelligence-page .archive-composer-model-trigger:not(.is-static):hover {
     border-color: rgba(203, 241, 255, 0.3);
   }
 

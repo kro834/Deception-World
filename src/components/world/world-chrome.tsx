@@ -480,7 +480,7 @@ export function SideMenuLayer({
             </span>
           </GuardedLink>
           <p>
-            <span>GPT-5.5 · TERRA · SOL</span>
+            <span>Grok 4.20</span>
             記録を会話で探し、人格と深く話す
           </p>
         </div>

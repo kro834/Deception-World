@@ -358,7 +358,7 @@ test("Archive Intelligence is an independent route reached from the shared side 
   assert.match(intelligenceRoute, /styles-intelligence\.css\?url/);
   assert.match(intelligenceRoute, /\.\.\.WORLD_STYLESHEET_LINKS/);
   assert.match(intelligencePage, /<ArchiveIntelligenceWorkspace[\s\S]*?modelPreferences=/);
-  assert.match(intelligencePage, /<ArchiveModelSelector/);
+  assert.doesNotMatch(intelligencePage, /<ArchiveModelSelector/);
   assert.match(intelligencePage, /<SideMenuLayer context="intelligence"/);
   assert.match(
     intelligencePage,
@@ -403,9 +403,10 @@ test("the AI app is internally scrollable, mobile-first, and motion-aware", () =
   assert.match(intelligenceStyles, /@media \(max-height: 560px\)/);
   assert.match(intelligenceStyles, /data-keyboard="open"/);
   assert.match(intelligenceStyles, /\.archive-model-dialog/);
+  assert.match(oracle, /ARCHIVE_RUNTIME_MODEL_LABEL/);
+  assert.match(oracle, /Grok 4\.20/);
+  assert.doesNotMatch(intelligencePage, /setModelSelectorOpen/);
   assert.match(modelSelector, /RadioGroup\.Root/);
-  assert.match(modelSelector, /onCloseAutoFocus/);
-  assert.match(modelSelector, /Search Pro/);
   assert.match(oracle, /参照したページ/);
   assert.match(oracle, /reply\.referenceCandidateIds/);
   assert.match(intelligenceStyles, /caret-color: rgba\(255, 255, 255, 0\.94\)/);

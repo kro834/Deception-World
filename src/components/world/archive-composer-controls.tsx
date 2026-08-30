@@ -22,7 +22,7 @@ type ArchiveComposerToolsProps = {
   editorRef: RefObject<HTMLTextAreaElement | null>;
   onNewConversation: () => void;
   onAttachArchive: () => void;
-  onOpenDetailed: () => void;
+  onOpenDetailed?: () => void;
 };
 
 type SelectionSnapshot = { start: number; end: number } | null;
@@ -52,6 +52,19 @@ function useStableEditorSelection(editorRef: RefObject<HTMLTextAreaElement | nul
   };
 
   return { preserve, restore };
+}
+
+export function ArchiveComposerModelBadge({
+  label = "Grok 4.20",
+}: {
+  label?: string;
+}) {
+  return (
+    <div className="archive-composer-model-trigger is-static" aria-label={`使用モデル ${label}`}>
+      <span aria-hidden="true" />
+      <b>{label}</b>
+    </div>
+  );
 }
 
 export function ArchiveComposerModelMenu({
@@ -206,6 +219,7 @@ export function ArchiveComposerTools({
               </span>
             </button>
           </Popover.Close>
+          {onOpenDetailed ? (
           <Popover.Close asChild>
             <button
               type="button"
@@ -222,6 +236,7 @@ export function ArchiveComposerTools({
               </span>
             </button>
           </Popover.Close>
+          ) : null}
           <Popover.Arrow className="archive-composer-popover-arrow" aria-hidden="true" />
         </Popover.Content>
       </Popover.Portal>
