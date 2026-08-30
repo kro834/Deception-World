@@ -127,6 +127,51 @@ function retryDelay(attempt: number, serverDelay?: number): number {
   return base + Math.floor(Math.random() * 180);
 }
 
+function raceWithDeadline<T>(
+  operation: Promise<T>,
+  deadlineMs: number,
+  signal: AbortSignal,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    let settled = false;
+    let timer = 0;
+    let raf = 0;
+    const started = Date.now();
+    const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+      if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+      signal.removeEventListener("abort", onAbort);
+      callback();
+    };
+    const onAbort = () => finish(() => reject(abortError(signal)));
+    const expire = () =>
+      finish(() =>
+        reject(new ArchiveApiClientError("Archive AI request expired", "request_expired")),
+      );
+    const tick = () => {
+      if (settled) return;
+      if (Date.now() - started >= deadlineMs) {
+        expire();
+        return;
+      }
+      if (typeof requestAnimationFrame === "function") raf = requestAnimationFrame(tick);
+    };
+    if (signal.aborted) {
+      reject(abortError(signal));
+      return;
+    }
+    signal.addEventListener("abort", onAbort, { once: true });
+    timer = setTimeout(expire, deadlineMs) as unknown as number;
+    if (typeof requestAnimationFrame === "function") raf = requestAnimationFrame(tick);
+    operation.then(
+      (value) => finish(() => resolve(value)),
+      (error) => finish(() => reject(error)),
+    );
+  });
+}
+
 function monotonicNow(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
@@ -280,6 +325,56 @@ export async function postArchiveApi<T>({
     ...pendingContext,
   });
 
+  return raceWithDeadline(
+    runArchiveApiRequest({
+      url,
+      client,
+      requestBody,
+      headers,
+      requestId,
+      sessionId,
+      signal,
+      validate,
+      startedAt,
+      deadline,
+      onState,
+      onTiming,
+    }),
+    Math.max(0, deadline - Date.now()),
+    signal,
+  );
+}
+
+async function runArchiveApiRequest<T>({
+  url,
+  client,
+  requestBody,
+  headers,
+  requestId,
+  sessionId,
+  signal,
+  validate,
+  startedAt,
+  deadline,
+  onState,
+  onTiming,
+}: {
+  url: "/api/archive-search" | "/api/archive-intelligence";
+  client: "search-v1" | "persona-v1";
+  requestBody: Record<string, unknown>;
+  headers: Record<string, string>;
+  requestId: string;
+  sessionId: string;
+  signal: AbortSignal;
+  validate: (payload: unknown) => payload is T;
+  startedAt: number;
+  deadline: number;
+  onState?: (state: ArchiveApiLifecycle) => void;
+  onTiming?: (timing: ArchiveApiTiming) => void;
+}): Promise<T> {
+  void client;
+  void sessionId;
+  void startedAt;
   let postAttempted = false;
   let postAttempts = 0;
   let pollAttempt = 0;
@@ -433,6 +528,13 @@ export async function resumeArchiveApi<T>({
     Math.max(pending.startedAt, Date.now()) + RESUME_TTL_MS,
     Date.now() + RESUME_TTL_MS,
   );
+  return raceWithDeadline(
+    runResume(),
+    Math.max(250, resumeDeadline - Date.now()),
+    signal,
+  );
+
+  async function runResume(): Promise<T> {
   while (Date.now() < resumeDeadline) {
     if (signal.aborted) throw abortError(signal);
     if (!browserCanAttempt()) {
@@ -526,4 +628,5 @@ export async function resumeArchiveApi<T>({
 
   void forgetArchiveAiPending(pending.requestId);
   throw new ArchiveApiClientError("Archive AI request expired", "request_expired");
+  }
 }

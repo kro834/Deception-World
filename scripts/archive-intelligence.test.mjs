@@ -614,7 +614,8 @@ test("the composer sends only by button, stays abortable and stale-response safe
   assert.match(archiveApiClient, /credentials:\s*"same-origin"/);
   assert.match(archiveApiClient, /"x-archive-client": client/);
   assert.match(archiveApiClient, /if \(!response\.ok\)/);
-  assert.match(archiveApiClient, /Promise\.race\(/);
+  assert.match(archiveApiClient, /function raceWithDeadline/);
+  assert.match(archiveApiClient, /requestAnimationFrame\(tick\)/);
   assert.match(archiveApiClient, /Archive API attempt timed out/);
   assert.match(archiveApiClient, /const REQUEST_TTL_MS = 32_000/);
   assert.match(archiveApiClient, /const RESUME_TTL_MS = 32_000/);

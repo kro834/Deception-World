@@ -291,6 +291,10 @@ export function ArchiveRoleplay({
     const sessionId = activeRequestSessionIdRef.current;
     const recoveryRequestId = stopRecovery ? recoveryRequestIdRef.current : null;
     const recoverySessionId = stopRecovery ? recoveryRequestSessionIdRef.current : undefined;
+    if (requestId) void forgetArchiveAiPending(requestId);
+    if (recoveryRequestId && recoveryRequestId !== requestId) {
+      void forgetArchiveAiPending(recoveryRequestId);
+    }
     activeRequestIdRef.current = null;
     activeRequestSessionIdRef.current = undefined;
     foregroundPendingKeyRef.current = null;
@@ -404,7 +408,10 @@ export function ArchiveRoleplay({
     let disposed = false;
     void (async () => {
       const pendingRecords = (await listArchiveAiPending()).filter(
-        (record) => record.client === "persona-v1" && record.url === "/api/archive-intelligence",
+        (record) =>
+          record.client === "persona-v1" &&
+          record.url === "/api/archive-intelligence" &&
+          Date.now() - record.startedAt < 32_000,
       );
       if (disposed || abortRef.current || !pendingRecords.length) return;
       recoveryRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
@@ -495,12 +502,23 @@ export function ArchiveRoleplay({
 
   useEffect(() => {
     if (!pendingKey) return;
-    const timer = window.setTimeout(() => {
-      if (abortRef.current || recoveryAbortRef.current) return;
-      setPendingKey(null);
-    }, 8_000);
-    return () => window.clearTimeout(timer);
-  }, [pendingKey]);
+    const started = Date.now();
+    let raf = 0;
+    const expire = () => stopResponse(false, true);
+    const tick = () => {
+      if (Date.now() - started >= 20_000) {
+        expire();
+        return;
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    const timer = window.setTimeout(expire, 20_000);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+    };
+  }, [pendingKey, stopResponse]);
 
   const selectCharacter = (nextCharacter: ArchiveCharacterId) => {
     if (nextCharacter === characterId) return;
@@ -672,7 +690,7 @@ export function ArchiveRoleplay({
 
     await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
 
-    if (controller.signal.aborted || requestSequenceRef.current !== sequence) return;
+    if (requestSequenceRef.current !== sequence) return;
     const delivery = reply.delivery ?? {
       channel: reply.source === "openai" ? ("online" as const) : ("local" as const),
       reason: reply.source === "openai" ? ("ok" as const) : ("client_network" as const),

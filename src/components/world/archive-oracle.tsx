@@ -817,6 +817,7 @@ export function ArchiveIntelligenceWorkspace({
     const sessionId = searchRequestSessionIdRef.current;
     searchRequestIdRef.current = null;
     searchRequestSessionIdRef.current = undefined;
+    if (requestId) void forgetArchiveAiPending(requestId);
     if (cancelServer && requestId) {
       void cancelArchiveApi({ client: "search-v1", requestId, sessionId });
     }
@@ -842,7 +843,10 @@ export function ArchiveIntelligenceWorkspace({
     let disposed = false;
     void (async () => {
       const pendingRecords = (await listArchiveAiPending()).filter(
-        (record) => record.client === "search-v1" && record.url === "/api/archive-search",
+        (record) =>
+          record.client === "search-v1" &&
+          record.url === "/api/archive-search" &&
+          Date.now() - record.startedAt < 32_000,
       );
       // A user can start a foreground request while a cold WebKit database is
       // still opening. Never attach a second resume loop to that same request.
@@ -925,13 +929,25 @@ export function ArchiveIntelligenceWorkspace({
 
   useEffect(() => {
     if (!searchPending) return;
-    const timer = window.setTimeout(() => {
-      if (searchAbortRef.current || searchRecoveryAbortRef.current) return;
-      setSearchPending(false);
-      setSearchLifecycle(null);
-    }, 8_000);
-    return () => window.clearTimeout(timer);
-  }, [searchPending]);
+    const started = Date.now();
+    let raf = 0;
+    const expire = () => {
+      stopSearch(true);
+    };
+    const tick = () => {
+      if (Date.now() - started >= 20_000) {
+        expire();
+        return;
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    const timer = window.setTimeout(expire, 20_000);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+    };
+  }, [searchPending, stopSearch]);
 
   useEffect(() => {
     if (!active) stopSearch();
@@ -1119,7 +1135,7 @@ export function ArchiveIntelligenceWorkspace({
 
       await waitForArchiveThinkingFloor(thinkingStartedAt, controller.signal);
 
-      if (controller.signal.aborted || searchSequenceRef.current !== sequence) return;
+      if (searchSequenceRef.current !== sequence) return;
       const delivery = reply.delivery ?? {
         channel: reply.source === "openai" ? ("online" as const) : ("local" as const),
         reason: reply.source === "openai" ? ("ok" as const) : ("client_network" as const),
