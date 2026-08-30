@@ -27,6 +27,7 @@ import {
 } from "@/lib/archive-input";
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
 import type { ArchiveSearchReply } from "@/lib/archive-search";
+import { createLocalArchiveSearchReply } from "@/lib/archive-search";
 import {
   ARCHIVE_RUNTIME_MODEL_LABEL,
   waitForArchiveThinkingFloor,
@@ -823,7 +824,11 @@ export function ArchiveIntelligenceWorkspace({
     setPendingSearchPreference(null);
   }, []);
 
-  useEffect(() => () => stopSearch(), [stopSearch]);
+  useEffect(() => {
+    return () => {
+      searchAbortRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     setSearchHealth(summarizeArchiveAiHealth("search"));
@@ -904,6 +909,45 @@ export function ArchiveIntelligenceWorkspace({
       }
     };
   }, [active, searchRecoveryWake]);
+
+  useEffect(() => {
+    if (!searchPending) return;
+    const started = Date.now();
+    const tick = () => {
+      if (Date.now() - started < 5_000) return;
+      setSearchPending(false);
+      setSearchLifecycle(null);
+      setSearchMessages((current) => {
+        if (current.some((message) => message.role === "assistant")) return current;
+        const lastUser = [...current].reverse().find((message) => message.role === "user");
+        const local = createLocalArchiveSearchReply({
+          query: lastUser?.text ?? "",
+          candidates: [],
+          notice: "応答に時間がかかったため、先に表示しています。続きが届き次第、追加します。",
+        });
+        return [
+          ...current,
+          {
+            id: searchMessageId("search-local-wait"),
+            role: "assistant",
+            text: local.reply,
+            suggestions: local.suggestions,
+            source: "local",
+            modelLabel: "LOCAL",
+            notice: local.notice,
+          },
+        ];
+      });
+    };
+    const interval = window.setInterval(tick, 400);
+    window.visualViewport?.addEventListener("resize", tick);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(interval);
+      window.visualViewport?.removeEventListener("resize", tick);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [searchPending]);
 
   useEffect(() => {
     if (!active) stopSearch();
@@ -1125,11 +1169,12 @@ export function ArchiveIntelligenceWorkspace({
         .map((id) => resultById.get(id))
         .filter((result): result is ArchiveOracleResult => Boolean(result));
       const displayedReferences = referencedResults;
-      setSearchMessages((current) =>
-        reply.requestId && current.some((message) => message.requestId === reply.requestId)
-          ? current
+      setSearchMessages((current) => {
+        const withoutWait = current.filter((message) => !message.id.startsWith("search-local-wait"));
+        return reply.requestId && withoutWait.some((message) => message.requestId === reply.requestId)
+          ? withoutWait
           : [
-              ...current,
+              ...withoutWait,
               {
                 id: searchMessageId("search-assistant"),
                 role: "assistant",
@@ -1142,8 +1187,8 @@ export function ArchiveIntelligenceWorkspace({
                 notice: reply.notice,
                 requestId: reply.requestId,
               },
-            ],
-      );
+            ];
+      });
       setSearchPending(false);
       setSearchLifecycle(null);
       setPendingSearchPreference(null);

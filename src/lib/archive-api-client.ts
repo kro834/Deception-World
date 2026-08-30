@@ -94,7 +94,10 @@ function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<
       document.removeEventListener("visibilitychange", visibilityWake);
       signal.removeEventListener("abort", abort);
     };
+    let settled = false;
     const finish = () => {
+      if (settled) return;
+      settled = true;
       cleanup();
       resolve();
     };
@@ -113,6 +116,14 @@ function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<
     document.addEventListener("visibilitychange", visibilityWake);
     signal.addEventListener("abort", abort, { once: true });
     timer = window.setTimeout(finish, Math.max(200, Math.min(400, delayMs)));
+    if (typeof requestAnimationFrame === "function") {
+      const started = Date.now();
+      const step = () => {
+        if (Date.now() - started >= Math.max(200, Math.min(400, delayMs))) finish();
+        else requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
   });
 }
 
@@ -323,39 +334,40 @@ export async function postArchiveApi<T>({
   }
   const startedAt = Date.now();
   const deadline = startedAt + REQUEST_TTL_MS;
-  const sessionId = await getArchiveAiSessionId();
-  const requestBody = { ...(body as Record<string, unknown>), requestId };
-  const headers = {
-    "content-type": "application/json",
-    "x-archive-client": client,
-    "x-archive-request-id": requestId,
-    "x-archive-session-id": sessionId,
-  };
-  void rememberArchiveAiPending({
-    requestId,
-    sessionId,
-    url,
-    client,
-    startedAt,
-    ...pendingContext,
-  });
-
   return raceWithDeadline(
-    runArchiveApiRequest({
-      url,
-      client,
-      requestBody,
-      headers,
-      requestId,
-      sessionId,
-      signal,
-      validate,
-      startedAt,
-      deadline,
-      onState,
-      onTiming,
-    }),
-    Math.max(0, deadline - Date.now()),
+    (async () => {
+      const sessionId = await getArchiveAiSessionId();
+      const requestBody = { ...(body as Record<string, unknown>), requestId };
+      const headers = {
+        "content-type": "application/json",
+        "x-archive-client": client,
+        "x-archive-request-id": requestId,
+        "x-archive-session-id": sessionId,
+      };
+      void rememberArchiveAiPending({
+        requestId,
+        sessionId,
+        url,
+        client,
+        startedAt,
+        ...pendingContext,
+      });
+      return runArchiveApiRequest({
+        url,
+        client,
+        requestBody,
+        headers,
+        requestId,
+        sessionId,
+        signal,
+        validate,
+        startedAt,
+        deadline,
+        onState,
+        onTiming,
+      });
+    })(),
+    REQUEST_TTL_MS,
     signal,
   );
 }

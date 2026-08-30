@@ -46,6 +46,8 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /archiveLifecycleText\(searchLifecycle\)/);
   assert.match(oracle, /接続を確認しています/);
   assert.match(oracle, /waitForArchiveThinkingFloor\(thinkingStartedAt, controller\.signal\)/);
+  assert.match(oracle, /search-local-wait/);
+  assert.match(oracle, /createLocalArchiveSearchReply/);
   assert.match(
     oracle,
     /<GuardedLink[\s\S]*?to=\{entry\.to\}[\s\S]*?hash=\{entry\.hash\}[\s\S]*?assets=\{entry\.assets\}/,
