@@ -174,10 +174,7 @@ test("monitor rollback is main-only, stale-safe, and excludes alert-only verdict
   assert.match(workflow, /group: deception-world-production-main/u);
   assert.match(workflow, /fetch-depth: 0/u);
   assert.doesNotMatch(workflowPreamble, /\$\{\{ secrets\./u);
-  assert.match(
-    workflow,
-    /current\.id !== expectedId \|\| current\.url !== expectedUrl \|\| current\.sha !== expectedSha/u,
-  );
+  assert.match(workflow, /failed_id="\$\{\{ steps\.production\.outputs\.id \}\}"/u);
   const rollbackIf = workflow.match(/if: always\(\) && steps\.production[^\n]+/u)?.[0] ?? "";
   assert.match(rollbackIf, /outputs\.verdict == 'rollback'/u);
   assert.doesNotMatch(rollbackIf, /alert_only/u);
@@ -207,9 +204,16 @@ test("monitor rollback is main-only, stale-safe, and excludes alert-only verdict
   assert.match(failureGate, /steps\.ancestor_control\.outcome == 'failure'/u);
   assert.match(failureGate, /steps\.ancestor_routes\.outcome == 'failure'/u);
   assert.doesNotMatch(failureGate, /current != 'true'/u);
-  assert.match(workflow, /restored\.url === failedUrl \|\| restored\.sha === failedSha/u);
+  assert.match(workflow, /resolveVercelRollbackTarget/u);
+  assert.match(
+    rollback,
+    /git merge-base --is-ancestor "\$previous_sha" "\$GITHUB_SHA"[\s\S]*?assertVercelProductionSnapshot[\s\S]*?vercel rollback "\$previous_url"/u,
+  );
+  assert.match(workflow, /vercel rollback "\$previous_url"/u);
+  assert.doesNotMatch(workflow, /vercel rollback --timeout/u);
+  assert.match(workflow, /restored\.url !== previousUrl \|\| restored\.sha !== previousSha/u);
   assert.match(rollback, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
-  assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$restored_sha"/u);
+  assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$previous_sha"/u);
   assert.match(workflow, /node scripts\/archive-ai-monitor-verdict\.mjs "\$\{args\[@\]\}"/u);
   assert.match(workflow, /exit 1\s*$/u);
 });

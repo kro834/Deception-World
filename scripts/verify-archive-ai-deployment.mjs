@@ -259,6 +259,11 @@ export async function verifyArchiveAiControlPlane({
       maintenance.payload.recovery.local >= 0 &&
       Number.isSafeInteger(maintenance.payload?.recovery?.failed) &&
       maintenance.payload.recovery.failed >= 0 &&
+      Number.isSafeInteger(maintenance.payload?.recovery?.stalePending) &&
+      maintenance.payload.recovery.stalePending === 0 &&
+      (maintenance.payload?.recovery?.oldestPendingAgeMs === null ||
+        (Number.isSafeInteger(maintenance.payload?.recovery?.oldestPendingAgeMs) &&
+          maintenance.payload.recovery.oldestPendingAgeMs >= 0)) &&
       maintenance.payload.recovery.errors === 0 &&
       maintenance.payload.recovery.examined ===
         maintenance.payload.recovery.pending +

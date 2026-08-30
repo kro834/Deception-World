@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  archiveRateLimitSecret,
+  archiveRateLimitSecretKeyring,
   archiveSecretsEqual,
   decryptArchiveValue,
   encryptArchiveValue,
@@ -38,7 +38,9 @@ export const Route = createFileRoute("/api/internal/archive-ai-health")({
         const deploymentSha = archiveDeploymentSha();
         let rateLimitSecret = false;
         try {
-          rateLimitSecret = Buffer.byteLength(archiveRateLimitSecret()) >= 32;
+          rateLimitSecret = archiveRateLimitSecretKeyring().every(
+            ({ value }) => Buffer.byteLength(value) >= 32,
+          );
         } catch {
           rateLimitSecret = false;
         }

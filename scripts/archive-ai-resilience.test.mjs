@@ -13,6 +13,7 @@ import { archiveAiStateResponse } from "../src/lib/archive-ai-http.server.ts";
 import {
   archiveOpenAiCreateOutcomeUnknown,
   archiveOpenAiProviderIdentity,
+  archiveOpenAiResponseIsMissing,
   ArchiveOpenAiTransportError,
   cancelOpenAiBackgroundResponse,
   createOpenAiBackgroundResponse,
@@ -281,6 +282,19 @@ test("provider retry classification excludes terminal status, payload, and quota
     ),
     true,
   );
+});
+
+test("a missing persisted provider response is classified separately from a missing model", () => {
+  assert.equal(
+    archiveOpenAiResponseIsMissing(new ArchiveOpenAiTransportError("not found", 404)),
+    true,
+  );
+  assert.equal(
+    archiveOpenAiResponseIsMissing(new ArchiveOpenAiTransportError("unavailable", 503)),
+    false,
+  );
+  assert.match(jobSource, /provider_response_id && archiveOpenAiResponseIsMissing\(error\)/u);
+  assert.match(jobSource, /\? "provider_response_expired"/u);
 });
 
 test("Retry-After supports milliseconds, seconds, HTTP dates, and bounded fallback", (t) => {
@@ -634,11 +648,11 @@ test("archive API client recovers a transient HTTP failure through the same requ
       return Response.json({
         requestId: logicalRequestId,
         state: "local",
-        requestedModel: "test-model",
+        requestedModel: "gpt-5.6-luna",
         result: {
           reply: "recovered",
           requestId: logicalRequestId,
-          requestedModel: "test-model",
+          requestedModel: "gpt-5.6-luna",
           source: "local",
           modelVerified: false,
         },
@@ -656,11 +670,151 @@ test("archive API client recovers a transient HTTP failure through the same requ
   assert.deepEqual(result, {
     reply: "recovered",
     requestId: logicalRequestId,
-    requestedModel: "test-model",
+    requestedModel: "gpt-5.6-luna",
     source: "local",
     modelVerified: false,
   });
   assert.equal(fetchCalls, 2);
+});
+
+test("healthy pending polls honor the server window without extra client jitter", async (t) => {
+  const delays = [];
+  let nextTimerId = 0;
+  const cancelledTimers = new Set();
+  replaceProperty(t, Math, "random", () => 0.999);
+  replaceProperty(t, globalThis, "setTimeout", (callback, delay = 0, ...args) => {
+    const id = ++nextTimerId;
+    const numericDelay = Number(delay);
+    delays.push(numericDelay);
+    if (numericDelay < 10_000) {
+      queueMicrotask(() => {
+        if (!cancelledTimers.has(id)) callback(...args);
+      });
+    }
+    return id;
+  });
+  replaceProperty(t, globalThis, "clearTimeout", (id) => cancelledTimers.add(id));
+
+  const requestId = "00000000-0000-4000-8000-000000000140";
+  let fetchCalls = 0;
+  const timings = [];
+  installGlobals(t, {
+    fetch: async () => {
+      fetchCalls += 1;
+      if (fetchCalls === 1) {
+        return Response.json(
+          {
+            requestId,
+            state: "running",
+            retryAfterMs: 250,
+            requestedModel: "gpt-5.6-terra",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          },
+          { status: 202 },
+        );
+      }
+      return Response.json({
+        requestId,
+        state: "local",
+        requestedModel: "gpt-5.6-terra",
+        result: {
+          reply: "ready",
+          requestId,
+          requestedModel: "gpt-5.6-terra",
+          source: "local",
+          modelVerified: false,
+        },
+      });
+    },
+  });
+
+  const result = await postArchiveApi({
+    url: "/api/archive-search",
+    client: "search-v1",
+    body: { query: "ready" },
+    requestId,
+    signal: new AbortController().signal,
+    validate: (payload) => Boolean(payload && typeof payload === "object" && "reply" in payload),
+    onTiming: (timing) => timings.push(timing),
+  });
+
+  assert.equal(result.reply, "ready");
+  assert.equal(fetchCalls, 2);
+  assert.deepEqual(
+    delays.filter((delay) => delay < 10_000 && delay !== 450),
+    [250],
+    "a lease-aware server delay must not receive the transport-failure jitter",
+  );
+  assert.deepEqual(
+    timings.map(({ phase, outcome, status }) => ({ phase, outcome, status })),
+    [
+      { phase: "submit", outcome: "response", status: 202 },
+      { phase: "poll", outcome: "response", status: 200 },
+    ],
+  );
+  assert.equal(timings.every((timing) => timing.durationMs >= 0), true);
+});
+
+test("a confirmed missing ledger is recreated immediately after the paid retry wait", async (t) => {
+  const delays = [];
+  let nextTimerId = 0;
+  const cancelledTimers = new Set();
+  replaceProperty(t, Math, "random", () => 0);
+  replaceProperty(t, globalThis, "setTimeout", (callback, delay = 0, ...args) => {
+    const id = ++nextTimerId;
+    const numericDelay = Number(delay);
+    delays.push(numericDelay);
+    if (numericDelay < 10_000) {
+      queueMicrotask(() => {
+        if (!cancelledTimers.has(id)) callback(...args);
+      });
+    }
+    return id;
+  });
+  replaceProperty(t, globalThis, "clearTimeout", (id) => cancelledTimers.add(id));
+
+  const requestId = "00000000-0000-4000-8000-000000000141";
+  const methods = [];
+  installGlobals(t, {
+    fetch: async (_input, init) => {
+      methods.push(init.method);
+      if (methods.length === 1) {
+        return Response.json({ error: "temporarily unavailable" }, { status: 503 });
+      }
+      if (methods.length === 2) {
+        return Response.json({ error: "not found" }, { status: 404 });
+      }
+      return Response.json({
+        requestId,
+        state: "local",
+        requestedModel: "gpt-5.6-luna",
+        result: {
+          reply: "recreated",
+          requestId,
+          requestedModel: "gpt-5.6-luna",
+          source: "local",
+          modelVerified: false,
+        },
+      });
+    },
+  });
+
+  const result = await postArchiveApi({
+    url: "/api/archive-intelligence",
+    client: "persona-v1",
+    body: { messages: [] },
+    requestId,
+    signal: new AbortController().signal,
+    validate: (payload) => Boolean(payload && typeof payload === "object" && "reply" in payload),
+  });
+
+  assert.equal(result.reply, "recreated");
+  assert.deepEqual(methods, ["POST", "GET", "POST"]);
+  assert.deepEqual(
+    delays.filter((delay) => delay < 10_000 && delay !== 450),
+    [1_000],
+    "GET 404 must not add the old two-second sleep before the same-id POST",
+  );
 });
 
 test("archive API client can recreate a missing ledger with the same id up to three POST attempts", async (t) => {
@@ -693,11 +847,11 @@ test("archive API client can recreate a missing ledger with the same id up to th
       return Response.json({
         requestId: logicalRequestId,
         state: "local",
-        requestedModel: "test-model",
+        requestedModel: "gpt-5.6-terra",
         result: {
           reply: "recovered after ledger recreation",
           requestId: logicalRequestId,
-          requestedModel: "test-model",
+          requestedModel: "gpt-5.6-terra",
           source: "local",
           modelVerified: false,
         },

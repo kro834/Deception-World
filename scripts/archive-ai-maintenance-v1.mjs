@@ -26,6 +26,19 @@ function validRecovery(recovery) {
   if (!recovery || typeof recovery !== "object") return false;
   const fields = ["examined", "pending", "succeeded", "local", "failed", "errors"];
   if (!fields.every((field) => nonNegativeInteger(recovery[field]))) return false;
+  if (
+    recovery.stalePending !== undefined &&
+    !nonNegativeInteger(recovery.stalePending)
+  ) {
+    return false;
+  }
+  if (
+    recovery.oldestPendingAgeMs !== undefined &&
+    recovery.oldestPendingAgeMs !== null &&
+    !nonNegativeInteger(recovery.oldestPendingAgeMs)
+  ) {
+    return false;
+  }
   return (
     recovery.examined ===
     recovery.pending + recovery.succeeded + recovery.local + recovery.failed + recovery.errors
@@ -118,10 +131,15 @@ export async function runArchiveAiMaintenanceV1({
       deploymentSha,
     };
   }
-  if (!response.ok || payload.recovery.errors > 0) {
+  if (!response.ok || payload.recovery.errors > 0 || payload.recovery.stalePending > 0) {
     return {
       ok: false,
-      reason: payload.recovery.errors > 0 ? "recovery_errors" : "http_status",
+      reason:
+        payload.recovery.errors > 0
+          ? "recovery_errors"
+          : payload.recovery.stalePending > 0
+            ? "stale_pending_requests"
+            : "http_status",
       status: response.status,
       deploymentSha,
     };

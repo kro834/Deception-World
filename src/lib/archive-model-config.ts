@@ -30,6 +30,12 @@ export const DEFAULT_ARCHIVE_MODEL_PREFERENCES: ArchiveModelPreferences = {
 
 export const ARCHIVE_MIN_THINKING_MS = 2400;
 
+// GPT-5.5 is intentionally pinned. The UI and request ledger keep the stable
+// logical model name while the provider receives this exact snapshot, so an
+// upstream alias change cannot silently alter behavior or trip every
+// Production model-attestation probe at once.
+export const ARCHIVE_GPT55_PROVIDER_SNAPSHOT = "gpt-5.5-2026-04-23" as const;
+
 export async function waitForArchiveThinkingFloor(
   startedAt: number,
   signal: AbortSignal,
@@ -129,7 +135,9 @@ export function resolveArchiveSearchRoute(value: ArchiveSearchPreference) {
       : "standard";
   return {
     preference,
-    model: preference.model,
+    requestedModel: preference.model,
+    model:
+      preference.model === "gpt-5.5" ? ARCHIVE_GPT55_PROVIDER_SNAPSHOT : preference.model,
     reasoning: pro
       ? ({ effort: "xhigh", mode: "pro", context: "current_turn" } as const)
       : ({ effort: preference.effort, context: "current_turn" } as const),

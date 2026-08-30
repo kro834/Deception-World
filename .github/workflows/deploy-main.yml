@@ -116,7 +116,16 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
-          candidate_url="$(vercel deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN" --meta "githubCommitSha=$GITHUB_SHA" --build-env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA" --env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA")"
+          previous_url="${{ steps.previous.outputs.url }}"
+          previous_sha="${{ steps.previous.outputs.sha }}"
+          test -n "$previous_url"
+          test -n "$previous_sha"
+          candidate_url="$(vercel deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN" \
+            --meta "githubCommitSha=$GITHUB_SHA" \
+            --meta "archivePreviousProductionUrl=$previous_url" \
+            --meta "archivePreviousProductionSha=$previous_sha" \
+            --build-env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA" \
+            --env "ARCHIVE_DEPLOYMENT_SHA=$GITHUB_SHA")"
           node -e 'const value = new URL(process.argv[1]); if (value.protocol !== "https:") process.exit(1)' "$candidate_url"
           echo "url=$candidate_url" >> "$GITHUB_OUTPUT"
 
@@ -143,9 +152,21 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
-          node --input-type=module - "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
-          import { assertVercelProductionSnapshot } from "./scripts/vercel-production-deployment.mjs";
-          const [expectedUrl, expectedSha] = process.argv.slice(2);
+          node --input-type=module - "${{ steps.candidate.outputs.url }}" "$GITHUB_SHA" "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
+          import {
+            assertVercelCandidateRollbackMetadata,
+            assertVercelProductionSnapshot,
+          } from "./scripts/vercel-production-deployment.mjs";
+          const [candidateUrl, candidateSha, expectedUrl, expectedSha] = process.argv.slice(2);
+          await assertVercelCandidateRollbackMetadata({
+            candidateUrl,
+            candidateSha,
+            previousUrl: expectedUrl,
+            previousSha: expectedSha,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
           await assertVercelProductionSnapshot({
             expectedUrl,
             expectedSha,

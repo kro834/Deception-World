@@ -1,5 +1,11 @@
-import type { ArchiveDeliveryReason } from "./archive-delivery.ts";
-import { isAllowedArchiveProviderModel } from "./archive-provider-models.js";
+import {
+  ARCHIVE_DELIVERY_REASONS,
+  type ArchiveDeliveryReason,
+} from "./archive-delivery.ts";
+import {
+  isAllowedArchiveProviderModel,
+  isArchiveRequestedModel,
+} from "./archive-provider-models.js";
 
 export const ARCHIVE_AI_REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -7,6 +13,19 @@ export const ARCHIVE_AI_REQUEST_ID_PATTERN =
 export const ARCHIVE_AI_SESSION_ID_PATTERN = ARCHIVE_AI_REQUEST_ID_PATTERN;
 const ARCHIVE_PROVIDER_RESPONSE_ID_PATTERN = /^resp_[A-Za-z0-9_-]{8,}$/u;
 const ARCHIVE_OPENAI_REQUEST_ID_PATTERN = /^req_[A-Za-z0-9_-]{8,}$/u;
+const ARCHIVE_MAX_PENDING_TTL_MS = 25 * 60 * 60 * 1_000;
+const ARCHIVE_PENDING_CLOCK_SKEW_MS = 5 * 60 * 1_000;
+
+function isValidPendingExpiry(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const expiresAt = Date.parse(value);
+  const now = Date.now();
+  return (
+    Number.isFinite(expiresAt) &&
+    expiresAt >= now - ARCHIVE_PENDING_CLOCK_SKEW_MS &&
+    expiresAt <= now + ARCHIVE_MAX_PENDING_TTL_MS
+  );
+}
 
 export type ArchiveAiLifecycleState =
   | "queued"
@@ -65,13 +84,14 @@ export function isArchiveAiRequestEnvelope<T>(
     return (
       typeof candidate.retryAfterMs === "number" &&
       candidate.retryAfterMs >= 250 &&
-      typeof candidate.requestedModel === "string" &&
-      typeof candidate.expiresAt === "string"
+      candidate.retryAfterMs <= 5_000 &&
+      isArchiveRequestedModel(candidate.requestedModel) &&
+      isValidPendingExpiry(candidate.expiresAt)
     );
   }
   if (candidate.state === "succeeded" || candidate.state === "local") {
     const structurallyValid =
-      typeof candidate.requestedModel === "string" &&
+      isArchiveRequestedModel(candidate.requestedModel) &&
       (candidate.providerModel === undefined || typeof candidate.providerModel === "string") &&
       (candidate.providerResponseId === undefined || typeof candidate.providerResponseId === "string") &&
       (candidate.openaiRequestId === undefined || typeof candidate.openaiRequestId === "string") &&
@@ -118,7 +138,10 @@ export function isArchiveAiRequestEnvelope<T>(
     candidate.state === "expired" ||
     candidate.state === "cancelled"
   ) {
-    return typeof candidate.reason === "string" && typeof candidate.retryable === "boolean";
+    return (
+      ARCHIVE_DELIVERY_REASONS.includes(candidate.reason as ArchiveDeliveryReason) &&
+      typeof candidate.retryable === "boolean"
+    );
   }
   return false;
 }

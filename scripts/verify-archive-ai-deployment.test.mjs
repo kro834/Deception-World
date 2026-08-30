@@ -186,7 +186,16 @@ test("control-plane verifier authenticates health and maintenance and validates 
       }
       return json({
         cleaned: 2,
-        recovery: { examined: 2, pending: 1, succeeded: 1, local: 0, failed: 0, errors: 0 },
+        recovery: {
+          examined: 2,
+          pending: 1,
+          succeeded: 1,
+          local: 0,
+          failed: 0,
+          errors: 0,
+          stalePending: 0,
+          oldestPendingAgeMs: 12_000,
+        },
         deploymentSha: SHA,
       });
     },
@@ -258,7 +267,16 @@ test("control-plane-only deployment check does not consume a model route", async
       }
       return json({
         cleaned: 0,
-        recovery: { examined: 0, pending: 0, succeeded: 0, local: 0, failed: 0, errors: 0 },
+        recovery: {
+          examined: 0,
+          pending: 0,
+          succeeded: 0,
+          local: 0,
+          failed: 0,
+          errors: 0,
+          stalePending: 0,
+          oldestPendingAgeMs: null,
+        },
         deploymentSha: SHA,
       });
     },
@@ -289,6 +307,10 @@ test("deployment CLI requires an explicit base URL and expected SHA", async () =
 
 test("main deployment records and restores the exact previous URL and SHA", () => {
   const jobPreamble = deploymentWorkflow.slice(0, deploymentWorkflow.indexOf("    steps:"));
+  const candidate = deploymentWorkflow.slice(
+    deploymentWorkflow.indexOf("- name: Create staged Production candidate"),
+    deploymentWorkflow.indexOf("- name: Attest every selectable model route on candidate"),
+  );
   const candidateProbe = deploymentWorkflow.slice(
     deploymentWorkflow.indexOf("- name: Attest every selectable model route on candidate"),
     deploymentWorkflow.indexOf("- name: Promote attested candidate"),
@@ -302,6 +324,11 @@ test("main deployment records and restores the exact previous URL and SHA", () =
     deploymentWorkflow.indexOf("- name: Fail release after rollback"),
   );
   assert.match(deploymentWorkflow, /branches: \[main\]/u);
+  assert.match(deploymentWorkflow, /if: github\.ref == 'refs\/heads\/main'/u);
+  assert.doesNotMatch(
+    deploymentWorkflow.slice(0, deploymentWorkflow.indexOf("permissions:")),
+    /workflow_dispatch/u,
+  );
   assert.match(deploymentWorkflow, /fetch-depth: 0/u);
   assert.doesNotMatch(jobPreamble, /\$\{\{ secrets\./u);
   assert.match(
@@ -321,11 +348,31 @@ test("main deployment records and restores the exact previous URL and SHA", () =
   );
   assert.doesNotMatch(deploymentWorkflow, /git diff --name-only HEAD\^ HEAD/u);
   assert.match(deploymentWorkflow, /githubCommitSha/u);
+  assert.match(deploymentWorkflow, /--meta "archivePreviousProductionUrl=\$previous_url"/u);
+  assert.match(deploymentWorkflow, /--meta "archivePreviousProductionSha=\$previous_sha"/u);
+  assert.doesNotMatch(candidate, /--meta[^\n]*(?:TOKEN|SECRET|KEY)/iu);
+  assert.doesNotMatch(deploymentWorkflow, /set -x/u);
+  assert.ok(
+    deploymentWorkflow.indexOf("- name: Attest every selectable model route on candidate") <
+      deploymentWorkflow.indexOf("- name: Promote attested candidate"),
+    "candidate attestation must complete before the promotion step exists in execution order",
+  );
+  assert.match(
+    candidateProbe,
+    /--base-url "\$\{\{ steps\.candidate\.outputs\.url \}\}"[\s\S]*?--expected-sha "\$GITHUB_SHA"/u,
+  );
   assert.match(deploymentWorkflow, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
   assert.match(deploymentWorkflow, /id: promote[\s\S]*?continue-on-error: true/u);
+  assert.match(promote, /assertVercelCandidateRollbackMetadata/u);
   assert.match(promote, /assertVercelProductionSnapshot/u);
+  assert.match(promote, /candidateUrl,[\s\S]*?candidateSha,[\s\S]*?previousUrl: expectedUrl/u);
   assert.match(promote, /expectedUrl,[\s\S]*?expectedSha,/u);
   assert.match(promote, /projectId: process\.env\.VERCEL_PROJECT_ID/u);
+  assert.ok(
+    promote.indexOf("assertVercelCandidateRollbackMetadata") <
+      promote.indexOf("assertVercelProductionSnapshot"),
+    "candidate rollback metadata must be attested before the Production snapshot fence",
+  );
   assert.ok(
     promote.indexOf("assertVercelProductionSnapshot") < promote.indexOf('echo "attempted=true"'),
     "the stale snapshot fence must run before promotion is marked as attempted",
@@ -397,9 +444,17 @@ test("synthetic monitor requires explicit production identity and authenticated 
     /--phase control-plane[\s\S]*?--expected-sha "\$\{\{ steps\.production\.outputs\.sha \}\}"/u,
   );
   assert.match(monitorWorkflow, /github\.event\.schedule == '47 \*\/6 \* \* \*'/u);
-  assert.match(monitorWorkflow, /vercel rollback --timeout/u);
-  assert.match(monitorWorkflow, /restored\.url === failedUrl \|\| restored\.sha === failedSha/u);
-  assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$restored_sha"/u);
+  assert.match(monitorWorkflow, /resolveVercelRollbackTarget/u);
+  assert.match(
+    monitorWorkflow,
+    /git merge-base --is-ancestor "\$previous_sha" "\$GITHUB_SHA"[\s\S]*?assertVercelProductionSnapshot[\s\S]*?vercel rollback "\$previous_url"/u,
+  );
+  assert.doesNotMatch(monitorWorkflow, /vercel rollback --timeout/u);
+  assert.match(
+    monitorWorkflow,
+    /restored\.url !== previousUrl \|\| restored\.sha !== previousSha/u,
+  );
+  assert.match(rollback, /--phase all-routes[\s\S]*?--expected-sha "\$previous_sha"/u);
   assert.match(monitorWorkflow, /Fail the workflow to trigger incident email notification/u);
 });
 

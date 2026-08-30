@@ -19,7 +19,10 @@ import {
   type ArchiveAiRequestRow,
 } from "./archive-ai-ledger.server.ts";
 import { logArchiveAiEvent } from "./archive-ai-observability.server.ts";
-import { checkArchiveAiAccess } from "./archive-ai-rate-limit.server.ts";
+import {
+  checkArchiveAiAccess,
+  type ArchiveAiAccess,
+} from "./archive-ai-rate-limit.server.ts";
 import type { ArchiveAiRequestState } from "./archive-ai-request.ts";
 import type { ArchiveDeliveryReason } from "./archive-delivery.ts";
 import {
@@ -32,6 +35,7 @@ import {
 import {
   archiveOpenAiCreateOutcomeUnknown,
   archiveOpenAiProviderIdentity,
+  archiveOpenAiResponseIsMissing,
   archiveProviderFailureReason,
   cancelOpenAiBackgroundResponse,
   createOpenAiBackgroundResponse,
@@ -58,6 +62,7 @@ export type ArchiveAiWireState = ArchiveAiRequestState<ArchiveAiResult>;
 
 type SearchStoredPayload = Omit<ArchiveSearchRequest, "requestId">;
 type PersonaStoredPayload = Omit<ArchiveIntelligenceRequest, "requestId">;
+const BACKGROUND_POLL_STAGGER_MS = 350;
 
 function requestMatchesBody(requestId: string, bodyRequestId: string | undefined): boolean {
   return Boolean(bodyRequestId && requestId === bodyRequestId.toLowerCase());
@@ -182,6 +187,20 @@ async function latestState(row: ArchiveAiRequestRow): Promise<ArchiveAiWireState
   );
 }
 
+function pendingState(
+  row: ArchiveAiRequestRow,
+  state: "queued" | "running" | "unknown",
+  retryAfterMs: number,
+): ArchiveAiWireState {
+  return {
+    requestId: row.request_id,
+    state,
+    retryAfterMs: Math.max(250, Math.min(5_000, retryAfterMs)),
+    requestedModel: row.requested_model,
+    expiresAt: row.expires_at_text,
+  };
+}
+
 async function cancelUnadoptedProviderResponse(
   apiKey: string,
   row: ArchiveAiRequestRow,
@@ -243,6 +262,15 @@ async function finishOnline(
       providerResponseId: response.metadata.providerResponseId,
       openaiRequestId: response.metadata.openaiRequestId,
     });
+    return {
+      requestId: row.request_id,
+      state: "succeeded",
+      requestedModel: row.requested_model,
+      providerModel: response.metadata.providerModel,
+      providerResponseId: response.metadata.providerResponseId,
+      openaiRequestId: response.metadata.openaiRequestId,
+      result,
+    };
   }
   return latestState(row);
 }
@@ -269,6 +297,12 @@ async function finishLocal(
       requestedModel: row.requested_model,
       reason,
     });
+    return {
+      requestId: row.request_id,
+      state: "local",
+      requestedModel: row.requested_model,
+      result,
+    };
   }
   return latestState(row);
 }
@@ -297,6 +331,12 @@ async function failRequest(
       reason,
       retryable,
     });
+    return {
+      requestId: row.request_id,
+      state: "failed",
+      reason,
+      retryable,
+    };
   }
   return latestState(row);
 }
@@ -325,13 +365,13 @@ async function executionForRow(
   });
 }
 
-export async function advanceArchiveAiRequest(
+async function advanceArchiveAiRequestFromRow(
   request: Request,
-  requestId: string,
-  sessionHash: string,
+  existing: ArchiveAiRequestRow,
   trustedRateLimitHash?: string,
+  precheckedAccess?: ArchiveAiAccess,
+  preparedExecution?: Awaited<ReturnType<typeof executionForRow>>,
 ): Promise<ArchiveAiWireState> {
-  const existing = await getArchiveAiRequest(requestId, sessionHash);
   const existingState = archiveAiRequestState<ArchiveAiResult>(existing);
   if (
     existingState.state !== "queued" &&
@@ -340,7 +380,7 @@ export async function advanceArchiveAiRequest(
   ) {
     return existingState;
   }
-  const row = await claimArchiveAiRequest(requestId, sessionHash);
+  const row = await claimArchiveAiRequest(existing.request_id, existing.session_hash);
   if (!row) return latestState(existing);
 
   const breakerKey = circuitKey(row);
@@ -363,7 +403,7 @@ export async function advanceArchiveAiRequest(
         return finishOnline(row, response, breakerKey);
       }
       if (response.metadata.status === "queued" || response.metadata.status === "in_progress") {
-        await recordArchiveAiProviderProgress({
+        const recorded = await recordArchiveAiProviderProgress({
           requestId: row.request_id,
           sessionHash: row.session_hash,
           providerModel: response.metadata.providerModel,
@@ -371,24 +411,27 @@ export async function advanceArchiveAiRequest(
           delayMs: 1_000,
           leaseGeneration: row.lease_generation,
         });
+        if (recorded) return pendingState(row, "running", 1_000);
         return latestState(row);
       }
       return failRequest(row, "provider_unavailable", false);
     }
 
     decryptedPayload = decryptArchiveAiRequestPayload(row);
-    const initialExecution = await executionForRow(row, decryptedPayload);
+    const initialExecution = preparedExecution ?? (await executionForRow(row, decryptedPayload));
     const storedRateLimitHash =
       typeof row.processing_context.rateLimitHash === "string" &&
       /^[0-9a-f]{64}$/u.test(row.processing_context.rateLimitHash)
         ? row.processing_context.rateLimitHash
         : (trustedRateLimitHash ?? row.session_hash);
-    const access = await checkArchiveAiAccess(
-      request,
-      initialExecution.costClass,
-      row.request_id,
-      storedRateLimitHash,
-    );
+    const access =
+      precheckedAccess ??
+      (await checkArchiveAiAccess(
+        request,
+        initialExecution.costClass,
+        row.request_id,
+        storedRateLimitHash,
+      ));
     if (!access.allowed) {
       const reason =
         access.reason === "unconfigured"
@@ -407,10 +450,20 @@ export async function advanceArchiveAiRequest(
     );
     if (!providerCreateAttempt) return failRequest(row, "provider_unavailable", false);
 
-    const execution = await executionForRow(row, decryptedPayload, access.safetyIdentifier);
+    // Admission already prepared and validated the exact prompt. Only the
+    // server-derived safety identifier is learned after the atomic rate-limit
+    // charge, so inject that one field instead of parsing/canonicalizing the
+    // entire conversation for a second time.
+    const execution = access.safetyIdentifier
+      ? {
+          ...initialExecution,
+          body: { ...initialExecution.body, safety_identifier: access.safetyIdentifier },
+        }
+      : initialExecution;
     const response = await createOpenAiBackgroundResponse({
       apiKey,
       body: execution.body,
+      requestedModel: row.requested_model,
       timeoutMs: Math.min(execution.timeoutMs, 25_000),
       logicalRequestId: row.request_id,
       attemptOffset: (providerCreateAttempt - 1) * 3,
@@ -452,7 +505,7 @@ export async function advanceArchiveAiRequest(
     });
     if (response.metadata.status === "completed") return finishOnline(row, response, breakerKey);
     if (response.metadata.status === "queued" || response.metadata.status === "in_progress") {
-      return latestState(row);
+      return pendingState(row, "running", 900);
     }
     await recordArchiveAiCircuitOutcome({
       breakerKey,
@@ -501,12 +554,16 @@ export async function advanceArchiveAiRequest(
           openaiRequestId: providerIdentity.openaiRequestId,
           attempt: providerCreateAttempt,
         });
+        return pendingState(row, "running", 900);
       } else {
         await cancelUnadoptedProviderResponse(apiKey, row, providerIdentity.providerResponseId);
       }
       return latestState(row);
     }
-    const reason = archiveProviderFailureReason(error);
+    const reason =
+      row.provider_response_id && archiveOpenAiResponseIsMissing(error)
+        ? "provider_response_expired"
+        : archiveProviderFailureReason(error);
     try {
       await recordArchiveAiCircuitOutcome({ breakerKey, success: false, reason });
     } catch (circuitError) {
@@ -538,6 +595,7 @@ export async function advanceArchiveAiRequest(
           retryAfterMs: 5_000,
           reason,
         });
+        return pendingState(row, "unknown", 5_000);
       }
       return latestState(row);
     }
@@ -556,7 +614,7 @@ export async function advanceArchiveAiRequest(
     }
     const retryableProviderFailure = isRetryableArchiveProviderError(error);
     if (row.provider_response_id && retryableProviderFailure) {
-      await recordArchiveAiProviderProgress({
+      const recorded = await recordArchiveAiProviderProgress({
         requestId: row.request_id,
         sessionHash: row.session_hash,
         providerModel: row.provider_model ?? row.requested_model,
@@ -572,10 +630,21 @@ export async function advanceArchiveAiRequest(
         providerResponseId: row.provider_response_id,
         reason,
       });
+      if (recorded) return pendingState(row, "running", 5_000);
       return latestState(row);
     }
     return failRequest(row, reason, retryableProviderFailure);
   }
+}
+
+export async function advanceArchiveAiRequest(
+  request: Request,
+  requestId: string,
+  sessionHash: string | readonly string[],
+  trustedRateLimitHash?: string,
+): Promise<ArchiveAiWireState> {
+  const existing = await getArchiveAiRequest(requestId, sessionHash);
+  return advanceArchiveAiRequestFromRow(request, existing, trustedRateLimitHash);
 }
 
 export async function startArchiveSearchAiRequest(
@@ -599,10 +668,11 @@ export async function startArchiveSearchAiRequest(
     candidates: canonicalCandidates,
     modelPreference: storedPayload.modelPreference,
   });
-  await admitArchiveAiRequest({
+  const admission = await admitArchiveAiRequest({
     request,
     requestId: identity.requestId,
     sessionHash: identity.sessionHash,
+    sessionHashes: identity.sessionHashes,
     surface: "search",
     clientVersion: request.headers.get("x-archive-client") ?? "unknown",
     payload: storedPayload,
@@ -615,7 +685,13 @@ export async function startArchiveSearchAiRequest(
     costClass: execution.costClass,
     rateLimitHash,
   });
-  return advanceArchiveAiRequest(request, identity.requestId, identity.sessionHash, rateLimitHash);
+  return advanceArchiveAiRequestFromRow(
+    request,
+    admission.row,
+    rateLimitHash,
+    admission.access,
+    execution,
+  );
 }
 
 export async function startArchiveIntelligenceAiRequest(
@@ -634,10 +710,11 @@ export async function startArchiveIntelligenceAiRequest(
     messages: input.messages,
   };
   const execution = createArchiveIntelligenceOpenAiExecution(storedPayload);
-  await admitArchiveAiRequest({
+  const admission = await admitArchiveAiRequest({
     request,
     requestId: identity.requestId,
     sessionHash: identity.sessionHash,
+    sessionHashes: identity.sessionHashes,
     surface: "persona",
     clientVersion: request.headers.get("x-archive-client") ?? "unknown",
     payload: storedPayload,
@@ -650,7 +727,13 @@ export async function startArchiveIntelligenceAiRequest(
     costClass: execution.costClass,
     rateLimitHash,
   });
-  return advanceArchiveAiRequest(request, identity.requestId, identity.sessionHash, rateLimitHash);
+  return advanceArchiveAiRequestFromRow(
+    request,
+    admission.row,
+    rateLimitHash,
+    admission.access,
+    execution,
+  );
 }
 
 export async function resumeArchiveAiRequest(
@@ -662,7 +745,12 @@ export async function resumeArchiveAiRequest(
   if (identity.requestId !== pathRequestId.toLowerCase()) {
     throw new Error("archive_request_identity_mismatch");
   }
-  return advanceArchiveAiRequest(request, identity.requestId, identity.sessionHash, rateLimitHash);
+  return advanceArchiveAiRequest(
+    request,
+    identity.requestId,
+    identity.sessionHashes,
+    rateLimitHash,
+  );
 }
 
 /**
@@ -684,13 +772,20 @@ export function continueArchiveAiRequestInBackground(
       (current.state === "queued" || current.state === "running" || current.state === "unknown") &&
       Date.now() < deadline
     ) {
-      const delay = Math.min(5_000, Math.max(700, current.retryAfterMs));
+      // Give the foreground browser poll a small head start. Without this
+      // stagger, the waitUntil worker and the active client wake together; the
+      // worker can hold the lease while the client reads a stale pending row,
+      // delaying an already-finished answer by a full extra polling interval.
+      const delay = Math.min(
+        5_000,
+        Math.max(700, current.retryAfterMs) + BACKGROUND_POLL_STAGGER_MS,
+      );
       await new Promise<void>((resolve) => setTimeout(resolve, delay));
       try {
         current = await advanceArchiveAiRequest(
           request,
           identity.requestId,
-          identity.sessionHash,
+          identity.sessionHashes,
           rateLimitHash,
         );
       } catch (error) {

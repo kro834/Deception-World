@@ -26,11 +26,11 @@ npm run dev
 
 `OPENAI_API_KEY` を設定すると、8つの人格回線と汎用会話に対応したサーチにOpenAI Responses APIを使用します。サーチは挨拶・相談・文章作成・一般質問へそのまま答え、Deception World固有の質問だけを公開記録で根拠付けして参照ページを表示します。専用画面から `gpt-5.5` または `gpt-5.6-terra`（reasoning effort Low／Medium／High／XHigh）を選べ、Search ProはTerra XHighのPro modeを使用します。なりきりProは `gpt-5.6-sol` のInstant／Max／Pro、Normal人格は `gpt-5.6-luna` Lowへ固定しています。
 
-送信ごとに論理request IDを発行し、Postgres上の暗号化リクエスト台帳へ一度だけ登録します。OpenAI Responses APIは `background: true`、`store: false`、ツール無効で開始し、Response ID確定後は同じResponseだけを回収します。ブラウザは本文を保存せず、待機中IDだけをIndexedDBへ24時間保持します。iPhoneのバックグラウンド化、再読込、Wi-Fi／モバイル回線切替後も、同じIDで状態を再取得するため二重生成・二重利用枠消費を防げます。ブラウザの一時的なfetch失敗だけではローカル回答へ切り替えません。
+送信ごとに論理request IDを発行し、Postgres上の暗号化リクエスト台帳へ一度だけ登録します。OpenAI Responses APIは `background: true`、`store: false`、ツール無効で開始し、Response ID確定後は同じResponseだけを回収します。ブラウザは本文を保存せず、待機中IDだけをIndexedDBへ24時間保持します。iPhoneのバックグラウンド化、再読込、Wi-Fi／モバイル回線切替後も、同じIDで状態を再取得するため、アプリ上の二重表示と利用枠の二重消費を防げます。ブラウザの一時的なfetch失敗だけではローカル回答へ切り替えません。最初のprovider作成結果だけが不明になった場合は、回答到達を優先して5秒後に最大1回だけ再作成を許可するため、上流では稀に二重生成・二重費用が発生し得ますが、台帳は先に確定した一件だけを採用します。
 
 ProductionではPostgresを必須とし、共有DBが利用できなければOpenAIを呼ばずfail closedします。プロセス内レート制限への縮退はローカル開発だけです。利用者bucketはブラウザが任意生成するheaderではなく、サーバー発行・HMAC署名済みのHttpOnly／Secure／SameSite=Lax cookieから導出します。headerのsession IDは既存台帳の所有権・再取得互換にだけ使用し、raw IPは保存・ログしません。台帳作成と利用者分／日次／全体の3 bucket更新は単一トランザクションで処理し、同じrequest IDは再消費しません。いずれかのbucketが上限を超えた場合は3 bucketの更新をまとめてrollbackし、拒否済みIDだけを記録します。上限は `ARCHIVE_AI_CLIENT_MINUTE_LIMIT`（既定12単位/分）、`ARCHIVE_AI_CLIENT_DAILY_LIMIT`（既定120単位/UTC日）、`ARCHIVE_AI_GLOBAL_DAILY_LIMIT`（既定250単位/UTC日）です。
 
-完了回答はAES-256-GCMで暗号化して24時間保持し、期限後に削除します。ログへプロンプト、回答本文、API key、raw IPは出しません。要求モデルをそのまま自己申告せず、OpenAIの生レスポンスに含まれるmodel、Response ID、request IDを照合します。不一致は `provider_model_mismatch` としてオンライン成功扱いにしません。
+完了回答はAES-256-GCMで暗号化して24時間保持し、期限後に削除します。新規暗号文はactive keyの非秘密key IDを持ち、復号時は `ARCHIVE_RESULT_ENCRYPTION_KEY_PREVIOUS` の保持鍵も参照します。session所有権・payload重複判定・署名cookieもactive＋previousのHMAC keyringを照合するため、鍵交換中も24時間以内の回答回収と同一request IDの再送が途切れません。ログへプロンプト、回答本文、API key、raw IPは出しません。要求モデルをそのまま自己申告せず、OpenAIの生レスポンスに含まれるmodel、Response ID、request IDを照合します。不一致は `provider_model_mismatch` としてオンライン成功扱いにしません。
 
 公開候補の検証は `npm run verify:archive-ai -- --base-url https://candidate.example --expected-sha COMMIT_SHA --monitor-token "$ARCHIVE_MONITOR_TOKEN"` で行います。未昇格コードからProduction台帳のmaintenanceは実行せず、GPT-5.5／TerraそれぞれのLow・Medium・High・XHigh、Terra Search Pro、Luna Normal、Sol Instant・Max・Proという選択可能な全13経路が、オンライン応答・実モデル一致・provider IDs・commit SHA一致を満たした場合だけ終了コード0です。`--base-url` と `--expected-sha` は省略できません。秘密鍵と回答本文は検証ログへ出しません。
 
@@ -42,7 +42,9 @@ Vercel Productionへ次を登録します。Previewでは実キーを要求せ�
 - `DATABASE_URL`
 - `ARCHIVE_AI_REQUIRED=1`
 - `ARCHIVE_RATE_LIMIT_SECRET`（32 bytes以上）
+- `ARCHIVE_RATE_LIMIT_SECRET_PREVIOUS`（交換時のみ。旧値を単一文字列、comma区切り、またはJSON文字列配列で指定）
 - `ARCHIVE_RESULT_ENCRYPTION_KEY`（正確に32 bytes）
+- `ARCHIVE_RESULT_ENCRYPTION_KEY_PREVIOUS`（交換時のみ。各旧値は正確に32 bytes）
 - `ARCHIVE_MONITOR_TOKEN`（32 bytes以上）
 
 GitHub Actionsには `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`、`ARCHIVE_MONITOR_TOKEN`、必要な場合だけ `VERCEL_PROTECTION_BYPASS` をsecretとして登録し、`PUBLIC_BASE_URL` をvariableへ登録します。OpenAI key、DB URL、暗号化鍵、レート制限鍵はGitHubへ渡しません。Vercel側の自動Production domain割当は停止し、`.github/workflows/deploy-main.yml` だけがmainのcommitからstaged Production候補を作成します。
@@ -51,13 +53,16 @@ workflowはlint、全テスト、型検査、Production build、候補上の全1
 
 `GET /api/internal/archive-ai-health` は `Authorization: Bearer $ARCHIVE_MONITOR_TOKEN` で、必須値の形式、共有DB接続、台帳・rate charge・circuit breakerの3テーブル、AES-256-GCM roundtrip、deployment SHAを確認し、モデル呼び出しは行いません。`POST /api/internal/archive-ai-maintenance` は同じtokenと安定版v1契約で、期限内のpendingをlease付きで最大24件ずつ再巡回し、24時間を過ぎた台帳を削除します。provider response ID確定済みの行は同一IDだけを回収し、ID未確定のunknownは台帳の最大1回だけの再作成規則を維持します。Vercel Observabilityの1分livenessをhealth endpointへ設定してください。`.github/workflows/archive-ai-monitor.yml` は5分ごとにVercel APIから現在のProduction aliasを不変URLとcommit SHAへ解決し、そのSHAがmain履歴に属することと、公開aliasが同じSHAを配信することをhealth／maintenanceで検証します。正常なmain祖先がProductionに残っている場合も、v1 maintenanceを継続し、旧版を自動rollback対象にせずcontrol planeを確認し、6時間ごとに選択可能な全13経路を照合します。SHA・設定・レスポンス契約などデプロイ起因と確定できる失敗だけで、監視開始時と同じdeploymentがまだProductionであることを再確認してから直前Productionへ自動rollbackします。429、5xx、timeout、network error、provider共通障害の可能性だけではrollbackせず、workflowを失敗させて通知します。rollback後はaliasを再解決し、不変URLとSHAの両方が変わり、復旧先SHAがmain履歴に属しcontrol planeと全モデル経路が正常であることまで確認します。GitHub Actionsのworkflow失敗メール通知をVercelプロジェクト所有者／運用担当者で有効化してください。
 
-キー交換は「新キーをProductionへ追加→候補を全13経路検証→昇格→15分の安定確認→旧キー失効」の順で行います。
+作成から8分を超えてterminal状態へ進まないpendingは、provider保持期限へ近づいた異常としてmaintenanceを503にし、監視へ即時通知します。
+
+OpenAI key交換は「新キーをProductionへ追加→候補を全13経路検証→昇格→15分の安定確認→旧キー失効」の順で行います。台帳暗号鍵またはrate-limit HMAC鍵を交換する場合は、新値を通常変数へ、旧値を対応する `*_PREVIOUS` へ同時設定してから候補を検証・昇格します。旧値は回答回収TTLを覆う24時間以上保持し、その後 `*_PREVIOUS` から除去して再検証します。新規暗号文・session hash・payload hash・cookieは常にactive keyを使用します。
 
 失敗時はスモーク検証に表示されたreasonで切り分けます。
 
 - `unconfigured`: Production必須6変数と、設定後の再デプロイを確認します。
 - `provider_authentication` / `provider_permission`: Production Project、Service Account、API keyの権限を確認します。
 - `provider_model_unavailable` / `provider_quota`: 対象Projectのモデル利用権限、利用上限、請求状態を確認します。
+- `provider_response_expired`: provider保持期限内に回答を回収できなかったため、stale pending監視とmaintenance実行間隔を確認します。
 - `provider_rate_limited`: `Retry-After` と利用量を確認し、対象時間枠の回復を待ちます。
 - `provider_model_mismatch`: providerModelと固定allow-listを確認し、公開候補を昇格させません。
 - `shared_state_unavailable`: `DATABASE_URL`、migration、共有DBの接続状態を確認します。ProductionではOpenAIを呼びません。

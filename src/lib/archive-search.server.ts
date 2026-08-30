@@ -282,6 +282,7 @@ export function createArchiveSearchOpenAiExecution({
 }) {
   const route = resolveArchiveSearchRoute(modelPreference);
   const model = route.model;
+  const requestedModel = route.requestedModel;
   const proConversation = route.preference.execution === "pro";
   const trustedCandidates = canonicalizeArchiveSearchCandidates(candidates);
   const body = {
@@ -316,7 +317,7 @@ export function createArchiveSearchOpenAiExecution({
   const parse = (payload: unknown, metadata?: ArchiveOpenAiMetadata): ArchiveSearchReply =>
     parseArchiveSearchOpenAiPayload(payload, metadata, processingContext);
   return {
-    requestedModel: model,
+    requestedModel,
     timeoutMs: route.timeoutMs,
     costClass: route.costClass,
     body,
@@ -350,6 +351,7 @@ export async function requestOpenAiArchiveSearch({
   });
   return requestOpenAiStructuredResponse({
     apiKey,
+    requestedModel: execution.requestedModel,
     timeoutMs: execution.timeoutMs,
     signal,
     logicalRequestId,

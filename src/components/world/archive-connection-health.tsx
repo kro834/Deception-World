@@ -22,6 +22,7 @@ const REASON_LABELS = {
   provider_quota: "AI利用枠を確認してください",
   provider_rate_limited: "AI回線が混み合っています",
   provider_model_mismatch: "実モデルの検証不一致",
+  provider_response_expired: "AI回答の上流保持期限切れ",
   request_expired: "回答の保持期限切れ",
   request_cancelled: "回答生成を停止",
   client_network: "端末側の通信中断",

@@ -122,7 +122,7 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
         new Headers(init.headers).get("authorization"),
         "Bearer archive-payload-test-key",
       );
-      assert.equal(body.model, expected.model, name);
+      assert.equal(body.model, providerModelFor(expected.model), name);
       assert.deepEqual(body.reasoning, expected.reasoning, name);
       assert.equal(body.max_output_tokens, expected.maxOutputTokens, name);
       assert.equal(body.text.verbosity, expected.verbosity, name);
@@ -130,6 +130,8 @@ test("every Archive Intelligence choice reaches the Responses API with its fixed
       assert.equal(body.store, false, name);
       assert.deepEqual(body.tools, [], name);
       const resolvedRoute = modelConfig.resolveArchiveSearchRoute(preference);
+      assert.equal(resolvedRoute.requestedModel, expected.model, name);
+      assert.equal(resolvedRoute.model, providerModelFor(expected.model), name);
       assert.equal(resolvedRoute.costClass, expected.costClass);
       assert.equal(resolvedRoute.timeoutMs, expected.timeoutMs, name);
       assert.equal(reply?.source, "openai", name);

@@ -14,6 +14,7 @@ import {
   listArchiveAiPending,
   postArchiveApi,
   resumeArchiveApi,
+  subscribeArchiveAiRecoveryWake,
   type ArchiveApiLifecycle,
 } from "@/lib/archive-api-client";
 import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
@@ -785,7 +786,9 @@ export function ArchiveIntelligenceWorkspace({
   const searchLogRef = useRef<HTMLDivElement>(null);
   const searchFollowLatestRef = useRef(true);
   const searchAbortRef = useRef<AbortController | null>(null);
+  const searchRecoveryAbortRef = useRef<AbortController | null>(null);
   const searchRequestIdRef = useRef<string | null>(null);
+  const searchRequestSessionIdRef = useRef<string | undefined>(undefined);
   const searchSequenceRef = useRef(0);
   const surfaceTransitionTimerRef = useRef<number | null>(null);
   const [surface, setSurface] = useState<"search" | "roleplay">("search");
@@ -799,6 +802,7 @@ export function ArchiveIntelligenceWorkspace({
   const [searchHealth, setSearchHealth] = useState(() => summarizeArchiveAiHealth("search", []));
   const [pendingSearchPreference, setPendingSearchPreference] =
     useState<ArchiveSearchPreference | null>(null);
+  const [searchRecoveryWake, setSearchRecoveryWake] = useState(0);
 
   const latestSearchAssistant = [...searchMessages]
     .reverse()
@@ -811,10 +815,14 @@ export function ArchiveIntelligenceWorkspace({
     searchSequenceRef.current += 1;
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
+    searchRecoveryAbortRef.current?.abort();
+    searchRecoveryAbortRef.current = null;
     const requestId = searchRequestIdRef.current;
+    const sessionId = searchRequestSessionIdRef.current;
     searchRequestIdRef.current = null;
+    searchRequestSessionIdRef.current = undefined;
     if (cancelServer && requestId) {
-      void cancelArchiveApi({ client: "search-v1", requestId });
+      void cancelArchiveApi({ client: "search-v1", requestId, sessionId });
     }
     setSearchPending(false);
     setSearchLifecycle(null);
@@ -827,20 +835,28 @@ export function ArchiveIntelligenceWorkspace({
     setSearchHealth(summarizeArchiveAiHealth("search"));
   }, []);
 
+  useEffect(
+    () => subscribeArchiveAiRecoveryWake(() => setSearchRecoveryWake((value) => value + 1)),
+    [],
+  );
+
   useEffect(() => {
-    if (!active) return;
+    if (!active || searchAbortRef.current) return;
     const controller = new AbortController();
     let disposed = false;
     void (async () => {
       const pendingRecords = (await listArchiveAiPending()).filter(
         (record) => record.client === "search-v1" && record.url === "/api/archive-search",
       );
-      if (disposed || !pendingRecords.length) return;
+      // A user can start a foreground request while a cold WebKit database is
+      // still opening. Never attach a second resume loop to that same request.
+      if (disposed || searchAbortRef.current || !pendingRecords.length) return;
       searchRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
-      if (!searchAbortRef.current) searchAbortRef.current = controller;
+      searchRequestSessionIdRef.current = pendingRecords[0]?.sessionId;
+      searchRecoveryAbortRef.current = controller;
       setSearchPending(true);
       setSearchLifecycle("reconnecting");
-      await Promise.allSettled(
+      const settled = await Promise.allSettled(
         pendingRecords.map(async (pendingRecord) => {
           const reply = await resumeArchiveApi({
             pending: pendingRecord,
@@ -877,18 +893,30 @@ export function ArchiveIntelligenceWorkspace({
         }),
       );
       if (!disposed) {
-        if (searchAbortRef.current === controller) searchAbortRef.current = null;
-        searchRequestIdRef.current = null;
-        setSearchPending(false);
-        setSearchLifecycle(null);
+        const firstFailedIndex = settled.findIndex((result) => result.status === "rejected");
+        if (firstFailedIndex >= 0) {
+          const failedRecord = pendingRecords[firstFailedIndex];
+          searchRequestIdRef.current = failedRecord?.requestId ?? null;
+          searchRequestSessionIdRef.current = failedRecord?.sessionId;
+          setSearchPending(true);
+          setSearchLifecycle("reconnecting");
+        } else {
+          if (searchRecoveryAbortRef.current === controller) {
+            searchRecoveryAbortRef.current = null;
+          }
+          searchRequestIdRef.current = null;
+          searchRequestSessionIdRef.current = undefined;
+          setSearchPending(false);
+          setSearchLifecycle(null);
+        }
       }
     })();
     return () => {
       disposed = true;
       controller.abort();
-      if (searchAbortRef.current === controller) searchAbortRef.current = null;
+      if (searchRecoveryAbortRef.current === controller) searchRecoveryAbortRef.current = null;
     };
-  }, [active]);
+  }, [active, searchRecoveryWake]);
 
   useEffect(() => {
     if (!active) stopSearch();
@@ -983,6 +1011,7 @@ export function ArchiveIntelligenceWorkspace({
       const requestId = createArchiveAiRequestId();
       searchAbortRef.current = controller;
       searchRequestIdRef.current = requestId;
+      searchRequestSessionIdRef.current = undefined;
       const thinkingStartedAt = performance.now();
       const sequence = searchSequenceRef.current + 1;
       searchSequenceRef.current = sequence;
@@ -1064,7 +1093,10 @@ export function ArchiveIntelligenceWorkspace({
         setSearchLifecycle(null);
         setPendingSearchPreference(null);
         if (searchAbortRef.current === controller) searchAbortRef.current = null;
-        if (searchRequestIdRef.current === requestId) searchRequestIdRef.current = null;
+        if (searchRequestIdRef.current === requestId) {
+          searchRequestIdRef.current = null;
+          searchRequestSessionIdRef.current = undefined;
+        }
         return;
       }
 
@@ -1126,7 +1158,10 @@ export function ArchiveIntelligenceWorkspace({
       setSearchLifecycle(null);
       setPendingSearchPreference(null);
       if (searchAbortRef.current === controller) searchAbortRef.current = null;
-      if (searchRequestIdRef.current === requestId) searchRequestIdRef.current = null;
+      if (searchRequestIdRef.current === requestId) {
+        searchRequestIdRef.current = null;
+        searchRequestSessionIdRef.current = undefined;
+      }
     },
     [modelPreferences.search, searchMessages],
   );

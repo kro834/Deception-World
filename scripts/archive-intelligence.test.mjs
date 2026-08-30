@@ -578,7 +578,10 @@ test("server-confirmed local persona fallback covers every character without cli
   assert.match(aiJob, /archiveProviderFailureReason\(error\)/);
   assert.doesNotMatch(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
   assert.match(roleplay, /ローカル回答へは置き換えていません/);
-  assert.match(roleplay, /cancelArchiveApi\(\{ client: "persona-v1", requestId \}\)/);
+  assert.match(
+    roleplay,
+    /cancelArchiveApi\(\{ client: "persona-v1", requestId, sessionId \}\)/,
+  );
   assert.match(roleplay, /<ArchiveConnectionHealth/);
   assert.match(roleplay, /recordArchiveAiHealth\(\{/);
 });

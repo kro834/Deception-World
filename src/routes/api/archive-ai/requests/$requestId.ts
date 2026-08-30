@@ -85,8 +85,8 @@ export const Route = createFileRoute("/api/archive-ai/requests/$requestId")({
         try {
           const identity = readArchiveRequestIdentity(request);
           if (identity.requestId !== requestId) return hiddenNotFound();
-          const existing = await getArchiveAiRequest(requestId, identity.sessionHash);
-          await cancelArchiveAiRequest(requestId, identity.sessionHash);
+          const existing = await getArchiveAiRequest(requestId, identity.sessionHashes);
+          await cancelArchiveAiRequest(requestId, existing.session_hash);
           const apiKey = process.env.OPENAI_API_KEY?.trim();
           if (
             apiKey &&
@@ -114,7 +114,7 @@ export const Route = createFileRoute("/api/archive-ai/requests/$requestId")({
           }
           return respond(
             archiveAiStateResponse(
-              archiveAiRequestState(await getArchiveAiRequest(requestId, identity.sessionHash)),
+              archiveAiRequestState(await getArchiveAiRequest(requestId, existing.session_hash)),
             ),
           );
         } catch (error) {

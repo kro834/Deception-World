@@ -1,11 +1,13 @@
 import {
   archivePayloadHash,
+  archivePayloadHashes,
   decryptArchiveValue,
   encryptArchiveValue,
 } from "./archive-ai-crypto.server.ts";
 import type { ArchiveAiRequestState } from "./archive-ai-request.ts";
 import {
   chargeArchiveAiAccessInTransaction,
+  type ArchiveAiAccess,
   type ArchiveAiCostClass,
 } from "./archive-ai-rate-limit.server.ts";
 import type { ArchiveDeliveryReason } from "./archive-delivery.ts";
@@ -92,14 +94,18 @@ ${EXPIRE_REQUEST_SET}
 WHERE request_id = $1::uuid AND session_hash = $2
   AND state <> 'expired' AND expires_at <= NOW()`;
 
-function verifyOwnership(row: ArchiveAiRequestRow | undefined, sessionHash: string) {
-  if (!row || row.session_hash !== sessionHash) throw new ArchiveAiRequestNotFoundError();
+function verifyOwnership(
+  row: ArchiveAiRequestRow | undefined,
+  sessionHash: string | readonly string[],
+) {
+  const candidates = typeof sessionHash === "string" ? [sessionHash] : sessionHash;
+  if (!row || !candidates.includes(row.session_hash)) throw new ArchiveAiRequestNotFoundError();
   return row;
 }
 
 export async function getArchiveAiRequest(
   requestId: string,
-  sessionHash: string,
+  sessionHash: string | readonly string[],
 ): Promise<ArchiveAiRequestRow> {
   const sql = await getSql();
   let rows = await sql.query<ArchiveAiRequestRow>(
@@ -108,7 +114,7 @@ export async function getArchiveAiRequest(
   );
   let row = verifyOwnership(rows[0], sessionHash);
   if (row.state !== "expired" && new Date(row.expires_at_text).getTime() <= Date.now()) {
-    await sql.query(EXPIRE_REQUEST, [requestId, sessionHash]);
+    await sql.query(EXPIRE_REQUEST, [requestId, row.session_hash]);
     rows = await sql.query<ArchiveAiRequestRow>(
       `${SELECT_REQUEST} WHERE request_id = $1::uuid LIMIT 1`,
       [requestId],
@@ -122,6 +128,7 @@ export async function admitArchiveAiRequest({
   request,
   requestId,
   sessionHash,
+  sessionHashes,
   surface,
   clientVersion,
   payload,
@@ -133,6 +140,7 @@ export async function admitArchiveAiRequest({
   request: Request;
   requestId: string;
   sessionHash: string;
+  sessionHashes?: readonly string[];
   surface: ArchiveAiSurface;
   clientVersion: string;
   payload: unknown;
@@ -140,9 +148,12 @@ export async function admitArchiveAiRequest({
   requestedModel: string;
   costClass: ArchiveAiCostClass;
   rateLimitHash?: string;
-}): Promise<{ row: ArchiveAiRequestRow; created: boolean }> {
+}): Promise<{ row: ArchiveAiRequestRow; created: boolean; access?: ArchiveAiAccess }> {
   const sql = await getSql();
-  const payloadHash = archivePayloadHash({ surface, requestedModel, payload });
+  const hashInput = { surface, requestedModel, payload };
+  const payloadHash = archivePayloadHash(hashInput);
+  const payloadHashes = archivePayloadHashes(hashInput);
+  const ownershipHashes = sessionHashes?.length ? sessionHashes : [sessionHash];
   const encryptedRequest = encryptArchiveValue(payload, {
     requestId,
     sessionHash,
@@ -173,18 +184,18 @@ export async function admitArchiveAiRequest({
       `${SELECT_REQUEST} WHERE request_id = $1::uuid LIMIT 1 FOR UPDATE`,
       [requestId],
     );
-    let row = verifyOwnership(rows[0], sessionHash);
+    let row = verifyOwnership(rows[0], ownershipHashes);
     if (row.state !== "expired" && new Date(row.expires_at_text).getTime() <= Date.now()) {
-      await transaction.query(EXPIRE_REQUEST, [requestId, sessionHash]);
+      await transaction.query(EXPIRE_REQUEST, [requestId, row.session_hash]);
       rows = await transaction.query<ArchiveAiRequestRow>(
         `${SELECT_REQUEST} WHERE request_id = $1::uuid LIMIT 1 FOR UPDATE`,
         [requestId],
       );
-      row = verifyOwnership(rows[0], sessionHash);
+      row = verifyOwnership(rows[0], ownershipHashes);
     }
     if (
       row.surface !== surface ||
-      row.payload_hash !== payloadHash ||
+      !payloadHashes.includes(row.payload_hash) ||
       row.requested_model !== requestedModel
     ) {
       throw new ArchiveAiRequestConflictError();
@@ -193,14 +204,14 @@ export async function admitArchiveAiRequest({
     // This is deliberately inside the same transaction as the ledger INSERT.
     // Existing requestIds resolve through archive_ai_rate_charges and therefore
     // cannot consume the three user buckets for a second time.
-    await chargeArchiveAiAccessInTransaction(
+    const access = await chargeArchiveAiAccessInTransaction(
       transaction,
       request,
       costClass,
       requestId,
-      rateLimitHash ?? sessionHash,
+      rateLimitHash ?? row.session_hash,
     );
-    return { row, created: Boolean(inserted.length) };
+    return { row, created: Boolean(inserted.length), access };
   });
 }
 

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/api/internal/archive-ai-maintenance")({
               recovery,
               deploymentSha: archiveDeploymentSha(),
             },
-            recovery.errors > 0 ? 503 : 200,
+            recovery.errors > 0 || recovery.stalePending > 0 ? 503 : 200,
           );
         } catch {
           return archiveAiJson({ error: "database_unavailable" }, 503);

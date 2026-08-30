@@ -12,7 +12,11 @@ import {
   type ArchiveAiPendingRecord,
 } from "./archive-ai-pending.ts";
 
-export { createArchiveAiRequestId, listArchiveAiPending } from "./archive-ai-pending.ts";
+export {
+  createArchiveAiRequestId,
+  listArchiveAiPending,
+  subscribeArchiveAiRecoveryWake,
+} from "./archive-ai-pending.ts";
 
 export class ArchiveApiClientError extends Error {
   readonly reason: ArchiveDeliveryReason;
@@ -34,6 +38,15 @@ export type ArchiveApiLifecycle =
   | Extract<ArchiveAiLifecycleState, "queued" | "running" | "unknown">
   | "submitting"
   | "reconnecting";
+
+export type ArchiveApiTiming = {
+  requestId: string;
+  phase: "submit" | "poll" | "resume";
+  attempt: number;
+  durationMs: number;
+  outcome: "response" | "network_error" | "aborted";
+  status?: number;
+};
 
 const CLIENT_DELAYS_MS = [1_000, 2_000, 4_000, 5_000] as const;
 const REQUEST_TTL_MS = 24 * 60 * 60 * 1_000;
@@ -100,11 +113,29 @@ function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<
 }
 
 function retryDelay(attempt: number, serverDelay?: number): number {
-  const base =
-    typeof serverDelay === "number" && Number.isFinite(serverDelay)
-      ? Math.max(250, Math.min(5_000, serverDelay))
-      : CLIENT_DELAYS_MS[Math.min(attempt, CLIENT_DELAYS_MS.length - 1)];
+  if (typeof serverDelay === "number" && Number.isFinite(serverDelay)) {
+    // A healthy pending response already carries the server's lease-aware next
+    // poll window. Adding client jitter here only makes a completed answer sit
+    // unseen for longer; transient transport failures still use jitter below.
+    return Math.max(250, Math.min(5_000, serverDelay));
+  }
+  const base = CLIENT_DELAYS_MS[Math.min(attempt, CLIENT_DELAYS_MS.length - 1)];
   return base + Math.floor(Math.random() * 180);
+}
+
+function monotonicNow(): number {
+  return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
+function reportTiming(
+  onTiming: ((timing: ArchiveApiTiming) => void) | undefined,
+  timing: ArchiveApiTiming,
+): void {
+  try {
+    onTiming?.(timing);
+  } catch {
+    // Diagnostics must never become part of the delivery path.
+  }
 }
 
 async function responsePayload(response: Response): Promise<unknown> {
@@ -159,12 +190,15 @@ async function fetchWithAttemptTimeout(
 export async function cancelArchiveApi({
   client,
   requestId,
+  sessionId,
 }: {
   client: "search-v1" | "persona-v1";
   requestId: string;
+  sessionId?: string;
 }): Promise<void> {
   const controller = new AbortController();
   try {
+    const resolvedSessionId = sessionId ?? (await getArchiveAiSessionId());
     const response = await fetchWithAttemptTimeout(
       `/api/archive-ai/requests/${encodeURIComponent(requestId)}`,
       {
@@ -173,7 +207,7 @@ export async function cancelArchiveApi({
         headers: {
           "x-archive-client": client,
           "x-archive-request-id": requestId,
-          "x-archive-session-id": getArchiveAiSessionId(),
+          "x-archive-session-id": resolvedSessionId,
         },
       },
       controller.signal,
@@ -196,6 +230,7 @@ export async function postArchiveApi<T>({
   requestId = createArchiveAiRequestId(),
   pendingContext,
   onState,
+  onTiming,
 }: {
   url: "/api/archive-search" | "/api/archive-intelligence";
   client: "search-v1" | "persona-v1";
@@ -205,6 +240,7 @@ export async function postArchiveApi<T>({
   requestId?: string;
   pendingContext?: Pick<ArchiveAiPendingRecord, "contextId" | "userMessageId">;
   onState?: (state: ArchiveApiLifecycle) => void;
+  onTiming?: (timing: ArchiveApiTiming) => void;
 }): Promise<T> {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new ArchiveApiClientError(
@@ -214,7 +250,7 @@ export async function postArchiveApi<T>({
   }
   const startedAt = Date.now();
   const deadline = startedAt + REQUEST_TTL_MS;
-  const sessionId = getArchiveAiSessionId();
+  const sessionId = await getArchiveAiSessionId();
   const requestBody = { ...(body as Record<string, unknown>), requestId };
   const headers = {
     "content-type": "application/json",
@@ -222,11 +258,19 @@ export async function postArchiveApi<T>({
     "x-archive-request-id": requestId,
     "x-archive-session-id": sessionId,
   };
-  void rememberArchiveAiPending({ requestId, url, client, startedAt, ...pendingContext });
+  await rememberArchiveAiPending({
+    requestId,
+    sessionId,
+    url,
+    client,
+    startedAt,
+    ...pendingContext,
+  });
 
   let postAttempted = false;
   let postAttempts = 0;
   let pollAttempt = 0;
+  let transportAttempt = 0;
   let serverDelay: number | undefined;
   let reconnecting = false;
 
@@ -244,6 +288,9 @@ export async function postArchiveApi<T>({
     onState?.(method === "POST" ? "submitting" : reconnecting ? "reconnecting" : "running");
 
     let response: Response;
+    const fetchStartedAt = monotonicNow();
+    const phase = method === "POST" ? "submit" : "poll";
+    const attempt = ++transportAttempt;
     try {
       response = await fetchWithAttemptTimeout(
         endpoint,
@@ -255,8 +302,23 @@ export async function postArchiveApi<T>({
         },
         signal,
       );
+      reportTiming(onTiming, {
+        requestId,
+        phase,
+        attempt,
+        durationMs: Math.max(0, monotonicNow() - fetchStartedAt),
+        outcome: "response",
+        status: response.status,
+      });
       reconnecting = false;
     } catch {
+      reportTiming(onTiming, {
+        requestId,
+        phase,
+        attempt,
+        durationMs: Math.max(0, monotonicNow() - fetchStartedAt),
+        outcome: signal.aborted ? "aborted" : "network_error",
+      });
       if (signal.aborted) throw abortError(signal);
       postAttempted = true;
       reconnecting = true;
@@ -271,7 +333,9 @@ export async function postArchiveApi<T>({
       postAttempts < MAX_LEDGER_POST_ATTEMPTS
     ) {
       postAttempted = false;
-      await waitForConnectionWindow(retryDelay(pollAttempt++), signal);
+      // A successful authoritative lookup proved that this logical request has
+      // no ledger row. Recreate it immediately with the same id; sleeping here
+      // previously added two to four seconds after an already-paid retry wait.
       continue;
     }
     if (response.status === 410) {
@@ -332,19 +396,22 @@ export async function resumeArchiveApi<T>({
   signal,
   validate,
   onState,
+  onTiming,
 }: {
   pending: ArchiveAiPendingRecord;
   signal: AbortSignal;
   validate: (payload: unknown) => payload is T;
   onState?: (state: ArchiveApiLifecycle) => void;
+  onTiming?: (timing: ArchiveApiTiming) => void;
 }): Promise<T> {
-  const sessionId = getArchiveAiSessionId();
+  const sessionId = pending.sessionId ?? (await getArchiveAiSessionId());
   const headers = {
     "x-archive-client": pending.client,
     "x-archive-request-id": pending.requestId,
     "x-archive-session-id": sessionId,
   };
   let attempt = 0;
+  let transportAttempt = 0;
   let serverDelay: number | undefined;
 
   while (Date.now() < pending.expiresAt) {
@@ -355,6 +422,8 @@ export async function resumeArchiveApi<T>({
     }
     onState?.("reconnecting");
     let response: Response;
+    const fetchStartedAt = monotonicNow();
+    const fetchAttempt = ++transportAttempt;
     try {
       response = await fetchWithAttemptTimeout(
         `/api/archive-ai/requests/${encodeURIComponent(pending.requestId)}`,
@@ -365,7 +434,22 @@ export async function resumeArchiveApi<T>({
         },
         signal,
       );
+      reportTiming(onTiming, {
+        requestId: pending.requestId,
+        phase: "resume",
+        attempt: fetchAttempt,
+        durationMs: Math.max(0, monotonicNow() - fetchStartedAt),
+        outcome: "response",
+        status: response.status,
+      });
     } catch {
+      reportTiming(onTiming, {
+        requestId: pending.requestId,
+        phase: "resume",
+        attempt: fetchAttempt,
+        durationMs: Math.max(0, monotonicNow() - fetchStartedAt),
+        outcome: signal.aborted ? "aborted" : "network_error",
+      });
       if (signal.aborted) throw abortError(signal);
       await waitForConnectionWindow(retryDelay(attempt++), signal);
       continue;
@@ -379,7 +463,9 @@ export async function resumeArchiveApi<T>({
       continue;
     }
     if (!response.ok) {
-      void forgetArchiveAiPending(pending.requestId);
+      // A status probe can race ledger admission, key propagation, or a WebKit
+      // process restore. Keep the durable identity until an explicit terminal
+      // envelope/410 or its local TTL proves that recovery is impossible.
       throw new ArchiveApiClientError(
         `Archive API request recovery failed with ${response.status}`,
         "client_http_4xx",

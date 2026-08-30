@@ -18,5 +18,16 @@ export const ARCHIVE_PROVIDER_MODELS_BY_REQUEST = Object.freeze({
  * @param {string} providerModel
  */
 export function isAllowedArchiveProviderModel(requestedModel, providerModel) {
-  return ARCHIVE_PROVIDER_MODELS_BY_REQUEST[requestedModel]?.includes(providerModel) ?? false;
+  if (!Object.hasOwn(ARCHIVE_PROVIDER_MODELS_BY_REQUEST, requestedModel)) return false;
+  return ARCHIVE_PROVIDER_MODELS_BY_REQUEST[requestedModel].includes(providerModel);
+}
+
+/**
+ * @param {unknown} requestedModel
+ */
+export function isArchiveRequestedModel(requestedModel) {
+  return (
+    typeof requestedModel === "string" &&
+    Object.hasOwn(ARCHIVE_PROVIDER_MODELS_BY_REQUEST, requestedModel)
+  );
 }

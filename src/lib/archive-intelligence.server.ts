@@ -378,6 +378,7 @@ export async function requestOpenAiArchiveReply({
   });
   return requestOpenAiStructuredResponse({
     apiKey,
+    requestedModel: execution.requestedModel,
     timeoutMs: execution.timeoutMs,
     signal,
     logicalRequestId,

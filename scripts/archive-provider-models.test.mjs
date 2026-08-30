@@ -5,6 +5,7 @@ import { isArchiveAiRequestEnvelope } from "../src/lib/archive-ai-request.ts";
 import {
   ARCHIVE_PROVIDER_MODELS_BY_REQUEST,
   isAllowedArchiveProviderModel,
+  isArchiveRequestedModel,
 } from "../src/lib/archive-provider-models.js";
 import {
   ARCHIVE_AI_DEPLOYMENT_CASES,
@@ -72,6 +73,40 @@ test("the browser envelope accepts the allowed GPT-5.5 snapshot and rejects unkn
     isArchiveAiRequestEnvelope(
       searchEnvelope(requestId, "gpt-5.5", "gpt-5.5-2099-01-01"),
       isSearchResult,
+    ),
+    false,
+  );
+});
+
+test("provider model lookup fails closed for inherited and hostile keys", () => {
+  assert.equal(isArchiveRequestedModel("__proto__"), false);
+  assert.equal(isArchiveRequestedModel("constructor"), false);
+  assert.equal(isAllowedArchiveProviderModel("__proto__", "gpt-5.5-2026-04-23"), false);
+  assert.equal(isAllowedArchiveProviderModel("constructor", "gpt-5.6-sol"), false);
+});
+
+test("request envelopes reject unknown models, malformed expiries, and unknown reasons", () => {
+  const requestId = crypto.randomUUID();
+  const pending = {
+    requestId,
+    state: "running",
+    retryAfterMs: 1_000,
+    requestedModel: "gpt-5.6-terra",
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+  };
+  assert.equal(isArchiveAiRequestEnvelope(pending, () => false), true);
+  assert.equal(
+    isArchiveAiRequestEnvelope({ ...pending, requestedModel: "__proto__" }, () => false),
+    false,
+  );
+  assert.equal(
+    isArchiveAiRequestEnvelope({ ...pending, expiresAt: "not-a-date" }, () => false),
+    false,
+  );
+  assert.equal(
+    isArchiveAiRequestEnvelope(
+      { requestId, state: "failed", reason: "made_up_reason", retryable: false },
+      () => false,
     ),
     false,
   );

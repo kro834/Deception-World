@@ -72,7 +72,10 @@ test("maintenance recovery selects only due unexpired opaque request identities"
 test("recovery delegates every provider action to the lease-fenced collector", () => {
   assert.match(recoverySource, /advanceArchiveAiRequest\(/u);
   assert.match(recoverySource, /await Promise\.all\(/u);
-  assert.match(jobSource, /const row = await claimArchiveAiRequest\(requestId, sessionHash\)/u);
+  assert.match(
+    jobSource,
+    /const row = await claimArchiveAiRequest\(existing\.request_id, existing\.session_hash\)/u,
+  );
   assert.match(
     jobSource,
     /if \(row\.provider_response_id\)[\s\S]*?responseId: row\.provider_response_id/u,
@@ -85,10 +88,34 @@ test("recovery delegates every provider action to the lease-fenced collector", (
   );
 });
 
+test("initial requests reuse admission state and stagger background polling behind the client", () => {
+  assert.match(
+    ledgerSource,
+    /const access = await chargeArchiveAiAccessInTransaction[\s\S]*?return \{ row, created: Boolean\(inserted\.length\), access \}/u,
+  );
+  const searchStart = jobSource.slice(
+    jobSource.indexOf("export async function startArchiveSearchAiRequest"),
+    jobSource.indexOf("export async function startArchiveIntelligenceAiRequest"),
+  );
+  assert.match(searchStart, /const admission = await admitArchiveAiRequest/u);
+  assert.match(
+    searchStart,
+    /advanceArchiveAiRequestFromRow\([\s\S]*?admission\.row[\s\S]*?admission\.access[\s\S]*?execution/u,
+  );
+  assert.match(jobSource, /const BACKGROUND_POLL_STAGGER_MS = 350/u);
+  assert.match(
+    jobSource,
+    /Math\.max\(700, current\.retryAfterMs\) \+ BACKGROUND_POLL_STAGGER_MS/u,
+  );
+});
+
 test("signed maintenance runs recovery and the monitor revisits it every five minutes", () => {
   assert.match(maintenanceSource, /if \(!authorized\(request\)\).*404/u);
   assert.match(maintenanceSource, /recoverArchiveAiPendingRequests\(request\)/u);
-  assert.match(maintenanceSource, /recovery\.errors > 0 \? 503 : 200/u);
+  assert.match(
+    maintenanceSource,
+    /recovery\.errors > 0 \|\| recovery\.stalePending > 0 \? 503 : 200/u,
+  );
   assert.match(monitorWorkflow, /cron: "\*\/5 \* \* \* \*"/u);
   assert.match(
     monitorWorkflow,
@@ -102,6 +129,13 @@ test("signed maintenance runs recovery and the monitor revisits it every five mi
     monitorWorkflow,
     /steps\.identity\.outputs\.durable == 'true' && steps\.identity\.outputs\.current != 'true'/u,
   );
+});
+
+test("maintenance alerts before a background provider response can age out", () => {
+  assert.match(recoverySource, /ARCHIVE_AI_STALE_PENDING_MS = 8 \* 60 \* 1_000/u);
+  assert.match(recoverySource, /created_at <= NOW\(\) - \(\$1::text/u);
+  assert.match(recoverySource, /summary\.stalePending = pendingHealth\.stalePending/u);
+  assert.match(maintenanceSource, /recovery\.stalePending > 0/u);
 });
 
 test("control-plane verification fails closed on a partial recovery batch", async () => {

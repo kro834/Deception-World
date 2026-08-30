@@ -146,6 +146,13 @@ function unwrapArchiveOpenAiError(error: unknown): unknown {
     : error;
 }
 
+export function archiveOpenAiResponseIsMissing(error: unknown): boolean {
+  const classifiedError = unwrapArchiveOpenAiError(error);
+  return (
+    classifiedError instanceof ArchiveOpenAiTransportError && classifiedError.status === 404
+  );
+}
+
 /**
  * Only failures that can plausibly succeed without changing the request are
  * retried. In particular, auth, permission, missing-model, invalid-payload and
@@ -461,6 +468,7 @@ async function requestOpenAiJson({
 export async function requestOpenAiStructuredResponse<T>({
   apiKey,
   body,
+  requestedModel: requestedModelOverride,
   timeoutMs,
   signal,
   logicalRequestId,
@@ -468,12 +476,13 @@ export async function requestOpenAiStructuredResponse<T>({
 }: {
   apiKey: string;
   body: unknown;
+  requestedModel?: string;
   timeoutMs: number;
   signal?: AbortSignal;
   logicalRequestId?: string;
   parse: (payload: unknown, metadata?: ArchiveOpenAiMetadata) => T;
 }): Promise<T> {
-  const requestedModel = requestedModelFromBody(body);
+  const requestedModel = requestedModelOverride?.trim() || requestedModelFromBody(body);
   const { payload, response } = await requestOpenAiJson({
     apiKey,
     method: "POST",
@@ -510,17 +519,19 @@ export async function requestOpenAiStructuredResponse<T>({
 export async function createOpenAiBackgroundResponse({
   apiKey,
   body,
+  requestedModel: requestedModelOverride,
   timeoutMs = 20_000,
   logicalRequestId,
   attemptOffset = 0,
 }: {
   apiKey: string;
   body: Record<string, unknown>;
+  requestedModel?: string;
   timeoutMs?: number;
   logicalRequestId: string;
   attemptOffset?: number;
 }): Promise<ArchiveOpenAiBackgroundResponse> {
-  const requestedModel = requestedModelFromBody(body);
+  const requestedModel = requestedModelOverride?.trim() || requestedModelFromBody(body);
   let payload: unknown;
   let response: Response;
   try {

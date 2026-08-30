@@ -12,6 +12,7 @@ export const ARCHIVE_DELIVERY_REASONS = [
   "provider_quota",
   "provider_rate_limited",
   "provider_model_mismatch",
+  "provider_response_expired",
   "request_expired",
   "request_cancelled",
   "client_network",

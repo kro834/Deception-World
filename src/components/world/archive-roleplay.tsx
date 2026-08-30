@@ -1,5 +1,13 @@
 import { ArrowUp, RotateCcw, Sparkles, Square } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { GuardedLink } from "@/components/load-gate";
 import {
   recordArchiveAiHealth,
@@ -14,6 +22,7 @@ import {
   listArchiveAiPending,
   postArchiveApi,
   resumeArchiveApi,
+  subscribeArchiveAiRecoveryWake,
 } from "@/lib/archive-api-client";
 import {
   ARCHIVE_CHARACTERS,
@@ -91,8 +100,25 @@ type ArchiveRoleplayProps = {
 
 const MAX_VISIBLE_MESSAGES = 36;
 
-function sessionKey(characterId: ArchiveCharacterId): string {
-  return characterId;
+function sessionKey(characterId: ArchiveCharacterId, mode: ArchiveRoleplayMode): string {
+  return `${characterId}:${mode}`;
+}
+
+function pendingSessionKey(contextId: string | undefined, fallback: string): string {
+  if (!contextId) return fallback;
+  const [characterId, mode, extra] = contextId.split(":");
+  if (
+    !extra &&
+    characterId in ARCHIVE_CHARACTER_BY_ID &&
+    (mode === "normal" || mode === "pro")
+  ) {
+    return sessionKey(characterId as ArchiveCharacterId, mode);
+  }
+  // v1 records only stored the character. They were shared across modes, so
+  // recover them into Normal without contaminating the new Pro transcript.
+  return contextId in ARCHIVE_CHARACTER_BY_ID
+    ? sessionKey(contextId as ArchiveCharacterId, "normal")
+    : fallback;
 }
 
 function messageId(prefix: string): string {
@@ -226,14 +252,26 @@ export function ArchiveRoleplay({
   );
   const [liveMessage, setLiveMessage] = useState("人格回線を選択できます。");
   const abortRef = useRef<AbortController | null>(null);
+  const recoveryAbortRef = useRef<AbortController | null>(null);
   const activeRequestIdRef = useRef<string | null>(null);
+  const activeRequestSessionIdRef = useRef<string | undefined>(undefined);
+  const recoveryRequestIdRef = useRef<string | null>(null);
+  const recoveryRequestSessionIdRef = useRef<string | undefined>(undefined);
+  const recoveryPendingKeyRef = useRef<string | null>(null);
+  const foregroundPendingKeyRef = useRef<string | null>(null);
   const requestSequenceRef = useRef(0);
   const logRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const followLatestRef = useRef(true);
+  const viewportBySessionRef = useRef<
+    Record<string, { scrollTop: number; followLatest: boolean }>
+  >({});
+  const [recoveryWake, setRecoveryWake] = useState(0);
 
   const profile = ARCHIVE_CHARACTER_BY_ID[characterId];
-  const activeSessionKey = sessionKey(characterId);
+  const activeSessionKey = sessionKey(characterId, mode);
+  const activeSessionKeyRef = useRef(activeSessionKey);
+  activeSessionKeyRef.current = activeSessionKey;
   const messages = useMemo(() => sessions[activeSessionKey] ?? [], [activeSessionKey, sessions]);
   const pending = pendingKey === activeSessionKey;
   const latestAssistant = [...messages].reverse().find((message) => message.role === "assistant");
@@ -244,14 +282,53 @@ export function ArchiveRoleplay({
     requestSequenceRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
-    const requestId = activeRequestIdRef.current;
-    activeRequestIdRef.current = null;
-    if (cancelServer && requestId) {
-      void cancelArchiveApi({ client: "persona-v1", requestId });
+    const stopRecovery =
+      !cancelServer || recoveryPendingKeyRef.current === activeSessionKeyRef.current;
+    if (stopRecovery) {
+      recoveryAbortRef.current?.abort();
+      recoveryAbortRef.current = null;
     }
-    setPendingKey(null);
+    const requestId = activeRequestIdRef.current;
+    const sessionId = activeRequestSessionIdRef.current;
+    const recoveryRequestId = stopRecovery ? recoveryRequestIdRef.current : null;
+    const recoverySessionId = stopRecovery ? recoveryRequestSessionIdRef.current : undefined;
+    activeRequestIdRef.current = null;
+    activeRequestSessionIdRef.current = undefined;
+    foregroundPendingKeyRef.current = null;
+    if (stopRecovery) {
+      recoveryRequestIdRef.current = null;
+      recoveryRequestSessionIdRef.current = undefined;
+      recoveryPendingKeyRef.current = null;
+    }
+    if (cancelServer && requestId) {
+      void cancelArchiveApi({ client: "persona-v1", requestId, sessionId });
+    }
+    if (cancelServer && recoveryRequestId && recoveryRequestId !== requestId) {
+      void cancelArchiveApi({
+        client: "persona-v1",
+        requestId: recoveryRequestId,
+        sessionId: recoverySessionId,
+      });
+    }
+    setPendingKey(stopRecovery ? null : recoveryPendingKeyRef.current);
     setPendingProProfile(null);
     if (announce) setLiveMessage("応答生成を停止しました。");
+  }, []);
+
+  const stopForegroundResponse = useCallback((cancelServer = false) => {
+    requestSequenceRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    const requestId = activeRequestIdRef.current;
+    const sessionId = activeRequestSessionIdRef.current;
+    activeRequestIdRef.current = null;
+    activeRequestSessionIdRef.current = undefined;
+    foregroundPendingKeyRef.current = null;
+    if (cancelServer && requestId) {
+      void cancelArchiveApi({ client: "persona-v1", requestId, sessionId });
+    }
+    setPendingKey(recoveryPendingKeyRef.current);
+    setPendingProProfile(null);
   }, []);
 
   useEffect(() => () => stopResponse(false), [stopResponse]);
@@ -259,6 +336,29 @@ export function ArchiveRoleplay({
   useEffect(() => {
     setConnectionHealth(summarizeArchiveAiHealth("persona"));
   }, []);
+
+  useEffect(
+    () => subscribeArchiveAiRecoveryWake(() => setRecoveryWake((value) => value + 1)),
+    [],
+  );
+
+  const rememberActiveViewport = useCallback(() => {
+    const log = logRef.current;
+    if (!log) return;
+    viewportBySessionRef.current[activeSessionKey] = {
+      scrollTop: log.scrollTop,
+      followLatest: followLatestRef.current,
+    };
+  }, [activeSessionKey]);
+
+  useLayoutEffect(() => {
+    if (!active) return;
+    const log = logRef.current;
+    if (!log) return;
+    const viewport = viewportBySessionRef.current[activeSessionKey];
+    followLatestRef.current = viewport?.followLatest ?? true;
+    log.scrollTop = viewport?.followLatest === false ? viewport.scrollTop : log.scrollHeight;
+  }, [active, activeSessionKey]);
 
   useEffect(() => {
     if (!active) return;
@@ -300,23 +400,23 @@ export function ArchiveRoleplay({
   );
 
   useEffect(() => {
+    if (abortRef.current) return;
     const controller = new AbortController();
     let disposed = false;
     void (async () => {
       const pendingRecords = (await listArchiveAiPending()).filter(
         (record) => record.client === "persona-v1" && record.url === "/api/archive-intelligence",
       );
-      if (disposed || !pendingRecords.length) return;
-      activeRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
-      if (!abortRef.current) abortRef.current = controller;
+      if (disposed || abortRef.current || !pendingRecords.length) return;
+      recoveryRequestIdRef.current = pendingRecords[0]?.requestId ?? null;
+      recoveryRequestSessionIdRef.current = pendingRecords[0]?.sessionId;
+      recoveryAbortRef.current = controller;
       const firstContext = pendingRecords[0]?.contextId;
-      setPendingKey(
-        firstContext && firstContext in ARCHIVE_CHARACTER_BY_ID
-          ? sessionKey(firstContext as ArchiveCharacterId)
-          : activeSessionKey,
-      );
+      const firstPendingKey = pendingSessionKey(firstContext, activeSessionKeyRef.current);
+      recoveryPendingKeyRef.current = firstPendingKey;
+      if (!foregroundPendingKeyRef.current) setPendingKey(firstPendingKey);
       setLiveMessage("再接続前の人格回答を回収しています。");
-      await Promise.allSettled(
+      const settled = await Promise.allSettled(
         pendingRecords.map(async (pendingRecord) => {
           const reply = await resumeArchiveApi({
             pending: pendingRecord,
@@ -331,11 +431,10 @@ export function ArchiveRoleplay({
             },
           });
           if (disposed || controller.signal.aborted) return;
-          const contextId = pendingRecord.contextId;
-          const targetKey =
-            contextId && contextId in ARCHIVE_CHARACTER_BY_ID
-              ? sessionKey(contextId as ArchiveCharacterId)
-              : activeSessionKey;
+          const targetKey = pendingSessionKey(
+            pendingRecord.contextId,
+            activeSessionKeyRef.current,
+          );
           updateSession(targetKey, (current) =>
             reply.requestId && current.some((message) => message.requestId === reply.requestId)
               ? current
@@ -362,22 +461,39 @@ export function ArchiveRoleplay({
         }),
       );
       if (!disposed) {
-        if (abortRef.current === controller) abortRef.current = null;
-        activeRequestIdRef.current = null;
-        setPendingKey(null);
-        setLiveMessage("再接続前の回答を復元しました。");
+        const firstFailedIndex = settled.findIndex((result) => result.status === "rejected");
+        if (firstFailedIndex >= 0) {
+          const failedRecord = pendingRecords[firstFailedIndex];
+          recoveryRequestIdRef.current = failedRecord?.requestId ?? null;
+          recoveryRequestSessionIdRef.current = failedRecord?.sessionId;
+          const failedPendingKey = pendingSessionKey(
+            failedRecord?.contextId,
+            activeSessionKeyRef.current,
+          );
+          recoveryPendingKeyRef.current = failedPendingKey;
+          if (!foregroundPendingKeyRef.current) setPendingKey(failedPendingKey);
+          setLiveMessage("再接続中。同じ回答を引き続き回収できます。");
+        } else {
+          if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
+          recoveryRequestIdRef.current = null;
+          recoveryRequestSessionIdRef.current = undefined;
+          recoveryPendingKeyRef.current = null;
+          setPendingKey(foregroundPendingKeyRef.current);
+          setLiveMessage("再接続前の回答を復元しました。");
+        }
       }
     })();
     return () => {
       disposed = true;
       controller.abort();
-      if (abortRef.current === controller) abortRef.current = null;
+      if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
     };
-  }, [activeSessionKey, updateSession]);
+  }, [recoveryWake, updateSession]);
 
   const selectCharacter = (nextCharacter: ArchiveCharacterId) => {
     if (nextCharacter === characterId) return;
-    stopResponse(false, true);
+    rememberActiveViewport();
+    stopForegroundResponse(true);
     setCharacterId(nextCharacter);
     setDraft("");
     setMessageEdit(null);
@@ -389,22 +505,25 @@ export function ArchiveRoleplay({
   const selectMode = useCallback(
     (nextMode: ArchiveRoleplayMode) => {
       if (nextMode === mode) return;
-      stopResponse(false, true);
+      rememberActiveViewport();
+      stopForegroundResponse(true);
       setMode(nextMode);
       setSelectedUserMessageId(null);
       followLatestRef.current = true;
       setLiveMessage(`${nextMode === "pro" ? "プロ" : "ノーマル"}モードへ切り替えました。`);
     },
-    [mode, stopResponse],
+    [mode, rememberActiveViewport, stopForegroundResponse],
   );
 
   const clearConversation = () => {
-    stopResponse(false, true);
+    if (recoveryPendingKeyRef.current === activeSessionKey) stopResponse(false, true);
+    else stopForegroundResponse(true);
     setSessions((current) => ({ ...current, [activeSessionKey]: [] }));
     setDraft("");
     setMessageEdit(null);
     setSelectedUserMessageId(null);
     followLatestRef.current = true;
+    viewportBySessionRef.current[activeSessionKey] = { scrollTop: 0, followLatest: true };
     setLiveMessage(`${profile.name}との現在の会話を初期化しました。`);
   };
 
@@ -439,15 +558,18 @@ export function ArchiveRoleplay({
     if (!options.preserveDraft) setDraft("");
     setMessageEdit(null);
     setSelectedUserMessageId(null);
+    foregroundPendingKeyRef.current = keyAtRequest;
     setPendingKey(keyAtRequest);
     setPendingProProfile(proProfileAtRequest);
     setLiveMessage(`${profile.name}が応答を生成しています。`);
     followLatestRef.current = true;
+    viewportBySessionRef.current[keyAtRequest] = { scrollTop: 0, followLatest: true };
 
     const controller = new AbortController();
     const requestId = createArchiveAiRequestId();
     abortRef.current = controller;
     activeRequestIdRef.current = requestId;
+    activeRequestSessionIdRef.current = undefined;
     const thinkingStartedAt = performance.now();
     const sequence = requestSequenceRef.current + 1;
     requestSequenceRef.current = sequence;
@@ -472,7 +594,7 @@ export function ArchiveRoleplay({
         signal: controller.signal,
         validate: isArchiveReply,
         pendingContext: {
-          contextId: characterAtRequest,
+          contextId: keyAtRequest,
           userMessageId: nextMessages.at(-1)?.id,
         },
         requestId,
@@ -518,10 +640,14 @@ export function ArchiveRoleplay({
           trimmed: conversationHistory.length < nextMessages.length,
         }),
       );
-      setPendingKey((current) => (current === keyAtRequest ? null : current));
+      foregroundPendingKeyRef.current = null;
+      setPendingKey(recoveryPendingKeyRef.current);
       setPendingProProfile(null);
       if (abortRef.current === controller) abortRef.current = null;
-      if (activeRequestIdRef.current === requestId) activeRequestIdRef.current = null;
+      if (activeRequestIdRef.current === requestId) {
+        activeRequestIdRef.current = null;
+        activeRequestSessionIdRef.current = undefined;
+      }
       setLiveMessage("オンライン回答を回収できませんでした。再送信できます。");
       return;
     }
@@ -568,10 +694,14 @@ export function ArchiveRoleplay({
         ? current
         : [...current, assistantMessage],
     );
-    setPendingKey((current) => (current === keyAtRequest ? null : current));
+    foregroundPendingKeyRef.current = null;
+    setPendingKey(recoveryPendingKeyRef.current);
     setPendingProProfile(null);
     if (abortRef.current === controller) abortRef.current = null;
-    if (activeRequestIdRef.current === requestId) activeRequestIdRef.current = null;
+    if (activeRequestIdRef.current === requestId) {
+      activeRequestIdRef.current = null;
+      activeRequestSessionIdRef.current = undefined;
+    }
     setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}から応答が届きました。`);
   };
 
@@ -703,7 +833,7 @@ export function ArchiveRoleplay({
           }}
         >
           {ARCHIVE_CHARACTERS.map((character) => {
-            const key = sessionKey(character.id);
+            const key = sessionKey(character.id, mode);
             const count = sessions[key]?.length ?? 0;
             return (
               <button
@@ -839,6 +969,10 @@ export function ArchiveRoleplay({
             const element = event.currentTarget;
             followLatestRef.current =
               element.scrollHeight - element.scrollTop - element.clientHeight < 96;
+            viewportBySessionRef.current[activeSessionKey] = {
+              scrollTop: element.scrollTop,
+              followLatest: followLatestRef.current,
+            };
           }}
         >
           {!messages.length ? (

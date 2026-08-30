@@ -12,7 +12,13 @@ import {
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const TOKEN = "maintenance-monitor-token".repeat(2);
 
-function maintenanceResponse({ contractVersion = 1, sha = SHA, errors = 0, status = 200 } = {}) {
+function maintenanceResponse({
+  contractVersion = 1,
+  sha = SHA,
+  errors = 0,
+  stalePending = 0,
+  status = 200,
+} = {}) {
   const payload = {
     ...(contractVersion === null ? {} : { contractVersion }),
     cleaned: 2,
@@ -23,6 +29,8 @@ function maintenanceResponse({ contractVersion = 1, sha = SHA, errors = 0, statu
       local: 0,
       failed: 1,
       errors,
+      stalePending,
+      oldestPendingAgeMs: stalePending ? 490_000 : 12_000,
     },
     deploymentSha: sha,
   };
@@ -100,4 +108,15 @@ test("maintenance recovery errors alert but can never request rollback", async (
   } finally {
     unlinkSync(outputPath);
   }
+});
+
+test("maintenance alerts when a pending response approaches provider retention expiry", async () => {
+  const result = await runArchiveAiMaintenanceV1({
+    baseUrl: "https://archive.example",
+    expectedSha: SHA,
+    monitorToken: TOKEN,
+    fetchImpl: async () => maintenanceResponse({ stalePending: 1, status: 503 }),
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "stale_pending_requests");
 });

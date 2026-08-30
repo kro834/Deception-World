@@ -206,57 +206,82 @@ jobs:
           failed_url="${{ steps.production.outputs.url }}"
           failed_sha="${{ steps.production.outputs.sha }}"
 
-          # Re-resolve immediately before mutation. Refuse to touch Production if another
-          # deployment somehow replaced the one that was actually probed.
-          node --input-type=module - "$failed_id" "$failed_url" "$failed_sha" <<'NODE'
-          import { resolveVercelProductionDeployment } from "./scripts/vercel-production-deployment.mjs";
-          const [expectedId, expectedUrl, expectedSha] = process.argv.slice(2);
-          const current = await resolveVercelProductionDeployment({
+          # The failed deployment itself carries the exact URL/SHA captured by the
+          # main release before promotion. Missing metadata on an older deployment
+          # is alert-only: never fall back to Vercel's implicit rollback history.
+          rollback_target="$(node --input-type=module - "$failed_id" "$failed_url" "$failed_sha" <<'NODE'
+          import { resolveVercelRollbackTarget } from "./scripts/vercel-production-deployment.mjs";
+          const [failedDeploymentId, failedUrl, failedSha] = process.argv.slice(2);
+          const target = await resolveVercelRollbackTarget({
+            baseUrl: process.env.ARCHIVE_AI_BASE_URL,
+            failedDeploymentId,
+            failedUrl,
+            failedSha,
+            token: process.env.VERCEL_TOKEN,
+            teamId: process.env.VERCEL_ORG_ID,
+            projectId: process.env.VERCEL_PROJECT_ID,
+          });
+          process.stdout.write(`${target.url} ${target.sha}`);
+          NODE
+          )"
+          read -r previous_url previous_sha <<< "$rollback_target"
+          test -n "$previous_url"
+          test -n "$previous_sha"
+
+          # The API resolver already fenced both deployments to VERCEL_PROJECT_ID.
+          # Git ancestry is checked separately immediately before the mutation.
+          git cat-file -e "${previous_sha}^{commit}"
+          git merge-base --is-ancestor "$previous_sha" "$GITHUB_SHA"
+
+          # Close the window between metadata/ancestry validation and mutation. A
+          # manual Vercel promotion is outside GitHub concurrency, so re-resolve the
+          # public alias immediately before the exact-target rollback.
+          node --input-type=module - "$failed_url" "$failed_sha" <<'NODE'
+          import { assertVercelProductionSnapshot } from "./scripts/vercel-production-deployment.mjs";
+          const [expectedUrl, expectedSha] = process.argv.slice(2);
+          await assertVercelProductionSnapshot({
+            expectedUrl,
+            expectedSha,
             baseUrl: process.env.ARCHIVE_AI_BASE_URL,
             token: process.env.VERCEL_TOKEN,
             teamId: process.env.VERCEL_ORG_ID,
             projectId: process.env.VERCEL_PROJECT_ID,
           });
-          if (current.id !== expectedId || current.url !== expectedUrl || current.sha !== expectedSha) {
-            throw new Error("Production changed after monitoring; refusing a stale rollback");
-          }
           NODE
 
-          vercel rollback --timeout "5 m" --token "$VERCEL_TOKEN"
+          vercel rollback "$previous_url" --timeout "5 m" --token "$VERCEL_TOKEN"
           vercel rollback status --timeout "5 m" --token "$VERCEL_TOKEN"
 
-          restored_identity=""
+          restored=false
           for attempt in $(seq 1 12); do
-            if restored_identity="$(node --input-type=module - "$failed_url" "$failed_sha" <<'NODE'
+            if node --input-type=module - "$previous_url" "$previous_sha" <<'NODE'
           import { resolveVercelProductionDeployment } from "./scripts/vercel-production-deployment.mjs";
-          const [failedUrl, failedSha] = process.argv.slice(2);
+          const [previousUrl, previousSha] = process.argv.slice(2);
           const restored = await resolveVercelProductionDeployment({
             baseUrl: process.env.ARCHIVE_AI_BASE_URL,
             token: process.env.VERCEL_TOKEN,
             teamId: process.env.VERCEL_ORG_ID,
             projectId: process.env.VERCEL_PROJECT_ID,
           });
-          if (restored.url === failedUrl || restored.sha === failedSha) process.exit(1);
-          process.stdout.write(`${restored.url} ${restored.sha}`);
+          if (restored.url !== previousUrl || restored.sha !== previousSha) process.exit(1);
           NODE
-            )"; then
+            then
+              restored=true
               break
             fi
             sleep 5
           done
-          test -n "$restored_identity"
-          read -r restored_url restored_sha <<< "$restored_identity"
-          test "$restored_url" != "$failed_url"
-          test "$restored_sha" != "$failed_sha"
-          git cat-file -e "${restored_sha}^{commit}"
-          git merge-base --is-ancestor "$restored_sha" "$GITHUB_SHA"
+          if [ "$restored" != "true" ]; then
+            echo "Production did not return to the metadata-pinned previous deployment" >&2
+            exit 1
+          fi
 
-          args=(--phase all-routes --base-url "$ARCHIVE_AI_BASE_URL" --expected-sha "$restored_sha" --monitor-token "$ARCHIVE_MONITOR_TOKEN")
+          args=(--phase all-routes --base-url "$ARCHIVE_AI_BASE_URL" --expected-sha "$previous_sha" --monitor-token "$ARCHIVE_MONITOR_TOKEN")
           if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
             args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
           fi
           node scripts/archive-ai-monitor-verdict.mjs "${args[@]}"
-          echo "Production rolled back from $failed_url at $failed_sha to $restored_url at $restored_sha"
+          echo "Production rolled back from $failed_url at $failed_sha to $previous_url at $previous_sha"
 
       - name: Fail the workflow to trigger incident email notification
         if: always() && (steps.credentials.outcome == 'failure' || steps.production.outcome == 'failure' || steps.identity.outcome == 'failure' || steps.maintenance.outcome == 'failure' || steps.ancestor_control.outcome == 'failure' || steps.ancestor_routes.outcome == 'failure' || steps.control.outcome == 'failure' || steps.routes.outcome == 'failure' || steps.rollback.outcome == 'failure')

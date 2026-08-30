@@ -1,5 +1,35 @@
 import { pathToFileURL } from "node:url";
 
+function previousValues(value, name, failures) {
+  const trimmed = value?.trim();
+  if (!trimmed) return [];
+  if (!trimmed.startsWith("[")) {
+    return trimmed
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (!Array.isArray(parsed) || parsed.some((item) => typeof item !== "string" || !item.trim())) {
+      throw new Error();
+    }
+    return parsed.map((item) => item.trim());
+  } catch {
+    failures.push(`${name} must be a string or JSON array of strings`);
+    return [];
+  }
+}
+
+function validEncryptionKey(value) {
+  if (/^[0-9a-f]{64}$/iu.test(value)) return true;
+  try {
+    return Buffer.from(value.replace(/-/gu, "+").replace(/_/gu, "/"), "base64").length === 32;
+  } catch {
+    return false;
+  }
+}
+
 export function assertProductionArchiveAiEnvironment(environment = process.env) {
   const required =
     environment.VERCEL_ENV === "production" || environment.ARCHIVE_AI_REQUIRED === "1";
@@ -24,18 +54,25 @@ export function assertProductionArchiveAiEnvironment(environment = process.env) 
   if (Buffer.byteLength(environment.ARCHIVE_RATE_LIMIT_SECRET?.trim() ?? "") < 32) {
     failures.push("ARCHIVE_RATE_LIMIT_SECRET must contain at least 32 bytes");
   }
-  const encryptionKey = environment.ARCHIVE_RESULT_ENCRYPTION_KEY?.trim() ?? "";
-  let encryptionKeyValid = /^[0-9a-f]{64}$/iu.test(encryptionKey);
-  if (!encryptionKeyValid) {
-    try {
-      encryptionKeyValid =
-        Buffer.from(encryptionKey.replace(/-/gu, "+").replace(/_/gu, "/"), "base64").length === 32;
-    } catch {
-      encryptionKeyValid = false;
-    }
+  const previousRateLimitSecrets = previousValues(
+    environment.ARCHIVE_RATE_LIMIT_SECRET_PREVIOUS,
+    "ARCHIVE_RATE_LIMIT_SECRET_PREVIOUS",
+    failures,
+  );
+  if (previousRateLimitSecrets.some((value) => Buffer.byteLength(value) < 32)) {
+    failures.push("ARCHIVE_RATE_LIMIT_SECRET_PREVIOUS entries must contain at least 32 bytes");
   }
-  if (!encryptionKeyValid) {
+  const encryptionKey = environment.ARCHIVE_RESULT_ENCRYPTION_KEY?.trim() ?? "";
+  if (!validEncryptionKey(encryptionKey)) {
     failures.push("ARCHIVE_RESULT_ENCRYPTION_KEY must decode to exactly 32 bytes");
+  }
+  const previousEncryptionKeys = previousValues(
+    environment.ARCHIVE_RESULT_ENCRYPTION_KEY_PREVIOUS,
+    "ARCHIVE_RESULT_ENCRYPTION_KEY_PREVIOUS",
+    failures,
+  );
+  if (previousEncryptionKeys.some((value) => !validEncryptionKey(value))) {
+    failures.push("ARCHIVE_RESULT_ENCRYPTION_KEY_PREVIOUS entries must decode to exactly 32 bytes");
   }
   if (Buffer.byteLength(environment.ARCHIVE_MONITOR_TOKEN?.trim() ?? "") < 32) {
     failures.push("ARCHIVE_MONITOR_TOKEN must contain at least 32 bytes");

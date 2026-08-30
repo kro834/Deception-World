@@ -4,6 +4,10 @@ import type { ArchiveAiRequestState } from "./archive-ai-request.ts";
 import { getSql } from "./db.ts";
 
 const RECOVERY_BATCH_SIZE = 24;
+// A provider background response is retained only briefly. A request that has
+// not reached a terminal ledger state within this window needs an operator
+// alert before its exact provider response can disappear.
+export const ARCHIVE_AI_STALE_PENDING_MS = 8 * 60 * 1_000;
 
 type RecoverableArchiveAiRequest = {
   request_id: string;
@@ -17,7 +21,41 @@ export type ArchiveAiRecoverySummary = {
   local: number;
   failed: number;
   errors: number;
+  stalePending: number;
+  oldestPendingAgeMs: number | null;
 };
+
+type ArchiveAiPendingHealthRow = {
+  stale_pending: number | string;
+  oldest_created_at_text: string | null;
+};
+
+async function readArchiveAiPendingHealth(): Promise<
+  Pick<ArchiveAiRecoverySummary, "stalePending" | "oldestPendingAgeMs">
+> {
+  const sql = await getSql();
+  const rows = await sql.query<ArchiveAiPendingHealthRow>(
+    `SELECT
+       COUNT(*) FILTER (
+         WHERE created_at <= NOW() - ($1::text || ' milliseconds')::interval
+       )::integer AS stale_pending,
+       MIN(created_at)::text AS oldest_created_at_text
+     FROM archive_ai_requests
+     WHERE state IN ('queued', 'running', 'unknown')
+       AND expires_at > NOW()`,
+    [ARCHIVE_AI_STALE_PENDING_MS],
+  );
+  const row = rows[0];
+  const oldestCreatedAt = row?.oldest_created_at_text
+    ? Date.parse(row.oldest_created_at_text)
+    : Number.NaN;
+  return {
+    stalePending: Math.max(0, Number(row?.stale_pending ?? 0) || 0),
+    oldestPendingAgeMs: Number.isFinite(oldestCreatedAt)
+      ? Math.max(0, Date.now() - oldestCreatedAt)
+      : null,
+  };
+}
 
 /**
  * Select only opaque routing identifiers for pending work. The encrypted
@@ -76,6 +114,8 @@ export async function recoverArchiveAiPendingRequests(
     local: 0,
     failed: 0,
     errors: 0,
+    stalePending: 0,
+    oldestPendingAgeMs: null,
   };
 
   await Promise.all(
@@ -96,6 +136,10 @@ export async function recoverArchiveAiPendingRequests(
       }
     }),
   );
+
+  const pendingHealth = await readArchiveAiPendingHealth();
+  summary.stalePending = pendingHealth.stalePending;
+  summary.oldestPendingAgeMs = pendingHealth.oldestPendingAgeMs;
 
   logArchiveAiEvent("maintenance_recovery_batch", summary);
   return summary;
