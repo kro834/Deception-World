@@ -49,6 +49,7 @@ test("search is conversational while navigation stays on a deterministic allow-l
   assert.match(oracle, /search-local-wait/);
   assert.match(oracle, /createLocalArchiveSearchReply/);
   assert.match(oracle, /searchArchiveOracle\(query, 3\)/);
+  assert.match(oracle, /userIndex/);
   assert.doesNotMatch(oracle, /応答に時間がかかったため/);
   assert.match(
     oracle,

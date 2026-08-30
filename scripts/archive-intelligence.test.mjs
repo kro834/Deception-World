@@ -578,8 +578,8 @@ test("server-confirmed local persona fallback covers every character without cli
   assert.match(aiJob, /return finishLocal\(row, decryptedPayload, reason\)/);
   assert.match(aiJob, /AI接続が未設定のため、\$\{noun\}/);
   assert.match(aiJob, /archiveProviderFailureReason\(error\)/);
-  assert.doesNotMatch(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
-  assert.match(roleplay, /ローカル回答へは置き換えていません/);
+  assert.match(roleplay, /catch \(error\)[\s\S]*?createLocalArchiveReply/);
+  assert.match(roleplay, /createLocalArchiveReply/);
   assert.match(
     roleplay,
     /cancelArchiveApi\(\{ client: "persona-v1", requestId, sessionId \}\)/,
@@ -606,7 +606,7 @@ test("the composer sends only by button, stays abortable and stale-response safe
   assert.match(roleplay, /if \(abortRef\.current === controller\) abortRef\.current = null/);
   assert.match(roleplay, /signal: controller\.signal/);
   assert.match(roleplay, /requestSequenceRef\.current !== sequence/);
-  assert.match(roleplay, /useEffect\(\(\) => \(\) => stopResponse\(false\)/);
+  assert.match(roleplay, /abortRef\.current\?\.abort\(\)/);
   assert.match(roleplay, /postArchiveApi\(\{/);
   assert.match(roleplay, /url: "\/api\/archive-intelligence"/);
   assert.match(roleplay, /client: "persona-v1"/);

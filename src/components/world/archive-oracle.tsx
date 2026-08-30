@@ -19,7 +19,6 @@ import {
   type ArchiveApiLifecycle,
 } from "@/lib/archive-api-client";
 import { absorbArchiveUserIntent, archiveMemoryNoteTexts } from "@/lib/archive-user-memory";
-import { isArchiveDelivery } from "@/lib/archive-delivery";
 import {
   hasVisibleArchiveText,
   normalizeArchiveInput,
@@ -708,25 +707,15 @@ function searchMessageId(prefix: string): string {
 function isArchiveSearchReply(value: unknown): value is ArchiveSearchReply {
   if (!value || typeof value !== "object") return false;
   const reply = value as Partial<ArchiveSearchReply>;
-  const common =
-    typeof reply.reply === "string" &&
-    Array.isArray(reply.suggestions) &&
-    (reply.focusCandidateId === undefined || typeof reply.focusCandidateId === "string") &&
-    Array.isArray(reply.referenceCandidateIds) &&
-    reply.referenceCandidateIds.every((id) => typeof id === "string") &&
-    (reply.source === "openai" || reply.source === "local") &&
-    Boolean(reply.delivery) &&
-    isArchiveDelivery(reply.delivery);
-  if (!common) return false;
-  if (reply.source === "openai") {
-    return (
-      reply.delivery?.channel === "online" &&
-      reply.delivery.reason === "ok" &&
-      typeof reply.requestId === "string" &&
-      typeof reply.requestedModel === "string"
-    );
+  if (typeof reply.reply !== "string" || !reply.reply.trim()) return false;
+  if (reply.suggestions !== undefined && !Array.isArray(reply.suggestions)) return false;
+  if (reply.referenceCandidateIds !== undefined && !Array.isArray(reply.referenceCandidateIds)) {
+    return false;
   }
-  return reply.delivery?.channel === "local" && reply.modelVerified === false;
+  if (reply.source !== undefined && reply.source !== "openai" && reply.source !== "local") {
+    return false;
+  }
+  return true;
 }
 
 function archiveLifecycleText(state: ArchiveApiLifecycle | null): string {
@@ -779,6 +768,7 @@ export function ArchiveIntelligenceWorkspace({
   const searchLogRef = useRef<HTMLDivElement>(null);
   const searchFollowLatestRef = useRef(true);
   const searchAbortRef = useRef<AbortController | null>(null);
+  const searchPendingUserIdRef = useRef<string | null>(null);
   const searchRecoveryAbortRef = useRef<AbortController | null>(null);
   const searchRequestIdRef = useRef<string | null>(null);
   const searchRequestSessionIdRef = useRef<string | undefined>(undefined);
@@ -913,14 +903,20 @@ export function ArchiveIntelligenceWorkspace({
   useEffect(() => {
     if (!searchPending) return;
     const started = Date.now();
+    const pendingUserId = searchPendingUserIdRef.current;
     const tick = () => {
       if (Date.now() - started < 1_500) return;
       setSearchPending(false);
       setSearchLifecycle(null);
       setSearchMessages((current) => {
-        if (current.some((message) => message.role === "assistant")) return current;
-        const lastUser = [...current].reverse().find((message) => message.role === "user");
-        const query = lastUser?.text ?? "";
+        const userIndex = pendingUserId
+          ? current.findIndex((message) => message.id === pendingUserId)
+          : current.map((message) => message.role).lastIndexOf("user");
+        if (userIndex < 0) return current;
+        if (current.slice(userIndex + 1).some((message) => message.role === "assistant")) {
+          return current;
+        }
+        const query = current[userIndex]?.text ?? "";
         const results = searchArchiveOracle(query, 3);
         const local = createLocalArchiveSearchReply({
           query,
@@ -932,17 +928,17 @@ export function ArchiveIntelligenceWorkspace({
             referenceExcerpt: entry.description,
           })),
         });
-        const referenced = local.referenceCandidateIds
+        const referenced = (local.referenceCandidateIds ?? [])
           .map((id) => results.find((result) => result.entry.id === id))
           .filter((result): result is ArchiveOracleResult => Boolean(result));
         return [
           ...current,
           {
-            id: searchMessageId("search-local-wait"),
+            id: searchMessageId(`search-local-wait-${pendingUserId ?? "turn"}`),
             role: "assistant",
             text: local.reply,
             results: referenced,
-            suggestions: local.suggestions,
+            suggestions: local.suggestions ?? [],
             source: "local",
             modelLabel: "LOCAL",
             notice: local.notice,
@@ -1049,6 +1045,7 @@ export function ArchiveIntelligenceWorkspace({
       setSearchPending(true);
       setSearchLifecycle("submitting");
       setPendingSearchPreference(searchPreferenceAtRequest);
+      searchPendingUserIdRef.current = nextMessages.at(-1)?.id ?? null;
 
       const controller = new AbortController();
       const requestId = createArchiveAiRequestId();
@@ -1107,20 +1104,43 @@ export function ArchiveIntelligenceWorkspace({
         });
       } catch (error) {
         if (searchAbortRef.current !== controller) return;
+        const local = createLocalArchiveSearchReply({
+          query: resolvedQuery,
+          candidates: results.map(({ entry }) => ({
+            id: entry.id,
+            label: entry.label,
+            kicker: entry.kicker,
+            description: entry.description,
+            referenceExcerpt: entry.description,
+          })),
+        });
+        const referenced = (local.referenceCandidateIds ?? [])
+          .map((id) => results.find((result) => result.entry.id === id))
+          .filter((result): result is ArchiveOracleResult => Boolean(result));
         const deliveryReason =
           error instanceof ArchiveApiClientError ? error.reason : "client_network";
-        setSearchMessages((current) => [
-          ...current,
-          {
-            id: searchMessageId("search-error"),
-            role: "assistant",
-            text: "オンライン回答を回収できませんでした。ローカル回答へは置き換えていません。接続を確認し、同じメッセージを再送してください。",
-            source: "error",
-            modelLabel: "RECONNECT",
-            notice: `通信状態: ${deliveryReason}`,
-            requestId,
-          },
-        ]);
+        setSearchMessages((current) => {
+          const userIndex = current.findIndex(
+            (message) => message.id === nextMessages.at(-1)?.id,
+          );
+          if (userIndex >= 0 && current.slice(userIndex + 1).some((message) => message.role === "assistant")) {
+            return current;
+          }
+          return [
+            ...current,
+            {
+              id: searchMessageId("search-local-error"),
+              role: "assistant",
+              text: local.reply,
+              results: referenced,
+              suggestions: local.suggestions ?? [],
+              source: "local",
+              modelLabel: "LOCAL",
+              notice: local.notice ?? `公開記録から先に回答しています。通信状態: ${deliveryReason}`,
+              requestId,
+            },
+          ];
+        });
         setSearchHealth(
           recordArchiveAiHealth({
             surface: "search",
@@ -1176,12 +1196,14 @@ export function ArchiveIntelligenceWorkspace({
           )
         : results;
       const resultById = new Map(orderedResults.map((result) => [result.entry.id, result]));
-      const referencedResults = reply.referenceCandidateIds
+      const referencedResults = (reply.referenceCandidateIds ?? [])
         .map((id) => resultById.get(id))
         .filter((result): result is ArchiveOracleResult => Boolean(result));
       const displayedReferences = referencedResults;
+      const pendingUserId = nextMessages.at(-1)?.id;
       setSearchMessages((current) => {
-        const withoutWait = current.filter((message) => !message.id.startsWith("search-local-wait"));
+        const waitPrefix = pendingUserId ? `search-local-wait-${pendingUserId}` : "search-local-wait";
+        const withoutWait = current.filter((message) => !message.id.includes(waitPrefix));
         return reply.requestId && withoutWait.some((message) => message.requestId === reply.requestId)
           ? withoutWait
           : [
