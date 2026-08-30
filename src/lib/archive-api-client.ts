@@ -50,7 +50,8 @@ export type ArchiveApiTiming = {
 };
 
 const CLIENT_DELAYS_MS = [1_000, 2_000, 4_000, 5_000] as const;
-const REQUEST_TTL_MS = 45_000;
+const REQUEST_TTL_MS = 90_000;
+const RESUME_TTL_MS = 90_000;
 const FETCH_ATTEMPT_TIMEOUT_MS = 20_000;
 const MAX_LEDGER_POST_ATTEMPTS = 3;
 
@@ -59,7 +60,9 @@ function abortError(signal: AbortSignal): unknown {
 }
 
 function browserCanAttempt(): boolean {
-  if (typeof document !== "undefined" && document.visibilityState === "hidden") return false;
+  // iOS Safari/WebKit can report hidden or offline while the composer is
+  // focused (keyboard, iframe preview). Blocking the poll there left the UI
+  // on 思考中 forever because waitForConnectionWindow had no timer.
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }
 
@@ -109,7 +112,7 @@ function waitForConnectionWindow(delayMs: number, signal: AbortSignal): Promise<
     window.addEventListener("pageshow", wake, { once: true });
     document.addEventListener("visibilitychange", visibilityWake);
     signal.addEventListener("abort", abort, { once: true });
-    if (browserCanAttempt()) timer = window.setTimeout(finish, delayMs);
+    timer = window.setTimeout(finish, Math.max(250, Math.min(5_000, delayMs)));
   });
 }
 
@@ -280,7 +283,8 @@ export async function postArchiveApi<T>({
     if (!browserCanAttempt()) {
       reconnecting = true;
       onState?.("reconnecting");
-      await waitForConnectionWindow(5_000, signal);
+      await waitForConnectionWindow(1_000, signal);
+      continue;
     }
     const method = postAttempted ? "GET" : "POST";
     const endpoint =
@@ -361,7 +365,6 @@ export async function postArchiveApi<T>({
     const payload = await responsePayload(response);
     assertMatchingResponseRequestId(payload, requestId);
     if (!isArchiveAiRequestEnvelope(payload, validate)) {
-      void forgetArchiveAiPending(requestId);
       throw new ArchiveApiClientError("Archive API response was invalid", "client_invalid_payload");
     }
     const state: ArchiveAiRequestState<T> = payload;
@@ -416,11 +419,17 @@ export async function resumeArchiveApi<T>({
   let transportAttempt = 0;
   let serverDelay: number | undefined;
 
-  while (Date.now() < pending.expiresAt) {
+  const resumeDeadline = Math.min(
+    pending.expiresAt,
+    Math.max(pending.startedAt, Date.now()) + RESUME_TTL_MS,
+    Date.now() + RESUME_TTL_MS,
+  );
+  while (Date.now() < resumeDeadline) {
     if (signal.aborted) throw abortError(signal);
     if (!browserCanAttempt()) {
       onState?.("reconnecting");
-      await waitForConnectionWindow(5_000, signal);
+      await waitForConnectionWindow(1_000, signal);
+      continue;
     }
     onState?.("running");
     let response: Response;

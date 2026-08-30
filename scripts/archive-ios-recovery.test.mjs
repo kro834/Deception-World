@@ -426,14 +426,14 @@ test("surface recovery failures remain reconnecting and persona modes keep isola
     "utf8",
   );
   assert.match(oracle, /subscribeArchiveAiRecoveryWake/);
-  assert.match(oracle, /firstFailedIndex[\s\S]*?setSearchPending\(true\)[\s\S]*?setSearchLifecycle\("reconnecting"\)/);
+  assert.match(oracle, /setSearchPending\(true\)[\s\S]*?setSearchLifecycle\("reconnecting"\)[\s\S]*?firstFailedIndex[\s\S]*?setSearchPending\(false\)/);
   assert.match(oracle, /if \(disposed \|\| searchAbortRef\.current \|\| !pendingRecords\.length\) return/);
   assert.match(oracle, /const searchAbortRef[\s\S]*?const searchRecoveryAbortRef/);
   assert.match(oracle, /<ArchiveRoleplay[\s\S]*?active=\{active && surface === "roleplay"\}/);
   assert.match(roleplay, /subscribeArchiveAiRecoveryWake/);
   assert.match(
     roleplay,
-    /firstFailedIndex[\s\S]*?recoveryPendingKeyRef\.current = failedPendingKey[\s\S]*?setPendingKey\(failedPendingKey\)/,
+    /firstFailedIndex[\s\S]*?forgetArchiveAiPending\(failedRecord\.requestId\)[\s\S]*?setPendingKey\(foregroundPendingKeyRef\.current\)/,
   );
   assert.match(roleplay, /if \(disposed \|\| abortRef\.current \|\| !pendingRecords\.length\) return/);
   assert.match(roleplay, /const recoveryRequestIdRef[\s\S]*?const foregroundPendingKeyRef/);

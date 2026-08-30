@@ -9,8 +9,16 @@ export const ARCHIVE_PROVIDER_MODELS_BY_REQUEST = Object.freeze({
     "grok-4.20-0309-non-reasoning",
     "grok-4.20-0309-reasoning",
   ]),
-  "gpt-5.6-terra": Object.freeze(["gpt-5.6-terra", "grok-4.20-0309-non-reasoning"]),
-  "gpt-5.6-luna": Object.freeze(["gpt-5.6-luna", "grok-4.20-0309-non-reasoning"]),
+  "gpt-5.6-terra": Object.freeze([
+    "gpt-5.6-terra",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
+  ]),
+  "gpt-5.6-luna": Object.freeze([
+    "gpt-5.6-luna",
+    "grok-4.20-0309-non-reasoning",
+    "grok-4.20-0309-reasoning",
+  ]),
   "gpt-5.6-sol": Object.freeze([
     "gpt-5.6-sol",
     "grok-4.20-0309-non-reasoning",
