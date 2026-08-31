@@ -25,6 +25,7 @@ import {
   truncateArchiveInput,
 } from "@/lib/archive-input";
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
+import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
 import type { ArchiveSearchReply } from "@/lib/archive-search";
 import { createLocalArchiveSearchReply } from "@/lib/archive-search";
 import {
@@ -1143,10 +1144,11 @@ export function ArchiveIntelligenceWorkspace({
         const deliveryReason =
           error instanceof ArchiveApiClientError ? error.reason : "client_network";
         setSearchMessages((current) => {
-          const userIndex = current.findIndex(
-            (message) => message.id === nextMessages.at(-1)?.id,
-          );
-          if (userIndex >= 0 && current.slice(userIndex + 1).some((message) => message.role === "assistant")) {
+          const userIndex = current.findIndex((message) => message.id === nextMessages.at(-1)?.id);
+          if (
+            userIndex >= 0 &&
+            current.slice(userIndex + 1).some((message) => message.role === "assistant")
+          ) {
             return current;
           }
           return [
@@ -1225,9 +1227,12 @@ export function ArchiveIntelligenceWorkspace({
       const displayedReferences = referencedResults;
       const pendingUserId = nextMessages.at(-1)?.id;
       setSearchMessages((current) => {
-        const waitPrefix = pendingUserId ? `search-local-wait-${pendingUserId}` : "search-local-wait";
+        const waitPrefix = pendingUserId
+          ? `search-local-wait-${pendingUserId}`
+          : "search-local-wait";
         const withoutWait = current.filter((message) => !message.id.includes(waitPrefix));
-        return reply.requestId && withoutWait.some((message) => message.requestId === reply.requestId)
+        return reply.requestId &&
+          withoutWait.some((message) => message.requestId === reply.requestId)
           ? withoutWait
           : [
               ...withoutWait,
@@ -1593,9 +1598,7 @@ export function ArchiveIntelligenceWorkspace({
               <div>
                 <small>{ARCHIVE_RUNTIME_MODEL_LABEL}</small>
                 <p>
-                  {searchLifecycle === "reconnecting"
-                    ? "接続を確認しています"
-                    : "考えています"}
+                  {searchLifecycle === "reconnecting" ? "接続を確認しています" : "考えています"}
                 </p>
               </div>
             </div>

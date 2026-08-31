@@ -394,11 +394,9 @@ test("Archive Intelligence is an independent route reached from the shared side 
 
   assert.doesNotMatch(chrome, /import \{ ArchiveOracle \}/);
   assert.doesNotMatch(chrome, /oracleRef|oracleOpen|site-archive-oracle-dialog/);
-  assert.match(chrome, /to="\/intelligence"/);
   assert.match(chrome, /beforeNavigate=\{close\}/);
-  assert.match(chrome, /aria-current=\{context === "intelligence" \? "page" : undefined\}/);
-  assert.match(chrome, /<b>AIに聞く<\/b>/);
-  assert.match(chrome, /会話型サーチと、8つの人格回線/);
+  assert.doesNotMatch(chrome, /to="\/intelligence"/);
+  assert.doesNotMatch(chrome, /AIに聞く/);
 });
 
 test("the AI app is internally scrollable, mobile-first, and motion-aware", () => {

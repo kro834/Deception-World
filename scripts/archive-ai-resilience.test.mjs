@@ -752,7 +752,10 @@ test("healthy pending polls honor the server window without extra client jitter"
       { phase: "poll", outcome: "response", status: 200 },
     ],
   );
-  assert.equal(timings.every((timing) => timing.durationMs >= 0), true);
+  assert.equal(
+    timings.every((timing) => timing.durationMs >= 0),
+    true,
+  );
 });
 
 test("a confirmed missing ledger is recreated immediately after the paid retry wait", async (t) => {
@@ -812,7 +815,7 @@ test("a confirmed missing ledger is recreated immediately after the paid retry w
   assert.deepEqual(methods, ["POST", "GET", "POST"]);
   assert.deepEqual(
     delays.filter((delay) => delay < 10_000 && delay !== 450),
-    [1_000],
+    [200],
     "GET 404 must not add the old two-second sleep before the same-id POST",
   );
 });

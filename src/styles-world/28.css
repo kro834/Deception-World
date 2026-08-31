@@ -1,0 +1,303 @@
+/* Refero-informed usability pass -------------------------------------------
+   Preserve the cinematic identity while making common controls feel quieter,
+   larger, and easier to scan. Decorative spectacle stays in hero moments;
+   navigation and content surfaces use a restrained product-design rhythm. */
+
+:root {
+  --ui-hairline: rgba(218, 241, 255, 0.16);
+  --ui-hairline-strong: rgba(218, 241, 255, 0.26);
+  --ui-surface: rgba(9, 15, 24, 0.88);
+  --ui-surface-raised: rgba(14, 23, 35, 0.92);
+  --ui-muted: rgba(225, 234, 243, 0.7);
+  --ui-radius-sm: 12px;
+  --ui-radius-md: 18px;
+  --ui-radius-lg: 26px;
+  --ui-control-height: 46px;
+}
+
+/* Familiar, restrained sticky navigation. */
+.topbar,
+.manager-topbar,
+.rider-archive-topbar {
+  border-bottom-color: var(--ui-hairline);
+  background: linear-gradient(180deg, rgba(4, 7, 12, 0.94), rgba(4, 7, 12, 0.84));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: blur(18px) saturate(125%);
+}
+
+.topbar::after,
+.manager-topbar::after,
+.rider-archive-topbar::after {
+  opacity: 0.34;
+}
+
+.brand b {
+  letter-spacing: 0.08em;
+}
+
+.brand small,
+.topbar nav a {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.topbar nav {
+  gap: clamp(18px, 2.5vw, 34px);
+}
+
+.topbar nav a::after {
+  height: 1px;
+  box-shadow: none;
+}
+
+/* The menu reads as a clear directory instead of another spectacle layer. */
+.side-panel {
+  padding-inline: clamp(20px, 4vw, 34px);
+  background: linear-gradient(180deg, rgba(12, 19, 29, 0.98), rgba(5, 9, 15, 0.99)), var(--ink);
+}
+
+.side-panel::before,
+.side-panel::after,
+.side-panel-depth {
+  opacity: 0.34;
+}
+
+.side-panel-head {
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--ui-hairline);
+}
+
+.side-panel-head p,
+.side-panel-group > p {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.side-panel-group {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 18px 0;
+  border-top: 1px solid rgba(218, 241, 255, 0.09);
+}
+
+.side-panel-head + .side-panel-group {
+  border-top: 0;
+}
+
+.side-panel-links {
+  gap: 6px;
+}
+
+.side-panel-links :is(a, button.side-panel-link-button) {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-sm);
+  color: rgba(245, 248, 252, 0.82);
+  background: transparent;
+  translate: none;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.side-panel-links :is(a, button.side-panel-link-button) > span {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.side-panel-links :is(a, button.side-panel-link-button) > i {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.side-panel-links :is(a, button.side-panel-link-button)[aria-current="page"] {
+  border-color: var(--ui-hairline-strong);
+  background: rgba(103, 216, 255, 0.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .side-panel-links :is(a, button.side-panel-link-button):hover {
+    border-color: var(--ui-hairline);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.055);
+    translate: none;
+    transform: translate3d(2px, 0, 0);
+  }
+}
+
+.side-panel-riders .side-panel-links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) {
+  min-width: 0;
+}
+
+/* Product-like controls: clear grouping, generous hit targets, quiet chrome. */
+.rider-tabs.liquid-swipe-tabs,
+.world-column-tabs,
+.world-column-dialog-tabs,
+.manager-archive-tabs {
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--ui-hairline);
+  border-radius: var(--ui-radius-md);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: none;
+}
+
+.rider-tabs.liquid-swipe-tabs > button[role="tab"],
+.world-column-tabs > button[role="tab"],
+.world-column-dialog-tabs > button[role="tab"],
+.manager-archive-tabs > button[role="tab"] {
+  min-height: var(--ui-control-height);
+  border-radius: var(--ui-radius-sm);
+}
+
+.rider-tabs span,
+.world-column-tabs b,
+.world-column-dialog-tabs b,
+.manager-archive-tabs b {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+/* Refero-like content rhythm: the art stays vivid, its frame stays calm. */
+.signal,
+.rider-detail,
+.episode-card-surface,
+.world-column,
+.manager-copy-section,
+.other-archive-card {
+  border-color: var(--ui-hairline);
+}
+
+.rider-detail,
+.world-column,
+.manager-copy-section {
+  border-radius: var(--ui-radius-lg);
+}
+
+.episode-card-surface {
+  border-radius: var(--ui-radius-md);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.episode-thumbnail,
+.episode-thumbnail img {
+  border-radius: calc(var(--ui-radius-md) - 3px);
+}
+
+.episode-card.is-active .episode-card-surface {
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.3),
+    0 0 0 1px color-mix(in srgb, var(--episode-tone) 28%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .episode-card:hover .episode-card-surface {
+    transform: translate3d(0, -3px, 0);
+  }
+}
+
+/* Readability floor for meaningful text. Tiny coordinates remain decorative. */
+.story-copy p,
+.world-column-summary-pane p,
+.rider-description,
+.rider-line,
+.manager-copy-body p,
+.site-announcement-copy p {
+  color: var(--ui-muted);
+  font-size: clamp(14px, 1.1vw, 16px);
+  line-height: 1.85;
+}
+
+.episode-card-copy > p,
+.episode-card-copy small,
+.rider-person,
+.world-column-tabs small,
+.manager-archive-tabs small {
+  font-size: 11px;
+}
+
+.primary-action,
+.text-action,
+.episode-controls button,
+.poster-shuffle,
+.poster-reset,
+.poster-lock {
+  min-height: var(--ui-control-height);
+}
+
+.primary-action {
+  border-radius: var(--ui-radius-sm);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 760px) {
+  :root {
+    --ui-control-height: 48px;
+  }
+
+  .topbar {
+    min-height: 68px;
+  }
+
+  .brand small {
+    font-size: 10px;
+  }
+
+  .side-panel {
+    padding-inline: 18px;
+  }
+
+  .side-panel-riders .side-panel-links {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) {
+    padding-inline: 11px;
+  }
+
+  .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) > span {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rider-tabs.liquid-swipe-tabs,
+  .world-column-tabs,
+  .manager-archive-tabs {
+    border-radius: 16px;
+  }
+
+  .story-copy p,
+  .world-column-summary-pane p,
+  .rider-description,
+  .rider-line,
+  .manager-copy-body p,
+  .site-announcement-copy p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+}
+
+@media (max-width: 390px) {
+  .side-panel-riders .side-panel-links {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel-links :is(a, button.side-panel-link-button),
+  .episode-card-surface {
+    transition-duration: 0.01ms !important;
+  }
+}

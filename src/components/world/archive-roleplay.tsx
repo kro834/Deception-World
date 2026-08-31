@@ -38,6 +38,7 @@ import {
   truncateArchiveInput,
 } from "@/lib/archive-input";
 import { branchArchiveMessages } from "@/lib/archive-message-branch";
+import { trimArchiveConversation } from "@/lib/archive-conversation-budget";
 import {
   createLocalArchiveReply,
   hasTacticalSnapshot,
@@ -107,11 +108,7 @@ function sessionKey(characterId: ArchiveCharacterId, mode: ArchiveRoleplayMode):
 function pendingSessionKey(contextId: string | undefined, fallback: string): string {
   if (!contextId) return fallback;
   const [characterId, mode, extra] = contextId.split(":");
-  if (
-    !extra &&
-    characterId in ARCHIVE_CHARACTER_BY_ID &&
-    (mode === "normal" || mode === "pro")
-  ) {
+  if (!extra && characterId in ARCHIVE_CHARACTER_BY_ID && (mode === "normal" || mode === "pro")) {
     return sessionKey(characterId as ArchiveCharacterId, mode);
   }
   // v1 records only stored the character. They were shared across modes, so
@@ -243,9 +240,9 @@ export function ArchiveRoleplay({
   const logRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const followLatestRef = useRef(true);
-  const viewportBySessionRef = useRef<
-    Record<string, { scrollTop: number; followLatest: boolean }>
-  >({});
+  const viewportBySessionRef = useRef<Record<string, { scrollTop: number; followLatest: boolean }>>(
+    {},
+  );
   const [recoveryWake, setRecoveryWake] = useState(0);
 
   const profile = ARCHIVE_CHARACTER_BY_ID[characterId];
@@ -325,10 +322,7 @@ export function ArchiveRoleplay({
     setConnectionHealth(summarizeArchiveAiHealth("persona"));
   }, []);
 
-  useEffect(
-    () => subscribeArchiveAiRecoveryWake(() => setRecoveryWake((value) => value + 1)),
-    [],
-  );
+  useEffect(() => subscribeArchiveAiRecoveryWake(() => setRecoveryWake((value) => value + 1)), []);
 
   const rememberActiveViewport = useCallback(() => {
     const log = logRef.current;
@@ -473,10 +467,7 @@ export function ArchiveRoleplay({
             },
           });
           if (disposed || controller.signal.aborted) return;
-          const targetKey = pendingSessionKey(
-            pendingRecord.contextId,
-            activeSessionKeyRef.current,
-          );
+          const targetKey = pendingSessionKey(pendingRecord.contextId, activeSessionKeyRef.current);
           updateSession(targetKey, (current) =>
             reply.requestId && current.some((message) => message.requestId === reply.requestId)
               ? current
@@ -512,7 +503,9 @@ export function ArchiveRoleplay({
           recoveryRequestSessionIdRef.current = undefined;
           recoveryPendingKeyRef.current = null;
           setPendingKey(foregroundPendingKeyRef.current);
-          setLiveMessage("オンライン回答を回収できませんでした。同じメッセージを再送してください。");
+          setLiveMessage(
+            "オンライン回答を回収できませんでした。同じメッセージを再送してください。",
+          );
         } else {
           if (recoveryAbortRef.current === controller) recoveryAbortRef.current = null;
           recoveryRequestIdRef.current = null;
@@ -681,7 +674,10 @@ export function ArchiveRoleplay({
         error instanceof ArchiveApiClientError ? error.reason : "client_network";
       updateSession(keyAtRequest, (current) => {
         const userIndex = current.findIndex((message) => message.id === nextMessages.at(-1)?.id);
-        if (userIndex >= 0 && current.slice(userIndex + 1).some((message) => message.role === "assistant")) {
+        if (
+          userIndex >= 0 &&
+          current.slice(userIndex + 1).some((message) => message.role === "assistant")
+        ) {
           return current;
         }
         return [
@@ -696,7 +692,8 @@ export function ArchiveRoleplay({
             navigationQuery: local.navigationQuery,
             source: "local",
             modelLabel: "LOCAL",
-            notice: local.notice ?? `公開記録の人格で先に応答しています。通信状態: ${deliveryReason}`,
+            notice:
+              local.notice ?? `公開記録の人格で先に応答しています。通信状態: ${deliveryReason}`,
             requestId,
           },
         ];
@@ -713,7 +710,9 @@ export function ArchiveRoleplay({
           trimmed: conversationHistory.length < nextMessages.length,
         }),
       );
-      setLiveMessage(`${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}が公開記録から応答しました。`);
+      setLiveMessage(
+        `${ARCHIVE_CHARACTER_BY_ID[characterAtRequest].name}が公開記録から応答しました。`,
+      );
       return;
     } finally {
       if (abortRef.current === controller) {
@@ -1175,11 +1174,7 @@ export function ArchiveRoleplay({
               </span>
               <div>
                 <small>{ARCHIVE_RUNTIME_MODEL_LABEL}</small>
-                <p>
-                  {liveMessage.includes("再接続")
-                    ? "接続を確認しています"
-                    : "考えています"}
-                </p>
+                <p>{liveMessage.includes("再接続") ? "接続を確認しています" : "考えています"}</p>
               </div>
             </div>
           ) : null}
@@ -1263,7 +1258,9 @@ export function ArchiveRoleplay({
                   draft.length > messageMaxLength ||
                   messageEditOverLimit
                 }
-                aria-label={messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`}
+                aria-label={
+                  messageEdit ? `${profile.name}へ編集して再送信` : `${profile.name}へ送信`
+                }
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() =>
                   void sendMessage(

@@ -57,6 +57,7 @@ function isSearchResult(value) {
 test("the shared provider contract accepts the official GPT-5.5 snapshot and Grok 4.20", () => {
   assert.deepEqual(ARCHIVE_PROVIDER_MODELS_BY_REQUEST["gpt-5.5"], [
     "gpt-5.5-2026-04-23",
+    "grok-4.20",
     "grok-4.20-0309-non-reasoning",
     "grok-4.20-0309-reasoning",
   ]);
@@ -138,7 +139,10 @@ test("request envelopes reject unknown models, malformed expiries, and unknown r
     requestedModel: "gpt-5.6-terra",
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
   };
-  assert.equal(isArchiveAiRequestEnvelope(pending, () => false), true);
+  assert.equal(
+    isArchiveAiRequestEnvelope(pending, () => false),
+    true,
+  );
   assert.equal(
     isArchiveAiRequestEnvelope({ ...pending, requestedModel: "__proto__" }, () => false),
     false,
@@ -170,20 +174,17 @@ test("the Production verifier accepts an allowed resolved GPT-5.5 snapshot", asy
         deploymentCase.expectedModel === "gpt-5.5"
           ? "gpt-5.5-2026-04-23"
           : deploymentCase.expectedModel;
-      return Response.json(
-        searchEnvelope(requestId, deploymentCase.expectedModel, providerModel),
-        {
+      return Response.json(searchEnvelope(requestId, deploymentCase.expectedModel, providerModel), {
         headers: { "x-archive-deployment-sha": SHA },
-        },
-      );
+      });
     },
   });
 
   assert.equal(report.ok, true);
   assert.equal(
-    report.results.filter((result) => result.expectedModel === "gpt-5.5").every(
-      (result) => result.providerModel === "gpt-5.5-2026-04-23",
-    ),
+    report.results
+      .filter((result) => result.expectedModel === "gpt-5.5")
+      .every((result) => result.providerModel === "gpt-5.5-2026-04-23"),
     true,
   );
 });

@@ -456,34 +456,6 @@ export function SideMenuLayer({
             </svg>
           </button>
         </div>
-        <div className="side-panel-oracle-card">
-          <GuardedLink
-            to="/intelligence"
-            assets={[]}
-            className="side-panel-oracle-trigger"
-            beforeNavigate={close}
-            aria-current={context === "intelligence" ? "page" : undefined}
-            aria-label="AIに聞く専用ページを開く"
-          >
-            <span className="side-panel-oracle-sigil" aria-hidden="true">
-              <i />
-              <i />
-              <b>AI</b>
-            </span>
-            <span className="side-panel-oracle-copy">
-              <small>ARCHIVE INTELLIGENCE / HYBRID</small>
-              <b>AIに聞く</b>
-              <span>会話型サーチと、8つの人格回線</span>
-            </span>
-            <span className="side-panel-oracle-arrow" aria-hidden="true">
-              ↗
-            </span>
-          </GuardedLink>
-          <p>
-            <span>Grok 4.20</span>
-            記録を会話で探し、人格と深く話す
-          </p>
-        </div>
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
@@ -660,7 +632,7 @@ export function SideMenuLayer({
           </div>
         </div>
         {context === "world" ? (
-          <div className="side-panel-group">
+          <div className="side-panel-group side-panel-riders">
             <p>RIDERS</p>
             <div className="side-panel-links">
               {RIDER_NAV.map((r, i) =>

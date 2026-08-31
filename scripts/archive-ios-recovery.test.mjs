@@ -246,7 +246,10 @@ test("a 4s-plus WebKit cold start is retried on pageshow without losing the requ
   });
   windowTarget.dispatchEvent(new Event("pageshow"));
   const records = await recovered;
-  assert.equal(records.some((record) => record.requestId === expected.requestId), true);
+  assert.equal(
+    records.some((record) => record.requestId === expected.requestId),
+    true,
+  );
   windowTarget.dispatchEvent(new Event("online"));
   assert.equal(wakeCount, 2);
   unsubscribe();
@@ -400,7 +403,7 @@ test("request-id mismatch is rejected but the correct pending request remains re
   await forgetArchiveAiPending(expectedRequestId);
 });
 
-test("communication-error messages have a dedicated RECONNECT source", () => {
+test("communication errors fall back to a clearly labelled local response", () => {
   const oracle = readFileSync(
     new URL("../src/components/world/archive-oracle.tsx", import.meta.url),
     "utf8",
@@ -410,8 +413,8 @@ test("communication-error messages have a dedicated RECONNECT source", () => {
     "utf8",
   );
   for (const source of [oracle, roleplay]) {
-    assert.match(source, /source:\s*"error"/u);
-    assert.match(source, /modelLabel:\s*"RECONNECT"/u);
+    assert.match(source, /source:\s*"local"/u);
+    assert.match(source, /modelLabel:\s*"LOCAL"/u);
     assert.match(source, /message\.source === "local"[\s\S]*?"LOCAL"[\s\S]*?"RECONNECT"/u);
   }
 });
@@ -428,11 +431,11 @@ test("surface recovery failures remain reconnecting and persona modes keep isola
   assert.match(oracle, /subscribeArchiveAiRecoveryWake/);
   assert.match(oracle, /resumeArchiveApi/);
   assert.match(oracle, /firstFailedIndex[\s\S]*?forgetArchiveAiPending\(failedRecord\.requestId\)/);
-  assert.doesNotMatch(
+  assert.doesNotMatch(oracle, /searchRecoveryAbortRef[\s\S]{0,200}setSearchPending\(true\)/);
+  assert.match(
     oracle,
-    /searchRecoveryAbortRef[\s\S]{0,200}setSearchPending\(true\)/,
+    /if \(disposed \|\| searchAbortRef\.current \|\| !pendingRecords\.length\) return/,
   );
-  assert.match(oracle, /if \(disposed \|\| searchAbortRef\.current \|\| !pendingRecords\.length\) return/);
   assert.match(oracle, /const searchAbortRef[\s\S]*?const searchRecoveryAbortRef/);
   assert.match(oracle, /<ArchiveRoleplay[\s\S]*?active=\{active && surface === "roleplay"\}/);
   assert.match(roleplay, /subscribeArchiveAiRecoveryWake/);
@@ -440,7 +443,10 @@ test("surface recovery failures remain reconnecting and persona modes keep isola
     roleplay,
     /firstFailedIndex[\s\S]*?forgetArchiveAiPending\(failedRecord\.requestId\)[\s\S]*?setPendingKey\(foregroundPendingKeyRef\.current\)/,
   );
-  assert.match(roleplay, /if \(disposed \|\| abortRef\.current \|\| !pendingRecords\.length\) return/);
+  assert.match(
+    roleplay,
+    /if \(disposed \|\| abortRef\.current \|\| !pendingRecords\.length\) return/,
+  );
   assert.match(roleplay, /const recoveryRequestIdRef[\s\S]*?const foregroundPendingKeyRef/);
   assert.match(
     roleplay,
@@ -448,9 +454,15 @@ test("surface recovery failures remain reconnecting and persona modes keep isola
   );
   assert.match(roleplay, /stopForegroundResponse\(true\);[\s\S]*?setCharacterId/);
   assert.match(roleplay, /stopForegroundResponse\(true\);[\s\S]*?setMode/);
-  assert.match(roleplay, /function sessionKey\(characterId:[\s\S]*?mode:[\s\S]*?`\$\{characterId\}:\$\{mode\}`/);
+  assert.match(
+    roleplay,
+    /function sessionKey\(characterId:[\s\S]*?mode:[\s\S]*?`\$\{characterId\}:\$\{mode\}`/,
+  );
   assert.match(roleplay, /viewportBySessionRef\.current\[activeSessionKey\]/);
-  assert.match(roleplay, /useLayoutEffect\(\(\) => \{[\s\S]*?if \(!active\) return;[\s\S]*?viewportBySessionRef/);
+  assert.match(
+    roleplay,
+    /useLayoutEffect\(\(\) => \{[\s\S]*?if \(!active\) return;[\s\S]*?viewportBySessionRef/,
+  );
   assert.match(roleplay, /contextId: keyAtRequest/);
 });
 

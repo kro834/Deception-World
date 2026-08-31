@@ -16,6 +16,7 @@ import { readArchiveRequestIdentity } from "@/lib/archive-ai-crypto.server";
 import { archiveAiApiKey } from "@/lib/archive-ai-credentials.server";
 import { logArchiveAiEvent } from "@/lib/archive-ai-observability.server";
 import { cancelOpenAiBackgroundResponse } from "@/lib/archive-openai-transport.server";
+import { ARCHIVE_AI_REQUEST_ID_PATTERN } from "@/lib/archive-ai-request";
 import { assertSameSiteRequest } from "@/lib/auth/isolation.server";
 import {
   isAllowedArchiveBrowserRequest,
