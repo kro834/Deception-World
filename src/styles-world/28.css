@@ -141,23 +141,33 @@
 
 /* Product-like controls: clear grouping, generous hit targets, quiet chrome. */
 .rider-tabs.liquid-swipe-tabs,
-.world-column-tabs,
-.world-column-dialog-tabs,
-.manager-archive-tabs {
+.world-column-tabs.liquid-swipe-tabs,
+.world-column-dialog-tabs.liquid-swipe-tabs,
+.manager-archive-tabs.liquid-swipe-tabs {
+  --liquid-shell-radius: var(--ui-radius-md);
+  --liquid-control-inset: 6px;
+  --liquid-control-radius: calc(var(--liquid-shell-radius) - var(--liquid-control-inset));
   gap: 4px;
   padding: 6px;
   border: 1px solid var(--ui-hairline);
-  border-radius: var(--ui-radius-md);
+  border-radius: var(--liquid-shell-radius);
   background: rgba(255, 255, 255, 0.035);
   box-shadow: none;
 }
 
+.rider-tabs.liquid-swipe-tabs > .liquid-selection-lens,
+.world-column-tabs.liquid-swipe-tabs > .liquid-selection-lens,
+.world-column-dialog-tabs.liquid-swipe-tabs > .liquid-selection-lens,
+.manager-archive-tabs.liquid-swipe-tabs > .liquid-selection-lens {
+  border-radius: var(--liquid-control-radius);
+}
+
 .rider-tabs.liquid-swipe-tabs > button[role="tab"],
-.world-column-tabs > button[role="tab"],
-.world-column-dialog-tabs > button[role="tab"],
-.manager-archive-tabs > button[role="tab"] {
+.world-column-tabs.liquid-swipe-tabs > button[role="tab"],
+.world-column-dialog-tabs.liquid-swipe-tabs > button[role="tab"],
+.manager-archive-tabs.liquid-swipe-tabs > button[role="tab"] {
   min-height: var(--ui-control-height);
-  border-radius: var(--ui-radius-sm);
+  border-radius: var(--liquid-control-radius);
 }
 
 .rider-tabs span,
@@ -273,9 +283,11 @@
   }
 
   .rider-tabs.liquid-swipe-tabs,
-  .world-column-tabs,
-  .manager-archive-tabs {
-    border-radius: 16px;
+  .world-column-tabs.liquid-swipe-tabs,
+  .manager-archive-tabs.liquid-swipe-tabs {
+    --liquid-shell-radius: 16px;
+    --liquid-control-radius: calc(var(--liquid-shell-radius) - var(--liquid-control-inset));
+    border-radius: var(--liquid-shell-radius);
   }
 
   .story-copy p,
