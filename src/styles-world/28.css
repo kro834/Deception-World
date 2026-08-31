@@ -144,9 +144,11 @@
 .world-column-tabs.liquid-swipe-tabs,
 .world-column-dialog-tabs.liquid-swipe-tabs,
 .manager-archive-tabs.liquid-swipe-tabs {
-  --liquid-shell-radius: var(--ui-radius-md);
+  /* A fully rounded capsule keeps the shell, moving lens, and tab controls on
+     the same oval silhouette regardless of their responsive height. */
+  --liquid-shell-radius: 999px;
   --liquid-control-inset: 6px;
-  --liquid-control-radius: calc(var(--liquid-shell-radius) - var(--liquid-control-inset));
+  --liquid-control-radius: 999px;
   gap: 4px;
   padding: 6px;
   border: 1px solid var(--ui-hairline);
@@ -285,8 +287,8 @@
   .rider-tabs.liquid-swipe-tabs,
   .world-column-tabs.liquid-swipe-tabs,
   .manager-archive-tabs.liquid-swipe-tabs {
-    --liquid-shell-radius: 16px;
-    --liquid-control-radius: calc(var(--liquid-shell-radius) - var(--liquid-control-inset));
+    --liquid-shell-radius: 999px;
+    --liquid-control-radius: 999px;
     border-radius: var(--liquid-shell-radius);
   }
 
