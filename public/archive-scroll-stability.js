@@ -3,6 +3,32 @@
 
   if (document.documentElement.dataset.embeddedArchive !== "true") return;
 
+  const editableSelector =
+    'input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]';
+  const blockClipboardAction = (event) => event.preventDefault();
+  const blockContentSelection = (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest(editableSelector)) {
+      event.preventDefault();
+    }
+  };
+  const blockClipboardShortcut = (event) => {
+    const key = event.key.toLowerCase();
+    const isClipboardShortcut =
+      ((event.ctrlKey || event.metaKey) && ["c", "x", "v"].includes(key)) ||
+      (key === "insert" && (event.ctrlKey || event.shiftKey));
+    if (!isClipboardShortcut) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  document.addEventListener("copy", blockClipboardAction, true);
+  document.addEventListener("cut", blockClipboardAction, true);
+  document.addEventListener("paste", blockClipboardAction, true);
+  document.addEventListener("contextmenu", blockClipboardAction, true);
+  document.addEventListener("dragstart", blockClipboardAction, true);
+  document.addEventListener("selectstart", blockContentSelection, true);
+  document.addEventListener("keydown", blockClipboardShortcut, true);
+
   const rootSelector = '[id$="saga-forms-performance-v5"]';
   const lockProperties = ["overflow", "overflow-x", "overflow-y", "touch-action"];
   let observer;

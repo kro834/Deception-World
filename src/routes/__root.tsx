@@ -4,6 +4,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
+import { ContentProtection } from "@/components/content-protection";
 import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
 
@@ -66,6 +67,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body className="antialiased">
+        <ContentProtection />
         <LegacyDataRetirement />
         <PreviewHostBridge />
         <AuthProvider>
