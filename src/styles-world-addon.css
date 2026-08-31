@@ -2193,3 +2193,104 @@ button.manager-portrait-frame:focus-visible {
     backdrop-filter: none;
   }
 }
+
+/* Character dossiers use a dedicated near-future type system. Oxanium gives
+   archive labels and numerals a technical silhouette, while Zen Kaku keeps
+   Japanese names and section titles crisp at iPhone sizes. Long-form prose
+   deliberately stays on the quieter site body face for reading comfort. */
+.manager-page {
+  --dossier-font-interface: "Oxanium", "Avenir Next", "Helvetica Neue", sans-serif;
+  --dossier-font-display: "Oxanium", "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic UI", sans-serif;
+  --dossier-font-jp: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
+    sans-serif;
+}
+
+.manager-page .manager-topbar,
+.manager-page .manager-back,
+.manager-page .manager-file-number,
+.manager-page .manager-eyebrow,
+.manager-page .manager-numeral,
+.manager-page .manager-portrait-meta,
+.manager-page .manager-section-index,
+.manager-page .manager-section-nav,
+.manager-page .manager-scroll-cue,
+.manager-page .manager-facts dt,
+.manager-page .manager-rider-stats dt,
+.manager-page .rider-archive-civilian > figcaption > p:first-child,
+.manager-page .rider-archive-civilian > figcaption > small,
+.manager-page .rider-nightmare-card-copy > p,
+.manager-page .rider-nightmare-card-copy > small {
+  font-family: var(--dossier-font-interface);
+  font-variant-numeric: tabular-nums;
+}
+
+.manager-page .manager-introduction h1,
+.manager-page:not(.is-sovereign) .manager-introduction h1,
+.manager-page .manager-section-index span,
+.manager-page .manager-copy-heading > span,
+.manager-page .manager-copy-heading h2,
+.manager-page:not(.is-sovereign) .manager-copy-heading h2,
+.manager-page .rider-archive-civilian > figcaption > h2,
+.manager-page .rider-nightmare-card-copy h2,
+.manager-page .rider-partner-en-name {
+  font-family: var(--dossier-font-display);
+  font-feature-settings:
+    "palt" 1,
+    "kern" 1;
+}
+
+.manager-page .manager-display-name {
+  font-family: var(--dossier-font-jp);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.manager-page .manager-introduction h1 small {
+  font-family: var(--dossier-font-interface);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+}
+
+.manager-page .manager-title,
+.manager-page .manager-quotes q,
+.manager-page .manager-facts dd,
+.manager-page .manager-rider-stats dd,
+.manager-page .manager-section-nav a > b,
+.manager-page .manager-copy-heading > p,
+.manager-page .rider-partner-call {
+  font-family: var(--dossier-font-jp);
+  font-feature-settings:
+    "palt" 1,
+    "kern" 1;
+}
+
+.manager-page .manager-title {
+  font-weight: 500;
+  letter-spacing: 0.055em;
+}
+
+.manager-page .manager-quotes q {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.manager-page .manager-copy-heading h2,
+.manager-page:not(.is-sovereign) .manager-copy-heading h2 {
+  font-weight: 600;
+  letter-spacing: -0.018em;
+}
+
+.manager-page .manager-section-nav a > b {
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .manager-page .manager-display-name {
+    letter-spacing: -0.045em;
+  }
+
+  .manager-page .manager-introduction h1 small {
+    letter-spacing: 0.2em;
+  }
+}
