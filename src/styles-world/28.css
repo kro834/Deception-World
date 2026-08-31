@@ -157,6 +157,14 @@
   box-shadow: none;
 }
 
+/* The rider selector is a tall archive panel rather than a horizontal rail.
+   Keep its shell architectural while preserving the oval moving lens and
+   individual rider buttons requested for the Liquid Glass controls. */
+.rider-tabs.liquid-swipe-tabs {
+  --liquid-shell-radius: 40px;
+  --liquid-control-radius: 999px;
+}
+
 .rider-tabs.liquid-swipe-tabs > .liquid-selection-lens,
 .world-column-tabs.liquid-swipe-tabs > .liquid-selection-lens,
 .world-column-dialog-tabs.liquid-swipe-tabs > .liquid-selection-lens,
@@ -290,6 +298,10 @@
     --liquid-shell-radius: 999px;
     --liquid-control-radius: 999px;
     border-radius: var(--liquid-shell-radius);
+  }
+
+  .rider-tabs.liquid-swipe-tabs {
+    --liquid-shell-radius: 28px;
   }
 
   .story-copy p,
