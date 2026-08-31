@@ -187,8 +187,8 @@
 }
 
 .form-archive-switcher.liquid-swipe-tabs {
-  outline: 1px solid color-mix(in srgb, var(--future-hud-primary) 14%, transparent);
-  outline-offset: 3px;
+  outline: 0;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--future-hud-primary) 14%, transparent);
 }
 
 .form-archive-frame-status {

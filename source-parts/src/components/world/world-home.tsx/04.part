@@ -1,8 +1,3 @@
-      try {
-        dialog.showModal();
-      } catch {
-        /* already open */
-      }
     }
     if (!openedByKeyboard) dialog.focus({ preventScroll: true });
     cancelEpisodePickupScrollReset.current = settlePickupScroll(
@@ -407,3 +402,10 @@
           <div className="threat-copy">
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
+              SIX SIGNALS
+              <br />
+              ABOVE THE WORLD.
+            </h3>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
+          </div>
+          <div className="signal-column">

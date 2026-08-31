@@ -10,6 +10,9 @@ type Related = {
   en: string;
   form: string;
   image: string;
+  imageWebp: string;
+  imageWidth: number;
+  imageHeight: number;
   thumb: string;
   pos: string;
   accent: string;
@@ -28,6 +31,9 @@ const RELATED: Related[] = [
     en: "TERRA ALAIN",
     form: "EARTH FORM",
     image: "/character-terra.jpeg",
+    imageWebp: "/character-terra.webp",
+    imageWidth: 1470,
+    imageHeight: 1948,
     thumb: "/character-terra-thumb.jpeg",
     pos: "50% 12%",
     accent: "#69df74",
@@ -115,6 +121,9 @@ const RELATED: Related[] = [
     en: "LUNA ALAIN",
     form: "MOON FORM",
     image: "/character-luna.jpeg",
+    imageWebp: "/character-luna.webp",
+    imageWidth: 1028,
+    imageHeight: 1800,
     thumb: "/character-luna-thumb.jpeg",
     pos: "50% 12%",
     accent: "#c9d4ff",
@@ -201,7 +210,14 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
   useWorldMode();
   const person = RELATED.find((p) => p.id === id) ?? RELATED[0];
   return (
-    <main className="manager-page" style={{ ["--manager-accent" as string]: person.accent }}>
+    <main
+      className="manager-page related-character-page"
+      style={{
+        ["--manager-accent" as string]: person.accent,
+        ["--manager-accent-soft" as string]: person.accent,
+        ["--future-hud-primary" as string]: person.accent,
+      }}
+    >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
@@ -216,7 +232,11 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           <div className="manager-portrait-frame">
             <img
               src={person.image}
+              srcSet={person.imageWebp}
+              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
               alt={`${person.name}のキャラクタービジュアル`}
+              width={person.imageWidth}
+              height={person.imageHeight}
               style={{ objectPosition: person.pos, objectFit: "cover" }}
               loading="eager"
               decoding="async"
@@ -253,14 +273,26 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           </dl>
         </div>
       </section>
-      <section className="manager-dossier">
+      <section className="manager-dossier" aria-label={`${person.name}の人物資料`}>
         <div className="manager-section-index">
           <span>{person.code}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
+        <nav className="manager-section-nav" aria-label="人物資料の章">
+          {person.sections.map((section) => (
+            <a key={section.no} href={`#character-section-${section.no}`}>
+              <span>{section.no}</span>
+              <b>{section.kicker}</b>
+            </a>
+          ))}
+        </nav>
         <div className="manager-sections">
           {person.sections.map((s) => (
-            <article className="manager-copy-section" key={s.no}>
+            <article
+              className="manager-copy-section"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

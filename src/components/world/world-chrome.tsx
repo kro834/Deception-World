@@ -169,7 +169,7 @@ export function DossierTopbar({
           >
             <span>{returnLabel}</span>
             <i aria-hidden="true">
-              <UiVectorIcon kind="arrow-down-left" size={14} />
+              <UiVectorIcon kind="arrow-left" size={14} />
             </i>
           </GuardedLink>
           <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
@@ -184,7 +184,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "intelligence";
+  context?: "world" | "archive" | "movie" | "rexonance" | "extreme";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -425,9 +425,7 @@ export function SideMenuLayer({
                     ? "REXONANCE SAGA"
                     : context === "extreme"
                       ? "EXTREME SAGA"
-                      : context === "intelligence"
-                        ? "ARCHIVE INTELLIGENCE"
-                        : "DECEPTION WORLD"}
+                      : "DECEPTION WORLD"}
             </b>
           </div>
           <button

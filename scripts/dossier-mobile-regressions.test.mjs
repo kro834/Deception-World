@@ -53,6 +53,12 @@ test("Cipher uses the supplied dedicated thumbnail without replacing its dossier
 test("detail routes use per-location restoration without overwriting the world scroll", () => {
   assert.match(router, /scrollRestoration:\s*true/);
   assert.match(loadGate, /useLayoutEffect\(\(\) => \{[\s\S]*?resetDetailScroll/);
+  assert.match(loadGate, /const pathnameChanged = previousPathname\.current !== pathname/);
+  assert.match(loadGate, /const isDossierSectionHash = \/\^#\?character-section-\//);
+  assert.match(
+    loadGate,
+    /DETAIL_ROUTE\.test\(pathname\) && pathnameChanged && !isDossierSectionHash/,
+  );
   assert.match(loadGate, /router snapshots the outgoing world's position/);
   assert.match(loadGate, /holdRouteScrollMotion/);
   assert.match(loadGate, /dataset\.routeScrollSettling = "true"/);

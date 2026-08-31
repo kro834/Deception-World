@@ -1,3 +1,7 @@
+    { dt: "STATUS", dd: "ACCESS GRANTED" },
+  ],
+  sections: [
+    {
       no: "01",
       kicker: "AUTHORITY / COMBAT MATH",
       title: "戦場は、解を出すための計算空間になる。",
@@ -77,6 +81,7 @@ export const REEMU: Profile = {
   name: "リームー",
   title: "責任から逃れる観測者",
   image: "/manager-reemu.jpeg",
+  imageWebp: "/manager-reemu.webp",
   pos: "50% 14%",
   accent: "#d7ab51",
   quotes: [
@@ -165,6 +170,7 @@ export const ZEUS: Profile = {
   name: "ゼウス",
   title: "主権を継いだ六詠第一位",
   image: "/manager-zeus-detail.jpeg?v=20260823-2",
+  imageWebp: "/manager-zeus-detail.webp",
   pos: "50% 42%",
   accent: "#e6c58b",
   sovereign: true,
@@ -216,6 +222,7 @@ export const OPUS: Profile = {
   name: "オパス",
   title: "祈願と代価を処理する管理人",
   image: "/manager-opus.jpeg",
+  imageWebp: "/manager-opus.webp",
   pos: "50% 12%",
   accent: "#d54cff",
   quotes: [

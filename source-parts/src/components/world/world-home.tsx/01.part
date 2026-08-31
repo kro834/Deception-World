@@ -13,7 +13,7 @@ import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
   {
-    src: "/deception-world-poster.jpeg",
+    src: "/deception-world-poster.webp",
     pos: "50% 50%",
     fit: "cover",
     alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
@@ -407,3 +407,4 @@ const EPISODES: EpisodeRecord[] = [
   {
     no: "02",
     title: "LEGENDS",
+    src: "/episode-02-legends.jpeg",

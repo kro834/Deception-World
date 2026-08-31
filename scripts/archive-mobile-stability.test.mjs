@@ -121,8 +121,8 @@ test("embedded archives use one root scroller and recover stale locks throughout
   assert.match(scrollStability, /saga-archive:ready/);
 });
 
-test("production builds regenerate embedded archives without blocking the site on AI secrets", () => {
+test("production builds regenerate embedded archives and expose the public release probe", () => {
   assert.equal(packageJson.scripts["archive:embed"], "node scripts/build-embedded-archives.mjs");
   assert.equal(packageJson.scripts.prebuild, "npm run archive:embed");
-  assert.equal(packageJson.scripts["verify:archive-ai-env"], "node scripts/assert-production-ai-env.mjs");
+  assert.equal(packageJson.scripts["verify:public"], "node scripts/verify-public-deployment.mjs");
 });

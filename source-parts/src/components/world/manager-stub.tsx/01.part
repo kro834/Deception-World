@@ -35,6 +35,7 @@ type Profile = {
   name: string;
   title: string;
   image: string;
+  imageWebp: string;
   pos: string;
   accent: string;
   quotes: string[];
@@ -353,3 +354,9 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               <div className="rexonance-weapon-grid">
                 {weaponGallery.map((weapon, index) => (
                   <figure
+                    key={weapon.name}
+                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
+                  >
+                    <div>
+                      <img
+                        src={weapon.img}

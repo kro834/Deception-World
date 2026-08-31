@@ -1,6 +1,3 @@
-      syncAmbientPause();
-    };
-    const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
       handoffActive =
         typeof detail?.active === "boolean"
@@ -407,3 +404,8 @@
     setEpisodePickup(index);
     cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }

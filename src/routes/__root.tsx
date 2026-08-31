@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import appCss from "../styles.css?url";
@@ -65,6 +66,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body className="antialiased">
+        <LegacyDataRetirement />
         <PreviewHostBridge />
         <AuthProvider>
           <LoadGateProvider>

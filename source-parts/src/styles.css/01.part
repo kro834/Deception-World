@@ -61,6 +61,7 @@
 }
 
 .form-archive-switcher.liquid-swipe-tabs {
+  --liquid-shell-radius: 999px;
   position: fixed;
   z-index: 54;
   top: max(12px, calc(env(safe-area-inset-top) + 8px));
@@ -1549,8 +1550,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   background-size: 220% 100%;
   background-position: 120% 0;
   mix-blend-mode: overlay;
-  -webkit-mask-image: url("/logo-title.jpg");
-  mask-image: url("/logo-title.jpg");
+  -webkit-mask-image: url("/logo-title.webp");
+  mask-image: url("/logo-title.webp");
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -1962,4 +1963,3 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     opacity 0.25s ease 0.12s,
     color 160ms ease,
     border-color 160ms ease,
-    background 160ms ease,

@@ -35,6 +35,7 @@ type Profile = {
   name: string;
   title: string;
   image: string;
+  imageWebp: string;
   pos: string;
   accent: string;
   quotes: string[];
@@ -446,6 +447,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
       style={{
         ["--manager-accent" as string]: profile.accent,
         ["--manager-accent-soft" as string]: profile.accent,
+        ["--future-hud-primary" as string]: profile.accent,
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
@@ -470,6 +472,8 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <div className="manager-portrait-frame">
             <img
               src={profile.image}
+              srcSet={profile.imageWebp}
+              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
               alt={`${profile.name}のキャラクタービジュアル`}
               style={{ objectPosition: profile.pos, objectFit: "cover" }}
               loading="eager"
@@ -568,9 +572,21 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <span>{profile.numeral}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
+        <nav className="manager-section-nav" aria-label="人物資料の章">
+          {profile.sections.map((section) => (
+            <a key={section.no} href={`#character-section-${section.no}`}>
+              <span>{section.no}</span>
+              <b>{section.kicker}</b>
+            </a>
+          ))}
+        </nav>
         <div className="manager-sections">
           {profile.sections.map((s) => (
-            <article className="manager-copy-section" key={s.no}>
+            <article
+              className="manager-copy-section"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -601,6 +617,7 @@ export const REX_LOI: Profile = {
   name: "レックス・ロワ",
   title: "真の選択肢を残す管理人",
   image: "/manager-rex-loi.jpeg",
+  imageWebp: "/manager-rex-loi.webp",
   pos: "50% 0%",
   accent: "#67d8ff",
   quotes: [
@@ -693,6 +710,7 @@ export const SHUZA: Profile = {
   name: "シュザ",
   title: "最上位の戦闘演算",
   image: "/manager-shuza.jpeg",
+  imageWebp: "/manager-shuza.webp",
   pos: "50% 16%",
   accent: "#f14a60",
   quotes: [
@@ -787,6 +805,7 @@ export const REEMU: Profile = {
   name: "リームー",
   title: "責任から逃れる観測者",
   image: "/manager-reemu.jpeg",
+  imageWebp: "/manager-reemu.webp",
   pos: "50% 14%",
   accent: "#d7ab51",
   quotes: [
@@ -875,6 +894,7 @@ export const ZEUS: Profile = {
   name: "ゼウス",
   title: "主権を継いだ六詠第一位",
   image: "/manager-zeus-detail.jpeg?v=20260823-2",
+  imageWebp: "/manager-zeus-detail.webp",
   pos: "50% 42%",
   accent: "#e6c58b",
   sovereign: true,
@@ -926,6 +946,7 @@ export const OPUS: Profile = {
   name: "オパス",
   title: "祈願と代価を処理する管理人",
   image: "/manager-opus.jpeg",
+  imageWebp: "/manager-opus.webp",
   pos: "50% 12%",
   accent: "#d54cff",
   quotes: [

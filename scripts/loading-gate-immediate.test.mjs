@@ -2,15 +2,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
-const title = readFileSync(
-  new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url),
-  "utf8",
-);
-const transitionCss = readFileSync(
-  new URL("../src/styles-route-transitions.css", import.meta.url),
-  "utf8",
-);
+const readSource = (path) =>
+  readFileSync(new URL(path, import.meta.url), "utf8").replaceAll("\r\n", "\n");
+
+const gate = readSource("../src/components/load-gate.tsx");
+const title = readSource("../src/components/cinematic/title-sequence.tsx");
+const transitionCss = readSource("../src/styles-route-transitions.css");
 
 test("covered opening navigation is selected before immediate routes while rider transitions stay scoped", () => {
   const goStart = gate.indexOf("const go = useCallback");
@@ -20,7 +17,7 @@ test("covered opening navigation is selected before immediate routes while rider
   const goBlock = gate.slice(goStart, goEnd);
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if \(\s*!isArchiveTransition &&\s*!isIntelligenceTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{/,
   );
   assert.notEqual(coveredIndex, -1, "go must handle a shared transition before routing");
   assert.notEqual(directIndex, -1, "go must retain the immediate-route branch");
@@ -31,11 +28,10 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.match(goBlock, /async\s*\(\s*\{[^}]*\btransitionCovered\b[^}]*\}\s*:\s*GoOptions/);
 
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
-  assert.match(gate, /const isIntelligenceTransition = pathname !== to && to === "\/intelligence"/);
   assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isIntelligenceTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
   );
   const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");

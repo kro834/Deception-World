@@ -13,7 +13,7 @@ import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
   {
-    src: "/deception-world-poster.jpeg",
+    src: "/deception-world-poster.webp",
     pos: "50% 50%",
     fit: "cover",
     alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
@@ -2017,6 +2017,8 @@ export function WorldHome() {
                   <img
                     key={r.id}
                     src={r.img}
+                    srcSet={r.img.replace(/\.jpe?g$/i, ".webp")}
+                    sizes="(max-width: 760px) 92vw, (max-width: 1120px) 48vw, 560px"
                     alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
                     className={i === riderTab ? "is-on" : ""}
                     style={{ objectPosition: r.pos }}
@@ -2206,7 +2208,15 @@ export function WorldHome() {
       <section className="finale-section" data-performance-region>
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
-            <img src="/deception-world-poster.jpeg" alt="" loading="lazy" decoding="async" />
+            <img
+              src="/deception-world-poster.webp"
+              alt=""
+              width={1024}
+              height={1536}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+            />
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>

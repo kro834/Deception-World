@@ -1,12 +1,3 @@
-          {
-            name: "SPECIAL",
-            body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
-          },
-        ],
-        arsenal: [
-          {
-            name: "サーパスアタノール",
-            body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。",
           },
           {
             name: "デアグローブ／デアブーツ",
@@ -330,3 +321,16 @@
         ],
         finishers: [{ name: "クリティカルストライク", body: "仮面ライダーアルゲノムの必殺技。" }],
       },
+    ],
+    civilian: {
+      name: "紅城真守",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。紅魔館の執事。",
+      cv: "石川界人",
+    },
+  },
+  {
+    id: "over-zeztz",
+    no: "07",
+    name: "OVER ZEZTZ",
+    ja: "オーバーゼッツ",

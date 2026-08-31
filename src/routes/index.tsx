@@ -5,7 +5,13 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     links: [
-      { rel: "preload", as: "image", href: "/logo-title.jpg" },
+      {
+        rel: "preload",
+        as: "image",
+        type: "image/webp",
+        href: "/logo-title.webp",
+        fetchPriority: "high",
+      },
       { rel: "preload", as: "image", href: "/atmosphere-poster.jpg" },
     ],
   }),

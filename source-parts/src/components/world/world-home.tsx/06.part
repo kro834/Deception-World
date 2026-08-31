@@ -1,10 +1,3 @@
-                <span />
-                <b>{rider.name}</b>
-              </div>
-              <SlideOpenControl
-                className="rider-dossier-open"
-                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
-                label="個別資料"
                 opensDialog={false}
                 onOpen={() => {
                   void go({
@@ -161,7 +154,15 @@
       <section className="finale-section" data-performance-region>
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
-            <img src="/deception-world-poster.jpeg" alt="" loading="lazy" decoding="async" />
+            <img
+              src="/deception-world-poster.webp"
+              alt=""
+              width={1024}
+              height={1536}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+            />
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>

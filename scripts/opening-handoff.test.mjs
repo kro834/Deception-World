@@ -2,19 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
-const title = readFileSync(
-  new URL("../src/components/cinematic/title-sequence.tsx", import.meta.url),
-  "utf8",
-);
-const world = readFileSync(
-  new URL("../src/components/world/world-home.tsx", import.meta.url),
-  "utf8",
-);
-const transitionCss = readFileSync(
-  new URL("../src/styles-route-transitions.css", import.meta.url),
-  "utf8",
-);
+const readSource = (path) =>
+  readFileSync(new URL(path, import.meta.url), "utf8").replaceAll("\r\n", "\n");
+
+const gate = readSource("../src/components/load-gate.tsx");
+const title = readSource("../src/components/cinematic/title-sequence.tsx");
+const world = readSource("../src/components/world/world-home.tsx");
+const transitionCss = readSource("../src/styles-route-transitions.css");
 
 function sliceBetween(source, start, end, label) {
   const startIndex = source.indexOf(start);
@@ -108,7 +102,7 @@ test("covered navigation waits for destination readiness and is cancellation-saf
   const goBlock = sliceBetween(gate, "const go = useCallback", "\n\n  const api = useMemo", "go");
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isIntelligenceTransition\s*&&\s*!isZeusTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
+    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
   );
   assert.notEqual(coveredIndex, -1, "go must have a transitionCovered branch");
   assert.notEqual(directIndex, -1, "go must retain the ordinary direct-navigation branch");

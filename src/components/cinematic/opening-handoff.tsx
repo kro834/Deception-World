@@ -49,7 +49,7 @@ type OpeningHandoffLayerProps = {
 const NORMAL_DURATION_MS = 1180;
 const ECONOMY_DURATION_MS = 850;
 const REDUCED_DURATION_MS = 250;
-const DEFAULT_LOGO_SRC = "/logo-title.jpg";
+const DEFAULT_LOGO_SRC = "/logo-title.webp";
 const DEFAULT_VIDEO_SRC = "/atmosphere.mp4";
 const DEFAULT_VIDEO_POSTER = "/atmosphere-poster.jpg";
 
@@ -651,6 +651,9 @@ export function OpeningHandoffLayer({
         <img
           src={source.logoSrc ?? DEFAULT_LOGO_SRC}
           alt=""
+          width={1200}
+          height={800}
+          loading="eager"
           decoding="async"
           fetchPriority="high"
         />

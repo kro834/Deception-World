@@ -27,7 +27,7 @@ type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "archive" | "intelligence" | "zeus" | RiderTransitionVariant;
+  variant: "archive" | "zeus" | RiderTransitionVariant;
   phase: "covering" | "revealing";
 };
 
@@ -432,7 +432,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       }
       if (busy.current) return;
       const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
-      const isIntelligenceTransition = pathname !== to && to === "/intelligence";
       const isZeusTransition = to === "/managers/zeus";
       const isDreamTransition =
         pathname !== to && (to === "/dream-chapter" || transition === "dream");
@@ -443,7 +442,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const riderTransitionVariant = diveVariant ?? cutInVariant;
       if (
         !isArchiveTransition &&
-        !isIntelligenceTransition &&
         !isZeusTransition &&
         !riderTransitionVariant
       ) {
@@ -466,42 +464,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const isCurrent = () => transitionId.current === requestId;
       const startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      if (isIntelligenceTransition && !isArchiveTransition) {
-        const releaseScrollMotion = holdRouteScrollMotion();
-        const timings = reduceMotion ? { cover: 90, reveal: 100 } : { cover: 260, reveal: 300 };
-        document.documentElement.dataset.loading = "true";
-        setGate({ active: true, percent: 100, variant: "intelligence", phase: "covering" });
-        try {
-          if (assets.length) {
-            void preloadAssets(assets, () => undefined).catch(() => undefined);
-          }
-          await Promise.race([
-            router.preloadRoute({ to: to as never }).catch(() => undefined),
-            wait(1600),
-          ]);
-          const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-          if (coverTimeLeft > 0) await wait(coverTimeLeft);
-          if (!isCurrent()) return;
-          await navigate({ to: to as never, hash });
-          if (!isCurrent()) return;
-          setGate({
-            active: true,
-            percent: 100,
-            variant: "intelligence",
-            phase: "revealing",
-          });
-          await wait(timings.reveal);
-        } finally {
-          window.setTimeout(releaseScrollMotion, 360);
-          if (isCurrent()) {
-            document.documentElement.removeAttribute("data-loading");
-            setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
-            busy.current = false;
-          }
-        }
-        return;
-      }
 
       if (riderTransitionVariant && !isArchiveTransition) {
         const releaseScrollMotion = holdRouteScrollMotion();
@@ -644,28 +606,6 @@ function LoadOverlay({
   phase: GateState["phase"];
 }) {
   if (!active) return null;
-  if (variant === "intelligence") {
-    return (
-      <div
-        className={`load-gate archive-ai-route-transition is-${phase}`}
-        role="status"
-        aria-live="polite"
-        aria-busy={phase === "covering"}
-        aria-label={
-          phase === "revealing"
-            ? "Archive Intelligenceを開きました"
-            : "Archive Intelligenceへ接続中"
-        }
-      >
-        <span className="archive-ai-route-scan" aria-hidden="true" />
-        <span className="archive-ai-route-core" aria-hidden="true">
-          <i>AI</i>
-          <b>ARCHIVE INTELLIGENCE</b>
-          <small>{phase === "revealing" ? "CHANNEL READY" : "CONNECTING"}</small>
-        </span>
-      </div>
-    );
-  }
   const isRiderDive =
     variant === "saga" ||
     variant === "realm" ||
@@ -986,10 +926,14 @@ export function GuardedLink({
 export function AppGuards() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const locationHash = useRouterState({ select: (state) => state.location.hash });
+  const previousPathname = useRef<string | null>(null);
 
   useLayoutEffect(() => {
+    const pathnameChanged = previousPathname.current !== pathname;
+    previousPathname.current = pathname;
+    const isDossierSectionHash = /^#?character-section-/.test(locationHash);
     const resetRouteTop =
-      DETAIL_ROUTE.test(pathname) ||
+      (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash) ||
       (pathname === "/world" && (!locationHash || locationHash === "top"));
     if (!resetRouteTop) return;
     const releaseScrollMotion = holdRouteScrollMotion();

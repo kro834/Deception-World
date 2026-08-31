@@ -63,7 +63,7 @@ html[data-rail-lock] .world-column-dialog-card {
   transform-origin: 50% 6%;
 }
 
-.manager-portrait-frame {
+button.manager-portrait-frame {
   cursor: zoom-in;
   border: 0;
   padding: 0;
@@ -73,7 +73,7 @@ html[data-rail-lock] .world-column-dialog-card {
   text-align: left;
 }
 
-.manager-portrait-frame.is-closeup {
+button.manager-portrait-frame.is-closeup {
   cursor: zoom-out;
 }
 
@@ -89,10 +89,10 @@ html[data-rail-lock] .world-column-dialog-card {
 .lejas-face {
   opacity: 0;
 }
-.manager-portrait-frame.is-closeup .lejas-face {
+button.manager-portrait-frame.is-closeup .lejas-face {
   opacity: 1;
 }
-.manager-portrait-frame.is-closeup .lejas-wide {
+button.manager-portrait-frame.is-closeup .lejas-wide {
   opacity: 0;
 }
 
@@ -386,6 +386,7 @@ br.tab-br {
 .dossier-jump span {
   display: grid;
   min-width: 108px;
+  min-height: 52px;
   padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
@@ -411,9 +412,9 @@ br.tab-br {
   font-size: 13px;
   font-weight: 600;
 }
-.dossier-jump a:focus,
 .dossier-jump a:focus-visible {
-  outline: none;
+  outline: 2px solid color-mix(in srgb, var(--manager-accent, var(--cyan)) 72%, white);
+  outline-offset: 3px;
 }
 
 .manager-display-name b {
@@ -890,3 +891,206 @@ br.tab-br {
     letter-spacing: -0.035em;
     line-height: 1.08;
   }
+  .form-pickup-copy h2 span {
+    margin-bottom: 0.34em;
+    line-height: 1.35;
+  }
+  .form-pickup-heading h2 {
+    font-size: clamp(34px, 4.5vw, 50px);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+  .form-pickup-heading h2 > span {
+    margin-bottom: 0.2em;
+  }
+  .form-pickup-overview > div > p,
+  .form-pickup-sections p,
+  .rider-description {
+    line-break: strict;
+    text-wrap: pretty;
+  }
+}
+
+@media (max-width: 760px) {
+  .manager-hero {
+    padding-right: max(18px, env(safe-area-inset-right));
+    padding-left: max(18px, env(safe-area-inset-left));
+  }
+
+  .manager-dossier,
+  .manager-rider-record,
+  .manager-pagination {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+
+  .form-pickup-card,
+  .form-pickup-layout,
+  .form-pickup-stats,
+  .form-pickup-gallery,
+  .rider-form-gallery,
+  .rider-archive-identity-records.has-nightmare {
+    grid-template-columns: 1fr;
+  }
+
+  .form-pickup-stats > div {
+    border-right: 0;
+  }
+
+  .form-pickup-stats > div:nth-last-child(-n + 3) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .form-pickup-stats > div:last-child {
+    border-bottom: 0;
+  }
+}
+
+.export-page {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 48px 24px;
+  background: #05070c;
+  color: #f4f6fb;
+  text-align: center;
+  font-family: "Noto Sans JP", sans-serif;
+}
+.export-page p {
+  margin: 0;
+  letter-spacing: 0.42em;
+  font-size: 10px;
+  color: rgba(244, 246, 251, 0.42);
+}
+.export-page h1 {
+  margin: 0;
+  font-family: Cinzel, serif;
+  font-size: 28px;
+  font-weight: 600;
+}
+.export-page b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.export-page-btn {
+  display: inline-flex;
+  min-width: 220px;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+.export-page-alt,
+.export-page small {
+  color: rgba(244, 246, 251, 0.48);
+  font-size: 12px;
+}
+.export-page-alt {
+  text-decoration: underline;
+}
+
+/* ── iOS-style slide-to-open controls ───────────────────────────── */
+
+.ios-slide-open {
+  --slide-accent: var(--manager-accent, var(--archive-accent, #67d8ff));
+  --slide-thumb-size: 50px;
+  position: absolute;
+  z-index: 6;
+  display: block;
+  width: min(216px, calc(100% - 36px));
+  height: 58px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 4px;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: auto;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% -20%, rgba(255, 255, 255, 0.28), transparent 44%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--slide-accent) 17%, rgba(7, 12, 20, 0.9)),
+      rgba(7, 10, 17, 0.82)
+    );
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 28%, transparent),
+    0 16px 38px rgba(0, 0, 0, 0.42);
+  cursor: ew-resize;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  scale: 1;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    scale 0.35s var(--glass-spring, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.form-pickup-plus.ios-slide-open {
+  right: 18px;
+  bottom: 18px;
+  -webkit-backdrop-filter: blur(11px) saturate(142%);
+  backdrop-filter: blur(11px) saturate(142%);
+}
+
+.form-pickup-plus.ios-slide-open .ios-slide-open-thumb {
+  -webkit-backdrop-filter: blur(8px) saturate(148%);
+  backdrop-filter: blur(8px) saturate(148%);
+}
+
+.rider-nightmare-pickup-button.ios-slide-open {
+  --slide-accent: #e71a9c;
+  position: relative;
+  right: auto;
+  bottom: auto;
+  align-self: flex-end;
+  margin-top: auto;
+  margin-left: auto;
+}
+
+.world-column-slide-open.ios-slide-open {
+  --slide-accent: var(--cyan, #67d8ff);
+  position: relative;
+  width: min(100%, 300px);
+  margin: 12px 0 0 auto;
+}
+
+/* Every column contributes to the number/title/body track even while hidden.
+   The largest item therefore reserves each region at the current viewport,
+   and switching text can never move the slider or resize the outer frame. */
+.world-column-number-stack,
+.world-column-heading-stack,
+.world-column-summary-stack,
+.world-column-dialog-copy-stack {
+  display: grid;
+  min-width: 0;
+}
+
+.world-column-dialog-copy-pane {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+.world-column-dialog-copy-pane.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: worldColumnDialogCopyIn 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

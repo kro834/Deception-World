@@ -1,4 +1,3 @@
-    src: "/episode-02-legends.jpeg",
     pos: "50% 50%",
     alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル",
     pickups: [
@@ -407,3 +406,6 @@ export function WorldHome() {
     };
     const handleVisibilityChange = () => {
       handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    const handleOpeningHandoff = (event: Event) => {

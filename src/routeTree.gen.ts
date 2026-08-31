@@ -15,14 +15,11 @@ import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
-import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
-import { Route as ApiArchiveIntelligenceRouteImport } from './routes/api/archive-intelligence'
-import { Route as ApiArchiveSearchRouteImport } from './routes/api/archive-search'
 import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
@@ -34,9 +31,6 @@ import { Route as ManagersShuzaRouteImport } from './routes/managers/shuza'
 import { Route as ManagersZeusRouteImport } from './routes/managers/zeus'
 import { Route as RidersIdRouteImport } from './routes/riders/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiInternalArchiveAiHealthRouteImport } from './routes/api/internal/archive-ai-health'
-import { Route as ApiInternalArchiveAiMaintenanceRouteImport } from './routes/api/internal/archive-ai-maintenance'
-import { Route as ApiArchiveAiRequestsRequestIdRouteImport } from './routes/api/archive-ai/requests/$requestId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -68,11 +62,6 @@ const FormArchiveRoute = FormArchiveRouteImport.update({
   path: '/form-archive',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IntelligenceRoute = IntelligenceRouteImport.update({
-  id: '/intelligence',
-  path: '/intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -96,16 +85,6 @@ const RidersRoute = RidersRouteImport.update({
 const WorldRoute = WorldRouteImport.update({
   id: '/world',
   path: '/world',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiArchiveIntelligenceRoute = ApiArchiveIntelligenceRouteImport.update({
-  id: '/api/archive-intelligence',
-  path: '/api/archive-intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiArchiveSearchRoute = ApiArchiveSearchRouteImport.update({
-  id: '/api/archive-search',
-  path: '/api/archive-search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiExportRoute = ApiExportRouteImport.update({
@@ -163,24 +142,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiInternalArchiveAiHealthRoute =
-  ApiInternalArchiveAiHealthRouteImport.update({
-    id: '/api/internal/archive-ai-health',
-    path: '/api/internal/archive-ai-health',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiInternalArchiveAiMaintenanceRoute =
-  ApiInternalArchiveAiMaintenanceRouteImport.update({
-    id: '/api/internal/archive-ai-maintenance',
-    path: '/api/internal/archive-ai-maintenance',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiArchiveAiRequestsRequestIdRoute =
-  ApiArchiveAiRequestsRequestIdRouteImport.update({
-    id: '/api/archive-ai/requests/$requestId',
-    path: '/api/archive-ai/requests/$requestId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -189,14 +150,11 @@ export interface FileRoutesByFullPath {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
-  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
-  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
-  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -208,9 +166,6 @@ export interface FileRoutesByFullPath {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
-  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
-  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -219,14 +174,11 @@ export interface FileRoutesByTo {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
-  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
-  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
-  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -238,9 +190,6 @@ export interface FileRoutesByTo {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
-  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
-  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -250,14 +199,11 @@ export interface FileRoutesById {
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/form-archive': typeof FormArchiveRoute
-  '/intelligence': typeof IntelligenceRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
-  '/api/archive-intelligence': typeof ApiArchiveIntelligenceRoute
-  '/api/archive-search': typeof ApiArchiveSearchRoute
   '/api/export': typeof ApiExportRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -269,9 +215,6 @@ export interface FileRoutesById {
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/internal/archive-ai-health': typeof ApiInternalArchiveAiHealthRoute
-  '/api/internal/archive-ai-maintenance': typeof ApiInternalArchiveAiMaintenanceRoute
-  '/api/archive-ai/requests/$requestId': typeof ApiArchiveAiRequestsRequestIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -282,14 +225,11 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
-    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
-    | '/api/archive-intelligence'
-    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -301,9 +241,6 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
-    | '/api/internal/archive-ai-health'
-    | '/api/internal/archive-ai-maintenance'
-    | '/api/archive-ai/requests/$requestId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -312,14 +249,11 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
-    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
-    | '/api/archive-intelligence'
-    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -331,9 +265,6 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
-    | '/api/internal/archive-ai-health'
-    | '/api/internal/archive-ai-maintenance'
-    | '/api/archive-ai/requests/$requestId'
   id:
     | '__root__'
     | '/'
@@ -342,14 +273,11 @@ export interface FileRouteTypes {
     | '/dream-chapter'
     | '/extreme-saga'
     | '/form-archive'
-    | '/intelligence'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
     | '/world'
-    | '/api/archive-intelligence'
-    | '/api/archive-search'
     | '/api/export'
     | '/characters/luna'
     | '/characters/terra'
@@ -361,9 +289,6 @@ export interface FileRouteTypes {
     | '/managers/zeus'
     | '/riders/$id'
     | '/api/auth/$'
-    | '/api/internal/archive-ai-health'
-    | '/api/internal/archive-ai-maintenance'
-    | '/api/archive-ai/requests/$requestId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -373,19 +298,13 @@ export interface RootRouteChildren {
   DreamChapterRoute: typeof DreamChapterRoute
   ExtremeSagaRoute: typeof ExtremeSagaRoute
   FormArchiveRoute: typeof FormArchiveRoute
-  IntelligenceRoute: typeof IntelligenceRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   WorldRoute: typeof WorldRoute
-  ApiArchiveIntelligenceRoute: typeof ApiArchiveIntelligenceRoute
-  ApiArchiveSearchRoute: typeof ApiArchiveSearchRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiInternalArchiveAiHealthRoute: typeof ApiInternalArchiveAiHealthRoute
-  ApiInternalArchiveAiMaintenanceRoute: typeof ApiInternalArchiveAiMaintenanceRoute
-  ApiArchiveAiRequestsRequestIdRoute: typeof ApiArchiveAiRequestsRequestIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -432,13 +351,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/intelligence': {
-      id: '/intelligence'
-      path: '/intelligence'
-      fullPath: '/intelligence'
-      preLoaderRoute: typeof IntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -472,20 +384,6 @@ declare module '@tanstack/react-router' {
       path: '/world'
       fullPath: '/world'
       preLoaderRoute: typeof WorldRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/archive-intelligence': {
-      id: '/api/archive-intelligence'
-      path: '/api/archive-intelligence'
-      fullPath: '/api/archive-intelligence'
-      preLoaderRoute: typeof ApiArchiveIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/archive-search': {
-      id: '/api/archive-search'
-      path: '/api/archive-search'
-      fullPath: '/api/archive-search'
-      preLoaderRoute: typeof ApiArchiveSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export': {
@@ -565,27 +463,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/internal/archive-ai-health': {
-      id: '/api/internal/archive-ai-health'
-      path: '/api/internal/archive-ai-health'
-      fullPath: '/api/internal/archive-ai-health'
-      preLoaderRoute: typeof ApiInternalArchiveAiHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/internal/archive-ai-maintenance': {
-      id: '/api/internal/archive-ai-maintenance'
-      path: '/api/internal/archive-ai-maintenance'
-      fullPath: '/api/internal/archive-ai-maintenance'
-      preLoaderRoute: typeof ApiInternalArchiveAiMaintenanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/archive-ai/requests/$requestId': {
-      id: '/api/archive-ai/requests/$requestId'
-      path: '/api/archive-ai/requests/$requestId'
-      fullPath: '/api/archive-ai/requests/$requestId'
-      preLoaderRoute: typeof ApiArchiveAiRequestsRequestIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -643,19 +520,13 @@ const rootRouteChildren: RootRouteChildren = {
   DreamChapterRoute: DreamChapterRoute,
   ExtremeSagaRoute: ExtremeSagaRoute,
   FormArchiveRoute: FormArchiveRoute,
-  IntelligenceRoute: IntelligenceRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   WorldRoute: WorldRoute,
-  ApiArchiveIntelligenceRoute: ApiArchiveIntelligenceRoute,
-  ApiArchiveSearchRoute: ApiArchiveSearchRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiInternalArchiveAiHealthRoute: ApiInternalArchiveAiHealthRoute,
-  ApiInternalArchiveAiMaintenanceRoute: ApiInternalArchiveAiMaintenanceRoute,
-  ApiArchiveAiRequestsRequestIdRoute: ApiArchiveAiRequestsRequestIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

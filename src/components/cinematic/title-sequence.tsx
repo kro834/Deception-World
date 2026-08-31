@@ -466,31 +466,46 @@ export function TitleSequence() {
         <div className="cine-title-lockup">
           <div className="cine-logo-wrap">
             <img
-              src="/logo-title.jpg"
+              src="/logo-title.webp"
               alt=""
               className="cine-logo-glow"
+              width={1200}
+              height={800}
+              loading="eager"
               decoding="async"
+              fetchPriority="low"
               draggable={false}
             />
             <img
-              src="/logo-title.jpg"
+              src="/logo-title.webp"
               alt=""
               className="cine-logo-echo cine-logo-echo-ice"
+              width={1200}
+              height={800}
+              loading="eager"
               decoding="async"
+              fetchPriority="low"
               draggable={false}
             />
             <img
-              src="/logo-title.jpg"
+              src="/logo-title.webp"
               alt=""
               className="cine-logo-echo cine-logo-echo-gold"
+              width={1200}
+              height={800}
+              loading="eager"
               decoding="async"
+              fetchPriority="low"
               draggable={false}
             />
             <img
               ref={logoRef}
-              src="/logo-title.jpg"
+              src="/logo-title.webp"
               alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
               className="cine-logo-core"
+              width={1200}
+              height={800}
+              loading="eager"
               decoding="async"
               fetchPriority="high"
               draggable={false}

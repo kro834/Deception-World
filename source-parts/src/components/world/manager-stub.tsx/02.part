@@ -1,9 +1,3 @@
-                    key={weapon.name}
-                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
-                  >
-                    <div>
-                      <img
-                        src={weapon.img}
                         alt={`${weapon.name}の武装ビジュアル`}
                         style={{ objectPosition: weapon.pos ?? "50% 50%" }}
                         decoding="async"
@@ -91,6 +85,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
       style={{
         ["--manager-accent" as string]: profile.accent,
         ["--manager-accent-soft" as string]: profile.accent,
+        ["--future-hud-primary" as string]: profile.accent,
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
@@ -115,6 +110,8 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <div className="manager-portrait-frame">
             <img
               src={profile.image}
+              srcSet={profile.imageWebp}
+              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
               alt={`${profile.name}のキャラクタービジュアル`}
               style={{ objectPosition: profile.pos, objectFit: "cover" }}
               loading="eager"
@@ -213,9 +210,21 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <span>{profile.numeral}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
+        <nav className="manager-section-nav" aria-label="人物資料の章">
+          {profile.sections.map((section) => (
+            <a key={section.no} href={`#character-section-${section.no}`}>
+              <span>{section.no}</span>
+              <b>{section.kicker}</b>
+            </a>
+          ))}
+        </nav>
         <div className="manager-sections">
           {profile.sections.map((s) => (
-            <article className="manager-copy-section" key={s.no}>
+            <article
+              className="manager-copy-section"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -246,6 +255,7 @@ export const REX_LOI: Profile = {
   name: "レックス・ロワ",
   title: "真の選択肢を残す管理人",
   image: "/manager-rex-loi.jpeg",
+  imageWebp: "/manager-rex-loi.webp",
   pos: "50% 0%",
   accent: "#67d8ff",
   quotes: [
@@ -338,6 +348,7 @@ export const SHUZA: Profile = {
   name: "シュザ",
   title: "最上位の戦闘演算",
   image: "/manager-shuza.jpeg",
+  imageWebp: "/manager-shuza.webp",
   pos: "50% 16%",
   accent: "#f14a60",
   quotes: [
@@ -349,7 +360,3 @@ export const SHUZA: Profile = {
     { dt: "NAME", dd: "シュザ" },
     { dt: "RANK", dd: "六詠・第三位" },
     { dt: "AUTHORITY", dd: "戦闘演算／最適解" },
-    { dt: "STATUS", dd: "ACCESS GRANTED" },
-  ],
-  sections: [
-    {

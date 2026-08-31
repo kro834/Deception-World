@@ -1013,7 +1013,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     tone: "#32e1d0",
     img: "/rider-profile-over-zeztz.jpeg",
     pos: "50% 8%",
-    civilianImg: "/archive-ai-james-20260829.jpg",
+    civilianImg: "/character-james-20260829.jpg",
     civilianPos: "50% 8%",
     title: "英国支部から派遣された、最強のエージェント。",
     quotes: [
@@ -1334,9 +1334,11 @@ export function RiderPage({ id }: { id: string }) {
       className="manager-page rider-dossier-page"
       style={{
         ["--manager-accent" as string]: rider.tone,
+        ["--manager-accent-soft" as string]: rider.tone,
         ["--rider-tone" as string]: rider.tone,
         ["--archive-accent" as string]: rider.tone,
         ["--archive-accent-soft" as string]: rider.tone,
+        ["--future-hud-primary" as string]: rider.tone,
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
@@ -1353,6 +1355,10 @@ export function RiderPage({ id }: { id: string }) {
           <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
+              srcSet={
+                rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined
+              }
+              sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
               style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
               loading="eager"
@@ -1396,6 +1402,10 @@ export function RiderPage({ id }: { id: string }) {
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
+              srcSet={
+                rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined
+              }
+              sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}
               loading="lazy"
@@ -1487,9 +1497,21 @@ export function RiderPage({ id }: { id: string }) {
           <span>{rider.no}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
+        <nav className="manager-section-nav" aria-label="人物資料の章">
+          {rider.sections.map((section) => (
+            <a key={section.no} href={`#character-section-${section.no}`}>
+              <span>{section.no}</span>
+              <b>{section.kicker}</b>
+            </a>
+          ))}
+        </nav>
         <div className="manager-sections">
           {rider.sections.map((s) => (
-            <article className="manager-copy-section" key={s.no}>
+            <article
+              className="manager-copy-section"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

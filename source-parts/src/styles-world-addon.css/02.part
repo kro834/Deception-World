@@ -1,206 +1,3 @@
-  .form-pickup-copy h2 span {
-    margin-bottom: 0.34em;
-    line-height: 1.35;
-  }
-  .form-pickup-heading h2 {
-    font-size: clamp(34px, 4.5vw, 50px);
-    letter-spacing: -0.035em;
-    line-height: 1.08;
-  }
-  .form-pickup-heading h2 > span {
-    margin-bottom: 0.2em;
-  }
-  .form-pickup-overview > div > p,
-  .form-pickup-sections p,
-  .rider-description {
-    line-break: strict;
-    text-wrap: pretty;
-  }
-}
-
-@media (max-width: 760px) {
-  .manager-hero {
-    padding-right: max(18px, env(safe-area-inset-right));
-    padding-left: max(18px, env(safe-area-inset-left));
-  }
-
-  .manager-dossier,
-  .manager-rider-record,
-  .manager-pagination {
-    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  }
-
-  .form-pickup-card,
-  .form-pickup-layout,
-  .form-pickup-stats,
-  .form-pickup-gallery,
-  .rider-form-gallery,
-  .rider-archive-identity-records.has-nightmare {
-    grid-template-columns: 1fr;
-  }
-
-  .form-pickup-stats > div {
-    border-right: 0;
-  }
-
-  .form-pickup-stats > div:nth-last-child(-n + 3) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .form-pickup-stats > div:last-child {
-    border-bottom: 0;
-  }
-}
-
-.export-page {
-  min-height: 100dvh;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 14px;
-  padding: 48px 24px;
-  background: #05070c;
-  color: #f4f6fb;
-  text-align: center;
-  font-family: "Noto Sans JP", sans-serif;
-}
-.export-page p {
-  margin: 0;
-  letter-spacing: 0.42em;
-  font-size: 10px;
-  color: rgba(244, 246, 251, 0.42);
-}
-.export-page h1 {
-  margin: 0;
-  font-family: Cinzel, serif;
-  font-size: 28px;
-  font-weight: 600;
-}
-.export-page b {
-  font-size: 15px;
-  font-weight: 600;
-}
-.export-page-btn {
-  display: inline-flex;
-  min-width: 220px;
-  min-height: 52px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  text-decoration: none;
-  font-weight: 700;
-}
-.export-page-alt,
-.export-page small {
-  color: rgba(244, 246, 251, 0.48);
-  font-size: 12px;
-}
-.export-page-alt {
-  text-decoration: underline;
-}
-
-/* ── iOS-style slide-to-open controls ───────────────────────────── */
-
-.ios-slide-open {
-  --slide-accent: var(--manager-accent, var(--archive-accent, #67d8ff));
-  --slide-thumb-size: 50px;
-  position: absolute;
-  z-index: 6;
-  display: block;
-  width: min(216px, calc(100% - 36px));
-  height: 58px;
-  min-width: 0;
-  min-height: 58px;
-  padding: 4px;
-  overflow: hidden;
-  isolation: isolate;
-  aspect-ratio: auto;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 999px;
-  color: #fff;
-  background:
-    radial-gradient(circle at 18% -20%, rgba(255, 255, 255, 0.28), transparent 44%),
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--slide-accent) 17%, rgba(7, 12, 20, 0.9)),
-      rgba(7, 10, 17, 0.82)
-    );
-  -webkit-backdrop-filter: blur(20px) saturate(165%);
-  backdrop-filter: blur(20px) saturate(165%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 color-mix(in srgb, var(--slide-accent) 28%, transparent),
-    0 16px 38px rgba(0, 0, 0, 0.42);
-  cursor: ew-resize;
-  touch-action: pan-y;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  scale: 1;
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    scale 0.35s var(--glass-spring, cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-.form-pickup-plus.ios-slide-open {
-  right: 18px;
-  bottom: 18px;
-  -webkit-backdrop-filter: blur(11px) saturate(142%);
-  backdrop-filter: blur(11px) saturate(142%);
-}
-
-.form-pickup-plus.ios-slide-open .ios-slide-open-thumb {
-  -webkit-backdrop-filter: blur(8px) saturate(148%);
-  backdrop-filter: blur(8px) saturate(148%);
-}
-
-.rider-nightmare-pickup-button.ios-slide-open {
-  --slide-accent: #e71a9c;
-  position: relative;
-  right: auto;
-  bottom: auto;
-  align-self: flex-end;
-  margin-top: auto;
-  margin-left: auto;
-}
-
-.world-column-slide-open.ios-slide-open {
-  --slide-accent: var(--cyan, #67d8ff);
-  position: relative;
-  width: min(100%, 300px);
-  margin: 12px 0 0 auto;
-}
-
-/* Every column contributes to the number/title/body track even while hidden.
-   The largest item therefore reserves each region at the current viewport,
-   and switching text can never move the slider or resize the outer frame. */
-.world-column-number-stack,
-.world-column-heading-stack,
-.world-column-summary-stack,
-.world-column-dialog-copy-stack {
-  display: grid;
-  min-width: 0;
-}
-
-.world-column-dialog-copy-pane {
-  grid-area: 1 / 1;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  animation: none;
-}
-
-.world-column-dialog-copy-pane.is-active {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-  animation: worldColumnDialogCopyIn 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
 
 .world-column-stack-item {
   grid-area: 1 / 1;
@@ -889,5 +686,414 @@
   .load-gate.is-sovereign-gate.is-revealing {
     animation: none;
     opacity: 0;
+  }
+}
+
+/* Modern character records -------------------------------------------------
+   Character pages keep their individual accent colours and cinematic art,
+   while the reading layer uses a calmer editorial rhythm: one radius system,
+   restrained hairlines, and a comfortable measure for long Japanese copy. */
+.manager-page:not(.is-sovereign) {
+  background:
+    radial-gradient(
+      circle at 78% 8%,
+      color-mix(in srgb, var(--manager-accent) 9%, transparent),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 8% 64%,
+      color-mix(in srgb, var(--manager-accent) 5%, transparent),
+      transparent 36rem
+    ),
+    #050609;
+}
+
+.manager-page:not(.is-sovereign) .manager-grid {
+  opacity: 0.055;
+  background-size: 88px 88px;
+}
+
+.manager-page:not(.is-sovereign) .manager-glow {
+  opacity: 0.62;
+}
+
+.manager-page:not(.is-sovereign) .manager-hero {
+  width: min(1320px, calc(100% - 48px));
+  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+  gap: clamp(48px, 6.6vw, 104px);
+}
+
+.manager-page:not(.is-sovereign) .manager-portrait-frame {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 28%, rgba(255, 255, 255, 0.1));
+  border-radius: clamp(24px, 3vw, 40px);
+  background: #090a0e;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.018);
+}
+
+.manager-page:not(.is-sovereign) .manager-portrait-frame::before,
+.manager-page:not(.is-sovereign) .manager-portrait-frame::after {
+  display: none;
+}
+
+.manager-page:not(.is-sovereign) .manager-portrait-frame > img {
+  filter: saturate(0.92) contrast(1.025);
+  animation-duration: 18s;
+}
+
+button.manager-portrait-frame:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--manager-accent) 72%, white);
+  outline-offset: 4px;
+}
+
+.manager-page:not(.is-sovereign) .manager-numeral {
+  top: 22px;
+  left: 24px;
+  padding: 8px 12px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  background: rgba(4, 5, 8, 0.52);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  backdrop-filter: blur(14px) saturate(135%);
+  font-size: clamp(18px, 2.5vw, 30px);
+  letter-spacing: -0.025em;
+}
+
+.manager-page:not(.is-sovereign) .manager-introduction {
+  width: 100%;
+  max-width: 720px;
+}
+
+.manager-page:not(.is-sovereign) .manager-introduction h1 {
+  gap: 12px;
+  font-size: clamp(54px, 7.4vw, 104px);
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+}
+
+.manager-page:not(.is-sovereign) .manager-introduction h1 small {
+  font-size: 0.12em;
+  letter-spacing: 0.32em;
+}
+
+.manager-page:not(.is-sovereign) .manager-title {
+  max-width: 42rem;
+  margin-top: 26px;
+  color: rgba(244, 246, 251, 0.68);
+  font-size: clamp(14px, 1.25vw, 18px);
+  line-height: 1.7;
+  letter-spacing: 0.045em;
+  text-wrap: pretty;
+}
+
+.manager-page:not(.is-sovereign) .manager-quotes {
+  gap: 14px;
+  margin: 38px 0;
+  padding: 22px 24px;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 18%, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  background:
+    linear-gradient(110deg, color-mix(in srgb, var(--manager-accent) 6%, transparent), transparent 64%),
+    rgba(255, 255, 255, 0.018);
+}
+
+.manager-page:not(.is-sovereign) .manager-quotes q {
+  color: rgba(244, 246, 251, 0.84);
+  font-size: clamp(13px, 1.08vw, 16px);
+  line-height: 1.85;
+  text-wrap: pretty;
+}
+
+.manager-page:not(.is-sovereign) .manager-facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border: 0;
+}
+
+.manager-page:not(.is-sovereign) .manager-facts > div {
+  min-height: 72px;
+  padding: 15px 17px;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 14%, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--manager-accent) 3.5%, transparent), transparent),
+    rgba(255, 255, 255, 0.014);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.manager-page:not(.is-sovereign) .manager-dossier {
+  width: min(1200px, calc(100% - 48px));
+  padding-top: clamp(76px, 8vw, 118px);
+}
+
+.manager-page:not(.is-sovereign) .manager-section-index {
+  margin-bottom: 22px;
+}
+
+.manager-section-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 8px;
+  margin: 0 0 clamp(34px, 5vw, 58px);
+}
+
+.manager-section-nav a {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  min-height: 58px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 15%, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.016);
+  color: rgba(244, 246, 251, 0.66);
+  text-decoration: none;
+  transition:
+    border-color 0.24s ease,
+    background 0.24s ease,
+    color 0.24s ease,
+    transform 0.32s var(--glass-spring);
+}
+
+.manager-section-nav a > span {
+  color: var(--manager-accent);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.manager-section-nav a > b {
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.55;
+  letter-spacing: 0.17em;
+  overflow-wrap: anywhere;
+}
+
+.manager-section-nav a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--manager-accent) 72%, white);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .manager-section-nav a:hover {
+    border-color: color-mix(in srgb, var(--manager-accent) 42%, transparent);
+    background: color-mix(in srgb, var(--manager-accent) 5%, rgba(255, 255, 255, 0.018));
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+  }
+}
+
+.manager-copy-section {
+  scroll-margin-top: 104px;
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-section {
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(38px, 6vw, 82px);
+  margin-bottom: 14px;
+  padding: clamp(40px, 5vw, 64px);
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 13%, rgba(255, 255, 255, 0.075));
+  border-radius: 28px;
+  background:
+    linear-gradient(132deg, color-mix(in srgb, var(--manager-accent) 3%, transparent), transparent 38%),
+    rgba(13, 14, 18, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    0 24px 72px rgba(0, 0, 0, 0.18);
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-section::after {
+  display: none;
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-section:target {
+  border-color: color-mix(in srgb, var(--manager-accent) 44%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 24px 72px rgba(0, 0, 0, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--manager-accent) 12%, transparent);
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-heading h2 {
+  max-width: 500px;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-size: clamp(30px, 3.4vw, 48px);
+  font-weight: 600;
+  line-height: 1.24;
+  letter-spacing: -0.025em;
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-body {
+  width: 100%;
+  max-width: 46rem;
+  gap: 18px;
+}
+
+.manager-page:not(.is-sovereign) .manager-copy-body p {
+  color: rgba(225, 229, 237, 0.72);
+  font-size: clamp(13px, 1.02vw, 15px);
+  line-height: 1.94;
+  text-align: start;
+  text-wrap: pretty;
+  line-break: strict;
+}
+
+/* The second civilian record on rider pages now belongs to the same visual
+   family as the primary dossier instead of looking like a separate template. */
+.rider-dossier-page .rider-archive-civilian,
+.rider-dossier-page .rider-nightmare-card {
+  border-radius: 28px;
+  border-color: color-mix(in srgb, var(--archive-accent) 18%, rgba(255, 255, 255, 0.08));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--archive-accent) 4%, transparent), transparent 38%),
+    rgba(12, 14, 19, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 26px 72px rgba(0, 0, 0, 0.24);
+}
+
+.rider-dossier-page .rider-archive-civilian > figcaption > p:not(:first-child),
+.rider-dossier-page .rider-partner-copy > p {
+  color: rgba(225, 229, 237, 0.7);
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  text-wrap: pretty;
+}
+
+@media (max-width: 980px) {
+  .manager-page:not(.is-sovereign) .manager-hero {
+    grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
+    gap: 34px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-copy-section {
+    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+    gap: 34px;
+  }
+}
+
+@media (max-width: 760px) {
+  .manager-page:not(.is-sovereign) .manager-hero {
+    display: block;
+    width: 100%;
+    padding-top: calc(92px + env(safe-area-inset-top));
+    padding-bottom: 70px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-portrait-column {
+    margin-bottom: 42px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-portrait-frame {
+    border-radius: 24px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-introduction h1 {
+    font-size: clamp(48px, 14.5vw, 76px);
+  }
+
+  .manager-page:not(.is-sovereign) .manager-title {
+    margin-top: 20px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-quotes {
+    margin: 28px 0;
+    padding: 19px 18px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-dossier {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    padding-top: 68px;
+  }
+
+  .manager-section-nav {
+    display: flex;
+    width: calc(100% + 18px);
+    margin-right: -18px;
+    padding-right: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .manager-section-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .manager-section-nav a {
+    min-width: min(78vw, 280px);
+    font-size: 11px;
+    scroll-snap-align: start;
+  }
+
+  .manager-section-nav a > b {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .manager-copy-section {
+    scroll-margin-top: 86px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-copy-section {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 32px 22px;
+    border-radius: 24px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-copy-heading h2 {
+    font-size: clamp(29px, 8vw, 42px);
+  }
+
+  .rider-dossier-page .rider-archive-civilian,
+  .rider-dossier-page .rider-nightmare-card {
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .manager-back,
+  .manager-topbar .side-panel-trigger {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-facts > div {
+    min-height: 66px;
+  }
+
+  .manager-page:not(.is-sovereign) .manager-dossier {
+    width: calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manager-section-nav a {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .manager-page:not(.is-sovereign) .manager-numeral,
+  .manager-page:not(.is-sovereign) .manager-quotes,
+  .manager-page:not(.is-sovereign) .manager-copy-section,
+  .rider-dossier-page .rider-archive-civilian,
+  .rider-dossier-page .rider-nightmare-card {
+    background: #0d0f14;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

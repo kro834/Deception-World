@@ -14,6 +14,7 @@ export function LejasPage() {
       style={{
         ["--manager-accent" as string]: "#78b69b",
         ["--manager-accent-soft" as string]: "#d7ab51",
+        ["--future-hud-primary" as string]: "#78b69b",
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
@@ -38,6 +39,8 @@ export function LejasPage() {
             <img
               className="lejas-wide"
               src="/manager-lejas.jpeg"
+              srcSet="/manager-lejas.webp"
+              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
               alt=""
               width={1122}
               height={1402}
@@ -49,6 +52,8 @@ export function LejasPage() {
             <img
               className="lejas-face"
               src="/manager-lejas-portrait.jpeg"
+              srcSet="/manager-lejas-portrait.webp"
+              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
               alt=""
               width={1500}
               height={1872}
@@ -125,8 +130,22 @@ export function LejasPage() {
           <span>IV</span>
           <small>CHARACTER DOSSIER</small>
         </div>
+        <nav className="manager-section-nav" aria-label="人物資料の章">
+          <a href="#character-section-01">
+            <span>01</span>
+            <b>AUTHORITY / BOARD</b>
+          </a>
+          <a href="#character-section-02">
+            <span>02</span>
+            <b>PERSONALITY / TRUE DECEPTION</b>
+          </a>
+          <a href="#character-section-03">
+            <span>03</span>
+            <b>BATTLE / USED OPTIONS</b>
+          </a>
+        </nav>
         <div className="manager-sections">
-          <article className="manager-copy-section">
+          <article className="manager-copy-section" id="character-section-01">
             <div className="manager-copy-heading">
               <span>01</span>
               <p>AUTHORITY / BOARD</p>
@@ -141,7 +160,7 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section">
+          <article className="manager-copy-section" id="character-section-02">
             <div className="manager-copy-heading">
               <span>02</span>
               <p>PERSONALITY / TRUE DECEPTION</p>
@@ -153,7 +172,7 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section">
+          <article className="manager-copy-section" id="character-section-03">
             <div className="manager-copy-heading">
               <span>03</span>
               <p>BATTLE / USED OPTIONS</p>

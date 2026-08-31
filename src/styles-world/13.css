@@ -200,7 +200,7 @@
 }
 
 .rider-tabs.liquid-swipe-tabs {
-  --liquid-shell-radius: 30px;
+  --liquid-shell-radius: 40px;
   --rider-liquid-safe-inline: clamp(18px, 2.3vw, 26px);
   min-height: 0;
   z-index: 3;

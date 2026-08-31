@@ -26,7 +26,7 @@ export const RIDER_NAV: DossierLink[] = [
   { id: "vandal", name: "ヴァンダール", href: "/riders/vandal", assets: ["/civilian-vandal.jpeg"], kicker: "RIDER 04" },
   { id: "leddic", name: "レディック", href: "/riders/leddic", assets: ["/civilian-leddic.jpeg", "/civilian-naikami-chigiri.jpeg", "/rider-leddic-ishihen.jpeg", "/rider-leddic-hoko.jpeg", "/rider-leddic-rekka-20260829.jpeg"], kicker: "RIDER 05" },
   { id: "argenome", name: "アルゲノム", href: "/riders/argenome", assets: ["/civilian-argenome.jpeg"], kicker: "RIDER 06" },
-  { id: "over-zeztz", name: "オーバーゼッツ", href: "/riders/over-zeztz", assets: ["/archive-ai-james-20260829.jpg"], kicker: "RIDER 07" },
+  { id: "over-zeztz", name: "オーバーゼッツ", href: "/riders/over-zeztz", assets: ["/character-james-20260829.webp"], kicker: "RIDER 07" },
   { id: "cipher", name: "サイファー", href: "/riders/cipher", assets: ["/civilian-cipher.jpeg", "/rider-cipher.jpeg", "/rider-cipher-blacksite.jpeg"], kicker: "RIDER 08" },
 ];
 
