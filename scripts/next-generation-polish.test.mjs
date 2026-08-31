@@ -45,7 +45,7 @@ test("world mode publishes coalesced, passive scroll progress", () => {
   assert.match(worldMode, /data(?:set\.)?pageScrolled|dataset\.pageScrolled/);
 });
 
-test("the app no longer disables basic document selection and copy gestures", () => {
+test("content protection stays outside the route-loading interaction guard", () => {
   assert.doesNotMatch(loadGate, /addEventListener\("(?:copy|cut|paste|contextmenu|selectstart)"/);
 });
 
