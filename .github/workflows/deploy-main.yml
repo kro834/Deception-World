@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+      PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL || 'https://sand-zenith-meadow-dune.grok.me' }}
       VERCEL_CLI_VERSION: 59.10.0
     steps:
       - name: Check out exact main commit
@@ -43,10 +43,16 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
-          test -n "$VERCEL_TOKEN"
-          test -n "$VERCEL_ORG_ID"
-          test -n "$VERCEL_PROJECT_ID"
-          test -n "$PUBLIC_BASE_URL"
+          missing=()
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID PUBLIC_BASE_URL; do
+            if [ -z "${!name:-}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf '::error title=Missing deployment configuration::Set %s in the production environment.\n' "${missing[*]}"
+            exit 1
+          fi
           node -e 'const value = new URL(process.env.PUBLIC_BASE_URL); if (value.protocol !== "https:") process.exit(1)'
 
       - name: Install locked dependencies
