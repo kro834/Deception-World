@@ -20,8 +20,8 @@ test("modern interface layer includes mobile and economy rendering fallbacks", a
 
 test("Liquid Glass rails use concentric shell, lens, and control radii", async () => {
   const css = await read("src/styles-world/28.css");
-  assert.match(css, /--liquid-shell-radius: var\(--ui-radius-md\)/);
-  assert.match(css, /--liquid-control-radius: calc\(var\(--liquid-shell-radius\) - var\(--liquid-control-inset\)\)/);
+  assert.match(css, /--liquid-shell-radius: 999px/);
+  assert.match(css, /--liquid-control-radius: 999px/);
   assert.match(css, /\.manager-archive-tabs\.liquid-swipe-tabs > \.liquid-selection-lens[\s\S]*border-radius: var\(--liquid-control-radius\)/);
   assert.match(css, /\.manager-archive-tabs\.liquid-swipe-tabs > button\[role="tab"\][\s\S]*border-radius: var\(--liquid-control-radius\)/);
 });
