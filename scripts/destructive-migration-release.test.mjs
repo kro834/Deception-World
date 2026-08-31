@@ -12,6 +12,25 @@ const workflow = readFileSync(
   new URL("../.github/workflows/deploy-main.yml", import.meta.url),
   "utf8",
 );
+const vercelConfig = JSON.parse(
+  readFileSync(new URL("../vercel.json", import.meta.url), "utf8"),
+);
+const packageJson = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
+
+test("the credential-free Git fallback publishes verified main builds only", () => {
+  assert.deepEqual(vercelConfig.git?.deploymentEnabled, {
+    "*": false,
+    main: true,
+  });
+  assert.equal(vercelConfig.github?.autoAlias, true);
+  assert.equal(vercelConfig.buildCommand, "npm run release:build");
+  assert.match(packageJson.scripts?.["release:build"] ?? "", /npm run lint/);
+  assert.match(packageJson.scripts?.["release:build"] ?? "", /npm test/);
+  assert.match(packageJson.scripts?.["release:build"] ?? "", /npm run typecheck/);
+  assert.match(packageJson.scripts?.["release:build"] ?? "", /npm run build/);
+});
 
 test("destructive migrations require an exact explicit opt-in", () => {
   assert.equal(DESTRUCTIVE_MIGRATIONS.has("0004_retire_archive_ai.sql"), true);

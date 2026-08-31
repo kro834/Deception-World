@@ -1,11 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run release:build",
   "git": {
     "deploymentEnabled": {
-      "main": false
+      "*": false,
+      "main": true
     }
   },
   "github": {
-    "autoAlias": false
+    "autoAlias": true
   }
 }

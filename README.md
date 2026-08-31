@@ -24,7 +24,7 @@ npm run dev
 
 ## 公開
 
-Production公開は `main` へのpushだけを起点にします。`.github/workflows/deploy-main.yml` がlint、テスト、型検査、Production build、候補URLのスモークテストを通した後にだけVercel Productionへ昇格します。破壊的migrationは通常の候補buildでは保留され、互換コードをProductionへ昇格して公開確認を終えた後に限り、同じcommit SHAの隔離buildから明示適用します。削除開始後は旧スキーマを要求する版へ自動rollbackしません。
+Production公開は `main` へのpushだけを起点にします。VercelのGit連携も `main` 以外を無効化し、Production build内でlint、全テスト、型検査、buildを通過した版だけを公開します。資格情報を設定した環境では `.github/workflows/deploy-main.yml` が候補URLのスモークテストと段階的な昇格も実施します。破壊的migrationは通常のbuildでは保留され、互換コードの公開確認後に限って明示適用します。
 
 ## AIチャットの撤去
 

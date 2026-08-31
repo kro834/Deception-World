@@ -11,6 +11,7 @@
     "archive:embed": "node scripts/build-embedded-archives.mjs",
     "prebuild": "npm run archive:embed",
     "build": "vite build && npm run db:migrate",
+    "release:build": "npm run lint && npm test && npm run typecheck && npm run build",
     "db:migrate": "node scripts/migrate.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview --host 0.0.0.0 --port 8080",
