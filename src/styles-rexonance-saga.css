@@ -2101,3 +2101,95 @@
     color: CanvasText;
   }
 }
+
+/* Shared by Rexonance and Extreme: readable comparison notes and touch nav. */
+.rxs-page .rxs-local-nav-inner {
+  grid-template-columns: minmax(0, 1fr) auto 48px;
+  gap: clamp(8px, 2vw, 24px);
+}
+
+.rxs-page .rxs-brand,
+.rxs-page .rxs-local-nav nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.rxs-page .rxs-local-nav nav {
+  gap: 12px;
+}
+
+.rxs-page .rxs-local-nav nav a {
+  justify-content: center;
+  min-width: 44px;
+  font-size: 13px;
+}
+
+.rxs-page .rxs-menu-trigger {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.rxs-page .rxs-scroll-cue,
+.rxs-page .rxs-comparison article small,
+.rxs-page .rxs-comparison article > p,
+.rxs-page .rxs-comparison-result em,
+.rxs-page .rxs-processing-comparison > header small,
+.rxs-page .rxs-p14-copy dt,
+.rxs-page .rxs-p14-range-control > p,
+.rxs-page .rxs-p14-method-note,
+.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small,
+.rxs-page .rxs-stage-hint,
+.rxs-page .rxs-system-grid article header small {
+  font-size: 12px;
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+}
+
+.rxs-page .rxs-comparison-result em,
+.rxs-page .rxs-p14-method-note,
+.rxs-page .rxs-stage-hint {
+  color: #a5b2c2;
+}
+
+.rxs-page .rxs-comparison article header {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rxs-page .rxs-comparison article header > div,
+.rxs-page .rxs-p14-values > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rxs-page .rxs-comparison-result em {
+  max-width: 26ch;
+}
+
+.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  white-space: normal;
+}
+
+@media (max-width: 680px) {
+  .rxs-page .rxs-brand span {
+    display: none;
+  }
+  .rxs-page .rxs-stages .rxs-section-heading h2 {
+    font-size: clamp(25px, 7.3vw, 38px);
+    line-height: 1.4;
+  }
+  .rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .rxs-page .rxs-local-nav {
+    background: #080e17;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

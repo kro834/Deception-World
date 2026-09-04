@@ -2633,3 +2633,31 @@ html[data-world-effects="economy"] .dream-case-list li {
     transition: none !important;
   }
 }
+
+/* Keep chapter navigation and dossier captions legible on compact screens. */
+.dream-chapter-nav a {
+  min-height: 48px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.dream-chapter-nav a small,
+.dream-back-link small,
+.dream-section-heading p,
+.dream-character-copy small {
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+}
+
+.dream-scroll-cue {
+  min-height: 48px;
+  font-size: 11px;
+}
+
+@media (max-width: 480px) {
+  .dream-chapter-nav a {
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+}
