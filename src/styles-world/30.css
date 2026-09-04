@@ -183,6 +183,69 @@ main.manager-page .manager-hero .manager-portrait-frame {
 /* Tablet layouts follow viewport size, including iPad Split View, rather
    than device detection. Keep the phone and wide desktop composition intact. */
 @media (min-width: 761px) and (max-width: 1366px) {
+  .site-shell .poster-stage {
+    gap: 32px;
+    padding-bottom: 28px;
+  }
+
+  .site-shell .hero .poster-controls {
+    width: var(--poster-width);
+    max-width: 100%;
+    padding: 0;
+    gap: 12px;
+  }
+
+  .site-shell .poster-control-cluster {
+    width: 100%;
+    box-sizing: border-box;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px;
+    border-radius: 24px;
+  }
+
+  .site-shell .poster-control-cluster > button {
+    min-height: 52px;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    border-color: var(--glass-border-soft);
+  }
+
+  .site-shell .poster-shuffle { grid-column: 1 / -1; }
+
+  .site-shell .poster-control-cluster > button + button::before { content: none; }
+
+  .site-shell .poster-control-cluster button b {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .site-shell .poster-lock b {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 8px;
+    white-space: normal;
+    line-height: 1.5;
+  }
+
+  .site-shell .poster-controls output { font-size: 12px; }
+
+  .site-shell .poster-index {
+    bottom: 0;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    writing-mode: horizontal-tb;
+    white-space: nowrap;
+  }
+
+  .site-shell .poster-index span { font-size: 10px; }
+
+  .site-shell .poster-frame::before { inset: -10px; }
+
   .site-shell .hero-metadata b {
     white-space: normal;
     overflow-wrap: anywhere;
