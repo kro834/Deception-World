@@ -69,9 +69,18 @@
 }
 
 .site-shell .hero-metadata > span {
+  padding: 16px 12px;
   border-left: 2px solid rgb(131 228 255 / 55%);
   border-top: 1px solid rgb(131 228 255 / 18%);
   background: linear-gradient(100deg, rgb(30 66 89 / 38%), rgb(8 15 25 / 70%));
+}
+
+.site-shell .hero-metadata b {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.6;
 }
 
 .site-shell :is(.world-column-content, .episode-archive, .threat-panel),
@@ -182,7 +191,8 @@ main.manager-page .manager-hero .manager-portrait-frame {
 
 /* Tablet layouts follow viewport size, including iPad Split View, rather
    than device detection. Keep the phone and wide desktop composition intact. */
-@media (min-width: 761px) and (max-width: 1366px) {
+/* Include the 1376px iPad Pro and desktop-mode tablet viewports. */
+@media (min-width: 761px) and (max-width: 1440px) {
   .site-shell .poster-stage {
     gap: 32px;
     padding-bottom: 28px;
