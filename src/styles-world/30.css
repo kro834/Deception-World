@@ -1,0 +1,173 @@
+/* Future archive: material, edge lighting and circuit geometry.
+   Decorations are CSS backgrounds, so they never intercept gestures or add
+   animated full-screen compositing layers. */
+:root {
+  --neo-cyan: #83e4ff;
+  --neo-gold: #e6c78c;
+  --neo-border: rgb(131 228 255 / 26%);
+  --neo-panel:
+    linear-gradient(90deg, rgb(131 228 255 / 65%), rgb(230 199 140 / 30%), transparent) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse at 0 0, rgb(31 94 124 / 22%), transparent 70%),
+    linear-gradient(140deg, #101d2c, #080e18 70%);
+}
+
+.site-shell {
+  background:
+    radial-gradient(ellipse at 90% 12%, rgb(31 111 151 / 16%), transparent 34rem),
+    radial-gradient(ellipse at 0 65%, rgb(25 94 139 / 12%), transparent 36rem),
+    linear-gradient(90deg, rgb(131 228 255 / 2.5%) 1px, transparent 1px) 0 0 / 96px 96px,
+    #050910;
+}
+
+.site-shell .topbar,
+.manager-page .manager-topbar,
+.form-archive-page .rider-archive-topbar {
+  border-bottom-color: var(--neo-border);
+  background:
+    linear-gradient(90deg, #83e4ff, #427ca9 42%, #e6c78c 74%, transparent) bottom / 100% 1px no-repeat,
+    linear-gradient(105deg, rgb(15 34 51 / 97%), rgb(5 10 18 / 96%) 70%);
+  box-shadow: 0 5px 28px rgb(0 0 0 / 22%);
+}
+
+.site-shell .topbar nav a {
+  color: #bdcfde;
+}
+
+.site-shell .topbar nav a:is([aria-current="location"], [aria-current="page"]) {
+  color: var(--neo-cyan);
+}
+
+.site-shell .hero-copy::before {
+  background:
+    linear-gradient(90deg, var(--neo-cyan), transparent) left top / 112px 1px no-repeat,
+    linear-gradient(180deg, var(--neo-cyan), transparent) left top / 1px 64px no-repeat,
+    repeating-linear-gradient(90deg, var(--neo-cyan) 0 1px, transparent 1px 7px) right top / 48px 5px no-repeat,
+    linear-gradient(270deg, var(--neo-gold), transparent) right bottom / 100px 1px no-repeat,
+    linear-gradient(0deg, var(--neo-gold), transparent) right bottom / 1px 42px no-repeat;
+  opacity: 0.7;
+}
+
+.site-shell .eyebrow > span {
+  padding: 7px 11px;
+  border: 1px solid rgb(131 228 255 / 24%);
+  border-radius: 5px 14px 5px 5px;
+  background: linear-gradient(115deg, rgb(29 85 111 / 36%), rgb(8 16 27 / 50%));
+  color: #b0edff;
+  letter-spacing: 0.18em;
+}
+
+.site-shell .primary-action {
+  border: 1px solid rgb(131 228 255 / 48%);
+  background:
+    linear-gradient(90deg, #a8eeff, transparent 65%) top / 100% 1px no-repeat,
+    linear-gradient(115deg, #19465e, #102d43 55%, #0b192a);
+  color: #f3fbff;
+  box-shadow: inset 0 0 24px rgb(96 206 255 / 7%), 0 10px 30px rgb(0 0 0 / 26%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.site-shell .hero-metadata > span {
+  border-left: 2px solid rgb(131 228 255 / 55%);
+  border-top: 1px solid rgb(131 228 255 / 18%);
+  background: linear-gradient(100deg, rgb(30 66 89 / 38%), rgb(8 15 25 / 70%));
+}
+
+.site-shell :is(.world-column-content, .episode-archive, .threat-panel),
+.site-shell .rider-console {
+  border-color: var(--neo-border);
+  background: var(--neo-panel);
+  box-shadow: inset 0 0 0 5px rgb(5 12 22 / 60%), 0 20px 54px rgb(0 0 0 / 20%);
+}
+
+.site-shell .episode-card .episode-card-surface {
+  background:
+    linear-gradient(110deg, rgb(110 182 210 / 8%), transparent 55%),
+    #080f1b;
+}
+
+.site-shell .signal.has-visual {
+  border-color: rgb(131 228 255 / 32%);
+  box-shadow: 0 10px 32px rgb(0 0 0 / 28%), inset 0 0 0 1px rgb(131 228 255 / 7%);
+}
+
+.site-shell .signal.is-accessible::before {
+  border-radius: 6px;
+  border-color: rgb(131 228 255 / 60%);
+  background-color: rgb(8 27 42 / 85%);
+}
+
+.side-panel {
+  background:
+    linear-gradient(180deg, var(--neo-cyan), rgb(131 228 255 / 15%) 45%, var(--neo-gold)) left / 1px 100% no-repeat,
+    radial-gradient(ellipse at 100% 0, #15334a, transparent 34rem),
+    #080f19;
+}
+
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+  border-color: rgb(131 228 255 / 9%);
+  background: linear-gradient(110deg, rgb(99 174 210 / 7%), transparent 80%);
+}
+
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+  border-color: rgb(131 228 255 / 25%);
+  color: #b5d4e8;
+}
+
+main.manager-page .manager-hero .manager-facts > div,
+main.manager-page .manager-dossier .manager-copy-section,
+main.manager-page .manager-hero .manager-quotes {
+  border-color: color-mix(in srgb, var(--manager-accent, #83e4ff) 32%, #223043);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--manager-accent, #83e4ff) 60%, white), transparent 70%) top / 100% 1px no-repeat,
+    linear-gradient(125deg, color-mix(in srgb, var(--manager-accent, #83e4ff) 9%, #0d1724), #080f19 85%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%), 0 10px 30px rgb(0 0 0 / 14%);
+}
+
+.manager-page .manager-file-number {
+  width: fit-content;
+  padding: 7px 11px;
+  border-left: 2px solid var(--manager-accent, #83e4ff);
+  background: color-mix(in srgb, var(--manager-accent, #83e4ff) 9%, #080f19);
+}
+
+main.manager-page .manager-hero .manager-portrait-frame {
+  border-color: color-mix(in srgb, var(--manager-accent, #83e4ff) 50%, #223043);
+  box-shadow: 0 14px 44px rgb(0 0 0 / 30%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell .primary-action:hover {
+    border-color: #b0edff;
+    box-shadow: inset 0 0 24px rgb(96 206 255 / 13%), 0 8px 30px rgb(46 177 223 / 14%);
+  }
+
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button):hover {
+    border-color: rgb(131 228 255 / 44%);
+    background: linear-gradient(100deg, rgb(59 156 201 / 20%), rgb(18 37 55 / 60%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell .primary-action {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .site-shell .topbar,
+  .manager-page .manager-topbar,
+  .form-archive-page .rider-archive-topbar,
+  .side-panel {
+    background: #0b1725;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell .primary-action,
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button),
+  main.manager-page .manager-hero .manager-facts > div {
+    border-color: ButtonText;
+  }
+}

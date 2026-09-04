@@ -29,3 +29,10 @@ The site is a cinematic official archive: spectacular at story-defining moments 
 - Text below 11px when it communicates navigation, metadata, status, or instructions.
 - New gesture-only interactions without a normal tap or click path.
 - Adding another accent color to shared navigation or general content surfaces.
+
+## Future archive material — 2026-09-05
+
+- Use dark blue metal-like panels, cyan-to-gold edge lighting, circuit-line backgrounds and framed section labels to connect the world archive, dossiers and special sites.
+- Inherit the character's existing accent in individual dossiers; Rexonance and Extreme retain their own product colors. Keep portraits and content above decoration.
+- Express depth through static gradients and inset edges. Reserve extra light response for fine-pointer hover; do not add continuous full-screen animation, blur layers or gesture-catching overlays.
+- Preserve the readability and touch dimensions from the design audit. Reduced-transparency mode uses solid navigation surfaces, and reduced-motion mode disables the new button transition.
