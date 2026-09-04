@@ -179,3 +179,60 @@ main.manager-page .manager-hero .manager-portrait-frame {
     border-color: ButtonText;
   }
 }
+
+/* Tablet layouts follow viewport size, including iPad Split View, rather
+   than device detection. Keep the phone and wide desktop composition intact. */
+@media (min-width: 761px) and (max-width: 1366px) {
+  .site-shell .hero-metadata b {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    line-height: 1.6;
+  }
+
+  .side-panel {
+    width: min(72vw, 480px);
+  }
+
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+    min-height: 56px;
+  }
+
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1040px) and (orientation: portrait) {
+  .site-shell .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    padding: 152px 40px 72px;
+  }
+
+  .site-shell .hero-copy {
+    width: 100%;
+    max-width: 880px;
+    padding: 0;
+  }
+
+  .site-shell .hero h1 span {
+    font-size: clamp(44px, 6vw, 60px);
+  }
+
+  .site-shell .hero h1 strong {
+    font-size: clamp(48px, 6.8vw, 68px);
+    line-height: 1.15;
+    text-wrap: normal;
+  }
+
+  .site-shell .hero-lead { margin-top: 24px; }
+  .site-shell .hero-actions { margin-top: 28px; }
+  .site-shell .hero-metadata { margin-top: 28px; }
+
+  .site-shell .poster-stage {
+    width: 100%;
+    --poster-width: min(56vw, 520px);
+  }
+}
