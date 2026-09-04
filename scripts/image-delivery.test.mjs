@@ -7,6 +7,7 @@ const readSource = (path) => readFileSync(new URL(path, import.meta.url), "utf8"
 const optimizedAssets = [
   ["logo-title.webp", 150_000],
   ["deception-world-poster.webp", 650_000],
+  ["deception-world-poster-delivery.webp", 480_000],
   ["character-james-20260829.webp", 100_000],
   ["rider-saga-rexonance-thumbnail-20260827.webp", 160_000],
   ["rider-realm.webp", 160_000],
@@ -48,10 +49,21 @@ test("critical images expose explicit priority and responsive delivery hints", (
   assert.match(indexRoute, /type: "image\/webp"[\s\S]*?href: "\/logo-title\.webp"/);
   assert.match(titleSequence, /src="\/logo-title\.webp"[\s\S]*?width=\{1200\}[\s\S]*?height=\{800\}/);
   assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title\.webp"/);
-  assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster\.webp"/);
+  assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster-delivery\.webp"/);
   assert.match(worldHome, /srcSet=\{r\.img\.replace\(\/\\\.jpe\?g\$\/i, "\.webp"\)\}/);
-  assert.match(worldHome, /src="\/deception-world-poster\.webp"[\s\S]*?loading="lazy"/);
+  assert.match(worldHome, /src="\/deception-world-poster-delivery\.webp"[\s\S]*?loading="lazy"/);
   assert.match(riderPage, /rider\.id === "over-zeztz" \? "\/character-james-20260829\.webp"/);
+});
+
+test("world preload and first poster use the same lightweight URL", () => {
+  const route = readSource("../src/routes/world.tsx");
+  const home = readSource("../src/components/world/world-home.tsx");
+  assert.match(route, /href: WORLD_ENTER_ASSETS\[0\]/);
+  assert.match(home, /src: "\/deception-world-poster-delivery\.webp"/);
+  assert.doesNotMatch(home, /["']\/deception-world-poster\.webp["']/);
+  const original = statSync(new URL("../public/deception-world-poster.webp", import.meta.url)).size;
+  const delivery = statSync(new URL("../public/deception-world-poster-delivery.webp", import.meta.url)).size;
+  assert.ok(delivery < original * 0.85);
 });
 
 test("the user supplied Over Zeztz JPEG remains available as the canonical fallback", () => {

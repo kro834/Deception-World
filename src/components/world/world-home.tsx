@@ -13,7 +13,7 @@ import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 
 const POSTERS = [
   {
-    src: "/deception-world-poster.webp",
+    src: "/deception-world-poster-delivery.webp",
     pos: "50% 50%",
     fit: "cover",
     alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
@@ -2209,7 +2209,7 @@ export function WorldHome() {
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img
-              src="/deception-world-poster.webp"
+              src="/deception-world-poster-delivery.webp"
               alt=""
               width={1024}
               height={1536}

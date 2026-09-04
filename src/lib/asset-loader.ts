@@ -1,5 +1,5 @@
 const KNOWN_BYTES: Record<string, number> = {
-  "/deception-world-poster.webp": 561774,
+  "/deception-world-poster-delivery.webp": 468454,
   "/poster-card-03.jpeg": 293500,
   "/poster-card-04.jpeg": 369600,
   "/poster-card-05.jpeg": 537900,
@@ -26,7 +26,7 @@ const KNOWN_BYTES: Record<string, number> = {
 };
 
 export const WORLD_ENTER_ASSETS = [
-  "/deception-world-poster.webp",
+  "/deception-world-poster-delivery.webp",
 ] as const;
 
 export const DREAM_CHAPTER_ENTER_ASSETS = [
