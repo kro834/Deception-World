@@ -478,6 +478,26 @@
   .site-shell .signal.has-visual {
     min-height: 210px;
   }
+  /* The portrait cards must grow together with their rows and outer panel.
+     The legacy 168px rows clipped the 210px cards and hid their names. */
+  .site-shell .manager-archive-panel.is-managers {
+    block-size: auto;
+    min-block-size: 0;
+  }
+  .site-shell .manager-archive-panel.is-managers .manager-slot-grid {
+    block-size: auto;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(210px, auto);
+    gap: 12px;
+  }
+  .site-shell .manager-archive-panel.is-managers .manager-slot-grid > .signal {
+    block-size: auto;
+  }
+  .site-shell .manager-archive-panel.is-managers .signal b {
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
   .site-shell .return-strip {
     padding: 22px;
   }

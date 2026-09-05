@@ -198,6 +198,82 @@ async function checkDreamLayout(page) {
   }
 }
 
+async function checkArrivalScroll(page) {
+  await page.locator(".zeus-signal").tap();
+  await page.locator(".load-gate.is-revealing").waitFor();
+  const arrival = await page.evaluate(() => ({
+    loading: document.documentElement.hasAttribute("data-loading"),
+    touchAction: getComputedStyle(document.body).touchAction,
+    overlayInput: getComputedStyle(document.querySelector(".load-gate.is-revealing")).pointerEvents,
+    y: scrollY,
+  }));
+  assert.equal(arrival.loading, false, "Destination revealed with scroll lock still active");
+  assert.notEqual(arrival.touchAction, "none");
+  assert.equal(arrival.overlayInput, "none");
+  const { width, height } = page.viewportSize();
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const x = width * 0.3;
+    const y = height * 0.8;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let step = 1; step <= 8; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y - step * 25 }],
+      });
+      await page.waitForTimeout(16);
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(1000);
+    const after = await page.evaluate(() => scrollY);
+    assert.ok(
+      after > arrival.y + 20,
+      `Arrival swipe was blocked or reset: ${arrival.y} -> ${after}`,
+    );
+    return { ...arrival, after };
+  } finally {
+    await cdp.detach();
+  }
+}
+
+async function checkManagerCards(page) {
+  const panel = page.locator(".manager-archive-panel.is-managers");
+  await panel.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(650);
+  const cards = await panel.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    return [...element.querySelectorAll(".signal")].map((card) => {
+      const rect = card.getBoundingClientRect();
+      const name = card.querySelector("b");
+      const label = name.getBoundingClientRect();
+      return {
+        name: name.textContent,
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        insidePanel: rect.top >= bounds.top - 1 && rect.bottom <= bounds.bottom + 1,
+        nameInsideCard:
+          label.top >= rect.top &&
+          label.bottom <= rect.bottom &&
+          label.left >= rect.left &&
+          label.right <= rect.right,
+      };
+    });
+  });
+  assert.equal(cards.length, 6);
+  for (let i = 0; i < cards.length; i++) {
+    assert.ok(cards[i].insidePanel, `${cards[i].name}: clipped by the panel`);
+    assert.ok(cards[i].nameInsideCard, `${cards[i].name}: clipped name`);
+    for (const next of cards.slice(i + 1)) {
+      const overlapX = Math.min(cards[i].right, next.right) - Math.max(cards[i].left, next.left);
+      const overlapY = Math.min(cards[i].bottom, next.bottom) - Math.max(cards[i].top, next.top);
+      assert.ok(overlapX <= 1 || overlapY <= 1, `${cards[i].name} overlaps ${next.name}`);
+    }
+  }
+  return cards;
+}
+
 async function checkEpisodeClose(page) {
   await page.locator(".episode-pickup-plus").nth(1).tap();
   await waitForOpen(page, ".episode-pickup-dialog", true);
@@ -263,6 +339,8 @@ try {
   for (const viewport of viewports) {
     for (const [name, check] of [
       ["menu focus and Escape", checkMenu],
+      ["six manager cards and names do not overlap", checkManagerCards],
+      ["touch scroll during destination reveal", checkArrivalScroll],
       ["stationary 18/140/300 ms touch", checkStationaryTaps],
       ["55% hold and slide opens", (page) => checkPartialSlide(page, 0.55, true)],
       ["20% hold and slide cancels", (page) => checkPartialSlide(page, 0.2, false)],

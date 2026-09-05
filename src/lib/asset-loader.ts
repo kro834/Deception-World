@@ -31,6 +31,7 @@ export const WORLD_ENTER_ASSETS = [
 
 export const DREAM_CHAPTER_ENTER_ASSETS = [
   "/dream-chapter-logo.jpeg",
+  "/dream-chapter-poster-05.jpeg",
 ] as const;
 
 export const REXONANCE_SAGA_ENTER_ASSETS = [
@@ -115,6 +116,11 @@ async function pullOne(
   if (!request) {
     request = (async () => {
       try {
+        // Use the browser's image request/cache once. Fetching the same URL
+        // first can cause a second request before the decoded image is used.
+        if (IMAGE_ASSET_PATTERN.test(url) && typeof Image !== "undefined") {
+          return await decodeImageAsset(url);
+        }
         const res = await fetch(url, { cache: "force-cache" });
         if (!res.ok) throw new Error(`Asset request failed: ${res.status}`);
         const headerLen = Number(res.headers.get("content-length"));

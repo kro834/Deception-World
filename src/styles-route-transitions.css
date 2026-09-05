@@ -4,6 +4,13 @@ html[data-route-scroll-settling="true"] {
   scroll-behavior: auto !important;
 }
 
+/* Once the destination is mounted, decorative reveal layers no longer own
+   input. A finger can start scrolling before their fade has finished. */
+.load-gate.is-revealing,
+.load-gate.is-arriving {
+  pointer-events: none;
+}
+
 .form-archive-page {
   --archive-toolbar-height: calc(env(safe-area-inset-top) + 72px);
 }
