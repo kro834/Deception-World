@@ -1,5 +1,3 @@
-    }
-    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
     cancelEpisodePickupScrollReset.current = settlePickupScroll(
       dialog,
       [".episode-pickup-panel"],
@@ -152,6 +150,10 @@
           </span>
         </div>
         <div className="hero-copy">
+          <p className="anime-work-title">
+            <span>仮面ライダーサーガ 劇場版第二作</span>
+            <b>DECEPTION WORLD</b>
+          </p>
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
@@ -408,4 +410,3 @@
             </h3>
             <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
           </div>
-          <div className="signal-column">

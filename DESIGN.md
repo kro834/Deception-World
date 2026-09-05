@@ -1,5 +1,15 @@
 # Deception World — Interface Direction
 
+## Anime film edition — 2026-09-05
+
+This edition supersedes the archive-first styling below while preserving the story, approved illustrations, comparison data and established interactions. The main site should read as an anime film website: lead with key art and the actual film title, give Japanese headlines a clear hierarchy, and use quiet chapter divisions instead of nested HUD frames. Ice blue remains the primary identity; muted rose is a small editorial accent, not another navigation state.
+
+On iPhone, show the poster before the introduction, keep controls in a two-row group and place episode titles below their images. On landscape iPad, balance the poster and introduction in two columns without fixed-height clipping. Controls are at least 48px where practical, primary poster controls are 52px, secondary labels are 12px and reading text is generally 16px. Individual rider and manager accents, along with the distinct special-site identities, remain intact.
+
+Dream Chapter is the first film and a Touhou Project collaboration. Use its approved bamboo-grove artwork, vermilion, night violet, ivory, Mincho typography and a vertical Japanese catchphrase to distinguish it from the blue main site. State the collaboration explicitly without adding unconfirmed plot, characters or claims of endorsement. Character names and descriptions sit below portraits, not on top of faces.
+
+Reuse existing art and installed/system fonts; do not add background video or perpetual full-screen effects. Decoration must not capture touch input. Keep keyboard focus visible, preserve reduced-motion/transparency alternatives and test short taps, deliberate taps, partial-distance slides, menu focus and dialog closing after scroll. `npm run verify:ui` runs the interaction regression checks against a running development/preview server (Chrome by default, configurable with `BASE_URL` and `PW_BROWSER_CHANNEL`). Browser emulation does not replace an iOS Safari device check.
+
 ## Thesis
 
 The site is a cinematic official archive: spectacular at story-defining moments and quiet everywhere a visitor must read, compare, or choose. The visual identity remains black, ice blue, and gold; familiar product-design rhythm keeps it usable.

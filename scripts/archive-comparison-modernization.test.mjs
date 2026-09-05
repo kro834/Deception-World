@@ -20,7 +20,7 @@ const archives = [
 test("Saga and Realm archives load one shared modern comparison layer", () => {
   for (const archive of archives) {
     const html = readFileSync(new URL(`../${archive.dir}/${archive.file}`, import.meta.url), "utf8");
-    assert.match(html, /archive-comparison-modern\.css\?v=20260826-r43/);
+    assert.match(html, /archive-comparison-modern\.css\?v=20260905-anime/);
     assert.match(html, /archive-comparison-modern\.js\?v=20260826-r43/);
   }
 });

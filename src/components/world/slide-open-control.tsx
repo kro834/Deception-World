@@ -380,8 +380,8 @@ export function SlideOpenControl({
     const ratio = moveToPointer(event.clientX);
     const deltaX = Math.abs(event.clientX - pointerStart.current.x);
     const deltaY = Math.abs(event.clientY - pointerStart.current.y);
-    const isThumbTap =
-      !holdActivated.current && deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
+    // Holding arms a drag; it must not cancel a stationary, deliberate tap.
+    const isThumbTap = deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
     activePointer.current = null;
     try {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {

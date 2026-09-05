@@ -1,0 +1,622 @@
+/* Dream Chapter: Touhou collaboration film. Existing approved art and content. */
+
+html[data-dream-chapter="true"] {
+  --dream-gold: #e6c28e;
+  --dream-blue: #c1a5ee;
+  --dream-ink: #100b16;
+  --dream-glass-border: rgb(215 193 218 / 24%);
+  --dream-scarlet: #cc493b;
+  --dream-paper: #f2e8d8;
+  --dream-serif: "Yu Mincho", "Hiragino Mincho ProN", serif;
+}
+
+.dream-page {
+  color: #f6eee4;
+  background:
+    radial-gradient(ellipse at 90% 30%, rgb(113 72 137 / 13%), transparent 55%),
+    linear-gradient(135deg, #100b16, #1b0e1d 60%, #110b16);
+}
+
+.dream-site-header {
+  min-height: 76px;
+  border-bottom-color: rgb(231 194 142 / 28%);
+  background: rgb(19 12 23 / 90%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: none;
+}
+
+.dream-site-header > p {
+  color: #f1dfc9;
+  font-size: 12px;
+}
+.dream-site-header > p b {
+  font-size: 12px;
+}
+.dream-back-link {
+  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
+}
+.dream-back-link > span:first-child {
+  border: 0;
+}
+
+.dream-page .dream-chapter-nav {
+  top: max(76px, calc(52px + env(safe-area-inset-top)));
+  width: min(720px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid rgb(225 191 157 / 26%);
+  border-top: 0;
+  border-radius: 0;
+  background: rgb(28 15 30 / 95%);
+  box-shadow: none;
+}
+
+.dream-chapter-nav a {
+  min-height: 50px;
+  border-radius: 0;
+  color: #efe3d7;
+}
+.dream-chapter-nav a[aria-current="location"] {
+  color: #fff4e7;
+  background: rgb(204 73 59 / 24%);
+  box-shadow: inset 0 -2px var(--dream-scarlet);
+}
+.dream-chapter-nav a small {
+  color: #e9baad;
+}
+
+.dream-hero {
+  min-height: max(820px, 100svh);
+  padding: 168px clamp(24px, 6vw, 90px) 84px;
+  align-items: end;
+}
+.dream-hero-field {
+  background: #151316;
+}
+.dream-hero-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 42% 48%;
+}
+.dream-hero-field > :is(.dream-aurora, .dream-light-gate, .dream-dream-grid) {
+  display: none;
+}
+.dream-hero .dream-orbit {
+  display: none;
+}
+.dream-hero-field .dream-star-field {
+  opacity: 0.12;
+}
+.dream-hero-vignette {
+  background:
+    linear-gradient(90deg, transparent 38%, rgb(16 11 22 / 35%) 68%, rgb(16 11 22 / 78%)),
+    linear-gradient(0deg, #100b16, transparent 38%, rgb(16 11 22 / 24%));
+}
+.dream-hero-copy {
+  z-index: auto;
+  width: min(520px, 43vw);
+  margin-left: auto;
+  margin-right: 88px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.dream-hero-copy > p {
+  width: fit-content;
+  margin-bottom: 20px;
+  padding: 8px 13px;
+  border-left: 3px solid var(--dream-scarlet);
+  color: #f3dfc9;
+  background: rgb(25 12 25 / 70%);
+  font-size: 12px;
+  font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+  text-transform: none;
+  letter-spacing: 0.12em;
+}
+.dream-title-logo {
+  width: 100%;
+  max-width: 100%;
+  margin: -7% 0 -6%;
+  mix-blend-mode: screen;
+  filter: none;
+}
+/* Keep the logo's black JPEG matte blended with the art, including economy
+   mode. A backdrop-filter on its parent would isolate the blend again. */
+html[data-dream-chapter="true"] .dream-hero-copy {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.dream-hero-catch span {
+  display: block;
+}
+.dream-hero-copy > div {
+  display: grid;
+  gap: 12px;
+  margin-top: 26px;
+}
+.dream-hero-copy > div b {
+  color: #fff0dc;
+  font-family: var(--dream-serif);
+  font-size: clamp(25px, 2.3vw, 34px);
+  letter-spacing: 0.12em;
+}
+.dream-hero-copy > div span {
+  padding: 0;
+  border: 0;
+  color: #fff1e5;
+  font-size: 16px;
+}
+.dream-hero-catch {
+  position: absolute;
+  top: 175px;
+  right: clamp(26px, 6vw, 88px);
+  z-index: 2;
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-family: var(--dream-serif);
+  font-size: clamp(22px, 2.4vw, 36px);
+  line-height: 1.7;
+  letter-spacing: 0.3em;
+  text-shadow: 0 2px 16px #100b16;
+}
+.dream-hero-actions {
+  gap: 12px;
+  margin-top: 30px;
+}
+.dream-hero-actions a {
+  min-height: 58px;
+  border: 1px solid rgb(236 206 176 / 50%);
+  border-radius: 2px;
+  background: rgb(42 19 35 / 86%);
+}
+.dream-hero-actions a:first-child {
+  background: #a42f2c;
+  border-color: #d87866;
+}
+.dream-hero-actions span {
+  font-size: 14px;
+}
+.dream-hero-actions b {
+  font-size: 12px;
+  color: #f3d4c9;
+}
+.dream-scroll-cue {
+  left: clamp(24px, 6vw, 90px);
+  right: auto;
+  bottom: 30px;
+}
+
+.dream-section {
+  width: min(1200px, calc(100% - 88px));
+  padding-block: 96px;
+}
+.dream-page .dream-section-heading {
+  gap: 16px 24px;
+  padding-bottom: 26px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgb(217 186 154 / 34%);
+  background: none;
+}
+.dream-page .dream-section-heading p {
+  border-left-color: var(--dream-scarlet);
+  color: #efb2a1;
+}
+.dream-section-heading h2 {
+  font-size: clamp(42px, 5.1vw, 76px);
+  letter-spacing: 0.01em;
+}
+.dream-section-heading > span {
+  font-size: 12px;
+  color: #d4bfd4;
+}
+
+.dream-poster-stage {
+  grid-template-columns: minmax(0, 1fr) 192px;
+  gap: 24px;
+}
+.dream-poster-stage > figure {
+  min-height: 0;
+  height: 650px;
+  border-radius: 2px;
+}
+.dream-poster-stage > figure::after {
+  background: linear-gradient(0deg, rgb(16 11 22 / 80%), transparent 28%);
+}
+.dream-poster-stage figcaption {
+  inset: auto 22px 22px;
+}
+.dream-poster-stage figcaption span {
+  font-size: 12px;
+}
+.dream-poster-thumbnails button,
+.dream-poster-controls button {
+  border-radius: 2px;
+}
+.dream-poster-controls button span {
+  font-size: 12px;
+}
+
+.dream-character-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.dream-dolminence-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+.dream-character-grid article,
+.dream-dolminence-grid article {
+  border-radius: 3px;
+  border-color: rgb(218 187 170 / 25%);
+  background: #251a29;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.dream-character-grid button,
+.dream-dolminence-grid button {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: auto;
+  min-height: 0;
+  border-radius: 2px;
+}
+.dream-character-grid img,
+.dream-dolminence-grid img {
+  display: block;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  filter: none;
+  transform: none;
+}
+.dream-character-grid .dream-character-shade,
+.dream-dolminence-grid .dream-character-shade {
+  display: none;
+}
+.dream-character-copy,
+.dream-dolminence-copy {
+  position: relative;
+  inset: auto;
+  padding: 24px;
+  border-top: 2px solid color-mix(in srgb, var(--dream-accent) 65%, #c94738);
+  background: #251a29;
+}
+.dream-character-copy b,
+.dream-dolminence-copy b {
+  font-family: var(--dream-serif);
+  font-size: clamp(24px, 2.2vw, 32px);
+  line-height: 1.45;
+  letter-spacing: 0.03em;
+}
+.dream-character-copy small,
+.dream-dolminence-copy small {
+  margin-bottom: 9px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.dream-character-copy i,
+.dream-dolminence-copy i {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #dac9dc;
+  letter-spacing: 0.1em;
+}
+.dream-character-copy em,
+.dream-dolminence-copy em {
+  margin-top: 22px;
+  font-size: 12px;
+}
+.dream-character-number,
+.dream-dolminence-number {
+  top: 16px;
+  right: 18px;
+  font-size: 30px;
+  text-shadow: 0 2px 8px #100b16;
+}
+.dream-dolminence-intro {
+  max-width: 44em;
+  font-size: 16px;
+  color: #ddcddf;
+  line-height: 2;
+}
+
+.dream-case-list {
+  gap: 0;
+  border-top: 1px solid rgb(224 189 168 / 30%);
+}
+.dream-case-list li {
+  min-height: 190px;
+  border: 0;
+  border-bottom: 1px solid rgb(224 189 168 / 30%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.dream-case-list li::before {
+  background: var(--dream-scarlet);
+  box-shadow: none;
+}
+.dream-case-list h3 {
+  margin-top: 48px;
+  font-family: var(--dream-serif);
+}
+.dream-case-list li > span,
+.dream-case-list small {
+  font-size: 12px;
+}
+.dream-case-list i {
+  display: none;
+}
+.dream-footer {
+  min-height: 420px;
+  border-top: 1px solid rgb(220 183 169 / 24%);
+}
+.dream-footer h2 {
+  font-size: clamp(32px, 6vw, 86px);
+}
+.dream-footer a {
+  font-size: 14px;
+  min-height: 48px;
+}
+.dream-footer p {
+  font-size: 12px;
+}
+.dream-dossier-sections > section > p,
+.dream-ability-list p {
+  font-size: 16px;
+  line-height: 2;
+}
+.dream-profile-grid dt,
+.dream-dossier-visuals figcaption {
+  font-size: 12px;
+}
+.dream-dossier-visuals img {
+  object-fit: contain;
+}
+
+@media (min-width: 641px) and (max-width: 1440px) {
+  .dream-section {
+    width: calc(100% - 88px);
+  }
+  .dream-dossier-layout {
+    grid-template-columns: 1fr;
+  }
+  .dream-dossier-visuals {
+    position: relative;
+    top: auto;
+    height: 570px;
+    min-height: 0;
+  }
+  .dream-dossier-copy {
+    padding: 64px 60px 90px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .dream-poster-stage {
+    grid-template-areas: "visual" "thumbnails" "controls";
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-dolminence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-site-header {
+    min-height: 66px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+  .dream-page .dream-chapter-nav {
+    top: max(66px, calc(50px + env(safe-area-inset-top)));
+    width: calc(100% - 24px);
+  }
+  .dream-chapter-nav a {
+    min-height: 50px;
+    padding-inline: 3px;
+    font-size: 12px;
+  }
+  .dream-chapter-nav a small {
+    font-size: 12px;
+  }
+  .dream-hero {
+    min-height: max(820px, 100svh);
+    padding: 138px 20px max(52px, env(safe-area-inset-bottom));
+  }
+  .dream-hero-field {
+    bottom: 15%;
+    height: 85%;
+  }
+  .dream-hero-art {
+    object-position: 43% center;
+  }
+  .dream-hero-vignette {
+    background: linear-gradient(
+      0deg,
+      #100b16 6%,
+      rgb(16 11 22 / 92%) 21%,
+      rgb(16 11 22 / 8%) 60%,
+      rgb(16 11 22 / 20%)
+    );
+  }
+  .dream-hero-copy {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  .dream-hero-copy > p {
+    margin-bottom: 12px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .dream-title-logo {
+    width: 100%;
+    margin: -7% 0 -6%;
+  }
+  .dream-hero-copy > div {
+    gap: 9px;
+    margin-top: 15px;
+  }
+  .dream-hero-copy > div b {
+    font-size: 25px;
+    letter-spacing: 0.08em;
+  }
+  .dream-hero-copy > div span {
+    font-size: 14px;
+  }
+  .dream-hero-catch {
+    top: 155px;
+    right: 20px;
+    font-size: 22px;
+    letter-spacing: 0.2em;
+  }
+  .dream-hero-actions {
+    margin-top: 22px;
+    gap: 10px;
+  }
+  .dream-hero-actions a {
+    min-height: 54px;
+    padding: 10px;
+  }
+  .dream-hero-actions span {
+    font-size: 13px;
+  }
+  .dream-scroll-cue {
+    display: none;
+  }
+  .dream-section {
+    width: calc(100% - 40px);
+    padding-block: 64px;
+  }
+  .dream-page .dream-section-heading {
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+  }
+  .dream-section-heading h2 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+  .dream-section-heading > span {
+    font-size: 12px;
+  }
+  .dream-poster-stage {
+    gap: 18px;
+  }
+  .dream-poster-stage > figure {
+    min-height: 0;
+    height: 480px;
+    border-radius: 2px;
+  }
+  .dream-poster-stage figcaption {
+    inset: auto 16px 16px;
+  }
+  .dream-poster-stage figcaption span {
+    font-size: 12px;
+  }
+  .dream-character-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .dream-dolminence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .dream-character-grid button,
+  .dream-dolminence-grid button {
+    height: auto;
+    min-height: 0;
+  }
+  .dream-character-copy {
+    padding: 22px;
+  }
+  .dream-character-copy b {
+    font-size: 30px;
+  }
+  .dream-dolminence-copy {
+    padding: 14px 12px;
+  }
+  .dream-dolminence-copy b {
+    font-size: 20px;
+  }
+  .dream-dolminence-copy small {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .dream-dolminence-copy i {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .dream-dolminence-copy em {
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .dream-dolminence-number {
+    top: 10px;
+    right: 12px;
+    font-size: 24px;
+  }
+  .dream-dolminence-intro {
+    margin-top: 0;
+    font-size: 16px;
+  }
+  .dream-case-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dream-case-list li {
+    min-height: 176px;
+    padding: 20px 14px;
+  }
+  .dream-case-list li > b {
+    top: 18px;
+    right: 12px;
+    font-size: 60px;
+  }
+  .dream-case-list h3 {
+    margin-top: 43px;
+    font-size: 25px;
+  }
+  .dream-case-list li > span,
+  .dream-case-list small {
+    font-size: 12px;
+  }
+  .dream-dossier-visuals {
+    height: 440px;
+    min-height: 0;
+  }
+  .dream-dossier-copy {
+    padding: 38px 22px 72px;
+  }
+  .dream-dossier-sections > section > p,
+  .dream-ability-list p {
+    font-size: 16px;
+  }
+  .dream-footer {
+    min-height: 320px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:root .dream-site-header,
+  html:root .dream-back-link,
+  html:root .dream-chapter-nav,
+  html:root .dream-hero-actions a,
+  html:root .dream-character-grid article,
+  html:root .dream-dolminence-grid article {
+    background: #130c17;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

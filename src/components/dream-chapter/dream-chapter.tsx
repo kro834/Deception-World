@@ -763,6 +763,7 @@ export function DreamChapter() {
         data-dream-hero-active={heroVisible ? "true" : "false"}
       >
         <div className="dream-hero-field" aria-hidden="true">
+          <img className="dream-hero-art" src="/dream-chapter-poster-05.jpeg" alt="" width={1448} height={1086} fetchPriority="high" decoding="async" />
           <span className="dream-aurora dream-aurora-blue" />
           <span className="dream-aurora dream-aurora-gold" />
           <span className="dream-light-gate" />
@@ -773,8 +774,9 @@ export function DreamChapter() {
         <span className="dream-hero-vignette" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-a" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-b" aria-hidden="true" />
+        <p className="dream-hero-catch"><span>夢と現実の境界が、</span><span>明ける。</span></p>
         <div className="dream-hero-copy">
-          <p>FILM 01 / DREAM OBSERVATION RECORD</p>
+          <p>仮面ライダーサーガ × 東方Project</p>
           <h1 id="dream-title" className="dream-visually-hidden">
             仮面ライダーサーガ Dream Chapter
           </h1>
@@ -789,7 +791,7 @@ export function DreamChapter() {
           />
           <div>
             <b>ドリームチャプター</b>
-            <span>夢と現実の境界が、明ける。</span>
+            <span>映画第一作 / DREAM CHAPTER</span>
           </div>
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
             <a href="#posters">
@@ -1060,7 +1062,7 @@ export function DreamChapter() {
         <header className="dream-section-heading" data-dream-reveal>
           <p>EPISODE / CASE RECORD</p>
           <h2 id="case-title">CASES</h2>
-          <span>NO THUMBNAILS</span>
+          <span>CASE 0–5</span>
         </header>
         <ol className="dream-case-list" data-dream-reveal>
           {DREAM_CASES.map((episode) => (

@@ -1,0 +1,155 @@
+/* Cinematic edition: readable dossiers and special-site specifications.
+   Existing comparison calculations, ordering, placeholders and rows stay intact. */
+
+/* A. Rider and manager detail pages share .manager-page and .manager-*.
+   Match the addon specificity, otherwise its 13px body floor wins. */
+main.manager-page {
+  --anime-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --anime-display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  font-family: var(--anime-body);
+}
+
+main.manager-page .manager-introduction h1,
+main.manager-page:not(.is-sovereign) .manager-introduction h1,
+main.manager-page .manager-copy-heading h2,
+main.manager-page:not(.is-sovereign) .manager-copy-heading h2,
+main.manager-page .form-pickup-copy h2,
+main.manager-page .form-pickup-heading h2 {
+  font-family: var(--anime-display);
+  letter-spacing: 0.015em;
+}
+
+main.manager-page .manager-copy-heading h2,
+main.manager-page:not(.is-sovereign) .manager-copy-heading h2 {
+  font-size: clamp(28px, 3.1vw, 42px);
+  line-height: 1.4;
+}
+
+main.manager-page:not(.is-sovereign) .manager-copy-body p,
+main.manager-page .manager-copy-body p,
+main.manager-page .rider-partner-copy > p,
+main.manager-page .form-pickup-overview > p,
+main.manager-page .form-pickup-overview > div > p,
+main.manager-page .form-pickup-sections p {
+  color: #c5ccd7;
+  font-size: clamp(16px, 1.17vw, 17px);
+  line-height: 1.95;
+  letter-spacing: 0.035em;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+main.manager-page .manager-quotes q,
+main.manager-page:not(.is-sovereign) .manager-quotes q,
+main.manager-page .form-pickup-copy q {
+  font-family: var(--anime-body);
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.9;
+}
+
+main.manager-page .manager-section-nav a > b,
+main.manager-page .manager-facts dt,
+main.manager-page .form-pickup-stats dt,
+main.manager-page .form-pickup-copy > small,
+main.manager-page .form-pickup-copy > p {
+  font-size: 12px;
+  line-height: 1.65;
+  letter-spacing: 0.07em;
+}
+
+main.manager-page .manager-facts dd,
+main.manager-page .form-pickup-stats dd {
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* Bigger key art, flatter reading surfaces, one radius family. Preserve the
+   image's existing inline object-position, crop and entrance animation. */
+@media (min-width: 761px) {
+  main.manager-page:not(.is-sovereign) .manager-hero {
+    grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(36px, 5vw, 72px);
+  }
+}
+
+main.manager-page .manager-hero .manager-portrait-frame {
+  border-radius: 12px;
+}
+
+main.manager-page .manager-dossier .manager-copy-section {
+  border-radius: 12px;
+}
+
+main.manager-page .form-pickup-card {
+  grid-template-columns: minmax(240px, 0.95fr) minmax(0, 1.05fr);
+  border-radius: 12px;
+}
+
+@media (max-width: 760px) {
+  main.manager-page .manager-introduction h1,
+  main.manager-page:not(.is-sovereign) .manager-introduction h1 {
+    line-height: 1.18;
+  }
+
+  main.manager-page .manager-dossier .manager-copy-section {
+    padding: 30px 20px;
+  }
+
+  main.manager-page .form-pickup-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main.manager-page .form-pickup-copy {
+    padding: 24px 22px 28px;
+  }
+}
+
+/* B. Shared .rxs-* serves both Rexonance and Extreme.
+   The initial hero positioning is deliberately left for visual QA: landscape
+   and iPhone each have separate art positioning rules. */
+.rxs-page.rxs-page {
+  --rxs-font-text: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --rxs-font-display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+  --rxs-muted: #adb7c8;
+}
+
+.rxs-page .rxs-comparison article p,
+.rxs-page .rxs-comparison-note,
+.rxs-page .rxs-p14-method-note,
+.rxs-page .rxs-comparison-result i,
+.rxs-page .rxs-comparison-result em,
+.rxs-page .exs-unavailable li {
+  color: #afb9c9;
+  font-size: 12px;
+  line-height: 1.75;
+  letter-spacing: 0.025em;
+}
+
+.rxs-page .rxs-stage-panel > div > p,
+.rxs-page .rxs-system-grid p,
+.rxs-page .rxs-section-heading > p,
+.rxs-page .rxs-p14-copy > p {
+  font-size: clamp(16px, 1.16vw, 17px);
+  line-height: 1.9;
+}
+
+.rxs-page .rxs-stage-tabs button small {
+  font-size: 12px;
+  letter-spacing: 0.035em;
+}
+
+@media (max-width: 680px) {
+  .rxs-page .rxs-comparison article header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .rxs-page .rxs-comparison-result {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .rxs-page .rxs-comparison-result em {
+    max-width: 100%;
+  }
+}

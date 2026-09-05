@@ -1384,6 +1384,10 @@ export function WorldHome() {
           </span>
         </div>
         <div className="hero-copy">
+          <p className="anime-work-title">
+            <span>仮面ライダーサーガ 劇場版第二作</span>
+            <b>DECEPTION WORLD</b>
+          </p>
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
@@ -2286,19 +2290,19 @@ export function WorldHome() {
           if (event.target === episodePickupDialogRef.current) closeEpisodePickup();
         }}
       >
+        <button
+          type="button"
+          className="episode-pickup-close ios26-glass"
+          data-liquid-pointer="true"
+          onClick={closeEpisodePickup}
+          aria-label="エピソードのピックアップを閉じる"
+        >
+          <LiquidPointerGlow />
+          <span className="episode-pickup-close-icon" aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </span>
+        </button>
         <div className="episode-pickup-panel">
-          <button
-            type="button"
-            className="episode-pickup-close ios26-glass"
-            data-liquid-pointer="true"
-            onClick={closeEpisodePickup}
-            aria-label="エピソードのピックアップを閉じる"
-          >
-            <LiquidPointerGlow />
-            <span className="episode-pickup-close-icon" aria-hidden="true">
-              <UiVectorIcon kind="close" size={16} />
-            </span>
-          </button>
           <header className="episode-pickup-heading">
             <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
             <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>

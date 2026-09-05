@@ -408,3 +408,4 @@ const EPISODES: EpisodeRecord[] = [
     no: "02",
     title: "LEGENDS",
     src: "/episode-02-legends.jpeg",
+    pos: "50% 50%",

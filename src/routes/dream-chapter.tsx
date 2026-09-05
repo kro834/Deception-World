@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DreamChapter } from "@/components/dream-chapter/dream-chapter";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import dreamChapterCssUrl from "@/styles-dream-chapter.css?url";
+import dreamFilmCssUrl from "@/styles-dream-film.css?url";
 
 export const Route = createFileRoute("/dream-chapter")({
   component: DreamChapter,
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/dream-chapter")({
     links: [
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: dreamChapterCssUrl },
+      { rel: "stylesheet", href: dreamFilmCssUrl },
+      { rel: "preload", as: "image", href: "/dream-chapter-poster-05.jpeg" },
       {
         rel: "preload",
         as: "image",

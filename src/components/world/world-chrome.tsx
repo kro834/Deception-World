@@ -245,14 +245,22 @@ export function SideMenuLayer({
       capture: true,
       passive: false,
     });
-    const frame = window.requestAnimationFrame(() => {
+    let focusFrame = 0;
+    const focusPanel = () => {
+      // The opening CSS visibility transition can still be hidden on the
+      // first frame. Retry after layout rather than leaving focus on body.
+      if (window.getComputedStyle(panel).visibility !== "visible") {
+        focusFrame = window.requestAnimationFrame(focusPanel);
+        return;
+      }
       const focusTarget = sideMenuRestoreFocusRef.current
         ? panel.querySelector<HTMLElement>(".side-panel-close")
         : panel;
       focusTarget?.focus({ preventScroll: true });
-    });
+    };
+    focusFrame = window.requestAnimationFrame(focusPanel);
     return () => {
-      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("touchmove", containBackgroundScroll, true);
       document.removeEventListener("wheel", containBackgroundScroll, true);
       document.body.style.overflow = previousOverflow;
@@ -365,7 +373,7 @@ export function SideMenuLayer({
     const last = focusable.at(-1)!;
     if (
       event.shiftKey &&
-      (document.activeElement === first || !panel.contains(document.activeElement))
+      (document.activeElement === panel || document.activeElement === first || !panel.contains(document.activeElement))
     ) {
       event.preventDefault();
       last.focus({ preventScroll: true });

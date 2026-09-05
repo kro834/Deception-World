@@ -1,3 +1,4 @@
+          <div className="signal-column">
             <ManagerRail ref={managerRail} />
 
             {managerTab === 0 ? (
@@ -408,4 +409,3 @@
               <SlideOpenControl
                 className="rider-dossier-open"
                 ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
-                label="個別資料"

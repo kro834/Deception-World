@@ -1,5 +1,3 @@
-      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive =
         typeof detail?.active === "boolean"
           ? detail.active
           : document.documentElement.hasAttribute("data-opening-handoff-active");
@@ -409,3 +407,5 @@
       } catch {
         /* already open */
       }
+    }
+    if (!openedByKeyboard) dialog.focus({ preventScroll: true });

@@ -1,0 +1,534 @@
+/* Cinematic edition. Keep artwork and story first; the archive UI remains
+   functional, with the same touch, keyboard and reduced-motion contracts. */
+:root {
+  --anime-line: rgb(227 233 250 / 18%);
+  --anime-rose: #ff7894;
+  --anime-surface: #0e1421;
+}
+
+.site-shell {
+  background: radial-gradient(ellipse at 0 25%, #151828 0, transparent 40rem), #070b13;
+}
+
+.site-shell::before,
+.site-shell::after,
+.site-shell .hero-copy::before {
+  display: none;
+}
+
+.site-shell .topbar {
+  background: rgb(7 11 19 / 96%);
+  border-bottom: 1px solid var(--anime-line);
+  box-shadow: none;
+}
+
+.site-shell .topbar nav a {
+  font-size: 14px;
+  letter-spacing: 0.12em;
+}
+
+.site-shell .hero {
+  gap: clamp(32px, 4vw, 64px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: center;
+  padding: 128px clamp(24px, 6vw, 96px) 80px;
+}
+
+.site-shell .hero-copy {
+  max-width: 680px;
+  min-width: 0;
+  padding: 0;
+  animation-delay: 0s;
+  animation-duration: 700ms;
+}
+
+.anime-work-title {
+  margin: 0 0 32px;
+}
+.anime-work-title span {
+  display: block;
+  margin-bottom: 10px;
+  color: #bbc5d9;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  line-height: 1.8;
+}
+.anime-work-title b {
+  display: block;
+  font-family: "Oxanium", var(--font-display);
+  font-size: clamp(21px, 2.5vw, 34px);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  color: #f5f8ff;
+}
+
+.site-shell .hero .eyebrow {
+  margin-bottom: 20px;
+}
+.site-shell .eyebrow > span {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--anime-rose);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+.site-shell .eyebrow i {
+  width: 48px;
+  background: var(--anime-rose);
+}
+.site-shell .hero h1 {
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+.site-shell .hero h1 span {
+  font-size: clamp(34px, 4vw, 58px);
+}
+.site-shell .hero h1 strong {
+  font-size: clamp(40px, 4.7vw, 68px);
+  line-height: 1.18;
+  margin-top: 8px;
+  filter: none;
+  background-image: linear-gradient(100deg, #ffffff 12%, #bae5ff 80%);
+}
+.site-shell .hero-lead {
+  margin-top: 26px;
+  color: #c4ccdb;
+  font-size: 16px;
+  line-height: 1.95;
+  letter-spacing: 0.025em;
+}
+.site-shell .hero-actions {
+  gap: 20px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.site-shell .primary-action {
+  min-height: 56px;
+  padding: 14px 22px;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  border-color: rgb(232 238 251 / 42%);
+}
+.site-shell .text-action {
+  min-height: 48px;
+  font-size: 13px;
+}
+.site-shell .hero-metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 32px;
+  border-block: 1px solid var(--anime-line);
+}
+.site-shell .hero-metadata > span {
+  padding: 16px 12px;
+  border: 0;
+  background: none;
+}
+.site-shell .hero-metadata > span + span {
+  border-left: 1px solid var(--anime-line);
+}
+.site-shell .hero-metadata :is(small, b) {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+.site-shell .hero-metadata b {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.site-shell .poster-stage {
+  --poster-width: min(100%, 440px);
+  width: 100%;
+  gap: 28px;
+  padding: 0 0 26px;
+  animation-delay: 100ms;
+  animation-duration: 700ms;
+}
+.site-shell .poster-frame {
+  padding: 3px;
+  box-shadow: 0 22px 64px rgb(0 0 0 / 35%);
+}
+.site-shell .poster-frame::before {
+  inset: -10px;
+  border-color: rgb(215 227 251 / 20%);
+}
+.site-shell .poster-holo-ring {
+  opacity: 0.45;
+}
+.site-shell .poster-back-card {
+  opacity: 0.15;
+}
+.site-shell .poster-stage .orbit {
+  opacity: 0.22;
+}
+.site-shell .poster-index {
+  display: none;
+}
+.site-shell .hero .poster-controls {
+  width: 100%;
+  max-width: 440px;
+  padding: 0;
+  gap: 10px;
+}
+.site-shell .poster-control-cluster {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 8px;
+  gap: 8px;
+  border-radius: 22px;
+  border-color: var(--anime-line);
+  background: linear-gradient(140deg, #1c2535, #0c1320);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+.site-shell .poster-control-cluster > button {
+  min-height: 52px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--anime-line);
+  border-radius: 14px;
+}
+.site-shell .poster-shuffle {
+  grid-column: 1 / -1;
+}
+.site-shell .poster-control-cluster > button + button::before {
+  content: none;
+}
+.site-shell .poster-control-cluster button b {
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+}
+.site-shell .poster-lock b {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  justify-content: center;
+  white-space: normal;
+}
+.site-shell .poster-lock small {
+  font-size: 12px;
+}
+.site-shell .poster-controls output {
+  font-size: 12px;
+  color: #aebad0;
+}
+
+/* A chapter rhythm, instead of nested instrument panels. */
+.site-shell :is(.story-section, .riders-section, .records-section) {
+  padding-block: clamp(64px, 8vw, 112px);
+}
+.site-shell .section-index {
+  margin-bottom: 40px;
+}
+.site-shell .section-index > span {
+  color: var(--anime-rose);
+}
+.site-shell .section-index small {
+  color: #b8c2d5;
+  font-size: 12px;
+}
+.site-shell :is(.story-heading h2, .section-title h2, .records-heading h2) {
+  font-family: "Zen Kaku Gothic New", var(--font-body);
+  font-weight: 700;
+  font-size: clamp(32px, 4.8vw, 68px);
+  letter-spacing: 0.005em;
+  line-height: 1.4;
+}
+.site-shell :is(.story-copy > p, .section-title > p, .rider-description, .world-column-copy p) {
+  color: #c5cddd;
+  font-size: 16px;
+  line-height: 2;
+  letter-spacing: 0.025em;
+}
+.site-shell :is(.threat-panel, .rider-console, .world-column-content, .episode-archive) {
+  border: 1px solid var(--anime-line);
+  border-radius: 24px;
+  background: var(--anime-surface);
+  box-shadow: none;
+  outline: 0;
+}
+.site-shell .threat-copy h3 {
+  font-size: clamp(25px, 3vw, 40px);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+.site-shell .threat-copy > p {
+  font-size: 16px;
+  line-height: 1.9;
+  color: #c5cddd;
+}
+.site-shell .system-label {
+  font-size: 12px;
+  color: #b7c5db;
+}
+.site-shell .signal.has-visual {
+  border-radius: 12px;
+  border-color: var(--anime-line);
+  box-shadow: none;
+}
+.site-shell .signal.has-visual b {
+  font-size: 16px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.5;
+}
+.site-shell .signal.has-visual small {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.site-shell .rider-description {
+  max-width: 36em;
+}
+.site-shell .rider-detail h3 {
+  font-size: clamp(30px, 3vw, 44px);
+  line-height: 1.35;
+}
+.site-shell .rider-name-line {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.site-shell .rider-person {
+  font-size: 16px;
+  line-height: 1.8;
+}
+.site-shell .rider-number {
+  font-size: 12px;
+}
+.site-shell .rider-monogram {
+  opacity: 0.07;
+}
+.site-shell .return-strip {
+  padding: 24px;
+  border-radius: 12px;
+  border-color: var(--anime-line);
+  background: #121625;
+}
+.site-shell .return-strip p {
+  font-size: 16px;
+  line-height: 1.8;
+}
+.site-shell .return-strip b {
+  font-size: 16px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.site-shell .return-strip span {
+  font-size: 12px;
+  color: var(--anime-rose);
+}
+.site-shell .episode-archive {
+  padding: clamp(18px, 3vw, 36px);
+}
+.site-shell .episode-archive-heading h3 {
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.5;
+}
+.site-shell .episode-archive-heading > div:first-child > span {
+  font-size: 12px;
+}
+.site-shell .episode-card .episode-card-surface {
+  border-radius: 18px;
+  background: #080d16;
+}
+.site-shell .episode-card-copy h4 {
+  font-size: clamp(22px, 2.6vw, 36px);
+  line-height: 1.25;
+}
+.site-shell .episode-card-copy > p {
+  font-size: 12px;
+}
+.site-shell .episode-card-copy small {
+  font-size: 12px;
+}
+.site-shell .episode-controls button {
+  width: 52px;
+  height: 52px;
+}
+.site-shell .world-column-number {
+  font-size: 12px;
+}
+.site-shell footer {
+  border-top: 1px solid var(--anime-line);
+}
+
+/* Consistent directory typography, without suppressing keyboard focus. */
+.side-panel {
+  background: #0d1320;
+  border-left-color: var(--anime-line);
+}
+.side-panel .side-panel-head {
+  background: none;
+}
+.side-panel .side-panel-group > p {
+  font-size: 12px;
+  color: #aebcd1;
+  letter-spacing: 0.12em;
+}
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+  min-height: 56px;
+  padding: 10px 12px;
+}
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 760px) {
+  .site-shell .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 144px 22px 56px;
+  }
+  .site-shell .hero-copy {
+    width: 100%;
+  }
+  .anime-work-title {
+    margin-bottom: 24px;
+  }
+  .anime-work-title span {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .anime-work-title b {
+    font-size: clamp(21px, 6vw, 29px);
+  }
+  .site-shell .hero h1 span {
+    font-size: 34px;
+  }
+  .site-shell .hero h1 strong {
+    font-size: clamp(38px, 10.2vw, 58px);
+  }
+  .site-shell .hero-lead {
+    font-size: 15px;
+  }
+  .site-shell .hero-metadata {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
+  .site-shell .hero-metadata > span {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .site-shell .hero-metadata > span + span {
+    border-left: 0;
+    border-top: 1px solid var(--anime-line);
+  }
+  .site-shell .poster-stage {
+    --poster-width: min(100%, 360px);
+  }
+  .site-shell .poster-stage {
+    order: -1;
+  }
+  .site-shell .hero .poster-controls {
+    max-width: 360px;
+  }
+  .site-shell .scroll-cue {
+    display: none;
+  }
+  .site-shell .section-index {
+    margin-bottom: 28px;
+  }
+  .site-shell :is(.story-section, .riders-section, .records-section) {
+    padding-inline: 22px;
+  }
+  .site-shell .episode-archive {
+    border-radius: 18px;
+  }
+  .site-shell .episode-archive-heading {
+    gap: 18px;
+  }
+  .site-shell .episode-grid {
+    --episode-mobile-card-height: 330px;
+  }
+  .site-shell .episode-card .episode-card-surface {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 182px minmax(0, 1fr);
+  }
+  .site-shell .episode-thumbnail {
+    height: 182px;
+  }
+  .site-shell .episode-card .episode-card-copy {
+    height: auto;
+    padding: 18px;
+  }
+  .site-shell .episode-card-copy small {
+    padding-top: 12px;
+    font-size: 12px;
+  }
+  .site-shell .finale-content h2 {
+    font-size: clamp(32px, 8.5vw, 48px);
+    line-height: 1.4;
+  }
+  .site-shell .signal.has-visual {
+    min-height: 210px;
+  }
+  .site-shell .return-strip {
+    padding: 22px;
+  }
+  .side-panel {
+    width: min(92vw, 460px);
+  }
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+    flex: 1 1 180px;
+  }
+  .side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+    flex: 0 0 auto;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1040px) and (orientation: portrait) {
+  .site-shell .hero {
+    display: flex;
+    flex-direction: column;
+    padding-top: 152px;
+  }
+  .site-shell .hero-copy {
+    max-width: 760px;
+  }
+  .site-shell .poster-stage {
+    --poster-width: min(72vw, 480px);
+  }
+  .site-shell .hero .poster-controls {
+    max-width: 480px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-shell :is(.hero-copy, .poster-stage) {
+    animation: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .site-shell .topbar {
+    background: #070b13;
+  }
+}
+@media (forced-colors: active) {
+  .site-shell .hero h1 strong {
+    color: CanvasText;
+    background: none;
+  }
+  .site-shell .poster-control-cluster > button {
+    border-color: ButtonText;
+  }
+}
