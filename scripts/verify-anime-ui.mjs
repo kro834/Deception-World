@@ -128,7 +128,7 @@ async function checkStationaryTaps(page) {
   return durations;
 }
 
-async function checkPartialSlide(page, ratio, shouldOpen) {
+async function checkPartialSlide(page, ratio, shouldOpen, verticalDrift = 0) {
   const button = page.locator(".world-column-slide-open");
   await button.click({ trial: true });
   await page.waitForTimeout(400);
@@ -145,7 +145,9 @@ async function checkPartialSlide(page, ratio, shouldOpen) {
     for (let step = 1; step <= 8; step++) {
       await cdp.send("Input.dispatchTouchEvent", {
         type: "touchMove",
-        touchPoints: [{ x: start.x + (travel * ratio * step) / 8, y: start.y }],
+        touchPoints: [
+          { x: start.x + (travel * ratio * step) / 8, y: start.y + (verticalDrift * step) / 8 },
+        ],
       });
       await page.waitForTimeout(16);
     }
@@ -273,6 +275,90 @@ async function checkEpisodeSwipes(page) {
   } finally {
     await cdp.detach();
   }
+}
+
+async function checkThumbAndTextPanning(page) {
+  const drag = await checkPartialSlide(page, 0.55, true, 120);
+  await page.keyboard.press("Escape");
+  await waitForOpen(page, ".world-column-dialog", false);
+  const button = page.locator(".world-column-slide-open");
+  await button.click({ trial: true });
+  await page.waitForTimeout(400);
+  const box = await button.boundingBox();
+  const x = box.x + box.width - 44,
+    y = box.y + box.height / 2;
+  const before = await page.evaluate(() => scrollY);
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let i = 1; i <= 10; i++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y - i * 15 }],
+      });
+      await page.waitForTimeout(20);
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(300);
+    const after = await page.evaluate(() => scrollY);
+    assert.ok(after > before + 50, `Label blocked vertical scrolling: ${before} -> ${after}`);
+    await waitForOpen(page, ".world-column-dialog", false);
+    return { diagonalDragOpened: drag.opened, labelScroll: after - before };
+  } finally {
+    await cdp.detach();
+  }
+}
+
+async function checkFormPickupLayout(page) {
+  await page.goto(new URL("/managers/lejas", baseUrl).href);
+  await page.waitForTimeout(2200);
+  const opener = page.locator(".form-pickup .ios-slide-open").first();
+  await opener.focus();
+  await page.keyboard.press("Enter");
+  await waitForOpen(page, ".form-pickup-dialog", true);
+  const dialog = page.locator(".form-pickup-dialog[open]");
+  const panel = dialog.locator(".form-pickup-panel");
+  const close = dialog.locator(".form-pickup-close");
+  const before = await close.boundingBox();
+  const layout = await dialog.evaluate((e) => {
+    const panel = e.querySelector(".form-pickup-panel");
+    const heading = e.querySelector(".form-pickup-heading").getBoundingClientRect();
+    const close = e.querySelector(".form-pickup-close").getBoundingClientRect();
+    return {
+      horizontalOverflow: panel.scrollWidth - panel.clientWidth,
+      headingClear: heading.top >= close.bottom,
+      statsFit: [...e.querySelectorAll(".form-pickup-stats dt,.form-pickup-stats dd")].every(
+        (n) => n.scrollWidth <= n.clientWidth + 1,
+      ),
+    };
+  });
+  assert.ok(layout.horizontalOverflow <= 1);
+  assert.equal(layout.headingClear, true);
+  assert.equal(layout.statsFit, true);
+  const box = await panel.boundingBox();
+  const cdp = await page.context().newCDPSession(page);
+  const x = box.x + box.width * 0.3,
+    y = box.y + box.height * 0.8;
+  try {
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let i = 1; i <= 10; i++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: y - i * 18 }],
+      });
+      await page.waitForTimeout(20);
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  } finally {
+    await cdp.detach();
+  }
+  await page.waitForTimeout(400);
+  assert.ok(await panel.evaluate((e) => e.scrollTop > 0));
+  const after = await close.boundingBox();
+  assert.ok(Math.abs(before.y - after.y) < 2, "Form close button moved with content");
+  await close.tap();
+  await waitForOpen(page, ".form-pickup-dialog", false);
+  return { ...layout, closeStayedVisible: true };
 }
 
 async function checkAndroidRenderer(page) {
@@ -448,6 +534,8 @@ try {
       ["stationary 18/140/300 ms touch", checkStationaryTaps],
       ["55% hold and slide opens", (page) => checkPartialSlide(page, 0.55, true)],
       ["20% hold and slide cancels", (page) => checkPartialSlide(page, 0.2, false)],
+      ["diagonal thumb drag and vertical label scroll", checkThumbAndTextPanning],
+      ["form pickup text and anchored close", checkFormPickupLayout],
       ["episode close after scroll", checkEpisodeClose],
       ...(viewport.userAgent
         ? [["Android CSS-only glass keeps selection working", checkAndroidRenderer]]

@@ -200,15 +200,6 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           if (e.target === dlg.current) close();
         }}
       >
-        <div className="form-pickup-panel">
-          {isRexonance ? (
-            <div className="rexonance-panel-ambient" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <span />
-            </div>
-          ) : null}
           <button
             type="button"
             className="form-pickup-close"
@@ -222,6 +213,15 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               <UiVectorIcon kind="close" size={16} />
             </i>
           </button>
+        <div className="form-pickup-panel">
+          {isRexonance ? (
+            <div className="rexonance-panel-ambient" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <span />
+            </div>
+          ) : null}
           <div className="form-pickup-heading">
             <p>
               <span>RIDER PICKUP</span>

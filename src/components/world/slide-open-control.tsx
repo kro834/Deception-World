@@ -423,7 +423,11 @@ export function SlideOpenControl({
       onPointerMove={drag}
       onPointerUp={finishDrag}
       onPointerCancel={cancelDrag}
-      onLostPointerCapture={cancelDrag}
+      onLostPointerCapture={(event) => {
+        // A touch initially captures the thumb. Moving capture to the button
+        // emits a bubbling loss from that child, not cancellation of our drag.
+        if (event.target === event.currentTarget) cancelDrag(event);
+      }}
       onFocus={(event) => {
         if (event.currentTarget.matches(":focus-visible") && !suppressFocusRing.current) {
           event.currentTarget.dataset.keyboardFocus = "true";
@@ -463,6 +467,8 @@ export function SlideOpenControl({
           bottom: "3px",
           left: "4px",
           height: "auto",
+          pointerEvents: "auto",
+          touchAction: "none",
           transform: "translate3d(var(--slide-offset, 0px), 0, 0)",
         }}
       >

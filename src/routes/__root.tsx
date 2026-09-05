@@ -6,6 +6,7 @@ import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
 import androidPerformanceCss from "../styles-android-performance.css?url";
+import pickupStabilityCss from "../styles-pickup-stability.css?url";
 import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
 
@@ -45,6 +46,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: androidPerformanceCss },
+      { rel: "stylesheet", href: pickupStabilityCss },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "64x64", href: "/favicon.png" },
       { rel: "stylesheet", href: appCss },

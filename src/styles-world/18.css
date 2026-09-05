@@ -77,7 +77,9 @@ html[data-android-renderer] body {
 html[data-android-renderer] .ios-slide-open {
   touch-action: pan-y pinch-zoom;
   -ms-touch-action: pan-y;
-  overscroll-behavior: contain;
+  /* The rail clips its decorative fill but must not trap vertical panning.
+     The thumb reserves drag ownership independently through touch-action. */
+  overscroll-behavior: auto;
 }
 
 html[data-android-renderer] .ambient {
