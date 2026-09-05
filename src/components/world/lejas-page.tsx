@@ -199,7 +199,7 @@ export function LejasPage() {
             "ガッチャーン!",
             "レベルアップ!!",
             "TRUE! FALSE! CHECKMATE!",
-            "KAMEN RIDER FALS!",
+            "KAMEN RIDER PHALARIS!",
           ],
           quote: "選んだのは君だ。私が並べた選択肢の中から",
           stats: [
@@ -248,7 +248,7 @@ export function LejasPage() {
           ],
           finishers: [
             {
-              name: "FALS CRITICAL STRIKE",
+              name: "PHALARIS CRITICAL STRIKE",
               body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。",
             },
             {
