@@ -1,11 +1,3 @@
-    alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル",
-    pickups: [
-      {
-        label: "仮面ライダーレルムレジェンズ",
-        displayLines: ["仮面ライダーレルム", "レジェンズ"],
-        src: "/rider-profile-realm.jpeg",
-        pos: "50% 8%",
-        alt: "仮面ライダーレルムレジェンズ",
         width: 1221,
         height: 1800,
         to: "/riders/realm",
@@ -410,3 +402,18 @@ export function WorldHome() {
     const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
       handoffActive =
+        typeof detail?.active === "boolean"
+          ? detail.active
+          : document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    syncAmbientPause();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
+
+  useEffect(() => {

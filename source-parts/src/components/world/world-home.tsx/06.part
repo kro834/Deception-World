@@ -1,3 +1,11 @@
+              <p className="rider-description">{rider.desc}</p>
+              <div className="rider-line">
+                <span />
+                <b>{rider.name}</b>
+              </div>
+              <SlideOpenControl
+                className="rider-dossier-open"
+                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
                 label="個別資料"
                 opensDialog={false}
                 onOpen={() => {

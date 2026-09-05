@@ -409,3 +409,11 @@ const EPISODES: EpisodeRecord[] = [
     title: "LEGENDS",
     src: "/episode-02-legends.jpeg",
     pos: "50% 50%",
+    alt: "赤い装甲のライダーと黒金のライダーが交戦するEP2のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダーレルムレジェンズ",
+        displayLines: ["仮面ライダーレルム", "レジェンズ"],
+        src: "/rider-profile-realm.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーレルムレジェンズ",

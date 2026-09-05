@@ -198,6 +198,74 @@ async function checkDreamLayout(page) {
   }
 }
 
+async function checkEpisodeSwipes(page) {
+  const grid = page.locator(".episode-grid");
+  // The initial route restores scroll for 1.8s. This programmatic jump is not
+  // user input, so wait for restoration before positioning the touch fixture.
+  await page.waitForTimeout(800);
+  await grid.scrollIntoViewIfNeeded();
+  // Let the section's entrance motion settle before choosing touch coordinates.
+  await page.waitForTimeout(900);
+  const cdp = await page.context().newCDPSession(page);
+  const aligned = async (index) =>
+    page.waitForFunction(
+      (index) => {
+        const grid = document.querySelector(".episode-grid");
+        const card = grid.querySelectorAll(".episode-card")[index];
+        const left = Math.min(
+          grid.scrollWidth - grid.clientWidth,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        return Math.abs(grid.scrollLeft - left) <= 2 && card.classList.contains("is-active");
+      },
+      index,
+      { timeout: 5000 },
+    );
+  try {
+    for (const direction of [1, -1]) {
+      for (let step = 1; step <= 4; step++) {
+        const box = await grid.boundingBox();
+        const x = box.x + box.width * (direction === 1 ? 0.8 : 0.2);
+        const y = box.y + Math.min(220, box.height / 2);
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+        for (let frame = 1; frame <= 12; frame++) {
+          await cdp.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x: x - (direction * box.width * 0.6 * frame) / 12, y }],
+          });
+          await page.waitForTimeout(25);
+        }
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        const index = direction === 1 ? step : 4 - step;
+        try {
+          await aligned(index);
+        } catch (error) {
+          const state = await grid.evaluate((element) => ({
+            left: element.scrollLeft,
+            active: [...element.children].findIndex((card) => card.classList.contains("is-active")),
+          }));
+          throw new Error(
+            `Swipe ${direction}/${step} expected EP${index + 1}: ${JSON.stringify(state)}`,
+            { cause: error },
+          );
+        }
+      }
+    }
+    // Simulate a browser losing its native snap after an interrupted gesture.
+    // The JS fallback must finish alignment without requiring another swipe.
+    await grid.evaluate((element) => {
+      element.style.scrollSnapType = "none";
+      const card = element.querySelectorAll(".episode-card")[1];
+      element.scrollLeft = card.offsetLeft - (element.clientWidth - card.clientWidth) / 2 - 40;
+    });
+    await aligned(1);
+    await grid.evaluate((element) => element.style.removeProperty("scroll-snap-type"));
+    return { forward: "01 → 05", backward: "05 → 01", interruptedSnapRecovered: true };
+  } finally {
+    await cdp.detach();
+  }
+}
+
 async function checkArrivalScroll(page) {
   await page.locator(".zeus-signal").tap();
   await page.locator(".load-gate.is-revealing").waitFor();
@@ -340,6 +408,7 @@ try {
     for (const [name, check] of [
       ["menu focus and Escape", checkMenu],
       ["six manager cards and names do not overlap", checkManagerCards],
+      ["episode swipes finish card alignment", checkEpisodeSwipes],
       ["touch scroll during destination reveal", checkArrivalScroll],
       ["stationary 18/140/300 ms touch", checkStationaryTaps],
       ["55% hold and slide opens", (page) => checkPartialSlide(page, 0.55, true)],

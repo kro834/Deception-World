@@ -1,18 +1,3 @@
-        typeof detail?.active === "boolean"
-          ? detail.active
-          : document.documentElement.hasAttribute("data-opening-handoff-active");
-      syncAmbientPause();
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
-    syncAmbientPause();
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
-    };
-  }, []);
-
-  useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const syncMotionPreference = () => setMotionReduced(media.matches);
     syncMotionPreference();
@@ -189,6 +174,8 @@
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    let settleTimer = 0;
+    let touching = false;
     const releaseProgrammaticScroll = () => {
       episodeProgrammatic.current = false;
       if (episodeScrollTimer.current != null) {
@@ -214,20 +201,65 @@
       });
       setEpisode((cur) => (cur === best ? cur : best));
     };
+    const settleScroll = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = 0;
+      if (touching || episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      const maxLeft = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      let target: HTMLElement | null = null;
+      let distance = Number.POSITIVE_INFINITY;
+      cards.forEach((card) => {
+        const left = Math.min(
+          maxLeft,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        const delta = Math.abs(left - grid.scrollLeft);
+        if (delta < distance) {
+          distance = delta;
+          target = card;
+        }
+      });
+      // Native snapping can stop between cards after interrupted iOS momentum.
+      // Align only after release and idle; never compete with a held gesture.
+      if (target && distance > 1) scrollAxisX(grid, target);
+      syncFromScroll();
+    };
+    const scheduleSettle = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settleScroll, 180);
+    };
+    const startTouch = () => {
+      touching = true;
+      window.clearTimeout(settleTimer);
+      releaseProgrammaticScroll();
+    };
+    const endTouch = () => {
+      touching = false;
+      scheduleSettle();
+    };
     const onScroll = () => {
+      scheduleSettle();
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("touchstart", startTouch, { passive: true });
+    grid.addEventListener("touchend", endTouch, { passive: true });
+    grid.addEventListener("touchcancel", endTouch, { passive: true });
     grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", syncFromScroll);
+    grid.addEventListener("scrollend", settleScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", syncFromScroll);
+      grid.removeEventListener("scrollend", settleScroll);
     };
   }, []);
 
@@ -386,26 +418,3 @@
 
   const openEpisodePickup = (
     index: number,
-    trigger: HTMLButtonElement,
-    openedByKeyboard: boolean,
-  ) => {
-    const dialog = episodePickupDialogRef.current;
-    if (!dialog || !EPISODES[index]?.pickups?.length) return;
-    if (episodePointerFocusTimer.current != null) {
-      window.clearTimeout(episodePointerFocusTimer.current);
-      episodePointerFocusTimer.current = null;
-    }
-    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
-    goEpisode(index);
-    episodePickupTriggerRef.current = trigger;
-    episodePickupOpenedByKeyboard.current = openedByKeyboard;
-    setEpisodePickup(index);
-    cancelEpisodePickupScrollReset.current?.();
-    if (!dialog.open) {
-      try {
-        dialog.showModal();
-      } catch {
-        /* already open */
-      }
-    }
-    if (!openedByKeyboard) dialog.focus({ preventScroll: true });

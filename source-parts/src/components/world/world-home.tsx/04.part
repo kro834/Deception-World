@@ -1,3 +1,26 @@
+    trigger: HTMLButtonElement,
+    openedByKeyboard: boolean,
+  ) => {
+    const dialog = episodePickupDialogRef.current;
+    if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    if (episodePointerFocusTimer.current != null) {
+      window.clearTimeout(episodePointerFocusTimer.current);
+      episodePointerFocusTimer.current = null;
+    }
+    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
+    goEpisode(index);
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
+    setEpisodePickup(index);
+    cancelEpisodePickupScrollReset.current?.();
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }
+    }
+    if (!openedByKeyboard) dialog.focus({ preventScroll: true });
     cancelEpisodePickupScrollReset.current = settlePickupScroll(
       dialog,
       [".episode-pickup-panel"],
@@ -394,19 +417,3 @@
             <p>
               世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
             </p>
-            <p>
-              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
-            </p>
-          </div>
-        </div>
-
-        <div className="threat-panel" id="manager-archive" data-performance-region>
-          <div className="threat-copy">
-            <span className="system-label">MANAGER ARCHIVE</span>
-            <h3>
-              SIX SIGNALS
-              <br />
-              ABOVE THE WORLD.
-            </h3>
-            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
-          </div>

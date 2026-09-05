@@ -1,3 +1,19 @@
+            <p>
+              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            </p>
+          </div>
+        </div>
+
+        <div className="threat-panel" id="manager-archive" data-performance-region>
+          <div className="threat-copy">
+            <span className="system-label">MANAGER ARCHIVE</span>
+            <h3>
+              SIX SIGNALS
+              <br />
+              ABOVE THE WORLD.
+            </h3>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
+          </div>
           <div className="signal-column">
             <ManagerRail ref={managerRail} />
 
@@ -401,11 +417,3 @@
                 <br />
                 <span className="rider-name-line">{rider.ja}</span>
               </h3>
-              <p className="rider-description">{rider.desc}</p>
-              <div className="rider-line">
-                <span />
-                <b>{rider.name}</b>
-              </div>
-              <SlideOpenControl
-                className="rider-dossier-open"
-                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}

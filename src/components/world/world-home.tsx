@@ -1012,6 +1012,8 @@ export function WorldHome() {
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    let settleTimer = 0;
+    let touching = false;
     const releaseProgrammaticScroll = () => {
       episodeProgrammatic.current = false;
       if (episodeScrollTimer.current != null) {
@@ -1037,20 +1039,65 @@ export function WorldHome() {
       });
       setEpisode((cur) => (cur === best ? cur : best));
     };
+    const settleScroll = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = 0;
+      if (touching || episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      const maxLeft = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      let target: HTMLElement | null = null;
+      let distance = Number.POSITIVE_INFINITY;
+      cards.forEach((card) => {
+        const left = Math.min(
+          maxLeft,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        const delta = Math.abs(left - grid.scrollLeft);
+        if (delta < distance) {
+          distance = delta;
+          target = card;
+        }
+      });
+      // Native snapping can stop between cards after interrupted iOS momentum.
+      // Align only after release and idle; never compete with a held gesture.
+      if (target && distance > 1) scrollAxisX(grid, target);
+      syncFromScroll();
+    };
+    const scheduleSettle = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settleScroll, 180);
+    };
+    const startTouch = () => {
+      touching = true;
+      window.clearTimeout(settleTimer);
+      releaseProgrammaticScroll();
+    };
+    const endTouch = () => {
+      touching = false;
+      scheduleSettle();
+    };
     const onScroll = () => {
+      scheduleSettle();
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("touchstart", startTouch, { passive: true });
+    grid.addEventListener("touchend", endTouch, { passive: true });
+    grid.addEventListener("touchcancel", endTouch, { passive: true });
     grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", syncFromScroll);
+    grid.addEventListener("scrollend", settleScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", syncFromScroll);
+      grid.removeEventListener("scrollend", settleScroll);
     };
   }, []);
 
