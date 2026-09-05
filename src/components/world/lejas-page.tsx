@@ -192,7 +192,7 @@ export function LejasPage() {
           img: "/manager-lejas-rider.jpeg",
           pos: "50% 8%",
           system: "ゲーマドライバー × グランドマスターガシャット／ゲームマスターガシャット",
-          name: "ファルス",
+          name: "ファラリス",
           calls: [
             "GAME MASTER SYSTEM!",
             "ガシャット!",
