@@ -1,3 +1,9 @@
+              </p>
+              <h3 aria-label={`仮面ライダー${rider.ja}`}>
+                <span className="rider-name-line">仮面ライダー</span>
+                <br />
+                <span className="rider-name-line">{rider.ja}</span>
+              </h3>
               <p className="rider-description">{rider.desc}</p>
               <div className="rider-line">
                 <span />
@@ -35,14 +41,6 @@
             <br />
             ひとつではない。
           </h2>
-        </div>
-        <div className="return-strip">
-          <div>
-            <span>RETURNING SIGNAL</span>
-            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
-          </div>
-          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
-          <i aria-hidden="true" />
         </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">

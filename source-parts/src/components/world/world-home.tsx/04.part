@@ -1,3 +1,7 @@
+  };
+
+  const openEpisodePickup = (
+    index: number,
     trigger: HTMLButtonElement,
     openedByKeyboard: boolean,
   ) => {
@@ -412,8 +416,3 @@
           <div className="story-copy">
             <p className="story-lead story-lead-sequel">
               <span>『ドリームチャプター』に続く</span>
-              <span>劇場版第二作</span>
-            </p>
-            <p>
-              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
-            </p>

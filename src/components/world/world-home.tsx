@@ -2132,14 +2132,6 @@ export function WorldHome() {
             ひとつではない。
           </h2>
         </div>
-        <div className="return-strip">
-          <div>
-            <span>RETURNING SIGNAL</span>
-            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
-          </div>
-          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
-          <i aria-hidden="true" />
-        </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">
             <div>

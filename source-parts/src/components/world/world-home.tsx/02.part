@@ -1,3 +1,4 @@
+        alt: "仮面ライダーレルムレジェンズ",
         width: 1221,
         height: 1800,
         to: "/riders/realm",
@@ -415,5 +416,3 @@ export function WorldHome() {
       document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
     };
   }, []);
-
-  useEffect(() => {
