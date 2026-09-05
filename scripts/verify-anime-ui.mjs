@@ -11,6 +11,14 @@ const channel = process.env.PW_BROWSER_CHANNEL || process.argv[3] || "chrome";
 const viewports = [
   { name: "iPhone", width: 375, height: 667 },
   { name: "iPad landscape", width: 1376, height: 1008 },
+  {
+    name: "Android Chrome",
+    width: 393,
+    height: 851,
+    deviceScaleFactor: 2.75,
+    userAgent:
+      "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36",
+  },
 ];
 const results = [];
 
@@ -68,6 +76,9 @@ async function checkStationaryTaps(page) {
   try {
     for (const holdMs of [18, 140, 300]) {
       await button.click({ trial: true });
+      // CDP coordinates bypass Playwright's input stabilization. Allow the
+      // compositor's scroll-to-control to catch up, particularly at high DPR.
+      await page.waitForTimeout(400);
       const thumb = await button.locator(".ios-slide-open-thumb").boundingBox();
       assert.ok(thumb, "The pickup thumb must be visible");
       const point = { x: thumb.x + thumb.width / 2, y: thumb.y + thumb.height / 2 };
@@ -120,6 +131,7 @@ async function checkStationaryTaps(page) {
 async function checkPartialSlide(page, ratio, shouldOpen) {
   const button = page.locator(".world-column-slide-open");
   await button.click({ trial: true });
+  await page.waitForTimeout(400);
   const track = await button.boundingBox();
   const thumb = await button.locator(".ios-slide-open-thumb").boundingBox();
   assert.ok(track && thumb);
@@ -200,9 +212,6 @@ async function checkDreamLayout(page) {
 
 async function checkEpisodeSwipes(page) {
   const grid = page.locator(".episode-grid");
-  // The initial route restores scroll for 1.8s. This programmatic jump is not
-  // user input, so wait for restoration before positioning the touch fixture.
-  await page.waitForTimeout(800);
   await grid.scrollIntoViewIfNeeded();
   // Let the section's entrance motion settle before choosing touch coordinates.
   await page.waitForTimeout(900);
@@ -264,6 +273,32 @@ async function checkEpisodeSwipes(page) {
   } finally {
     await cdp.detach();
   }
+}
+
+async function checkAndroidRenderer(page) {
+  await page.waitForTimeout(1000);
+  const rail = page.locator(".manager-archive-tabs");
+  await rail.scrollIntoViewIfNeeded();
+  await rail.locator('button[role="tab"]').nth(1).tap();
+  await page.waitForTimeout(400);
+  const state = await page.evaluate(() => ({
+    profile: document.documentElement.dataset.worldEffects,
+    headerBlur: getComputedStyle(document.querySelector(".topbar")).backdropFilter,
+    railBlur: getComputedStyle(document.querySelector(".manager-archive-tabs")).backdropFilter,
+    selected: document
+      .querySelector(".manager-archive-tabs button:nth-of-type(2)")
+      .getAttribute("aria-selected"),
+    canvases: document.querySelectorAll(".liquid-refraction-canvas").length,
+    backdropVisible:
+      getComputedStyle(document.querySelector(".hero-backdrop-layer")).display !== "none",
+  }));
+  assert.equal(state.profile, "economy");
+  assert.equal(state.headerBlur, "none");
+  assert.equal(state.railBlur, "none");
+  assert.equal(state.canvases, 0);
+  assert.equal(state.selected, "true");
+  assert.equal(state.backdropVisible, false);
+  return state;
 }
 
 async function checkArrivalScroll(page) {
@@ -414,11 +449,17 @@ try {
       ["55% hold and slide opens", (page) => checkPartialSlide(page, 0.55, true)],
       ["20% hold and slide cancels", (page) => checkPartialSlide(page, 0.2, false)],
       ["episode close after scroll", checkEpisodeClose],
+      ...(viewport.userAgent
+        ? [["Android CSS-only glass keeps selection working", checkAndroidRenderer]]
+        : []),
     ]) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         isMobile: true,
         hasTouch: true,
+        ...(viewport.userAgent
+          ? { userAgent: viewport.userAgent, deviceScaleFactor: viewport.deviceScaleFactor }
+          : {}),
       });
       const page = await context.newPage();
       page.setDefaultTimeout(7000);
@@ -428,8 +469,9 @@ try {
           timeout: 20000,
         });
         await page.locator(".side-panel-trigger").waitFor({ state: "visible" });
-        // Allow hydration and startup effects to bind the controls before input.
-        await page.waitForTimeout(1200);
+        // Initial route restoration runs for 1.8s. Programmatic fixture
+        // positioning must happen after it, or it can move our touch target.
+        await page.waitForTimeout(2200);
         const details = await check(page);
         results.push({
           viewport: viewport.name,
@@ -454,6 +496,13 @@ try {
     const page = await browser.newPage({
       viewport: { width: viewport.width, height: viewport.height },
       hasTouch: true,
+      ...(viewport.userAgent
+        ? {
+            userAgent: viewport.userAgent,
+            deviceScaleFactor: viewport.deviceScaleFactor,
+            isMobile: true,
+          }
+        : {}),
     });
     try {
       const details = await checkDreamLayout(page);

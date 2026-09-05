@@ -1,3 +1,7 @@
+    pageLocked = true;
+    document.documentElement.dataset.railLock = 'true';
+    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
+  };
   const unlockPage = () => {
     if (!pageLocked) return;
     pageLocked = false;
@@ -205,6 +209,3 @@
     if (document.hidden) cancel();
   };
   document.addEventListener('visibilitychange', handleVisibilityChange);
-
-  let swallowClick = false;
-  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {

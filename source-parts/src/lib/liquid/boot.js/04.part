@@ -1,3 +1,6 @@
+
+  let swallowClick = false;
+  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
     if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
     select(i); settle(i);
   }));

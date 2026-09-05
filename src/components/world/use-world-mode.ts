@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLiquidPointerLight } from "./use-liquid-pointer-light";
+import { prefersLightweightRendering } from "@/lib/rendering-profile";
 
 export function useWorldMode() {
   useLiquidPointerLight();
@@ -15,16 +16,7 @@ export function useWorldMode() {
     html.dataset.mode = "world";
     html.dataset.scrollMotionReady = "true";
     const userAgent = navigator.userAgent;
-    const device = navigator as Navigator & {
-      deviceMemory?: number;
-      connection?: { saveData?: boolean; effectiveType?: string };
-    };
-    const economyEffects =
-      device.connection?.saveData === true ||
-      device.connection?.effectiveType === "slow-2g" ||
-      device.connection?.effectiveType === "2g" ||
-      (device.deviceMemory !== undefined && device.deviceMemory <= 2) ||
-      (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2);
+    const economyEffects = prefersLightweightRendering(navigator);
     if (/Android/i.test(userAgent)) html.dataset.androidRenderer = "true";
     if (/SamsungBrowser|SM-[A-Z0-9]+/i.test(userAgent)) html.dataset.oneUiRenderer = "true";
     if (economyEffects) html.dataset.worldEffects = "economy";
