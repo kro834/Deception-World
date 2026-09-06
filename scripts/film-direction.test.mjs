@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { mountFilmMotion } from "../src/lib/film-motion.js";
 
-function fixture({ reduced = false, economy = false, hidden = false } = {}) {
+function fixture({ reduced = false, economy = false, hidden = false, scan = false } = {}) {
   const events = new Map(),
     mediaEvents = new Map();
   const document = {
@@ -31,7 +31,11 @@ function fixture({ reduced = false, economy = false, hidden = false } = {}) {
     animations.push(animation);
     return animation;
   };
-  const node = { animate, querySelector: () => ({ animate }) };
+  const node = {
+    animate,
+    querySelector: (selector) =>
+      selector === ".film-boundary-line" || scan ? { animate } : null,
+  };
   const root = { ownerDocument: document, querySelectorAll: () => [node] };
   const observers = [];
   class Observer {
@@ -114,6 +118,22 @@ test("background entry remains pending until the tab is visible", () => {
   f.cleanup();
 });
 
+test("heading light scan is one-shot, readable and cancelled on route cleanup", () => {
+  const f = fixture({ scan: true });
+  f.observer.callback([{ target: f.node, isIntersecting: true }]);
+  f.observer.callback([{ target: f.node, isIntersecting: true }]);
+  assert.equal(f.animations.length, 3);
+  assert.ok(f.animations[0].frames[0].opacity >= 0.8);
+  for (const animation of f.animations) {
+    assert.ok(animation.timing.duration <= 700);
+    assert.equal(animation.timing.iterations, undefined);
+    for (const frame of animation.frames)
+      assert.ok(Object.keys(frame).every((key) => ["transform", "opacity"].includes(key)));
+  }
+  f.cleanup();
+  assert.ok(f.animations.every((animation) => animation.cancelled));
+});
+
 test("changing motion preference cancels active animation and detaches the observer", () => {
   const f = fixture();
   f.observer.callback([{ target: f.node, isIntersecting: true }]);
@@ -160,4 +180,8 @@ test("hero identity is before the key visual and new typography remains touch-sc
   assert.match(css, /grid-template-areas: "identity" "visual" "copy"/);
   assert.doesNotMatch(css, /touch-action:\s*none|animation:[^;]*infinite|height:\s*100vh/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  const scan = read("src/components/cinematic/film-text-scan.tsx");
+  assert.match(scan, /aria-hidden="true"/);
+  assert.doesNotMatch(scan, /onTouch|onPointer|tabIndex/);
+  assert.match(css, /\.film-text-scan > i\s*\{[^}]*pointer-events: none/);
 });

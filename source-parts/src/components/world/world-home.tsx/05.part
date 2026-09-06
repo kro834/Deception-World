@@ -385,7 +385,7 @@
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>八人が、世界へ。</h2>
+          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
@@ -421,3 +421,4 @@
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
             </div>
+            <div className="rider-number">RIDER / {rider.no}</div>

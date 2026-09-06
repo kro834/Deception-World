@@ -29,12 +29,24 @@ export function mountFilmMotion(root, environment = globalThis) {
         remember(
           node.animate(
             [
-              { opacity: 0.65, transform: "translate3d(0, 14px, 0)" },
+              { opacity: 0.82, transform: "translate3d(0, 10px, 0)" },
               { opacity: 1, transform: "none" },
             ],
-            { duration: 480, easing: "cubic-bezier(.2,.75,.2,1)" },
+            { duration: 520, easing: "cubic-bezier(.16,1,.3,1)" },
           ),
         );
+        const scan = node.querySelector(".film-text-scan > i");
+        if (scan?.animate)
+          remember(
+            scan.animate(
+              [
+                { opacity: 0, transform: "translate3d(-110%, 0, 0)" },
+                { opacity: 0.8, transform: "translate3d(80%, 0, 0)" },
+                { opacity: 0, transform: "translate3d(680%, 0, 0)" },
+              ],
+              { duration: 680, easing: "cubic-bezier(.2,.6,.3,1)" },
+            ),
+          );
         const line = node.querySelector(".film-boundary-line");
         if (line?.animate)
           remember(

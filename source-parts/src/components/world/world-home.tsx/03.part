@@ -1,4 +1,3 @@
-    return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
   useEffect(() => {
@@ -421,3 +420,5 @@
 
   const goEpisode = (index: number) => {
     const next = Math.max(0, Math.min(EPISODES.length - 1, index));
+    setEpisode(next);
+    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];

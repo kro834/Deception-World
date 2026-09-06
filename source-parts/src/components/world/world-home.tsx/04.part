@@ -1,5 +1,3 @@
-    setEpisode(next);
-    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
     episodeProgrammatic.current = true;
     scrollAxisX(episodeGridRef.current, card ?? null);
     if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
@@ -186,6 +184,7 @@
           </span>
         </div>
         <div className="film-hero-identity" data-film-reveal>
+          <FilmTextScan />
           <p className="anime-work-title">
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
@@ -197,7 +196,8 @@
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+            <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
@@ -420,4 +420,5 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />

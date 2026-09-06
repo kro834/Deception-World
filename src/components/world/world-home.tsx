@@ -11,6 +11,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
+import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 
 const POSTERS = [
   {
@@ -1454,6 +1455,7 @@ export function WorldHome() {
           </span>
         </div>
         <div className="film-hero-identity" data-film-reveal>
+          <FilmTextScan />
           <p className="anime-work-title">
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
@@ -1465,7 +1467,8 @@ export function WorldHome() {
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+            <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
@@ -1688,7 +1691,8 @@ export function WorldHome() {
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />
               救うべき世界は、
               <br />
               <em>現実</em>にある。
@@ -2076,7 +2080,7 @@ export function WorldHome() {
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>八人が、世界へ。</h2>
+          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
@@ -2155,7 +2159,8 @@ export function WorldHome() {
             <span>POWER BEYOND THE BORDER</span>
             <i />
           </p>
-          <h2>
+          <h2 data-film-reveal>
+            <FilmTextScan />
             到達点は、
             <br />
             ひとつではない。
@@ -2292,7 +2297,8 @@ export function WorldHome() {
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />
               サーガは、
               <br />
               まだ終わらない。

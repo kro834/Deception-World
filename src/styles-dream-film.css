@@ -208,6 +208,8 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   padding-block: 96px;
 }
 .dream-page .dream-section-heading {
+  --film-scan-ink: #efb2a124;
+  --film-scan-line: #efb2a180;
   gap: 16px 24px;
   padding-bottom: 26px;
   margin-bottom: 40px;
@@ -217,6 +219,10 @@ html[data-dream-chapter="true"] .dream-hero-copy {
 .dream-page .dream-section-heading p {
   border-left-color: var(--dream-scarlet);
   color: #efb2a1;
+  max-inline-size: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  letter-spacing: clamp(0.08em, 1.6vw, 0.28em);
 }
 .dream-section-heading h2 {
   font-size: clamp(42px, 5.1vw, 76px);

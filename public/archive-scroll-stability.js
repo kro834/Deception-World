@@ -3,14 +3,7 @@
 
   if (document.documentElement.dataset.embeddedArchive !== "true") return;
 
-  const editableSelector =
-    'input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]';
   const blockClipboardAction = (event) => event.preventDefault();
-  const blockContentSelection = (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest(editableSelector)) {
-      event.preventDefault();
-    }
-  };
   const blockClipboardShortcut = (event) => {
     const key = event.key.toLowerCase();
     const isClipboardShortcut =
@@ -26,7 +19,7 @@
   document.addEventListener("paste", blockClipboardAction, true);
   document.addEventListener("contextmenu", blockClipboardAction, true);
   document.addEventListener("dragstart", blockClipboardAction, true);
-  document.addEventListener("selectstart", blockContentSelection, true);
+  // CSS prevents selection without cancelling the browser's native text pan.
   document.addEventListener("keydown", blockClipboardShortcut, true);
 
   const rootSelector = '[id$="saga-forms-performance-v5"]';

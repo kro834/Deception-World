@@ -7,6 +7,7 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
+import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_CASES,
   DREAM_CHARACTERS,
@@ -822,6 +823,7 @@ export function DreamChapter() {
         aria-labelledby="poster-title"
       >
         <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>KEY VISUAL ARCHIVE</p>
           <h2 id="poster-title">POSTERS</h2>
           <span>01 — 08</span>
@@ -964,6 +966,7 @@ export function DreamChapter() {
         aria-labelledby="character-title"
       >
         <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>CAST / OBSERVED SUBJECTS</p>
           <h2 id="character-title">CHARACTERS</h2>
           <span>03 FILES</span>
@@ -1014,6 +1017,7 @@ export function DreamChapter() {
         aria-labelledby="dolminence-title"
       >
         <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>CLASSIFIED ORGANIZATION / AGENT DISGUISE RECORD</p>
           <h2 id="dolminence-title">DOLMINENCE</h2>
           <span>04 FILES</span>
@@ -1063,6 +1067,7 @@ export function DreamChapter() {
 
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
         <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>EPISODE / CASE RECORD</p>
           <h2 id="case-title">CASES</h2>
           <span>CASE 0–5</span>

@@ -21,8 +21,8 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20260828-r44/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20260828-r44/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20260906-r45/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260906-r45/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === activeTransitionRef\.current\.archive\) return/);
@@ -58,7 +58,7 @@ test("embedded archives externalize base64 images and load the mobile stability 
     assert.match(html, /data-archive-kind="(?:saga|realm)"/);
     assert.match(html, /archive-mobile-stability\.css/);
     assert.match(html, /archive-mobile-stability\.css\?v=20260823-r41/);
-    assert.match(html, /archive-scroll-stability\.js\?v=20260828-r44/);
+    assert.match(html, /archive-scroll-stability\.js\?v=20260906-r45/);
     assert.match(html, /data-archive-ready-signal/);
     assert.match(html, /saga-archive:ready/);
     assert.ok(statSync(file).size < 1_000_000, `${file.pathname} should stay below 1 MB`);
