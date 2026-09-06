@@ -45,6 +45,7 @@ export const Route = createRootRoute({
         : []),
     ],
     links: [
+      { rel: "preload", as: "image", type: "image/webp", href: "/zeus-button-360.webp" },
       { rel: "stylesheet", href: androidPerformanceCss },
       { rel: "stylesheet", href: pickupStabilityCss },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },

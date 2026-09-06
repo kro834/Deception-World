@@ -654,7 +654,9 @@ function ZeusButton({
       <span className="zeus-button-aura" aria-hidden="true" />
       <img
         className="zeus-button-image is-default"
-        src="/zeus-button.png"
+        src="/zeus-button-360.webp"
+        width={360}
+        height={360}
         alt=""
         decoding="async"
         fetchPriority="high"
@@ -662,9 +664,11 @@ function ZeusButton({
       />
       <img
         className="zeus-button-image is-returning"
-        src="/zeus-button-return.jpeg"
+        src="/zeus-button-return-360.webp"
+        width={360}
+        height={360}
         alt=""
-        loading="lazy"
+        loading="eager"
         decoding="async"
         fetchPriority="low"
         draggable={false}
