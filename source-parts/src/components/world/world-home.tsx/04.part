@@ -1,3 +1,12 @@
+    setEpisode(next);
+    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
+    episodeProgrammatic.current = true;
+    scrollAxisX(episodeGridRef.current, card ?? null);
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
+      episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
+    }, 520);
   };
 
   const openEpisodePickup = (
@@ -110,7 +119,7 @@
   };
 
   return (
-    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+    <main ref={shellRef} className="site-shell motion-on film-edition" data-motion-enabled="true">
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -176,11 +185,14 @@
             />
           </span>
         </div>
-        <div className="hero-copy">
+        <div className="film-hero-identity" data-film-reveal>
           <p className="anime-work-title">
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
           </p>
+          <span className="film-edition-mark" aria-hidden="true">02</span>
+        </div>
+        <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
@@ -223,6 +235,10 @@
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
+          <div className="film-visual-caption" aria-hidden="true">
+            <span>KEY VISUAL</span>
+            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -287,10 +303,6 @@
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-index">
-            <span>KEY VISUAL</span>
-            <b>{String(poster + 1).padStart(2, "0")}</b>
-          </div>
           <div className="poster-controls">
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
@@ -397,9 +409,10 @@
       </section>
 
       <section className="story-section" id="story">
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -408,11 +421,3 @@
               <i />
             </p>
             <h2>
-              救うべき世界は、
-              <br />
-              <em>現実</em>にある。
-            </h2>
-          </div>
-          <div className="story-copy">
-            <p className="story-lead story-lead-sequel">
-              <span>『ドリームチャプター』に続く</span>

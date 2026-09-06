@@ -1,3 +1,7 @@
+            <div className="rider-number">RIDER / {rider.no}</div>
+            <div className="rider-copy-block">
+              <p className="rider-person">
+                <NameText value={rider.person} />
               </p>
               <h3 aria-label={`仮面ライダー${rider.ja}`}>
                 <span className="rider-name-line">仮面ライダー</span>
@@ -27,9 +31,10 @@
       </section>
 
       <section className="records-section" id="records" data-performance-region>
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>03</span>
           <small>NEW RECORDS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
           <p className="eyebrow">

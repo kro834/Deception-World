@@ -1,3 +1,11 @@
+              救うべき世界は、
+              <br />
+              <em>現実</em>にある。
+            </h2>
+          </div>
+          <div className="story-copy">
+            <p className="story-lead story-lead-sequel">
+              <span>『ドリームチャプター』に続く</span>
               <span>劇場版第二作</span>
             </p>
             <p>
@@ -10,7 +18,7 @@
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
-          <div className="threat-copy">
+          <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
               SIX SIGNALS
@@ -367,9 +375,10 @@
 
       <section className="riders-section" id="riders" data-performance-region>
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
           <p className="eyebrow">
@@ -412,7 +421,3 @@
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
             </div>
-            <div className="rider-number">RIDER / {rider.no}</div>
-            <div className="rider-copy-block">
-              <p className="rider-person">
-                <NameText value={rider.person} />

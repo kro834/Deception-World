@@ -10,6 +10,7 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { mountFilmMotion } from "@/lib/film-motion";
 
 const POSTERS = [
   {
@@ -746,6 +747,8 @@ export function WorldHome() {
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
+  useEffect(() => mountFilmMotion(shellRef.current), []);
+
   useLayoutEffect(() => {
     const returnId = readRiderReturn();
     const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
@@ -881,17 +884,37 @@ export function WorldHome() {
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    const t = window.setInterval(() => {
-      setPoster((p) => {
-        setPrevPoster(p);
-        return (p + 1) % POSTERS.length;
-      });
+    if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+    let cancelled = false;
+    let decoding = false;
+    const nextIndex = (poster + 1) % POSTERS.length;
+    const t = window.setInterval(async () => {
+      if (decoding || document.querySelector("dialog[open]")) return;
+      decoding = true;
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[nextIndex].src;
+      try {
+        await image.decode();
+        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        setPrevPoster(poster);
+        setPoster(nextIndex);
+      } catch {
+        // Preserve the current art when the next image cannot be delivered.
+      } finally {
+        decoding = false;
+      }
     }, 5200);
-    return () => window.clearInterval(t);
-  }, [ambientPaused, heroVisible, locked, motionReduced]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
     ).connection;
@@ -905,10 +928,10 @@ export function WorldHome() {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -1364,7 +1387,7 @@ export function WorldHome() {
   };
 
   return (
-    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+    <main ref={shellRef} className="site-shell motion-on film-edition" data-motion-enabled="true">
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -1430,11 +1453,14 @@ export function WorldHome() {
             />
           </span>
         </div>
-        <div className="hero-copy">
+        <div className="film-hero-identity" data-film-reveal>
           <p className="anime-work-title">
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
           </p>
+          <span className="film-edition-mark" aria-hidden="true">02</span>
+        </div>
+        <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
@@ -1477,6 +1503,10 @@ export function WorldHome() {
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
+          <div className="film-visual-caption" aria-hidden="true">
+            <span>KEY VISUAL</span>
+            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -1541,10 +1571,6 @@ export function WorldHome() {
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-index">
-            <span>KEY VISUAL</span>
-            <b>{String(poster + 1).padStart(2, "0")}</b>
-          </div>
           <div className="poster-controls">
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
@@ -1651,9 +1677,10 @@ export function WorldHome() {
       </section>
 
       <section className="story-section" id="story">
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -1682,7 +1709,7 @@ export function WorldHome() {
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
-          <div className="threat-copy">
+          <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
               SIX SIGNALS
@@ -2039,9 +2066,10 @@ export function WorldHome() {
 
       <section className="riders-section" id="riders" data-performance-region>
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
           <p className="eyebrow">
@@ -2117,9 +2145,10 @@ export function WorldHome() {
       </section>
 
       <section className="records-section" id="records" data-performance-region>
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>03</span>
           <small>NEW RECORDS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
           <p className="eyebrow">

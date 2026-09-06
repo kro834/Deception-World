@@ -10,6 +10,7 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { mountFilmMotion } from "@/lib/film-motion";
 
 const POSTERS = [
   {
@@ -416,3 +417,6 @@ const EPISODES: EpisodeRecord[] = [
         displayLines: ["仮面ライダーレルム", "レジェンズ"],
         src: "/rider-profile-realm.jpeg",
         pos: "50% 8%",
+        alt: "仮面ライダーレルムレジェンズ",
+        width: 1221,
+        height: 1800,

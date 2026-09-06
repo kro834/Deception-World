@@ -1,9 +1,3 @@
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotionPreference = () => setMotionReduced(media.matches);
-    syncMotionPreference();
-    media.addEventListener?.("change", syncMotionPreference);
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
@@ -45,17 +39,37 @@
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    const t = window.setInterval(() => {
-      setPoster((p) => {
-        setPrevPoster(p);
-        return (p + 1) % POSTERS.length;
-      });
+    if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+    let cancelled = false;
+    let decoding = false;
+    const nextIndex = (poster + 1) % POSTERS.length;
+    const t = window.setInterval(async () => {
+      if (decoding || document.querySelector("dialog[open]")) return;
+      decoding = true;
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[nextIndex].src;
+      try {
+        await image.decode();
+        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        setPrevPoster(poster);
+        setPoster(nextIndex);
+      } catch {
+        // Preserve the current art when the next image cannot be delivered.
+      } finally {
+        decoding = false;
+      }
     }, 5200);
-    return () => window.clearInterval(t);
-  }, [ambientPaused, heroVisible, locked, motionReduced]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
     ).connection;
@@ -69,10 +83,10 @@
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -407,12 +421,3 @@
 
   const goEpisode = (index: number) => {
     const next = Math.max(0, Math.min(EPISODES.length - 1, index));
-    setEpisode(next);
-    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
-    episodeProgrammatic.current = true;
-    scrollAxisX(episodeGridRef.current, card ?? null);
-    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-    episodeScrollTimer.current = window.setTimeout(() => {
-      episodeProgrammatic.current = false;
-      episodeScrollTimer.current = null;
-    }, 520);
