@@ -139,7 +139,7 @@
     var active = FORM_META[activeId];
     return '<div class="rexonance-setting-dossier">' +
       '<section class="rexonance-setting-hero"><small>REXONANCE // ' + active.badge + '</small><h4>《 仮面ライダーレクソナンスサーガ 》</h4><p>《 仮面ライダーレクソナンスサーガ・マックス 》</p><p>《 仮面ライダーレクソナンスサーガ・ウルトラ 》</p>' +
-      '<div class="rexonance-call-grid"><span>EXCONVERT！</span><span>Ultra DEUS！</span><span>REXONANCE！</span><span>GODSIDE！RIDER！</span><span>SA-GA！DEUS！ SA-GA！DEUS！ SA-GA！DEUS！</span><span>REXONANCE！</span></div></section>' +
+      '<div class="rexonance-call-grid"><span>Ultra DEUS！</span><span>REXONANCE！</span><span>FAR UP！</span><span>OVER SA-GA！RIDER！</span><span>SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！</span><span>REXONANCE！</span></div></section>' +
       '<section class="rexonance-setting-block"><small>STANDARD SPEC</small><h4>標準運用値</h4><dl class="rexonance-stat-grid">' + dossierStatMarkup(FORM_META.rexonance.stats) + '</dl></section>' +
       '<section class="rexonance-setting-block"><small>OVERVIEW</small><h4>概要</h4>' + paragraphs(OVERVIEW) + '<div class="rexonance-order">エクスプリーム ＜ エクスプリーム・ウルトラ ＜ レクソナンス ＜ レクソナンス・マックス ＜ レクソナンス・ウルトラ</div><p>レクソナンスは《無限出力》を捨てた形態ではなく、その無限出力を、無限の攻撃として完成させた形態である。</p></section>' +
       '<section class="rexonance-setting-block"><small>COMBAT OS</small><h4>SA-GA OS 5.5</h4>' + paragraphs(SAGA_OS) + '</section>' +
