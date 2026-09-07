@@ -1,5 +1,5 @@
 const KNOWN_BYTES: Record<string, number> = {
-  "/deception-world-poster.webp": 561774,
+  "/deception-world-poster-delivery.webp": 468454,
   "/poster-card-03.jpeg": 293500,
   "/poster-card-04.jpeg": 369600,
   "/poster-card-05.jpeg": 537900,
@@ -26,11 +26,12 @@ const KNOWN_BYTES: Record<string, number> = {
 };
 
 export const WORLD_ENTER_ASSETS = [
-  "/deception-world-poster.webp",
+  "/deception-world-poster-delivery.webp",
 ] as const;
 
 export const DREAM_CHAPTER_ENTER_ASSETS = [
   "/dream-chapter-logo.jpeg",
+  "/dream-chapter-poster-05.jpeg",
 ] as const;
 
 export const REXONANCE_SAGA_ENTER_ASSETS = [
@@ -115,6 +116,11 @@ async function pullOne(
   if (!request) {
     request = (async () => {
       try {
+        // Use the browser's image request/cache once. Fetching the same URL
+        // first can cause a second request before the decoded image is used.
+        if (IMAGE_ASSET_PATTERN.test(url) && typeof Image !== "undefined") {
+          return await decodeImageAsset(url);
+        }
         const res = await fetch(url, { cache: "force-cache" });
         if (!res.ok) throw new Error(`Asset request failed: ${res.status}`);
         const headerLen = Number(res.headers.get("content-length"));

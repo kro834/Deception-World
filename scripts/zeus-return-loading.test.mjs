@@ -20,7 +20,7 @@ test("Zeus navigation closes transient UI and uses the shared route controller",
 test("Zeus swaps only its compact character image without mounting a fullscreen loader", () => {
   assert.match(source, /const \[returnImage, setReturnImage\] = useState\(false\)/);
   assert.match(source, /data-return-loading=\{String\(returnImage\)\}/);
-  assert.match(source, /src="\/zeus-button-return\.jpeg"/);
+  assert.match(source, /src="\/zeus-button-return-360\.webp"/);
   assert.match(
     styles,
     /\.zeus-button\[data-return-loading="true"\][\s\S]*?\.zeus-button-image\.is-returning/,

@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import VERT_SRC from "./vert.glsl?raw";
 import FRAG_SRC from "./frag.glsl?raw";
+import { prefersLightweightRendering } from "../rendering-profile.js";
 
 const VERTEX_SHADER = VERT_SRC;
 const FRAGMENT_SHADER = FRAG_SRC;
@@ -178,6 +179,12 @@ class GlassRenderer {
     this.canvas.style.setProperty('--liquid-canvas-overscan', this.overscan + 'px');
   }
   activate(root) {
+    // Keep the CSS lens and all tab/hold/drag handlers, but avoid shader compile,
+    // DOM texture rasterization and GPU uploads on the lightweight profile.
+    if (prefersLightweightRendering(navigator)) {
+      root.dataset.liquidWebgl = 'fallback';
+      return false;
+    }
     if (!this.ensure()) { root.dataset.liquidWebgl = 'fallback'; return false; }
     if (this.activeRoot !== root) {
       this.stop();

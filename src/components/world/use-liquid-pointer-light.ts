@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { prefersLightweightRendering } from "@/lib/rendering-profile";
 
 const SELECTOR = "[data-liquid-pointer]";
 
@@ -13,7 +14,7 @@ export function useLiquidPointerLight() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
-    if (reducedMotion.matches || reducedTransparency.matches) return;
+    if (reducedMotion.matches || reducedTransparency.matches || prefersLightweightRendering(navigator)) return;
 
     let active: LiquidTarget | null = null;
     let pressed: LiquidTarget | null = null;

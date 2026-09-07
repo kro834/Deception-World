@@ -1,25 +1,3 @@
-      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive =
-        typeof detail?.active === "boolean"
-          ? detail.active
-          : document.documentElement.hasAttribute("data-opening-handoff-active");
-      syncAmbientPause();
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
-    syncAmbientPause();
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
-    };
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotionPreference = () => setMotionReduced(media.matches);
-    syncMotionPreference();
-    media.addEventListener?.("change", syncMotionPreference);
-    return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
   useEffect(() => {
@@ -60,17 +38,37 @@
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    const t = window.setInterval(() => {
-      setPoster((p) => {
-        setPrevPoster(p);
-        return (p + 1) % POSTERS.length;
-      });
+    if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+    let cancelled = false;
+    let decoding = false;
+    const nextIndex = (poster + 1) % POSTERS.length;
+    const t = window.setInterval(async () => {
+      if (decoding || document.querySelector("dialog[open]")) return;
+      decoding = true;
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[nextIndex].src;
+      try {
+        await image.decode();
+        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        setPrevPoster(poster);
+        setPoster(nextIndex);
+      } catch {
+        // Preserve the current art when the next image cannot be delivered.
+      } finally {
+        decoding = false;
+      }
     }, 5200);
-    return () => window.clearInterval(t);
-  }, [ambientPaused, heroVisible, locked, motionReduced]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
     ).connection;
@@ -84,10 +82,10 @@
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -191,6 +189,8 @@
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    let settleTimer = 0;
+    let touching = false;
     const releaseProgrammaticScroll = () => {
       episodeProgrammatic.current = false;
       if (episodeScrollTimer.current != null) {
@@ -216,20 +216,65 @@
       });
       setEpisode((cur) => (cur === best ? cur : best));
     };
+    const settleScroll = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = 0;
+      if (touching || episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      const maxLeft = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      let target: HTMLElement | null = null;
+      let distance = Number.POSITIVE_INFINITY;
+      cards.forEach((card) => {
+        const left = Math.min(
+          maxLeft,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        const delta = Math.abs(left - grid.scrollLeft);
+        if (delta < distance) {
+          distance = delta;
+          target = card;
+        }
+      });
+      // Native snapping can stop between cards after interrupted iOS momentum.
+      // Align only after release and idle; never compete with a held gesture.
+      if (target && distance > 1) scrollAxisX(grid, target);
+      syncFromScroll();
+    };
+    const scheduleSettle = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settleScroll, 180);
+    };
+    const startTouch = () => {
+      touching = true;
+      window.clearTimeout(settleTimer);
+      releaseProgrammaticScroll();
+    };
+    const endTouch = () => {
+      touching = false;
+      scheduleSettle();
+    };
     const onScroll = () => {
+      scheduleSettle();
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("touchstart", startTouch, { passive: true });
+    grid.addEventListener("touchend", endTouch, { passive: true });
+    grid.addEventListener("touchcancel", endTouch, { passive: true });
     grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", syncFromScroll);
+    grid.addEventListener("scrollend", settleScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", syncFromScroll);
+      grid.removeEventListener("scrollend", settleScroll);
     };
   }, []);
 
@@ -377,35 +422,3 @@
     const next = Math.max(0, Math.min(EPISODES.length - 1, index));
     setEpisode(next);
     const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
-    episodeProgrammatic.current = true;
-    scrollAxisX(episodeGridRef.current, card ?? null);
-    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-    episodeScrollTimer.current = window.setTimeout(() => {
-      episodeProgrammatic.current = false;
-      episodeScrollTimer.current = null;
-    }, 520);
-  };
-
-  const openEpisodePickup = (
-    index: number,
-    trigger: HTMLButtonElement,
-    openedByKeyboard: boolean,
-  ) => {
-    const dialog = episodePickupDialogRef.current;
-    if (!dialog || !EPISODES[index]?.pickups?.length) return;
-    if (episodePointerFocusTimer.current != null) {
-      window.clearTimeout(episodePointerFocusTimer.current);
-      episodePointerFocusTimer.current = null;
-    }
-    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
-    goEpisode(index);
-    episodePickupTriggerRef.current = trigger;
-    episodePickupOpenedByKeyboard.current = openedByKeyboard;
-    setEpisodePickup(index);
-    cancelEpisodePickupScrollReset.current?.();
-    if (!dialog.open) {
-      try {
-        dialog.showModal();
-      } catch {
-        /* already open */
-      }

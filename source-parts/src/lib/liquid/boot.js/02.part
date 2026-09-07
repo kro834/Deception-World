@@ -1,3 +1,8 @@
+    this.stop(); this.canvas.remove();
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
   setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
   setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
   setPhase(phase) {
@@ -205,7 +210,3 @@ function initRail(root) {
   const blockPageScroll = (e) => { e.preventDefault(); };
   const lockPage = () => {
     if (!lockScroll || pageLocked) return;
-    pageLocked = true;
-    document.documentElement.dataset.railLock = 'true';
-    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
-  };

@@ -6,6 +6,8 @@ import { LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
+import { mountFilmMotion } from "@/lib/film-motion";
+import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_CASES,
   DREAM_CHARACTERS,
@@ -428,6 +430,8 @@ export function DreamChapter() {
   const activePoster = DREAM_POSTERS[posterIndex];
   const previousPoster = previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
 
+  useEffect(() => mountFilmMotion(pageRef.current), []);
+
   const cancelShuffle = useCallback(() => {
     shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -763,6 +767,7 @@ export function DreamChapter() {
         data-dream-hero-active={heroVisible ? "true" : "false"}
       >
         <div className="dream-hero-field" aria-hidden="true">
+          <img className="dream-hero-art" src="/dream-chapter-poster-05.jpeg" alt="" width={1448} height={1086} fetchPriority="high" decoding="async" />
           <span className="dream-aurora dream-aurora-blue" />
           <span className="dream-aurora dream-aurora-gold" />
           <span className="dream-light-gate" />
@@ -773,8 +778,9 @@ export function DreamChapter() {
         <span className="dream-hero-vignette" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-a" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-b" aria-hidden="true" />
+        <p className="dream-hero-catch"><span>夢と現実の境界が、</span><span>明ける。</span></p>
         <div className="dream-hero-copy">
-          <p>FILM 01 / DREAM OBSERVATION RECORD</p>
+          <p>仮面ライダーサーガ × 東方Project</p>
           <h1 id="dream-title" className="dream-visually-hidden">
             仮面ライダーサーガ Dream Chapter
           </h1>
@@ -789,7 +795,7 @@ export function DreamChapter() {
           />
           <div>
             <b>ドリームチャプター</b>
-            <span>夢と現実の境界が、明ける。</span>
+            <span>映画第一作 / DREAM CHAPTER</span>
           </div>
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
             <a href="#posters">
@@ -816,7 +822,8 @@ export function DreamChapter() {
         className="dream-section dream-poster-section"
         aria-labelledby="poster-title"
       >
-        <header className="dream-section-heading" data-dream-reveal>
+        <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>KEY VISUAL ARCHIVE</p>
           <h2 id="poster-title">POSTERS</h2>
           <span>01 — 08</span>
@@ -958,7 +965,8 @@ export function DreamChapter() {
         className="dream-section dream-character-section"
         aria-labelledby="character-title"
       >
-        <header className="dream-section-heading" data-dream-reveal>
+        <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>CAST / OBSERVED SUBJECTS</p>
           <h2 id="character-title">CHARACTERS</h2>
           <span>03 FILES</span>
@@ -1008,7 +1016,8 @@ export function DreamChapter() {
         className="dream-section dream-dolminence-section"
         aria-labelledby="dolminence-title"
       >
-        <header className="dream-section-heading" data-dream-reveal>
+        <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>CLASSIFIED ORGANIZATION / AGENT DISGUISE RECORD</p>
           <h2 id="dolminence-title">DOLMINENCE</h2>
           <span>04 FILES</span>
@@ -1057,10 +1066,11 @@ export function DreamChapter() {
       </section>
 
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
-        <header className="dream-section-heading" data-dream-reveal>
+        <header className="dream-section-heading" data-film-reveal>
+          <FilmTextScan />
           <p>EPISODE / CASE RECORD</p>
           <h2 id="case-title">CASES</h2>
-          <span>NO THUMBNAILS</span>
+          <span>CASE 0–5</span>
         </header>
         <ol className="dream-case-list" data-dream-reveal>
           {DREAM_CASES.map((episode) => (

@@ -1,3 +1,33 @@
+              救うべき世界は、
+              <br />
+              <em>現実</em>にある。
+            </h2>
+          </div>
+          <div className="story-copy">
+            <p className="story-lead story-lead-sequel">
+              <span>『ドリームチャプター』に続く</span>
+              <span>劇場版第二作</span>
+            </p>
+            <p>
+              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+            </p>
+            <p>
+              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            </p>
+          </div>
+        </div>
+
+        <div className="threat-panel" id="manager-archive" data-performance-region>
+          <div className="threat-copy" data-film-reveal>
+            <span className="system-label">MANAGER ARCHIVE</span>
+            <h3>
+              SIX SIGNALS
+              <br />
+              ABOVE THE WORLD.
+            </h3>
+            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
+          </div>
+          <div className="signal-column">
             <ManagerRail ref={managerRail} />
 
             {managerTab === 0 ? (
@@ -345,16 +375,17 @@
 
       <section className="riders-section" id="riders" data-performance-region>
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
           <p className="eyebrow">
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>八人が、世界へ。</h2>
+          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
@@ -391,21 +422,3 @@
               {rider.name.slice(0, 1)}
             </div>
             <div className="rider-number">RIDER / {rider.no}</div>
-            <div className="rider-copy-block">
-              <p className="rider-person">
-                <NameText value={rider.person} />
-              </p>
-              <h3 aria-label={`仮面ライダー${rider.ja}`}>
-                <span className="rider-name-line">仮面ライダー</span>
-                <br />
-                <span className="rider-name-line">{rider.ja}</span>
-              </h3>
-              <p className="rider-description">{rider.desc}</p>
-              <div className="rider-line">
-                <span />
-                <b>{rider.name}</b>
-              </div>
-              <SlideOpenControl
-                className="rider-dossier-open"
-                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
-                label="個別資料"

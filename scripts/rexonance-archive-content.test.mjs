@@ -10,8 +10,9 @@ const updateSource = readFileSync(
 test("レクソナンス三形態の新設定と基礎値をフォームアーカイブへ保持する", () => {
   for (const expected of [
     "332.2t / 480.5t",
-    "EXCONVERT！",
     "Ultra DEUS！",
+    "FAR UP！",
+    "OVER SA-GA！RIDER！",
     "SA-GA OS 5.5",
     "超自己進化",
     "絶対秩序",
@@ -24,6 +25,37 @@ test("レクソナンス三形態の新設定と基礎値をフォームアー�
     "一時的にレクソナンス・ウルトラへ移行する",
   ]) {
     assert.match(updateSource, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+});
+
+test("微調整後の変身音をライダー詳細とフォームアーカイブで同じ順序にする", () => {
+  const riderSource = readFileSync(
+    new URL("../src/components/world/rider-page.tsx", import.meta.url),
+    "utf8",
+  );
+  const calls = [
+    "Ultra DEUS！",
+    "REXONANCE！",
+    "FAR UP！",
+    "OVER SA-GA！RIDER！",
+    "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
+    "REXONANCE！",
+  ];
+  const riderBlock = riderSource.slice(
+    riderSource.indexOf('name: "レクソナンスサーガ"'),
+    riderSource.indexOf("stats: [", riderSource.indexOf('name: "レクソナンスサーガ"')),
+  );
+  let riderPosition = -1;
+  let archivePosition = -1;
+  for (const call of calls) {
+    riderPosition = riderBlock.indexOf(call, riderPosition + 1);
+    archivePosition = updateSource.indexOf(call, archivePosition + 1);
+    assert.notEqual(riderPosition, -1, `ライダー詳細に ${call} が順番どおり存在する`);
+    assert.notEqual(archivePosition, -1, `アーカイブに ${call} が順番どおり存在する`);
+  }
+  for (const obsolete of ["EXCONVERT！", "GODSIDE！RIDER！"]) {
+    assert.doesNotMatch(riderBlock, new RegExp(obsolete));
+    assert.doesNotMatch(updateSource, new RegExp(obsolete));
   }
 });
 

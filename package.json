@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/run-tests.mjs",
     "verify:public": "node scripts/verify-public-deployment.mjs",
+    "verify:ui": "node scripts/verify-anime-ui.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "fetch-assets": "node scripts/fetch-public-assets.mjs",

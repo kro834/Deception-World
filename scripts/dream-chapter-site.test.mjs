@@ -336,7 +336,7 @@ test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", 
   assert.match(styleSource, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
-test("Dream Chapter hero uses a non-character ambient background", () => {
+test("Dream Chapter collaboration hero uses approved art without intercepting touch", () => {
   const heroClass = pageSource.indexOf('className="dream-hero"');
   const heroStart = pageSource.lastIndexOf("<section", heroClass);
   const heroEnd = pageSource.indexOf("</section>", heroStart);
@@ -347,12 +347,12 @@ test("Dream Chapter hero uses a non-character ambient background", () => {
   assert.match(
     heroSource,
     /className=["']dream-(?:ambient-backdrop|hero-field)["']/,
-    "the hero needs a dedicated environment-only ambient backdrop",
+    "the hero needs a dedicated decorative backdrop",
   );
-  assert.doesNotMatch(
+  assert.match(
     heroSource,
-    /src=["']\/dream-chapter-(?:poster-\d+|ciel|diluculum|keiya|keiya-awakened|kaisaku|lord-[^"']+|dread|lupin)\.(?:jpe?g|png|webp)["']/,
-    "the hero background must not feature a specific character or reuse a character poster",
+    /className="dream-hero-art" src="\/dream-chapter-poster-05.jpeg"/,
+    "the collaboration hero reuses the approved character and bamboo scene",
   );
   assert.match(styleSource, /\.dream-(?:ambient-backdrop|hero-field)\s*\{/);
   assert.match(

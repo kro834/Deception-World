@@ -496,6 +496,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
+          // The destination is now visible. The remaining reveal is visual
+          // only and must not keep a new touch gesture scroll-locked.
+          document.documentElement.removeAttribute("data-loading");
           setGate({
             active: true,
             percent: 100,
@@ -528,6 +531,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
+          document.documentElement.removeAttribute("data-loading");
           setGate({ active: true, percent: 0, variant: "zeus", phase: "revealing" });
           await wait(timings.reveal);
         } finally {
@@ -564,6 +568,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         setGate({ active: true, percent: 100, variant: "archive", phase: "covering" });
         await navigate({ to: to as never, hash });
         if (!isCurrent()) return;
+        document.documentElement.removeAttribute("data-loading");
         setGate({ active: true, percent: 100, variant: "archive", phase: "revealing" });
         await wait(timings.reveal);
       } finally {

@@ -1,3 +1,35 @@
+    episodeProgrammatic.current = true;
+    scrollAxisX(episodeGridRef.current, card ?? null);
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
+      episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
+    }, 520);
+  };
+
+  const openEpisodePickup = (
+    index: number,
+    trigger: HTMLButtonElement,
+    openedByKeyboard: boolean,
+  ) => {
+    const dialog = episodePickupDialogRef.current;
+    if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    if (episodePointerFocusTimer.current != null) {
+      window.clearTimeout(episodePointerFocusTimer.current);
+      episodePointerFocusTimer.current = null;
+    }
+    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
+    goEpisode(index);
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
+    setEpisodePickup(index);
+    cancelEpisodePickupScrollReset.current?.();
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        /* already open */
+      }
     }
     if (!openedByKeyboard) dialog.focus({ preventScroll: true });
     cancelEpisodePickupScrollReset.current = settlePickupScroll(
@@ -85,7 +117,7 @@
   };
 
   return (
-    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+    <main ref={shellRef} className="site-shell motion-on film-edition" data-motion-enabled="true">
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -151,12 +183,21 @@
             />
           </span>
         </div>
+        <div className="film-hero-identity" data-film-reveal>
+          <FilmTextScan />
+          <p className="anime-work-title">
+            <span>仮面ライダーサーガ 劇場版第二作</span>
+            <b>DECEPTION WORLD</b>
+          </p>
+          <span className="film-edition-mark" aria-hidden="true">02</span>
+        </div>
         <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+            <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
@@ -194,6 +235,10 @@
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
+          <div className="film-visual-caption" aria-hidden="true">
+            <span>KEY VISUAL</span>
+            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -258,10 +303,6 @@
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-index">
-            <span>KEY VISUAL</span>
-            <b>{String(poster + 1).padStart(2, "0")}</b>
-          </div>
           <div className="poster-controls">
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
@@ -368,9 +409,10 @@
       </section>
 
       <section className="story-section" id="story">
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -378,34 +420,5 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2>
-              救うべき世界は、
-              <br />
-              <em>現実</em>にある。
-            </h2>
-          </div>
-          <div className="story-copy">
-            <p className="story-lead story-lead-sequel">
-              <span>『ドリームチャプター』に続く</span>
-              <span>劇場版第二作</span>
-            </p>
-            <p>
-              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
-            </p>
-            <p>
-              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
-            </p>
-          </div>
-        </div>
-
-        <div className="threat-panel" id="manager-archive" data-performance-region>
-          <div className="threat-copy">
-            <span className="system-label">MANAGER ARCHIVE</span>
-            <h3>
-              SIX SIGNALS
-              <br />
-              ABOVE THE WORLD.
-            </h3>
-            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
-          </div>
-          <div className="signal-column">
+            <h2 data-film-reveal>
+              <FilmTextScan />

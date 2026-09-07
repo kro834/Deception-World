@@ -1,0 +1,68 @@
+/* Android compositing budget. Keep artwork, CSS lenses, transitions and touch
+   geometry; replace repeated backdrop sampling with the existing gradients. */
+html[data-android-renderer] body *,
+html[data-android-renderer] body *::before,
+html[data-android-renderer] body *::after,
+html[data-android-renderer] dialog::backdrop {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* The closed menus retain their normal visibility rules. Open surfaces need a
+   readable backing now that their background is no longer blurred. */
+html[data-android-renderer]
+  :is(
+    .topbar,
+    .manager-topbar,
+    .rider-archive-topbar,
+    .rxs-local-nav,
+    .dream-site-header,
+    .side-panel,
+    .site-announcement-hub,
+    .world-column-dialog-card,
+    .episode-pickup-dialog
+  ) {
+  background-color: #101b29;
+}
+
+html[data-android-renderer]
+  :is(
+    .grain,
+    .ambient-orb,
+    .hero-backdrop-layer,
+    .world-column-orbit-glow,
+    .liquid-contact-glow,
+    .liquid-pointer-glow
+  ) {
+  display: none !important;
+}
+
+/* Freeze only autonomous decoration, not entrance/exit or selection motion. */
+html[data-android-renderer]
+  :is(
+    .orbit,
+    .poster-holo-ring,
+    .poster-sheen,
+    .poster-media,
+    .world-column-orbit,
+    .rxs-hero-ambient,
+    .rxs-orbit,
+    .dream-aurora,
+    .dream-light-gate,
+    .dream-star-field,
+    .dream-orbit
+  ),
+html[data-android-renderer]
+  :is(.poster-holo-ring, .poster-sheen, .poster-media, .corner, .side-panel-trigger-ring)::before,
+html[data-android-renderer]
+  :is(.poster-holo-ring, .poster-sheen, .poster-media, .corner, .side-panel-trigger-ring)::after {
+  animation: none !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+
+html[data-android-renderer]
+  :is(.manager-glow, .rider-archive-glow, .rxs-hero-ambient, .dream-aurora) {
+  filter: none !important;
+  opacity: 0.12;
+}

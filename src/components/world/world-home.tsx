@@ -10,10 +10,12 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { mountFilmMotion } from "@/lib/film-motion";
+import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 
 const POSTERS = [
   {
-    src: "/deception-world-poster.webp",
+    src: "/deception-world-poster-delivery.webp",
     pos: "50% 50%",
     fit: "cover",
     alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
@@ -746,6 +748,8 @@ export function WorldHome() {
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
+  useEffect(() => mountFilmMotion(shellRef.current), []);
+
   useLayoutEffect(() => {
     const returnId = readRiderReturn();
     const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
@@ -881,17 +885,37 @@ export function WorldHome() {
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    const t = window.setInterval(() => {
-      setPoster((p) => {
-        setPrevPoster(p);
-        return (p + 1) % POSTERS.length;
-      });
+    if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+    let cancelled = false;
+    let decoding = false;
+    const nextIndex = (poster + 1) % POSTERS.length;
+    const t = window.setInterval(async () => {
+      if (decoding || document.querySelector("dialog[open]")) return;
+      decoding = true;
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = POSTERS[nextIndex].src;
+      try {
+        await image.decode();
+        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        setPrevPoster(poster);
+        setPoster(nextIndex);
+      } catch {
+        // Preserve the current art when the next image cannot be delivered.
+      } finally {
+        decoding = false;
+      }
     }, 5200);
-    return () => window.clearInterval(t);
-  }, [ambientPaused, heroVisible, locked, motionReduced]);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
     ).connection;
@@ -905,10 +929,10 @@ export function WorldHome() {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 2) % POSTERS.length].src;
+      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -1012,6 +1036,8 @@ export function WorldHome() {
     const grid = episodeGridRef.current;
     if (!grid) return;
     let frame = 0;
+    let settleTimer = 0;
+    let touching = false;
     const releaseProgrammaticScroll = () => {
       episodeProgrammatic.current = false;
       if (episodeScrollTimer.current != null) {
@@ -1037,20 +1063,65 @@ export function WorldHome() {
       });
       setEpisode((cur) => (cur === best ? cur : best));
     };
+    const settleScroll = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = 0;
+      if (touching || episodeProgrammatic.current) return;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>(".episode-card"));
+      const maxLeft = Math.max(0, grid.scrollWidth - grid.clientWidth);
+      let target: HTMLElement | null = null;
+      let distance = Number.POSITIVE_INFINITY;
+      cards.forEach((card) => {
+        const left = Math.min(
+          maxLeft,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        const delta = Math.abs(left - grid.scrollLeft);
+        if (delta < distance) {
+          distance = delta;
+          target = card;
+        }
+      });
+      // Native snapping can stop between cards after interrupted iOS momentum.
+      // Align only after release and idle; never compete with a held gesture.
+      if (target && distance > 1) scrollAxisX(grid, target);
+      syncFromScroll();
+    };
+    const scheduleSettle = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settleScroll, 180);
+    };
+    const startTouch = () => {
+      touching = true;
+      window.clearTimeout(settleTimer);
+      releaseProgrammaticScroll();
+    };
+    const endTouch = () => {
+      touching = false;
+      scheduleSettle();
+    };
     const onScroll = () => {
+      scheduleSettle();
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
     };
+    grid.addEventListener("touchstart", startTouch, { passive: true });
+    grid.addEventListener("touchend", endTouch, { passive: true });
+    grid.addEventListener("touchcancel", endTouch, { passive: true });
     grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
     grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", syncFromScroll);
+    grid.addEventListener("scrollend", settleScroll);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", syncFromScroll);
+      grid.removeEventListener("scrollend", settleScroll);
     };
   }, []);
 
@@ -1317,7 +1388,7 @@ export function WorldHome() {
   };
 
   return (
-    <main ref={shellRef} className="site-shell motion-on" data-motion-enabled="true">
+    <main ref={shellRef} className="site-shell motion-on film-edition" data-motion-enabled="true">
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -1383,12 +1454,21 @@ export function WorldHome() {
             />
           </span>
         </div>
+        <div className="film-hero-identity" data-film-reveal>
+          <FilmTextScan />
+          <p className="anime-work-title">
+            <span>仮面ライダーサーガ 劇場版第二作</span>
+            <b>DECEPTION WORLD</b>
+          </p>
+          <span className="film-edition-mark" aria-hidden="true">02</span>
+        </div>
         <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target>
+          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+            <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
@@ -1426,6 +1506,10 @@ export function WorldHome() {
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
+          <div className="film-visual-caption" aria-hidden="true">
+            <span>KEY VISUAL</span>
+            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -1490,10 +1574,6 @@ export function WorldHome() {
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-index">
-            <span>KEY VISUAL</span>
-            <b>{String(poster + 1).padStart(2, "0")}</b>
-          </div>
           <div className="poster-controls">
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
@@ -1600,9 +1680,10 @@ export function WorldHome() {
       </section>
 
       <section className="story-section" id="story">
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -1610,7 +1691,8 @@ export function WorldHome() {
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />
               救うべき世界は、
               <br />
               <em>現実</em>にある。
@@ -1631,7 +1713,7 @@ export function WorldHome() {
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
-          <div className="threat-copy">
+          <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
               SIX SIGNALS
@@ -1988,16 +2070,17 @@ export function WorldHome() {
 
       <section className="riders-section" id="riders" data-performance-region>
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
           <p className="eyebrow">
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2>八人が、世界へ。</h2>
+          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
@@ -2066,28 +2149,22 @@ export function WorldHome() {
       </section>
 
       <section className="records-section" id="records" data-performance-region>
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>03</span>
           <small>NEW RECORDS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
           <p className="eyebrow">
             <span>POWER BEYOND THE BORDER</span>
             <i />
           </p>
-          <h2>
+          <h2 data-film-reveal>
+            <FilmTextScan />
             到達点は、
             <br />
             ひとつではない。
           </h2>
-        </div>
-        <div className="return-strip">
-          <div>
-            <span>RETURNING SIGNAL</span>
-            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
-          </div>
-          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
-          <i aria-hidden="true" />
         </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">
@@ -2209,7 +2286,7 @@ export function WorldHome() {
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img
-              src="/deception-world-poster.webp"
+              src="/deception-world-poster-delivery.webp"
               alt=""
               width={1024}
               height={1536}
@@ -2220,7 +2297,8 @@ export function WorldHome() {
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />
               サーガは、
               <br />
               まだ終わらない。
@@ -2286,19 +2364,19 @@ export function WorldHome() {
           if (event.target === episodePickupDialogRef.current) closeEpisodePickup();
         }}
       >
+        <button
+          type="button"
+          className="episode-pickup-close ios26-glass"
+          data-liquid-pointer="true"
+          onClick={closeEpisodePickup}
+          aria-label="エピソードのピックアップを閉じる"
+        >
+          <LiquidPointerGlow />
+          <span className="episode-pickup-close-icon" aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </span>
+        </button>
         <div className="episode-pickup-panel">
-          <button
-            type="button"
-            className="episode-pickup-close ios26-glass"
-            data-liquid-pointer="true"
-            onClick={closeEpisodePickup}
-            aria-label="エピソードのピックアップを閉じる"
-          >
-            <LiquidPointerGlow />
-            <span className="episode-pickup-close-icon" aria-hidden="true">
-              <UiVectorIcon kind="close" size={16} />
-            </span>
-          </button>
           <header className="episode-pickup-heading">
             <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
             <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>

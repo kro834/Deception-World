@@ -2633,3 +2633,54 @@ html[data-world-effects="economy"] .dream-case-list li {
     transition: none !important;
   }
 }
+
+/* Keep chapter navigation and dossier captions legible on compact screens. */
+.dream-chapter-nav a {
+  min-height: 48px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.dream-chapter-nav a small,
+.dream-back-link small,
+.dream-section-heading p,
+.dream-character-copy small {
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+}
+
+.dream-scroll-cue {
+  min-height: 48px;
+  font-size: 11px;
+}
+
+@media (max-width: 480px) {
+  .dream-chapter-nav a {
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+}
+
+/* Observation records use the same illuminated edges as the world archive. */
+.dream-page .dream-chapter-nav {
+  border-color: rgb(131 180 255 / 32%);
+  background:
+    linear-gradient(90deg, #83b4ff, #e6c78c, transparent) bottom / 100% 1px no-repeat,
+    linear-gradient(105deg, #14253c, #080e1a);
+}
+
+.dream-page .dream-section-heading {
+  border-bottom-color: rgb(131 180 255 / 38%);
+  background: linear-gradient(90deg, rgb(57 102 155 / 13%), transparent 70%);
+}
+
+.dream-page .dream-section-heading p {
+  padding-left: 12px;
+  border-left: 2px solid #e6c78c;
+}
+
+.dream-page :is(.dream-character-grid, .dream-dolminence-grid) button {
+  border-color: rgb(131 180 255 / 36%);
+  box-shadow: inset 0 1px 0 rgb(180 218 255 / 18%), 0 16px 38px rgb(0 0 0 / 25%);
+}

@@ -193,10 +193,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         theme: "rexonance",
         quote: "無限出力を、無限の攻撃として完成させる。",
         calls: [
-          "EXCONVERT！",
           "Ultra DEUS！",
           "REXONANCE！",
-          "GODSIDE！RIDER！",
+          "FAR UP！",
+          "OVER SA-GA！RIDER！",
           "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
           "REXONANCE！",
         ],

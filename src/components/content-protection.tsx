@@ -1,18 +1,9 @@
 import { useEffect } from "react";
 
-const EDITABLE_SELECTOR =
-  'input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]';
-
-const isEditableTarget = (target: EventTarget | null) =>
-  target instanceof Element && target.closest(EDITABLE_SELECTOR) !== null;
-
 export function ContentProtection() {
   useEffect(() => {
     const preventClipboardAction = (event: Event) => {
       event.preventDefault();
-    };
-    const preventContentSelection = (event: Event) => {
-      if (!isEditableTarget(event.target)) event.preventDefault();
     };
     const preventClipboardShortcut = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -29,7 +20,8 @@ export function ContentProtection() {
     document.addEventListener("paste", preventClipboardAction, true);
     document.addEventListener("contextmenu", preventClipboardAction, true);
     document.addEventListener("dragstart", preventClipboardAction, true);
-    document.addEventListener("selectstart", preventContentSelection, true);
+    // Selection/callout protection belongs to CSS. Cancelling selection at the
+    // document level can interfere with a native text-origin pan on WebKit.
     document.addEventListener("keydown", preventClipboardShortcut, true);
 
     return () => {
@@ -38,7 +30,6 @@ export function ContentProtection() {
       document.removeEventListener("paste", preventClipboardAction, true);
       document.removeEventListener("contextmenu", preventClipboardAction, true);
       document.removeEventListener("dragstart", preventClipboardAction, true);
-      document.removeEventListener("selectstart", preventContentSelection, true);
       document.removeEventListener("keydown", preventClipboardShortcut, true);
     };
   }, []);

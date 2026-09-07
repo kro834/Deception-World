@@ -1,3 +1,21 @@
+            <div className="rider-copy-block">
+              <p className="rider-person">
+                <NameText value={rider.person} />
+              </p>
+              <h3 aria-label={`仮面ライダー${rider.ja}`}>
+                <span className="rider-name-line">仮面ライダー</span>
+                <br />
+                <span className="rider-name-line">{rider.ja}</span>
+              </h3>
+              <p className="rider-description">{rider.desc}</p>
+              <div className="rider-line">
+                <span />
+                <b>{rider.name}</b>
+              </div>
+              <SlideOpenControl
+                className="rider-dossier-open"
+                ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
+                label="個別資料"
                 opensDialog={false}
                 onOpen={() => {
                   void go({
@@ -12,28 +30,22 @@
       </section>
 
       <section className="records-section" id="records" data-performance-region>
-        <div className="section-index">
+        <div className="section-index" data-film-reveal>
           <span>03</span>
           <small>NEW RECORDS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
           <p className="eyebrow">
             <span>POWER BEYOND THE BORDER</span>
             <i />
           </p>
-          <h2>
+          <h2 data-film-reveal>
+            <FilmTextScan />
             到達点は、
             <br />
             ひとつではない。
           </h2>
-        </div>
-        <div className="return-strip">
-          <div>
-            <span>RETURNING SIGNAL</span>
-            <b>KAMEN RIDER REALM / BELL ALLAIN</b>
-          </div>
-          <p>仮面ライダーレルム、ベル・アレイン。復活。</p>
-          <i aria-hidden="true" />
         </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">
@@ -155,7 +167,7 @@
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img
-              src="/deception-world-poster.webp"
+              src="/deception-world-poster-delivery.webp"
               alt=""
               width={1024}
               height={1536}
@@ -166,7 +178,8 @@
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>
-            <h2>
+            <h2 data-film-reveal>
+              <FilmTextScan />
               サーガは、
               <br />
               まだ終わらない。
@@ -232,19 +245,19 @@
           if (event.target === episodePickupDialogRef.current) closeEpisodePickup();
         }}
       >
+        <button
+          type="button"
+          className="episode-pickup-close ios26-glass"
+          data-liquid-pointer="true"
+          onClick={closeEpisodePickup}
+          aria-label="エピソードのピックアップを閉じる"
+        >
+          <LiquidPointerGlow />
+          <span className="episode-pickup-close-icon" aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </span>
+        </button>
         <div className="episode-pickup-panel">
-          <button
-            type="button"
-            className="episode-pickup-close ios26-glass"
-            data-liquid-pointer="true"
-            onClick={closeEpisodePickup}
-            aria-label="エピソードのピックアップを閉じる"
-          >
-            <LiquidPointerGlow />
-            <span className="episode-pickup-close-icon" aria-hidden="true">
-              <UiVectorIcon kind="close" size={16} />
-            </span>
-          </button>
           <header className="episode-pickup-heading">
             <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
             <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>

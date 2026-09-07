@@ -31,7 +31,7 @@ test("a failed request is not warmed and can be retried", async (t) => {
   assert.equal(assetsWarmed([url]), false);
 });
 
-test("an image is warmed only after fetch and decode both succeed", async (t) => {
+test("images use one native request and warm only after successful decode", async (t) => {
   const originalFetch = globalThis.fetch;
   const hadImage = Object.hasOwn(globalThis, "Image");
   const originalImage = globalThis.Image;
@@ -75,6 +75,30 @@ test("an image is warmed only after fetch and decode both succeed", async (t) =>
   assert.equal(assetsWarmed([url]), true);
 
   await preloadAssets([url], () => undefined);
-  assert.equal(fetchCalls, 2);
+  assert.equal(fetchCalls, 0, "native image loading must not duplicate a fetch request");
   assert.equal(decodeCalls, 2);
+});
+
+test("concurrent image warmups share one native decode", async (t) => {
+  const hadImage = Object.hasOwn(globalThis, "Image");
+  const originalImage = globalThis.Image;
+  t.after(() => {
+    if (hadImage) globalThis.Image = originalImage;
+    else delete globalThis.Image;
+  });
+  let decodeCalls = 0;
+  globalThis.Image = class {
+    naturalWidth = 32;
+    async decode() {
+      decodeCalls += 1;
+      await Promise.resolve();
+    }
+  };
+  const url = "/asset-loader-shared-native.webp";
+  await Promise.all([
+    preloadAssets([url], () => undefined),
+    preloadAssets([url], () => undefined),
+  ]);
+  assert.equal(decodeCalls, 1);
+  assert.equal(assetsWarmed([url]), true);
 });

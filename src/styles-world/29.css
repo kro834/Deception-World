@@ -1,0 +1,141 @@
+/* Cross-route readability audit. Keep display type and capsule geometry intact;
+   establish a legible floor for instructions, metadata and directory links. */
+.site-shell .topbar nav a {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.site-shell :is(.primary-action, .text-action, .scroll-cue),
+.site-shell .hero-metadata :is(small, b),
+.site-shell .section-index small,
+.site-shell .eyebrow,
+.site-shell .signal.has-visual small,
+.site-shell .world-column-number {
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.site-shell footer a,
+.site-shell .poster-lock small {
+  font-size: 11px;
+}
+
+.site-shell .episode-controls output {
+  font-size: 12px;
+  color: #a5b2c2;
+}
+
+.site-shell .episode-card-copy small {
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  color: #a5b2c2;
+}
+
+.site-shell .hero-metadata small,
+.site-shell .section-index small,
+.site-shell .world-column-number {
+  color: #a5b2c2;
+}
+
+.site-shell .scroll-cue,
+.site-shell footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.side-panel .side-panel-head p,
+.side-panel .side-panel-group > p,
+.side-panel .side-panel-links :is(a, button) > i,
+.side-panel .side-panel-zeus-toggle small {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #a5b2c2;
+}
+
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+  height: auto;
+  min-height: 52px;
+  gap: 8px;
+  padding-block: 10px;
+}
+
+.side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.side-panel .side-panel-close {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.manager-page .manager-back {
+  font-size: 12px;
+}
+
+.manager-page .manager-file-number,
+.manager-page .manager-introduction h1 > small,
+.manager-page .manager-facts dt,
+.manager-page .manager-section-index small,
+.manager-page .manager-copy-heading p,
+.manager-page .manager-pagination small,
+.manager-page .rider-archive-civilian > figcaption > :is(p, small),
+.manager-page .rider-archive-civilian dt {
+  font-size: 11px;
+  line-height: 1.65;
+  letter-spacing: 0.08em;
+  color: #a5b2c2;
+}
+
+.manager-page .manager-facts > div,
+.manager-page .rider-archive-civilian dl > div {
+  min-width: 0;
+}
+
+.manager-page .manager-facts dd,
+.manager-page .rider-archive-civilian dd {
+  overflow-wrap: anywhere;
+}
+
+.site-shell .ios-slide-open .ios-slide-open-label small,
+.manager-page .ios-slide-open .ios-slide-open-label small {
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}
+
+/* Labels may grow with text zoom; do not force long names onto one line. */
+.site-shell .return-strip :is(b, p),
+.site-shell .episode-card-copy h3 {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .side-panel .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 2px;
+  }
+
+  .side-panel .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) > span {
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .topbar,
+  .manager-topbar,
+  .side-panel {
+    background: #080e17;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
