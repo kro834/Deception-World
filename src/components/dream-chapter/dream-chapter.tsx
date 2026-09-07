@@ -767,7 +767,15 @@ export function DreamChapter() {
         data-dream-hero-active={heroVisible ? "true" : "false"}
       >
         <div className="dream-hero-field" aria-hidden="true">
-          <img className="dream-hero-art" src="/dream-chapter-poster-05.jpeg" alt="" width={1448} height={1086} fetchPriority="high" decoding="async" />
+          <img
+            className="dream-hero-art"
+            src="/dream-chapter-poster-05.jpeg"
+            alt=""
+            width={1448}
+            height={1086}
+            fetchPriority="high"
+            decoding="async"
+          />
           <span className="dream-aurora dream-aurora-blue" />
           <span className="dream-aurora dream-aurora-gold" />
           <span className="dream-light-gate" />
@@ -778,7 +786,10 @@ export function DreamChapter() {
         <span className="dream-hero-vignette" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-a" aria-hidden="true" />
         <span className="dream-orbit dream-orbit-b" aria-hidden="true" />
-        <p className="dream-hero-catch"><span>夢と現実の境界が、</span><span>明ける。</span></p>
+        <p className="dream-hero-catch">
+          <span>夢と現実の境界が、</span>
+          <span>明ける。</span>
+        </p>
         <div className="dream-hero-copy">
           <p>仮面ライダーサーガ × 東方Project</p>
           <h1 id="dream-title" className="dream-visually-hidden">
@@ -889,6 +900,27 @@ export function DreamChapter() {
                   cancelShuffle();
                   selectPoster(index);
                   if (event.detail !== 0) event.currentTarget.blur();
+                }}
+                onKeyDown={(event) => {
+                  const last = DREAM_POSTERS.length - 1;
+                  const next =
+                    event.key === "Home"
+                      ? 0
+                      : event.key === "End"
+                        ? last
+                        : event.key === "ArrowRight" || event.key === "ArrowDown"
+                          ? (index + 1) % DREAM_POSTERS.length
+                          : event.key === "ArrowLeft" || event.key === "ArrowUp"
+                            ? (index + last) % DREAM_POSTERS.length
+                            : null;
+                  if (next == null) return;
+                  event.preventDefault();
+                  cancelShuffle();
+                  setPosterLocked(true);
+                  selectPoster(next);
+                  event.currentTarget.parentElement
+                    ?.querySelectorAll<HTMLButtonElement>("[role=tab]")
+                    [next]?.focus();
                 }}
               >
                 <LiquidPointerGlow />

@@ -12,6 +12,23 @@
   --font-display: "Cinzel", serif;
   --font-sans: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
 }
+
+/* Site-wide content protection. Editable controls retain cursor/selection
+   ergonomics, while the capture guard blocks their clipboard operations. */
+html,
+body,
+body * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]),
+:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]) * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
 /* ── Form archive route chrome and dive ─────────────────────── */
 .archive-route-dive {
   z-index: 2147483000;
@@ -1954,12 +1971,3 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   font: 600 0.56rem/1 var(--font-sans);
   letter-spacing: 0.08em;
 }
-
-.is-playing .cine-skip {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-  transition:
-    opacity 0.25s ease 0.12s,
-    color 160ms ease,
-    border-color 160ms ease,

@@ -147,6 +147,9 @@ export default defineConfig(({ command }) => ({
       ? [
           nitro({
             preset: "vercel",
+            // Keep the embedded database's runtime next to its .data/.wasm files.
+            // Bundling it into _libs loses these assets on an unconfigured host.
+            traceDeps: ["@electric-sql/pglite*"],
             vercel: {
               functions: {
                 // waitUntil collectors need enough time to survive mobile

@@ -1,3 +1,4 @@
+    { dt: "AUTHORITY", dd: "戦闘演算／最適解" },
     { dt: "STATUS", dd: "ACCESS GRANTED" },
   ],
   sections: [

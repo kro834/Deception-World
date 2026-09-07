@@ -5,7 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const root = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const partsRoot = join(root, "source-parts");
-const requested = new Set(process.argv.slice(2).map((value) => value.replaceAll("/", sep)));
+const checkOnly = process.argv.includes("--check");
+const requested = new Set(
+  process.argv
+    .slice(2)
+    .filter((value) => value !== "--check")
+    .map((value) => value.replaceAll("/", sep)),
+);
 
 function listPartGroups(dir, groups = new Map()) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -42,6 +48,14 @@ for (const [relativeTarget, partFiles] of listPartGroups(partsRoot)) {
   const target = resolve(root, relativeTarget);
   if (!existsSync(target)) throw new Error(`Missing authoritative source: ${relativeTarget}`);
   partFiles.sort();
+  if (checkOnly) {
+    const normalize = (text) => text.replaceAll("\r\n", "\n");
+    const source = normalize(readFileSync(target, "utf8"));
+    const assembled = normalize(partFiles.map((part) => readFileSync(part, "utf8")).join(""));
+    if (source !== assembled) throw new Error(`Out-of-date source parts: ${relativeTarget}`);
+    synced += 1;
+    continue;
+  }
   const chunks = splitAtLineBoundaries(readFileSync(target, "utf8"), partFiles.length);
   partFiles.forEach((part, index) => writeFileSync(part, chunks[index], "utf8"));
   console.log(`${relativeTarget}  ${partFiles.length} parts synchronized`);
@@ -51,4 +65,4 @@ for (const [relativeTarget, partFiles] of listPartGroups(partsRoot)) {
 if (requested.size && synced !== requested.size) {
   throw new Error(`Synchronized ${synced} of ${requested.size} requested source groups`);
 }
-console.log(`synchronized ${synced} source groups`);
+console.log(`${checkOnly ? "verified" : "synchronized"} ${synced} source groups`);

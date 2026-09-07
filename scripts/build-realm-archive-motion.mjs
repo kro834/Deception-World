@@ -38,7 +38,7 @@ function normalizeMaster(source) {
     .replace("17 / 17 FORMS", "09 / 09 FORMS")
     .replace(
       /const accents = \{[\s\S]*?\n {2}\};\n\n {2}const telemetry =/,
-      `${realmAccents}\n\n  const telemetry =`,
+      `${realmAccents.replaceAll("\r\n", "\n")}\n\n  const telemetry =`,
     );
 
   if (!normalized.includes("const DEFAULT_FORM_ID = 'stella';")) {
@@ -54,10 +54,9 @@ function normalizeMaster(source) {
 }
 
 export function createRealmArchiveMotion(sagaArchive) {
+  sagaArchive = sagaArchive.replaceAll("\r\n", "\n");
   const master = normalizeMaster(scriptById(sagaArchive, "saga-archive-master-script"));
-  const adaptive = normalizeIdentifiers(
-    scriptById(sagaArchive, "saga-adaptive-motion-v16-script"),
-  );
+  const adaptive = normalizeIdentifiers(scriptById(sagaArchive, "saga-adaptive-motion-v16-script"));
   const runtime = normalizeIdentifiers(scriptById(sagaArchive, "saga-runtime-v16-script"));
 
   return `/* eslint-disable no-empty, @typescript-eslint/no-unused-vars */
@@ -67,7 +66,7 @@ ${master}
 ${adaptive}
 
 ${runtime}
-`;
+`.replaceAll("\r\n", "\n");
 }
 
 export function buildRealmArchiveMotion() {

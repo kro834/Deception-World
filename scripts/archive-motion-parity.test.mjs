@@ -21,7 +21,12 @@ const realmMotion = readFileSync(
 );
 
 test("Realm motion controller is regenerated exactly from Saga's current controllers", () => {
-  assert.equal(realmMotion, createRealmArchiveMotion(sagaArchive));
+  assert.equal(realmMotion.replaceAll("\r\n", "\n"), createRealmArchiveMotion(sagaArchive));
+});
+
+test("Windows and Unix source archives generate identical controllers", () => {
+  const lf = sagaArchive.replaceAll("\r\n", "\n");
+  assert.equal(createRealmArchiveMotion(lf), createRealmArchiveMotion(lf.replaceAll("\n", "\r\n")));
 });
 
 test("Realm archive loads its normalized motion controller in both deliverables", () => {
@@ -80,7 +85,10 @@ test("both archives derive the current-location marker from final document geome
     assert.match(controller, /window\.innerHeight \* 0\.18/);
     assert.match(controller, /Math\.abs\(formEntry\.top - detailEntry\.top\) <= 96/);
     assert.match(controller, /currentIndex === 0 \|\| currentIndex === 1 \? currentIndex : 0/);
-    assert.match(controller, /reachedEntries\[reachedEntries\.length - 1\] \|\| formEntry \|\| byDocumentTop\[0\]/);
+    assert.match(
+      controller,
+      /reachedEntries\[reachedEntries\.length - 1\] \|\| formEntry \|\| byDocumentTop\[0\]/,
+    );
     assert.match(controller, /locationIntentIndex/);
     assert.match(controller, /scrollend/);
     assert.match(controller, /const atDocumentEnd = maxScroll > 0 && scrollTop >= maxScroll - 2/);
@@ -107,11 +115,31 @@ test("iPad two-column Form and Detail navigation preserves either explicit selec
       { index: 3, top: 6008 },
     ];
 
-    assert.equal(resolveLocation(measured, 1309, false, 0).index, 0, "Form must not flip to Detail");
-    assert.equal(resolveLocation(measured, 1309, false, 1).index, 1, "Detail must not flip to Form");
-    assert.equal(resolveLocation(measured, 1309, false, 2).index, 0, "returning from later content starts at Form");
-    assert.equal(resolveLocation(measured, 240, false, -1).index, 0, "initial state starts at Form despite crossed heading coordinates");
-    assert.equal(resolveLocation(measured, 5541, true, 2).index, 3, "document end resolves to the final physical section");
+    assert.equal(
+      resolveLocation(measured, 1309, false, 0).index,
+      0,
+      "Form must not flip to Detail",
+    );
+    assert.equal(
+      resolveLocation(measured, 1309, false, 1).index,
+      1,
+      "Detail must not flip to Form",
+    );
+    assert.equal(
+      resolveLocation(measured, 1309, false, 2).index,
+      0,
+      "returning from later content starts at Form",
+    );
+    assert.equal(
+      resolveLocation(measured, 240, false, -1).index,
+      0,
+      "initial state starts at Form despite crossed heading coordinates",
+    );
+    assert.equal(
+      resolveLocation(measured, 5541, true, 2).index,
+      3,
+      "document end resolves to the final physical section",
+    );
   }
 });
 

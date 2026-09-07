@@ -440,11 +440,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         : RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES];
       const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
       const riderTransitionVariant = diveVariant ?? cutInVariant;
-      if (
-        !isArchiveTransition &&
-        !isZeusTransition &&
-        !riderTransitionVariant
-      ) {
+      if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
         const changesDocument = pathname !== to;
         const releaseScrollMotion = changesDocument || hash ? holdRouteScrollMotion() : null;
         const assetWarmup = assets.length
@@ -936,7 +932,9 @@ export function AppGuards() {
   useLayoutEffect(() => {
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
-    const isDossierSectionHash = /^#?character-section-/.test(locationHash);
+    const isDossierSectionHash =
+      /^#?character-section-/.test(locationHash) ||
+      /^#?(?:dossier-profile|dossier-index|identity-records|form-records)$/.test(locationHash);
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash) ||
       (pathname === "/world" && (!locationHash || locationHash === "top"));

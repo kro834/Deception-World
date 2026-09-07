@@ -1,6 +1,7 @@
 import worldCssUrl from "@/styles-world.css?url";
 import worldAddonCssUrl from "@/styles-world-addon.css?url";
 import filmDirectionCssUrl from "@/styles-film-direction.css?url";
+import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -21,6 +22,7 @@ export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   WORLD_BASE_STYLESHEET_LINK,
   WORLD_ADDON_STYLESHEET_LINK,
   { rel: "stylesheet", href: filmDirectionCssUrl },
+  { rel: "stylesheet", href: dossierReaderCssUrl },
 ];
 
 type WorldHeadInput = {

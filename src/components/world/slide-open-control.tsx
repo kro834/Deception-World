@@ -55,6 +55,7 @@ export function SlideOpenControl({
   const dragMetrics = useRef<SlideMetrics | null>(null);
   const holdTimer = useRef<number | null>(null);
   const activateTimer = useRef<number | null>(null);
+  const resetFrame = useRef<number | null>(null);
   const completingRef = useRef(false);
   const suppressFocusRing = useRef(false);
 
@@ -72,6 +73,8 @@ export function SlideOpenControl({
     holdTimer.current = null;
     if (activateTimer.current != null) window.clearTimeout(activateTimer.current);
     activateTimer.current = null;
+    if (resetFrame.current != null) window.cancelAnimationFrame(resetFrame.current);
+    resetFrame.current = null;
   }, []);
 
   const reset = useCallback(() => {
@@ -110,10 +113,7 @@ export function SlideOpenControl({
      page gesture ownership active. */
   useEffect(() => {
     const cancelDanglingDrag = (event?: PointerEvent) => {
-      if (
-        activePointer.current == null ||
-        (event && event.pointerId !== activePointer.current)
-      )
+      if (activePointer.current == null || (event && event.pointerId !== activePointer.current))
         return;
       const button = internalButtonRef.current;
       const pointerId = activePointer.current;
@@ -124,16 +124,24 @@ export function SlideOpenControl({
       }
       reset();
     };
-    const cancelOnBlur = () => cancelDanglingDrag();
+    const cancelOnBlur = () => {
+      cancelDanglingDrag();
+      reset();
+    };
+    const cancelWhenHidden = () => {
+      if (document.hidden) cancelOnBlur();
+    };
     window.addEventListener("pointerup", cancelDanglingDrag);
     window.addEventListener("pointercancel", cancelDanglingDrag);
     window.addEventListener("blur", cancelOnBlur);
     window.addEventListener("pagehide", cancelOnBlur);
+    document.addEventListener("visibilitychange", cancelWhenHidden);
     return () => {
       window.removeEventListener("pointerup", cancelDanglingDrag);
       window.removeEventListener("pointercancel", cancelDanglingDrag);
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
+      document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
   }, [reset]);
 
@@ -224,13 +232,14 @@ export function SlideOpenControl({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     activateTimer.current = window.setTimeout(
       () => {
+        activateTimer.current = null;
         onOpen(source);
         // A route transition can spend a short time preloading before the
         // current page unmounts. Keep the thumb at the completed edge during
         // that interval so it never appears to spring back before navigation.
         // Dialog launchers stay on the same page, so reset them only after the
         // modal has had a frame to cover the control.
-        if (opensDialog) window.requestAnimationFrame(reset);
+        if (opensDialog) resetFrame.current = window.requestAnimationFrame(reset);
       },
       reducedMotion ? 0 : COMPLETE_ANIMATION_MS,
     );

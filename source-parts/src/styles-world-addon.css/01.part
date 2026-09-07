@@ -1094,3 +1094,54 @@ br.tab-br {
   pointer-events: auto;
   animation: worldColumnDialogCopyIn 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.world-column-stack-item {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.world-column-stack-item.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  animation: worldColumnReveal 0.56s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 六詠・管理外・その他 share one six-slot matrix. Fixed rows make the
+   category switch height-independent; unknown records remain visible slots. */
+.manager-archive-panel,
+.manager-archive-panel.is-unmanaged,
+.manager-archive-panel.is-other {
+  display: block;
+  min-block-size: 0;
+  block-size: 366px;
+}
+
+.manager-slot-grid,
+.manager-slot-grid.signal-array,
+.manager-slot-grid.unmanaged-array,
+.manager-slot-grid.other-array {
+  display: grid;
+  min-block-size: 0;
+  block-size: 366px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, 178px);
+  gap: 10px;
+}
+
+.manager-slot-grid > .signal,
+.manager-slot-grid > .dante-archive,
+.manager-slot-grid > .other-archive-card,
+.manager-slot-grid > .archive-placeholder {
+  min-block-size: 0;
+  block-size: 178px;
+}
+
+.manager-slot-grid .dante-archive {
+  display: block;
+  overflow: hidden;
+  border-radius: 20px 34px 20px 12px;
+  background: #12070a;
+}

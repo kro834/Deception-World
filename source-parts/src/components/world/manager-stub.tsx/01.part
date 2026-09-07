@@ -7,6 +7,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
+import { DossierContents, DossierReader } from "./dossier-reader";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -200,19 +201,19 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           if (e.target === dlg.current) close();
         }}
       >
-          <button
-            type="button"
-            className="form-pickup-close"
-            data-liquid-pointer="true"
-            onClick={close}
-            aria-label="閉じる"
-          >
-            <LiquidPointerGlow />
-            <span>CLOSE</span>
-            <i aria-hidden="true">
-              <UiVectorIcon kind="close" size={16} />
-            </i>
-          </button>
+        <button
+          type="button"
+          className="form-pickup-close"
+          data-liquid-pointer="true"
+          onClick={close}
+          aria-label="閉じる"
+        >
+          <LiquidPointerGlow />
+          <span>CLOSE</span>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </i>
+        </button>
         <div className="form-pickup-panel">
           {isRexonance ? (
             <div className="rexonance-panel-ambient" aria-hidden="true">

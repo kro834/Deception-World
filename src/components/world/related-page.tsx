@@ -1,6 +1,7 @@
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
+import { DossierContents, DossierReader } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 
 type Related = {
@@ -227,7 +228,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         returnHash="manager-archive"
         returnLabel="その他へ戻る"
       />
-      <section className="manager-hero">
+      <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
             <img
@@ -246,16 +247,21 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           </div>
         </div>
         <div className="manager-introduction">
-          <p className="manager-file-number">CHARACTER FILE // {person.code}</p>
-          <h1>
-            <small>
-              {person.en} / {person.form}
-            </small>
-            <span className="manager-display-name">
-              <NameText value={person.name} />
-            </span>
-          </h1>
-          <p className="manager-title"># {person.title}</p>
+          <header className="dossier-identity">
+            <p className="manager-file-number">CHARACTER FILE // {person.code}</p>
+            <h1>
+              <small>
+                {person.en} / {person.form}
+              </small>
+              <span className="manager-display-name">
+                <NameText value={person.name} />
+              </span>
+            </h1>
+            <p className="manager-title"># {person.title}</p>
+            <a className="dossier-read-link" href="#dossier-index">
+              人物資料を読む <span aria-hidden="true">↓</span>
+            </a>
+          </header>
           <div className="manager-quotes">
             {person.quotes.map((q) => (
               <q key={q}>{q}</q>
@@ -273,26 +279,20 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           </dl>
         </div>
       </section>
-      <section className="manager-dossier" aria-label={`${person.name}の人物資料`}>
+      <DossierReader name={person.name} forms />
+      <section
+        className="manager-dossier"
+        id="dossier-index"
+        aria-label={`${person.name}の人物資料`}
+      >
         <div className="manager-section-index">
           <span>{person.code}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
-        <nav className="manager-section-nav" aria-label="人物資料の章">
-          {person.sections.map((section) => (
-            <a key={section.no} href={`#character-section-${section.no}`}>
-              <span>{section.no}</span>
-              <b>{section.kicker}</b>
-            </a>
-          ))}
-        </nav>
+        <DossierContents sections={person.sections} />
         <div className="manager-sections">
           {person.sections.map((s) => (
-            <article
-              className="manager-copy-section"
-              id={`character-section-${s.no}`}
-              key={s.no}
-            >
+            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -307,7 +307,9 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           ))}
         </div>
       </section>
-      <FormPickup rider={person.rider} />
+      <div id="form-records">
+        <FormPickup rider={person.rider} />
+      </div>
       <DossierNav
         items={RELATED_NAV}
         currentHref={`/characters/${person.id}`}

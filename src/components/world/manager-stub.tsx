@@ -7,6 +7,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
+import { DossierContents, DossierReader } from "./dossier-reader";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -200,19 +201,19 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           if (e.target === dlg.current) close();
         }}
       >
-          <button
-            type="button"
-            className="form-pickup-close"
-            data-liquid-pointer="true"
-            onClick={close}
-            aria-label="閉じる"
-          >
-            <LiquidPointerGlow />
-            <span>CLOSE</span>
-            <i aria-hidden="true">
-              <UiVectorIcon kind="close" size={16} />
-            </i>
-          </button>
+        <button
+          type="button"
+          className="form-pickup-close"
+          data-liquid-pointer="true"
+          onClick={close}
+          aria-label="閉じる"
+        >
+          <LiquidPointerGlow />
+          <span>CLOSE</span>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </i>
+        </button>
         <div className="form-pickup-panel">
           {isRexonance ? (
             <div className="rexonance-panel-ambient" aria-hidden="true">
@@ -467,7 +468,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
-      <section className="manager-hero">
+      <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
             <img
@@ -503,14 +504,19 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               <b>主権</b>
             </p>
           ) : null}
-          <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
-          <h1>
-            <small>RIKUEI {profile.numeral}</small>
-            <span className="manager-display-name">
-              <NameText value={profile.name} />
-            </span>
-          </h1>
-          <p className="manager-title"># {profile.title}</p>
+          <header className="dossier-identity">
+            <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
+            <h1>
+              <small>RIKUEI {profile.numeral}</small>
+              <span className="manager-display-name">
+                <NameText value={profile.name} />
+              </span>
+            </h1>
+            <p className="manager-title"># {profile.title}</p>
+            <a className="dossier-read-link" href="#dossier-index">
+              人物資料を読む <span aria-hidden="true">↓</span>
+            </a>
+          </header>
           {profile.sovereign ? (
             <section className="sovereign-status" aria-label="六詠第一位・主権の管理人">
               <div className="sovereign-emblem" aria-hidden="true">
@@ -567,26 +573,20 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           </dl>
         </div>
       </section>
-      <section className="manager-dossier" aria-label={`${profile.name}の人物資料`}>
+      <DossierReader name={profile.name} forms={Boolean(profile.rider)} />
+      <section
+        className="manager-dossier"
+        id="dossier-index"
+        aria-label={`${profile.name}の人物資料`}
+      >
         <div className="manager-section-index">
           <span>{profile.numeral}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
-        <nav className="manager-section-nav" aria-label="人物資料の章">
-          {profile.sections.map((section) => (
-            <a key={section.no} href={`#character-section-${section.no}`}>
-              <span>{section.no}</span>
-              <b>{section.kicker}</b>
-            </a>
-          ))}
-        </nav>
+        <DossierContents sections={profile.sections} />
         <div className="manager-sections">
           {profile.sections.map((s) => (
-            <article
-              className="manager-copy-section"
-              id={`character-section-${s.no}`}
-              key={s.no}
-            >
+            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -601,7 +601,11 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           ))}
         </div>
       </section>
-      {profile.rider ? <FormPickup rider={profile.rider} /> : null}
+      {profile.rider ? (
+        <div id="form-records">
+          <FormPickup rider={profile.rider} />
+        </div>
+      ) : null}
       <DossierNav items={RIKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="RIKUEI" />
     </main>
   );

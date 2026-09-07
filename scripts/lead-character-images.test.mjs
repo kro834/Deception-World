@@ -31,7 +31,7 @@ const replacements = [
 test("Yuma and Bell use the supplied visuals in dossiers and route preloads", () => {
   for (const replacement of replacements) {
     assert.match(
-      dossierNav,
+      dossierNav.replace(/\s+/g, " "),
       new RegExp(`id: "${replacement.id}"[^\\n]+assets: \\["${replacement.path.replaceAll("/", "\\/").replace(".", "\\.")}"\\]`),
     );
     assert.match(riderPage, new RegExp(`civilianImg: "${replacement.path.replaceAll("/", "\\/").replace(".", "\\.")}"`));

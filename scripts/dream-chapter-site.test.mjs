@@ -351,7 +351,7 @@ test("Dream Chapter collaboration hero uses approved art without intercepting to
   );
   assert.match(
     heroSource,
-    /className="dream-hero-art" src="\/dream-chapter-poster-05.jpeg"/,
+    /className="dream-hero-art"\s+src="\/dream-chapter-poster-05.jpeg"/,
     "the collaboration hero reuses the approved character and bamboo scene",
   );
   assert.match(styleSource, /\.dream-(?:ambient-backdrop|hero-field)\s*\{/);

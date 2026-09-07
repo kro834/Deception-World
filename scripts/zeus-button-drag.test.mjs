@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const source = readFileSync(new URL("../src/components/zeus-button.tsx", import.meta.url), "utf8");
+const source = readFileSync(
+  new URL("../src/components/zeus-button.tsx", import.meta.url),
+  "utf8",
+).replaceAll("\r\n", "\n");
 
 test("Zeus dragging corrects viewport coordinates inside transformed dialogs", () => {
   assert.match(source, /const setVisualCenter = useCallback/);
@@ -23,7 +26,10 @@ test("normal taps and vertical scroll keep native ownership until long-press act
     /onPointerDown=\{\(event\) => \{([\s\S]*?)\n\s*\}\}\n\s*onPointerMove=/,
   )?.[1];
   assert.ok(pointerDown, "Zeus must keep an explicit pointer-down handler");
-  const beforeTimer = pointerDown.slice(0, pointerDown.indexOf("holdTimer.current = window.setTimeout"));
+  const beforeTimer = pointerDown.slice(
+    0,
+    pointerDown.indexOf("holdTimer.current = window.setTimeout"),
+  );
   assert.doesNotMatch(beforeTimer, /event\.preventDefault\(\)/);
   assert.doesNotMatch(beforeTimer, /setPointerCapture\(/);
   assert.match(pointerDown, /held\.current = true;[\s\S]*?setPointerCapture\(event\.pointerId\)/);

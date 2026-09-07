@@ -33,8 +33,7 @@ function fixture({ reduced = false, economy = false, hidden = false, scan = fals
   };
   const node = {
     animate,
-    querySelector: (selector) =>
-      selector === ".film-boundary-line" || scan ? { animate } : null,
+    querySelector: (selector) => (selector === ".film-boundary-line" || scan ? { animate } : null),
   };
   const root = { ownerDocument: document, querySelectorAll: () => [node] };
   const observers = [];
@@ -144,7 +143,8 @@ test("changing motion preference cancels active animation and detaches the obser
   f.cleanup();
 });
 
-const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const read = (path) =>
+  readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll("\r\n", "\n");
 test("film theme is delivered after the addon without changing special-route ordering", () => {
   const head = read("src/lib/world-head.ts");
   assert.match(head, /styles-film-direction\.css\?url/);

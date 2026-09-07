@@ -1,3 +1,5 @@
+    name: "OVER ZEZTZ",
+    ja: "オーバーゼッツ",
     person: "ジェームズ・スミス",
     enPerson: "JAMES SMITH",
     epithet: "もう一人のセヴン",
@@ -332,6 +334,3 @@ export function RiderPage({ id }: { id: string }) {
         ["--future-hud-primary" as string]: rider.tone,
       }}
     >
-      <div className="manager-ambient" aria-hidden="true">
-        <div className="manager-grid" />
-        <div className="manager-glow" />

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { assetsWarmed, preloadAssets } from "../src/lib/asset-loader.ts";
+import { ASSET_REQUEST_TIMEOUT_MS, assetsWarmed, preloadAssets } from "../src/lib/asset-loader.ts";
 
 const source = readFileSync(new URL("../src/lib/asset-loader.ts", import.meta.url), "utf8");
 
@@ -95,10 +95,96 @@ test("concurrent image warmups share one native decode", async (t) => {
     }
   };
   const url = "/asset-loader-shared-native.webp";
-  await Promise.all([
-    preloadAssets([url], () => undefined),
-    preloadAssets([url], () => undefined),
-  ]);
+  await Promise.all([preloadAssets([url], () => undefined), preloadAssets([url], () => undefined)]);
   assert.equal(decodeCalls, 1);
   assert.equal(assetsWarmed([url]), true);
 });
+
+test("revisioned URLs retain independent ready and in-flight identities", async (t) => {
+  const originalImage = globalThis.Image;
+  t.after(() => {
+    if (originalImage) globalThis.Image = originalImage;
+    else delete globalThis.Image;
+  });
+  let decodes = 0;
+  globalThis.Image = class {
+    naturalWidth = 32;
+    async decode() {
+      decodes += 1;
+    }
+  };
+  const v1 = "/revision-test.webp?v=1";
+  const v2 = "/revision-test.webp?v=2";
+  await preloadAssets([v1], () => {});
+  assert.equal(assetsWarmed([v2]), false);
+  await preloadAssets([v2], () => {});
+  await Promise.all([3, 4].map((v) => preloadAssets([`/revision-test.webp?v=${v}`], () => {})));
+  assert.equal(decodes, 4);
+});
+
+for (const kind of ["decode", "image-events", "fetch", "stream"]) {
+  test(`a stalled ${kind} settles, stays unwarmed, and can be retried`, async (t) => {
+    const originalImage = globalThis.Image;
+    const originalFetch = globalThis.fetch;
+    t.after(() => {
+      if (originalImage) globalThis.Image = originalImage;
+      else delete globalThis.Image;
+      globalThis.fetch = originalFetch;
+    });
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    let cancelled = false;
+    let calls = 0;
+    let succeed = false;
+    const url = `/deadline-${kind}.${kind.startsWith("image") || kind === "decode" ? "webp" : "bin"}`;
+    if (kind === "decode" || kind === "image-events") {
+      globalThis.Image = class {
+        naturalWidth = 32;
+        onload = null;
+        decode =
+          kind === "decode"
+            ? () => {
+                calls += 1;
+                return succeed ? Promise.resolve() : new Promise(() => {});
+              }
+            : undefined;
+        set src(value) {
+          if (kind === "image-events") {
+            calls += 1;
+            if (succeed) this.onload?.();
+          }
+        }
+        removeAttribute() {
+          cancelled = true;
+        }
+      };
+    } else {
+      delete globalThis.Image;
+      globalThis.fetch = async (_url, options) => {
+        calls += 1;
+        options.signal.addEventListener("abort", () => {
+          cancelled = true;
+        });
+        if (succeed) return new Response(new Uint8Array([1]));
+        if (kind === "fetch") return new Promise(() => {});
+        return new Response(
+          new ReadableStream({
+            pull() {
+              return new Promise(() => {});
+            },
+          }),
+        );
+      };
+    }
+    const pending = preloadAssets([url], () => {});
+    // Let both fetch headers and reader/decode setup run before advancing time.
+    for (let i = 0; i < 8; i += 1) await Promise.resolve();
+    t.mock.timers.tick(ASSET_REQUEST_TIMEOUT_MS + 1);
+    await pending;
+    assert.equal(cancelled, true);
+    assert.equal(assetsWarmed([url]), false);
+    succeed = true;
+    await preloadAssets([url], () => {});
+    assert.equal(calls, 2);
+    assert.equal(assetsWarmed([url]), true);
+  });
+}

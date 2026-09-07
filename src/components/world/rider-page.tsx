@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
+import { DossierContents, DossierReader } from "./dossier-reader";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -1350,14 +1351,12 @@ export function RiderPage({ id }: { id: string }) {
         returnHash="riders-return"
         returnLabel="ライダー一覧へ戻る"
       />
-      <section className="manager-hero">
+      <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
-              srcSet={
-                rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined
-              }
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
               style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
@@ -1369,14 +1368,19 @@ export function RiderPage({ id }: { id: string }) {
           </div>
         </div>
         <div className="manager-introduction">
-          <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
-          <h1>
-            <small>{rider.enPerson}</small>
-            <span className="manager-display-name">
-              <NameText value={rider.civilian.name} />
-            </span>
-          </h1>
-          <p className="manager-title"># {rider.epithet}</p>
+          <header className="dossier-identity">
+            <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
+            <h1>
+              <small>{rider.enPerson}</small>
+              <span className="manager-display-name">
+                <NameText value={rider.civilian.name} />
+              </span>
+            </h1>
+            <p className="manager-title"># {rider.epithet}</p>
+            <a className="dossier-read-link" href="#dossier-index">
+              人物資料を読む <span aria-hidden="true">↓</span>
+            </a>
+          </header>
           <div className="manager-quotes">
             {rider.quotes.map((q) => (
               <q key={q}>{q}</q>
@@ -1394,17 +1398,17 @@ export function RiderPage({ id }: { id: string }) {
           </dl>
         </div>
       </section>
+      <DossierReader name={rider.civilian.name} identity forms={pickupForms.length > 0} />
       <section
         className={`rider-archive-identity-records${rider.nightmare ? " has-nightmare" : ""}${rider.partner ? " has-partner" : ""}`}
+        id="identity-records"
         aria-label={rider.partner ? "変身前記録と相棒記録" : "変身前記録"}
       >
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
-              srcSet={
-                rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined
-              }
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}
@@ -1492,26 +1496,19 @@ export function RiderPage({ id }: { id: string }) {
           </article>
         ) : null}
       </section>
-      <section className="manager-dossier">
+      <section
+        className="manager-dossier"
+        id="dossier-index"
+        aria-label={`${rider.civilian.name}の人物資料`}
+      >
         <div className="manager-section-index">
           <span>{rider.no}</span>
           <small>CHARACTER DOSSIER</small>
         </div>
-        <nav className="manager-section-nav" aria-label="人物資料の章">
-          {rider.sections.map((section) => (
-            <a key={section.no} href={`#character-section-${section.no}`}>
-              <span>{section.no}</span>
-              <b>{section.kicker}</b>
-            </a>
-          ))}
-        </nav>
+        <DossierContents sections={rider.sections} />
         <div className="manager-sections">
           {rider.sections.map((s) => (
-            <article
-              className="manager-copy-section"
-              id={`character-section-${s.no}`}
-              key={s.no}
-            >
+            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -1527,7 +1524,7 @@ export function RiderPage({ id }: { id: string }) {
         </div>
       </section>
       {pickupForms.length ? (
-        <div className="rider-form-pickup-stack">
+        <div className="rider-form-pickup-stack" id="form-records">
           {pickupForms.map((form, index) => (
             <FormPickup
               key={`${form.name}-${form.sub ?? "base"}`}
