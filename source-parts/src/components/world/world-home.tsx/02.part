@@ -1,5 +1,3 @@
-        to: "/riders/realm",
-        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
           "/civilian-bell-20260826.jpeg",
         ],
       },
@@ -45,6 +43,13 @@
     src: "/episode-05-farce.jpeg",
     pos: "50% 44%",
     alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
+  },
+  {
+    no: "06",
+    title: "DEUS",
+    src: "/episode-06-deus.webp",
+    pos: "42% 38%",
+    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
   },
 ];
 
@@ -418,7 +423,3 @@ export function WorldHome() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotionPreference = () => setMotionReduced(media.matches);
-    syncMotionPreference();
-    media.addEventListener?.("change", syncMotionPreference);
-    return () => media.removeEventListener?.("change", syncMotionPreference);

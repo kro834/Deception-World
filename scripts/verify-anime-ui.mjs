@@ -214,6 +214,7 @@ async function checkDreamLayout(page) {
 
 async function checkEpisodeSwipes(page) {
   const grid = page.locator(".episode-grid");
+  const lastIndex = (await grid.locator(".episode-card").count()) - 1;
   await grid.scrollIntoViewIfNeeded();
   // Let the section's entrance motion settle before choosing touch coordinates.
   await page.waitForTimeout(900);
@@ -234,7 +235,7 @@ async function checkEpisodeSwipes(page) {
     );
   try {
     for (const direction of [1, -1]) {
-      for (let step = 1; step <= 4; step++) {
+      for (let step = 1; step <= lastIndex; step++) {
         const box = await grid.boundingBox();
         const x = box.x + box.width * (direction === 1 ? 0.8 : 0.2);
         const y = box.y + Math.min(220, box.height / 2);
@@ -247,7 +248,7 @@ async function checkEpisodeSwipes(page) {
           await page.waitForTimeout(25);
         }
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-        const index = direction === 1 ? step : 4 - step;
+        const index = direction === 1 ? step : lastIndex - step;
         try {
           await aligned(index);
         } catch (error) {
@@ -271,7 +272,8 @@ async function checkEpisodeSwipes(page) {
     });
     await aligned(1);
     await grid.evaluate((element) => element.style.removeProperty("scroll-snap-type"));
-    return { forward: "01 → 05", backward: "05 → 01", interruptedSnapRecovered: true };
+    const last = String(lastIndex + 1).padStart(2, "0");
+    return { forward: `01 → ${last}`, backward: `${last} → 01`, interruptedSnapRecovered: true };
   } finally {
     await cdp.detach();
   }

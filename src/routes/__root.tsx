@@ -9,6 +9,7 @@ import androidPerformanceCss from "../styles-android-performance.css?url";
 import pickupStabilityCss from "../styles-pickup-stability.css?url";
 import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
+import frostedControlsCss from "../styles-frosted-controls.css?url";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -54,6 +55,7 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/__grok/icon-180.png" },
       { rel: "stylesheet", href: routeTransitionsCss },
+      { rel: "stylesheet", href: frostedControlsCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

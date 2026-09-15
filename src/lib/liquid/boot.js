@@ -179,6 +179,12 @@ class GlassRenderer {
     this.canvas.style.setProperty('--liquid-canvas-overscan', this.overscan + 'px');
   }
   activate(root) {
+    // Frosted controls use the DOM lens, including during hold and drag.
+    // Do not compile shaders or rasterize text behind an opaque surface.
+    if (getComputedStyle(root).getPropertyValue('--liquid-frosted').trim() === '1') {
+      root.dataset.liquidWebgl = 'fallback';
+      return false;
+    }
     // Keep the CSS lens and all tab/hold/drag handlers, but avoid shader compile,
     // DOM texture rasterization and GPU uploads on the lightweight profile.
     if (prefersLightweightRendering(navigator)) {
@@ -383,6 +389,11 @@ function initRail(root) {
     const changed = next !== active;
     active = next;
     syncTabState(active);
+    const viewport = root.parentElement;
+    if (viewport && viewport.classList.contains('rider-rail-viewport')) {
+      const tab = list[active];
+      viewport.scrollTo({ left: Math.max(0, tab.offsetLeft - (viewport.clientWidth - tab.offsetWidth) / 2), behavior: 'auto' });
+    }
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
     if (focus) list[active].focus({ preventScroll: true });
   };

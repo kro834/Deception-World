@@ -1,0 +1,149 @@
+/* Shared material contract. Geometry overrides are deliberate: older page
+   styles have held/mobile variants that must not restore square corners. */
+:root {
+  --liquid-frosted: 1;
+}
+
+html body .liquid-swipe-tabs:not(.liquid-glass-action) {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: stretch;
+  min-height: 68px;
+  height: auto;
+}
+
+html body .liquid-swipe-tabs > button[role="tab"] {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 54px;
+}
+
+html body .rider-console {
+  grid-template-columns: minmax(0, 1fr);
+}
+html body .rider-rail-viewport {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 4px 0 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #8797a5 #192331;
+}
+html body .rider-tabs.liquid-swipe-tabs {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+}
+html body .rider-tabs > button[role="tab"] {
+  flex: 1 0 120px;
+  min-width: 120px;
+}
+
+html body .liquid-swipe-tabs,
+html body .ios-slide-open,
+html body .rxs-p14-ios-slider {
+  --liquid-shell-radius: 999px !important;
+  --liquid-control-radius: 999px !important;
+  border-radius: 999px !important;
+}
+
+html body .liquid-swipe-tabs > button[role="tab"],
+html body .liquid-rail-surface,
+html body .liquid-selection-lens,
+html body .liquid-selection-surface,
+html body .ios-slide-open::before,
+html body .ios-slide-open::after,
+html body .ios-slide-open-thumb,
+html body .rxs-p14-ios-track,
+html body .rxs-p14-ios-thumb {
+  border-radius: 999px !important;
+}
+
+html body .liquid-swipe-tabs,
+html body .liquid-rail-surface,
+html body .ios-slide-open,
+html body .ios26-glass,
+html body .side-panel[data-liquid-pointer],
+html body .rxs-p14-ios-slider {
+  background: linear-gradient(155deg, #354351, #192331 70%, #202d3b) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff30,
+    inset 0 -1px 0 #00000050,
+    0 3px 10px #00000024 !important;
+}
+
+html body .liquid-selection-surface,
+html body .ios-slide-open-thumb,
+html body .rxs-p14-ios-thumb {
+  background: linear-gradient(145deg, #8797a5, #4a6175 55%, #344b61) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff70,
+    inset 0 -1px 0 #ffffff25,
+    0 2px 6px #00000038 !important;
+  opacity: 1 !important;
+}
+
+html body .liquid-rail-surface,
+html body .liquid-selection-surface {
+  transform: none !important;
+  will-change: auto;
+}
+
+/* One readable wordmark replaces the three blurred echo layers. */
+html body .cine-logo-glow,
+html body .cine-logo-echo {
+  display: none;
+}
+html body .is-playing .cine-logo-wrap {
+  animation: frosted-title-arrival 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  filter: none;
+  clip-path: none;
+}
+@keyframes frosted-title-arrival {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .is-playing .cine-logo-wrap {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A quiet static highlight supplies the frosted texture without a moving
+   refraction canvas, nested blurs, or continuously animated reflections. */
+html body .liquid-contact-glow,
+html body .liquid-pointer-glow,
+html body .liquid-contact-reflection,
+html body .liquid-lens-reflection,
+html body .ios-slide-open-thumb::before,
+html body .ios-slide-open-thumb::after {
+  display: none !important;
+}
+
+html body .ios-slide-open-arrows i {
+  animation: none;
+}
+
+html body [data-opening-handoff-logo] {
+  will-change: transform, opacity;
+}
+html body [data-opening-handoff-logo] > img {
+  filter: none;
+}
+html body [data-opening-handoff-logo-flare],
+html body [data-opening-handoff-logo-orbit] {
+  display: none;
+}

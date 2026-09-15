@@ -46,8 +46,8 @@ type OpeningHandoffLayerProps = {
   onComplete: (token: number) => void;
 };
 
-const NORMAL_DURATION_MS = 1180;
-const ECONOMY_DURATION_MS = 850;
+const NORMAL_DURATION_MS = 960;
+const ECONOMY_DURATION_MS = 720;
 const REDUCED_DURATION_MS = 250;
 const DEFAULT_LOGO_SRC = "/logo-title.webp";
 const DEFAULT_VIDEO_SRC = "/atmosphere.mp4";
@@ -121,6 +121,20 @@ function rectTransform(from: OpeningHandoffRect, to: OpeningHandoffRect) {
   )}, ${Math.max(0.001, to.height / Math.max(1, from.height))})`;
 }
 
+// The title is wide, while the destination sigil is square. Fit it inside
+// that target instead of squeezing the wordmark independently on each axis.
+function fitLogoRect(from: OpeningHandoffRect, target: OpeningHandoffRect) {
+  const scale = Math.min(target.width / from.width, target.height / from.height);
+  const width = from.width * scale;
+  const height = from.height * scale;
+  return {
+    left: target.left + (target.width - width) / 2,
+    top: target.top + (target.height - height) / 2,
+    width,
+    height,
+  };
+}
+
 function durationFor(source: OpeningHandoffSource) {
   if (source.reducedMotion) return REDUCED_DURATION_MS;
   if (source.economy) return ECONOMY_DURATION_MS;
@@ -136,9 +150,7 @@ function animateNode(
   if (!node || typeof node.animate !== "function") return null;
   const animation = node.animate(keyframes, options);
   running.add(animation);
-  void animation.finished
-    .catch(() => undefined)
-    .finally(() => running.delete(animation));
+  void animation.finished.catch(() => undefined).finally(() => running.delete(animation));
   return animation;
 }
 
@@ -150,11 +162,7 @@ function updateVisualViewport(root: HTMLElement) {
   root.style.setProperty("--opening-vv-height", `${viewport?.height ?? window.innerHeight}px`);
 }
 
-export function OpeningHandoffLayer({
-  snapshot,
-  onCovered,
-  onComplete,
-}: OpeningHandoffLayerProps) {
+export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: OpeningHandoffLayerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -291,19 +299,18 @@ export function OpeningHandoffLayer({
         if (!alive || settled) return;
         updateVisualViewport(stableRoot);
 
-        if (
-          stableSnapshot.phase !== "arriving" ||
-          !stableSnapshot.destination ||
-          !logoAnimation
-        )
+        if (stableSnapshot.phase !== "arriving" || !stableSnapshot.destination || !logoAnimation)
           return;
         const currentRect = visualViewportLocalRect(
           stableLogo.getBoundingClientRect(),
           sourceLogoRect,
         );
-        const targetRect = elementRect(
-          stableSnapshot.destination.sigil,
-          elementRect(stableSnapshot.destination.brand, currentRect),
+        const targetRect = fitLogoRect(
+          currentRect,
+          elementRect(
+            stableSnapshot.destination.sigil,
+            elementRect(stableSnapshot.destination.brand, currentRect),
+          ),
         );
         const elapsed = performance.now() - arrivalStartedAt;
         const remaining = Math.max(80, duration - elapsed);
@@ -401,8 +408,8 @@ export function OpeningHandoffLayer({
       animateNode(
         logo,
         [
-          { opacity: 0, filter: "blur(12px) brightness(1.7)", transform: "scale(0.78)" },
-          { opacity: 1, filter: "blur(0px) brightness(1.08)", transform: "scale(1)" },
+          { opacity: 0.35, transform: "translate3d(0, 8px, 0) scale(0.96)" },
+          { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
         ],
         commonOptions(coverDuration, COVER_EASING),
         running,
@@ -432,9 +439,9 @@ export function OpeningHandoffLayer({
       timers.add(coveredTimer);
     } else if (snapshot.destination) {
       const destination = snapshot.destination;
-      const logoTarget = elementRect(
-        destination.sigil,
-        elementRect(destination.brand, sourceLogoRect),
+      const logoTarget = fitLogoRect(
+        sourceLogoRect,
+        elementRect(destination.sigil, elementRect(destination.brand, sourceLogoRect)),
       );
       const videoTarget = elementRect(
         destination.backdrop,
@@ -456,17 +463,14 @@ export function OpeningHandoffLayer({
         [
           {
             opacity: 1,
-            filter: "blur(0px) brightness(1.08) saturate(1.08)",
             transform: "translate3d(0, 0, 0) scale(1)",
           },
           {
             opacity: 0.98,
-            filter: "blur(0px) brightness(1.38) saturate(1.24)",
             offset: 0.58,
           },
           {
             opacity: 0.08,
-            filter: "blur(1px) brightness(1.16) saturate(1.08)",
             transform: rectTransform(sourceLogoRect, logoTarget),
           },
         ],

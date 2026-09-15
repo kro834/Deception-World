@@ -1,3 +1,5 @@
+            </div>
+            <div className="rider-number">RIDER / {rider.no}</div>
             <div className="rider-copy-block">
               <p className="rider-person">
                 <NameText value={rider.person} />

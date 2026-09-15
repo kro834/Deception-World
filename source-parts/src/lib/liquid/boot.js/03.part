@@ -1,3 +1,8 @@
+  const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  let pageLocked = false;
+  const blockPageScroll = (e) => { e.preventDefault(); };
+  const lockPage = () => {
+    if (!lockScroll || pageLocked) return;
     pageLocked = true;
     document.documentElement.dataset.railLock = 'true';
     window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
@@ -208,4 +213,3 @@
   const handleVisibilityChange = () => {
     if (document.hidden) cancel();
   };
-  document.addEventListener('visibilitychange', handleVisibilityChange);

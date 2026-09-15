@@ -179,6 +179,12 @@ class GlassRenderer {
     this.canvas.style.setProperty('--liquid-canvas-overscan', this.overscan + 'px');
   }
   activate(root) {
+    // Frosted controls use the DOM lens, including during hold and drag.
+    // Do not compile shaders or rasterize text behind an opaque surface.
+    if (getComputedStyle(root).getPropertyValue('--liquid-frosted').trim() === '1') {
+      root.dataset.liquidWebgl = 'fallback';
+      return false;
+    }
     // Keep the CSS lens and all tab/hold/drag handlers, but avoid shader compile,
     // DOM texture rasterization and GPU uploads on the lightweight profile.
     if (prefersLightweightRendering(navigator)) {
@@ -207,6 +213,3 @@ class GlassRenderer {
     root.dataset.liquidWebgl = 'true'; root.dataset.liquidWebglActive = 'false';
     return true;
   }
-  isActive(root) { return this.activeRoot === root; }
-  detach(root) {
-    if (this.activeRoot !== root) return;

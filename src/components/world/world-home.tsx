@@ -469,6 +469,13 @@ const EPISODES: EpisodeRecord[] = [
     pos: "50% 44%",
     alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
   },
+  {
+    no: "06",
+    title: "DEUS",
+    src: "/episode-06-deus.webp",
+    pos: "42% 38%",
+    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
+  },
 ];
 
 function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
@@ -2086,7 +2093,9 @@ export function WorldHome() {
           </p>
         </div>
         <div className="rider-console">
-          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
+          <div className="rider-rail-viewport">
+            <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
+          </div>
           <div
             id="rider-active-panel"
             className="rider-detail"

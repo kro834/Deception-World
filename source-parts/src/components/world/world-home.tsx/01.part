@@ -421,3 +421,5 @@ const EPISODES: EpisodeRecord[] = [
         alt: "仮面ライダーレルムレジェンズ",
         width: 1221,
         height: 1800,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
