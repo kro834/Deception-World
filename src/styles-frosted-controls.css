@@ -29,11 +29,19 @@ html body .rxs-p14-ios-slider {
 html body .rider-tabs > .liquid-rail-surface {
   border-radius: var(--liquid-shell-radius) !important;
 }
+html body .rider-tabs.liquid-swipe-tabs {
+  align-self: start;
+  align-content: start;
+  grid-auto-rows: 74px;
+  height: auto;
+  padding: 12px;
+}
 html body .rider-tabs button span {
   color: #e0e8f2;
   font-size: clamp(11px, 0.85vw, 13px);
   line-height: 1.45;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 html body .rider-tabs button[aria-selected="true"] span {
   color: #fff;
@@ -45,18 +53,53 @@ html body .rider-tabs > button[role="tab"] {
   box-sizing: border-box;
 }
 html body .liquid-swipe-tabs > .liquid-selection-lens {
-  transition: transform 100ms linear, width 100ms linear, height 100ms linear, opacity 100ms linear, scale 160ms ease-out;
+  scale: 1 !important;
+  transition: transform 80ms linear, width 80ms linear, height 80ms linear, opacity 80ms linear !important;
 }
-html body .liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens {
-  scale: 1.025 !important;
+html body .liquid-selection-surface {
+  scale: 1;
+  transition: scale 120ms ease-out !important;
   transform-origin: center;
 }
+/* Scale the material, not the positioning layer: scaling the latter also
+   magnifies its translate3d offset and makes lower/right tabs drift. */
+html body .liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens > .liquid-selection-surface {
+  scale: var(--liquid-held-scale-x, 1.06) var(--liquid-held-scale-y, 1.16) !important;
+}
+html body .rider-tabs .liquid-selection-lens::before {
+  display: none;
+}
 html body .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens {
-  transition: none;
+  transition: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
   html body .liquid-swipe-tabs > .liquid-selection-lens {
-    transition: none;
+    transition: none !important;
+  }
+  html body .liquid-selection-surface {
+    transition: none !important;
+  }
+}
+
+/* Selection must not replay the old 920 ms portrait entrance after every tap. */
+html body .rider-visual img {
+  animation: rider-selection-fade 100ms linear both;
+  transform: none;
+}
+@keyframes rider-selection-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+html body .rider-visual,
+html body .rider-copy-block {
+  animation-duration: 100ms;
+  animation-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .rider-visual img,
+  html body .rider-visual,
+  html body .rider-copy-block {
+    animation: none;
   }
 }
 
@@ -79,8 +122,18 @@ html body .film-edition .primary-action.ios26-glass {
   -webkit-text-fill-color: currentColor;
 }
 html body .film-edition .hero,
-html body .film-edition .hero * {
+html body .film-edition .hero *,
+html body .film-edition .topbar,
+html body .film-edition .topbar * {
   touch-action: pan-y pinch-zoom;
+}
+/* Decorative clipping must not create nested scrolling boxes on WebKit.
+   The document remains the scroll owner even when panning over the poster. */
+@supports (overflow: clip) {
+  html body .film-edition .hero,
+  html body .film-edition .poster-media {
+    overflow: clip;
+  }
 }
 /* The poster is a scroll surface, not a draggable image. Native image dragging
    and long-press selection must not take ownership of a page-scroll gesture. */

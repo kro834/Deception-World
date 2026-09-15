@@ -213,3 +213,5 @@ class GlassRenderer {
     root.dataset.liquidWebgl = 'true'; root.dataset.liquidWebglActive = 'false';
     return true;
   }
+  isActive(root) { return this.activeRoot === root; }
+  detach(root) {

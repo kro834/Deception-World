@@ -1,8 +1,3 @@
-    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
-    setEpisode(next);
-    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
-    episodeProgrammatic.current = true;
-    scrollAxisX(episodeGridRef.current, card ?? null);
     if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
     episodeScrollTimer.current = window.setTimeout(() => {
       episodeProgrammatic.current = false;
@@ -423,3 +418,6 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
+            <h2 data-film-reveal>
+              <FilmTextScan />
+              救うべき世界は、

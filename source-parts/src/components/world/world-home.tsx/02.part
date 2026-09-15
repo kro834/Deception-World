@@ -1,3 +1,5 @@
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
           "/civilian-bell-20260826.jpeg",
         ],
       },
@@ -255,17 +257,7 @@ const RiderRail = memo(
             }}
           >
             <small>{r.no}</small>
-            <span>
-              {r.name === "OVER ZEZTZ" ? (
-                <>
-                  OVER
-                  <br className="tab-br" />
-                  ZEZTZ
-                </>
-              ) : (
-                r.name
-              )}
-            </span>
+            <span>{r.name}</span>
             <i />
           </button>
         ))}
@@ -423,3 +415,8 @@ export function WorldHome() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
+  }, []);

@@ -1,3 +1,5 @@
+  const handleVisibilityChange = () => {
+    if (document.hidden) cancel();
   };
   document.addEventListener('visibilitychange', handleVisibilityChange);
 

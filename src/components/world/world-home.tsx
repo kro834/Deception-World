@@ -680,17 +680,7 @@ const RiderRail = memo(
             }}
           >
             <small>{r.no}</small>
-            <span>
-              {r.name === "OVER ZEZTZ" ? (
-                <>
-                  OVER
-                  <br className="tab-br" />
-                  ZEZTZ
-                </>
-              ) : (
-                r.name
-              )}
-            </span>
+            <span>{r.name}</span>
             <i />
           </button>
         ))}
@@ -2113,7 +2103,7 @@ export function WorldHome() {
                     className={i === riderTab ? "is-on" : ""}
                     style={{ objectPosition: r.pos }}
                     decoding="async"
-                    loading="lazy"
+                    loading={i === riderTab ? "eager" : "lazy"}
                     fetchPriority={i === riderTab ? "auto" : "low"}
                     draggable={false}
                   />

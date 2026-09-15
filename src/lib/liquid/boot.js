@@ -373,11 +373,17 @@ function initRail(root) {
     });
   };
   const settle = (i) => {
-    const g = measure()[i]; if (!g || !lens) return;
+    const geos = measure();
+    const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+    // Enlarge visibly without resizing the hit target or crossing the shell.
+    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, root.clientWidth - box.x - box.width))) - 1) * 2;
+    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, root.clientHeight - box.y - box.height))) - 1) * 2;
+    lens.style.setProperty('--liquid-held-scale-x', String(1 + Math.min(20, spareX) / Math.max(1, g.width)));
+    lens.style.setProperty('--liquid-held-scale-y', String(1 + Math.min(16, spareY) / Math.max(1, g.height)));
     lens.style.removeProperty('scale');
     root.dataset.liquidInitialized = 'true';
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
@@ -474,9 +480,11 @@ function initRail(root) {
       const tab = tabs()[preview];
       if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
       const lw = g.width, lh = g.height;
+      const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;
+      const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
       const geo = {
-        x: clamp(px - lw / 2, 0, Math.max(0, root.offsetWidth - lw)),
-        y: clamp(py - lh / 2, 0, Math.max(0, root.offsetHeight - lh)),
+        x: clamp(px - lw / 2, insetX, Math.max(insetX, root.clientWidth - lw - insetX)),
+        y: clamp(py - lh / 2, insetY, Math.max(insetY, root.clientHeight - lh - insetY)),
         width: lw,
         height: lh,
       };
@@ -550,12 +558,13 @@ function initRail(root) {
       getRenderer().setGeometry(gesture.geos[start]);
       getRenderer().setPhase('pressed');
     }
-    settle(start);
+    // Move once on release (tap), or on hold, not on both down and up.
     contact(e.clientX, e.clientY);
     clearTimeout(holdTimer);
     holdTimer = setTimeout(() => {
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
+      settle(gesture.start);
       // A stationary hold is visual feedback, not a document-wide scroll lock.
       // Capture and lock only after a deliberate slider drag begins.
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');

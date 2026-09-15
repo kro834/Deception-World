@@ -1,5 +1,3 @@
-  isActive(root) { return this.activeRoot === root; }
-  detach(root) {
     if (this.activeRoot !== root) return;
     this.stop(); this.canvas.remove();
     root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
@@ -158,11 +156,17 @@ function initRail(root) {
     });
   };
   const settle = (i) => {
-    const g = measure()[i]; if (!g || !lens) return;
+    const geos = measure();
+    const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+    // Enlarge visibly without resizing the hit target or crossing the shell.
+    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, root.clientWidth - box.x - box.width))) - 1) * 2;
+    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, root.clientHeight - box.y - box.height))) - 1) * 2;
+    lens.style.setProperty('--liquid-held-scale-x', String(1 + Math.min(20, spareX) / Math.max(1, g.width)));
+    lens.style.setProperty('--liquid-held-scale-y', String(1 + Math.min(16, spareY) / Math.max(1, g.height)));
     lens.style.removeProperty('scale');
     root.dataset.liquidInitialized = 'true';
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
@@ -212,4 +216,3 @@ function initRail(root) {
   let pageLocked = false;
   const blockPageScroll = (e) => { e.preventDefault(); };
   const lockPage = () => {
-    if (!lockScroll || pageLocked) return;
