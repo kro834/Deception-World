@@ -174,11 +174,6 @@ function initRail(root) {
     const changed = next !== active;
     active = next;
     syncTabState(active);
-    const viewport = root.parentElement;
-    if (viewport && viewport.classList.contains('rider-rail-viewport')) {
-      const tab = list[active];
-      viewport.scrollTo({ left: Math.max(0, tab.offsetLeft - (viewport.clientWidth - tab.offsetWidth) / 2), behavior: 'auto' });
-    }
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
     if (focus) list[active].focus({ preventScroll: true });
   };
@@ -213,3 +208,8 @@ function initRail(root) {
     if (getRenderer().isActive(root)) getRenderer().setPhase('rest');
     clearTimeout(holdTimer);
   };
+  const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  let pageLocked = false;
+  const blockPageScroll = (e) => { e.preventDefault(); };
+  const lockPage = () => {
+    if (!lockScroll || pageLocked) return;

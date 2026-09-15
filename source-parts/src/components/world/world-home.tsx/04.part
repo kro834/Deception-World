@@ -1,3 +1,4 @@
+    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
     setEpisode(next);
     const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
     episodeProgrammatic.current = true;
@@ -422,4 +423,3 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2 data-film-reveal>

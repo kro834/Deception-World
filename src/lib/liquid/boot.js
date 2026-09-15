@@ -389,11 +389,6 @@ function initRail(root) {
     const changed = next !== active;
     active = next;
     syncTabState(active);
-    const viewport = root.parentElement;
-    if (viewport && viewport.classList.contains('rider-rail-viewport')) {
-      const tab = list[active];
-      viewport.scrollTo({ left: Math.max(0, tab.offsetLeft - (viewport.clientWidth - tab.offsetWidth) / 2), behavior: 'auto' });
-    }
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
     if (focus) list[active].focus({ preventScroll: true });
   };
@@ -467,8 +462,9 @@ function initRail(root) {
     if (gesture.axis === 'pending') { contact(m.x, m.y); return; }
 
     if (lockScroll) {
-      const px = (m.x - gesture.rect.left) / gesture.sx;
-      const py = (m.y - gesture.rect.top) / (gesture.sy || 1);
+      const startGeo = gesture.geos[gesture.start];
+      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
+      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
       const geos = measure();
       gesture.geos = geos;
       const preview = nearestTab(px, py, geos);
@@ -582,6 +578,10 @@ function initRail(root) {
       }
       if (lockScroll) {
         gesture.axis = 'free';
+        const first = gesture.geos[0];
+        const oneRow = gesture.geos.every(g => Math.abs(g.y - first.y) < 2);
+        const oneColumn = gesture.geos.every(g => Math.abs(g.x - first.x) < 2);
+        gesture.linearAxis = oneRow ? 'horizontal' : oneColumn ? 'vertical' : Math.abs(dx) >= Math.abs(dy) ? 'horizontal' : 'vertical';
       } else {
         gesture.axis = 'horizontal';
       }
@@ -608,8 +608,9 @@ function initRail(root) {
       gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
     }
     if (g.axis === 'free') {
-      const px = (e.clientX - g.rect.left) / g.sx;
-      const py = (e.clientY - g.rect.top) / (g.sy || 1);
+      const startGeo = g.geos[g.start];
+      const px = g.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (e.clientX - g.rect.left) / g.sx;
+      const py = g.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (e.clientY - g.rect.top) / (g.sy || 1);
       const idx = nearestTab(px, py, measure());
       swallowClick = true;
       gesture = null; reset(); unlockPage(); select(idx);

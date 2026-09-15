@@ -1,3 +1,4 @@
+            <h2 data-film-reveal>
               <FilmTextScan />
               救うべき世界は、
               <br />
@@ -392,9 +393,7 @@
           </p>
         </div>
         <div className="rider-console">
-          <div className="rider-rail-viewport">
-            <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          </div>
+                  <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
             className="rider-detail"
@@ -423,3 +422,4 @@
             </div>
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
+            </div>

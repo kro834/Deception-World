@@ -1,3 +1,4 @@
+  };
   document.addEventListener('visibilitychange', handleVisibilityChange);
 
   let swallowClick = false;

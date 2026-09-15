@@ -423,4 +423,3 @@
   };
 
   const goEpisode = (index: number) => {
-    const next = Math.max(0, Math.min(EPISODES.length - 1, index));

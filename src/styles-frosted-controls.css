@@ -4,7 +4,7 @@
   --liquid-frosted: 1;
 }
 
-html body .liquid-swipe-tabs:not(.liquid-glass-action) {
+html body .liquid-swipe-tabs:not(.liquid-glass-action):not(.rider-tabs) {
   display: flex !important;
   flex-flow: row nowrap !important;
   align-items: stretch;
@@ -12,39 +12,51 @@ html body .liquid-swipe-tabs:not(.liquid-glass-action) {
   height: auto;
 }
 
-html body .liquid-swipe-tabs > button[role="tab"] {
+html body .liquid-swipe-tabs:not(.rider-tabs) > button[role="tab"] {
   flex: 1 1 0;
   min-width: 0;
   min-height: 54px;
 }
 
-html body .rider-console {
-  grid-template-columns: minmax(0, 1fr);
-}
-html body .rider-rail-viewport {
-  min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding: 4px 0 12px;
-  scrollbar-width: thin;
-  scrollbar-color: #8797a5 #192331;
-}
-html body .rider-tabs.liquid-swipe-tabs {
-  width: max-content;
-  min-width: 100%;
-  max-width: none;
-}
-html body .rider-tabs > button[role="tab"] {
-  flex: 1 0 120px;
-  min-width: 120px;
-}
-
-html body .liquid-swipe-tabs,
+html body .liquid-swipe-tabs:not(.rider-tabs),
 html body .ios-slide-open,
 html body .rxs-p14-ios-slider {
   --liquid-shell-radius: 999px !important;
   --liquid-control-radius: 999px !important;
   border-radius: 999px !important;
+}
+
+html body .rider-tabs > .liquid-rail-surface {
+  border-radius: var(--liquid-shell-radius) !important;
+}
+html body .rider-tabs button span {
+  color: #e0e8f2;
+}
+html body .liquid-swipe-tabs > .liquid-selection-lens {
+  transition: transform 180ms linear, width 180ms linear, height 180ms linear, opacity 120ms linear;
+}
+html body .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .liquid-swipe-tabs > .liquid-selection-lens {
+    transition: none;
+  }
+}
+
+html body .film-edition .hero h1 {
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  text-shadow: 0 2px 6px #000;
+}
+html body .film-edition .hero h1 :is(span, strong) {
+  color: #f5f8ff;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+}
+html body .film-edition .hero-lead {
+  color: #e0e8f2;
+  text-shadow: 0 1px 3px #000;
 }
 
 html body .liquid-swipe-tabs > button[role="tab"],

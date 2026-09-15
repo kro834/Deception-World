@@ -2093,9 +2093,7 @@ export function WorldHome() {
           </p>
         </div>
         <div className="rider-console">
-          <div className="rider-rail-viewport">
-            <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          </div>
+                  <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
             className="rider-detail"
