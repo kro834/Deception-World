@@ -31,6 +31,12 @@ html body .rider-tabs > .liquid-rail-surface {
 }
 html body .rider-tabs button span {
   color: #e0e8f2;
+  font-size: clamp(11px, 0.85vw, 13px);
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+}
+html body .rider-tabs button[aria-selected="true"] span {
+  color: #fff;
 }
 html body .liquid-swipe-tabs > .liquid-selection-lens {
   transition: transform 180ms linear, width 180ms linear, height 180ms linear, opacity 120ms linear;
@@ -89,7 +95,7 @@ html body .rxs-p14-ios-slider {
 html body .liquid-selection-surface,
 html body .ios-slide-open-thumb,
 html body .rxs-p14-ios-thumb {
-  background: linear-gradient(145deg, #8797a5, #4a6175 55%, #344b61) !important;
+  background: linear-gradient(145deg, #536879, #394e63 55%, #2b4055) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   filter: none !important;
