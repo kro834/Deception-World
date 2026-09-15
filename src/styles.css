@@ -1567,8 +1567,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   background-size: 220% 100%;
   background-position: 120% 0;
   mix-blend-mode: overlay;
-  -webkit-mask-image: url("/logo-title.webp");
-  mask-image: url("/logo-title.webp");
+  -webkit-mask-image: url("/logo-title-20260915.webp");
+  mask-image: url("/logo-title-20260915.webp");
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;

@@ -49,7 +49,7 @@ type OpeningHandoffLayerProps = {
 const NORMAL_DURATION_MS = 960;
 const ECONOMY_DURATION_MS = 720;
 const REDUCED_DURATION_MS = 250;
-const DEFAULT_LOGO_SRC = "/logo-title.webp";
+const DEFAULT_LOGO_SRC = "/logo-title-20260915.webp";
 const DEFAULT_VIDEO_SRC = "/atmosphere.mp4";
 const DEFAULT_VIDEO_POSTER = "/atmosphere-poster.jpg";
 
@@ -654,6 +654,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       <div ref={logoRef} data-opening-handoff-logo>
         <img
           src={source.logoSrc ?? DEFAULT_LOGO_SRC}
+          crossOrigin="anonymous"
           alt=""
           width={1200}
           height={800}

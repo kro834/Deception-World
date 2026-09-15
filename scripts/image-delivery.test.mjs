@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
 
 const readSource = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 const optimizedAssets = [
-  ["logo-title.webp", 150_000],
+  ["logo-title-20260915.webp", 150_000],
   ["deception-world-poster.webp", 650_000],
   ["deception-world-poster-delivery.webp", 480_000],
   ["character-james-20260829.webp", 100_000],
@@ -46,13 +47,29 @@ test("critical images expose explicit priority and responsive delivery hints", (
   const assetLoader = readSource("../src/lib/asset-loader.ts");
   const riderPage = readSource("../src/components/world/rider-page.tsx");
 
-  assert.match(indexRoute, /type: "image\/webp"[\s\S]*?href: "\/logo-title\.webp"/);
-  assert.match(titleSequence, /src="\/logo-title\.webp"[\s\S]*?width=\{1200\}[\s\S]*?height=\{800\}/);
-  assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title\.webp"/);
+  assert.match(indexRoute, /type: "image\/webp"[\s\S]*?href: "\/logo-title-20260915\.webp"/);
+  assert.match(titleSequence, /src="\/logo-title-20260915\.webp"[\s\S]*?width=\{1200\}[\s\S]*?height=\{800\}/);
+  assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title-20260915\.webp"/);
   assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster-delivery\.webp"/);
   assert.match(worldHome, /srcSet=\{r\.img\.replace\(\/\\\.jpe\?g\$\/i, "\.webp"\)\}/);
   assert.match(worldHome, /src="\/deception-world-poster-delivery\.webp"[\s\S]*?loading="lazy"/);
   assert.match(riderPage, /rider\.id === "over-zeztz" \? "\/character-james-20260829\.webp"/);
+});
+
+test("the supplied September logo is preserved and used by every opening layer", () => {
+  const original = readFileSync(new URL("../public/logo-title-20260915.png", import.meta.url));
+  assert.equal(
+    createHash("sha256").update(original).digest("hex"),
+    "62717decd5513c51604d747a0f7544aa5170b903d0bdb1f15654e73190715e39",
+    "Keep the exact supplied artwork as the canonical source",
+  );
+  const titleSequence = readSource("../src/components/cinematic/title-sequence.tsx");
+  const css = readSource("../src/styles.css");
+  assert.equal(titleSequence.match(/src="\/logo-title-20260915\.webp"/g)?.length, 4);
+  assert.equal(css.match(/mask-image: url\("\/logo-title-20260915\.webp"\)/g)?.length, 2);
+  for (const path of ["../src/routes/index.tsx", "../src/components/cinematic/title-sequence.tsx", "../src/components/cinematic/opening-handoff.tsx", "../src/styles.css"]) {
+    assert.doesNotMatch(readSource(path), /["']\/logo-title\.(?:webp|jpg)["']/, `${path} must not load the cached old logo`);
+  }
 });
 
 test("world preload and first poster use the same lightweight URL", () => {

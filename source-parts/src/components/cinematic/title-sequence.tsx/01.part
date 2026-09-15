@@ -466,7 +466,8 @@ export function TitleSequence() {
         <div className="cine-title-lockup">
           <div className="cine-logo-wrap">
             <img
-              src="/logo-title.webp"
+              src="/logo-title-20260915.webp"
+              crossOrigin="anonymous"
               alt=""
               className="cine-logo-glow"
               width={1200}
@@ -477,7 +478,8 @@ export function TitleSequence() {
               draggable={false}
             />
             <img
-              src="/logo-title.webp"
+              src="/logo-title-20260915.webp"
+              crossOrigin="anonymous"
               alt=""
               className="cine-logo-echo cine-logo-echo-ice"
               width={1200}
@@ -488,7 +490,8 @@ export function TitleSequence() {
               draggable={false}
             />
             <img
-              src="/logo-title.webp"
+              src="/logo-title-20260915.webp"
+              crossOrigin="anonymous"
               alt=""
               className="cine-logo-echo cine-logo-echo-gold"
               width={1200}
@@ -500,7 +503,8 @@ export function TitleSequence() {
             />
             <img
               ref={logoRef}
-              src="/logo-title.webp"
+              src="/logo-title-20260915.webp"
+              crossOrigin="anonymous"
               alt="仮面ライダーサーガ Kamen Rider SA-GA Deception World"
               className="cine-logo-core"
               width={1200}
