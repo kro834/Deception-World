@@ -437,12 +437,14 @@ function initRail(root) {
     pageLocked = true;
     document.documentElement.dataset.railLock = 'true';
     window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
+    window.addEventListener('wheel', blockPageScroll, { passive: false, capture: true });
   };
   const unlockPage = () => {
     if (!pageLocked) return;
     pageLocked = false;
     delete document.documentElement.dataset.railLock;
     window.removeEventListener('touchmove', blockPageScroll, { capture: true });
+    window.removeEventListener('wheel', blockPageScroll, { capture: true });
   };
   const cancel = () => {
     const wasActive = Boolean(gesture);
@@ -552,6 +554,9 @@ function initRail(root) {
       sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
     };
     root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'false';
+    // Own the gesture from contact until release, including the hold delay.
+    lockPage();
+    try { root.setPointerCapture(e.pointerId); } catch { /* Window handlers still release the lock. */ }
     setContact(start);
     if (!reduce() && getRenderer().activate(root)) {
       getRenderer().setAccent(getComputedStyle(target).getPropertyValue('--liquid-accent').trim());
@@ -565,8 +570,6 @@ function initRail(root) {
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
       settle(gesture.start);
-      // A stationary hold is visual feedback, not a document-wide scroll lock.
-      // Capture and lock only after a deliberate slider drag begins.
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');
     }, 105);
   });
@@ -582,7 +585,7 @@ function initRail(root) {
         return;
       }
       clearTimeout(holdTimer);
-      if (gesture.pointerType !== 'mouse' && !gesture.held && Math.abs(dy) > Math.abs(dx) * 1.12) {
+      if (!lockScroll && gesture.pointerType !== 'mouse' && !gesture.held && Math.abs(dy) > Math.abs(dx) * 1.12) {
         cancel(); return;
       }
       if (lockScroll) {

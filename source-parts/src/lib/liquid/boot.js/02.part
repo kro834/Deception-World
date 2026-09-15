@@ -1,4 +1,3 @@
-    if (this.activeRoot !== root) return;
     this.stop(); this.canvas.remove();
     root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
     this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
@@ -216,3 +215,4 @@ function initRail(root) {
   let pageLocked = false;
   const blockPageScroll = (e) => { e.preventDefault(); };
   const lockPage = () => {
+    if (!lockScroll || pageLocked) return;

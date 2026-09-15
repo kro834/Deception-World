@@ -61,6 +61,13 @@ html body .liquid-selection-surface {
   transition: scale 120ms ease-out !important;
   transform-origin: center;
 }
+/* Decide touch ownership before pointerdown; changing touch-action on hold
+   is too late for Safari. Only slider surfaces suppress page panning. */
+html body .liquid-swipe-tabs,
+html body .liquid-swipe-tabs * {
+  touch-action: none !important;
+}
+
 /* Scale the material, not the positioning layer: scaling the latter also
    magnifies its translate3d offset and makes lower/right tabs drift. */
 html body .liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens > .liquid-selection-surface {

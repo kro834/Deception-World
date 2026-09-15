@@ -215,3 +215,4 @@ class GlassRenderer {
   }
   isActive(root) { return this.activeRoot === root; }
   detach(root) {
+    if (this.activeRoot !== root) return;

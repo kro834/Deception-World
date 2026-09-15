@@ -95,6 +95,19 @@ try {
     const rail = page.locator(".rider-tabs");
     await rail.scrollIntoViewIfNeeded();
     await page.waitForTimeout(180);
+    if (cdp) {
+      const first = await rail.locator('button').first().boundingBox();
+      const x = first.x + first.width / 2, y = first.y + first.height / 2;
+      const before = await page.evaluate(() => scrollY);
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchStart',touchPoints:[{x,y}]});
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), true);
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchMove',touchPoints:[{x,y:y+35}]});
+      await page.waitForTimeout(60);
+      assert.equal(await page.evaluate(() => scrollY), before, 'immediate slider touch scrolled the page');
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchEnd',touchPoints:[]});
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), false);
+      await page.waitForTimeout(120);
+    }
     const baseline = await geometry(rail);
     let heldGrowth;
     for (let i = 0; i < 8; i++) {
@@ -121,6 +134,7 @@ try {
       const rect = await tab.boundingBox();
       await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
       await page.mouse.down();
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), true);
       await page.waitForTimeout(280);
       const held = await geometry(rail);
       assert.equal(held.held, "true");
@@ -129,9 +143,14 @@ try {
       assert.ok(held.visual.width >= state.lens.width + 17, `hold width too small`);
       assert.ok(inside(held.visual, held.shell), `held lens crosses shell ${JSON.stringify(held)}`);
       assert.ok(Math.abs(held.lens.height - 74) < 1, 'holding must not resize the positioning layer');
-      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), false);
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), true);
+      const heldScroll = await page.evaluate(() => scrollY);
+      await page.mouse.wheel(0, 160);
+      await page.waitForTimeout(50);
+      assert.equal(await page.evaluate(() => scrollY), heldScroll, 'page moved while slider was held');
       heldGrowth = { width: Math.round(held.visual.width - state.lens.width), height: Math.round(held.visual.height - 74) };
       await page.mouse.up();
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), false);
       await page.waitForTimeout(150);
     }
     // Exercise the originally reported path: drag into OVER ZEZTZ, not only tap.
@@ -163,6 +182,7 @@ try {
     assert.equal(await tabs.nth(6).getAttribute('aria-selected'),'true','drag did not select OVER ZEZTZ');
     assert.ok(Math.abs((await geometry(rail)).lens.height-74)<1);
     assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-rail-lock')),false);
+    await swipe(page, cdp, 3, height * 0.7);
     console.log(JSON.stringify({ engine, viewport: `${width}x${height}`, scrollSurfaces: surfaces.length + 2, allEightRiders: "stable", heldGrowth, lensMs: 80, portraitMs: 100 }));
     if (process.env.SAVE_SCREENSHOTS) {
       await rail.scrollIntoViewIfNeeded();
