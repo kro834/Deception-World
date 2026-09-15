@@ -78,8 +78,17 @@ html body .film-edition .primary-action.ios26-glass {
   color: #f5f8ff;
   -webkit-text-fill-color: currentColor;
 }
-html body .film-edition .hero :is(h1, .hero-lead, .primary-action, .hero-copy, .hero-actions) {
+html body .film-edition .hero,
+html body .film-edition .hero * {
   touch-action: pan-y pinch-zoom;
+}
+/* The poster is a scroll surface, not a draggable image. Native image dragging
+   and long-press selection must not take ownership of a page-scroll gesture. */
+html body .film-edition .hero img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 html body .liquid-swipe-tabs > button[role="tab"],

@@ -8,7 +8,7 @@ try {
     await page.goto('http://localhost:8080/world');
     await page.waitForTimeout(1800);
     const cdp = await page.context().newCDPSession(page);
-    for (const selector of ['.hero h1', '.hero .primary-action']) {
+    for (const selector of ['.hero h1', '.hero-lead', '.hero .primary-action', '.hero .text-action', '.hero-metadata', '.poster-frame', '.film-visual-caption', '.poster-shuffle', '.poster-controls button:last-child', '.hero-copy']) {
       const target = page.locator(selector);
       await target.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
@@ -39,7 +39,19 @@ try {
     const heights = await page.locator('.rider-tabs button').evaluateAll(es => es.map(e=>e.getBoundingClientRect().height));
     assert.ok(Math.max(...heights)-Math.min(...heights)<1);
     await page.mouse.up();
-    console.log(`${width}: hero touch scroll, readable CTA, held enlargement without page lock PASS`);
+    for (let i=0; i<8; i++) {
+      await page.locator('.rider-tabs button').nth(i).tap();
+      await page.waitForTimeout(200);
+      const selection = await page.locator('.rider-tabs').evaluate(e => {
+        const lens=e.querySelector('.liquid-selection-lens');
+        const selected=e.querySelector('[aria-selected="true"]');
+        return {height:lens.getBoundingClientRect().height, tabHeight:selected.getBoundingClientRect().height, duration:getComputedStyle(lens).transitionDuration};
+      });
+      assert.ok(Math.abs(selection.height-74)<1, JSON.stringify(selection));
+      assert.equal(selection.tabHeight,74);
+      assert.equal(parseFloat(selection.duration),0.1);
+    }
+    console.log(`${width}: all 10 hero touch surfaces, readable CTA, held enlargement without page lock PASS`);
     await page.close();
   }
 } finally { await browser.close(); }
