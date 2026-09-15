@@ -38,8 +38,18 @@ html body .rider-tabs button span {
 html body .rider-tabs button[aria-selected="true"] span {
   color: #fff;
 }
+html body .rider-tabs > button[role="tab"] {
+  height: 74px;
+  min-height: 74px;
+  max-height: 74px;
+  box-sizing: border-box;
+}
 html body .liquid-swipe-tabs > .liquid-selection-lens {
-  transition: transform 180ms linear, width 180ms linear, height 180ms linear, opacity 120ms linear;
+  transition: transform 100ms linear, width 100ms linear, height 100ms linear, opacity 100ms linear, scale 160ms ease-out;
+}
+html body .liquid-swipe-tabs[data-liquid-held="true"] > .liquid-selection-lens {
+  scale: 1.025 !important;
+  transform-origin: center;
 }
 html body .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-lens {
   transition: none;
@@ -63,6 +73,13 @@ html body .film-edition .hero h1 :is(span, strong) {
 html body .film-edition .hero-lead {
   color: #e0e8f2;
   text-shadow: 0 1px 3px #000;
+}
+html body .film-edition .primary-action.ios26-glass {
+  color: #f5f8ff;
+  -webkit-text-fill-color: currentColor;
+}
+html body .film-edition .hero :is(h1, .hero-lead, .primary-action, .hero-copy, .hero-actions) {
+  touch-action: pan-y pinch-zoom;
 }
 
 html body .liquid-swipe-tabs > button[role="tab"],

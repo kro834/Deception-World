@@ -556,8 +556,8 @@ function initRail(root) {
     holdTimer = setTimeout(() => {
       if (!gesture) return;
       gesture.held = true; root.dataset.liquidHeld = 'true';
-      lockPage();
-      try { root.setPointerCapture(gesture.pointerId); } catch { /* Native gesture takeover is safe. */ }
+      // A stationary hold is visual feedback, not a document-wide scroll lock.
+      // Capture and lock only after a deliberate slider drag begins.
       if (getRenderer().isActive(root)) getRenderer().setPhase('held');
     }, 105);
   });
