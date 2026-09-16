@@ -236,19 +236,31 @@ async function checkEpisodeSwipes(page) {
   try {
     for (const direction of [1, -1]) {
       for (let step = 1; step <= lastIndex; step++) {
+        const index = direction === 1 ? step : lastIndex - step;
         const box = await grid.boundingBox();
         const x = box.x + box.width * (direction === 1 ? 0.8 : 0.2);
         const y = box.y + Math.min(220, box.height / 2);
-        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
-        for (let frame = 1; frame <= 12; frame++) {
+        const spacing = await grid.evaluate((element, index) => {
+          const card = element.querySelectorAll(".episode-card")[index];
+          const left = Math.min(element.scrollWidth - element.clientWidth,
+            Math.max(0, card.offsetLeft - (element.clientWidth - card.clientWidth) / 2));
+          return Math.abs(left - element.scrollLeft);
+        }, index);
+        const travel = Math.min(box.width * 0.6, spacing * 0.75);
+        const point = (x) => ({ x, y, id: 1, radiusX: 4, radiusY: 4, force: 1 });
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point(x)] });
+        // A controlled single-card slide must decelerate before release. A
+        // fixed-speed viewport-wide flick can legitimately cross several cards
+        // on iPad; that is tested separately below, without constraining count.
+        for (let frame = 1; frame <= 20; frame++) {
+          const progress = 1 - (1 - frame / 20) ** 3;
           await cdp.send("Input.dispatchTouchEvent", {
             type: "touchMove",
-            touchPoints: [{ x: x - (direction * box.width * 0.6 * frame) / 12, y }],
+            touchPoints: [point(x - direction * travel * progress)],
           });
-          await page.waitForTimeout(25);
+          await page.waitForTimeout(20);
         }
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-        const index = direction === 1 ? step : lastIndex - step;
         try {
           await aligned(index);
         } catch (error) {
@@ -272,8 +284,26 @@ async function checkEpisodeSwipes(page) {
     });
     await aligned(1);
     await grid.evaluate((element) => element.style.removeProperty("scroll-snap-type"));
+    const box = await grid.boundingBox();
+    const x = box.x + box.width * 0.8;
+    const y = box.y + Math.min(220, box.height / 2);
+    await cdp.send("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
+    for (let step=1;step<=8;step++) {
+      await cdp.send("Input.dispatchTouchEvent", {type:"touchMove",touchPoints:[{x:x-box.width*0.6*step/8,y}]});
+      await page.waitForTimeout(16);
+    }
+    await cdp.send("Input.dispatchTouchEvent", {type:"touchEnd",touchPoints:[]});
+    await page.waitForFunction(()=>{
+      const grid=document.querySelector('.episode-grid');
+      const cards=[...grid.querySelectorAll('.episode-card')];
+      const index=cards.findIndex(card=>card.classList.contains('is-active'));
+      if(index<=1)return false;
+      const card=cards[index];
+      const left=Math.min(grid.scrollWidth-grid.clientWidth,Math.max(0,card.offsetLeft-(grid.clientWidth-card.clientWidth)/2));
+      return Math.abs(grid.scrollLeft-left)<=2;
+    },null,{timeout:5000});
     const last = String(lastIndex + 1).padStart(2, "0");
-    return { forward: `01 → ${last}`, backward: `${last} → 01`, interruptedSnapRecovered: true };
+    return { forward: `01 → ${last}`, backward: `${last} → 01`, interruptedSnapRecovered: true, fastFlickAligned: true };
   } finally {
     await cdp.detach();
   }
@@ -543,6 +573,7 @@ try {
         ? [["Android CSS-only glass keeps selection working", checkAndroidRenderer]]
         : []),
     ]) {
+      if (process.env.UI_TEST_FILTER && !name.includes(process.env.UI_TEST_FILTER)) continue;
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         isMobile: true,
@@ -583,6 +614,7 @@ try {
     ...viewports,
     { name: "iPad compact landscape", width: 1024, height: 768 },
   ]) {
+    if (process.env.UI_TEST_FILTER) continue;
     const page = await browser.newPage({
       viewport: { width: viewport.width, height: viewport.height },
       hasTouch: true,
