@@ -183,6 +183,28 @@ try {
     assert.ok(Math.abs((await geometry(rail)).lens.height-74)<1);
     assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-rail-lock')),false);
     await swipe(page, cdp, 3, height * 0.7);
+    // A resized/rotated viewport must cancel a captured press even if its
+    // pointerup is lost. Height-only Safari toolbar changes keep contact intact.
+    await rail.scrollIntoViewIfNeeded();
+    const recoveryTarget = await tabs.first().boundingBox();
+    await page.mouse.move(recoveryTarget.x + recoveryTarget.width / 2, recoveryTarget.y + recoveryTarget.height / 2);
+    await page.mouse.down();
+    assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-rail-lock')),true);
+    await page.setViewportSize({width, height:height-24});
+    await page.waitForTimeout(100);
+    assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-rail-lock')),true,'toolbar resize cancelled contact');
+    await page.setViewportSize({width:width+12, height});
+    try {
+      await page.waitForFunction(()=>!document.documentElement.hasAttribute('data-rail-lock'),null,{timeout:3000});
+    } catch (error) {
+      console.log('RESIZE LOCK',await page.evaluate(()=>({width:innerWidth,height:innerHeight,html:document.documentElement.style.cssText,rails:[...document.querySelectorAll('.liquid-swipe-tabs')].map(e=>({class:e.className,held:e.dataset.liquidHeld,pressed:e.dataset.liquidPressed,bound:e.dataset.liquidBound}))})));
+      throw error;
+    }
+    assert.equal(await rail.getAttribute('data-liquid-held'),'false');
+    await page.mouse.up();
+    await page.setViewportSize({width,height});
+    await page.waitForTimeout(150);
+    await swipe(page, cdp, 3, height * 0.7);
     console.log(JSON.stringify({ engine, viewport: `${width}x${height}`, scrollSurfaces: surfaces.length + 2, allEightRiders: "stable", heldGrowth, lensMs: 80, portraitMs: 100 }));
     if (process.env.SAVE_SCREENSHOTS) {
       await rail.scrollIntoViewIfNeeded();

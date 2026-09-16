@@ -95,7 +95,8 @@ test("Dream Chapter provides landmark navigation, staged reveals, and modal scro
   assert.match(dream, /className="dream-chapter-nav"/);
   assert.match(dream, /data-dream-reveal/);
   assert.match(dream, /lockDreamViewport/);
-  assert.match(dream, /window\.scrollTo\(\{ top: scrollY, left: 0, behavior: "auto" \}\)/);
+  assert.match(dream, /acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
+  assert.match(dream, /releaseViewportScrollLock\(\)/);
   assert.match(dreamStyles, /min-height:\s*100svh/);
   assert.match(dreamStyles, /prefers-reduced-motion:\s*reduce/);
   assert.match(dreamStyles, /#dolminence\s*\{[^}]*contain-intrinsic-size:\s*auto\s+2810px/s);

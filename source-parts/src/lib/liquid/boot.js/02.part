@@ -1,10 +1,3 @@
-    this.stop(); this.canvas.remove();
-    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
-    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
-  }
-  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
-  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
-  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
   setPhase(phase) {
     this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
     this.releasing = phase === 'rest';
@@ -124,6 +117,9 @@ function initRail(root) {
   if (!root) return function () {};
   if (root.dataset.liquidBound === "true") return root.__liquidDispose || function () {};
   root.dataset.liquidBound = "true";
+  const events = new AbortController();
+  const on = (target, name, handler) => target.addEventListener(name, handler, { signal: events.signal });
+  let disposed = false;
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
   const reflection = root.querySelector('.liquid-contact-reflection');
@@ -212,7 +208,20 @@ function initRail(root) {
     clearTimeout(holdTimer);
   };
   const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
-  let pageLocked = false;
-  const blockPageScroll = (e) => { e.preventDefault(); };
+  let releasePageLock = null;
   const lockPage = () => {
-    if (!lockScroll || pageLocked) return;
+    if (!lockScroll || releasePageLock) return;
+    releasePageLock = acquireViewportScrollLock({ rail: true });
+  };
+  const unlockPage = () => {
+    releasePageLock?.();
+    releasePageLock = null;
+  };
+  const cancel = () => {
+    const pointerId = gesture?.pointerId;
+    const wasActive = Boolean(gesture);
+    gesture = null;
+    if (pointerId !== undefined) {
+      try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
+    }
+    pending = null;

@@ -1,17 +1,3 @@
-  window.addEventListener('pagehide', cancel);
-  const handleVisibilityChange = () => {
-    if (document.hidden) cancel();
-  };
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-
-  let swallowClick = false;
-  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
-    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
-    select(i); settle(i);
-  }));
-
-  root.addEventListener('keydown', (e) => {
-    const tab = e.target.closest('button[role="tab"]');
     if (!tab || !root.contains(tab)) return;
     const list = tabs();
     const current = list.indexOf(tab);
@@ -40,11 +26,15 @@
     ro = requestAnimationFrame(() => { ro = 0; relayout(); });
   });
   resizeObserver.observe(root);
-  root.addEventListener('liquidrelayout', relayout);
-  requestAnimationFrame(() => settle(active));
+  on(root, 'liquidrelayout', relayout);
+  const initialFrame = requestAnimationFrame(() => settle(active));
 
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     cancel();
+    events.abort();
+    cancelAnimationFrame(initialFrame);
     clearTimeout(holdTimer);
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
@@ -55,8 +45,12 @@
     window.removeEventListener('pointercancel', cancel, true);
     window.removeEventListener('blur', cancel);
     window.removeEventListener('pagehide', cancel);
+    window.removeEventListener('orientationchange', cancel);
+    window.removeEventListener('resize', handleViewportResize);
     document.removeEventListener('visibilitychange', handleVisibilityChange);
     if (getRenderer().isActive(root)) getRenderer().detach(root);
+    delete root.dataset.liquidBound;
+    delete root.dataset.liquidInitialized;
     root.__liquidDispose = null;
   };
   root.__liquidDispose = dispose;
@@ -128,30 +122,35 @@ function initPanel() {
   const closeBtn = panel.querySelector('.side-panel-close');
   const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
   let isOpen = panel.dataset.open === 'true';
-  let previousBodyOverflow = '';
+  let releasePanelLock = isOpen ? acquireViewportScrollLock() : null;
+  const events = new AbortController();
+  const on = (target, name, handler) => target.addEventListener(name, handler, { signal: events.signal });
 
   const focusables = () => [...panel.querySelectorAll(focusableSelector)]
     .filter((element) => element.tabIndex >= 0 && element.getAttribute('aria-hidden') !== 'true');
   const set = (open) => {
     if (open === isOpen) return;
     isOpen = open;
-    if (open) previousBodyOverflow = document.body.style.overflow;
-    else trigger.focus({ preventScroll: true });
+    if (open) releasePanelLock = acquireViewportScrollLock();
+    else {
+      releasePanelLock?.();
+      releasePanelLock = null;
+      trigger.focus({ preventScroll: true });
+    }
     panel.dataset.open = String(open);
     scrim.dataset.open = String(open);
     panel.setAttribute('aria-hidden', String(!open));
     panel.inert = !open;
     trigger.setAttribute('aria-expanded', String(open));
-    document.body.style.overflow = open ? 'hidden' : previousBodyOverflow;
     if (open) (closeBtn || panel).focus({ preventScroll: true });
   };
   panel.setAttribute('aria-hidden', String(!isOpen));
   panel.inert = !isOpen;
-  trigger.addEventListener('click', () => set(true));
-  scrim.addEventListener('click', () => set(false));
-  if (closeBtn) closeBtn.addEventListener('click', function () { set(false); });
-  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
-  panel.addEventListener('keydown', (e) => {
+  on(trigger, 'click', () => set(true));
+  on(scrim, 'click', () => set(false));
+  if (closeBtn) on(closeBtn, 'click', () => set(false));
+  panel.querySelectorAll('a').forEach(a => on(a, 'click', () => set(false)));
+  on(panel, 'keydown', (e) => {
     if (!isOpen) return;
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -176,6 +175,12 @@ function initPanel() {
       first.focus({ preventScroll: true });
     }
   });
+  return () => {
+    releasePanelLock?.();
+    releasePanelLock = null;
+    events.abort();
+    delete panel.dataset.liquidBound;
+  };
 }
 
 // Each surface is initialised independently: a failure in one must not strand
@@ -200,7 +205,10 @@ export function bootLiquidGlass(scope) {
   root.querySelectorAll('.liquid-glass-action').forEach(function (el) {
     safely('action', function () { initAction(el); });
   });
-  safely('panel', initPanel);
+  safely('panel', () => {
+    const dispose = initPanel();
+    if (dispose) disposers.push(dispose);
+  });
   document.documentElement.setAttribute('data-scroll-motion-ready', 'true');
   root.querySelectorAll('[data-reveal]').forEach(function (el) {
     el.setAttribute('data-visible', 'true');

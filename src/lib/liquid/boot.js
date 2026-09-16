@@ -8,6 +8,7 @@
 import VERT_SRC from "./vert.glsl?raw";
 import FRAG_SRC from "./frag.glsl?raw";
 import { prefersLightweightRendering } from "../rendering-profile.js";
+import { acquireViewportScrollLock } from "../viewport-scroll-lock.js";
 
 const VERTEX_SHADER = VERT_SRC;
 const FRAGMENT_SHADER = FRAG_SRC;
@@ -342,6 +343,9 @@ function initRail(root) {
   if (!root) return function () {};
   if (root.dataset.liquidBound === "true") return root.__liquidDispose || function () {};
   root.dataset.liquidBound = "true";
+  const events = new AbortController();
+  const on = (target, name, handler) => target.addEventListener(name, handler, { signal: events.signal });
+  let disposed = false;
   const lens = root.querySelector(':scope > .liquid-selection-lens');
   const glow = root.querySelector('.liquid-contact-glow');
   const reflection = root.querySelector('.liquid-contact-reflection');
@@ -430,25 +434,22 @@ function initRail(root) {
     clearTimeout(holdTimer);
   };
   const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
-  let pageLocked = false;
-  const blockPageScroll = (e) => { e.preventDefault(); };
+  let releasePageLock = null;
   const lockPage = () => {
-    if (!lockScroll || pageLocked) return;
-    pageLocked = true;
-    document.documentElement.dataset.railLock = 'true';
-    window.addEventListener('touchmove', blockPageScroll, { passive: false, capture: true });
-    window.addEventListener('wheel', blockPageScroll, { passive: false, capture: true });
+    if (!lockScroll || releasePageLock) return;
+    releasePageLock = acquireViewportScrollLock({ rail: true });
   };
   const unlockPage = () => {
-    if (!pageLocked) return;
-    pageLocked = false;
-    delete document.documentElement.dataset.railLock;
-    window.removeEventListener('touchmove', blockPageScroll, { capture: true });
-    window.removeEventListener('wheel', blockPageScroll, { capture: true });
+    releasePageLock?.();
+    releasePageLock = null;
   };
   const cancel = () => {
+    const pointerId = gesture?.pointerId;
     const wasActive = Boolean(gesture);
     gesture = null;
+    if (pointerId !== undefined) {
+      try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
+    }
     pending = null;
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
@@ -531,7 +532,7 @@ function initRail(root) {
     contact(m.x, m.y);
   };
 
-  root.addEventListener('pointerdown', (e) => {
+  on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
@@ -574,7 +575,7 @@ function initRail(root) {
     }, 105);
   });
 
-  root.addEventListener('pointermove', (e) => {
+  on(root, 'pointermove', (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
     if (gesture.axis === 'pending') {
       const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
@@ -635,15 +636,15 @@ function initRail(root) {
     gesture = null; reset(); unlockPage(); select(idx);
     requestAnimationFrame(() => settle(idx));
   };
-  root.addEventListener('pointerup', finish);
-  root.addEventListener('pointercancel', () => cancel());
-  root.addEventListener('lostpointercapture', (e) => {
+  on(root, 'pointerup', finish);
+  on(root, 'pointercancel', () => cancel());
+  on(root, 'lostpointercapture', (e) => {
     // Touch pointers are implicitly captured by the pressed tab on Android.
     // Moving capture to the rail emits a bubbling lostpointercapture from that
     // child; only cancel when the rail itself actually loses capture.
     if (e.target === root && gesture) cancel();
   });
-  root.addEventListener('contextmenu', (e) => e.preventDefault());
+  on(root, 'contextmenu', (e) => e.preventDefault());
 
   // Pointer capture is not guaranteed in Samsung Internet and embedded
   // Android WebViews. Finish/cancel at the window boundary as well so a lift
@@ -653,18 +654,28 @@ function initRail(root) {
   window.addEventListener('pointercancel', cancel, true);
   window.addEventListener('blur', cancel);
   window.addEventListener('pagehide', cancel);
+  // Rotation invalidates captured coordinates. Toolbar height changes do not:
+  // cancelling on every visualViewport resize would interrupt normal iOS drags.
+  window.addEventListener('orientationchange', cancel);
+  let viewportWidth = window.innerWidth;
+  const handleViewportResize = () => {
+    if (window.innerWidth === viewportWidth) return;
+    viewportWidth = window.innerWidth;
+    cancel();
+  };
+  window.addEventListener('resize', handleViewportResize);
   const handleVisibilityChange = () => {
     if (document.hidden) cancel();
   };
   document.addEventListener('visibilitychange', handleVisibilityChange);
 
   let swallowClick = false;
-  tabs().forEach((t, i) => t.addEventListener('click', (ev) => {
+  tabs().forEach((t, i) => on(t, 'click', (ev) => {
     if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
     select(i); settle(i);
   }));
 
-  root.addEventListener('keydown', (e) => {
+  on(root, 'keydown', (e) => {
     const tab = e.target.closest('button[role="tab"]');
     if (!tab || !root.contains(tab)) return;
     const list = tabs();
@@ -694,11 +705,15 @@ function initRail(root) {
     ro = requestAnimationFrame(() => { ro = 0; relayout(); });
   });
   resizeObserver.observe(root);
-  root.addEventListener('liquidrelayout', relayout);
-  requestAnimationFrame(() => settle(active));
+  on(root, 'liquidrelayout', relayout);
+  const initialFrame = requestAnimationFrame(() => settle(active));
 
   const dispose = () => {
+    if (disposed) return;
+    disposed = true;
     cancel();
+    events.abort();
+    cancelAnimationFrame(initialFrame);
     clearTimeout(holdTimer);
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
@@ -709,8 +724,12 @@ function initRail(root) {
     window.removeEventListener('pointercancel', cancel, true);
     window.removeEventListener('blur', cancel);
     window.removeEventListener('pagehide', cancel);
+    window.removeEventListener('orientationchange', cancel);
+    window.removeEventListener('resize', handleViewportResize);
     document.removeEventListener('visibilitychange', handleVisibilityChange);
     if (getRenderer().isActive(root)) getRenderer().detach(root);
+    delete root.dataset.liquidBound;
+    delete root.dataset.liquidInitialized;
     root.__liquidDispose = null;
   };
   root.__liquidDispose = dispose;
@@ -782,30 +801,35 @@ function initPanel() {
   const closeBtn = panel.querySelector('.side-panel-close');
   const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
   let isOpen = panel.dataset.open === 'true';
-  let previousBodyOverflow = '';
+  let releasePanelLock = isOpen ? acquireViewportScrollLock() : null;
+  const events = new AbortController();
+  const on = (target, name, handler) => target.addEventListener(name, handler, { signal: events.signal });
 
   const focusables = () => [...panel.querySelectorAll(focusableSelector)]
     .filter((element) => element.tabIndex >= 0 && element.getAttribute('aria-hidden') !== 'true');
   const set = (open) => {
     if (open === isOpen) return;
     isOpen = open;
-    if (open) previousBodyOverflow = document.body.style.overflow;
-    else trigger.focus({ preventScroll: true });
+    if (open) releasePanelLock = acquireViewportScrollLock();
+    else {
+      releasePanelLock?.();
+      releasePanelLock = null;
+      trigger.focus({ preventScroll: true });
+    }
     panel.dataset.open = String(open);
     scrim.dataset.open = String(open);
     panel.setAttribute('aria-hidden', String(!open));
     panel.inert = !open;
     trigger.setAttribute('aria-expanded', String(open));
-    document.body.style.overflow = open ? 'hidden' : previousBodyOverflow;
     if (open) (closeBtn || panel).focus({ preventScroll: true });
   };
   panel.setAttribute('aria-hidden', String(!isOpen));
   panel.inert = !isOpen;
-  trigger.addEventListener('click', () => set(true));
-  scrim.addEventListener('click', () => set(false));
-  if (closeBtn) closeBtn.addEventListener('click', function () { set(false); });
-  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
-  panel.addEventListener('keydown', (e) => {
+  on(trigger, 'click', () => set(true));
+  on(scrim, 'click', () => set(false));
+  if (closeBtn) on(closeBtn, 'click', () => set(false));
+  panel.querySelectorAll('a').forEach(a => on(a, 'click', () => set(false)));
+  on(panel, 'keydown', (e) => {
     if (!isOpen) return;
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -830,6 +854,12 @@ function initPanel() {
       first.focus({ preventScroll: true });
     }
   });
+  return () => {
+    releasePanelLock?.();
+    releasePanelLock = null;
+    events.abort();
+    delete panel.dataset.liquidBound;
+  };
 }
 
 // Each surface is initialised independently: a failure in one must not strand
@@ -854,7 +884,10 @@ export function bootLiquidGlass(scope) {
   root.querySelectorAll('.liquid-glass-action').forEach(function (el) {
     safely('action', function () { initAction(el); });
   });
-  safely('panel', initPanel);
+  safely('panel', () => {
+    const dispose = initPanel();
+    if (dispose) disposers.push(dispose);
+  });
   document.documentElement.setAttribute('data-scroll-motion-ready', 'true');
   root.querySelectorAll('[data-reveal]').forEach(function (el) {
     el.setAttribute('data-visible', 'true');

@@ -8,6 +8,7 @@ import {
 } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
+import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -219,14 +220,9 @@ export function SideMenuLayer({
     const root = document.documentElement;
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    const previousRootOverflow = root.style.overflow;
-    const previousRootOverscroll = root.style.overscrollBehavior;
     panel.scrollTop = 0;
     root.dataset.sideMenuOpen = "true";
-    root.style.overflow = "hidden";
-    root.style.overscrollBehavior = "none";
-    document.body.style.overflow = "hidden";
+    const releaseViewportScrollLock = acquireViewportScrollLock();
     const containBackgroundScroll = (event: TouchEvent | WheelEvent) => {
       if (!(event.target instanceof Node)) {
         event.preventDefault();
@@ -263,9 +259,7 @@ export function SideMenuLayer({
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("touchmove", containBackgroundScroll, true);
       document.removeEventListener("wheel", containBackgroundScroll, true);
-      document.body.style.overflow = previousOverflow;
-      root.style.overflow = previousRootOverflow;
-      root.style.overscrollBehavior = previousRootOverscroll;
+      releaseViewportScrollLock();
       delete root.dataset.sideMenuOpen;
       if (sideMenuRestoreFocusRef.current) {
         previousFocus?.focus({ preventScroll: true });
@@ -293,9 +287,7 @@ export function SideMenuLayer({
         return;
       }
     }
-    const previousOverflow = document.body.style.overflow;
-    const ownsBodyScrollLock = previousOverflow !== "hidden";
-    if (ownsBodyScrollLock) document.body.style.overflow = "hidden";
+    const releaseViewportScrollLock = acquireViewportScrollLock();
     dialog.scrollTop = 0;
     // Focusing the dialog itself prevents WebKit from auto-focusing (and
     // visually latching) the first close control when showModal() runs.
@@ -303,7 +295,7 @@ export function SideMenuLayer({
 
     return () => {
       if (dialog.open) dialog.close();
-      if (ownsBodyScrollLock) document.body.style.overflow = previousOverflow;
+      releaseViewportScrollLock();
       if (announcementOpenedByKeyboardRef.current) {
         const returnTarget =
           sidePanel?.dataset.open === "true" && announcementTrigger?.isConnected

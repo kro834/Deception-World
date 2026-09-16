@@ -62,7 +62,8 @@ test("the React side menu owns its state without a second vanilla controller", (
 
 test("the open side menu owns vertical panning without leaking to the page", () => {
   assert.match(chrome, /root\.dataset\.sideMenuOpen = "true"/);
-  assert.match(chrome, /root\.style\.overflow = "hidden"/);
+  assert.match(chrome, /const releaseViewportScrollLock = acquireViewportScrollLock\(\)/);
+  assert.match(chrome, /releaseViewportScrollLock\(\)/);
   assert.match(chrome, /document\.addEventListener\("touchmove", containBackgroundScroll/);
   assert.match(chrome, /panel\.contains\(event\.target\)/);
   assert.match(chrome, /panel\.scrollTop = 0/);

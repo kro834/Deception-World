@@ -25,7 +25,7 @@ test("form archive uses the shared Liquid Glass rail gesture", () => {
   }
 });
 
-test("Android keeps vertical page panning available until the archive rail is held", () => {
+test("archive rails capture contact and release through the shared viewport owner", () => {
   assert.match(
     styles,
     /html\[data-android-renderer\] \.form-archive-switcher\.liquid-swipe-tabs[^}]*touch-action: pan-y pinch-zoom;/,
@@ -36,5 +36,8 @@ test("Android keeps vertical page panning available until the archive rail is he
   );
   assert.match(liquidRail, /try \{ root\.setPointerCapture\(gesture\.pointerId\); \} catch/);
   assert.match(liquidRail, /if \(e\.target === root && gesture\) cancel\(\);/);
-  assert.match(liquidRail, /window\.addEventListener\('touchmove', blockPageScroll, \{ passive: false, capture: true \}\)/);
+  assert.match(liquidRail, /acquireViewportScrollLock\(\{ rail: true \}\)/);
+  assert.match(liquidRail, /releasePageLock\?\.\(\)/);
+  const frosted = readFileSync(new URL("../src/styles-frosted-controls.css", import.meta.url), "utf8");
+  assert.match(frosted, /\.liquid-swipe-tabs \*\s*\{[^}]*touch-action:\s*none\s*!important/);
 });

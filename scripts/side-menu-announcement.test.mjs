@@ -59,7 +59,7 @@ test("announcement interaction preserves the side menu and supports every modal 
     chrome,
     /event\.stopPropagation\(\);[\s\S]*?const restoreFocus = event\.detail === 0;[\s\S]*?closeAnnouncement\(restoreFocus\)/,
   );
-  assert.match(chrome, /document\.body\.style\.overflow = "hidden"/);
+  assert.match(chrome, /const releaseViewportScrollLock = acquireViewportScrollLock\(\)/);
 });
 
 test("side-menu focus restoration follows the input modality on iPad", () => {
@@ -80,12 +80,12 @@ test("side-menu focus restoration follows the input modality on iPad", () => {
   );
 });
 
-test("the nested announcement does not take ownership of an existing body scroll lock", () => {
-  assert.match(chrome, /const ownsBodyScrollLock = previousOverflow !== "hidden"/);
-  assert.match(chrome, /if \(ownsBodyScrollLock\) document\.body\.style\.overflow = "hidden"/);
+test("the nested announcement participates in the shared viewport scroll lock", () => {
+  assert.match(chrome, /acquireViewportScrollLock/);
+  assert.match(chrome, /const releaseViewportScrollLock = acquireViewportScrollLock\(\)/);
   assert.match(
     chrome,
-    /return \(\) => \{[\s\S]*?if \(dialog\.open\) dialog\.close\(\);[\s\S]*?if \(ownsBodyScrollLock\) document\.body\.style\.overflow = previousOverflow/,
+    /return \(\) => \{[\s\S]*?if \(dialog\.open\) dialog\.close\(\);[\s\S]*?releaseViewportScrollLock\(\)/,
   );
 });
 

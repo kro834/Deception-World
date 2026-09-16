@@ -39,3 +39,16 @@ test("pointer lighting coalesces work and pauses with the page", async () => {
   assert.match(mode, /worldEffects/);
   assert.match(mode, /worldPageVisible/);
 });
+
+test("final future interface polish stays finite, light, and motion-safe", async () => {
+  const root = await read("src/routes/__root.tsx");
+  const css = await read("src/styles-future-interface.css");
+  assert.match(root, /frostedControlsCss[\s\S]*futureInterfaceCss/);
+  assert.match(root, /href: frostedControlsCss[\s\S]*href: futureInterfaceCss/);
+  assert.doesNotMatch(css, /animation(?:-\w+)?\s*:[^;]*(?:infinite|filter)/i);
+  assert.doesNotMatch(css, /(?<!-)filter\s*:/i);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+
+  const riderTabs = css.match(/:is\([^{}]*\.rider-tabs[^{}]*\)\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.doesNotMatch(riderTabs, /\b(?:width|height|scale|transform|padding|margin)\s*:/i);
+});

@@ -7,6 +7,7 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
+import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_CASES,
@@ -28,36 +29,12 @@ const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string }[] = [
 
 function lockDreamViewport() {
   const root = document.documentElement;
-  const body = document.body;
-  const scrollY = window.scrollY;
-  const previous = {
-    rootOverflow: root.style.overflow,
-    rootOverscroll: root.style.overscrollBehavior,
-    rootScrollBehavior: root.style.scrollBehavior,
-    bodyOverflow: body.style.overflow,
-    bodyPosition: body.style.position,
-    bodyTop: body.style.top,
-    bodyWidth: body.style.width,
-  };
   root.dataset.dreamDialogOpen = "true";
-  root.style.overflow = "hidden";
-  root.style.overscrollBehavior = "none";
-  body.style.overflow = "hidden";
-  body.style.position = "fixed";
-  body.style.top = `-${scrollY}px`;
-  body.style.width = "100%";
+  const releaseViewportScrollLock = acquireViewportScrollLock({ freezeBody: true });
 
   return () => {
-    root.style.overflow = previous.rootOverflow;
-    root.style.overscrollBehavior = previous.rootOverscroll;
-    body.style.overflow = previous.bodyOverflow;
-    body.style.position = previous.bodyPosition;
-    body.style.top = previous.bodyTop;
-    body.style.width = previous.bodyWidth;
     delete root.dataset.dreamDialogOpen;
-    root.style.scrollBehavior = "auto";
-    window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
-    root.style.scrollBehavior = previous.rootScrollBehavior;
+    releaseViewportScrollLock();
   };
 }
 

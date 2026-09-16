@@ -8,6 +8,7 @@
 import VERT_SRC from "./vert.glsl?raw";
 import FRAG_SRC from "./frag.glsl?raw";
 import { prefersLightweightRendering } from "../rendering-profile.js";
+import { acquireViewportScrollLock } from "../viewport-scroll-lock.js";
 
 const VERTEX_SHADER = VERT_SRC;
 const FRAGMENT_SHADER = FRAG_SRC;
@@ -216,3 +217,10 @@ class GlassRenderer {
   isActive(root) { return this.activeRoot === root; }
   detach(root) {
     if (this.activeRoot !== root) return;
+    this.stop(); this.canvas.remove();
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
+  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
+  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
