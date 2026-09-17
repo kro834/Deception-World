@@ -35,6 +35,19 @@
 
 ## 検証と未確認
 
+### iOS / iPadOS 18.7.7互換描画
+
+iOS 18系の人物・トップ・特設ページでは装飾だけを軽量CSS描画にする。液体レンズのWebGL初期化・背景テクスチャ作成とポインター追従光を省き、固定ヘッダー・メニュー・ガラスボタンのbackdrop-filterを不透明寄りの背景色へ置き換える。大きな装飾のぼかしも省く。タッチ判定、長押し拡大、切り替え時間、スクロールロックの仕様は変更しない。先に追加したWebP配信も引き続き使用する。
+
+iPhone/iPadのOS 18 UAを判定し、デスクトップ表示のiPadはMacintosh UA＋複数タッチ対応＋Safari 18の組み合わせで選ぶ。OSのパッチ番号がUAに現れない場合があるため18.7.7だけへ限定しない。通常のmacOS SafariやiOS 26/27へは適用しない。未知のUAには既存方針を維持する。
+
+Appleの18.7.7資料は対応端末とWebKit更新の確認に用い、全端末で描画不具合があることを示す資料とは扱わない。背景ぼかしを軽量化するのは本サイトの重ね合わせ描画を減らす設計判断。
+
+- https://support.apple.com/en-us/126793
+- https://webkit.org/blog/15865/webkit-features-in-safari-18-0/
+
+`PW_IOS18=1 PW_ENGINE=webkit PLAYWRIGHT_BROWSERS_PATH=/tmp/deception-playwright-browsers BASE_URL=http://127.0.0.1:8082 node scripts/verify-hero-touch.mjs` で互換分岐・背景フィルター解除・3画面サイズのスクロールと8人の切り替え・長押し寸法を検証できる。これは現在のWebKitでiOS 18用分岐を通すテストであり、iOS 18.7.7実機・当該版Safariの再現ではない。実機fps・発熱は未測定。328単体テスト・型チェック・ビルド成功、lintエラー0件（既存警告11件）。
+
 ユーザー指定OS: Tensor G4搭載PixelはAndroid 16、iPhone 16（A18）はiOS 26、iPhone 18 Pro Max（A20 Pro）およびM4/M5端末はOS 27（iPadではiPadOS）。iOS 26のマイナーバージョンは未確認。Safari 26.4のスクロール連動描画改善を26系全体に適用済みと見なさない。
 
 ChromeのCDPタッチおよびWebKitのマウス/ホイール検証は実機SoC測定ではない。対象5SoCでのLCP、操作応答、描画フレーム時間、5分以上の連続操作後の性能は未測定。実機とOS情報が必要。目標は初回表示・操作応答の改善、枠サイズ・画像品質・スクロール操作の維持。ディスプレイや省電力制約を超えるfpsを強制しない。

@@ -17,8 +17,8 @@ test("Android Chrome, Samsung and WebView use CSS glass even with plentiful RAM"
 });
 test("iPhone, iPad and desktop keep the full renderer without resource constraints", () => {
   for (const userAgent of [
-    "iPhone OS 18",
-    "iPad; CPU OS 18",
+    "iPhone OS 26",
+    "iPad; CPU OS 27",
     "Macintosh; Intel Mac OS X",
     "Windows NT 10.0",
   ]) {

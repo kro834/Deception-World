@@ -59,9 +59,14 @@ function inside(lens, shell) {
 
 try {
   for (const [width, height] of [[390, 844], [1024, 768], [1280, 960]]) {
-    const page = await browser.newPage({ viewport: { width, height }, hasTouch: true, isMobile: engine === "chromium" });
+    const page = await browser.newPage({ viewport: { width, height }, hasTouch: true, isMobile: engine === "chromium", ...(process.env.PW_IOS18 ? { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7_7 like Mac OS X) AppleWebKit/605.1.15 Version/18.7 Mobile/15E148 Safari/604.1" } : {}) });
     await page.goto(new URL("/world", origin).href);
     await page.locator('.rider-tabs[data-liquid-initialized="true"]').waitFor({ state: "attached" });
+    if (process.env.PW_IOS18) {
+      assert.equal(await page.evaluate(() => document.documentElement.dataset.ios18Renderer), "true");
+      assert.equal(await page.locator('.topbar').evaluate(el => getComputedStyle(el).backdropFilter), "none");
+      assert.equal(await page.evaluate(() => document.documentElement.dataset.worldEffects), "economy");
+    }
     // Programmatic test positioning is not user input. Wait for the router's
     // initial restoration before scrollIntoView; native input cancellation is
     // covered separately by verify-anime-ui's destination-reveal test.

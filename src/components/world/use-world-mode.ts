@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLiquidPointerLight } from "./use-liquid-pointer-light";
-import { prefersLightweightRendering } from "@/lib/rendering-profile";
+import { prefersLightweightRendering, prefersIOS18Rendering } from "@/lib/rendering-profile";
 
 export function useWorldMode() {
   useLiquidPointerLight();
@@ -8,6 +8,7 @@ export function useWorldMode() {
     const html = document.documentElement;
     const prev = html.dataset.mode;
     const previousAndroid = html.dataset.androidRenderer;
+    const previousIOS18 = html.dataset.ios18Renderer;
     const previousOneUi = html.dataset.oneUiRenderer;
     const previousEffects = html.dataset.worldEffects;
     const previousVisibility = html.dataset.worldPageVisible;
@@ -18,6 +19,8 @@ export function useWorldMode() {
     html.dataset.scrollMotionReady = "true";
     const userAgent = navigator.userAgent;
     const economyEffects = prefersLightweightRendering(navigator);
+    if (prefersIOS18Rendering(navigator)) html.dataset.ios18Renderer = "true";
+    else delete html.dataset.ios18Renderer;
     if (/Android/i.test(userAgent)) html.dataset.androidRenderer = "true";
     if (/SamsungBrowser|SM-[A-Z0-9]+/i.test(userAgent)) html.dataset.oneUiRenderer = "true";
     if (economyEffects) html.dataset.worldEffects = "economy";
@@ -87,6 +90,8 @@ export function useWorldMode() {
       else delete html.dataset.mode;
       if (previousAndroid) html.dataset.androidRenderer = previousAndroid;
       else delete html.dataset.androidRenderer;
+      if (previousIOS18) html.dataset.ios18Renderer = previousIOS18;
+      else delete html.dataset.ios18Renderer;
       if (previousOneUi) html.dataset.oneUiRenderer = previousOneUi;
       else delete html.dataset.oneUiRenderer;
       if (previousEffects) html.dataset.worldEffects = previousEffects;

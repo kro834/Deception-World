@@ -1,0 +1,28 @@
+/* iOS/iPadOS 18: keep gesture geometry and transform transitions, avoid
+   repeated backdrop sampling on fixed chrome and interactive glass. */
+html[data-ios18-renderer="true"]
+  :is(
+    .topbar,
+    .manager-topbar,
+    .rider-archive-topbar,
+    .rxs-local-nav,
+    .dream-site-header,
+    .side-panel,
+    .ios26-glass,
+    .world-column-dialog-card,
+    .episode-pickup-dialog,
+    .dossier-reader
+  ) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-color: #101b29;
+}
+html[data-ios18-renderer="true"] :is(.liquid-pointer-glow, .liquid-contact-glow) {
+  display: none !important;
+}
+html[data-ios18-renderer="true"]
+  :is(.manager-glow, .rider-archive-glow, .rxs-hero-ambient, .dream-aurora) {
+  filter: none !important;
+  opacity: 0.12;
+  will-change: auto !important;
+}
