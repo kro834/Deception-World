@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
+import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
 
 export const Route = createFileRoute("/rexonance-saga")({
   component: RexonanceSaga,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/rexonance-saga")({
     links: [
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
+      { rel: "stylesheet", href: resonanceMotionCssUrl },
       {
         rel: "preload",
         as: "image",

@@ -399,13 +399,23 @@ export function RexonanceSaga() {
       connection?.saveData === true ||
       connection?.effectiveType === "slow-2g" ||
       connection?.effectiveType === "2g";
-    const allowMotion = !media.matches && !constrained;
-    setMotionReady(allowMotion);
+    const updateMotion = () => setMotionReady(!media.matches && !constrained);
+    updateMotion();
+    media.addEventListener("change", updateMotion);
+    const updateVisibility = () => {
+      page.dataset.motionPaused = String(document.hidden);
+    };
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    const cleanup = () => {
+      media.removeEventListener("change", updateMotion);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];
-    if (!allowMotion || !("IntersectionObserver" in window)) {
+    if (!("IntersectionObserver" in window)) {
       reveals.forEach((element) => element.classList.add("is-visible"));
-      return;
+      return cleanup;
     }
 
     const observer = new IntersectionObserver(
@@ -419,7 +429,10 @@ export function RexonanceSaga() {
       { rootMargin: "0px 0px -10%", threshold: 0.12 },
     );
     reveals.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cleanup();
+    };
   }, []);
 
   useEffect(() => {
@@ -493,6 +506,11 @@ export function RexonanceSaga() {
 
       <section className="rxs-hero" aria-labelledby="rxs-title">
         <div className="rxs-hero-ambient" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </div>
+        <div className="rxs-resonance-field" aria-hidden="true">
           <i />
           <i />
           <i />
@@ -862,9 +880,16 @@ export function RexonanceSaga() {
             タップ、長押し、または左右へのスライドで切り替え
           </p>
 
-          <div id="rxs-stage-panel" className="rxs-stage-panel" role="tabpanel" aria-live="polite">
+          <div
+            id="rxs-stage-panel"
+            className="rxs-stage-panel"
+            role="tabpanel"
+            aria-live="polite"
+            style={{ ["--rxs-stage-accent" as string]: activeStage.accent }}
+          >
             <figure key={stage}>
               <span aria-hidden="true" />
+              <i className="rxs-stage-scan" aria-hidden="true" />
               <img
                 src={activeStage.image}
                 alt={activeStage.alt}
