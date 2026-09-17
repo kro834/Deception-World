@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 
-const browser = await chromium.launch({ channel: "chrome" });
+const engine = process.env.PW_ENGINE || "chromium";
+const browser = await (engine === "webkit" ? webkit : chromium).launch(
+  engine === "webkit" ? {} : { channel: "chrome" },
+);
 try {
   for (const [width, height] of [
     [390, 844],
@@ -9,7 +12,7 @@ try {
   ]) {
     const context = await browser.newContext({
       viewport: { width, height },
-      isMobile: true,
+      isMobile: engine === "chromium",
       hasTouch: true,
       deviceScaleFactor: width < 768 ? 3 : 2,
     });
@@ -44,22 +47,28 @@ try {
       "Alternate images must not compete with the hero at startup",
     );
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    await page.screenshot({ path: `/tmp/rexonance-hero-${width}.png` });
-    const cdp = await context.newCDPSession(page);
-    await cdp.send("Input.dispatchTouchEvent", {
-      type: "touchStart",
-      touchPoints: [{ x: width / 2, y: height * 0.7 }],
-    });
-    for (let n = 1; n <= 10; n++) {
+    await page.screenshot({ path: `/tmp/rexonance-hero-${engine}-${width}.png` });
+    if (engine === "chromium") {
+      const cdp = await context.newCDPSession(page);
       await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchMove",
-        touchPoints: [{ x: width / 2, y: height * 0.7 - n * 15 }],
+        type: "touchStart",
+        touchPoints: [{ x: width / 2, y: height * 0.7 }],
       });
-      await page.waitForTimeout(16);
+      for (let n = 1; n <= 10; n++) {
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: width / 2, y: height * 0.7 - n * 15 }],
+        });
+        await page.waitForTimeout(16);
+      }
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    } else {
+      // Desktop WebKit wheel coverage is not a claim of physical iOS touch testing.
+      await page.mouse.move(width / 2, height * 0.7);
+      await page.mouse.wheel(0, 150);
     }
-    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await page.waitForTimeout(200);
-    assert.ok(await page.evaluate(() => scrollY > 20), "Hero touch scroll");
+    assert.ok(await page.evaluate(() => scrollY > 20), "Hero scroll");
     for (const stage of ["max", "ultra", "standard"]) {
       const index = ["standard", "max", "ultra"].indexOf(stage);
       await page.locator(".rxs-stage-tabs button").nth(index).click();
@@ -75,7 +84,7 @@ try {
         "rxsScanPass",
       );
     }
-    await page.screenshot({ path: `/tmp/rexonance-stage-${width}.png` });
+    await page.screenshot({ path: `/tmp/rexonance-stage-${engine}-${width}.png` });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.locator('main[data-motion-ready="false"]').waitFor();
     assert.equal(
@@ -86,7 +95,7 @@ try {
     await page.locator('main[data-motion-ready="true"]').waitFor();
     assert.deepEqual(errors, []);
     console.log(
-      `PASS ${width}x${height}: hero, touch scroll, all stages, live reduced motion, no overflow/errors`,
+      `PASS ${engine} ${width}x${height}: hero, scroll, all stages, live reduced motion, no overflow/errors`,
     );
     await context.close();
   }

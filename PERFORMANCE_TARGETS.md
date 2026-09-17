@@ -33,4 +33,10 @@
 
 ChromeのCDPタッチおよびWebKitのマウス/ホイール検証は実機SoC測定ではない。対象5SoCでのLCP、操作応答、描画フレーム時間、5分以上の連続操作後の性能は未測定。実機とOS情報が必要。目標は初回表示・操作応答の改善、枠サイズ・画像品質・スクロール操作の維持。ディスプレイや省電力制約を超えるfpsを強制しない。
 
+### レクソナンス配信のブラウザー検証
+
+`scripts/verify-rexonance-motion.mjs` はChromeとWebKitの両方に対応。390×844・DPR 3と1280×800・DPR 2で、軽量画像の選択、元JPEGの重複取得0件、トップ表示時の別形態画像取得0件、3形態の表示、横はみ出しなし、実行時エラーなし、動きを減らす設定の動的変更を確認した。ChromeはCDPタッチ、WebKitはデスクトップモードのホイールでスクロールを検証（モバイルWebKitのホイールはPlaywright未対応）。この結果を端末のGPU処理速度・発熱測定の代用にはしない。
+
+再実行: `PW_ENGINE=webkit PLAYWRIGHT_BROWSERS_PATH=/tmp/deception-playwright-browsers node scripts/verify-rexonance-motion.mjs`。ローカルproduction preview（8082）が必要。ブラウザーの配置先は環境に合わせる。
+
 ユーザーが公開分担を明示: Codexは検証済み変更をmainへpushし、Grokの操作による公開はユーザー側で行う。push完了と公開サイト反映済みは区別する。既存Vercel用GitHub Actionsの資格情報不足はGrokの公開経路とは別であり、今回のmain反映を止める条件にはしない。
