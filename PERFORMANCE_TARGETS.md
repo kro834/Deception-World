@@ -40,3 +40,17 @@ ChromeのCDPタッチおよびWebKitのマウス/ホイール検証は実機SoC�
 再実行: `PW_ENGINE=webkit PLAYWRIGHT_BROWSERS_PATH=/tmp/deception-playwright-browsers node scripts/verify-rexonance-motion.mjs`。ローカルproduction preview（8082）が必要。ブラウザーの配置先は環境に合わせる。
 
 ユーザーが公開分担を明示: Codexは検証済み変更をmainへpushし、Grokの操作による公開はユーザー側で行う。push完了と公開サイト反映済みは区別する。既存Vercel用GitHub Actionsの資格情報不足はGrokの公開経路とは別であり、今回のmain反映を止める条件にはしない。
+
+### Tensor G4向けの最終調整（2026-09-17）
+
+ユーザーから実機上の問題は「ほぼない」と報告され、今回を最終調整とする。Googleの仕様ではTensor G4搭載Pixel 9系は最大120Hz表示に対応する。ただし表示上限はWebページの持続描画性能を保証しないため、GPU利用率を上げること自体を目的にせず、不要なCPU処理を除く。
+
+AndroidかつCSSスクロールタイムライン対応環境では、ヘッダーの進捗バーをブラウザーのスクロール連動transformへ移行した。スクロールごとのscrollHeight読み取りとCSS変数更新を省き、ヘッダー状態も閾値をまたいだ場合だけ更新する。ChromeのUA縮小では機種名が省略され得るためTensor G4を推測で検出せず、Androidの機能対応で選択する。Apple系、未対応環境、動きを減らす設定では従来のJavaScript処理を維持する。設定変更時と画面離脱時には保留フレームと監視を解除する。
+
+`node scripts/verify-android-progress.mjs`でAndroid縮小UA、未対応機能、iPhone UAを検証。Android経路のスクロール後CSS変数書き込みは0回、進捗比率0.495582と描画scaleX 0.495582が一致した。代替処理、動きを減らす設定の動的切り替え、実行時エラー0件も確認。これはブラウザーでの処理削減の検証であり、Tensor G4実機のfps・消費電力測定ではない。最終リリースゲートは324テスト成功、型チェック・ビルド成功、lintエラー0件（既存警告11件）。
+
+一次資料:
+
+- Google Pixel仕様: https://support.google.com/pixelphone/answer/7158570?hl=en
+- Chromium UA縮小: https://www.chromium.org/updates/ua-reduction/
+- Chromeスクロールアニメーションの処理経路: https://developer.chrome.com/blog/scroll-animation-performance-case-study/

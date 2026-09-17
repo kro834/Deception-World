@@ -13,6 +13,7 @@ export function useWorldMode() {
     const previousVisibility = html.dataset.worldPageVisible;
     const previousPageScrolled = html.dataset.pageScrolled;
     const previousPageProgress = html.style.getPropertyValue("--page-progress");
+    const previousNativeProgress = html.dataset.nativeScrollProgress;
     html.dataset.mode = "world";
     html.dataset.scrollMotionReady = "true";
     const userAgent = navigator.userAgent;
@@ -29,19 +30,47 @@ export function useWorldMode() {
     document.addEventListener("visibilitychange", syncVisibility);
 
     let progressFrame = 0;
-    const syncPageProgress = () => {
-      progressFrame = 0;
-      const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
-      html.style.setProperty("--page-progress", progress.toFixed(4));
-      if (window.scrollY > 20) html.dataset.pageScrolled = "true";
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const supportsNativeProgress =
+      /Android/i.test(userAgent) &&
+      window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
+    let nativeProgress = supportsNativeProgress && !reducedMotion.matches;
+    let lastScrolled: boolean | undefined;
+    let lastProgress = "";
+    const syncScrolled = () => {
+      const scrolled = window.scrollY > 20;
+      if (scrolled === lastScrolled) return;
+      lastScrolled = scrolled;
+      if (scrolled) html.dataset.pageScrolled = "true";
       else delete html.dataset.pageScrolled;
     };
+    const syncPageProgress = () => {
+      progressFrame = 0;
+      syncScrolled();
+      if (nativeProgress) return;
+      const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+      const value = progress.toFixed(4);
+      if (value !== lastProgress) html.style.setProperty("--page-progress", value);
+      lastProgress = value;
+    };
     const requestProgressSync = () => {
+      if (nativeProgress) {
+        syncScrolled();
+        return;
+      }
       if (progressFrame) return;
       progressFrame = window.requestAnimationFrame(syncPageProgress);
     };
-    syncPageProgress();
+    const syncProgressMode = () => {
+      if (progressFrame) window.cancelAnimationFrame(progressFrame);
+      nativeProgress = supportsNativeProgress && !reducedMotion.matches;
+      if (nativeProgress) html.dataset.nativeScrollProgress = "true";
+      else delete html.dataset.nativeScrollProgress;
+      syncPageProgress();
+    };
+    syncProgressMode();
+    reducedMotion.addEventListener("change", syncProgressMode);
     window.addEventListener("scroll", requestProgressSync, { passive: true });
     window.addEventListener("resize", requestProgressSync, { passive: true });
     window.visualViewport?.addEventListener("resize", requestProgressSync, { passive: true });
@@ -51,6 +80,9 @@ export function useWorldMode() {
       window.removeEventListener("resize", requestProgressSync);
       window.visualViewport?.removeEventListener("resize", requestProgressSync);
       if (progressFrame) window.cancelAnimationFrame(progressFrame);
+      reducedMotion.removeEventListener("change", syncProgressMode);
+      if (previousNativeProgress) html.dataset.nativeScrollProgress = previousNativeProgress;
+      else delete html.dataset.nativeScrollProgress;
       if (prev) html.dataset.mode = prev;
       else delete html.dataset.mode;
       if (previousAndroid) html.dataset.androidRenderer = previousAndroid;

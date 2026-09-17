@@ -66,3 +66,20 @@ html[data-android-renderer]
   filter: none !important;
   opacity: 0.12;
 }
+/* Tensor G4 / Android Chrome: compositor-driven progress, no per-frame layout read. */
+@supports (animation-timeline: scroll(root block)) {
+  html[data-native-scroll-progress="true"]
+    :is(.topbar, .manager-topbar, .rider-archive-topbar, .dream-site-header)::after {
+    animation: android-page-progress auto linear both;
+    animation-timeline: scroll(root block);
+    transition: none;
+  }
+}
+@keyframes android-page-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
