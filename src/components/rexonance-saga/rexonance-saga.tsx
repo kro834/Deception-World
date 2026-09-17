@@ -5,6 +5,8 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
+import { rexonanceImage } from "@/lib/rexonance-images";
+import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
 type RexonanceStage = "standard" | "max" | "ultra";
 type P14Baseline = "p1" | "p2";
@@ -380,7 +382,9 @@ export function RexonanceSaga() {
     };
     rail.addEventListener("railselect", onSelect);
     const dispose = initRail(rail);
+    const stopWarmup = warmRexonanceStages(rail, [STAGES.max.image, STAGES.ultra.image]);
     return () => {
+      stopWarmup();
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
@@ -530,6 +534,7 @@ export function RexonanceSaga() {
           <span className="rxs-orbit rxs-orbit-b" />
           <img
             src="/rider-rexonance-saga-pickup.jpeg"
+            {...rexonanceImage("/rider-rexonance-saga-pickup.jpeg")}
             alt=""
             width="1050"
             height="1400"
@@ -692,6 +697,7 @@ export function RexonanceSaga() {
           <figure>
             <img
               src="/rexonance-p14-core.jpg"
+              {...rexonanceImage("/rexonance-p14-core.jpg")}
               alt="青い回路に接続されたP14演算コア"
               width="1000"
               height="1000"
@@ -892,6 +898,7 @@ export function RexonanceSaga() {
               <i className="rxs-stage-scan" aria-hidden="true" />
               <img
                 src={activeStage.image}
+                {...rexonanceImage(activeStage.image)}
                 alt={activeStage.alt}
                 width={stage === "max" ? 1086 : 1200}
                 height={stage === "max" ? 1448 : 1600}

@@ -224,3 +224,4 @@ class GlassRenderer {
   setAccent(c) { this.accent = parseColor(c); this.schedule(); }
   setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
   setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
+  setPhase(phase) {

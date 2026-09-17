@@ -1,4 +1,3 @@
-  setPhase(phase) {
     this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
     this.releasing = phase === 'rest';
     if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
@@ -176,7 +175,10 @@ function initRail(root) {
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
     if (focus) list[active].focus({ preventScroll: true });
   };
+  let contactIndex = null;
   const setContact = (i) => {
+    if (contactIndex === i) return;
+    contactIndex = i;
     tabs().forEach((t, k) => {
       if (k === i) t.setAttribute('data-liquid-contact', 'true');
       else t.removeAttribute('data-liquid-contact');
@@ -185,8 +187,8 @@ function initRail(root) {
   const contact = (cx, cy) => {
     if (!gesture) return;
     const r = gesture.rect;
-    const sx = r.width / Math.max(root.offsetWidth, 1) || 1;
-    const sy = r.height / Math.max(root.offsetHeight, 1) || 1;
+    const sx = gesture.sx;
+    const sy = gesture.sy;
     const lx = (cx - r.left) / sx, ly = (cy - r.top) / sy;
     if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
     if (root.dataset.liquidWebglActive === 'true' || !glow) return;
@@ -224,4 +226,3 @@ function initRail(root) {
     if (pointerId !== undefined) {
       try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
     }
-    pending = null;

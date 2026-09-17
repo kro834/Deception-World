@@ -1,3 +1,4 @@
+    pending = null;
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
     reset();
@@ -21,8 +22,7 @@
       const startGeo = gesture.geos[gesture.start];
       const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
       const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
-      const geos = measure();
-      gesture.geos = geos;
+      const geos = gesture.geos;
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
       setContact(preview);
@@ -40,8 +40,9 @@
       };
       lensGeometry = geo;
       if (lens) {
-        lens.style.width = geo.width.toFixed(2) + 'px';
-        lens.style.height = geo.height.toFixed(2) + 'px';
+        const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
+        if (lens.style.width !== width) lens.style.width = width;
+        if (lens.style.height !== height) lens.style.height = height;
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
@@ -71,8 +72,9 @@
     const tab = tabs()[preview];
     if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
     if (lens) {
-      lens.style.width = g.width.toFixed(2) + 'px';
-      lens.style.height = g.height.toFixed(2) + 'px';
+      const width = g.width.toFixed(2) + 'px', height = g.height.toFixed(2) + 'px';
+      if (lens.style.width !== width) lens.style.width = width;
+      if (lens.style.height !== height) lens.style.height = height;
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
@@ -223,4 +225,3 @@
   }));
 
   on(root, 'keydown', (e) => {
-    const tab = e.target.closest('button[role="tab"]');

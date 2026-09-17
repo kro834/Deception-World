@@ -402,7 +402,10 @@ function initRail(root) {
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
     if (focus) list[active].focus({ preventScroll: true });
   };
+  let contactIndex = null;
   const setContact = (i) => {
+    if (contactIndex === i) return;
+    contactIndex = i;
     tabs().forEach((t, k) => {
       if (k === i) t.setAttribute('data-liquid-contact', 'true');
       else t.removeAttribute('data-liquid-contact');
@@ -411,8 +414,8 @@ function initRail(root) {
   const contact = (cx, cy) => {
     if (!gesture) return;
     const r = gesture.rect;
-    const sx = r.width / Math.max(root.offsetWidth, 1) || 1;
-    const sy = r.height / Math.max(root.offsetHeight, 1) || 1;
+    const sx = gesture.sx;
+    const sy = gesture.sy;
     const lx = (cx - r.left) / sx, ly = (cy - r.top) / sy;
     if (getRenderer().isActive(root)) getRenderer().setContact({ x: lx, y: ly }, { x: gesture.vx, y: gesture.vy });
     if (root.dataset.liquidWebglActive === 'true' || !glow) return;
@@ -474,8 +477,7 @@ function initRail(root) {
       const startGeo = gesture.geos[gesture.start];
       const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
       const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
-      const geos = measure();
-      gesture.geos = geos;
+      const geos = gesture.geos;
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
       setContact(preview);
@@ -493,8 +495,9 @@ function initRail(root) {
       };
       lensGeometry = geo;
       if (lens) {
-        lens.style.width = geo.width.toFixed(2) + 'px';
-        lens.style.height = geo.height.toFixed(2) + 'px';
+        const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
+        if (lens.style.width !== width) lens.style.width = width;
+        if (lens.style.height !== height) lens.style.height = height;
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
@@ -524,8 +527,9 @@ function initRail(root) {
     const tab = tabs()[preview];
     if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
     if (lens) {
-      lens.style.width = g.width.toFixed(2) + 'px';
-      lens.style.height = g.height.toFixed(2) + 'px';
+      const width = g.width.toFixed(2) + 'px', height = g.height.toFixed(2) + 'px';
+      if (lens.style.width !== width) lens.style.width = width;
+      if (lens.style.height !== height) lens.style.height = height;
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);

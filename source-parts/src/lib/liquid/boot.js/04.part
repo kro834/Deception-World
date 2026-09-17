@@ -1,3 +1,4 @@
+    const tab = e.target.closest('button[role="tab"]');
     if (!tab || !root.contains(tab)) return;
     const list = tabs();
     const current = list.indexOf(tab);

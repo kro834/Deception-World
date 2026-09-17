@@ -3,6 +3,7 @@ import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
+import { rexonanceImage } from "@/lib/rexonance-images";
 
 export const Route = createFileRoute("/rexonance-saga")({
   component: RexonanceSaga,
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/rexonance-saga")({
         rel: "preload",
         as: "image",
         href: "/rider-rexonance-saga-pickup.jpeg",
+        imageSrcSet: rexonanceImage("/rider-rexonance-saga-pickup.jpeg").srcSet,
+        imageSizes: rexonanceImage("/rider-rexonance-saga-pickup.jpeg").sizes,
         fetchPriority: "high",
       },
     ],

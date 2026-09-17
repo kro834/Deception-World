@@ -11,6 +11,7 @@ try {
       viewport: { width, height },
       isMobile: true,
       hasTouch: true,
+      deviceScaleFactor: width < 768 ? 3 : 2,
     });
     const page = await context.newPage();
     const errors = [];
@@ -19,6 +20,29 @@ try {
     await page.locator('main[data-motion-ready="true"]').waitFor();
     assert.equal(await page.locator(".rxs-resonance-field i").count(), 3);
     await page.waitForTimeout(1800);
+    const delivery = await page.locator(".rxs-hero-visual img").evaluate((img) => ({
+      source: img.currentSrc,
+      originalRequests: performance
+        .getEntriesByType("resource")
+        .filter((r) => new URL(r.name).pathname === "/rider-rexonance-saga-pickup.jpeg").length,
+    }));
+    assert.match(delivery.source, /-delivery-\d+\.webp$/);
+    assert.equal(
+      delivery.originalRequests,
+      0,
+      "Responsive preload must not also fetch the original",
+    );
+    console.log("Image delivery", width, delivery);
+    assert.equal(
+      await page.evaluate(
+        () =>
+          performance
+            .getEntriesByType("resource")
+            .filter((r) => /rider-rexonance-(max|ultra)/.test(r.name)).length,
+      ),
+      0,
+      "Alternate images must not compete with the hero at startup",
+    );
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.screenshot({ path: `/tmp/rexonance-hero-${width}.png` });
     const cdp = await context.newCDPSession(page);

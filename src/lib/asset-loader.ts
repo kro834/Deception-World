@@ -1,3 +1,5 @@
+import { rexonanceImage } from "./rexonance-images.ts";
+
 const KNOWN_BYTES: Record<string, number> = {
   "/deception-world-poster-delivery.webp": 468454,
   "/poster-card-03.jpeg": 293500,
@@ -78,6 +80,7 @@ async function decodeImageAsset(url: string, signal: AbortSignal) {
     };
     const abort = () => {
       finish(false);
+      image.removeAttribute?.("srcset");
       image.removeAttribute?.("src");
     };
     if (signal.aborted) {
@@ -87,6 +90,11 @@ async function decodeImageAsset(url: string, signal: AbortSignal) {
     signal.addEventListener("abort", abort, { once: true });
     image.onerror = () => finish(false);
     if (typeof image.decode !== "function") image.onload = () => finish(image.naturalWidth > 0);
+    const responsive = rexonanceImage(url);
+    if (responsive.srcSet) {
+      image.sizes = responsive.sizes;
+      image.srcset = responsive.srcSet;
+    }
     image.src = url;
     if (typeof image.decode === "function") {
       void image.decode().then(
