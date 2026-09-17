@@ -2229,6 +2229,7 @@ export function WorldHome() {
                   <div className="episode-thumbnail">
                     <img
                       src={ep.src}
+                      {...dossierImage(ep.src)}
                       alt={ep.alt}
                       style={{ objectPosition: ep.pos }}
                       loading="lazy"
@@ -2393,6 +2394,7 @@ export function WorldHome() {
                     <figure>
                       <img
                         src={item.src}
+                        {...dossierImage(item.src)}
                         alt={item.alt}
                         style={{ objectPosition: item.pos }}
                         width={item.width}
@@ -2538,3 +2540,4 @@ export function WorldHome() {
     </main>
   );
 }
+import { dossierImage } from "@/lib/dossier-images";

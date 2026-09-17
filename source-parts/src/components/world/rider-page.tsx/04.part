@@ -1,3 +1,4 @@
+    no: "07",
     name: "OVER ZEZTZ",
     ja: "オーバーゼッツ",
     person: "ジェームズ・スミス",
@@ -333,4 +334,3 @@ export function RiderPage({ id }: { id: string }) {
         ["--archive-accent-soft" as string]: rider.tone,
         ["--future-hud-primary" as string]: rider.tone,
       }}
-    >

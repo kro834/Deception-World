@@ -1,5 +1,3 @@
-              <br />
-              <em>現実</em>にある。
             </h2>
           </div>
           <div className="story-copy">
@@ -421,3 +419,6 @@
               {rider.name.slice(0, 1)}
             </div>
             <div className="rider-number">RIDER / {rider.no}</div>
+            <div className="rider-copy-block">
+              <p className="rider-person">
+                <NameText value={rider.person} />

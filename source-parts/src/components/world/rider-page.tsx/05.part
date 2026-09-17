@@ -1,3 +1,4 @@
+    >
       <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
@@ -12,7 +13,7 @@
           <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
               style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
@@ -64,7 +65,7 @@
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}

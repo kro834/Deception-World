@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { dossierImage } from "@/lib/dossier-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -1356,7 +1357,7 @@ export function RiderPage({ id }: { id: string }) {
           <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
               style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
@@ -1408,7 +1409,7 @@ export function RiderPage({ id }: { id: string }) {
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : undefined}
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}

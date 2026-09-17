@@ -1,4 +1,5 @@
 import { rexonanceImage } from "./rexonance-images.ts";
+import { dossierImage } from "./dossier-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
   "/deception-world-poster-delivery.webp": 468454,
@@ -90,9 +91,9 @@ async function decodeImageAsset(url: string, signal: AbortSignal) {
     signal.addEventListener("abort", abort, { once: true });
     image.onerror = () => finish(false);
     if (typeof image.decode !== "function") image.onload = () => finish(image.naturalWidth > 0);
-    const responsive = rexonanceImage(url);
+    const responsive = { ...dossierImage(url), ...rexonanceImage(url) };
     if (responsive.srcSet) {
-      image.sizes = responsive.sizes;
+      if (responsive.sizes) image.sizes = responsive.sizes;
       image.srcset = responsive.srcSet;
     }
     image.src = url;

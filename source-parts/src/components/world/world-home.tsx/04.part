@@ -1,4 +1,3 @@
-    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
     episodeScrollTimer.current = window.setTimeout(() => {
       episodeProgrammatic.current = false;
       episodeScrollTimer.current = null;
@@ -421,3 +420,5 @@
             <h2 data-film-reveal>
               <FilmTextScan />
               救うべき世界は、
+              <br />
+              <em>現実</em>にある。

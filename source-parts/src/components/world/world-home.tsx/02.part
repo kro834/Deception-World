@@ -420,3 +420,5 @@ export function WorldHome() {
     media.addEventListener?.("change", syncMotionPreference);
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
+
+  useEffect(() => {

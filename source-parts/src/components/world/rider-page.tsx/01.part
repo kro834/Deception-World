@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { dossierImage } from "@/lib/dossier-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
@@ -333,4 +334,3 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "月城 悠真",
-      kicker: "BEFORE TRANSFORMATION / CAST",
