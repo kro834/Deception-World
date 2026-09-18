@@ -136,6 +136,10 @@
   line-height: 1.55 !important;
 }
 
+[id$="saga-form-compare-ios"] .compare-form-card .detail-lead {
+  min-height: var(--compare-lead-height, auto) !important;
+}
+
 [id$="saga-form-compare-ios"] .compare-form-card .viz-badge {
   padding: 0.3rem 0.42rem !important;
   border: 1px solid rgb(var(--side-rgb) / 24%);
@@ -370,12 +374,12 @@
 
   [id$="saga-form-compare-ios"] .compare-side legend {
     padding-inline: 0.18rem !important;
-    font-size: 0.54rem !important;
+    font-size: max(11px, 0.6875rem) !important;
   }
 
   [id$="saga-form-compare-ios"] .compare-side legend b {
     margin-left: 0.22rem !important;
-    font-size: 0.65rem !important;
+    font-size: max(11px, 0.6875rem) !important;
   }
 
   [id$="saga-form-compare-ios"] .compare-native-select {
@@ -401,7 +405,7 @@
 
   [id$="saga-form-compare-ios"] .compare-form-card .viz-badge {
     justify-self: start;
-    font-size: 0.56rem !important;
+    font-size: max(11px, 0.6875rem) !important;
   }
 
   [id$="saga-form-compare-ios"] .compare-form-card .form-art {
@@ -415,12 +419,12 @@
   }
 
   [id$="saga-form-compare-ios"] .compare-form-card .spec-item {
-    min-height: 5.05rem !important;
+    min-height: var(--compare-row-height, 5.05rem) !important;
     padding: 0.58rem 0.55rem !important;
   }
 
   [id$="saga-form-compare-ios"] .compare-form-card .spec-item .text-muted {
-    font-size: max(10px, 0.625rem) !important;
+    font-size: max(11px, 0.6875rem) !important;
     letter-spacing: 0.045em !important;
   }
 
@@ -432,7 +436,7 @@
   [id$="saga-form-compare-ios"] .spec-compare-badge {
     min-width: 2.45rem;
     padding-inline: 0.28rem;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   [id$="saga-form-compare-ios"] .compare-advantage-summary {
@@ -512,7 +516,7 @@
 
   [id$="saga-form-compare-ios"] .compare-form-card .spec-item {
     grid-template-columns: minmax(0, 1fr) !important;
-    min-height: 5rem !important;
+    min-height: var(--compare-row-height, 5rem) !important;
     padding: 0.5rem 0.48rem !important;
   }
 
@@ -531,12 +535,12 @@
   }
 
   [id$="saga-form-compare-ios"] .compare-advantage-summary span {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 0.07em;
   }
 
   [id$="saga-form-compare-ios"] .compare-advantage-summary small {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 0.03em;
   }
 }

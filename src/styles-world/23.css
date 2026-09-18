@@ -291,6 +291,10 @@
 .site-announcement-list-visual {
   position: relative;
   display: block;
+  box-sizing: border-box;
+  align-self: center;
+  width: 100%;
+  min-width: 0;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border: 1px solid rgba(168, 211, 255, 0.18);
@@ -331,26 +335,28 @@
 .site-announcement-list-copy small,
 .site-announcement-list-copy time,
 .site-announcement-list-copy i {
-  color: rgba(132, 205, 255, 0.66);
+  color: rgba(171, 218, 247, 0.82);
   font-family: var(--font-display);
-  font-size: 7px;
+  font-size: 11px;
   font-style: normal;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
 }
 
 .site-announcement-list-copy time {
-  color: rgba(222, 238, 248, 0.44);
+  color: rgba(222, 238, 248, 0.78);
 }
 
 .site-announcement-list-copy b {
-  overflow: hidden;
+  overflow: visible;
   font-family: var(--font-display);
-  font-size: clamp(26px, 4.4vw, 50px);
+  font-size: clamp(16px, 1.7vw, 22px);
   font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .site-announcement-list-arrow {
@@ -654,13 +660,21 @@
   }
 }
 
-@media (min-width: 900px) {
+/* Two-column cards retain the same fully readable, multi-line title treatment
+   as their one-column counterparts. */
+@media (min-width: 1180px) {
   .site-announcement-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .site-announcement-list:has(> :only-child) {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-announcement-list-item {
+    height: 100%;
+    grid-template-columns: 88px minmax(0, 1fr) 44px;
+    gap: 12px;
   }
 }
 
@@ -726,7 +740,7 @@
   }
 
   .site-announcement-list-copy b {
-    font-size: clamp(23px, 8vw, 34px);
+    font-size: clamp(18px, 5.5vw, 22px);
   }
 
   .site-announcement-list-copy i {
@@ -803,11 +817,11 @@
   }
 
   .site-announcement-list-copy time {
-    display: none;
+    flex-basis: 100%;
   }
 
   .site-announcement-list-copy b {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .site-announcement-list-arrow {

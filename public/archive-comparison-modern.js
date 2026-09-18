@@ -119,6 +119,7 @@
   const alignSpecRows = (cardA, cardB) => {
     [cardA, cardB].forEach((card) => {
       card.style.removeProperty("--compare-head-height");
+      card.style.removeProperty("--compare-lead-height");
       card.querySelectorAll(".compare-spec-placeholder").forEach((item) => item.remove());
       card.querySelectorAll(".spec-item").forEach((item) => {
         item.style.removeProperty("order");
@@ -176,6 +177,20 @@
       cardA.style.setProperty("--compare-head-height", `${height}px`);
       cardB.style.setProperty("--compare-head-height", `${height}px`);
     }
+    const leadA = cardA.querySelector(".detail-lead");
+    const leadB = cardB.querySelector(".detail-lead");
+    if (leadA instanceof HTMLElement && leadB instanceof HTMLElement) {
+      const height = Math.ceil(
+        Math.max(
+          leadA.scrollHeight,
+          leadA.getBoundingClientRect().height,
+          leadB.scrollHeight,
+          leadB.getBoundingClientRect().height,
+        ),
+      );
+      cardA.style.setProperty("--compare-lead-height", `${height}px`);
+      cardB.style.setProperty("--compare-lead-height", `${height}px`);
+    }
     return labels.length;
   };
 
@@ -186,6 +201,7 @@
       item.removeAttribute("title");
     });
     root.querySelectorAll(".spec-compare-badge").forEach((badge) => badge.remove());
+    root.querySelectorAll(".compare-result-a11y").forEach((note) => note.remove());
   };
 
   const decorate = (row, result, label) => {
@@ -198,6 +214,10 @@
     const badgeText = { lead: "優位", trail: "相手優位", tie: "同値" }[result];
     row.item.dataset.compareNote = messages[result];
     row.item.title = messages[result];
+    const accessibleNote = document.createElement("span");
+    accessibleNote.className = "sr-only compare-result-a11y";
+    accessibleNote.textContent = `${messages[result]}。値 ${row.value}`;
+    row.item.appendChild(accessibleNote);
     const badge = document.createElement("span");
     badge.className = "spec-compare-badge";
     badge.setAttribute("aria-hidden", "true");
@@ -243,7 +263,9 @@
     if (!(cardA instanceof HTMLElement) || !(cardB instanceof HTMLElement)) return;
 
     clearResults(root);
-    const alignedRows = alignSpecRows(cardA, cardB);
+    [cardA, cardB].forEach((card) => {
+      card.querySelectorAll(".compare-spec-placeholder").forEach((item) => item.remove());
+    });
     const rowsA = rowsByLabel(cardA);
     const rowsB = rowsByLabel(cardB);
     let leadsA = 0;
@@ -269,6 +291,7 @@
         decorate(rowB, "tie", label);
       }
     });
+    const alignedRows = alignSpecRows(cardA, cardB);
 
     const sameForm = cardA.dataset.formId === cardB.dataset.formId;
     updateSummary(sideA, leadsA, comparable, sameForm);

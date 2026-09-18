@@ -260,6 +260,19 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.ok(statSync(p14Asset).size < 400_000, "P14 artwork should stay below 400 KB");
 });
 
+test("narrow comparison rows keep a stable layout and readable native selection", () => {
+  assert.match(styles, /\.rxs-page \.rxs-comparison-result \{\s*margin-inline-start: auto;/);
+  assert.match(
+    styles,
+    /@media \(max-width: 360px\) \{\s*\.rxs-page \.rxs-comparison article header \{\s*display: grid;\s*grid-template-columns: minmax\(0, 1fr\);/,
+  );
+  assert.match(styles, /\.rxs-page \.rxs-comparison-result \{\s*width: 100%;/);
+  assert.match(
+    styles,
+    /\.rxs-page \.rxs-comparison-selector select \{\s*box-sizing: border-box;\s*min-width: 0;\s*padding-inline: 12px;/,
+  );
+});
+
 test("P14 controls and metadata retain readable text at narrow widths", () => {
   assert.match(
     styles,

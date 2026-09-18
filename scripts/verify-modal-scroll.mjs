@@ -74,6 +74,14 @@ async function checkSidePanel(page, viewport) {
   await page.locator(".side-panel-trigger").click();
   const panel = page.locator(".side-panel[data-open='true']");
   await panel.waitFor({ state: "visible" });
+  // Visibility changes before the drawer slides into the viewport. CDP touch
+  // coordinates must be measured after that finite entrance transition ends.
+  await panel.evaluate(async (element) => {
+    const transitions = element
+      .getAnimations()
+      .filter((animation) => animation.effect?.getTiming().iterations !== Infinity);
+    await Promise.all(transitions.map((animation) => animation.finished.catch(() => {})));
+  });
   const panelMetrics = await panel.evaluate((element) => ({
     scrollHeight: element.scrollHeight,
     clientHeight: element.clientHeight,

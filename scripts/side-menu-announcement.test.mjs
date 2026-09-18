@@ -155,6 +155,31 @@ test("announcement glass is safe-area aware, internally scrollable, and responsi
     /\.site-announcement-hub \{[\s\S]*?grid-template-rows: auto minmax\(0, 1fr\)/,
   );
   assert.match(styles, /linear-gradient\(rgba\(116, 184, 255, 0\.025\) 1px/);
+  assert.match(
+    styles,
+    /@media \(min-width: 1180px\)[\s\S]*?\.site-announcement-list \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/,
+  );
+  assert.match(
+    styles,
+    /@media \(min-width: 1180px\)[\s\S]*?\.site-announcement-list-item \{\s*height: 100%;\s*grid-template-columns: 88px minmax\(0, 1fr\) 44px;\s*gap: 12px;/,
+  );
+  assert.match(
+    styles,
+    /\.site-announcement-list-copy small,[\s\S]*?\.site-announcement-list-copy time,[\s\S]*?font-size: 11px;[\s\S]*?line-height: 1\.45;/,
+  );
+  assert.match(
+    styles,
+    /\.site-announcement-list-copy b \{[\s\S]*?font-size: clamp\(16px, 1\.7vw, 22px\);[\s\S]*?line-height: 1\.5;[\s\S]*?overflow-wrap: anywhere;[\s\S]*?text-overflow: clip;[\s\S]*?white-space: normal;/,
+  );
+  assert.match(
+    styles,
+    /@media \(max-width: 360px\)[\s\S]*?\.site-announcement-list-copy time \{[\s\S]*?flex-basis: 100%;/,
+  );
+  assert.doesNotMatch(styles, /\.site-announcement-list-copy time \{\s*display: none;/);
+  assert.match(
+    styles,
+    /\.site-announcement-list-visual \{[^}]*align-self: center;[^}]*width: 100%;[^}]*min-width: 0;/,
+  );
   assert.match(styles, /@media \(max-width: 700px\)/);
   assert.match(styles, /\.site-announcement-hub \{[\s\S]*?width: 100%;[\s\S]*?height: 100%/);
   assert.match(styles, /@media \(orientation: landscape\) and \(max-height: 600px\)/);

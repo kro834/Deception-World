@@ -2187,6 +2187,32 @@
   max-width: 26ch;
 }
 
+.rxs-page .rxs-comparison-result {
+  margin-inline-start: auto;
+}
+
+/* Keep the reading order consistent when a phone cannot fit both columns. */
+@media (max-width: 360px) {
+  .rxs-page .rxs-comparison article header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page .rxs-comparison-result {
+    width: 100%;
+  }
+
+  .rxs-page .rxs-comparison-selector {
+    padding: 12px;
+  }
+
+  .rxs-page .rxs-comparison-selector select {
+    box-sizing: border-box;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+}
+
 .rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
   white-space: normal;
 }
