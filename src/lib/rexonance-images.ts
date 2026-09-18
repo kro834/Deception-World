@@ -6,14 +6,18 @@ const widths: Record<string, number> = {
   "/rexonance-p14-core.jpg": 1000,
 };
 
-export function rexonanceImage(source: string) {
+export function rexonanceImage(source: string, lazyLayout = false) {
   const width = widths[source];
   if (!width) return {};
   const stem = source.replace(/\.[^.]+$/, "");
   return {
     srcSet: [640, 960, width].map((size) => `${stem}-delivery-${size}.webp ${size}w`).join(", "),
-    sizes: source.includes("p14")
-      ? "(max-width: 767px) 100vw, 40vw"
-      : "(max-width: 767px) 100vw, 64vw",
+    // Only an in-document lazy image has a layout width for `auto`. Keep
+    // preload and stage warmup candidates identical to their eager images.
+    sizes:
+      (lazyLayout ? "auto, " : "") +
+      (source.includes("p14")
+        ? "(max-width: 767px) 100vw, 40vw"
+        : "(max-width: 767px) 100vw, 64vw"),
   };
 }

@@ -1,12 +1,28 @@
-/** iPad desktop mode hides its OS version, but exposes Safari's major version.
+/** Safari 26+ freezes the OS token to 18.x. Prefer its browser version on
+ * Apple touch devices; never classify a desktop Mac as an iPad by UA alone.
  * @param {{userAgent?: string, maxTouchPoints?: number}} device
  */
-export function prefersIOS18Rendering(device) {
+function appleRenderingMajor(device) {
   const ua = device.userAgent || "";
-  if (/iPhone|iPad|iPod/.test(ua)) return /OS 18(?:[_\s;]|$)/.test(ua);
-  return (
-    /Macintosh/.test(ua) && (device.maxTouchPoints || 0) > 1 && /Version\/18(?:\.|\s)/.test(ua)
-  );
+  const mobile = /iPhone|iPad|iPod/.test(ua);
+  if (!mobile && !(/Macintosh/.test(ua) && (device.maxTouchPoints || 0) > 1)) return undefined;
+  const safari = ua.match(/Version\/(\d+)(?:\.|\s|$)/);
+  if (safari) return Number(safari[1]);
+  // Other iOS browsers may report the real OS, without Safari's Version token.
+  const os = mobile ? ua.match(/OS (\d+)(?:_|\s|;|$)/) : null;
+  return os ? Number(os[1]) : undefined;
+}
+
+/** @param {{userAgent?: string, maxTouchPoints?: number}} device */
+export function prefersIOS18Rendering(device) {
+  return appleRenderingMajor(device) === 18;
+}
+
+/** Opt in only known iOS/iPadOS 27 clients; capabilities are checked separately.
+ * @param {{userAgent?: string, maxTouchPoints?: number}} device
+ */
+export function supportsIOS27Enhancements(device) {
+  return appleRenderingMajor(device) === 27;
 }
 
 /**

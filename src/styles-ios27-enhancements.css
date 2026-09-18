@@ -1,0 +1,69 @@
+/* iOS/iPadOS 27 progressive motion. The dataset is installed only after the
+   platform, accessibility preferences and native timeline support are checked. */
+@supports (animation-timeline: view(block)) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-ios27-enhanced="true"] .rxs-page[data-motion-ready="true"] .rxs-hero {
+      view-timeline-name: --rxs-ios27-hero;
+      view-timeline-axis: block;
+    }
+
+    /* `transform` composes with the hero artwork's existing independent
+       `translate` and `scale`, preserving its authored face framing. */
+    html[data-ios27-enhanced="true"] .rxs-page[data-motion-ready="true"] .rxs-hero-visual {
+      animation-name: rxs-ios27-hero-depth;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rxs-ios27-hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* Limit native entry choreography to headings. Interactive comparison,
+       selector, stage and metric surfaces keep their established one-shot motion. */
+    html[data-ios27-enhanced="true"]
+      .rxs-page[data-motion-ready="true"]
+      .rxs-section-heading.rxs-reveal {
+      translate: 0 0;
+      transition: none;
+      animation-name: rxs-ios27-heading-entry;
+      animation-duration: auto;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      animation-fill-mode: both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes rxs-ios27-hero-depth {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(0, 20px, 0) scale(1.015);
+  }
+}
+
+@keyframes rxs-ios27-heading-entry {
+  from {
+    opacity: 0.82;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  html[data-ios27-enhanced="true"] .rxs-page .rxs-hero-visual,
+  html[data-ios27-enhanced="true"] .rxs-page .rxs-section-heading.rxs-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none !important;
+    transition: none !important;
+  }
+  html[data-ios27-enhanced="true"] .rxs-page .rxs-section-heading.rxs-reveal {
+    translate: 0 0;
+  }
+}

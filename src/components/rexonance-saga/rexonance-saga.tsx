@@ -6,6 +6,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
 type RexonanceStage = "standard" | "max" | "ultra";
@@ -461,15 +462,36 @@ export function RexonanceSaga() {
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") onScroll();
     };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.visualViewport?.addEventListener("resize", onScroll, { passive: true });
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
+    let listening = false;
+    const detach = () => {
       window.removeEventListener("scroll", onScroll);
       window.visualViewport?.removeEventListener("resize", onScroll);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      listening = false;
+    };
+    const syncNativeMotion = () => {
+      if (document.documentElement.dataset.ios27Enhanced === "true") {
+        detach();
+        page.style.removeProperty("--rxs-hero-progress");
+        lastProgress = -1;
+      } else if (!listening) {
+        listening = true;
+        update();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.visualViewport?.addEventListener("resize", onScroll, { passive: true });
+        document.addEventListener("visibilitychange", onVisibilityChange);
+      }
+    };
+    // A trackpad iPad can have a fine pointer. Follow the installed capability
+    // mode, not just its UA, so unsupported timelines retain the old fallback.
+    const observer = supportsIOS27Enhancements(navigator) ? new MutationObserver(syncNativeMotion) : null;
+    observer?.observe(document.documentElement, { attributes: true, attributeFilter: ["data-ios27-enhanced"] });
+    syncNativeMotion();
+    return () => {
+      observer?.disconnect();
+      detach();
     };
   }, [motionReady]);
 
@@ -697,7 +719,7 @@ export function RexonanceSaga() {
           <figure>
             <img
               src="/rexonance-p14-core.jpg"
-              {...rexonanceImage("/rexonance-p14-core.jpg")}
+              {...rexonanceImage("/rexonance-p14-core.jpg", true)}
               alt="青い回路に接続されたP14演算コア"
               width="1000"
               height="1000"

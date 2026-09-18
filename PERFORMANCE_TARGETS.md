@@ -35,6 +35,24 @@
 
 ## 検証と未確認
 
+### iOS / iPadOS 27の段階的な機能拡張（2026-09-18）
+
+対応するAppleタッチ端末で、CSSのスクロールタイムラインと範囲指定を機能検出して追加演出を有効にする。スクロール進捗バーをブラウザー側で処理し、スクロールごとのJavaScript進捗値更新を省く。レクソナンスでは、ヒーロー退出時に最大20px・1.015倍の奥行き演出、各章見出しにスクロール連動の入場演出を追加。文字の不透明度は最低0.82を保ち、transform/opacity以外は動かさない。iPadでマウスを接続しても旧JavaScript視差と二重駆動しないよう、CSS拡張が実際に有効な間だけ旧処理を停止する。機能未対応などでCSS拡張が無効なら既存のfine-pointer用JSへ戻し、監視は離脱時に解除する。
+
+動きを減らす・透明度を下げる設定では追加演出を無効化し、低メモリ・省データ等の既存軽量条件を優先する。設定の動的切り替えとページ離脱時の解除を行う。iOS18互換表示、iOS26、Android、機能未対応環境は既存経路を維持。OS表記を18.xへ固定するSafari26以降を誤判定しないよう、Appleタッチ端末のSafari VersionトークンをOSトークンより優先する。Safariバージョンが無いiOSブラウザーは報告されるOSを参考にするが、追加機能は必ず個別検出する。機種・SoCを指紋採取して識別しない。
+
+Safari27が対応する画像の `sizes="auto"` は、実DOMでlazy読み込みするP14画像のみに使用し、旧ブラウザー用の明示サイズを後続に残す。ヒーローのpreloadと形態画像のwarmupは従来の明示サイズで統一し、二重取得を避ける。既存のiOS標準セレクターとタッチ判定は変更しない。
+
+一次資料:
+
+- Safari27のlazy画像auto sizes: https://webkit.org/blog/18325/webkit-features-for-safari-27-0/
+- スクロール連動描画の合成スレッド処理（26.4以降）: https://webkit.org/blog/17862/webkit-features-for-safari-26-4/
+- Safari26以降のOSトークン固定: https://webkit.org/blog/17333/webkit-features-in-safari-26-0/
+
+337テスト・型チェック・ビルド成功、lintは既存警告11件のみ。`scripts/verify-ios27-enhancements.mjs` はChrome/WebKitそれぞれでiPhone27（固定OS表記）、マウス接続・デスクトップ表示iPad27、iPhone18/26、機能未対応、省データを検証する。新経路では進捗CSS変数へのスクロール時書き込み0回、P14画像要求1件、ライブの動きを減らす設定と復帰を確認。`scripts/verify-android-progress.mjs` は既存Android・iPhone26に加えてiPhone27の進捗位置を検証する。`PW_IOS27=1 PW_ENGINE=webkit scripts/verify-rexonance-motion.mjs` 相当のNode実行で3形態切り替え、画像先読み、はみ出し・実行時エラーなしも確認する（ブラウザー配置設定は既述）。
+
+ブラウザーへUA・タッチ特性を設定して該当経路を通す検証であり、iOS27実機やA20 Pro/M4/M5の持続性能測定ではない。120fpsや電力削減率は保証しない。
+
 ### iOS / iPadOS 18.7.7互換描画
 
 iOS 18系の人物・トップ・特設ページでは装飾だけを軽量CSS描画にする。液体レンズのWebGL初期化・背景テクスチャ作成とポインター追従光を省き、固定ヘッダー・メニュー・ガラスボタンのbackdrop-filterを不透明寄りの背景色へ置き換える。大きな装飾のぼかしも省く。タッチ判定、長押し拡大、切り替え時間、スクロールロックの仕様は変更しない。先に追加したWebP配信も引き続き使用する。

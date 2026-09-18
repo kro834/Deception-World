@@ -3,13 +3,12 @@ import { chromium } from "playwright";
 
 const browser = await chromium.launch({ channel: "chrome" });
 try {
-  for (const mode of ["android", "unsupported", "iphone"]) {
+  for (const mode of ["android", "unsupported", "iphone", "iphone27"]) {
     const page = await browser.newPage({
       viewport: { width: 412, height: 915 },
-      userAgent:
-        mode === "iphone"
-          ? "Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1"
-          : "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/140.0.0.0 Mobile Safari/537.36",
+      userAgent: mode.startsWith("iphone")
+        ? `Mozilla/5.0 (iPhone; CPU iPhone OS ${mode === "iphone27" ? 27 : 26}_0 like Mac OS X) AppleWebKit/605.1.15 Version/${mode === "iphone27" ? 27 : 26}.0 Mobile/15E148 Safari/604.1`
+        : "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/140.0.0.0 Mobile Safari/537.36",
       hasTouch: true,
       isMobile: true,
     });
@@ -51,8 +50,8 @@ try {
       ).a,
     }));
     assert.ok(result.ratio > 0.1, "Scroll must move the page");
-    assert.equal(result.native, mode === "android");
-    if (mode === "android") {
+    assert.equal(result.native, mode === "android" || mode === "iphone27");
+    if (mode === "android" || mode === "iphone27") {
       assert.equal(result.writes, 0);
       assert.ok(Math.abs(result.scale - result.ratio) < 0.025, JSON.stringify(result));
       await page.emulateMedia({ reducedMotion: "reduce" });

@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useLiquidPointerLight } from "./use-liquid-pointer-light";
-import { prefersLightweightRendering, prefersIOS18Rendering } from "@/lib/rendering-profile";
+import {
+  prefersLightweightRendering,
+  prefersIOS18Rendering,
+  supportsIOS27Enhancements,
+} from "@/lib/rendering-profile";
 
 export function useWorldMode() {
   useLiquidPointerLight();
@@ -9,6 +13,7 @@ export function useWorldMode() {
     const prev = html.dataset.mode;
     const previousAndroid = html.dataset.androidRenderer;
     const previousIOS18 = html.dataset.ios18Renderer;
+    const previousIOS27 = html.dataset.ios27Enhanced;
     const previousOneUi = html.dataset.oneUiRenderer;
     const previousEffects = html.dataset.worldEffects;
     const previousVisibility = html.dataset.worldPageVisible;
@@ -34,8 +39,14 @@ export function useWorldMode() {
 
     let progressFrame = 0;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
+    const enhancedIOS27 =
+      supportsIOS27Enhancements(navigator) &&
+      !economyEffects &&
+      window.CSS?.supports("animation-timeline", "view()") === true &&
+      window.CSS?.supports("animation-range", "entry 0% entry 100%") === true;
     const supportsNativeProgress =
-      /Android/i.test(userAgent) &&
+      (/Android/i.test(userAgent) || enhancedIOS27) &&
       window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
     let nativeProgress = supportsNativeProgress && !reducedMotion.matches;
     let lastScrolled: boolean | undefined;
@@ -67,6 +78,9 @@ export function useWorldMode() {
     };
     const syncProgressMode = () => {
       if (progressFrame) window.cancelAnimationFrame(progressFrame);
+      if (enhancedIOS27 && !reducedMotion.matches && !reducedTransparency.matches)
+        html.dataset.ios27Enhanced = "true";
+      else delete html.dataset.ios27Enhanced;
       nativeProgress = supportsNativeProgress && !reducedMotion.matches;
       if (nativeProgress) html.dataset.nativeScrollProgress = "true";
       else delete html.dataset.nativeScrollProgress;
@@ -74,6 +88,7 @@ export function useWorldMode() {
     };
     syncProgressMode();
     reducedMotion.addEventListener("change", syncProgressMode);
+    reducedTransparency.addEventListener("change", syncProgressMode);
     window.addEventListener("scroll", requestProgressSync, { passive: true });
     window.addEventListener("resize", requestProgressSync, { passive: true });
     window.visualViewport?.addEventListener("resize", requestProgressSync, { passive: true });
@@ -84,6 +99,7 @@ export function useWorldMode() {
       window.visualViewport?.removeEventListener("resize", requestProgressSync);
       if (progressFrame) window.cancelAnimationFrame(progressFrame);
       reducedMotion.removeEventListener("change", syncProgressMode);
+      reducedTransparency.removeEventListener("change", syncProgressMode);
       if (previousNativeProgress) html.dataset.nativeScrollProgress = previousNativeProgress;
       else delete html.dataset.nativeScrollProgress;
       if (prev) html.dataset.mode = prev;
@@ -92,6 +108,8 @@ export function useWorldMode() {
       else delete html.dataset.androidRenderer;
       if (previousIOS18) html.dataset.ios18Renderer = previousIOS18;
       else delete html.dataset.ios18Renderer;
+      if (previousIOS27) html.dataset.ios27Enhanced = previousIOS27;
+      else delete html.dataset.ios27Enhanced;
       if (previousOneUi) html.dataset.oneUiRenderer = previousOneUi;
       else delete html.dataset.oneUiRenderer;
       if (previousEffects) html.dataset.worldEffects = previousEffects;

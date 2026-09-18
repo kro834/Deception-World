@@ -14,6 +14,12 @@ try {
       viewport: { width, height },
       isMobile: engine === "chromium",
       hasTouch: true,
+      ...(process.env.PW_IOS27
+        ? {
+            userAgent:
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/27.0 Mobile/15E148 Safari/604.1",
+          }
+        : {}),
       deviceScaleFactor: width < 768 ? 3 : 2,
     });
     const page = await context.newPage();
@@ -21,6 +27,11 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${process.env.BASE_URL || "http://127.0.0.1:8082"}/rexonance-saga`);
     await page.locator('main[data-motion-ready="true"]').waitFor();
+    if (process.env.PW_IOS27)
+      assert.equal(
+        await page.evaluate(() => document.documentElement.dataset.ios27Enhanced),
+        "true",
+      );
     assert.equal(await page.locator(".rxs-resonance-field i").count(), 3);
     await page.waitForTimeout(1800);
     const delivery = await page.locator(".rxs-hero-visual img").evaluate((img) => ({

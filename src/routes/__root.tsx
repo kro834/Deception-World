@@ -7,6 +7,7 @@ import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
+import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
 import pickupStabilityCss from "../styles-pickup-stability.css?url";
 import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
@@ -51,6 +52,7 @@ export const Route = createRootRoute({
       { rel: "preload", as: "image", type: "image/webp", href: "/zeus-button-360.webp" },
       { rel: "stylesheet", href: androidPerformanceCss },
       { rel: "stylesheet", href: ios18PerformanceCss },
+      { rel: "stylesheet", href: ios27EnhancementsCss },
       { rel: "stylesheet", href: pickupStabilityCss },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "64x64", href: "/favicon.png" },
