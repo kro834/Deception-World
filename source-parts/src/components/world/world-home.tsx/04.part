@@ -1,8 +1,3 @@
-    episodeScrollTimer.current = window.setTimeout(() => {
-      episodeProgrammatic.current = false;
-      episodeScrollTimer.current = null;
-    }, 520);
-  };
 
   const openEpisodePickup = (
     index: number,
@@ -300,14 +295,21 @@
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-controls">
+          <div
+            className="poster-controls"
+            onFocusCapture={() => setPosterControlsFocused(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+            }}
+          >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
                 type="button"
                 className="poster-shuffle ios26-glass"
                 data-liquid-pointer="true"
-                disabled={shuffling}
+                aria-disabled={shuffling}
                 aria-busy={shuffling}
+                aria-label="ポスターをシャッフル（SHUFFLE POSTER）"
                 onClick={shufflePoster}
               >
                 <LiquidPointerGlow />
@@ -321,6 +323,7 @@
                 className="poster-reset ios26-glass"
                 data-liquid-pointer="true"
                 disabled={poster === 0 || shuffling}
+                aria-label="先頭のポスターへ戻る（RESET）"
                 onClick={() => goPoster(0)}
               >
                 <LiquidPointerGlow />
@@ -394,7 +397,12 @@
                 </b>
               </button>
             </div>
-            <output>
+            <output
+              aria-label="表示中のポスター"
+              aria-live={locked || posterControlsFocused ? "polite" : "off"}
+              aria-atomic="true"
+              aria-busy={shuffling}
+            >
               {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
             </output>
           </div>
@@ -417,8 +425,3 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2 data-film-reveal>
-              <FilmTextScan />
-              救うべき世界は、
-              <br />
-              <em>現実</em>にある。

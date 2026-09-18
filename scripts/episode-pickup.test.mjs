@@ -188,3 +188,15 @@ test("iPhone episode cards remain centered from EP1 through EP5", () => {
     /scroll-padding-inline: max\(1px, calc\(\(100% - var\(--episode-mobile-card-width\)\) \/ 2\)\)/,
   );
 });
+
+test("the narrowest episode pickup trigger retains a 48px touch target", () => {
+  const narrowScreenStyles = mobileStyles.slice(mobileStyles.indexOf("@media (max-width: 360px)"));
+  assert.match(
+    narrowScreenStyles,
+    /\.episode-card\.has-pickup \.episode-card-copy \{[\s\S]*?padding-right: 62px/,
+  );
+  assert.match(
+    narrowScreenStyles,
+    /\.episode-pickup-plus \{[\s\S]*?width: 48px;[\s\S]*?height: 48px/,
+  );
+});

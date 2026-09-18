@@ -8,8 +8,12 @@ try {
     const page = await browser.newPage({ viewport: { width, height: 844 }, hasTouch: true });
     for (const route of ["/world", "/riders/saga", "/rexonance-saga", "/dream-chapter"]) {
       await page.goto(`${process.env.BASE_URL || "http://localhost:8082"}${route}`);
-      await page.locator(".side-panel-trigger").first().click();
-      await page.waitForFunction(() => document.querySelector(".side-panel")?.dataset.open === "true");
+      const trigger = page.locator(".side-panel-trigger").first();
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      await page.waitForFunction(
+        () => document.querySelector(".side-panel")?.dataset.open === "true",
+      );
       const defects = await page.locator(".side-panel").evaluate((panel) => {
         const problems = [];
         const close = panel.querySelector(".side-panel-close").getBoundingClientRect();
@@ -25,9 +29,80 @@ try {
         return problems;
       });
       assert.deepEqual(defects, [], `${route} at ${width}px`);
-      await page.locator(".side-panel-close").click();
-      await page.waitForFunction(() => document.querySelector(".side-panel")?.dataset.open === "false");
-      assert.equal(await page.evaluate(() => document.documentElement.dataset.sideMenuOpen), undefined);
+
+      const panel = page.locator(".side-panel");
+      const close = page.locator(".side-panel-close");
+      await page.waitForFunction(() => {
+        const openPanel = document.querySelector('.side-panel[data-open="true"]');
+        return openPanel?.contains(document.activeElement);
+      });
+      await page.locator("body").evaluate((body) => {
+        const probe = document.createElement("button");
+        probe.id = "navigation-focus-probe";
+        body.append(probe);
+        probe.focus();
+      });
+      assert.equal(
+        await panel.evaluate((node) => node.contains(document.activeElement)),
+        true,
+        `${route} at ${width}px contains stray focus`,
+      );
+
+      await close.focus();
+      await page.keyboard.press("Shift+Tab");
+      assert.equal(
+        await panel
+          .locator("a[href], button:not([disabled])")
+          .last()
+          .evaluate((node) => node === document.activeElement),
+        true,
+        `${route} at ${width}px wraps backward from close`,
+      );
+
+      const notice = page.locator(".side-panel-announcement-trigger");
+      await notice.focus();
+      await page.keyboard.press("Enter");
+      const announcement = page.locator("#site-announcement-dialog");
+      await announcement.waitFor({ state: "visible" });
+      assert.equal(
+        await announcement.evaluate((node) => node.contains(document.activeElement)),
+        true,
+        `${route} at ${width}px allows nested notice focus`,
+      );
+      await page.keyboard.press("Escape");
+      await announcement.waitFor({ state: "hidden" });
+      assert.equal(
+        await notice.evaluate((node) => node === document.activeElement),
+        true,
+        `${route} at ${width}px restores notice focus`,
+      );
+
+      await panel.evaluate((node) => {
+        node.scrollTop = node.scrollHeight;
+      });
+      assert.equal(
+        await close.evaluate((node) => {
+          const box = node.getBoundingClientRect();
+          return box.top >= 0 && box.bottom <= window.innerHeight;
+        }),
+        true,
+        `${route} at ${width}px keeps close visible at panel bottom`,
+      );
+
+      await page.keyboard.press("Escape");
+      await page.waitForFunction(
+        () => document.querySelector(".side-panel")?.dataset.open === "false",
+      );
+      assert.equal(
+        await trigger.evaluate((node) => node === document.activeElement),
+        true,
+        `${route} at ${width}px restores trigger focus on Escape`,
+      );
+      assert.equal(
+        await page.evaluate(() => document.documentElement.dataset.sideMenuOpen),
+        undefined,
+      );
+      await page.locator("#navigation-focus-probe").evaluate((node) => node.remove());
       console.log(`PASS ${width}px ${route}: targets, labels, close and unlock`);
     }
     await page.close();

@@ -1,3 +1,6 @@
+            <div className="rider-copy-block">
+              <p className="rider-person">
+                <NameText value={rider.person} />
               </p>
               <h3 aria-label={`仮面ライダー${rider.ja}`}>
                 <span className="rider-name-line">仮面ライダー</span>

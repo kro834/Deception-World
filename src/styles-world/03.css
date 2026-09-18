@@ -318,6 +318,7 @@
 }
 
 .poster-shuffle:disabled,
+.poster-shuffle[aria-disabled="true"],
 .poster-reset:disabled,
 .poster-lock:disabled {
   border-color: transparent;
@@ -327,6 +328,7 @@
 }
 
 .poster-shuffle:disabled span,
+.poster-shuffle[aria-disabled="true"] span,
 .poster-reset:disabled span,
 .poster-lock:disabled span {
   color: rgba(103, 216, 255, 0.28);

@@ -702,6 +702,7 @@ export function WorldHome() {
   const [poster, setPoster] = useState(0);
   const [prevPoster, setPrevPoster] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
+  const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [shuffling, setShuffling] = useState(false);
   const [ambientPaused, setAmbientPaused] = useState(
     () =>
@@ -882,6 +883,7 @@ export function WorldHome() {
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
+    if (posterControlsFocused) return;
     if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     let cancelled = false;
     let decoding = false;
@@ -908,10 +910,11 @@ export function WorldHome() {
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (posterControlsFocused) return;
     if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
@@ -929,7 +932,7 @@ export function WorldHome() {
       image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -1571,14 +1574,21 @@ export function WorldHome() {
           </div>
           <div className="orbit" aria-hidden="true" />
           <div className="orbit orbit-two" aria-hidden="true" />
-          <div className="poster-controls">
+          <div
+            className="poster-controls"
+            onFocusCapture={() => setPosterControlsFocused(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+            }}
+          >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
               <button
                 type="button"
                 className="poster-shuffle ios26-glass"
                 data-liquid-pointer="true"
-                disabled={shuffling}
+                aria-disabled={shuffling}
                 aria-busy={shuffling}
+                aria-label="ポスターをシャッフル（SHUFFLE POSTER）"
                 onClick={shufflePoster}
               >
                 <LiquidPointerGlow />
@@ -1592,6 +1602,7 @@ export function WorldHome() {
                 className="poster-reset ios26-glass"
                 data-liquid-pointer="true"
                 disabled={poster === 0 || shuffling}
+                aria-label="先頭のポスターへ戻る（RESET）"
                 onClick={() => goPoster(0)}
               >
                 <LiquidPointerGlow />
@@ -1665,7 +1676,12 @@ export function WorldHome() {
                 </b>
               </button>
             </div>
-            <output>
+            <output
+              aria-label="表示中のポスター"
+              aria-live={locked || posterControlsFocused ? "polite" : "off"}
+              aria-atomic="true"
+              aria-busy={shuffling}
+            >
               {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
             </output>
           </div>

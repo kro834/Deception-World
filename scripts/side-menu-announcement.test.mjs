@@ -80,6 +80,21 @@ test("side-menu focus restoration follows the input modality on iPad", () => {
   );
 });
 
+test("the side menu contains stray focus without blocking its nested announcement", () => {
+  assert.match(chrome, /const containBackgroundFocus = \(event: FocusEvent\) => \{/);
+  assert.match(chrome, /panel\.contains\(event\.target\)/);
+  assert.match(
+    chrome,
+    /announcementDialog\?\.open && announcementDialog\.contains\(event\.target\)/,
+  );
+  assert.match(chrome, /document\.addEventListener\("focusin", containBackgroundFocus, true\)/);
+  assert.match(chrome, /document\.removeEventListener\("focusin", containBackgroundFocus, true\)/);
+  assert.match(
+    chrome,
+    /const focusTarget = sideMenuRestoreFocusRef\.current[\s\S]*?side-panel-close[\s\S]*?: panel;[\s\S]*?focusTarget\?\.focus\(\{ preventScroll: true \}\)/,
+  );
+});
+
 test("the nested announcement participates in the shared viewport scroll lock", () => {
   assert.match(chrome, /acquireViewportScrollLock/);
   assert.match(chrome, /const releaseViewportScrollLock = acquireViewportScrollLock\(\)/);

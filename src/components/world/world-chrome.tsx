@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
 import { Link } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
@@ -236,6 +243,15 @@ export function SideMenuLayer({
       if (announcementDialog?.open && announcementDialog.contains(event.target)) return;
       event.preventDefault();
     };
+    const containBackgroundFocus = (event: FocusEvent) => {
+      if (!(event.target instanceof Node) || panel.contains(event.target)) return;
+      const announcementDialog = announcementRef.current;
+      if (announcementDialog?.open && announcementDialog.contains(event.target)) return;
+      const focusTarget = sideMenuRestoreFocusRef.current
+        ? panel.querySelector<HTMLElement>(".side-panel-close")
+        : panel;
+      focusTarget?.focus({ preventScroll: true });
+    };
     document.addEventListener("touchmove", containBackgroundScroll, {
       capture: true,
       passive: false,
@@ -244,6 +260,7 @@ export function SideMenuLayer({
       capture: true,
       passive: false,
     });
+    document.addEventListener("focusin", containBackgroundFocus, true);
     let focusFrame = 0;
     const focusPanel = () => {
       // The opening CSS visibility transition can still be hidden on the
@@ -262,6 +279,7 @@ export function SideMenuLayer({
       window.cancelAnimationFrame(focusFrame);
       document.removeEventListener("touchmove", containBackgroundScroll, true);
       document.removeEventListener("wheel", containBackgroundScroll, true);
+      document.removeEventListener("focusin", containBackgroundFocus, true);
       releaseViewportScrollLock();
       delete root.dataset.sideMenuOpen;
       if (sideMenuRestoreFocusRef.current) {
@@ -380,10 +398,7 @@ export function SideMenuLayer({
     setSelectedAnnouncementId(null);
   };
 
-  const openAnnouncementDetail = (
-    event: MouseEvent<HTMLButtonElement>,
-    id: AnnouncementId,
-  ) => {
+  const openAnnouncementDetail = (event: MouseEvent<HTMLButtonElement>, id: AnnouncementId) => {
     const openedByKeyboard = event.detail === 0;
     announcementTransitionKeyboardRef.current = openedByKeyboard;
     announcementReturnIdRef.current = id;
@@ -429,7 +444,9 @@ export function SideMenuLayer({
     const last = focusable.at(-1)!;
     if (
       event.shiftKey &&
-      (document.activeElement === panel || document.activeElement === first || !panel.contains(document.activeElement))
+      (document.activeElement === panel ||
+        document.activeElement === first ||
+        !panel.contains(document.activeElement))
     ) {
       event.preventDefault();
       last.focus({ preventScroll: true });

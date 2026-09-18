@@ -1,8 +1,3 @@
-    clearRiderReturn();
-  }, []);
-
-  const selectRider = useCallback((next: number) => {
-    const current = riderTabRef.current;
     if (current === next) return;
     if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
     setPreviousRiderTab(current);
@@ -35,6 +30,7 @@
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
+    if (posterControlsFocused) return;
     if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     let cancelled = false;
     let decoding = false;
@@ -61,10 +57,11 @@
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
+  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
+    if (posterControlsFocused) return;
     if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
     const connection = (
       navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
@@ -82,7 +79,7 @@
       image.src = POSTERS[(poster + 1) % POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling]);
+  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -422,3 +419,8 @@
     episodeProgrammatic.current = true;
     scrollAxisX(episodeGridRef.current, card ?? null);
     if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
+      episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
+    }, 520);
+  };
