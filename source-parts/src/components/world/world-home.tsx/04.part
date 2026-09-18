@@ -1,3 +1,13 @@
+
+  const goEpisode = (index: number) => {
+    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
+    setEpisode(next);
+    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
+    episodeProgrammatic.current = true;
+    scrollAxisX(episodeGridRef.current, card ?? null);
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
+      episodeProgrammatic.current = false;
       episodeScrollTimer.current = null;
     }, 520);
   };
@@ -184,14 +194,21 @@
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
           </p>
-          <span className="film-edition-mark" aria-hidden="true">02</span>
+          <span className="film-edition-mark" aria-hidden="true">
+            02
+          </span>
         </div>
         <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+          <h1
+            ref={openingFocusRef}
+            tabIndex={-1}
+            data-opening-handoff-focus-target
+            data-film-reveal
+          >
             <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
@@ -232,7 +249,9 @@
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className="film-visual-caption" aria-hidden="true">
             <span>KEY VISUAL</span>
-            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+            <span>
+              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+            </span>
           </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
@@ -302,7 +321,7 @@
             className="poster-controls"
             onFocusCapture={() => setPosterControlsFocused(true)}
             onBlurCapture={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+                if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
             }}
           >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
@@ -401,28 +420,3 @@
               </button>
             </div>
             <output
-              aria-label="表示中のポスター"
-              aria-live={locked || posterControlsFocused ? "polite" : "off"}
-              aria-atomic="true"
-              aria-busy={shuffling}
-            >
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </output>
-          </div>
-        </div>
-        <a className="scroll-cue" href="#story">
-          <span>SCROLL TO DESCEND</span>
-          <i />
-        </a>
-      </section>
-
-      <section className="story-section" id="story">
-        <div className="section-index" data-film-reveal>
-          <span>01</span>
-          <small>WORLD / STORY</small>
-          <i className="film-boundary-line" aria-hidden="true" />
-        </div>
-        <div className="story-layout">
-          <div className="story-heading">
-            <p className="eyebrow">
-              <span>THIS IS NOT A DREAM</span>

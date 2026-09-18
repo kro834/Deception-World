@@ -1,3 +1,18 @@
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
+  }, []);
+
+  useEffect(() => {
     clearRiderReturn();
   }, []);
 
@@ -292,8 +307,6 @@
       shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
-      if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
-      if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
       if (episodePointerFocusTimer.current != null) {
@@ -407,22 +420,3 @@
       shuffleTimers.current.push(timer);
     });
   };
-
-  const closeDante = () => {
-    if (danteCloseTimer.current != null) {
-      window.clearTimeout(danteCloseTimer.current);
-      danteCloseTimer.current = null;
-    }
-    const dlg = danteDialogRef.current;
-    if (dlg?.open) dlg.close();
-  };
-
-  const goEpisode = (index: number) => {
-    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
-    setEpisode(next);
-    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
-    episodeProgrammatic.current = true;
-    scrollAxisX(episodeGridRef.current, card ?? null);
-    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-    episodeScrollTimer.current = window.setTimeout(() => {
-      episodeProgrammatic.current = false;

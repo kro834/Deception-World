@@ -1,3 +1,28 @@
+              aria-label="表示中のポスター"
+              aria-live={locked || posterControlsFocused ? "polite" : "off"}
+              aria-atomic="true"
+              aria-busy={shuffling}
+            >
+              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+            </output>
+          </div>
+        </div>
+        <a className="scroll-cue" href="#story">
+          <span>SCROLL TO DESCEND</span>
+          <i />
+        </a>
+      </section>
+
+      <section className="story-section" id="story">
+        <div className="section-index" data-film-reveal>
+          <span>01</span>
+          <small>WORLD / STORY</small>
+          <i className="film-boundary-line" aria-hidden="true" />
+        </div>
+        <div className="story-layout">
+          <div className="story-heading">
+            <p className="eyebrow">
+              <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
             <h2 data-film-reveal>
@@ -22,7 +47,16 @@
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
-          <span id="manager-archive-other" className="manager-archive-return-anchor" aria-hidden="true" />
+          <span
+            id="manager-archive-other"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
+          <span
+            id="manager-archive-unmanaged"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
           <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
@@ -185,46 +219,20 @@
                 role="tabpanel"
                 aria-labelledby="manager-tab-1"
               >
-                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
+                <p className="visually-hidden">管理外。ダンテの人物資料を閲覧できます。</p>
                 <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
-                  <button
+                  <GuardedLink
                     className="dante-archive"
-                    type="button"
-                    aria-label="管理人殺し ダンテへのアクセスを試みる"
-                    onClick={(e) => {
-                      if (danteOpenTimer.current != null) return;
-                      const host = e.currentTarget;
-                      host.classList.add("is-glitching");
-                      danteOpenTimer.current = window.setTimeout(() => {
-                        danteOpenTimer.current = null;
-                        host.classList.remove("is-glitching");
-                        const dlg = danteDialogRef.current;
-                        if (!dlg) return;
-                        if (danteCloseTimer.current != null)
-                          window.clearTimeout(danteCloseTimer.current);
-                        try {
-                          dlg.showModal();
-                        } catch {
-                          /* already open */
-                        }
-                        (document.activeElement as HTMLElement | null)?.blur();
-                        const inner = dlg.querySelector(".dante-denied-inner");
-                        inner?.classList.remove("is-slam");
-                        void (inner as HTMLElement | null)?.offsetWidth;
-                        inner?.classList.add("is-slam");
-                        danteCloseTimer.current = window.setTimeout(() => {
-                          danteCloseTimer.current = null;
-                          if (dlg.open) dlg.close();
-                        }, 2600);
-                      }, 420);
-                    }}
+                    to="/characters/dante"
+                    assets={["/character-dante.webp"]}
+                    aria-label="管理人殺し ダンテの人物資料へ"
                   >
                     <span className="dante-visual">
                       <img
-                        src="/manager-killer-dante.jpeg"
+                        src="/character-dante-thumb.webp"
                         alt="ダンテのキャラクタービジュアル"
-                        width={1416}
-                        height={1756}
+                        width={360}
+                        height={450}
                         loading="lazy"
                         decoding="async"
                       />
@@ -235,7 +243,7 @@
                       <em>管理人殺し</em>
                       <i>ACCESS //</i>
                     </span>
-                  </button>
+                  </GuardedLink>
                   {Array.from({ length: 5 }, (_, index) => (
                     <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
                   ))}
@@ -390,13 +398,16 @@
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
+          <h2 data-film-reveal>
+            <FilmTextScan />
+            八人が、世界へ。
+          </h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
         </div>
         <div className="rider-console">
-                  <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
+          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
             className="rider-detail"
@@ -409,20 +420,3 @@
                 i === riderTab || i === previousRiderTab ? (
                   <img
                     key={r.id}
-                    src={r.img}
-                    srcSet={r.img.replace(/\.jpe?g$/i, ".webp")}
-                    sizes="(max-width: 760px) 92vw, (max-width: 1120px) 48vw, 560px"
-                    alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
-                    className={i === riderTab ? "is-on" : ""}
-                    style={{ objectPosition: r.pos }}
-                    decoding="async"
-                    loading={i === riderTab ? "eager" : "lazy"}
-                    fetchPriority={i === riderTab ? "auto" : "low"}
-                    draggable={false}
-                  />
-                ) : null,
-              )}
-            </div>
-            <div className="rider-monogram" aria-hidden="true">
-              {rider.name.slice(0, 1)}
-            </div>

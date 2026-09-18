@@ -1,3 +1,8 @@
+                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
+                  >
+                    <div>
+                      <img
+                        src={weapon.img}
                         alt={`${weapon.name}の武装ビジュアル`}
                         style={{ objectPosition: weapon.pos ?? "50% 50%" }}
                         decoding="async"
@@ -359,6 +364,3 @@ export const SHUZA: Profile = {
     "感情は変数にすぎない。結果は先に出ている",
     "最速で終わらせる。それが一番の慈悲だ",
   ],
-  facts: [
-    { dt: "NAME", dd: "シュザ" },
-    { dt: "RANK", dd: "六詠・第三位" },

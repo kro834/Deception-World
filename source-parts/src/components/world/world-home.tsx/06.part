@@ -1,3 +1,20 @@
+                    src={r.img}
+                    srcSet={r.img.replace(/\.jpe?g$/i, ".webp")}
+                    sizes="(max-width: 760px) 92vw, (max-width: 1120px) 48vw, 560px"
+                    alt={i === riderTab ? `仮面ライダー${r.ja}のビジュアル` : ""}
+                    className={i === riderTab ? "is-on" : ""}
+                    style={{ objectPosition: r.pos }}
+                    decoding="async"
+                    loading={i === riderTab ? "eager" : "lazy"}
+                    fetchPriority={i === riderTab ? "auto" : "low"}
+                    draggable={false}
+                  />
+                ) : null,
+              )}
+            </div>
+            <div className="rider-monogram" aria-hidden="true">
+              {rider.name.slice(0, 1)}
+            </div>
             <div className="rider-number">RIDER / {rider.no}</div>
             <div className="rider-copy-block">
               <p className="rider-person">
@@ -397,30 +414,6 @@
               </div>
             ))}
           </div>
-        </div>
-      </dialog>
-
-      <dialog
-        ref={danteDialogRef}
-        className="dante-denied-dialog"
-        tabIndex={-1}
-        aria-label="アクセス拒否"
-        onCancel={(e) => {
-          e.preventDefault();
-          closeDante();
-        }}
-        onClick={(e) => {
-          if (e.target === danteDialogRef.current) closeDante();
-        }}
-      >
-        <div className="dante-denied-inner" tabIndex={-1}>
-          <p className="dante-denied-kicker">ACCESS DENIED</p>
-          <div className="dante-no-stack" aria-hidden="true">
-            <strong className="dante-no-ghost">NO</strong>
-            <strong className="dante-no-ghost is-offset">NO</strong>
-          </div>
-          <strong className="dante-no">NO</strong>
-          <p className="dante-denied-note">管理外 ／ 対象外記録</p>
         </div>
       </dialog>
     </main>

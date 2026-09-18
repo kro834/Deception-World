@@ -734,15 +734,12 @@ export function WorldHome() {
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
-  const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
-  const danteOpenTimer = useRef<number | null>(null);
-  const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
@@ -763,6 +760,12 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-other") return;
     setManagerTab(2);
     syncRail(managerRail.current, 2);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
   }, [locationHash]);
 
   useLayoutEffect(() => {
@@ -1148,8 +1151,6 @@ export function WorldHome() {
       shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
-      if (danteOpenTimer.current != null) window.clearTimeout(danteOpenTimer.current);
-      if (danteCloseTimer.current != null) window.clearTimeout(danteCloseTimer.current);
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
       if (episodePointerFocusTimer.current != null) {
@@ -1262,15 +1263,6 @@ export function WorldHome() {
       }, delay);
       shuffleTimers.current.push(timer);
     });
-  };
-
-  const closeDante = () => {
-    if (danteCloseTimer.current != null) {
-      window.clearTimeout(danteCloseTimer.current);
-      danteCloseTimer.current = null;
-    }
-    const dlg = danteDialogRef.current;
-    if (dlg?.open) dlg.close();
   };
 
   const goEpisode = (index: number) => {
@@ -1468,14 +1460,21 @@ export function WorldHome() {
             <span>仮面ライダーサーガ 劇場版第二作</span>
             <b>DECEPTION WORLD</b>
           </p>
-          <span className="film-edition-mark" aria-hidden="true">02</span>
+          <span className="film-edition-mark" aria-hidden="true">
+            02
+          </span>
         </div>
         <div className="hero-copy">
           <p className="eyebrow">
             <span>THE SECOND SAGA</span>
             <i />
           </p>
-          <h1 ref={openingFocusRef} tabIndex={-1} data-opening-handoff-focus-target data-film-reveal>
+          <h1
+            ref={openingFocusRef}
+            tabIndex={-1}
+            data-opening-handoff-focus-target
+            data-film-reveal
+          >
             <FilmTextScan />
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
@@ -1516,7 +1515,9 @@ export function WorldHome() {
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
           <div className="film-visual-caption" aria-hidden="true">
             <span>KEY VISUAL</span>
-            <span>{String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}</span>
+            <span>
+              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+            </span>
           </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
@@ -1586,7 +1587,7 @@ export function WorldHome() {
             className="poster-controls"
             onFocusCapture={() => setPosterControlsFocused(true)}
             onBlurCapture={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+                if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
             }}
           >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
@@ -1734,7 +1735,16 @@ export function WorldHome() {
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
-          <span id="manager-archive-other" className="manager-archive-return-anchor" aria-hidden="true" />
+          <span
+            id="manager-archive-other"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
+          <span
+            id="manager-archive-unmanaged"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
           <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
@@ -1897,46 +1907,20 @@ export function WorldHome() {
                 role="tabpanel"
                 aria-labelledby="manager-tab-1"
               >
-                <p className="visually-hidden">管理外。個体情報へのアクセスは制限されています。</p>
+                <p className="visually-hidden">管理外。ダンテの人物資料を閲覧できます。</p>
                 <div className="manager-slot-grid unmanaged-array" aria-label="管理外">
-                  <button
+                  <GuardedLink
                     className="dante-archive"
-                    type="button"
-                    aria-label="管理人殺し ダンテへのアクセスを試みる"
-                    onClick={(e) => {
-                      if (danteOpenTimer.current != null) return;
-                      const host = e.currentTarget;
-                      host.classList.add("is-glitching");
-                      danteOpenTimer.current = window.setTimeout(() => {
-                        danteOpenTimer.current = null;
-                        host.classList.remove("is-glitching");
-                        const dlg = danteDialogRef.current;
-                        if (!dlg) return;
-                        if (danteCloseTimer.current != null)
-                          window.clearTimeout(danteCloseTimer.current);
-                        try {
-                          dlg.showModal();
-                        } catch {
-                          /* already open */
-                        }
-                        (document.activeElement as HTMLElement | null)?.blur();
-                        const inner = dlg.querySelector(".dante-denied-inner");
-                        inner?.classList.remove("is-slam");
-                        void (inner as HTMLElement | null)?.offsetWidth;
-                        inner?.classList.add("is-slam");
-                        danteCloseTimer.current = window.setTimeout(() => {
-                          danteCloseTimer.current = null;
-                          if (dlg.open) dlg.close();
-                        }, 2600);
-                      }, 420);
-                    }}
+                    to="/characters/dante"
+                    assets={["/character-dante.webp"]}
+                    aria-label="管理人殺し ダンテの人物資料へ"
                   >
                     <span className="dante-visual">
                       <img
-                        src="/manager-killer-dante.jpeg"
+                        src="/character-dante-thumb.webp"
                         alt="ダンテのキャラクタービジュアル"
-                        width={1416}
-                        height={1756}
+                        width={360}
+                        height={450}
                         loading="lazy"
                         decoding="async"
                       />
@@ -1947,7 +1931,7 @@ export function WorldHome() {
                       <em>管理人殺し</em>
                       <i>ACCESS //</i>
                     </span>
-                  </button>
+                  </GuardedLink>
                   {Array.from({ length: 5 }, (_, index) => (
                     <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
                   ))}
@@ -2102,13 +2086,16 @@ export function WorldHome() {
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2 data-film-reveal><FilmTextScan />八人が、世界へ。</h2>
+          <h2 data-film-reveal>
+            <FilmTextScan />
+            八人が、世界へ。
+          </h2>
           <p>
             主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
           </p>
         </div>
         <div className="rider-console">
-                  <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
+          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
             className="rider-detail"
@@ -2537,30 +2524,6 @@ export function WorldHome() {
               </div>
             ))}
           </div>
-        </div>
-      </dialog>
-
-      <dialog
-        ref={danteDialogRef}
-        className="dante-denied-dialog"
-        tabIndex={-1}
-        aria-label="アクセス拒否"
-        onCancel={(e) => {
-          e.preventDefault();
-          closeDante();
-        }}
-        onClick={(e) => {
-          if (e.target === danteDialogRef.current) closeDante();
-        }}
-      >
-        <div className="dante-denied-inner" tabIndex={-1}>
-          <p className="dante-denied-kicker">ACCESS DENIED</p>
-          <div className="dante-no-stack" aria-hidden="true">
-            <strong className="dante-no-ghost">NO</strong>
-            <strong className="dante-no-ghost is-offset">NO</strong>
-          </div>
-          <strong className="dante-no">NO</strong>
-          <p className="dante-denied-note">管理外 ／ 対象外記録</p>
         </div>
       </dialog>
     </main>

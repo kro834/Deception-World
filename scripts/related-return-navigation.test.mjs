@@ -14,7 +14,7 @@ test("related dossiers return to the Other archive tab through a stable native h
     dossierNav,
     /currentHref\.startsWith\("\/characters\/"\)[\s\S]*?"manager-archive-other"/,
   );
-  assert.match(worldHome, /id="manager-archive-other" className="manager-archive-return-anchor"/);
+  assert.match(worldHome, /id="manager-archive-other"\s+className="manager-archive-return-anchor"/);
   assert.match(
     worldHome,
     /locationHash !== "manager-archive-other"[\s\S]*?setManagerTab\(2\)[\s\S]*?syncRail\(managerRail\.current, 2\)/,

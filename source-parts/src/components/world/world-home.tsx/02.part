@@ -1,3 +1,9 @@
+        width: 1221,
+        height: 1800,
+        to: "/riders/realm",
+        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
+          "/civilian-bell-20260826.jpeg",
+        ],
       },
       {
         label: "仮面ライダーレルム　アースフォーム",
@@ -306,15 +312,12 @@ export function WorldHome() {
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
-  const danteDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
-  const danteOpenTimer = useRef<number | null>(null);
-  const danteCloseTimer = useRef<number | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
@@ -335,6 +338,12 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-other") return;
     setManagerTab(2);
     syncRail(managerRail.current, 2);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
   }, [locationHash]);
 
   useLayoutEffect(() => {
@@ -411,18 +420,3 @@ export function WorldHome() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
     syncAmbientPause();
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
-    };
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const syncMotionPreference = () => setMotionReduced(media.matches);
-    syncMotionPreference();
-    media.addEventListener?.("change", syncMotionPreference);
-    return () => media.removeEventListener?.("change", syncMotionPreference);
-  }, []);
-
-  useEffect(() => {

@@ -420,9 +420,3 @@ const EPISODES: EpisodeRecord[] = [
         src: "/rider-profile-realm.jpeg",
         pos: "50% 8%",
         alt: "仮面ライダーレルムレジェンズ",
-        width: 1221,
-        height: 1800,
-        to: "/riders/realm",
-        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
-          "/civilian-bell-20260826.jpeg",
-        ],

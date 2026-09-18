@@ -1,0 +1,125 @@
+.dante-page .manager-portrait-frame {
+  background: #e8e5e3;
+}
+.dante-page .form-pickup-visual img,
+.dante-page .form-pickup-layout img {
+  object-fit: contain;
+  background: #eee;
+}
+.dante-page #form-records {
+  display: grid;
+  gap: clamp(24px, 5vw, 64px);
+}
+.dante-page .form-pickup-copy h2 {
+  overflow-wrap: anywhere;
+}
+.dante-page .form-pickup-copy h2 b .form-name-part,
+.dante-page .form-pickup-heading h2 b .form-name-part {
+  display: inline-block;
+  font-size: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+}
+.dante-page .manager-quotes q,
+.dante-page .manager-copy-body p,
+.dante-page .form-pickup-sections p,
+.dante-page .form-pickup-overview p {
+  line-break: strict;
+  text-wrap: pretty;
+  line-height: 1.9;
+}
+.dante-page .form-pickup-layout > * {
+  min-width: 0;
+}
+.dante-page .form-pickup-layout img {
+  aspect-ratio: auto;
+  height: auto;
+}
+.dante-page .form-pickup-layout figcaption {
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .dante-page .form-pickup-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dante-page .form-pickup-heading {
+    padding-right: 0;
+  }
+  .dante-page .form-pickup-heading h2 {
+    font-size: clamp(24px, 6vw, 34px);
+    line-height: 1.4;
+  }
+  .dante-page .form-pickup-copy h2 {
+    font-size: clamp(22px, 6vw, 32px);
+  }
+  .dante-page .form-pickup-heading h2 > span {
+    font-size: 0.65em;
+  }
+}
+.dante-entry-glitch {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0a1019;
+  color: #e8eef5;
+  opacity: 0;
+  animation: dante-signal-entry 540ms steps(1, end) both;
+}
+.dante-entry-glitch span {
+  font: 600 clamp(14px, 4vw, 34px)/1.5 monospace;
+  letter-spacing: 0.12em;
+  text-shadow:
+    3px 0 #ba415b,
+    -3px 0 #369b89;
+}
+.dante-entry-glitch i {
+  position: absolute;
+  inset: 32% 0 auto;
+  height: 3px;
+  background: #ba415b;
+  transform: translateX(-8%);
+}
+.dante-entry-glitch i:last-child {
+  top: 67%;
+  background: #369b89;
+  transform: translateX(10%);
+}
+@keyframes dante-signal-entry {
+  0% {
+    opacity: 0.92;
+    transform: translateX(0);
+  }
+  20% {
+    opacity: 0.74;
+    transform: translateX(5px);
+  }
+  38% {
+    opacity: 0.9;
+    transform: translateX(-4px);
+  }
+  58% {
+    opacity: 0.48;
+    transform: translateX(2px);
+  }
+  76% {
+    opacity: 0.2;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dante-entry-glitch {
+    animation: none;
+    display: none;
+  }
+}

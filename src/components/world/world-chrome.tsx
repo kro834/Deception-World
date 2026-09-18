@@ -726,6 +726,19 @@ export function SideMenuLayer({
           </div>
         ) : null}
         <div className="side-panel-group">
+          <p>UNMANAGED</p>
+          <div className="side-panel-links">
+            <GuardedLink
+              to="/characters/dante"
+              assets={["/character-dante.webp"]}
+              beforeNavigate={close}
+            >
+              <span>ダンテ</span>
+              <i>管理人殺し</i>
+            </GuardedLink>
+          </div>
+        </div>
+        <div className="side-panel-group">
           <p>INFORMATION</p>
           <div className="side-panel-links">
             <button

@@ -17,6 +17,7 @@ export type RiderForm = {
   system: string;
   name: string;
   prefix?: string;
+  nameParts?: string[];
   sub?: string;
   calls: string[];
   quote?: string;
@@ -57,6 +58,13 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   const gateImage = useRef<HTMLImageElement | null>(null);
   const [gateActive, setGateActive] = useState(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
+  const formName = rider.nameParts
+    ? rider.nameParts.map((part) => (
+        <span className="form-name-part" key={part}>
+          {part}
+        </span>
+      ))
+    : rider.name;
   const isRexonance = rider.theme === "rexonance";
   const resetScroll = () => {
     const dialog = dlg.current;
@@ -181,7 +189,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           <small>PICKUP</small>
           <h2>
             <span>{riderPrefix}</span>
-            <b>{rider.name}</b>
+            <b>{formName}</b>
           </h2>
           {rider.sub ? <em>{rider.sub}</em> : null}
           <q>{rider.quote ?? rider.system}</q>
@@ -230,7 +238,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
             <small>{rider.system}</small>
             <h2>
               <span>{riderPrefix}</span>
-              <b>{rider.name}</b>
+              <b>{formName}</b>
             </h2>
             {rider.sub ? <em>{rider.sub}</em> : null}
             <div className="rider-call">
@@ -356,8 +364,3 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 {weaponGallery.map((weapon, index) => (
                   <figure
                     key={weapon.name}
-                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
-                  >
-                    <div>
-                      <img
-                        src={weapon.img}

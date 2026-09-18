@@ -38,7 +38,7 @@ test("pickup headings use semantic lines and iPad-specific typography", async ()
     read("src/styles-world/rexonance-pickup.css"),
   ]);
 
-  const semanticHeading = /<h2>\s*<span>\{riderPrefix\}<\/span>\s*<b>\{rider\.name\}<\/b>\s*<\/h2>/s;
+  const semanticHeading = /<h2>\s*<span>\{riderPrefix\}<\/span>\s*<b>\{formName\}<\/b>\s*<\/h2>/s;
   assert.match(component, semanticHeading);
   assert.match(componentSource, semanticHeading);
 

@@ -21,6 +21,7 @@ html[data-mode="world"] {
   pointer-events: none;
 }
 
+.site-shell #manager-archive-unmanaged,
 .site-shell #manager-archive-other {
   position: absolute;
   top: 0;
