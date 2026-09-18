@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
@@ -193,7 +193,10 @@ export function SideMenuLayer({
   const announcementRef = useRef<HTMLDialogElement>(null);
   const announcementTriggerRef = useRef<HTMLButtonElement>(null);
   const announcementStageRef = useRef<HTMLDivElement>(null);
-  const announcementHeadingRef = useRef<HTMLHeadingElement>(null);
+  const announcementBackRef = useRef<HTMLButtonElement>(null);
+  const announcementTransitionFrameRef = useRef(0);
+  const announcementTransitionKeyboardRef = useRef(false);
+  const announcementReturnIdRef = useRef<AnnouncementId | null>(null);
   const announcementOpenedByKeyboardRef = useRef(false);
   const sideMenuRestoreFocusRef = useRef(false);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
@@ -312,18 +315,58 @@ export function SideMenuLayer({
     };
   }, [announcementOpen]);
 
-  useEffect(() => {
-    if (!announcementOpen || !selectedAnnouncement) return;
-    const frame = window.requestAnimationFrame(() => {
-      if (announcementStageRef.current) announcementStageRef.current.scrollTop = 0;
-      announcementHeadingRef.current?.focus({ preventScroll: true });
+  useLayoutEffect(() => {
+    if (!announcementOpen) return;
+    if (announcementTransitionFrameRef.current) {
+      window.cancelAnimationFrame(announcementTransitionFrameRef.current);
+    }
+    if (announcementStageRef.current) announcementStageRef.current.scrollTop = 0;
+    const keyboardTransition = announcementTransitionKeyboardRef.current;
+    const returnId = announcementReturnIdRef.current;
+    announcementTransitionFrameRef.current = window.requestAnimationFrame(() => {
+      announcementTransitionFrameRef.current = 0;
+      if (!announcementRef.current?.open) return;
+      if (selectedAnnouncement) {
+        if (keyboardTransition) announcementBackRef.current?.focus({ preventScroll: true });
+        else announcementRef.current.focus({ preventScroll: true });
+      } else if (keyboardTransition && returnId) {
+        const returnTarget = Array.from(
+          announcementRef.current.querySelectorAll<HTMLButtonElement>(
+            ".site-announcement-list-item",
+          ),
+        ).find((item) => item.dataset.announcementId === returnId);
+        returnTarget?.focus({ preventScroll: true });
+        // Keep a later keyboard opener visible without scrolling the page or
+        // the side menu behind this dialog. Pointer returns still start at 0.
+        const stage = announcementStageRef.current;
+        if (returnTarget && stage) {
+          const targetBounds = returnTarget.getBoundingClientRect();
+          const stageBounds = stage.getBoundingClientRect();
+          if (targetBounds.bottom > stageBounds.bottom) {
+            stage.scrollTop += targetBounds.bottom - stageBounds.bottom;
+          } else if (targetBounds.top < stageBounds.top) {
+            stage.scrollTop -= stageBounds.top - targetBounds.top;
+          }
+        }
+      } else {
+        announcementRef.current.focus({ preventScroll: true });
+      }
+      announcementTransitionKeyboardRef.current = false;
+      announcementReturnIdRef.current = null;
     });
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      if (announcementTransitionFrameRef.current) {
+        window.cancelAnimationFrame(announcementTransitionFrameRef.current);
+        announcementTransitionFrameRef.current = 0;
+      }
+    };
   }, [announcementOpen, selectedAnnouncement]);
 
   const openAnnouncements = (event: MouseEvent<HTMLButtonElement>) => {
     const openedByKeyboard = event.detail === 0;
     announcementOpenedByKeyboardRef.current = openedByKeyboard;
+    announcementTransitionKeyboardRef.current = false;
+    announcementReturnIdRef.current = null;
     if (!openedByKeyboard) event.currentTarget.blur();
     setSelectedAnnouncementId(null);
     setAnnouncementOpen(true);
@@ -331,7 +374,28 @@ export function SideMenuLayer({
 
   const closeAnnouncement = (restoreFocus = announcementOpenedByKeyboardRef.current) => {
     announcementOpenedByKeyboardRef.current = restoreFocus;
+    announcementTransitionKeyboardRef.current = false;
+    announcementReturnIdRef.current = null;
     setAnnouncementOpen(false);
+    setSelectedAnnouncementId(null);
+  };
+
+  const openAnnouncementDetail = (
+    event: MouseEvent<HTMLButtonElement>,
+    id: AnnouncementId,
+  ) => {
+    const openedByKeyboard = event.detail === 0;
+    announcementTransitionKeyboardRef.current = openedByKeyboard;
+    announcementReturnIdRef.current = id;
+    if (!openedByKeyboard) event.currentTarget.blur();
+    setSelectedAnnouncementId(id);
+  };
+
+  const returnToAnnouncementIndex = (event: MouseEvent<HTMLButtonElement>) => {
+    const openedByKeyboard = event.detail === 0;
+    announcementTransitionKeyboardRef.current = openedByKeyboard;
+    announcementReturnIdRef.current = selectedAnnouncementId;
+    if (!openedByKeyboard) event.currentTarget.blur();
     setSelectedAnnouncementId(null);
   };
 
@@ -747,9 +811,10 @@ export function SideMenuLayer({
                 }`}
               >
                 <button
+                  ref={announcementBackRef}
                   className="site-announcement-back"
                   type="button"
-                  onClick={() => setSelectedAnnouncementId(null)}
+                  onClick={returnToAnnouncementIndex}
                 >
                   <span aria-hidden="true">←</span>
                   一覧へ戻る
@@ -779,9 +844,7 @@ export function SideMenuLayer({
                       {selectedAnnouncement.eyebrow}
                     </span>
                   ) : null}
-                  <h3 ref={announcementHeadingRef} tabIndex={-1}>
-                    {selectedAnnouncement.title}
-                  </h3>
+                  <h3>{selectedAnnouncement.title}</h3>
                   {selectedAnnouncement.lede ? (
                     <p className="site-announcement-lede">{selectedAnnouncement.lede}</p>
                   ) : null}
@@ -827,7 +890,8 @@ export function SideMenuLayer({
                       <button
                         className="site-announcement-list-item"
                         type="button"
-                        onClick={() => setSelectedAnnouncementId(notice.id)}
+                        data-announcement-id={notice.id}
+                        onClick={(event) => openAnnouncementDetail(event, notice.id)}
                         aria-label={`${notice.title}を開く`}
                       >
                         <span className="site-announcement-list-visual" aria-hidden="true">

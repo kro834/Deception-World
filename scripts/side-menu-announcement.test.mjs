@@ -106,10 +106,22 @@ test("the announcement archive opens an index before a selected transmission", (
   assert.match(chrome, /<ul className="site-announcement-list">/);
   assert.match(chrome, /<li key=\{notice\.id\}>/);
   assert.match(chrome, /aria-label=\{`\$\{notice\.title\}を開く`\}/);
-  assert.match(chrome, /onClick=\{\(\) => setSelectedAnnouncementId\(notice\.id\)\}/);
+  assert.match(chrome, /onClick=\{\(event\) => openAnnouncementDetail\(event, notice\.id\)\}/);
   assert.match(chrome, /className="site-announcement-back"/);
-  assert.match(chrome, /onClick=\{\(\) => setSelectedAnnouncementId\(null\)\}/);
+  assert.match(chrome, /onClick=\{returnToAnnouncementIndex\}/);
   assert.match(chrome, /一覧へ戻る/);
+});
+
+test("announcement index and detail transitions restore scroll and keyboard focus", () => {
+  assert.match(chrome, /useLayoutEffect\(\(\) => \{/);
+  assert.match(chrome, /announcementStageRef\.current\.scrollTop = 0/);
+  assert.match(chrome, /announcementBackRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(chrome, /announcementReturnIdRef\.current = selectedAnnouncementId/);
+  assert.match(chrome, /item\.dataset\.announcementId === returnId/);
+  assert.match(chrome, /returnTarget\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(chrome, /const openedByKeyboard = event\.detail === 0/);
+  assert.match(chrome, /if \(!openedByKeyboard\) event\.currentTarget\.blur\(\)/);
+  assert.match(chrome, /data-announcement-id=\{notice\.id\}/);
 });
 
 test("announcement glass is safe-area aware, internally scrollable, and responsive", () => {

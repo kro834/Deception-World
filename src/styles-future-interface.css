@@ -277,6 +277,47 @@
   }
 }
 
+/* Content labels must remain readable independently of responsive headlines.
+   Inheriting a fraction of h1 made civilian names as small as 4.32px. */
+main.manager-page .manager-introduction .dossier-identity h1 small {
+  font-size: clamp(11px, 1vw, 13px);
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+  overflow-wrap: anywhere;
+  color: var(--future-muted);
+}
+
+main.manager-page :is(.dossier-contents-copy small, .dossier-index-return > span,
+    .rider-nightmare-card-copy > p, .rider-nightmare-card-copy > small) {
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+.site-shell.film-edition :is(.world-column-index > span, .episode-card-copy > p > span,
+    .episode-card-copy > p > b,
+    .episode-card-copy > small, .rider-line > b, .footer-title > span) {
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.site-shell.film-edition .episode-card-copy > p {
+  gap: 10px;
+}
+
+.site-shell.film-edition .episode-thumbnail > span {
+  padding: 5px 8px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 6px;
+  background: rgb(4 10 19 / 90%);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Shared navigation: predictable label rows without additional blur layers. */
 html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
   display: grid;

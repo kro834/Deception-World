@@ -498,6 +498,11 @@ async function checkManagerCards(page) {
 async function checkEpisodeClose(page) {
   await page.locator(".episode-pickup-plus").nth(1).tap();
   await waitForOpen(page, ".episode-pickup-dialog", true);
+  // Compare scroller geometry only after the dialog's entrance transform ends.
+  // The close button lives outside the panel but moves with that transform.
+  await page.locator(".episode-pickup-dialog").evaluate(async (dialog) => {
+    await Promise.all(dialog.getAnimations().map((animation) => animation.finished.catch(() => {})));
+  });
   const panel = page.locator(".episode-pickup-panel");
   const close = page.locator(".episode-pickup-close");
   await close.click({ trial: true });

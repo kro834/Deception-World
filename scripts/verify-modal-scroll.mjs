@@ -89,6 +89,50 @@ async function checkSidePanel(page, viewport) {
   const announcement = page.locator("#site-announcement-dialog[open]");
   await announcement.waitFor({ state: "visible" });
   const stage = announcement.locator(".site-announcement-stage");
+  const firstNotice = announcement.locator(".site-announcement-list-item").first();
+  await firstNotice.focus();
+  await page.keyboard.press("Enter");
+  const back = announcement.locator(".site-announcement-back");
+  await back.waitFor({ state: "visible" });
+  await page.waitForFunction(() => document.activeElement?.matches(".site-announcement-back"));
+  assert.equal(
+    await back.evaluate((element) => document.activeElement === element),
+    true,
+    "keyboard-opened announcement detail did not focus its back control",
+  );
+  await stage.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await page.keyboard.press("Enter");
+  await firstNotice.waitFor({ state: "visible" });
+  await page.waitForFunction(() =>
+    document.activeElement === document.querySelector(".site-announcement-list-item"),
+  );
+  assert.equal(
+    await stage.evaluate((element) => element.scrollTop),
+    0,
+    "announcement index retained the detail scroll position",
+  );
+  assert.equal(
+    await firstNotice.evaluate((element) => document.activeElement === element),
+    true,
+    "announcement index did not restore focus to its keyboard opener",
+  );
+  record(viewport, "announcement index/detail keyboard focus and scroll restoration");
+  const lastNotice = announcement.locator(".site-announcement-list-item").last();
+  await lastNotice.focus();
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => document.activeElement?.matches(".site-announcement-back"));
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() =>
+    document.activeElement === [...document.querySelectorAll(".site-announcement-list-item")].at(-1),
+  );
+  assert.equal(await lastNotice.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const stage = element.closest(".site-announcement-stage").getBoundingClientRect();
+    return bounds.top >= stage.top - 1 && bounds.bottom <= stage.bottom + 1;
+  }), true, "restored keyboard opener is outside the visible announcement stage");
+  await stage.evaluate((element) => { element.scrollTop = 0; });
   const stageMetrics = await stage.evaluate((element) => ({
     scrollHeight: element.scrollHeight,
     clientHeight: element.clientHeight,
