@@ -277,6 +277,62 @@
   }
 }
 
+/* Shared navigation: predictable label rows without additional blur layers. */
+html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 62px;
+  gap: 8px 12px;
+  padding: 12px 16px;
+}
+
+html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+  width: fit-content;
+  margin: 0;
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+html body :is(.side-panel-close, .site-announcement-close) {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+}
+
+html body :is(.side-panel-close, .site-announcement-close) > svg {
+  width: 20px;
+  height: 20px;
+}
+
+html body .site-announcement-back {
+  min-height: 48px;
+  font-size: 13px;
+}
+
+@media (max-width: 840px) {
+  html body .topbar nav a {
+    min-height: 48px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :is(.dossier-read-link, .dossier-reader a, .dossier-contents a, .manager-pagination > a,
       .rxs-local-nav a, .rxs-stage-tabs button, .dream-chapter-nav a, .dream-hero-actions a) {
