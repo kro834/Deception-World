@@ -39,6 +39,7 @@ function FormArchive() {
   const [transitionGeneration, setTransitionGeneration] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [clientReady, setClientReady] = useState(false);
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const transitionGenerationRef = useRef(0);
@@ -48,10 +49,17 @@ function FormArchive() {
   const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20260906-r45"
-    : "/realm-form-archive-embedded.html?v=20260906-r45";
+    ? "/saga-form-archive-embedded.html?v=20260918-r46"
+    : "/realm-form-archive-embedded.html?v=20260918-r46";
+
+  // An SSR iframe can finish before hydration and lose its one-shot load
+  // event. Mount it only after React can own that event and its ready fallback.
+  useEffect(() => {
+    setClientReady(true);
+  }, []);
 
   useEffect(() => {
+    if (!clientReady) return;
     const expectedArchive = archive;
     const expectedGeneration = transitionGeneration;
     const expectedFrame = frameRef.current;
@@ -119,7 +127,7 @@ function FormArchive() {
         readyFallbackRef.current = null;
       }
     };
-  }, [archive, transitionGeneration]);
+  }, [archive, clientReady, transitionGeneration]);
 
   const selectArchive = useCallback(
     (next: ArchiveKind) => {
@@ -230,60 +238,62 @@ function FormArchive() {
         <i aria-hidden="true" />
         <span>{isSaga ? "SAGA" : "REALM"} ARCHIVE</span>
       </div>
-      <iframe
-        ref={frameRef}
-        key={`${archive}:${transitionGeneration}`}
-        id="form-archive-frame"
-        data-archive-kind={archive}
-        data-archive-generation={transitionGeneration}
-        title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
-        src={archiveDocument}
-        sandbox="allow-scripts allow-downloads"
-        referrerPolicy="no-referrer"
-        loading="eager"
-        scrolling="yes"
-        onLoad={(event) => {
-          const frame = event.currentTarget;
-          const activeTransition = activeTransitionRef.current;
-          if (
-            frameRef.current !== frame ||
-            frame.dataset.archiveKind !== activeTransition.archive ||
-            frame.dataset.archiveGeneration !== String(activeTransition.generation)
-          ) {
-            return;
-          }
-
-          loadedFrameTransitionRef.current = activeTransition;
-          const previousFallback = readyFallbackRef.current;
-          if (previousFallback) window.clearTimeout(previousFallback.timer);
-          const timer = window.setTimeout(() => {
-            const fallback = readyFallbackRef.current;
-            const currentTransition = activeTransitionRef.current;
+      {clientReady ? (
+        <iframe
+          ref={frameRef}
+          key={`${archive}:${transitionGeneration}`}
+          id="form-archive-frame"
+          data-archive-kind={archive}
+          data-archive-generation={transitionGeneration}
+          title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
+          src={archiveDocument}
+          sandbox="allow-scripts allow-downloads"
+          referrerPolicy="no-referrer"
+          loading="eager"
+          scrolling="yes"
+          onLoad={(event) => {
+            const frame = event.currentTarget;
+            const activeTransition = activeTransitionRef.current;
             if (
-              fallback?.timer !== timer ||
-              fallback.archive !== activeTransition.archive ||
-              fallback.generation !== activeTransition.generation ||
-              fallback.frame !== frame ||
-              currentTransition.archive !== activeTransition.archive ||
-              currentTransition.generation !== activeTransition.generation ||
-              frameRef.current !== frame
+              frameRef.current !== frame ||
+              frame.dataset.archiveKind !== activeTransition.archive ||
+              frame.dataset.archiveGeneration !== String(activeTransition.generation)
             ) {
               return;
             }
 
-            readyFallbackRef.current = null;
-            setLoaded(true);
-          }, ARCHIVE_READY_FAILSAFE_MS);
-          readyFallbackRef.current = { ...activeTransition, frame, timer };
+            loadedFrameTransitionRef.current = activeTransition;
+            const previousFallback = readyFallbackRef.current;
+            if (previousFallback) window.clearTimeout(previousFallback.timer);
+            const timer = window.setTimeout(() => {
+              const fallback = readyFallbackRef.current;
+              const currentTransition = activeTransitionRef.current;
+              if (
+                fallback?.timer !== timer ||
+                fallback.archive !== activeTransition.archive ||
+                fallback.generation !== activeTransition.generation ||
+                fallback.frame !== frame ||
+                currentTransition.archive !== activeTransition.archive ||
+                currentTransition.generation !== activeTransition.generation ||
+                frameRef.current !== frame
+              ) {
+                return;
+              }
 
-          // A newly created WebKit iframe can restore an inline scroll lock
-          // from the archive controller before its first paint. Ask the loaded
-          // document to clear transient UI, then request a fresh child-owned
-          // ready signal. Loading the document alone is not archive readiness.
-          frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
-          frame.contentWindow?.postMessage({ type: "saga-archive:status-request" }, "*");
-        }}
-      />
+              readyFallbackRef.current = null;
+              setLoaded(true);
+            }, ARCHIVE_READY_FAILSAFE_MS);
+            readyFallbackRef.current = { ...activeTransition, frame, timer };
+
+            // A newly created WebKit iframe can restore an inline scroll lock
+            // from the archive controller before its first paint. Ask the loaded
+            // document to clear transient UI, then request a fresh child-owned
+            // ready signal. Loading the document alone is not archive readiness.
+            frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
+            frame.contentWindow?.postMessage({ type: "saga-archive:status-request" }, "*");
+          }}
+        />
+      ) : null}
     </main>
   );
 }

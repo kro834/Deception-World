@@ -239,6 +239,7 @@ export function ExtremeSaga() {
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
+  const selectPointerInteractionRef = useRef(false);
   const activeStage = EXTREME_STAGES[stage];
   const activeComparison = COMPARISONS[baseline];
 
@@ -246,6 +247,12 @@ export function ExtremeSaga() {
     window.requestAnimationFrame(() => {
       if (document.activeElement === control) control.blur();
     });
+  };
+
+  const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
+    if (!selectPointerInteractionRef.current) return;
+    selectPointerInteractionRef.current = false;
+    releaseControlFocus(control);
   };
 
   useEffect(() => {
@@ -438,10 +445,19 @@ export function ExtremeSaga() {
             <select
               value={baseline}
               aria-label="エクスプリームの比較対象"
+              onPointerDown={() => {
+                selectPointerInteractionRef.current = true;
+              }}
+              onKeyDown={() => {
+                selectPointerInteractionRef.current = false;
+              }}
+              onBlur={() => {
+                selectPointerInteractionRef.current = false;
+              }}
               onChange={(event) => {
                 const control = event.currentTarget;
                 setBaseline(control.value as ExtremeBaseline);
-                releaseControlFocus(control);
+                releaseSelectFocusAfterPointerChange(control);
               }}
             >
               <option value="diluculum">ディルクルムサーガ</option>
@@ -625,6 +641,7 @@ export function ExtremeSaga() {
             {(Object.keys(EXTREME_STAGES) as ExtremeStage[]).map((key) => (
               <button
                 key={key}
+                id={`exs-stage-tab-${key}`}
                 type="button"
                 role="tab"
                 aria-selected={stage === key}
@@ -644,7 +661,13 @@ export function ExtremeSaga() {
             タップ、長押し、または左右へのスライドで切り替え
           </p>
 
-          <div id="exs-stage-panel" className="rxs-stage-panel" role="tabpanel" aria-live="polite">
+          <div
+            id="exs-stage-panel"
+            className="rxs-stage-panel"
+            role="tabpanel"
+            aria-labelledby={`exs-stage-tab-${stage}`}
+            aria-live="polite"
+          >
             <figure key={stage}>
               <span aria-hidden="true" />
               <img

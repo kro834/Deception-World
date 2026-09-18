@@ -21,8 +21,8 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20260906-r45/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20260906-r45/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20260918-r46/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20260918-r46/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   assert.match(route, /if \(!loaded \|\| next === activeTransitionRef\.current\.archive\) return/);
@@ -31,6 +31,11 @@ test("the app uses memory-safe embedded archives and recreates the iframe when s
 });
 
 test("archive readiness is owned by the current child frame and transition generation", () => {
+  assert.match(route, /const \[clientReady, setClientReady\] = useState\(false\)/);
+  assert.match(route, /useEffect\(\(\) => \{\s*setClientReady\(true\);\s*\}, \[\]\)/);
+  assert.match(route, /useEffect\(\(\) => \{\s*if \(!clientReady\) return;/);
+  assert.match(route, /\}, \[archive, clientReady, transitionGeneration\]\)/);
+  assert.match(route, /\{clientReady \? \(\s*<iframe/);
   assert.match(route, /activeTransition\.archive !== expectedArchive/);
   assert.match(route, /activeTransition\.generation !== expectedGeneration/);
   assert.match(route, /frameRef\.current !== expectedFrame/);

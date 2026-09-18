@@ -2132,6 +2132,14 @@
   min-height: 48px;
 }
 
+/* The section links are hidden below 900px: remove their desktop grid track
+   as well so the shared menu stays at the trailing edge on both special sites. */
+@media (max-width: 900px) {
+  .rxs-page .rxs-local-nav-inner {
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+}
+
 .rxs-page .rxs-scroll-cue,
 .rxs-page .rxs-comparison article small,
 .rxs-page .rxs-comparison article > p,

@@ -356,6 +356,7 @@ export function RexonanceSaga() {
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
+  const selectPointerInteractionRef = useRef(false);
   const activeStage = STAGES[stage];
   const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
@@ -363,6 +364,12 @@ export function RexonanceSaga() {
     window.requestAnimationFrame(() => {
       if (document.activeElement === control) control.blur();
     });
+  };
+
+  const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
+    if (!selectPointerInteractionRef.current) return;
+    selectPointerInteractionRef.current = false;
+    releaseControlFocus(control);
   };
 
   useEffect(() => {
@@ -486,8 +493,13 @@ export function RexonanceSaga() {
     };
     // A trackpad iPad can have a fine pointer. Follow the installed capability
     // mode, not just its UA, so unsupported timelines retain the old fallback.
-    const observer = supportsIOS27Enhancements(navigator) ? new MutationObserver(syncNativeMotion) : null;
-    observer?.observe(document.documentElement, { attributes: true, attributeFilter: ["data-ios27-enhanced"] });
+    const observer = supportsIOS27Enhancements(navigator)
+      ? new MutationObserver(syncNativeMotion)
+      : null;
+    observer?.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-ios27-enhanced"],
+    });
     syncNativeMotion();
     return () => {
       observer?.disconnect();
@@ -607,10 +619,19 @@ export function RexonanceSaga() {
             <select
               value={performanceBaseline}
               aria-label="レクソナンスの比較対象"
+              onPointerDown={() => {
+                selectPointerInteractionRef.current = true;
+              }}
+              onKeyDown={() => {
+                selectPointerInteractionRef.current = false;
+              }}
+              onBlur={() => {
+                selectPointerInteractionRef.current = false;
+              }}
               onChange={(event) => {
                 const control = event.currentTarget;
                 setPerformanceBaseline(control.value as PerformanceBaseline);
-                releaseControlFocus(control);
+                releaseSelectFocusAfterPointerChange(control);
               }}
             >
               <option value="vertex">ヴァーテックスサーガ</option>
@@ -787,10 +808,19 @@ export function RexonanceSaga() {
                   id="rxs-p14-baseline"
                   value={p14Baseline}
                   aria-label="P14の比較基準"
+                  onPointerDown={() => {
+                    selectPointerInteractionRef.current = true;
+                  }}
+                  onKeyDown={() => {
+                    selectPointerInteractionRef.current = false;
+                  }}
+                  onBlur={() => {
+                    selectPointerInteractionRef.current = false;
+                  }}
                   onChange={(event) => {
                     const control = event.currentTarget;
                     setP14Baseline(control.value as P14Baseline);
-                    releaseControlFocus(control);
+                    releaseSelectFocusAfterPointerChange(control);
                   }}
                 >
                   <option value="p1">P1比（P1＝100%）</option>
@@ -889,6 +919,7 @@ export function RexonanceSaga() {
             {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
               <button
                 key={key}
+                id={`rxs-stage-tab-${key}`}
                 type="button"
                 role="tab"
                 aria-selected={stage === key}
@@ -912,6 +943,7 @@ export function RexonanceSaga() {
             id="rxs-stage-panel"
             className="rxs-stage-panel"
             role="tabpanel"
+            aria-labelledby={`rxs-stage-tab-${stage}`}
             aria-live="polite"
             style={{ ["--rxs-stage-accent" as string]: activeStage.accent }}
           >

@@ -140,3 +140,32 @@ test("special-site parallax only updates meaningful visible frames", () => {
     assert.match(source, /visibilitychange/);
   }
 });
+
+test("native selector preserves keyboard focus and releases pointer focus", () => {
+  assert.match(component, /const selectPointerInteractionRef = useRef\(false\)/);
+  assert.match(
+    component,
+    /onPointerDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = true/,
+  );
+  assert.match(
+    component,
+    /onKeyDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+  );
+  assert.match(
+    component,
+    /onBlur=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+  );
+  assert.match(
+    component,
+    /if \(!selectPointerInteractionRef\.current\) return;[\s\S]*?releaseControlFocus\(control\)/,
+  );
+  assert.doesNotMatch(
+    component,
+    /setBaseline\(control\.value as ExtremeBaseline\);\s*releaseControlFocus\(control\)/,
+  );
+});
+
+test("stage panel is named by the selected stage tab", () => {
+  assert.match(component, /id=\{`exs-stage-tab-\$\{key\}`\}/);
+  assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{stage\}`\}/);
+});

@@ -1438,6 +1438,8 @@ html[data-visualize-standalone] {
   display: inline-flex;
   align-items: center;
   gap: 0.76rem;
+  box-sizing: border-box;
+  min-height: 3rem;
   min-width: max-content;
   color: #fff;
   text-decoration: none;
@@ -2270,6 +2272,9 @@ html[data-visualize-standalone] {
   #saga-forms-performance-v5 .hero-topline { align-items: center; min-height: 3.9rem; padding: 0.68rem 0.8rem; }
   #saga-forms-performance-v5 .archive-wordmark small { display: none; }
   #saga-forms-performance-v5 .archive-wordmark strong { font-size: 0.68rem; }
+  /* Keep the compact 2rem sigil while adding breathing room around the
+     full-size return-to-top target. */
+  #saga-forms-performance-v5 .archive-wordmark { padding-block: 0.5rem; }
   #saga-forms-performance-v5 .wordmark-sigil { width: 2rem; }
   #saga-forms-performance-v5 .archive-nav { max-width: 50%; gap: 0; }
   #saga-forms-performance-v5 .archive-nav a { padding: 0.58rem 0.55rem; font-size: 0.53rem; white-space: nowrap; }
@@ -2414,6 +2419,7 @@ html[data-visualize-standalone] {
 }
 
 @media (max-width: 390px) {
+  #saga-forms-performance-v5 .archive-wordmark { min-width: 3rem; justify-content: center; }
   #saga-forms-performance-v5 .archive-wordmark span:last-child { display: none; }
   #saga-forms-performance-v5 .archive-nav { max-width: calc(100% - 3rem); }
   #saga-forms-performance-v5 .archive-hero h1 strong { font-size: clamp(3.45rem, 20vw, 5rem); }

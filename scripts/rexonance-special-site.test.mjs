@@ -154,6 +154,35 @@ test("iPad hero and touch sliders release transient emphasis", () => {
   );
 });
 
+test("native selectors only release focus after pointer input", () => {
+  assert.match(component, /const selectPointerInteractionRef = useRef\(false\)/);
+  assert.match(
+    component,
+    /onPointerDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = true/,
+  );
+  assert.match(
+    component,
+    /onKeyDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+  );
+  assert.match(
+    component,
+    /onBlur=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+  );
+  assert.match(
+    component,
+    /if \(!selectPointerInteractionRef\.current\) return;[\s\S]*?releaseControlFocus\(control\)/,
+  );
+  assert.doesNotMatch(
+    component,
+    /setPerformanceBaseline\(control\.value as PerformanceBaseline\);\s*releaseControlFocus\(control\)/,
+  );
+});
+
+test("stage panel is named by the selected stage tab", () => {
+  assert.match(component, /id=\{`rxs-stage-tab-\$\{key\}`\}/);
+  assert.match(component, /aria-labelledby=\{`rxs-stage-tab-\$\{stage\}`\}/);
+});
+
 test("P14 comparison preserves every value and uses native iOS selection with a range fallback", () => {
   for (const value of [
     "100%",
@@ -272,8 +301,7 @@ test("Rexonance page ships local optimized artwork and responsive motion fallbac
   }
   assert.match(component, /fetchPriority="high"/);
   assert.ok(
-    statSync(new URL("../public/rider-rexonance-saga-pickup.jpeg", import.meta.url)).size <
-      600_000,
+    statSync(new URL("../public/rider-rexonance-saga-pickup.jpeg", import.meta.url)).size < 600_000,
     "the eager hero should stay below 600 KB",
   );
   assert.match(component, /loading=\{stage === "standard" \? "eager" : "lazy"\}/);
