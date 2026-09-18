@@ -273,6 +273,18 @@ test("narrow comparison rows keep a stable layout and readable native selection"
   );
 });
 
+test("shared processor specifications retain readable names, units, and core counts", () => {
+  assert.match(styles, /\.rxs-specs strong span \{[^}]*font-size: max\(12px, 0\.2em\);/);
+  assert.match(
+    styles,
+    /\.rxs-page \.rxs-specs > div > small \{[^}]*font-size: 12px;[^}]*line-height: 1\.6;/,
+  );
+  assert.match(
+    styles,
+    /\.rxs-specs p \{[^}]*margin: 12px 0 0;[^}]*color: var\(--rxs-muted\);[^}]*font-size: 12px;[^}]*line-height: 1\.6;/,
+  );
+});
+
 test("P14 controls and metadata retain readable text at narrow widths", () => {
   assert.match(
     styles,

@@ -767,3 +767,34 @@ html[data-dream-chapter="true"] .dream-hero-copy {
     color: CanvasText;
   }
 }
+
+/* The film hero is intentionally compact on landscape tablets. Keep each
+   Japanese destination whole while retaining its English record label below. */
+@media (min-width: 981px) and (max-width: 1280px) {
+  .dream-page .dream-hero-actions a {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .dream-page .dream-hero-actions small {
+    grid-row: 1 / -1;
+  }
+
+  .dream-page .dream-hero-actions span {
+    white-space: nowrap;
+  }
+
+  .dream-page .dream-hero-actions b {
+    grid-column: 2;
+  }
+}
+
+/* File IDs and section ordinals remain part of the dossier's reading order,
+   rather than decorative microtype, at every modal width. */
+.dream-dossier-title > p,
+.dream-dossier-sections > section > header span {
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  overflow-wrap: anywhere;
+}

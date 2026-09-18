@@ -2242,6 +2242,7 @@ export function WorldHome() {
             onKeyDown={(event) => {
               if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
               event.preventDefault();
+              if (event.target !== event.currentTarget) return;
               goEpisode(episode + (event.key === "ArrowRight" ? 1 : -1));
             }}
           >

@@ -63,6 +63,13 @@ test("episode selection and the single-tap plus remain sibling controls", () => 
   assert.match(worldHome, /releaseProgrammaticScroll[\s\S]*?"pointerdown"[\s\S]*?"wheel"/);
 });
 
+test("episode arrow keys only switch records when the region itself has focus", () => {
+  assert.match(
+    worldHome,
+    /className="episode-grid"[\s\S]*?onKeyDown=\{\(event\) => \{\s*if \(event\.key !== "ArrowLeft" && event\.key !== "ArrowRight"\) return;\s*event\.preventDefault\(\);\s*if \(event\.target !== event\.currentTarget\) return;\s*goEpisode/,
+  );
+});
+
 test("the pickup dialog is modal, dismissible, and scroll-reset on every open", () => {
   assert.match(worldHome, /ref=\{episodePickupDialogRef\}/);
   assert.match(worldHome, /id="episode-pickup-dialog"/);

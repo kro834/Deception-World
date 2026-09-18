@@ -445,6 +445,24 @@ test("mobile poster controls give full-size labels room beside their icons", () 
   );
 });
 
+test("landscape iPad hero CTAs retain Japanese labels and modal file metadata", () => {
+  assert.match(
+    filmStyleSource,
+    /@media\s*\(min-width:\s*981px\)\s*and\s*\(max-width:\s*1280px\)[\s\S]*?\.dream-page \.dream-hero-actions a\s*\{[\s\S]*?grid-template-columns:\s*auto minmax\(0, 1fr\);[\s\S]*?grid-template-rows:\s*auto auto;/,
+    "1024px and 1280px landscape CTAs must place the English label below the Japanese destination",
+  );
+  assert.match(
+    filmStyleSource,
+    /\.dream-page \.dream-hero-actions span\s*\{\s*white-space:\s*nowrap;/,
+    "the Japanese CTA destination must not break inside its label",
+  );
+  assert.match(
+    filmStyleSource,
+    /\.dream-dossier-title > p,\s*\.dream-dossier-sections > section > header span\s*\{[\s\S]*?font-size:\s*12px;[\s\S]*?line-height:\s*1\.5;[\s\S]*?letter-spacing:\s*0\.14em;[\s\S]*?overflow-wrap:\s*anywhere;/,
+    "modal file identifiers and section ordinals need a readable size and safe wrapping",
+  );
+});
+
 test("Dream Chapter navigation has a dedicated loading transition", () => {
   const loadingSources = `${loadGateSource}\n${routeTransitionStyleSource}\n${styleSource}`;
 

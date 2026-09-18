@@ -1373,14 +1373,23 @@
 
 .rxs-specs strong span {
   margin-left: 8px;
-  font-size: 0.2em;
+  font-size: max(12px, 0.2em);
   letter-spacing: 0;
 }
 
+.rxs-page .rxs-specs > div > small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+}
+
 .rxs-specs p {
-  color: #707681;
-  font-size: 9px;
-  letter-spacing: 0.18em;
+  margin: 12px 0 0;
+  color: var(--rxs-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
 }
 
 .rxs-footer {
