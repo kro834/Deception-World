@@ -406,6 +406,23 @@ test("poster shuffle preserves keyboard focus while exposing its busy state", ()
   );
 });
 
+test("poster autoplay and prefetch pause across the Dream poster focus boundary", () => {
+  assert.match(
+    pageSource,
+    /const \[posterControlsFocused, setPosterControlsFocused\] = useState\(false\)/,
+  );
+  assert.equal(pageSource.match(/posterControlsFocused \|\|/g)?.length, 2);
+  assert.match(pageSource, /onFocusCapture=\{\(\) => setPosterControlsFocused\(true\)\}/);
+  assert.match(
+    pageSource,
+    /if \(!event\.currentTarget\.contains\(event\.relatedTarget\)\) \{\s*setPosterControlsFocused\(false\);\s*\}/,
+  );
+  assert.equal(
+    pageSource.match(/posterControlsFocused,\s*(?:\n\s*)?poster(?:Index|Visible)/g)?.length,
+    2,
+  );
+});
+
 test("mobile film poster caption remains inside its clipped figure", () => {
   assert.match(
     filmStyleSource,

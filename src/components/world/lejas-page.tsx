@@ -79,19 +79,21 @@ export function LejasPage() {
           </button>
         </div>
         <div className="manager-introduction">
-          <p className="manager-eyebrow">
-            <span>TOP-LEVEL MANAGER / BOARD / CHOICE</span>
-            <i />
-          </p>
-          <p className="manager-file-number">ARCHIVE ACCESS // IV</p>
-          <h1>
-            <small>RIKUEI IV</small>
-            <span className="manager-display-name">レジャス</span>
-          </h1>
-          <p className="manager-title"># 真実だけで破滅を組み上げる盤面の管理人</p>
-          <a className="dossier-read-link" href="#dossier-index">
-            人物資料を読む <span aria-hidden="true">↓</span>
-          </a>
+          <header className="dossier-identity">
+            <p className="manager-eyebrow">
+              <span>TOP-LEVEL MANAGER / BOARD / CHOICE</span>
+              <i />
+            </p>
+            <p className="manager-file-number">ARCHIVE ACCESS // IV</p>
+            <h1>
+              <small>RIKUEI IV</small>
+              <span className="manager-display-name">レジャス</span>
+            </h1>
+            <p className="manager-title"># 真実だけで破滅を組み上げる盤面の管理人</p>
+            <a className="dossier-read-link" href="#dossier-index">
+              人物資料を読む <span aria-hidden="true">↓</span>
+            </a>
+          </header>
           <div className="manager-quotes" aria-label="レジャスの台詞">
             <q>私は一度も嘘を吐いていない</q>
             <q>選んだのは君だ。私が並べた選択肢の中から</q>

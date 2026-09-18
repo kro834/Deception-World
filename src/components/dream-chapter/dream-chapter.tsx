@@ -389,6 +389,7 @@ export function DreamChapter() {
   const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
   const [posterLocked, setPosterLocked] = useState(false);
   const [posterShuffling, setPosterShuffling] = useState(false);
+  const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
   const [heroVisible, setHeroVisible] = useState(true);
   const [posterMotionEnabled, setPosterMotionEnabled] = useState(true);
@@ -560,6 +561,7 @@ export function DreamChapter() {
     if (
       posterLocked ||
       posterShuffling ||
+      posterControlsFocused ||
       !posterVisible ||
       !posterMotionEnabled ||
       menuOpen ||
@@ -583,11 +585,20 @@ export function DreamChapter() {
     posterLocked,
     posterMotionEnabled,
     posterShuffling,
+    posterControlsFocused,
     posterVisible,
   ]);
 
   useEffect(() => {
-    if (!posterMotionEnabled || !posterVisible || menuOpen || character || dolminenceRecord) return;
+    if (
+      !posterMotionEnabled ||
+      !posterVisible ||
+      posterControlsFocused ||
+      menuOpen ||
+      character ||
+      dolminenceRecord
+    )
+      return;
     const timer = window.setTimeout(() => {
       const image = new Image();
       image.decoding = "async";
@@ -595,7 +606,15 @@ export function DreamChapter() {
       image.src = DREAM_POSTERS[(posterIndex + 1) % DREAM_POSTERS.length].src;
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [character, dolminenceRecord, menuOpen, posterIndex, posterMotionEnabled, posterVisible]);
+  }, [
+    character,
+    dolminenceRecord,
+    menuOpen,
+    posterControlsFocused,
+    posterIndex,
+    posterMotionEnabled,
+    posterVisible,
+  ]);
 
   useEffect(() => {
     if (
@@ -820,6 +839,12 @@ export function DreamChapter() {
         <div
           className={`dream-poster-stage${posterShuffling ? " is-shuffling" : ""}`}
           data-dream-reveal
+          onFocusCapture={() => setPosterControlsFocused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setPosterControlsFocused(false);
+            }
+          }}
         >
           {previousPoster ? (
             <figure className="dream-poster-previous" aria-hidden="true">

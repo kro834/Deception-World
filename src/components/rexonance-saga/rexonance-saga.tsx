@@ -808,6 +808,7 @@ export function RexonanceSaga() {
                   id="rxs-p14-baseline"
                   value={p14Baseline}
                   aria-label="P14の比較基準"
+                  aria-describedby="rxs-p14-baseline-help"
                   onPointerDown={() => {
                     selectPointerInteractionRef.current = true;
                   }}
@@ -823,8 +824,8 @@ export function RexonanceSaga() {
                     releaseSelectFocusAfterPointerChange(control);
                   }}
                 >
-                  <option value="p1">P1比（P1＝100%）</option>
-                  <option value="p2">P2比（P2＝100%）</option>
+                  <option value="p1">P1比</option>
+                  <option value="p2">P2比</option>
                 </select>
               </label>
             ) : (
@@ -841,6 +842,7 @@ export function RexonanceSaga() {
                   step="1"
                   value={p14Baseline === "p1" ? 1 : 2}
                   aria-label="P14の比較対象"
+                  aria-describedby="rxs-p14-baseline-help"
                   aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
                   onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
                   onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
@@ -855,7 +857,7 @@ export function RexonanceSaga() {
                 />
               </div>
             )}
-            <p>
+            <p id="rxs-p14-baseline-help">
               {nativeIOSSelection
                 ? "iOS標準選択から、100%とする比較基準をP1またはP2へ切り替えられます。"
                 : "スライダーを動かすか両端をタップして、100%とする比較基準をP1またはP2へ切り替えられます。"}

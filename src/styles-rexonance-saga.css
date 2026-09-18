@@ -952,7 +952,8 @@
   background: rgb(4 9 18 / 88%);
   accent-color: #0a84ff;
   color-scheme: dark;
-  font: 700 20px/1 var(--rxs-font-body);
+  font: 700 20px/1 var(--rxs-font-text);
+  letter-spacing: normal;
 }
 
 .rxs-p14-ios-slider:active .rxs-p14-ios-thumb {
@@ -1007,16 +1008,19 @@
 
 .rxs-p14-values span {
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .rxs-p14-values i {
   display: block;
   margin-bottom: 4px;
   color: #707987;
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1.5;
   font-style: normal;
   font-weight: 750;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
 }
 
 .rxs-p14-values b,
@@ -1034,6 +1038,7 @@
 
 .rxs-p14-metrics article > p {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: baseline;
   justify-content: space-between;
@@ -1044,11 +1049,16 @@
 }
 
 .rxs-p14-metrics article > p span {
+  min-width: 0;
   color: #6f7986;
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .rxs-p14-metrics article > p b {
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: #71ddff;
   font-size: 15px;
   text-align: right;

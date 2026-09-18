@@ -43,18 +43,63 @@ export function DossierReader({
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const current = [...entries].reverse().find((entry) => entry.isIntersecting);
-        if (current) setActive(current.target.id);
-      },
-      { rootMargin: "-22% 0px -70% 0px", threshold: 0 },
-    );
-    for (const id of ids.split(",")) {
-      const section = document.getElementById(id);
-      if (section) observer.observe(section);
-    }
-    return () => observer.disconnect();
+    const sections = ids
+      .split(",")
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null);
+    if (!sections.length) return;
+    let observer: IntersectionObserver | undefined;
+    let resizeFrame = 0;
+
+    const observePosition = () => {
+      observer?.disconnect();
+      // Match native anchor placement, including the fixed header and reader.
+      // A percentage-based band can remain above the section after an iPad jump.
+      const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      const margin = parseFloat(getComputedStyle(sections[0]).scrollMarginTop) || 0;
+      const height = Math.max(1, window.innerHeight);
+      const line = Math.min(height - 1, Math.max(0, padding + margin + 2));
+      const intersecting = new Set<Element>();
+      const syncActive = (entries: IntersectionObserverEntry[] = []) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) intersecting.add(entry.target);
+          else intersecting.delete(entry.target);
+        }
+        // Entries contain only changed intersections, not the current full set.
+        // Resolve from document order so upward scrolling and gaps stay stable.
+        // Keep the observer's visibility result: fractional layout/animation
+        // coordinates can differ slightly from a fresh bounding-rect read.
+        const current = sections
+          .filter(
+            (section) =>
+              intersecting.has(section) || section.getBoundingClientRect().top <= line + 1,
+          )
+          .at(-1);
+        setActive((current ?? sections[0]).id);
+      };
+      observer = new IntersectionObserver(syncActive, {
+        rootMargin: `-${line}px 0px -${Math.max(0, height - line - 1)}px 0px`,
+        threshold: 0,
+      });
+      sections.forEach((section) => observer?.observe(section));
+      syncActive();
+    };
+    const onResize = () => {
+      if (resizeFrame) return;
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = 0;
+        observePosition();
+      });
+    };
+    // Parent route effects install data-mode and its scroll-padding after child
+    // effects; measure on the next frame, once that shared chrome is applied.
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", onResize);
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+    };
   }, [ids]);
 
   return (

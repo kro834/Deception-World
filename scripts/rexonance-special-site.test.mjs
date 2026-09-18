@@ -221,8 +221,10 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /iPad\|iPhone\|iPod/);
   assert.match(component, /navigator\.maxTouchPoints > 1/);
   assert.match(component, /<select/);
-  assert.match(component, /<option value="p1">P1比（P1＝100%）<\/option>/);
-  assert.match(component, /<option value="p2">P2比（P2＝100%）<\/option>/);
+  assert.match(component, /<option value="p1">P1比<\/option>/);
+  assert.match(component, /<option value="p2">P2比<\/option>/);
+  assert.match(component, /aria-describedby="rxs-p14-baseline-help"/);
+  assert.match(component, /<p id="rxs-p14-baseline-help">/);
   assert.match(component, /control\.value as P14Baseline/);
   assert.match(component, /iOS標準選択/);
   assert.match(component, /aria-pressed=/);
@@ -256,6 +258,27 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   const p14Asset = new URL("../public/rexonance-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
   assert.ok(statSync(p14Asset).size < 400_000, "P14 artwork should stay below 400 KB");
+});
+
+test("P14 controls and metadata retain readable text at narrow widths", () => {
+  assert.match(
+    styles,
+    /\.rxs-p14-native-select select\s*\{[\s\S]*?font:\s*700 20px\/1 var\(--rxs-font-text\);/,
+  );
+  assert.doesNotMatch(styles, /var\(--rxs-font-body\)/);
+  assert.match(
+    styles,
+    /\.rxs-p14-values span\s*\{[\s\S]*?min-width:\s*0;[\s\S]*?overflow-wrap:\s*anywhere;/,
+  );
+  assert.match(
+    styles,
+    /\.rxs-p14-values i\s*\{[\s\S]*?font-size:\s*11px;[\s\S]*?line-height:\s*1\.5;[\s\S]*?overflow-wrap:\s*anywhere;/,
+  );
+  assert.match(styles, /\.rxs-p14-metrics article > p\s*\{[\s\S]*?flex-wrap:\s*wrap;/);
+  assert.match(
+    styles,
+    /\.rxs-p14-metrics article > p span\s*\{[\s\S]*?min-width:\s*0;[\s\S]*?font-size:\s*11px;[\s\S]*?line-height:\s*1\.5;[\s\S]*?overflow-wrap:\s*anywhere;/,
+  );
 });
 
 test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
