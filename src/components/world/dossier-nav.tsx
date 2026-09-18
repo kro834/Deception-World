@@ -182,7 +182,11 @@ export function DossierNav({
 }) {
   const { idx, prev, next } = neighbors(items, currentHref);
   if (idx < 0) return null;
-  const returnHash = currentHref.startsWith("/riders/") ? "riders-return" : "manager-archive";
+  const returnHash = currentHref.startsWith("/riders/")
+    ? "riders-return"
+    : currentHref.startsWith("/characters/")
+      ? "manager-archive-other"
+      : "manager-archive";
 
   return (
     <nav className="manager-pagination" aria-label="前後の資料">

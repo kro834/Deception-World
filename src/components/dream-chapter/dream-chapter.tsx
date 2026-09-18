@@ -920,8 +920,10 @@ export function DreamChapter() {
               className="dream-poster-shuffle ios26-glass"
               data-liquid-pointer="true"
               aria-label="ポスターをシャッフル"
-              disabled={posterShuffling}
+              aria-disabled={posterShuffling}
+              aria-busy={posterShuffling}
               onClick={(event) => {
+                if (posterShuffling) return;
                 shufflePosters();
                 if (event.detail !== 0) event.currentTarget.blur();
               }}

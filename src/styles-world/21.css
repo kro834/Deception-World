@@ -21,6 +21,17 @@ html[data-mode="world"] {
   pointer-events: none;
 }
 
+.site-shell #manager-archive-other {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  /* Native fragment navigation may precede the hydrated root's scroll-padding. */
+  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+  pointer-events: none;
+}
+
 /* UPDATE belongs to the opening composition and should not cover deep links. */
 html[data-mode="world"] .site-shell > .site-update-control {
   position: absolute;

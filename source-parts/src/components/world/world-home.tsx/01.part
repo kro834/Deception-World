@@ -1,4 +1,5 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -424,3 +425,4 @@ const EPISODES: EpisodeRecord[] = [
         to: "/riders/realm",
         assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
           "/civilian-bell-20260826.jpeg",
+        ],

@@ -12,6 +12,7 @@ const dataSource = readProjectFile("src/components/dream-chapter/dream-chapter-d
 const pageSource = readProjectFile("src/components/dream-chapter/dream-chapter.tsx");
 const menuSource = readProjectFile("src/components/world/world-chrome.tsx");
 const styleSource = readProjectFile("src/styles-dream-chapter.css");
+const filmStyleSource = readProjectFile("src/styles-dream-film.css");
 const loadGateSource = readProjectFile("src/components/load-gate.tsx");
 const routeTransitionStyleSource = readProjectFile("src/styles-route-transitions.css");
 const pickupScrollResetSource = readProjectFile("src/components/world/pickup-scroll-reset.ts");
@@ -382,6 +383,49 @@ test("poster archive implements unbiased shuffle, lock, and Liquid Glass control
   assert.match(pageSource, /className=[^\n]*dream-poster-lock[^\n]*ios26-glass/);
   assert.match(pageSource, /data-liquid-pointer=["']true["']/);
   assert.match(pageSource, /window\.clearTimeout/);
+});
+
+test("poster shuffle preserves keyboard focus while exposing its busy state", () => {
+  const shuffleControl = pageSource.slice(
+    pageSource.indexOf('className="dream-poster-shuffle ios26-glass"'),
+    pageSource.indexOf('className="dream-poster-reset ios26-glass"'),
+  );
+
+  assert.match(shuffleControl, /aria-disabled=\{posterShuffling\}/);
+  assert.match(shuffleControl, /aria-busy=\{posterShuffling\}/);
+  assert.match(shuffleControl, /if \(posterShuffling\) return;/);
+  assert.doesNotMatch(shuffleControl, /\sdisabled=\{/);
+  assert.match(styleSource, /button:not\(:disabled\):not\(\[aria-disabled="true"\]\):hover/);
+  assert.match(
+    styleSource,
+    /button:not\(\[aria-disabled="true"\]\)\[data-liquid-pointer-pressed="true"\]/,
+  );
+  assert.match(
+    filmStyleSource,
+    /\.dream-poster-controls button\[aria-disabled=["']true["']\]\s*\{[^}]*cursor:\s*progress;[^}]*opacity:\s*0\.66;/,
+  );
+});
+
+test("mobile film poster caption remains inside its clipped figure", () => {
+  assert.match(
+    filmStyleSource,
+    /@media\s*\(max-width:\s*640px\)[\s\S]*?\.dream-poster-stage figcaption\s*\{[\s\S]*?inset:\s*auto;[\s\S]*?padding-inline:\s*16px;/,
+  );
+  assert.doesNotMatch(
+    filmStyleSource,
+    /@media\s*\(max-width:\s*640px\)[\s\S]*?\.dream-poster-stage figcaption\s*\{[^}]*inset:\s*auto\s+16px\s+16px/,
+  );
+});
+
+test("mobile poster controls give full-size labels room beside their icons", () => {
+  assert.match(
+    filmStyleSource,
+    /@media\s*\(max-width:\s*640px\)[\s\S]*?\.dream-poster-controls\s*\{\s*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/,
+  );
+  assert.match(
+    filmStyleSource,
+    /@media\s*\(max-width:\s*640px\)[\s\S]*?\.dream-poster-controls \.dream-poster-shuffle\s*\{\s*grid-column:\s*1 \/ -1;/,
+  );
 });
 
 test("Dream Chapter navigation has a dedicated loading transition", () => {

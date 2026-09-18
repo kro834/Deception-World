@@ -1,3 +1,8 @@
+    clearRiderReturn();
+  }, []);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
     if (current === next) return;
     if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
     setPreviousRiderTab(current);
@@ -421,6 +426,3 @@
     if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
     episodeScrollTimer.current = window.setTimeout(() => {
       episodeProgrammatic.current = false;
-      episodeScrollTimer.current = null;
-    }, 520);
-  };

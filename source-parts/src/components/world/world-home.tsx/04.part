@@ -1,3 +1,6 @@
+      episodeScrollTimer.current = null;
+    }, 520);
+  };
 
   const openEpisodePickup = (
     index: number,
@@ -423,5 +426,3 @@
           <div className="story-heading">
             <p className="eyebrow">
               <span>THIS IS NOT A DREAM</span>
-              <i />
-            </p>

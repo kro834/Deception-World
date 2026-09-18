@@ -1,4 +1,5 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -692,6 +693,7 @@ const RiderRail = memo(
 export function WorldHome() {
   useWorldMode();
   const { go, notifyOpeningDestination } = useLoadGate();
+  const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
   const openingBrandRef = useRef<HTMLAnchorElement>(null);
   const openingSigilRef = useRef<HTMLSpanElement>(null);
@@ -756,6 +758,12 @@ export function WorldHome() {
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
   }, []);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
+    syncRail(managerRail.current, 2);
+  }, [locationHash]);
 
   useLayoutEffect(() => {
     let firstFrame = 0;
@@ -1726,6 +1734,7 @@ export function WorldHome() {
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
+          <span id="manager-archive-other" className="manager-archive-return-anchor" aria-hidden="true" />
           <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>

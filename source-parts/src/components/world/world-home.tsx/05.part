@@ -1,3 +1,5 @@
+              <i />
+            </p>
             <h2 data-film-reveal>
               <FilmTextScan />
               救うべき世界は、
@@ -20,6 +22,7 @@
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
+          <span id="manager-archive-other" className="manager-archive-return-anchor" aria-hidden="true" />
           <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
@@ -423,4 +426,3 @@
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
             </div>
-            <div className="rider-number">RIDER / {rider.no}</div>

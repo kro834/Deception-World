@@ -51,3 +51,17 @@ test("names are escaped as text, not rendered as markup", () => {
   assert.doesNotMatch(markup, /<script>/);
   assert.match(markup, /&lt;script&gt;/);
 });
+
+test("the bespoke Lejas dossier offers the same reading anchors as other managers", () => {
+  const lejas = readFileSync(
+    new URL("../src/components/world/lejas-page.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(lejas, /<DossierReader name="レジャス" forms\s*\/>/);
+  for (const id of ["dossier-profile", "dossier-index", "form-records"]) {
+    assert.equal(lejas.split(`id="${id}"`).length - 1, 1, `unique target: ${id}`);
+  }
+  assert.match(lejas, /className="dossier-read-link" href="#dossier-index"/);
+  assert.match(lejas, /<DossierContents/);
+  assert.doesNotMatch(lejas, /className="manager-section-nav"/);
+});

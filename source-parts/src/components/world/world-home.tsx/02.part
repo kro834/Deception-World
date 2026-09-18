@@ -1,4 +1,3 @@
-        ],
       },
       {
         label: "仮面ライダーレルム　アースフォーム",
@@ -266,6 +265,7 @@ const RiderRail = memo(
 export function WorldHome() {
   useWorldMode();
   const { go, notifyOpeningDestination } = useLoadGate();
+  const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
   const openingBrandRef = useRef<HTMLAnchorElement>(null);
   const openingSigilRef = useRef<HTMLSpanElement>(null);
@@ -330,6 +330,12 @@ export function WorldHome() {
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
   }, []);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
+    syncRail(managerRail.current, 2);
+  }, [locationHash]);
 
   useLayoutEffect(() => {
     let firstFrame = 0;
@@ -420,8 +426,3 @@ export function WorldHome() {
   }, []);
 
   useEffect(() => {
-    clearRiderReturn();
-  }, []);
-
-  const selectRider = useCallback((next: number) => {
-    const current = riderTabRef.current;

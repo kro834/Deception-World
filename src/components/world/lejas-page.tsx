@@ -3,6 +3,7 @@ import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierTopbar } from "./world-chrome";
+import { DossierContents, DossierReader } from "./dossier-reader";
 
 export function LejasPage() {
   useWorldMode();
@@ -11,6 +12,7 @@ export function LejasPage() {
   return (
     <main
       className="manager-page"
+      id="top"
       style={{
         ["--manager-accent" as string]: "#78b69b",
         ["--manager-accent-soft" as string]: "#d7ab51",
@@ -27,7 +29,7 @@ export function LejasPage() {
         returnLabel="六詠一覧へ戻る"
       />
 
-      <section className="manager-hero" id="top">
+      <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <button
             type="button"
@@ -87,6 +89,9 @@ export function LejasPage() {
             <span className="manager-display-name">レジャス</span>
           </h1>
           <p className="manager-title"># 真実だけで破滅を組み上げる盤面の管理人</p>
+          <a className="dossier-read-link" href="#dossier-index">
+            人物資料を読む <span aria-hidden="true">↓</span>
+          </a>
           <div className="manager-quotes" aria-label="レジャスの台詞">
             <q>私は一度も嘘を吐いていない</q>
             <q>選んだのは君だ。私が並べた選択肢の中から</q>
@@ -125,25 +130,31 @@ export function LejasPage() {
         </div>
       </section>
 
-      <section className="manager-dossier" aria-label="レジャスの人物資料">
+      <DossierReader name="レジャス" forms />
+      <section className="manager-dossier" id="dossier-index" aria-label="レジャスの人物資料">
         <div className="manager-section-index">
           <span>IV</span>
           <small>CHARACTER DOSSIER</small>
         </div>
-        <nav className="manager-section-nav" aria-label="人物資料の章">
-          <a href="#character-section-01">
-            <span>01</span>
-            <b>AUTHORITY / BOARD</b>
-          </a>
-          <a href="#character-section-02">
-            <span>02</span>
-            <b>PERSONALITY / TRUE DECEPTION</b>
-          </a>
-          <a href="#character-section-03">
-            <span>03</span>
-            <b>BATTLE / USED OPTIONS</b>
-          </a>
-        </nav>
+        <DossierContents
+          sections={[
+            {
+              no: "01",
+              kicker: "AUTHORITY / BOARD",
+              title: "対立する目的が生まれた瞬間、世界は盤面になる。",
+            },
+            {
+              no: "02",
+              kicker: "PERSONALITY / TRUE DECEPTION",
+              title: "正しい情報だけで、相手自身に間違わせる。",
+            },
+            {
+              no: "03",
+              kicker: "BATTLE / USED OPTIONS",
+              title: "最善手を選び続けた先に、敗北だけを残す。",
+            },
+          ]}
+        />
         <div className="manager-sections">
           <article className="manager-copy-section" id="character-section-01">
             <div className="manager-copy-heading">
@@ -187,77 +198,79 @@ export function LejasPage() {
         </div>
       </section>
 
-      <FormPickup
-        rider={{
-          img: "/manager-lejas-rider.jpeg",
-          pos: "50% 8%",
-          system: "ゲーマドライバー × グランドマスターガシャット／ゲームマスターガシャット",
-          name: "ファラリス",
-          calls: [
-            "GAME MASTER SYSTEM!",
-            "ガシャット!",
-            "ガッチャーン!",
-            "レベルアップ!!",
-            "TRUE! FALSE! CHECKMATE!",
-            "KAMEN RIDER PHALARIS!",
-          ],
-          quote: "選んだのは君だ。私が並べた選択肢の中から",
-          stats: [
-            { dt: "HEIGHT", dd: "214.4cm" },
-            { dt: "WEIGHT", dd: "104.4kg" },
-            { dt: "PUNCH", dd: "244.4t" },
-            { dt: "KICK", dd: "444.4t" },
-            { dt: "JUMP", dd: "1444.4m" },
-            { dt: "100m", dd: "0.0014sec" },
-          ],
-          abilities: [
-            {
-              name: "FALSE BOARD",
-              body: "異なる目的を持つ二名以上がいる時だけ盤面を成立させ、人物、武器、建造物、能力、関係性までを駒や地形として登録する。",
-            },
-            {
-              name: "RULE INSTALL",
-              body: "敵味方と自身へ適用されるルールを最大四つ設定する。完全に解読した者はそのルールを逆用できる。",
-            },
-            {
-              name: "ROLE ASSIGN",
-              body: "現実の能力、立場、関係性を基に、キング、クイーン、ルーク、ビショップ、ナイト、ポーンなどの役割を与える。",
-            },
-            {
-              name: "TRUE DISPLAY",
-              body: "虚偽を含まない盤面情報を提示する一方、順番、範囲、主語、時間軸を選び、その先に生じる別の結果を伏せる。",
-            },
-            {
-              name: "SAVE / RETRY",
-              body: "配置、損傷、能力使用状況を一度だけ保存・復元する。全員の記憶は維持される。",
-            },
-            {
-              name: "CHECKMATE PROCESS",
-              body: "重要な選択を四手記録し、勝利へ至る合法手を閉鎖する。",
-            },
-          ],
-          arsenal: [
-            {
-              name: "ノー・リーガムーブ",
-              body: "大剣。対象の合法手を斬り、直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。",
-            },
-            {
-              name: "チェックメイト・バスティオン",
-              body: "盾。受けた攻撃を一手として記録し、同系統を自動減衰する。",
-            },
-          ],
-          finishers: [
-            {
-              name: "PHALARIS CRITICAL STRIKE",
-              body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。",
-            },
-            {
-              name: "CHECKMATE CRITICAL END",
-              body: "盤面を一枚の白黒区画へ圧縮し、一点へ収束したライダーキックで終局へ導く。",
-            },
-          ],
-        }}
-      />
+      <div id="form-records">
+        <FormPickup
+          rider={{
+            img: "/manager-lejas-rider.jpeg",
+            pos: "50% 8%",
+            system: "ゲーマドライバー × グランドマスターガシャット／ゲームマスターガシャット",
+            name: "ファラリス",
+            calls: [
+              "GAME MASTER SYSTEM!",
+              "ガシャット!",
+              "ガッチャーン!",
+              "レベルアップ!!",
+              "TRUE! FALSE! CHECKMATE!",
+              "KAMEN RIDER PHALARIS!",
+            ],
+            quote: "選んだのは君だ。私が並べた選択肢の中から",
+            stats: [
+              { dt: "HEIGHT", dd: "214.4cm" },
+              { dt: "WEIGHT", dd: "104.4kg" },
+              { dt: "PUNCH", dd: "244.4t" },
+              { dt: "KICK", dd: "444.4t" },
+              { dt: "JUMP", dd: "1444.4m" },
+              { dt: "100m", dd: "0.0014sec" },
+            ],
+            abilities: [
+              {
+                name: "FALSE BOARD",
+                body: "異なる目的を持つ二名以上がいる時だけ盤面を成立させ、人物、武器、建造物、能力、関係性までを駒や地形として登録する。",
+              },
+              {
+                name: "RULE INSTALL",
+                body: "敵味方と自身へ適用されるルールを最大四つ設定する。完全に解読した者はそのルールを逆用できる。",
+              },
+              {
+                name: "ROLE ASSIGN",
+                body: "現実の能力、立場、関係性を基に、キング、クイーン、ルーク、ビショップ、ナイト、ポーンなどの役割を与える。",
+              },
+              {
+                name: "TRUE DISPLAY",
+                body: "虚偽を含まない盤面情報を提示する一方、順番、範囲、主語、時間軸を選び、その先に生じる別の結果を伏せる。",
+              },
+              {
+                name: "SAVE / RETRY",
+                body: "配置、損傷、能力使用状況を一度だけ保存・復元する。全員の記憶は維持される。",
+              },
+              {
+                name: "CHECKMATE PROCESS",
+                body: "重要な選択を四手記録し、勝利へ至る合法手を閉鎖する。",
+              },
+            ],
+            arsenal: [
+              {
+                name: "ノー・リーガムーブ",
+                body: "大剣。対象の合法手を斬り、直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。",
+              },
+              {
+                name: "チェックメイト・バスティオン",
+                body: "盾。受けた攻撃を一手として記録し、同系統を自動減衰する。",
+              },
+            ],
+            finishers: [
+              {
+                name: "PHALARIS CRITICAL STRIKE",
+                body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。",
+              },
+              {
+                name: "CHECKMATE CRITICAL END",
+                body: "盤面を一枚の白黒区画へ圧縮し、一点へ収束したライダーキックで終局へ導く。",
+              },
+            ],
+          }}
+        />
+      </div>
       <DossierNav items={RIKUEI_NAV} currentHref="/managers/lejas" indexLabel="RIKUEI" />
     </main>
   );
