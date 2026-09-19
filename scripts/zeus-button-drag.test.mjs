@@ -7,6 +7,19 @@ const source = readFileSync(
   "utf8",
 ).replaceAll("\r\n", "\n");
 
+test("queued placement cannot interrupt a gesture and interrupted drags restore their origin", () => {
+  assert.match(source, /placementFrame\.current = null;\s*if \(activePointer\.current != null\) return;/);
+  assert.match(source, /if \(activePointer\.current == null\) placeButton\(position\)/);
+  assert.match(source, /gestureOrigin\.current = \{ \.\.\.pendingPosition\.current \}/);
+  assert.match(source, /if \(wasHeld\) restoreGestureOrigin\(\)/);
+  assert.match(source, /else if \(wasHeld && cancelled\) \{\s*restoreGestureOrigin\(\)/);
+});
+
+test("drag drawing is frame-coalesced and the release flushes the final position", () => {
+  assert.match(source, /if \(dragFrame\.current == null\) \{\s*dragFrame\.current = window\.requestAnimationFrame/);
+  assert.match(source, /const finishPointer[\s\S]*?cancelDragFrame\(\);[\s\S]*?moveToPointer\(event.clientX, event.clientY\);\s*onPositionChange/);
+});
+
 test("Zeus dragging corrects viewport coordinates inside transformed dialogs", () => {
   assert.match(source, /const setVisualCenter = useCallback/);
   assert.match(source, /const parent = button\.offsetParent/);

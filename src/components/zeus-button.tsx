@@ -240,6 +240,20 @@ function ZeusButton({
   const pendingPosition = useRef(position);
   const placementFrame = useRef<number | null>(null);
   const placementTimer = useRef<number | null>(null);
+  const dragFrame = useRef<number | null>(null);
+  const gestureOrigin = useRef(position);
+
+  const cancelDragFrame = useCallback(() => {
+    if (dragFrame.current != null) window.cancelAnimationFrame(dragFrame.current);
+    dragFrame.current = null;
+  }, []);
+
+  const cancelPlacement = useCallback(() => {
+    if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
+    if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
+    placementTimer.current = null;
+    placementFrame.current = null;
+  }, []);
 
   const getViewport = useCallback(() => {
     const viewport = window.visualViewport;
@@ -420,8 +434,21 @@ function ZeusButton({
     [avoidCriticalControls, clampCenter, getViewport, setVisualCenter],
   );
 
+  const restoreGestureOrigin = useCallback(() => {
+    const viewport = getViewport();
+    // Restore the displayed origin, not the expanded drag bounds or a new
+    // collision candidate. Otherwise cancellation itself shifts the button.
+    setVisualCenter(
+      viewport.offsetLeft + gestureOrigin.current.x * viewport.width,
+      viewport.offsetTop + gestureOrigin.current.y * viewport.height,
+    );
+    pendingPosition.current = { ...gestureOrigin.current };
+  }, [getViewport, setVisualCenter]);
+
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => placeButton(position));
+    const frame = window.requestAnimationFrame(() => {
+      if (activePointer.current == null) placeButton(position);
+    });
     return () => window.cancelAnimationFrame(frame);
   }, [placeButton, position]);
 
@@ -430,6 +457,7 @@ function ZeusButton({
       if (activePointer.current != null || placementFrame.current != null) return;
       placementFrame.current = window.requestAnimationFrame(() => {
         placementFrame.current = null;
+        if (activePointer.current != null) return;
         placeButton(pendingPosition.current);
       });
     };
@@ -486,8 +514,10 @@ function ZeusButton({
   useEffect(
     () => () => {
       clearHoldTimer();
+      cancelDragFrame();
+      cancelPlacement();
     },
-    [clearHoldTimer],
+    [clearHoldTimer, cancelDragFrame, cancelPlacement],
   );
 
   /* Pointer capture is not guaranteed in Samsung Internet or embedded
@@ -501,13 +531,16 @@ function ZeusButton({
         return;
       const button = buttonRef.current;
       const pointerId = activePointer.current;
+      const wasHeld = held.current;
       clearHoldTimer();
+      cancelDragFrame();
       activePointer.current = null;
       held.current = false;
       moved.current = true;
       if (button) {
         button.dataset.dragging = "false";
         button.setAttribute("aria-grabbed", "false");
+        if (wasHeld) restoreGestureOrigin();
         try {
           if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
         } catch {
@@ -531,7 +564,7 @@ function ZeusButton({
       window.removeEventListener("pagehide", cancelOnBlur);
       document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
-  }, [clearHoldTimer]);
+  }, [clearHoldTimer, cancelDragFrame, restoreGestureOrigin]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
@@ -551,13 +584,14 @@ function ZeusButton({
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
     if (activePointer.current !== event.pointerId) return;
     clearHoldTimer();
+    cancelDragFrame();
     const wasHeld = held.current;
     activePointer.current = null;
     if (wasHeld && !cancelled) {
       moveToPointer(event.clientX, event.clientY);
       onPositionChange(pendingPosition.current);
     } else if (wasHeld && cancelled) {
-      placeButton(position);
+      restoreGestureOrigin();
     }
     held.current = false;
     event.currentTarget.dataset.dragging = "false";
@@ -592,6 +626,10 @@ function ZeusButton({
       onPointerDown={(event) => {
         if (navigating) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
+        if (activePointer.current != null) return;
+        cancelPlacement();
+        cancelDragFrame();
+        gestureOrigin.current = { ...pendingPosition.current };
         const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
@@ -640,7 +678,14 @@ function ZeusButton({
           return;
         }
         event.preventDefault();
-        moveToPointer(event.clientX, event.clientY);
+        if (dragFrame.current == null) {
+          dragFrame.current = window.requestAnimationFrame(() => {
+            dragFrame.current = null;
+            if (held.current && activePointer.current != null) {
+              moveToPointer(latestPointer.current.x, latestPointer.current.y);
+            }
+          });
+        }
       }}
       onPointerUp={(event) => finishPointer(event)}
       onPointerCancel={(event) => finishPointer(event, true)}
