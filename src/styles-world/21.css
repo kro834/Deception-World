@@ -106,10 +106,11 @@ html[data-mode="world"] .site-shell > .site-update-control {
   position: sticky;
 }
 
-/* Reserve the iPad pickup header's control lane so its long rider title can
-   never run underneath the close control once the button is re-anchored. */
+/* The inner pickup panel begins below the fixed close control. Keeping the
+   heading full-width prevents long form names from losing a needless column
+   on iPhone landscape and iPad. */
 .form-pickup-heading {
-  padding-right: 64px;
+  padding-right: 0;
 }
 
 .liquid-pointer-glow {

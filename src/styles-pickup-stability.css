@@ -107,6 +107,7 @@ html[data-mode="world"] .form-pickup-dialog > .form-pickup-close {
 }
 
 html[data-mode="world"] .form-pickup-heading,
+html[data-mode="world"] .form-pickup-layout > *,
 html[data-mode="world"] .form-pickup-stats > div {
   min-width: 0;
 }
@@ -124,6 +125,53 @@ html[data-mode="world"] .form-pickup-heading .rider-call b {
   font-size: 10px;
   line-height: 1.5;
   padding: 8px 10px;
+}
+
+/* Keep the full form name readable in the caption instead of letting the
+   label and title compete for one narrow flex row. */
+html[data-mode="world"] .form-pickup-layout figcaption {
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+}
+html[data-mode="world"] .form-pickup-layout figcaption > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Standard dossiers share a quiet label / strong title hierarchy. Keep the
+   bespoke Rexonance heading and its animation independent. */
+html[data-mode="world"] .form-pickup-dialog:not(.is-rexonance-dialog) .form-pickup-heading > small {
+  display: block;
+  color: #b9c5d5;
+  font-size: 12px;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+html[data-mode="world"] .form-pickup-dialog:not(.is-rexonance-dialog) .form-pickup-heading > em {
+  display: block;
+  margin: 8px 0 14px;
+  color: #d0d8e4;
+  font-size: 14px;
+  font-style: normal;
+  line-height: 1.6;
+}
+@media (max-width: 760px) {
+  html[data-mode="world"]
+    .form-pickup-dialog:not(.is-rexonance-dialog)
+    .form-pickup-heading
+    h2
+    > span {
+    margin-bottom: 8px;
+    color: #b9c5d5;
+    font-size: 0.6em;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+  }
+  html[data-mode="world"] .form-pickup-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
