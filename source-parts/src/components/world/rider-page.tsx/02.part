@@ -1,3 +1,5 @@
+    civilian: {
+      name: "月城 悠真",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
       cv: "坂田将吾",
@@ -330,7 +332,3 @@
           },
           {
             name: "SPECIAL",
-            body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
-          },
-        ],
-        arsenal: [

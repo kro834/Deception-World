@@ -1,5 +1,3 @@
-    >
-      <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>

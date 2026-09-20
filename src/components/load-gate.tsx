@@ -821,7 +821,7 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
           ))}
         </span>
         <span className="rider-cutin-caption">
-          <small>NO TRACE // DEAD DROP</small>
+          <small>SPOOF // TRACE // PROXY</small>
           <b>CIPHER</b>
         </span>
       </div>

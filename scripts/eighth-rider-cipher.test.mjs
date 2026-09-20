@@ -28,12 +28,12 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
   ]) {
     assert.equal(existsSync(new URL(path, import.meta.url)), true, `${path} must exist`);
   }
-  assert.match(dossier, /title: "最期の死者"/);
+  assert.match(dossier, /title: "SCARS特務情報官"/);
   assert.match(dossier, /name: "サイファー"/);
   assert.match(dossier, /name: "サイファー・ブラックサイト"/);
   assert.match(dossier, /rider\.id === "cipher"\s*\?\s*rider\.forms/);
   assert.match(dossier, /name: "SPOOF"/);
-  assert.match(dossier, /name: "DEAD DROP"/);
+  assert.doesNotMatch(dossier, /DEAD DROP|NO TRACE|CIPHER BLACK!/);
   assert.match(dossier, /name: "BLACKOUT"/);
   assert.match(dossier, /name: "BURN NOTICE"/);
   assert.match(dossier, /"ON EARTH!\?"/);
@@ -41,6 +41,18 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
   assert.match(dossier, /サイファードライバー × プライムコア/);
   assert.match(dossier, /name: "サイファーエンター"/);
   assert.match(dossier, /name: "サイファーコンカー"/);
+});
+
+test("Cipher calls and comparisons follow the revised September record", () => {
+  const cipher = dossier.slice(dossier.indexOf('id: "cipher"'), dossier.indexOf('export function RiderPage'));
+  const calls = [...cipher.matchAll(/calls: \[([\s\S]*?)\]/g)].map((match) => [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]));
+  assert.deepEqual(calls, [
+    ["CIPHER IN!", "ROLLOUT!", "CIPHER!", "ON EARTH!?"],
+    ["CIPHER IN!", "ROLLOUT!", "ERASE THE TRACE!", "BLACKSITE!", "FOCUS ON!"],
+  ]);
+  for (const value of ["ディルクルムサーガやヴィンクルムサーガ", "エクスプリームサーガやレルムレジェンズ", "エクスプリームサーガ・ウルトラを大幅に下回る", "CIPHER ENTER！", "CIPHER CONQUER！", "7200TOPS / 96Core", "18000TOPS / 144Core", "2400E", "5200E"]) assert.ok(cipher.includes(value), value);
+  assert.doesNotMatch(cipher, /DEAD DROP|NO TRACE|CIPHER BLACK!|REALMSフランス本部からSCARSへ潜入|インテグラルサーガやヴァーテックス/);
+  assert.doesNotMatch(gate, /NO TRACE \/\/ DEAD DROP/);
 });
 
 test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {

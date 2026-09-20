@@ -302,7 +302,7 @@ const RIDERS = [
     tone: "#f05bcf",
     img: "/rider-cipher-thumbnail-20260825.jpeg",
     pos: "50% 8%",
-    desc: "最期の死者",
+    desc: "SCARSに所属する謎の特務情報官。情報的不確定性を利用して戦う。",
   },
 ];
 
