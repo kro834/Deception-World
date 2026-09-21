@@ -395,7 +395,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       ],
     },
     special: {
-      kicker: "FINAL STAGE / ULTIMATE SITE",
+      kicker: "FINAL STAGE / STORY SITE",
       name: "ファーフロムサーガ",
       en: "FAR FROM SAGA",
       sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
@@ -528,7 +528,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       body: "変身前ビジュアル // CONFIRMED。REALMS元日本支部リーダー。",
     },
     special: {
-      kicker: "FINAL STAGE / ULTIMATE SITE",
+      kicker: "FINAL STAGE / STORY SITE",
       name: "レルムロイヤル",
       en: "REALM ROYAL",
       sub: "ROYAL / WRATH / ABYSS / BIRTH / NEHAN",

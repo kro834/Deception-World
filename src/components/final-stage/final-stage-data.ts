@@ -29,6 +29,98 @@ export type RrForm = {
 export const FFS_STAGE_ORDER: readonly FfsStageKey[] = ["middle", "high", "xhigh", "max", "ultra"];
 export const RR_FORM_ORDER: readonly RrFormKey[] = ["royal", "wrath", "abyss", "birth", "nehan"];
 
+export type CastEntry = {
+  id: string;
+  name: string;
+  en: string;
+  kicker: string;
+  role: string;
+  body: string;
+  image: string;
+  pos: string;
+  width: number;
+  height: number;
+  to: string;
+  assets: readonly string[];
+  accent: string;
+};
+
+/* Synopsis composed only from the supplied rider records and the established
+   Deception World setting; no new plot is introduced. */
+export const STORY = {
+  lead: "書き換えられた世界を、本来の持ち主へ返す。",
+  paragraphs: [
+    "世界、概念、領域、物語、法則。あらゆるものを管轄する管理人たちと、八人のライダーが交差した『Deception World』の先で、物語はファイナルステージへ至る。",
+    "アナザーレルムとハデスによる世界侵食は、「その世界の物語を書き換える」性質を持つ。侵食が深部まで進んだ世界と人格を前に、シエル＝月城悠真とベル・アレインは、それぞれの最終到達形態へ向かう。",
+    "悠真は、レクソナンスコアから変化した『オーバーゴッズコア』と『オーバークリスタルコア』をエクスサーガドライバーへ接続する。《秩序》と《破壊》を司るレックス・ロワ、最高位神格としての五代目ゼウス、そしてゼウスから切り離されながら月城悠真という人格を獲得した悠真自身──三者の共鳴が、仮面ライダーファーフロムサーガを成立させる。",
+    "ベルは、変身者一人だけを適応者として編纂するレジェンズの欠点を解消するために再設計された『ロイヤルコア』を、レルムズルーレットのリミッターを解除して装填し、仮面ライダーレルムロイヤルへ。戦場を「レルムの王国」として宣言し、侵食された世界・領域・人格を「王国の失地」として、本来の持ち主へ返還する。",
+    "シエルの「一人も諦めない」思想を、ベルがシステムとして実装した『ROYALLL』。その開発経緯そのものが、二人の物語の答えになる。王と英雄が並び立って災厄を退けた伝説を現実へ確定させ、役目を終えた接続が静かに解除されるとき、サーガは守り抜いた世界へ降り立つ。",
+  ],
+} as const;
+
+export const CAST: readonly CastEntry[] = [
+  {
+    id: "yuma",
+    name: "月城 悠真",
+    en: "YUMA TSUKISHIRO / CIEL",
+    kicker: "RIDER 01 / KAMEN RIDER SAGA",
+    role: "夢見る者 ／ 仮面ライダーファーフロムサーガ",
+    body: "ゼウスから切り離されながら、月城悠真という人格を獲得した本人。レックス・ロワ、五代目ゼウスとの三者共鳴の中心に立ち、何を破壊し、何を保存するかの最終決定権を握る。",
+    image: "/civilian-yuma-20260826.jpeg",
+    pos: "50% 12%",
+    width: 960,
+    height: 1280,
+    to: "/riders/saga",
+    assets: ["/civilian-yuma-20260826.jpeg"],
+    accent: "#7fe6ff",
+  },
+  {
+    id: "bell",
+    name: "ベル・アレイン",
+    en: "BELL ALAIN",
+    kicker: "RIDER 02 / KAMEN RIDER REALM",
+    role: "完成品 ／ 仮面ライダーレルムロイヤル",
+    body: "レジェンズの欠点を解消するためにロイヤルコアを再設計し、シエルの「一人も諦めない」思想を『ROYALLL』としてシステムに実装した。王は民を守る分、自らの盾を薄くする。",
+    image: "/civilian-bell-20260826.jpeg",
+    pos: "50% 10%",
+    width: 853,
+    height: 1280,
+    to: "/riders/realm",
+    assets: ["/civilian-bell-20260826.jpeg"],
+    accent: "#ff6f8d",
+  },
+  {
+    id: "rex-loi",
+    name: "レックス・ロワ",
+    en: "REX LOI",
+    kicker: "MANAGER / 六詠・第二位",
+    role: "真の選択肢を残す管理人",
+    body: "《秩序》と《破壊》を司り、ファーフロムサーガの三者共鳴の一柱となる。その主権が敵側の作用領域を限定し、《絶対秩序》が更新中と更新後の機構の矛盾を防ぐ。",
+    image: "/manager-rex-loi.jpeg",
+    pos: "50% 0%",
+    width: 1024,
+    height: 1536,
+    to: "/managers/rex-loi",
+    assets: ["/manager-rex-loi.jpeg"],
+    accent: "#67d8ff",
+  },
+  {
+    id: "zeus",
+    name: "ゼウス",
+    en: "ZEUS",
+    kicker: "MANAGER / 六詠・第一位",
+    role: "主権を継いだ六詠第一位",
+    body: "最高位神格としての五代目ゼウス。その《第一性》が、悠真の承認した処理へ《第一実行権》を与える。二柱の意思が彼の人格を上書きすることはない。",
+    image: "/manager-zeus-detail.jpeg",
+    pos: "50% 42%",
+    width: 1122,
+    height: 1402,
+    to: "/managers/zeus",
+    assets: ["/manager-zeus-detail.jpeg?v=20260823-2"],
+    accent: "#e6c58b",
+  },
+] as const;
+
 export const FAR_FROM_SAGA = {
   name: "ファーフロムサーガ",
   en: "FAR FROM SAGA",

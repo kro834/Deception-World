@@ -560,8 +560,10 @@ export function SideMenuLayer({
                       ]
                     : [
                         ["top", "トップ", "TOP"],
-                        ["far-from-saga", "ファーフロムサーガ", "FAR FROM SAGA"],
-                        ["realm-royal", "レルムロイヤル", "REALM ROYAL"],
+                        ["story", "あらすじ", "STORY"],
+                        ["characters", "登場人物", "CHARACTERS"],
+                        ["far-from-saga", "ファーフロムサーガ", "RIDER 01"],
+                        ["realm-royal", "レルムロイヤル", "RIDER 02"],
                       ]
                 ).map(([hash, label, code]) => (
                   <GuardedLink
@@ -685,16 +687,6 @@ export function SideMenuLayer({
               <span>レクソナンスサーガ</span>
               <i>PERFORMANCE SITE</i>
             </GuardedLink>
-            <GuardedLink
-              to="/final-stage"
-              hash="top"
-              assets={context === "final-stage" ? [] : FINAL_STAGE_ENTER_ASSETS}
-              beforeNavigate={close}
-              aria-current={context === "final-stage" ? "page" : undefined}
-            >
-              <span>ファイナルステージ</span>
-              <i>ULTIMATE SITE</i>
-            </GuardedLink>
           </div>
         </div>
         <div className="side-panel-group">
@@ -733,6 +725,16 @@ export function SideMenuLayer({
                 <i>MOVIE 01</i>
               </GuardedLink>
             )}
+            <GuardedLink
+              to="/final-stage"
+              hash="top"
+              assets={context === "final-stage" ? [] : FINAL_STAGE_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "final-stage" ? "page" : undefined}
+            >
+              <span>ファイナルステージ</span>
+              <i>FINAL STAGE</i>
+            </GuardedLink>
           </div>
         </div>
         {context === "world" ? (

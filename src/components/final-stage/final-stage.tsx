@@ -5,13 +5,16 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
+import { dossierImage } from "@/lib/dossier-images";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import {
+  CAST,
   FAR_FROM_SAGA,
   FFS_STAGE_ORDER,
   REALM_ROYAL,
   RR_FORM_ORDER,
+  STORY,
   type Article,
   type FfsStageKey,
   type RrFormKey,
@@ -239,8 +242,9 @@ export function FinalStage() {
             <b>ファイナルステージ</b>
           </GuardedLink>
           <nav aria-label="ファイナルステージ ページ内ナビゲーション">
-            <a href="#far-from-saga">ファーフロム</a>
-            <a href="#realm-royal">ロイヤル</a>
+            <a href="#story">あらすじ</a>
+            <a href="#characters">人物</a>
+            <a href="#riders">ライダー</a>
           </nav>
           <SideMenuTrigger
             className="rxs-menu-trigger"
@@ -279,15 +283,88 @@ export function FinalStage() {
             <br />
             ステージ
           </h1>
-          <p className="rxs-hero-lede">ファイナルステージ限定、二つの究極形態の記録。</p>
+          <p className="rxs-hero-lede">{STORY.lead}</p>
         </div>
-        <a className="rxs-scroll-cue" href="#riders">
-          <span>記録を開く</span>
+        <a className="rxs-scroll-cue" href="#story">
+          <span>あらすじを読む</span>
           <i aria-hidden="true" />
         </a>
       </section>
 
+      <section id="story" className="rxs-section fst-story">
+        <header className="rxs-section-heading rxs-reveal">
+          <p>01 / STORY</p>
+          <h2>
+            書き換えられた世界を、
+            <br />
+            本来の持ち主へ。
+          </h2>
+        </header>
+        <div className="fst-story-layout rxs-reveal">
+          <div className="fst-story-index" aria-hidden="true">
+            <span>FINAL</span>
+            <span>STAGE</span>
+            <i />
+          </div>
+          <Prose paragraphs={STORY.paragraphs} className="fst-story-copy" />
+        </div>
+      </section>
+
+      <section id="characters" className="rxs-section fst-cast-section">
+        <header className="rxs-section-heading rxs-reveal">
+          <p>02 / CHARACTERS</p>
+          <h2>
+            二人のライダーと、
+            <br />
+            二柱の管理人。
+          </h2>
+          <span>各記録は、ディセプションワールドの人物資料へ接続します。</span>
+        </header>
+        <div className="fst-cast" role="list" aria-label="登場人物">
+          {CAST.map((person) => (
+            <article
+              key={person.id}
+              className="fst-cast-card rxs-reveal"
+              role="listitem"
+              style={{ ["--fst-accent" as string]: person.accent }}
+            >
+              <figure>
+                <img
+                  src={person.image}
+                  {...dossierImage(person.image)}
+                  alt={`${person.name}のビジュアル`}
+                  style={{ objectPosition: person.pos }}
+                  width={person.width}
+                  height={person.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <div>
+                <small>{person.kicker}</small>
+                <h3>{person.name}</h3>
+                <em>{person.en}</em>
+                <strong>{person.role}</strong>
+                <p>{person.body}</p>
+                <GuardedLink
+                  to={person.to}
+                  assets={person.assets}
+                  aria-label={`${person.name}の人物資料を開く`}
+                >
+                  <span>人物資料</span>
+                  <i aria-hidden="true">↗</i>
+                </GuardedLink>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section id="riders" className="rxs-section fst-entries-section" aria-label="収録ライダー">
+        <header className="rxs-section-heading rxs-reveal">
+          <p>03 / RIDERS</p>
+          <h2>二つの究極形態。</h2>
+        </header>
         <div className="fst-entries">
           <a className="fst-entry rxs-reveal" href="#far-from-saga">
             <figure>
@@ -339,7 +416,7 @@ export function FinalStage() {
       {/* ---------------- FAR FROM SAGA ---------------- */}
       <section id="far-from-saga" className="rxs-section fst-rider fst-ffs">
         <header className="rxs-section-heading rxs-reveal">
-          <p>RIDER RECORD 01 / {FAR_FROM_SAGA.en}</p>
+          <p>03 / RIDER RECORD 01 / {FAR_FROM_SAGA.en}</p>
           <h2>
             <span className="fst-prefix">仮面ライダー</span>
             ファーフロム
@@ -461,7 +538,7 @@ export function FinalStage() {
       {/* ---------------- REALM ROYAL ---------------- */}
       <section id="realm-royal" className="rxs-section fst-rider fst-rr">
         <header className="rxs-section-heading rxs-reveal">
-          <p>RIDER RECORD 02 / {REALM_ROYAL.en}</p>
+          <p>03 / RIDER RECORD 02 / {REALM_ROYAL.en}</p>
           <h2>
             <span className="fst-prefix">仮面ライダー</span>
             レルム
@@ -576,7 +653,7 @@ export function FinalStage() {
 
       <footer className="rxs-footer fst-footer">
         <div>
-          <p>FINAL STAGE / TWO ULTIMATE FORMS</p>
+          <p>FINAL STAGE / STORY &amp; RECORDS</p>
           <h2>ファイナルステージ、開幕。</h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>

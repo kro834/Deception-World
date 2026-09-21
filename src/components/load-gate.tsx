@@ -732,7 +732,7 @@ function RiderRouteDive({
             : variant === "extreme"
               ? "EXTREME // SUPREME SITE"
               : variant === "final-stage"
-                ? "FINAL STAGE // ULTIMATE SITE"
+                ? "FINAL STAGE // STORY SITE"
                 : `${meta.name} // RIDER ${meta.no}`}
         </small>
         <span>

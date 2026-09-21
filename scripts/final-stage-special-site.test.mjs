@@ -30,23 +30,26 @@ test("Final Stage special site has a route, menu entry, warmup asset, and dedica
   );
   assert.match(loader, /export const FINAL_STAGE_ENTER_ASSETS/);
   assert.match(loadGate, /"\/final-stage": "final-stage"/);
-  assert.match(loadGate, /FINAL STAGE \/\/ ULTIMATE SITE/);
+  assert.match(loadGate, /FINAL STAGE \/\/ STORY SITE/);
   assert.match(loadGate, /最終位相へダイブ中/);
   assert.match(transitions, /\.is-final-stage-dive/);
   assert.match(deployment, /"\/final-stage"/);
 });
 
-test("shared special navigation keeps Final Stage directly below Rexonance", () => {
+test("Final Stage is listed under STORIES after Dream Chapter, not under SPECIAL", () => {
   const specialNavigation = menu.slice(
     menu.indexOf("<p>SPECIAL</p>"),
     menu.indexOf("<p>STORIES</p>"),
   );
-  const extremePosition = specialNavigation.indexOf("<span>エクスプリームサーガ</span>");
-  const rexonancePosition = specialNavigation.indexOf("<span>レクソナンスサーガ</span>");
-  const finalStagePosition = specialNavigation.indexOf("<span>ファイナルステージ</span>");
-  assert.ok(extremePosition >= 0);
-  assert.ok(rexonancePosition > extremePosition);
-  assert.ok(finalStagePosition > rexonancePosition);
+  assert.equal(specialNavigation.indexOf("<span>ファイナルステージ</span>"), -1);
+  const stories = menu.slice(menu.indexOf("<p>STORIES</p>"), menu.indexOf("<p>RIDERS</p>"));
+  const dreamPosition = stories.lastIndexOf("<span>映画第一作「ドリームチャプター」</span>");
+  const finalStagePosition = stories.indexOf("<span>ファイナルステージ</span>");
+  assert.ok(dreamPosition >= 0);
+  assert.ok(finalStagePosition > dreamPosition);
+  assert.match(stories, /<i>FINAL STAGE<\/i>/);
+  assert.match(menu, /\["story", "あらすじ", "STORY"\]/);
+  assert.match(menu, /\["characters", "登場人物", "CHARACTERS"\]/);
 });
 
 test("Final Stage component wires the shared chrome, section anchors, and hero title", () => {
@@ -55,6 +58,8 @@ test("Final Stage component wires the shared chrome, section anchors, and hero t
   assert.match(component, /id="top"/);
   assert.match(component, /className="rxs-page fst-page"/);
   assert.match(component, /aria-labelledby="fst-title"/);
+  assert.match(component, /id="story"/);
+  assert.match(component, /id="characters"/);
   assert.match(component, /id="far-from-saga"/);
   assert.match(component, /id="realm-royal"/);
   assert.match(component, /fetchPriority="high"/);
