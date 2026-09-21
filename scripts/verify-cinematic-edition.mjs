@@ -41,7 +41,13 @@ try {
     const page = await browser.newPage({ viewport, hasTouch: true, reducedMotion: "reduce" });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    for (const route of ["/world", "/dream-chapter", "/rexonance-saga", "/extreme-saga"]) {
+    for (const route of [
+      "/world",
+      "/dream-chapter",
+      "/rexonance-saga",
+      "/extreme-saga",
+      "/final-stage",
+    ]) {
       await page.goto(base + route, { waitUntil: "networkidle" });
       await noOverflow(page);
       if (route === "/world") {
@@ -102,7 +108,10 @@ try {
               }));
             assert.equal(thumbnailGeometry.count, 15, "all Dream posters appear in the rail");
             assert.equal(thumbnailGeometry.columns, 2, "tablet thumbnails use two columns");
-            assert.ok(thumbnailGeometry.buttonHeight >= 80, "thumbnail controls remain touch-sized");
+            assert.ok(
+              thumbnailGeometry.buttonHeight >= 80,
+              "thumbnail controls remain touch-sized",
+            );
             assert.equal(thumbnailGeometry.overflowY, "auto", "thumbnail rail scrolls vertically");
             assert.ok(
               thumbnailGeometry.scrollHeight > thumbnailGeometry.clientHeight,

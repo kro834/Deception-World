@@ -10,6 +10,7 @@ import { Link } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
+  FINAL_STAGE_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
@@ -192,7 +193,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance" | "extreme";
+  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "final-stage";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -506,7 +507,9 @@ export function SideMenuLayer({
                     ? "REXONANCE SAGA"
                     : context === "extreme"
                       ? "EXTREME SAGA"
-                      : "DECEPTION WORLD"}
+                      : context === "final-stage"
+                        ? "FINAL STAGE"
+                        : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -538,7 +541,7 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            {context === "rexonance" || context === "extreme" ? (
+            {context === "rexonance" || context === "extreme" || context === "final-stage" ? (
               <>
                 {(context === "rexonance"
                   ? [
@@ -547,17 +550,29 @@ export function SideMenuLayer({
                       ["stages", "三つの運用段階", "STAGES"],
                       ["system", "トリニティ・レゾナンス", "SYSTEM"],
                     ]
-                  : [
-                      ["top", "トップ", "TOP"],
-                      ["performance", "性能比較", "COMPARISON"],
-                      ["p14", "P14", "PROCESSOR"],
-                      ["stages", "二つの運用段階", "STAGES"],
-                      ["system", "中核システム", "SYSTEM"],
-                    ]
+                  : context === "extreme"
+                    ? [
+                        ["top", "トップ", "TOP"],
+                        ["performance", "性能比較", "COMPARISON"],
+                        ["p14", "P14", "PROCESSOR"],
+                        ["stages", "二つの運用段階", "STAGES"],
+                        ["system", "中核システム", "SYSTEM"],
+                      ]
+                    : [
+                        ["top", "トップ", "TOP"],
+                        ["far-from-saga", "ファーフロムサーガ", "FAR FROM SAGA"],
+                        ["realm-royal", "レルムロイヤル", "REALM ROYAL"],
+                      ]
                 ).map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
-                    to={context === "rexonance" ? "/rexonance-saga" : "/extreme-saga"}
+                    to={
+                      context === "rexonance"
+                        ? "/rexonance-saga"
+                        : context === "extreme"
+                          ? "/extreme-saga"
+                          : "/final-stage"
+                    }
                     hash={hash}
                     assets={[]}
                     beforeNavigate={close}
@@ -669,6 +684,16 @@ export function SideMenuLayer({
             >
               <span>レクソナンスサーガ</span>
               <i>PERFORMANCE SITE</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/final-stage"
+              hash="top"
+              assets={context === "final-stage" ? [] : FINAL_STAGE_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "final-stage" ? "page" : undefined}
+            >
+              <span>ファイナルステージ</span>
+              <i>ULTIMATE SITE</i>
             </GuardedLink>
           </div>
         </div>

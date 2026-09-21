@@ -1,11 +1,3 @@
-      cv: "石川界人",
-    },
-  },
-  {
-    id: "over-zeztz",
-    no: "07",
-    name: "OVER ZEZTZ",
-    ja: "オーバーゼッツ",
     person: "ジェームズ・スミス",
     enPerson: "JAMES SMITH",
     epithet: "もう一人のセヴン",
@@ -332,3 +324,29 @@ export function RiderPage({ id }: { id: string }) {
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      <DossierTopbar
+        fileLabel={`CHARACTER FILE // ${rider.no}`}
+        returnHash="riders-return"
+        returnLabel="ライダー一覧へ戻る"
+      />
+      <section className="manager-hero" id="dossier-profile">
+        <div className="manager-portrait-column">
+          <div className="manager-portrait-frame">
+            <img
+              src={rider.civilianImg}
+              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
+              sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
+              alt={`${rider.civilian.name}の変身前ビジュアル`}
+              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            <span className="manager-numeral">{rider.no}</span>
+          </div>
+        </div>
+        <div className="manager-introduction">
+          <header className="dossier-identity">

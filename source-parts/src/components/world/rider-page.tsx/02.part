@@ -1,5 +1,3 @@
-    civilian: {
-      name: "月城 悠真",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
       cv: "坂田将吾",
@@ -44,6 +42,20 @@
           ],
         },
       ],
+    },
+    special: {
+      kicker: "FINAL STAGE / ULTIMATE SITE",
+      name: "ファーフロムサーガ",
+      en: "FAR FROM SAGA",
+      sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
+      quote:
+        "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
+      img: "/rider-far-from-saga-middle.webp",
+      pos: "50% 8%",
+      to: "/final-stage",
+      hash: "far-from-saga",
+      assets: FINAL_STAGE_ENTER_ASSETS,
+      label: "特設サイトへ",
     },
   },
   {
@@ -163,6 +175,20 @@
       name: "ベル・アレイン",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。REALMS元日本支部リーダー。",
+    },
+    special: {
+      kicker: "FINAL STAGE / ULTIMATE SITE",
+      name: "レルムロイヤル",
+      en: "REALM ROYAL",
+      sub: "ROYAL / WRATH / ABYSS / BIRTH / NEHAN",
+      quote:
+        "戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。",
+      img: "/rider-realm-royal.webp",
+      pos: "50% 10%",
+      to: "/final-stage",
+      hash: "realm-royal",
+      assets: FINAL_STAGE_ENTER_ASSETS,
+      label: "特設サイトへ",
     },
   },
   {
@@ -324,11 +350,3 @@
           { dt: "KICK", dd: "372.2t" },
           { dt: "JUMP", dd: "5000m" },
           { dt: "100m", dd: "0.01sec" },
-        ],
-        abilities: [
-          {
-            name: "SCANNING",
-            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
-          },
-          {
-            name: "SPECIAL",

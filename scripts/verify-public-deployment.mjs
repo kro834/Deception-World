@@ -9,6 +9,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/riders/saga",
   "/dream-chapter",
   "/rexonance-saga",
+  "/final-stage",
 ];
 
 export const RETIRED_AI_ROUTES = [
@@ -96,8 +97,7 @@ async function main() {
   };
   const report = await verifyPublicDeployment({
     baseUrl: valueAfter("--base-url") ?? process.env.PUBLIC_BASE_URL,
-    bypassToken:
-      valueAfter("--vercel-bypass-token") ?? process.env.VERCEL_PROTECTION_BYPASS,
+    bypassToken: valueAfter("--vercel-bypass-token") ?? process.env.VERCEL_PROTECTION_BYPASS,
   });
   console.log(`Public deployment smoke test: ${report.origin}`);
   for (const result of report.results) {

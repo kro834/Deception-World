@@ -14,6 +14,7 @@ import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
+import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
@@ -56,6 +57,11 @@ const DreamChapterRoute = DreamChapterRouteImport.update({
 const ExtremeSagaRoute = ExtremeSagaRouteImport.update({
   id: '/extreme-saga',
   path: '/extreme-saga',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinalStageRoute = FinalStageRouteImport.update({
+  id: '/final-stage',
+  path: '/final-stage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormArchiveRoute = FormArchiveRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
+  '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
+  '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
+  '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/download'
     | '/dream-chapter'
     | '/extreme-saga'
+    | '/final-stage'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/download'
     | '/dream-chapter'
     | '/extreme-saga'
+    | '/final-stage'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/download'
     | '/dream-chapter'
     | '/extreme-saga'
+    | '/final-stage'
     | '/form-archive'
     | '/login'
     | '/managers'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   DownloadRoute: typeof DownloadRoute
   DreamChapterRoute: typeof DreamChapterRoute
   ExtremeSagaRoute: typeof ExtremeSagaRoute
+  FinalStageRoute: typeof FinalStageRoute
   FormArchiveRoute: typeof FormArchiveRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
@@ -354,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/extreme-saga'
       fullPath: '/extreme-saga'
       preLoaderRoute: typeof ExtremeSagaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/final-stage': {
+      id: '/final-stage'
+      path: '/final-stage'
+      fullPath: '/final-stage'
+      preLoaderRoute: typeof FinalStageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/form-archive': {
@@ -540,6 +560,7 @@ const rootRouteChildren: RootRouteChildren = {
   DownloadRoute: DownloadRoute,
   DreamChapterRoute: DreamChapterRoute,
   ExtremeSagaRoute: ExtremeSagaRoute,
+  FinalStageRoute: FinalStageRoute,
   FormArchiveRoute: FormArchiveRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,

@@ -20,7 +20,8 @@ import {
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets } from "@/lib/asset-loader";
 
-type RiderDiveVariant = "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme";
+type RiderDiveVariant =
+  "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
@@ -54,6 +55,7 @@ const RIDER_DIVE_ROUTES = {
   "/riders/vandal": "vandal",
   "/rexonance-saga": "rexonance",
   "/extreme-saga": "extreme",
+  "/final-stage": "final-stage",
 } as const satisfies Record<string, RiderDiveVariant>;
 
 const RIDER_CUT_IN_ROUTES = {
@@ -78,6 +80,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   dream: { cover: 620, reveal: 520 },
   rexonance: { cover: 560, reveal: 520 },
   extreme: { cover: 540, reveal: 500 },
+  "final-stage": { cover: 540, reveal: 500 },
 };
 
 const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; label: string }> = {
@@ -88,6 +91,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   dream: { no: "I", name: "DREAM CHAPTER", label: "ドリームチャプター" },
   rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
   extreme: { no: "EX", name: "EXTREME", label: "エクスプリームサーガ" },
+  "final-stage": { no: "FS", name: "FINAL STAGE", label: "ファイナルステージ" },
 };
 
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
@@ -618,7 +622,8 @@ function LoadOverlay({
     variant === "vandal" ||
     variant === "dream" ||
     variant === "rexonance" ||
-    variant === "extreme";
+    variant === "extreme" ||
+    variant === "final-stage";
   if (isRiderDive) {
     return <RiderRouteDive variant={variant} phase={phase} />;
   }
@@ -726,7 +731,9 @@ function RiderRouteDive({
             ? "REXONANCE // PERFORMANCE SITE"
             : variant === "extreme"
               ? "EXTREME // SUPREME SITE"
-              : `${meta.name} // RIDER ${meta.no}`}
+              : variant === "final-stage"
+                ? "FINAL STAGE // ULTIMATE SITE"
+                : `${meta.name} // RIDER ${meta.no}`}
         </small>
         <span>
           {variant === "rexonance"
@@ -737,9 +744,13 @@ function RiderRouteDive({
               ? revealing
                 ? "至高位相へ到着"
                 : "P14至高位相へダイブ中"
-              : revealing
-                ? "個別資料へ到着"
-                : "記録位相へダイブ中"}
+              : variant === "final-stage"
+                ? revealing
+                  ? "最終位相へ到着"
+                  : "最終位相へダイブ中"
+                : revealing
+                  ? "個別資料へ到着"
+                  : "記録位相へダイブ中"}
         </span>
       </span>
     </div>

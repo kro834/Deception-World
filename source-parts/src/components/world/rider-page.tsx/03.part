@@ -1,3 +1,11 @@
+        ],
+        abilities: [
+          {
+            name: "SCANNING",
+            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
+          },
+          {
+            name: "SPECIAL",
             body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
           },
         ],
@@ -333,3 +341,11 @@
       name: "紅城真守",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。紅魔館の執事。",
+      cv: "石川界人",
+    },
+  },
+  {
+    id: "over-zeztz",
+    no: "07",
+    name: "OVER ZEZTZ",
+    ja: "オーバーゼッツ",

@@ -37,6 +37,7 @@ const routeSources = Object.fromEntries(
       "src/routes/dream-chapter.tsx",
       "src/routes/rexonance-saga.tsx",
       "src/routes/extreme-saga.tsx",
+      "src/routes/final-stage.tsx",
       "src/routes/form-archive.tsx",
       "src/routes/download.tsx",
     ].map(async (path) => [path, await read(path)]),
@@ -84,6 +85,7 @@ test("special routes append their CSS after world base and addon styles", () => 
   const dream = routeSources["src/routes/dream-chapter.tsx"];
   const rexonance = routeSources["src/routes/rexonance-saga.tsx"];
   const extreme = routeSources["src/routes/extreme-saga.tsx"];
+  const finalStage = routeSources["src/routes/final-stage.tsx"];
   const archive = routeSources["src/routes/form-archive.tsx"];
   const download = routeSources["src/routes/download.tsx"];
 
@@ -99,6 +101,14 @@ test("special routes append their CSS after world base and addon styles", () => 
   const extremeLink = extreme.indexOf('{ rel: "stylesheet", href: extremeSagaCssUrl }');
   assert.ok(
     extreme.indexOf("...WORLD_STYLESHEET_LINKS") < rexonanceLink && rexonanceLink < extremeLink,
+  );
+  const finalStageRexonanceLink = finalStage.indexOf(
+    '{ rel: "stylesheet", href: rexonanceSagaCssUrl }',
+  );
+  const finalStageLink = finalStage.indexOf('{ rel: "stylesheet", href: finalStageCssUrl }');
+  assert.ok(
+    finalStage.indexOf("...WORLD_STYLESHEET_LINKS") < finalStageRexonanceLink &&
+      finalStageRexonanceLink < finalStageLink,
   );
   assert.match(archive, /links:\s*WORLD_STYLESHEET_LINKS/);
   assert.match(download, /stylesheetLinks:\s*\[WORLD_ADDON_STYLESHEET_LINK\]/);

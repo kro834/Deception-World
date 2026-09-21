@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { GuardedLink } from "@/components/load-gate";
+import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
@@ -69,6 +71,19 @@ type RiderDossier = {
     pos: string;
     facts: { dt: string; dd: string }[];
     sections: { no: string; kicker: string; title: string; body: string[] }[];
+  };
+  special?: {
+    kicker: string;
+    name: string;
+    en: string;
+    sub?: string;
+    quote: string;
+    img: string;
+    pos: string;
+    to: "/final-stage";
+    hash?: string;
+    assets: readonly string[];
+    label: string;
   };
 };
 
@@ -379,6 +394,20 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         },
       ],
     },
+    special: {
+      kicker: "FINAL STAGE / ULTIMATE SITE",
+      name: "ファーフロムサーガ",
+      en: "FAR FROM SAGA",
+      sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
+      quote:
+        "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
+      img: "/rider-far-from-saga-middle.webp",
+      pos: "50% 8%",
+      to: "/final-stage",
+      hash: "far-from-saga",
+      assets: FINAL_STAGE_ENTER_ASSETS,
+      label: "特設サイトへ",
+    },
   },
   {
     id: "realm",
@@ -497,6 +526,20 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       name: "ベル・アレイン",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。REALMS元日本支部リーダー。",
+    },
+    special: {
+      kicker: "FINAL STAGE / ULTIMATE SITE",
+      name: "レルムロイヤル",
+      en: "REALM ROYAL",
+      sub: "ROYAL / WRATH / ABYSS / BIRTH / NEHAN",
+      quote:
+        "戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。",
+      img: "/rider-realm-royal.webp",
+      pos: "50% 10%",
+      to: "/final-stage",
+      hash: "realm-royal",
+      assets: FINAL_STAGE_ENTER_ASSETS,
+      label: "特設サイトへ",
     },
   },
   {
@@ -1549,6 +1592,49 @@ export function RiderPage({ id }: { id: string }) {
             />
           ))}
         </div>
+      ) : null}
+      {rider.special ? (
+        <section
+          className="rider-special-site"
+          id="special-site"
+          aria-labelledby="rider-special-site-title"
+        >
+          <article className="rider-special-site-card">
+            <div className="rider-special-site-visual">
+              <img
+                src={rider.special.img}
+                alt={`仮面ライダー${rider.special.name}のビジュアル`}
+                style={{ objectPosition: rider.special.pos }}
+                width="1080"
+                height="1440"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
+              <span>SPECIAL SITE</span>
+            </div>
+            <div className="rider-special-site-copy">
+              <p>{rider.special.kicker}</p>
+              <small>{rider.special.en}</small>
+              <h2 id="rider-special-site-title">
+                <span>仮面ライダー</span>
+                <b>{rider.special.name}</b>
+              </h2>
+              {rider.special.sub ? <em>{rider.special.sub}</em> : null}
+              <q>{rider.special.quote}</q>
+              <GuardedLink
+                to={rider.special.to}
+                hash={rider.special.hash}
+                assets={rider.special.assets}
+                className="rider-special-site-link"
+                aria-label={`仮面ライダー${rider.special.name}の特設サイトを開く`}
+              >
+                <span>{rider.special.label}</span>
+                <i aria-hidden="true">↗</i>
+              </GuardedLink>
+            </div>
+          </article>
+        </section>
       ) : null}
       {rider.partner && partnerForms.length ? (
         <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">

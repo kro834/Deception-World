@@ -10,7 +10,7 @@ test("cinematic skin follows each feature's own stylesheet", async () => {
     head,
     /WORLD_STYLESHEET_LINKS[^=]*=\s*\[\s*\.\.\.WORLD_CORE_STYLESHEET_LINKS,\s*CINEMATIC_STYLESHEET_LINK/,
   );
-  for (const route of ["dream-chapter", "rexonance-saga", "extreme-saga"]) {
+  for (const route of ["dream-chapter", "rexonance-saga", "extreme-saga", "final-stage"]) {
     const source = await read(`src/routes/${route}.tsx`);
     const links = source.slice(source.search(/(?:stylesheetLinks|links):\s*\[/));
     assert.ok(

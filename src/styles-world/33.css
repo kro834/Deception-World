@@ -1,0 +1,228 @@
+/* 33. Final Stage special-site card on the Saga / Realm rider dossiers. */
+.rider-special-site {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto 64px;
+}
+
+.rider-special-site-card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 34%, transparent);
+  border-radius: 22px 48px 28px 16px;
+  background:
+    radial-gradient(circle at 88% 6%, rgba(233, 196, 123, 0.16), transparent 30%),
+    radial-gradient(circle at 6% 96%, rgba(114, 231, 255, 0.14), transparent 32%),
+    linear-gradient(148deg, rgba(6, 9, 18, 0.985), rgba(12, 8, 22, 0.97));
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.55),
+    0 0 40px color-mix(in srgb, var(--manager-accent) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  color: #f3f5fb;
+}
+
+.rider-special-site-card::before,
+.rider-special-site-card::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  width: 58px;
+  height: 58px;
+  pointer-events: none;
+}
+
+.rider-special-site-card::before {
+  top: 0;
+  right: 0;
+  border-top: 2px solid rgba(233, 196, 123, 0.88);
+  border-right: 2px solid rgba(233, 196, 123, 0.88);
+  border-top-right-radius: 48px;
+}
+
+.rider-special-site-card::after {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid rgba(114, 231, 255, 0.82);
+  border-left: 2px solid rgba(114, 231, 255, 0.82);
+  border-bottom-left-radius: 28px;
+}
+
+.rider-special-site-visual {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 3 / 4;
+  min-height: 100%;
+  overflow: hidden;
+  background: #04060c;
+}
+
+.rider-special-site-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rider-special-site-visual span {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(3, 5, 11, 0.62);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  color: rgba(233, 196, 123, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+.rider-special-site-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(28px, 4vw, 48px) clamp(24px, 4vw, 52px);
+}
+
+.rider-special-site-copy p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--manager-accent);
+}
+
+.rider-special-site-copy small {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: rgba(214, 222, 238, 0.68);
+}
+
+.rider-special-site-copy h2 {
+  margin: 2px 0 0;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.rider-special-site-copy h2 span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.42em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: rgba(214, 222, 238, 0.78);
+}
+
+.rider-special-site-copy h2 b {
+  font-weight: inherit;
+  background: linear-gradient(120deg, #fff8e8, #e9c47b 45%, #72e7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rider-special-site-copy em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(233, 196, 123, 0.9);
+}
+
+.rider-special-site-copy q {
+  quotes: none;
+  margin: 6px 0 4px;
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.9;
+  color: rgba(226, 232, 244, 0.9);
+}
+
+.rider-special-site-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  align-self: flex-start;
+  min-height: 48px;
+  margin-top: auto;
+  padding: 0 26px;
+  border: 1px solid var(--manager-accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--manager-accent) 10%, transparent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.rider-special-site-link i {
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rider-special-site-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rider-special-site-link:hover {
+    background: color-mix(in srgb, var(--manager-accent) 26%, transparent);
+    box-shadow: 0 0 28px color-mix(in srgb, var(--manager-accent) 35%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .rider-special-site-card:hover .rider-special-site-visual img {
+    transform: scale(1.04);
+  }
+}
+
+@media (max-width: 760px) {
+  .rider-special-site {
+    width: min(1180px, calc(100% - 32px));
+    margin-bottom: 48px;
+  }
+
+  .rider-special-site-card {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 18px 34px 22px 14px;
+  }
+
+  .rider-special-site-visual {
+    min-height: 0;
+  }
+
+  .rider-special-site-copy {
+    padding: 24px 22px 28px;
+  }
+
+  .rider-special-site-link {
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rider-special-site-visual img,
+  .rider-special-site-link {
+    transition: none;
+  }
+
+  .rider-special-site-card:hover .rider-special-site-visual img {
+    transform: none;
+  }
+}

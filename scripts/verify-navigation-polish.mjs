@@ -6,7 +6,13 @@ const browser = await engine.launch(engine === chromium ? { channel: "chrome" } 
 try {
   for (const width of [320, 390, 1280]) {
     const page = await browser.newPage({ viewport: { width, height: 844 }, hasTouch: true });
-    for (const route of ["/world", "/riders/saga", "/rexonance-saga", "/dream-chapter"]) {
+    for (const route of [
+      "/world",
+      "/riders/saga",
+      "/rexonance-saga",
+      "/dream-chapter",
+      "/final-stage",
+    ]) {
       await page.goto(`${process.env.BASE_URL || "http://localhost:8082"}${route}`);
       const trigger = page.locator(".side-panel-trigger").first();
       await trigger.focus();
