@@ -89,6 +89,40 @@ try {
           const thumbnails = await rect(page, ".dream-poster-thumbnails");
           assert.ok(thumbnails.x >= image.x + image.width, "tablet thumbnails beside poster");
           assert.ok(thumbnails.height <= image.height + 2, "thumbnail grid fits poster height");
+          if (viewport.width >= 981 && viewport.width > viewport.height) {
+            const thumbnailGeometry = await page
+              .locator(".dream-poster-thumbnails")
+              .evaluate((rail) => ({
+                count: rail.querySelectorAll("button").length,
+                columns: getComputedStyle(rail).gridTemplateColumns.split(" ").length,
+                overflowY: getComputedStyle(rail).overflowY,
+                buttonHeight: rail.querySelector("button").getBoundingClientRect().height,
+                clientHeight: rail.clientHeight,
+                scrollHeight: rail.scrollHeight,
+              }));
+            assert.equal(thumbnailGeometry.count, 15, "all Dream posters appear in the rail");
+            assert.equal(thumbnailGeometry.columns, 2, "tablet thumbnails use two columns");
+            assert.ok(thumbnailGeometry.buttonHeight >= 80, "thumbnail controls remain touch-sized");
+            assert.equal(thumbnailGeometry.overflowY, "auto", "thumbnail rail scrolls vertically");
+            assert.ok(
+              thumbnailGeometry.scrollHeight > thumbnailGeometry.clientHeight,
+              "fifteen thumbnails scroll within poster height",
+            );
+            await page.locator(".dream-poster-thumbnails button").last().focus();
+            const focusState = await page.locator(".dream-poster-thumbnails").evaluate((rail) => {
+              const railRect = rail.getBoundingClientRect();
+              const focusedRect = document.activeElement?.getBoundingClientRect();
+              return {
+                scrollTop: rail.scrollTop,
+                visible:
+                  Boolean(focusedRect) &&
+                  focusedRect.top >= railRect.top - 1 &&
+                  focusedRect.bottom <= railRect.bottom + 1,
+              };
+            });
+            assert.ok(focusState.scrollTop > 0, "keyboard focus scrolls the thumbnail rail");
+            assert.equal(focusState.visible, true, "focused thumbnail remains visible");
+          }
         }
         await page.locator(".dream-character-grid button").first().click();
         await page.locator(".dream-dossier-dialog[open]").waitFor();

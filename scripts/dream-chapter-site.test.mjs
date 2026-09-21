@@ -3,6 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { DREAM_POSTERS } from "../src/components/dream-chapter/dream-chapter-data.ts";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readProjectFile = (relativePath) =>
@@ -19,11 +20,11 @@ const pickupScrollResetSource = readProjectFile("src/components/world/pickup-scr
 
 const routePath = "src/routes/dream-chapter.tsx";
 const posterAssets = Array.from(
-  { length: 8 },
+  { length: 15 },
   (_, index) => `public/dream-chapter-poster-${String(index + 1).padStart(2, "0")}.jpeg`,
 );
 const posterThumbnailAssets = Array.from(
-  { length: 8 },
+  { length: 15 },
   (_, index) => `public/dream-chapter-poster-thumb-${String(index + 1).padStart(2, "0")}.jpeg`,
 );
 const characterAssets = [
@@ -142,13 +143,13 @@ test("Dream Chapter renders its movie logo and maps all four Dolminence records"
   assert.match(menuSource, /DOLMINENCE/);
 });
 
-test("Dream Chapter data contains exactly eight posters and three mapped characters", () => {
+test("Dream Chapter data contains fifteen posters and three mapped characters", () => {
   const posters = extractExportedArray(dataSource, "DREAM_POSTERS");
   const posterSources = [
     ...posters.matchAll(/src:\s*["'](\/dream-chapter-poster-\d{2}\.jpeg)["']/g),
   ].map((match) => match[1]);
 
-  assert.equal(posterSources.length, 8);
+  assert.equal(posterSources.length, 15);
   assert.deepEqual(
     posterSources,
     posterAssets.map((asset) => asset.replace(/^public/, "")),
@@ -298,8 +299,8 @@ test("Keiya battle-style names are unique and include the compound style", () =>
   assert.equal(new Set(names).size, names.length, "battle-style names must be unique");
 });
 
-test("all nineteen optimized movie JPEG assets are valid and stay below 700 KB", () => {
-  assert.equal(allMovieAssets.length, 19);
+test("all twenty-six movie JPEG assets are valid and stay below 700 KB", () => {
+  assert.equal(allMovieAssets.length, 26);
 
   for (const asset of allMovieAssets) {
     const absolutePath = path.join(repositoryRoot, asset);
@@ -327,6 +328,24 @@ test("poster controls use dedicated low-traffic thumbnails", () => {
     assert.ok(jpegDimensions(readFileSync(absolutePath)), `${asset} must be a valid JPEG`);
   }
   assert.match(pageSource, /dream-chapter-poster-thumb-/);
+});
+
+test("seven added shuffle images preserve their composition and declared dimensions", () => {
+  assert.equal(DREAM_POSTERS.slice(8).length, 7);
+  for (const [offset, poster] of DREAM_POSTERS.slice(8).entries()) {
+    const dimensions = jpegDimensions(
+      readFileSync(path.join(repositoryRoot, "public", poster.src)),
+    );
+    assert.deepEqual(dimensions, { width: poster.width, height: poster.height });
+    assert.equal(poster.fit, "contain");
+    assert.equal(poster.position, "50% 50%");
+    const thumbnail = jpegDimensions(
+      readFileSync(path.join(repositoryRoot, posterThumbnailAssets[offset + 8])),
+    );
+    assert.ok(Math.max(thumbnail.width, thumbnail.height) <= 320);
+    assert.ok(Math.abs(thumbnail.width / thumbnail.height - poster.width / poster.height) < 0.01);
+  }
+  assert.match(pageSource, /01 — \{String\(DREAM_POSTERS\.length\)/);
 });
 
 test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", () => {

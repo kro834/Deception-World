@@ -189,6 +189,11 @@ async function checkDreamLayout(page) {
       thumbnailsRight: thumbnailRect.right,
       stageRight: stageRect.right,
       thumbnailCount: thumbnails.querySelectorAll("button").length,
+      thumbnailHeight: thumbnails.querySelector("button").getBoundingClientRect().height,
+      thumbnailColumns: getComputedStyle(thumbnails).gridTemplateColumns,
+      thumbnailOverflowY: getComputedStyle(thumbnails).overflowY,
+      thumbnailClientHeight: thumbnails.clientHeight,
+      thumbnailScrollHeight: thumbnails.scrollHeight,
     };
   });
   if (
@@ -197,11 +202,27 @@ async function checkDreamLayout(page) {
     layout.height >= 600 &&
     layout.width > layout.height
   ) {
-    // The refined tablet console intentionally gives the eight thumbnails a
-    // second column. Verify that it is populated and contained, not empty.
-    assert.equal(layout.thumbnailCount, 8);
+    // The tablet console keeps all fifteen image-led thumbnails in two
+    // touch-sized columns and scrolls them inside the poster-height rail.
+    assert.equal(layout.thumbnailCount, 15);
     assert.ok(layout.thumbnailsLeft >= layout.posterRight);
     assert.ok(layout.thumbnailsRight <= layout.stageRight);
+    assert.equal(layout.thumbnailColumns.split(" ").length, 2);
+    assert.ok(layout.thumbnailHeight >= 80);
+    assert.equal(layout.thumbnailOverflowY, "auto");
+    assert.ok(layout.thumbnailScrollHeight > layout.thumbnailClientHeight);
+    await page.locator(".dream-poster-thumbnails button").last().focus();
+    const focusedThumbnail = await page.locator(".dream-poster-thumbnails").evaluate((thumbnails) => {
+      const rail = thumbnails.getBoundingClientRect();
+      const focused = document.activeElement?.getBoundingClientRect();
+      return {
+        scrollTop: thumbnails.scrollTop,
+        visible:
+          Boolean(focused) && focused.top >= rail.top - 1 && focused.bottom <= rail.bottom + 1,
+      };
+    });
+    assert.ok(focusedThumbnail.scrollTop > 0);
+    assert.equal(focusedThumbnail.visible, true);
   } else if (layout.width <= 1180) {
     assert.ok(
       Math.abs(layout.stageWidth - layout.posterWidth) < 2,

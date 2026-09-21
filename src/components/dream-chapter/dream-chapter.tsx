@@ -834,7 +834,7 @@ export function DreamChapter() {
           <FilmTextScan />
           <p>KEY VISUAL ARCHIVE</p>
           <h2 id="poster-title">POSTERS</h2>
-          <span>01 — 08</span>
+          <span>01 — {String(DREAM_POSTERS.length).padStart(2, "0")}</span>
         </header>
 
         <div
