@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
 import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
+import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -62,6 +63,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: routeTransitionsCss },
       { rel: "stylesheet", href: frostedControlsCss },
       { rel: "stylesheet", href: futureInterfaceCss },
+      { rel: "stylesheet", href: pickupVisibilityCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

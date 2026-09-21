@@ -598,7 +598,9 @@ function initRail(root) {
         const first = gesture.geos[0];
         const oneRow = gesture.geos.every(g => Math.abs(g.y - first.y) < 2);
         const oneColumn = gesture.geos.every(g => Math.abs(g.x - first.x) < 2);
-        gesture.linearAxis = oneRow ? 'horizontal' : oneColumn ? 'vertical' : Math.abs(dx) >= Math.abs(dy) ? 'horizontal' : 'vertical';
+        // Straight rails stay on their single axis. A responsive grid must keep
+        // both coordinates live so the pointer can turn across rows and columns.
+        gesture.linearAxis = oneRow ? 'horizontal' : oneColumn ? 'vertical' : null;
       } else {
         gesture.axis = 'horizontal';
       }

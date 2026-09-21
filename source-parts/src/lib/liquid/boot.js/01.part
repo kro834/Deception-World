@@ -225,3 +225,4 @@ class GlassRenderer {
   setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
   setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
   setPhase(phase) {
+    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;

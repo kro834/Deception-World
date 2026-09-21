@@ -1,4 +1,3 @@
-    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
     this.releasing = phase === 'rest';
     if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
     this.schedule();
@@ -226,3 +225,4 @@ function initRail(root) {
     if (pointerId !== undefined) {
       try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
     }
+    pending = null;

@@ -1,0 +1,81 @@
+/* Pickup controls stay legible over every poster/hero image.
+   Keep this file late in the style order: it is a visual contrast layer only;
+   dimensions, transforms, touch-action, and pointer ownership remain in the
+   existing pickup/slide-open rules. */
+
+:where(html body) .ios-slide-open .ios-slide-open-thumb {
+  /* A solid surface prevents the image behind the thumb from lowering the
+     contrast of the plus glyph. */
+  background: #101a28 !important;
+  border: 2px solid rgba(255, 255, 255, 0.92) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* These are decorative glass highlights, not part of the control affordance.
+   Removing them also avoids a blurred layer over the white plus. */
+:where(html body) .ios-slide-open .ios-slide-open-thumb::before,
+:where(html body) .ios-slide-open .ios-slide-open-thumb::after {
+  display: none !important;
+}
+
+:where(html body) .ios-slide-open .ios-slide-open-thumb > i {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: none !important;
+}
+
+:where(html body) .ios-slide-open .ios-slide-open-thumb > b {
+  color: #fff !important;
+  text-shadow: none !important;
+}
+
+:where(html body) .ios-slide-open .ios-slide-open-thumb svg {
+  color: #fff !important;
+  filter: none !important;
+}
+
+:where(html body)
+  .ios-slide-open:is([data-holding="true"], [data-dragging="true"], [data-completing="true"])
+  .ios-slide-open-thumb {
+  background: #0b1421 !important;
+  border-color: #fff !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28) !important;
+}
+
+/* Outrank both the global glass surface and route-level World themes so their
+   bright backgrounds cannot wash out the white glyph. */
+html body .site-shell .episode-pickup-plus.ios26-glass {
+  background: #101a28 !important;
+  border: 2px solid rgba(255, 255, 255, 0.92) !important;
+  color: #fff !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+:where(html body) .episode-pickup-plus-icon,
+:where(html body) .episode-pickup-plus-icon .ui-vector-icon {
+  color: #fff !important;
+  filter: none !important;
+}
+
+:where(html body) .ios-slide-open-thumb .ui-vector-icon path,
+:where(html body) .episode-pickup-plus-icon .ui-vector-icon path {
+  stroke-width: 2.4;
+}
+
+:where(html body) .episode-pickup-plus:hover,
+:where(html body) .episode-pickup-plus:active,
+:where(html body) .episode-pickup-plus:focus-visible {
+  border-color: #fff !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
