@@ -1,0 +1,868 @@
+/* Neo interface — near-future archive skin for the World route.
+   Loaded after the programme sheets. This layer only recolours and
+   decorates: layout grids, rail geometry, touch-action and motion lifecycle
+   stay with the earlier stylesheets. No image references, keyframes or blur. */
+.site-shell.film-edition {
+  --neo-ink: #04070c;
+  --neo-ink-2: #070d16;
+  --neo-panel: rgb(8 18 30 / 92%);
+  --neo-panel-raised: rgb(12 26 42 / 96%);
+  --neo-cyan: #6fe3ff;
+  --neo-cyan-deep: #2fb8dc;
+  --neo-gold: #e9c982;
+  --neo-signal: #ff5f6d;
+  --neo-text: #eef5fa;
+  --neo-muted: #9fb2c3;
+  --neo-line: rgb(111 227 255 / 22%);
+  --neo-line-strong: rgb(111 227 255 / 56%);
+  --neo-glow: rgb(111 227 255 / 14%);
+  --neo-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --neo-chamfer: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+  --neo-chamfer-small: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+  /* Corner brackets drawn with gradients: reusable on any panel. */
+  --neo-bracket:
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 22px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 22px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 22px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 1px 22px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 22px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 1px 22px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 22px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 22px no-repeat;
+  --programme-ink: var(--neo-ink);
+  --programme-paper: var(--neo-text);
+  --programme-red: var(--neo-cyan);
+  --programme-red-text: var(--neo-cyan);
+  --programme-muted: var(--neo-muted);
+  --programme-rule: var(--neo-line);
+  color: var(--neo-text);
+  background:
+    radial-gradient(ellipse 60% 40% at 84% 6%, rgb(47 184 220 / 13%), transparent),
+    radial-gradient(ellipse 50% 36% at 6% 62%, rgb(233 201 130 / 5%), transparent),
+    repeating-linear-gradient(90deg, rgb(111 227 255 / 3.5%) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgb(111 227 255 / 3.5%) 0 1px, transparent 1px 72px),
+    var(--neo-ink);
+}
+
+/* ---------- Top bar ---------- */
+.site-shell.film-edition .topbar {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(111 227 255 / 7%),
+      transparent 26%,
+      transparent 74%,
+      rgb(233 201 130 / 5%)
+    ),
+    rgb(4 7 12 / 96%);
+  border-bottom: 1px solid var(--neo-line);
+  box-shadow:
+    0 1px 0 rgb(111 227 255 / 6%),
+    0 14px 40px rgb(0 0 0 / 35%);
+}
+.site-shell.film-edition .topbar::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--neo-cyan) 30%,
+    var(--neo-gold) 70%,
+    transparent
+  );
+  opacity: 0.55;
+}
+.site-shell.film-edition .brand-sigil {
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  color: var(--neo-cyan);
+  background: linear-gradient(145deg, rgb(111 227 255 / 16%), rgb(111 227 255 / 3%));
+  box-shadow: inset 0 0 12px rgb(111 227 255 / 12%);
+}
+.site-shell.film-edition .brand > span > b {
+  color: var(--neo-text);
+  letter-spacing: 0.12em;
+}
+.site-shell.film-edition .brand > span > small {
+  color: var(--neo-muted);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .topbar nav a {
+  color: #c4d3df;
+  font-family: var(--neo-mono);
+  letter-spacing: 0.16em;
+}
+.site-shell.film-edition .topbar nav a[aria-current="location"] {
+  color: var(--neo-text);
+  box-shadow: inset 0 -2px var(--neo-cyan);
+  text-shadow: 0 0 16px rgb(111 227 255 / 45%);
+}
+.site-shell.film-edition .topbar .side-panel-trigger {
+  color: var(--neo-cyan);
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  background: linear-gradient(155deg, rgb(20 38 56 / 96%), rgb(8 18 30 / 98%)) !important;
+  box-shadow: inset 0 0 0 1px rgb(111 227 255 / 8%) !important;
+}
+
+/* ---------- Hero ---------- */
+.site-shell.film-edition > .hero {
+  background:
+    radial-gradient(ellipse 48% 60% at 78% 50%, rgb(47 184 220 / 10%), transparent),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(111 227 255 / 2.2%) 3px 4px),
+    linear-gradient(120deg, #0a1522, var(--neo-ink) 62%);
+  border-bottom: 1px solid var(--neo-line);
+}
+.site-shell.film-edition .hero::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--film-topbar-height, 80px) + 14px) 18px 18px;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--neo-bracket);
+  opacity: 0.7;
+}
+.site-shell.film-edition .hero-backdrop {
+  opacity: 0.1;
+}
+.site-shell.film-edition .film-hero-identity {
+  border-bottom-color: var(--neo-line);
+}
+.site-shell.film-edition .film-hero-identity::after {
+  width: min(280px, 60%);
+  height: 2px;
+  background:
+    repeating-linear-gradient(90deg, var(--neo-cyan) 0 14px, transparent 14px 20px) left / 70% 100%
+      no-repeat,
+    linear-gradient(90deg, transparent 72%, var(--neo-gold) 72%);
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title span::before {
+  content: "//";
+  margin-inline-end: 0.7em;
+  color: var(--neo-gold);
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title b {
+  font-family: var(--neo-mono);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  word-spacing: 0.04em;
+  color: var(--neo-text);
+  text-shadow:
+    0 0 32px rgb(111 227 255 / 28%),
+    0 18px 48px rgb(0 0 0 / 55%);
+}
+.site-shell.film-edition .film-edition-mark {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  padding: 8px 12px;
+  background: rgb(111 227 255 / 6%);
+  box-shadow: inset 0 0 18px rgb(111 227 255 / 10%);
+}
+.site-shell.film-edition .hero-copy {
+  border-left: 2px solid transparent;
+  border-image: linear-gradient(180deg, var(--neo-cyan), rgb(111 227 255 / 0%)) 1;
+}
+.site-shell.film-edition .hero h1 :is(span, strong) {
+  color: var(--neo-text);
+  text-shadow: 0 12px 34px rgb(0 0 0 / 55%);
+}
+.site-shell.film-edition .hero h1 strong {
+  color: var(--neo-cyan);
+  -webkit-text-fill-color: currentColor;
+  text-shadow:
+    0 0 28px rgb(111 227 255 / 35%),
+    0 12px 34px rgb(0 0 0 / 55%);
+}
+.site-shell.film-edition .hero-lead {
+  color: #c9d6e2;
+}
+
+/* Primary entry: chamfered plate with an inner light edge. Focus lives
+   inside the clip so the ring is never cut off. */
+.site-shell.film-edition .hero .primary-action,
+.site-shell.film-edition .finale-content .primary-action {
+  border: 1px solid var(--neo-cyan);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer);
+  color: #04202b;
+  background: linear-gradient(120deg, #aef0ff, var(--neo-cyan) 45%, #58cbe8) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%),
+    inset 0 0 0 1px rgb(255 255 255 / 20%) !important;
+  letter-spacing: 0.16em;
+  font-family: var(--neo-mono);
+  font-weight: 700;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.site-shell.film-edition .hero .primary-action > span,
+.site-shell.film-edition .finale-content .primary-action > span {
+  color: #04202b;
+  -webkit-text-fill-color: currentColor;
+}
+.site-shell.film-edition .hero .primary-action svg {
+  color: #04202b;
+}
+.site-shell.film-edition :is(.hero, .finale-content) .primary-action:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px #04202b,
+    inset 0 0 0 5px #fff0b5 !important;
+}
+.site-shell.film-edition .hero .text-action {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+  text-decoration: underline;
+  text-decoration-color: rgb(111 227 255 / 45%);
+  text-underline-offset: 6px;
+}
+.site-shell.film-edition .hero-metadata {
+  border-color: var(--neo-line);
+}
+.site-shell.film-edition .hero-metadata small {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .hero-metadata b {
+  color: var(--neo-text);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.06em;
+}
+
+/* Key visual: hairline frame, corner readouts, cold glow. */
+.site-shell.film-edition .film-visual-caption {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  border-color: var(--neo-line);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .poster-frame {
+  padding: 6px;
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  background: var(--neo-bracket), #060b12;
+  box-shadow:
+    0 0 0 1px var(--neo-ink),
+    0 0 0 2px rgb(111 227 255 / 12%),
+    0 24px 64px rgb(0 0 0 / 55%),
+    0 0 72px var(--neo-glow);
+}
+.site-shell.film-edition .poster-control-cluster > button {
+  color: var(--neo-text);
+  font-family: var(--neo-mono);
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%)) !important;
+  box-shadow: inset 0 1px 0 rgb(111 227 255 / 10%) !important;
+}
+.site-shell.film-edition .poster-control-cluster > button > span[aria-hidden] {
+  color: var(--neo-cyan);
+}
+.site-shell.film-edition .poster-control-cluster > button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #fff0b5 !important;
+}
+.site-shell.film-edition .poster-controls output {
+  color: var(--neo-muted);
+  font-family: var(--neo-mono);
+}
+
+/* ---------- Eyebrows and chapter indices ---------- */
+.site-shell.film-edition .eyebrow > span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .eyebrow i {
+  background: linear-gradient(90deg, var(--neo-cyan), transparent);
+}
+
+.site-shell.film-edition :is(.story-section, .riders-section, .records-section) {
+  background: transparent;
+}
+.site-shell.film-edition :is(.story-section, .riders-section, .records-section)::before {
+  background: linear-gradient(90deg, var(--neo-cyan) 0 12%, var(--neo-line) 12% 100%);
+}
+.site-shell.film-edition .section-index {
+  border-bottom: 1px solid var(--neo-line);
+  background: repeating-linear-gradient(90deg, var(--neo-line-strong) 0 1px, transparent 1px 24px)
+    left bottom / 100% 6px no-repeat;
+  color: var(--neo-muted);
+}
+.site-shell.film-edition .section-index > span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: -0.04em;
+  text-shadow: 0 0 36px rgb(111 227 255 / 30%);
+}
+@supports (-webkit-text-stroke: 1px #000) {
+  .site-shell.film-edition .section-index > span {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--neo-cyan);
+    text-shadow: 0 0 36px rgb(111 227 255 / 22%);
+  }
+}
+.site-shell.film-edition .section-index > small {
+  color: var(--neo-text);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .section-index > small::before {
+  color: var(--neo-gold);
+}
+.site-shell.film-edition .film-boundary-line {
+  background: linear-gradient(90deg, var(--neo-cyan), var(--neo-gold) 60%, transparent);
+}
+
+/* ---------- Story: holographic record instead of a paper insert ---------- */
+.site-shell.film-edition .story-layout {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  color: var(--neo-text);
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 7%), transparent 38%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(111 227 255 / 1.8%) 3px 4px),
+    var(--neo-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 10%),
+    0 28px 80px rgb(0 0 0 / 45%),
+    0 0 64px var(--neo-glow);
+}
+.site-shell.film-edition .story-layout::before {
+  content: "STORY // RECORD 01";
+  color: var(--neo-ink);
+  background: linear-gradient(90deg, var(--neo-cyan), #a9efff);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.site-shell.film-edition .story-layout .story-heading .eyebrow > span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .story-layout .story-heading .eyebrow i {
+  background: linear-gradient(90deg, var(--neo-cyan), transparent);
+}
+.site-shell.film-edition .story-layout .story-heading h2 {
+  color: var(--neo-text);
+  font-family: var(--cinema-display);
+  text-shadow: 0 14px 40px rgb(0 0 0 / 55%);
+}
+.site-shell.film-edition .story-layout .story-heading h2 em {
+  color: var(--neo-cyan);
+  text-shadow: 0 0 26px rgb(111 227 255 / 40%);
+}
+.site-shell.film-edition .story-layout .story-copy > p {
+  color: #c9d6e2;
+}
+.site-shell.film-edition .story-layout .story-copy > .story-lead {
+  color: var(--neo-text);
+}
+.site-shell.film-edition .story-layout .story-copy > .story-lead span {
+  border-color: var(--neo-line-strong);
+}
+
+/* ---------- Manager archive ---------- */
+.site-shell.film-edition .threat-panel {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 40%),
+    var(--neo-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 8%),
+    0 20px 60px rgb(0 0 0 / 40%);
+}
+.site-shell.film-edition .threat-panel::before {
+  width: 120px;
+  background: linear-gradient(90deg, var(--neo-cyan) 70%, var(--neo-gold) 70%);
+}
+.site-shell.film-edition .threat-copy .system-label {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.22em;
+}
+.site-shell.film-edition .threat-copy h3 {
+  color: var(--neo-text);
+  font-family: var(--neo-mono);
+  text-shadow: 0 0 30px rgb(111 227 255 / 18%);
+}
+.site-shell.film-edition .threat-copy > p {
+  color: var(--neo-muted);
+}
+.site-shell.film-edition .manager-archive-tabs {
+  border-color: var(--neo-line);
+}
+.site-shell.film-edition .manager-archive-tabs button:is(.is-active, :focus-visible) {
+  color: var(--neo-text);
+  background: rgb(111 227 255 / 12%);
+}
+.site-shell.film-edition .manager-slot-grid :is(.signal, .dante-archive, .other-archive-card) {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 18px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 18px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 18px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 18px no-repeat,
+    linear-gradient(160deg, rgb(111 227 255 / 7%), transparent 45%),
+    var(--neo-panel-raised);
+  box-shadow: inset 0 1px 0 rgb(111 227 255 / 8%);
+}
+.site-shell.film-edition
+  .manager-slot-grid
+  :is(.signal, .dante-archive, .other-archive-card):focus-visible {
+  outline-color: #fff0b5;
+  border-color: var(--neo-cyan);
+}
+.site-shell.film-edition .signal small {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+}
+.site-shell.film-edition .signal.has-visual small {
+  color: var(--neo-cyan);
+}
+.site-shell.film-edition .signal b {
+  color: var(--neo-text);
+}
+
+/* ---------- World column ---------- */
+.site-shell.film-edition .world-column {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 8%),
+    0 20px 60px rgb(0 0 0 / 40%);
+}
+.site-shell.film-edition .world-column::before {
+  width: 120px;
+  background: linear-gradient(90deg, var(--neo-cyan) 70%, var(--neo-gold) 70%);
+}
+.site-shell.film-edition .world-column-index {
+  border-color: var(--neo-line);
+}
+.site-shell.film-edition .world-column-index > span,
+.site-shell.film-edition .world-column-number {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+}
+.site-shell.film-edition .world-column-tabs button {
+  border-color: var(--neo-line);
+  color: var(--neo-muted);
+}
+.site-shell.film-edition .world-column-tabs button:is(.is-active, :focus-visible) {
+  border-color: var(--neo-cyan);
+  color: var(--neo-text);
+  background: rgb(111 227 255 / 10%);
+  box-shadow: inset 3px 0 0 var(--neo-cyan);
+}
+.site-shell.film-edition .world-column-tabs small,
+.site-shell.film-edition .world-column-copy .eyebrow {
+  color: var(--neo-cyan);
+}
+.site-shell.film-edition .world-column-copy h3 {
+  color: var(--neo-text);
+}
+.site-shell.film-edition .world-column-summary-pane p {
+  color: #c2d0dc;
+}
+.site-shell.film-edition .world-column-orbit-trigger {
+  border-color: var(--neo-line-strong);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%));
+}
+.site-shell.film-edition .world-column-orbit-trigger > i {
+  color: var(--neo-ink);
+  background: var(--neo-cyan);
+}
+
+/* ---------- Rider console ---------- */
+.site-shell.film-edition .rider-console {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 8%),
+    0 24px 70px rgb(0 0 0 / 45%),
+    0 0 60px var(--neo-glow);
+}
+.site-shell.film-edition .rider-tabs {
+  border-color: var(--neo-line);
+}
+.site-shell.film-edition .rider-tabs button.is-active {
+  color: var(--neo-text);
+  background: rgb(111 227 255 / 8%);
+}
+.site-shell.film-edition .rider-tabs button.is-active::before {
+  background: var(--neo-cyan);
+}
+.site-shell.film-edition .rider-detail {
+  border-radius: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 71%,
+      var(--neo-line-strong) 71% calc(71% + 1px),
+      transparent calc(71% + 1px)
+    ),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(111 227 255 / 1.6%) 3px 4px),
+    rgb(9 19 31 / 96%);
+}
+.site-shell.film-edition .rider-number,
+.site-shell.film-edition .rider-person {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.16em;
+}
+.site-shell.film-edition .rider-detail h3 {
+  color: var(--neo-text);
+  text-shadow: 0 0 30px rgb(111 227 255 / 18%);
+}
+.site-shell.film-edition .rider-description {
+  color: #c2d0dc;
+}
+.site-shell.film-edition .rider-line {
+  background: linear-gradient(90deg, var(--neo-cyan), var(--neo-gold) 60%, transparent);
+}
+.site-shell.film-edition .rider-dossier-open {
+  border-color: var(--neo-line-strong);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 12%),
+    0 0 32px var(--neo-glow) !important;
+}
+.site-shell.film-edition .rider-dossier-open .ios-slide-open-label small {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+}
+.site-shell.film-edition .rider-dossier-open .ios-slide-open-label b {
+  color: var(--neo-text);
+}
+.site-shell.film-edition .rider-dossier-open:focus-visible {
+  outline-color: #fff0b5;
+}
+
+/* ---------- Records ---------- */
+.site-shell.film-edition .records-heading h2 {
+  color: var(--neo-text);
+}
+.site-shell.film-edition .records-heading > p {
+  color: var(--neo-muted);
+}
+.site-shell.film-edition .records-heading .eyebrow > span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.2em;
+}
+.site-shell.film-edition .episode-archive {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(111 227 255 / 8%),
+    0 20px 60px rgb(0 0 0 / 40%);
+}
+.site-shell.film-edition .episode-archive::before,
+.site-shell.film-edition .episode-archive::after {
+  background: linear-gradient(90deg, var(--neo-cyan) 70%, var(--neo-gold) 70%);
+}
+.site-shell.film-edition .episode-archive-heading {
+  border-color: var(--neo-line);
+}
+.site-shell.film-edition .episode-archive-heading > div:first-child > span,
+.site-shell.film-edition .episode-archive-meta strong {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+}
+.site-shell.film-edition .episode-controls button {
+  color: var(--neo-text);
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%));
+}
+.site-shell.film-edition .episode-controls button:focus-visible {
+  outline: none;
+  border-color: var(--neo-cyan);
+  box-shadow: inset 0 0 0 2px #fff0b5;
+}
+.site-shell.film-edition .episode-card-surface {
+  border: 1px solid var(--neo-line);
+  border-radius: 0;
+  background:
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 18px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 18px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 18px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 18px no-repeat,
+    var(--neo-panel-raised);
+  box-shadow: inset 0 1px 0 rgb(111 227 255 / 6%);
+}
+.site-shell.film-edition .episode-card.is-active .episode-card-surface {
+  border-color: var(--neo-cyan);
+  box-shadow:
+    inset 0 0 0 1px rgb(111 227 255 / 25%),
+    0 0 0 1px var(--neo-ink),
+    0 18px 50px rgb(0 0 0 / 45%),
+    0 0 48px var(--neo-glow);
+}
+.site-shell.film-edition .episode-card-copy > p {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+}
+.site-shell.film-edition .episode-card-copy h4 {
+  color: var(--neo-text);
+}
+.site-shell.film-edition .episode-card-copy small {
+  color: var(--neo-muted);
+}
+.site-shell.film-edition .episode-pickup-plus {
+  color: var(--neo-ink);
+  border-color: var(--neo-cyan);
+  background: linear-gradient(120deg, #aef0ff, var(--neo-cyan)) !important;
+  box-shadow: 0 0 24px var(--neo-glow) !important;
+}
+
+/* ---------- Finale and footer ---------- */
+.site-shell.film-edition .finale-section {
+  background: var(--neo-ink);
+}
+.site-shell.film-edition .finale-content > span {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.24em;
+}
+.site-shell.film-edition .finale-content h2 {
+  color: var(--neo-text);
+  text-shadow:
+    0 0 40px rgb(111 227 255 / 25%),
+    0 2px 24px #000;
+}
+.site-shell.film-edition > footer {
+  border-top: 1px solid var(--neo-line);
+  background:
+    linear-gradient(90deg, transparent, var(--neo-cyan) 30%, var(--neo-gold) 70%, transparent) top /
+      100% 1px no-repeat,
+    #030509;
+  color: var(--neo-muted);
+}
+.site-shell.film-edition > footer .footer-title b {
+  color: var(--neo-text);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.12em;
+}
+.site-shell.film-edition > footer p {
+  font-family: var(--neo-mono);
+  letter-spacing: 0.16em;
+}
+.site-shell.film-edition > footer a {
+  color: var(--neo-cyan);
+  text-decoration-color: rgb(111 227 255 / 45%);
+}
+
+/* ---------- Dialogs and side panel ---------- */
+.site-shell.film-edition .world-column-dialog-card,
+.site-shell.film-edition .episode-pickup-panel {
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  background:
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 40%),
+    rgb(6 13 22 / 98%);
+  box-shadow:
+    0 0 0 1px var(--neo-ink),
+    0 40px 100px rgb(0 0 0 / 60%),
+    0 0 80px var(--neo-glow);
+}
+.site-shell.film-edition .world-column-dialog-number {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+  letter-spacing: 0.18em;
+}
+.site-shell.film-edition .world-column-dialog-close,
+.site-shell.film-edition .episode-pickup-close {
+  color: var(--neo-cyan);
+  border: 1px solid var(--neo-line-strong);
+  border-radius: 0;
+  clip-path: var(--neo-chamfer-small);
+  background: linear-gradient(155deg, rgb(20 38 56 / 98%), rgb(8 18 30 / 98%)) !important;
+  box-shadow: inset 0 0 0 1px rgb(111 227 255 / 8%) !important;
+}
+.site-shell.film-edition .world-column-dialog-close:focus-visible,
+.site-shell.film-edition .episode-pickup-close:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px #fff0b5 !important;
+}
+.site-shell.film-edition .side-panel {
+  border-left-color: var(--neo-line-strong);
+  background:
+    linear-gradient(180deg, rgb(111 227 255 / 6%), transparent 22%, rgb(233 201 130 / 3%)),
+    rgb(4 9 16 / 99%);
+}
+.site-shell.film-edition .side-panel .side-panel-group > p {
+  color: var(--neo-cyan);
+  font-family: var(--neo-mono);
+}
+.site-shell.film-edition .side-panel .side-panel-links [aria-current="page"] {
+  border-left: 2px solid var(--neo-cyan);
+  background: rgb(111 227 255 / 8%);
+}
+
+/* ---------- Pointer response, only on fine pointers ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition .hero .primary-action:hover,
+  .site-shell.film-edition .finale-content .primary-action:hover {
+    background: linear-gradient(120deg, #d2f8ff, #8fe9ff 45%, #6fd6ef) !important;
+  }
+  .site-shell.film-edition .poster-control-cluster > button:not(:disabled):hover,
+  .site-shell.film-edition .episode-controls button:hover,
+  .site-shell.film-edition .topbar .side-panel-trigger:hover {
+    border-color: var(--neo-cyan);
+    box-shadow:
+      inset 0 0 0 1px rgb(111 227 255 / 22%),
+      inset 0 0 20px rgb(111 227 255 / 10%) !important;
+  }
+  .site-shell.film-edition
+    .manager-slot-grid
+    :is(.signal, .dante-archive, .other-archive-card):hover,
+  .site-shell.film-edition .episode-card:not(.is-active) .episode-card-surface:hover {
+    border-color: var(--neo-line-strong);
+    box-shadow:
+      inset 0 1px 0 rgb(111 227 255 / 10%),
+      0 0 40px var(--neo-glow);
+  }
+  .site-shell.film-edition .topbar nav a:hover {
+    color: var(--neo-text);
+  }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .site-shell.film-edition {
+    background:
+      radial-gradient(ellipse 80% 30% at 84% 4%, rgb(47 184 220 / 12%), transparent),
+      repeating-linear-gradient(90deg, rgb(111 227 255 / 3%) 0 1px, transparent 1px 56px),
+      repeating-linear-gradient(0deg, rgb(111 227 255 / 3%) 0 1px, transparent 1px 56px),
+      var(--neo-ink);
+  }
+  /* The phone top bar shares one row between three links; wide tracking
+     would break the words. */
+  .site-shell.film-edition .topbar nav a {
+    font-family: inherit;
+    letter-spacing: 0;
+  }
+  .site-shell.film-edition .hero::before {
+    inset: calc(var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 10px) 10px 10px;
+    opacity: 0.55;
+  }
+  .site-shell.film-edition .film-hero-identity .anime-work-title span::before {
+    content: none;
+  }
+  .site-shell.film-edition .film-hero-identity .anime-work-title span {
+    letter-spacing: 0.1em;
+  }
+  .site-shell.film-edition .film-hero-identity .anime-work-title b {
+    font-size: clamp(36px, 13.5vw, 96px);
+    letter-spacing: -0.03em;
+  }
+  .site-shell.film-edition .story-layout {
+    box-shadow:
+      inset 0 1px 0 rgb(111 227 255 / 10%),
+      0 16px 48px rgb(0 0 0 / 45%);
+  }
+  .site-shell.film-edition .rider-console,
+  .site-shell.film-edition .episode-card.is-active .episode-card-surface {
+    box-shadow:
+      inset 0 0 0 1px rgb(111 227 255 / 20%),
+      0 14px 40px rgb(0 0 0 / 45%);
+  }
+  .site-shell.film-edition .rider-detail {
+    background: rgb(9 19 31 / 96%);
+  }
+}
+
+@media (max-width: 360px) {
+  /* Three links share one 188px row; the 6px side padding was the difference
+     between RECORDS fitting and splitting. */
+  .site-shell.film-edition .topbar nav a {
+    padding-inline: 0;
+    font-size: 13px;
+  }
+}
+
+/* ---------- Accessibility modes ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .site-shell.film-edition
+    :is(
+      .primary-action,
+      .poster-control-cluster > button,
+      .episode-controls button,
+      .signal,
+      .episode-card-surface
+    ) {
+    transition: none;
+  }
+}
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .site-shell.film-edition {
+    background: var(--neo-ink);
+  }
+  .site-shell.film-edition
+    :is(
+      .story-layout,
+      .threat-panel,
+      .world-column,
+      .rider-console,
+      .episode-archive,
+      .episode-card-surface,
+      .world-column-dialog-card,
+      .episode-pickup-panel
+    ) {
+    border-color: rgb(111 227 255 / 70%);
+    background: #070d16;
+    box-shadow: none;
+  }
+  .site-shell.film-edition .rider-detail {
+    background: #0a1522;
+  }
+  .site-shell.film-edition .hero::before {
+    display: none;
+  }
+}

@@ -46,3 +46,9 @@ The site is a cinematic official archive: spectacular at story-defining moments 
 - Inherit the character's existing accent in individual dossiers; Rexonance and Extreme retain their own product colors. Keep portraits and content above decoration.
 - Express depth through static gradients and inset edges. Reserve extra light response for fine-pointer hover; do not add continuous full-screen animation, blur layers or gesture-catching overlays.
 - Preserve the readability and touch dimensions from the design audit. Reduced-transparency mode uses solid navigation surfaces, and reduced-motion mode disables the new button transition.
+
+## Neo interface — 2026-09-21
+
+`src/styles-world-neo.css` is the final layer on the World route, loaded after the programme sheets. It replaces the paper-and-red programme look with a near-future archive: ink black with a faint 72px grid, ice-cyan hairlines and gold corner brackets, chamfered controls (clip-path only; hit areas and rail geometry are unchanged), outlined chapter numerals, Oxanium readouts for labels and metadata, and one cyan plate for the primary entry. The story insert becomes a dark holographic record instead of a light sheet.
+
+The layer only recolours and decorates. It adds no keyframes, images, blur or touch-action rules, keeps focus rings inside the chamfer with inset shadows, and falls back to solid panels under reduced transparency or increased contrast. Dream Chapter, Rexonance and Extreme keep their own identities; dossier pages already share the cyan-gold archive language.
