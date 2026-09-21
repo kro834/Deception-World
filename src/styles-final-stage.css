@@ -177,109 +177,199 @@
   font-weight: 600;
 }
 
-/* ---------- Cast ---------- */
+/* ---------- Cast: eight characters on a two-row liquid rail ---------- */
 .fst-cast-section {
   background:
     radial-gradient(circle at 14% 20%, rgb(216 58 67 / 8%), transparent 30rem),
     radial-gradient(circle at 86% 70%, rgb(56 173 245 / 10%), transparent 32rem), #03050c;
 }
 
-.fst-cast {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(14px, 2vw, 24px);
+.fst-cast-console {
   max-width: 1180px;
   margin: auto;
+  padding: clamp(18px, 2.6vw, 32px);
+  border: 1px solid var(--fst-line);
+  border-radius: clamp(22px, 3vw, 34px);
+  background:
+    linear-gradient(var(--rxs-cyan), var(--rxs-cyan)) left top / 28px 1px no-repeat,
+    linear-gradient(var(--rxs-cyan), var(--rxs-cyan)) left top / 1px 28px no-repeat,
+    linear-gradient(var(--rxs-gold), var(--rxs-gold)) right bottom / 28px 1px no-repeat,
+    linear-gradient(var(--rxs-gold), var(--rxs-gold)) right bottom / 1px 28px no-repeat,
+    linear-gradient(150deg, rgb(127 230 255 / 5%), transparent 55%),
+    var(--fst-panel);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 45%);
 }
 
-.fst-cast-card {
+/* The shared frosted layer forces every rail into one flex row; eight
+   characters need a grid so the lens can travel across two rows. */
+html body .fst-page .fst-cast-tabs.liquid-swipe-tabs {
+  --liquid-shell-radius: 28px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(1000px, 100%);
+  border-radius: 28px !important;
+}
+
+html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  border-radius: 28px !important;
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  min-height: 60px;
+  padding: 9px 6px;
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.fst-cast-detail {
   display: grid;
-  grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.72fr) minmax(320px, 1.28fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  margin-top: clamp(20px, 3vw, 36px);
+}
+
+.fst-cast-detail figure {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  margin: 0;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--fst-accent) 30%, transparent);
   border-radius: clamp(20px, 2.6vw, 30px);
-  background:
-    linear-gradient(150deg, color-mix(in srgb, var(--fst-accent) 8%, transparent), transparent 55%),
-    var(--fst-panel);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 40%);
+  background: #060a14;
+  box-shadow: 0 0 70px color-mix(in srgb, var(--fst-accent) 12%, transparent);
+  animation: fstPanelIn 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
   contain: layout paint style;
 }
 
-.fst-cast-card figure {
-  position: relative;
-  min-height: 300px;
-  margin: 0;
-  overflow: hidden;
-  background: #060a14;
-}
-
-.fst-cast-card figure::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(90deg, transparent 70%, rgb(7 11 20 / 70%));
-}
-
-.fst-cast-card img {
+.fst-cast-detail figure img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.fst-cast-card > div {
+.fst-cast-detail figcaption {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  color: #eef3f8;
+  background: rgb(3 5 10 / 72%);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.2em;
+}
+
+.fst-cast-monogram {
+  position: relative;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      color-mix(in srgb, var(--fst-accent) 18%, transparent),
+      transparent 60%
+    ),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(255 255 255 / 2%) 3px 4px), #070b14;
+}
+
+.fst-cast-monogram i {
+  position: absolute;
+  inset: 18px;
+  border: 1px solid color-mix(in srgb, var(--fst-accent) 30%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(var(--fst-accent), var(--fst-accent)) left top / 22px 1px no-repeat,
+    linear-gradient(var(--fst-accent), var(--fst-accent)) left top / 1px 22px no-repeat,
+    linear-gradient(var(--fst-accent), var(--fst-accent)) right bottom / 22px 1px no-repeat,
+    linear-gradient(var(--fst-accent), var(--fst-accent)) right bottom / 1px 22px no-repeat;
+}
+
+.fst-cast-monogram b {
+  color: var(--fst-accent);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.fst-cast-monogram small {
+  color: var(--fst-muted);
+  font-size: 9px;
+  letter-spacing: 0.26em;
+}
+
+.fst-cast-copy {
   display: grid;
   align-content: start;
   gap: 8px;
-  padding: clamp(20px, 2.4vw, 30px);
+  animation: fstPanelIn 480ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.fst-cast-card small {
+.fst-cast-copy small {
   color: var(--fst-accent);
   font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.22em;
 }
 
-.fst-cast-card h3 {
-  margin: 4px 0 0;
+.fst-cast-copy h3 {
+  margin: 6px 0 0;
   font-family: var(--rxs-font-display);
-  font-size: clamp(24px, 2.4vw, 34px);
+  font-size: clamp(30px, 3.6vw, 52px);
   font-weight: 680;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-feature-settings: "palt" 1;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
-.fst-cast-card em {
+.fst-cast-copy em {
   color: var(--fst-muted);
   font-size: 11px;
   font-style: normal;
   letter-spacing: 0.16em;
 }
 
-.fst-cast-card strong {
-  margin-top: 6px;
+.fst-cast-copy strong {
+  margin-top: 8px;
   color: var(--fst-text);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.fst-cast-card p {
+.fst-cast-copy p {
   margin: 4px 0 0;
-  color: #b7c1cd;
-  font-size: 13px;
-  line-height: 1.85;
+  color: #c2cdd9;
+  font-size: 14px;
+  line-height: 1.95;
   text-wrap: pretty;
 }
 
-.fst-cast-card > div > a {
+.fst-cast-copy > a {
   display: inline-flex;
   gap: 12px;
   align-items: center;
   justify-self: start;
-  min-height: 44px;
-  margin-top: 10px;
-  padding: 10px 18px;
+  min-height: 46px;
+  margin-top: 14px;
+  padding: 10px 20px;
   border: 1px solid color-mix(in srgb, var(--fst-accent) 40%, transparent);
   border-radius: 999px;
   color: var(--fst-text);
@@ -290,14 +380,219 @@
   text-decoration: none;
 }
 
-.fst-cast-card > div > a i {
+.fst-cast-copy > a i {
   color: var(--fst-accent);
   font-style: normal;
 }
 
-.fst-cast-card > div > a:focus-visible {
+.fst-cast-copy > a:focus-visible {
   outline: 2px solid #fff0b5;
   outline-offset: 3px;
+}
+
+/* ---------- Rider pickups ---------- */
+.fst-riders-section {
+  background:
+    radial-gradient(circle at 12% 12%, rgb(56 173 245 / 12%), transparent 34rem),
+    radial-gradient(circle at 88% 40%, rgb(255 199 97 / 8%), transparent 30rem), #02050d;
+}
+
+.fst-pickup {
+  --slide-accent: var(--fst-accent);
+  max-width: 1180px;
+  margin: 0 auto 24px;
+}
+
+.fst-pickup-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--fst-accent) 34%, transparent);
+  border-radius: 22px 48px 28px 16px;
+  background:
+    radial-gradient(
+      circle at 88% 6%,
+      color-mix(in srgb, var(--fst-accent) 14%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(148deg, rgb(6 9 18 / 98%), rgb(12 8 22 / 97%));
+  box-shadow:
+    0 34px 90px rgb(0 0 0 / 55%),
+    0 0 40px color-mix(in srgb, var(--fst-accent) 12%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+  contain: layout paint style;
+}
+
+.fst-pickup-visual {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  background: #05070b;
+}
+
+.fst-pickup-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fst-pickup-visual > span {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+}
+
+.fst-pickup-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: clamp(24px, 3vw, 40px);
+}
+
+.fst-pickup-copy p,
+.fst-pickup-copy small {
+  margin: 0;
+  color: var(--fst-accent);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.24em;
+}
+
+.fst-pickup-copy small {
+  color: var(--fst-muted);
+}
+
+.fst-pickup-copy h3 {
+  margin: 6px 0 0;
+  font-family: var(--rxs-font-display);
+  font-size: clamp(30px, 4vw, 50px);
+  font-weight: 680;
+  font-feature-settings: "palt" 1;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+
+.fst-pickup-copy h3 span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.42em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--fst-muted);
+}
+
+.fst-pickup-copy h3 b {
+  background: linear-gradient(95deg, #fff, var(--fst-accent) 70%);
+  background-clip: text;
+  color: transparent;
+  overflow-wrap: anywhere;
+}
+
+.fst-pickup-copy em {
+  color: var(--fst-muted);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.fst-pickup-copy q {
+  margin-top: 8px;
+  padding-left: 14px;
+  border-left: 2px solid color-mix(in srgb, var(--fst-accent) 60%, transparent);
+  color: #d3dbe5;
+  font-size: 14px;
+  line-height: 1.9;
+  quotes: "「" "」";
+}
+
+/* Record dialog */
+.fst-pickup-dialog {
+  border-color: color-mix(in srgb, var(--fst-accent) 45%, transparent);
+  border-radius: 26px;
+}
+
+.fst-pickup-dialog .fst-pickup-panel {
+  padding: 76px clamp(20px, 3vw, 40px) 40px;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      color-mix(in srgb, var(--fst-accent) 12%, transparent),
+      transparent 30rem
+    ),
+    #05070d;
+  color: var(--fst-text);
+}
+
+.fst-pickup-heading {
+  max-width: 980px;
+  margin: 0 auto 8px;
+  text-align: center;
+}
+
+.fst-pickup-heading p {
+  margin: 0 0 10px;
+  color: var(--fst-accent);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.28em;
+}
+
+.fst-pickup-heading small {
+  color: var(--fst-muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+.fst-pickup-heading h2 {
+  margin: 10px 0 8px;
+  font-family: var(--rxs-font-display);
+  font-size: clamp(30px, 4.4vw, 56px);
+  font-weight: 680;
+  font-feature-settings: "palt" 1;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.fst-pickup-heading h2 span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.4em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--rxs-cyan);
+}
+
+.fst-pickup-heading em {
+  color: var(--fst-muted);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.fst-pickup-record {
+  margin-top: 28px;
+}
+
+.fst-pickup-record .rxs-reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.fst-pickup-record .fst-subheading {
+  margin-top: clamp(44px, 6vw, 72px);
+}
+
+.fst-pickup-record .rxs-stage-panel figure {
+  height: min(60vw, 620px);
 }
 
 /* ---------- Rider entries ---------- */
@@ -883,10 +1178,6 @@
   .fst-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .fst-cast {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (min-width: 681px) and (max-width: 1440px) and (max-height: 1100px) and (orientation: landscape) {
@@ -958,17 +1249,26 @@
     display: none;
   }
 
-  .fst-cast-card {
+  html body .fst-page .fst-cast-tabs.liquid-swipe-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fst-cast-detail,
+  .fst-pickup-card {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .fst-cast-card figure {
-    height: min(92vw, 380px);
-    min-height: 0;
+  .fst-cast-detail figure {
+    max-height: 420px;
+    aspect-ratio: 4 / 5;
   }
 
-  .fst-cast-card figure::after {
-    background: linear-gradient(180deg, transparent 60%, rgb(7 11 20 / 85%));
+  .fst-pickup-visual {
+    min-height: min(110vw, 460px);
+  }
+
+  .fst-pickup-dialog .fst-pickup-panel {
+    padding-top: 72px;
   }
 
   .fst-entry figure {
@@ -1035,7 +1335,9 @@
   }
 
   .fst-form-copy,
-  .fst-form-specs {
+  .fst-form-specs,
+  .fst-cast-detail figure,
+  .fst-cast-copy {
     animation: none;
   }
 }
@@ -1044,7 +1346,8 @@
   .fst-entry,
   .fst-articles article,
   .fst-finishers article,
-  .fst-cast-card,
+  .fst-cast-console,
+  .fst-pickup-card,
   .fst-story-layout,
   .fst-specs div {
     background: #070b14;

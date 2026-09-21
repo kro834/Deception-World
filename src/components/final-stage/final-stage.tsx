@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
+import { resetPickupScroll, settlePickupScroll } from "@/components/world/pickup-scroll-reset";
+import { SlideOpenControl } from "@/components/world/slide-open-control";
+import { UiVectorIcon } from "@/components/world/ui-vector-icon";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { rexonanceImage } from "@/lib/rexonance-images";
-import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import {
   CAST,
   FAR_FROM_SAGA,
@@ -16,6 +18,7 @@ import {
   RR_FORM_ORDER,
   STORY,
   type Article,
+  type CastEntry,
   type FfsStageKey,
   type RrFormKey,
   type SpecRow,
@@ -112,15 +115,198 @@ function SubHeading({ kicker, title }: { kicker: string; title: string }) {
   );
 }
 
+/* A rider record behind the same hold-and-slide pickup as the dossier pages.
+   The record stays mounted inside the dialog so its rails bind once. */
+function RiderPickup({
+  id,
+  accent,
+  image,
+  imageWidth,
+  imageHeight,
+  imagePos,
+  eyebrow,
+  name,
+  sub,
+  quote,
+  children,
+}: {
+  id: string;
+  accent: string;
+  image: string;
+  imageWidth: number;
+  imageHeight: number;
+  imagePos: string;
+  eyebrow: string;
+  name: string;
+  sub: string;
+  quote: string;
+  children: ReactNode;
+}) {
+  const dlg = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
+  const pointerOpened = useRef(false);
+  const cancelScrollReset = useRef<(() => void) | null>(null);
+  const dialogId = `${id}-pickup`;
+  const resetScroll = () => {
+    const dialog = dlg.current;
+    if (!dialog) return;
+    resetPickupScroll(dialog, [".fst-pickup-panel"]);
+  };
+  const clearPointerFocus = () => {
+    if (!pointerOpened.current) return;
+    const button = opener.current;
+    if (!button) return;
+    button.dataset.keyboardFocus = "false";
+    button.blur();
+  };
+  const open = (source: "keyboard" | "pointer") => {
+    const dialog = dlg.current;
+    if (!dialog) return;
+    pointerOpened.current = source === "pointer";
+    clearPointerFocus();
+    cancelScrollReset.current?.();
+    try {
+      dialog.showModal();
+    } catch {
+      /* already open */
+    }
+    cancelScrollReset.current = settlePickupScroll(dialog, [".fst-pickup-panel"], () => {
+      dialog.focus({ preventScroll: true });
+      clearPointerFocus();
+    });
+  };
+  const close = () => {
+    cancelScrollReset.current?.();
+    cancelScrollReset.current = null;
+    dlg.current?.close();
+    clearPointerFocus();
+    window.requestAnimationFrame(clearPointerFocus);
+    resetScroll();
+  };
+  useEffect(() => () => cancelScrollReset.current?.(), []);
+  return (
+    <section
+      id={id}
+      className="fst-pickup"
+      aria-label={`仮面ライダー${name}の記録`}
+      style={{ ["--fst-accent" as string]: accent, ["--manager-accent" as string]: accent }}
+    >
+      <article className="fst-pickup-card">
+        <div className="fst-pickup-visual">
+          <img
+            src={image}
+            {...rexonanceImage(image)}
+            alt={`仮面ライダー${name}のフォームビジュアル`}
+            style={{ objectPosition: imagePos }}
+            width={imageWidth}
+            height={imageHeight}
+            loading="lazy"
+            decoding="async"
+          />
+          <span>RIDER</span>
+          <SlideOpenControl
+            buttonRef={opener}
+            className="form-pickup-plus fst-pickup-plus"
+            ariaControls={dialogId}
+            ariaLabel={`仮面ライダー${name}をピックアップ`}
+            label="記録を開く"
+            onOpen={open}
+          />
+        </div>
+        <div className="fst-pickup-copy">
+          <p>{eyebrow}</p>
+          <small>PICKUP</small>
+          <h3>
+            <span>仮面ライダー</span>
+            <b>{name}</b>
+          </h3>
+          <em>{sub}</em>
+          <q>{quote}</q>
+        </div>
+      </article>
+      <dialog
+        ref={dlg}
+        id={dialogId}
+        className="form-pickup-dialog fst-pickup-dialog"
+        tabIndex={-1}
+        aria-label={`仮面ライダー${name}`}
+        onClose={resetScroll}
+        onCancel={(event) => {
+          event.preventDefault();
+          close();
+        }}
+        onClick={(event) => {
+          if (event.target === dlg.current) close();
+        }}
+      >
+        <button
+          type="button"
+          className="form-pickup-close"
+          data-liquid-pointer="true"
+          onClick={close}
+          aria-label="閉じる"
+        >
+          <LiquidPointerGlow />
+          <span>CLOSE</span>
+          <i aria-hidden="true">
+            <UiVectorIcon kind="close" size={16} />
+          </i>
+        </button>
+        <div className="form-pickup-panel fst-pickup-panel">
+          <div className="fst-pickup-heading">
+            <p>
+              <span>RIDER PICKUP</span>
+            </p>
+            <small>{eyebrow}</small>
+            <h2>
+              <span>仮面ライダー</span>
+              <b>{name}</b>
+            </h2>
+            <em>{sub}</em>
+          </div>
+          <div className="fst-pickup-record">{children}</div>
+        </div>
+      </dialog>
+    </section>
+  );
+}
+
+function CastVisual({ person }: { person: CastEntry }) {
+  if (person.image) {
+    return (
+      <img
+        src={person.image}
+        {...dossierImage(person.image)}
+        alt={`${person.name}のビジュアル`}
+        style={{ objectPosition: person.pos }}
+        width={person.width}
+        height={person.height}
+        loading="lazy"
+        decoding="async"
+      />
+    );
+  }
+  return (
+    <div className="fst-cast-monogram" aria-hidden="true">
+      <i />
+      <b>{person.monogram}</b>
+      <small>VISUAL PENDING</small>
+    </div>
+  );
+}
+
 export function FinalStage() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<FfsStageKey>("middle");
   const [form, setForm] = useState<RrFormKey>("royal");
+  const [castIndex, setCastIndex] = useState(0);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const formTabsRef = useRef<HTMLDivElement | null>(null);
+  const castTabsRef = useRef<HTMLDivElement | null>(null);
+  const activeCast = CAST[castIndex];
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeForm = REALM_ROYAL.forms[form];
 
@@ -133,17 +319,17 @@ export function FinalStage() {
   useEffect(() => {
     const rail = stageTabsRef.current;
     if (!rail) return;
-    const unbind = bindRail(rail, FFS_STAGE_ORDER, setStage);
-    const stopWarmup = warmRexonanceStages(
+    return bindRail(rail, FFS_STAGE_ORDER, setStage);
+  }, []);
+
+  useEffect(() => {
+    const rail = castTabsRef.current;
+    if (!rail) return;
+    return bindRail(
       rail,
-      FFS_STAGE_ORDER.filter((key) => key !== "middle").map(
-        (key) => FAR_FROM_SAGA.stages[key].image,
-      ),
+      CAST.map((_, index) => String(index)),
+      (key) => setCastIndex(Number(key)),
     );
-    return () => {
-      stopWarmup();
-      unbind();
-    };
   }, []);
 
   useEffect(() => {
@@ -295,10 +481,11 @@ export function FinalStage() {
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / STORY</p>
           <h2>
-            書き換えられた世界を、
+            帰るべき場所へ、
             <br />
-            本来の持ち主へ。
+            明日へと続く帰り道を。
           </h2>
+          <span>{STORY.title}</span>
         </header>
         <div className="fst-story-layout rxs-reveal">
           <div className="fst-story-index" aria-hidden="true">
@@ -314,341 +501,328 @@ export function FinalStage() {
         <header className="rxs-section-heading rxs-reveal">
           <p>02 / CHARACTERS</p>
           <h2>
-            二人のライダーと、
+            帰還した仲間と、
             <br />
-            二柱の管理人。
+            道を照らす者たち。
           </h2>
-          <span>各記録は、ディセプションワールドの人物資料へ接続します。</span>
+          <span>八人の登場人物。各記録はディセプションワールドの人物資料へ接続します。</span>
         </header>
-        <div className="fst-cast" role="list" aria-label="登場人物">
-          {CAST.map((person) => (
-            <article
-              key={person.id}
-              className="fst-cast-card rxs-reveal"
-              role="listitem"
-              style={{ ["--fst-accent" as string]: person.accent }}
-            >
-              <figure>
-                <img
-                  src={person.image}
-                  {...dossierImage(person.image)}
-                  alt={`${person.name}のビジュアル`}
-                  style={{ objectPosition: person.pos }}
-                  width={person.width}
-                  height={person.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </figure>
-              <div>
-                <small>{person.kicker}</small>
-                <h3>{person.name}</h3>
-                <em>{person.en}</em>
-                <strong>{person.role}</strong>
-                <p>{person.body}</p>
+        <div className="fst-cast-console rxs-reveal">
+          <div
+            ref={castTabsRef}
+            className="rxs-stage-tabs liquid-swipe-tabs fst-cast-tabs"
+            role="tablist"
+            aria-label="登場人物"
+            aria-describedby="fst-cast-hint"
+            data-liquid-glass="true"
+            data-stage={activeCast.id}
+          >
+            <LiquidLens />
+            {CAST.map((person, index) => (
+              <button
+                key={person.id}
+                id={`fst-cast-tab-${person.id}`}
+                type="button"
+                role="tab"
+                aria-selected={castIndex === index}
+                aria-controls="fst-cast-panel"
+                tabIndex={castIndex === index ? 0 : -1}
+                className={castIndex === index ? "is-active" : ""}
+                style={{ ["--liquid-accent" as string]: person.accent }}
+                onClick={() => setCastIndex(index)}
+                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+              >
+                <span>{person.no}</span>
+                <small>{person.name}</small>
+              </button>
+            ))}
+          </div>
+          <p id="fst-cast-hint" className="rxs-stage-hint">
+            タップ、長押し、またはスライドで切り替え
+          </p>
+          <div
+            id="fst-cast-panel"
+            className="fst-cast-detail"
+            role="tabpanel"
+            aria-labelledby={`fst-cast-tab-${activeCast.id}`}
+            aria-live="polite"
+            style={{ ["--fst-accent" as string]: activeCast.accent }}
+          >
+            <figure key={`${activeCast.id}-visual`}>
+              <CastVisual person={activeCast} />
+              <figcaption>
+                <span>CHARACTER {activeCast.no}</span>
+              </figcaption>
+            </figure>
+            <div key={`${activeCast.id}-copy`} className="fst-cast-copy">
+              <small>{activeCast.kicker}</small>
+              <h3>{activeCast.name}</h3>
+              <em>{activeCast.en}</em>
+              <strong>{activeCast.role}</strong>
+              {activeCast.body.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+              {activeCast.to ? (
                 <GuardedLink
-                  to={person.to}
-                  assets={person.assets}
-                  aria-label={`${person.name}の人物資料を開く`}
+                  to={activeCast.to}
+                  assets={activeCast.assets ?? []}
+                  aria-label={`${activeCast.name}の人物資料を開く`}
                 >
                   <span>人物資料</span>
                   <i aria-hidden="true">↗</i>
                 </GuardedLink>
-              </div>
-            </article>
-          ))}
+              ) : null}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="riders" className="rxs-section fst-entries-section" aria-label="収録ライダー">
+      <section id="riders" className="rxs-section fst-riders-section" aria-label="ライダー記録">
         <header className="rxs-section-heading rxs-reveal">
           <p>03 / RIDERS</p>
           <h2>二つの究極形態。</h2>
-        </header>
-        <div className="fst-entries">
-          <a className="fst-entry rxs-reveal" href="#far-from-saga">
-            <figure>
-              <img
-                src={FAR_FROM_SAGA.stages.ultra.image}
-                {...rexonanceImage(FAR_FROM_SAGA.stages.ultra.image)}
-                alt=""
-                width={FAR_FROM_SAGA.stages.ultra.width}
-                height={FAR_FROM_SAGA.stages.ultra.height}
-                loading="lazy"
-                decoding="async"
-              />
-            </figure>
-            <div>
-              <small>RIDER RECORD 01 / {FAR_FROM_SAGA.en}</small>
-              <strong>
-                <span>仮面ライダー</span>
-                {FAR_FROM_SAGA.name}
-              </strong>
-              <em>{FAR_FROM_SAGA.stagesLine}</em>
-              <i aria-hidden="true">↓</i>
-            </div>
-          </a>
-          <a className="fst-entry rxs-reveal" href="#realm-royal">
-            <figure>
-              <img
-                src={REALM_ROYAL.visuals[0].image}
-                {...rexonanceImage(REALM_ROYAL.visuals[0].image)}
-                alt=""
-                width={REALM_ROYAL.visuals[0].width}
-                height={REALM_ROYAL.visuals[0].height}
-                loading="lazy"
-                decoding="async"
-              />
-            </figure>
-            <div>
-              <small>RIDER RECORD 02 / {REALM_ROYAL.en}</small>
-              <strong>
-                <span>仮面ライダー</span>
-                {REALM_ROYAL.name}
-              </strong>
-              <em>{REALM_ROYAL.formsLine}</em>
-              <i aria-hidden="true">↓</i>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      {/* ---------------- FAR FROM SAGA ---------------- */}
-      <section id="far-from-saga" className="rxs-section fst-rider fst-ffs">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>03 / RIDER RECORD 01 / {FAR_FROM_SAGA.en}</p>
-          <h2>
-            <span className="fst-prefix">仮面ライダー</span>
-            ファーフロム
-            <br />
-            サーガ
-          </h2>
-          <span>{FAR_FROM_SAGA.stagesLine}</span>
+          <span>ピックアップを開いて、各形態の記録を閲覧できます。</span>
         </header>
 
-        <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
+        <RiderPickup
+          id="far-from-saga"
+          accent="#7fe6ff"
+          image={FAR_FROM_SAGA.stages.middle.image}
+          imageWidth={FAR_FROM_SAGA.stages.middle.width}
+          imageHeight={FAR_FROM_SAGA.stages.middle.height}
+          imagePos="50% 8%"
+          eyebrow={`RIDER RECORD 01 / ${FAR_FROM_SAGA.en}`}
+          name={FAR_FROM_SAGA.name}
+          sub={FAR_FROM_SAGA.stagesLine}
+          quote="レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。"
+        >
+          <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
 
-        <div className="fst-spec-block rxs-reveal">
-          <SpecList rows={FAR_FROM_SAGA.specs} label="ファーフロムサーガ スペック" />
-          <p className="fst-note">{FAR_FROM_SAGA.specNote}</p>
-        </div>
-
-        <SubHeading kicker="OVERVIEW" title="概要" />
-        <Prose paragraphs={FAR_FROM_SAGA.overview} className="rxs-reveal" />
-
-        <SubHeading kicker="FIVE STAGES" title="形態段階" />
-        <div className="rxs-stage-switcher rxs-reveal">
-          <div
-            ref={stageTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs fst-ffs-stage-tabs"
-            role="tablist"
-            aria-label="ファーフロムサーガの形態段階"
-            aria-describedby="fst-ffs-stage-hint"
-            data-liquid-glass="true"
-            data-stage={stage}
-          >
-            <LiquidLens />
-            {FFS_STAGE_ORDER.map((key) => (
-              <button
-                key={key}
-                id={`fst-ffs-stage-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={stage === key}
-                aria-controls="fst-ffs-stage-panel"
-                tabIndex={stage === key ? 0 : -1}
-                className={stage === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}
-                onClick={() => setStage(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>{FAR_FROM_SAGA.stages[key].code}</span>
-                <small>{FAR_FROM_SAGA.stages[key].label}</small>
-              </button>
-            ))}
+          <div className="fst-spec-block">
+            <SpecList rows={FAR_FROM_SAGA.specs} label="ファーフロムサーガ スペック" />
+            <p className="fst-note">{FAR_FROM_SAGA.specNote}</p>
           </div>
-          <p id="fst-ffs-stage-hint" className="rxs-stage-hint">
-            タップ、長押し、または左右へのスライドで切り替え
-          </p>
 
-          <div
-            id="fst-ffs-stage-panel"
-            className="rxs-stage-panel fst-stage-panel"
-            role="tabpanel"
-            aria-labelledby={`fst-ffs-stage-tab-${stage}`}
-            aria-live="polite"
-            style={{ ["--fst-accent" as string]: activeStage.accent }}
-          >
-            <figure key={stage}>
-              <span aria-hidden="true" />
-              <img
-                src={activeStage.image}
-                {...rexonanceImage(activeStage.image)}
-                alt={activeStage.alt}
-                width={activeStage.width}
-                height={activeStage.height}
-                loading={stage === "middle" ? "eager" : "lazy"}
-                decoding="async"
-              />
-            </figure>
-            <div key={`${stage}-copy`}>
-              <small>{activeStage.code}</small>
-              <h3>{activeStage.label}</h3>
-              {activeStage.body.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+          <SubHeading kicker="OVERVIEW" title="概要" />
+          <Prose paragraphs={FAR_FROM_SAGA.overview} className="fst-plain" />
+
+          <SubHeading kicker="FIVE STAGES" title="形態段階" />
+          <div className="rxs-stage-switcher">
+            <div
+              ref={stageTabsRef}
+              className="rxs-stage-tabs liquid-swipe-tabs fst-ffs-stage-tabs"
+              role="tablist"
+              aria-label="ファーフロムサーガの形態段階"
+              aria-describedby="fst-ffs-stage-hint"
+              data-liquid-glass="true"
+              data-stage={stage}
+            >
+              <LiquidLens />
+              {FFS_STAGE_ORDER.map((key) => (
+                <button
+                  key={key}
+                  id={`fst-ffs-stage-tab-${key}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={stage === key}
+                  aria-controls="fst-ffs-stage-panel"
+                  tabIndex={stage === key ? 0 : -1}
+                  className={stage === key ? "is-active" : ""}
+                  style={{ ["--liquid-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}
+                  onClick={() => setStage(key)}
+                  onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+                >
+                  <span>{FAR_FROM_SAGA.stages[key].code}</span>
+                  <small>{FAR_FROM_SAGA.stages[key].label}</small>
+                </button>
               ))}
             </div>
-          </div>
-        </div>
+            <p id="fst-ffs-stage-hint" className="rxs-stage-hint">
+              タップ、長押し、または左右へのスライドで切り替え
+            </p>
 
-        <SubHeading kicker="CORE MECHANISM" title="新規理論・中核機構" />
-        <ArticleGrid items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
-
-        <SubHeading kicker="ARMOR / OS" title="装甲・浮遊ユニットと統合OS" />
-        <ArticleGrid items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]} columns={2} label="装甲とOS" />
-
-        <SubHeading kicker="DIVINE AUTHORITY" title="神属権限・継承能力" />
-        <ArticleGrid items={FAR_FROM_SAGA.powers} columns={3} label="神属権限・継承能力" />
-
-        <SubHeading kicker="ARSENAL" title="追加武装" />
-        <div className="fst-arsenal rxs-reveal">
-          <ul aria-label="ファーフロムサーガ 追加武装">
-            {FAR_FROM_SAGA.arsenal.map((weapon) => (
-              <li key={weapon}>{weapon}</li>
-            ))}
-          </ul>
-          <p>{FAR_FROM_SAGA.arsenalNote}</p>
-        </div>
-
-        <SubHeading kicker="FINISHER" title="必殺技" />
-        <div className="fst-finishers">
-          {FAR_FROM_SAGA.finishers.map((finisher) => (
-            <article key={finisher.name} className="rxs-reveal">
-              <small>{finisher.code}</small>
-              <h4>{finisher.name}</h4>
-              <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
-              {finisher.body.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* ---------------- REALM ROYAL ---------------- */}
-      <section id="realm-royal" className="rxs-section fst-rider fst-rr">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>03 / RIDER RECORD 02 / {REALM_ROYAL.en}</p>
-          <h2>
-            <span className="fst-prefix">仮面ライダー</span>
-            レルム
-            <br />
-            ロイヤル
-          </h2>
-          <span>{REALM_ROYAL.formsLine}</span>
-        </header>
-
-        <SubHeading kicker="FIVE CROWNS" title="形態とスペック" />
-        <div className="rxs-stage-switcher rxs-reveal">
-          <div
-            ref={formTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs fst-rr-form-tabs"
-            role="tablist"
-            aria-label="レルムロイヤルの形態"
-            aria-describedby="fst-rr-form-hint"
-            data-liquid-glass="true"
-            data-stage={form}
-          >
-            <LiquidLens />
-            {RR_FORM_ORDER.map((key) => (
-              <button
-                key={key}
-                id={`fst-rr-form-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={form === key}
-                aria-controls="fst-rr-form-panel"
-                tabIndex={form === key ? 0 : -1}
-                className={form === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: REALM_ROYAL.forms[key].accent }}
-                onClick={() => setForm(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>{REALM_ROYAL.forms[key].code}</span>
-                <small>{REALM_ROYAL.forms[key].label}</small>
-              </button>
-            ))}
-          </div>
-          <p id="fst-rr-form-hint" className="rxs-stage-hint">
-            タップ、長押し、または左右へのスライドで切り替え
-          </p>
-
-          <div
-            id="fst-rr-form-panel"
-            className="fst-form-panel"
-            role="tabpanel"
-            aria-labelledby={`fst-rr-form-tab-${form}`}
-            aria-live="polite"
-            style={{ ["--fst-accent" as string]: activeForm.accent }}
-          >
-            <div key={`${form}-copy`} className="fst-form-copy">
-              <small>{activeForm.code}</small>
-              <h3>{activeForm.name}</h3>
-              <CallOuts calls={activeForm.calls} label={`${activeForm.name} 変身音声`} />
-            </div>
-            <div key={`${form}-specs`} className="fst-form-specs">
-              <SpecList rows={activeForm.specs} label={`${activeForm.name} スペック`} />
+            <div
+              id="fst-ffs-stage-panel"
+              className="rxs-stage-panel fst-stage-panel"
+              role="tabpanel"
+              aria-labelledby={`fst-ffs-stage-tab-${stage}`}
+              aria-live="polite"
+              style={{ ["--fst-accent" as string]: activeStage.accent }}
+            >
+              <figure key={stage}>
+                <span aria-hidden="true" />
+                <img
+                  src={activeStage.image}
+                  {...rexonanceImage(activeStage.image)}
+                  alt={activeStage.alt}
+                  width={activeStage.width}
+                  height={activeStage.height}
+                  loading={stage === "middle" ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </figure>
+              <div key={`${stage}-copy`}>
+                <small>{activeStage.code}</small>
+                <h3>{activeStage.label}</h3>
+                {activeStage.body.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <SubHeading kicker="VISUAL" title="ビジュアル" />
-        <div className="fst-gallery rxs-reveal" role="list" aria-label="レルムロイヤル ビジュアル">
-          {REALM_ROYAL.visuals.map((visual, index) => (
-            <figure key={visual.image} role="listitem">
-              <img
-                src={visual.image}
-                {...rexonanceImage(visual.image, true)}
-                alt={visual.alt}
-                width={visual.width}
-                height={visual.height}
-                loading="lazy"
-                decoding="async"
-                fetchPriority={index === 0 ? "auto" : "low"}
-              />
-              <figcaption>{visual.label}</figcaption>
-            </figure>
-          ))}
-        </div>
+          <SubHeading kicker="CORE MECHANISM" title="新規理論・中核機構" />
+          <ArticleGrid items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
 
-        <SubHeading kicker="OVERVIEW" title="概要" />
-        <Prose paragraphs={REALM_ROYAL.overview} className="rxs-reveal" />
+          <SubHeading kicker="ARMOR / OS" title="装甲・浮遊ユニットと統合OS" />
+          <ArticleGrid
+            items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]}
+            columns={2}
+            label="装甲とOS"
+          />
 
-        <SubHeading kicker="ARMOR / APPEARANCE" title="装甲・外観" />
-        <Prose paragraphs={REALM_ROYAL.armor} className="rxs-reveal" />
+          <SubHeading kicker="DIVINE AUTHORITY" title="神属権限・継承能力" />
+          <ArticleGrid items={FAR_FROM_SAGA.powers} columns={3} label="神属権限・継承能力" />
 
-        <SubHeading kicker="ABILITY" title="能力" />
-        <ArticleGrid items={REALM_ROYAL.abilities} columns={3} label="レルムロイヤルの能力" />
-
-        <SubHeading kicker="MULTI TYPE" title={REALM_ROYAL.multiType.title} />
-        <Prose paragraphs={REALM_ROYAL.multiType.body} className="rxs-reveal" />
-
-        <SubHeading kicker="ARSENAL" title="追加武装" />
-        <ArticleGrid items={REALM_ROYAL.arsenal} columns={3} label="レルムロイヤル 追加武装" />
-
-        <SubHeading kicker="FINISHER" title="必殺技" />
-        <div className="fst-finishers">
-          {REALM_ROYAL.finishers.map((finisher) => (
-            <article key={finisher.name} className="rxs-reveal">
-              <small>{finisher.code}</small>
-              <h4>{finisher.name}</h4>
-              <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
-              {finisher.body.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+          <SubHeading kicker="ARSENAL" title="追加武装" />
+          <div className="fst-arsenal">
+            <ul aria-label="ファーフロムサーガ 追加武装">
+              {FAR_FROM_SAGA.arsenal.map((weapon) => (
+                <li key={weapon}>{weapon}</li>
               ))}
-            </article>
-          ))}
-        </div>
+            </ul>
+            <p>{FAR_FROM_SAGA.arsenalNote}</p>
+          </div>
+
+          <SubHeading kicker="FINISHER" title="必殺技" />
+          <div className="fst-finishers">
+            {FAR_FROM_SAGA.finishers.map((finisher) => (
+              <article key={finisher.name} className="fst-plain">
+                <small>{finisher.code}</small>
+                <h4>{finisher.name}</h4>
+                <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
+                {finisher.body.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </article>
+            ))}
+          </div>
+        </RiderPickup>
+
+        <RiderPickup
+          id="realm-royal"
+          accent="#ff6f8d"
+          image={REALM_ROYAL.visuals[0].image}
+          imageWidth={REALM_ROYAL.visuals[0].width}
+          imageHeight={REALM_ROYAL.visuals[0].height}
+          imagePos="50% 10%"
+          eyebrow={`RIDER RECORD 02 / ${REALM_ROYAL.en}`}
+          name={REALM_ROYAL.name}
+          sub={REALM_ROYAL.formsLine}
+          quote="戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。"
+        >
+          <SubHeading kicker="FIVE CROWNS" title="形態とスペック" />
+          <div className="rxs-stage-switcher">
+            <div
+              ref={formTabsRef}
+              className="rxs-stage-tabs liquid-swipe-tabs fst-rr-form-tabs"
+              role="tablist"
+              aria-label="レルムロイヤルの形態"
+              aria-describedby="fst-rr-form-hint"
+              data-liquid-glass="true"
+              data-stage={form}
+            >
+              <LiquidLens />
+              {RR_FORM_ORDER.map((key) => (
+                <button
+                  key={key}
+                  id={`fst-rr-form-tab-${key}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={form === key}
+                  aria-controls="fst-rr-form-panel"
+                  tabIndex={form === key ? 0 : -1}
+                  className={form === key ? "is-active" : ""}
+                  style={{ ["--liquid-accent" as string]: REALM_ROYAL.forms[key].accent }}
+                  onClick={() => setForm(key)}
+                  onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+                >
+                  <span>{REALM_ROYAL.forms[key].code}</span>
+                  <small>{REALM_ROYAL.forms[key].label}</small>
+                </button>
+              ))}
+            </div>
+            <p id="fst-rr-form-hint" className="rxs-stage-hint">
+              タップ、長押し、または左右へのスライドで切り替え
+            </p>
+
+            <div
+              id="fst-rr-form-panel"
+              className="fst-form-panel"
+              role="tabpanel"
+              aria-labelledby={`fst-rr-form-tab-${form}`}
+              aria-live="polite"
+              style={{ ["--fst-accent" as string]: activeForm.accent }}
+            >
+              <div key={`${form}-copy`} className="fst-form-copy">
+                <small>{activeForm.code}</small>
+                <h3>{activeForm.name}</h3>
+                <CallOuts calls={activeForm.calls} label={`${activeForm.name} 変身音声`} />
+              </div>
+              <div key={`${form}-specs`} className="fst-form-specs">
+                <SpecList rows={activeForm.specs} label={`${activeForm.name} スペック`} />
+              </div>
+            </div>
+          </div>
+
+          <SubHeading kicker="VISUAL" title="ビジュアル" />
+          <div className="fst-gallery" role="list" aria-label="レルムロイヤル ビジュアル">
+            {REALM_ROYAL.visuals.map((visual, index) => (
+              <figure key={visual.image} role="listitem">
+                <img
+                  src={visual.image}
+                  {...rexonanceImage(visual.image, true)}
+                  alt={visual.alt}
+                  width={visual.width}
+                  height={visual.height}
+                  loading="lazy"
+                  decoding="async"
+                  fetchPriority={index === 0 ? "auto" : "low"}
+                />
+                <figcaption>{visual.label}</figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <SubHeading kicker="OVERVIEW" title="概要" />
+          <Prose paragraphs={REALM_ROYAL.overview} className="fst-plain" />
+
+          <SubHeading kicker="ARMOR / APPEARANCE" title="装甲・外観" />
+          <Prose paragraphs={REALM_ROYAL.armor} className="fst-plain" />
+
+          <SubHeading kicker="ABILITY" title="能力" />
+          <ArticleGrid items={REALM_ROYAL.abilities} columns={3} label="レルムロイヤルの能力" />
+
+          <SubHeading kicker="MULTI TYPE" title={REALM_ROYAL.multiType.title} />
+          <Prose paragraphs={REALM_ROYAL.multiType.body} className="fst-plain" />
+
+          <SubHeading kicker="ARSENAL" title="追加武装" />
+          <ArticleGrid items={REALM_ROYAL.arsenal} columns={3} label="レルムロイヤル 追加武装" />
+
+          <SubHeading kicker="FINISHER" title="必殺技" />
+          <div className="fst-finishers">
+            {REALM_ROYAL.finishers.map((finisher) => (
+              <article key={finisher.name} className="fst-plain">
+                <small>{finisher.code}</small>
+                <h4>{finisher.name}</h4>
+                <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
+                {finisher.body.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </article>
+            ))}
+          </div>
+        </RiderPickup>
       </section>
 
       <footer className="rxs-footer fst-footer">
