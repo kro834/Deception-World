@@ -418,6 +418,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             source: runtime.source,
             destination,
           });
+          // The destination now owns document scrolling. Keep the handoff
+          // artwork alive for its arrival animation, but release the global
+          // loading lock before waiting for that animation to complete.
+          document.documentElement.removeAttribute("data-loading");
           // The destination must paint twice before FLIP reads its geometry.
           // This prevents zero-sized target rects during iOS viewport changes.
           await nextFrame();

@@ -181,6 +181,23 @@ test("the handoff root owns touch input while it covers the page", () => {
   );
 });
 
+test("the arriving handoff releases the destination scroll surface", () => {
+  const arrivingRule = cssRuleContaining(
+    transitionCss,
+    '[data-opening-handoff-root][data-opening-handoff-phase="arriving"]',
+    "arriving opening handoff",
+  );
+  assert.match(arrivingRule.declarations, /pointer-events\s*:\s*none\s*;/);
+  assert.match(arrivingRule.declarations, /touch-action\s*:\s*auto\s*;/);
+  assert.match(arrivingRule.declarations, /overscroll-behavior\s*:\s*auto\s*;/);
+
+  assert.match(
+    loadGateSource,
+    /phase:\s*"arriving",[\s\S]{0,600}?document\.documentElement\.removeAttribute\("data-loading"\);[\s\S]{0,260}?await nextFrame\(\)/,
+    "The global scroll lock must be removed when arrival starts, before the arrival animation wait.",
+  );
+});
+
 test("reduced motion uses an opacity-only early path", () => {
   const reducedBlock = blockAfter(
     openingSource,

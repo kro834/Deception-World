@@ -23,12 +23,17 @@ class FakeTarget {
     entries.push(listener);
     this.listeners.set(type, entries);
     const signal = typeof options === "object" ? options.signal : undefined;
-    signal?.addEventListener("abort", () => this.removeEventListener(type, listener), { once: true });
+    signal?.addEventListener("abort", () => this.removeEventListener(type, listener), {
+      once: true,
+    });
   }
 
   removeEventListener(type, listener) {
     const entries = this.listeners.get(type) ?? [];
-    this.listeners.set(type, entries.filter((entry) => entry !== listener));
+    this.listeners.set(
+      type,
+      entries.filter((entry) => entry !== listener),
+    );
   }
 
   dispatch(type, event = {}) {
@@ -64,8 +69,7 @@ function mountRailRuntime() {
     dataset: {},
     classList: { contains: (name) => name === "liquid-swipe-tabs" },
     querySelector: () => null,
-    querySelectorAll: (selector) =>
-      selector === ':scope > button[role="tab"]' ? [tab] : [],
+    querySelectorAll: (selector) => (selector === ':scope > button[role="tab"]' ? [tab] : []),
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 44 }),
     offsetWidth: 100,
     offsetHeight: 44,
@@ -136,7 +140,46 @@ function mountRailRuntime() {
       timeStamp: 1,
       target: tab,
     });
-  return { initRail: context.initRail, pointerDown, root, win };
+  return { initRail: context.initRail, pointerDown, root, win, doc };
+}
+
+const releasePaths = {
+  pointerup: ({ win }) => win.dispatch("pointerup", { pointerId: 7, clientX: 20, clientY: 20 }),
+  pointercancel: ({ win }) => win.dispatch("pointercancel", { pointerId: 7 }),
+  lostcapture: ({ root }) => root.dispatch("lostpointercapture", { pointerId: 7 }),
+  blur: ({ win }) => win.dispatch("blur"),
+  pagehide: ({ win }) => win.dispatch("pagehide"),
+  hidden: ({ doc }) => {
+    doc.hidden = true;
+    doc.dispatch("visibilitychange");
+  },
+  rotation: ({ win }) => win.dispatch("orientationchange"),
+  resize: ({ win }) => {
+    win.innerWidth = 768;
+    win.dispatch("resize");
+  },
+};
+
+for (const [name, release] of Object.entries(releasePaths)) {
+  test(`Liquid rail releases page scroll after ${name}`, () => {
+    const ui = mountRailRuntime();
+    const dispose = ui.initRail(ui.root);
+    try {
+      ui.pointerDown();
+      assert.equal(ui.root.dataset.railLock, "true");
+      release(ui);
+      assert.equal(ui.root.dataset.railLock, undefined);
+      assert.equal(ui.root.dataset.liquidHeld, "false");
+      // Returning from an interruption must not leave a stale gesture owner.
+      ui.doc.hidden = false;
+      ui.pointerDown();
+      assert.equal(ui.root.dataset.railLock, "true");
+      ui.win.dispatch("pointercancel", { pointerId: 7 });
+      assert.equal(ui.root.dataset.railLock, undefined);
+    } finally {
+      dispose();
+    }
+  });
 }
 
 test("a disposed Liquid rail is inert and can be safely rebound on the same DOM", () => {
@@ -146,20 +189,36 @@ test("a disposed Liquid rail is inert and can be safely rebound on the same DOM"
 
   assert.equal(root.dataset.liquidBound, undefined);
   pointerDown();
-  assert.equal(root.dataset.railLock, undefined, "disposed root handlers must not reacquire a lock");
+  assert.equal(
+    root.dataset.railLock,
+    undefined,
+    "disposed root handlers must not reacquire a lock",
+  );
 
   const disposeSecond = initRail(root);
   assert.equal(root.dataset.liquidBound, "true");
   pointerDown();
   assert.equal(root.dataset.railLock, "true", "the replacement binding should own pointerdown");
   win.dispatch("blur");
-  assert.equal(root.dataset.railLock, undefined, "replacement window cleanup should release on blur");
+  assert.equal(
+    root.dataset.railLock,
+    undefined,
+    "replacement window cleanup should release on blur",
+  );
 
   disposeFirst();
-  assert.equal(root.dataset.liquidBound, "true", "an old idempotent disposer must not clear a new binding");
+  assert.equal(
+    root.dataset.liquidBound,
+    "true",
+    "an old idempotent disposer must not clear a new binding",
+  );
   assert.equal(initRail(root), disposeSecond, "the replacement disposer must remain registered");
   pointerDown();
-  assert.equal(root.dataset.railLock, "true", "an old disposer must not abort replacement handlers");
+  assert.equal(
+    root.dataset.railLock,
+    "true",
+    "an old disposer must not abort replacement handlers",
+  );
   win.dispatch("blur");
   assert.equal(root.dataset.railLock, undefined);
 

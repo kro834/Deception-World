@@ -1213,6 +1213,14 @@ html[data-route-scroll-settling="true"] {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Once the destination is present, the portal is visual continuity only.
+   Let touch scrolling begin immediately while the arrival animation fades. */
+[data-opening-handoff-root][data-opening-handoff-phase="arriving"] {
+  pointer-events: none;
+  touch-action: auto;
+  overscroll-behavior: auto;
+}
+
 [data-opening-handoff-root]::before,
 [data-opening-handoff-root]::after {
   position: absolute;

@@ -72,8 +72,12 @@ try {
     // covered separately by verify-anime-ui's destination-reveal test.
     await page.waitForFunction(() => !document.documentElement.hasAttribute('data-route-scroll-settling'));
     const cdp = engine === "chromium" ? await page.context().newCDPSession(page) : null;
+    let checkedSurfaces = 0;
     for (const selector of surfaces) {
       const target = page.locator(selector).first();
+      // The compact cinematic hero intentionally removes its duplicate
+      // POSTER link. Do not confuse a hidden link with a covered touch target.
+      if (selector === ".hero .text-action" && width <= 767 && !(await target.isVisible())) continue;
       await target.evaluate(e => e.scrollIntoView({ block: "center", behavior: "instant" }));
       await page.waitForTimeout(160);
       const point = await target.evaluate(e => {
@@ -89,6 +93,7 @@ try {
       assert.ok(point, `${width} ${selector}: target is covered ${await target.evaluate(e => {const r=e.getBoundingClientRect();return JSON.stringify({rect:r.toJSON(),hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML.slice(0,220),pointerEvents:getComputedStyle(e).pointerEvents});})}`);
       try { await swipe(page, cdp, point.x, point.y); }
       catch (error) { throw new Error(`${width} ${selector}: ${error.message}`); }
+      checkedSurfaces++;
       assert.notEqual(await page.locator('.side-panel').getAttribute('data-open'), 'true');
     }
     // Empty left/right gutters are scroll surfaces too, not just named nodes.
@@ -210,7 +215,7 @@ try {
     await page.setViewportSize({width,height});
     await page.waitForTimeout(150);
     await swipe(page, cdp, 3, height * 0.7);
-    console.log(JSON.stringify({ engine, viewport: `${width}x${height}`, scrollSurfaces: surfaces.length + 2, allEightRiders: "stable", heldGrowth, lensMs: 80, portraitMs: 100 }));
+    console.log(JSON.stringify({ engine, viewport: `${width}x${height}`, scrollSurfaces: checkedSurfaces + 2, allEightRiders: "stable", heldGrowth, lensMs: 80, portraitMs: 100 }));
     if (process.env.SAVE_SCREENSHOTS) {
       await rail.scrollIntoViewIfNeeded();
       await page.screenshot({ path: `/tmp/rider-final-${engine}-${width}.png` });
