@@ -1,3 +1,5 @@
+                  <small>{locked ? "LOCKED" : "AUTO"}</small>
+                  {locked ? "固定中" : "自動切替"}
                 </b>
               </button>
             </div>
@@ -116,6 +118,7 @@
                     to="/managers/rex-loi"
                     assets={MANAGER_ASSETS["rex-loi"]}
                     style={{ ["--delay" as string]: "0.16s" }}
+                    aria-label="六詠II レックス・ロワの個別資料を開く"
                   >
                     <img
                       src="/manager-rex-loi-thumb.jpeg"
@@ -136,6 +139,7 @@
                     to="/managers/shuza"
                     assets={MANAGER_ASSETS.shuza}
                     style={{ ["--delay" as string]: "0.32s" }}
+                    aria-label="六詠III シュザの個別資料を開く"
                   >
                     <img
                       src="/manager-shuza-thumb.jpeg"
@@ -198,6 +202,7 @@
                     to="/managers/reemu"
                     assets={MANAGER_ASSETS.reemu}
                     style={{ ["--delay" as string]: "0.8s" }}
+                    aria-label="六詠VI リームーの個別資料を開く"
                   >
                     <img
                       src="/manager-reemu-thumb.jpeg"
@@ -419,6 +424,3 @@
             aria-labelledby={`rider-tab-${rider.id}`}
             style={{ ["--rider-tone" as string]: rider.tone }}
           >
-            <div className="rider-visual fit-cover">
-              {RIDERS.map((r, i) =>
-                i === riderTab || i === previousRiderTab ? (

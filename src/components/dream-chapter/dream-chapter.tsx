@@ -14,6 +14,7 @@ import {
   DREAM_CHARACTERS,
   DREAM_DOLMINENCE,
   DREAM_POSTERS,
+  DREAM_STORY_CROSSINGS,
   type DreamCharacter,
   type DreamDolminence,
 } from "./dream-chapter-data";
@@ -1104,21 +1105,76 @@ export function DreamChapter() {
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
         <header className="dream-section-heading" data-film-reveal>
           <FilmTextScan />
-          <p>EPISODE / CASE RECORD</p>
-          <h2 id="case-title">CASES</h2>
-          <span>CASE 0–5</span>
+          <p>STORY / CASE RECORD</p>
+          <h2 id="case-title">物語の記録</h2>
+          <span>CASE 0–5 / DREAM CHAPTER</span>
         </header>
-        <ol className="dream-case-list" data-dream-reveal>
-          {DREAM_CASES.map((episode) => (
-            <li key={episode.no}>
-              <span>CASE</span>
-              <b>{episode.no}</b>
-              <h3>{episode.title}</h3>
-              <small>{episode.reading}</small>
-              <i aria-hidden="true" />
-            </li>
-          ))}
-        </ol>
+        <div className="dream-story-intro">
+          <p>
+            人の心に入り込む悪夢を追って、シエル、東風谷慶弥、怪作の道が交わる。
+            幻想郷を巻き込む異変のなかで、三人は霊夢や魔理沙たちと関わり、
+            それぞれの守るべきものと向き合っていく。
+          </p>
+          <p className="dream-story-scope" id="dream-story-scope">
+            中盤までの内容を含みます。各章を開くとあらすじを読めます。Case 5は記録途中です。
+          </p>
+        </div>
+        <div className="dream-story-layout">
+          <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
+            <p className="dream-story-eyebrow">SAGA × TOUHOU PROJECT</p>
+            <h3 id="dream-crossings-title">幻想郷との交差</h3>
+            <p className="dream-story-crossings-lead">
+              ただ同じ場所に集うのではなく、それぞれの立場から異変に関わっていく。
+            </p>
+            <dl>
+              {DREAM_STORY_CROSSINGS.map((place, index) => (
+                <div key={place.name}>
+                  <dt>
+                    <span aria-hidden="true">0{index + 1}</span>
+                    {place.name}
+                  </dt>
+                  <dd>
+                    <strong>{place.role}</strong>
+                    <p>{place.body}</p>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+          <ol
+            className="dream-story-cases"
+            aria-label="章ごとのあらすじ"
+            aria-describedby="dream-story-scope"
+          >
+            {DREAM_CASES.map((episode) => (
+              <li key={episode.no}>
+                <details className="dream-story-case">
+                  <summary>
+                    <span className="dream-story-case-number">
+                      CASE <b>{episode.no}</b>
+                    </span>
+                    <span className="dream-story-case-heading">
+                      <span>{episode.title}</span>
+                      <small>{episode.reading}</small>
+                    </span>
+                    {episode.no === "5" ? (
+                      <span className="dream-story-case-status">記録途中</span>
+                    ) : null}
+                    <span className="dream-story-case-toggle" aria-hidden="true">
+                      ＋
+                    </span>
+                  </summary>
+                  <div className="dream-story-case-body">
+                    <h3>{episode.lead}</h3>
+                    {episode.paragraphs.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
+                </details>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
       <footer className="dream-footer">

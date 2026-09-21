@@ -6,6 +6,7 @@ import {
 } from "@/lib/world-head";
 import dreamChapterCssUrl from "@/styles-dream-chapter.css?url";
 import dreamFilmCssUrl from "@/styles-dream-film.css?url";
+import dreamStoryCssUrl from "@/styles-dream-story.css?url";
 
 export const Route = createFileRoute("/dream-chapter")({
   component: DreamChapter,
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/dream-chapter")({
       {
         name: "description",
         content:
-          "映画第一作『ドリームチャプター』のポスター、シエル・東風谷慶弥・怪作の人物資料、ドルミネンスの機密記録、Case 0〜5を収録した公式記録ページ。",
+          "映画第一作『ドリームチャプター』の人物資料、ドルミネンスの機密記録と、Case 0〜5の中盤までのあらすじを収録。シエルたちと幻想郷の住人が交わる物語を紹介します。",
       },
       { property: "og:title", content: "DREAM CHAPTER｜Deception World" },
       {
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/dream-chapter")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: dreamChapterCssUrl },
       { rel: "stylesheet", href: dreamFilmCssUrl },
+      { rel: "stylesheet", href: dreamStoryCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       { rel: "preload", as: "image", href: "/dream-chapter-poster-05.jpeg" },
       {

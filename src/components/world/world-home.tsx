@@ -1427,13 +1427,25 @@ export function WorldHome() {
           </a>
         </div>
         <nav aria-label="メインメニュー">
-          <a href="#story" aria-current={activeSection === "story" ? "location" : undefined}>
+          <a
+            href="#story"
+            aria-label="STORY：ストーリーへ移動"
+            aria-current={activeSection === "story" ? "location" : undefined}
+          >
             STORY
           </a>
-          <a href="#riders" aria-current={activeSection === "riders" ? "location" : undefined}>
+          <a
+            href="#riders"
+            aria-label="RIDERS：ライダーへ移動"
+            aria-current={activeSection === "riders" ? "location" : undefined}
+          >
             RIDERS
           </a>
-          <a href="#records" aria-current={activeSection === "records" ? "location" : undefined}>
+          <a
+            href="#records"
+            aria-label="RECORDS：記録へ移動"
+            aria-current={activeSection === "records" ? "location" : undefined}
+          >
             RECORDS
           </a>
         </nav>
@@ -1812,6 +1824,7 @@ export function WorldHome() {
                     to="/managers/rex-loi"
                     assets={MANAGER_ASSETS["rex-loi"]}
                     style={{ ["--delay" as string]: "0.16s" }}
+                    aria-label="六詠II レックス・ロワの個別資料を開く"
                   >
                     <img
                       src="/manager-rex-loi-thumb.jpeg"
@@ -1832,6 +1845,7 @@ export function WorldHome() {
                     to="/managers/shuza"
                     assets={MANAGER_ASSETS.shuza}
                     style={{ ["--delay" as string]: "0.32s" }}
+                    aria-label="六詠III シュザの個別資料を開く"
                   >
                     <img
                       src="/manager-shuza-thumb.jpeg"
@@ -1894,6 +1908,7 @@ export function WorldHome() {
                     to="/managers/reemu"
                     assets={MANAGER_ASSETS.reemu}
                     style={{ ["--delay" as string]: "0.8s" }}
+                    aria-label="六詠VI リームーの個別資料を開く"
                   >
                     <img
                       src="/manager-reemu-thumb.jpeg"

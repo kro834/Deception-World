@@ -1,3 +1,6 @@
+            <div className="rider-visual fit-cover">
+              {RIDERS.map((r, i) =>
+                i === riderTab || i === previousRiderTab ? (
                   <img
                     key={r.id}
                     src={r.img}

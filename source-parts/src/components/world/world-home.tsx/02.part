@@ -1,5 +1,3 @@
-        to: "/riders/realm",
-        assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
           "/civilian-bell-20260826.jpeg",
         ],
       },
@@ -422,3 +420,8 @@ export function WorldHome() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
     };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);

@@ -1,9 +1,3 @@
-          shuffleTimers.current.push(settleTimer);
-        }
-      }, delay);
-      shuffleTimers.current.push(timer);
-    });
-  };
 
   const goEpisode = (index: number) => {
     const next = Math.max(0, Math.min(EPISODES.length - 1, index));
@@ -155,13 +149,25 @@
           </a>
         </div>
         <nav aria-label="メインメニュー">
-          <a href="#story" aria-current={activeSection === "story" ? "location" : undefined}>
+          <a
+            href="#story"
+            aria-label="STORY：ストーリーへ移動"
+            aria-current={activeSection === "story" ? "location" : undefined}
+          >
             STORY
           </a>
-          <a href="#riders" aria-current={activeSection === "riders" ? "location" : undefined}>
+          <a
+            href="#riders"
+            aria-label="RIDERS：ライダーへ移動"
+            aria-current={activeSection === "riders" ? "location" : undefined}
+          >
             RIDERS
           </a>
-          <a href="#records" aria-current={activeSection === "records" ? "location" : undefined}>
+          <a
+            href="#records"
+            aria-label="RECORDS：記録へ移動"
+            aria-current={activeSection === "records" ? "location" : undefined}
+          >
             RECORDS
           </a>
         </nav>
@@ -420,5 +426,3 @@
                   )}
                 </span>
                 <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}
