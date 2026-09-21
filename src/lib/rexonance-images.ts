@@ -15,7 +15,7 @@ const widths: Record<string, number> = {
   "/rider-realm-royal-03.webp": 1182,
   "/rider-realm-royal-04.webp": 1344,
   "/character-archive.webp": 1086,
-  "/character-nagi.webp": 1086,
+  "/character-nagi-20260922.webp": 1086,
 };
 
 export function rexonanceImage(source: string, lazyLayout = false) {

@@ -30,7 +30,7 @@ const SOURCES = [
   { file: "2.webp", name: "rider-realm-royal-03" },
   { file: "3.webp", name: "rider-realm-royal-04" },
   { file: "11.webp", name: "character-archive" },
-  { file: "12.webp", name: "character-nagi" },
+  { file: "13.webp", name: "character-nagi-20260922" },
 ];
 
 const DELIVERY_WIDTHS = [640, 960];
