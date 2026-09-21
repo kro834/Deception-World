@@ -1,3 +1,9 @@
+          shuffleTimers.current.push(settleTimer);
+        }
+      }, delay);
+      shuffleTimers.current.push(timer);
+    });
+  };
 
   const goEpisode = (index: number) => {
     const next = Math.max(0, Math.min(EPISODES.length - 1, index));
@@ -416,7 +422,3 @@
                 <b>
                   <small>{locked ? "LOCKED" : "AUTO"}</small>
                   {locked ? "固定中" : "自動切替"}
-                </b>
-              </button>
-            </div>
-            <output

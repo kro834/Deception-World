@@ -7,7 +7,7 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
-  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260823-r41">';
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260921-r47">';
 const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260906-r45" defer></script>';
 const archives = [
   {

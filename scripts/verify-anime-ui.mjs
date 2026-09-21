@@ -176,14 +176,33 @@ async function checkDreamLayout(page) {
   const layout = await stage.evaluate((element) => {
     const stageRect = element.getBoundingClientRect();
     const posterRect = element.querySelector(".dream-poster-current").getBoundingClientRect();
+    const thumbnails = element.querySelector(".dream-poster-thumbnails");
+    const thumbnailRect = thumbnails.getBoundingClientRect();
     return {
       width: innerWidth,
+      height: innerHeight,
       stageWidth: stageRect.width,
       posterWidth: posterRect.width,
       columns: getComputedStyle(element).gridTemplateColumns,
+      posterRight: posterRect.right,
+      thumbnailsLeft: thumbnailRect.left,
+      thumbnailsRight: thumbnailRect.right,
+      stageRight: stageRect.right,
+      thumbnailCount: thumbnails.querySelectorAll("button").length,
     };
   });
-  if (layout.width <= 1180) {
+  if (
+    layout.width >= 981 &&
+    layout.width <= 1440 &&
+    layout.height >= 600 &&
+    layout.width > layout.height
+  ) {
+    // The refined tablet console intentionally gives the eight thumbnails a
+    // second column. Verify that it is populated and contained, not empty.
+    assert.equal(layout.thumbnailCount, 8);
+    assert.ok(layout.thumbnailsLeft >= layout.posterRight);
+    assert.ok(layout.thumbnailsRight <= layout.stageRight);
+  } else if (layout.width <= 1180) {
     assert.ok(
       Math.abs(layout.stageWidth - layout.posterWidth) < 2,
       `Empty poster column: ${JSON.stringify(layout)}`,
@@ -242,8 +261,10 @@ async function checkEpisodeSwipes(page) {
         const y = box.y + Math.min(220, box.height / 2);
         const spacing = await grid.evaluate((element, index) => {
           const card = element.querySelectorAll(".episode-card")[index];
-          const left = Math.min(element.scrollWidth - element.clientWidth,
-            Math.max(0, card.offsetLeft - (element.clientWidth - card.clientWidth) / 2));
+          const left = Math.min(
+            element.scrollWidth - element.clientWidth,
+            Math.max(0, card.offsetLeft - (element.clientWidth - card.clientWidth) / 2),
+          );
           return Math.abs(left - element.scrollLeft);
         }, index);
         const travel = Math.min(box.width * 0.6, spacing * 0.75);
@@ -287,23 +308,38 @@ async function checkEpisodeSwipes(page) {
     const box = await grid.boundingBox();
     const x = box.x + box.width * 0.8;
     const y = box.y + Math.min(220, box.height / 2);
-    await cdp.send("Input.dispatchTouchEvent", {type:"touchStart", touchPoints:[{x,y}]});
-    for (let step=1;step<=8;step++) {
-      await cdp.send("Input.dispatchTouchEvent", {type:"touchMove",touchPoints:[{x:x-box.width*0.6*step/8,y}]});
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let step = 1; step <= 8; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: x - (box.width * 0.6 * step) / 8, y }],
+      });
       await page.waitForTimeout(16);
     }
-    await cdp.send("Input.dispatchTouchEvent", {type:"touchEnd",touchPoints:[]});
-    await page.waitForFunction(()=>{
-      const grid=document.querySelector('.episode-grid');
-      const cards=[...grid.querySelectorAll('.episode-card')];
-      const index=cards.findIndex(card=>card.classList.contains('is-active'));
-      if(index<=1)return false;
-      const card=cards[index];
-      const left=Math.min(grid.scrollWidth-grid.clientWidth,Math.max(0,card.offsetLeft-(grid.clientWidth-card.clientWidth)/2));
-      return Math.abs(grid.scrollLeft-left)<=2;
-    },null,{timeout:5000});
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForFunction(
+      () => {
+        const grid = document.querySelector(".episode-grid");
+        const cards = [...grid.querySelectorAll(".episode-card")];
+        const index = cards.findIndex((card) => card.classList.contains("is-active"));
+        if (index <= 1) return false;
+        const card = cards[index];
+        const left = Math.min(
+          grid.scrollWidth - grid.clientWidth,
+          Math.max(0, card.offsetLeft - (grid.clientWidth - card.clientWidth) / 2),
+        );
+        return Math.abs(grid.scrollLeft - left) <= 2;
+      },
+      null,
+      { timeout: 5000 },
+    );
     const last = String(lastIndex + 1).padStart(2, "0");
-    return { forward: `01 → ${last}`, backward: `${last} → 01`, interruptedSnapRecovered: true, fastFlickAligned: true };
+    return {
+      forward: `01 → ${last}`,
+      backward: `${last} → 01`,
+      interruptedSnapRecovered: true,
+      fastFlickAligned: true,
+    };
   } finally {
     await cdp.detach();
   }
@@ -501,7 +537,9 @@ async function checkEpisodeClose(page) {
   // Compare scroller geometry only after the dialog's entrance transform ends.
   // The close button lives outside the panel but moves with that transform.
   await page.locator(".episode-pickup-dialog").evaluate(async (dialog) => {
-    await Promise.all(dialog.getAnimations().map((animation) => animation.finished.catch(() => {})));
+    await Promise.all(
+      dialog.getAnimations().map((animation) => animation.finished.catch(() => {})),
+    );
   });
   const panel = page.locator(".episode-pickup-panel");
   const close = page.locator(".episode-pickup-close");

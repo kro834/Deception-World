@@ -420,3 +420,5 @@ const EPISODES: EpisodeRecord[] = [
         src: "/rider-profile-realm.jpeg",
         pos: "50% 8%",
         alt: "仮面ライダーレルムレジェンズ",
+        width: 1221,
+        height: 1800,

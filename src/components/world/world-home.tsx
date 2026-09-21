@@ -1007,6 +1007,9 @@ export function WorldHome() {
   }, []);
 
   useEffect(() => {
+    const shell = shellRef.current;
+    const topbar = shell?.querySelector<HTMLElement>(".topbar");
+    let previousTopbarHeight = 0;
     const sections = (["story", "riders", "records"] as const)
       .map((id) => document.getElementById(id))
       .filter((section): section is HTMLElement => section != null);
@@ -1014,6 +1017,13 @@ export function WorldHome() {
     let frame = 0;
     const syncActiveSection = () => {
       frame = 0;
+      // Text enlargement may grow the fixed header. Reuse this observer rather
+      // than hiding the first title underneath it or adding another listener.
+      const topbarHeight = topbar?.offsetHeight ?? 0;
+      if (topbarHeight > 0 && topbarHeight !== previousTopbarHeight) {
+        shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
+        previousTopbarHeight = topbarHeight;
+      }
       const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
       let current: "story" | "riders" | "records" | null = null;
       sections.forEach((section) => {
@@ -1030,6 +1040,7 @@ export function WorldHome() {
     const resizeObserver =
       typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
     sections.forEach((section) => resizeObserver?.observe(section));
+    if (topbar) resizeObserver?.observe(topbar);
     window.addEventListener("scroll", requestSectionSync, { passive: true });
     window.addEventListener("resize", requestSectionSync, { passive: true });
     window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
@@ -1039,6 +1050,7 @@ export function WorldHome() {
       window.removeEventListener("resize", requestSectionSync);
       window.visualViewport?.removeEventListener("resize", requestSectionSync);
       resizeObserver?.disconnect();
+      shell?.style.removeProperty("--film-topbar-height");
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);

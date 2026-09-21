@@ -1,3 +1,5 @@
+                  <img
+                    key={r.id}
                     src={r.img}
                     srcSet={r.img.replace(/\.jpe?g$/i, ".webp")}
                     sizes="(max-width: 760px) 92vw, (max-width: 1120px) 48vw, 560px"

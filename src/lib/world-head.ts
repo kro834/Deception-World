@@ -2,6 +2,7 @@ import worldCssUrl from "@/styles-world.css?url";
 import worldAddonCssUrl from "@/styles-world-addon.css?url";
 import filmDirectionCssUrl from "@/styles-film-direction.css?url";
 import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
+import cinematicEditionCssUrl from "@/styles-cinematic-edition.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -18,11 +19,20 @@ export const WORLD_ADDON_STYLESHEET_LINK: RouteStylesheetLink = {
   href: worldAddonCssUrl,
 };
 
-export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
+export const WORLD_CORE_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   WORLD_BASE_STYLESHEET_LINK,
   WORLD_ADDON_STYLESHEET_LINK,
   { rel: "stylesheet", href: filmDirectionCssUrl },
   { rel: "stylesheet", href: dossierReaderCssUrl },
+];
+
+export const CINEMATIC_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: cinematicEditionCssUrl,
+};
+export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
+  ...WORLD_CORE_STYLESHEET_LINKS,
+  CINEMATIC_STYLESHEET_LINK,
 ];
 
 type WorldHeadInput = {

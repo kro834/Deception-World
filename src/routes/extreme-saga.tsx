@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExtremeSaga } from "@/components/extreme-saga/extreme-saga";
-import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import {
+  WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
+  CINEMATIC_STYLESHEET_LINK,
+} from "@/lib/world-head";
 import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 
@@ -25,6 +28,7 @@ export const Route = createFileRoute("/extreme-saga")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: extremeSagaCssUrl },
+      CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
         as: "image",

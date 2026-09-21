@@ -1,3 +1,7 @@
+                </b>
+              </button>
+            </div>
+            <output
               aria-label="表示中のポスター"
               aria-live={locked || posterControlsFocused ? "polite" : "off"}
               aria-atomic="true"
@@ -418,5 +422,3 @@
             <div className="rider-visual fit-cover">
               {RIDERS.map((r, i) =>
                 i === riderTab || i === previousRiderTab ? (
-                  <img
-                    key={r.id}
