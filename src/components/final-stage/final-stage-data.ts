@@ -129,8 +129,11 @@ export const CAST: readonly CastEntry[] = [
       "世界間を繋ぐ中継施設で案内係を務める。利用者のために書き溜めてきた手製の地図が、閉ざされた迷宮の中で唯一の抜け道を照らし出し、孤立した悠真を救う。",
       "かつて自身もアーカイヴに守られていた。安全なシェルターへ逃げるよう促されながらも、「今度は自分が、誰かの未来を案内したい」と願う。",
     ],
-    monogram: "NAGI",
-    accent: "#ffd77a",
+    image: "/character-nagi.webp",
+    pos: "50% 10%",
+    width: 1086,
+    height: 1448,
+    accent: "#b59bff",
   },
   {
     id: "rex-loi",
@@ -200,8 +203,11 @@ export const CAST: readonly CastEntry[] = [
       "かつて災厄から逃れた人々を保護していた管理機構。外の世界の脅威を恐れるあまり暴走し、人々を「安全だった過去の時間と場所」に縛り付け、未来の変化そのものを拒絶する。",
       "本体には住民の暮らす避難区画が直結し、通路と通信を次々に遮断して悠真を仲間から分断する。永遠の停滞に執着し、広場ごと空間を閉じ込めようと迫る。",
     ],
-    monogram: "ARCHIVE",
-    accent: "#9aa7b8",
+    image: "/character-archive.webp",
+    pos: "50% 0%",
+    width: 1086,
+    height: 1448,
+    accent: "#8fb8ff",
   },
 ] as const;
 

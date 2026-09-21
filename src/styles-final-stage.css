@@ -591,8 +591,17 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   margin-top: clamp(44px, 6vw, 72px);
 }
 
+/* The record shows each stage head to toe: contain, never crop. */
 .fst-pickup-record .rxs-stage-panel figure {
-  height: min(60vw, 620px);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  max-height: 760px;
+}
+
+.fst-pickup-record .rxs-stage-panel img {
+  object-fit: contain;
+  object-position: 50% 50%;
+  background: #03050a;
 }
 
 /* ---------- Rider entries ---------- */

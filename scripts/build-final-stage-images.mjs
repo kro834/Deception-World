@@ -29,6 +29,8 @@ const SOURCES = [
   { file: "1.webp", name: "rider-realm-royal-02" },
   { file: "2.webp", name: "rider-realm-royal-03" },
   { file: "3.webp", name: "rider-realm-royal-04" },
+  { file: "11.webp", name: "character-archive" },
+  { file: "12.webp", name: "character-nagi" },
 ];
 
 const DELIVERY_WIDTHS = [640, 960];

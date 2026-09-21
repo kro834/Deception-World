@@ -277,6 +277,7 @@ function CastVisual({ person }: { person: CastEntry }) {
       <img
         src={person.image}
         {...dossierImage(person.image)}
+        {...rexonanceImage(person.image)}
         alt={`${person.name}のビジュアル`}
         style={{ objectPosition: person.pos }}
         width={person.width}
