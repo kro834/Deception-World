@@ -1,16 +1,17 @@
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}
-                </b>
-              </button>
-            </div>
-            <output
-              aria-label="表示中のポスター"
-              aria-live={locked || posterControlsFocused ? "polite" : "off"}
-              aria-atomic="true"
-              aria-busy={shuffling}
-            >
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </output>
+          </p>
+          <div className="hero-metadata" aria-label="作品情報">
+            <span>
+              <small>FORMAT</small>
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
           </div>
         </div>
         <a className="scroll-cue" href="#story">

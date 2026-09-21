@@ -423,3 +423,5 @@
       shuffleTimers.current.push(timer);
     });
   };
+
+  const goEpisode = (index: number) => {

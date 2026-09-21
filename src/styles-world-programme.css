@@ -1,0 +1,344 @@
+/* Film programme art direction. World route only: original key visuals,
+   native document scrolling and existing gesture controls stay intact. */
+.site-shell.film-edition {
+  --programme-ink: #090b0f;
+  --programme-paper: #f2eee5;
+  --programme-red: #d83a43;
+  --programme-muted: #adb2bc;
+  --programme-rule: rgb(242 238 229 / 23%);
+  background: var(--programme-ink);
+}
+
+.site-shell.film-edition .topbar {
+  background: #090b0f;
+  border-bottom: 1px solid var(--programme-rule);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.site-shell.film-edition .brand-sigil {
+  border-color: var(--programme-red);
+  color: #ff8088;
+  box-shadow: none;
+  background: transparent;
+}
+.site-shell.film-edition .topbar nav a {
+  color: #d6d6d8;
+  letter-spacing: 0.1em;
+}
+.site-shell.film-edition .topbar nav a[aria-current="location"] {
+  color: #fff;
+  box-shadow: inset 0 -2px var(--programme-red);
+}
+.site-shell.film-edition .topbar .side-panel-trigger {
+  color: var(--programme-paper);
+  border-color: var(--programme-rule);
+  border-radius: 2px;
+  background: #171a20;
+  box-shadow: none;
+}
+
+.site-shell.film-edition > .hero {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-areas: "identity identity" "copy visual" "context visual";
+  grid-template-rows: auto 1fr 1fr;
+  align-content: start;
+  align-items: center;
+  gap: clamp(24px, 3vw, 44px) clamp(32px, 6vw, 96px);
+  min-height: 100svh;
+  height: auto;
+  padding: calc(var(--film-topbar-height, 80px) + 32px) 6vw 56px;
+  background: #090b0f;
+  border-bottom: 1px solid var(--programme-rule);
+}
+.site-shell.film-edition .hero::before,
+.site-shell.film-edition .hero::after {
+  content: none;
+}
+.site-shell.film-edition .hero-backdrop {
+  opacity: 0.045;
+  pointer-events: none;
+}
+.site-shell.film-edition .film-hero-identity {
+  align-self: start;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--programme-rule);
+}
+.site-shell.film-edition .film-hero-identity::after {
+  left: 0;
+  bottom: -1px;
+  width: 96px;
+  height: 3px;
+  background: var(--programme-red);
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title span {
+  color: #c8c6c1;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  line-height: 1.7;
+}
+.site-shell.film-edition .film-hero-identity .anime-work-title b {
+  font-family: Impact, "Arial Narrow", "Oxanium", sans-serif;
+  font-weight: 400;
+  font-size: clamp(64px, 11vw, 168px);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+  word-spacing: 0.08em;
+  color: var(--programme-paper);
+  text-shadow: none;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.site-shell.film-edition .film-edition-mark {
+  color: #ff8088;
+  border-color: var(--programme-red);
+  font-size: 22px;
+  flex: 0 0 auto;
+}
+.site-shell.film-edition .hero-copy {
+  align-self: end;
+  padding-left: clamp(16px, 2vw, 28px);
+  border-left: 2px solid var(--programme-red);
+}
+.site-shell.film-edition .hero-context {
+  grid-area: context;
+  align-self: start;
+  min-width: 0;
+  padding-left: clamp(16px, 2vw, 28px);
+}
+.site-shell.film-edition .hero h1 {
+  margin: 0 0 24px;
+}
+.site-shell.film-edition .hero h1 :is(span, strong) {
+  color: var(--programme-paper);
+  -webkit-text-fill-color: currentColor;
+  font-size: clamp(30px, 3.3vw, 52px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+  background: none;
+  text-shadow: none;
+}
+.site-shell.film-edition .hero-lead {
+  color: #c6c5c3;
+  font-size: 15px;
+  line-height: 2;
+}
+.site-shell.film-edition .hero-actions {
+  margin-top: 28px;
+}
+.site-shell.film-edition .hero .primary-action {
+  min-height: 56px;
+  padding: 16px 24px;
+  /* The shared frosted-control baseline is important. Override only this
+     entry action, including its pressed state, rather than every glass UI. */
+  background: #ac2632 !important;
+  color: #fff;
+  border: 1px solid #f36b72;
+  border-radius: 2px;
+  box-shadow: none;
+  letter-spacing: 0.13em;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.site-shell.film-edition .hero .primary-action > span {
+  color: #fff;
+}
+.site-shell.film-edition .hero .text-action {
+  color: #d7d3cb;
+}
+.site-shell.film-edition .hero-metadata {
+  margin-top: 28px;
+  border-color: var(--programme-rule);
+  border-left: 0;
+}
+.site-shell.film-edition .hero-metadata > span {
+  padding-block: 6px;
+}
+.site-shell.film-edition .hero-metadata small {
+  color: #a8adb7;
+}
+.site-shell.film-edition .hero-metadata b {
+  color: #dcd9d2;
+}
+
+.site-shell.film-edition .poster-stage {
+  --poster-width: min(100%, 360px);
+  max-width: 460px;
+  gap: 12px;
+  justify-self: end;
+}
+.site-shell.film-edition .film-visual-caption {
+  padding-bottom: 8px;
+  color: #c3c4c9;
+  border-color: var(--programme-rule);
+  letter-spacing: 0.13em;
+}
+.site-shell.film-edition .poster-frame {
+  padding: 5px;
+  border: 1px solid #797c83;
+  border-radius: 0;
+  background: #0d0f14;
+  box-shadow:
+    8px 8px 0 #090b0f,
+    9px 9px 0 #d83a4366;
+}
+.site-shell.film-edition .hero .poster-controls {
+  width: var(--poster-width);
+  max-width: 100%;
+}
+.site-shell.film-edition .poster-control-cluster {
+  gap: 8px;
+  background: transparent;
+}
+.site-shell.film-edition .poster-control-cluster > button {
+  min-height: 48px;
+  background: #171a20;
+  color: var(--programme-paper);
+  border: 1px solid #5c616c;
+  border-radius: 2px;
+  box-shadow: none;
+}
+.site-shell.film-edition .poster-control-cluster > button > span[aria-hidden] {
+  color: #ff8790;
+}
+.site-shell.film-edition .poster-controls output {
+  color: #b2b6bf;
+}
+.site-shell.film-edition :is(.hero a, .hero button, .topbar a, .topbar button):focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 4px;
+}
+
+@media (min-width: 761px) and (max-width: 1440px) and (orientation: landscape) {
+  .site-shell.film-edition > .hero {
+    padding-top: calc(var(--film-topbar-height, 76px) + 24px);
+    padding-bottom: 32px;
+    gap: 24px 5vw;
+  }
+  .site-shell.film-edition .poster-stage {
+    --poster-width: min(100%, 31vw, max(260px, calc((100svh - 365px) * 0.667)));
+  }
+  .site-shell.film-edition .hero-copy {
+    padding-left: 18px;
+  }
+  .site-shell.film-edition .hero h1 {
+    margin-bottom: 16px;
+  }
+  .site-shell.film-edition .hero h1 :is(span, strong) {
+    font-size: clamp(30px, 3.2vw, 42px);
+  }
+  .site-shell.film-edition .hero-actions {
+    margin-top: 20px;
+  }
+  .site-shell.film-edition .hero-metadata {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-shell.film-edition .topbar nav a {
+    font-size: 13px;
+    letter-spacing: 0.025em;
+  }
+  .site-shell.film-edition > .hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "identity" "copy" "visual" "context";
+    grid-template-rows: repeat(4, auto);
+    gap: 24px;
+    padding: calc(var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 24px) 20px 40px;
+  }
+  .site-shell.film-edition .film-hero-identity {
+    padding-bottom: 20px;
+    gap: 12px;
+  }
+  .site-shell.film-edition .film-hero-identity .anime-work-title b {
+    font-size: clamp(48px, 19vw, 110px);
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+  .site-shell.film-edition .film-hero-identity .anime-work-title span {
+    font-size: 12px;
+    letter-spacing: 0.035em;
+  }
+  .site-shell.film-edition .hero-copy {
+    border: 0;
+    padding: 0;
+  }
+  .site-shell.film-edition .hero-context {
+    padding: 0;
+  }
+  .site-shell.film-edition .hero h1 {
+    margin: 0;
+  }
+  .site-shell.film-edition .hero h1 :is(span, strong) {
+    font-size: clamp(26px, 7vw, 38px);
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+  .site-shell.film-edition .hero-actions {
+    margin-top: 18px;
+  }
+  .site-shell.film-edition .hero .primary-action {
+    min-height: 56px;
+    padding-inline: 18px;
+  }
+  .site-shell.film-edition .hero-lead {
+    font-size: 14px;
+    line-height: 1.9;
+    margin-top: 0;
+  }
+  .site-shell.film-edition .hero-metadata {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+    padding: 12px 0 0;
+  }
+  .site-shell.film-edition .hero-metadata > span {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding-block: 0;
+    grid-column: auto;
+  }
+  .site-shell.film-edition .hero-metadata :is(small, b) {
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    overflow-wrap: anywhere;
+  }
+  .site-shell.film-edition .poster-stage {
+    --poster-width: min(100%, 360px);
+    max-width: 100%;
+    justify-self: center;
+    gap: 12px;
+  }
+  .site-shell.film-edition .hero .poster-controls {
+    width: var(--poster-width);
+    max-width: 100%;
+  }
+  .site-shell.film-edition .poster-control-cluster {
+    grid-template-columns: 1.3fr 1fr 1fr;
+  }
+  .site-shell.film-edition .poster-control-cluster > button {
+    padding: 10px 6px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition .hero .primary-action:hover {
+    background: #c3303d !important;
+  }
+  .site-shell.film-edition .poster-control-cluster > button:not(:disabled):hover {
+    border-color: #ff8790;
+    background: #242029;
+  }
+}

@@ -1503,11 +1503,6 @@ export function WorldHome() {
             <span>世界は、</span>
             <strong>欺瞞でできている。</strong>
           </h1>
-          <p className="hero-lead">
-            救うべきものは、夢の向こうにはない。
-            <br />
-            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
-          </p>
           <div className="hero-actions">
             <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
               <LiquidPointerGlow />
@@ -1519,20 +1514,6 @@ export function WorldHome() {
             <a className="text-action" href="#poster-stage">
               POSTER
             </a>
-          </div>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>
-            </span>
-            <span>
-              <small>WORLD</small>
-              <b>SAGA / REALITY</b>
-            </span>
-            <span>
-              <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
-            </span>
           </div>
         </div>
 
@@ -1717,6 +1698,27 @@ export function WorldHome() {
             >
               {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
             </output>
+          </div>
+        </div>
+        <div className="hero-context">
+          <p className="hero-lead">
+            救うべきものは、夢の向こうにはない。
+            <br />
+            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
+          </p>
+          <div className="hero-metadata" aria-label="作品情報">
+            <span>
+              <small>FORMAT</small>
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
           </div>
         </div>
         <a className="scroll-cue" href="#story">

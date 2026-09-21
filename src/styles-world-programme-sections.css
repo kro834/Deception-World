@@ -1,0 +1,457 @@
+/* Deception World programme sections
+   Loaded after the cinematic layer. Interaction geometry stays in styles-world. */
+
+.site-shell.film-edition {
+  --programme-ink: #090b0f;
+  --programme-paper: #f2eee5;
+  --programme-red: #d83a43;
+  --programme-red-text: #fa8990;
+  --programme-muted: #adb2bc;
+  --programme-rule: rgb(242 238 229 / 24%);
+}
+
+.site-shell.film-edition :is(.story-section, .riders-section, .records-section) {
+  background: var(--programme-ink);
+}
+
+.site-shell.film-edition :is(.story-section, .riders-section, .records-section)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--programme-red) 0 12%, var(--programme-rule) 12% 100%);
+}
+
+.site-shell.film-edition .section-index {
+  margin-bottom: clamp(44px, 7vw, 88px);
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--programme-rule);
+  color: var(--programme-muted);
+}
+
+.site-shell.film-edition .section-index::after {
+  background: none;
+}
+
+.site-shell.film-edition .section-index > span {
+  color: var(--programme-red);
+  font-family: var(--cinema-display);
+  font-size: clamp(38px, 5vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.8;
+}
+
+.site-shell.film-edition .section-index > small {
+  color: currentColor;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+
+/* Story reads as an inserted programme essay. */
+.site-shell.film-edition .story-layout {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: var(--programme-paper);
+  box-shadow: 18px 18px 0 rgb(216 58 67 / 13%);
+}
+
+.site-shell.film-edition .story-layout::before {
+  content: "STORY / PROGRAMME NOTE";
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 9px 13px;
+  color: #fff;
+  background: var(--programme-red);
+  font-family: var(--cinema-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.site-shell.film-edition .story-layout .story-heading h2 {
+  color: #171a1f;
+  font-family: var(--cinema-display);
+  letter-spacing: -0.045em;
+}
+
+.site-shell.film-edition .story-layout .story-heading h2 em {
+  color: #b5242e;
+  text-shadow: none;
+}
+
+.site-shell.film-edition .story-layout .story-copy > p {
+  color: #26313b;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 2;
+}
+
+.site-shell.film-edition .story-layout .story-copy > .story-lead {
+  color: #171a1f;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+/* Manager directory: one editorial plate, not a stack of blue glass boxes. */
+.site-shell.film-edition .threat-panel {
+  border: 1px solid var(--programme-rule);
+  border-radius: 0;
+  background: #101318;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .threat-panel::before {
+  width: 88px;
+  background: var(--programme-red);
+}
+
+.site-shell.film-edition .threat-copy .system-label {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .threat-copy h3 {
+  color: var(--programme-paper);
+  letter-spacing: 0.04em;
+  line-height: 1.08;
+}
+
+.site-shell.film-edition .threat-copy > p {
+  color: var(--programme-muted);
+  line-height: 1.9;
+}
+
+.site-shell.film-edition .manager-archive-tabs {
+  border-color: var(--programme-rule);
+  background: #090b0f;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .manager-archive-tabs button:is(.is-active, :focus-visible) {
+  color: var(--programme-paper);
+  background: rgb(216 58 67 / 13%);
+}
+
+/* Labels stay legible on the retained opaque Liquid surface, including
+   inactive tabs. Do not change the rail's height or rounded geometry. */
+.site-shell.film-edition .manager-archive-tabs button small {
+  color: #c1cbd8;
+}
+
+.site-shell.film-edition .manager-archive-tabs button b {
+  color: #eef1f5;
+}
+
+.site-shell.film-edition .manager-slot-grid :is(.signal, .dante-archive, .other-archive-card) {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background-color: #111419;
+  box-shadow: none;
+}
+
+.site-shell.film-edition
+  .manager-slot-grid
+  :is(.signal, .dante-archive, .other-archive-card):focus-visible {
+  outline-color: var(--programme-paper);
+  border-color: var(--programme-red);
+}
+
+.site-shell.film-edition .signal.has-visual small {
+  color: var(--programme-muted);
+}
+
+/* World notes use a ruled editorial spread. */
+.site-shell.film-edition .world-column {
+  border: 1px solid var(--programme-rule);
+  border-radius: 0;
+  background: #0d1014;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .world-column::before {
+  width: 88px;
+  background: var(--programme-red);
+}
+
+.site-shell.film-edition .world-column-index {
+  border-color: var(--programme-rule);
+}
+
+.site-shell.film-edition .world-column-index > span,
+.site-shell.film-edition .world-column-number {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .world-column-tabs {
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .world-column-tabs button {
+  border-color: var(--programme-rule);
+  color: var(--programme-muted);
+  background: transparent;
+}
+
+.site-shell.film-edition .world-column-tabs button:is(.is-active, :focus-visible) {
+  border-color: var(--programme-red);
+  color: var(--programme-paper);
+  background: rgb(216 58 67 / 10%);
+  box-shadow: inset 3px 0 0 var(--programme-red);
+}
+
+.site-shell.film-edition .world-column-tabs small,
+.site-shell.film-edition .world-column-copy .eyebrow {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .world-column-copy h3 {
+  color: var(--programme-paper);
+  letter-spacing: -0.04em;
+}
+
+.site-shell.film-edition .world-column-summary-pane p {
+  color: var(--programme-muted);
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+.site-shell.film-edition .world-column-orbit-trigger {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: #15181d;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .world-column-orbit-trigger > i {
+  color: #fff;
+  background: var(--programme-red);
+  box-shadow: none;
+}
+
+/* Rider directory becomes a clean cast listing while retaining rail geometry. */
+.site-shell.film-edition .rider-console {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: #0d1014;
+  box-shadow: 18px 18px 0 rgb(216 58 67 / 9%);
+}
+
+.site-shell.film-edition .rider-tabs {
+  border-color: var(--programme-rule);
+  background: #090b0f;
+}
+
+.site-shell.film-edition .rider-tabs button.is-active {
+  color: var(--programme-paper);
+  background: rgb(242 238 229 / 7%);
+}
+
+.site-shell.film-edition .rider-tabs button.is-active::before {
+  background: var(--programme-red);
+}
+
+.site-shell.film-edition .rider-detail {
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, transparent 0 71%, rgb(216 58 67 / 13%) 71% 71.4%, transparent 71.4%),
+    #111419;
+}
+
+.site-shell.film-edition .rider-number,
+.site-shell.film-edition .rider-person {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .rider-detail h3 {
+  color: var(--programme-paper);
+  letter-spacing: -0.035em;
+}
+
+.site-shell.film-edition .rider-description {
+  color: var(--programme-muted);
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.site-shell.film-edition .rider-dossier-open {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: var(--programme-paper);
+  color: #171a1f;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .rider-dossier-open:focus-visible {
+  outline-color: var(--programme-red);
+}
+
+/* Records resemble programme stills with hard editorial rules. */
+.site-shell.film-edition .records-heading h2 {
+  color: var(--programme-paper);
+}
+
+.site-shell.film-edition .records-heading > p {
+  color: var(--programme-muted);
+}
+
+.site-shell.film-edition .episode-archive {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: #0d1014;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .episode-archive::before,
+.site-shell.film-edition .episode-archive::after {
+  background: var(--programme-red);
+  box-shadow: none;
+}
+
+.site-shell.film-edition .episode-archive-heading {
+  border-color: var(--programme-rule);
+}
+
+.site-shell.film-edition .episode-archive-heading > div:first-child > span,
+.site-shell.film-edition .episode-archive-meta strong {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .episode-controls button {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: #171a1f;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .episode-controls button:focus-visible {
+  border-color: var(--programme-red);
+  color: var(--programme-paper);
+  outline-color: var(--programme-red);
+}
+
+.site-shell.film-edition .episode-card-surface {
+  border-color: var(--programme-rule);
+  border-radius: 0;
+  background: #12151a;
+  box-shadow: none;
+}
+
+.site-shell.film-edition .episode-card.is-active .episode-card-surface {
+  border-color: var(--programme-red);
+  box-shadow: 10px 10px 0 rgb(216 58 67 / 12%);
+}
+
+.site-shell.film-edition .episode-card-select {
+  border-radius: 0;
+}
+
+.site-shell.film-edition .episode-card-copy > p {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .episode-card-copy h4 {
+  color: var(--programme-paper);
+}
+
+.site-shell.film-edition .episode-card-copy small {
+  color: var(--programme-muted);
+}
+
+/* Closing spread. */
+.site-shell.film-edition .finale-section {
+  background: var(--programme-ink);
+}
+
+.site-shell.film-edition .finale-content > span {
+  color: var(--programme-red-text);
+}
+
+.site-shell.film-edition .finale-content h2 {
+  color: var(--programme-paper);
+  text-shadow: 0 2px 24px #000;
+}
+
+.site-shell.film-edition .finale-content .primary-action {
+  border-color: var(--programme-paper);
+  border-radius: 0;
+  background: var(--programme-paper);
+  color: #171a1f;
+  box-shadow: none;
+}
+
+.site-shell.film-edition > footer {
+  border-top: 1px solid var(--programme-rule);
+  background: #07080a;
+  color: var(--programme-muted);
+}
+
+.site-shell.film-edition > footer .footer-title b {
+  color: var(--programme-paper);
+}
+
+.site-shell.film-edition > footer a {
+  color: var(--programme-paper);
+  text-decoration-color: var(--programme-red);
+  text-underline-offset: 5px;
+}
+
+@media (max-width: 760px) {
+  .site-shell.film-edition :is(.story-section, .riders-section, .records-section) {
+    padding-inline: 20px;
+  }
+
+  .site-shell.film-edition .section-index {
+    align-items: flex-end;
+    margin-bottom: 34px;
+  }
+
+  .site-shell.film-edition .section-index > span {
+    font-size: 42px;
+  }
+
+  .site-shell.film-edition .story-layout {
+    padding: 54px 22px 30px;
+    box-shadow: 8px 8px 0 rgb(216 58 67 / 14%);
+  }
+
+  .site-shell.film-edition .story-layout::before {
+    font-size: 11px;
+  }
+
+  .site-shell.film-edition .story-layout .story-copy > p {
+    font-size: 15px;
+    line-height: 1.9;
+  }
+
+  .site-shell.film-edition :is(.threat-panel, .world-column, .episode-archive) {
+    padding-inline: 18px;
+  }
+
+  .site-shell.film-edition .world-column-summary-pane {
+    columns: 1;
+  }
+
+  .site-shell.film-edition .world-column-summary-pane p,
+  .site-shell.film-edition .rider-description {
+    font-size: 15px;
+  }
+
+  .site-shell.film-edition .rider-console,
+  .site-shell.film-edition .episode-card.is-active .episode-card-surface {
+    box-shadow: 7px 7px 0 rgb(216 58 67 / 11%);
+  }
+
+  .site-shell.film-edition .rider-detail {
+    background: #111419;
+  }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .site-shell.film-edition
+    :is(.threat-panel, .world-column, .rider-console, .episode-archive, .episode-card-surface) {
+    border-color: rgb(242 238 229 / 54%);
+  }
+}

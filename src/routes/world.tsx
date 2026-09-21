@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { WorldHome } from "@/components/world/world-home";
-import { createWorldHead } from "@/lib/world-head";
+import { createWorldHead, WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
+import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
 
 export const Route = createFileRoute("/world")({
   component: WorldHome,
@@ -11,6 +13,11 @@ export const Route = createFileRoute("/world")({
       description:
         "六人の最上位管理人と八人のライダーが交差する、劇場版第二作『Deception World』公式記録サイト。",
       image: "/deception-world-poster.jpeg",
+      stylesheetLinks: [
+        ...WORLD_STYLESHEET_LINKS,
+        { rel: "stylesheet", href: worldProgrammeCssUrl },
+        { rel: "stylesheet", href: worldProgrammeSectionsCssUrl },
+      ],
     });
     return {
       ...head,
