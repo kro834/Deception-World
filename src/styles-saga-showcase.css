@@ -107,7 +107,12 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.24;
+  text-wrap: balance;
   text-shadow: none;
+}
+
+.rxs-page.rxs-page .rxs-hero-kicker-tail {
+  white-space: nowrap;
 }
 
 .rxs-page.rxs-page .rxs-hero h1 {

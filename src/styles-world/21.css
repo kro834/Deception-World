@@ -4,20 +4,24 @@ html[data-mode="world"] {
   scroll-padding-top: calc(96px + env(safe-area-inset-top));
 }
 
-.site-shell :where(#top, #story, #manager-archive, #riders, #records) {
+html[data-mode="world"]:has(.site-shell) {
+  /* Keep the offset on home-page targets so cold hash loads work before mode hydration. */
+  scroll-padding-top: 0;
+}
+
+.site-shell :where(#top, #story, #manager-archive, #riders, #records, #poster-stage) {
   scroll-margin-top: calc(96px + env(safe-area-inset-top));
 }
 
 .site-shell #riders-return {
   position: absolute;
-  /* The root already supplies the fixed-header inset through scroll-padding.
-     Keep this return-only target inside the section so the heading and the
+  /* Keep this return-only target inside the section so the heading and the
      first rider card re-enter together instead of leaving a large empty band. */
   top: clamp(64px, 6vw, 88px);
   left: 0;
   width: 1px;
   height: 1px;
-  scroll-margin-top: 0;
+  scroll-margin-top: calc(96px + env(safe-area-inset-top));
   pointer-events: none;
 }
 
@@ -28,7 +32,6 @@ html[data-mode="world"] {
   left: 0;
   width: 1px;
   height: 1px;
-  /* Native fragment navigation may precede the hydrated root's scroll-padding. */
   scroll-margin-top: calc(96px + env(safe-area-inset-top));
   pointer-events: none;
 }

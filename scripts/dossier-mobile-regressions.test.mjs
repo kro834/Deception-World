@@ -93,7 +93,7 @@ test("all rider dossiers return deeper without a doubled fixed-header inset", ()
   assert.equal((worldChrome.match(/hash=\{returnHash\}/g) ?? []).length, 2);
   assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
   assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*clamp\(64px, 6vw, 88px\)/);
-  assert.match(worldPolishStyles, /#riders-return[\s\S]*?scroll-margin-top:\s*0/);
+  assert.match(worldPolishStyles, /#riders-return[\s\S]*?scroll-margin-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/);
 });
 
 test("the rider selected before opening a dossier is restored once on return", () => {

@@ -341,7 +341,7 @@ test("Rexonance stage switching uses one animated Liquid Glass selector", () => 
   assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
   assert.match(styles, /data-liquid-held="true"/);
   assert.match(styles, /data-liquid-dragging="true"/);
-  assert.match(component, /タップ、長押し、または左右へのスライドで切り替え/);
+  assert.match(component, /タップ・長押し・左右スライドで切り替え/);
   assert.match(liquidStyles, /-webkit-touch-callout: none/);
   assert.match(liquidStyles, /touch-action: pan-y/);
 });

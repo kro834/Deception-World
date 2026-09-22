@@ -49,7 +49,7 @@ const STAGES: Record<
   },
   ultra: {
     label: "ウルトラ",
-    code: "ULTRA / 60 SEC",
+    code: "ULTRA 60s",
     image: REXONANCE_SITE_ARTWORK.ultra,
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
     title: "ただ一つの実在へ、収束する。",
@@ -558,7 +558,9 @@ export function RexonanceSaga() {
           <i />
         </div>
         <div className="rxs-hero-copy">
-          <p>THE NEXT GENERATION OF SA-GA</p>
+          <p>
+            THE NEXT GENERATION <span className="rxs-hero-kicker-tail">OF SA-GA</span>
+          </p>
           <h1 id="rxs-title">
             <span>REXONANCE SAGA</span>
             限りなく、
@@ -932,7 +934,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p id="rxs-stage-hint" className="rxs-stage-hint">
-            タップ、長押し、または左右へのスライドで切り替え
+            タップ・長押し・左右スライドで切り替え
           </p>
 
           <div

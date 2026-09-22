@@ -100,6 +100,13 @@ function jpegDimensions(buffer) {
 
 const escapeRegularExpression = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+test("Dream Chapter anchors and narrow-phone navigation remain readable without shrinking type", () => {
+  assert.match(styleSource, /\.dream-section\s*\{[\s\S]*?scroll-margin-top:\s*max\(164px, calc\(136px \+ env\(safe-area-inset-top\)\)\)/);
+  assert.match(filmStyleSource, /@media \(max-width: 360px\)[\s\S]*?\.dream-page \.dream-chapter-nav\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(filmStyleSource, /@media \(max-width: 360px\)[\s\S]*?\.dream-page \.dream-section\s*\{[\s\S]*?scroll-margin-top:\s*max\(190px, calc\(162px \+ env\(safe-area-inset-top\)\)\)/);
+  assert.match(filmStyleSource, /@media \(max-width: 360px\)[\s\S]*?\.dream-page \.dream-dolminence-grid\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\)/);
+});
+
 function extractDolminenceRecord(source, id) {
   const startToken = `    id: "${id}",`;
   const start = source.indexOf(startToken);

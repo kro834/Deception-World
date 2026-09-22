@@ -425,3 +425,7 @@ const EPISODES: EpisodeRecord[] = [
         height: 1800,
         to: "/riders/realm",
         assets: RIDER_NAV.find((item) => item.id === "realm")?.assets ?? [
+          "/civilian-bell-20260826.jpeg",
+        ],
+      },
+      {

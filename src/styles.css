@@ -3651,7 +3651,7 @@ html[data-rail-lock] body {
 }
 
 .zeus-button {
-  --zeus-button-size: clamp(84px, 8.8vw, 122px);
+  --zeus-button-size: clamp(72px, 7vw, 92px);
   --zeus-safe-top: env(safe-area-inset-top, 0px);
   --zeus-safe-right: env(safe-area-inset-right, 0px);
   --zeus-safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -3932,7 +3932,7 @@ html[data-rail-lock] body {
 
 @media (max-width: 560px) {
   .zeus-button {
-    --zeus-button-size: 72px;
+    --zeus-button-size: 60px;
   }
 }
 

@@ -23,4 +23,6 @@ test("related dossiers return to the Other archive tab through a stable native h
     worldStyles,
     /#manager-archive-other[\s\S]*?scroll-margin-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/,
   );
+  assert.match(worldStyles, /html\[data-mode="world"\][\s\S]*?scroll-padding-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/);
+  assert.match(worldStyles, /html\[data-mode="world"\]:has\(\.site-shell\)[\s\S]*?scroll-padding-top:\s*0/);
 });

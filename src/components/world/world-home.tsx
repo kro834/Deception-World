@@ -1775,11 +1775,33 @@ export function WorldHome() {
           <div className="threat-copy" data-film-reveal>
             <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
-              SIX SIGNALS
-              <br />
-              ABOVE THE WORLD.
+              {managerTab === 0 ? (
+                <>
+                  SIX SIGNALS
+                  <br />
+                  ABOVE THE WORLD.
+                </>
+              ) : managerTab === 1 ? (
+                <>
+                  OUTSIDE
+                  <br />
+                  THE SYSTEM.
+                </>
+              ) : (
+                <>
+                  OTHER
+                  <br />
+                  RECORDS.
+                </>
+              )}
             </h3>
-            <p>最上位管理人、六詠。六つの個体記録を照合できます。</p>
+            <p>
+              {managerTab === 0
+                ? "最上位管理人、六詠。六つの個体記録を照合できます。"
+                : managerTab === 1
+                  ? "六詠にも通常の管理人体系にも属さない、ダンテの人物資料を閲覧できます。"
+                  : "物語に関わる、その他の人物資料を閲覧できます。"}
+            </p>
           </div>
           <div className="signal-column">
             <ManagerRail ref={managerRail} />

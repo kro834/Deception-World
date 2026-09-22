@@ -13,7 +13,7 @@ html[data-dream-chapter="true"] {
   background: var(--dream-ink);
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
-  scroll-padding-top: max(148px, calc(120px + env(safe-area-inset-top)));
+  scroll-padding-top: 0;
 }
 
 html[data-dream-chapter="true"] body {
@@ -283,7 +283,8 @@ html[data-page-scrolled] .dream-site-header {
 }
 
 .dream-section {
-  scroll-margin-top: max(148px, calc(120px + env(safe-area-inset-top)));
+  /* Targets retain the fixed-nav offset even on cold hash loads, before hydration. */
+  scroll-margin-top: max(164px, calc(136px + env(safe-area-inset-top)));
 }
 
 html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible="true"]) {

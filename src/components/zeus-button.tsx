@@ -22,7 +22,7 @@ type ZeusButtonSettings = {
 
 const ENABLED_KEY = "deception-world:zeus-button-enabled";
 const POSITION_KEY = "deception-world:zeus-button-position";
-const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.9, y: 0.82 };
+const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.95, y: 0.82 };
 const LONG_PRESS_MS = 420;
 const MOVE_TOLERANCE = 9;
 const RETURN_IMAGE_MIN_MS = 360;

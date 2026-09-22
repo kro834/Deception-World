@@ -547,6 +547,7 @@ export function SideMenuLayer({
                   ? [
                       ["top", "トップ", "TOP"],
                       ["performance", "パフォーマンス", "PERFORMANCE"],
+                      ["p14", "P14", "PROCESSOR"],
                       ["stages", "三つの運用段階", "STAGES"],
                       ["system", "トリニティ・レゾナンス", "SYSTEM"],
                     ]
