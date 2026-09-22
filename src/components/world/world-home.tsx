@@ -13,6 +13,7 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 
 const POSTERS = [
   {
@@ -2034,8 +2035,11 @@ export function WorldHome() {
                       <i>レルム ムーンフォーム</i>
                     </span>
                   </GuardedLink>
-                  {Array.from({ length: 4 }, (_, index) => (
-                    <ArchivePlaceholder key={index} index={index + 3} tone="other" />
+                  {OTHER_ARTWORK.map((artwork) => (
+                    <OtherArtworkCard key={artwork.id} artwork={artwork} />
+                  ))}
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 5} tone="other" />
                   ))}
                 </div>
               </div>

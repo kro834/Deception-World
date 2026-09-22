@@ -1,5 +1,3 @@
-          </p>
-          <div className="hero-metadata" aria-label="作品情報">
             <span>
               <small>FORMAT</small>
               <b>ORIGINAL MOVIE</b>
@@ -327,8 +325,11 @@
                       <i>レルム ムーンフォーム</i>
                     </span>
                   </GuardedLink>
-                  {Array.from({ length: 4 }, (_, index) => (
-                    <ArchivePlaceholder key={index} index={index + 3} tone="other" />
+                  {OTHER_ARTWORK.map((artwork) => (
+                    <OtherArtworkCard key={artwork.id} artwork={artwork} />
+                  ))}
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 5} tone="other" />
                   ))}
                 </div>
               </div>
@@ -424,4 +425,3 @@
             role="tabpanel"
             aria-labelledby={`rider-tab-${rider.id}`}
             style={{ ["--rider-tone" as string]: rider.tone }}
-          >

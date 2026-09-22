@@ -13,6 +13,7 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 
 const POSTERS = [
   {

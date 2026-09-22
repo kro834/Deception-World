@@ -1,0 +1,100 @@
+.other-artwork-card {
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  touch-action: pan-y pinch-zoom;
+}
+
+.other-artwork-card .other-card-copy b {
+  font-size: clamp(16px, 1.5vw, 20px);
+  color: #fff;
+}
+
+.other-artwork-card .other-card-copy i {
+  font-size: 11px;
+  color: #d2f5ff;
+}
+
+.other-artwork-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border: 0;
+  background: transparent;
+  color: #f6f8ff;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y pinch-zoom;
+}
+
+.other-artwork-dialog::backdrop {
+  background: rgb(3 8 15 / 96%);
+}
+
+.other-artwork-viewer {
+  width: min(100%, 760px);
+  margin-inline: auto;
+}
+
+.other-artwork-viewer header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 12px;
+  border: 1px solid #49718b;
+  background: #101e2b;
+}
+
+.other-artwork-viewer h2 {
+  margin: 0;
+  font-size: clamp(18px, 3vw, 26px);
+  line-height: 1.5;
+}
+
+.other-artwork-viewer button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 8px;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #8dc5dc;
+  border-radius: 999px;
+  background: #21394e;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.other-artwork-viewer button:focus-visible {
+  outline: 3px solid #91eaff;
+  outline-offset: 3px;
+}
+
+.other-artwork-viewer > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 12px auto 0;
+  object-fit: contain;
+}
+
+/* Native modal state controls the lock, so closing or unmounting cannot leave it behind. */
+:is(html, body):has(.other-artwork-dialog[open]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}

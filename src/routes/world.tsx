@@ -5,6 +5,7 @@ import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
 import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
+import otherArtworkCssUrl from "@/styles-other-artwork.css?url";
 
 export const Route = createFileRoute("/world")({
   component: WorldHome,
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldProgrammeCssUrl },
         { rel: "stylesheet", href: worldProgrammeSectionsCssUrl },
         { rel: "stylesheet", href: worldNeoCssUrl },
+        { rel: "stylesheet", href: otherArtworkCssUrl },
       ],
     });
     return {

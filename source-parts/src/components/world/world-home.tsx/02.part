@@ -425,3 +425,4 @@ export function WorldHome() {
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
