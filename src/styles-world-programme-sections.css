@@ -278,9 +278,11 @@
 
 .site-shell.film-edition .rider-dossier-open {
   border-color: var(--programme-rule);
-  border-radius: 0;
-  background: var(--programme-paper);
-  color: #171a1f;
+  /* Pair the pale labels with their own opaque dark surface. The route must
+     remain readable even before the shared frosted-control sheet arrives. */
+  border-radius: 999px;
+  background: #122132 !important;
+  color: #fff;
   box-shadow: none;
 }
 

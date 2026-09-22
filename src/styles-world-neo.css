@@ -567,11 +567,29 @@
     0 0 32px var(--neo-glow) !important;
 }
 .site-shell.film-edition .rider-dossier-open .ios-slide-open-label small {
-  color: var(--neo-cyan);
+  color: #b9ebfa;
   font-family: var(--neo-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
 }
 .site-shell.film-edition .rider-dossier-open .ios-slide-open-label b {
-  color: var(--neo-text);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+.site-shell.film-edition .rider-dossier-open .ios-slide-open-arrows {
+  color: #b9ebfa;
+  opacity: 1;
+}
+.site-shell.film-edition .rider-dossier-open .ios-slide-open-arrows i {
+  border-color: #b9ebfa;
+  /* Older arrow keyframes must not fade the navigation cue out. */
+  opacity: 1 !important;
+}
+.site-shell.film-edition .rider-dossier-open .ios-slide-open-fill {
+  background: rgb(111 227 255 / 8%);
 }
 .site-shell.film-edition .rider-dossier-open:focus-visible {
   outline-color: #fff0b5;
