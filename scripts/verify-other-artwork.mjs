@@ -11,6 +11,28 @@ const browser = await (engine === "webkit" ? webkit : chromium).launch(
 );
 await mkdir(output, { recursive: true });
 
+const focusAppearance = (locator) =>
+  locator.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const outline =
+      style.outlineStyle !== "none" &&
+      style.outlineStyle !== "hidden" &&
+      Number.parseFloat(style.outlineWidth) > 0;
+    const shadow =
+      style.boxShadow !== "none" && !/^rgba?\(0, 0, 0, 0\)(?: 0px){2,4}$/.test(style.boxShadow);
+    const focusVisible = node.matches(":focus-visible");
+    return {
+      outline,
+      shadow,
+      focusVisible,
+      emphasized: focusVisible && (outline || shadow),
+      outlineValue: `${style.outlineWidth} ${style.outlineStyle} ${style.outlineColor}`,
+      boxShadow: style.boxShadow,
+      focused: document.activeElement === node,
+      activeElement: document.activeElement?.outerHTML.slice(0, 250),
+    };
+  });
+
 try {
   for (const [width, height] of [
     [390, 844],
@@ -44,9 +66,16 @@ try {
       const trigger = page.getByRole("button", { name: `${name}の画像を拡大`, exact: true });
       await trigger.locator("img").evaluate((img) => img.decode());
       assert.ok((await trigger.locator("img").getAttribute("src")).includes(`character-${id}-`));
-      await trigger.click();
+      await trigger.tap();
       const dialog = page.locator(`#other-artwork-${id}[open]`);
       await dialog.waitFor();
+      const close = page.getByRole("button", { name: `${name}の画像を閉じる`, exact: true });
+      const pointerDialogFocus = await focusAppearance(dialog);
+      const pointerCloseFocus = await focusAppearance(close);
+      assert.equal(pointerDialogFocus.focused, true, `${name}: pointer open should focus dialog`);
+      assert.equal(pointerDialogFocus.emphasized, false, JSON.stringify(pointerDialogFocus));
+      assert.equal(pointerCloseFocus.focused, false, `${name}: pointer open must not focus close`);
+      assert.equal(pointerCloseFocus.emphasized, false, JSON.stringify(pointerCloseFocus));
       await dialog.locator(".other-artwork-viewer > img").evaluate((img) => img.decode());
       const metrics = await dialog.locator(".other-artwork-viewer > img").evaluate((img) => ({
         fit: getComputedStyle(img).objectFit,
@@ -64,8 +93,24 @@ try {
       await page.screenshot({
         path: checkedOutputPath(`${output}/${engine}-${width}-${id}.png`, [output]),
       });
-      await page.getByRole("button", { name: `${name}の画像を閉じる`, exact: true }).click();
+      // A touch opening must not disable later keyboard navigation.
+      // macOS WebKit uses Option+Tab to visit buttons with default keyboard-access settings.
+      await page.keyboard.press(engine === "webkit" ? "Alt+Tab" : "Tab");
+      const switchedKeyboardFocus = await focusAppearance(close);
+      assert.equal(switchedKeyboardFocus.focused, true, JSON.stringify(switchedKeyboardFocus));
+      assert.equal(switchedKeyboardFocus.emphasized, true, JSON.stringify(switchedKeyboardFocus));
+      await close.tap();
       await dialog.waitFor({ state: "detached" });
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      const pointerTriggerFocus = await focusAppearance(trigger);
+      assert.equal(
+        pointerTriggerFocus.focused,
+        false,
+        `${name}: pointer close should release focus`,
+      );
+      assert.equal(pointerTriggerFocus.emphasized, false, JSON.stringify(pointerTriggerFocus));
       assert.notEqual(
         await page.evaluate(() => getComputedStyle(document.documentElement).overflowY),
         "hidden",
@@ -79,12 +124,24 @@ try {
       await trigger.focus();
       await page.keyboard.press("Enter");
       await dialog.waitFor();
+      await page.keyboard.press(engine === "webkit" ? "Alt+Tab" : "Tab");
+      const keyboardCloseFocus = await focusAppearance(close);
+      assert.equal(keyboardCloseFocus.focused, true, `${name}: Tab should reach close`);
+      assert.equal(keyboardCloseFocus.emphasized, true, JSON.stringify(keyboardCloseFocus));
       await page.keyboard.press("Escape");
       await dialog.waitFor({ state: "detached" });
-      assert.equal(await trigger.evaluate((node) => document.activeElement === node), true);
+      const keyboardTriggerFocus = await focusAppearance(trigger);
+      assert.equal(
+        keyboardTriggerFocus.focused,
+        true,
+        `${name}: Escape should restore trigger focus`,
+      );
+      assert.equal(keyboardTriggerFocus.emphasized, true, JSON.stringify(keyboardTriggerFocus));
       // Backdrop dismissal uses a gutter outside the image panel.
       await trigger.click();
       await dialog.waitFor();
+      assert.equal((await focusAppearance(dialog)).emphasized, false);
+      assert.equal((await focusAppearance(close)).emphasized, false);
       await page.mouse.click(4, 100);
       await dialog.waitFor({ state: "detached" });
     }

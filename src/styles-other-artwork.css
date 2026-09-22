@@ -4,6 +4,7 @@
   font: inherit;
   cursor: pointer;
   touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .other-artwork-card .other-card-copy b {
@@ -32,6 +33,14 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Initial modal focus is structural, not a selected control or image. */
+.other-artwork-dialog:focus,
+.other-artwork-dialog:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .other-artwork-dialog::backdrop {
@@ -83,6 +92,12 @@
 .other-artwork-viewer button:focus-visible {
   outline: 3px solid #91eaff;
   outline-offset: 3px;
+}
+
+/* Keep keyboard focus visible, including when switching from touch to Tab. */
+.other-artwork-dialog[data-input-mode="pointer"] .other-artwork-viewer button:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .other-artwork-viewer > img {

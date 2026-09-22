@@ -28,13 +28,18 @@ export const OTHER_ARTWORK = [
 
 export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[number] }) {
   const [open, setOpen] = useState(false);
+  const [keyboardFocus, setKeyboardFocus] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const keyboardOpened = useRef(false);
   const dialogId = `other-artwork-${artwork.id}`;
 
   useEffect(() => {
-    if (open && dialog.current && !dialog.current.open) dialog.current.showModal();
+    if (!open || !dialog.current) return;
+    if (!dialog.current.open) dialog.current.showModal();
+    // WebKit can show a focus ring on the first button even after a touch opening.
+    // Start on the labelled dialog; Tab still reaches its close control normally.
+    dialog.current.focus({ preventScroll: true });
   }, [open]);
 
   return (
@@ -48,6 +53,7 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
         aria-controls={open ? dialogId : undefined}
         onClick={(event) => {
           keyboardOpened.current = event.detail === 0;
+          setKeyboardFocus(keyboardOpened.current);
           setOpen(true);
         }}
       >
@@ -74,7 +80,20 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
             ref={dialog}
             id={dialogId}
             className="other-artwork-dialog"
+            tabIndex={-1}
+            autoFocus
+            data-input-mode={keyboardFocus ? "keyboard" : "pointer"}
             aria-labelledby={`${dialogId}-title`}
+            onKeyDownCapture={(event) => {
+              if (["Tab", "Enter", " ", "Escape"].includes(event.key)) {
+                keyboardOpened.current = true;
+                setKeyboardFocus(true);
+              }
+            }}
+            onPointerDownCapture={() => {
+              keyboardOpened.current = false;
+              setKeyboardFocus(false);
+            }}
             onClose={() => {
               setOpen(false);
               if (keyboardOpened.current) trigger.current?.focus({ preventScroll: true });
@@ -90,7 +109,10 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
                 <button
                   type="button"
                   aria-label={`${artwork.name}の画像を閉じる`}
-                  onClick={() => dialog.current?.close()}
+                  onClick={(event) => {
+                    keyboardOpened.current = event.detail === 0;
+                    dialog.current?.close();
+                  }}
                 >
                   <span>閉じる</span>
                   <UiVectorIcon kind="close" size={18} />

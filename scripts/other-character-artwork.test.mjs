@@ -74,7 +74,10 @@ test("native dialog close paths cannot leave the page scroll lock behind", () =>
     component,
     /if \(event\.target === event\.currentTarget\) dialog\.current\?\.close\(\)/,
   );
-  assert.match(component, /onClick=\{\(\) => dialog\.current\?\.close\(\)\}/);
+  assert.match(
+    component,
+    /onClick=\{\(event\) => \{\s*keyboardOpened\.current = event\.detail === 0;\s*dialog\.current\?\.close\(\)/,
+  );
   assert.match(styles, /:is\(html, body\):has\(\.other-artwork-dialog\[open\]\)/);
   assert.match(styles, /:has\(\.other-artwork-dialog\[open\]\)\s*\{[^}]*overflow: hidden/s);
   assert.doesNotMatch(
@@ -92,4 +95,25 @@ test("keyboard and pointer closures restore an appropriate trigger state", () =>
   assert.match(component, /else trigger\.current\?\.blur\(\)/);
   assert.match(component, /aria-haspopup="dialog"/);
   assert.match(component, /aria-labelledby=\{`\$\{dialogId\}-title`\}/);
+});
+
+test("artwork opens without automatically highlighting its close button", () => {
+  assert.match(
+    component,
+    /showModal\(\)[\s\S]*?dialog\.current\.focus\(\{ preventScroll: true \}\)/,
+  );
+  assert.match(component, /tabIndex=\{-1\}/);
+  assert.match(component, /tabIndex=\{-1\}\s*autoFocus/);
+  assert.match(component, /data-input-mode=\{keyboardFocus \? "keyboard" : "pointer"\}/);
+  assert.match(
+    styles,
+    /\.other-artwork-dialog:focus-visible\s*\{\s*outline: none;\s*box-shadow: none;/,
+  );
+  assert.match(
+    styles,
+    /\[data-input-mode="pointer"\] \.other-artwork-viewer button:focus\s*\{\s*outline: none;/,
+  );
+  assert.match(styles, /\.other-artwork-viewer button:focus-visible\s*\{\s*outline: 3px solid/);
+  assert.match(component, /onKeyDownCapture=[\s\S]*?setKeyboardFocus\(true\)/);
+  assert.match(component, /onPointerDownCapture=[\s\S]*?setKeyboardFocus\(false\)/);
 });
