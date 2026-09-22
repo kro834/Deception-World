@@ -6,6 +6,7 @@ import {
 } from "@/lib/world-head";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
+import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 
 export const Route = createFileRoute("/rexonance-saga")({
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: resonanceMotionCssUrl },
+      { rel: "stylesheet", href: sagaShowcaseCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

@@ -6,6 +6,7 @@ import {
 } from "@/lib/world-head";
 import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
+import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   component: ExtremeSaga,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/extreme-saga")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: extremeSagaCssUrl },
+      { rel: "stylesheet", href: sagaShowcaseCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

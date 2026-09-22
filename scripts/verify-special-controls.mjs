@@ -27,7 +27,20 @@ async function checkSelect(select, page) {
   await select.dispatchEvent("pointerdown", { pointerType: "touch" });
   await select.selectOption(before.values[before.index]);
   await page.waitForTimeout(80);
-  assert.equal(await select.evaluate((control) => document.activeElement === control), false);
+  // Pointer emphasis must be cleared: either the select blurs, or it keeps
+  // focus (so a native iOS picker stays usable) marked as pointer focus with
+  // no visible outline.
+  const pointerState = await select.evaluate((control) => ({
+    focused: document.activeElement === control,
+    marked: control.dataset.pointerFocus === "true",
+    outline: getComputedStyle(control).outlineStyle,
+    label: control.getAttribute("aria-label") ?? control.id,
+    width: innerWidth,
+  }));
+  assert.ok(
+    !pointerState.focused || (pointerState.marked && pointerState.outline === "none"),
+    JSON.stringify(pointerState),
+  );
 }
 
 try {
@@ -39,7 +52,8 @@ try {
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1",
     });
     for (const route of ["/rexonance-saga", "/extreme-saga", "/final-stage"]) {
-      await page.goto(base + route);
+      // Wait for hydration: the select handlers are attached by React.
+      await page.goto(base + route, { waitUntil: "networkidle" });
       await page.waitForFunction(
         () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
       );
@@ -92,14 +106,12 @@ try {
       );
     }
     await page.goto(base + "/riders/saga");
-    const links = await page
-      .locator(".dossier-reader-links a")
-      .evaluateAll((items) =>
-        items.map((item) => ({
-          height: item.getBoundingClientRect().height,
-          font: parseFloat(getComputedStyle(item).fontSize),
-        })),
-      );
+    const links = await page.locator(".dossier-reader-links a").evaluateAll((items) =>
+      items.map((item) => ({
+        height: item.getBoundingClientRect().height,
+        font: parseFloat(getComputedStyle(item).fontSize),
+      })),
+    );
     assert.ok(links.length > 0 && links.every((link) => link.height >= 48 && link.font >= 13));
     await page.goto(base + "/form-archive");
     for (const kind of ["saga", "realm"]) {

@@ -154,7 +154,14 @@ try {
       } else if (viewport.width > 760) {
         const copy = await rect(page, ".rxs-hero-copy");
         const art = await rect(page, ".rxs-hero-visual");
-        assert.ok(art.x >= copy.x + copy.width - 1, "tablet feature art does not overlap copy");
+        // Side-by-side heroes put the art right of the copy; Final Stage
+        // stacks its logo above the copy. Either way they must not intersect.
+        const apart =
+          art.x >= copy.x + copy.width - 1 ||
+          art.x + art.width <= copy.x + 1 ||
+          art.y >= copy.y + copy.height - 1 ||
+          art.y + art.height <= copy.y + 1;
+        assert.ok(apart, `${route}: tablet feature art does not overlap copy`);
         assert.ok(art.x + art.width <= viewport.width, "tablet feature art stays inside viewport");
       }
       await page.screenshot({ path: `${output}/${route.slice(1)}-${viewport.width}.png` });
