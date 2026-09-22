@@ -79,3 +79,20 @@ html body .site-shell .episode-pickup-plus.ios26-glass {
     0 0 0 1px rgba(0, 0, 0, 0.95),
     inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
 }
+
+/* The eight-rider dossier control sits over detailed artwork. Its former
+   22px SVG painted only a 12px plus. Enlarge the glyph, not the drag target,
+   and remove the competing inner ring while keeping the outer white edge. */
+.rider-dossier-open.ios-slide-open .ios-slide-open-thumb > i {
+  display: none;
+}
+
+.rider-dossier-open.ios-slide-open .ios-slide-open-thumb > b,
+.rider-dossier-open.ios-slide-open .ios-slide-open-thumb .ui-vector-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.rider-dossier-open.ios-slide-open .ios-slide-open-thumb .ui-vector-icon path {
+  stroke-width: 3;
+}

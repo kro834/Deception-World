@@ -1,8 +1,8 @@
 // Shared by HTML preload, image elements and navigation warmup.
 const widths: Record<string, number> = {
-  "/rider-rexonance-saga-pickup.jpeg": 1050,
-  "/rider-rexonance-max.webp": 1086,
-  "/rider-rexonance-ultra.webp": 1200,
+  "/rider-rexonance-saga-pickup-20260922.webp": 1086,
+  "/rider-rexonance-max-20260922.webp": 1086,
+  "/rider-rexonance-ultra-20260922.webp": 1086,
   "/rexonance-p14-core.jpg": 1000,
   "/final-stage-logo.webp": 1536,
   "/rider-far-from-saga-middle.webp": 1070,

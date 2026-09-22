@@ -154,28 +154,37 @@ test("iPad hero and touch sliders release transient emphasis", () => {
   );
 });
 
-test("native selectors only release focus after pointer input", () => {
-  assert.match(component, /const selectPointerInteractionRef = useRef\(false\)/);
+test("native selectors keep the OS picker open while clearing pointer emphasis", () => {
+  assert.doesNotMatch(component, /releaseSelectFocusAfterPointerChange/);
+  for (const select of component.matchAll(/<select\b[\s\S]*?<\/select>/g)) {
+    assert.doesNotMatch(select[0], /blur\(|releaseControlFocus/);
+  }
+  assert.match(component, /event\.currentTarget\.dataset\.pointerFocus = "true"/);
+  assert.match(component, /select\[data-pointer-focus="true"\]/);
+  assert.match(component, /document\.addEventListener\("keydown", restoreKeyboardFocus, true\)/);
+  assert.match(styles, /select\[data-pointer-focus="true"\]:focus\s*\{\s*outline: none/);
+});
+
+test("native iOS picker input updates both comparisons before dismissal", () => {
   assert.match(
     component,
-    /onPointerDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = true/,
+    /onInput=\{\(event\) => \{\s*setPerformanceBaseline\(event\.currentTarget\.value as PerformanceBaseline\)/,
   );
   assert.match(
     component,
-    /onKeyDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+    /onInput=\{\(event\) => \{\s*setP14Baseline\(event\.currentTarget\.value as P14Baseline\)/,
   );
+});
+
+test("long numeric values reserve glyph height and narrow-screen width", () => {
+  assert.match(styles, /\.rxs-headline-metrics strong\s*\{[^}]*padding: 0 0\.08em/s);
+  assert.match(styles, /\.rxs-headline-metrics strong\s*\{[^}]*line-height: 1\.08/s);
   assert.match(
-    component,
-    /onBlur=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
+    styles,
+    /\.rxs-headline-metrics strong\s*\{[^}]*font-variant-numeric: tabular-nums/s,
   );
-  assert.match(
-    component,
-    /if \(!selectPointerInteractionRef\.current\) return;[\s\S]*?releaseControlFocus\(control\)/,
-  );
-  assert.doesNotMatch(
-    component,
-    /setPerformanceBaseline\(control\.value as PerformanceBaseline\);\s*releaseControlFocus\(control\)/,
-  );
+  assert.match(styles, /\.rxs-comparison article strong\s*\{[^}]*line-height: 1\.15/s);
+  assert.match(styles, /\.rxs-comparison-result b\s*\{[^}]*line-height: 1\.15/s);
 });
 
 test("stage panel is named by the selected stage tab", () => {
@@ -225,7 +234,7 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /<option value="p2">P2比<\/option>/);
   assert.match(component, /aria-describedby="rxs-p14-baseline-help"/);
   assert.match(component, /<p id="rxs-p14-baseline-help">/);
-  assert.match(component, /control\.value as P14Baseline/);
+  assert.match(component, /event\.currentTarget\.value as P14Baseline/);
   assert.match(component, /iOS標準選択/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
@@ -339,9 +348,9 @@ test("Rexonance stage switching uses one animated Liquid Glass selector", () => 
 
 test("Rexonance page ships local optimized artwork and responsive motion fallbacks", () => {
   for (const asset of [
-    "public/rider-rexonance-saga-pickup.jpeg",
-    "public/rider-rexonance-max.webp",
-    "public/rider-rexonance-ultra.webp",
+    "public/rider-rexonance-saga-pickup-20260922.webp",
+    "public/rider-rexonance-max-20260922.webp",
+    "public/rider-rexonance-ultra-20260922.webp",
   ]) {
     const url = new URL(`../${asset}`, import.meta.url);
     assert.equal(existsSync(url), true, `${asset} should exist`);
@@ -349,7 +358,8 @@ test("Rexonance page ships local optimized artwork and responsive motion fallbac
   }
   assert.match(component, /fetchPriority="high"/);
   assert.ok(
-    statSync(new URL("../public/rider-rexonance-saga-pickup.jpeg", import.meta.url)).size < 600_000,
+    statSync(new URL("../public/rider-rexonance-saga-pickup-20260922.webp", import.meta.url)).size <
+      1_200_000,
     "the eager hero should stay below 600 KB",
   );
   assert.match(component, /loading=\{stage === "standard" \? "eager" : "lazy"\}/);

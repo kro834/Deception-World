@@ -4,7 +4,7 @@ import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
-import { FormPickup } from "./manager-stub";
+import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -200,7 +200,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         calls: ["HIGH SUPREME!", "ULTRA CORE!", "EXSUPREME SAGA ULTRA!"],
       },
       {
-        img: "/rider-rexonance-saga-pickup.jpeg",
+        img: "/rider-rexonance-saga-pickup-20260922.webp",
         pos: "50% 7%",
         system: "エクスサーガドライバー × デュアルエクスコア／レクソナンスコア",
         name: "レクソナンスサーガ",
@@ -335,17 +335,3 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           {
             img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
             pos: "50% 50%",
-            name: "アクシスレイカー・マークⅦ　ランチャーモード",
-            label: "AXIS RAKER / LAUNCHER MODE",
-          },
-          {
-            img: "/weapon-unite-edge-lancer.jpeg",
-            pos: "50% 50%",
-            name: "ユナイトエッジ　ランサーモード",
-            label: "UNITE EDGE / LANCER MODE",
-          },
-        ],
-      },
-    ],
-    civilian: {
-      name: "月城 悠真",

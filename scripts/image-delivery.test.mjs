@@ -53,7 +53,7 @@ test("critical images expose explicit priority and responsive delivery hints", (
   assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster-delivery\.webp"/);
   assert.match(worldHome, /srcSet=\{r\.img\.replace\(\/\\\.jpe\?g\$\/i, "\.webp"\)\}/);
   assert.match(worldHome, /src="\/deception-world-poster-delivery\.webp"[\s\S]*?loading="lazy"/);
-  assert.match(riderPage, /rider\.id === "over-zeztz" \? "\/character-james-20260829\.webp"/);
+  assert.match(riderPage, /rider\.id === "over-zeztz"\s*\?\s*"\/character-james-20260829\.webp"/);
 });
 
 test("the supplied September logo is preserved and used by every opening layer", () => {

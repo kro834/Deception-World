@@ -1,11 +1,16 @@
+#saga-detail-rexonance .form-art,
+#saga-form-compare-ios .compare-form-card[data-form-id="rexonance"] .form-art {
+  content: url("/rider-rexonance-saga-pickup-20260922.webp");
+}
+
 #saga-detail-rexonance-max .form-art,
 #saga-form-compare-ios .compare-form-card[data-form-id="rexonance-max"] .form-art {
-  content: url("/rider-rexonance-max.webp");
+  content: url("/rider-rexonance-max-20260922.webp");
 }
 
 #saga-detail-rexonance-ultra .form-art,
 #saga-form-compare-ios .compare-form-card[data-form-id="rexonance-ultra"] .form-art {
-  content: url("/rider-rexonance-ultra.webp");
+  content: url("/rider-rexonance-ultra-20260922.webp");
 }
 
 #saga-forms-performance-v5 .rexonance-setting-dossier {

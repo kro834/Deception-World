@@ -24,7 +24,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
   "/dream-chapter-logo.jpeg": 211523,
-  "/rider-rexonance-saga-pickup.jpeg": 564268,
+  "/rider-rexonance-saga-pickup-20260922.webp": 391098,
   "/saga-extreme-middle.webp": 238554,
   "/final-stage-logo.webp": 106600,
 };
@@ -36,7 +36,7 @@ export const DREAM_CHAPTER_ENTER_ASSETS = [
   "/dream-chapter-poster-05.jpeg",
 ] as const;
 
-export const REXONANCE_SAGA_ENTER_ASSETS = ["/rider-rexonance-saga-pickup.jpeg"] as const;
+export const REXONANCE_SAGA_ENTER_ASSETS = ["/rider-rexonance-saga-pickup-20260922.webp"] as const;
 
 export const EXTREME_SAGA_ENTER_ASSETS = ["/saga-extreme-middle.webp"] as const;
 

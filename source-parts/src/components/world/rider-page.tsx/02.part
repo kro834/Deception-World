@@ -1,3 +1,17 @@
+            name: "アクシスレイカー・マークⅦ　ランチャーモード",
+            label: "AXIS RAKER / LAUNCHER MODE",
+          },
+          {
+            img: "/weapon-unite-edge-lancer.jpeg",
+            pos: "50% 50%",
+            name: "ユナイトエッジ　ランサーモード",
+            label: "UNITE EDGE / LANCER MODE",
+          },
+        ],
+      },
+    ],
+    civilian: {
+      name: "月城 悠真",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
       cv: "坂田将吾",
@@ -216,7 +230,7 @@
       { dt: "BIRTHDAY", dd: "9月2日" },
       { dt: "HEIGHT", dd: "179.0cm" },
       { dt: "WEIGHT", dd: "71.2kg" },
-      { dt: "CV", dd: "内山昂輝" },
+      { dt: "CV", dd: "小林千晃" },
     ],
     sections: [
       {
@@ -288,7 +302,7 @@
       name: "ローア",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。サーガ世界の管理人。",
-      cv: "内山昂輝",
+      cv: "小林千晃",
     },
   },
   {
@@ -305,48 +319,20 @@
     civilianImg: "/civilian-vandal.jpeg",
     civilianPos: "50% 10%",
     title: "六詠第二位が、肉弾戦へ権限を変換する。",
-    quotes: [
-      "世界は、今日も選択を許されて居ます",
-      "生者には生を。死者には静寂を",
-      "今日も又、道を閉ざす物だけを壊しましょう",
-    ],
-    facts: [
-      { dt: "NAME", dd: "レックス・ロワ" },
-      { dt: "AGE", dd: "不明" },
-      { dt: "GENDER", dd: "両性具有／性自認は女性" },
-      { dt: "HEIGHT", dd: "185.0cm" },
-      { dt: "WEIGHT", dd: "80.1kg" },
-      { dt: "DIVINITY", dd: "秩序の神" },
-    ],
-    sections: [
-      {
-        no: "01",
-        kicker: "POSITION / IDEAL",
-        title: "世界を残し、支配だけを終わらせる。",
-        body: [
-          "『六詠』の管理人の一人。特定の領域ではなく、単独で中央官制の全役割を背負う。世界は残し、支配だけを終わらせる。",
-        ],
-      },
-      {
-        no: "02",
-        kicker: "PERSONALITY / VERDICT",
-        title: "他者の選択を奪わない、完全なる良心。",
-        body: [
-          "力有る者には責任を。私の力が、私の欲によって振るわれぬ様に。道を閉ざす物だけを壊す。",
-        ],
-      },
-    ],
-    forms: [
-      {
-        img: "/rider-vandal-20260826.jpeg",
-        pos: "50% 8%",
-        system: "ヴァンダールドライバー × スペシャルコア",
-        name: "ヴァンダール",
-        calls: ["RIDE IN!", "SPECIAL!", "ROLLOUT!", "NONE SHALL TRANSCEND IT!", "VANDAL!"],
-        stats: [
-          { dt: "HEIGHT", dd: "203.6cm" },
-          { dt: "WEIGHT", dd: "113.2kg" },
-          { dt: "PUNCH", dd: "262.9t" },
-          { dt: "KICK", dd: "372.2t" },
-          { dt: "JUMP", dd: "5000m" },
-          { dt: "100m", dd: "0.01sec" },
+    quotes: REX_LOI.quotes,
+    facts: REX_LOI.facts,
+    sections: REX_LOI.sections,
+    forms: REX_LOI.rider ? [REX_LOI.rider] : [],
+    civilian: {
+      name: "レックス・ロワ",
+      kicker: "BEFORE TRANSFORMATION / CAST",
+      body: "変身前ビジュアル // CONFIRMED。六詠の管理人。",
+      cv: "斎賀みつき",
+    },
+  },
+  {
+    id: "leddic",
+    no: "05",
+    name: "LEDDIC",
+    ja: "レディック",
+    person: "在原華火",

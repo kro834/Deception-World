@@ -32,7 +32,7 @@ const reconstructedPickup = readParts("src/components/world/manager-stub.tsx");
 const reconstructedHome = readParts("src/components/world/world-home.tsx");
 
 const assets = [
-  "rider-rexonance-saga-pickup.jpeg",
+  "rider-rexonance-saga-pickup-20260922.webp",
   "weapon-realm-slayer-mark-vi.jpeg",
   "weapon-realm-slayer-mark-xiv.jpeg",
   "weapon-axis-raker-mark-vii-arcs.jpeg",
@@ -133,6 +133,6 @@ test("generated and reconstructable source retain the Rexonance feature markers"
   for (const source of [reconstructedRider, reconstructedPickup]) {
     assert.match(source, /rexonance/i);
   }
-  assert.match(reconstructedRider, /rider-rexonance-saga-pickup\.jpeg/);
+  assert.match(reconstructedRider, /rider-rexonance-saga-pickup-20260922\.webp/);
   assert.match(reconstructedPickup, /rexonance-gate-spiral is-cyan/);
 });

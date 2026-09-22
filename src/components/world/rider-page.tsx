@@ -4,7 +4,7 @@ import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
-import { FormPickup } from "./manager-stub";
+import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -200,7 +200,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         calls: ["HIGH SUPREME!", "ULTRA CORE!", "EXSUPREME SAGA ULTRA!"],
       },
       {
-        img: "/rider-rexonance-saga-pickup.jpeg",
+        img: "/rider-rexonance-saga-pickup-20260922.webp",
         pos: "50% 7%",
         system: "エクスサーガドライバー × デュアルエクスコア／レクソナンスコア",
         name: "レクソナンスサーガ",
@@ -567,7 +567,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       { dt: "BIRTHDAY", dd: "9月2日" },
       { dt: "HEIGHT", dd: "179.0cm" },
       { dt: "WEIGHT", dd: "71.2kg" },
-      { dt: "CV", dd: "内山昂輝" },
+      { dt: "CV", dd: "小林千晃" },
     ],
     sections: [
       {
@@ -639,7 +639,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       name: "ローア",
       kicker: "BEFORE TRANSFORMATION / CAST",
       body: "変身前ビジュアル // CONFIRMED。サーガ世界の管理人。",
-      cv: "内山昂輝",
+      cv: "小林千晃",
     },
   },
   {
@@ -656,80 +656,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilianImg: "/civilian-vandal.jpeg",
     civilianPos: "50% 10%",
     title: "六詠第二位が、肉弾戦へ権限を変換する。",
-    quotes: [
-      "世界は、今日も選択を許されて居ます",
-      "生者には生を。死者には静寂を",
-      "今日も又、道を閉ざす物だけを壊しましょう",
-    ],
-    facts: [
-      { dt: "NAME", dd: "レックス・ロワ" },
-      { dt: "AGE", dd: "不明" },
-      { dt: "GENDER", dd: "両性具有／性自認は女性" },
-      { dt: "HEIGHT", dd: "185.0cm" },
-      { dt: "WEIGHT", dd: "80.1kg" },
-      { dt: "DIVINITY", dd: "秩序の神" },
-    ],
-    sections: [
-      {
-        no: "01",
-        kicker: "POSITION / IDEAL",
-        title: "世界を残し、支配だけを終わらせる。",
-        body: [
-          "『六詠』の管理人の一人。特定の領域ではなく、単独で中央官制の全役割を背負う。世界は残し、支配だけを終わらせる。",
-        ],
-      },
-      {
-        no: "02",
-        kicker: "PERSONALITY / VERDICT",
-        title: "他者の選択を奪わない、完全なる良心。",
-        body: [
-          "力有る者には責任を。私の力が、私の欲によって振るわれぬ様に。道を閉ざす物だけを壊す。",
-        ],
-      },
-    ],
-    forms: [
-      {
-        img: "/rider-vandal-20260826.jpeg",
-        pos: "50% 8%",
-        system: "ヴァンダールドライバー × スペシャルコア",
-        name: "ヴァンダール",
-        calls: ["RIDE IN!", "SPECIAL!", "ROLLOUT!", "NONE SHALL TRANSCEND IT!", "VANDAL!"],
-        stats: [
-          { dt: "HEIGHT", dd: "203.6cm" },
-          { dt: "WEIGHT", dd: "113.2kg" },
-          { dt: "PUNCH", dd: "262.9t" },
-          { dt: "KICK", dd: "372.2t" },
-          { dt: "JUMP", dd: "5000m" },
-          { dt: "100m", dd: "0.01sec" },
-        ],
-        abilities: [
-          {
-            name: "SCANNING",
-            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
-          },
-          {
-            name: "SPECIAL",
-            body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
-          },
-        ],
-        arsenal: [
-          {
-            name: "サーパスアタノール",
-            body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。",
-          },
-          {
-            name: "デアグローブ／デアブーツ",
-            body: "対象を破壊に適した組成へ変え、飛行・潜航を含む推進機能を錬成する。",
-          },
-        ],
-        finishers: [
-          {
-            name: "DEAD END",
-            body: "光で対象の全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳撃または蹴撃を中枢へ叩き込む。",
-          },
-        ],
-      },
-    ],
+    quotes: REX_LOI.quotes,
+    facts: REX_LOI.facts,
+    sections: REX_LOI.sections,
+    forms: REX_LOI.rider ? [REX_LOI.rider] : [],
     civilian: {
       name: "レックス・ロワ",
       kicker: "BEFORE TRANSFORMATION / CAST",
@@ -1174,9 +1104,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         no: "01",
         kicker: "SCARS / PROFILE",
         title: "スカーズに所属する、謎の男。",
-        body: [
-          "スカーズに所属している謎の男。役職は特務情報官。",
-        ],
+        body: ["スカーズに所属している謎の男。役職は特務情報官。"],
       },
       {
         no: "02",
@@ -1263,13 +1191,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         system: "サイファードライバー × プライムコア",
         name: "サイファー・ブラックサイト",
         sub: "BLACKSITE",
-        calls: [
-          "CIPHER IN!",
-          "ROLLOUT!",
-          "ERASE THE TRACE!",
-          "BLACKSITE!",
-          "FOCUS ON!",
-        ],
+        calls: ["CIPHER IN!", "ROLLOUT!", "ERASE THE TRACE!", "BLACKSITE!", "FOCUS ON!"],
         overview: [
           "リュシアンがREALMSフランス本部で極秘開発された『サイファードライバー』と『プライムコア』を使用して変身する仮面ライダー。潜入継続が不可能となった場合、または対象を確実に排除しなければ任務を達成できない場合に移行する強襲戦闘形態である。",
           "SPOOFやPROXYなどへ割り当てられていた演算資源及びEMPの大部分を身体駆動、武装、敵解析へ転用し、戦闘能力を飛躍的に向上させる。短時間であればエクスプリームサーガやレルムレジェンズ級の相手とも正面から交戦可能。ただし、純粋な総合戦闘性能ではエクスプリームサーガ・ウルトラを大幅に下回る。",
@@ -1391,7 +1313,11 @@ export function RiderPage({ id }: { id: string }) {
           <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
+              srcSet={
+                rider.id === "over-zeztz"
+                  ? "/character-james-20260829.webp"
+                  : dossierImage(rider.civilianImg).srcSet
+              }
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
               style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
@@ -1443,7 +1369,11 @@ export function RiderPage({ id }: { id: string }) {
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
+              srcSet={
+                rider.id === "over-zeztz"
+                  ? "/character-james-20260829.webp"
+                  : dossierImage(rider.civilianImg).srcSet
+              }
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}

@@ -364,3 +364,24 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
                 {weaponGallery.map((weapon, index) => (
                   <figure
                     key={weapon.name}
+                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
+                  >
+                    <div>
+                      <img
+                        src={weapon.img}
+                        alt={`${weapon.name}の武装ビジュアル`}
+                        style={{ objectPosition: weapon.pos ?? "50% 50%" }}
+                        decoding="async"
+                        loading="lazy"
+                        fetchPriority="low"
+                      />
+                    </div>
+                    <figcaption>
+                      <small>{weapon.label}</small>
+                      <b>{weapon.name}</b>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>

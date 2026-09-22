@@ -389,13 +389,16 @@
 
 .rxs-headline-metrics strong {
   display: block;
+  padding: 0 0.08em;
+  margin-inline: -0.08em;
   margin-top: 45px;
   background: linear-gradient(100deg, #fff, var(--rxs-cyan));
   background-clip: text;
   color: transparent;
   font-size: clamp(86px, 12vw, 170px);
-  line-height: 0.82;
+  line-height: 1.08;
   letter-spacing: -0.09em;
+  font-variant-numeric: tabular-nums;
 }
 
 .rxs-headline-metrics article:nth-child(2) strong {
@@ -590,6 +593,7 @@
 
 .rxs-comparison article header div {
   display: flex;
+  min-width: 0;
   gap: 16px;
   align-items: baseline;
 }
@@ -600,8 +604,12 @@
 }
 
 .rxs-comparison article strong {
-  font-size: clamp(25px, 3vw, 40px);
+  min-width: 0;
+  font-size: clamp(22px, 3vw, 40px);
+  line-height: 1.15;
   letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .rxs-comparison-result {
@@ -620,6 +628,8 @@
 .rxs-comparison-result b {
   color: var(--rxs-cyan);
   font-size: clamp(19px, 2.2vw, 29px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
 }
 
 .rxs-comparison-result em {
@@ -966,6 +976,13 @@
 .rxs-p14-native-select select:focus-visible {
   outline: 2px solid #0a84ff;
   outline-offset: 3px;
+}
+
+/* A native iOS picker may return focus without dispatching change when it is
+   dismissed. Keep that pointer focus from looking like a persistent choice;
+   the document keydown handler removes the marker before keyboard focus moves. */
+.rxs-page select[data-pointer-focus="true"]:focus {
+  outline: none;
 }
 
 .rxs-p14-range-control > p {
@@ -1858,6 +1875,10 @@
     display: block;
   }
 
+  .rxs-comparison article strong {
+    font-size: clamp(20px, 6vw, 25px);
+  }
+
   .rxs-comparison-result {
     min-width: 142px;
   }
@@ -2251,14 +2272,21 @@
 .rxs-page .rxs-local-nav {
   border-bottom-color: color-mix(in srgb, var(--rxs-cyan) 35%, transparent);
   background:
-    linear-gradient(90deg, var(--rxs-cyan), var(--rxs-pink), transparent) bottom / 100% 1px no-repeat,
+    linear-gradient(90deg, var(--rxs-cyan), var(--rxs-pink), transparent) bottom / 100% 1px
+      no-repeat,
     linear-gradient(110deg, #112438, #060c15 70%);
 }
 
 .rxs-page :is(.rxs-comparison, .rxs-p14-comparator, .rxs-system-grid article) {
   border-color: color-mix(in srgb, var(--rxs-cyan) 24%, transparent);
   background:
-    linear-gradient(90deg, var(--rxs-cyan), color-mix(in srgb, var(--rxs-pink) 45%, transparent), transparent) top / 100% 1px no-repeat,
+    linear-gradient(
+        90deg,
+        var(--rxs-cyan),
+        color-mix(in srgb, var(--rxs-pink) 45%, transparent),
+        transparent
+      )
+      top / 100% 1px no-repeat,
     radial-gradient(ellipse at 0 0, rgb(36 87 118 / 24%), transparent 70%),
     #080f1b;
   box-shadow: inset 0 0 0 5px rgb(4 11 21 / 45%);

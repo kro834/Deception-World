@@ -1,45 +1,3 @@
-        ],
-        abilities: [
-          {
-            name: "SCANNING",
-            body: "一撃を見た時点で学習を完了し、重心移動、意図、能力発動条件、癖、精神状態、さらに相手の未来までを読み取り、より適切な戦法を提示する。",
-          },
-          {
-            name: "SPECIAL",
-            body: "最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない規模の攻撃と防御へ転用する。",
-          },
-        ],
-        arsenal: [
-          {
-            name: "サーパスアタノール",
-            body: "胸部変換炉。光と闇の神性を均衡循環させ、終焉の炎『ヒネモス』を生む。",
-          },
-          {
-            name: "デアグローブ／デアブーツ",
-            body: "対象を破壊に適した組成へ変え、飛行・潜航を含む推進機能を錬成する。",
-          },
-        ],
-        finishers: [
-          {
-            name: "DEAD END",
-            body: "光で対象の全構造を可視化・固定し、闇で外部供給、再生、逃走、能力継承を遮断する。ヒネモスを纏った拳撃または蹴撃を中枢へ叩き込む。",
-          },
-        ],
-      },
-    ],
-    civilian: {
-      name: "レックス・ロワ",
-      kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。六詠の管理人。",
-      cv: "斎賀みつき",
-    },
-  },
-  {
-    id: "leddic",
-    no: "05",
-    name: "LEDDIC",
-    ja: "レディック",
-    person: "在原華火",
     enPerson: "HANAKA ARIHARA",
     epithet: "規格外の幸運",
     tone: "#69df74",
@@ -349,3 +307,31 @@
     no: "07",
     name: "OVER ZEZTZ",
     ja: "オーバーゼッツ",
+    person: "ジェームズ・スミス",
+    enPerson: "JAMES SMITH",
+    epithet: "もう一人のセヴン",
+    tone: "#32e1d0",
+    img: "/rider-profile-over-zeztz.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/character-james-20260829.jpg",
+    civilianPos: "50% 8%",
+    title: "英国支部から派遣された、最強のエージェント。",
+    quotes: [
+      "My name is Code Number Seven.",
+      "Nice to meet you… but I’m about to erase you.",
+      "So, goodbye. I'm on it.",
+    ],
+    facts: [
+      { dt: "NAME", dd: "James Smith" },
+      { dt: "CODE", dd: "セヴン" },
+      { dt: "AGE", dd: "28歳" },
+      { dt: "SEX", dd: "男性" },
+      { dt: "HEIGHT", dd: "185cm" },
+      { dt: "AFFILIATION", dd: "CODE英国支部" },
+      { dt: "OCCUPATION", dd: "エージェント" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "AGENT PROFILE",
+        title: "陽気な顔と、任務の最適解。",

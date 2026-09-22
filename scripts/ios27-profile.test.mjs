@@ -39,8 +39,8 @@ test("older iOS, unknown future versions, macOS and Android retain their renderi
 });
 test("auto sizes is opt-in for lazy layout and never part of hero or stage warmup", () => {
   assert.match(rexonanceImage("/rexonance-p14-core.jpg", true).sizes, /^auto, .*40vw$/);
-  assert.doesNotMatch(rexonanceImage("/rider-rexonance-saga-pickup.jpeg").sizes, /auto/);
-  assert.doesNotMatch(rexonanceImage("/rider-rexonance-max.webp").sizes, /auto/);
+  assert.doesNotMatch(rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp").sizes, /auto/);
+  assert.doesNotMatch(rexonanceImage("/rider-rexonance-max-20260922.webp").sizes, /auto/);
   assert.deepEqual(rexonanceImage("/unknown.jpg", true), {});
 });
 test("enhancement lifecycle checks capabilities, preferences and restores previous attributes", () => {

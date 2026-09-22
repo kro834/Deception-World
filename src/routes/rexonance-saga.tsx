@@ -33,9 +33,9 @@ export const Route = createFileRoute("/rexonance-saga")({
       {
         rel: "preload",
         as: "image",
-        href: "/rider-rexonance-saga-pickup.jpeg",
-        imageSrcSet: rexonanceImage("/rider-rexonance-saga-pickup.jpeg").srcSet,
-        imageSizes: rexonanceImage("/rider-rexonance-saga-pickup.jpeg").sizes,
+        href: "/rider-rexonance-saga-pickup-20260922.webp",
+        imageSrcSet: rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp").srcSet,
+        imageSizes: rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp").sizes,
         fetchPriority: "high",
       },
     ],

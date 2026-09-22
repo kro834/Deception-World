@@ -93,7 +93,7 @@ test("Alternate forms warm only near the rail, sequentially and at low priority"
   const f = fixture();
   let cleanup;
   try {
-    cleanup = warmRexonanceStages({}, ["/rider-rexonance-max.webp", "/rider-rexonance-ultra.webp"]);
+    cleanup = warmRexonanceStages({}, ["/rider-rexonance-max-20260922.webp", "/rider-rexonance-ultra-20260922.webp"]);
     f.flush();
     assert.equal(f.images.length, 0);
     f.near();
@@ -123,7 +123,7 @@ test("Data saving avoids speculative downloads and hidden tabs defer warmup", ()
   for (const connection of [{ saveData: true }, { effectiveType: "3g" }, { effectiveType: "2g" }]) {
     const f = fixture(connection);
     try {
-      warmRexonanceStages({}, ["/rider-rexonance-max.webp"])();
+      warmRexonanceStages({}, ["/rider-rexonance-max-20260922.webp"])();
       f.flush();
       assert.equal(f.images.length, 0);
     } finally {
@@ -133,7 +133,7 @@ test("Data saving avoids speculative downloads and hidden tabs defer warmup", ()
   const f = fixture();
   let cleanup;
   try {
-    cleanup = warmRexonanceStages({}, ["/rider-rexonance-max.webp"]);
+    cleanup = warmRexonanceStages({}, ["/rider-rexonance-max-20260922.webp"]);
     f.document.hidden = true;
     f.near();
     f.flush();

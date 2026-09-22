@@ -29,7 +29,7 @@ const STAGES: Record<
   standard: {
     label: "レクソナンス",
     code: "HIGH",
-    image: "/rider-rexonance-saga-pickup.jpeg",
+    image: "/rider-rexonance-saga-pickup-20260922.webp",
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
     title: "無限出力を、実効攻撃へ。",
     lede: "超自己進化と絶対秩序をSA-GA OS 5.5で統合。標準運用の時点で、エクスプリーム・ウルトラ以上の実効戦闘性能を高い安定性で維持します。",
@@ -39,7 +39,7 @@ const STAGES: Record<
   max: {
     label: "マックス",
     code: "MAX",
-    image: "/rider-rexonance-max.webp",
+    image: "/rider-rexonance-max-20260922.webp",
     alt: "仮面ライダーレクソナンスサーガ・マックスの全身ビジュアル",
     title: "全身を、一撃のために。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
@@ -49,7 +49,7 @@ const STAGES: Record<
   ultra: {
     label: "ウルトラ",
     code: "ULTRA / 60 SEC",
-    image: "/rider-rexonance-ultra.webp",
+    image: "/rider-rexonance-ultra-20260922.webp",
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
     title: "ただ一つの実在へ、収束する。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
@@ -356,7 +356,6 @@ export function RexonanceSaga() {
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const selectPointerInteractionRef = useRef(false);
   const activeStage = STAGES[stage];
   const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
   const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
@@ -366,17 +365,21 @@ export function RexonanceSaga() {
     });
   };
 
-  const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
-    if (!selectPointerInteractionRef.current) return;
-    selectPointerInteractionRef.current = false;
-    releaseControlFocus(control);
-  };
-
   useEffect(() => {
     const isIOSDevice =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     setNativeIOSSelection(isIOSDevice);
+  }, []);
+
+  useEffect(() => {
+    const restoreKeyboardFocus = () => {
+      pageRef.current
+        ?.querySelectorAll<HTMLSelectElement>('select[data-pointer-focus="true"]')
+        .forEach((control) => delete control.dataset.pointerFocus);
+    };
+    document.addEventListener("keydown", restoreKeyboardFocus, true);
+    return () => document.removeEventListener("keydown", restoreKeyboardFocus, true);
   }, []);
 
   useEffect(() => {
@@ -567,11 +570,11 @@ export function RexonanceSaga() {
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <img
-            src="/rider-rexonance-saga-pickup.jpeg"
-            {...rexonanceImage("/rider-rexonance-saga-pickup.jpeg")}
+            src="/rider-rexonance-saga-pickup-20260922.webp"
+            {...rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp")}
             alt=""
-            width="1050"
-            height="1400"
+            width="1086"
+            height="1448"
             decoding="async"
             fetchPriority="high"
           />
@@ -619,19 +622,14 @@ export function RexonanceSaga() {
             <select
               value={performanceBaseline}
               aria-label="レクソナンスの比較対象"
-              onPointerDown={() => {
-                selectPointerInteractionRef.current = true;
+              onPointerDown={(event) => {
+                event.currentTarget.dataset.pointerFocus = "true";
               }}
-              onKeyDown={() => {
-                selectPointerInteractionRef.current = false;
-              }}
-              onBlur={() => {
-                selectPointerInteractionRef.current = false;
+              onInput={(event) => {
+                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
               }}
               onChange={(event) => {
-                const control = event.currentTarget;
-                setPerformanceBaseline(control.value as PerformanceBaseline);
-                releaseSelectFocusAfterPointerChange(control);
+                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
               }}
             >
               <option value="vertex">ヴァーテックスサーガ</option>
@@ -809,19 +807,14 @@ export function RexonanceSaga() {
                   value={p14Baseline}
                   aria-label="P14の比較基準"
                   aria-describedby="rxs-p14-baseline-help"
-                  onPointerDown={() => {
-                    selectPointerInteractionRef.current = true;
+                  onPointerDown={(event) => {
+                    event.currentTarget.dataset.pointerFocus = "true";
                   }}
-                  onKeyDown={() => {
-                    selectPointerInteractionRef.current = false;
-                  }}
-                  onBlur={() => {
-                    selectPointerInteractionRef.current = false;
+                  onInput={(event) => {
+                    setP14Baseline(event.currentTarget.value as P14Baseline);
                   }}
                   onChange={(event) => {
-                    const control = event.currentTarget;
-                    setP14Baseline(control.value as P14Baseline);
-                    releaseSelectFocusAfterPointerChange(control);
+                    setP14Baseline(event.currentTarget.value as P14Baseline);
                   }}
                 >
                   <option value="p1">P1比</option>
@@ -956,8 +949,8 @@ export function RexonanceSaga() {
                 src={activeStage.image}
                 {...rexonanceImage(activeStage.image)}
                 alt={activeStage.alt}
-                width={stage === "max" ? 1086 : 1200}
-                height={stage === "max" ? 1448 : 1600}
+                width={1086}
+                height={1448}
                 loading={stage === "standard" ? "eager" : "lazy"}
                 decoding="async"
               />

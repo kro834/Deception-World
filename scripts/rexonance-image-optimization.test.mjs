@@ -5,9 +5,9 @@ import { rexonanceImage } from "../src/lib/rexonance-images.ts";
 
 test("Responsive Rexonance variants exist and are smaller than their originals", () => {
   for (const source of [
-    "/rider-rexonance-saga-pickup.jpeg",
-    "/rider-rexonance-max.webp",
-    "/rider-rexonance-ultra.webp",
+    "/rider-rexonance-saga-pickup-20260922.webp",
+    "/rider-rexonance-max-20260922.webp",
+    "/rider-rexonance-ultra-20260922.webp",
     "/rexonance-p14-core.jpg",
   ]) {
     const { srcSet, sizes } = rexonanceImage(source);

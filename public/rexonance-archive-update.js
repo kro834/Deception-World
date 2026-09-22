@@ -172,17 +172,23 @@
       badge.classList.add("is-confirmed");
     }
     if (grid) grid.innerHTML = statMarkup(meta.stats);
+    if (image && formId === "rexonance") {
+      image.src = "/rider-rexonance-saga-pickup-20260922.webp";
+      image.alt = "仮面ライダーレクソナンスサーガの外観資料。";
+      image.width = 1086;
+      image.height = 1448;
+    }
     if (image && formId === "rexonance-max") {
-      image.src = "/rider-rexonance-max.webp";
+      image.src = "/rider-rexonance-max-20260922.webp";
       image.alt = "仮面ライダーレクソナンスサーガ・マックスの外観資料。";
       image.width = 1086;
       image.height = 1448;
     }
     if (image && formId === "rexonance-ultra") {
-      image.src = "/rider-rexonance-ultra.webp";
+      image.src = "/rider-rexonance-ultra-20260922.webp";
       image.alt = "仮面ライダーレクソナンスサーガ・ウルトラの外観資料。";
-      image.width = 1200;
-      image.height = 1600;
+      image.width = 1086;
+      image.height = 1448;
     }
     if (layout) layout.outerHTML = full ? dossierMarkup(formId) : compactMarkup(meta);
   }

@@ -38,7 +38,7 @@ try {
       source: img.currentSrc,
       originalRequests: performance
         .getEntriesByType("resource")
-        .filter((r) => new URL(r.name).pathname === "/rider-rexonance-saga-pickup.jpeg").length,
+        .filter((r) => new URL(r.name).pathname === "/rider-rexonance-saga-pickup-20260922.webp").length,
     }));
     assert.match(delivery.source, /-delivery-\d+\.webp$/);
     assert.equal(

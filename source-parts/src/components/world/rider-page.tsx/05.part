@@ -1,21 +1,3 @@
-            <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
-            <h1>
-              <small>{rider.enPerson}</small>
-              <span className="manager-display-name">
-                <NameText value={rider.civilian.name} />
-              </span>
-            </h1>
-            <p className="manager-title"># {rider.epithet}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
-          </header>
-          <div className="manager-quotes">
-            {rider.quotes.map((q) => (
-              <q key={q}>{q}</q>
-            ))}
-          </div>
-          <dl className="manager-facts">
             {rider.facts.map((f) => (
               <div key={f.dt}>
                 <dt>{f.dt}</dt>
@@ -37,7 +19,11 @@
           <div className="rider-archive-civilian-visual">
             <img
               src={rider.civilianImg}
-              srcSet={rider.id === "over-zeztz" ? "/character-james-20260829.webp" : dossierImage(rider.civilianImg).srcSet}
+              srcSet={
+                rider.id === "over-zeztz"
+                  ? "/character-james-20260829.webp"
+                  : dossierImage(rider.civilianImg).srcSet
+              }
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 44vw, 520px"
               alt=""
               style={{ objectPosition: rider.civilianPos }}

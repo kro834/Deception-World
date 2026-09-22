@@ -5,9 +5,9 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 const root = new URL("../public/", import.meta.url);
 for (const file of [
-  "rider-rexonance-saga-pickup.jpeg",
-  "rider-rexonance-max.webp",
-  "rider-rexonance-ultra.webp",
+  "rider-rexonance-saga-pickup-20260922.webp",
+  "rider-rexonance-max-20260922.webp",
+  "rider-rexonance-ultra-20260922.webp",
   "rexonance-p14-core.jpg",
 ]) {
   const input = new URL(file, root);

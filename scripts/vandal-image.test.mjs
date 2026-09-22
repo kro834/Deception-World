@@ -14,14 +14,8 @@ const managerPage = readFileSync(
   new URL("../src/components/world/manager-stub.tsx", import.meta.url),
   "utf8",
 );
-const thumbnail = new URL(
-  "../public/rider-vandal-thumbnail-20260827.jpeg",
-  import.meta.url,
-);
-const dossierImage = new URL(
-  "../public/rider-vandal-20260826.jpeg",
-  import.meta.url,
-);
+const thumbnail = new URL("../public/rider-vandal-thumbnail-20260827.jpeg", import.meta.url);
+const dossierImage = new URL("../public/rider-vandal-20260826.jpeg", import.meta.url);
 
 test("Vandal uses the dedicated thumbnail in the rider index", () => {
   assert.match(
@@ -32,7 +26,8 @@ test("Vandal uses the dedicated thumbnail in the rider index", () => {
 });
 
 test("Vandal keeps the full visual across both dossiers", () => {
-  assert.equal((riderPage.match(/\/rider-vandal-20260826\.jpeg/g) ?? []).length, 2);
+  assert.equal((riderPage.match(/\/rider-vandal-20260826\.jpeg/g) ?? []).length, 1);
+  assert.match(riderPage, /forms: REX_LOI\.rider \? \[REX_LOI\.rider\] : \[\]/);
   assert.match(
     managerPage,
     /export const REX_LOI:[^]*?rider: \{[^]*?img: "\/rider-vandal-20260826\.jpeg"/,
