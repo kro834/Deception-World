@@ -6,6 +6,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
@@ -29,7 +30,7 @@ const STAGES: Record<
   standard: {
     label: "レクソナンス",
     code: "HIGH",
-    image: "/rider-rexonance-saga-pickup-20260922.webp",
+    image: REXONANCE_SITE_ARTWORK.standard,
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
     title: "無限出力を、実効攻撃へ。",
     lede: "超自己進化と絶対秩序をSA-GA OS 5.5で統合。標準運用の時点で、エクスプリーム・ウルトラ以上の実効戦闘性能を高い安定性で維持します。",
@@ -39,7 +40,7 @@ const STAGES: Record<
   max: {
     label: "マックス",
     code: "MAX",
-    image: "/rider-rexonance-max-20260922.webp",
+    image: REXONANCE_SITE_ARTWORK.max,
     alt: "仮面ライダーレクソナンスサーガ・マックスの全身ビジュアル",
     title: "全身を、一撃のために。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
@@ -49,7 +50,7 @@ const STAGES: Record<
   ultra: {
     label: "ウルトラ",
     code: "ULTRA / 60 SEC",
-    image: "/rider-rexonance-ultra-20260922.webp",
+    image: REXONANCE_SITE_ARTWORK.ultra,
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
     title: "ただ一つの実在へ、収束する。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
@@ -570,8 +571,8 @@ export function RexonanceSaga() {
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <img
-            src="/rider-rexonance-saga-pickup-20260922.webp"
-            {...rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp")}
+            src={REXONANCE_SITE_ARTWORK.standard}
+            {...rexonanceImage(REXONANCE_SITE_ARTWORK.standard)}
             alt=""
             width="1086"
             height="1448"

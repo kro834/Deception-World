@@ -1,5 +1,10 @@
+import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
+
 // Shared by HTML preload, image elements and navigation warmup.
 const widths: Record<string, number> = {
+  [REXONANCE_SITE_ARTWORK.standard]: 1086,
+  [REXONANCE_SITE_ARTWORK.max]: 1086,
+  [REXONANCE_SITE_ARTWORK.ultra]: 1086,
   "/rider-rexonance-saga-pickup-20260922.webp": 1086,
   "/rider-rexonance-max-20260922.webp": 1086,
   "/rider-rexonance-ultra-20260922.webp": 1086,

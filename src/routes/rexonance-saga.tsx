@@ -8,6 +8,7 @@ import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
 export const Route = createFileRoute("/rexonance-saga")({
   component: RexonanceSaga,
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/rexonance-saga")({
         property: "og:description",
         content: "サーガシステムの次世代到達点。その性能と共鳴を体験する公式特設サイト。",
       },
-      { property: "og:image", content: "/rider-saga-rexonance-thumbnail-20260827.jpeg" },
+      { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],
     links: [
       ...WORLD_STYLESHEET_LINKS,
@@ -35,9 +36,9 @@ export const Route = createFileRoute("/rexonance-saga")({
       {
         rel: "preload",
         as: "image",
-        href: "/rider-rexonance-saga-pickup-20260922.webp",
-        imageSrcSet: rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp").srcSet,
-        imageSizes: rexonanceImage("/rider-rexonance-saga-pickup-20260922.webp").sizes,
+        href: REXONANCE_SITE_ARTWORK.standard,
+        imageSrcSet: rexonanceImage(REXONANCE_SITE_ARTWORK.standard).srcSet,
+        imageSizes: rexonanceImage(REXONANCE_SITE_ARTWORK.standard).sizes,
         fetchPriority: "high",
       },
     ],

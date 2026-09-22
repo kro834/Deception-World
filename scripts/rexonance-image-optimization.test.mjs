@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import { rexonanceImage } from "../src/lib/rexonance-images.ts";
+import { REXONANCE_SITE_ARTWORK } from "../src/lib/rexonance-site-artwork.ts";
 
 test("Responsive Rexonance variants exist and are smaller than their originals", () => {
   for (const source of [
+    ...Object.values(REXONANCE_SITE_ARTWORK),
     "/rider-rexonance-saga-pickup-20260922.webp",
     "/rider-rexonance-max-20260922.webp",
     "/rider-rexonance-ultra-20260922.webp",
