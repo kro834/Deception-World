@@ -93,18 +93,13 @@ test("World scroll milestones stay out of the page-wide render", () => {
   assert.match(nav, /useState<WorldSectionId \| null>\(null\)/);
   assert.match(nav, /if \(current === lastActiveRef\.current\) return;/);
   assert.match(nav, /aria-current=\{activeSection === "story" \? "location" : undefined\}/);
-  assert.match(
-    nav,
-    /if \(significantResize\(\)\) \{\s*readLandingTop\(\);\s*requestSectionSync\(\);/,
-  );
+  assert.match(nav, /if \(significantResize\(\)\) requestSectionSync\(\);/);
   assert.match(nav, /else resizeSettleTimer = window\.setTimeout\(requestSectionSync, 150\)/);
   assert.match(nav, /window\.clearTimeout\(resizeSettleTimer\);/);
-  // Anchor jumps land a section at its scroll-margin-top: the marker reaches it.
-  assert.match(nav, /parseFloat\(getComputedStyle\(sections\[0\]\)\.scrollMarginTop\)/);
-  assert.match(
-    nav,
-    /const marker = Math\.max\(92, landingTop \+ 8, Math\.min\(200, window\.innerHeight \* 0\.22\)\);/,
-  );
+  // Anchor jumps land a section at its scroll-margin-top: the marker reaches it
+  // (related-return-navigation.test.mjs pins the exact comparison).
+  assert.match(nav, /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0/);
+  assert.match(nav, /section\.getBoundingClientRect\(\)\.top <= Math\.max\(marker, landing \+ 8\)/);
   const page = home.slice(home.indexOf("export function WorldHome()"));
   assert.doesNotMatch(page, /setActiveSection/);
   assert.match(page, /<WorldSectionNav \/>/);

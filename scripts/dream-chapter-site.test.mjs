@@ -411,6 +411,15 @@ test("poster archive implements unbiased shuffle, lock, and Liquid Glass control
   assert.match(pageSource, /window\.clearTimeout/);
 });
 
+test("poster transition ignores the shorter shuffle animation before removing the previous image", () => {
+  assert.match(
+    pageSource,
+    /onAnimationEnd=\{\(event\) => \{\s*if \(event\.animationName === "dream-poster-enter"\) setPreviousPosterIndex\(null\)/,
+  );
+  assert.match(styleSource, /dream-poster-shuffle-in 210ms/);
+  assert.match(styleSource, /dream-poster-enter 620ms/);
+});
+
 test("poster shuffle preserves keyboard focus while exposing its busy state", () => {
   const shuffleControl = pageSource.slice(
     pageSource.indexOf('className="dream-poster-shuffle ios26-glass"'),

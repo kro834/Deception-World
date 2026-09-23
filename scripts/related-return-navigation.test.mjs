@@ -26,3 +26,19 @@ test("related dossiers return to the Other archive tab through a stable native h
   assert.match(worldStyles, /html\[data-mode="world"\][\s\S]*?scroll-padding-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/);
   assert.match(worldStyles, /html\[data-mode="world"\]:has\(\.site-shell\)[\s\S]*?scroll-padding-top:\s*0/);
 });
+
+test("World section indicator includes the hash landing on short landscape screens", () => {
+  const start = worldHome.indexOf("const syncActiveSection = () => {");
+  const end = worldHome.indexOf("const requestSectionSync = () => {", start);
+  assert.ok(start >= 0 && end > start);
+  const sync = worldHome.slice(start, end);
+  assert.match(sync, /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0/);
+  assert.match(sync, /section\.getBoundingClientRect\(\)\.top <= Math\.max\(marker, landing \+ 8\)/);
+});
+
+test("World primary hash targets do not shift when preceding sections leave deferred layout", () => {
+  assert.match(
+    worldStyles,
+    /\.site-shell :is\(\.world-column, \.riders-section\)\s*\{[\s\S]*?content-visibility:\s*visible;[\s\S]*?contain-intrinsic-size:\s*none/,
+  );
+});

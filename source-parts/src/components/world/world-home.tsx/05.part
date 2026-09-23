@@ -1,5 +1,3 @@
-                  {locked ? "固定中" : "自動切替"}
-                </b>
               </button>
             </div>
             <output
@@ -452,3 +450,4 @@
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
+          <p className="eyebrow">

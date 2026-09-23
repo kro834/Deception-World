@@ -52,6 +52,13 @@ html[data-mode="world"] .site-shell > .site-update-control {
 /* Riders and Records stay laid out: content-visibility placeholders were off by
    ±400 px at phone widths, so the topbar anchors landed mid-section. */
 
+/* Primary hash targets must not move when earlier estimated sections are laid out.
+   Images within these sections still retain their own lazy loading. */
+.site-shell :is(.world-column, .riders-section) {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
 /* Pause only time-based decoration off screen. Scroll-driven reveals must keep
    their timeline, or they sit hidden at progress 0 after a jump or a fling. */
 [data-performance-region][data-viewport-active="false"]

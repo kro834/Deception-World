@@ -741,13 +741,6 @@ const WorldSectionNav = memo(function WorldSectionNav() {
       .map((id) => document.getElementById(id))
       .filter((section): section is HTMLElement => section != null);
     if (!sections.length) return;
-    // Anchor jumps land a section at its scroll-margin-top (96px + safe area,
-    // styles-world/21.css); the marker must reach that line on short viewports.
-    let landingTop = 0;
-    const readLandingTop = () => {
-      landingTop = parseFloat(getComputedStyle(sections[0]).scrollMarginTop) || 0;
-    };
-    readLandingTop();
     let frame = 0;
     let resizeSettleTimer = 0;
     const syncActiveSection = () => {
@@ -759,13 +752,14 @@ const WorldSectionNav = memo(function WorldSectionNav() {
         shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
         previousTopbarHeight = topbarHeight;
       }
-      // A route stylesheet still loading after an in-app navigation reads 0:
-      // read again until it applies (no style read once it has).
-      if (!landingTop) readLandingTop();
-      const marker = Math.max(92, landingTop + 8, Math.min(200, window.innerHeight * 0.22));
+      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
       let current: WorldSectionId | null = null;
       sections.forEach((section) => {
-        if (section.getBoundingClientRect().top <= marker) {
+        // Short landscape viewports can place the native hash landing (96px)
+        // just below the visual marker (92px). Count that landing as active.
+        // Read every sync, so a route stylesheet that applies late still counts.
+        const landing = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
+        if (section.getBoundingClientRect().top <= Math.max(marker, landing + 8)) {
           current = section.id as WorldSectionId;
         }
       });
@@ -784,10 +778,8 @@ const WorldSectionNav = memo(function WorldSectionNav() {
     // DeX) syncs once it settles. A rotation can change the safe area.
     const requestResizeSync = () => {
       window.clearTimeout(resizeSettleTimer);
-      if (significantResize()) {
-        readLandingTop();
-        requestSectionSync();
-      } else resizeSettleTimer = window.setTimeout(requestSectionSync, 150);
+      if (significantResize()) requestSectionSync();
+      else resizeSettleTimer = window.setTimeout(requestSectionSync, 150);
     };
     const resizeObserver =
       typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);

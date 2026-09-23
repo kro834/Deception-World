@@ -1,8 +1,3 @@
-    syncRail(managerRail.current, 2);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
     setManagerTab(1);
     syncRail(managerRail.current, 1);
   }, [locationHash]);
@@ -452,3 +447,7 @@
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
     finalImage.src = POSTERS[finalPoster].src;
+    const finalReady =
+      finalImage
+        .decode?.()
+        .then(() => true)
