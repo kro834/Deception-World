@@ -1,3 +1,7 @@
+          <div
+            id="rider-active-panel"
+            className="rider-detail"
+            role="tabpanel"
             aria-labelledby={`rider-tab-${rider.id}`}
             style={{ ["--rider-tone" as string]: rider.tone }}
           >

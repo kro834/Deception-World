@@ -1,3 +1,12 @@
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
           </div>
         </div>
         <a className="scroll-cue" href="#story">
@@ -431,7 +440,3 @@
         </div>
         <div className="rider-console">
           <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          <div
-            id="rider-active-panel"
-            className="rider-detail"
-            role="tabpanel"

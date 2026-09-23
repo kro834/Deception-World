@@ -1,3 +1,88 @@
+        sigil: openingSigilRef.current,
+        hero: openingHeroRef.current,
+        backdrop: openingBackdropRef.current,
+        focus: openingFocusRef.current,
+      };
+      const targets = [
+        destination.brand,
+        destination.sigil,
+        destination.hero,
+        destination.backdrop,
+        destination.focus,
+      ];
+
+      if (
+        window.location.pathname === destination.path &&
+        targets.every((target) => target?.isConnected)
+      ) {
+        notifyOpeningDestination(destination);
+        return;
+      }
+
+      if (window.performance.now() < destinationReadyDeadline) {
+        retryFrame = window.requestAnimationFrame(announceDestination);
+      }
+    };
+
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        announceDestination();
+      });
+    });
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+      window.cancelAnimationFrame(retryFrame);
+    };
+  }, [notifyOpeningDestination]);
+
+  useEffect(() => {
+    let handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+    const syncAmbientPause = () => {
+      setAmbientPaused(document.hidden || handoffActive);
+    };
+    const handleVisibilityChange = () => {
+      handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    const handleOpeningHandoff = (event: Event) => {
+      const detail = (event as CustomEvent<{ active?: boolean }>).detail;
+      handoffActive =
+        typeof detail?.active === "boolean"
+          ? detail.active
+          : document.documentElement.hasAttribute("data-opening-handoff-active");
+      syncAmbientPause();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    syncAmbientPause();
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("deception-world:opening-handoff", handleOpeningHandoff);
+    };
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    clearRiderReturn();
+  }, []);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
+    if (current === next) return;
+    if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+    setPreviousRiderTab(current);
+    riderTabRef.current = next;
+    setRiderTab(next);
+    riderTransitionTimer.current = window.setTimeout(() => {
       setPreviousRiderTab(null);
       riderTransitionTimer.current = null;
     }, 220);
@@ -39,8 +124,10 @@
       try {
         await image.decode();
         if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
-        setPrevPoster(poster);
-        setPoster(nextIndex);
+        startTransition(() => {
+          setPrevPoster(poster);
+          setPoster(nextIndex);
+        });
       } catch {
         // Preserve the current art when the next image cannot be delivered.
       } finally {
@@ -127,62 +214,15 @@
       (entries) => {
         entries.forEach((entry) => {
           (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
-          if (entry.target === openingHeroRef.current) setHeroVisible(entry.isIntersecting);
+          // Non-urgent: a time-sliced render instead of one long frame mid-scroll.
+          if (entry.target === openingHeroRef.current)
+            startTransition(() => setHeroVisible(entry.isIntersecting));
         });
       },
       { rootMargin: "240px 0px" },
     );
     regions.forEach((region) => observer.observe(region));
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const shell = shellRef.current;
-    const topbar = shell?.querySelector<HTMLElement>(".topbar");
-    let previousTopbarHeight = 0;
-    const sections = (["story", "riders", "records"] as const)
-      .map((id) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section != null);
-    if (!sections.length) return;
-    let frame = 0;
-    const syncActiveSection = () => {
-      frame = 0;
-      // Text enlargement may grow the fixed header. Reuse this observer rather
-      // than hiding the first title underneath it or adding another listener.
-      const topbarHeight = topbar?.offsetHeight ?? 0;
-      if (topbarHeight > 0 && topbarHeight !== previousTopbarHeight) {
-        shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
-        previousTopbarHeight = topbarHeight;
-      }
-      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
-      let current: "story" | "riders" | "records" | null = null;
-      sections.forEach((section) => {
-        if (section.getBoundingClientRect().top <= marker) {
-          current = section.id as "story" | "riders" | "records";
-        }
-      });
-      setActiveSection(current);
-    };
-    const requestSectionSync = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(syncActiveSection);
-    };
-    const resizeObserver =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
-    sections.forEach((section) => resizeObserver?.observe(section));
-    if (topbar) resizeObserver?.observe(topbar);
-    window.addEventListener("scroll", requestSectionSync, { passive: true });
-    window.addEventListener("resize", requestSectionSync, { passive: true });
-    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
-    syncActiveSection();
-    return () => {
-      window.removeEventListener("scroll", requestSectionSync);
-      window.removeEventListener("resize", requestSectionSync);
-      window.visualViewport?.removeEventListener("resize", requestSectionSync);
-      resizeObserver?.disconnect();
-      shell?.style.removeProperty("--film-topbar-height");
-      if (frame) window.cancelAnimationFrame(frame);
-    };
   }, []);
 
   useEffect(() => {
@@ -400,38 +440,3 @@
             shuffleActive.current = false;
             shuffleTimers.current = [];
           }, 300);
-          shuffleTimers.current.push(settleTimer);
-        }
-      }, delay);
-      shuffleTimers.current.push(timer);
-    });
-  };
-
-  const goEpisode = (index: number) => {
-    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
-    setEpisode(next);
-    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
-    episodeProgrammatic.current = true;
-    scrollAxisX(episodeGridRef.current, card ?? null);
-    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-    episodeScrollTimer.current = window.setTimeout(() => {
-      episodeProgrammatic.current = false;
-      episodeScrollTimer.current = null;
-    }, 520);
-  };
-
-  const openEpisodePickup = (
-    index: number,
-    trigger: HTMLButtonElement,
-    openedByKeyboard: boolean,
-  ) => {
-    const dialog = episodePickupDialogRef.current;
-    if (!dialog || !EPISODES[index]?.pickups?.length) return;
-    if (episodePointerFocusTimer.current != null) {
-      window.clearTimeout(episodePointerFocusTimer.current);
-      episodePointerFocusTimer.current = null;
-    }
-    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
-    goEpisode(index);
-    episodePickupTriggerRef.current = trigger;
-    episodePickupOpenedByKeyboard.current = openedByKeyboard;
