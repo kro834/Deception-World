@@ -1,3 +1,6 @@
+          <p className="eyebrow">
+            <span>EIGHT RIDERS / ONE WORLD</span>
+            <i />
           </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
             <FilmTextScan />

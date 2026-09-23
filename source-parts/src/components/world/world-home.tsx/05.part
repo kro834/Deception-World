@@ -1,3 +1,8 @@
+                </b>
+              </button>
+            </div>
+            <output
+              aria-label="表示中のポスター"
               aria-live={locked || posterControlsFocused ? "polite" : "off"}
               aria-atomic="true"
               aria-busy={shuffling}
@@ -446,6 +451,3 @@
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
-          <p className="eyebrow">
-            <span>EIGHT RIDERS / ONE WORLD</span>
-            <i />

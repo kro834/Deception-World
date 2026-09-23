@@ -38,6 +38,25 @@ test("JS scroll progress restyles only the headers that draw it", () => {
     assert.match(mode, new RegExp(`"${host}"`));
   }
   assert.match(mode, /addEventListener\("resize", requestResizeSync, \{ passive: true \}\)/);
+  // A small height-only resize with no scroll still syncs, once it settles.
+  assert.match(mode, /else resizeSettleTimer = window\.setTimeout\(requestProgressSync, 150\)/);
+  assert.match(
+    mode,
+    /window\.clearTimeout\(resizeSettleTimer\);\s*reducedMotion\.removeEventListener/,
+  );
+  // The prism line hides the World topbar's hairline: no per-frame value
+  // there, while the dossier and dream headers keep theirs.
+  assert.match(mode, /const PRISM_TOPBAR = "\.site-shell\.film-edition\.motion-on \.topbar";/);
+  assert.match(
+    mode,
+    /if \(value !== null && prismLine && host\.matches\(PRISM_TOPBAR\)\) continue;/,
+  );
+  assert.match(mode, /prismLine = prismLineCapable && !reducedMotion\.matches;/);
+  const css = read("src/styles-android-performance.css");
+  assert.match(
+    css,
+    /html:not\(\[data-world-effects="economy"\]\) \.site-shell\.film-edition\.motion-on \.topbar::after \{\s*content: none;/,
+  );
 });
 
 test("Zeus blocks touch scrolling only while a held drag owns the finger", () => {
@@ -68,7 +87,18 @@ test("World scroll milestones stay out of the page-wide render", () => {
   assert.match(nav, /useState<WorldSectionId \| null>\(null\)/);
   assert.match(nav, /if \(current === lastActiveRef\.current\) return;/);
   assert.match(nav, /aria-current=\{activeSection === "story" \? "location" : undefined\}/);
-  assert.match(nav, /if \(significantResize\(\)\) requestSectionSync\(\)/);
+  assert.match(
+    nav,
+    /if \(significantResize\(\)\) \{\s*readLandingTop\(\);\s*requestSectionSync\(\);/,
+  );
+  assert.match(nav, /else resizeSettleTimer = window\.setTimeout\(requestSectionSync, 150\)/);
+  assert.match(nav, /window\.clearTimeout\(resizeSettleTimer\);/);
+  // Anchor jumps land a section at its scroll-margin-top: the marker reaches it.
+  assert.match(nav, /parseFloat\(getComputedStyle\(sections\[0\]\)\.scrollMarginTop\)/);
+  assert.match(
+    nav,
+    /const marker = Math\.max\(92, landingTop \+ 8, Math\.min\(200, window\.innerHeight \* 0\.22\)\);/,
+  );
   const page = home.slice(home.indexOf("export function WorldHome()"));
   assert.doesNotMatch(page, /setActiveSection/);
   assert.match(page, /<WorldSectionNav \/>/);

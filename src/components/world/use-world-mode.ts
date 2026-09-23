@@ -16,6 +16,11 @@ const PROGRESS_HOST_CLASSES = [
   "dream-site-header",
 ];
 
+/* The World topbar whose hairline styles-android-performance.css hides for the
+   Motion prism line (content: none) where scroll timelines run. Keep the two
+   selectors in sync: that host needs no per-frame value there. */
+const PRISM_TOPBAR = ".site-shell.film-edition.motion-on .topbar";
+
 export function useWorldMode() {
   useLiquidPointerLight();
   useEffect(() => {
@@ -58,6 +63,13 @@ export function useWorldMode() {
       (/Android/i.test(userAgent) || enhancedIOS27) &&
       window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
     let nativeProgress = supportsNativeProgress && !reducedMotion.matches;
+    // The prism line replaces the World topbar's hairline under the same
+    // conditions as its CSS (not economy, scroll timelines, motion allowed).
+    const prismLineCapable =
+      !economyEffects &&
+      window.CSS?.supports("animation-timeline", "view()") === true &&
+      window.CSS?.supports("animation-range", "entry 0% entry 100%") === true;
+    let prismLine = false;
     let lastScrolled: boolean | undefined;
     const progressHosts = PROGRESS_HOST_CLASSES.map((name) =>
       document.getElementsByClassName(name),
@@ -66,6 +78,7 @@ export function useWorldMode() {
       for (const hosts of progressHosts) {
         for (const host of Array.from(hosts)) {
           if (!(host instanceof HTMLElement)) continue;
+          if (value !== null && prismLine && host.matches(PRISM_TOPBAR)) continue;
           if (value === null) host.style.removeProperty("--page-progress");
           else if (host.style.getPropertyValue("--page-progress") !== value)
             host.style.setProperty("--page-progress", value);
@@ -105,12 +118,18 @@ export function useWorldMode() {
       nativeProgress = supportsNativeProgress && !reducedMotion.matches;
       if (nativeProgress) html.dataset.nativeScrollProgress = "true";
       else delete html.dataset.nativeScrollProgress;
+      prismLine = prismLineCapable && !reducedMotion.matches;
       syncPageProgress();
     };
+    let resizeSettleTimer = 0;
     const significantResize = createViewportResizeFilter();
-    // The URL bar collapsing mid-scroll is followed by scroll events anyway.
+    // The URL bar collapsing mid-scroll is followed by scroll events anyway. A
+    // small height-only change with no scroll (a window edge, split screen,
+    // DeX) syncs once it settles.
     const requestResizeSync = () => {
+      window.clearTimeout(resizeSettleTimer);
       if (significantResize()) requestProgressSync();
+      else resizeSettleTimer = window.setTimeout(requestProgressSync, 150);
     };
     syncProgressMode();
     reducedMotion.addEventListener("change", syncProgressMode);
@@ -124,6 +143,7 @@ export function useWorldMode() {
       window.removeEventListener("resize", requestResizeSync);
       window.visualViewport?.removeEventListener("resize", requestResizeSync);
       if (progressFrame) window.cancelAnimationFrame(progressFrame);
+      window.clearTimeout(resizeSettleTimer);
       reducedMotion.removeEventListener("change", syncProgressMode);
       reducedTransparency.removeEventListener("change", syncProgressMode);
       if (previousNativeProgress) html.dataset.nativeScrollProgress = previousNativeProgress;

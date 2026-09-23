@@ -1,5 +1,3 @@
-        alt: "仮面ライダーレルム ムーンフォーム",
-        width: 1024,
         height: 1536,
         to: "/characters/luna",
         assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
@@ -290,7 +288,15 @@ const WorldSectionNav = memo(function WorldSectionNav() {
       .map((id) => document.getElementById(id))
       .filter((section): section is HTMLElement => section != null);
     if (!sections.length) return;
+    // Anchor jumps land a section at its scroll-margin-top (96px + safe area,
+    // styles-world/21.css); the marker must reach that line on short viewports.
+    let landingTop = 0;
+    const readLandingTop = () => {
+      landingTop = parseFloat(getComputedStyle(sections[0]).scrollMarginTop) || 0;
+    };
+    readLandingTop();
     let frame = 0;
+    let resizeSettleTimer = 0;
     const syncActiveSection = () => {
       frame = 0;
       // Text enlargement may grow the fixed header. Reuse this observer rather
@@ -300,7 +306,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
         shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
         previousTopbarHeight = topbarHeight;
       }
-      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
+      const marker = Math.max(92, landingTop + 8, Math.min(200, window.innerHeight * 0.22));
       let current: WorldSectionId | null = null;
       sections.forEach((section) => {
         if (section.getBoundingClientRect().top <= marker) {
@@ -317,9 +323,15 @@ const WorldSectionNav = memo(function WorldSectionNav() {
       frame = window.requestAnimationFrame(syncActiveSection);
     };
     const significantResize = createViewportResizeFilter();
-    // The URL bar collapsing mid-scroll is followed by scroll events anyway.
+    // The URL bar collapsing mid-scroll is followed by scroll events anyway. A
+    // small height-only change with no scroll (a window edge, split screen,
+    // DeX) syncs once it settles. A rotation can change the safe area.
     const requestResizeSync = () => {
-      if (significantResize()) requestSectionSync();
+      window.clearTimeout(resizeSettleTimer);
+      if (significantResize()) {
+        readLandingTop();
+        requestSectionSync();
+      } else resizeSettleTimer = window.setTimeout(requestSectionSync, 150);
     };
     const resizeObserver =
       typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
@@ -336,6 +348,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
       resizeObserver?.disconnect();
       shell?.style.removeProperty("--film-topbar-height");
       if (frame) window.cancelAnimationFrame(frame);
+      window.clearTimeout(resizeSettleTimer);
     };
   }, []);
 
@@ -439,13 +452,3 @@ export function WorldHome() {
     setManagerTab(2);
     syncRail(managerRail.current, 2);
   }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    let firstFrame = 0;
-    let secondFrame = 0;

@@ -101,6 +101,23 @@ try {
       await page.waitForFunction(
         () => document.documentElement.dataset.nativeScrollProgress === "true",
       );
+    } else if (mode === "iphone") {
+      // iOS 26 on an engine with scroll timelines: the prism is the line and
+      // the hairline is hidden (content: none), so the topbar needs no
+      // per-frame value; with reduced motion the hairline path (and its
+      // value) is back. ("unsupported" hides timelines from JS only, so it
+      // keeps writing.)
+      assert.equal(result.writes, 0, `${mode}: writes for a hidden hairline`);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.waitForTimeout(300);
+      const reduced = await page.evaluate(() => ({
+        pseudo: getComputedStyle(document.querySelector(".topbar"), "::after").content,
+        value: Number(document.querySelector(".topbar").style.getPropertyValue("--page-progress")),
+        ratio: scrollY / (document.documentElement.scrollHeight - innerHeight),
+      }));
+      assert.notEqual(reduced.pseudo, "none", `${mode}: reduced motion hairline`);
+      assert.ok(Math.abs(reduced.value - reduced.ratio) < 0.025, JSON.stringify(reduced));
+      await page.emulateMedia({ reducedMotion: "no-preference" });
     } else {
       assert.ok(result.writes > 0);
       assert.ok(Math.abs(result.progress - result.ratio) < 0.025, JSON.stringify(result));

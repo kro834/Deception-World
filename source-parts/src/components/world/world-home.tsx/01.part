@@ -449,3 +449,5 @@ const EPISODES: EpisodeRecord[] = [
         label: "仮面ライダーレルム　ムーンフォーム",
         src: "/rider-realm-moon.jpeg",
         pos: "50% 10%",
+        alt: "仮面ライダーレルム ムーンフォーム",
+        width: 1024,
