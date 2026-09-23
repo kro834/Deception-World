@@ -7,6 +7,7 @@ import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import otherArtworkCssUrl from "@/styles-other-artwork.css?url";
+import worldRevealCssUrl from "@/styles-world-reveal.css?url";
 import worldMirageCssUrl from "@/styles-world-mirage.css?url";
 import worldRisingCssUrl from "@/styles-world-rising.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
@@ -31,9 +32,10 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldNeoCssUrl },
         { rel: "stylesheet", href: motionEditionCssUrl },
         { rel: "stylesheet", href: otherArtworkCssUrl },
+        { rel: "stylesheet", href: worldRevealCssUrl },
+        { rel: "stylesheet", href: worldRisingCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
-        { rel: "stylesheet", href: worldRisingCssUrl },
       ],
     });
     return {

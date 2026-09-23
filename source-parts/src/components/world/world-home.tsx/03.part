@@ -1,3 +1,22 @@
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotionPreference = () => setMotionReduced(media.matches);
+    syncMotionPreference();
+    media.addEventListener?.("change", syncMotionPreference);
+    return () => media.removeEventListener?.("change", syncMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    clearRiderReturn();
+  }, []);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
+    if (current === next) return;
+    if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+    setPreviousRiderTab(current);
+    riderTabRef.current = next;
+    setRiderTab(next);
+    riderTransitionTimer.current = window.setTimeout(() => {
       setPreviousRiderTab(null);
       riderTransitionTimer.current = null;
     }, 220);
@@ -421,17 +440,3 @@
   };
 
   const openEpisodePickup = (
-    index: number,
-    trigger: HTMLButtonElement,
-    openedByKeyboard: boolean,
-  ) => {
-    const dialog = episodePickupDialogRef.current;
-    if (!dialog || !EPISODES[index]?.pickups?.length) return;
-    if (episodePointerFocusTimer.current != null) {
-      window.clearTimeout(episodePointerFocusTimer.current);
-      episodePointerFocusTimer.current = null;
-    }
-    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
-    goEpisode(index);
-    episodePickupTriggerRef.current = trigger;
-    episodePickupOpenedByKeyboard.current = openedByKeyboard;

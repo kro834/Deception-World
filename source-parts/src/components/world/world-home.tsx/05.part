@@ -1,3 +1,13 @@
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
           </div>
         </div>
         <a className="scroll-cue" href="#story">
@@ -20,11 +30,9 @@
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2 data-film-reveal>
+            <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(STORY_TITLE)}>
               <FilmTextScan />
-              救うべき世界は、
-              <br />
-              <em>現実</em>にある。
+              <RevealText>{STORY_TITLE}</RevealText>
             </h2>
           </div>
           <div className="story-copy">
@@ -32,11 +40,15 @@
               <span>『ドリームチャプター』に続く</span>
               <span>劇場版第二作</span>
             </p>
-            <p>
-              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+            <p data-text-reveal="copy">
+              <RevealText copy>
+                世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+              </RevealText>
             </p>
-            <p>
-              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            <p data-text-reveal="copy">
+              <RevealText copy>
+                シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+              </RevealText>
             </p>
           </div>
         </div>
@@ -421,17 +433,10 @@
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2 data-film-reveal>
+          <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
             <FilmTextScan />
-            八人が、世界へ。
+            <RevealText>{RIDERS_TITLE}</RevealText>
           </h2>
-          <p>
-            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
-          </p>
-        </div>
-        <div className="rider-console">
-          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          <div
-            id="rider-active-panel"
-            className="rider-detail"
-            role="tabpanel"
+          <p data-text-reveal="copy">
+            <RevealText copy>
+              主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。

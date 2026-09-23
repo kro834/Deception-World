@@ -13,6 +13,8 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { RevealText } from "./reveal-text";
+import { revealLabel } from "./reveal-label";
 import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
@@ -435,3 +437,6 @@ const EPISODES: EpisodeRecord[] = [
         label: "仮面ライダーレルム　アースフォーム",
         src: "/rider-realm-earth.jpeg",
         pos: "50% 12%",
+        alt: "仮面ライダーレルム アースフォーム",
+        width: 1026,
+        height: 1533,

@@ -1892,17 +1892,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
         [data-loading]
       ):not(:has(dialog[open]))
       .site-shell.film-edition.mirage-edition
-      :is(.story-heading h2, .section-title h2, .records-heading h2) {
-      animation: mr-wipe var(--mr-ease-io) both;
-      animation-timeline: view(block);
-      animation-range: entry 0% entry 100%;
-    }
-
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not(:has(dialog[open]))
-      .site-shell.film-edition.mirage-edition
-      :is(.story-copy > p, .section-title > p) {
+      :is(.story-copy > .story-lead-sequel, .section-title > .eyebrow) {
       animation: mr-rise-soft var(--mr-ease-out) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
