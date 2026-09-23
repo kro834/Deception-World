@@ -14,6 +14,8 @@ import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
+import { MirageTicker } from "./mirage-ticker";
+import { useMirageBoot } from "./use-mirage-boot";
 
 const POSTERS = [
   {
@@ -747,6 +749,7 @@ export function WorldHome() {
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
+  useMirageBoot(shellRef);
 
   useLayoutEffect(() => {
     const returnId = readRiderReturn();
@@ -1401,7 +1404,11 @@ export function WorldHome() {
   };
 
   return (
-    <main ref={shellRef} className="site-shell motion-on film-edition" data-motion-enabled="true">
+    <main
+      ref={shellRef}
+      className="site-shell motion-on film-edition mirage-edition"
+      data-motion-enabled="true"
+    >
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -1479,11 +1486,29 @@ export function WorldHome() {
             />
           </span>
         </div>
+        <div className="mr-hero-hud" aria-hidden="true">
+          <i className="mr-hero-scan" />
+          <i className="mr-hero-beam" />
+          <span className="mr-hero-floor">
+            <i />
+          </span>
+          <span className="mr-hero-readout">
+            <b>SYNC</b>
+            <i />
+          </span>
+        </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />
           <p className="anime-work-title">
             <span>仮面ライダーサーガ 劇場版第二作</span>
-            <b>DECEPTION WORLD</b>
+            <b>
+              <i className="mr-word" data-text="DECEPTION">
+                DECEPTION
+              </i>{" "}
+              <i className="mr-word" data-text="WORLD">
+                WORLD
+              </i>
+            </b>
           </p>
           <span className="film-edition-mark" aria-hidden="true">
             02
@@ -1502,7 +1527,9 @@ export function WorldHome() {
           >
             <FilmTextScan />
             <span>世界は、</span>
-            <strong>欺瞞でできている。</strong>
+            <strong>
+              <i className="mr-redact">欺瞞</i>でできている。
+            </strong>
           </h1>
           <div className="hero-actions">
             <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
@@ -1727,6 +1754,8 @@ export function WorldHome() {
           <i />
         </a>
       </section>
+
+      <MirageTicker variant="open" records={EPISODES.length} />
 
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
@@ -2377,7 +2406,13 @@ export function WorldHome() {
         </div>
       </section>
 
+      <MirageTicker variant="close" records={EPISODES.length} />
+
       <footer>
+        <div className="mr-endmark" aria-hidden="true">
+          <span>END OF RECORD</span>
+          <b>終端</b>
+        </div>
         <div className="footer-title">
           <span>仮面ライダーサーガ</span>
           <b>DECEPTION WORLD</b>

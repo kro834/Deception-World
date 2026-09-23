@@ -1,8 +1,13 @@
+            </span>
+          </div>
+        </div>
         <a className="scroll-cue" href="#story">
           <span>SCROLL TO DESCEND</span>
           <i />
         </a>
       </section>
+
+      <MirageTicker variant="open" records={EPISODES.length} />
 
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
@@ -429,3 +434,4 @@
           <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
+            className="rider-detail"

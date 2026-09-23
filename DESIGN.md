@@ -81,3 +81,31 @@ The palette is one token set on `.dream-page.dream-page`: night ink `#0d0912`, �
 - Chrome and dossiers: the header and act index are opaque (`#130c17` is restated under reduced transparency). The dossier close button is now vermilion instead of blue.
 
 Motion is limited to a finite opening: the art settles and the title is brushed in. Optional view-timeline rises appear on the credits. All of it is gated by reduced motion and economy mode, and it pauses when the hero leaves view. The layer loads after the Dream sheets and before the cinematic sheet. It keeps the measured geometry of the poster console, dossier columns and story disclosures, and no text is smaller than 12px. `scripts/dream-taisho.test.mjs` guards these rules.
+
+## Mirage edition (World) — 2026-09-23
+
+`src/styles-world-mirage.css` is the last stylesheet on `/world`. It stages Deception World as a live holographic projection from the managers' observation deck:
+- panels are built from light and lock on like HUD targets;
+- one colour channel is always slightly off-register (the deception);
+- signal red marks where the truth is hidden, as in the redaction bar over 欺瞞.
+
+The palette is ice `#7ae8ff` on ink `#04080f`, with gold for the bottom brackets. A prism (ice → violet → magenta → gold) carries the title logo's light streaks into rules, rings and ghosts. Neo and programme tokens are remapped, so older rules recolour for free. HUD labels use a 3.5 KB Michroma subset loaded on the route only (capitals, digits, separators, `display=swap`). Titles stay in Oxanium and Zen Kaku Gothic New, and every label is at least 12px, including the former 6–9px finale, footer, index and dialog labels.
+
+What changed on the page:
+- **Hero.** Key art at .5 behind a left-weighted scrim, and a chrome-ink wordmark with a static misregistered ghost. The CRT scanlines and the perpetual scan sweep over the poster are gone. The poster sits in a projection frame, with scroll-turned tick dials (≥1200px, fine pointer), a perspective grid floor, a LIVE indicator, and the 欺瞞 redaction.
+- **Tickers.** Scroll-driven signal bands after the hero and before the footer. They repeat only existing copy and are aria-hidden.
+- **Chapters and panels.** Chapters draw their prism rule, pass a faint light curtain, and step their outlined numerals into place. Panels lock on with brackets.
+- **Manager cards.** The name and OPEN DOSSIER sit together at the bottom, so no text crosses a face.
+- **Rider art.** A cool projection grade and an edge fade. The stray divider through the copy and the giant watermark letter over the art are removed.
+- **Finale.** Unblurred key art, and an iris of rings that opens through the pinned scroll.
+- **Footer.** END OF RECORD / 終端.
+- **Layout fix.** The landscape-phone hero grid, which had collapsed to a 120px column, is fixed.
+
+Motion comes in three families, and none of them loops:
+- **Boot.** A finite boot from the first paint (frame lock, scan pass, beam sweep, title wipe, ghost pop, projector slit, charged CTA border, telemetry, redaction retract). It runs once per session and holds while a load cover or the opening handoff is up. An arrival through the handoff plays only the HUD parts. The boot ends on a sentinel on `.mr-hero-hud`, which is never hidden, via `use-mirage-boot.ts`.
+- **Scroll.** Scroll-linked choreography on **named** view timelines. An `overflow:hidden` panel would capture an anonymous `view()`. The page's `body` did the same through `overflow-x: hidden`, which had silently frozen every view timeline on World, including the Motion edition's. The layer switches `body` to `overflow-x: clip` on `/world` only.
+- **Hover.** Fine-pointer holography (foil sweeps, chroma edges, a charge replay on the CTA).
+
+Every family is gated by reduced motion and economy rendering, and keyframes animate only opacity, individual transforms, clip-path and two registered properties. Time-based keyframes stay at or under two opacity reversals a second, which is below the WCAG 2.3.1 flash threshold. Ornaments are aria-hidden and `pointer-events: none`. Rail geometry, slide controls, pinned control colours and the handoff targets are untouched.
+
+Guards: `scripts/world-mirage.test.mjs` pins these rules, and `scripts/verify-world-mirage.mjs` checks the boot, the timeline sources, the rest state, the landscape hero and the handoff arrival in a browser.

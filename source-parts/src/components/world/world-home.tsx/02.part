@@ -1,7 +1,3 @@
-        label: "仮面ライダーレルム　アースフォーム",
-        src: "/rider-realm-earth.jpeg",
-        pos: "50% 12%",
-        alt: "仮面ライダーレルム アースフォーム",
         width: 1026,
         height: 1533,
         to: "/characters/terra",
@@ -316,6 +312,7 @@ export function WorldHome() {
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
+  useMirageBoot(shellRef);
 
   useLayoutEffect(() => {
     const returnId = readRiderReturn();
@@ -429,3 +426,12 @@ export function WorldHome() {
   useEffect(() => {
     clearRiderReturn();
   }, []);
+
+  const selectRider = useCallback((next: number) => {
+    const current = riderTabRef.current;
+    if (current === next) return;
+    if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
+    setPreviousRiderTab(current);
+    riderTabRef.current = next;
+    setRiderTab(next);
+    riderTransitionTimer.current = window.setTimeout(() => {

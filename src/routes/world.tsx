@@ -7,6 +7,12 @@ import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import otherArtworkCssUrl from "@/styles-other-artwork.css?url";
+import worldMirageCssUrl from "@/styles-world-mirage.css?url";
+
+// Michroma carries the Mirage HUD labels. The subset holds only the capitals,
+// digits and separators those labels use (about 3.5 KB).
+const MIRAGE_FONTS_URL =
+  "https://fonts.googleapis.com/css2?family=Michroma&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%2F-.%3A%2B%23%25%26%C2%B7%7C%3C%3E%20";
 
 export const Route = createFileRoute("/world")({
   component: WorldHome,
@@ -23,6 +29,8 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldNeoCssUrl },
         { rel: "stylesheet", href: motionEditionCssUrl },
         { rel: "stylesheet", href: otherArtworkCssUrl },
+        { rel: "stylesheet", href: MIRAGE_FONTS_URL },
+        { rel: "stylesheet", href: worldMirageCssUrl },
       ],
     });
     return {
