@@ -23,7 +23,9 @@
    Hooks: the owner element carries data-text-reveal="heading" | "copy"
    (never data-reveal: styles-world/08.css:288 hides [data-reveal] until a
    legacy observer marks it visible). <RevealText> emits one inline
-   span.tr-c per character.
+   span.tr-c per character in headings, and per short phrase (up to three
+   characters, ending at punctuation) in copy, the way an IME commits
+   Japanese: a third of the scroll-linked animations for the same look.
 
    Timing: every block owns a named view timeline (--tr). Character k of n
    has --tr-p = k/(n-1) and --tr-d = 1/(n-1); it is typed at
@@ -90,6 +92,18 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       [data-text-reveal="copy"] {
       --tr-span: 18svh;
       --tr-fade: 4svh;
+    }
+
+    /* Copy is typed a short phrase at a time (reveal-text.tsx): the cursor
+       stays one cell wide, on the phrase's first character. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .site-shell.film-edition.mirage-edition
+      [data-text-reveal="copy"]
+      .tr-c {
+      background-size: 1em 100%;
+      background-repeat: no-repeat;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(

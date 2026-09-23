@@ -686,11 +686,25 @@ async function styleCost(context) {
 
   await walk(page);
   const timelines = await timelineState(page);
+  // Headings: one span per character (48). Copy: one per short phrase (60
+  // for 182 characters, reveal-text.tsx), a third of the per-character count.
   assert.ok(
-    timelines.spans >= 200 && timelines.spans <= 260,
-    `phone-412: ${timelines.spans} character spans`,
+    timelines.spans >= 95 && timelines.spans <= 125,
+    `phone-412: ${timelines.spans} typed spans`,
   );
-  assert.equal(timelines.animations, timelines.spans, "phone-412: one animation per character");
+  const cells = await page.evaluate(() => ({
+    heading: [...document.querySelectorAll('[data-text-reveal="heading"] .tr-c')].filter(
+      (span) => Array.from(span.textContent).length !== 1,
+    ).length,
+    copy: Math.max(
+      ...[...document.querySelectorAll('[data-text-reveal="copy"] .tr-c')].map(
+        (span) => Array.from(span.textContent).length,
+      ),
+    ),
+  }));
+  assert.equal(cells.heading, 0, "phone-412: a heading span holds more than one character");
+  assert.ok(cells.copy <= 4, `phone-412: a copy phrase of ${cells.copy} characters`);
+  assert.equal(timelines.animations, timelines.spans, "phone-412: one animation per typed span");
   assert.equal(timelines.perSpan, 0, "phone-412: a character without exactly one reveal");
   assert.deepEqual(timelines.detached, [], "phone-412: reveal bound to a panel scroller");
   assert.equal(timelines.timeBased, 0, "phone-412: reveal must be scroll-linked and finite");
@@ -899,7 +913,7 @@ async function styleCost(context) {
   assert.ok(overflow <= 1, `phone-412: horizontal overflow ${overflow}`);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    `phone-412: ${timelines.animations} characters on the document timeline, layers +${withReveal - withoutReveal}, ${rails.pressed} rail presses (${rails.partLit} beside part-lit text) held still, gating, jumps and nav links ok ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}`,
+    `phone-412: ${timelines.animations} typed spans on the document timeline, layers +${withReveal - withoutReveal}, ${rails.pressed} rail presses (${rails.partLit} beside part-lit text) held still, gating, jumps and nav links ok ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}`,
   );
   await context.close();
 }
@@ -1031,7 +1045,7 @@ for (const viewport of [
   assert.ok(overflow <= 1, `${viewport.name}: horizontal overflow ${overflow}`);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    `${viewport.name}: ${timelines.animations} characters, timelines, ink, reveal line${navs.length ? `, nav links ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}` : ""} and rails ok`,
+    `${viewport.name}: ${timelines.animations} typed spans, timelines, ink, reveal line${navs.length ? `, nav links ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}` : ""} and rails ok`,
   );
   await context.close();
 }
