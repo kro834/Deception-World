@@ -7,6 +7,7 @@ import {
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
+import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: resonanceMotionCssUrl },
       { rel: "stylesheet", href: sagaShowcaseCssUrl },
+      { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

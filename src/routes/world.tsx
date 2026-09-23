@@ -5,6 +5,7 @@ import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
 import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
+import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import otherArtworkCssUrl from "@/styles-other-artwork.css?url";
 
 export const Route = createFileRoute("/world")({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldProgrammeCssUrl },
         { rel: "stylesheet", href: worldProgrammeSectionsCssUrl },
         { rel: "stylesheet", href: worldNeoCssUrl },
+        { rel: "stylesheet", href: motionEditionCssUrl },
         { rel: "stylesheet", href: otherArtworkCssUrl },
       ],
     });
@@ -27,7 +29,13 @@ export const Route = createFileRoute("/world")({
       ...head,
       links: [
         ...head.links,
-        { rel: "preload", as: "image", type: "image/webp", href: WORLD_ENTER_ASSETS[0], fetchPriority: "high" },
+        {
+          rel: "preload",
+          as: "image",
+          type: "image/webp",
+          href: WORLD_ENTER_ASSETS[0],
+          fetchPriority: "high",
+        },
       ],
     };
   },

@@ -7,6 +7,7 @@ import {
 import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
+import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   component: ExtremeSaga,
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: extremeSagaCssUrl },
       { rel: "stylesheet", href: sagaShowcaseCssUrl },
+      { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

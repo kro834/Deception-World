@@ -1,0 +1,368 @@
+/* Motion edition — scroll-linked choreography for the World, Rexonance,
+   Extreme and Final Stage pages.
+
+   Every effect is driven by the scroll position (CSS view/scroll timelines),
+   so nothing loops, nothing runs while the page is still, and scrolling back
+   plays it in reverse. Keyframes touch only opacity, translate and scale.
+   The layer is progressive: without timeline support, with reduced motion,
+   in economy rendering, or before a page grants motion, content is simply
+   shown at rest. Elements that already own an animation (film reveals,
+   stage panels, metric swaps, the iOS 27 hero and heading timelines, liquid
+   rails) are deliberately left alone.
+
+   Entry motion ends at `entry 100%` — the moment an element is fully on
+   screen — so content at the very bottom of a page still finishes. */
+
+/* Legacy perpetual decoration still reached Final Stage through the shared
+   base sheet; it is idle ornament, not motion that responds to anything. */
+.fst-page .rxs-hero-ambient i,
+.fst-page .rxs-scroll-cue i,
+.site-shell.film-edition .manager-slot-grid .signal {
+  animation: none;
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* ---------- Reading progress under the local navigation ---------- */
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-local-nav::after,
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .topbar::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        var(--mx-progress-from, #69eaff),
+        var(--mx-progress-to, #c8a8ff)
+      );
+      transform-origin: 0 50%;
+      pointer-events: none;
+      animation: mx-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    html:not([data-world-effects="economy"]) .rxs-page.exs-page[data-motion-ready="true"] {
+      --mx-progress-from: #69dbff;
+      --mx-progress-to: #ffd57a;
+    }
+
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on {
+      --mx-progress-from: #6fe3ff;
+      --mx-progress-to: #e9c982;
+    }
+
+    /* ---------- Special sites: hero hands over to the page ---------- */
+    html:not([data-world-effects="economy"]) .rxs-page[data-motion-ready="true"] .rxs-hero-copy {
+      animation: mx-hand-over linear both;
+      animation-timeline: view(block);
+      animation-range: exit 0% exit 90%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      img {
+      animation: mx-recede linear both;
+      animation-timeline: view(block);
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* ---------- Chapter headlines rise as they arrive ---------- */
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      :is(.rxs-section-heading h2, .rxs-footer h2) {
+      animation: mx-headline cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > span {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 10% entry 100%;
+    }
+
+    /* ---------- Numbers arrive at scale; hairlines draw themselves ---------- */
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      :is(.rxs-headline-metrics article strong, .rxs-specs > div strong) {
+      transform-origin: 0 100%;
+      animation: mx-figure cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-specs
+      > div
+      strong {
+      transform-origin: 50% 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      right: 0;
+      left: 0;
+      height: 1px;
+      background: var(--sc-accent, #69eaff);
+      transform-origin: 0 50%;
+      pointer-events: none;
+      animation: mx-line cubic-bezier(0.65, 0, 0.35, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div:nth-child(2) {
+      animation-range: entry 8% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div:nth-child(3) {
+      animation-range: entry 16% entry 100%;
+    }
+
+    /* ---------- Tiles lift into place in reading order ---------- */
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      :is(
+        .rxs-system-grid article,
+        .exs-p14-comparison article,
+        .rxs-processing-comparison > div > section,
+        .rxs-comparison-selector,
+        .fst-story-layout,
+        .fst-cast-console,
+        .fst-pickup-card
+      ) {
+      animation: mx-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      :is(.rxs-system-grid article, .rxs-processing-comparison > div > section):nth-child(2) {
+      animation-range: entry 10% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(3) {
+      animation-range: entry 20% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      > span {
+      animation: mx-arrow cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 20% entry 100%;
+    }
+
+    /* ---------- Artwork settles as it is scrolled through ---------- */
+    html:not([data-world-effects="economy"])
+      .rxs-page[data-motion-ready="true"]
+      :is(.rxs-stage-panel figure img, .rxs-p14-overview figure img) {
+      animation: mx-settle linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 55%;
+    }
+
+    html:not([data-world-effects="economy"]) .rxs-page[data-motion-ready="true"] .fst-story-copy p {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* ---------- World: panels arrive, the finale opens up ---------- */
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .hero-copy {
+      animation: mx-hand-over linear both;
+      animation-timeline: view(block);
+      animation-range: exit 0% exit 90%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive) {
+      animation: mx-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.manager-slot-grid .signal, .episode-card) {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.manager-slot-grid .signal, .episode-card):nth-child(3n + 2) {
+      animation-range: entry 8% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.manager-slot-grid .signal, .episode-card):nth-child(3n) {
+      animation-range: entry 16% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      .finale-backdrop
+      img {
+      animation: mx-settle linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 60%;
+    }
+
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .finale-content {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 10% entry 100%;
+    }
+  }
+}
+
+@keyframes mx-progress {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes mx-hand-over {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -56px;
+  }
+}
+
+@keyframes mx-recede {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0.25;
+    scale: 1.08;
+  }
+}
+
+@keyframes mx-headline {
+  from {
+    opacity: 0;
+    translate: 0 56px;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes mx-rise {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes mx-figure {
+  from {
+    opacity: 0;
+    translate: 0 32px;
+    scale: 0.82;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes mx-line {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes mx-lift {
+  from {
+    opacity: 0;
+    translate: 0 72px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes mx-arrow {
+  from {
+    opacity: 0;
+    translate: -32px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes mx-settle {
+  from {
+    scale: 1.16;
+  }
+  to {
+    scale: 1;
+  }
+}

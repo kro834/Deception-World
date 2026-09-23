@@ -5,6 +5,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
 } from "@/lib/world-head";
 import finalStageCssUrl from "@/styles-final-stage.css?url";
+import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/final-stage")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: finalStageCssUrl },
+      { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
