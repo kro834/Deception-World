@@ -118,6 +118,9 @@ async function openWorld(
   { query = "", init = [], reducedMotion = false, forcedColors = false } = {},
 ) {
   const context = await browser.newContext(PROFILES[name].options);
+  // The dev server loads hundreds of modules: past the default 250 resource
+  // timing entries, the rider art scrollToGate waits for is never recorded.
+  await context.addInitScript(() => performance.setResourceTimingBufferSize(2000));
   for (const script of init) await context.addInitScript(script);
   const page = await context.newPage();
   if (reducedMotion) await page.emulateMedia({ reducedMotion: "reduce" });
