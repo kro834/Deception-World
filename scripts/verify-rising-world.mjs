@@ -442,7 +442,7 @@ async function checkSequence(browser, name) {
   assert.ok(cut.title > 0.99, `${name}: the title is cut in ${JSON.stringify(cut)}`);
   assert.equal(cut.visibleText, "EP7 REXONANCE");
   assert.equal(cut.hidden, "true");
-  // End still by ~9 s of sequence time.
+  // End still by ~10 s of sequence time (RISING_TIMING.webgl.end: 9.6 s).
   await page.waitForSelector(".rw-replay", { timeout: 9000 });
   const endAfter = Date.now() - pressedAt;
   const end = await page.evaluate(async () => {

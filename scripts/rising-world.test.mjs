@@ -504,8 +504,19 @@ test("the sheet: finite, compositor-only, gated like Mirage, legible and scoped"
   // The landscape end still: the rider's sides are masked, no lit column.
   const landscape = css.slice(css.indexOf("@media (min-aspect-ratio: 3/4)"));
   const block = landscape.slice(0, landscape.indexOf("\n}\n"));
-  assert.match(block, /\.rw-end-art \{[^}]*(?<!-webkit-)mask-image: linear-gradient\(/);
-  assert.match(block, /-webkit-mask-image: linear-gradient\(/);
+  assert.match(block, /\.rw-end-art \{[^}]*(?<!-webkit-)mask-image:\s*linear-gradient\(/);
+  assert.match(block, /-webkit-mask-image:\s*linear-gradient\(/);
+  // Its top melts into the dark as well (the shader fades the art the same).
+  assert.match(
+    block,
+    /linear-gradient\(180deg, transparent, #000 16%\);\s*mask-composite: intersect;/,
+  );
+  assert.match(block, /-webkit-mask-composite: source-in;/);
+  const shader = await read("src/components/world/rising.frag.glsl");
+  assert.match(
+    shader,
+    /inFrame \*= mix\(1\.0, fall\(1\.0, 0\.84, ruv\.y\), step\(0\.75, aspect\)\);/,
+  );
   assert.doesNotMatch(block, /\.rw-end::after/);
 });
 

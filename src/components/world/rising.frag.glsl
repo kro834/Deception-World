@@ -313,6 +313,8 @@ void main() {
     charCol += light * vec3(0.12, 0.04, 0.01) * (1.0 - age);
     vec2 ruv = (uv + haze * 0.5 - 0.5) * uRiderScale + vec2(0.5, 0.5);
     float inFrame = step(0.0, ruv.x) * step(ruv.x, 1.0) * smoothstep(0.0, 0.08, ruv.x) * fall(1.0, 0.92, ruv.x);
+    // Landscape (fitted by height): the art's top melts into the dark, as in the end still.
+    inFrame *= mix(1.0, fall(1.0, 0.84, ruv.y), step(0.75, aspect));
     // Ember-lit while the fire burns; as it dies down the grade settles into
     // the end still's (.rw-end: the art at 0.56 under a faint ember wash), so
     // the canvas cross-fades into a picture of the same colour.

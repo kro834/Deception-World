@@ -315,24 +315,32 @@
 
 /* Landscape: the rider is fitted by height, like the shader, and its sides
    are feathered into the ember (a mask on the art alone), so the tint, the
-   ember and the vignette span the full width with no lit column. */
+   ember and the vignette span the full width with no lit column... */
 @media (min-aspect-ratio: 3/4) {
   .site-shell.film-edition.mirage-edition .rw-end-art {
     object-fit: contain;
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent calc(50% - 37.5cqh),
-      #000 calc(50% - 30cqh),
-      #000 calc(50% + 30cqh),
-      transparent calc(50% + 37.5cqh)
-    );
-    mask-image: linear-gradient(
-      90deg,
-      transparent calc(50% - 37.5cqh),
-      #000 calc(50% - 30cqh),
-      #000 calc(50% + 30cqh),
-      transparent calc(50% + 37.5cqh)
-    );
+    /* ...and its top melts into the dark too (the shader fades it the same),
+       so the art's own sky never reads as a lit column above the rider. */
+    -webkit-mask-image:
+      linear-gradient(
+        90deg,
+        transparent calc(50% - 37.5cqh),
+        #000 calc(50% - 30cqh),
+        #000 calc(50% + 30cqh),
+        transparent calc(50% + 37.5cqh)
+      ),
+      linear-gradient(180deg, transparent, #000 16%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(
+        90deg,
+        transparent calc(50% - 37.5cqh),
+        #000 calc(50% - 30cqh),
+        #000 calc(50% + 30cqh),
+        transparent calc(50% + 37.5cqh)
+      ),
+      linear-gradient(180deg, transparent, #000 16%);
+    mask-composite: intersect;
   }
 }
 
