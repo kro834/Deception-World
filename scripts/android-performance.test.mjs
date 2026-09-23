@@ -102,15 +102,18 @@ test("Android keeps compositor-driven reading progress, independent of economy",
     css,
     /html\[data-native-scroll-progress="true"\][\s\S]*?animation-timeline: scroll\(root block\)/,
   );
-  // One line: the native path drops the Motion prism, the script path drops
-  // the hairline.
+  // One line: wherever Motion draws its compositor-driven prism (::before),
+  // the hairline goes, on the native and the script path alike, so capable
+  // Android shows the same line as iOS. The prism itself is never hidden.
   assert.match(
     css,
-    /html\[data-native-scroll-progress="true"\]:not\(\[data-world-effects="economy"\]\)\s*\.site-shell\.film-edition\.motion-on\s*\.topbar::before \{\s*content: none;/,
+    /html:not\(\[data-world-effects="economy"\]\)\s*\.site-shell\.film-edition\.motion-on\s*\.topbar::after \{\s*content: none;/,
   );
+  assert.doesNotMatch(css, /\.topbar::before \{\s*content: none;/);
+  const motion = readSource("src/styles-motion-edition.css");
   assert.match(
-    css,
-    /html:not\(\[data-world-effects="economy"\]\):not\(\[data-native-scroll-progress="true"\]\)\s*\.site-shell\.film-edition\.motion-on\s*\.topbar::after \{\s*content: none;/,
+    motion,
+    /html:not\(\[data-world-effects="economy"\]\) \.site-shell\.film-edition\.motion-on \.topbar::before \{[\s\S]*?animation-timeline: scroll\(root block\);/,
   );
 });
 

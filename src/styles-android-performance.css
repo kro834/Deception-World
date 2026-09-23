@@ -97,20 +97,15 @@ html[data-android-renderer][data-world-effects="economy"]
 }
 
 /* One reading-progress line under the World topbar. The Motion edition draws
-   its prism line (.topbar::before, styles-motion-edition.css) under the same
-   conditions as below. On the native path the hairline above is the line;
-   on the script path (--page-progress) the prism replaces the hairline. */
+   its 2px prism line (.topbar::before, styles-motion-edition.css) under the
+   same conditions as below, from scroll(root block) on the compositor. There
+   the prism is the line on every path (Android, iOS 26 and 27, desktop), so
+   capable Android shows what iOS shows, and the faint 1px hairline is
+   dropped. Economy, reduced motion and engines without scroll timelines keep
+   the hairline (native above on Android, --page-progress elsewhere). */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html[data-native-scroll-progress="true"]:not([data-world-effects="economy"])
-      .site-shell.film-edition.motion-on
-      .topbar::before {
-      content: none;
-    }
-
-    html:not([data-world-effects="economy"]):not([data-native-scroll-progress="true"])
-      .site-shell.film-edition.motion-on
-      .topbar::after {
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .topbar::after {
       content: none;
     }
   }
