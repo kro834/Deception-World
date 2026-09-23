@@ -1,0 +1,2138 @@
+/* Taisho edition — Dream Chapter as a grand night-theatre film site.
+
+   One token set (夜墨 ink, 海老茶, 金, 生成り paper, 朱 seal) replaces the
+   five layered skins that preceded it. Titles are Shippori Mincho with real
+   vertical setting; ornament is drawn with CSS only (子持ち罫, double
+   frames, 七宝, 青海波, 矢絣) and stays behind or beside text, never over
+   faces or controls. Every selector doubles the page class so it outranks
+   the cinematic sheet in either load order (direct load or client
+   navigation). Measured geometry — the poster console, thumbnail rail,
+   dossier columns, chrome heights and the story <details> — keeps the
+   dimensions the verify scripts expect. Motion is finite and gated. */
+
+.dream-page.dream-page {
+  --ts-ink: #0d0912;
+  --ts-night: #1a1023;
+  --ts-velvet: #221428;
+  --ts-plum: #594255;
+  --ts-ebicha: #6e2c35;
+  --ts-ebicha-deep: #4a1d27;
+  --ts-konjo: #192f60;
+  --ts-konjo-deep: #121c3c;
+  --ts-shu: #cc493b;
+  --ts-shu-text: #e0664f;
+  --ts-shu-deep: #a8352c;
+  --ts-kin: #c8a45c;
+  --ts-kin-light: #e6c28e;
+  --ts-kin-deep: #8a6a2f;
+  --ts-kin-hi: #f3e0b0;
+  --ts-kinari: #f4ecdc;
+  --ts-neri: #ede4cd;
+  --ts-zoge: #e3d6bd;
+  --ts-ginnezu: #b3adb8;
+  --ts-fuji: #b9a3de;
+  --ts-hair: rgb(200 164 92 / 55%);
+  --ts-hair-soft: rgb(200 164 92 / 26%);
+  --ts-display:
+    "Shippori Mincho B1", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif;
+  --ts-text: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --ts-latin: "Cinzel", "Times New Roman", serif;
+  --ts-gilt: linear-gradient(
+    100deg,
+    #8a6a2f 0%,
+    #c8a45c 16%,
+    #f3e0b0 32%,
+    #d9b877 46%,
+    #9a7b3c 62%,
+    #e6c28e 80%,
+    #b08d48 100%
+  );
+  --ts-gilt-vertical: linear-gradient(
+    180deg,
+    #f3e0b0 0%,
+    #e6c28e 30%,
+    #c8a45c 58%,
+    #9a7b3c 80%,
+    #d9b877 100%
+  );
+  --ts-komochi:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) bottom / 100% 1px no-repeat;
+  --ts-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  /* Legacy tokens now resolve to the Taisho palette. */
+  --dream-gold: var(--ts-kin-light);
+  --dream-scarlet: var(--ts-shu);
+  --dream-ink: var(--ts-ink);
+  --dream-paper: var(--ts-neri);
+  --dream-blue: var(--ts-fuji);
+  --dream-serif: var(--ts-text);
+  --dream-glass-border: var(--ts-hair-soft);
+  color: var(--ts-kinari);
+  background: var(--ts-ink);
+  font-family: var(--ts-text);
+  font-feature-settings: "palt" 0;
+}
+
+/* ---------- Chrome: header and the 幕 index ---------- */
+.dream-page.dream-page .dream-site-header {
+  border-bottom: 1px solid var(--ts-hair-soft);
+  background: #130c17;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-site-header::after {
+  background: linear-gradient(90deg, var(--ts-kin), var(--ts-shu));
+}
+
+.dream-page.dream-page .dream-site-header > p {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.dream-page.dream-page .dream-site-header > p b {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-back-link {
+  border-color: var(--ts-hair-soft);
+  color: var(--ts-zoge);
+  background: transparent;
+  font-family: var(--ts-latin);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-back-link small {
+  color: var(--ts-ginnezu);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.dream-page.dream-page .dream-site-header .side-panel-trigger.ios26-glass {
+  border: 1px solid var(--ts-hair);
+  background: var(--ts-velvet) !important;
+  box-shadow: none !important;
+}
+
+.dream-page.dream-page .dream-chapter-nav {
+  left: 0;
+  right: 0;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 176px));
+  justify-content: center;
+  border: 0;
+  border-bottom: 1px solid var(--ts-hair-soft);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) bottom / 100% 1px no-repeat,
+    var(--ts-ink);
+  box-shadow: none;
+  transform: none;
+  translate: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-chapter-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-inline-start: 1px solid var(--ts-hair-soft);
+  color: var(--ts-zoge);
+  background: transparent;
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-chapter-nav a:last-child {
+  border-inline-end: 1px solid var(--ts-hair-soft);
+}
+
+.dream-page.dream-page .dream-chapter-nav a small {
+  color: var(--ts-kin);
+  font-family: var(--ts-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-chapter-nav a > span {
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-chapter-nav a[aria-current="location"] {
+  color: var(--ts-kinari);
+  background: linear-gradient(var(--ts-shu) 0 0) 50% calc(100% - 2px) / 28px 2px no-repeat;
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-chapter-nav a:focus-visible,
+.dream-page.dream-page .dream-back-link:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: -4px;
+}
+
+/* ---------- Hero: a one-sheet ---------- */
+.dream-page.dream-page .dream-hero {
+  --ts-title-size: clamp(44px, min(6.2vw, 9.2svh), 92px);
+  --ts-title-right: clamp(40px, 7vw, 120px);
+  --ts-chrome: 126px;
+  --ts-obi: 64px;
+  position: relative;
+  display: block;
+  min-height: max(760px, 100svh);
+  padding: 0;
+  overflow: hidden;
+  background: var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-hero::before {
+  display: none;
+}
+
+/* The frame is the last layer. Every other hero layer stays at z-index:auto
+   and paints in source order: a z-indexed copy block would isolate the
+   logo's screen blend and bring back its black matte. */
+.dream-page.dream-page .dream-hero::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: calc(var(--ts-chrome) + 14px) clamp(12px, 2vw, 28px) calc(var(--ts-obi) + 14px);
+  z-index: auto;
+  opacity: 1;
+  transform: none;
+  animation: none;
+  mix-blend-mode: normal;
+  border: 1px solid rgb(200 164 92 / 34%);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 30px 2px,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 2px 30px,
+    linear-gradient(var(--ts-kin) 0 0) 100% 0 / 30px 2px,
+    linear-gradient(var(--ts-kin) 0 0) 100% 0 / 2px 30px,
+    linear-gradient(var(--ts-kin) 0 0) 0 100% / 30px 2px,
+    linear-gradient(var(--ts-kin) 0 0) 0 100% / 2px 30px,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 30px 2px,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 2px 30px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-hero-field {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  background: var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-hero-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 42% 30%;
+  filter: saturate(0.82) brightness(0.74) contrast(1.06);
+}
+
+.dream-page.dream-page .dream-hero-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  background:
+    linear-gradient(270deg, rgb(13 9 18 / 92%) 0 16%, rgb(13 9 18 / 60%) 32%, transparent 54%),
+    linear-gradient(0deg, rgb(13 9 18 / 96%) 0, rgb(13 9 18 / 55%) 18%, transparent 36%),
+    linear-gradient(180deg, rgb(13 9 18 / 80%) 0, transparent 22%),
+    radial-gradient(ellipse at 44% 42%, transparent 40%, rgb(13 9 18 / 55%) 100%);
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-hero-title {
+  position: absolute;
+  top: calc(var(--ts-chrome) + clamp(28px, 5svh, 56px));
+  right: var(--ts-title-right);
+  z-index: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: calc(var(--ts-title-size) * 0.3);
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-hero-title-label {
+  writing-mode: vertical-rl;
+  padding-inline-start: 10px;
+  border-inline-start: 1px solid var(--ts-hair);
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: clamp(13px, 1.1vw, 16px);
+  font-weight: 500;
+  letter-spacing: 0.5em;
+}
+
+.dream-page.dream-page .dream-hero-title-name {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: calc(var(--ts-title-size) * 0.12);
+}
+
+.dream-page.dream-page .dream-hero-title-name > span {
+  display: block;
+  writing-mode: vertical-rl;
+  color: var(--ts-kin-light);
+  background: var(--ts-gilt-vertical);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ts-display);
+  font-size: var(--ts-title-size);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 55%));
+}
+
+.dream-page.dream-page .dream-hero-title-name > span + span {
+  margin-top: 1.35em;
+}
+
+.dream-page.dream-page .dream-hero-catch {
+  position: absolute;
+  top: calc(var(--ts-chrome) + clamp(28px, 5svh, 56px) + var(--ts-title-size) * 1.2);
+  right: calc(var(--ts-title-right) + 27px + var(--ts-title-size) * 2.42 + clamp(28px, 3vw, 52px));
+  left: auto;
+  z-index: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  writing-mode: vertical-rl;
+  color: var(--ts-kinari);
+  font-family: var(--ts-text);
+  font-size: clamp(17px, 1.7vw, 26px);
+  font-weight: 500;
+  line-height: 1.9;
+  letter-spacing: 0.3em;
+  text-shadow: 0 2px 14px rgb(13 9 18 / 90%);
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-hero-catch > span {
+  display: block;
+}
+
+.dream-page.dream-page .dream-hero-catch > span:last-child {
+  padding-top: 5em;
+  color: var(--ts-shu-text);
+}
+
+.dream-page.dream-page .dream-hero-copy {
+  position: absolute;
+  left: clamp(28px, 5vw, 96px);
+  bottom: calc(var(--ts-obi) + clamp(36px, 6svh, 64px));
+  z-index: auto;
+  display: grid;
+  gap: 16px;
+  width: clamp(340px, 34vw, 420px);
+  margin: 0;
+  padding: 0;
+  transform: none;
+  translate: none;
+}
+
+.dream-page.dream-page .dream-hero-copy > p {
+  width: auto;
+  margin: 0;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--ts-shu);
+  color: var(--ts-zoge);
+  background: none;
+  font-family: var(--ts-text);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-title-logo {
+  width: 100%;
+  margin: -6% 0 -5%;
+  mix-blend-mode: screen;
+  filter: saturate(0.85);
+}
+
+.dream-page.dream-page .dream-hero-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.dream-page.dream-page .dream-hero-actions a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 10px;
+  min-height: 56px;
+  padding: 8px 14px;
+  border: 1px solid var(--ts-hair);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: rgb(34 20 40 / 88%);
+  box-shadow: inset 0 0 0 3px rgb(13 9 18 / 60%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-hero-actions a:first-child {
+  border-color: #d97a62;
+  background: var(--ts-shu-deep);
+}
+
+.dream-page.dream-page .dream-hero-actions small {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-hero-actions a:first-child :is(small, b) {
+  color: var(--ts-kinari);
+}
+
+.dream-page.dream-page .dream-hero-actions span {
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-hero-actions b {
+  color: rgb(244 236 220 / 78%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-hero-actions a:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 3px;
+}
+
+.dream-page.dream-page .dream-hero-obi {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 44px);
+  height: var(--ts-obi);
+  padding: 0 24px;
+  border-top: 1px solid var(--ts-hair);
+  color: var(--ts-zoge);
+  background: rgb(13 9 18 / 86%);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+  justify-content: safe center;
+}
+
+.dream-page.dream-page .dream-hero-obi > span:nth-child(3) {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-hero-obi > i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ts-kin);
+  rotate: 45deg;
+  flex-shrink: 0;
+}
+
+/* ---------- 口上 prologue ---------- */
+.dream-page.dream-page .dream-prologue {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(96px, 12vw, 168px) 20px;
+  background:
+    radial-gradient(circle at 76% 22%, rgb(246 236 210 / 10%) 0 60px, transparent 180px),
+    radial-gradient(ellipse at 50% 0, rgb(25 47 96 / 30%), transparent 62%), var(--ts-ink);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dream-page.dream-page .dream-prologue-card {
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: clamp(28px, 4vw, 56px);
+  width: min(760px, 100%);
+  padding: clamp(48px, 7vw, 88px) clamp(24px, 5vw, 72px);
+  border: 3px solid var(--ts-kin);
+  outline: 1px solid rgb(200 164 92 / 70%);
+  outline-offset: -10px;
+  background: radial-gradient(ellipse at 50% 45%, #1b1320 0%, #0c0810 62%, #050307 100%);
+  box-shadow: inset 0 0 90px rgb(0 0 0 / 80%);
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-prologue-card::before,
+.dream-page.dream-page .dream-prologue-card::after {
+  content: "❖";
+  position: absolute;
+  left: 50%;
+  padding: 0 12px;
+  color: var(--ts-kin);
+  background: #0c0810;
+  font-size: 12px;
+  line-height: 1;
+  translate: -50% 0;
+}
+
+.dream-page.dream-page .dream-prologue-card::before {
+  top: 4px;
+}
+
+.dream-page.dream-page .dream-prologue-card::after {
+  bottom: 4px;
+}
+
+.dream-page.dream-page .dream-prologue-card h2 {
+  margin: 0;
+  writing-mode: vertical-rl;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.6em;
+}
+
+.dream-page.dream-page .dream-prologue-card > p {
+  margin: 0;
+  writing-mode: vertical-rl;
+  height: calc(20 * 1.16em);
+  color: var(--ts-kinari);
+  font-family: var(--ts-text);
+  font-size: clamp(16px, 1.5vw, 19px);
+  font-weight: 500;
+  line-height: 2.15;
+  letter-spacing: 0.16em;
+  line-break: strict;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
+  height: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.6em;
+  align-self: flex-end;
+  color: var(--ts-ginnezu);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+/* ---------- Acts: shared section rhythm and headings ---------- */
+.dream-page.dream-page .dream-section {
+  background: transparent;
+}
+
+.dream-page.dream-page :is(.dream-poster-section, .dream-character-section, .dream-case-section) {
+  background: transparent;
+}
+
+.dream-page.dream-page .dream-section-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "act kicker count"
+    "act title count"
+    "act rule rule";
+  column-gap: clamp(16px, 2vw, 28px);
+  align-items: end;
+  margin: 0 0 clamp(40px, 6vw, 72px);
+  padding: 0;
+  border: 0;
+}
+
+.dream-page.dream-page .dream-section-heading::before,
+.dream-page.dream-page .dream-section-heading::after {
+  display: none;
+}
+
+.dream-page.dream-page .dream-act-mark {
+  grid-area: act;
+  align-self: stretch;
+  padding-right: 12px;
+  border-right: 1px solid var(--ts-hair);
+  writing-mode: vertical-rl;
+  color: var(--ts-kin);
+  font-family: var(--ts-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.5em;
+}
+
+.dream-page.dream-page .dream-section-heading > p {
+  grid-area: kicker;
+  margin: 0 0 10px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-shadow: none;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.dream-page.dream-page .dream-section-heading > p::before {
+  display: none;
+}
+
+.dream-page.dream-page .dream-section-heading h2 {
+  grid-area: title;
+  margin: 0;
+  color: var(--ts-kin-light);
+  background: var(--ts-gilt);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ts-display);
+  font-size: clamp(38px, 4.6vw, 64px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: 0.12em;
+  text-shadow: none;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
+  grid-area: count;
+  align-self: end;
+  margin: 0 0 8px;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-section-heading > .film-boundary-line {
+  grid-area: rule;
+  position: static;
+  display: block;
+  width: auto;
+  height: 5px;
+  margin-top: 16px;
+  background: var(--ts-komochi);
+  transform-origin: 0 50%;
+}
+
+.dream-page.dream-page .film-text-scan > i {
+  border-right-color: var(--ts-kin-hi);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 5px, rgb(243 224 176 / 18%) 5px 6px),
+    linear-gradient(90deg, transparent, rgb(200 164 92 / 22%), rgb(243 224 176 / 42%));
+}
+
+/* ---------- 第一幕 絵看板 ---------- */
+.dream-page.dream-page .dream-poster-stage {
+  padding: clamp(10px, 1.4vw, 18px);
+  border: 1px solid var(--ts-hair);
+  outline: 1px solid var(--ts-hair-soft);
+  outline-offset: -5px;
+  border-radius: 2px;
+  background: var(--ts-velvet);
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-poster-stage > figure {
+  border: 1px solid var(--ts-hair-soft);
+  border-radius: 0;
+  background: conic-gradient(#150c1b 25%, #110a16 0 50%, #150c1b 0 75%, #110a16 0) 0 0 / 28px 28px;
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-poster-stage figcaption {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  border-top: 1px solid var(--ts-hair-soft);
+  color: var(--ts-zoge);
+  background: rgb(13 9 18 / 92%);
+}
+
+.dream-page.dream-page .dream-poster-stage figcaption span {
+  flex: none;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-poster-stage figcaption b {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-poster-thumbnails button.ios26-glass {
+  border: 1px solid var(--ts-hair-soft);
+  border-radius: 2px;
+  background: var(--ts-ink) !important;
+  box-shadow: none !important;
+}
+
+.dream-page.dream-page .dream-poster-thumbnails button.ios26-glass[aria-selected="true"] {
+  border-color: var(--ts-kin);
+  box-shadow:
+    inset 0 0 0 1px var(--ts-kin),
+    inset 0 0 0 3px rgb(204 73 59 / 70%) !important;
+}
+
+.dream-page.dream-page .dream-poster-thumbnails span {
+  color: var(--ts-kinari);
+  background: rgb(13 9 18 / 82%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-poster-controls button.ios26-glass {
+  border: 1px solid var(--ts-hair);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: var(--ts-ink) !important;
+  box-shadow: inset 0 0 0 3px rgb(34 20 40 / 90%) !important;
+  font-family: var(--ts-latin);
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-poster-controls button.ios26-glass :is(i, svg, em) {
+  color: var(--ts-kin-light);
+  background: transparent;
+}
+
+.dream-page.dream-page .dream-poster-controls .dream-poster-lock[aria-pressed="true"] {
+  border-color: var(--ts-shu);
+  background: var(--ts-ebicha-deep) !important;
+}
+
+.dream-page.dream-page .dream-poster-controls button:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-poster-thumbnails button:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: -3px;
+}
+
+.dream-page.dream-page .dream-poster-controls button.ios26-glass b {
+  border-color: var(--ts-hair);
+  color: var(--ts-kin-light);
+  background: transparent;
+  font-size: 12px;
+}
+
+/* ---------- 第二幕 登場人物: arch portraits and 幟 banners ---------- */
+.dream-page.dream-page .dream-character-grid {
+  direction: rtl;
+  gap: clamp(36px, 4vw, 56px) clamp(24px, 3vw, 44px);
+}
+
+.dream-page.dream-page .dream-character-grid > article {
+  direction: ltr;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-character-grid > article::before,
+.dream-page.dream-page .dream-character-grid > article::after {
+  display: none;
+}
+
+.dream-page.dream-page .dream-character-grid button.ios26-glass {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  grid-template-rows: auto auto auto auto;
+  column-gap: 14px;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  color: var(--ts-kinari);
+  background: none !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+.dream-page.dream-page .dream-character-grid button img {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4.2;
+  object-fit: cover;
+  border: 1px solid var(--ts-kin);
+  border-radius: 999px 999px 3px 3px;
+  outline: 1px solid rgb(200 164 92 / 70%);
+  outline-offset: -6px;
+  background: var(--ts-neri);
+  filter: none;
+  transform: none;
+}
+
+.dream-page.dream-page .dream-character-shade {
+  display: none;
+}
+
+.dream-page.dream-page .dream-character-number {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  justify-self: start;
+  margin: 0 0 14px 14px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+  box-shadow:
+    inset 0 0 0 2px var(--ts-shu-deep),
+    inset 0 0 0 3px rgb(244 236 220 / 70%);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-character-copy {
+  display: contents;
+}
+
+.dream-page.dream-page .dream-character-copy b {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  writing-mode: vertical-rl;
+  min-height: 60%;
+  margin: 0;
+  padding: 22px 0 44px;
+  border-top: 3px solid var(--ts-kin);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4px,
+      var(--ts-kin) 4px 5px,
+      transparent 5px calc(100% - 5px),
+      var(--ts-kin) calc(100% - 5px) calc(100% - 4px),
+      transparent 0
+    ),
+    var(--ts-ebicha);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 18px), 0 100%);
+  font-family: var(--ts-display);
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: 800;
+  line-height: 58px;
+  letter-spacing: 0.22em;
+  text-align: start;
+}
+
+.dream-page.dream-page .dream-character-grid > article:first-child .dream-character-copy b {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4px,
+      var(--ts-kin) 4px 5px,
+      transparent 5px calc(100% - 5px),
+      var(--ts-kin) calc(100% - 5px) calc(100% - 4px),
+      transparent 0
+    ),
+    var(--ts-shu-deep);
+}
+
+.dream-page.dream-page .dream-character-copy small {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 22px 0 0;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-text);
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-character-copy i {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin: 6px 0 0;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-character-copy em {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  justify-self: start;
+  margin: 14px 0 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ts-hair);
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-character-copy em::after {
+  content: " ›";
+  color: var(--ts-kin);
+}
+
+/* The ring is drawn inside the arch: the grid touches the section edges, and
+   the section's content-visibility clips anything painted outside it. */
+.dream-page.dream-page .dream-character-grid button:focus-visible {
+  outline: none;
+}
+
+.dream-page.dream-page .dream-character-grid button:focus-visible img {
+  outline: 3px solid var(--ts-fuji);
+  outline-offset: -5px;
+}
+
+.dream-page.dream-page .dream-character-grid button:focus-visible .dream-character-copy em {
+  border-bottom-color: var(--ts-fuji);
+  color: var(--ts-kinari);
+}
+
+.dream-page.dream-page [data-dream-reveal][data-dream-visible="true"] {
+  clip-path: none;
+}
+
+/* ---------- 第三幕 ドルミネンス: playbill slips ---------- */
+.dream-page.dream-page .dream-dolminence-section {
+  background:
+    radial-gradient(
+        circle at 0 0,
+        #0000 0 calc(36.8px - 1px),
+        rgb(200 164 92 / 7%) 0 36.8px,
+        #0000 0
+      )
+      0 0 / 52px 52px,
+    radial-gradient(
+        circle at 100% 0,
+        #0000 0 calc(36.8px - 1px),
+        rgb(200 164 92 / 7%) 0 36.8px,
+        #0000 0
+      )
+      0 0 / 52px 52px,
+    radial-gradient(
+        circle at 0 100%,
+        #0000 0 calc(36.8px - 1px),
+        rgb(200 164 92 / 7%) 0 36.8px,
+        #0000 0
+      )
+      0 0 / 52px 52px,
+    radial-gradient(
+        circle at 100% 100%,
+        #0000 0 calc(36.8px - 1px),
+        rgb(200 164 92 / 7%) 0 36.8px,
+        #0000 0
+      )
+      0 0 / 52px 52px,
+    var(--ts-night);
+}
+
+.dream-page.dream-page .dream-dolminence-section {
+  padding-inline: clamp(18px, 3.4vw, 48px);
+  border: 3px solid var(--ts-kin-deep);
+  outline: 1px solid rgb(200 164 92 / 50%);
+  outline-offset: -10px;
+}
+
+.dream-page.dream-page .dream-dolminence-section::before {
+  display: none;
+}
+
+.dream-page.dream-page .dream-dolminence-intro {
+  max-width: 40em;
+  margin: 0 0 clamp(36px, 5vw, 56px);
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 16px;
+  line-height: 1.95;
+  letter-spacing: 0.06em;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-dolminence-grid > article {
+  border: 1px solid var(--ts-hair-soft);
+  border-top: 3px solid var(--ts-ebicha);
+  border-radius: 0;
+  background: var(--ts-ink);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.dream-page.dream-page .dream-dolminence-grid > article::before,
+.dream-page.dream-page .dream-dolminence-grid > article::after {
+  display: none;
+}
+
+.dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  color: var(--ts-kinari);
+  background: none !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+.dream-page.dream-page .dream-dolminence-grid button img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid var(--ts-hair-soft);
+  outline: 1px solid rgb(200 164 92 / 18%);
+  outline-offset: -6px;
+  border-radius: 0;
+  filter: none;
+  transform: none;
+}
+
+.dream-page.dream-page .dream-dolminence-number {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ts-kin);
+  border-radius: 0;
+  color: var(--ts-kin-light);
+  background: rgb(13 9 18 / 88%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-dolminence-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  align-content: start;
+  gap: 6px;
+  padding: 16px 6px 8px;
+  border: 0;
+  background: none;
+}
+
+.dream-page.dream-page .dream-dolminence-copy small {
+  color: var(--ts-shu-text);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-dolminence-copy b {
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: clamp(19px, 1.7vw, 24px);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-dolminence-copy i {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.18em;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-dolminence-copy em {
+  justify-self: start;
+  margin-top: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--ts-hair);
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-dolminence-copy em::after {
+  content: " ›";
+  color: var(--ts-kin);
+}
+
+.dream-page.dream-page .dream-dolminence-grid button:focus-visible {
+  outline: 3px solid var(--ts-fuji);
+  outline-offset: -4px;
+}
+
+/* ---------- 第四幕 物語の記録: intertitle cards ---------- */
+/* The story reader used a 16px anchor margin, which left its heading under
+   the act index. It now lands exactly like the other three acts. */
+.dream-page.dream-page #cases.dream-section {
+  scroll-margin-top: max(164px, calc(136px + env(safe-area-inset-top)));
+}
+
+.dream-page.dream-page .dream-case-section {
+  background:
+    radial-gradient(
+        circle at 50% 150%,
+        #0000 0 calc(7px - 1px),
+        rgb(200 164 92 / 8%) 0 7px,
+        #0000 0 calc(14px - 1px),
+        rgb(200 164 92 / 8%) 0 14px,
+        #0000 0 calc(21px - 1px),
+        rgb(200 164 92 / 8%) 0 21px,
+        #0000 0 calc(28px - 1px),
+        rgb(200 164 92 / 8%) 0 28px,
+        #0000 0
+      )
+      0 0 / 56px 28px repeat-x,
+    var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-story-intro {
+  max-width: 40em;
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+.dream-page.dream-page .dream-story-intro > p {
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 16px;
+  line-height: 1.95;
+  word-break: auto-phrase;
+  line-break: strict;
+}
+
+.dream-page.dream-page .dream-story-intro > .dream-story-scope {
+  padding-left: 12px;
+  border-left: 2px solid var(--ts-shu);
+  color: var(--ts-ginnezu);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.dream-page.dream-page .dream-story-layout {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+}
+
+.dream-page.dream-page .dream-story-crossings {
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid var(--ts-hair);
+  outline: 1px solid var(--ts-hair-soft);
+  outline-offset: -7px;
+  border-radius: 0;
+  background: var(--ts-velvet);
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-story-crossings .dream-story-eyebrow {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-story-crossings h3 {
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-story-crossings-lead,
+.dream-page.dream-page .dream-story-crossings dd p {
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 15px;
+  line-height: 1.9;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-story-crossings dl > div {
+  border-top: 1px solid var(--ts-hair-soft);
+}
+
+.dream-page.dream-page .dream-story-crossings dt {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-story-crossings dt span {
+  color: var(--ts-shu-text);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-story-crossings dd strong {
+  color: var(--ts-kinari);
+  font-family: var(--ts-text);
+}
+
+.dream-page.dream-page .dream-story-cases {
+  counter-reset: ts-case -1;
+  gap: 14px;
+}
+
+.dream-page.dream-page .dream-story-cases > li {
+  counter-increment: ts-case;
+}
+
+.dream-page.dream-page .dream-story-case {
+  border: 3px solid var(--ts-kin-deep);
+  outline: 1px solid rgb(200 164 92 / 55%);
+  outline-offset: -9px;
+  border-radius: 0;
+  background: radial-gradient(ellipse at 50% 40%, #1b1320 0%, #0c0810 70%, #060409 100%);
+  box-shadow: none;
+}
+
+.dream-page.dream-page .dream-story-case[open] {
+  border-color: var(--ts-kin);
+  background: #0c0810;
+}
+
+.dream-page.dream-page .dream-story-case > summary {
+  gap: clamp(14px, 2vw, 28px);
+  min-height: 92px;
+  padding: 18px clamp(20px, 3vw, 36px);
+  border-radius: 0;
+  background: none;
+}
+
+.dream-page.dream-page .dream-story-case-number {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 64px;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-story-case-number::before {
+  content: "其ノ" counter(ts-case, cjk-decimal);
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-story-cases > li:first-child .dream-story-case-number::before {
+  content: "序";
+}
+
+.dream-page.dream-page .dream-story-case-number b {
+  color: var(--ts-kin-light);
+}
+
+.dream-page.dream-page .dream-story-case-heading > span {
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-story-case-heading > small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-story-case-status {
+  display: grid;
+  place-items: center;
+  padding: 6px 8px;
+  border-radius: 3px;
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+  box-shadow:
+    inset 0 0 0 2px var(--ts-shu-deep),
+    inset 0 0 0 3px rgb(244 236 220 / 60%);
+  font-family: var(--ts-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-story-case-toggle {
+  color: var(--ts-kin);
+}
+
+.dream-page.dream-page .dream-story-case > summary:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: -4px;
+}
+
+.dream-page.dream-page .dream-story-case-body {
+  margin: 0 clamp(12px, 2vw, 22px) clamp(12px, 2vw, 22px);
+  padding: clamp(24px, 3.4vw, 40px);
+  border-top: 0;
+  color: var(--ts-night);
+  background: var(--ts-neri);
+}
+
+.dream-page.dream-page .dream-story-case-body h3 {
+  max-width: 34em;
+  margin: 0 0 16px;
+  color: var(--ts-ebicha);
+  font-family: var(--ts-display);
+  font-size: clamp(18px, 1.7vw, 22px);
+  font-weight: 800;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-story-case-body p {
+  max-width: 38em;
+  color: #2a1a2e;
+  font-family: var(--ts-text);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.95;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Finale: credits roll ---------- */
+.dream-page.dream-page .dream-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: clamp(88px, 11vw, 150px) 20px clamp(64px, 8vw, 110px);
+  border-top: 0;
+  text-align: center;
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 1px no-repeat,
+    radial-gradient(ellipse at 50% 0, rgb(110 44 53 / 26%), transparent 60%),
+    var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-footer > p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin: 0;
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-footer > h2 {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-footer > h2 > span {
+  color: var(--ts-kin-light);
+  background: var(--ts-gilt);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ts-display);
+  font-size: clamp(26px, 7vw, 64px);
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.dream-page.dream-page .dream-footer > h2 > small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5em;
+}
+
+.dream-page.dream-page .dream-credits {
+  display: grid;
+  gap: 14px;
+  width: min(620px, 100%);
+  margin: 18px 0 0;
+  padding: 26px 0;
+  background: var(--ts-komochi);
+}
+
+.dream-page.dream-page .dream-credits > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: 20px;
+  align-items: baseline;
+}
+
+.dream-page.dream-page .dream-credits dt {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-align: right;
+}
+
+.dream-page.dream-page .dream-credits dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 1.1em;
+  margin: 0;
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: left;
+}
+
+.dream-page.dream-page .dream-credits dd span {
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-footer-end {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin-top: 16px;
+  border: 2px solid var(--ts-kin);
+  border-radius: 50%;
+  outline: 1px solid rgb(200 164 92 / 45%);
+  outline-offset: 5px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 42px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-footer > a {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 30px;
+  border: 1px solid var(--ts-hair);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: var(--ts-velvet);
+  box-shadow: inset 0 0 0 3px rgb(13 9 18 / 70%);
+  margin: 0;
+}
+
+.dream-page.dream-page .dream-footer > a span {
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-footer > a small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-footer > a:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 3px;
+}
+
+/* ---------- Dossier dialog ---------- */
+.dream-page.dream-page .dream-dossier-shell {
+  border: 1px solid var(--ts-hair);
+  border-radius: 4px;
+  background: var(--ts-velvet);
+}
+
+.dream-page.dream-page .dream-dossier-layout,
+.dream-page.dream-page .dream-dossier-visuals {
+  background: var(--ts-velvet);
+}
+
+.dream-page.dream-page .dream-dossier-copy {
+  color: var(--ts-kinari);
+  background: var(--ts-velvet);
+}
+
+.dream-page.dream-page .dream-dossier-visuals figure {
+  border: 1px solid var(--ts-hair-soft);
+  border-radius: 0;
+  background: var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-dossier-title h2 {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.dream-page.dream-page .dream-dossier-title > span {
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-dossier-sections section > header span {
+  color: var(--ts-kin-light);
+}
+
+.dream-page.dream-page .dream-dossier-title b {
+  color: var(--ts-ginnezu);
+  font-size: 12px;
+  font-family: var(--ts-latin);
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-dossier-sections h3 {
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-dossier-sections p {
+  font-family: var(--ts-text);
+}
+
+.dream-page.dream-page :is(.dream-profile-grid, .dream-ability-list article) {
+  border-color: var(--ts-hair-soft);
+  border-radius: 0;
+  background: var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-dossier-close.ios26-glass {
+  border: 1px solid var(--ts-hair);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: var(--ts-ink) !important;
+  box-shadow: none !important;
+}
+
+.dream-page.dream-page .dream-dossier-close svg {
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+}
+
+/* ---------- Pointer response (fine pointers only) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-character-grid button img,
+  .dream-page.dream-page .dream-dolminence-grid > article,
+  .dream-page.dream-page .dream-hero-actions a,
+  .dream-page.dream-page .dream-footer > a {
+    transition:
+      outline-color 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  .dream-page.dream-page .dream-character-grid button:hover img {
+    outline-color: rgb(200 164 92 / 80%);
+  }
+
+  .dream-page.dream-page .dream-dolminence-grid > article:hover {
+    border-color: var(--ts-hair);
+  }
+
+  .dream-page.dream-page .dream-hero-actions a:hover,
+  .dream-page.dream-page .dream-footer > a:hover {
+    border-color: var(--ts-kin-light);
+  }
+}
+
+/* ---------- Opening: finite, non-blocking ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-hero-art {
+    animation: ts-settle 9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-hero-title-name > span {
+    animation: ts-brush 1.1s var(--ts-ease) 0.35s both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-hero-title-name
+    > span
+    + span {
+    animation-delay: 0.7s;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-hero-title-label {
+    animation: ts-fade 0.9s var(--ts-ease) 0.2s both;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-hero-catch > span {
+    animation: ts-brush 1s var(--ts-ease) 1.15s both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-hero-catch
+    > span:last-child {
+    animation-delay: 1.45s;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    :is(.dream-hero-copy > p, .dream-hero-actions, .dream-hero-obi) {
+    animation: ts-rise 0.9s var(--ts-ease) 1.3s both;
+  }
+
+  .dream-page.dream-page .dream-hero[data-dream-hero-active="false"] .dream-hero-art {
+    animation-play-state: paused;
+  }
+
+  @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+    html:not([data-world-effects="economy"])
+      .dream-page.dream-page
+      :is(.dream-story-cases > li, .dream-credits > div, .dream-footer-end) {
+      animation: ts-rise linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes ts-settle {
+  from {
+    scale: 1.08;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes ts-brush {
+  from {
+    opacity: 0.2;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ts-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ts-rise {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ---------- Breakpoints ---------- */
+/* The cinematic sheet caps the side-rail console at 1440px; above that the
+   old tall stack returned with an empty velvet void. Same geometry, uncapped. */
+@media (min-width: 1441px) and (min-height: 600px) and (orientation: landscape) {
+  .dream-page.dream-page .dream-poster-stage {
+    grid-template-areas: "visual thumbnails" "controls controls";
+    grid-template-columns: minmax(0, 1fr) 192px;
+    grid-template-rows: min(62svh, 620px) auto;
+    gap: 18px 24px;
+  }
+
+  .dream-page.dream-page .dream-poster-stage > figure {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .dream-page.dream-page .dream-poster-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: clamp(80px, 11svh, 92px);
+    gap: 10px;
+    min-height: 0;
+    padding: 2px 6px 2px 2px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-padding-block: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(200 164 92 / 56%) rgb(13 9 18 / 72%);
+  }
+
+  .dream-page.dream-page .dream-poster-thumbnails button {
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 80px;
+    aspect-ratio: auto;
+    scroll-margin-block: 2px;
+  }
+
+  .dream-page.dream-page .dream-poster-controls {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-poster-controls .dream-poster-shuffle {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 1180px) {
+  .dream-page.dream-page .dream-site-header > p {
+    display: none;
+  }
+
+  /* Single-column console: the poster keeps the full stage width (the
+     verify contract measures it), so the frame moves onto the figure. */
+  .dream-page.dream-page .dream-poster-stage {
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+  }
+
+  .dream-page.dream-page .dream-poster-stage > figure {
+    border-color: var(--ts-hair);
+  }
+
+  .dream-page.dream-page .dream-dolminence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .dream-page.dream-page .dream-story-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-page.dream-page .dream-character-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-character-grid > article:first-child {
+    grid-column: 1 / -1;
+    width: min(100%, 440px);
+    justify-self: center;
+  }
+}
+
+/* Phones and portrait tablets: the catch, copy and band join a bottom-aligned
+   grid under the title, so in tall frames nothing sits on the face. */
+@media (max-width: 760px), (min-width: 761px) and (max-aspect-ratio: 4/5) {
+  .dream-page.dream-page .dream-hero {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-hero-art {
+    object-position: 57% 28%;
+  }
+
+  .dream-page.dream-page .dream-hero-vignette {
+    background:
+      linear-gradient(270deg, rgb(13 9 18 / 88%) 0 18%, rgb(13 9 18 / 42%) 44%, transparent 68%),
+      linear-gradient(0deg, rgb(13 9 18 / 98%) 0, rgb(13 9 18 / 86%) 34%, transparent 58%),
+      linear-gradient(180deg, rgb(13 9 18 / 80%) 0, transparent 22%);
+  }
+
+  .dream-page.dream-page .dream-hero-catch {
+    position: relative;
+    inset: auto;
+    grid-row: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    margin: 0 20px 12px;
+    writing-mode: horizontal-tb;
+    line-height: 1.6;
+    letter-spacing: 0.14em;
+  }
+
+  .dream-page.dream-page .dream-hero-catch > span:last-child {
+    padding-top: 0;
+    color: #f28b74;
+  }
+
+  .dream-page.dream-page .dream-hero-copy {
+    position: relative;
+    inset: auto;
+    grid-row: 3;
+    width: auto;
+    gap: 12px;
+    margin: 0 20px clamp(30px, 5svh, 48px);
+  }
+
+  .dream-page.dream-page .dream-hero-obi {
+    position: relative;
+    grid-row: 4;
+  }
+}
+
+@media (min-width: 761px) and (max-aspect-ratio: 4/5) {
+  .dream-page.dream-page .dream-hero {
+    --ts-title-size: clamp(56px, min(8vw, 6svh), 84px);
+    min-height: max(900px, 100svh);
+  }
+
+  .dream-page.dream-page :is(.dream-hero-catch, .dream-hero-copy) {
+    margin-inline: clamp(40px, 6vw, 72px);
+  }
+
+  .dream-page.dream-page .dream-hero-catch {
+    font-size: 24px;
+  }
+
+  .dream-page.dream-page .dream-hero-copy {
+    width: min(480px, calc(100% - 2 * clamp(40px, 6vw, 72px)));
+  }
+}
+
+/* The full band needs about 990px with its padding; below that the lead
+   credit drops. */
+@media (max-width: 1000px) {
+  .dream-page.dream-page .dream-hero-obi > :is(span:first-child, i:nth-child(2)) {
+    display: none;
+  }
+}
+
+/* A landscape phone cannot show a 20-character vertical column under the
+   fixed chrome, so the prologue reads horizontally there. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page .dream-prologue-card {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .dream-page.dream-page .dream-prologue-card :is(h2, > p) {
+    writing-mode: horizontal-tb;
+  }
+
+  .dream-page.dream-page .dream-prologue-card > p {
+    height: auto;
+    line-height: 2;
+  }
+
+  .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
+    flex-direction: row;
+    align-self: flex-end;
+  }
+
+  .dream-page.dream-page .dream-dossier-visuals figcaption {
+    overflow: hidden;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 800px) {
+  .dream-page.dream-page .dream-story-case > summary {
+    grid-template-columns: 64px minmax(0, 1fr) auto 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-hero {
+    --ts-title-size: clamp(34px, min(11vw, 5.4svh), 46px);
+    --ts-title-right: 20px;
+    --ts-chrome: 116px;
+    --ts-obi: 52px;
+    min-height: max(780px, 100svh);
+  }
+
+  .dream-page.dream-page .dream-hero-catch {
+    font-size: 17px;
+  }
+
+  .dream-page.dream-page .dream-title-logo {
+    width: min(72vw, 290px);
+  }
+
+  .dream-page.dream-page .dream-hero-obi {
+    gap: 14px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
+  .dream-page.dream-page .dream-hero-obi > :is(i:nth-child(4), span:nth-child(3)) {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-back-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy em {
+    white-space: normal;
+  }
+
+  .dream-page.dream-page .dream-chapter-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a > span {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a small {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
+  .dream-page.dream-page .dream-section-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "act kicker"
+      "act title"
+      "act count"
+      "rule rule";
+  }
+
+  .dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
+    margin: 8px 0 0;
+  }
+
+  /* ドルミネンス must hold one line inside the framed playbill. */
+  .dream-page.dream-page .dream-section-heading h2 {
+    font-size: clamp(30px, 9vw, 40px);
+    letter-spacing: 0.06em;
+  }
+
+  .dream-page.dream-page .dream-character-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-character-grid > article:first-child {
+    width: 100%;
+  }
+
+  .dream-page.dream-page .dream-credits > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    text-align: center;
+  }
+
+  .dream-page.dream-page .dream-credits :is(dt, dd) {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .dream-page.dream-page .dream-story-case > summary {
+    min-height: 84px;
+  }
+}
+
+/* Narrow phones: each playbill slip lies on its side, portrait left and
+   billing right, so katakana names keep their full width. */
+@media (max-width: 560px) {
+  .dream-page.dream-page .dream-dolminence-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: center;
+    column-gap: 14px;
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy {
+    padding: 4px 4px 4px 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-hero-actions b {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-hero-actions a {
+    grid-template-rows: auto;
+    column-gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .dream-page.dream-page .dream-hero-actions small {
+    grid-row: 1;
+    font-size: 16px;
+  }
+
+  .dream-page.dream-page .dream-hero-actions span {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (max-width: 360px) {
+  .dream-page.dream-page #cases.dream-section {
+    scroll-margin-top: max(190px, calc(162px + env(safe-area-inset-top)));
+  }
+
+  .dream-page.dream-page .dream-hero {
+    --ts-title-size: clamp(30px, 9.4vw, 36px);
+    --ts-chrome: 164px;
+    min-height: max(800px, 100svh);
+  }
+
+  .dream-page.dream-page .dream-chapter-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a:nth-child(2n) {
+    border-inline-end: 1px solid var(--ts-hair-soft);
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a:nth-child(n + 3) {
+    border-top: 1px solid var(--ts-hair-soft);
+  }
+
+  .dream-page.dream-page .dream-prologue {
+    padding-inline: 12px;
+  }
+
+  .dream-page.dream-page .dream-prologue-card {
+    gap: 16px;
+    padding-inline: 14px;
+  }
+
+  .dream-page.dream-page .dream-prologue-card > p {
+    height: calc(24 * 1.16em);
+    font-size: 16px;
+  }
+
+  .dream-page.dream-page .dream-dolminence-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Accessibility modes ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  .dream-page.dream-page .dream-site-header {
+    background: #130c17;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .dream-page.dream-page :is(.dream-chapter-nav, .dream-hero-obi) {
+    background: var(--ts-ink);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .dream-page.dream-page {
+    --ts-hair: rgb(230 194 142 / 90%);
+    --ts-hair-soft: rgb(230 194 142 / 60%);
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page
+    :is(.dream-hero-title-name > span, .dream-section-heading h2, .dream-footer > h2 > span) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a[aria-current="location"] > span {
+    text-decoration: underline 2px;
+    text-underline-offset: 4px;
+  }
+}

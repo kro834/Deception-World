@@ -21,12 +21,26 @@ import {
 
 type DreamSectionId = "posters" | "characters" | "dolminence" | "cases";
 
-const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string }[] = [
-  { id: "posters", label: "POSTERS" },
-  { id: "characters", label: "CHARACTERS" },
-  { id: "dolminence", label: "DOLMINENCE" },
-  { id: "cases", label: "CASES" },
+const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string; act: string }[] = [
+  { id: "posters", label: "絵看板", act: "第一幕" },
+  { id: "characters", label: "登場人物", act: "第二幕" },
+  { id: "dolminence", label: "ドルミネンス", act: "第三幕" },
+  { id: "cases", label: "物語", act: "第四幕" },
 ];
+
+const KANJI_DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"] as const;
+
+/** 1 → 一, 12 → 十二: Japanese numerals for ornamental captions. */
+function toKanjiNumber(value: number) {
+  if (value < 10) return KANJI_DIGITS[value];
+  const tens = Math.floor(value / 10);
+  const ones = value % 10;
+  return `${tens === 1 ? "" : KANJI_DIGITS[tens]}十${ones ? KANJI_DIGITS[ones] : ""}`;
+}
+
+// Shared by the opening prologue; the story section keeps the spoiler note.
+const DREAM_STORY_INTRO =
+  "人の心に入り込む悪夢を追って、シエル、東風谷慶弥、怪作の道が交わる。幻想郷を巻き込む異変のなかで、三人は霊夢や魔理沙たちと関わり、それぞれの守るべきものと向き合っていく。";
 
 function lockDreamViewport() {
   const root = document.documentElement;
@@ -475,7 +489,12 @@ export function DreamChapter() {
       const marker = Math.max(140, Math.min(320, window.innerHeight * 0.36));
       let current: DreamSectionId | null = null;
       sections.forEach((section) => {
-        if (section.getBoundingClientRect().top <= marker) current = section.id as DreamSectionId;
+        // A nav jump lands the section at its scroll margin, which can sit below
+        // the marker on short landscape screens.
+        const landing = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
+        if (section.getBoundingClientRect().top <= Math.max(marker, landing + 8)) {
+          current = section.id as DreamSectionId;
+        }
       });
       setActiveSection(current);
     };
@@ -740,8 +759,8 @@ export function DreamChapter() {
           </span>
         </GuardedLink>
         <p>
-          KAMEN RIDER SAGA
-          <b>THE MOVIE I</b>
+          <span>KAMEN RIDER SAGA · THE MOVIE I</span>
+          <b>ドリームチャプター</b>
         </p>
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
       </header>
@@ -749,9 +768,9 @@ export function DreamChapter() {
       <SideMenuLayer context="movie" open={menuOpen} onOpenChange={setMenuOpen} />
 
       <nav className="dream-chapter-nav" aria-label="DREAM CHAPTER セクション">
-        {DREAM_SECTION_LINKS.map(({ id, label }, index) => (
+        {DREAM_SECTION_LINKS.map(({ id, label, act }) => (
           <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
-            <small>{String(index + 1).padStart(2, "0")}</small>
+            <small>{act}</small>
             <span>{label}</span>
           </a>
         ))}
@@ -773,16 +792,15 @@ export function DreamChapter() {
             fetchPriority="high"
             decoding="async"
           />
-          <span className="dream-aurora dream-aurora-blue" />
-          <span className="dream-aurora dream-aurora-gold" />
-          <span className="dream-light-gate" />
-          <span className="dream-dream-grid" />
-          <span className="dream-star-field dream-star-field-near" />
-          <span className="dream-star-field dream-star-field-far" />
         </div>
         <span className="dream-hero-vignette" aria-hidden="true" />
-        <span className="dream-orbit dream-orbit-a" aria-hidden="true" />
-        <span className="dream-orbit dream-orbit-b" aria-hidden="true" />
+        <div className="dream-hero-title" aria-hidden="true">
+          <span className="dream-hero-title-label">映画第一作</span>
+          <span className="dream-hero-title-name">
+            <span>ドリーム</span>
+            <span>チャプター</span>
+          </span>
+        </div>
         <p className="dream-hero-catch">
           <span>夢と現実の境界が、</span>
           <span>明ける。</span>
@@ -801,27 +819,37 @@ export function DreamChapter() {
             fetchPriority="high"
             decoding="async"
           />
-          <div>
-            <b>ドリームチャプター</b>
-            <span>映画第一作 / DREAM CHAPTER</span>
-          </div>
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
             <a href="#posters">
-              <small>01</small>
-              <span>記録を見る</span>
+              <small>壱</small>
+              <span>絵看板を見る</span>
               <b>POSTERS</b>
             </a>
             <a href="#characters">
-              <small>02</small>
-              <span>人物資料へ</span>
-              <b>CHARACTERS</b>
+              <small>弐</small>
+              <span>登場人物へ</span>
+              <b>CAST</b>
             </a>
           </nav>
         </div>
-        <a className="dream-scroll-cue" href="#posters">
-          <span>ENTER THE RECORD</span>
+        <div className="dream-hero-obi">
+          <span>仮面ライダーサーガ × 東方Project</span>
           <i aria-hidden="true" />
-        </a>
+          <span>映画第一作 THE MOVIE I</span>
+          <i aria-hidden="true" />
+          <span>劇場版第二作『ディセプションワールド』へ続く</span>
+        </div>
+      </section>
+
+      <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">
+        <div className="dream-prologue-card" data-dream-reveal>
+          <h2 id="prologue-title">口上</h2>
+          <p>{DREAM_STORY_INTRO}</p>
+          <p className="dream-prologue-sign">
+            <span>仮面ライダーサーガ × 東方Project</span>
+            <span>映画第一作</span>
+          </p>
+        </div>
       </section>
 
       <section
@@ -832,9 +860,13 @@ export function DreamChapter() {
       >
         <header className="dream-section-heading" data-film-reveal>
           <FilmTextScan />
-          <p>KEY VISUAL ARCHIVE</p>
-          <h2 id="poster-title">POSTERS</h2>
+          <b className="dream-act-mark" aria-hidden="true">
+            第一幕
+          </b>
+          <p>ACT I — KEY VISUALS</p>
+          <h2 id="poster-title">絵看板</h2>
           <span>01 — {String(DREAM_POSTERS.length).padStart(2, "0")}</span>
+          <i className="film-boundary-line" aria-hidden="true" />
         </header>
 
         <div
@@ -883,8 +915,8 @@ export function DreamChapter() {
               decoding="async"
             />
             <figcaption>
-              <span>VISUAL / {String(posterIndex + 1).padStart(2, "0")}</span>
-              <b>DREAM CHAPTER</b>
+              <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
+              <b>{activePoster.alt}</b>
             </figcaption>
           </figure>
           <div className="dream-poster-thumbnails" role="tablist" aria-label="ポスターを選択">
@@ -1004,9 +1036,13 @@ export function DreamChapter() {
       >
         <header className="dream-section-heading" data-film-reveal>
           <FilmTextScan />
-          <p>CAST / OBSERVED SUBJECTS</p>
-          <h2 id="character-title">CHARACTERS</h2>
+          <b className="dream-act-mark" aria-hidden="true">
+            第二幕
+          </b>
+          <p>ACT II — CAST</p>
+          <h2 id="character-title">登場人物</h2>
           <span>03 FILES</span>
+          <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-character-grid" data-dream-reveal>
           {DREAM_CHARACTERS.map((item) => (
@@ -1022,7 +1058,7 @@ export function DreamChapter() {
                   setCharacter(item);
                   if (event.detail !== 0) event.currentTarget.blur();
                 }}
-                aria-label={`${item.name}の詳細を開く`}
+                aria-label={`${item.name} 人物資料を開く`}
               >
                 <LiquidPointerGlow />
                 <img
@@ -1037,10 +1073,10 @@ export function DreamChapter() {
                 <span className="dream-character-shade" aria-hidden="true" />
                 <span className="dream-character-number">{item.order}</span>
                 <span className="dream-character-copy">
-                  <small>{item.tagline}</small>
                   <b>{item.name}</b>
+                  <small>{item.tagline}</small>
                   <i>{item.roman}</i>
-                  <em>OPEN DOSSIER ↗</em>
+                  <em>人物資料を開く</em>
                 </span>
               </button>
             </article>
@@ -1055,9 +1091,13 @@ export function DreamChapter() {
       >
         <header className="dream-section-heading" data-film-reveal>
           <FilmTextScan />
-          <p>CLASSIFIED ORGANIZATION / AGENT DISGUISE RECORD</p>
-          <h2 id="dolminence-title">DOLMINENCE</h2>
+          <b className="dream-act-mark" aria-hidden="true">
+            第三幕
+          </b>
+          <p>ACT III — DOLMINENCE</p>
+          <h2 id="dolminence-title">ドルミネンス</h2>
           <span>04 FILES</span>
+          <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <p className="dream-dolminence-intro" data-dream-reveal>
           夢と現実の境界で作戦を遂行する機密組織「ドルミネンス」。擬装システムと既存の変身装置を用いる、四つの記録を開示する。
@@ -1076,7 +1116,7 @@ export function DreamChapter() {
                   setDolminenceRecord(record);
                   if (event.detail !== 0) event.currentTarget.blur();
                 }}
-                aria-label={`${record.name}の機密資料を開く`}
+                aria-label={`${record.name} 機密記録を開く`}
               >
                 <LiquidPointerGlow />
                 <img
@@ -1094,7 +1134,7 @@ export function DreamChapter() {
                   <small>{record.agent}</small>
                   <b>{record.name}</b>
                   <i>{record.roman}</i>
-                  <em>OPEN CLASSIFIED FILE ↗</em>
+                  <em>機密記録を開く</em>
                 </span>
               </button>
             </article>
@@ -1105,16 +1145,16 @@ export function DreamChapter() {
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
         <header className="dream-section-heading" data-film-reveal>
           <FilmTextScan />
-          <p>STORY / CASE RECORD</p>
+          <b className="dream-act-mark" aria-hidden="true">
+            第四幕
+          </b>
+          <p>ACT IV — STORY</p>
           <h2 id="case-title">物語の記録</h2>
           <span>CASE 0–5 / DREAM CHAPTER</span>
+          <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-story-intro">
-          <p>
-            人の心に入り込む悪夢を追って、シエル、東風谷慶弥、怪作の道が交わる。
-            幻想郷を巻き込む異変のなかで、三人は霊夢や魔理沙たちと関わり、
-            それぞれの守るべきものと向き合っていく。
-          </p>
+          <p>六つの章で、夢と現実の境界に起きた異変をたどる。</p>
           <p className="dream-story-scope" id="dream-story-scope">
             中盤までの内容を含みます。各章を開くとあらすじを読めます。Case 5は記録途中です。
           </p>
@@ -1178,10 +1218,46 @@ export function DreamChapter() {
       </section>
 
       <footer className="dream-footer">
-        <p>KAMEN RIDER SAGA / THE MOVIE I</p>
-        <h2>DREAM CHAPTER</h2>
+        <p>
+          <span>仮面ライダーサーガ × 東方Project</span>
+          <span>映画第一作</span>
+        </p>
+        <h2>
+          <span>ドリームチャプター</span>
+          <small>DREAM CHAPTER</small>
+        </h2>
+        <dl className="dream-credits" aria-label="登場記録">
+          <div>
+            <dt>登場人物</dt>
+            <dd>
+              {DREAM_CHARACTERS.map((item) => (
+                <span key={item.id}>{item.name}</span>
+              ))}
+            </dd>
+          </div>
+          <div>
+            <dt>ドルミネンス</dt>
+            <dd>
+              {DREAM_DOLMINENCE.map((record) => (
+                <span key={record.id}>{record.name}</span>
+              ))}
+            </dd>
+          </div>
+          <div>
+            <dt>舞台</dt>
+            <dd>
+              {DREAM_STORY_CROSSINGS.map((place) => (
+                <span key={place.name}>{place.name}</span>
+              ))}
+            </dd>
+          </div>
+        </dl>
+        <span className="dream-footer-end" aria-hidden="true">
+          終
+        </span>
         <GuardedLink to="/world" hash="top" assets={WORLD_ENTER_ASSETS} transition="dream">
-          DECEPTION WORLDへ戻る
+          <span>ディセプションワールドへ戻る</span>
+          <small>DECEPTION WORLD</small>
         </GuardedLink>
       </footer>
 
