@@ -899,7 +899,9 @@ export function DreamChapter() {
             className="dream-poster-current"
             role="tabpanel"
             aria-labelledby={`dream-poster-tab-${posterIndex}`}
-            onAnimationEnd={() => setPreviousPosterIndex(null)}
+            onAnimationEnd={(event) => {
+              if (event.animationName === "dream-poster-enter") setPreviousPosterIndex(null);
+            }}
           >
             <img
               key={activePoster.src}
