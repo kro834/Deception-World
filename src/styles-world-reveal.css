@@ -4,8 +4,15 @@
    a time, in reading order, as the reader scrolls: an ice block cursor sits
    on the next cell, and each character appears at full ink the moment it is
    typed. The words are always in the DOM at full colour; the only animated
-   properties are `color` and `background-color` on inline spans, so no layer
+   properties are `color` and `background-image` on inline spans, so no layer
    is created per character and line breaking (kinsoku) is untouched.
+
+   Paint budget (scripts/scroll-paint-budget.test.mjs): never animate
+   `background-color`, `color` (except tr-ink) or `clip-path` on a scroll or
+   view timeline. Chromium 142+ (Chrome, Samsung Internet 30) treats a
+   background-color animation as compositable and repaints the page under it
+   every frame; a stepped background-image cursor only repaints its own cell
+   when it moves.
 
    Blocks: the story, riders, records and finale headings, the story copy and
    the riders copy. Blocks that change with a rail (the archive title and
@@ -154,6 +161,9 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 @keyframes tr-caret {
   from,
   to {
-    background-color: color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent);
+    background-image: linear-gradient(
+      color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent),
+      color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent)
+    );
   }
 }

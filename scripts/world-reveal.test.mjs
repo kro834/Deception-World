@@ -220,7 +220,10 @@ test("only colour and the cursor cell are animated, per inline character, and fu
     ),
   ];
   assert.deepEqual(properties("tr-ink"), ["color"]);
-  assert.deepEqual(properties("tr-caret"), ["background-color"]);
+  // background-image, not background-color: Chromium 142+ (Samsung Internet
+  // 30, current Chrome) repaints the page under a background-color animation
+  // every scroll frame; the stepped image repaints only the cell it enters.
+  assert.deepEqual(properties("tr-caret"), ["background-image"]);
   // Typing: a character is invisible until its turn, then appears at once at
   // its own colour (the implicit `to`); the ice cursor holds its cell for one step.
   assert.deepEqual(
@@ -228,7 +231,10 @@ test("only colour and the cursor cell are animated, per inline character, and fu
     ["from"],
   );
   assert.match(keyframes["tr-ink"][0].body, /color: transparent/);
-  assert.match(keyframes["tr-caret"][0].body, /color-mix\(in oklab, var\(--mr-ice/);
+  assert.match(
+    flat(keyframes["tr-caret"][0].body),
+    /^background-image: linear-gradient\((color-mix\(in oklab, var\(--mr-ice, #7ae8ff\) 82%, transparent\)), \1\);$/,
+  );
   for (const { body } of rules.filter(({ body }) => /animation:\s*tr-ink/.test(body))) {
     assert.match(body, /tr-ink steps\(1, end\) both,\s*tr-caret steps\(1, end\) none/);
     assert.match(body, /var\(--tr-d, 0\)/);

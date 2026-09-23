@@ -366,6 +366,15 @@ const spanAudit = (page) =>
     for (const span of document.querySelectorAll(".tr-c")) {
       const own = getComputedStyle(span);
       const parent = getComputedStyle(span.parentElement);
+      // The typing cursor is this span's own background-image while its
+      // tr-caret range is active (the reader stopped mid-block).
+      const cursor = span
+        .getAnimations()
+        .some(
+          (animation) =>
+            animation.animationName === "tr-caret" &&
+            animation.effect.getComputedTiming().progress !== null,
+        );
       for (const property of inherited) {
         // An unset fill follows the character's own (animated) colour.
         if (property === "-webkit-text-fill-color" && own.webkitTextFillColor === own.color)
@@ -374,6 +383,7 @@ const spanAudit = (page) =>
           problems.add(`${property}: ${own.getPropertyValue(property)} (${span.textContent})`);
       }
       for (const [property, value] of Object.entries(still)) {
+        if (property === "background-image" && cursor) continue;
         if (own.getPropertyValue(property) !== value)
           problems.add(`${property}: ${own.getPropertyValue(property)} (${span.textContent})`);
       }
