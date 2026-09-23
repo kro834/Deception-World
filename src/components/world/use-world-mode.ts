@@ -5,6 +5,16 @@ import {
   prefersIOS18Rendering,
   supportsIOS27Enhancements,
 } from "@/lib/rendering-profile";
+import { createViewportResizeFilter } from "@/lib/viewport-resize";
+
+/* Only these headers draw `--page-progress` (styles-world/01.css, styles-dream-chapter.css).
+   Writing the inherited property on <html> restyled every element on every scroll frame. */
+const PROGRESS_HOST_CLASSES = [
+  "topbar",
+  "manager-topbar",
+  "rider-archive-topbar",
+  "dream-site-header",
+];
 
 export function useWorldMode() {
   useLiquidPointerLight();
@@ -18,7 +28,6 @@ export function useWorldMode() {
     const previousEffects = html.dataset.worldEffects;
     const previousVisibility = html.dataset.worldPageVisible;
     const previousPageScrolled = html.dataset.pageScrolled;
-    const previousPageProgress = html.style.getPropertyValue("--page-progress");
     const previousNativeProgress = html.dataset.nativeScrollProgress;
     html.dataset.mode = "world";
     html.dataset.scrollMotionReady = "true";
@@ -50,7 +59,19 @@ export function useWorldMode() {
       window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
     let nativeProgress = supportsNativeProgress && !reducedMotion.matches;
     let lastScrolled: boolean | undefined;
-    let lastProgress = "";
+    const progressHosts = PROGRESS_HOST_CLASSES.map((name) =>
+      document.getElementsByClassName(name),
+    );
+    const writeProgress = (value: string | null) => {
+      for (const hosts of progressHosts) {
+        for (const host of Array.from(hosts)) {
+          if (!(host instanceof HTMLElement)) continue;
+          if (value === null) host.style.removeProperty("--page-progress");
+          else if (host.style.getPropertyValue("--page-progress") !== value)
+            host.style.setProperty("--page-progress", value);
+        }
+      }
+    };
     const syncScrolled = () => {
       const scrolled = window.scrollY > 20;
       if (scrolled === lastScrolled) return;
@@ -65,8 +86,8 @@ export function useWorldMode() {
       const scrollable = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
       const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
       const value = progress.toFixed(4);
-      if (value !== lastProgress) html.style.setProperty("--page-progress", value);
-      lastProgress = value;
+      // Per-host comparison: a header that mounts later still receives the value.
+      writeProgress(value);
     };
     const requestProgressSync = () => {
       if (nativeProgress) {
@@ -86,17 +107,22 @@ export function useWorldMode() {
       else delete html.dataset.nativeScrollProgress;
       syncPageProgress();
     };
+    const significantResize = createViewportResizeFilter();
+    // The URL bar collapsing mid-scroll is followed by scroll events anyway.
+    const requestResizeSync = () => {
+      if (significantResize()) requestProgressSync();
+    };
     syncProgressMode();
     reducedMotion.addEventListener("change", syncProgressMode);
     reducedTransparency.addEventListener("change", syncProgressMode);
     window.addEventListener("scroll", requestProgressSync, { passive: true });
-    window.addEventListener("resize", requestProgressSync, { passive: true });
-    window.visualViewport?.addEventListener("resize", requestProgressSync, { passive: true });
+    window.addEventListener("resize", requestResizeSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestResizeSync, { passive: true });
     return () => {
       document.removeEventListener("visibilitychange", syncVisibility);
       window.removeEventListener("scroll", requestProgressSync);
-      window.removeEventListener("resize", requestProgressSync);
-      window.visualViewport?.removeEventListener("resize", requestProgressSync);
+      window.removeEventListener("resize", requestResizeSync);
+      window.visualViewport?.removeEventListener("resize", requestResizeSync);
       if (progressFrame) window.cancelAnimationFrame(progressFrame);
       reducedMotion.removeEventListener("change", syncProgressMode);
       reducedTransparency.removeEventListener("change", syncProgressMode);
@@ -118,8 +144,7 @@ export function useWorldMode() {
       else delete html.dataset.worldPageVisible;
       if (previousPageScrolled) html.dataset.pageScrolled = previousPageScrolled;
       else delete html.dataset.pageScrolled;
-      if (previousPageProgress) html.style.setProperty("--page-progress", previousPageProgress);
-      else html.style.removeProperty("--page-progress");
+      writeProgress(null);
     };
   }, []);
 }
