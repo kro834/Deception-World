@@ -1,7 +1,9 @@
 // RISING THE WORLD in a real browser: the gate after the footer, the
 // sequence, its tiers, controls, performance and a frame-exact WCAG 2.3.1
 // flash audit (60 fps, seeked through the ?rising-audit test hook, portal and
-// title shake included).
+// title shake included). The audit enforces the one flash a second DESIGN.md
+// promises (WCAG allows three), and a real-clock pass hammers the controls
+// (held Enter, rapid clicks) with frames from a CDP screencast.
 //
 //   BASE_URL=http://127.0.0.1:8091 PW_BROWSER_CHANNEL=chrome node scripts/verify-rising-world.mjs
 //
@@ -97,12 +99,29 @@ const COUNT_WEBGL = () => {
     return getContext.call(this, type, ...rest);
   };
 };
+// GL never ready in time: the parallel compile never completes, or the
+// resized bitmaps never arrive. Both must fall back to the calm tier at 700 ms.
+const STALL_COMPILE = () => {
+  const getProgramParameter = WebGLRenderingContext.prototype.getProgramParameter;
+  WebGLRenderingContext.prototype.getProgramParameter = function (program, pname) {
+    if (pname === 0x91b1) return false; // COMPLETION_STATUS_KHR
+    return getProgramParameter.call(this, program, pname);
+  };
+};
+const HOLD_BITMAPS = () => {
+  window.createImageBitmap = () => new Promise(() => {});
+};
 
-async function openWorld(browser, name, { query = "", init = [], reducedMotion = false } = {}) {
+async function openWorld(
+  browser,
+  name,
+  { query = "", init = [], reducedMotion = false, forcedColors = false } = {},
+) {
   const context = await browser.newContext(PROFILES[name].options);
   for (const script of init) await context.addInitScript(script);
   const page = await context.newPage();
   if (reducedMotion) await page.emulateMedia({ reducedMotion: "reduce" });
+  if (forcedColors) await page.emulateMedia({ forcedColors: "active" });
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(new URL(`/world${query}`, base).href, { waitUntil: "domcontentloaded" });
@@ -155,9 +174,54 @@ const readViewport = (page) =>
     return { tier: viewport.dataset.tier ?? null, ready: viewport.dataset.ready === "true" };
   });
 
+/** RGB of a screenshot at viewport fractions, decoded in a scratch page. */
+async function samplePixels(browser, buffer, points) {
+  const page = await browser.newPage();
+  try {
+    return await page.evaluate(
+      async ([data, spots]) => {
+        const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+        const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }));
+        const context = new OffscreenCanvas(bitmap.width, bitmap.height).getContext("2d");
+        context.drawImage(bitmap, 0, 0);
+        return spots.map(([fx, fy]) => {
+          // A 9x9 average around the point.
+          const x = Math.round(bitmap.width * fx) - 4;
+          const y = Math.round(bitmap.height * fy) - 4;
+          const px = context.getImageData(x, y, 9, 9).data;
+          const sum = [0, 0, 0];
+          for (let index = 0; index < px.length; index += 4) {
+            for (let channel = 0; channel < 3; channel += 1) sum[channel] += px[index + channel];
+          }
+          return sum.map((value) => Math.round(value / 81));
+        });
+      },
+      [buffer.toString("base64"), points],
+    );
+  } finally {
+    await page.close();
+  }
+}
+
+/** Live (unclosed) ImageBitmaps in the page after a forced GC, as "WxH". */
+async function liveBitmaps(cdp) {
+  await cdp.send("HeapProfiler.collectGarbage");
+  const proto = await cdp.send("Runtime.evaluate", { expression: "ImageBitmap.prototype" });
+  const query = await cdp.send("Runtime.queryObjects", {
+    prototypeObjectId: proto.result.objectId,
+  });
+  const result = await cdp.send("Runtime.callFunctionOn", {
+    objectId: query.objects.objectId,
+    functionDeclaration:
+      "function(){return this.filter((b)=>b.width>0).map((b)=>b.width+'x'+b.height).sort()}",
+    returnByValue: true,
+  });
+  return result.result.value;
+}
+
 // ---------------------------------------------------------------- gate
-async function checkGate(browser, name) {
-  const { context, page, errors } = await openWorld(browser, name);
+async function checkGate(browser, name, { reducedMotion = false } = {}) {
+  const { context, page, errors } = await openWorld(browser, name, { reducedMotion });
   const infiniteAtTop = await page.evaluate(
     () =>
       document
@@ -194,8 +258,17 @@ async function checkGate(browser, name) {
   };
   const before = await sample(stage + 40);
   const rest = await sample(0);
+  // Every profile is Chromium with view timelines: the rise must exist unless
+  // reduced motion is on (a broken guard or a renamed keyframe fails here).
   const motion = before.root !== null;
-  if (motion) {
+  assert.equal(
+    motion,
+    !reducedMotion,
+    `${name}${reducedMotion ? " (reduced)" : ""}: rw-rise present=${motion} ${JSON.stringify(before)}`,
+  );
+  if (reducedMotion) {
+    assert.ok(before.opacity > 0.99, `${name}: reduced motion shows the button without the rise`);
+  } else {
     assert.ok(before.opacity < 0.05, `${name}: button hidden before the gate ${before.opacity}`);
     assert.equal(before.root, true, `${name}: the rise must follow the document scroll`);
   }
@@ -231,7 +304,16 @@ async function checkGate(browser, name) {
   assert.ok(layout.overflowX <= 1, `${name}: horizontal overflow ${layout.overflowX}`);
   assert.deepEqual(layout.infinite, [], `${name}: infinite animations at the bottom`);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ check: "gate", name, motion, before, rest, ...layout }));
+  console.log(
+    JSON.stringify({
+      check: reducedMotion ? "gate-reduced" : "gate",
+      name,
+      motion,
+      before,
+      rest,
+      ...layout,
+    }),
+  );
   await context.close();
 }
 
@@ -239,6 +321,37 @@ async function checkGate(browser, name) {
 async function checkSequence(browser, name) {
   const { context, page, errors } = await openWorld(browser, name, { init: [COUNT_WEBGL] });
   await scrollToGate(page);
+  if (PROFILES[name].options.hasTouch) {
+    // A flick that starts on the button scrolls, and creates no GL context: the
+    // browser takes the pan (pointercancel) before the touch prime fires. A
+    // finger that rests on the button first may prime one, by design.
+    const box = await page.locator(".rw-gate-button").boundingBox();
+    const x = box.x + box.width / 2;
+    let y = box.y + box.height / 2;
+    const from = await page.evaluate(() => window.scrollY);
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let step = 0; step < 8; step += 1) {
+      y += 20;
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y }] });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(300);
+    const flick = await page.evaluate(
+      (start) => ({
+        contexts: window.__webglContexts,
+        open: document.querySelector(".rw-dialog").open,
+        scrolled: start - window.scrollY,
+      }),
+      from,
+    );
+    assert.equal(flick.contexts, 0, `${name}: a flick from the button primed GL`);
+    assert.equal(flick.open, false, `${name}: a flick from the button opened the dialog`);
+    assert.ok(flick.scrolled > 100, `${name}: the flick scrolled ${flick.scrolled}px`);
+    console.log(JSON.stringify({ check: "touch-flick-no-prime", name, ...flick }));
+    await cdp.detach();
+    await scrollToGate(page);
+  }
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const pressedAt = Date.now();
   await press(page, name);
@@ -391,6 +504,24 @@ async function checkSequence(browser, name) {
     title: 1,
     live: "EP7 REXONANCE",
   });
+  if (name === "desktop" || name === "landscape-844") {
+    // The landscape end still: the rider's sides are feathered into the ember,
+    // with no lit column around the art (the side matches the centre).
+    await page.waitForTimeout(300);
+    const [side, centre] = await samplePixels(
+      browser,
+      await page.screenshot({ type: "png", scale: "css" }),
+      [
+        [0.05, 0.08],
+        [0.5, 0.08],
+      ],
+    );
+    const gap = Math.max(...side.map((value, index) => Math.abs(value - centre[index])));
+    assert.ok(gap <= 8, `${name}: lit column in the end still ${side} vs ${centre}`);
+    console.log(JSON.stringify({ check: "end-still-band", name, side, centre }));
+  }
+  // もう一度 right after the swap is a double press (SWAP_GUARD_MS): wait it out.
+  await page.waitForTimeout(700);
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.ready === "true");
   const replayed = await page.evaluate(() => ({
@@ -399,8 +530,33 @@ async function checkSequence(browser, name) {
     canvases: document.querySelectorAll(".rw-gl canvas").length,
   }));
   assert.deepEqual(replayed, { focus: "rw-skip", title: 0, canvases: 1 });
-  await page.click(".rw-close");
+  // CLOSE and a reopen in one task: the old session's queued close event must
+  // not tear down the new one (a dark modal with no run and no lock).
+  await page.evaluate(() => {
+    document.querySelector(".rw-close").click();
+    document.querySelector(".rw-gate-button").click();
+  });
+  await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.ready === "true");
+  await page.waitForTimeout(300);
+  const reopened = await page.evaluate(() => ({
+    open: document.querySelector(".rw-dialog").open,
+    locked: document.documentElement.style.overflow === "hidden",
+    art: Boolean(document.querySelector(".rw-calm-world").getAttribute("src")),
+    canvases: document.querySelectorAll(".rw-gl canvas").length,
+    running: window.__risingStats?.running,
+  }));
+  assert.deepEqual(
+    reopened,
+    { open: true, locked: true, art: true, canvases: 1, running: true },
+    `${name}: close + reopen in one task`,
+  );
+  await page.getByRole("button", { name: "CLOSE", exact: true }).click();
   await page.waitForFunction(() => !document.querySelector(".rw-dialog").open);
+  assert.equal(
+    await page.evaluate(() => document.documentElement.style.overflow),
+    "",
+    `${name}: the lock is released after the race`,
+  );
   assert.deepEqual(errors, []);
   console.log(
     JSON.stringify({
@@ -459,12 +615,83 @@ async function checkTiers(browser, name) {
       end: getComputedStyle(document.querySelector(".rw-end")).visibility,
     }));
     assert.deepEqual(pending, { tier: null, end: "hidden" }, `${name}: pending engine`);
+    // SKIP while the chunk loads is kept: the run starts at the end still
+    // instead of playing the whole sequence (8.8 s) once the chunk arrives.
+    await page.focus(".rw-skip");
+    await page.keyboard.press("Enter");
+    // The delayed chunks arrive in turn (the module graph loads in steps); the
+    // end still follows the run's start at once, not ~9 s later.
     await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.tier, null, {
       timeout: 8000,
     });
+    await page.waitForSelector(".rw-replay", { timeout: 1000 });
+    const skippedEarly = await page.evaluate(() => ({
+      tier: document.querySelector(".rw-viewport").dataset.tier ?? null,
+      canvases: document.querySelectorAll(".rw-gl canvas").length,
+      title: Number(getComputedStyle(document.querySelector(".rw-title-wrap")).opacity),
+      live: document.querySelector(".rw-live").textContent,
+      focus: document.activeElement?.className,
+    }));
+    assert.deepEqual(
+      skippedEarly,
+      { tier: "css", canvases: 0, title: 1, live: "EP7 REXONANCE", focus: "rw-replay" },
+      `${name}: SKIP while the engine loads`,
+    );
     await page.keyboard.press("Escape");
     assert.deepEqual(errors, []);
-    console.log(JSON.stringify({ check: "engine-pending", name, ...pending }));
+    console.log(JSON.stringify({ check: "engine-pending", name, ...pending, skippedEarly }));
+    await context.close();
+  }
+  // The engine chunk fails (offline): the static end still, final for the
+  // document (a failed import() is cached), so no もう一度 is offered, and a
+  // focused SKIP hands focus to CLOSE.
+  {
+    const { context, page, errors } = await openWorld(browser, name);
+    await page.route(/rising-sequence/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await route.abort();
+    });
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
+    await page.waitForTimeout(200);
+    await page.focus(".rw-gate-button");
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Shift+Tab");
+    const pendingFocus = await page.evaluate(() => document.activeElement?.className);
+    await page.waitForSelector('.rw-viewport[data-tier="static"]', { timeout: 5000 });
+    await page.waitForTimeout(100);
+    const read = () =>
+      page.evaluate(() => ({
+        tier: document.querySelector(".rw-viewport").dataset.tier ?? null,
+        replay: document.querySelectorAll(".rw-replay").length,
+        skip: document.querySelectorAll(".rw-skip").length,
+        live: document.querySelector(".rw-live").textContent,
+        focus: document.activeElement?.className,
+      }));
+    const failed = await read();
+    assert.equal(pendingFocus, "rw-skip", `${name}: Shift+Tab from CLOSE reaches SKIP`);
+    assert.deepEqual(
+      failed,
+      { tier: "static", replay: 0, skip: 0, live: "EP7 REXONANCE", focus: "rw-close" },
+      `${name}: engine failure`,
+    );
+    await page.unroute(/rising-sequence/);
+    await page.keyboard.press("Enter"); // CLOSE
+    await page.waitForFunction(() => !document.querySelector(".rw-dialog").open);
+    await page.focus(".rw-gate-button");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector('.rw-viewport[data-tier="static"]', { timeout: 5000 });
+    await page.waitForTimeout(100);
+    const again = await read();
+    assert.deepEqual(
+      again,
+      { tier: "static", replay: 0, skip: 0, live: "EP7 REXONANCE", focus: "rw-close" },
+      `${name}: the failure is final for the document`,
+    );
+    await page.keyboard.press("Escape");
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: "tier-static", name, failed, again }));
     await context.close();
   }
   // Save-Data and no WebGL: the calm CSS version.
@@ -487,10 +714,111 @@ async function checkTiers(browser, name) {
       tier: document.querySelector(".rw-viewport").dataset.tier,
       canvases: document.querySelectorAll(".rw-gl canvas").length,
       live: document.querySelector(".rw-live").textContent,
+      fallback: window.__risingStats?.fallback ?? null,
     }));
-    assert.deepEqual(calm, { tier: "css", canvases: 0, live: "EP7 REXONANCE" });
+    assert.deepEqual(calm, {
+      tier: "css",
+      canvases: 0,
+      live: "EP7 REXONANCE",
+      // Software GL and no GL both surface as a null context (failIfMajorPerformanceCaveat).
+      fallback: label === "no-webgl" ? "no-webgl" : null,
+    });
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ check: `tier-${label}`, name, ...calm }));
+    await context.close();
+  }
+  // GL not ready in time (RISING_READY_TIMEOUT_MS): a compile that never
+  // completes (primed at pointerdown) or bitmaps that never arrive (unprimed)
+  // fall back to the calm tier at 700 ms, and the run still ends normally.
+  for (const [label, init, primed] of [
+    ["stall-compile", STALL_COMPILE, true],
+    ["hold-bitmaps", HOLD_BITMAPS, false],
+  ]) {
+    const { context, page, errors } = await openWorld(browser, name, { init: [init] });
+    const parallel = await page.evaluate(() =>
+      Boolean(
+        document
+          .createElement("canvas")
+          .getContext("webgl")
+          ?.getExtension("KHR_parallel_shader_compile"),
+      ),
+    );
+    if (label === "stall-compile" && !parallel) {
+      warn(`${name}: no KHR_parallel_shader_compile, stall-compile skipped`);
+      await context.close();
+      continue;
+    }
+    if (label === "hold-bitmaps") {
+      // The approach prewarm never resolves, so scrollToGate's art wait still holds.
+      await page.evaluate(() =>
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+      );
+      await page.waitForTimeout(1500);
+    } else {
+      await scrollToGate(page);
+    }
+    await press(page, name);
+    await page.waitForFunction(() => window.__risingStats?.readyMs != null, null, {
+      timeout: 3000,
+    });
+    const slow = await page.evaluate(() => ({
+      tier: document.querySelector(".rw-viewport").dataset.tier,
+      fallback: window.__risingStats.fallback,
+      canvases: document.querySelectorAll(".rw-gl canvas").length,
+      primed: window.__risingStats.primed,
+      readyMs: window.__risingStats.readyMs,
+    }));
+    assert.deepEqual(
+      { tier: slow.tier, fallback: slow.fallback, canvases: slow.canvases, primed: slow.primed },
+      { tier: "css", fallback: "not-ready", canvases: 0, primed },
+      `${name} ${label}: ${JSON.stringify(slow)}`,
+    );
+    assert.ok(slow.readyMs >= 650 && slow.readyMs < 1000, `${name} ${label}: ${slow.readyMs} ms`);
+    await page.waitForSelector(".rw-replay", { timeout: 9000 });
+    assert.equal(await page.textContent(".rw-live"), "EP7 REXONANCE");
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: `slow-gl-${label}`, name, ...slow }));
+    await context.close();
+  }
+  // The prepared bitmaps (about 4.6 MB decoded) are closed when the gate
+  // unmounts, and prepared again on the next approach.
+  if (name === "pixel") {
+    const { context, page, errors } = await openWorld(browser, name);
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Runtime.enable");
+    await cdp.send("HeapProfiler.enable");
+    const waitBitmaps = async (count) => {
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        const live = await liveBitmaps(cdp);
+        if (live.length === count) return live;
+        await page.waitForTimeout(500);
+      }
+      return liveBitmaps(cdp);
+    };
+    await scrollToGate(page);
+    const approached = await waitBitmaps(2);
+    assert.deepEqual(approached, ["576x768", "683x1024"], `${name}: prepared on approach`);
+    await page.evaluate(() => document.querySelector('a[href="/riders/saga"]').click());
+    await page.waitForFunction(() => location.pathname === "/riders/saga");
+    await page.waitForTimeout(1500);
+    const away = await waitBitmaps(0);
+    assert.deepEqual(away, [], `${name}: bitmaps outlive /world`);
+    await page.evaluate(() => document.querySelector('a[href^="/world"]').click());
+    await page.waitForFunction(() => location.pathname === "/world");
+    await page.waitForSelector(".site-shell.mirage-edition .rw-gate-button");
+    await page.waitForTimeout(1500);
+    await scrollToGate(page);
+    const back = await waitBitmaps(2);
+    assert.deepEqual(back, ["576x768", "683x1024"], `${name}: prepared again on return`);
+    await press(page, name);
+    await page.waitForFunction(
+      () => document.querySelector(".rw-viewport").dataset.ready === "true",
+      null,
+      { timeout: 3000 },
+    );
+    assert.equal((await readViewport(page)).tier, "webgl");
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: "bitmap-lifecycle", name, approached, away, back }));
     await context.close();
   }
   // Context loss mid-run: straight to the end still, no errors.
@@ -770,6 +1098,33 @@ async function auditFlashes(browser, name, tier) {
     portalSeconds: window.__risingTest.run.portalSeconds,
   }));
   assert.equal(actualTier, tier, `${name}: audit tier`);
+  if (tier !== "reduced") {
+    // The portal is an iris: halfway through, the circle is scaled and the key
+    // visual inside is counter-scaled, so the art stays the full-screen cover
+    // fit the canvas (or the calm layer) takes over from.
+    await page.evaluate((T) => window.__risingTest.seek(T), -portalSeconds / 2);
+    const iris = await page.evaluate(() => {
+      const scaleOf = (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a;
+      const art = document.querySelector(".rw-portal-art");
+      const rect = art.getBoundingClientRect();
+      return {
+        circle: scaleOf(document.querySelector(".rw-portal")),
+        product: scaleOf(document.querySelector(".rw-portal")) * scaleOf(art),
+        rect: [rect.left, rect.top, rect.width, rect.height].map(Math.round),
+        window: [window.innerWidth, window.innerHeight],
+      };
+    });
+    assert.ok(iris.circle < 0.9, `${name} ${tier}: the portal is mid-way ${JSON.stringify(iris)}`);
+    assert.ok(Math.abs(iris.product - 1) <= 0.02, `${name} ${tier}: iris ${JSON.stringify(iris)}`);
+    assert.ok(
+      Math.abs(iris.rect[0]) <= 2 &&
+        Math.abs(iris.rect[1]) <= 2 &&
+        Math.abs(iris.rect[2] - iris.window[0]) <= 2 &&
+        Math.abs(iris.rect[3] - iris.window[1]) <= 2,
+      `${name} ${tier}: the portal art covers the viewport ${JSON.stringify(iris)}`,
+    );
+    console.log(JSON.stringify({ check: "portal-iris", name, tier, ...iris }));
+  }
   if (shotsDir) mkdirSync(shotsDir, { recursive: true });
   const keyframes = new Set(KEYFRAMES.map((t) => Math.round(t * FPS)));
   // Negative times are the portal (the sequence clock starts after it).
@@ -815,8 +1170,210 @@ async function auditFlashes(browser, name, tier) {
       meanL: result.meanL,
     }),
   );
-  assert.ok(worst < 3, `${name} ${tier}: ${worst} flashes/s (WCAG 2.3.1 limit is 3)`);
-  if (worst >= 2) warn(`${name} ${tier}: ${worst} flashes/s (target <= 1)`);
+  assert.ok(
+    worst <= 1,
+    `${name} ${tier}: ${worst} flashes/s (DESIGN.md promises 1; WCAG 2.3.1 limit is 3)`,
+  );
+  await context.close();
+}
+
+// The controls on a real clock: a held Enter (33 ms key repeat) on SKIP, then
+// clicks on the SKIP / もう一度 spot every 100 ms. The two swap the picture
+// between the void and the end still, so each must stay at one flash a second:
+// frames from a CDP screencast, plus swap timestamps that do not depend on the
+// screencast's frame rate. A held Enter on the gate opens the dialog once.
+async function auditControlFlashes(browser, name, tier) {
+  const { context, page, errors } = await openWorld(browser, name, {
+    init: tier === "css" ? [SAVE_DATA] : [],
+    reducedMotion: tier === "reduced",
+  });
+  await scrollToGate(page);
+  const viewport = PROFILES[name].options.viewport;
+  const cell = viewport.width >= 1024 ? { w: 341, h: 256 } : { w: 160, h: 160 };
+  const cdp = await context.newCDPSession(page);
+  const key = (type, autoRepeat = false) =>
+    cdp.send("Input.dispatchKeyEvent", {
+      type,
+      key: "Enter",
+      code: "Enter",
+      windowsVirtualKeyCode: 13,
+      nativeVirtualKeyCode: 13,
+      ...(type === "keyDown" ? { text: "\r", unmodifiedText: "\r", autoRepeat } : {}),
+    });
+  const holdEnter = async (ms) => {
+    await key("keyDown");
+    const started = Date.now();
+    while (Date.now() - started < ms) {
+      await page.waitForTimeout(33);
+      await key("keyDown", true);
+    }
+    await key("keyUp");
+  };
+  await page.evaluate(() => {
+    window.__controls = { swaps: [], clicks: 0, gateClicks: 0 };
+    const controls = document.querySelector(".rw-controls");
+    new MutationObserver(() =>
+      window.__controls.swaps.push({
+        t: performance.now(),
+        control: controls.querySelector("button")?.className ?? null,
+      }),
+    ).observe(controls, { childList: true, subtree: true, attributes: true });
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (event.target.closest?.(".rw-controls")) window.__controls.clicks += 1;
+        if (event.target.closest?.(".rw-gate-button")) window.__controls.gateClicks += 1;
+      },
+      true,
+    );
+  });
+  // A held Enter on the gate: the first press opens the dialog and focuses
+  // CLOSE; the repeats must neither close it nor reopen it.
+  await page.focus(".rw-gate-button");
+  await holdEnter(2000);
+  await page.waitForTimeout(300);
+  const gate = await page.evaluate(() => ({
+    open: document.querySelector(".rw-dialog").open,
+    gateClicks: window.__controls.gateClicks,
+    focus: document.activeElement?.className,
+  }));
+  assert.deepEqual(gate, { open: true, gateClicks: 1, focus: "rw-close" }, `${name} ${tier}`);
+  await page.keyboard.press("Shift+Tab");
+  assert.equal(await page.evaluate(() => document.activeElement?.className), "rw-skip");
+  await page.evaluate(() => {
+    window.__controls.swaps = [];
+    window.__controls.clicks = 0;
+  });
+  const frames = [];
+  cdp.on("Page.screencastFrame", async ({ data, metadata, sessionId }) => {
+    frames.push({ t: metadata.timestamp, data });
+    try {
+      await cdp.send("Page.screencastFrameAck", { sessionId });
+    } catch {
+      // The session closes with the context.
+    }
+  });
+  await cdp.send("Page.startScreencast", {
+    format: "jpeg",
+    quality: 70,
+    maxWidth: Math.round(viewport.width / 2),
+    maxHeight: Math.round(viewport.height / 2),
+    everyNthFrame: 1,
+  });
+  await page.waitForTimeout(300);
+  await holdEnter(2000);
+  await page.waitForTimeout(700);
+  const held = await page.evaluate(() => ({
+    clicks: window.__controls.clicks,
+    swaps: [...new Set(window.__controls.swaps.map((swap) => swap.control))],
+    focus: document.activeElement?.className,
+  }));
+  assert.deepEqual(
+    held,
+    { clicks: 1, swaps: ["rw-replay"], focus: "rw-replay" },
+    `${name} ${tier}: a held Enter on SKIP presses once`,
+  );
+  await page.evaluate(() => (window.__controls.swaps = []));
+  const box = await page.locator(".rw-controls button").boundingBox();
+  const started = Date.now();
+  let presses = 0;
+  while (Date.now() - started < 2000) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    presses += 1;
+    await page.waitForTimeout(100);
+  }
+  await page.waitForTimeout(700);
+  await cdp.send("Page.stopScreencast");
+  const swapTimes = await page.evaluate(() => {
+    // One swap unmounts one button and mounts the other: count distinct changes.
+    const changes = [];
+    let last = null;
+    for (const swap of window.__controls.swaps) {
+      if (swap.control !== last) changes.push(swap.t);
+      last = swap.control;
+    }
+    return changes;
+  });
+  const swapsPerSecond = Math.max(
+    0,
+    ...swapTimes.map((t0) => swapTimes.filter((t) => t >= t0 && t < t0 + 1000).length),
+  );
+  assert.ok(
+    swapsPerSecond <= 2,
+    `${name} ${tier}: ${swapsPerSecond} swaps in 1 s (${presses} clicks)`,
+  );
+  const analyser = await createAnalyser(browser, cell, viewport);
+  for (const frame of frames) {
+    await analyser.evaluate(([t, data]) => window.addFrame(t, data), [frame.t, frame.data]);
+  }
+  const result = await analyser.evaluate(() => window.countFlashes());
+  await analyser.close();
+  const worst = Math.max(result.general.perSecond, result.red.perSecond);
+  assert.deepEqual(errors, []);
+  console.log(
+    JSON.stringify({
+      check: "control-flashes",
+      name,
+      tier,
+      frames: result.frames,
+      presses,
+      swaps: swapTimes.length,
+      swapsPerSecond,
+      general: result.general.perSecond,
+      red: result.red.perSecond,
+    }),
+  );
+  assert.ok(result.frames >= 10, `${name} ${tier}: ${result.frames} screencast frames`);
+  assert.ok(worst <= 1, `${name} ${tier}: controls flash ${worst} times a second`);
+  await context.close();
+}
+
+// Forced colours drop box-shadow: every control keeps a visible focus ring
+// (WCAG 2.4.7), and CLOSE keeps its drawn cross.
+async function checkForcedColors(browser, name) {
+  const { context, page, errors } = await openWorld(browser, name, { forcedColors: true });
+  await scrollToGate(page);
+  const ring = () =>
+    page.evaluate(() => {
+      const element = document.activeElement;
+      const style = getComputedStyle(element);
+      return {
+        control: element.className,
+        visible: element.matches(":focus-visible"),
+        outline: style.outlineStyle,
+        width: style.outlineWidth,
+      };
+    });
+  await page.keyboard.press("Tab");
+  await page.focus(".rw-gate-button");
+  const rings = [await ring()];
+  await page.keyboard.press("Enter");
+  rings.push(await ring());
+  await page.keyboard.press("Shift+Tab");
+  rings.push(await ring());
+  for (const entry of rings) {
+    assert.ok(
+      entry.visible && entry.outline !== "none" && entry.width !== "0px",
+      `${name}: no focus ring in forced colours ${JSON.stringify(entry)}`,
+    );
+  }
+  assert.deepEqual(
+    rings.map((entry) => entry.control),
+    ["rw-gate-button", "rw-close", "rw-skip"],
+  );
+  const cross = await page.evaluate(() => {
+    const rgb = (value) => value.match(/\d+/g).slice(0, 3).join(",");
+    return {
+      stroke: rgb(
+        getComputedStyle(document.querySelector(".rw-close i"), "::before").backgroundColor,
+      ),
+      button: rgb(getComputedStyle(document.querySelector(".rw-close")).backgroundColor),
+    };
+  });
+  assert.notEqual(cross.stroke, cross.button, `${name}: the × vanishes in forced colours`);
+  await page.keyboard.press("Escape");
+  assert.deepEqual(errors, []);
+  console.log(JSON.stringify({ check: "forced-colors", name, rings, cross }));
   await context.close();
 }
 
@@ -825,6 +1382,12 @@ try {
   for (const name of profileNames) {
     if (sections.has("gate")) await checkGate(browser, name);
     if (sections.has("sequence")) await checkSequence(browser, name);
+  }
+  if (sections.has("gate")) {
+    for (const name of profileNames.filter((entry) => entry === "pixel" || entry === "desktop")) {
+      await checkGate(browser, name, { reducedMotion: true });
+    }
+    if (profileNames.includes("desktop")) await checkForcedColors(browser, "desktop");
   }
   if (sections.has("tiers")) {
     for (const name of profileNames.filter((entry) => entry === "pixel" || entry === "desktop")) {
@@ -839,6 +1402,12 @@ try {
     )) {
       for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
         await auditFlashes(browser, name, tier);
+      }
+    }
+    // Portrait phones stay under the threshold by area; the desktop is the risk.
+    if (profileNames.includes("desktop")) {
+      for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
+        await auditControlFlashes(browser, "desktop", tier);
       }
     }
   }

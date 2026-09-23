@@ -56,20 +56,29 @@ export const RISING_START_RUNG = 1;
 const COMPACT_PIXEL_BUDGET = 420_000;
 const WIDE_PIXEL_BUDGET = 820_000;
 
-/** Decoded and resized off the main thread; uploads in 1-3 ms instead of 20-90 ms. */
+/**
+ * A resized ImageBitmap: uploads in 1-3 ms instead of 20-90 ms. The source is
+ * a Blob, which is decoded on a decoder thread; the bilinear ("low") resize is
+ * the only main-thread work (<2 ms at 1x). An <img> source would be decoded
+ * and resized synchronously on the main thread (about 100 ms for the poster at
+ * 4x CPU), in the middle of the reader's scroll towards the gate.
+ */
 async function loadBitmap(src: string, maxSide: number): Promise<RisingImage> {
   const image = new Image();
   image.decoding = "async";
   image.src = src;
-  await image.decode();
+  await image.decode(); // natural size; decoded off the main thread
   const ratio = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
   const width = Math.max(1, Math.round(image.naturalWidth * ratio));
   const height = Math.max(1, Math.round(image.naturalHeight * ratio));
   try {
-    const bitmap = await createImageBitmap(image, {
+    // HTTP cache: the finale backdrop and the world-enter assets load the same files.
+    const response = await fetch(image.currentSrc || src);
+    if (!response.ok) throw new Error(`rising-art ${response.status}`);
+    const bitmap = await createImageBitmap(await response.blob(), {
       resizeWidth: width,
       resizeHeight: height,
-      resizeQuality: "medium",
+      resizeQuality: "low", // "medium" mipmaps on the main thread: ~27 ms at 4x CPU
     });
     return { source: bitmap, aspect: width / height };
   } catch {
@@ -109,6 +118,24 @@ export function prepareRisingAssets(world: string, rider: string) {
 /** The prepared assets if they are already decoded, without waiting. */
 export function preparedRisingAssets(world: string, rider: string) {
   return preparedKey === `${world}|${rider}` ? preparedValue : null;
+}
+
+/**
+ * Closes the prepared bitmaps (about 4.6 MB decoded) when the gate unmounts;
+ * the next approach prepares them again. A prepare still in flight goes stale
+ * (prepared !== pending) and its bitmaps are left to GC, since a run may be
+ * awaiting that promise. Primed renderers have already uploaded their textures.
+ */
+export function releaseRisingAssets() {
+  const value = preparedValue;
+  prepared = null;
+  preparedKey = "";
+  preparedValue = null;
+  for (const image of value ? [value.world, value.rider] : []) {
+    if (typeof ImageBitmap !== "undefined" && image.source instanceof ImageBitmap) {
+      image.source.close();
+    }
+  }
 }
 
 export type FireRendererOptions = {

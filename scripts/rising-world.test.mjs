@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { hasConstrainedResources } from "../src/lib/rendering-profile.js";
 import {
+  RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
   pickRisingTier,
+  portalEase,
   risingFramesPerDraw,
   risingUniformsAt,
 } from "../src/components/world/rising-timing.ts";
@@ -41,7 +43,6 @@ const ALLOWED_WORDS = new Set([
   "CLOSE",
   "SKIP",
   "もう一度",
-  "閉じる",
 ]);
 
 test("the rising sheet is linked before the Mirage face, so Mirage stays last", async () => {
@@ -120,6 +121,13 @@ test("the title is announced at the cut, and the dialog is named by the button",
     /aria-label="RISING THE WORLD"[\s\S]*<button[\s\S]*className="rw-gate-button"/,
   );
   assert.doesNotMatch(component, /aria-expanded/);
+  // WCAG 2.5.3: CLOSE is named by its visible label, with no aria-label.
+  const close = component.slice(
+    component.indexOf('className="rw-close"'),
+    component.indexOf("</button>", component.indexOf('className="rw-close"')),
+  );
+  assert.doesNotMatch(close, /aria-label/);
+  assert.match(close, /<span>CLOSE<\/span>/);
 });
 
 test("the dialog locks the page in step with showModal and close, and closes on cancel", async () => {
@@ -142,6 +150,11 @@ test("the dialog locks the page in step with showModal and close, and closes on 
   assert.match(component, /releaseLockRef\.current\?\.\(\);/);
   assert.match(component, /triggerRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(component, /addEventListener\("pagehide"/);
+  // A close event left over from an earlier session never tears down a reopened one.
+  assert.match(
+    component,
+    /onClose=\{\(\) => \{[\s\S]{0,200}?if \(!dialogRef\.current\?\.open\) finishClose\(\);/,
+  );
   // Keyboard open focuses CLOSE, pointer open the dialog surface.
   assert.match(
     component,
@@ -183,7 +196,10 @@ test("the renderer is opaque, refuses software GL and never uploads an <img> mid
   assert.doesNotMatch(fire, /high-performance/);
   assert.match(fire, /KHR_parallel_shader_compile/);
   assert.match(fire, /COMPLETION_STATUS_KHR/);
-  assert.match(fire, /createImageBitmap\(image, \{/);
+  // A Blob source decodes off the main thread; an <img> source would not (F2).
+  assert.match(fire, /createImageBitmap\(await response\.blob\(\), \{/);
+  assert.match(fire, /resizeQuality: "low"/);
+  assert.doesNotMatch(fire, /createImageBitmap\(image/);
   assert.match(fire, /WEBGL_lose_context"\)\?\.loseContext\(\)/);
   assert.equal([...fire.matchAll(/texImage2D\(/g)].length, 1, "one upload path");
   assert.match(
@@ -202,11 +218,108 @@ test("the controller picks the tier by capability and keeps the portal on the co
   );
   assert.doesNotMatch(sequence, /clipPath|clip-path/, "the portal is not a clip-path animation");
   assert.match(sequence, /transform: `scale\(/);
+  // The portal is an iris: the art is counter-scaled, and its box stays the
+  // viewport-sized cover fit that GL frame 0 and the calm layer share.
+  assert.match(sequence, /portalArt\.animate\(/);
+  assert.match(sequence, /transform: `scale\(\$\{\(1 \/ scale\)\.toFixed\(5\)\}\)`/);
+  assert.match(sequence, /width: `\$\{width\}px`,\s*height: `\$\{height\}px`,/);
   assert.match(sequence, /risingFramesPerDraw\(stats\.cadenceMs\)/);
   assert.match(sequence, /document\.addEventListener\("visibilitychange", onVisibility\)/);
   assert.match(sequence, /addEventListener\("webglcontextlost", onContextLost\)/);
-  assert.match(sequence, /PRIME_TTL_MS = 1000/);
-  assert.match(sequence, /RISING_READY_TIMEOUT_MS/);
+  assert.match(sequence, /const PRIME_TTL_MS = 1000;/);
+  // The GL-ready deadline (the calm fallback on slow devices), end to end.
+  assert.equal(RISING_READY_TIMEOUT_MS, 700);
+  assert.match(
+    sequence,
+    /const deadline = openedAt \+ \(audit \? 5000 : RISING_READY_TIMEOUT_MS\);/,
+  );
+  assert.match(sequence, /await withDeadline\(prepareRisingAssets\(world, rider\), deadline\)/);
+  assert.match(sequence, /await withDeadline\(compiled, deadline\)/);
+  assert.match(sequence, /reject\(new Error\("not-ready"\)\)/);
+});
+
+test("the portal ease: cubic-bezier(0.7, 0, 0.84, 0), and the iris holds the art still", () => {
+  assert.equal(portalEase(0), 0);
+  assert.equal(portalEase(1), 1);
+  assert.equal(portalEase(-1), 0);
+  assert.equal(portalEase(2), 1);
+  let previous = 0;
+  for (let step = 1; step <= 200; step += 1) {
+    const value = portalEase(step / 200);
+    assert.ok(value >= previous - 1e-12, `not monotonic at ${step / 200}`);
+    previous = value;
+  }
+  // An ease-in: y = t^3 on the curve, far below the diagonal at the midpoint.
+  assert.ok(portalEase(0.5) < 0.2, String(portalEase(0.5)));
+  // 32 samples, linear in between: scale x counter-scale stays within 2%.
+  const STEPS = 32;
+  for (const radius of [597, 908, 1200]) {
+    const from = Math.min(1, Math.max(0.01, 28 / radius));
+    const scales = Array.from(
+      { length: STEPS + 1 },
+      (_, index) => from + (1 - from) * portalEase(index / STEPS),
+    );
+    for (let index = 0; index < STEPS; index += 1) {
+      const scale = (scales[index] + scales[index + 1]) / 2;
+      const counter = (1 / scales[index] + 1 / scales[index + 1]) / 2;
+      assert.ok(Math.abs(scale * counter - 1) <= 0.02, `radius ${radius}, sample ${index}`);
+    }
+  }
+});
+
+test("the prepared bitmaps are closed when the gate unmounts", async () => {
+  const fire = stripComments(await read("src/components/world/rising-fire.ts"));
+  const release = fire.slice(fire.indexOf("export function releaseRisingAssets"));
+  assert.match(release, /prepared = null;/);
+  assert.match(release, /image\.source\.close\(\)/);
+  const sequence = await read("src/components/world/rising-sequence.ts");
+  assert.match(
+    sequence,
+    /export function releaseRising\(\) \{\s*releasePrimed\(\);\s*releaseRisingAssets\(\);/,
+  );
+  const component = await read("src/components/world/rising-world.tsx");
+  assert.match(
+    component,
+    /runRef\.current\?\.dispose\(\);\s*runRef\.current = null;\s*\/\/[^\n]*\n\s*engineModule\?\.releaseRising\(\);/,
+  );
+});
+
+test("the controls: no key repeats, no double presses, SKIP while loading, a final failure", async () => {
+  const component = await read("src/components/world/rising-world.tsx");
+  const dialog = component.slice(component.indexOf("<dialog"), component.indexOf("</dialog>"));
+  // A held Enter or Space clicks once (WCAG 2.3.1: SKIP / もう一度 swap the picture).
+  assert.match(
+    dialog,
+    /onKeyDown=\{\(event\) => \{[\s\S]{0,200}?if \(event\.repeat && \(event\.key === "Enter" \|\| event\.key === " "\)\) event\.preventDefault\(\);/,
+  );
+  assert.match(component, /const SWAP_GUARD_MS = 600;/);
+  assert.match(
+    component,
+    /const settled = \(\) => performance\.now\(\) - swappedAtRef\.current >= SWAP_GUARD_MS;/,
+  );
+  assert.match(component, /const skip = \(\) => \{\s*if \(!settled\(\)\) return;/);
+  assert.match(component, /const replay = \(\) => \{\s*if \(!settled\(\)\) return;/);
+  // Keyed, so focus really moves from SKIP to もう一度 and is announced.
+  assert.match(
+    dialog,
+    /<button key="replay" type="button" className="rw-replay" onClick=\{replay\}>/,
+  );
+  assert.match(dialog, /<button key="skip" type="button" className="rw-skip" onClick=\{skip\}>/);
+  // SKIP pressed while the engine chunk loads is kept, and applied to the run.
+  assert.doesNotMatch(component, /onClick=\{\(\) => runRef\.current\?\.skip\(\)\}/);
+  assert.match(component, /else skipRequestedRef\.current = true;/);
+  assert.match(
+    component,
+    /module\.runRising\([\s\S]*?if \(skipRequestedRef\.current\) \{\s*skipRequestedRef\.current = false;\s*run\.skip\(\);/,
+  );
+  assert.match(component, /onEnd: markEnded,/);
+  // A failed import is final: no retry that cannot work, and no もう一度.
+  const load = component.slice(
+    component.indexOf("const loadEngine"),
+    component.indexOf("const prewarm"),
+  );
+  assert.doesNotMatch(load, /engine = null/);
+  assert.match(dialog, /failed \? null : \(\s*<button key="replay"/);
 });
 
 test("capability tiers: reduced motion, constrained resources, everything else WebGL", () => {
@@ -324,16 +437,59 @@ test("the sheet: finite, compositor-only, gated like Mirage, legible and scoped"
   for (const [, size] of css.matchAll(/font(?:-size)?:[^;]*?(\d+(?:\.\d+)?)px/g)) {
     assert.ok(Number(size) >= 12, `font size ${size}px`);
   }
-  for (const [selector] of css.matchAll(/^[^\s@}][^{]*\{/gm)) {
-    if (/^(?:from|to|\d+%)/.test(selector.trim())) continue;
-    for (const part of selectorList(selector.replace(/\{$/, ""))) {
-      assert.match(
-        part,
-        /\.site-shell\.film-edition\.mirage-edition|^html:not/,
-        `unscoped selector: ${part}`,
-      );
-    }
+  // Every style rule, including those nested in @media / @supports; keyframe
+  // stops are skipped. The sheet has no nested style rules.
+  const stack = [];
+  let prelude = "";
+  let nested = 0;
+  for (let index = 0; index < css.length; index += 1) {
+    const character = css[index];
+    if (character === "{") {
+      const head = prelude.replace(/\s+/g, " ").trim();
+      prelude = "";
+      if (head.startsWith("@")) {
+        stack.push(head);
+        continue;
+      }
+      if (!stack.at(-1)?.startsWith("@keyframes")) {
+        if (stack.length > 0) nested += 1;
+        for (const part of selectorList(head)) {
+          assert.match(
+            part,
+            /\.site-shell\.film-edition\.mirage-edition|^html:not/,
+            `unscoped selector: ${part}`,
+          );
+        }
+      }
+      index = css.indexOf("}", index);
+    } else if (character === "}") {
+      stack.pop();
+      prelude = "";
+    } else if (character === ";") prelude = "";
+    else prelude += character;
   }
+  assert.ok(nested > 0, "nested rules were scope-checked");
+  // The rise's keyframes exist (a renamed keyframe would silently drop it).
+  assert.match(gate, /\.rw-gate-button \{\s*animation: rw-rise linear both;/);
+  assert.match(css, /@keyframes rw-rise \{/);
+  // WCAG 2.4.7 under forced colours (no box-shadow): a transparent outline,
+  // painted in a system colour there, and a cross drawn in ButtonText.
+  assert.match(css, /\.rw-gate-button:focus-visible \{\s*outline: 2px solid transparent;/);
+  assert.match(
+    css,
+    /:is\(\.rw-controls button, \.rw-close\):focus-visible \{\s*outline: 2px solid transparent;/,
+  );
+  const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
+  assert.match(
+    forced,
+    /\.rw-close i::after \{\s*forced-color-adjust: none;\s*background: ButtonText;/,
+  );
+  // The landscape end still: the rider's sides are masked, no lit column.
+  const landscape = css.slice(css.indexOf("@media (min-aspect-ratio: 3/4)"));
+  const block = landscape.slice(0, landscape.indexOf("\n}\n"));
+  assert.match(block, /\.rw-end-art \{[^}]*(?<!-webkit-)mask-image: linear-gradient\(/);
+  assert.match(block, /-webkit-mask-image: linear-gradient\(/);
+  assert.doesNotMatch(block, /\.rw-end::after/);
 });
 
 test("the Zeus button steps off the gate button", async () => {
@@ -377,8 +533,11 @@ test("review guards: legible gate label, dark pending state, tap-only priming, v
     component,
     /delete viewportRef\.current\.dataset\.tier;[\s\S]*?await loadEngine\(\)/,
   );
-  // A touch that turns into a scroll never creates a GL context.
+  // A quick touch that turns into a scroll (pointercancel within
+  // TOUCH_PRIME_DELAY_MS) creates no GL context; a resting touch may prime one
+  // for PRIME_TTL_MS (the number DESIGN.md states).
   assert.match(component, /event\.pointerType !== "touch"/);
+  assert.match(component, /const TOUCH_PRIME_DELAY_MS = 60;/);
   assert.match(component, /onPointerUp=\{primePending\}\s*onPointerCancel=\{cancelPrime\}/);
   // The calm tier's fire enters with the burn and is climbing at its title cut.
   const sequence = await read("src/components/world/rising-sequence.ts");

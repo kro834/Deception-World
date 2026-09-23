@@ -52,6 +52,30 @@ export const RISING_TIMING: Record<RisingTier, TierTiming> = {
 export const RISING_READY_TIMEOUT_MS = 700;
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/** The portal's ease-in, cubic-bezier(0.7, 0, 0.84, 0): the circle bursts at the end. */
+export const PORTAL_BEZIER = [0.7, 0, 0.84, 0] as const;
+
+/**
+ * The portal easing at time progress x (0-1). The portal is sampled with it
+ * (rising-sequence.ts) so the key visual inside can be counter-scaled frame by
+ * frame: the circle opens like an iris over a still, full-screen image.
+ */
+export function portalEase(x: number) {
+  const [x1, y1, x2, y2] = PORTAL_BEZIER;
+  const bezier = (t: number, a: number, b: number) =>
+    3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t * t * b + t ** 3;
+  const target = clamp01(x);
+  if (target === 0 || target === 1) return target;
+  let low = 0;
+  let high = 1;
+  for (let step = 0; step < 30; step += 1) {
+    const middle = (low + high) / 2;
+    if (bezier(middle, x1, x2) < target) low = middle;
+    else high = middle;
+  }
+  return bezier((low + high) / 2, y1, y2);
+}
 const smooth = (a: number, b: number, value: number) => {
   const t = clamp01((value - a) / (b - a));
   return t * t * (3 - 2 * t);

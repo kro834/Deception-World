@@ -105,8 +105,11 @@
   pointer-events: none;
 }
 
+/* The ring is the inset shadow. The transparent outline is painted in a
+   system colour under forced colours, which drop box-shadow. */
 .site-shell.film-edition.mirage-edition .rw-gate-button:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: -5px;
   box-shadow:
     inset 0 0 0 3px #fff0b5,
     inset 0 0 0 5px var(--rw-ink);
@@ -310,23 +313,26 @@
   background: rgb(110 24 8 / 0.34);
 }
 
-/* Landscape: the rider is fitted by height, like the shader, with the sides
-   fading into the void. */
+/* Landscape: the rider is fitted by height, like the shader, and its sides
+   are feathered into the ember (a mask on the art alone), so the tint, the
+   ember and the vignette span the full width with no lit column. */
 @media (min-aspect-ratio: 3/4) {
   .site-shell.film-edition.mirage-edition .rw-end-art {
     object-fit: contain;
-  }
-
-  .site-shell.film-edition.mirage-edition .rw-end::after {
-    background:
-      linear-gradient(
-        90deg,
-        var(--rw-void) calc(50% - 37.5cqh),
-        transparent calc(50% - 30cqh),
-        transparent calc(50% + 30cqh),
-        var(--rw-void) calc(50% + 37.5cqh)
-      ),
-      rgb(110 24 8 / 0.34);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent calc(50% - 37.5cqh),
+      #000 calc(50% - 30cqh),
+      #000 calc(50% + 30cqh),
+      transparent calc(50% + 37.5cqh)
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent calc(50% - 37.5cqh),
+      #000 calc(50% - 30cqh),
+      #000 calc(50% + 30cqh),
+      transparent calc(50% + 37.5cqh)
+    );
   }
 }
 
@@ -560,7 +566,8 @@
 }
 
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: -5px;
   box-shadow:
     inset 0 0 0 3px #fff0b5,
     inset 0 0 0 5px var(--rw-void);
@@ -586,5 +593,12 @@
   .site-shell.film-edition.mirage-edition :is(.rw-gate-button, .rw-controls button, .rw-close) {
     border: 1px solid ButtonText;
     clip-path: none;
+  }
+
+  /* Forced colours replace the cross's currentColor background with Canvas. */
+  .site-shell.film-edition.mirage-edition .rw-close i::before,
+  .site-shell.film-edition.mirage-edition .rw-close i::after {
+    forced-color-adjust: none;
+    background: ButtonText;
   }
 }

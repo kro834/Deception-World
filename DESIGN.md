@@ -127,22 +127,23 @@ Guards: `scripts/world-reveal.test.mjs` and `scripts/verify-world-reveal.mjs`.
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.
 
-Pressing it opens a modal sequence of 8.8 s:
-- a round window onto the key visual bursts out of the button (a compositor-only scale, so it stays smooth while the page restyles for the dialog);
+Pressing it opens a modal sequence of about 9.2 s: a 0.42 s portal, then an 8.8 s sequence clock that starts when the portal has covered the screen and the renderer is ready (7.3 s on the CSS tier):
+- a round window onto the key visual bursts out of the button and opens like an iris over the still image (the circle is scaled and the image counter-scaled: compositor-only, so it stays smooth while the page restyles for the dialog);
 - a dive into the key visual: zoom blur, speed lines, an amber breakthrough;
 - the world consumed by red flames climbing from below, with heat haze, char and embers;
-- mid-burn, at 4.5 s, one hard cut to EP7 REXONANCE, while the Rexonance art emerges from the ash;
-- a static end still with CLOSE and もう一度. SKIP jumps straight to it; Esc and the Android back gesture close.
+- mid-burn, 4.5 s into the sequence (about 4.9 s after the press), one hard cut to EP7 REXONANCE, while the Rexonance art emerges from the ash;
+- a static end still with CLOSE and もう一度. SKIP jumps straight to it, also while the engine is still loading; Esc and the Android back gesture close. If the engine cannot load, the dialog shows the end still with the title and CLOSE only.
 
-One WebGL fragment shader (`rising.frag.glsl`, high precision where the GPU has it) draws the dive and the fire at about three quarters of CSS resolution within a pixel budget. It draws every frame on 60 and 90 Hz panels and every second frame on 120 and 144 Hz panels, and steps down a resolution-first quality ladder only when frames run late. The engine is loaded with `import()` when the gate nears the viewport. Its images are prepared as resized ImageBitmaps, and the GL context and shader compile start at pointerdown (for touch, once the contact is clearly a tap rather than a scroll). Until the engine has loaded, the dialog stays dark. The context exists only while the sequence plays and is released at the end, on close and on pagehide.
+One WebGL fragment shader (`rising.frag.glsl`, high precision where the GPU has it) draws the dive and the fire at about three quarters of CSS resolution within a pixel budget. It draws every frame on 60 and 90 Hz panels and every second frame on 120 and 144 Hz panels, and steps down a resolution-first quality ladder only when frames run late. The engine is loaded with `import()` when the gate nears the viewport. Its images are prepared as resized ImageBitmaps, and the GL context and shader compile start at pointerdown (for touch, 60 ms into the contact or at pointerup: a flick the browser takes over before then (pointercancel) creates none; a finger that rests on the button before scrolling can still prime one, which is released after 1 s unless the click adopts it). Until the engine has loaded, the dialog stays dark. The context exists only while the sequence plays and is released at the end, on close and on pagehide. The prepared bitmaps are closed when the gate unmounts and prepared again on the next approach.
 
 The tier is chosen by capability, never by device model. Capable devices, Galaxy, Pixel and iPhone included, get the full WebGL version. Save-Data, 2G, low-memory, two-core, software-GL and no-WebGL devices, or GL that is not ready in 700 ms, get a calm CSS version. Reduced motion gets a cross-fade to the still.
 
-The sequence stays at one flash a second, general or red (WCAG 2.3.1, measured frame by frame at 60 fps):
+The sequence stays at one flash a second, general or red (WCAG 2.3.1, measured frame by frame at 60 fps; the flash audit fails above one):
 - colour temperature only rises;
 - the bloom is amber;
 - nothing pulses;
 - the shockwave is a gentle refraction;
-- the title is one cut and only the title shakes.
+- the title is one cut and only the title shakes;
+- SKIP and もう一度 swap the picture between the void and the end still, so a held Enter or Space clicks once and a press within 600 ms of a swap is ignored (the audit holds Enter and clicks every 100 ms on a real clock).
 
 The dialog is named RISING THE WORLD, the title is announced when it appears, and only the supplied words appear. Guards: `scripts/rising-world.test.mjs`, and `scripts/verify-rising-world.mjs` for the gate, the sequence, the tiers, performance and the flash audit in a browser.

@@ -21,17 +21,14 @@ const RIDER_ART =
 type Engine = typeof import("./rising-sequence");
 let engine: Promise<Engine> | null = null;
 let engineModule: Engine | null = null;
+// A failed import() is not retried: the browser keeps the failed module in its
+// module map for the document's lifetime, so the same (hashed) URL would only
+// reject again without a request. The dialog then shows the static end still.
 const loadEngine = () => {
-  engine ??= import("./rising-sequence").then(
-    (module) => {
-      engineModule = module;
-      return module;
-    },
-    (error: unknown) => {
-      engine = null;
-      throw error;
-    },
-  );
+  engine ??= import("./rising-sequence").then((module) => {
+    engineModule = module;
+    return module;
+  });
   return engine;
 };
 const prewarm = () => {
@@ -57,6 +54,10 @@ declare global {
 // (the browser takes over the pan) sooner; a quicker tap primes at pointerup.
 const TOUCH_PRIME_DELAY_MS = 60;
 
+// SKIP and もう一度 share one spot and swap the picture between the end still
+// and the void: a press this soon after a swap is a double or repeated press.
+const SWAP_GUARD_MS = 600;
+
 const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
 
@@ -80,8 +81,11 @@ export function RisingWorld() {
   const originRef = useRef({ x: 0, y: 0 });
   const refocusControlRef = useRef(false);
   const generationRef = useRef(0);
+  const swappedAtRef = useRef(Number.NEGATIVE_INFINITY);
+  const skipRequestedRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [live, setLive] = useState("");
 
   // Warm the engine, the images and the shader when the gate nears the view.
@@ -102,6 +106,7 @@ export function RisingWorld() {
 
   // SKIP and もう一度 replace each other; keep keyboard focus on the control.
   useLayoutEffect(() => {
+    swappedAtRef.current = performance.now();
     if (!refocusControlRef.current) return;
     refocusControlRef.current = false;
     controlsRef.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
@@ -113,11 +118,18 @@ export function RisingWorld() {
     );
   }, []);
 
+  // Every path to the end still: focus moves from SKIP to もう一度 with it.
+  const markEnded = useCallback(() => {
+    noteControlFocus();
+    setEnded(true);
+  }, [noteControlFocus]);
+
   // Starts (or restarts, for もう一度) a run inside the open dialog.
   const begin = useCallback(async () => {
     const generation = ++generationRef.current;
     runRef.current?.dispose();
     runRef.current = null;
+    skipRequestedRef.current = false;
     setLive("");
     // No tier yet: the engine is still loading. The picture stays dark until
     // the run starts, so the end still (the reveal) never shows first.
@@ -126,11 +138,18 @@ export function RisingWorld() {
     try {
       module = engineModule ?? (await loadEngine());
     } catch {
-      // Offline or the chunk failed: show the end still with the title.
+      // Offline or the chunk failed: show the end still with the title. The
+      // failure is final (see loadEngine), so もう一度 is not offered.
+      skipRequestedRef.current = false;
       const viewport = viewportRef.current;
       if (viewport && dialogRef.current?.open && generation === generationRef.current) {
         viewport.dataset.tier = "static";
         setLive("EP7 REXONANCE");
+        // SKIP unmounts without a successor: hand its focus to CLOSE first.
+        if (controlsRef.current?.contains(document.activeElement)) {
+          closeRef.current?.focus({ preventScroll: true });
+        }
+        setFailed(true);
         setEnded(true);
       }
       return;
@@ -145,10 +164,7 @@ export function RisingWorld() {
       rider: RIDER_ART,
       audit,
       onTitle: () => setLive("EP7 REXONANCE"),
-      onEnd: () => {
-        noteControlFocus();
-        setEnded(true);
-      },
+      onEnd: markEnded,
     });
     runRef.current = run;
     window.__risingStats = run.stats;
@@ -163,7 +179,12 @@ export function RisingWorld() {
         seek: (T: number) => runRef.current?.seek(T),
       };
     }
-  }, [noteControlFocus]);
+    // SKIP pressed while the engine chunk was loading.
+    if (skipRequestedRef.current) {
+      skipRequestedRef.current = false;
+      run.skip();
+    }
+  }, [markEnded]);
 
   // Pointer contact: warm up, and create the GL context and start the shader
   // compile on a detached canvas before the click opens the dialog. A touch
@@ -217,7 +238,16 @@ export function RisingWorld() {
     [begin],
   );
 
+  const settled = () => performance.now() - swappedAtRef.current >= SWAP_GUARD_MS;
+
+  const skip = () => {
+    if (!settled()) return;
+    if (runRef.current) runRef.current.skip();
+    else skipRequestedRef.current = true; // the run starts at the end still
+  };
+
   const replay = () => {
+    if (!settled()) return;
     noteControlFocus();
     setEnded(false);
     void begin();
@@ -231,6 +261,7 @@ export function RisingWorld() {
     generationRef.current += 1;
     runRef.current?.dispose();
     runRef.current = null;
+    skipRequestedRef.current = false;
     setOpen(false);
     setEnded(false);
     setLive("");
@@ -258,6 +289,8 @@ export function RisingWorld() {
       openRef.current = false;
       runRef.current?.dispose();
       runRef.current = null;
+      // After the run: close the prepared bitmaps; the next approach prepares again.
+      engineModule?.releaseRising();
       releaseLockRef.current?.();
       releaseLockRef.current = null;
     };
@@ -294,7 +327,15 @@ export function RisingWorld() {
           event.preventDefault();
           closeDialog();
         }}
-        onClose={finishClose}
+        onClose={() => {
+          // A close event queued by an earlier close can arrive after start() has
+          // reopened the dialog; it belongs to the old session.
+          if (!dialogRef.current?.open) finishClose();
+        }}
+        onKeyDown={(event) => {
+          // A held Enter or Space would click the control under focus on every repeat.
+          if (event.repeat && (event.key === "Enter" || event.key === " ")) event.preventDefault();
+        }}
       >
         <div ref={viewportRef} className="rw-viewport">
           <div className="rw-end" aria-hidden="true">
@@ -342,11 +383,13 @@ export function RisingWorld() {
         </p>
         <div ref={controlsRef} className="rw-controls">
           {ended ? (
-            <button type="button" className="rw-replay" onClick={replay}>
-              もう一度
-            </button>
+            failed ? null : (
+              <button key="replay" type="button" className="rw-replay" onClick={replay}>
+                もう一度
+              </button>
+            )
           ) : (
-            <button type="button" className="rw-skip" onClick={() => runRef.current?.skip()}>
+            <button key="skip" type="button" className="rw-skip" onClick={skip}>
               SKIP
             </button>
           )}

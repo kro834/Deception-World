@@ -3,11 +3,17 @@
 // WAAPI title and fades from one clock, and releases everything at the end.
 // Loaded with import() from the gate (rising-world.tsx).
 import { hasConstrainedResources } from "@/lib/rendering-profile";
-import { FireRenderer, prepareRisingAssets, preparedRisingAssets } from "./rising-fire";
+import {
+  FireRenderer,
+  prepareRisingAssets,
+  preparedRisingAssets,
+  releaseRisingAssets,
+} from "./rising-fire";
 import {
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
   pickRisingTier,
+  portalEase,
   risingFramesPerDraw,
   type RisingTier,
 } from "./rising-timing";
@@ -108,6 +114,12 @@ export function primeRising(world: string, rider: string) {
   };
 }
 
+/** The gate unmounted: drop a primed context and close the prepared bitmaps. */
+export function releaseRising() {
+  releasePrimed();
+  releaseRisingAssets();
+}
+
 function adoptPrimed(world: string, rider: string) {
   const current = primed;
   if (!current) return null;
@@ -166,6 +178,8 @@ type TimedAnimation = { animation: Animation; end: number };
 
 const EXPO_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 const REDUCED_FADE_SECONDS = 0.4;
+// Portal samples: scale x counter-scale stays within about 1% between them.
+const PORTAL_STEPS = 32;
 
 function withDeadline<T>(promise: Promise<T>, deadline: number) {
   return new Promise<T>((resolve, reject) => {
@@ -241,15 +255,17 @@ export function runRising({
   const frameTimes: number[] = [];
   const drawTimes: number[] = [];
 
-  // ---- Portal: the key visual bursts out of the button. A round element that
-  // carries the key visual scales up from the button's size until it covers
-  // the screen: transform only, so the compositor keeps it smooth while the
-  // main thread restyles the page for the open dialog and GL gets ready. Its
-  // image sits exactly where the full-screen cover image will be, so the
-  // hand-over to the canvas (or the calm layer) is seamless. Reduced motion:
-  // a plain fade.
+  // ---- Portal: the key visual bursts out of the button. A round element
+  // scales up from the button's size until it covers the screen, and the key
+  // visual inside it is counter-scaled on the same samples, so the circle opens
+  // like an iris over a still image: transform only, so the compositor keeps it
+  // smooth while the main thread restyles the page for the open dialog and GL
+  // gets ready. The image sits exactly where the full-screen cover image will
+  // be, so the hand-over to the canvas (or the calm layer) is seamless.
+  // Reduced motion: a plain fade.
   const portalSeconds = tier === "reduced" ? REDUCED_FADE_SECONDS : RISING_TIMING[tier].portal;
   let portal: Animation | null = null;
+  let portalIris: Animation | null = null;
   if (tier === "reduced") {
     portal = viewport.animate([{ opacity: 0 }, { opacity: 1 }], {
       duration: portalSeconds * 1000,
@@ -279,16 +295,34 @@ export function runRising({
     }
     viewport.dataset.portal = "true";
     const from = Math.min(1, Math.max(0.01, 28 / radius)); // about the button's height
-    portal = portalElement.animate(
-      [{ transform: `scale(${from.toFixed(4)})` }, { transform: "scale(1)" }],
-      {
-        duration: portalSeconds * 1000,
-        easing: "cubic-bezier(0.7, 0, 0.84, 0)",
-        fill: "forwards",
-      },
+    // The ease-in (portalEase), sampled: linear between the samples.
+    const scales = Array.from(
+      { length: PORTAL_STEPS + 1 },
+      (_, index) => from + (1 - from) * portalEase(index / PORTAL_STEPS),
     );
+    const timing = { duration: portalSeconds * 1000, easing: "linear", fill: "forwards" } as const;
+    portal = portalElement.animate(
+      scales.map((scale, index) => ({
+        offset: index / PORTAL_STEPS,
+        transform: `scale(${scale.toFixed(5)})`,
+      })),
+      timing,
+    );
+    if (portalArt) {
+      portalArt.style.transformOrigin = `${ox}px ${oy}px`; // the circle's centre
+      portalIris = portalArt.animate(
+        scales.map((scale, index) => ({
+          offset: index / PORTAL_STEPS,
+          transform: `scale(${(1 / scale).toFixed(5)})`,
+        })),
+        timing,
+      );
+    }
   }
-  if (audit) portal?.pause();
+  if (audit) {
+    portal?.pause();
+    portalIris?.pause();
+  }
   const portalDone = portal
     ? portal.finished.then(
         () => undefined,
@@ -400,6 +434,7 @@ export function runRising({
     raf = 0;
     document.removeEventListener("visibilitychange", onVisibility);
     portal?.finish();
+    portalIris?.finish();
     delete viewport.dataset.portal;
     for (const { animation } of animations) animation.finish();
     dropRenderer();
@@ -518,6 +553,7 @@ export function runRising({
     if (disposed) return;
     if (portal) {
       portal.currentTime = Math.min(portalSeconds, Math.max(0, T + portalSeconds)) * 1000;
+      if (portalIris) portalIris.currentTime = portal.currentTime;
     }
     if (T < 0) {
       if (tier !== "reduced") viewport.dataset.portal = "true";
@@ -610,6 +646,7 @@ export function runRising({
     raf = 0;
     document.removeEventListener("visibilitychange", onVisibility);
     portal?.cancel();
+    portalIris?.cancel();
     for (const { animation } of animations) animation.cancel();
     animations = [];
     dropRenderer();
