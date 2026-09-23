@@ -1,0 +1,89 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import test from "node:test";
+
+import { createViewportResizeFilter } from "../src/lib/viewport-resize.ts";
+
+const read = (path) =>
+  readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll("\r\n", "\n");
+
+test("toolbar-only resizes are ignored, real viewport changes are not", (t) => {
+  const originalWindow = globalThis.window;
+  t.after(() => {
+    globalThis.window = originalWindow;
+  });
+  const viewport = { width: 412, height: 915, scale: 1 };
+  globalThis.window = { innerWidth: 412, innerHeight: 915, visualViewport: viewport };
+  const significant = createViewportResizeFilter();
+  viewport.height = 971; // URL bar collapsed
+  assert.equal(significant(), false);
+  viewport.height = 915; // URL bar back
+  assert.equal(significant(), false);
+  viewport.height = 560; // soft keyboard
+  assert.equal(significant(), true);
+  viewport.height = 915;
+  assert.equal(significant(), true);
+  viewport.width = 915; // rotation
+  viewport.height = 412;
+  assert.equal(significant(), true);
+  viewport.scale = 1.5; // pinch zoom
+  assert.equal(significant(), true);
+});
+
+test("JS scroll progress restyles only the headers that draw it", () => {
+  const mode = read("src/components/world/use-world-mode.ts");
+  assert.doesNotMatch(mode, /html\.style\.setProperty\("--page-progress"/);
+  assert.match(mode, /host\.style\.setProperty\("--page-progress", value\)/);
+  for (const host of ["topbar", "manager-topbar", "rider-archive-topbar", "dream-site-header"]) {
+    assert.match(mode, new RegExp(`"${host}"`));
+  }
+  assert.match(mode, /addEventListener\("resize", requestResizeSync, \{ passive: true \}\)/);
+});
+
+test("Zeus blocks touch scrolling only while a held drag owns the finger", () => {
+  const zeus = read("src/components/zeus-button.tsx");
+  const install = zeus.indexOf('window.addEventListener("touchmove", preventHeldTouchScroll');
+  assert.ok(install > 0);
+  assert.equal(zeus.indexOf('window.addEventListener("touchmove"', install + 1), -1);
+  assert.match(
+    zeus.slice(zeus.lastIndexOf("const armTouchGuard", install), install),
+    /useCallback/,
+  );
+  assert.match(zeus, /held\.current = true;\s*armTouchGuard\(\);/);
+  assert.match(zeus, /const finishPointer[\s\S]*?held\.current = false;\s*disarmTouchGuard\(\);/);
+  assert.match(
+    zeus,
+    /const cancelDanglingPointer[\s\S]*?held\.current = false;\s*disarmTouchGuard\(\);/,
+  );
+  assert.match(zeus, /cancelPlacement\(\);\s*disarmTouchGuard\(\);/);
+  assert.match(zeus, /if \(!significantResize\(\)\) \{\s*onScroll\(\);/);
+});
+
+test("World scroll milestones stay out of the page-wide render", () => {
+  const home = read("src/components/world/world-home.tsx");
+  const nav = home.slice(
+    home.indexOf("const WorldSectionNav = memo("),
+    home.indexOf("export function WorldHome()"),
+  );
+  assert.match(nav, /useState<WorldSectionId \| null>\(null\)/);
+  assert.match(nav, /if \(current === lastActiveRef\.current\) return;/);
+  assert.match(nav, /aria-current=\{activeSection === "story" \? "location" : undefined\}/);
+  assert.match(nav, /if \(significantResize\(\)\) requestSectionSync\(\)/);
+  const page = home.slice(home.indexOf("export function WorldHome()"));
+  assert.doesNotMatch(page, /setActiveSection/);
+  assert.match(page, /<WorldSectionNav \/>/);
+  assert.match(page, /heroInViewRef\.current = entry\.isIntersecting/);
+  assert.match(page, /startTransition\(\(\) => setHeroVisible\(next\)\)/);
+  assert.match(page, /if \(decoding \|\| !heroInViewRef\.current/);
+});
+
+test("World sections keep their layout and scroll reveals are never paused", () => {
+  const chapters = read("src/styles-world/21.css");
+  assert.doesNotMatch(chapters, /\.records-section\s*\{[^}]*content-visibility/);
+  assert.doesNotMatch(chapters, /data-viewport-active="false"\] \*/);
+  assert.match(chapters, /data-viewport-active="false"\]\s*:is\(\s*\.orbit/);
+  const layer = read("src/styles-world/25.css");
+  assert.doesNotMatch(layer, /:is\([^)]*\.world-column[^)]*\)\s*\{\s*content-visibility/);
+  assert.doesNotMatch(layer, /:is\([^)]*\.episode-archive[^)]*\)\s*\{\s*content-visibility/);
+  assert.match(layer, /\.manager-dossier \{\s*content-visibility: auto;/);
+});
