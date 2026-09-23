@@ -31,9 +31,9 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldNeoCssUrl },
         { rel: "stylesheet", href: motionEditionCssUrl },
         { rel: "stylesheet", href: otherArtworkCssUrl },
+        { rel: "stylesheet", href: worldRisingCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
-        { rel: "stylesheet", href: worldRisingCssUrl },
       ],
     });
     return {
