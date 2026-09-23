@@ -1,3 +1,11 @@
+}
+
+.manager-slot-grid .dante-archive {
+  display: block;
+  overflow: hidden;
+  border-radius: 20px 34px 20px 12px;
+  background: #12070a;
+}
 
 .manager-slot-grid .dante-visual {
   position: absolute;
