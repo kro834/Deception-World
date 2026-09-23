@@ -453,6 +453,30 @@ const jump = (page, selector, share) =>
     [selector, share],
   );
 
+// The finale headline must write itself (pass through part-lit states) as the
+// finale scrolls in and through its stage, pinned or not, and end whole. An
+// empty range (an unpinned stage exactly one viewport tall) pops it at once.
+const finaleWrites = (page) =>
+  page.evaluate(async () => {
+    const section = document.querySelector(".finale-section");
+    const heading = section.querySelector(".finale-content h2");
+    const top = section.getBoundingClientRect().top + window.scrollY;
+    const unlit = () =>
+      [...heading.querySelectorAll(".tr-c")].filter(
+        (span) => getComputedStyle(span).color !== getComputedStyle(span.parentElement).color,
+      ).length;
+    const total = heading.querySelectorAll(".tr-c").length;
+    let partial = 0;
+    const end = top + Math.max(0, section.offsetHeight - innerHeight);
+    for (let y = top - innerHeight * 0.8; y <= end; y += 6) {
+      window.scrollTo({ top: y, behavior: "instant" });
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const count = unlit();
+      if (count > 0 && count < total) partial += 1;
+    }
+    return { partial, unlitAtEnd: unlit() };
+  });
+
 async function styleCost(context) {
   const page = await context.newPage();
   await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
@@ -839,6 +863,9 @@ for (const viewport of [
     );
   }
   assert.deepEqual(await spanAudit(page), [], `${viewport.name}: a rule restyles character spans`);
+  const finale = await finaleWrites(page);
+  assert.ok(finale.partial >= 3, `${viewport.name}: finale headline pops (${finale.partial})`);
+  assert.equal(finale.unlitAtEnd, 0, `${viewport.name}: finale headline unlit after its stage`);
   const rails = await railHold(page, viewport.mobile);
   assert.ok(rails.pressed >= 3, `${viewport.name}: ${rails.pressed} rail presses`);
   assert.deepEqual(rails.problems, [], `${viewport.name}: the reveal moves under a rail lock`);

@@ -25,9 +25,11 @@
    above the viewport bottom: 34svh for headings (top at 66% of the
    viewport), 44svh for copy (top at 56%). Above that line, after a hash jump
    or a restored scroll, the text is simply lit. The finale headline instead
-   writes itself while its stage is pinned, on Mirage's --mr-finale timeline
-   (declared on .finale-section, so it binds to the document even though
-   .finale-sticky clips with overflow:hidden), under Mirage's gate.
+   writes itself while its stage is pinned (or, on short landscape screens
+   where the stage is not pinned, while it rises into view), on Mirage's
+   --mr-finale timeline (declared on .finale-section, so it binds to the
+   document even though .finale-sticky clips with overflow:hidden), under
+   Mirage's gate.
 
    Off: reduced motion, economy rendering, increased contrast, forced
    colours, reduced transparency, and while the side menu, a loading cover or
@@ -102,6 +104,26 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       animation-play-state: running !important;
       animation-timeline: --mr-finale;
       animation-range: contain calc(var(--tr-p, 0) * 45%) contain calc(var(--tr-p, 0) * 45% + 15%);
+    }
+
+    /* Short landscape screens unpin the stage (styles-world/11.css): the
+       section is then exactly one viewport tall, its contain range is empty,
+       and every character would pop at the same scroll position. There the
+       headline writes itself as the stage rises into view instead. The range
+       counts from the section's top at the viewport bottom; the headline sits
+       about 30svh below that top, so it starts writing just inside the
+       viewport and is whole when its top reaches about two thirds of it. */
+    @media (orientation: landscape) and (max-height: 520px) {
+      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+          [data-loading]
+        ):not(:has(dialog[open]))
+        .site-shell.film-edition.mirage-edition
+        .finale-content
+        [data-text-reveal]
+        .tr-c {
+        animation-range: cover calc(40svh + var(--tr-p, 0) * 20svh) cover
+          calc(48svh + var(--tr-p, 0) * 20svh);
+      }
     }
   }
 }

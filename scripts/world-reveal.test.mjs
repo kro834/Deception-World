@@ -117,8 +117,10 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
       `${selector} ignores reduced motion`,
     );
     const timeline = body.match(/animation-timeline:\s*([^;]+)/)?.[1].trim();
+    const finaleRule =
+      timeline === "--mr-finale" || /\.finale-content \[data-text-reveal\] \.tr-c$/.test(selector);
     for (const part of splitSelectors(selector)) {
-      if (timeline === "--mr-finale") {
+      if (finaleRule) {
         // --mr-finale exists only under Mirage's gate; a character whose
         // timeline vanished mid-animation would be left paused at its ghost.
         assert.ok(part.startsWith(`${MIRAGE_GATE} .finale-content`), part);
@@ -130,8 +132,27 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
     }
     if (timeline) assert.match(timeline, /^--(?:tr|mr-finale)$/, selector);
   }
-  assert.equal(animated, 3, "view timelines, chapter characters, finale characters");
-  assert.equal(finale, 1);
+  assert.equal(
+    animated,
+    4,
+    "view timelines, chapter characters, finale characters, unpinned finale",
+  );
+  assert.equal(finale, 2);
+  // Where the finale stage is not pinned its contain range is empty, so the
+  // headline would pop at once: that layout gets a cover range of its own,
+  // under the exact media query that unpins the stage.
+  const UNPINNED = "@media (orientation: landscape) and (max-height: 520px)";
+  const unpinned = rules.filter(({ context }) => context.includes(UNPINNED));
+  assert.equal(unpinned.length, 1);
+  assert.match(unpinned[0].selector, /\.finale-content \[data-text-reveal\] \.tr-c$/);
+  assert.match(
+    flat(unpinned[0].body),
+    /^animation-range: cover calc\([^;]+\) cover calc\([^;]+\);$/,
+  );
+  assert.match(
+    stripComments(await read("src/styles-world/11.css")),
+    /@media \(orientation: landscape\) and \(max-height: 520px\) \{[^@]*\.finale-sticky \{\s*position: relative;/,
+  );
   // The finale reuses Mirage's pinned timeline instead of redeclaring it.
   assert.doesNotMatch(css, /finale-section[^{]*\{[^}]*view-timeline/);
   assert.match(css, /view-timeline: --tr block;/);
