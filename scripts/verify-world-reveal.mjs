@@ -203,17 +203,17 @@ async function navJumps(page, name, viewport) {
           .filter(({ block }) => ![...block.querySelectorAll(".tr-c")].every(full))
           .map(({ block, top }) => `${block.textContent.slice(0, 6)}@${top.toFixed(2)}`);
         const heading = document.querySelector(`#${section} [data-text-reveal="heading"]`);
-        const visibleUnlit = short
+        const visible = short
           ? [...heading.querySelectorAll(".tr-c")].filter(
-              (span) => span.getBoundingClientRect().top < innerHeight - 8 && !full(span),
-            ).length
-          : 0;
+              (span) => span.getBoundingClientRect().top < innerHeight - 8,
+            )
+          : [];
         return {
           scrollY: Math.round(window.scrollY),
           heading: Number((heading.getBoundingClientRect().top / innerHeight).toFixed(2)),
-          checked: checked.length,
+          checked: checked.length + (visible.length > 0 ? 1 : 0),
           unlit,
-          visibleUnlit,
+          visibleUnlit: visible.filter((span) => !full(span)).length,
         };
       },
       [id, shortLandscape(viewport)],
