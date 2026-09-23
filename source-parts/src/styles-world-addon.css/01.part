@@ -823,6 +823,24 @@ br.tab-br {
   }
 }
 
+/* Phones up to 440 px (Galaxy S / Samsung Internet at 360, Pixel at 412,
+   iPhones at 320-430): the four round tabs of the column rail and of its
+   pickup dialog left 44-57 px for a label, less than "レジェンズ" or "脚本制と"
+   need with tracking at 11-12px. Drop the tracking, use proportional kana at
+   11px, and give the centred label the button's inline padding so every title
+   shows whole ("脚本制と / 採録制" keeps its designed two-line break). */
+@media (max-width: 440px) {
+  .site-shell .world-column-tabs.liquid-swipe-tabs > button[role="tab"] {
+    padding-inline: 0;
+  }
+
+  .site-shell .world-column-tabs.liquid-swipe-tabs > button[role="tab"] b {
+    font-size: 11px;
+    letter-spacing: 0;
+    font-feature-settings: "palt";
+  }
+}
+
 @media (max-width: 920px) and (max-height: 560px) and (orientation: landscape) {
   header.topbar {
     grid-template-columns: auto minmax(0, 1fr) auto !important;
@@ -1137,11 +1155,3 @@ br.tab-br {
 .manager-slot-grid > .archive-placeholder {
   min-block-size: 0;
   block-size: 178px;
-}
-
-.manager-slot-grid .dante-archive {
-  display: block;
-  overflow: hidden;
-  border-radius: 20px 34px 20px 12px;
-  background: #12070a;
-}

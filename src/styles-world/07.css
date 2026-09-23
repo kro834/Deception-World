@@ -619,7 +619,9 @@
   height: 100%;
   object-fit: cover;
   object-position: 50% 43%;
-  filter: blur(12px) saturate(125%);
+  /* Unblurred key art at every width (DESIGN.md); the finale scrim keeps the
+     copy readable, and phones no longer raster a blurred full-screen layer. */
+  filter: saturate(1.1);
   transform: scale(var(--scene-backdrop-scale, 1.05));
   transform-origin: center;
 }

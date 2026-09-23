@@ -31,6 +31,7 @@ export const Route = createRootRoute({
       { name: "description", content: "仮面ライダーサーガ Deception World — 映画オープニング" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
       { name: "theme-color", content: "#000000" },
+      { name: "color-scheme", content: "dark" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
       { property: "og:title", content: APP_NAME },

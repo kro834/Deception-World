@@ -394,6 +394,16 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   }
 }
 
+/* The site is dark-only. Saying so under prefers-color-scheme as well (next
+   to the color-scheme meta and the base rule below) tells browsers with a
+   dark mode of their own, such as Samsung Internet, that the page already
+   has one, so they do not re-darken its colours and artwork. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
 @layer base {
   html,
   body,
@@ -1967,7 +1977,3 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   border: 1px solid rgb(255 255 255 / 0.16);
   border-radius: 6px;
   color: rgb(232 238 248 / 0.58);
-  background: rgb(255 255 255 / 0.05);
-  font: 600 0.56rem/1 var(--font-sans);
-  letter-spacing: 0.08em;
-}

@@ -1,5 +1,16 @@
-/* Android compositing budget. Keep artwork, CSS lenses, transitions and touch
-   geometry; replace repeated backdrop sampling with the existing gradients. */
+/* Android compositing budget (html[data-android-renderer]).
+
+   Capable Android (Pixel, Galaxy S, Samsung Internet) runs the full World:
+   the Mirage boot, Motion and Mirage scroll choreography, film motion and the
+   key art. Weak Android is chosen by capability in rendering-profile.js
+   (html[data-world-effects="economy"]), never by model, and only then are
+   decoration loops frozen. What stays specific to every Android renderer:
+   - no backdrop-filter, with opaque surfaces instead (backdrop sampling is the
+     heaviest GPU operation on Mali and Xclipse);
+   - the fixed full-screen grain, the blurred orbs and the hover/pointer glows
+     are hidden (nearly invisible, and costly as full-screen layers);
+   - reading progress is driven by the compositor (scroll(root block)), never
+     by a per-frame --page-progress write, and only one line is drawn. */
 html[data-android-renderer] body *,
 html[data-android-renderer] body *::before,
 html[data-android-renderer] body *::after,
@@ -26,19 +37,18 @@ html[data-android-renderer]
 }
 
 html[data-android-renderer]
-  :is(
-    .grain,
-    .ambient-orb,
-    .hero-backdrop-layer,
-    .world-column-orbit-glow,
-    .liquid-contact-glow,
-    .liquid-pointer-glow
-  ) {
+  :is(.grain, .ambient-orb, .world-column-orbit-glow, .liquid-contact-glow, .liquid-pointer-glow) {
   display: none !important;
 }
 
-/* Freeze only autonomous decoration, not entrance/exit or selection motion. */
-html[data-android-renderer]
+/* Weak Android: keep the plain gradient rather than paying for economy's
+   blurred full-height copy of the key art, and freeze only autonomous
+   decoration, not entrance/exit or selection motion. */
+html[data-android-renderer][data-world-effects="economy"] .hero-backdrop-layer {
+  display: none !important;
+}
+
+html[data-android-renderer][data-world-effects="economy"]
   :is(
     .orbit,
     .poster-holo-ring,
@@ -52,21 +62,23 @@ html[data-android-renderer]
     .dream-star-field,
     .dream-orbit
   ),
-html[data-android-renderer]
+html[data-android-renderer][data-world-effects="economy"]
   :is(.poster-holo-ring, .poster-sheen, .poster-media, .corner, .side-panel-trigger-ring)::before,
-html[data-android-renderer]
+html[data-android-renderer][data-world-effects="economy"]
   :is(.poster-holo-ring, .poster-sheen, .poster-media, .corner, .side-panel-trigger-ring)::after {
   animation: none !important;
   filter: none !important;
   will-change: auto !important;
 }
 
-html[data-android-renderer]
+html[data-android-renderer][data-world-effects="economy"]
   :is(.manager-glow, .rider-archive-glow, .rxs-hero-ambient, .dream-aurora) {
   filter: none !important;
   opacity: 0.12;
 }
-/* Tensor G4 / Android Chrome: compositor-driven progress, no per-frame layout read. */
+
+/* Android Chrome / Samsung Internet (and iOS 27): compositor-driven progress,
+   no per-frame layout read. */
 @supports (animation-timeline: scroll(root block)) {
   html[data-native-scroll-progress="true"]
     :is(.topbar, .manager-topbar, .rider-archive-topbar, .dream-site-header)::after {
@@ -81,5 +93,20 @@ html[data-android-renderer]
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+/* One reading-progress line under the World topbar. The Motion edition draws
+   its 2px prism line (.topbar::before, styles-motion-edition.css) under the
+   same conditions as below, from scroll(root block) on the compositor. There
+   the prism is the line on every path (Android, iOS 26 and 27, desktop), so
+   capable Android shows what iOS shows, and the faint 1px hairline is
+   dropped. Economy, reduced motion and engines without scroll timelines keep
+   the hairline (native above on Android, --page-progress elsewhere). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .topbar::after {
+      content: none;
+    }
   }
 }

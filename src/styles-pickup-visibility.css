@@ -71,13 +71,22 @@ html body .site-shell .episode-pickup-plus.ios26-glass {
   stroke-width: 2.4;
 }
 
-:where(html body) .episode-pickup-plus:hover,
 :where(html body) .episode-pickup-plus:active,
 :where(html body) .episode-pickup-plus:focus-visible {
   border-color: #fff !important;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.95),
     inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Touch browsers keep :hover after a tap; only a real hover shows it. */
+@media (hover: hover) {
+  :where(html body) .episode-pickup-plus:hover {
+    border-color: #fff !important;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.95),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.3) !important;
+  }
 }
 
 /* The eight-rider dossier control sits over detailed artwork. Its former

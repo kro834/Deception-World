@@ -6,6 +6,10 @@ const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
 const ANDROID_UA =
   "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
+const GALAXY_UA =
+  "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
+const SAMSUNG_INTERNET_UA =
+  "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36";
 
 const viewports = [
   { name: "phone-320", width: 320, height: 740 },
@@ -154,14 +158,22 @@ for (const viewport of viewports) {
   await context.close();
 }
 
-// Economy rendering (Android): the boot is skipped and nothing loops.
-{
+// Economy rendering (weak Android, chosen by a resource hint: 2 GB, or 4
+// cores): the boot is skipped and nothing loops.
+for (const [property, value] of [
+  ["deviceMemory", 2],
+  ["hardwareConcurrency", 4],
+]) {
   const context = await browser.newContext({
     viewport: { width: 393, height: 851 },
     userAgent: ANDROID_UA,
     isMobile: true,
     hasTouch: true,
   });
+  await context.addInitScript(
+    ([name, hint]) => Object.defineProperty(Navigator.prototype, name, { get: () => hint }),
+    [property, value],
+  );
   const { page } = await openWorld(context);
   await page.waitForFunction(
     () =>
@@ -170,9 +182,101 @@ for (const viewport of viewports) {
     undefined,
     { timeout: 3_000 },
   );
+  assert.equal(
+    await page.evaluate(() => document.documentElement.hasAttribute("data-mirage-quiet")),
+    true,
+  );
   const state = await readState(page);
   assert.deepEqual(state.infinite, []);
-  console.log("economy: boot skipped");
+  console.log(`economy (${property} ${value}): boot skipped`);
+  await context.close();
+}
+
+// Capable Android (Pixel 9, Galaxy S24, Samsung Internet): full motion. The
+// boot plays to its end, the scroll choreography runs on the document, the
+// key art shows and nothing loops. Glass stays CSS-only.
+for (const device of [
+  { name: "Android full (Pixel 9)", ua: ANDROID_UA, width: 412, height: 915, scale: 2.625 },
+  { name: "Android full (Galaxy S24)", ua: GALAXY_UA, width: 360, height: 780, scale: 3 },
+  {
+    name: "Android full (Samsung Internet)",
+    ua: SAMSUNG_INTERNET_UA,
+    width: 360,
+    height: 780,
+    scale: 3,
+  },
+]) {
+  const context = await browser.newContext({
+    viewport: { width: device.width, height: device.height },
+    deviceScaleFactor: device.scale,
+    userAgent: device.ua,
+    isMobile: true,
+    hasTouch: true,
+  });
+  const { page, errors } = await openWorld(context);
+  assert.equal(
+    await page.evaluate(() => document.documentElement.hasAttribute("data-mirage-quiet")),
+    false,
+    `${device.name}: boot gated off`,
+  );
+  await page.waitForFunction(
+    () => document.querySelector(".site-shell")?.dataset.mirageBoot === "done",
+    undefined,
+    { timeout: 8_000 },
+  );
+  await page.waitForFunction(
+    () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
+  );
+  const profile = await page.evaluate(() => ({
+    effects: document.documentElement.dataset.worldEffects ?? null,
+    android: document.documentElement.dataset.androidRenderer ?? null,
+    nativeProgress: document.documentElement.dataset.nativeScrollProgress ?? null,
+    // finish() stores the key only when the boot ran to its end.
+    played: sessionStorage.getItem("deception-world:mirage-boot:v1") === "1",
+    keyArt: (() => {
+      const layer = document.querySelector(".hero-backdrop-layer");
+      const box = layer?.getBoundingClientRect();
+      return Boolean(layer && getComputedStyle(layer).display !== "none" && box.width > 0);
+    })(),
+    canvases: document.querySelectorAll(".liquid-refraction-canvas").length,
+  }));
+  assert.deepEqual(
+    profile,
+    {
+      effects: null,
+      android: "true",
+      nativeProgress: "true",
+      played: true,
+      keyArt: true,
+      canvases: 0,
+    },
+    device.name,
+  );
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await page.waitForTimeout(250);
+  const state = await readState(page);
+  assert.ok(state.overflow <= 1, `${device.name}: horizontal overflow ${state.overflow}`);
+  assert.deepEqual(state.detached, [], `${device.name}: scroll animations bound to a panel`);
+  assert.deepEqual(state.infinite, [], `${device.name}: perpetual animations`);
+  assert.ok(state.mirage > 0, `${device.name}: no Mirage choreography`);
+  await page.evaluate(() =>
+    document
+      .querySelector(".story-heading h2")
+      .scrollIntoView({ block: "center", behavior: "instant" }),
+  );
+  await page.waitForTimeout(300);
+  const heading = await page.evaluate(() => {
+    const h2 = document.querySelector(".story-heading h2");
+    const box = h2.getBoundingClientRect();
+    const hit = document.elementFromPoint(
+      box.left + Math.min(40, box.width / 4),
+      box.top + box.height / 2,
+    );
+    return Boolean(hit && h2.contains(hit));
+  });
+  assert.equal(heading, true, `${device.name}: story heading hit-test`);
+  assert.equal(errors.length, 0, errors.join("\n"));
+  console.log(`${device.name}: boot played, choreography on, key art shown`);
   await context.close();
 }
 

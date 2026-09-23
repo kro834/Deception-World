@@ -28,7 +28,7 @@ export const MIRAGE_BOOT_GATE_SCRIPT = `(function () {
     }
     quiet =
       apple === 18 ||
-      /Android/i.test(u) ||
+      (/Android/i.test(u) && (n.hardwareConcurrency || 0) > 0 && n.hardwareConcurrency <= 4) ||
       c.saveData === true ||
       c.effectiveType === "slow-2g" ||
       c.effectiveType === "2g" ||
