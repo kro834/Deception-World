@@ -759,6 +759,9 @@ const WorldSectionNav = memo(function WorldSectionNav() {
         shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
         previousTopbarHeight = topbarHeight;
       }
+      // A route stylesheet still loading after an in-app navigation reads 0:
+      // read again until it applies (no style read once it has).
+      if (!landingTop) readLandingTop();
       const marker = Math.max(92, landingTop + 8, Math.min(200, window.innerHeight * 0.22));
       let current: WorldSectionId | null = null;
       sections.forEach((section) => {

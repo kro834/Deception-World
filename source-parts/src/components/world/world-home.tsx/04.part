@@ -1,3 +1,4 @@
+    const finalReady =
       finalImage
         .decode?.()
         .then(() => true)
@@ -451,4 +452,3 @@
                 </span>
                 <b>
                   <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}

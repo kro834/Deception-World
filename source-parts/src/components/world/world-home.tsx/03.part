@@ -1,3 +1,5 @@
+    syncRail(managerRail.current, 2);
+  }, [locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-unmanaged") return;
@@ -450,4 +452,3 @@
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
     finalImage.src = POSTERS[finalPoster].src;
-    const finalReady =
