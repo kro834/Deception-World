@@ -7,6 +7,7 @@ import {
   TARGETS,
   evaluate,
   median,
+  parseArgs,
   parseCell,
   rafStats,
   schedule,
@@ -94,7 +95,19 @@ test("Samsung harness cells parse, and GPU cells default to a 256 MB tile budget
   });
   assert.equal(parseCell("g412-1x-si28", "gpu").gpuMemoryMb, 256);
   assert.equal(parseCell("g360-1x-si28-128mb", "gpu").gpuMemoryMb, 128);
+  // Targets follow the parsed cell, not how its id was spelled.
+  assert.equal(targetsFor("scroll", parseCell("g360-4.0x-si28")), TARGETS.scroll["g360-4x-si28"]);
+  assert.equal(
+    targetsFor("gpu", parseCell("g412-1x-si28", "gpu")),
+    TARGETS.gpu["g412-1x-si28-256mb"],
+  );
+  assert.equal(targetsFor("scroll", parseCell("g412-6x-si30")), null);
   assert.throws(() => parseCell("s360-4x-si28"), /bad cell/);
+  // A misspelt --enforce must fail loudly, not switch the gate off.
+  assert.throws(() => parseArgs(["--enfore"]), /unknown option --enfore/);
+  assert.deepEqual(parseArgs(["--gpu", "--enforce"]), { mode: "gpu", enforce: true });
+  assert.deepEqual(parseArgs(["--load", "--runs=5"]), { mode: "load", runs: "5" });
+  assert.throws(() => parseArgs(["--gpu", "--mode=load"]), /conflicts/);
   assert.throws(() => parseCell("g360-4x-chrome"), /bad cell/);
 });
 

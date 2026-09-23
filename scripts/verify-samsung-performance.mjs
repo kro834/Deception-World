@@ -62,6 +62,8 @@
  *     [--variants=base,candidate,floor] [--floor=base|candidate] \
  *     [--gesture=drag|fling] [--route=/world] [--enforce] [--out=results.json] \
  *     [--keep-traces=<dir>]
+ * --gpu and --load are short for --mode=gpu and --mode=load. An unknown
+ * option is an error, so a misspelt --enforce cannot turn the gate off.
  * Cells are <g360|g412>-<cpu>x-<si28|si30>[-<mb>mb]. The defaults are the
  * columns of the definition of done: five scroll cells, two gpu cells
  * (g412 256 MB, g360 128 MB) and two load cells.
@@ -69,7 +71,8 @@
  * of done (TARGETS below). A target that needs the base or the floor needs
  * that variant in the same session. The targets were written against the
  * pre-plan commit, so BASE_REF_URL must serve the branch point, not an
- * already-improved build.
+ * already-improved build. If none of the requested cells has targets,
+ * --enforce exits 1 too, because nothing was checked.
  * Loopback URLs only, unless BROWSER_ALLOW_EXTERNAL_HOST=1 is set.
  * A full scroll matrix (5 cells, 3 variants, 3 runs) takes about 20 minutes;
  * gpu and load take about 4 minutes each.
@@ -429,10 +432,16 @@ export function summarizeLoad({ longTasks, loafs, lcp, paints, commits }) {
   };
 }
 
-/** Targets for a cell, or null when the definition of done names none. */
+/**
+ * Targets for a cell, or null when the definition of done names none. The
+ * key is rebuilt from the parsed cell, so "g360-4.0x-si28" and a gpu cell
+ * that leaves the 256 MB default implicit find their targets too.
+ */
 export function targetsFor(mode, cell) {
-  if (mode === "load") return TARGETS.load[`${cell.device}-${cell.cpu}x`] ?? null;
-  return TARGETS[mode]?.[cell.id] ?? null;
+  const key = `${cell.device}-${cell.cpu}x`;
+  if (mode === "load") return TARGETS.load[key] ?? null;
+  if (mode === "gpu") return TARGETS.gpu[`${key}-${cell.setting}-${cell.gpuMemoryMb}mb`] ?? null;
+  return TARGETS[mode]?.[`${key}-${cell.setting}`] ?? null;
 }
 
 /**
@@ -817,6 +826,7 @@ function report(mode, cells, variants, results, gesture) {
   const lines = [];
   let failures = 0;
   let missing = 0;
+  let untargeted = 0;
   for (const cell of cells) {
     const runs = Object.fromEntries(
       variants.map((variant) => [
@@ -870,10 +880,24 @@ function report(mode, cells, variants, results, gesture) {
             : verdict.kind === "max"
               ? String(verdict.value)
               : `${verdict.ratio === Infinity ? "inf" : verdict.ratio.toFixed(2)}x (${verdict.value} vs ${verdict.reference})`;
-        lines.push(`- ${verdict.status.toUpperCase()} ${label} ${bound}: ${actual}`);
+        // A frame-timing target that the all-animations-off floor misses in
+        // the same session (frames over 34 ms on a busy machine, say) cannot
+        // be met by animation work alone. Recalcs and LoAFs are left out: the
+        // floor runs the base build, which still has their causes.
+        const floorValue = ["over34", "rafP50", "rafP99"].includes(verdict.metric)
+          ? medians.floor?.[verdict.metric]
+          : null;
+        const floorNote =
+          verdict.status === "fail" && floorValue != null && floorValue > verdict.limit
+            ? ` (the floor misses it too: ${floorValue})`
+            : "";
+        lines.push(`- ${verdict.status.toUpperCase()} ${label} ${bound}: ${actual}${floorNote}`);
         if (verdict.status === "fail") failures++;
         if (verdict.status === "missing") missing++;
       }
+    } else {
+      lines.push("", "Targets: the definition of done names none for this cell.");
+      untargeted++;
     }
     const incomplete = results.filter(
       (r) => r.cell === cell.id && r.metrics && r.metrics.reachedEnd === false,
@@ -887,17 +911,43 @@ function report(mode, cells, variants, results, gesture) {
     ];
     if (pageErrors.length) lines.push(`- page errors: ${pageErrors.slice(0, 3).join(" | ")}`);
   }
-  return { text: lines.join("\n"), failures, missing };
+  return { text: lines.join("\n"), failures, missing, untargeted };
 }
 
 // ---------------------------------------------------------------- main
 
-function parseArgs(argv) {
+const OPTIONS = [
+  "help",
+  "mode",
+  "gpu",
+  "load",
+  "cells",
+  "runs",
+  "variants",
+  "floor",
+  "gesture",
+  "route",
+  "enforce",
+  "out",
+  "keep-traces",
+];
+
+export function parseArgs(argv) {
   const options = {};
   for (const arg of argv) {
     const match = /^--([^=]+)(?:=(.*))?$/.exec(arg);
     if (!match) throw new Error(`unexpected argument ${arg}`);
+    // A misspelt flag (--enfore, say) must fail, not turn the gate off silently.
+    if (!OPTIONS.includes(match[1])) throw new Error(`unknown option --${match[1]}`);
     options[match[1]] = match[2] ?? true;
+  }
+  // --gpu and --load are the plan's names for --mode=gpu and --mode=load.
+  for (const alias of ["gpu", "load"]) {
+    if (!options[alias]) continue;
+    if (options.mode && options.mode !== alias)
+      throw new Error(`--${alias} conflicts with --mode=${options.mode}`);
+    options.mode = alias;
+    delete options[alias];
   }
   return options;
 }
@@ -916,6 +966,9 @@ async function main() {
   if (!["drag", "fling"].includes(gesture)) throw new Error("--gesture must be drag or fling");
   const route = options.route || "/world";
   const runs = Number(options.runs || 3);
+  if (!Number.isInteger(runs) || runs < 1) throw new Error("--runs must be a positive integer");
+  if (options.floor && !["base", "candidate"].includes(options.floor))
+    throw new Error("--floor must be base or candidate");
   const cells = (options.cells ? String(options.cells).split(",") : DEFAULT_CELLS[mode]).map(
     (spec) => parseCell(spec.trim(), mode),
   );
@@ -1003,7 +1056,7 @@ async function main() {
     rmSync(scratch, { recursive: true, force: true });
   }
 
-  const { text, failures, missing } = report(mode, cells, variants, results, gesture);
+  const { text, failures, missing, untargeted } = report(mode, cells, variants, results, gesture);
   console.log(`## Samsung Internet ${mode} (${new Date().toISOString()})`);
   console.log(
     `base ${urls.base ?? "-"} | candidate ${urls.candidate}${variants.includes("floor") ? ` | floor on ${floorOn}` : ""}`,
@@ -1025,7 +1078,14 @@ async function main() {
     if (failures || missing) {
       console.log(`ENFORCE: ${failures} target(s) missed, ${missing} not measurable`);
       process.exitCode = 1;
-    } else console.log("ENFORCE: every target met");
+    } else if (untargeted === cells.length) {
+      // A gate that checked nothing must not read as a pass.
+      console.log("ENFORCE: none of the requested cells has targets; nothing was checked");
+      process.exitCode = 1;
+    } else
+      console.log(
+        `ENFORCE: every target met${untargeted ? ` (${untargeted} cell(s) without targets)` : ""}`,
+      );
   }
 }
 

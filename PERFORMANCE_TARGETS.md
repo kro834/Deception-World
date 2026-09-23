@@ -111,7 +111,7 @@ Samsung Internet（SI）はChromeと同じBlinkを使うが、Googleのサーバ
   - rAFのp95と「17ms超」の数は120Hzでは二峰性になるため使わない。
 - `--mode=gpu`: `--force-gpu-mem-available-mb`（既定256）の下で、タイル不足（チェッカーボード）を数える。
 - `--mode=load`: TBT、ロングタスク、LCP、ハイドレーション後に50ms以上のスタイル強制計算を含むLoAFを測る。
-- 比較: 変更前（base、`BASE_REF_URL`）、候補（`BASE_URL`）、全アニメーション停止の下限（floor）を同じセッションで順番を入れ替えながら各3回実行し、中央値と比率を出す。`--enforce` は計画書第9節の完了条件で判定し、比率の基準は変更前のコミットとする。
+- 比較: 変更前（base、`BASE_REF_URL`）、候補（`BASE_URL`）、全アニメーション停止の下限（floor）を同じセッションで順番を入れ替えながら各3回実行し、中央値と比率を出す。`--enforce` は計画書第9節の完了条件（スクリプト内の `TARGETS`）で判定し、比率の基準は変更前のコミットとする。完了条件のないセルだけを指定した場合は、何も判定していないので失敗として終了する。
 
 ```sh
 node scripts/serve-ref-build.mjs d0a9da8 --port=8171 &   # 変更前: git archiveで書き出してビルド
