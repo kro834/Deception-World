@@ -20,6 +20,18 @@ const viewports = [
       "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36",
   },
 ];
+// Headless Chrome reports the host's cores, and Android with 4 or fewer is
+// economy (rendering-profile.js): capable-Android checks pin a capable device
+// so they do not depend on the machine. configurable, so a later override in
+// the same page does not throw.
+const CAPABLE = () => {
+  for (const [key, value] of [
+    ["hardwareConcurrency", 8],
+    ["deviceMemory", 8],
+  ]) {
+    Object.defineProperty(Navigator.prototype, key, { get: () => value, configurable: true });
+  }
+};
 const results = [];
 
 async function waitForOpen(page, selector, open) {
@@ -652,6 +664,7 @@ try {
           ? { userAgent: viewport.userAgent, deviceScaleFactor: viewport.deviceScaleFactor }
           : {}),
       });
+      if (viewport.userAgent) await context.addInitScript(CAPABLE);
       const page = await context.newPage();
       page.setDefaultTimeout(7000);
       try {
@@ -696,6 +709,7 @@ try {
           }
         : {}),
     });
+    if (viewport.userAgent) await page.addInitScript(CAPABLE);
     try {
       const details = await checkDreamLayout(page);
       results.push({

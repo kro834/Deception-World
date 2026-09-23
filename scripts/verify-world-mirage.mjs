@@ -11,6 +11,19 @@ const GALAXY_UA =
 const SAMSUNG_INTERNET_UA =
   "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36";
 
+// Headless Chrome reports the host's cores, and Android with 4 or fewer is
+// economy (rendering-profile.js): capable-Android checks pin a capable device
+// so they do not depend on the machine. configurable, so a later override in
+// the same page does not throw.
+const CAPABLE = () => {
+  for (const [key, value] of [
+    ["hardwareConcurrency", 8],
+    ["deviceMemory", 8],
+  ]) {
+    Object.defineProperty(Navigator.prototype, key, { get: () => value, configurable: true });
+  }
+};
+
 const viewports = [
   { name: "phone-320", width: 320, height: 740 },
   { name: "phone-390", width: 390, height: 844 },
@@ -213,6 +226,7 @@ for (const device of [
     isMobile: true,
     hasTouch: true,
   });
+  await context.addInitScript(CAPABLE);
   const { page, errors } = await openWorld(context);
   assert.equal(
     await page.evaluate(() => document.documentElement.hasAttribute("data-mirage-quiet")),

@@ -19,7 +19,19 @@ const readProgressLines = () => {
     .filter(Boolean);
 };
 
-const browser = await chromium.launch({ channel: "chrome" });
+// Headless Chrome reports the host's cores, and Android with 4 or fewer (every
+// device with 2 or fewer) is economy: pin a capable device. configurable, so a
+// later override in the same page does not throw.
+const CAPABLE = () => {
+  for (const [key, value] of [
+    ["hardwareConcurrency", 8],
+    ["deviceMemory", 8],
+  ]) {
+    Object.defineProperty(Navigator.prototype, key, { get: () => value, configurable: true });
+  }
+};
+
+const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
 try {
   for (const mode of ["android", "android-economy", "unsupported", "iphone", "iphone27"]) {
     const native = mode === "android" || mode === "android-economy" || mode === "iphone27";
@@ -33,6 +45,7 @@ try {
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    if (mode !== "android-economy") await page.addInitScript(CAPABLE);
     // A weak Android (4 cores) gets economy: no Motion prism, native hairline.
     if (mode === "android-economy")
       await page.addInitScript(() =>
