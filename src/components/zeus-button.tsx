@@ -39,6 +39,7 @@ const ZEUS_AVOID_SELECTOR = [
   ".rider-nightmare-dialog-close",
   ".dream-hero-actions a",
   ".dream-dossier-close",
+  ".rw-gate-button",
 ].join(",");
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 

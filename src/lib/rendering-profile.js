@@ -44,3 +44,19 @@ export function prefersLightweightRendering(device) {
     ((device.hardwareConcurrency || 0) > 0 && device.hardwareConcurrency <= 2)
   );
 }
+
+/**
+ * Resource hints that point at a constrained device or connection: Save-Data,
+ * a 2G connection, at most 2 GB of memory or at most 2 logical cores. Read
+ * by capability only, never by device model or platform.
+ * @param {{deviceMemory?: number, hardwareConcurrency?: number,
+ * connection?: {saveData?: boolean, effectiveType?: string}}} device
+ */
+export function hasConstrainedResources(device) {
+  return (
+    device.connection?.saveData === true ||
+    ["slow-2g", "2g"].includes(device.connection?.effectiveType || "") ||
+    (device.deviceMemory !== undefined && device.deviceMemory <= 2) ||
+    ((device.hardwareConcurrency || 0) > 0 && device.hardwareConcurrency <= 2)
+  );
+}
