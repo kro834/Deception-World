@@ -1,10 +1,13 @@
 /* Android compositing budget (html[data-android-renderer]).
 
-   Capable Android (Pixel, Galaxy S, Samsung Internet) runs the full World:
-   the Mirage boot, Motion and Mirage scroll choreography, film motion and the
-   key art. Weak Android is chosen by capability in rendering-profile.js
-   (html[data-world-effects="economy"]), never by model, and only then are
-   decoration loops frozen. What stays specific to every Android renderer:
+   Capable Android (Pixel, Galaxy S, Samsung Internet) runs the World: the
+   Mirage boot, Motion and Mirage scroll choreography, film motion and the key
+   art. Its lite tier drops only the layers measured as heavy on Android GPUs
+   (the "Android lite tier" sections of styles-world-mirage.css and
+   styles-motion-edition.css, and the Zeus halo below). Weak Android is chosen
+   by capability in rendering-profile.js (html[data-world-effects="economy"]),
+   never by model, and only then are decoration loops frozen. What stays
+   specific to every Android renderer:
    - no backdrop-filter, with opaque surfaces instead (backdrop sampling is the
      heaviest GPU operation on Mali and Xclipse);
    - the fixed full-screen grain, the blurred orbs and the hover/pointer glows
@@ -39,6 +42,16 @@ html[data-android-renderer]
 html[data-android-renderer]
   :is(.grain, .ambient-orb, .world-column-orbit-glow, .liquid-contact-glow, .liquid-pointer-glow) {
   display: none !important;
+}
+
+/* Android lite tier: the fixed Zeus button keeps its rim and ring but not the
+   34px blurred halo, which enlarged a layer that is always on screen. Dragging
+   and the return spinner keep their own glow. */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .zeus-button:not([data-dragging="true"]):not([data-return-loading="true"]) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.86),
+    0 0 0 3px rgb(14 29 28 / 0.72);
 }
 
 /* Weak Android: keep the plain gradient rather than paying for economy's
