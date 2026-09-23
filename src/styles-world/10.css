@@ -45,7 +45,9 @@
   box-shadow:
     0 0 0 8rem color-mix(in srgb, var(--manager-accent) 2%, transparent),
     0 0 0 18rem color-mix(in srgb, var(--manager-accent-soft) 1.5%, transparent);
-  animation: managerOrbit 22s linear infinite;
+  /* No rotation: the ring is rotationally symmetric, so turning it was
+     invisible, yet it kept a 58rem layer (53-93 MB of tiles on phones) and a
+     main-thread frame every vsync. Static, it paints into .manager-ambient. */
 }
 
 .manager-topbar {
