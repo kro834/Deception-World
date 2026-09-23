@@ -76,6 +76,12 @@ test("Zeus blocks touch scrolling only while a held drag owns the finger", () =>
   );
   assert.match(zeus, /cancelPlacement\(\);\s*disarmTouchGuard\(\);/);
   assert.match(zeus, /if \(!significantResize\(\)\) \{\s*onScroll\(\);/);
+  // WebKit: the held guard is also on the button itself, and removed with it.
+  assert.match(
+    zeus,
+    /button\.addEventListener\("touchmove", preventHeldTouchScroll, \{ passive: false \}\)/,
+  );
+  assert.match(zeus, /button\.removeEventListener\("touchmove", preventHeldTouchScroll\)/);
 });
 
 test("World scroll milestones stay out of the page-wide render", () => {

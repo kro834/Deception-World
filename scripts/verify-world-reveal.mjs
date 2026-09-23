@@ -36,15 +36,26 @@ const RAILS = [
   ".rider-tabs",
 ];
 
-// Blocks the <html> --page-progress write (use-world-mode.ts) so the style
-// cost below is the reveal's own, whichever element carries the property.
-const NEUTRALISE_PAGE_PROGRESS = `(() => {
-  const set = CSSStyleDeclaration.prototype.setProperty;
-  CSSStyleDeclaration.prototype.setProperty = function (name, ...rest) {
-    if (name === "--page-progress" && this === document.documentElement.style) return;
-    return set.call(this, name, ...rest);
-  };
-})();`;
+// Headless Chrome reports the host's cores, and Android with 4 or fewer is
+// economy (rendering-profile.js): pin a capable device so the result does not
+// depend on the machine. configurable, so a later override does not throw.
+const CAPABLE = () => {
+  for (const [key, value] of [
+    ["hardwareConcurrency", 8],
+    ["deviceMemory", 8],
+  ]) {
+    Object.defineProperty(Navigator.prototype, key, { get: () => value, configurable: true });
+  }
+};
+async function capableContext(options) {
+  const context = await browser.newContext(options);
+  await context.addInitScript(CAPABLE);
+  return context;
+}
+
+// Short landscape phones (styles-world-reveal.css): headings are lit by about
+// 89% of the viewport there, so a nav jump that lands them low reads whole.
+const shortLandscape = (viewport) => viewport.width > viewport.height && viewport.height <= 520;
 
 function luminance(color) {
   const channels = color
@@ -85,16 +96,12 @@ async function openWorld(context, path = "/world") {
     () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
   );
   await page.waitForTimeout(1_200);
-  // This check is about the full-effects page. A build that still gives the
-  // device economy rendering is lifted to full effects and says so.
-  const lifted = await page.evaluate(() => {
-    const root = document.documentElement;
-    if (root.dataset.worldEffects !== "economy") return false;
-    delete root.dataset.worldEffects;
-    return true;
-  });
+  // This check is about the full-effects page: a capable device (Android
+  // included) must not get economy rendering. Never lifted here, so a
+  // regression that makes Pixel economy again fails.
+  const effects = await page.evaluate(() => document.documentElement.dataset.worldEffects ?? null);
   await settle(page);
-  return { page, errors, lifted };
+  return { page, errors, effects };
 }
 
 // Visit every region once so content-visibility sections have computed style.
@@ -117,6 +124,110 @@ async function placeTop(page, selector, fraction) {
   );
   await settle(page);
   await page.waitForTimeout(60);
+}
+
+// Scroll-linked choreography moves some blocks as the page scrolls, so the
+// block is placed by measuring it again after each step.
+async function placeTopExact(page, selector, fraction) {
+  let top = null;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    top = await page.evaluate(
+      ([target, share]) => {
+        const box = document.querySelector(target).getBoundingClientRect();
+        const delta = box.top - innerHeight * share;
+        if (Math.abs(delta) >= 2) window.scrollBy({ top: delta, behavior: "instant" });
+        return box.top / innerHeight;
+      },
+      [selector, fraction],
+    );
+    await settle(page);
+    await page.waitForTimeout(60);
+    if (Math.abs(top - fraction) < 0.004) break;
+  }
+  top = await page.evaluate(
+    (target) => document.querySelector(target).getBoundingClientRect().top / innerHeight,
+    selector,
+  );
+  assert.ok(Math.abs(top - fraction) < 0.015, `${selector}: placed at ${top} for ${fraction}`);
+  return top;
+}
+
+// The reveal line: every block is whole once its top reaches 74% of the
+// viewport (26svh), and not yet whole a little below it. Short landscape
+// screens light headings by about 89% (11svh).
+async function revealLine(page, name, viewport) {
+  for (const selector of BLOCKS) {
+    const heading = / h2$/.test(selector);
+    const [lit, ghost] = heading && shortLandscape(viewport) ? [0.87, 0.95] : [0.72, 0.78];
+    await placeTopExact(page, selector, lit);
+    assert.ok(
+      (await ink(page, selector)).every((character) => character.full),
+      `${name}: ${selector} not whole with its top at ${lit}`,
+    );
+    await placeTopExact(page, selector, ghost);
+    assert.ok(
+      (await ink(page, selector)).some((character) => !character.full),
+      `${name}: ${selector} already whole with its top at ${ghost}`,
+    );
+  }
+}
+
+// Nav links (the topbar's STORY / RIDERS / RECORDS) from the top of the page:
+// wherever a section lands, every block whose top is above the reveal line is
+// whole, and on short landscape screens so is every visible heading character.
+async function navJumps(page, name, viewport) {
+  const landings = [];
+  for (const id of ["story", "riders", "records"]) {
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await settle(page);
+    await page.waitForTimeout(200);
+    await page.click(`.topbar nav a[href="#${id}"]`);
+    // Wait for the (smooth) scroll to come to rest.
+    let last = -1;
+    for (let tick = 0; tick < 40; tick += 1) {
+      await page.waitForTimeout(100);
+      const y = await page.evaluate(() => Math.round(window.scrollY));
+      if (y === last && y > 0) break;
+      last = y;
+    }
+    await page.waitForTimeout(300);
+    const landing = await page.evaluate(
+      ([section, short]) => {
+        const full = (span) =>
+          getComputedStyle(span).color === getComputedStyle(span.parentElement).color;
+        const blocks = [...document.querySelectorAll("[data-text-reveal]")]
+          .filter((block) => !block.closest(".finale-content"))
+          .map((block) => ({ block, top: block.getBoundingClientRect().top / innerHeight }));
+        const checked = blocks.filter(({ top }) => top >= 0 && top <= 0.72);
+        const unlit = checked
+          .filter(({ block }) => ![...block.querySelectorAll(".tr-c")].every(full))
+          .map(({ block, top }) => `${block.textContent.slice(0, 6)}@${top.toFixed(2)}`);
+        const heading = document.querySelector(`#${section} [data-text-reveal="heading"]`);
+        const visibleUnlit = short
+          ? [...heading.querySelectorAll(".tr-c")].filter(
+              (span) => span.getBoundingClientRect().top < innerHeight - 8 && !full(span),
+            ).length
+          : 0;
+        return {
+          scrollY: Math.round(window.scrollY),
+          heading: Number((heading.getBoundingClientRect().top / innerHeight).toFixed(2)),
+          checked: checked.length,
+          unlit,
+          visibleUnlit,
+        };
+      },
+      [id, shortLandscape(viewport)],
+    );
+    assert.ok(landing.scrollY > 0, `${name} #${id}: the nav link did not scroll`);
+    assert.deepEqual(landing.unlit, [], `${name} #${id}: ghosted above the line`);
+    assert.equal(landing.visibleUnlit, 0, `${name} #${id}: visible heading ghosted`);
+    landings.push({ id, ...landing });
+  }
+  assert.ok(
+    landings.some((landing) => landing.checked > 0),
+    `${name}: no nav landing checked a block ${JSON.stringify(landings)}`,
+  );
+  return landings;
 }
 
 async function placeFinale(page, share) {
@@ -538,15 +649,15 @@ async function styleCost(context) {
 
 // Phone at full effects: the Android target once economy no longer applies.
 {
-  const context = await browser.newContext({
+  const context = await capableContext({
     viewport: { width: 412, height: 915 },
     deviceScaleFactor: 2.625,
     isMobile: true,
     hasTouch: true,
     userAgent: ANDROID_UA,
   });
-  const { page, errors, lifted } = await openWorld(context);
-  if (lifted) console.log("phone-412: economy rendering lifted to check the full-effects page");
+  const { page, errors, effects } = await openWorld(context);
+  assert.equal(effects, null, "phone-412: capable Android fell back to economy rendering");
 
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await settle(page);
@@ -594,6 +705,8 @@ async function styleCost(context) {
       `phone-412: ${selector} not fully lit at 50%`,
     );
   }
+  // Whole at the 74% line, not yet whole just below it.
+  await revealLine(page, "phone-412", { width: 412, height: 915 });
   // The finale headline writes itself early in the pin and is whole later.
   await placeFinale(page, 0.08);
   assert.ok(
@@ -759,55 +872,69 @@ async function styleCost(context) {
     else assert.ok(frames.at(-1).includes("0"), `jump ${selector} @${share}: already whole`);
   }
 
+  const navs = await navJumps(page, "phone-412", { width: 412, height: 915 });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   assert.ok(overflow <= 1, `phone-412: horizontal overflow ${overflow}`);
   assert.equal(errors.length, 0, errors.join("\n"));
   console.log(
-    `phone-412: ${timelines.animations} characters on the document timeline, layers +${withReveal - withoutReveal}, ${rails.pressed} rail presses (${rails.partLit} beside part-lit text) held still, gating and jumps ok`,
+    `phone-412: ${timelines.animations} characters on the document timeline, layers +${withReveal - withoutReveal}, ${rails.pressed} rail presses (${rails.partLit} beside part-lit text) held still, gating, jumps and nav links ok ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}`,
   );
   await context.close();
 }
 
 // A hash landing and a restored scroll read at full ink straight away.
 {
-  const context = await browser.newContext({
+  const context = await capableContext({
     viewport: { width: 412, height: 915 },
     deviceScaleFactor: 2.625,
     isMobile: true,
     hasTouch: true,
     userAgent: ANDROID_UA,
   });
-  const { page, errors } = await openWorld(context, "/world#riders");
+  const { page, errors, effects } = await openWorld(context, "/world#riders");
+  assert.equal(effects, null, "hash landing: economy");
   await page.waitForTimeout(600);
+  // Never vacuous: the page must have moved, and at least one block is checked.
   const landed = async (label) => {
+    assert.ok((await page.evaluate(() => window.scrollY)) > 0, `${label}: the page did not move`);
+    let checked = 0;
     for (const selector of [".section-title h2", ".section-title > p[data-text-reveal]"]) {
       const top = await page.evaluate(
         (target) => document.querySelector(target).getBoundingClientRect().top / innerHeight,
         selector,
       );
       if (top > 0.72) continue;
+      checked += 1;
       assert.ok(
         (await ink(page, selector)).every((character) => character.full),
         `${label}: ${selector} unlit at ${top.toFixed(2)}`,
       );
     }
+    assert.ok(checked >= 1, `${label}: no block landed above the reveal line`);
+    return checked;
   };
-  await landed("hash landing");
+  const hashChecked = await landed("hash landing");
   await placeTop(page, ".section-title > p[data-text-reveal]", 0.3);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector(".site-shell.mirage-edition");
   await page.waitForTimeout(1_800);
-  await page.evaluate(() => delete document.documentElement.dataset.worldEffects);
+  assert.equal(
+    await page.evaluate(() => document.documentElement.dataset.worldEffects ?? null),
+    null,
+    "restored scroll: economy",
+  );
   await settle(page);
-  await landed("restored scroll");
+  const restoredChecked = await landed("restored scroll");
   assert.equal(errors.length, 0, errors.join("\n"));
-  console.log("hash landing and restored scroll: text above the fold is lit");
+  console.log(
+    `hash landing and restored scroll: text above the fold is lit (${hashChecked} and ${restoredChecked} blocks checked)`,
+  );
   await context.close();
 }
 
 // Reduced motion: no reveal at all, every character at full ink.
 {
-  const context = await browser.newContext({
+  const context = await capableContext({
     viewport: { width: 390, height: 844 },
     isMobile: true,
     hasTouch: true,
@@ -827,19 +954,26 @@ async function styleCost(context) {
 }
 
 // Other shapes: nothing in the first view, every timeline on the document.
+// Android landscape phones (the Galaxy and Pixel sizes, toolbar subtracted)
+// and a 1366 laptop also check nav-link landings.
 for (const viewport of [
   { name: "phone-360", width: 360, height: 780, mobile: true },
-  { name: "landscape-844", width: 844, height: 390, mobile: true },
+  { name: "landscape-844", width: 844, height: 390, mobile: true, android: true, nav: true },
+  { name: "landscape-915", width: 915, height: 412, mobile: true, android: true, nav: true },
+  { name: "landscape-740", width: 740, height: 360, mobile: true, android: true, nav: true },
   { name: "tablet-1024", width: 1024, height: 768, mobile: false },
+  { name: "laptop-1366", width: 1366, height: 768, mobile: false, nav: true },
   { name: "desktop-1440", width: 1440, height: 900, mobile: false },
   { name: "desktop-2560", width: 2560, height: 1440, mobile: false },
 ]) {
-  const context = await browser.newContext({
+  const context = await capableContext({
     viewport: { width: viewport.width, height: viewport.height },
-    isMobile: viewport.mobile && viewport.width < 600,
+    isMobile: (viewport.mobile && viewport.width < 600) || Boolean(viewport.android),
     hasTouch: viewport.mobile,
+    ...(viewport.android ? { userAgent: ANDROID_UA } : {}),
   });
-  const { page, errors } = await openWorld(context);
+  const { page, errors, effects } = await openWorld(context);
+  assert.equal(effects, null, `${viewport.name}: economy rendering`);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await settle(page);
   const firstView = await page.evaluate(
@@ -862,6 +996,8 @@ for (const viewport of [
       `${viewport.name}: ${selector} not fully lit at 50%`,
     );
   }
+  await revealLine(page, viewport.name, viewport);
+  const navs = viewport.nav ? await navJumps(page, viewport.name, viewport) : [];
   assert.deepEqual(await spanAudit(page), [], `${viewport.name}: a rule restyles character spans`);
   const finale = await finaleWrites(page);
   assert.ok(finale.partial >= 3, `${viewport.name}: finale headline pops (${finale.partial})`);
@@ -872,17 +1008,19 @@ for (const viewport of [
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   assert.ok(overflow <= 1, `${viewport.name}: horizontal overflow ${overflow}`);
   assert.equal(errors.length, 0, errors.join("\n"));
-  console.log(`${viewport.name}: ${timelines.animations} characters, timelines, ink and rails ok`);
+  console.log(
+    `${viewport.name}: ${timelines.animations} characters, timelines, ink, reveal line${navs.length ? `, nav links ${JSON.stringify(navs.map(({ id, heading, checked }) => ({ id, heading, checked })))}` : ""} and rails ok`,
+  );
   await context.close();
 }
 
 // Style cost on the JS progress path (desktop, iOS 26): per-character spans
 // multiply the cost of any inherited custom property written on <html> every
-// scroll frame, so --page-progress must not be written there. The write is
-// neutralised here to measure the reveal's own cost.
+// scroll frame. use-world-mode.ts writes --page-progress only on the header
+// hosts, so this measures the page as shipped and fails if the root write
+// returns.
 {
-  const context = await browser.newContext({ viewport: { width: 412, height: 915 } });
-  await context.addInitScript(NEUTRALISE_PAGE_PROGRESS);
+  const context = await capableContext({ viewport: { width: 412, height: 915 } });
   const cost = await styleCost(context);
   await context.close();
   assert.ok(

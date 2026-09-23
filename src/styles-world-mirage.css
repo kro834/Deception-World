@@ -112,9 +112,11 @@
    `overflow-x: hidden`, which silently made it a scroll container that never
    scrolls, and every view() timeline on the page bound to it and froze. `clip`
    keeps the same horizontal clipping without creating a scroll container.
-   Rail locks, loading covers, the side menu and open dialogs keep their own
-   overflow rules; scroll choreography is switched off while they are active,
-   because a locked <body> becomes a scroll container again. */
+   Loading covers, the side menu and open dialogs keep their own overflow
+   rules; scroll choreography is switched off while they are active, because a
+   locked <body> becomes a scroll container again. A rail lock clips <body>
+   instead (styles-world-reveal.css), so the scroll-lit type holds still under
+   it; the Mirage choreography is still switched off then. */
 html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
   body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open])) {
   overflow: visible;

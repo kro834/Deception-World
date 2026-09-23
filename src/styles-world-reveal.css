@@ -25,7 +25,9 @@
    above the viewport bottom: 26svh for headings and copy alike (top at 74%
    of the viewport), so a nav jump or restored scroll leaves everything in
    the upper three quarters of the screen lit and only text still entering
-   at the bottom ghosted. The finale headline instead
+   at the bottom ghosted. On short landscape screens (360-520px tall) a nav
+   jump lands a heading at 83-86% of the viewport, so headings there are lit
+   by 11svh (top at about 89%). The finale headline instead
    writes itself while its stage is pinned (or, on short landscape screens
    where the stage is not pinned, while it rises into view), on Mirage's
    --mr-finale timeline (declared on .finale-section, so it binds to the
@@ -124,6 +126,19 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
         .tr-c {
         animation-range: cover calc(40svh + var(--tr-p, 0) * 20svh) cover
           calc(48svh + var(--tr-p, 0) * 20svh);
+      }
+
+      /* A topbar jump to RIDERS or RECORDS lands the heading at 83-86% of a
+         short landscape screen, below the 74% line: headings there are lit
+         by 11svh instead of 26svh, and still write themselves. */
+      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+          :has(dialog[open])
+        )
+        .site-shell.film-edition.mirage-edition
+        [data-text-reveal="heading"]:not(.finale-content *) {
+        --tr-from: 1svh;
+        --tr-span: 7svh;
+        --tr-fade: 3svh;
       }
     }
   }

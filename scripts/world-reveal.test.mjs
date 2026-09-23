@@ -142,13 +142,38 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
   // headline would pop at once: that layout gets a cover range of its own,
   // under the exact media query that unpins the stage.
   const UNPINNED = "@media (orientation: landscape) and (max-height: 520px)";
-  const unpinned = rules.filter(({ context }) => context.includes(UNPINNED));
+  const inUnpinned = rules.filter(({ context }) => context.includes(UNPINNED));
+  const unpinned = inUnpinned.filter(({ selector }) =>
+    /\.finale-content \[data-text-reveal\] \.tr-c$/.test(selector),
+  );
   assert.equal(unpinned.length, 1);
-  assert.match(unpinned[0].selector, /\.finale-content \[data-text-reveal\] \.tr-c$/);
   assert.match(
     flat(unpinned[0].body),
     /^animation-range: cover calc\([^;]+\) cover calc\([^;]+\);$/,
   );
+  // The same short screens: a nav jump lands a heading at 83-86% of the
+  // viewport, so headings there are lit sooner (variables only).
+  const shortHeadings = inUnpinned.filter((rule) => !unpinned.includes(rule));
+  assert.equal(shortHeadings.length, 1);
+  assert.ok(shortHeadings[0].selector.startsWith(GATE), shortHeadings[0].selector);
+  assert.match(
+    shortHeadings[0].selector,
+    /\[data-text-reveal="heading"\]:not\(\.finale-content \*\)$/,
+  );
+  const shortVars = Object.fromEntries(
+    [...shortHeadings[0].body.matchAll(/(--tr-(?:from|span|fade)):\s*([\d.]+)svh;/g)].map(
+      ([, name, value]) => [name, Number(value)],
+    ),
+  );
+  assert.deepEqual(Object.keys(shortVars).sort(), ["--tr-fade", "--tr-from", "--tr-span"]);
+  assert.equal(
+    flat(shortHeadings[0].body)
+      .replace(/--tr-(?:from|span|fade): [\d.]+svh;/g, "")
+      .trim(),
+    "",
+  );
+  const shortLine = shortVars["--tr-from"] + shortVars["--tr-span"] + shortVars["--tr-fade"];
+  assert.ok(shortLine <= 12, `short landscape headings lit by ${shortLine}svh`);
   assert.match(
     stripComments(await read("src/styles-world/11.css")),
     /@media \(orientation: landscape\) and \(max-height: 520px\) \{[^@]*\.finale-sticky \{\s*position: relative;/,
@@ -162,6 +187,37 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
   for (const { body } of playing) {
     assert.match(body, /animation-play-state: running !important;/);
   }
+});
+
+test("the reveal finishes at 26svh: headings and copy are whole with their top at 74%", async () => {
+  const { rules } = parse(await readCss());
+  const readVars = (rule) =>
+    Object.fromEntries(
+      [...rule.body.matchAll(/(--tr-(?:from|span|fade)):\s*([\d.]+)svh;/g)].map(
+        ([, name, value]) => [name, Number(value)],
+      ),
+    );
+  const base = rules.find(
+    ({ body, context }) =>
+      /view-timeline: --tr block;/.test(body) &&
+      !context.some((prelude) => prelude.includes("orientation: landscape")),
+  );
+  assert.ok(base, "the view-timeline rule");
+  const heading = readVars(base);
+  const copyRule = rules.find(({ selector }) =>
+    selector.endsWith('[data-text-reveal="copy"]:not(.finale-content *)'),
+  );
+  assert.ok(copyRule, "the copy rule");
+  // Copy inherits --tr-from from the base rule.
+  const copy = { ...heading, ...readVars(copyRule) };
+  for (const [name, vars] of [
+    ["heading", heading],
+    ["copy", copy],
+  ]) {
+    assert.equal(vars["--tr-from"] + vars["--tr-span"] + vars["--tr-fade"], 26, name);
+  }
+  const design = await read("DESIGN.md");
+  assert.match(design, /fully lit when their top reaches 74% of the viewport/);
 });
 
 test("rail locks clip <body> on /world so the reveal holds still under them", async () => {

@@ -28,7 +28,15 @@ import { BLANK, revealLabel, splittable } from "./reveal-label";
      real text to hit inside the heading).
    - copy: <RevealText copy> renders the whole sentence once in a
      .visually-hidden span and the split copy aria-hidden, so VoiceOver on iOS
-     does not stop on every character. */
+     does not stop on every character.
+     Trade-off: find in page (Chrome desktop and Android) matches each copy
+     phrase twice. The first match is the clipped label, so it has no visible
+     highlight; the label sits at the paragraph's top-left, so the jump still
+     lands on the paragraph, and the next match highlights the visible text.
+     innerText also contains the sentence twice. Selection is blocked
+     site-wide (styles.css), so copy and paste are unaffected. aria-labelledby
+     is not an alternative: role=paragraph cannot be named, so the paragraph
+     would go silent with its content aria-hidden. */
 
 function count(node: ReactNode): number {
   let total = 0;
