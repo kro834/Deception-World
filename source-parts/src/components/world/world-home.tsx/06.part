@@ -1,4 +1,3 @@
-            role="tabpanel"
             aria-labelledby={`rider-tab-${rider.id}`}
             style={{ ["--rider-tone" as string]: rider.tone }}
           >
@@ -235,6 +234,8 @@
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
+
+      <RisingWorld />
 
       <dialog
         ref={episodePickupDialogRef}

@@ -16,6 +16,7 @@ import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
+import { RisingWorld } from "./rising-world";
 
 const POSTERS = [
   {
@@ -2420,6 +2421,8 @@ export function WorldHome() {
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
+
+      <RisingWorld />
 
       <dialog
         ref={episodePickupDialogRef}

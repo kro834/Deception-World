@@ -1,0 +1,578 @@
+/* RISING THE WORLD — the gate below the record and the EP7 REXONANCE
+   sequence it opens.
+
+   The gate is real extra scroll length after the footer: as the reader keeps
+   scrolling past END OF RECORD, an ember glow climbs from below and the
+   RISING THE WORLD button rises into place (scroll-linked, so it reverses and
+   never loops). The button opens a modal dialog: a dive into the world, the
+   world burning in red flames and, mid-burn, a hard cut to EP7 REXONANCE.
+   WebGL draws the fire (rising-fire.ts); economy devices get the CSS version
+   below and reduced motion gets a still frame. Nothing here runs until the
+   dialog is open, and the only loops live inside it. */
+
+.site-shell.film-edition.mirage-edition .rw-gate {
+  --rw-ember: #ff5a2c;
+  --rw-ember-hi: #ffb070;
+  --rw-blood: #b3140c;
+  --rw-ash: #0b0304;
+  position: relative;
+  display: grid;
+  min-height: max(88svh, 560px);
+  place-items: end center;
+  padding: 0 20px clamp(64px, 14svh, 140px);
+  overflow: clip;
+  isolation: isolate;
+  background: linear-gradient(180deg, var(--mr-void, #02040a) 0%, #070203 42%, #160403 100%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 112%, rgb(255 70 30 / 52%), transparent 70%),
+    radial-gradient(ellipse 40% 28% at 50% 100%, rgb(255 176 112 / 30%), transparent 70%),
+    radial-gradient(ellipse 90% 60% at 50% 120%, rgb(179 20 12 / 45%), transparent 75%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-glow > i {
+  position: absolute;
+  bottom: -6%;
+  width: 34%;
+  height: 46%;
+  border-radius: 50% 50% 0 0;
+  opacity: 0.55;
+  background: radial-gradient(ellipse at 50% 100%, rgb(255 110 40 / 55%), transparent 70%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-glow > i:nth-child(1) {
+  left: 4%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-glow > i:nth-child(2) {
+  left: 33%;
+  height: 58%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-glow > i:nth-child(3) {
+  right: 4%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-rise {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-arrows {
+  display: grid;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-arrows > i {
+  display: block;
+  width: 18px;
+  height: 10px;
+  background: var(--rw-ember-hi);
+  clip-path: polygon(50% 0, 100% 100%, 50% 60%, 0 100%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-arrows > i:nth-child(2) {
+  opacity: 0.65;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-arrows > i:nth-child(3) {
+  opacity: 0.35;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  max-width: 100%;
+  padding: 0 30px 0 34px;
+  border: 0;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 18%), transparent 46%),
+    linear-gradient(120deg, #e2401e 0%, #b3140c 62%, #7e0b06 100%);
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 214 170 / 55%),
+    inset 0 0 0 1px rgb(255 176 112 / 45%);
+  font: 400 clamp(13px, 1.5vw, 17px) / 1.2 "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-button > i {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-button:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px #1a0402,
+    inset 0 0 0 5px #fff0b5;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition.mirage-edition .rw-gate-button {
+    transition: translate 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-gate-button:hover {
+    translate: 0 -3px;
+  }
+}
+
+/* Scroll past the record: the glow climbs and the button rises into place.
+   The gate is the last block on the page, so its entry range ends exactly at
+   the end of the scroll. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+        [data-loading]
+      ):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .rw-gate {
+      view-timeline: --rw-gate block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+        [data-loading]
+      ):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .rw-gate-glow {
+      animation: rw-glow linear both;
+      animation-timeline: --rw-gate;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+        [data-loading]
+      ):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .rw-gate-rise {
+      animation: rw-rise linear both;
+      animation-timeline: --rw-gate;
+      animation-range: entry 34% entry 100%;
+    }
+  }
+}
+
+@keyframes rw-glow {
+  from {
+    opacity: 0;
+    translate: 0 18%;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rw-rise {
+  from {
+    opacity: 0;
+    translate: 0 120px;
+    scale: 0.9;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+/* ---------- The sequence ---------- */
+.site-shell.film-edition.mirage-edition .rw-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: #fff;
+  background: transparent;
+}
+
+.site-shell.film-edition.mirage-edition .rw-dialog::backdrop {
+  background: rgb(2 1 2 / 40%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.site-shell.film-edition.mirage-edition .rw-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* CSS fallback layers: hidden while WebGL draws. */
+.site-shell.film-edition.mirage-edition .rw-css-fire,
+.site-shell.film-edition.mirage-edition .rw-dive-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .rw-stage:is([data-mode="css"], [data-mode="still"]) {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 110%, #7a0d06 0%, transparent 70%),
+    linear-gradient(180deg, #050102 0%, #120304 60%, #2a0603 100%);
+}
+
+.site-shell.film-edition.mirage-edition
+  .rw-stage:is([data-mode="css"], [data-mode="still"])
+  .rw-css-fire {
+  display: block;
+}
+
+.site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-dive-lines {
+  display: block;
+}
+
+/* The burnt world behind the fallback fire. */
+.site-shell.film-edition.mirage-edition .rw-css-fire::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.42;
+  background:
+    linear-gradient(180deg, rgb(5 1 2 / 20%), rgb(40 4 2 / 80%)),
+    url("/rider-rexonance-max-20260923-delivery-960.webp") 50% 30% / cover no-repeat;
+}
+
+.site-shell.film-edition.mirage-edition .rw-css-fire > i {
+  position: absolute;
+  bottom: -30%;
+  width: 70%;
+  height: 90%;
+  border-radius: 50% 50% 40% 40%;
+  opacity: 0.8;
+  background:
+    radial-gradient(ellipse 40% 55% at 50% 80%, rgb(255 226 170 / 80%), transparent 60%),
+    radial-gradient(ellipse 55% 70% at 50% 85%, rgb(255 90 40 / 75%), transparent 70%),
+    radial-gradient(ellipse 70% 80% at 50% 90%, rgb(179 20 12 / 60%), transparent 75%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-css-fire > i:nth-child(1) {
+  left: -20%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-css-fire > i:nth-child(2) {
+  left: 15%;
+  height: 110%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-css-fire > i:nth-child(3) {
+  right: -20%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-css-fire > i:nth-child(4) {
+  left: 38%;
+  width: 40%;
+  height: 70%;
+  opacity: 0.6;
+}
+
+.site-shell.film-edition.mirage-edition .rw-dive-lines > i {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    rgb(202 244 255 / 55%) 0 0.6deg,
+    transparent 0.6deg 7deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 12%, #000 40%, transparent 70%);
+  mask: radial-gradient(circle, transparent 12%, #000 40%, transparent 70%);
+}
+
+/* Title: invisible until the cut, then slammed in. */
+.site-shell.film-edition.mirage-edition .rw-title {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: clamp(4px, 1.2vw, 14px);
+  margin: 0;
+  padding: 0 16px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .rw-title-ep {
+  padding: 4px 14px;
+  color: #fff;
+  background: #b3140c;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  font: 400 clamp(14px, 2.4vw, 30px) / 1.2 "Michroma", "Oxanium", sans-serif;
+  letter-spacing: 0.3em;
+}
+
+.site-shell.film-edition.mirage-edition .rw-title-name {
+  color: #ffe3b0;
+  background: linear-gradient(180deg, #ffffff 0%, #ffe8c2 34%, #ff8a3d 70%, #d0240f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 22px rgb(255 70 30 / 55%)) drop-shadow(0 6px 0 rgb(40 4 2 / 70%));
+  font: 700 clamp(46px, 13.5vw, 232px) / 0.92 "Oxanium", "Noto Sans JP", sans-serif;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.site-shell.film-edition.mirage-edition .rw-stage:is([data-phase="title"], [data-phase="rest"]) .rw-title {
+  opacity: 1;
+}
+
+/* A shockwave ring leaves the title once. */
+.site-shell.film-edition.mirage-edition .rw-title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(70vw, 900px);
+  aspect-ratio: 1;
+  border: 2px solid rgb(255 176 112 / 80%);
+  border-radius: 50%;
+  opacity: 0;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .rw-actions {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .rw-action {
+  position: absolute;
+  min-width: 112px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid rgb(255 176 112 / 60%);
+  color: #fff;
+  background: rgb(10 2 3 / 78%);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  font: 400 12px / 1 "Michroma", "Oxanium", sans-serif;
+  letter-spacing: 0.22em;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.site-shell.film-edition.mirage-edition .rw-close {
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+}
+
+.site-shell.film-edition.mirage-edition .rw-action:not(.rw-close) {
+  bottom: max(28px, env(safe-area-inset-bottom));
+  left: 50%;
+  translate: -50% 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.site-shell.film-edition.mirage-edition .rw-stage[data-phase="rest"] .rw-action:not(.rw-close) {
+  visibility: visible;
+  opacity: 1;
+}
+
+.site-shell.film-edition.mirage-edition .rw-action:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 3px #1a0402,
+    inset 0 0 0 5px #fff0b5;
+}
+
+/* ---------- Motion (inside the open dialog only) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .site-shell.film-edition.mirage-edition .rw-stage[data-phase="title"] {
+    animation: rw-shake 380ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-phase="title"] .rw-title {
+    animation: rw-slam 260ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-phase="title"] .rw-title::after {
+    animation: rw-shock 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-phase="rest"] .rw-action:not(.rw-close) {
+    animation: rw-fade 420ms ease both;
+  }
+
+  /* CSS version of the dive and the fire (economy devices, no WebGL). */
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-dive-lines > i {
+    animation: rw-dive-lines 1450ms cubic-bezier(0.5, 0, 0.75, 0) both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-dive-lines > i + i {
+    animation-delay: 240ms;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-css-fire::before {
+    animation: rw-css-world 4300ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-css-fire > i {
+    animation: rw-css-flame 9000ms cubic-bezier(0.25, 0.1, 0.25, 1) 1300ms both;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-css-fire > i:nth-child(2) {
+    animation-delay: 1500ms;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-stage[data-mode="css"] .rw-css-fire > i:nth-child(3) {
+    animation-delay: 1700ms;
+  }
+}
+
+@keyframes rw-shake {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: -10px 4px;
+  }
+  40% {
+    translate: 8px -6px;
+  }
+  60% {
+    translate: -6px 3px;
+  }
+  80% {
+    translate: 3px -2px;
+  }
+}
+
+@keyframes rw-slam {
+  from {
+    opacity: 0;
+    scale: 1.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rw-shock {
+  from {
+    opacity: 0.9;
+    scale: 0.15;
+  }
+  to {
+    opacity: 0;
+    scale: 2.4;
+  }
+}
+
+@keyframes rw-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rw-dive-lines {
+  from {
+    opacity: 0;
+    scale: 0.35;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+    scale: 2.6;
+  }
+}
+
+@keyframes rw-css-world {
+  from {
+    opacity: 0;
+    scale: 2.4;
+  }
+  34% {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 0.42;
+    scale: 1;
+  }
+}
+
+@keyframes rw-css-flame {
+  from {
+    opacity: 0;
+    translate: 0 40%;
+    scale: 0.7;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.55;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+/* ---------- Accessibility modes ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  .site-shell.film-edition.mirage-edition .rw-dialog::backdrop {
+    background: #050102;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition.mirage-edition .rw-title-name {
+    background: none;
+    filter: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition :is(.rw-canvas, .rw-css-fire, .rw-dive-lines, .rw-gate-glow) {
+    display: none;
+  }
+}
