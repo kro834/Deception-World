@@ -160,6 +160,68 @@ export function createCinematicScore(): CinematicScore {
         osc.stop(t0 + 5.72);
         oscillators.push(osc);
       }
+
+      // The burn (about 2.6 s to 6.1 s): a low roar that swells with the
+      // flames, and scattered crackles, all from the same synthesized noise.
+      const roar = ctx.createBufferSource();
+      roar.buffer = makeBrownNoise(ctx, 4);
+      roar.loop = true;
+      const roarFilter = ctx.createBiquadFilter();
+      roarFilter.type = "lowpass";
+      roarFilter.frequency.setValueAtTime(180, t0 + 2.6);
+      roarFilter.frequency.linearRampToValueAtTime(420, t0 + 4.2);
+      roarFilter.frequency.linearRampToValueAtTime(200, t0 + 6.3);
+      const roarGain = ctx.createGain();
+      roarGain.gain.setValueAtTime(0, t0 + 2.6);
+      roarGain.gain.linearRampToValueAtTime(0.16, t0 + 3.9);
+      roarGain.gain.exponentialRampToValueAtTime(0.001, t0 + 6.6);
+      roar.connect(roarFilter);
+      roarFilter.connect(roarGain);
+      roarGain.connect(master);
+      roar.start(t0 + 2.6);
+      roar.stop(t0 + 6.7);
+      sources.push(roar);
+      nodes.push(roarFilter, roarGain);
+
+      const crackle = ctx.createBufferSource();
+      crackle.buffer = makeWhiteNoise(ctx, 4);
+      const crackleFilter = ctx.createBiquadFilter();
+      crackleFilter.type = "bandpass";
+      crackleFilter.frequency.value = 2400;
+      crackleFilter.Q.value = 0.9;
+      const crackleGain = ctx.createGain();
+      crackleGain.gain.setValueAtTime(0, t0 + 2.7);
+      for (let i = 0; i < 46; i += 1) {
+        const at = t0 + 2.75 + Math.random() * 3.2;
+        const peak = 0.04 + Math.random() * 0.08;
+        crackleGain.gain.setValueAtTime(0, at);
+        crackleGain.gain.linearRampToValueAtTime(peak, at + 0.004);
+        crackleGain.gain.exponentialRampToValueAtTime(0.001, at + 0.03 + Math.random() * 0.05);
+      }
+      crackle.connect(crackleFilter);
+      crackleFilter.connect(crackleGain);
+      crackleGain.connect(master);
+      crackle.start(t0 + 2.7);
+      crackle.stop(t0 + 6.1);
+      sources.push(crackle);
+      nodes.push(crackleFilter, crackleGain);
+
+      // The prism logo rises from the ash (about 6.1 s): a second, brighter chime.
+      const prismGain = ctx.createGain();
+      prismGain.gain.setValueAtTime(0, t0 + 6.05);
+      prismGain.gain.linearRampToValueAtTime(0.06, t0 + 6.3);
+      prismGain.gain.exponentialRampToValueAtTime(0.001, t0 + 7.9);
+      prismGain.connect(master);
+      nodes.push(prismGain);
+      for (const freq of [988, 1480, 1976]) {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        osc.connect(prismGain);
+        osc.start(t0 + 6.05);
+        osc.stop(t0 + 8);
+        oscillators.push(osc);
+      }
     })();
   }
 
