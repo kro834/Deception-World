@@ -8,6 +8,7 @@ import worldNeoCssUrl from "@/styles-world-neo.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import otherArtworkCssUrl from "@/styles-other-artwork.css?url";
 import worldMirageCssUrl from "@/styles-world-mirage.css?url";
+import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
 // digits and separators those labels use (about 3.5 KB).
@@ -35,6 +36,8 @@ export const Route = createFileRoute("/world")({
     });
     return {
       ...head,
+      // Runs while the HTML is parsed, before the first paint of the boot.
+      scripts: [{ children: MIRAGE_BOOT_GATE_SCRIPT }],
       links: [
         ...head.links,
         {

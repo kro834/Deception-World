@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { MIRAGE_BOOT_GATE_SCRIPT, MIRAGE_BOOT_KEY } from "../src/lib/mirage-boot-gate.js";
+import { prefersLightweightRendering } from "../src/lib/rendering-profile.js";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const readCss = async () =>
@@ -37,14 +39,31 @@ const keyframes = (css) =>
     ]),
   );
 
-const SCOPES = [
-  ".site-shell.film-edition.mirage-edition",
-  'html:not([data-world-effects="economy"]) .site-shell.film-edition.mirage-edition',
-  'html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on.mirage-edition',
-  'html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"]) .site-shell.film-edition.mirage-edition',
-  "html .site-shell.film-edition.mirage-edition > .hero",
-  'html[data-mode="world"]:not([data-rail-lock]):not([data-loading]) body:has(.site-shell.film-edition.mirage-edition)',
-];
+// Strip leading html qualifiers such as :not(...), :is(...) and [...].
+const stripHtmlQualifiers = (selector) => {
+  let rest = selector.slice(4);
+  while (rest.startsWith(":") || rest.startsWith("[")) {
+    const open = rest.startsWith("[") ? "[" : "(";
+    const close = open === "[" ? "]" : ")";
+    let depth = 0;
+    let index = rest.indexOf(open);
+    for (; index < rest.length; index += 1) {
+      if (rest[index] === open) depth += 1;
+      if (rest[index] === close) depth -= 1;
+      if (depth === 0) break;
+    }
+    rest = rest.slice(index + 1);
+  }
+  return rest;
+};
+
+const inScope = (part) => {
+  if (part.startsWith('html[data-mode="world"]')) {
+    return part.includes("body:has(.site-shell.film-edition.mirage-edition)");
+  }
+  const rest = part.startsWith("html") ? stripHtmlQualifiers(part).trimStart() : part;
+  return /^\.site-shell\.film-edition\.(?:motion-on\.)?mirage-edition(?![\w-])/.test(rest);
+};
 
 test("Mirage layer and its HUD face load last on /world only", async () => {
   const route = await read("src/routes/world.tsx");
@@ -111,17 +130,7 @@ test("every rule stays inside the edition scope", async () => {
   assert.ok(rules.length > 100, String(rules.length));
   for (const { selector } of rules) {
     for (const part of splitSelectors(selector)) {
-      assert.ok(
-        SCOPES.some(
-          (scope) =>
-            part === scope ||
-            part.startsWith(`${scope} `) ||
-            part.startsWith(`${scope}:`) ||
-            part.startsWith(`${scope}[`) ||
-            part.startsWith(`${scope}::`),
-        ),
-        part,
-      );
+      assert.ok(inScope(part), part);
     }
   }
 });
@@ -131,7 +140,7 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
   // <body> would otherwise capture every view timeline and freeze it.
   assert.match(
     css,
-    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\) \{\s*overflow: visible;\s*overflow-x: clip;/,
+    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\):not\(:has\(dialog\[open\]\)\) \{\s*overflow: visible;\s*overflow-x: clip;/,
   );
   const gate = css.indexOf("@supports (animation-timeline: view())");
   assert.ok(gate > 0);
@@ -141,6 +150,22 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
   for (const { selector, body } of styleRules(css)) {
     if (!/animation-timeline:\s*view\(/.test(body)) continue;
     assert.doesNotMatch(selector, clipping, selector);
+  }
+  // A scroll lock turns <body> back into a scroll container; the choreography
+  // is switched off meanwhile instead of rebinding to it.
+  for (const { selector, body } of styleRules(css.slice(gate))) {
+    if (!/animation-timeline|view-timeline/.test(body)) continue;
+    for (const part of splitSelectors(selector)) {
+      for (const lock of [
+        ":not([data-side-menu-open])",
+        ":not([data-rail-lock])",
+        ":not([data-loading])",
+        ":not(:has(dialog[open]))",
+      ]) {
+        const flat = part.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
+        assert.ok(flat.includes(lock), `${part} lacks ${lock}`);
+      }
+    }
   }
   for (const name of ["--mr-hero", "--mr-archive", "--mr-column", "--mr-records", "--mr-finale"]) {
     assert.match(css, new RegExp(`view-timeline: ${name} block;`), name);
@@ -285,4 +310,80 @@ test("accessibility modes are restated", async () => {
     css,
     /\.topbar nav a\[aria-current="location"\] \{\s*text-decoration: underline 2px;/,
   );
+});
+
+const runGate = (device, { storage = {}, hash = "" } = {}) => {
+  const attributes = new Map();
+  const documentStub = {
+    documentElement: { setAttribute: (key, value) => attributes.set(key, value) },
+  };
+  const windowStub = {
+    sessionStorage: { getItem: (key) => storage[key] ?? null },
+    location: { hash },
+  };
+  new Function("document", "navigator", "window", MIRAGE_BOOT_GATE_SCRIPT)(
+    documentStub,
+    device,
+    windowStub,
+  );
+  return attributes.has("data-mirage-quiet");
+};
+
+test("the pre-paint boot gate follows the lightweight renderer rules and session state", async () => {
+  const desktop = {
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    maxTouchPoints: 0,
+    hardwareConcurrency: 10,
+    deviceMemory: 8,
+  };
+  const iphone = (tail) => ({
+    userAgent: `Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${tail}`,
+    maxTouchPoints: 5,
+  });
+  const mac = (touch) => ({
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15",
+    maxTouchPoints: touch,
+  });
+  const devices = [
+    desktop,
+    iphone("Version/18.5 Mobile/15E148 Safari/604.1"),
+    iphone("Version/26.0 Mobile/15E148 Safari/604.1"),
+    iphone("CriOS/140.0 Mobile/15E148 Safari/604.1"),
+    mac(5),
+    mac(0),
+    {
+      userAgent:
+        "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+    },
+    { ...desktop, connection: { saveData: true } },
+    { ...desktop, connection: { effectiveType: "2g" } },
+    { ...desktop, connection: { effectiveType: "4g" } },
+    { ...desktop, deviceMemory: 2 },
+    { ...desktop, hardwareConcurrency: 2 },
+  ];
+  for (const device of devices) {
+    assert.equal(runGate(device), prefersLightweightRendering(device), device.userAgent);
+  }
+  assert.equal(runGate(desktop, { storage: { [MIRAGE_BOOT_KEY]: "1" } }), true);
+  assert.equal(runGate(desktop, { storage: { "deception-world:rider-return": "saga" } }), true);
+  assert.equal(runGate(desktop, { hash: "#riders" }), true);
+
+  const route = await read("src/routes/world.tsx");
+  assert.match(route, /scripts: \[\{ children: MIRAGE_BOOT_GATE_SCRIPT \}\]/);
+  const boot = await read("src/components/world/use-mirage-boot.ts");
+  assert.match(boot, /import \{ MIRAGE_BOOT_KEY \} from "@\/lib\/mirage-boot-gate";/);
+  assert.match(boot, /hasAttribute\("data-mirage-quiet"\)/);
+  assert.match(boot, /sentinel\?\.playState === "finished"/);
+
+  // Every time-based boot rule stays off once the gate has spoken.
+  const css = await readCss();
+  for (const { selector, body } of styleRules(css)) {
+    if (!/animation(?:-name)?:(?!\s*none)/.test(body) || /animation-timeline/.test(body)) continue;
+    if (/:hover/.test(selector)) continue;
+    for (const part of splitSelectors(selector)) {
+      assert.match(part, /:not\(\[data-mirage-quiet\]\)/, part);
+    }
+  }
 });
