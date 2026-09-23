@@ -49,15 +49,24 @@ html[data-mode="world"] .site-shell > .site-update-control {
   text-wrap: pretty;
 }
 
-.riders-section,
-.records-section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 1200px;
-}
+/* Riders and Records stay laid out: content-visibility placeholders were off by
+   ±400 px at phone widths, so the topbar anchors landed mid-section. */
 
-[data-performance-region][data-viewport-active="false"] *,
-[data-performance-region][data-viewport-active="false"] *::before,
-[data-performance-region][data-viewport-active="false"] *::after {
+/* Pause only time-based decoration off screen. Scroll-driven reveals must keep
+   their timeline, or they sit hidden at progress 0 after a jump or a fling. */
+[data-performance-region][data-viewport-active="false"]
+  :is(
+    .orbit,
+    .poster-holo-ring,
+    .poster-sheen,
+    .corner,
+    .side-panel-trigger-ring,
+    .world-column-orbit
+  ),
+[data-performance-region][data-viewport-active="false"]
+  :is(.orbit, .poster-holo-ring, .poster-sheen, .corner, .world-column-orbit)::before,
+[data-performance-region][data-viewport-active="false"]
+  :is(.orbit, .poster-holo-ring, .poster-sheen, .corner, .world-column-orbit)::after {
   animation-play-state: paused !important;
 }
 
