@@ -140,7 +140,7 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
   // <body> would otherwise capture every view timeline and freeze it.
   assert.match(
     css,
-    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\):not\(:has\(dialog\[open\]\)\) \{\s*overflow: visible;\s*overflow-x: clip;/,
+    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\) \{\s*overflow: visible;\s*overflow-x: clip;/,
   );
   const gate = css.indexOf("@supports (animation-timeline: view())");
   assert.ok(gate > 0);
@@ -160,7 +160,7 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
         ":not([data-side-menu-open])",
         ":not([data-rail-lock])",
         ":not([data-loading])",
-        ":not(:has(dialog[open]))",
+        ":not([data-dialog-open])",
       ]) {
         const flat = part.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
         assert.ok(flat.includes(lock), `${part} lacks ${lock}`);

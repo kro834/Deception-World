@@ -117,8 +117,8 @@
    locked <body> becomes a scroll container again. A rail lock clips <body>
    instead (styles-world-reveal.css), so the scroll-lit type holds still under
    it; the Mirage choreography is still switched off then. */
-html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
-  body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open])) {
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dialog-open])
+  body:has(.site-shell.film-edition.mirage-edition) {
   overflow: visible;
   overflow-x: clip;
 }
@@ -1715,7 +1715,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .hero {
       view-timeline: --mr-hero block;
@@ -1723,7 +1723,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section) {
       view-timeline: --mr-chapter block;
@@ -1731,7 +1731,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-panel {
       view-timeline: --mr-archive block;
@@ -1739,7 +1739,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .world-column {
       view-timeline: --mr-column block;
@@ -1747,7 +1747,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .episode-archive {
       view-timeline: --mr-records block;
@@ -1755,7 +1755,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-section {
       view-timeline: --mr-finale block;
@@ -1765,7 +1765,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
        than the viewport), so the handoff still measures a resting rect. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .hero-backdrop {
       animation: mr-par-back linear both;
@@ -1775,7 +1775,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .mr-hero-floor
       > i {
@@ -1786,7 +1786,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .poster-stage:not(.is-shuffling)
       .orbit {
@@ -1797,7 +1797,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .poster-stage:not(.is-shuffling)
       .orbit.orbit-two {
@@ -1807,7 +1807,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* After the boot, the wordmark splits apart as the page descends. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
       .mr-word {
       animation: mr-split-left linear both;
@@ -1817,7 +1817,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
       .mr-word
       + .mr-word {
@@ -1827,7 +1827,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* Signal bands move only while the reader scrolls. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .mr-ticker-row {
       animation: mr-marquee linear both;
@@ -1837,7 +1837,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .mr-ticker-row.is-outline {
       animation-name: mr-marquee-back;
@@ -1846,7 +1846,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* Chapter entrances. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section)::before {
       animation: mr-draw-x var(--mr-ease-io) both;
@@ -1856,7 +1856,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section)::after {
       animation: mr-curtain linear both;
@@ -1866,7 +1866,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .section-index
       > span {
@@ -1877,7 +1877,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(
         .section-index > small,
@@ -1892,7 +1892,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.story-copy > .story-lead-sequel, .section-title > .eyebrow) {
       animation: mr-rise-soft var(--mr-ease-out) both;
@@ -1902,7 +1902,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.story-layout, .rider-console)::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1913,7 +1913,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* Panels with overflow:hidden drive their contents by name. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-panel::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1923,7 +1923,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-copy
       h3 {
@@ -1934,7 +1934,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
@@ -1945,7 +1945,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.signal > img, .other-archive-card > img, .dante-visual img) {
       animation: mr-materialize var(--mr-ease-out) both;
@@ -1955,7 +1955,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .world-column::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1965,7 +1965,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .episode-archive::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1975,7 +1975,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .episode-archive-meta
       p
@@ -1988,7 +1988,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* The warp gate. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-sticky::before {
       animation: mr-iris linear both;
@@ -1998,7 +1998,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-content
       h2::after {
@@ -2009,7 +2009,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-content
       > span {
@@ -2020,7 +2020,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .mr-endmark
       :is(span, b) {
@@ -2032,7 +2032,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading])
     /* The reading-progress line takes the prism colours. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
         [data-loading]
-      ):not(:has(dialog[open]))
+      ):not([data-dialog-open])
       .site-shell.film-edition.motion-on.mirage-edition {
       --mx-progress-from: #7ae8ff;
       --mx-progress-to: #ff5cc8;

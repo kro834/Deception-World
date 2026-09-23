@@ -28,6 +28,9 @@ const cssFiles = [
     .map((name) => `src/styles-world/${name}`),
 ].sort();
 
+// RISING is being rewritten in its own stream; its gates move to the same
+// attribute when that lands. Nothing else may use the old gates.
+const PENDING_GATES = new Set(["src/styles-world-rising.css"]);
 // Timeline keyframes that still animate clip-path (main-thread paint).
 // Shrink this list; never grow it.
 const CLIP_PATH_ALLOWED = new Set(["mr-type", "mr-wipe", "mr-materialize"]);
@@ -162,4 +165,24 @@ test("scroll-linked keyframes never repaint the page every frame", () => {
   const ink = timelineRules.find(({ names }) => names.includes("tr-ink"));
   assert.match(ink.body, /tr-ink steps\(1, end\)/);
   assert.match(ink.body, /tr-caret steps\(1, end\)/);
+});
+
+test("no motion gate asks :has(dialog[open]); pages ask html[data-dialog-open]", () => {
+  for (const { path, rules } of sheets) {
+    if (PENDING_GATES.has(path)) continue;
+    for (const { selector } of rules) {
+      assert.doesNotMatch(selector, /:has\(\s*dialog\[open\]\s*\)/, `${path}: ${selector}`);
+    }
+  }
+  const gated = sheets
+    .filter(({ path }) => !PENDING_GATES.has(path))
+    .flatMap(({ rules }) => rules)
+    .filter(({ selector }) => selector.includes(":not([data-dialog-open])"));
+  assert.ok(gated.length >= 35, String(gated.length));
+  for (const { selector } of gated) {
+    for (const part of splitTopLevel(selector)) {
+      if (!part.includes("[data-dialog-open]")) continue;
+      assert.match(part, /^html[^\s]*:not\(\[data-dialog-open\]\)/, part);
+    }
+  }
 });

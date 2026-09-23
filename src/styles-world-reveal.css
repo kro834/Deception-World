@@ -55,8 +55,10 @@
    the lock (the root stays hidden and the rail blocks touch and wheel
    scrolling) while the timelines stay on the document, so the reveal simply
    holds still under a rail lock. */
-html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open])
-  body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open])) {
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(.site-shell.film-edition.mirage-edition) {
   overflow: clip !important;
 }
 
@@ -71,7 +73,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 @supports (animation-timeline: view()) and (animation-range: cover 0% cover 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal] {
@@ -82,7 +84,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal="copy"] {
@@ -91,7 +93,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal]
@@ -118,7 +120,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
          short landscape screen, below the 74% line: headings there are lit
          by 11svh instead of 26svh, and still write themselves. */
       html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-          :has(dialog[open])
+          [data-dialog-open]
         )
         .site-shell.film-edition.mirage-edition
         [data-text-reveal="heading"] {
@@ -135,7 +137,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
    selector repeats its animation rule so it outranks it. */
 @media (prefers-contrast: more), (forced-colors: active), (prefers-reduced-transparency: reduce) {
   html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-      :has(dialog[open])
+      [data-dialog-open]
     )
     .site-shell.film-edition.mirage-edition
     [data-text-reveal]

@@ -7,9 +7,10 @@ const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const readCss = async () => stripComments(await read("src/styles-world-reveal.css"));
 
 // The reveal's own gate: everything Mirage switches off except rail locks,
-// under which the reveal holds still (see the body clip rule).
+// under which the reveal holds still (see the body clip rule). An open dialog
+// is html[data-dialog-open] (src/lib/dialog-open-flag.js), not :has().
 const GATE =
-  'html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(:has(dialog[open])) .site-shell.film-edition.mirage-edition';
+  'html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not([data-dialog-open]) .site-shell.film-edition.mirage-edition';
 const flat = (text) =>
   text.replace(/\s+/g, " ").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").trim();
 
@@ -194,7 +195,7 @@ test("rail locks clip <body> on /world so the reveal holds still under them", as
   const lockClip = clip.find(({ selector }) => selector.includes("[data-rail-lock]"));
   assert.equal(
     lockClip.selector,
-    'html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]) body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open]))',
+    'html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not([data-dialog-open]) body:has(.site-shell.film-edition.mirage-edition)',
   );
   assert.equal(flat(lockClip.body), "overflow: clip !important;");
   assert.deepEqual(lockClip.context, []);
