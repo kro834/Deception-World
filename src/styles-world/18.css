@@ -49,11 +49,16 @@
 
 /* Android/WebView compositor profile. The artwork, Liquid Glass, glow and
    interaction layers stay intact; only raster area, update cadence and layer
-   ownership are tuned so ANGLE/Vulkan compositors do less repeated work. */
+   ownership are tuned so ANGLE/Vulkan compositors do less repeated work.
+   In-flow min-heights use svh: dvh changes whenever the URL bar shows or
+   hides, which restyles and relayouts the page in the middle of a scroll
+   (dialogs keep dvh; the toolbar cannot move under their scroll lock).
+   `contain` keeps Android's edge stretch, the counterpart of the iOS rubber
+   band, and still blocks pull-to-refresh. */
 html[data-android-renderer] {
   min-height: 100%;
-  min-height: 100dvh;
-  overscroll-behavior-y: none;
+  min-height: 100svh;
+  overscroll-behavior-y: contain;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -63,7 +68,7 @@ html[data-android-renderer] .site-shell,
 html[data-android-renderer] .manager-page,
 html[data-android-renderer] .rider-archive-page {
   min-height: 100%;
-  min-height: 100dvh;
+  min-height: 100svh;
 }
 
 html[data-android-renderer] body {
@@ -85,15 +90,6 @@ html[data-android-renderer] .ios-slide-open {
 html[data-android-renderer] .ambient {
   contain: layout paint style;
   isolation: isolate;
-}
-
-html[data-android-renderer] .grain {
-  inset: -28%;
-  animation-duration: 0.56s;
-}
-
-html[data-one-ui-renderer] .grain {
-  animation-duration: 0.64s;
 }
 
 html[data-android-renderer] .ambient-orb,
@@ -154,7 +150,6 @@ html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="medi
 
   html[data-android-renderer] .hero {
     min-height: 100svh;
-    min-height: 100dvh;
     padding-right: max(18px, env(safe-area-inset-right));
     padding-left: max(18px, env(safe-area-inset-left));
   }

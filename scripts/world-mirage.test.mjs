@@ -341,6 +341,25 @@ test("the pre-paint boot gate follows the lightweight renderer rules and session
     userAgent: `Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${tail}`,
     maxTouchPoints: 5,
   });
+  const pixel9 = {
+    userAgent:
+      "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+    maxTouchPoints: 5,
+    hardwareConcurrency: 9,
+    deviceMemory: 8,
+  };
+  const galaxyS24 = {
+    userAgent:
+      "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+    maxTouchPoints: 5,
+    hardwareConcurrency: 8,
+    deviceMemory: 8,
+  };
+  const samsungInternet = {
+    ...galaxyS24,
+    userAgent:
+      "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36",
+  };
   const mac = (touch) => ({
     userAgent:
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15",
@@ -353,10 +372,17 @@ test("the pre-paint boot gate follows the lightweight renderer rules and session
     iphone("CriOS/140.0 Mobile/15E148 Safari/604.1"),
     mac(5),
     mac(0),
-    {
-      userAgent:
-        "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
-    },
+    pixel9,
+    { ...pixel9, hardwareConcurrency: 8, deviceMemory: 8 },
+    galaxyS24,
+    samsungInternet,
+    { ...pixel9, hardwareConcurrency: 4 },
+    { ...samsungInternet, hardwareConcurrency: 4, deviceMemory: 4 },
+    { ...pixel9, deviceMemory: 2 },
+    { ...galaxyS24, hardwareConcurrency: 2 },
+    { ...samsungInternet, connection: { saveData: true } },
+    { ...pixel9, connection: { effectiveType: "slow-2g" } },
+    { ...desktop, hardwareConcurrency: 4 },
     { ...desktop, connection: { saveData: true } },
     { ...desktop, connection: { effectiveType: "2g" } },
     { ...desktop, connection: { effectiveType: "4g" } },
@@ -364,8 +390,16 @@ test("the pre-paint boot gate follows the lightweight renderer rules and session
     { ...desktop, hardwareConcurrency: 2 },
   ];
   for (const device of devices) {
-    assert.equal(runGate(device), prefersLightweightRendering(device), device.userAgent);
+    assert.equal(
+      runGate(device),
+      prefersLightweightRendering(device),
+      `${device.userAgent} ${JSON.stringify({ ...device, userAgent: undefined })}`,
+    );
   }
+  // Capable Android plays the boot; weak Android and constrained hints stay quiet.
+  for (const device of [pixel9, galaxyS24, samsungInternet]) assert.equal(runGate(device), false);
+  assert.equal(runGate({ ...pixel9, deviceMemory: 2 }), true);
+  assert.equal(runGate({ ...galaxyS24, hardwareConcurrency: 4 }), true);
   assert.equal(runGate(desktop, { storage: { [MIRAGE_BOOT_KEY]: "1" } }), true);
   assert.equal(runGate(desktop, { storage: { "deception-world:rider-return": "saga" } }), true);
   assert.equal(runGate(desktop, { hash: "#riders" }), true);

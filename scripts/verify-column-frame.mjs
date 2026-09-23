@@ -16,6 +16,12 @@ try {
     try {
       await page.goto(base + "/world");
       await page.waitForTimeout(2400);
+      // Android now plays the full Mirage boot; measure the settled page.
+      await page.waitForFunction(
+        () => document.querySelector(".site-shell")?.dataset.mirageBoot === "done",
+        undefined,
+        { timeout: 10_000 },
+      );
       await page.locator(".world-column-slide-open").focus();
       await page.keyboard.press("Enter");
       await page.locator(".world-column-dialog[open]").waitFor();

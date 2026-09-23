@@ -458,6 +458,8 @@ async function checkAndroidRenderer(page) {
   await page.waitForTimeout(400);
   const state = await page.evaluate(() => ({
     profile: document.documentElement.dataset.worldEffects,
+    android: document.documentElement.dataset.androidRenderer,
+    nativeProgress: document.documentElement.dataset.nativeScrollProgress,
     headerBlur: getComputedStyle(document.querySelector(".topbar")).backdropFilter,
     railBlur: getComputedStyle(document.querySelector(".manager-archive-tabs")).backdropFilter,
     selected: document
@@ -467,12 +469,16 @@ async function checkAndroidRenderer(page) {
     backdropVisible:
       getComputedStyle(document.querySelector(".hero-backdrop-layer")).display !== "none",
   }));
-  assert.equal(state.profile, "economy");
+  // A capable Android phone keeps full motion and the key art, with CSS-only
+  // glass (no backdrop sampling, no WebGL canvas) and native reading progress.
+  assert.equal(state.profile, undefined);
+  assert.equal(state.android, "true");
+  assert.equal(state.nativeProgress, "true");
   assert.equal(state.headerBlur, "none");
   assert.equal(state.railBlur, "none");
   assert.equal(state.canvases, 0);
   assert.equal(state.selected, "true");
-  assert.equal(state.backdropVisible, false);
+  assert.equal(state.backdropVisible, true);
   return state;
 }
 

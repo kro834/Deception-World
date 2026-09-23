@@ -1,6 +1,23 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
+// The topbar draws exactly one reading-progress line: the Motion edition's
+// prism (::before, `scale`) or the hairline (::after, `transform`).
+const readProgressLines = () => {
+  const topbar = document.querySelector(".topbar");
+  return ["::before", "::after"]
+    .map((pseudo) => {
+      const style = getComputedStyle(topbar, pseudo);
+      if (style.content === "none" || style.display === "none") return null;
+      const scale =
+        style.scale && style.scale !== "none"
+          ? Number.parseFloat(style.scale)
+          : new DOMMatrixReadOnly(style.transform === "none" ? undefined : style.transform).a;
+      return { pseudo, scale };
+    })
+    .filter(Boolean);
+};
+
 const browser = await chromium.launch({ channel: "chrome" });
 try {
   for (const mode of ["android", "unsupported", "iphone", "iphone27"]) {
@@ -50,12 +67,16 @@ try {
       ).a,
     }));
     assert.ok(result.ratio > 0.1, "Scroll must move the page");
+    const lines = await page.evaluate(readProgressLines);
+    assert.equal(lines.length, 1, `${mode}: one progress line ${JSON.stringify(lines)}`);
+    assert.ok(Math.abs(lines[0].scale - result.ratio) < 0.025, JSON.stringify({ lines, result }));
     assert.equal(result.native, mode === "android" || mode === "iphone27");
     if (mode === "android" || mode === "iphone27") {
       assert.equal(result.writes, 0);
       assert.ok(Math.abs(result.scale - result.ratio) < 0.025, JSON.stringify(result));
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.waitForFunction(() => !document.documentElement.dataset.nativeScrollProgress);
+      assert.equal((await page.evaluate(readProgressLines)).length, 1, `${mode}: reduced motion`);
       assert.ok(
         await page.evaluate(
           () => Number(document.documentElement.style.getPropertyValue("--page-progress")) > 0,

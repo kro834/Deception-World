@@ -81,6 +81,12 @@ try {
     try {
       await page.goto(`${base}/world`);
       await page.waitForTimeout(2400);
+      // Android now plays the full Mirage boot; measure the settled page.
+      await page.waitForFunction(
+        () => document.querySelector(".site-shell")?.dataset.mirageBoot === "done",
+        undefined,
+        { timeout: 10_000 },
+      );
       const hero = await page.evaluate(() => {
         const identity = document.querySelector(".film-hero-identity").getBoundingClientRect();
         const topbar = document.querySelector(".topbar").getBoundingClientRect();
