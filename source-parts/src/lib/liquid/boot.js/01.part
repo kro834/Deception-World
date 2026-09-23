@@ -30,6 +30,18 @@ function nearestTab(px, py, geos) {
 
 const mqCache = new Map();
 const mq = (q) => { let l = mqCache.get(q); if (!l) { l = matchMedia(q); mqCache.set(q, l); } return l; };
+
+// Frosted controls (styles-frosted-controls.css) set --liquid-frosted on :root
+// for the life of the page. Read it once, at the top of the first press while
+// style is still clean: read after the rail's page lock it forced a
+// whole-document style recalculation inside every tap handler.
+let frostedControls = null;
+function isFrosted() {
+  if (frostedControls === null) {
+    frostedControls = getComputedStyle(document.documentElement).getPropertyValue('--liquid-frosted').trim() === '1';
+  }
+  return frostedControls;
+}
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 function parseColor(color) {
@@ -182,7 +194,7 @@ class GlassRenderer {
   activate(root) {
     // Frosted controls use the DOM lens, including during hold and drag.
     // Do not compile shaders or rasterize text behind an opaque surface.
-    if (getComputedStyle(root).getPropertyValue('--liquid-frosted').trim() === '1') {
+    if (isFrosted()) {
       root.dataset.liquidWebgl = 'fallback';
       return false;
     }
@@ -218,11 +230,3 @@ class GlassRenderer {
   detach(root) {
     if (this.activeRoot !== root) return;
     this.stop(); this.canvas.remove();
-    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
-    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
-  }
-  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
-  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
-  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
-  setPhase(phase) {
-    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;

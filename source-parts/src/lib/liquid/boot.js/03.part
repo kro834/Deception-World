@@ -1,3 +1,6 @@
+      try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
+    }
+    pending = null;
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
     reset();
@@ -82,6 +85,7 @@
 
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
     let start = target ? list.indexOf(target) : -1;
@@ -164,10 +168,16 @@
     if (g.axis === 'pending') {
       const moved = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
       const threshold = (g.pointerType === 'mouse' ? 7 : 11) + (g.held ? 6 : 0);
-      const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const over = hit ? hit.closest('button[role="tab"]') : null;
       // A sloppy tap still counts when the finger lifts over the same tab.
-      if (moved >= threshold && over !== tabs()[g.start]) { cancel(); return; }
+      // Hit-test the geometry measured at pointerdown (the page is locked, so
+      // it still holds): elementFromPoint here forced style and layout after
+      // the lock, a whole-document recalculation on every tap.
+      if (moved >= threshold) {
+        const box = g.geos[g.start];
+        const px = (e.clientX - g.rect.left) / g.sx, py = (e.clientY - g.rect.top) / (g.sy || 1);
+        const over = Boolean(box) && px >= box.x && px <= box.x + box.width && py >= box.y && py <= box.y + box.height;
+        if (!over) { cancel(); return; }
+      }
       gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
     }
     if (g.axis === 'free') {
@@ -221,8 +231,3 @@
 
   let swallowClick = false;
   tabs().forEach((t, i) => on(t, 'click', (ev) => {
-    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
-    select(i); settle(i);
-  }));
-
-  on(root, 'keydown', (e) => {

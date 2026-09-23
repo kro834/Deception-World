@@ -1,3 +1,8 @@
+    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+    select(i); settle(i);
+  }));
+
+  on(root, 'keydown', (e) => {
     const tab = e.target.closest('button[role="tab"]');
     if (!tab || !root.contains(tab)) return;
     const list = tabs();

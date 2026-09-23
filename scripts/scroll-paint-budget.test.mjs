@@ -186,3 +186,22 @@ test("no motion gate asks :has(dialog[open]); pages ask html[data-dialog-open]",
     }
   }
 });
+
+test("no scroll animation is gated on a rail lock", () => {
+  for (const { path, rules } of sheets) {
+    if (PENDING_GATES.has(path)) continue;
+    for (const { selector, body } of rules) {
+      const moves =
+        /(?:^|;)\s*animation(?:-name)?\s*:(?!\s*none\s*(?:!important\s*)?(?:;|$))/.test(body) ||
+        /animation-timeline|animation-range|view-timeline|scroll-timeline/.test(body);
+      if (!moves) continue;
+      assert.doesNotMatch(selector, /data-rail-lock/, `${path}: ${selector}`);
+    }
+  }
+  // Under a rail lock <body> is clipped, not hidden, so view timelines keep
+  // the document as their scroller.
+  const reveal = parse(read("src/styles-world-reveal.css")).rules;
+  const clip = reveal.find(({ selector }) => selector.includes("[data-rail-lock]"));
+  assert.ok(clip, "the rail-lock body clip");
+  assert.equal(flat(clip.body), "overflow: clip !important;");
+});

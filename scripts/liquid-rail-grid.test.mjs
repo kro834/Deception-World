@@ -108,13 +108,11 @@ function mountRail(boxes) {
     setPointerCapture() {},
     releasePointerCapture() {},
   });
-  doc.elementFromPoint = (x, y) =>
-    tabs.find((_, index) => {
-      const box = boxes[index];
-      return (
-        x >= box.left && x <= box.left + box.width && y >= box.top && y <= box.top + box.height
-      );
-    }) ?? null;
+  // A tap is hit-tested against the geometry measured at pointerdown: a hit
+  // test here would force style and layout after the page lock.
+  doc.elementFromPoint = () => {
+    throw new Error("elementFromPoint forces style and layout inside the tap handler");
+  };
 
   let nextFrame = 1;
   const frames = new Map();
@@ -168,6 +166,7 @@ function mountRail(boxes) {
       setPhase() {},
       detach() {},
     }),
+    isFrosted: () => true,
     mix: (from, to, amount) => from + (to - from) * amount,
     mq: () => ({ matches: true }),
     nearestTab(px, py, geos) {
@@ -192,7 +191,7 @@ function mountRail(boxes) {
   const dispose = context.initRail(root);
   flushFrames();
 
-  const pointer = (type, x, y) =>
+  const pointer = (type, x, y, target = tabs[0]) =>
     root.dispatch(type, {
       isPrimary: true,
       pointerType: "touch",
@@ -201,7 +200,7 @@ function mountRail(boxes) {
       clientX: x,
       clientY: y,
       timeStamp: type === "pointerdown" ? 1 : 20,
-      target: tabs[0],
+      target,
     });
 
   return { dispose, flushFrames, lens, pointer, root, tabs, win };
@@ -268,6 +267,35 @@ test("cancelling a grid drag releases the immediate page lock", () => {
     ui.win.dispatch("pointercancel", { pointerId: 7 });
     assert.equal(ui.root.dataset.railLock, undefined);
     assert.equal(ui.root.dataset.liquidDragging, "false");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a sloppy tap counts when the finger lifts over the same tab", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
+  try {
+    // No pointermove arrives before the lift (a fast tap), 21px from contact.
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    assert.equal(ui.root.dataset.railLock, "true");
+    ui.pointer("pointerup", 90, 40, ui.tabs[1]);
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a sloppy tap that lifts over another tab is cancelled", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
+  try {
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    ui.pointer("pointerup", 75, 80, ui.tabs[1]);
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "false");
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "false");
+    assert.equal(ui.root.dataset.railLock, undefined);
+    assert.equal(ui.root.dataset.liquidPressed, "false");
   } finally {
     ui.dispose();
   }

@@ -1,3 +1,11 @@
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
+  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
+  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
+  setPhase(phase) {
+    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
     this.releasing = phase === 'rest';
     if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
     this.schedule();
@@ -223,6 +231,3 @@ function initRail(root) {
     const wasActive = Boolean(gesture);
     gesture = null;
     if (pointerId !== undefined) {
-      try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
-    }
-    pending = null;

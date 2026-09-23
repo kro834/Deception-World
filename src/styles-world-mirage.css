@@ -115,8 +115,10 @@
    Loading covers, the side menu and open dialogs keep their own overflow
    rules; scroll choreography is switched off while they are active, because a
    locked <body> becomes a scroll container again. A rail lock clips <body>
-   instead (styles-world-reveal.css), so the scroll-lit type holds still under
-   it; the Mirage choreography is still switched off then. */
+   instead (styles-world-reveal.css), so the timelines stay on the document:
+   the scroll-lit type and the Mirage choreography simply hold still under a
+   rail lock. (Switching them off restyled and restarted every scroll
+   animation on each rail tap, twice.) */
 html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dialog-open])
   body:has(.site-shell.film-edition.mirage-edition) {
   overflow: visible;
@@ -1713,49 +1715,49 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
    ================================================================ */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .hero {
       view-timeline: --mr-hero block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section) {
       view-timeline: --mr-chapter block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .threat-panel {
       view-timeline: --mr-archive block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .world-column {
       view-timeline: --mr-column block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .episode-archive {
       view-timeline: --mr-records block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .finale-section {
       view-timeline: --mr-finale block;
@@ -1763,9 +1765,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
 
     /* Hero depth planes: identity at scrollY 0 (the hero is never shorter
        than the viewport), so the handoff still measures a resting rect. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .hero-backdrop {
       animation: mr-par-back linear both;
@@ -1773,9 +1775,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: contain 0% exit 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .mr-hero-floor
       > i {
@@ -1784,9 +1786,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: contain 0% exit 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .poster-stage:not(.is-shuffling)
       .orbit {
@@ -1795,9 +1797,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: contain 0% exit 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .poster-stage:not(.is-shuffling)
       .orbit.orbit-two {
@@ -1805,9 +1807,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     }
 
     /* After the boot, the wordmark splits apart as the page descends. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
       .mr-word {
       animation: mr-split-left linear both;
@@ -1815,9 +1817,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: contain 0% contain 520px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
       .mr-word
       + .mr-word {
@@ -1825,9 +1827,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     }
 
     /* Signal bands move only while the reader scrolls. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .mr-ticker-row {
       animation: mr-marquee linear both;
@@ -1835,18 +1837,18 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: cover 0% cover 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .mr-ticker-row.is-outline {
       animation-name: mr-marquee-back;
     }
 
     /* Chapter entrances. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section)::before {
       animation: mr-draw-x var(--mr-ease-io) both;
@@ -1854,9 +1856,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 520px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.story-section, .riders-section, .records-section)::after {
       animation: mr-curtain linear both;
@@ -1864,9 +1866,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 900px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .section-index
       > span {
@@ -1875,9 +1877,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(
         .section-index > small,
@@ -1890,9 +1892,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.story-copy > .story-lead-sequel, .section-title > .eyebrow) {
       animation: mr-rise-soft var(--mr-ease-out) both;
@@ -1900,9 +1902,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 100%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.story-layout, .rider-console)::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1911,9 +1913,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     }
 
     /* Panels with overflow:hidden drive their contents by name. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .threat-panel::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1921,9 +1923,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 320px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .threat-copy
       h3 {
@@ -1932,9 +1934,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0px entry 140px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
@@ -1943,9 +1945,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0px entry 60px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       :is(.signal > img, .other-archive-card > img, .dante-visual img) {
       animation: mr-materialize var(--mr-ease-out) both;
@@ -1953,9 +1955,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 55%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .world-column::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1963,9 +1965,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 320px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .episode-archive::after {
       animation: mr-lock steps(4, jump-end) both;
@@ -1973,9 +1975,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 0% entry 320px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .episode-archive-meta
       p
@@ -1986,9 +1988,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     }
 
     /* The warp gate. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .finale-sticky::before {
       animation: mr-iris linear both;
@@ -1996,9 +1998,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 40% exit 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .finale-content
       h2::after {
@@ -2007,9 +2009,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 30% contain 30%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .finale-content
       > span {
@@ -2018,9 +2020,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
       animation-range: entry 40px entry 220px;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.mirage-edition
       .mr-endmark
       :is(span, b) {
@@ -2030,9 +2032,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     }
 
     /* The reading-progress line takes the prism colours. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
       .site-shell.film-edition.motion-on.mirage-edition {
       --mx-progress-from: #7ae8ff;
       --mx-progress-to: #ff5cc8;

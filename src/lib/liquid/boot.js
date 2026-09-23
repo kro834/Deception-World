@@ -30,6 +30,18 @@ function nearestTab(px, py, geos) {
 
 const mqCache = new Map();
 const mq = (q) => { let l = mqCache.get(q); if (!l) { l = matchMedia(q); mqCache.set(q, l); } return l; };
+
+// Frosted controls (styles-frosted-controls.css) set --liquid-frosted on :root
+// for the life of the page. Read it once, at the top of the first press while
+// style is still clean: read after the rail's page lock it forced a
+// whole-document style recalculation inside every tap handler.
+let frostedControls = null;
+function isFrosted() {
+  if (frostedControls === null) {
+    frostedControls = getComputedStyle(document.documentElement).getPropertyValue('--liquid-frosted').trim() === '1';
+  }
+  return frostedControls;
+}
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 function parseColor(color) {
@@ -182,7 +194,7 @@ class GlassRenderer {
   activate(root) {
     // Frosted controls use the DOM lens, including during hold and drag.
     // Do not compile shaders or rasterize text behind an opaque surface.
-    if (getComputedStyle(root).getPropertyValue('--liquid-frosted').trim() === '1') {
+    if (isFrosted()) {
       root.dataset.liquidWebgl = 'fallback';
       return false;
     }
@@ -538,6 +550,7 @@ function initRail(root) {
 
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
     let start = target ? list.indexOf(target) : -1;
@@ -620,10 +633,16 @@ function initRail(root) {
     if (g.axis === 'pending') {
       const moved = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
       const threshold = (g.pointerType === 'mouse' ? 7 : 11) + (g.held ? 6 : 0);
-      const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const over = hit ? hit.closest('button[role="tab"]') : null;
       // A sloppy tap still counts when the finger lifts over the same tab.
-      if (moved >= threshold && over !== tabs()[g.start]) { cancel(); return; }
+      // Hit-test the geometry measured at pointerdown (the page is locked, so
+      // it still holds): elementFromPoint here forced style and layout after
+      // the lock, a whole-document recalculation on every tap.
+      if (moved >= threshold) {
+        const box = g.geos[g.start];
+        const px = (e.clientX - g.rect.left) / g.sx, py = (e.clientY - g.rect.top) / (g.sy || 1);
+        const over = Boolean(box) && px >= box.x && px <= box.x + box.width && py >= box.y && py <= box.y + box.height;
+        if (!over) { cancel(); return; }
+      }
       gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
     }
     if (g.axis === 'free') {
