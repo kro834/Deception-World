@@ -55,6 +55,13 @@ html[data-mode="world"] .site-shell > .site-update-control {
   contain-intrinsic-size: auto 1200px;
 }
 
+/* Primary hash targets must not move when earlier estimated sections are laid out.
+   Images within these sections still retain their own lazy loading. */
+.site-shell :is(.world-column, .riders-section) {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
 [data-performance-region][data-viewport-active="false"] *,
 [data-performance-region][data-viewport-active="false"] *::before,
 [data-performance-region][data-viewport-active="false"] *::after {

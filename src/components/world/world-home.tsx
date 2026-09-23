@@ -1031,7 +1031,10 @@ export function WorldHome() {
       const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
       let current: "story" | "riders" | "records" | null = null;
       sections.forEach((section) => {
-        if (section.getBoundingClientRect().top <= marker) {
+        // Short landscape viewports can place the native hash landing (96px)
+        // just below the visual marker (92px). Count that landing as active.
+        const landing = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
+        if (section.getBoundingClientRect().top <= Math.max(marker, landing + 8)) {
           current = section.id as "story" | "riders" | "records";
         }
       });

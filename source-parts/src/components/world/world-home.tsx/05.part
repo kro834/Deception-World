@@ -1,3 +1,4 @@
+              <b>THE STORY CONTINUES</b>
             </span>
           </div>
         </div>
@@ -434,4 +435,3 @@
           <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
           <div
             id="rider-active-panel"
-            className="rider-detail"

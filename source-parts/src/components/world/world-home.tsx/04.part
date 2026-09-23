@@ -1,3 +1,5 @@
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
     setEpisodePickup(index);
     cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
@@ -434,4 +436,3 @@
             </span>
             <span>
               <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
