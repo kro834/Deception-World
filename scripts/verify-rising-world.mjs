@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
+import { RISING_TIMING } from "../src/components/world/rising-timing.ts";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const channel = process.env.PW_BROWSER_CHANNEL || "chrome";
@@ -619,7 +620,7 @@ async function checkTiers(browser, name) {
     }));
     assert.deepEqual(pending, { tier: null, end: "hidden" }, `${name}: pending engine`);
     // SKIP while the chunk loads is kept: the run starts at the end still
-    // instead of playing the whole sequence (8.8 s) once the chunk arrives.
+    // instead of playing the whole sequence (9.6 s) once the chunk arrives.
     await page.focus(".rw-skip");
     await page.keyboard.press("Enter");
     // The delayed chunks arrive in turn (the module graph loads in steps); the
@@ -905,13 +906,14 @@ async function checkPerformance(browser, name) {
   await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.ready === "true");
   await page.waitForSelector(".rw-replay", { timeout: 15_000 });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  const perf = await page.evaluate(() => {
+  const perf = await page.evaluate((drawWindow) => {
     const stats = window.__risingStats;
     const sorted = [...stats.renderMs].sort((a, b) => a - b);
     const pick = (q) => Number((sorted[Math.floor((sorted.length - 1) * q)] ?? 0).toFixed(2));
     return {
       draws: stats.draws,
-      drawsPerSecond: Number((stats.draws / 8.8).toFixed(1)),
+      // The canvas draws until its fade has finished (the sequence clock's draw window).
+      drawsPerSecond: Number((stats.draws / drawWindow).toFixed(1)),
       jsPerDrawP50: pick(0.5),
       jsPerDrawP95: pick(0.95),
       readyMs: stats.readyMs,
@@ -919,7 +921,7 @@ async function checkPerformance(browser, name) {
       rungChanges: stats.rungChanges,
       longTasks: window.__longTasks,
     };
-  });
+  }, RISING_TIMING.webgl.fade[1]);
   const longest = Math.max(0, ...perf.longTasks);
   assert.ok(perf.drawsPerSecond >= 40, `${name}: draw rate ${perf.drawsPerSecond}`);
   assert.ok(perf.jsPerDrawP95 < 4, `${name}: JS per draw p95 ${perf.jsPerDrawP95} ms`);
@@ -934,9 +936,9 @@ async function checkPerformance(browser, name) {
 
 // ---------------------------------------------------------------- flashes
 const FPS = 60;
-const AUDIT_END = { webgl: 9.2, css: 7.6, reduced: 3.0 };
+const AUDIT_END = { webgl: 10.0, css: 8.0, reduced: 3.0 };
 const KEYFRAMES = [
-  -0.3, -0.15, 0, 0.3, 1.0, 1.7, 2.05, 2.5, 3.4, 4.3, 4.5, 4.55, 4.8, 5.6, 6.6, 7.6, 9.0,
+  -0.3, -0.15, 0, 0.3, 1.0, 1.7, 2.05, 2.5, 3.4, 4.3, 4.5, 4.55, 4.8, 5.6, 6.6, 7.6, 8.8, 9.7,
 ];
 
 async function createAnalyser(browser, cell, viewport) {
@@ -1065,7 +1067,7 @@ async function createAnalyser(browser, cell, viewport) {
           cells,
           general,
           red,
-          meanL: [0, 1, 2.05, 3, 4.4, 4.6, 6, 8.8].map((t) => `${t}:${mean(t)}`).join(" "),
+          meanL: [0, 1, 2.05, 3, 4.4, 4.6, 6, 8.8, 9.6].map((t) => `${t}:${mean(t)}`).join(" "),
         };
       };
     },

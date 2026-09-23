@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { hasConstrainedResources } from "../src/lib/rendering-profile.js";
 import {
+  RISING_ART_ASPECT,
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
+  RISING_WORLD_FOCUS,
+  RISING_WORLD_POSITION,
   pickRisingTier,
   portalEase,
   risingFramesPerDraw,
@@ -85,7 +89,11 @@ test("the gate follows the footer, and the engine stays out of the World bundle"
 
 test("only the supplied words reach the reader", async () => {
   const component = await read("src/components/world/rising-world.tsx");
-  const markup = component.slice(component.indexOf("  return (\n    <>"));
+  // The JSX of every component in the file (the calm fire has its own).
+  const markup = [...component.matchAll(/\n {2}return \(\n {4}<>([\s\S]*?)\n {2}\);\n/g)]
+    .map((match) => match[1])
+    .join("\n");
+  assert.ok(markup.includes("<dialog") && markup.includes("rw-calm-defs"));
   const text = [...markup.matchAll(/>([^<>{}]*)</g)]
     .map((match) => match[1].trim())
     .filter((token) => /[\p{L}\p{N}]/u.test(token));
@@ -201,10 +209,16 @@ test("the renderer is opaque, refuses software GL and never uploads an <img> mid
   assert.match(fire, /resizeQuality: "low"/);
   assert.doesNotMatch(fire, /createImageBitmap\(image/);
   assert.match(fire, /WEBGL_lose_context"\)\?\.loseContext\(\)/);
-  assert.equal([...fire.matchAll(/texImage2D\(/g)].length, 1, "one upload path");
+  // One image upload path (resized bitmaps), plus the noise tile's storage,
+  // which is allocated empty (null) and filled on the GPU by the bake.
+  assert.equal([...fire.matchAll(/texImage2D\(/g)].length, 2, "image upload + noise target");
   assert.match(
     fire,
     /texImage2D\(gl\.TEXTURE_2D, 0, gl\.RGB, gl\.RGB, gl\.UNSIGNED_BYTE, source\)/,
+  );
+  assert.match(
+    fire,
+    /NOISE_SIZE,\s*NOISE_SIZE,\s*0,\s*gl\.RGBA,\s*gl\.UNSIGNED_BYTE,\s*null,?\s*\)/,
   );
   assert.match(fire, /this\.texture\(assets\.world\.source\)/);
 });
@@ -367,7 +381,7 @@ test("draw cadence: about 60 draws a second, never 45 on a 90 Hz panel", () => {
   assert.equal(risingFramesPerDraw(Number.NaN), 1);
 });
 
-test("the uniform schedule: heat only rises, one bloom, one cut, flames settle, ends by 9 s", () => {
+test("the uniform schedule: heat only rises, one bloom, one cut, flames settle, ends by 10 s", () => {
   const s = RISING_TIMING.webgl;
   let heat = -1;
   let warpPeaks = 0;
@@ -394,9 +408,12 @@ test("the uniform schedule: heat only rises, one bloom, one cut, flames settle, 
     for (const value of Object.values(u)) assert.ok(Number.isFinite(value));
   }
   assert.equal(warpPeaks, 1);
+  // The burn grew (2026-09-24), but the whole run, portal included, stays
+  // within about ten seconds.
   for (const tier of Object.keys(RISING_TIMING)) {
-    assert.ok(RISING_TIMING[tier].end <= 9, tier);
-    assert.ok(RISING_TIMING[tier].fade[1] <= RISING_TIMING[tier].end, tier);
+    const t = RISING_TIMING[tier];
+    assert.ok(t.portal + t.end <= 10.05, `${tier}: ${t.portal + t.end} s`);
+    assert.ok(t.fade[1] <= t.end, tier);
   }
   assert.equal(s.title, 4.5);
   assert.ok(risingUniformsAt(s.title).uBurn > 0.25 && risingUniformsAt(s.title).uBurn < 0.6);
@@ -544,4 +561,152 @@ test("review guards: legible gate label, dark pending state, tap-only priming, v
   const from = Number(sequence.match(/add\(calmBurn, \[\{ translate: "0 (\d+)%" \}/)[1]);
   assert.ok(from <= 70, `calm burn starts ${from}% down, below the frame for too long`);
   assert.match(css, new RegExp(`\\.rw-calm-burn \\{[^}]*translate: 0 ${from}%;`));
+});
+
+test("the burning image is the supplied rider art, shipped as-is plus a compact cut", async () => {
+  const art = await read("src/components/world/rising-art.ts");
+  assert.match(art, /export const RISING_BURN_ART = "\/rising-burn-rider-20260924\.webp";/);
+  assert.match(
+    art,
+    /export const RISING_BURN_ART_COMPACT = "\/rising-burn-rider-20260924-683\.webp";/,
+  );
+  // The same compact test as the renderer's pixel budget (rising-sequence.ts).
+  assert.match(art, /\(any-pointer: coarse\)"\)\.matches \|\| window\.innerWidth < 760/);
+  const sequence = await read("src/components/world/rising-sequence.ts");
+  assert.match(sequence, /\(any-pointer: coarse\)"\)\.matches \|\| window\.innerWidth < 760/);
+  assert.doesNotMatch(art, /^import /m, "static and dependency-free");
+  const component = await read("src/components/world/rising-world.tsx");
+  assert.match(component, /import \{ RISING_BURN_ART, risingBurnArt \} from "\.\/rising-art";/);
+  assert.doesNotMatch(component, /deception-world-poster/, "the key visual no longer burns");
+  // Chosen once at the press and used by the portal, the calm tier and the shader.
+  assert.match(component, /artRef\.current = risingBurnArt\(\);/);
+  assert.match(component, /world: artRef\.current,/);
+  assert.equal([...component.matchAll(/src=\{open \? art : undefined\}/g)].length, 2);
+  const original = await readFile(
+    new URL("../public/rising-burn-rider-20260924.webp", import.meta.url),
+  );
+  assert.equal(
+    createHash("sha256").update(original).digest("hex"),
+    "7c75b9f5f3c6329330d103c05c0a5025b9524d0e94e3de4c7eb6494eabb5de00",
+    "the supplied image, byte for byte",
+  );
+  const webpSize = (bytes) => {
+    // VP8 (lossy) frame header: 14-bit width and height after the start code.
+    const at = bytes.indexOf(Buffer.from([0x9d, 0x01, 0x2a]));
+    assert.ok(at > 0, "VP8 frame");
+    return [bytes.readUInt16LE(at + 3) & 0x3fff, bytes.readUInt16LE(at + 5) & 0x3fff];
+  };
+  assert.deepEqual(webpSize(original), [1024, 1536]);
+  const compact = await readFile(
+    new URL("../public/rising-burn-rider-20260924-683.webp", import.meta.url),
+  );
+  assert.deepEqual(webpSize(compact), [683, 1024]);
+  assert.ok(Math.abs(683 / 1024 - RISING_ART_ASPECT) < 0.001 && 1024 / 1536 === RISING_ART_ASPECT);
+});
+
+test("the image is framed the same by the portal, the calm tier and the shader", async () => {
+  const css = await readCss();
+  const [x, y] = RISING_WORLD_POSITION.map((value) => `${Math.round(value * 100)}%`);
+  for (const target of [".rw-calm-world", ".rw-portal-art"]) {
+    const block = css.slice(css.indexOf(`${target} {`));
+    assert.match(block.slice(0, block.indexOf("}")), new RegExp(`object-position: ${x} ${y};`));
+  }
+  const fire = stripComments(await read("src/components/world/rising-fire.ts"));
+  assert.match(fire, /const \[px, py\] = RISING_WORLD_POSITION;/);
+  assert.match(fire, /gl\.uniform2f\(at\.uFrame \?\? null, frame\[0\], frame\[1\]\)/);
+  assert.match(fire, /RISING_WORLD_FOCUS\[0\], RISING_WORLD_FOCUS\[1\]/);
+  // The dive's focus is the rider's chest core, inside the image.
+  assert.ok(RISING_WORLD_FOCUS.every((value) => value > 0.3 && value < 0.8));
+  const shader = await read("src/components/world/rising.frag.glsl");
+  // Never past the image edge, whatever the zoom.
+  assert.match(shader, /clamp\(mix\(uFrame, uFocus, [^;]+\), win, 1\.0 - win\)/);
+});
+
+test("the fire reads its turbulence from a baked, mipmapped noise tile", async () => {
+  const noise = await read("src/components/world/rising-noise.frag.glsl");
+  assert.match(noise, /#ifdef GL_FRAGMENT_PRECISION_HIGH\s+precision highp float;/);
+  for (const [, a, b] of noise.matchAll(/smoothstep\((-?[\d.]+),\s*(-?[\d.]+)/g)) {
+    assert.ok(Number(a) < Number(b), `smoothstep(${a}, ${b})`);
+  }
+  // Tileable: every lattice coordinate wraps with the period.
+  assert.match(noise, /mod\(i, period\)/);
+  const fire = stripComments(await read("src/components/world/rising-fire.ts"));
+  assert.match(fire, /import NOISE_SOURCE from "\.\/rising-noise\.frag\.glsl\?raw";/);
+  assert.match(fire, /const NOISE_SIZE = 256;/, "power of two: REPEAT and mipmaps in WebGL 1");
+  assert.match(fire, /gl\.TEXTURE_WRAP_S, gl\.REPEAT/);
+  assert.match(fire, /gl\.generateMipmap\(gl\.TEXTURE_2D\)/);
+  assert.match(fire, /gl\.LINEAR_MIPMAP_LINEAR/);
+  // Baked once: a ladder recompile keeps the tile.
+  assert.match(fire, /const bake = this\.noiseBaked \? null : link\(NOISE_SOURCE\);/);
+  assert.match(fire, /gl\.deleteTexture\(this\.noiseTexture\)/);
+  const shader = await read("src/components/world/rising.frag.glsl");
+  assert.match(shader, /uniform sampler2D uNoise;/);
+  // Scroll offsets wrap (fract), so FP16 texture coordinates never lose the tile.
+  for (const [offset] of shader.matchAll(/-fract\(T \* [\d.]+\)/g)) assert.ok(offset);
+  assert.doesNotMatch(shader, /nz\([^;]*[-+] T \*/, "unwrapped time offsets in a noise fetch");
+});
+
+test("no global strobe: every uniform turns at most once, flicker stays in the shader's space", () => {
+  const names = Object.keys(risingUniformsAt(0)).filter((name) => name !== "uShock");
+  for (const name of names) {
+    let direction = 0;
+    let turns = 0;
+    let previous = risingUniformsAt(0)[name];
+    for (let step = 1; step <= 1000; step += 1) {
+      const value = risingUniformsAt(step / 100)[name];
+      const delta = value - previous;
+      if (Math.abs(delta) > 1e-6) {
+        const next = Math.sign(delta);
+        if (direction !== 0 && next !== direction) turns += 1;
+        direction = next;
+      }
+      previous = value;
+    }
+    assert.ok(turns <= 1, `${name} turns ${turns} times`);
+  }
+});
+
+test("the calm tier's fire: compositor-only, finite, and off under reduced motion", async () => {
+  const sequence = stripComments(await read("src/components/world/rising-sequence.ts"));
+  const calm = sequence.slice(sequence.indexOf('if (tier === "css") {'));
+  const block = calm.slice(0, calm.indexOf("\n    add(calm, ["));
+  // Keyframes move only transform parts and opacity (the compositor runs
+  // them); fill is a timing option (a smoke billow's later rounds fill forwards only).
+  const options = ["offset", "delay", "duration", "easing", "fill", "length"];
+  for (const [, property] of block.matchAll(/[{,]\s*([a-zA-Z]+):/g)) {
+    assert.ok(["opacity", "scale", "translate", "rotate", ...options].includes(property), property);
+  }
+  for (const group of ["tongues", "embers", "puffs"])
+    assert.match(block, new RegExp(`${group}\\.forEach`));
+  assert.match(block, /add\(edgeA, /);
+  assert.match(block, /add\(edgeB, /);
+  assert.match(block, /fill: round \? "forwards" : "both"/);
+  assert.doesNotMatch(block, /iterations/);
+  const css = await readCss();
+  assert.match(
+    css,
+    /\.rw-viewport\[data-tier="reduced"\]\s*:is\(\.rw-calm-flames, \.rw-calm-smoke, \.rw-calm-embers\) \{\s*display: none;/,
+  );
+  // The char under the burn layer never lets its bottom edge rise into view.
+  assert.match(css, /\.rw-calm-burn::after \{[^}]*top: 99\.5%;[^}]*background: #070203;/);
+  // Tongue roots fade into the ember bed; landscape deepens the tears, and the
+  // tongues are seated with the same factor.
+  assert.match(
+    css,
+    /\.rw-calm-flames i \{[^}]*(?<!-webkit-)mask-image: linear-gradient\(0deg, transparent, #000 24%\);/,
+  );
+  assert.match(css, /\.rw-calm-char > svg \{[^}]*transform: scaleY\(var\(--rw-edge-k\)\);/);
+  assert.match(
+    css,
+    /@media \(min-aspect-ratio: 1\/1\) \{\s*\.site-shell\.film-edition\.mirage-edition \.rw-calm-burn \{\s*--rw-edge-k: 1\.8;/,
+  );
+  const component = await read("src/components/world/rising-world.tsx");
+  // Two fractal edges from fixed seeds (the server render and every run agree),
+  // each carrying its tongues, drawn from three shared flame symbols.
+  assert.match(component, /burnEdge\(edgeIndex \? 0x51c3 : 0x2b17\)/);
+  assert.doesNotMatch(component.slice(component.indexOf("function burnEdge")), /Math\.random\(/);
+  assert.match(component, /className=\{`rw-calm-char rw-calm-char-\$\{id\}`\}/);
+  assert.match(component, /bottom: `calc\(80\.5% - \$\{dip\}% \* var\(--rw-edge-k\)\)`/);
+  assert.match(component, /<use href=\{`#rw-flame-\$\{shape\}`\} fill="url\(#rw-flame-body\)" \/>/);
+  assert.equal([...component.matchAll(/^ {2}"M[\d .CMZ-]+Z",$/gm)].length, 3, "three flame shapes");
 });

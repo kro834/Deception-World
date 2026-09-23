@@ -27,6 +27,10 @@ const optimizedAssets = [
   ["manager-opus.webp", 130_000],
   ["manager-lejas.webp", 110_000],
   ["manager-lejas-portrait.webp", 110_000],
+  // RISING THE WORLD's burning image: the supplied original (wide screens) and
+  // the 683 x 1024 cut that compact screens load (rising-art.ts).
+  ["rising-burn-rider-20260924.webp", 340_000],
+  ["rising-burn-rider-20260924-683.webp", 160_000],
 ];
 
 test("critical and rider images ship as bounded, valid WebP assets", () => {

@@ -1,9 +1,11 @@
 // RISING THE WORLD: the WebGL renderer. One full-screen fragment shader draws
-// the dive, the burn, the flames and the embers (rising.frag.glsl). This
-// module is loaded with import() from the gate, so the World bundle does not
-// carry it.
+// the dive, the burn, the flames, the smoke and the sparks (rising.frag.glsl),
+// reading its turbulence from a small tileable noise texture that a second
+// shader bakes once per run (rising-noise.frag.glsl). This module is loaded
+// with import() from the gate, so the World bundle does not carry it.
 import FRAGMENT_SOURCE from "./rising.frag.glsl?raw";
-import { risingUniformsAt } from "./rising-timing";
+import NOISE_SOURCE from "./rising-noise.frag.glsl?raw";
+import { RISING_WORLD_FOCUS, RISING_WORLD_POSITION, risingUniformsAt } from "./rising-timing";
 
 export type RisingImage = {
   source: TexImageSource;
@@ -31,15 +33,17 @@ const UNIFORM_NAMES = [
   "uHeat",
   "uWorldScale",
   "uRiderScale",
+  "uFrame",
   "uFocus",
   "uWorld",
   "uRider",
+  "uNoise",
 ] as const;
 
 type UniformName = (typeof UNIFORM_NAMES)[number];
 
-// Resolution first (a canvas resize, no recompile); fewer octaves only as the
-// last resorts. The run starts on rung 1.
+// Resolution first (a canvas resize, no recompile); less flame detail and
+// fewer blur taps only as the last resorts. The run starts on rung 1.
 export const RISING_LADDER = [
   { scale: 1.0, octaves: 4, taps: 8 },
   { scale: 0.75, octaves: 4, taps: 8 },
@@ -55,6 +59,9 @@ export const RISING_START_RUNG = 1;
 // soft and the DOM title stays at native resolution).
 const COMPACT_PIXEL_BUDGET = 420_000;
 const WIDE_PIXEL_BUDGET = 820_000;
+
+// The baked noise tile: power of two (REPEAT and mipmaps in WebGL 1), 256 KB.
+const NOISE_SIZE = 256;
 
 /**
  * A resized ImageBitmap: uploads in 1-3 ms instead of 20-90 ms. The source is
@@ -153,6 +160,8 @@ export class FireRenderer {
   private readonly buffer: WebGLBuffer | null;
   private readonly worldTexture: WebGLTexture | null;
   private readonly riderTexture: WebGLTexture | null;
+  private readonly noiseTexture: WebGLTexture | null;
+  private noiseBaked = false;
   private readonly worldAspect: number;
   private readonly riderAspect: number;
   private program: WebGLProgram | null = null;
@@ -186,6 +195,7 @@ export class FireRenderer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     this.worldTexture = this.texture(assets.world.source);
     this.riderTexture = this.texture(assets.rider.source);
+    this.noiseTexture = this.noiseTarget();
     this.worldAspect = assets.world.aspect;
     this.riderAspect = assets.rider.aspect;
   }
@@ -207,44 +217,114 @@ export class FireRenderer {
     return texture;
   }
 
-  /** Compiles the current rung. With KHR_parallel_shader_compile the wait never blocks. */
+  /** The noise tile's storage: rendered into by the bake, then mipmapped. */
+  private noiseTarget() {
+    const gl = this.gl!;
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // RGBA / UNSIGNED_BYTE: the one colour attachment WebGL 1 guarantees complete.
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      NOISE_SIZE,
+      NOISE_SIZE,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    return texture;
+  }
+
+  /**
+   * Draws the noise tile once (about 65k pixels) and mipmaps it, so the flames
+   * sampled far below texel size stay smooth instead of shimmering.
+   */
+  private bakeNoise(program: WebGLProgram) {
+    const gl = this.gl!;
+    const framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.noiseTexture,
+      0,
+    );
+    gl.useProgram(program);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1f(gl.getUniformLocation(program, "uSize"), NOISE_SIZE);
+    gl.viewport(0, 0, NOISE_SIZE, NOISE_SIZE);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteFramebuffer(framebuffer);
+    gl.bindTexture(gl.TEXTURE_2D, this.noiseTexture);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.deleteProgram(program);
+    this.noiseBaked = true;
+  }
+
+  /**
+   * Compiles the current rung (and, the first time, the noise bake). With
+   * KHR_parallel_shader_compile the wait never blocks.
+   */
   async compile() {
     const gl = this.gl;
     if (!gl) throw new Error("disposed");
     const quality = RISING_LADDER[this.rung];
-    const shader = (type: number, source: string) => {
-      const created = gl.createShader(type)!;
-      gl.shaderSource(created, source);
-      gl.compileShader(created);
-      return created;
+    const link = (source: string) => {
+      const shader = (type: number, text: string) => {
+        const created = gl.createShader(type)!;
+        gl.shaderSource(created, text);
+        gl.compileShader(created);
+        return created;
+      };
+      const vertex = shader(gl.VERTEX_SHADER, VERTEX_SOURCE);
+      const fragment = shader(gl.FRAGMENT_SHADER, source);
+      const program = gl.createProgram()!;
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.bindAttribLocation(program, 0, "aPos");
+      gl.linkProgram(program);
+      return { program, vertex, fragment };
     };
-    const vertex = shader(gl.VERTEX_SHADER, VERTEX_SOURCE);
-    const fragment = shader(
-      gl.FRAGMENT_SHADER,
+    const main = link(
       `#define OCTAVES ${quality.octaves}\n#define BLUR_TAPS ${quality.taps}\n${FRAGMENT_SOURCE}`,
     );
-    const program = gl.createProgram()!;
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.bindAttribLocation(program, 0, "aPos");
-    gl.linkProgram(program);
+    const bake = this.noiseBaked ? null : link(NOISE_SOURCE);
+    const linked = [main, ...(bake ? [bake] : [])];
     if (this.parallel) {
+      const status = this.parallel.COMPLETION_STATUS_KHR;
       while (
         this.gl === gl &&
         !gl.isContextLost() &&
-        !gl.getProgramParameter(program, this.parallel.COMPLETION_STATUS_KHR)
+        !linked.every(({ program }) => gl.getProgramParameter(program, status))
       ) {
         await new Promise((resolve) => requestAnimationFrame(resolve));
       }
     }
     if (this.gl !== gl || gl.isContextLost()) throw new Error("context-lost");
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      const log = gl.getProgramInfoLog(program) || gl.getShaderInfoLog(fragment) || "link";
-      gl.deleteProgram(program);
-      throw new Error(log);
+    for (const { program, fragment } of linked) {
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        const log = gl.getProgramInfoLog(program) || gl.getShaderInfoLog(fragment) || "link";
+        for (const entry of linked) gl.deleteProgram(entry.program);
+        throw new Error(log);
+      }
     }
-    gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
+    for (const { vertex, fragment } of linked) {
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    if (bake) this.bakeNoise(bake.program);
+    const program = main.program;
     if (this.program) gl.deleteProgram(this.program);
     this.program = program;
     gl.useProgram(program);
@@ -257,8 +337,11 @@ export class FireRenderer {
     gl.bindTexture(gl.TEXTURE_2D, this.worldTexture);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.riderTexture);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.noiseTexture);
     gl.uniform1i(this.locations.uWorld ?? null, 0);
     gl.uniform1i(this.locations.uRider ?? null, 1);
+    gl.uniform1i(this.locations.uNoise ?? null, 2);
     this.resize();
   }
 
@@ -282,6 +365,13 @@ export class FireRenderer {
     const cover = (aspect: number): [number, number] =>
       screen > aspect ? [1, aspect / screen] : [screen / aspect, 1];
     const worldScale = cover(this.worldAspect);
+    // The centre of the crop that object-fit: cover with RISING_WORLD_POSITION
+    // shows (the portal and calm images), in the shader's y-up image space.
+    const [px, py] = RISING_WORLD_POSITION;
+    const frame: [number, number] = [
+      px * (1 - worldScale[0]) + worldScale[0] / 2,
+      1 - (py * (1 - worldScale[1]) + worldScale[1] / 2),
+    ];
     // The rider is fitted by height on landscape screens (never cropped to the chest).
     const riderScale: [number, number] =
       screen > this.riderAspect ? [screen / this.riderAspect, 1] : cover(this.riderAspect);
@@ -289,7 +379,8 @@ export class FireRenderer {
     gl.uniform2f(at.uRes ?? null, width, height);
     gl.uniform2f(at.uWorldScale ?? null, worldScale[0], worldScale[1]);
     gl.uniform2f(at.uRiderScale ?? null, riderScale[0], riderScale[1]);
-    gl.uniform2f(at.uFocus ?? null, 0.5, 0.56);
+    gl.uniform2f(at.uFrame ?? null, frame[0], frame[1]);
+    gl.uniform2f(at.uFocus ?? null, RISING_WORLD_FOCUS[0], RISING_WORLD_FOCUS[1]);
     this.size = { width, height, scale: Number(scale.toFixed(3)), rung: this.rung };
   }
 
@@ -331,6 +422,7 @@ export class FireRenderer {
     if (!gl.isContextLost()) {
       gl.deleteTexture(this.worldTexture);
       gl.deleteTexture(this.riderTexture);
+      gl.deleteTexture(this.noiseTexture);
       gl.deleteBuffer(this.buffer);
       if (this.program) gl.deleteProgram(this.program);
       gl.getExtension("WEBGL_lose_context")?.loseContext();

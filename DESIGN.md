@@ -127,23 +127,40 @@ Guards: `scripts/world-reveal.test.mjs` and `scripts/verify-world-reveal.mjs`.
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.
 
-Pressing it opens a modal sequence of about 9.2 s: a 0.42 s portal, then an 8.8 s sequence clock that starts when the portal has covered the screen and the renderer is ready (7.3 s on the CSS tier):
-- a round window onto the key visual bursts out of the button and opens like an iris over the still image (the circle is scaled and the image counter-scaled: compositor-only, so it stays smooth while the page restyles for the dialog);
-- a dive into the key visual: zoom blur, speed lines, an amber breakthrough;
-- the world consumed by red flames climbing from below, with heat haze, char and embers;
+Pressing it opens a modal sequence of about 10 s: a 0.42 s portal, then a 9.6 s sequence clock that starts when the portal has covered the screen and the renderer is ready (7.7 s on the CSS tier):
+- a round window onto the burning image bursts out of the button and opens like an iris over the still image (the circle is scaled and the image counter-scaled: compositor-only, so it stays smooth while the page restyles for the dialog);
+- a dive into the image: zoom blur, speed lines, an amber breakthrough, closing in on the rider's chest core;
+- the image burned away from below like a photographic print held over a fire (see The burn, below);
 - mid-burn, 4.5 s into the sequence (about 4.9 s after the press), one hard cut to EP7 REXONANCE, while the Rexonance art emerges from the ash;
 - a static end still with CLOSE and もう一度. SKIP jumps straight to it, also while the engine is still loading; Esc and the Android back gesture close. If the engine cannot load, the dialog shows the end still with the title and CLOSE only.
 
-One WebGL fragment shader (`rising.frag.glsl`, high precision where the GPU has it) draws the dive and the fire at about three quarters of CSS resolution within a pixel budget. It draws every frame on 60 and 90 Hz panels and every second frame on 120 and 144 Hz panels, and steps down a resolution-first quality ladder only when frames run late. The engine is loaded with `import()` when the gate nears the viewport. Its images are prepared as resized ImageBitmaps, and the GL context and shader compile start at pointerdown (for touch, 60 ms into the contact or at pointerup: a flick the browser takes over before then (pointercancel) creates none; a finger that rests on the button before scrolling can still prime one, which is released after 1 s unless the click adopts it). Until the engine has loaded, the dialog stays dark. The context exists only while the sequence plays and is released at the end, on close and on pagehide. The prepared bitmaps are closed when the gate unmounts and prepared again on the next approach.
+One WebGL fragment shader (`rising.frag.glsl`, high precision where the GPU has it) draws the dive and the burn at about three quarters of CSS resolution within a pixel budget. It draws every frame on 60 and 90 Hz panels and every second frame on 120 and 144 Hz panels, and steps down a resolution-first quality ladder only when frames run late. The engine is loaded with `import()` when the gate nears the viewport. Its images are prepared as resized ImageBitmaps, and the GL context and shader compile start at pointerdown (for touch, 60 ms into the contact or at pointerup: a flick the browser takes over before then (pointercancel) creates none; a finger that rests on the button before scrolling can still prime one, which is released after 1 s unless the click adopts it). Until the engine has loaded, the dialog stays dark. The context exists only while the sequence plays and is released at the end, on close and on pagehide. The prepared bitmaps are closed when the gate unmounts and prepared again on the next approach.
 
 The tier is chosen by capability, never by device model. Capable devices, Galaxy, Pixel and iPhone included, get the full WebGL version. Save-Data, 2G, low-memory, two-core, software-GL and no-WebGL devices, or GL that is not ready in 700 ms, get a calm CSS version. Reduced motion gets a cross-fade to the still.
 
 The sequence stays at one flash a second, general or red (WCAG 2.3.1, measured frame by frame at 60 fps; the flash audit fails above one):
 - colour temperature only rises;
 - the bloom is amber;
-- nothing pulses;
+- nothing pulses as a whole: the fire flickers only locally and gently (each tongue, each ember speck, the firelight along the front, each on its own slow beat);
 - the shockwave is a gentle refraction;
 - the title is one cut and only the title shakes;
 - SKIP and もう一度 swap the picture between the void and the end still, so a held Enter or Space clicks once and a press within 600 ms of a swap is ignored (the audit holds Enter and clicks every 100 ms on a real clock).
 
 The dialog is named RISING THE WORLD, the title is announced when it appears, and only the supplied words appear. Guards: `scripts/rising-world.test.mjs`, and `scripts/verify-rising-world.mjs` for the gate, the sequence, the tiers, performance and the flash audit in a browser.
+
+### The burn — 2026-09-24
+
+The image that burns is the supplied armoured rider on the night highway (`public/rising-burn-rider-20260924.webp`, kept byte for byte; coarse-pointer and narrow screens load its 683 × 1024 cut, the size the shader's texture is capped at anyway). `rising-art.ts` picks the file once at the press, so the portal, the calm tier and the shader share one download, and all three frame it like `object-fit: cover` at `object-position: 50% 10%`: phones see the whole figure, landscape screens keep the crest and chest.
+
+The shader burns it the way a print burns:
+- ahead of the front the emulsion yellows, browns and blisters (raised bubbles catch the firelight), then blackens at the lip;
+- the front is torn into tongues and islands and frays into fibres, with a thin incandescent lip and an ember bed behind it;
+- behind it the char is near black, greys to ash where it has burned longest, and glows along fissures and in scattered ember specks that cool within about a second;
+- the flames are domain-warped turbulence advected upwards, each tongue swelling and sinking on its own beat, its tip bent furthest by the sway, coloured by a blackbody ramp: yellow-white only at the hot root, orange in the body, dim deep red at the tips, translucent where thin;
+- slow smoke billows off the tongue tips, veils and darkens the print before the flames reach it and glows brown-orange on its underside; heat haze shimmers just above the fire; sparks rise with motion streaks, embers and tumbling ash flakes drift up;
+- the fire lights what is left of the print with a warm light that flickers along the front, never all at once;
+- as the fire dies down, the art in the ash settles into the end still's grade, so the canvas cross-fades into a picture of the same colour.
+
+Turbulence comes from a 256 × 256 tileable noise tile (`rising-noise.frag.glsl`: two fbm fields, cells and fine fbm) baked on the GPU once per run and mipmapped, so the burn costs texture fetches instead of per-pixel value noise; a ladder recompile keeps the tile. Every scrolling noise offset wraps with `fract`, so FP16 texture coordinates on Mali and Adreno never lose it, and no `smoothstep` runs with reversed edges.
+
+The calm CSS tier burns the same image with vector art that only moves by transform and opacity: two fractal burn edges (fixed seeds, so the server render agrees) with a blurred ember glow and an incandescent line climb together while sliding past each other, so the front they make keeps tearing into new shapes; flame clusters (three SVG symbols) sit on each edge, their roots melting into the ember bed, and lick on their own beats with scale, rotate, translate and a little opacity; smoke billows swell and thin above them and embers leave the front where it is. Landscape screens deepen the edge's tears. Reduced motion keeps only the cross-fade to the still.

@@ -10,8 +10,11 @@ import {
   releaseRisingAssets,
 } from "./rising-fire";
 import {
+  RISING_ART_ASPECT,
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
+  RISING_WORLD_FOCUS,
+  RISING_WORLD_POSITION,
   pickRisingTier,
   portalEase,
   risingFramesPerDraw,
@@ -181,6 +184,18 @@ const REDUCED_FADE_SECONDS = 0.4;
 // Portal samples: scale x counter-scale stays within about 1% between them.
 const PORTAL_STEPS = 32;
 
+/**
+ * Where the dive's focal point (RISING_WORLD_FOCUS) sits on screen, as a
+ * fraction of the height, for the calm tier's cover-fitted <img> framed by
+ * RISING_WORLD_POSITION: the zoom closes in on the same spot as the shader.
+ */
+function calmFocusY() {
+  const screen = window.innerWidth / Math.max(1, window.innerHeight);
+  const visible = Math.min(1, RISING_ART_ASPECT / screen); // fraction of the art's height shown
+  const top = RISING_WORLD_POSITION[1] * (1 - visible);
+  return Math.min(1, Math.max(0, (1 - RISING_WORLD_FOCUS[1] - top) / visible));
+}
+
 function withDeadline<T>(promise: Promise<T>, deadline: number) {
   return new Promise<T>((resolve, reject) => {
     const timer = window.setTimeout(
@@ -221,6 +236,13 @@ export function runRising({
   const calm = find(".rw-calm");
   const calmWorld = find(".rw-calm-world");
   const calmBurn = find(".rw-calm-burn");
+  const calmFlames = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames")];
+  const calmSmoke = find(".rw-calm-smoke");
+  const edgeA = find(".rw-calm-char-a");
+  const edgeB = find(".rw-calm-char-b");
+  const puffs = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-smoke i")];
+  const tongues = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames i")];
+  const embers = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-embers i")];
 
   let tier = currentRisingTier();
   const openedAt = performance.now();
@@ -333,7 +355,7 @@ export function runRising({
   const add = (
     element: HTMLElement | null,
     keyframes: Keyframe[],
-    options: { delay: number; duration: number; easing?: string },
+    options: { delay: number; duration: number; easing?: string; fill?: FillMode },
   ) => {
     if (!element) return;
     const animation = element.animate(keyframes, { fill: "both", ...options });
@@ -382,15 +404,120 @@ export function runRising({
       return;
     }
     if (tier === "css") {
+      // The dive closes in on the rider's chest core (RISING_WORLD_FOCUS),
+      // wherever the cover crop puts it on this screen.
+      if (calmWorld) calmWorld.style.transformOrigin = `50% ${(calmFocusY() * 100).toFixed(1)}%`;
       add(calmWorld, [{ scale: 1 }, { scale: 1.32 }], {
         delay: 0,
         duration: ms(s.breakthrough),
         easing: "cubic-bezier(0.5, 0, 0.75, 0)",
       });
-      add(calmBurn, [{ translate: "0 66%" }, { translate: "0 -6%" }], {
+      const burn = s.burnEnd - s.burnStart;
+      add(calmBurn, [{ translate: "0 58%" }, { translate: "0 -42%" }], {
         delay: ms(s.burnStart),
-        duration: ms(s.burnEnd - s.burnStart),
-        easing: "ease-in-out",
+        duration: ms(burn),
+        easing: "linear",
+      });
+      // The two fractal edges slide past each other as they climb, so the
+      // front they make together keeps tearing into new shapes.
+      add(edgeA, [{ translate: "0 0" }, { translate: "-4% 1%" }], {
+        delay: ms(s.burnStart),
+        duration: ms(burn),
+      });
+      add(edgeB, [{ translate: "-4% 2.5%" }, { translate: "4% -2.5%" }], {
+        delay: ms(s.burnStart),
+        duration: ms(burn),
+      });
+      // The fire takes hold, burns, and dies down with the settle.
+      const span = s.settle[1] - s.burnStart;
+      for (const flames of calmFlames) {
+        add(
+          flames,
+          [
+            { offset: 0, opacity: 0 },
+            { offset: 0.5 / span, opacity: 1 },
+            { offset: (s.settle[0] - s.burnStart) / span, opacity: 1 },
+            { offset: 1, opacity: 0.3 },
+          ],
+          { delay: ms(s.burnStart), duration: ms(span) },
+        );
+      }
+      add(
+        calmSmoke,
+        [
+          { offset: 0, opacity: 0 },
+          { offset: 0.2, opacity: 1 },
+          { offset: 1, opacity: 0.6 },
+        ],
+        { delay: ms(s.burnStart), duration: ms(span) },
+      );
+      // Billows well up off the flames, swell and thin out, one after another.
+      puffs.forEach((puff, index) => {
+        const rise = 1.9 + (index % 2) * 0.4;
+        const count = Math.max(1, Math.floor((burn - 0.2) / rise));
+        for (let round = 0; round < count; round += 1) {
+          // One billow per element at a time: each round is its own animation,
+          // and only the first fills backwards (a later round's backward fill
+          // would hide the one playing).
+          const at = s.burnStart + 0.2 + index * (rise / puffs.length) + round * rise;
+          if (at + rise > s.settle[1]) break;
+          add(
+            puff,
+            [
+              { offset: 0, opacity: 0, translate: "0 12%", scale: 0.55 },
+              { offset: 0.3, opacity: 0.9, translate: "0 -18%", scale: 0.9 },
+              { offset: 1, opacity: 0, translate: "0 -64%", scale: 1.5 },
+            ],
+            {
+              delay: ms(at),
+              duration: ms(rise),
+              easing: "cubic-bezier(0.3, 0.3, 0.5, 1)",
+              fill: round ? "forwards" : "both",
+            },
+          );
+        }
+      });
+      // Licking: every tongue stretches, narrows, leans and dims on its own
+      // beat (a sample every ~0.36 s, each eased), so the fire moves and
+      // flickers locally without the row ever pulsing together.
+      tongues.forEach((tongue, index) => {
+        const steps = Math.max(2, Math.round(burn / 0.36));
+        add(
+          tongue,
+          Array.from({ length: steps + 1 }, (_, step) => {
+            const phase = index * 1.7 + step * 2.1;
+            const stretch = 0.82 + 0.3 * Math.abs(Math.sin(phase * 0.63 + index * 0.9));
+            const narrow = 0.88 + 0.14 * Math.sin(phase * 1.1);
+            return {
+              offset: step / steps,
+              easing: "ease-in-out",
+              opacity: Number((0.8 + 0.2 * Math.abs(Math.cos(phase * 0.7))).toFixed(2)),
+              rotate: `${(Math.sin(phase * 0.8 + index) * 6).toFixed(1)}deg`,
+              scale: `${narrow.toFixed(3)} ${stretch.toFixed(3)}`,
+              translate: `${(Math.sin(phase * 1.3) * 5).toFixed(1)}% 0`,
+            };
+          }),
+          { delay: ms(s.burnStart), duration: ms(burn) },
+        );
+      });
+      // Embers leave the front where it is when they are thrown (the burn
+      // layer climbs linearly: its lip crosses the frame from 119.6% to 0%).
+      embers.forEach((ember, index) => {
+        const rise = 1.7 + (index % 3) * 0.3;
+        const at =
+          s.burnStart + 0.3 + ((index * 5) % embers.length) * ((burn - rise) / embers.length);
+        const lip = Math.max(2, ((at - s.burnStart) / burn) * 120 - 20);
+        const drift = Math.round(Math.sin(index * 2.7) * 36);
+        add(
+          ember,
+          [
+            { offset: 0, opacity: 0, translate: `0 -${lip.toFixed(1)}vh` },
+            { offset: 0.1, opacity: 1 },
+            { offset: 0.65, opacity: 0.85 },
+            { offset: 1, opacity: 0, translate: `${drift}px -${(lip + 46).toFixed(1)}vh` },
+          ],
+          { delay: ms(at), duration: ms(rise), easing: "cubic-bezier(0.3, 0.5, 0.6, 1)" },
+        );
       });
     }
     add(calm, [{ opacity: 1 }, { opacity: 0 }], {
