@@ -1,7 +1,3 @@
-        to: "/characters/terra",
-        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
-      },
-      {
         label: "仮面ライダーレルム　ムーンフォーム",
         src: "/rider-realm-moon.jpeg",
         pos: "50% 10%",
@@ -377,6 +373,8 @@ export function WorldHome() {
   const [pickupOpen, setPickupOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
+  // Read by the poster timer at once; the state follows when scrolling settles.
+  const heroInViewRef = useRef(true);
   const [motionReduced, setMotionReduced] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
@@ -440,3 +438,9 @@ export function WorldHome() {
       const destination = {
         path: "/world",
         brand: openingBrandRef.current,
+        sigil: openingSigilRef.current,
+        hero: openingHeroRef.current,
+        backdrop: openingBackdropRef.current,
+        focus: openingFocusRef.current,
+      };
+      const targets = [

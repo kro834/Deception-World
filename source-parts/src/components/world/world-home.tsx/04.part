@@ -1,3 +1,16 @@
+        const isFinalStep = index === steps.length - 1;
+        const ready = isFinalStep ? await waitForFinalImage() : true;
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];
+        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {
+          goPoster(next);
+        }
+        if (isFinalStep) {
+          const settleTimer = window.setTimeout(() => {
+            setShuffling(false);
+            shuffleActive.current = false;
+            shuffleTimers.current = [];
+          }, 300);
           shuffleTimers.current.push(settleTimer);
         }
       }, delay);
@@ -431,12 +444,3 @@
           </div>
         </div>
         <div className="hero-context">
-          <p className="hero-lead">
-            救うべきものは、夢の向こうにはない。
-            <br />
-            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
-          </p>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>

@@ -440,3 +440,7 @@ const EPISODES: EpisodeRecord[] = [
         alt: "仮面ライダーレルム アースフォーム",
         width: 1026,
         height: 1533,
+        to: "/characters/terra",
+        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
+      },
+      {

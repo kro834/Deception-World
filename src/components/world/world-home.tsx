@@ -819,6 +819,8 @@ export function WorldHome() {
   const [pickupOpen, setPickupOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
+  // Read by the poster timer at once; the state follows when scrolling settles.
+  const heroInViewRef = useRef(true);
   const [motionReduced, setMotionReduced] = useState(false);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
@@ -999,7 +1001,7 @@ export function WorldHome() {
     let decoding = false;
     const nextIndex = (poster + 1) % POSTERS.length;
     const t = window.setInterval(async () => {
-      if (decoding || document.querySelector("dialog[open]")) return;
+      if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
       decoding = true;
       const image = new Image();
       image.decoding = "async";
@@ -1008,6 +1010,7 @@ export function WorldHome() {
       try {
         await image.decode();
         if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        if (!heroInViewRef.current) return;
         startTransition(() => {
           setPrevPoster(poster);
           setPoster(nextIndex);
@@ -1094,19 +1097,42 @@ export function WorldHome() {
     const shell = shellRef.current;
     if (!shell || typeof IntersectionObserver === "undefined") return;
     const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");
+    // Hero visibility only gates the poster autoplay. Commit it once scrolling
+    // settles: re-rendering the page mid-fling costs a long frame on phones.
+    let pendingHeroVisible: boolean | null = null;
+    let heroVisibleTimer = 0;
+    const commitHeroVisible = () => {
+      heroVisibleTimer = 0;
+      if (pendingHeroVisible === null) return;
+      const next = pendingHeroVisible;
+      pendingHeroVisible = null;
+      startTransition(() => setHeroVisible(next));
+    };
+    const deferHeroVisible = () => {
+      if (pendingHeroVisible === null) return;
+      window.clearTimeout(heroVisibleTimer);
+      heroVisibleTimer = window.setTimeout(commitHeroVisible, 180);
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
-          // Non-urgent: a time-sliced render instead of one long frame mid-scroll.
-          if (entry.target === openingHeroRef.current)
-            startTransition(() => setHeroVisible(entry.isIntersecting));
+          if (entry.target === openingHeroRef.current) {
+            heroInViewRef.current = entry.isIntersecting;
+            pendingHeroVisible = entry.isIntersecting;
+            deferHeroVisible();
+          }
         });
       },
       { rootMargin: "240px 0px" },
     );
     regions.forEach((region) => observer.observe(region));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", deferHeroVisible, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", deferHeroVisible);
+      window.clearTimeout(heroVisibleTimer);
+    };
   }, []);
 
   useEffect(() => {
