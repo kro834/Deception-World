@@ -13,6 +13,10 @@ export function acquireViewportScrollLock({ freezeBody = false, rail = false } =
   const root = document.documentElement;
   const body = document.body;
   const owner = {};
+  // Read the scroll position before the first style write below, so opening a
+  // modal does not force a second page-wide style recalculation.
+  const scrollPosition =
+    freezeBody && !frozenPosition ? { top: window.scrollY, left: window.scrollX } : null;
   if (!owners.size) {
     snapshot = {
       rootOverflow: root.style.overflow,
@@ -27,8 +31,8 @@ export function acquireViewportScrollLock({ freezeBody = false, rail = false } =
     body.style.overflow = "hidden";
   }
   owners.add(owner);
-  if (freezeBody && !frozenPosition) {
-    frozenPosition = { top: window.scrollY, left: window.scrollX };
+  if (scrollPosition) {
+    frozenPosition = scrollPosition;
     body.style.position = "fixed";
     body.style.top = `-${frozenPosition.top}px`;
     body.style.width = "100%";
