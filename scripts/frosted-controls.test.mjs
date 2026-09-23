@@ -1,24 +1,20 @@
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
-import ts from "typescript";
-import vm from "node:vm";
 
-test("opening title fits square and wide destinations without distortion", () => {
-  const source = readFileSync(new URL("../src/components/cinematic/opening-handoff.tsx", import.meta.url), "utf8");
-  const node = ts.createSourceFile("opening.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
-    .statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === "fitLogoRect");
-  assert.ok(node);
-  const js = ts.transpile(node.getText(), {target: ts.ScriptTarget.ES2022});
-  const context = vm.createContext({});
-  vm.runInContext(js, context);
-  for (const target of [{left:12, top:8, width:48, height:48}, {left:30, top:10, width:180, height:40}]) {
-    const fitted = context.fitLogoRect({left:0, top:0, width:300, height:200}, target);
-    assert.equal(fitted.width / fitted.height, 1.5);
-    assert.ok(fitted.width <= target.width && fitted.height <= target.height);
-    assert.equal(fitted.left + fitted.width / 2, target.left + target.width / 2);
-    assert.equal(fitted.top + fitted.height / 2, target.top + target.height / 2);
-  }
+// ENTER THE WORLD no longer flies the title into the DW sigil (the camera
+// dives through it): both dive tiers aim at the same point of the logo.
+test("both dive tiers aim at the logo's ring without distorting the title", () => {
+  const handoff = readFileSync(new URL("../src/components/cinematic/opening-handoff.tsx", import.meta.url), "utf8");
+  const dive = readFileSync(new URL("../src/components/cinematic/opening-dive.ts", import.meta.url), "utf8");
+  const ring = handoff.match(/const RING = \{ x: ([\d.]+), y: ([\d.]+) \};/);
+  const diveRing = dive.match(/export const DIVE_RING = \{ x: ([\d.]+), y: ([\d.]+) \} as const;/);
+  assert.ok(ring && diveRing);
+  assert.deepEqual(ring.slice(1), diveRing.slice(1));
+  // The CSS dive scales the logo uniformly about that point (never per axis).
+  assert.match(handoff, /logo\.style\.transformOrigin = `\$\{sourceLogoRect\.width \* RING\.x\}px \$\{sourceLogoRect\.height \* RING\.y\}px`/);
+  assert.doesNotMatch(handoff, /scale\([\d.]+,\s*[\d.]+\)/);
+  assert.doesNotMatch(handoff, /fitLogoRect|rectTransform/);
 });
 
 test("EP6 uses the supplied DEUS asset without invented pickup records", () => {

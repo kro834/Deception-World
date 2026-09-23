@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { OPENING_DIVE } from "./opening-timing";
+import type { DiveRun, DiveStats } from "./opening-dive";
 
 export type OpeningHandoffRect = {
   left: number;
@@ -46,15 +48,47 @@ type OpeningHandoffLayerProps = {
   onComplete: (token: number) => void;
 };
 
-const NORMAL_DURATION_MS = 960;
-const ECONOMY_DURATION_MS = 720;
+// ENTER THE WORLD. The covering phase is the dive: WebGL where it is ready in
+// time (opening-dive.ts), otherwise the same storyboard with compositor-only
+// DOM layers. Either way it ends on a still of the world at the World page's
+// framing; the route changes under that still, and the arrival fades it out
+// over the page. Reduced motion is a short cross-fade.
+const ARRIVAL_MS = { full: 520, economy: 420 } as const;
 const REDUCED_DURATION_MS = 250;
-const DEFAULT_LOGO_SRC = "/logo-title-20260915.webp";
+const CSS_DIVE_SCALE = { full: 1, economy: 0.8 } as const;
+const DEFAULT_LOGO_SRC = "/logo-title-prism-20260924-delivery-1536.webp";
 const DEFAULT_VIDEO_SRC = "/atmosphere.mp4";
 const DEFAULT_VIDEO_POSTER = "/atmosphere-poster.jpg";
+const WORLD_ART = "/deception-world-poster-delivery.webp";
+// The dark dial inside the logo's ring (above サーガ), in its own box: the camera dives into it.
+const RING = { x: 0.573, y: 0.315 };
 
-const ARRIVAL_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
 const COVER_EASING = "cubic-bezier(0.22, 0.82, 0.2, 1)";
+const DIVE_EASING = "cubic-bezier(0.6, 0, 0.9, 0.4)";
+const SETTLE_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+type DiveEngine = typeof import("./opening-dive");
+let diveEngine: Promise<DiveEngine> | null = null;
+const loadDiveEngine = () => (diveEngine ??= import("./opening-dive"));
+
+type OpeningDiveTestHook = {
+  readonly tier: string;
+  readonly stats: DiveStats | null;
+  ready: () => Promise<string>;
+  /** Seconds since the dive started drawing (GL) or animating (CSS). */
+  seek: (T: number) => void;
+  /** Ends the dive on its landing frame; the route then changes. */
+  land: () => void;
+};
+
+declare global {
+  interface Window {
+    __openingDiveStats?: DiveStats;
+  }
+}
+
+const openingAuditRequested = () =>
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("opening-audit");
 
 function finite(value: number | undefined, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -101,44 +135,12 @@ function visualViewportLocalRect(
   };
 }
 
-function elementRect(element: HTMLElement | null | undefined, fallback: OpeningHandoffRect) {
-  if (!element?.isConnected) return fallback;
-  return visualViewportLocalRect(element.getBoundingClientRect(), fallback);
-}
-
 function setRect(element: HTMLElement, rect: OpeningHandoffRect) {
   element.style.left = `${rect.left}px`;
   element.style.top = `${rect.top}px`;
   element.style.width = `${Math.max(1, rect.width)}px`;
   element.style.height = `${Math.max(1, rect.height)}px`;
   element.style.transform = "none";
-}
-
-function rectTransform(from: OpeningHandoffRect, to: OpeningHandoffRect) {
-  return `translate3d(${to.left - from.left}px, ${to.top - from.top}px, 0) scale(${Math.max(
-    0.001,
-    to.width / Math.max(1, from.width),
-  )}, ${Math.max(0.001, to.height / Math.max(1, from.height))})`;
-}
-
-// The title is wide, while the destination sigil is square. Fit it inside
-// that target instead of squeezing the wordmark independently on each axis.
-function fitLogoRect(from: OpeningHandoffRect, target: OpeningHandoffRect) {
-  const scale = Math.min(target.width / from.width, target.height / from.height);
-  const width = from.width * scale;
-  const height = from.height * scale;
-  return {
-    left: target.left + (target.width - width) / 2,
-    top: target.top + (target.height - height) / 2,
-    width,
-    height,
-  };
-}
-
-function durationFor(source: OpeningHandoffSource) {
-  if (source.reducedMotion) return REDUCED_DURATION_MS;
-  if (source.economy) return ECONOMY_DURATION_MS;
-  return NORMAL_DURATION_MS;
 }
 
 function animateNode(
@@ -167,14 +169,32 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
   const backdropRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hudRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
-  const focusRef = useRef<HTMLDivElement>(null);
+  const glRef = useRef<HTMLDivElement>(null);
+  const speedRef = useRef<HTMLDivElement>(null);
+  const tunnelRef = useRef<HTMLDivElement>(null);
+  const worldRef = useRef<HTMLDivElement>(null);
+  const bloomRef = useRef<HTMLDivElement>(null);
   const activeTokenRef = useRef<number | null>(null);
+  // The dive outlives the covering effect: its landing frame stays on screen
+  // while the route changes, until the arrival has faded it out.
+  const diveRef = useRef<{ token: number; run: DiveRun } | null>(null);
   const onCoveredRef = useRef(onCovered);
   const onCompleteRef = useRef(onComplete);
   onCoveredRef.current = onCovered;
   onCompleteRef.current = onComplete;
+  const token = snapshot?.token ?? null;
+
+  // The GL context is released when this handoff is over (or replaced).
+  useLayoutEffect(() => {
+    return () => {
+      const dive = diveRef.current;
+      if (dive && dive.token === token) {
+        diveRef.current = null;
+        dive.run.dispose();
+      }
+    };
+  }, [token]);
 
   useLayoutEffect(() => {
     if (!snapshot) return;
@@ -183,27 +203,25 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     const backdrop = backdropRef.current;
     const video = videoRef.current;
     const hud = hudRef.current;
-    const line = lineRef.current;
     const logo = logoRef.current;
-    const focus = focusRef.current;
-    if (!root || !backdrop || !video || !hud || !line || !logo || !focus) return;
+    const gl = glRef.current;
+    if (!root || !backdrop || !video || !hud || !logo || !gl) return;
 
     // Keep non-null aliases for callbacks that can run after this layout effect returns.
     const stableSnapshot = snapshot;
     const stableRoot = root;
     const stableVideo = video;
-    const stableLogo = logo;
+    const stableGl = gl;
 
     const token = snapshot.token;
     const source = snapshot.source;
-    const duration = durationFor(source);
+    const mode = source.economy ? "economy" : "full";
+    const audit = openingAuditRequested();
     const running = new Set<Animation>();
     const timers = new Set<number>();
     let viewportFrame = 0;
     let alive = true;
     let settled = false;
-    let logoAnimation: Animation | null = null;
-    const arrivalStartedAt = performance.now();
     activeTokenRef.current = token;
 
     updateVisualViewport(root);
@@ -211,9 +229,9 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     const viewportRect = viewportFallbackRect();
     const sourceLogoRect = visualViewportLocalRect(source.logoRect, {
       left: viewportRect.width * 0.5 - 104,
-      top: viewportRect.height * 0.5 - 58,
+      top: viewportRect.height * 0.5 - 69,
       width: 208,
-      height: 116,
+      height: 139,
     });
     const sourceVideoRect = visualViewportLocalRect(source.videoRect, viewportRect);
     const sourceHudRect = visualViewportLocalRect(source.hudRect, {
@@ -222,17 +240,19 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       width: Math.min(620, viewportRect.width * 0.84),
       height: Math.min(620, viewportRect.width * 0.84),
     });
-    const sourceLineRect = visualViewportLocalRect(source.lineRect, {
-      left: viewportRect.width * 0.14,
-      top: viewportRect.height * 0.73,
-      width: viewportRect.width * 0.72,
-      height: 2,
-    });
+    const focusX = sourceLogoRect.left + sourceLogoRect.width * RING.x;
+    const focusY = sourceLogoRect.top + sourceLogoRect.height * RING.y;
 
-    setRect(logo, sourceLogoRect);
-    setRect(video, sourceVideoRect);
-    setRect(hud, sourceHudRect);
-    setRect(line, sourceLineRect);
+    if (snapshot.phase === "covering") {
+      setRect(logo, sourceLogoRect);
+      setRect(video, sourceVideoRect);
+      setRect(hud, sourceHudRect);
+      root.style.setProperty("--opening-dive-x", `${focusX}px`);
+      root.style.setProperty("--opening-dive-y", `${focusY}px`);
+      logo.style.transformOrigin = `${sourceLogoRect.width * RING.x}px ${sourceLogoRect.height * RING.y}px`;
+      video.style.transformOrigin = `${focusX - sourceVideoRect.left}px ${focusY - sourceVideoRect.top}px`;
+      hud.style.transformOrigin = `${focusX - sourceHudRect.left}px ${focusY - sourceHudRect.top}px`;
+    }
 
     const syncVideoTime = () => {
       if (!alive || !Number.isFinite(source.videoCurrentTime)) return;
@@ -251,7 +271,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       stableVideo.pause();
     }
 
-    const commonOptions = (length: number, easing = ARRIVAL_EASING): KeyframeAnimationOptions => ({
+    const commonOptions = (length: number, easing = SETTLE_EASING): KeyframeAnimationOptions => ({
       duration: length,
       easing,
       fill: "both",
@@ -272,19 +292,28 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     function settleHandoff() {
       if (settled || !alive || activeTokenRef.current !== token) return;
       settled = true;
-      stopActiveWork();
       if (stableSnapshot.phase === "covering") {
+        // The dive's landing still holds the screen while the route changes:
+        // its layers keep their last frame (they are not cancelled here).
+        for (const timer of timers) window.clearTimeout(timer);
+        timers.clear();
+        for (const animation of running) animation.finish();
+        stableVideo.pause();
         onCoveredRef.current(token);
         return;
       }
+      stopActiveWork();
       onCompleteRef.current(token);
     }
 
     function handleVisibilityChange() {
-      if (document.hidden) settleHandoff();
+      if (!document.hidden) return;
+      diveRef.current?.run.land();
+      settleHandoff();
     }
 
     function handleOrientationChange() {
+      diveRef.current?.run.land();
       settleHandoff();
     }
 
@@ -298,37 +327,6 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         viewportFrame = 0;
         if (!alive || settled) return;
         updateVisualViewport(stableRoot);
-
-        if (stableSnapshot.phase !== "arriving" || !stableSnapshot.destination || !logoAnimation)
-          return;
-        const currentRect = visualViewportLocalRect(
-          stableLogo.getBoundingClientRect(),
-          sourceLogoRect,
-        );
-        const targetRect = fitLogoRect(
-          currentRect,
-          elementRect(
-            stableSnapshot.destination.sigil,
-            elementRect(stableSnapshot.destination.brand, currentRect),
-          ),
-        );
-        const elapsed = performance.now() - arrivalStartedAt;
-        const remaining = Math.max(80, duration - elapsed);
-        running.delete(logoAnimation);
-        logoAnimation.cancel();
-        setRect(stableLogo, currentRect);
-        logoAnimation = animateNode(
-          stableLogo,
-          [
-            {
-              opacity: Number.parseFloat(getComputedStyle(stableLogo).opacity) || 1,
-              transform: "none",
-            },
-            { opacity: 0.08, transform: rectTransform(currentRect, targetRect) },
-          ],
-          commonOptions(remaining),
-          running,
-        );
       });
     }
 
@@ -345,6 +343,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       visualViewport?.removeEventListener("resize", scheduleViewportUpdate);
       visualViewport?.removeEventListener("scroll", scheduleViewportUpdate);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (window.__openingTest?.dive === diveHook) delete window.__openingTest.dive;
     }
 
     window.addEventListener("resize", scheduleViewportUpdate, { passive: true });
@@ -354,12 +353,15 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     visualViewport?.addEventListener("scroll", scheduleViewportUpdate, { passive: true });
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    let diveHook: OpeningDiveTestHook | null = null;
+
     if (document.hidden) {
       settleHandoff();
       return cleanupEffect;
     }
 
     if (source.reducedMotion) {
+      root.dataset.openingHandoffTier = "reduced";
       animateNode(
         root,
         snapshot.phase === "covering"
@@ -376,237 +378,185 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       return cleanupEffect;
     }
 
-    if (snapshot.phase === "covering") {
-      const coverDuration = Math.min(
-        duration,
-        source.reducedMotion ? 250 : source.economy ? 430 : 520,
-      );
-      animateNode(
+    if (snapshot.phase === "arriving") {
+      // The landing still (the GL canvas, or the CSS world layer) fades into
+      // the World page underneath, which already owns scrolling.
+      const arrival = animateNode(
         root,
-        [{ opacity: 0 }, { opacity: 1, offset: source.reducedMotion ? 1 : 0.72 }, { opacity: 1 }],
-        commonOptions(coverDuration, COVER_EASING),
+        [{ opacity: 1 }, { opacity: 0 }],
+        commonOptions(ARRIVAL_MS[mode], "cubic-bezier(0.4, 0, 0.2, 1)"),
         running,
       );
-      animateNode(
-        video,
-        [
-          { opacity: 0.28, filter: "saturate(0.82) brightness(0.72)", transform: "scale(1.025)" },
-          { opacity: 0.78, filter: "saturate(1.2) brightness(0.86)", transform: "scale(1)" },
-        ],
-        commonOptions(coverDuration, COVER_EASING),
-        running,
+      if (audit && arrival) arrival.pause();
+      const completionTimer = window.setTimeout(
+        () => {
+          timers.delete(completionTimer);
+          settleHandoff();
+        },
+        audit ? 1700 : ARRIVAL_MS[mode] + 34,
       );
-      animateNode(
-        backdrop,
-        [
-          { opacity: 0, transform: "scale(1.12) rotate(-3deg)" },
-          { opacity: 1, transform: "scale(1) rotate(0deg)" },
-        ],
-        commonOptions(coverDuration, COVER_EASING),
-        running,
-      );
-      animateNode(
-        logo,
-        [
-          { opacity: 0.35, transform: "translate3d(0, 8px, 0) scale(0.96)" },
-          { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
-        ],
-        commonOptions(coverDuration, COVER_EASING),
-        running,
-      );
-      animateNode(
-        hud,
-        [
-          { opacity: 0, transform: "scale(1.22) rotate(-8deg)" },
-          { opacity: 0.82, transform: "scale(1) rotate(0deg)" },
-        ],
-        commonOptions(coverDuration, COVER_EASING),
-        running,
-      );
-      animateNode(
-        line,
-        [
-          { opacity: 0, clipPath: "inset(0 50% 0 50%)" },
-          { opacity: 1, clipPath: "inset(0 0% 0 0%)" },
-        ],
-        commonOptions(coverDuration, COVER_EASING),
-        running,
-      );
-      const coveredTimer = window.setTimeout(() => {
-        timers.delete(coveredTimer);
-        settleHandoff();
-      }, coverDuration + 34);
-      timers.add(coveredTimer);
-    } else if (snapshot.destination) {
-      const destination = snapshot.destination;
-      const logoTarget = fitLogoRect(
-        sourceLogoRect,
-        elementRect(destination.sigil, elementRect(destination.brand, sourceLogoRect)),
-      );
-      const videoTarget = elementRect(
-        destination.backdrop,
-        elementRect(destination.hero, viewportRect),
-      );
-      const hudTarget = elementRect(
-        destination.focus,
-        elementRect(destination.hero, sourceHudRect),
-      );
-      const lineTarget = elementRect(destination.brand, sourceLineRect);
-
-      focus.style.left = `${hudTarget.left + hudTarget.width * 0.5}px`;
-      focus.style.top = `${hudTarget.top + hudTarget.height * 0.5}px`;
-      focus.style.width = `${Math.max(42, Math.min(hudTarget.width, hudTarget.height) * 0.92)}px`;
-      focus.style.height = focus.style.width;
-
-      logoAnimation = animateNode(
-        logo,
-        [
-          {
-            opacity: 1,
-            transform: "translate3d(0, 0, 0) scale(1)",
-          },
-          {
-            opacity: 0.98,
-            offset: 0.58,
-          },
-          {
-            opacity: 0.08,
-            transform: rectTransform(sourceLogoRect, logoTarget),
-          },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      animateNode(
-        video,
-        [
-          {
-            opacity: 0.8,
-            filter: "saturate(1.2) brightness(0.86)",
-            borderRadius: "0px",
-            clipPath: "inset(0% 0% 0% 0% round 0px)",
-            transform: "translate3d(0, 0, 0) scale(1)",
-          },
-          {
-            opacity: 0.48,
-            filter: "saturate(1.08) brightness(0.76)",
-            offset: 0.58,
-          },
-          {
-            opacity: 0,
-            filter: "saturate(0.9) brightness(0.68)",
-            borderRadius: "28px",
-            clipPath: "inset(0% 0% 0% 0% round 28px)",
-            transform: rectTransform(sourceVideoRect, videoTarget),
-          },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      animateNode(
-        hud,
-        [
-          { opacity: 0.82, filter: "blur(0px)", transform: "translate3d(0, 0, 0) scale(1)" },
-          { opacity: 0.58, filter: "blur(0px)", offset: 0.5 },
-          {
-            opacity: 0,
-            filter: "blur(7px)",
-            transform: rectTransform(sourceHudRect, hudTarget),
-          },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      animateNode(
-        line,
-        [
-          {
-            opacity: 1,
-            filter: "brightness(1.5)",
-            transform: "translate3d(0, 0, 0) scale(1)",
-          },
-          {
-            opacity: 0,
-            filter: "brightness(2.2)",
-            transform: rectTransform(sourceLineRect, lineTarget),
-          },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      animateNode(
-        backdrop,
-        [
-          { opacity: 1, filter: "hue-rotate(0deg) saturate(1.12)", transform: "scale(1)" },
-          {
-            opacity: 0.9,
-            filter: "hue-rotate(12deg) saturate(1.38)",
-            transform: "scale(1.08)",
-            offset: 0.64,
-          },
-          {
-            opacity: 0,
-            filter: "hue-rotate(18deg) saturate(1.1)",
-            transform: "scale(1.18)",
-          },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      animateNode(
-        focus,
-        [
-          { opacity: 0, transform: "translate3d(-50%, -50%, 0) scale(0.24)" },
-          { opacity: 0.92, transform: "translate3d(-50%, -50%, 0) scale(1)", offset: 0.72 },
-          { opacity: 0, transform: "translate3d(-50%, -50%, 0) scale(2.8)" },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      const topBar = root.querySelector<HTMLElement>('[data-opening-handoff-letterbox="top"]');
-      const bottomBar = root.querySelector<HTMLElement>(
-        '[data-opening-handoff-letterbox="bottom"]',
-      );
-      animateNode(
-        topBar,
-        [{ transform: "translate3d(0, 0, 0)" }, { transform: "translate3d(0, -104%, 0)" }],
-        commonOptions(duration),
-        running,
-      );
-      animateNode(
-        bottomBar,
-        [{ transform: "translate3d(0, 0, 0)" }, { transform: "translate3d(0, 104%, 0)" }],
-        commonOptions(duration),
-        running,
-      );
-      animateNode(
-        root,
-        [
-          { opacity: 1 },
-          { opacity: 1, offset: source.reducedMotion ? 0.34 : 0.82 },
-          { opacity: 0 },
-        ],
-        commonOptions(duration),
-        running,
-      );
-
-      const completionTimer = window.setTimeout(() => {
-        timers.delete(completionTimer);
-        settleHandoff();
-      }, duration + 34);
       timers.add(completionTimer);
+      return cleanupEffect;
+    }
+
+    // ---- Covering: the dive.
+    const cssAnimations: Animation[] = [];
+    let cssStarted = false;
+    const startCssDive = () => {
+      if (cssStarted || settled || !alive) return;
+      cssStarted = true;
+      stableRoot.dataset.openingHandoffTier = "css";
+      const k = CSS_DIVE_SCALE[mode];
+      const cut = OPENING_DIVE.cut * 1000 * k;
+      const end = OPENING_DIVE.glEnd * 1000 * k;
+      const at = (value: number) => Math.min(1, Math.max(0, value / end));
+      const add = (node: HTMLElement | null, keyframes: Keyframe[], easing = "linear") => {
+        const animation = animateNode(node, keyframes, commonOptions(end, easing), running);
+        if (animation) {
+          cssAnimations.push(animation);
+          if (audit) animation.pause();
+        }
+      };
+      // The title's still: it covers in about 0.2 s, the camera plunges into the
+      // ring, one amber swell, then the world settles at the page's framing.
+      add(stableRoot, [{ opacity: 0 }, { opacity: 1, offset: at(220 * k) }, { opacity: 1 }]);
+      // The glyphs dim as they grow (the tunnel), so none sweeps a bright edge
+      // back and forth across the frame.
+      add(logoRef.current, [
+        { transform: "scale(1)", opacity: 1, easing: DIVE_EASING },
+        { transform: "scale(3)", opacity: 0.8, offset: at(cut * 0.45), easing: DIVE_EASING },
+        { transform: "scale(6.5)", opacity: 0.28, offset: at(cut * 0.86) },
+        { transform: "scale(8)", opacity: 0, offset: at(cut) },
+        { transform: "scale(8)", opacity: 0 },
+      ]);
+      add(videoRef.current, [
+        { transform: "scale(1)", opacity: 0.8, easing: DIVE_EASING },
+        { transform: "scale(1.6)", opacity: 0.3, offset: at(cut) },
+        { transform: "scale(1.6)", opacity: 0 },
+      ]);
+      add(backdropRef.current, [
+        { transform: "scale(1)", opacity: 0.55, easing: DIVE_EASING },
+        { transform: "scale(1.7)", opacity: 0.9, offset: at(cut) },
+        { transform: "scale(1.7)", opacity: 0 },
+      ]);
+      add(hudRef.current, [
+        { transform: "scale(1)", opacity: 0.7, easing: DIVE_EASING },
+        { transform: "scale(3.2)", opacity: 0, offset: at(cut * 0.85) },
+        { transform: "scale(3.2)", opacity: 0 },
+      ]);
+      add(speedRef.current, [
+        { transform: "scale(0.7)", opacity: 0, easing: "ease-in" },
+        { transform: "scale(1.5)", opacity: 0.55, offset: at(cut * 0.55) },
+        { transform: "scale(2.6)", opacity: 0.8, offset: at(cut) },
+        { transform: "scale(3.2)", opacity: 0, offset: at(cut + 260 * k) },
+        { transform: "scale(3.2)", opacity: 0 },
+      ]);
+      add(tunnelRef.current, [
+        { opacity: 0, easing: "ease-in" },
+        { opacity: 0.8, offset: at(cut) },
+        { opacity: 0, offset: at(cut + 300 * k) },
+        { opacity: 0 },
+      ]);
+      add(bloomRef.current, [
+        { opacity: 0 },
+        { opacity: 0, offset: at(cut * 0.55) },
+        { opacity: 0.85, offset: at(cut), easing: "ease-out" },
+        { opacity: 0 },
+      ]);
+      add(worldRef.current, [
+        { opacity: 0, transform: "scale(1.35)" },
+        { opacity: 0, transform: "scale(1.35)", offset: at(cut * 0.9) },
+        { opacity: 1, transform: "scale(1.3)", offset: at(cut), easing: SETTLE_EASING },
+        { opacity: 1, transform: "scale(1)" },
+      ]);
+      for (const bar of stableRoot.querySelectorAll<HTMLElement>("[data-opening-handoff-letterbox]")) {
+        const top = bar.dataset.openingHandoffLetterbox === "top";
+        add(bar, [
+          { transform: "translate3d(0, 0, 0)" },
+          { transform: "translate3d(0, 0, 0)", offset: at(100 * k) },
+          {
+            transform: `translate3d(0, ${top ? "-104%" : "104%"}, 0)`,
+            offset: at(550 * k),
+          },
+          { transform: `translate3d(0, ${top ? "-104%" : "104%"}, 0)` },
+        ]);
+      }
+      if (!audit) {
+        const coveredTimer = window.setTimeout(() => {
+          timers.delete(coveredTimer);
+          settleHandoff();
+        }, end + 34);
+        timers.add(coveredTimer);
+      }
+    };
+
+    let tierLabel = "pending";
+    root.dataset.openingHandoffTier = "pending";
+
+    diveHook = {
+      get tier() {
+        return tierLabel;
+      },
+      get stats() {
+        return diveRef.current?.run.stats ?? null;
+      },
+      ready: async () => {
+        for (let frame = 0; frame < 600 && tierLabel === "pending"; frame += 1) {
+          await new Promise((resolve) => window.requestAnimationFrame(resolve));
+        }
+        return tierLabel;
+      },
+      seek: (T: number) => {
+        if (tierLabel === "webgl") diveRef.current?.run.seek(T);
+        else for (const animation of cssAnimations) animation.currentTime = Math.max(0, T) * 1000;
+      },
+      land: () => {
+        if (tierLabel === "webgl") diveRef.current?.run.land();
+        else settleHandoff();
+      },
+    };
+    if (audit) window.__openingTest = { ...window.__openingTest, dive: diveHook };
+
+    if (source.economy) {
+      // Constrained devices: the compositor-only dive, shorter, without GL.
+      tierLabel = "css";
+      startCssDive();
     } else {
-      const destinationTimer = window.setTimeout(() => {
-        timers.delete(destinationTimer);
-        settleHandoff();
-      }, 34);
-      timers.add(destinationTimer);
+      void loadDiveEngine()
+        .then(async (engine) => {
+          if (!alive || settled) return;
+          const run = engine.runOpeningDive({
+            host: stableGl,
+            logoRect: sourceLogoRect,
+            barHeight: Math.max(42, viewportRect.height * 0.075),
+            audit,
+            onLanded: () => settleHandoff(),
+          });
+          diveRef.current?.run.dispose();
+          diveRef.current = { token, run };
+          window.__openingDiveStats = run.stats;
+          const tier = await run.ready;
+          if (!alive || settled) return;
+          if (tier === "webgl") {
+            tierLabel = "webgl";
+            stableRoot.dataset.openingHandoffTier = "webgl";
+          } else {
+            tierLabel = "css";
+            startCssDive();
+          }
+        })
+        .catch(() => {
+          tierLabel = "css";
+          startCssDive();
+        });
+      // Fail-safe: a dive that never lands (the tab was frozen) still covers.
+      if (!audit) {
+        const safetyTimer = window.setTimeout(() => {
+          timers.delete(safetyTimer);
+          settleHandoff();
+        }, 2400);
+        timers.add(safetyTimer);
+      }
     }
 
     return cleanupEffect;
@@ -636,11 +586,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         muted
         playsInline
       />
-      <div data-opening-handoff-grid>
-        <i />
-        <i />
-        <i />
-      </div>
+      <div ref={speedRef} data-opening-handoff-speed />
       <div ref={hudRef} data-opening-handoff-hud>
         <span>DW // OPENING HANDOFF</span>
         <b>WORLD LINK</b>
@@ -648,26 +594,26 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         <i />
         <i />
       </div>
-      <div ref={lineRef} data-opening-handoff-line>
-        <i />
-      </div>
       <div ref={logoRef} data-opening-handoff-logo>
         <img
           src={source.logoSrc ?? DEFAULT_LOGO_SRC}
           crossOrigin="anonymous"
           alt=""
-          width={1200}
-          height={800}
+          width={1536}
+          height={1024}
           loading="eager"
           decoding="async"
           fetchPriority="high"
         />
-        <i data-opening-handoff-logo-flare />
-        <i data-opening-handoff-logo-orbit />
       </div>
-      <div ref={focusRef} data-opening-handoff-focus />
+      <div ref={tunnelRef} data-opening-handoff-tunnel />
+      <div ref={worldRef} data-opening-handoff-world>
+        <img src={WORLD_ART} alt="" width={1024} height={1536} decoding="async" />
+      </div>
+      <div ref={bloomRef} data-opening-handoff-bloom />
       <div data-opening-handoff-letterbox="top" />
       <div data-opening-handoff-letterbox="bottom" />
+      <div ref={glRef} data-opening-handoff-gl />
     </div>,
     document.body,
   );

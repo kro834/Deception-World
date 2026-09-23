@@ -130,17 +130,21 @@ test("the deployment assembler preserves the complete WorldHome implementation",
   assert.equal(worldHomeSourceParts, worldHome);
 });
 
-test("the shortened opening keeps heavy startup work off the first paint", () => {
-  assert.match(titleSequence, /const SEQUENCE_MS = 5800/);
+test("the opening (with its logo burn) keeps heavy startup work off the first paint", () => {
+  assert.match(titleSequence, /const SEQUENCE_MS = 7200/);
   assert.match(titleSequence, /requestIdleCallback\(warm, \{ timeout: 900 \}\)/);
   assert.match(titleSequence, /\}, 650\);/);
   assert.match(titleSequence, /preload="none"/);
   assert.match(titleSequence, /videoStartTimerRef\.current = window\.setTimeout/);
-  assert.match(styles, /--seq: 5\.8s/);
-  assert.match(styles, /progress-marker 0\.4s ease 5\.4s forwards/);
-  assert.match(reconstructedOpeningStyles, /--seq: 5\.8s/);
+  assert.match(styles, /--seq: 7\.2s/);
+  assert.match(styles, /progress-marker 0\.4s ease 6\.6s forwards/);
+  assert.match(reconstructedOpeningStyles, /--seq: 7\.2s/);
   assert.match(reconstructedOpeningStyles, /animation: progress-fill var\(--seq\) linear forwards/);
-  assert.match(reconstructedOpeningStyles, /progress-marker 0\.4s ease 5\.4s forwards/);
+  assert.match(reconstructedOpeningStyles, /progress-marker 0\.4s ease 6\.6s forwards/);
+  // The WebGL burn and dive engines load with import(), after the first paint.
+  assert.match(titleSequence, /import\("\.\/opening-burn"\)/);
+  assert.match(titleSequence, /import\("\.\/opening-dive"\)/);
+  assert.doesNotMatch(titleSequence, /^import (?!type )[^;]*from "\.\/opening-(?:burn|dive|gl)";/m);
 });
 
 test("opening the side menu yields the top layer to its navigation controls", () => {

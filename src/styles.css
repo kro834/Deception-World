@@ -451,7 +451,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 /* ── Cinematic stage ───────────────────────────────────────── */
 
 .cine-stage {
-  --seq: 5.8s;
+  --seq: 7.2s;
   position: relative;
   isolation: isolate;
   contain: layout paint style;
@@ -1500,6 +1500,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-logo-glow,
 .cine-logo-echo,
 .cine-logo-core,
+.cine-logo-first,
 .cine-logo-shine {
   position: absolute;
   inset: 0;
@@ -1557,12 +1558,360 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   display: none;
 }
 
-.cine-logo-core {
+.cine-logo-core,
+.cine-logo-first {
   opacity: 1;
   filter: none;
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+
+/* The ice logo arrives first and burns; the prism logo (the core) emerges
+   from the burn and stays. Both are alpha-keyed from the supplied artwork, so
+   they sit in the scene as light, without a box. */
+.is-playing .cine-logo-core,
+.is-playing .cine-title-lockup[data-burn] .cine-logo-first,
+.is-complete .cine-logo-first {
+  opacity: 0;
+}
+
+.is-playing .cine-title-lockup[data-burn="webgl"][data-burn-phase="done"] .cine-logo-core {
+  opacity: 1;
+}
+
+/* ---- The burn ---------------------------------------------------------------
+   WebGL tier: a premultiplied canvas (opening-burn.ts) swaps with the ice logo
+   in one frame and back to the prism logo in one frame. CSS tier: the ice logo
+   is wiped off from below and the prism logo on, under a flame band, with
+   transform and opacity only. Both tiers warm the scene with one soft light. */
+.cine-logo-burn {
+  position: absolute;
+  z-index: 2;
+  inset: -42% -6% -8%;
+  pointer-events: none;
+  contain: layout style;
+}
+
+.is-complete .cine-logo-burn {
+  display: none;
+}
+
+.cine-burn-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.cine-title-lockup[data-burn="webgl"][data-burn-phase="burning"] .cine-burn-canvas {
+  opacity: 1;
+}
+
+.cine-burn-light {
+  position: absolute;
+  inset: 12% 0 0;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 46% 42% at 40% 72%, rgb(255 104 44 / 0.34), transparent 72%),
+    radial-gradient(ellipse 62% 52% at 52% 64%, rgb(190 40 14 / 0.2), transparent 76%);
+}
+
+.cine-title-lockup[data-burn] .cine-burn-light {
+  animation: cine-burn-light 3.9s linear both;
+}
+
+/* The logo box inside the extended host (42% above, 8% below, 6% each side).
+   The wipe's lower edge and the reveal's upper edge both run from 106% to -6%
+   of the box: the ice logo fades out just above that edge, the prism logo in
+   just below it, and the flame band rides it. */
+.cine-burn-box {
+  position: absolute;
+  top: 28%;
+  left: 5.357%;
+  width: 89.286%;
+  height: 66.667%;
+  visibility: hidden;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-box {
+  visibility: visible;
+}
+
+.cine-burn-wipe,
+.cine-burn-reveal {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.cine-burn-wipe {
+  top: 0;
+  height: 100%;
+  -webkit-mask-image: linear-gradient(to top, transparent, #000 6%);
+  mask-image: linear-gradient(to top, transparent, #000 6%);
+  transform: translate3d(0, 6%, 0);
+}
+
+.cine-burn-reveal {
+  top: 0;
+  height: 112%;
+  -webkit-mask-image: linear-gradient(transparent, #000 5.4%);
+  mask-image: linear-gradient(transparent, #000 5.4%);
+  transform: translate3d(0, 94.64%, 0);
+}
+
+.cine-burn-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cine-burn-wipe > .cine-burn-art {
+  transform: translate3d(0, -6%, 0);
+}
+
+.cine-burn-reveal > .cine-burn-art {
+  height: 89.286%;
+  transform: translate3d(0, -106%, 0);
+}
+
+/* The prism logo glows ember-hot where it has just been uncovered, then cools. */
+.cine-burn-hot {
+  filter: sepia(1) saturate(4.2) hue-rotate(-18deg) brightness(1.08);
+  opacity: 0.9;
+}
+
+.cine-burn-flame {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  width: 98%;
+  height: 34%;
+  opacity: 0;
+  /* Its top sits 30% of the box above the burning edge, its base 4% below. */
+  transform: translate3d(0, 223.5%, 0);
+  -webkit-mask-image:
+    radial-gradient(ellipse 50% 100% at 50% 100%, #000 42%, transparent 100%),
+    linear-gradient(to top, transparent, #000 14%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 50% 100% at 50% 100%, #000 42%, transparent 100%),
+    linear-gradient(to top, transparent, #000 14%);
+  mask-composite: intersect;
+}
+
+.cine-burn-flame > i {
+  position: absolute;
+  inset: 0 -8%;
+  background:
+    linear-gradient(to top, transparent, rgb(255 170 92 / 0.72) 9%, rgb(255 84 30 / 0.38) 22%, transparent 42%),
+    radial-gradient(ellipse 4% 62% at 7% 100%, rgb(255 132 58 / 0.82), rgb(180 28 10 / 0.42) 58%, transparent),
+    radial-gradient(ellipse 5% 86% at 19% 100%, rgb(255 120 48 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent),
+    radial-gradient(ellipse 3.5% 58% at 31% 100%, rgb(255 146 70 / 0.8), rgb(180 30 10 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 5% 96% at 44% 100%, rgb(255 118 46 / 0.82), rgb(170 24 8 / 0.42) 60%, transparent),
+    radial-gradient(ellipse 4% 70% at 57% 100%, rgb(255 138 62 / 0.8), rgb(180 28 10 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 5% 90% at 70% 100%, rgb(255 120 48 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent),
+    radial-gradient(ellipse 3.5% 60% at 82% 100%, rgb(255 146 70 / 0.8), rgb(180 30 10 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 4.5% 80% at 93% 100%, rgb(255 126 52 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent);
+}
+
+.cine-burn-flame > i:nth-child(2) {
+  opacity: 0.6;
+  transform: translate3d(3%, 0, 0) scaleY(0.8);
+  transform-origin: 50% 100%;
+}
+
+.cine-burn-embers > i {
+  position: absolute;
+  bottom: 18%;
+  left: 12%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgb(255 170 90);
+  box-shadow: 0 0 6px rgb(255 96 30 / 0.8);
+  opacity: 0;
+}
+
+.cine-burn-embers > i:nth-child(2) { left: 24%; bottom: 30%; }
+.cine-burn-embers > i:nth-child(3) { left: 33%; bottom: 44%; }
+.cine-burn-embers > i:nth-child(4) { left: 41%; bottom: 22%; }
+.cine-burn-embers > i:nth-child(5) { left: 52%; bottom: 56%; }
+.cine-burn-embers > i:nth-child(6) { left: 58%; bottom: 36%; }
+.cine-burn-embers > i:nth-child(7) { left: 66%; bottom: 62%; }
+.cine-burn-embers > i:nth-child(8) { left: 74%; bottom: 48%; }
+.cine-burn-embers > i:nth-child(9) { left: 83%; bottom: 70%; }
+.cine-burn-embers > i:nth-child(10) { left: 90%; bottom: 58%; }
+
+/* CSS tier: one front, 0.2 -> 3.0 s after the burn starts (OPENING_BURN.front). */
+.cine-title-lockup[data-burn="css"] .cine-burn-wipe {
+  animation: cine-burn-wipe 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-wipe > .cine-burn-art {
+  animation: cine-burn-wipe-art 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-reveal {
+  animation: cine-burn-reveal 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-reveal > .cine-burn-art {
+  animation: cine-burn-reveal-art 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both;
+}
+
+/* The ember-hot copy rides with the reveal and cools as the fire moves on. */
+.cine-title-lockup[data-burn="css"] .cine-burn-reveal > .cine-burn-hot {
+  animation:
+    cine-burn-reveal-art 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both,
+    cine-burn-cool 3.5s ease-in-out both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-flame {
+  animation:
+    cine-burn-flame-rise 2.8s cubic-bezier(0.3, 0.1, 0.7, 0.9) 0.2s both,
+    cine-burn-flame-life 3.3s linear both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-flame > i {
+  animation: cine-burn-flame-drift 3.3s linear both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-flame > i:nth-child(2) {
+  animation-name: cine-burn-flame-drift-back;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i {
+  animation: cine-burn-ember 1.5s ease-out both;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(2n) {
+  animation-duration: 1.8s;
+}
+
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(1) { animation-delay: 0.45s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(2) { animation-delay: 0.7s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(3) { animation-delay: 1.05s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(4) { animation-delay: 0.6s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(5) { animation-delay: 1.45s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(6) { animation-delay: 1.15s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(7) { animation-delay: 1.75s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(8) { animation-delay: 1.4s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(9) { animation-delay: 2.05s; }
+.cine-title-lockup[data-burn="css"] .cine-burn-embers > i:nth-child(10) { animation-delay: 1.9s; }
+
+@keyframes cine-burn-light {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.55;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  66% {
+    opacity: 0.7;
+  }
+  82% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cine-burn-wipe {
+  to {
+    transform: translate3d(0, -106%, 0);
+  }
+}
+
+@keyframes cine-burn-wipe-art {
+  to {
+    transform: translate3d(0, 106%, 0);
+  }
+}
+
+@keyframes cine-burn-reveal {
+  to {
+    transform: translate3d(0, -5.357%, 0);
+  }
+}
+
+@keyframes cine-burn-reveal-art {
+  to {
+    transform: translate3d(0, 6%, 0);
+  }
+}
+
+@keyframes cine-burn-cool {
+  0%,
+  40% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cine-burn-flame-rise {
+  to {
+    transform: translate3d(0, -105.9%, 0);
+  }
+}
+
+/* In with the fire, out as the edge leaves the top of the logo. */
+@keyframes cine-burn-flame-life {
+  0% {
+    opacity: 0;
+  }
+  16% {
+    opacity: 0.95;
+  }
+  52% {
+    opacity: 0.95;
+  }
+  74%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cine-burn-flame-drift {
+  to {
+    transform: translate3d(6%, 0, 0);
+  }
+}
+
+@keyframes cine-burn-flame-drift-back {
+  from {
+    transform: translate3d(3%, 0, 0) scaleY(0.8);
+  }
+  to {
+    transform: translate3d(-4%, 0, 0) scaleY(0.8);
+  }
+}
+
+@keyframes cine-burn-ember {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(1.2vmin, -16vmin, 0);
+  }
 }
 
 .cine-logo-shine {
@@ -1577,8 +1926,10 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   background-size: 220% 100%;
   background-position: 120% 0;
   mix-blend-mode: overlay;
-  -webkit-mask-image: url("/logo-title-20260915.webp");
-  mask-image: url("/logo-title-20260915.webp");
+  /* The prism logo's alpha, from the file the core <img> chose (--cine-logo-mask,
+     set when it loads); fully masked until then, never a bare box. */
+  -webkit-mask-image: var(--cine-logo-mask, linear-gradient(transparent, transparent));
+  mask-image: var(--cine-logo-mask, linear-gradient(transparent, transparent));
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -1589,7 +1940,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-logo-shine {
-  animation: shine-sweep 1s ease-in-out 2.15s forwards;
+  animation: shine-sweep 1s ease-in-out 6.2s forwards;
 }
 
 .is-complete .cine-logo-shine {
@@ -1760,13 +2111,13 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: progress-marker 0.4s ease 0.2s forwards;
 }
 .is-playing .cine-progress > i:nth-of-type(2) {
-  animation: progress-marker 0.4s ease 1.95s forwards;
+  animation: progress-marker 0.4s ease 2.6s forwards;
 }
 .is-playing .cine-progress > i:nth-of-type(3) {
-  animation: progress-marker 0.4s ease 3.85s forwards;
+  animation: progress-marker 0.4s ease 4.6s forwards;
 }
 .is-playing .cine-progress > i:nth-of-type(4) {
-  animation: progress-marker 0.4s ease 5.4s forwards;
+  animation: progress-marker 0.4s ease 6.6s forwards;
 }
 
 .is-complete .cine-progress {
@@ -1798,14 +2149,15 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   transform: translateY(5px);
 }
 
+/* The ice logo arrives, burns, and the prism logo is locked in. */
 .is-playing .cine-cue span:nth-child(1) {
-  animation: cue-phase 1.2s ease 0.34s both;
+  animation: cue-phase 2.1s ease 0.34s both;
 }
 .is-playing .cine-cue span:nth-child(2) {
-  animation: cue-phase 1.35s ease 1.65s both;
+  animation: cue-phase 2.7s ease 2.6s both;
 }
 .is-playing .cine-cue span:nth-child(3) {
-  animation: cue-phase 1.5s ease 3.15s both;
+  animation: cue-phase 1.7s ease 5.4s both;
 }
 
 .is-complete .cine-cue {
@@ -1832,30 +2184,9 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     filter 0.35s ease 0.05s;
 }
 
-.is-diving .cine-atmosphere {
-  animation: world-dive-background 0.38s ease-out both;
-}
-
-.is-diving .cine-light-field {
-  animation: world-dive-light 0.42s ease-out both;
-}
-
-.is-diving .cine-stack {
-  animation: world-dive-logo-release 0.24s ease-out both;
-}
-
-.is-diving .cine-hud {
-  animation: world-dive-hud 0.34s ease-out both;
-}
-
-.is-diving .cine-particles {
-  animation: world-dive-particles 0.32s ease-out both;
-}
-
-.is-diving .cine-vignette {
-  animation: world-dive-vignette 0.36s ease-out both;
-}
-
+/* ENTER THE WORLD: the handoff layer's dive covers the title from its first
+   frame (the canvas fades in over it on the title's own framing), so the
+   scene holds still underneath; only the interface steps away. */
 .is-diving .cine-dive-tunnel {
   animation: world-dive-tunnel-enter 0.28s cubic-bezier(0.12, 0.82, 0.12, 1) both;
 }
@@ -1931,13 +2262,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: world-dive-interface 0.16s ease-in both;
 }
 
-.is-diving .cine-letterbox.top {
-  animation: world-dive-bar-top 0.36s ease-in both;
-}
-
-.is-diving .cine-letterbox.bottom {
-  animation: world-dive-bar-bottom 0.36s ease-in both;
-}
 
 .cine-skip {
   position: absolute;

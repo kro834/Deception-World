@@ -21,8 +21,8 @@ test("the opening composes a deterministic multi-plane cinematic reveal", () => 
   assert.equal(titlePart, title);
 });
 
-test("the richer opening keeps its original runtime and adaptive render budget", () => {
-  assert.match(title, /const SEQUENCE_MS = 5800/);
+test("the richer opening keeps its runtime (now with the logo burn) and adaptive render budget", () => {
+  assert.match(title, /const SEQUENCE_MS = 7200/);
   assert.match(title, /preload="none"/);
   assert.match(title, /deviceMemory\?: number/);
   assert.match(title, /economyOpening \? " is-economy-opening"/);
