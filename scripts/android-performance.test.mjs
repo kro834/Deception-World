@@ -147,3 +147,31 @@ test("Android keeps the edge stretch and uses small-viewport min-heights", () =>
   assert.doesNotMatch(css, /html\[data-android-renderer\][^{]*\{[^}]*overscroll-behavior-y: none/);
   assert.doesNotMatch(css, /html\[data-android-renderer\][^{]*\{[^}]*min-height: 100dvh/);
 });
+
+test("the Android display fixes stay pinned", () => {
+  // Unblurred finale key art (a blurred full-screen layer rastered late on phones).
+  const scene = readSource("src/styles-world/07.css");
+  const start = scene.indexOf(".finale-backdrop img {");
+  const finale = scene.slice(start, scene.indexOf("}", start));
+  assert.ok(start >= 0);
+  assert.doesNotMatch(finale, /filter:\s*blur\(/);
+  assert.match(finale, /filter: saturate\(1\.1\);/);
+  // Samsung Internet's forced dark mode leaves the dark page alone.
+  assert.match(readSource("src/routes/__root.tsx"), /\{ name: "color-scheme", content: "dark" \}/);
+  assert.match(
+    readSource("src/styles.css"),
+    /@media \(prefers-color-scheme: dark\) \{\s*:root \{\s*color-scheme: dark;/,
+  );
+  // Touch browsers keep :hover after a tap: the pickup plus hovers only on a real hover.
+  const pickup = readSource("src/styles-pickup-visibility.css");
+  assert.doesNotMatch(pickup, /\.episode-pickup-plus:hover,/);
+  assert.match(
+    pickup,
+    /@media \(hover: hover\) \{\s*:where\(html body\) \.episode-pickup-plus:hover \{/,
+  );
+  // The column rail labels fit at 360-440px (checked in a browser by verify-column-frame).
+  assert.match(
+    readSource("src/styles-world-addon.css"),
+    /@media \(max-width: 440px\) \{[\s\S]*?\.world-column-tabs\.liquid-swipe-tabs > button\[role="tab"\] b \{[^}]*letter-spacing: 0;[^}]*"palt"/,
+  );
+});

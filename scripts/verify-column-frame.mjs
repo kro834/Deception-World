@@ -1,17 +1,29 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 const base = process.env.BASE_URL || "http://localhost:8080";
-const browser = await chromium.launch({ channel: "chrome" });
+const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
+// Android widths: Galaxy (Samsung Internet) at 360, Pixel at 393, 412 and 430.
+// Without the ≤440px label fit (styles-world-addon.css), the page rail
+// overflows at 320-393 and the dialog rail at 412.
+const GALAXY_UA =
+  "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36";
+const PIXEL_UA =
+  "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
+const IPHONE_UA =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1";
+const ANDROID = new Map([
+  [360, GALAXY_UA],
+  [393, PIXEL_UA],
+  [412, PIXEL_UA],
+  [430, PIXEL_UA],
+]);
 try {
-  for (const width of [320, 375, 393, 430, 768, 1376]) {
+  for (const width of [320, 360, 375, 393, 412, 430, 768, 1376]) {
     const page = await browser.newPage({
       viewport: { width, height: width > 840 ? 1008 : 900 },
       isMobile: true,
       hasTouch: true,
-      userAgent:
-        width === 393 || width === 430
-          ? "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/131 Mobile Safari/537.36"
-          : "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+      userAgent: ANDROID.get(width) ?? IPHONE_UA,
     });
     try {
       await page.goto(base + "/world");
@@ -22,6 +34,15 @@ try {
         undefined,
         { timeout: 10_000 },
       );
+      // The page rail's labels fit too (not only the dialog's).
+      const pageRailFits = await page
+        .locator(".world-column-tabs:not(.world-column-dialog-tabs)")
+        .evaluate((e) =>
+          [...e.querySelectorAll("button b,button small")].every(
+            (n) => n.scrollWidth <= n.clientWidth + 1 && n.scrollHeight <= n.clientHeight + 1,
+          ),
+        );
+      assert.equal(pageRailFits, true, `page rail labels overflow at ${width}`);
       await page.locator(".world-column-slide-open").focus();
       await page.keyboard.press("Enter");
       await page.locator(".world-column-dialog[open]").waitFor();
@@ -59,8 +80,10 @@ try {
         assert.equal(state.selected, i);
         assert.ok(state.lensError < 2, JSON.stringify(state));
         assert.equal(state.inside, true);
-        assert.equal(state.textFits, true);
-        if (width <= 840) assert.equal(state.radius, "24px");
+        assert.equal(state.textFits, true, `dialog rail labels overflow at ${width}`);
+        // Frosted capsule rails at every width since cba387a
+        // (styles-frosted-controls.css, !important).
+        assert.equal(state.radius, "999px");
       }
       const start = await tabs.nth(3).boundingBox(),
         end = await tabs.nth(2).boundingBox();
