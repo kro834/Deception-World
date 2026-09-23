@@ -1,6 +1,3 @@
-        label: "仮面ライダーレルム　ムーンフォーム",
-        src: "/rider-realm-moon.jpeg",
-        pos: "50% 10%",
         alt: "仮面ライダーレルム ムーンフォーム",
         width: 1024,
         height: 1536,
@@ -250,6 +247,32 @@ const RiderRail = memo(
   }),
 );
 
+/* Scroll-lit headings (reveal-text.tsx, styles-world-reveal.css). Module
+   scope, so a WorldHome commit hands the memoised RevealText the same element
+   and React skips it; each heading's aria-label is revealLabel() of it. */
+const STORY_TITLE = (
+  <>
+    救うべき世界は、
+    <br />
+    <em>現実</em>にある。
+  </>
+);
+const RIDERS_TITLE = <>八人が、世界へ。</>;
+const RECORDS_TITLE = (
+  <>
+    到達点は、
+    <br />
+    ひとつではない。
+  </>
+);
+const FINALE_TITLE = (
+  <>
+    サーガは、
+    <br />
+    まだ終わらない。
+  </>
+);
+
 type WorldSectionId = "story" | "riders" | "records";
 
 /* The location marker changes at three scroll boundaries. Owning it here keeps
@@ -426,21 +449,3 @@ export function WorldHome() {
   useLayoutEffect(() => {
     let firstFrame = 0;
     let secondFrame = 0;
-    let retryFrame = 0;
-    let cancelled = false;
-    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
-    // connected targets for almost that whole window instead of assuming a
-    // fixed 24-frame budget, which can expire early on throttled devices.
-    const destinationReadyDeadline = window.performance.now() + 2_000;
-
-    const announceDestination = () => {
-      if (cancelled) return;
-      const destination = {
-        path: "/world",
-        brand: openingBrandRef.current,
-        sigil: openingSigilRef.current,
-        hero: openingHeroRef.current,
-        backdrop: openingBackdropRef.current,
-        focus: openingFocusRef.current,
-      };
-      const targets = [

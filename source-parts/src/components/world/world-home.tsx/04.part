@@ -1,3 +1,17 @@
+        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
+      ]);
+    if (motionReduced) {
+      void waitForFinalImage().then((ready) => {
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
+        shuffleActive.current = false;
+      });
+      return;
+    }
+
+    setShuffling(true);
+    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
+      const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;
         const ready = isFinalStep ? await waitForFinalImage() : true;
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
@@ -435,12 +449,3 @@
             </div>
             <output
               aria-label="表示中のポスター"
-              aria-live={locked || posterControlsFocused ? "polite" : "off"}
-              aria-atomic="true"
-              aria-busy={shuffling}
-            >
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </output>
-          </div>
-        </div>
-        <div className="hero-context">

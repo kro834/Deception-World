@@ -1,0 +1,165 @@
+/* Reveal edition — scroll-lit type on /world.
+
+   Chapter headings write themselves one character at a time, and their lead
+   paragraphs ink in progressively, in reading order, as the reader scrolls:
+   each character goes from a faint ghost through the projector's ice scan
+   front to full ink. The words are always in the DOM at full colour; the
+   only animated property is `color` on inline spans, so no layer is created
+   per character and line breaking (kinsoku) is untouched.
+
+   Blocks: the story, riders, records and finale headings, the story copy and
+   the riders copy. Blocks that change with a rail (the archive title and
+   copy, the column summary, the rider description) are left alone: a tab
+   switch would re-ink the new text wherever the reader stopped, and those
+   blocks sit where a rail is being used.
+
+   Hooks: the owner element carries data-text-reveal="heading" | "copy"
+   (never data-reveal: styles-world/08.css:288 hides [data-reveal] until a
+   legacy observer marks it visible). <RevealText> emits one inline
+   span.tr-c per character.
+
+   Timing: every block owns a named view timeline (--tr). Character k of n
+   has --tr-p = k/(n-1) and lights between
+     cover (from + p*span)  and  cover (from + p*span + fade)
+   so the last character is lit once the block's top is (from+span+fade)
+   above the viewport bottom: 34svh for headings (top at 66% of the
+   viewport), 44svh for copy (top at 56%). Above that line, after a hash jump
+   or a restored scroll, the text is simply lit. The finale headline instead
+   writes itself while its stage is pinned (or, on short landscape screens
+   where the stage is not pinned, while it rises into view), on Mirage's
+   --mr-finale timeline (declared on .finale-section, so it binds to the
+   document even though .finale-sticky clips with overflow:hidden), under
+   Mirage's gate.
+
+   Off: reduced motion, economy rendering, increased contrast, forced
+   colours, reduced transparency, and while the side menu, a loading cover or
+   a dialog locks the page (a locked <body> becomes a scroll container; the
+   text is shown fully lit, under the cover). Rail locks keep it on, below. */
+
+/* A rail drag locks the page with overflow:hidden on <html> and <body>
+   (viewport-scroll-lock.js). A hidden <body> is a scroll container, so every
+   view timeline would rebind to it mid-drag and the text beside the rail
+   would flip to full ink and back at each tap. Clipping <body> instead keeps
+   the lock (the root stays hidden and the rail blocks touch and wheel
+   scrolling) while the timelines stay on the document, so the reveal simply
+   holds still under a rail lock. */
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open])
+  body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open])) {
+  overflow: clip !important;
+}
+
+@supports (animation-timeline: view()) and (animation-range: cover 0% cover 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        :has(dialog[open])
+      )
+      .site-shell.film-edition.mirage-edition
+      [data-text-reveal]:not(.finale-content *) {
+      --tr-from: 6svh;
+      --tr-span: 20svh;
+      --tr-fade: 8svh;
+      view-timeline: --tr block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        :has(dialog[open])
+      )
+      .site-shell.film-edition.mirage-edition
+      [data-text-reveal="copy"]:not(.finale-content *) {
+      --tr-span: 28svh;
+      --tr-fade: 10svh;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        :has(dialog[open])
+      )
+      .site-shell.film-edition.mirage-edition
+      [data-text-reveal]:not(.finale-content *)
+      .tr-c {
+      animation: tr-ink linear both;
+      /* Scroll-linked, so there is nothing to save by pausing it off screen
+         (styles-world/21.css pauses [data-viewport-active="false"] regions).
+         A paused character would hold its old ink, then snap to its scroll
+         state a few frames after a jump lands. */
+      animation-play-state: running !important;
+      animation-timeline: --tr;
+      animation-range: cover calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span)) cover
+        calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span) + var(--tr-fade));
+    }
+
+    /* The finale headline writes itself through the first 60% of its pinned
+       stage, on Mirage's --mr-finale timeline. That timeline exists only
+       under Mirage's own gate, which also excludes rail locks, so this rule
+       repeats that gate exactly: a character whose named timeline vanished
+       mid-animation would stay paused at its ghost. No rail sits near the
+       finale, so nothing flips there. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+        [data-loading]
+      ):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .finale-content
+      [data-text-reveal]
+      .tr-c {
+      animation: tr-ink linear both;
+      animation-play-state: running !important;
+      animation-timeline: --mr-finale;
+      animation-range: contain calc(var(--tr-p, 0) * 45%) contain calc(var(--tr-p, 0) * 45% + 15%);
+    }
+
+    /* Short landscape screens unpin the stage (styles-world/11.css): the
+       section is then exactly one viewport tall, its contain range is empty,
+       and every character would pop at the same scroll position. There the
+       headline writes itself as the stage rises into view instead. The range
+       counts from the section's top at the viewport bottom; the headline sits
+       about 30svh below that top, so it starts writing just inside the
+       viewport and is whole when its top reaches about two thirds of it. */
+    @media (orientation: landscape) and (max-height: 520px) {
+      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+          [data-loading]
+        ):not(:has(dialog[open]))
+        .site-shell.film-edition.mirage-edition
+        .finale-content
+        [data-text-reveal]
+        .tr-c {
+        animation-range: cover calc(40svh + var(--tr-p, 0) * 20svh) cover
+          calc(48svh + var(--tr-p, 0) * 20svh);
+      }
+    }
+  }
+}
+
+/* Modes that must read at full contrast. Unknown media features evaluate
+   false, so an engine without one of them simply keeps the reveal. Each
+   selector repeats its animation rule so it outranks it. */
+@media (prefers-contrast: more), (forced-colors: active), (prefers-reduced-transparency: reduce) {
+  html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+      :has(dialog[open])
+    )
+    .site-shell.film-edition.mirage-edition
+    [data-text-reveal]:not(.finale-content *)
+    .tr-c,
+  html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
+      [data-loading]
+    ):not(:has(dialog[open]))
+    .site-shell.film-edition.mirage-edition
+    .finale-content
+    [data-text-reveal]
+    .tr-c {
+    animation: none;
+  }
+}
+
+/* Ghost, then the projector's ice scan front, then full ink. `currentColor`
+   in a keyframe for `color` is the parent's colour, so one keyframe serves
+   white headings, ice <em>s and grey copy; the implicit `to` is that colour.
+   The front passes each character once and only while the reader scrolls,
+   so nothing changes on a still page. No text-shadow here: it would re-run
+   overflow layout every frame. */
+@keyframes tr-ink {
+  from {
+    color: color-mix(in oklab, currentColor 14%, transparent);
+  }
+  50% {
+    color: color-mix(in oklab, var(--mr-ice, #7ae8ff) 85%, transparent);
+  }
+}

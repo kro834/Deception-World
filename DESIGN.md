@@ -112,6 +112,17 @@ Android (2026-09-23): a capable Android phone (Pixel, Galaxy, Samsung Internet) 
 
 Guards: `scripts/world-mirage.test.mjs` pins these rules, and `scripts/verify-world-mirage.mjs` checks the boot, the timeline sources, the rest state, the landscape hero and the handoff arrival in a browser.
 
+### Scroll-lit type
+
+As the reader scrolls, the story, riders, records and finale headings write themselves one character at a time in reading order, and the story and riders lead paragraphs ink in the same way. Each character starts as a 14% ghost, passes once through an ice scan front and settles at its own colour. Headings are fully lit when their top reaches 66% of the viewport, and copy when it reaches 56%. The finale headline writes itself during the first 60% of its pinned stage. On short landscape screens the stage is not pinned, so there it writes itself as the stage rises into view and is lit by the same 66% line.
+- **How.** `src/components/world/reveal-text.tsx` (with `reveal-label.ts`) splits the text into inline `span.tr-c` (Array.from, so server and client always match). The component is memoised, and the heading fragments are module constants in `world-home.tsx`. `src/styles-world-reveal.css` animates only `color` on named view timelines (`--tr`, and `--mr-finale` for the finale). It loads before Mirage. This adds no layers and keeps line breaking.
+- **Replaces.** Mirage's heading wipe and the copy rise on those blocks. The archive title, column summary and rider description stay whole text, because a rail changes them in place.
+- **Always readable.** Text above the reveal line is lit after hash jumps and restored scrolls. Reduced motion, economy rendering, increased contrast, forced colours, reduced transparency, the side menu, loading covers and dialogs all show full ink. Headings keep their visible text for hit tests and get an `aria-label`. Copy is read once from a visually hidden sentence.
+- **Rail locks.** On `/world`, `<body>` is clipped rather than hidden during a rail drag, so the view timelines stay on the document and the text holds still under the lock instead of flipping.
+- **Cost.** About +0.3 ms of style work per frame at 4× CPU throttling. This assumes `--page-progress` is not written on `<html>` every frame. A per-frame custom property on the root restyles every character.
+
+Guards: `scripts/world-reveal.test.mjs` and `scripts/verify-world-reveal.mjs`.
+
 ## Rising the World — 2026-09-23
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.

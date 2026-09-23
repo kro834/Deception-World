@@ -1,3 +1,21 @@
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",
+        brand: openingBrandRef.current,
+        sigil: openingSigilRef.current,
+        hero: openingHeroRef.current,
+        backdrop: openingBackdropRef.current,
+        focus: openingFocusRef.current,
+      };
+      const targets = [
         destination.brand,
         destination.sigil,
         destination.hero,
@@ -431,17 +449,3 @@
     const waitForFinalImage = () =>
       Promise.race([
         finalReady,
-        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
-      ]);
-    if (motionReduced) {
-      void waitForFinalImage().then((ready) => {
-        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
-        shuffleActive.current = false;
-      });
-      return;
-    }
-
-    setShuffling(true);
-    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
-      const timer = window.setTimeout(async () => {

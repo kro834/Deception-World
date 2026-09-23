@@ -14,6 +14,8 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { RevealText } from "./reveal-text";
+import { revealLabel } from "./reveal-label";
 import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
@@ -694,6 +696,32 @@ const RiderRail = memo(
       </div>
     );
   }),
+);
+
+/* Scroll-lit headings (reveal-text.tsx, styles-world-reveal.css). Module
+   scope, so a WorldHome commit hands the memoised RevealText the same element
+   and React skips it; each heading's aria-label is revealLabel() of it. */
+const STORY_TITLE = (
+  <>
+    救うべき世界は、
+    <br />
+    <em>現実</em>にある。
+  </>
+);
+const RIDERS_TITLE = <>八人が、世界へ。</>;
+const RECORDS_TITLE = (
+  <>
+    到達点は、
+    <br />
+    ひとつではない。
+  </>
+);
+const FINALE_TITLE = (
+  <>
+    サーガは、
+    <br />
+    まだ終わらない。
+  </>
 );
 
 type WorldSectionId = "story" | "riders" | "records";
@@ -1823,11 +1851,9 @@ export function WorldHome() {
               <span>THIS IS NOT A DREAM</span>
               <i />
             </p>
-            <h2 data-film-reveal>
+            <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(STORY_TITLE)}>
               <FilmTextScan />
-              救うべき世界は、
-              <br />
-              <em>現実</em>にある。
+              <RevealText>{STORY_TITLE}</RevealText>
             </h2>
           </div>
           <div className="story-copy">
@@ -1835,11 +1861,15 @@ export function WorldHome() {
               <span>『ドリームチャプター』に続く</span>
               <span>劇場版第二作</span>
             </p>
-            <p>
-              世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+            <p data-text-reveal="copy">
+              <RevealText copy>
+                世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。
+              </RevealText>
             </p>
-            <p>
-              シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+            <p data-text-reveal="copy">
+              <RevealText copy>
+                シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。
+              </RevealText>
             </p>
           </div>
         </div>
@@ -2224,12 +2254,14 @@ export function WorldHome() {
             <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
-          <h2 data-film-reveal>
+          <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
             <FilmTextScan />
-            八人が、世界へ。
+            <RevealText>{RIDERS_TITLE}</RevealText>
           </h2>
-          <p>
-            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+          <p data-text-reveal="copy">
+            <RevealText copy>
+              主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+            </RevealText>
           </p>
         </div>
         <div className="rider-console">
@@ -2306,11 +2338,9 @@ export function WorldHome() {
             <span>POWER BEYOND THE BORDER</span>
             <i />
           </p>
-          <h2 data-film-reveal>
+          <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RECORDS_TITLE)}>
             <FilmTextScan />
-            到達点は、
-            <br />
-            ひとつではない。
+            <RevealText>{RECORDS_TITLE}</RevealText>
           </h2>
         </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
@@ -2446,11 +2476,9 @@ export function WorldHome() {
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>
-            <h2 data-film-reveal>
+            <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(FINALE_TITLE)}>
               <FilmTextScan />
-              サーガは、
-              <br />
-              まだ終わらない。
+              <RevealText>{FINALE_TITLE}</RevealText>
             </h2>
             <a className="primary-action ios26-glass" href="#top" data-liquid-pointer="true">
               <LiquidPointerGlow />

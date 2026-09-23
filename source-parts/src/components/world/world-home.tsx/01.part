@@ -14,6 +14,8 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { RevealText } from "./reveal-text";
+import { revealLabel } from "./reveal-label";
 import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
@@ -444,3 +446,6 @@ const EPISODES: EpisodeRecord[] = [
         assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
       },
       {
+        label: "仮面ライダーレルム　ムーンフォーム",
+        src: "/rider-realm-moon.jpeg",
+        pos: "50% 10%",

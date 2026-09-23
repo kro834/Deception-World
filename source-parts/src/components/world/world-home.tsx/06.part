@@ -1,4 +1,12 @@
-            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+          </p>
+          <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
+            <FilmTextScan />
+            <RevealText>{RIDERS_TITLE}</RevealText>
+          </h2>
+          <p data-text-reveal="copy">
+            <RevealText copy>
+              主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+            </RevealText>
           </p>
         </div>
         <div className="rider-console">
@@ -75,11 +83,9 @@
             <span>POWER BEYOND THE BORDER</span>
             <i />
           </p>
-          <h2 data-film-reveal>
+          <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RECORDS_TITLE)}>
             <FilmTextScan />
-            到達点は、
-            <br />
-            ひとつではない。
+            <RevealText>{RECORDS_TITLE}</RevealText>
           </h2>
         </div>
         <section className="episode-archive" aria-labelledby="episode-archive-title">
@@ -215,11 +221,9 @@
           </div>
           <div className="finale-content">
             <span>THE WORLD IS WAITING.</span>
-            <h2 data-film-reveal>
+            <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(FINALE_TITLE)}>
               <FilmTextScan />
-              サーガは、
-              <br />
-              まだ終わらない。
+              <RevealText>{FINALE_TITLE}</RevealText>
             </h2>
             <a className="primary-action ios26-glass" href="#top" data-liquid-pointer="true">
               <LiquidPointerGlow />
