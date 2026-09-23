@@ -89,7 +89,11 @@ const COUNT_WEBGL = () => {
   window.__webglContexts = 0;
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
-    if (/webgl/i.test(String(type)) && this.closest?.(".rw-dialog")) window.__webglContexts += 1;
+    // The sequence's canvas is detached (primed or not yet appended) when its
+    // context is created, so it is recognised by its class, not its place.
+    if (/webgl/i.test(String(type)) && this.classList.contains("rw-canvas")) {
+      window.__webglContexts += 1;
+    }
     return getContext.call(this, type, ...rest);
   };
 };
@@ -233,7 +237,7 @@ async function checkGate(browser, name) {
 
 // ---------------------------------------------------------------- sequence
 async function checkSequence(browser, name) {
-  const { context, page, errors } = await openWorld(browser, name);
+  const { context, page, errors } = await openWorld(browser, name, { init: [COUNT_WEBGL] });
   await scrollToGate(page);
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const pressedAt = Date.now();
@@ -329,6 +333,7 @@ async function checkSequence(browser, name) {
     await new Promise((resolve) => setTimeout(resolve, 500));
     return {
       canvases: document.querySelectorAll(".rw-gl canvas").length,
+      contexts: window.__webglContexts,
       drawsBefore: draws,
       drawsAfter: window.__risingStats?.draws ?? 0,
       running: window.__risingStats?.running,
@@ -343,6 +348,8 @@ async function checkSequence(browser, name) {
     };
   });
   assert.equal(end.canvases, 0, `${name}: the canvas and its context are released`);
+  // A positive control for the context counter the reduced-motion tier relies on.
+  assert.equal(end.contexts, 1, `${name}: one WebGL context per run`);
   assert.equal(end.drawsBefore, end.drawsAfter, `${name}: nothing draws after the end`);
   assert.equal(end.running, false);
   assert.ok(end.title > 0.99);
@@ -431,6 +438,33 @@ async function checkTiers(browser, name) {
     assert.ok(doneAfter < 3600, `${name}: reduced motion ends by ~2.6 s (${doneAfter} ms)`);
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ check: "tier-reduced", name, doneAfter, ...reduced }));
+    await context.close();
+  }
+  // Pressed before the engine chunk arrives (a slow network): the dialog stays
+  // dark until the run starts; the end still never shows first.
+  {
+    const { context, page, errors } = await openWorld(browser, name);
+    await page.route(/rising-(?:sequence|fire|timing)|rising\.frag/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      await route.continue();
+    });
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "instant" }),
+    );
+    await page.waitForTimeout(200);
+    await press(page, name);
+    await page.waitForTimeout(400);
+    const pending = await page.evaluate(() => ({
+      tier: document.querySelector(".rw-viewport").dataset.tier ?? null,
+      end: getComputedStyle(document.querySelector(".rw-end")).visibility,
+    }));
+    assert.deepEqual(pending, { tier: null, end: "hidden" }, `${name}: pending engine`);
+    await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.tier, null, {
+      timeout: 8000,
+    });
+    await page.keyboard.press("Escape");
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: "engine-pending", name, ...pending }));
     await context.close();
   }
   // Save-Data and no WebGL: the calm CSS version.

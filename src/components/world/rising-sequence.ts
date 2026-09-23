@@ -353,7 +353,7 @@ export function runRising({
         duration: ms(s.breakthrough),
         easing: "cubic-bezier(0.5, 0, 0.75, 0)",
       });
-      add(calmBurn, [{ translate: "0 100%" }, { translate: "0 -6%" }], {
+      add(calmBurn, [{ translate: "0 66%" }, { translate: "0 -6%" }], {
         delay: ms(s.burnStart),
         duration: ms(s.burnEnd - s.burnStart),
         easing: "ease-in-out",

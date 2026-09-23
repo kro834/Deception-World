@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -45,6 +52,10 @@ declare global {
     __risingStats?: RisingStats;
   }
 }
+
+// Most taps last longer than this, and a flick usually cancels the pointer
+// (the browser takes over the pan) sooner; a quicker tap primes at pointerup.
+const TOUCH_PRIME_DELAY_MS = 60;
 
 const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
@@ -108,6 +119,9 @@ export function RisingWorld() {
     runRef.current?.dispose();
     runRef.current = null;
     setLive("");
+    // No tier yet: the engine is still loading. The picture stays dark until
+    // the run starts, so the end still (the reveal) never shows first.
+    if (viewportRef.current) delete viewportRef.current.dataset.tier;
     let module: Engine;
     try {
       module = engineModule ?? (await loadEngine());
@@ -152,10 +166,30 @@ export function RisingWorld() {
   }, [noteControlFocus]);
 
   // Pointer contact: warm up, and create the GL context and start the shader
-  // compile on a detached canvas before the click opens the dialog.
-  const prime = () => {
-    prewarm();
+  // compile on a detached canvas before the click opens the dialog. A touch
+  // that lands on the button may be the start of a scroll (pointercancel), so
+  // touch primes a moment later, or at pointerup: getContext() on the main
+  // thread must not delay the scroll starting under the thumb.
+  const primeTimerRef = useRef(0);
+  const cancelPrime = () => {
+    window.clearTimeout(primeTimerRef.current);
+    primeTimerRef.current = 0;
+  };
+  const primeNow = () => {
+    cancelPrime();
     engineModule?.primeRising(WORLD_ART, RIDER_ART);
+  };
+  const prime = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    prewarm();
+    if (event.pointerType !== "touch") {
+      primeNow();
+      return;
+    }
+    cancelPrime();
+    primeTimerRef.current = window.setTimeout(primeNow, TOUCH_PRIME_DELAY_MS);
+  };
+  const primePending = () => {
+    if (primeTimerRef.current) primeNow();
   };
 
   const start = useCallback(
@@ -220,6 +254,7 @@ export function RisingWorld() {
     window.addEventListener("pagehide", onPageHide);
     return () => {
       window.removeEventListener("pagehide", onPageHide);
+      window.clearTimeout(primeTimerRef.current);
       openRef.current = false;
       runRef.current?.dispose();
       runRef.current = null;
@@ -240,6 +275,8 @@ export function RisingWorld() {
           aria-haspopup="dialog"
           aria-controls="rising-world-dialog"
           onPointerDown={prime}
+          onPointerUp={primePending}
+          onPointerCancel={cancelPrime}
           onFocus={prewarm}
           onClick={(event) => start(event.detail === 0)}
         >

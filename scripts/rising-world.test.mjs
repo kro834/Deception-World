@@ -344,3 +344,45 @@ test("the Zeus button steps off the gate button", async () => {
   );
   assert.match(list, /"\.rw-gate-button",/);
 });
+
+test("review guards: legible gate label, dark pending state, tap-only priming, visible css burn", async () => {
+  const css = await readCss();
+  // WCAG 1.4.3: the 14px label against the ember gradient across its text band.
+  const hex = (value) => [1, 3, 5].map((index) => parseInt(value.slice(index, index + 2), 16));
+  const channel = (value) => {
+    const v = value / 255;
+    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  const top = hex(css.match(/--rw-ember: (#[0-9a-f]{6});/)[1]);
+  const bottom = hex(css.match(/--rw-ember-deep: (#[0-9a-f]{6});/)[1]);
+  const label = luminance([255, 246, 238]);
+  for (let t = 0.3; t <= 0.7; t += 0.05) {
+    const background = top.map((value, index) => value + (bottom[index] - value) * t);
+    const ratio = (label + 0.05) / (luminance(background) + 0.05);
+    assert.ok(ratio >= 4.5, `gate label contrast ${ratio.toFixed(2)} at ${t.toFixed(2)}`);
+  }
+  assert.match(
+    css,
+    /rgb\(255 240 200 \/ 0\.24\), transparent 36%\)/,
+    "hover sheen above the label",
+  );
+  // Until the engine chunk arrives there is no tier, and nothing but the void shows.
+  assert.match(
+    css,
+    /\.rw-viewport:not\(\[data-tier\]\)\s*:is\(\.rw-end, \.rw-calm, \.rw-gl\) \{\s*visibility: hidden;/,
+  );
+  const component = await read("src/components/world/rising-world.tsx");
+  assert.match(
+    component,
+    /delete viewportRef\.current\.dataset\.tier;[\s\S]*?await loadEngine\(\)/,
+  );
+  // A touch that turns into a scroll never creates a GL context.
+  assert.match(component, /event\.pointerType !== "touch"/);
+  assert.match(component, /onPointerUp=\{primePending\}\s*onPointerCancel=\{cancelPrime\}/);
+  // The calm tier's fire enters with the burn and is climbing at its title cut.
+  const sequence = await read("src/components/world/rising-sequence.ts");
+  const from = Number(sequence.match(/add\(calmBurn, \[\{ translate: "0 (\d+)%" \}/)[1]);
+  assert.ok(from <= 70, `calm burn starts ${from}% down, below the frame for too long`);
+  assert.match(css, new RegExp(`\\.rw-calm-burn \\{[^}]*translate: 0 ${from}%;`));
+});
