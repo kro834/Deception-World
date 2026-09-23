@@ -109,3 +109,27 @@ Motion comes in three families, and none of them loops:
 Every family is gated by reduced motion and economy rendering, and keyframes animate only opacity, individual transforms, clip-path and two registered properties. Time-based keyframes stay at or under two opacity reversals a second, which is below the WCAG 2.3.1 flash threshold. Ornaments are aria-hidden and `pointer-events: none`. Rail geometry, slide controls, pinned control colours and the handoff targets are untouched.
 
 Guards: `scripts/world-mirage.test.mjs` pins these rules, and `scripts/verify-world-mirage.mjs` checks the boot, the timeline sources, the rest state, the landscape hero and the handoff arrival in a browser.
+
+## Rising the World — 2026-09-23
+
+After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.
+
+Pressing it opens a modal sequence of 8.8 s:
+- a round window onto the key visual bursts out of the button (a compositor-only scale, so it stays smooth while the page restyles for the dialog);
+- a dive into the key visual: zoom blur, speed lines, an amber breakthrough;
+- the world consumed by red flames climbing from below, with heat haze, char and embers;
+- mid-burn, at 4.5 s, one hard cut to EP7 REXONANCE, while the Rexonance art emerges from the ash;
+- a static end still with CLOSE and もう一度. SKIP jumps straight to it; Esc and the Android back gesture close.
+
+One WebGL fragment shader (`rising.frag.glsl`, high precision where the GPU has it) draws the dive and the fire at about three quarters of CSS resolution within a pixel budget. It draws about 60 times a second on 60–144 Hz panels and steps down a resolution-first quality ladder only when frames run late. The engine is loaded with `import()` when the gate nears the viewport. Its images are prepared as resized ImageBitmaps, and the GL context and shader compile start at pointerdown. The context exists only while the sequence plays and is released at the end, on close and on pagehide.
+
+The tier is chosen by capability, never by device model. Capable devices, Galaxy, Pixel and iPhone included, get the full WebGL version. Save-Data, 2G, low-memory, two-core, software-GL and no-WebGL devices, or GL that is not ready in 700 ms, get a calm CSS version. Reduced motion gets a cross-fade to the still.
+
+The sequence stays at one flash a second, general or red (WCAG 2.3.1, measured frame by frame at 60 fps):
+- colour temperature only rises;
+- the bloom is amber;
+- nothing pulses;
+- the shockwave is a gentle refraction;
+- the title is one cut and only the title shakes.
+
+The dialog is named RISING THE WORLD, the title is announced when it appears, and only the supplied words appear. Guards: `scripts/rising-world.test.mjs`, and `scripts/verify-rising-world.mjs` for the gate, the sequence, the tiers, performance and the flash audit in a browser.
