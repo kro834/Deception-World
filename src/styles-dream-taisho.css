@@ -711,6 +711,22 @@
   white-space: nowrap;
 }
 
+/* Phones: the captions (13-25 characters) do not fit one line at 320-430px,
+   and an ellipsis hid the end of every one. Let them wrap instead. */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-poster-stage figcaption {
+    align-items: start;
+  }
+
+  .dream-page.dream-page .dream-poster-stage figcaption b {
+    overflow: visible;
+    line-height: 1.7;
+    text-overflow: clip;
+    text-wrap: pretty;
+    white-space: normal;
+  }
+}
+
 .dream-page.dream-page .dream-poster-thumbnails button.ios26-glass {
   border: 1px solid var(--ts-hair-soft);
   border-radius: 2px;

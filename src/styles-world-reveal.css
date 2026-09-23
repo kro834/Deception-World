@@ -29,12 +29,12 @@
    the upper three quarters of the screen lit and only text still entering
    at the bottom ghosted. On short landscape screens (360-520px tall) a nav
    jump lands a heading at 83-86% of the viewport, so headings there are lit
-   by 11svh (top at about 89%). The finale headline instead
-   writes itself while its stage is pinned (or, on short landscape screens
-   where the stage is not pinned, while it rises into view), on Mirage's
-   --mr-finale timeline (declared on .finale-section, so it binds to the
-   document even though .finale-sticky clips with overflow:hidden), under
-   Mirage's gate.
+   by 11svh (top at about 89%). The finale headline is typed the same way,
+   on its own position: it rises into view before its stage pins, so it is
+   whole by the same 74% line and stays whole while the stage is pinned.
+   (It used to follow the pinned stage's contain range, which only starts
+   once the section reaches the top of the screen, so on phones the
+   headline sat blank or half-typed mid-screen.)
 
    Off: reduced motion, economy rendering, increased contrast, forced
    colours, reduced transparency, and while the side menu, a loading cover or
@@ -53,13 +53,21 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow: clip !important;
 }
 
+/* .finale-sticky clipped with overflow:hidden, which made it a scroll
+   container: the finale headline's view timeline would bind to it and never
+   move. `clip` clips the same without being a scroller. */
+.site-shell.film-edition.mirage-edition .finale-sticky {
+  overflow: hidden;
+  overflow: clip;
+}
+
 @supports (animation-timeline: view()) and (animation-range: cover 0% cover 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         :has(dialog[open])
       )
       .site-shell.film-edition.mirage-edition
-      [data-text-reveal]:not(.finale-content *) {
+      [data-text-reveal] {
       --tr-from: 4svh;
       --tr-span: 16svh;
       --tr-fade: 6svh;
@@ -70,7 +78,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
         :has(dialog[open])
       )
       .site-shell.film-edition.mirage-edition
-      [data-text-reveal="copy"]:not(.finale-content *) {
+      [data-text-reveal="copy"] {
       --tr-span: 18svh;
       --tr-fade: 4svh;
     }
@@ -79,7 +87,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
         :has(dialog[open])
       )
       .site-shell.film-edition.mirage-edition
-      [data-text-reveal]:not(.finale-content *)
+      [data-text-reveal]
       .tr-c {
       animation:
         tr-ink steps(1, end) both,
@@ -98,47 +106,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
         cover calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span) + var(--tr-fade));
     }
 
-    /* The finale headline writes itself through the first 60% of its pinned
-       stage, on Mirage's --mr-finale timeline. That timeline exists only
-       under Mirage's own gate, which also excludes rail locks, so this rule
-       repeats that gate exactly: a character whose named timeline vanished
-       mid-animation would stay paused at its ghost. No rail sits near the
-       finale, so nothing flips there. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-        [data-loading]
-      ):not(:has(dialog[open]))
-      .site-shell.film-edition.mirage-edition
-      .finale-content
-      [data-text-reveal]
-      .tr-c {
-      animation:
-        tr-ink steps(1, end) both,
-        tr-caret steps(1, end) none;
-      animation-play-state: running !important;
-      animation-timeline: --mr-finale;
-      animation-range: contain calc(var(--tr-p, 0) * 45% + 15% - var(--tr-d, 0) * 45%) contain
-        calc(var(--tr-p, 0) * 45% + 15%);
-    }
-
-    /* Short landscape screens unpin the stage (styles-world/11.css): the
-       section is then exactly one viewport tall, its contain range is empty,
-       and every character would pop at the same scroll position. There the
-       headline writes itself as the stage rises into view instead. The range
-       counts from the section's top at the viewport bottom; the headline sits
-       about 30svh below that top, so it starts writing just inside the
-       viewport and is whole when its top reaches about two thirds of it. */
     @media (orientation: landscape) and (max-height: 520px) {
-      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-          [data-loading]
-        ):not(:has(dialog[open]))
-        .site-shell.film-edition.mirage-edition
-        .finale-content
-        [data-text-reveal]
-        .tr-c {
-        animation-range: cover calc(48svh + var(--tr-p, 0) * 20svh - var(--tr-d, 0) * 20svh) cover
-          calc(48svh + var(--tr-p, 0) * 20svh);
-      }
-
       /* A topbar jump to RIDERS or RECORDS lands the heading at 83-86% of a
          short landscape screen, below the 74% line: headings there are lit
          by 11svh instead of 26svh, and still write themselves. */
@@ -146,7 +114,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
           :has(dialog[open])
         )
         .site-shell.film-edition.mirage-edition
-        [data-text-reveal="heading"]:not(.finale-content *) {
+        [data-text-reveal="heading"] {
         --tr-from: 1svh;
         --tr-span: 7svh;
         --tr-fade: 3svh;
@@ -163,13 +131,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       :has(dialog[open])
     )
     .site-shell.film-edition.mirage-edition
-    [data-text-reveal]:not(.finale-content *)
-    .tr-c,
-  html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not(
-      [data-loading]
-    ):not(:has(dialog[open]))
-    .site-shell.film-edition.mirage-edition
-    .finale-content
     [data-text-reveal]
     .tr-c {
     animation: none;

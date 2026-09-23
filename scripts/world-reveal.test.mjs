@@ -10,9 +10,6 @@ const readCss = async () => stripComments(await read("src/styles-world-reveal.cs
 // under which the reveal holds still (see the body clip rule).
 const GATE =
   'html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(:has(dialog[open])) .site-shell.film-edition.mirage-edition';
-// Mirage's gate, which owns --mr-finale; the finale headline rides on it.
-const MIRAGE_GATE =
-  'html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(:has(dialog[open])) .site-shell.film-edition.mirage-edition';
 const flat = (text) =>
   text.replace(/\s+/g, " ").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").trim();
 
@@ -95,7 +92,6 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
   const { rules } = parse(css);
   assert.doesNotMatch(css, /\[data-reveal/);
   let animated = 0;
-  let finale = 0;
   for (const { selector, body, context } of rules) {
     // Anonymous timelines would bind to the nearest clipping panel.
     assert.doesNotMatch(
@@ -117,49 +113,23 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
       `${selector} ignores reduced motion`,
     );
     const timeline = body.match(/animation-timeline:\s*([^;]+)/)?.[1].trim();
-    const finaleRule =
-      timeline === "--mr-finale" || /\.finale-content \[data-text-reveal\] \.tr-c$/.test(selector);
     for (const part of splitSelectors(selector)) {
-      if (finaleRule) {
-        // --mr-finale exists only under Mirage's gate; a character whose
-        // timeline vanished mid-animation would be left paused at its ghost.
-        assert.ok(part.startsWith(`${MIRAGE_GATE} .finale-content`), part);
-        finale += 1;
-      } else {
-        assert.ok(part.startsWith(GATE), `${part} lacks the reveal gate`);
-        assert.match(part, /\[data-text-reveal(?:="copy")?\]:not\(\.finale-content \*\)/, part);
-      }
+      assert.ok(part.startsWith(GATE), `${part} lacks the reveal gate`);
+      assert.match(part, /\[data-text-reveal(?:="copy")?\](?: \.tr-c)?$/, part);
     }
-    if (timeline) assert.match(timeline, /^--(?:tr|mr-finale)$/, selector);
+    if (timeline) assert.equal(timeline, "--tr", selector);
   }
-  assert.equal(
-    animated,
-    4,
-    "view timelines, chapter characters, finale characters, unpinned finale",
-  );
-  assert.equal(finale, 2);
-  // Where the finale stage is not pinned its contain range is empty, so the
-  // headline would pop at once: that layout gets a cover range of its own,
-  // under the exact media query that unpins the stage.
-  const UNPINNED = "@media (orientation: landscape) and (max-height: 520px)";
-  const inUnpinned = rules.filter(({ context }) => context.includes(UNPINNED));
-  const unpinned = inUnpinned.filter(({ selector }) =>
-    /\.finale-content \[data-text-reveal\] \.tr-c$/.test(selector),
-  );
-  assert.equal(unpinned.length, 1);
-  assert.match(
-    flat(unpinned[0].body),
-    /^animation-range: cover calc\([^;]+\) cover calc\([^;]+\);$/,
-  );
-  // The same short screens: a nav jump lands a heading at 83-86% of the
+  // One view timeline per block and one character rule: the finale headline
+  // is typed on its own position like the other headings (the pinned stage's
+  // contain range started too late on phones and left it blank mid-screen).
+  assert.equal(animated, 2, "view timelines, characters");
+  // Short landscape screens: a nav jump lands a heading at 83-86% of the
   // viewport, so headings there are lit sooner (variables only).
-  const shortHeadings = inUnpinned.filter((rule) => !unpinned.includes(rule));
+  const SHORT = "@media (orientation: landscape) and (max-height: 520px)";
+  const shortHeadings = rules.filter(({ context }) => context.includes(SHORT));
   assert.equal(shortHeadings.length, 1);
   assert.ok(shortHeadings[0].selector.startsWith(GATE), shortHeadings[0].selector);
-  assert.match(
-    shortHeadings[0].selector,
-    /\[data-text-reveal="heading"\]:not\(\.finale-content \*\)$/,
-  );
+  assert.match(shortHeadings[0].selector, /\[data-text-reveal="heading"\]$/);
   const shortVars = Object.fromEntries(
     [...shortHeadings[0].body.matchAll(/(--tr-(?:from|span|fade)):\s*([\d.]+)svh;/g)].map(
       ([, name, value]) => [name, Number(value)],
@@ -174,16 +144,12 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
   );
   const shortLine = shortVars["--tr-from"] + shortVars["--tr-span"] + shortVars["--tr-fade"];
   assert.ok(shortLine <= 12, `short landscape headings lit by ${shortLine}svh`);
-  assert.match(
-    stripComments(await read("src/styles-world/11.css")),
-    /@media \(orientation: landscape\) and \(max-height: 520px\) \{[^@]*\.finale-sticky \{\s*position: relative;/,
-  );
-  // The finale reuses Mirage's pinned timeline instead of redeclaring it.
+  assert.doesNotMatch(css, /--mr-finale/);
   assert.doesNotMatch(css, /finale-section[^{]*\{[^}]*view-timeline/);
   assert.match(css, /view-timeline: --tr block;/);
   // Paused regions (styles-world/21.css) must not freeze scroll-linked ink.
   const playing = rules.filter(({ body }) => /animation-play-state/.test(body));
-  assert.equal(playing.length, 2);
+  assert.equal(playing.length, 1);
   for (const { body } of playing) {
     assert.match(body, /animation-play-state: running !important;/);
   }
@@ -205,7 +171,7 @@ test("the reveal finishes at 26svh: headings and copy are whole with their top a
   assert.ok(base, "the view-timeline rule");
   const heading = readVars(base);
   const copyRule = rules.find(({ selector }) =>
-    selector.endsWith('[data-text-reveal="copy"]:not(.finale-content *)'),
+    selector.endsWith('[data-text-reveal="copy"]'),
   );
   assert.ok(copyRule, "the copy rule");
   // Copy inherits --tr-from from the base rule.
@@ -224,16 +190,21 @@ test("rail locks clip <body> on /world so the reveal holds still under them", as
   const css = await readCss();
   const { rules } = parse(css);
   const clip = rules.filter(({ body }) => /overflow/.test(body));
-  assert.equal(clip.length, 1);
+  assert.equal(clip.length, 2);
+  const lockClip = clip.find(({ selector }) => selector.includes("[data-rail-lock]"));
   assert.equal(
-    clip[0].selector,
+    lockClip.selector,
     'html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]) body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open]))',
   );
-  assert.equal(flat(clip[0].body), "overflow: clip !important;");
-  assert.deepEqual(clip[0].context, []);
-  // Panels keep overflow:hidden: clipping .finale-sticky would revive a scale
-  // animation on its blurred image, and no revealed block needs it.
-  assert.doesNotMatch(css, /\.(?:threat-panel|world-column|rider-detail|finale-sticky)\b/);
+  assert.equal(flat(lockClip.body), "overflow: clip !important;");
+  assert.deepEqual(lockClip.context, []);
+  // The finale stage clips without being a scroll container, so the finale
+  // headline's view timeline binds to the document (hidden fallback first).
+  const stage = clip.find(({ selector }) => selector.endsWith(".finale-sticky"));
+  assert.equal(flat(stage.body), "overflow: hidden; overflow: clip;");
+  assert.deepEqual(stage.context, []);
+  // Other panels are left alone.
+  assert.doesNotMatch(css, /\.(?:threat-panel|world-column|rider-detail)\b/);
   // The lock itself is untouched: body is still hidden inline.
   const lock = await read("src/lib/viewport-scroll-lock.js");
   assert.match(lock, /body\.style\.overflow = "hidden";/);

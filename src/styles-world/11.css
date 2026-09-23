@@ -502,6 +502,43 @@
   }
 }
 
+/* Narrow phones: two columns left 81-116px for a rider or manager name, so
+   long names ended in an ellipsis ("オーバーゼ…"). Stack the previous and next
+   links full width and keep the index below them. */
+@media (max-width: 520px) {
+  .manager-pagination {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .manager-pagination > .manager-pagination-spacer {
+    display: none;
+  }
+
+  .manager-pagination > .manager-pagination-index {
+    grid-row: auto;
+    order: 1;
+  }
+
+  .manager-pagination > a:first-child {
+    border-right: 0;
+  }
+
+  /* Both names start at the left, clear of the floating Zeus button that
+     sits at the right edge on phones. */
+  .manager-pagination > a:last-child {
+    align-items: flex-start;
+    border-top: 1px solid color-mix(in srgb, var(--manager-accent-soft) 14%, transparent);
+    border-left: 0;
+    text-align: left;
+  }
+
+  .manager-pagination > a > b {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
   .finale-section {
     min-height: 100svh;

@@ -568,9 +568,8 @@ const jump = (page, selector, share) =>
     [selector, share],
   );
 
-// The finale headline must write itself (pass through part-lit states) as the
-// finale scrolls in and through its stage, pinned or not, and end whole. An
-// empty range (an unpinned stage exactly one viewport tall) pops it at once.
+// The finale headline must be typed (pass through part-lit states) as the
+// finale scrolls in, pinned or not, and end whole.
 const finaleWrites = (page) =>
   page.evaluate(async () => {
     const section = document.querySelector(".finale-section");
@@ -685,7 +684,8 @@ async function styleCost(context) {
   assert.equal(timelines.perSpan, 0, "phone-412: a character without exactly one reveal");
   assert.deepEqual(timelines.detached, [], "phone-412: reveal bound to a panel scroller");
   assert.equal(timelines.timeBased, 0, "phone-412: reveal must be scroll-linked and finite");
-  assert.equal(timelines.finaleOwnTimeline, "none", "phone-412: finale heading declares --tr");
+  // The finale headline is typed on its own position, like the other headings.
+  assert.equal(timelines.finaleOwnTimeline, "--tr", "phone-412: finale heading lacks --tr");
   assert.deepEqual(await wholeText(page), [], "phone-412: a block that must stay whole is split");
 
   // Mid-reveal: written in reading order, the tail still a ghost.
@@ -711,17 +711,25 @@ async function styleCost(context) {
   }
   // Whole at the 74% line, not yet whole just below it.
   await revealLine(page, "phone-412", { width: 412, height: 915 });
-  // The finale headline writes itself early in the pin and is whole later.
-  await placeFinale(page, 0.08);
+  // The finale headline is typed as it rises into view and is whole before
+  // its stage pins (it used to sit blank mid-screen until the pin began).
+  await placeTop(page, ".finale-content h2", 0.86);
   assert.ok(
     (await ink(page, ".finale-content h2")).some((character) => !character.full),
-    "phone-412: finale headline already whole at the start of its pin",
+    "phone-412: finale headline already whole just inside the viewport",
   );
-  await placeFinale(page, 0.7);
+  await placeTop(page, ".finale-content h2", 0.6);
   assert.ok(
     (await ink(page, ".finale-content h2")).every((character) => character.full),
-    "phone-412: finale headline unlit late in its pin",
+    "phone-412: finale headline not whole with its top at 60%",
   );
+  for (const share of [0, 0.7]) {
+    await placeFinale(page, share);
+    assert.ok(
+      (await ink(page, ".finale-content h2")).every((character) => character.full),
+      `phone-412: finale headline not whole at ${share} of its pin`,
+    );
+  }
 
   // Nothing is left behind at the end of the page.
   await page.evaluate(() =>
