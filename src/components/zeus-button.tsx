@@ -528,6 +528,17 @@ function ZeusButton({
     });
   }, [preventHeldTouchScroll]);
 
+  /* WebKit decides when a touch begins whether its moves can be cancelled,
+     and a window listener added mid-gesture may come too late. The button
+     keeps its own non-passive listener (only this small target is affected);
+     it re-binds whenever the button is re-portalled, because that remounts it. */
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (!button) return;
+    button.addEventListener("touchmove", preventHeldTouchScroll, { passive: false });
+    return () => button.removeEventListener("touchmove", preventHeldTouchScroll);
+  }, [preventHeldTouchScroll]);
+
   useEffect(
     () => () => {
       clearHoldTimer();

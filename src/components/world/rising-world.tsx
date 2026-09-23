@@ -355,7 +355,6 @@ export function RisingWorld() {
           ref={closeRef}
           type="button"
           className="rw-close"
-          aria-label="閉じる"
           onClick={closeDialog}
         >
           <span>CLOSE</span>

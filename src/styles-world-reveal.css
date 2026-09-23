@@ -22,9 +22,10 @@
    has --tr-p = k/(n-1) and lights between
      cover (from + p*span)  and  cover (from + p*span + fade)
    so the last character is lit once the block's top is (from+span+fade)
-   above the viewport bottom: 34svh for headings (top at 66% of the
-   viewport), 44svh for copy (top at 56%). Above that line, after a hash jump
-   or a restored scroll, the text is simply lit. The finale headline instead
+   above the viewport bottom: 26svh for headings and copy alike (top at 74%
+   of the viewport), so a nav jump or restored scroll leaves everything in
+   the upper three quarters of the screen lit and only text still entering
+   at the bottom ghosted. The finale headline instead
    writes itself while its stage is pinned (or, on short landscape screens
    where the stage is not pinned, while it rises into view), on Mirage's
    --mr-finale timeline (declared on .finale-section, so it binds to the
@@ -55,9 +56,9 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal]:not(.finale-content *) {
-      --tr-from: 6svh;
-      --tr-span: 20svh;
-      --tr-fade: 8svh;
+      --tr-from: 4svh;
+      --tr-span: 16svh;
+      --tr-fade: 6svh;
       view-timeline: --tr block;
     }
 
@@ -66,8 +67,8 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal="copy"]:not(.finale-content *) {
-      --tr-span: 28svh;
-      --tr-fade: 10svh;
+      --tr-span: 18svh;
+      --tr-fade: 4svh;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(

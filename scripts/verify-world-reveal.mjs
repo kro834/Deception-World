@@ -785,7 +785,7 @@ async function styleCost(context) {
         (target) => document.querySelector(target).getBoundingClientRect().top / innerHeight,
         selector,
       );
-      if (top > 0.56) continue;
+      if (top > 0.72) continue;
       assert.ok(
         (await ink(page, selector)).every((character) => character.full),
         `${label}: ${selector} unlit at ${top.toFixed(2)}`,
