@@ -220,7 +220,8 @@ html[data-side-menu-open="true"] body {
   contain-intrinsic-size: auto 1200px;
 }
 
-:is(.world-column, .episode-archive, .manager-archive-identity-records, .rider-form-pickup-stack) {
+/* .world-column and .episode-archive stay laid out so World anchors land exactly. */
+:is(.manager-archive-identity-records, .rider-form-pickup-stack) {
   content-visibility: auto;
   contain-intrinsic-size: auto 960px;
 }

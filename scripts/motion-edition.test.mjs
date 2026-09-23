@@ -42,7 +42,7 @@ test("every animation is scroll-linked, gated and finite", async () => {
     assert.doesNotMatch(rule, /infinite|\d+m?s\b/, rule);
   }
   const timelines =
-    css.match(/animation-timeline:\s*(?:view\(block\)|scroll\(root block\))/g) ?? [];
+    css.match(/animation-timeline:\s*(?:view\(block\)|scroll\(root block\)|--mx-[\w-]+)/g) ?? [];
   assert.equal(timelines.length, rules.filter((rule) => rule !== "none").length);
   assert.doesNotMatch(css, /touch-action:|overscroll-behavior:|backdrop-filter:|(?<!-)filter\s*:/);
   assert.doesNotMatch(css, /pointer-events:(?!\s*none)/);
@@ -96,5 +96,24 @@ test("elements that already own motion or measured geometry are left alone", asy
     /\.rider-visual|\.world-column-copy|\.poster-/,
   ]) {
     assert.doesNotMatch(css, owned, String(owned));
+  }
+});
+
+test("World timelines follow the page, not a clipping panel", async () => {
+  const css = await readCss();
+  // Anonymous view() binds to the nearest scroll container; these panels clip instead.
+  assert.match(
+    css,
+    /:is\(\.hero, \.threat-panel, \.episode-archive\) \{\s*overflow: hidden;\s*overflow: clip;/,
+  );
+  assert.match(css, /\.episode-grid \{\s*view-timeline: --mx-episodes block;/);
+  assert.match(css, /\.episode-card \{[^}]*animation-timeline: --mx-episodes;/);
+  assert.match(css, /\.finale-sticky \{\s*view-timeline: --mx-finale block;/);
+  assert.match(css, /\.finale-content \{[^}]*animation-timeline: --mx-finale;/);
+  assert.match(css, /\.finale-backdrop\s+img \{[^}]*animation-timeline: --mx-finale;/);
+  // The sticky stage keeps its own overflow; only its timeline is named.
+  assert.doesNotMatch(css, /finale-sticky[^{]*\{[^}]*overflow:/);
+  for (const [, name] of css.matchAll(/animation-timeline:\s*(--[\w-]+)/g)) {
+    assert.match(css, new RegExp(`view-timeline: ${name} block`), name);
   }
 });

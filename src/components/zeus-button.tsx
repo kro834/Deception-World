@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouterState } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
+import { createViewportResizeFilter } from "@/lib/viewport-resize";
 
 type ZeusButtonPosition = { x: number; y: number };
 
@@ -461,13 +462,6 @@ function ZeusButton({
         placeButton(pendingPosition.current);
       });
     };
-    const onResize = () => {
-      if (placementTimer.current != null) {
-        window.clearTimeout(placementTimer.current);
-        placementTimer.current = null;
-      }
-      schedulePlacement();
-    };
     const onScroll = () => {
       if (activePointer.current != null) return;
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
@@ -477,6 +471,19 @@ function ZeusButton({
         placementTimer.current = null;
         schedulePlacement();
       }, 72);
+    };
+    const significantResize = createViewportResizeFilter();
+    const onResize = () => {
+      // A URL bar collapsing mid-scroll only re-clamps once the gesture settles.
+      if (!significantResize()) {
+        onScroll();
+        return;
+      }
+      if (placementTimer.current != null) {
+        window.clearTimeout(placementTimer.current);
+        placementTimer.current = null;
+      }
+      schedulePlacement();
     };
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -496,28 +503,38 @@ function ZeusButton({
     };
   }, [placeButton]);
 
-  useEffect(() => {
-    const preventHeldTouchScroll = (event: TouchEvent) => {
-      if (held.current && activePointer.current != null && event.cancelable) {
-        event.preventDefault();
-      }
-    };
+  /* A permanent non-passive window touchmove listener makes every page scroll
+     wait for the main thread. Install it only while a held drag owns the
+     finger; the button is re-portalled into dialogs, so it is not bound to the
+     current button node either. */
+  const touchGuardArmed = useRef(false);
+  const preventHeldTouchScroll = useCallback((event: TouchEvent) => {
+    if (held.current && activePointer.current != null && event.cancelable) {
+      event.preventDefault();
+    }
+  }, []);
+  const disarmTouchGuard = useCallback(() => {
+    if (!touchGuardArmed.current) return;
+    touchGuardArmed.current = false;
+    window.removeEventListener("touchmove", preventHeldTouchScroll, { capture: true });
+  }, [preventHeldTouchScroll]);
+  const armTouchGuard = useCallback(() => {
+    if (touchGuardArmed.current) return;
+    touchGuardArmed.current = true;
     window.addEventListener("touchmove", preventHeldTouchScroll, {
       passive: false,
       capture: true,
     });
-    return () => {
-      window.removeEventListener("touchmove", preventHeldTouchScroll, { capture: true });
-    };
-  }, []);
+  }, [preventHeldTouchScroll]);
 
   useEffect(
     () => () => {
       clearHoldTimer();
       cancelDragFrame();
       cancelPlacement();
+      disarmTouchGuard();
     },
-    [clearHoldTimer, cancelDragFrame, cancelPlacement],
+    [clearHoldTimer, cancelDragFrame, cancelPlacement, disarmTouchGuard],
   );
 
   /* Pointer capture is not guaranteed in Samsung Internet or embedded
@@ -536,6 +553,7 @@ function ZeusButton({
       cancelDragFrame();
       activePointer.current = null;
       held.current = false;
+      disarmTouchGuard();
       moved.current = true;
       if (button) {
         button.dataset.dragging = "false";
@@ -564,7 +582,7 @@ function ZeusButton({
       window.removeEventListener("pagehide", cancelOnBlur);
       document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
-  }, [clearHoldTimer, cancelDragFrame, restoreGestureOrigin]);
+  }, [clearHoldTimer, cancelDragFrame, disarmTouchGuard, restoreGestureOrigin]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
@@ -594,6 +612,7 @@ function ZeusButton({
       restoreGestureOrigin();
     }
     held.current = false;
+    disarmTouchGuard();
     event.currentTarget.dataset.dragging = "false";
     event.currentTarget.setAttribute("aria-grabbed", "false");
     try {
@@ -645,6 +664,7 @@ function ZeusButton({
         holdTimer.current = window.setTimeout(() => {
           if (activePointer.current !== event.pointerId) return;
           held.current = true;
+          armTouchGuard();
           target.dataset.dragging = "true";
           target.setAttribute("aria-grabbed", "true");
           try {

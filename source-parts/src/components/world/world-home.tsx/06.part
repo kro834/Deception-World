@@ -1,3 +1,12 @@
+            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+          </p>
+        </div>
+        <div className="rider-console">
+          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
+          <div
+            id="rider-active-panel"
+            className="rider-detail"
+            role="tabpanel"
             aria-labelledby={`rider-tab-${rider.id}`}
             style={{ ["--rider-tone" as string]: rider.tone }}
           >

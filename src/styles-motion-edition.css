@@ -206,6 +206,29 @@
     }
 
     /* ---------- World: panels arrive, the finale opens up ---------- */
+    /* An anonymous view() binds to the nearest scroll container, and an
+       overflow:hidden panel is one: the hero copy, the signals and the episode
+       grid used to track a panel that never scrolls (stuck, main-thread only).
+       These panels only clip their art, so clip without becoming scroll
+       containers and let the timelines below follow the page. */
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.hero, .threat-panel, .episode-archive) {
+      overflow: hidden;
+      overflow: clip;
+    }
+
+    /* The episode grid scrolls sideways, so its cards share its view timeline. */
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .episode-grid {
+      view-timeline: --mx-episodes block;
+    }
+
+    /* The finale stage is sticky and clips its art; name its own timeline
+       instead of clipping it, so the stage keeps its scroll container. */
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .finale-sticky {
+      view-timeline: --mx-finale block;
+    }
+
     html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .hero-copy {
       animation: mx-hand-over linear both;
       animation-timeline: view(block);
@@ -222,9 +245,16 @@
 
     html:not([data-world-effects="economy"])
       .site-shell.film-edition.motion-on
-      :is(.manager-slot-grid .signal, .episode-card) {
+      .manager-slot-grid
+      .signal {
       animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .episode-card {
+      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: --mx-episodes;
       animation-range: entry 0% entry 100%;
     }
 
@@ -245,14 +275,14 @@
       .finale-backdrop
       img {
       animation: mx-settle linear both;
-      animation-timeline: view(block);
+      animation-timeline: --mx-finale;
       animation-range: cover 0% cover 60%;
     }
 
     html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .finale-content {
       animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
-      animation-timeline: view(block);
-      animation-range: entry 10% entry 100%;
+      animation-timeline: --mx-finale;
+      animation-range: entry 10% entry 90%;
     }
   }
 }

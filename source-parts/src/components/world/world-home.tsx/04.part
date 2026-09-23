@@ -1,3 +1,51 @@
+        const isFinalStep = index === steps.length - 1;
+        const ready = isFinalStep ? await waitForFinalImage() : true;
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];
+        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {
+          goPoster(next);
+        }
+        if (isFinalStep) {
+          const settleTimer = window.setTimeout(() => {
+            setShuffling(false);
+            shuffleActive.current = false;
+            shuffleTimers.current = [];
+          }, 300);
+          shuffleTimers.current.push(settleTimer);
+        }
+      }, delay);
+      shuffleTimers.current.push(timer);
+    });
+  };
+
+  const goEpisode = (index: number) => {
+    const next = Math.max(0, Math.min(EPISODES.length - 1, index));
+    setEpisode(next);
+    const card = episodeGridRef.current?.querySelectorAll<HTMLElement>(".episode-card")[next];
+    episodeProgrammatic.current = true;
+    scrollAxisX(episodeGridRef.current, card ?? null);
+    if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
+    episodeScrollTimer.current = window.setTimeout(() => {
+      episodeProgrammatic.current = false;
+      episodeScrollTimer.current = null;
+    }, 520);
+  };
+
+  const openEpisodePickup = (
+    index: number,
+    trigger: HTMLButtonElement,
+    openedByKeyboard: boolean,
+  ) => {
+    const dialog = episodePickupDialogRef.current;
+    if (!dialog || !EPISODES[index]?.pickups?.length) return;
+    if (episodePointerFocusTimer.current != null) {
+      window.clearTimeout(episodePointerFocusTimer.current);
+      episodePointerFocusTimer.current = null;
+    }
+    episodeGridRef.current?.removeAttribute("data-pointer-focus-suppressed");
+    goEpisode(index);
+    episodePickupTriggerRef.current = trigger;
+    episodePickupOpenedByKeyboard.current = openedByKeyboard;
     setEpisodePickup(index);
     cancelEpisodePickupScrollReset.current?.();
     if (!dialog.open) {
@@ -123,29 +171,7 @@
             </span>
           </a>
         </div>
-        <nav aria-label="メインメニュー">
-          <a
-            href="#story"
-            aria-label="STORY：ストーリーへ移動"
-            aria-current={activeSection === "story" ? "location" : undefined}
-          >
-            STORY
-          </a>
-          <a
-            href="#riders"
-            aria-label="RIDERS：ライダーへ移動"
-            aria-current={activeSection === "riders" ? "location" : undefined}
-          >
-            RIDERS
-          </a>
-          <a
-            href="#records"
-            aria-label="RECORDS：記録へ移動"
-            aria-current={activeSection === "records" ? "location" : undefined}
-          >
-            RECORDS
-          </a>
-        </nav>
+        <WorldSectionNav />
         <div className="topbar-actions">
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
@@ -276,7 +302,7 @@
                       objectPosition: previous.pos,
                       objectFit: previous.fit === "contain" ? "contain" : "cover",
                     }}
-                    onAnimationEnd={() => setPrevPoster(null)}
+                    onAnimationEnd={() => startTransition(() => setPrevPoster(null))}
                   />
                 ) : null}
                 <img
@@ -418,21 +444,3 @@
           </div>
         </div>
         <div className="hero-context">
-          <p className="hero-lead">
-            救うべきものは、夢の向こうにはない。
-            <br />
-            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
-          </p>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>
-            </span>
-            <span>
-              <small>WORLD</small>
-              <b>SAGA / REALITY</b>
-            </span>
-            <span>
-              <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
-            </span>

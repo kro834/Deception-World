@@ -1,4 +1,5 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { startTransition } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
@@ -17,6 +18,7 @@ import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
 import { RisingWorld } from "./rising-world";
+import { createViewportResizeFilter } from "@/lib/viewport-resize";
 
 const POSTERS = [
   {
@@ -694,6 +696,99 @@ const RiderRail = memo(
   }),
 );
 
+type WorldSectionId = "story" | "riders" | "records";
+
+/* The location marker changes at three scroll boundaries. Owning it here keeps
+   those updates to three links instead of re-rendering the whole World page. */
+const WorldSectionNav = memo(function WorldSectionNav() {
+  const navRef = useRef<HTMLElement>(null);
+  const lastActiveRef = useRef<WorldSectionId | null | undefined>(undefined);
+  const [activeSection, setActiveSection] = useState<WorldSectionId | null>(null);
+
+  useEffect(() => {
+    const shell = navRef.current?.closest<HTMLElement>(".site-shell");
+    const topbar = navRef.current?.closest<HTMLElement>(".topbar");
+    let previousTopbarHeight = 0;
+    const sections = (["story", "riders", "records"] as const)
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section != null);
+    if (!sections.length) return;
+    let frame = 0;
+    const syncActiveSection = () => {
+      frame = 0;
+      // Text enlargement may grow the fixed header. Reuse this observer rather
+      // than hiding the first title underneath it or adding another listener.
+      const topbarHeight = topbar?.offsetHeight ?? 0;
+      if (topbarHeight > 0 && topbarHeight !== previousTopbarHeight) {
+        shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
+        previousTopbarHeight = topbarHeight;
+      }
+      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
+      let current: WorldSectionId | null = null;
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= marker) {
+          current = section.id as WorldSectionId;
+        }
+      });
+      // An identical update still schedules a render right after a real one.
+      if (current === lastActiveRef.current) return;
+      lastActiveRef.current = current;
+      setActiveSection(current);
+    };
+    const requestSectionSync = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(syncActiveSection);
+    };
+    const significantResize = createViewportResizeFilter();
+    // The URL bar collapsing mid-scroll is followed by scroll events anyway.
+    const requestResizeSync = () => {
+      if (significantResize()) requestSectionSync();
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
+    sections.forEach((section) => resizeObserver?.observe(section));
+    if (topbar) resizeObserver?.observe(topbar);
+    window.addEventListener("scroll", requestSectionSync, { passive: true });
+    window.addEventListener("resize", requestResizeSync, { passive: true });
+    window.visualViewport?.addEventListener("resize", requestResizeSync, { passive: true });
+    syncActiveSection();
+    return () => {
+      window.removeEventListener("scroll", requestSectionSync);
+      window.removeEventListener("resize", requestResizeSync);
+      window.visualViewport?.removeEventListener("resize", requestResizeSync);
+      resizeObserver?.disconnect();
+      shell?.style.removeProperty("--film-topbar-height");
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <nav ref={navRef} aria-label="メインメニュー">
+      <a
+        href="#story"
+        aria-label="STORY：ストーリーへ移動"
+        aria-current={activeSection === "story" ? "location" : undefined}
+      >
+        STORY
+      </a>
+      <a
+        href="#riders"
+        aria-label="RIDERS：ライダーへ移動"
+        aria-current={activeSection === "riders" ? "location" : undefined}
+      >
+        RIDERS
+      </a>
+      <a
+        href="#records"
+        aria-label="RECORDS：記録へ移動"
+        aria-current={activeSection === "records" ? "location" : undefined}
+      >
+        RECORDS
+      </a>
+    </nav>
+  );
+});
+
 export function WorldHome() {
   useWorldMode();
   const { go, notifyOpeningDestination } = useLoadGate();
@@ -724,8 +819,9 @@ export function WorldHome() {
   const [pickupOpen, setPickupOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
+  // Read by the poster timer at once; the state follows when scrolling settles.
+  const heroInViewRef = useRef(true);
   const [motionReduced, setMotionReduced] = useState(false);
-  const [activeSection, setActiveSection] = useState<"story" | "riders" | "records" | null>(null);
   const managerRail = useRef<HTMLDivElement>(null);
   const columnRail = useRef<HTMLDivElement>(null);
   const riderRail = useRef<HTMLDivElement>(null);
@@ -905,7 +1001,7 @@ export function WorldHome() {
     let decoding = false;
     const nextIndex = (poster + 1) % POSTERS.length;
     const t = window.setInterval(async () => {
-      if (decoding || document.querySelector("dialog[open]")) return;
+      if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
       decoding = true;
       const image = new Image();
       image.decoding = "async";
@@ -914,8 +1010,11 @@ export function WorldHome() {
       try {
         await image.decode();
         if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
-        setPrevPoster(poster);
-        setPoster(nextIndex);
+        if (!heroInViewRef.current) return;
+        startTransition(() => {
+          setPrevPoster(poster);
+          setPoster(nextIndex);
+        });
       } catch {
         // Preserve the current art when the next image cannot be delivered.
       } finally {
@@ -998,65 +1097,41 @@ export function WorldHome() {
     const shell = shellRef.current;
     if (!shell || typeof IntersectionObserver === "undefined") return;
     const regions = shell.querySelectorAll<HTMLElement>("[data-performance-region]");
+    // Hero visibility only gates the poster autoplay. Commit it once scrolling
+    // settles: re-rendering the page mid-fling costs a long frame on phones.
+    let pendingHeroVisible: boolean | null = null;
+    let heroVisibleTimer = 0;
+    const commitHeroVisible = () => {
+      heroVisibleTimer = 0;
+      if (pendingHeroVisible === null) return;
+      const next = pendingHeroVisible;
+      pendingHeroVisible = null;
+      startTransition(() => setHeroVisible(next));
+    };
+    const deferHeroVisible = () => {
+      if (pendingHeroVisible === null) return;
+      window.clearTimeout(heroVisibleTimer);
+      heroVisibleTimer = window.setTimeout(commitHeroVisible, 180);
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           (entry.target as HTMLElement).dataset.viewportActive = String(entry.isIntersecting);
-          if (entry.target === openingHeroRef.current) setHeroVisible(entry.isIntersecting);
+          if (entry.target === openingHeroRef.current) {
+            heroInViewRef.current = entry.isIntersecting;
+            pendingHeroVisible = entry.isIntersecting;
+            deferHeroVisible();
+          }
         });
       },
       { rootMargin: "240px 0px" },
     );
     regions.forEach((region) => observer.observe(region));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const shell = shellRef.current;
-    const topbar = shell?.querySelector<HTMLElement>(".topbar");
-    let previousTopbarHeight = 0;
-    const sections = (["story", "riders", "records"] as const)
-      .map((id) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section != null);
-    if (!sections.length) return;
-    let frame = 0;
-    const syncActiveSection = () => {
-      frame = 0;
-      // Text enlargement may grow the fixed header. Reuse this observer rather
-      // than hiding the first title underneath it or adding another listener.
-      const topbarHeight = topbar?.offsetHeight ?? 0;
-      if (topbarHeight > 0 && topbarHeight !== previousTopbarHeight) {
-        shell?.style.setProperty("--film-topbar-height", `${topbarHeight}px`);
-        previousTopbarHeight = topbarHeight;
-      }
-      const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
-      let current: "story" | "riders" | "records" | null = null;
-      sections.forEach((section) => {
-        if (section.getBoundingClientRect().top <= marker) {
-          current = section.id as "story" | "riders" | "records";
-        }
-      });
-      setActiveSection(current);
-    };
-    const requestSectionSync = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(syncActiveSection);
-    };
-    const resizeObserver =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
-    sections.forEach((section) => resizeObserver?.observe(section));
-    if (topbar) resizeObserver?.observe(topbar);
-    window.addEventListener("scroll", requestSectionSync, { passive: true });
-    window.addEventListener("resize", requestSectionSync, { passive: true });
-    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
-    syncActiveSection();
+    window.addEventListener("scroll", deferHeroVisible, { passive: true });
     return () => {
-      window.removeEventListener("scroll", requestSectionSync);
-      window.removeEventListener("resize", requestSectionSync);
-      window.visualViewport?.removeEventListener("resize", requestSectionSync);
-      resizeObserver?.disconnect();
-      shell?.style.removeProperty("--film-topbar-height");
-      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", deferHeroVisible);
+      window.clearTimeout(heroVisibleTimer);
     };
   }, []);
 
@@ -1435,29 +1510,7 @@ export function WorldHome() {
             </span>
           </a>
         </div>
-        <nav aria-label="メインメニュー">
-          <a
-            href="#story"
-            aria-label="STORY：ストーリーへ移動"
-            aria-current={activeSection === "story" ? "location" : undefined}
-          >
-            STORY
-          </a>
-          <a
-            href="#riders"
-            aria-label="RIDERS：ライダーへ移動"
-            aria-current={activeSection === "riders" ? "location" : undefined}
-          >
-            RIDERS
-          </a>
-          <a
-            href="#records"
-            aria-label="RECORDS：記録へ移動"
-            aria-current={activeSection === "records" ? "location" : undefined}
-          >
-            RECORDS
-          </a>
-        </nav>
+        <WorldSectionNav />
         <div className="topbar-actions">
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
@@ -1588,7 +1641,7 @@ export function WorldHome() {
                       objectPosition: previous.pos,
                       objectFit: previous.fit === "contain" ? "contain" : "cover",
                     }}
-                    onAnimationEnd={() => setPrevPoster(null)}
+                    onAnimationEnd={() => startTransition(() => setPrevPoster(null))}
                   />
                 ) : null}
                 <img

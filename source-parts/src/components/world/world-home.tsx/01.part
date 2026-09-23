@@ -1,4 +1,5 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { startTransition } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
@@ -17,6 +18,7 @@ import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
 import { RisingWorld } from "./rising-world";
+import { createViewportResizeFilter } from "@/lib/viewport-resize";
 
 const POSTERS = [
   {
@@ -435,3 +437,10 @@ const EPISODES: EpisodeRecord[] = [
         label: "仮面ライダーレルム　アースフォーム",
         src: "/rider-realm-earth.jpeg",
         pos: "50% 12%",
+        alt: "仮面ライダーレルム アースフォーム",
+        width: 1026,
+        height: 1533,
+        to: "/characters/terra",
+        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
+      },
+      {

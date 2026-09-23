@@ -52,10 +52,14 @@ try {
     await page.waitForTimeout(1000);
     await page.evaluate(() => {
       window.progressWrites = 0;
+      window.rootProgressWrites = 0;
       const original = CSSStyleDeclaration.prototype.setProperty;
       CSSStyleDeclaration.prototype.setProperty = function (name, ...args) {
-        if (this === document.documentElement.style && name === "--page-progress")
-          window.progressWrites++;
+        if (name === "--page-progress") {
+          // The value lives on the header that draws it, never on <html>.
+          if (this === document.documentElement.style) window.rootProgressWrites++;
+          else if (this === document.querySelector(".topbar")?.style) window.progressWrites++;
+        }
         return original.call(this, name, ...args);
       };
       window.scrollTo({
@@ -67,11 +71,15 @@ try {
     const result = await page.evaluate(() => ({
       native: document.documentElement.dataset.nativeScrollProgress === "true",
       writes: window.progressWrites,
+      rootWrites: window.rootProgressWrites,
+      rootProgress: document.documentElement.style.getPropertyValue("--page-progress"),
       ratio: scrollY / (document.documentElement.scrollHeight - innerHeight),
-      progress: Number(document.documentElement.style.getPropertyValue("--page-progress")),
+      progress: Number(document.querySelector(".topbar").style.getPropertyValue("--page-progress")),
       economy: document.documentElement.dataset.worldEffects === "economy",
     }));
     assert.ok(result.ratio > 0.1, "Scroll must move the page");
+    assert.equal(result.rootWrites, 0, "<html> must not carry the per-frame progress value");
+    assert.equal(result.rootProgress, "");
     const lines = await page.evaluate(readProgressLines);
     assert.equal(lines.length, 1, `${mode}: one progress line ${JSON.stringify(lines)}`);
     assert.ok(Math.abs(lines[0].scale - result.ratio) < 0.025, JSON.stringify({ lines, result }));
@@ -85,7 +93,8 @@ try {
       assert.equal((await page.evaluate(readProgressLines)).length, 1, `${mode}: reduced motion`);
       assert.ok(
         await page.evaluate(
-          () => Number(document.documentElement.style.getPropertyValue("--page-progress")) > 0,
+          () =>
+            Number(document.querySelector(".topbar").style.getPropertyValue("--page-progress")) > 0,
         ),
       );
       await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -94,7 +103,7 @@ try {
       );
     } else {
       assert.ok(result.writes > 0);
-      assert.ok(Math.abs(result.progress - result.ratio) < 0.025);
+      assert.ok(Math.abs(result.progress - result.ratio) < 0.025, JSON.stringify(result));
     }
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ mode, ...result, line: lines[0], errors }));

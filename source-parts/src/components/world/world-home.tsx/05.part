@@ -1,3 +1,21 @@
+          <p className="hero-lead">
+            救うべきものは、夢の向こうにはない。
+            <br />
+            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
+          </p>
+          <div className="hero-metadata" aria-label="作品情報">
+            <span>
+              <small>FORMAT</small>
+              <b>ORIGINAL MOVIE</b>
+            </span>
+            <span>
+              <small>WORLD</small>
+              <b>SAGA / REALITY</b>
+            </span>
+            <span>
+              <small>STATUS</small>
+              <b>THE STORY CONTINUES</b>
+            </span>
           </div>
         </div>
         <a className="scroll-cue" href="#story">
@@ -426,12 +444,3 @@
             八人が、世界へ。
           </h2>
           <p>
-            主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
-          </p>
-        </div>
-        <div className="rider-console">
-          <RiderRail ref={riderRail} initialIndex={initialRiderTab} />
-          <div
-            id="rider-active-panel"
-            className="rider-detail"
-            role="tabpanel"
