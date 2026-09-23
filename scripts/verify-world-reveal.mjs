@@ -174,7 +174,9 @@ async function revealLine(page, name, viewport) {
 
 // Nav links (the topbar's STORY / RIDERS / RECORDS) from the top of the page:
 // wherever a section lands, every block whose top is above the reveal line is
-// whole, and on short landscape screens so is every visible heading character.
+// whole. On short landscape screens a heading lands at 83-86% of the viewport
+// (STORY's lands lower, still entering): one above the 89% line shows every
+// visible character lit.
 async function navJumps(page, name, viewport) {
   const landings = [];
   for (const id of ["story", "riders", "records"]) {
@@ -203,11 +205,13 @@ async function navJumps(page, name, viewport) {
           .filter(({ block }) => ![...block.querySelectorAll(".tr-c")].every(full))
           .map(({ block, top }) => `${block.textContent.slice(0, 6)}@${top.toFixed(2)}`);
         const heading = document.querySelector(`#${section} [data-text-reveal="heading"]`);
-        const visible = short
-          ? [...heading.querySelectorAll(".tr-c")].filter(
-              (span) => span.getBoundingClientRect().top < innerHeight - 8,
-            )
-          : [];
+        const headingTop = heading.getBoundingClientRect().top / innerHeight;
+        const visible =
+          short && headingTop <= 0.88
+            ? [...heading.querySelectorAll(".tr-c")].filter(
+                (span) => span.getBoundingClientRect().top < innerHeight - 8,
+              )
+            : [];
         return {
           scrollY: Math.round(window.scrollY),
           heading: Number((heading.getBoundingClientRect().top / innerHeight).toFixed(2)),
