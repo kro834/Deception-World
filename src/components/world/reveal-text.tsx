@@ -6,7 +6,9 @@ import { BLANK, revealLabel, splittable } from "./reveal-label";
    <RevealText> splits its text children into one inline <span class="tr-c">
    per character and gives each span its reading-order position as --tr-p
    (0 → 1). Everything else passes through untouched: <br>, components such as
-   <FilmTextScan />, and anything aria-hidden. Inline host elements (<em>,
+   <FilmTextScan />, and anything aria-hidden.
+   Each span also carries --tr-d = 1/(n-1), one character's share of the
+   block, which sizes the typing cursor's step. Inline host elements (<em>,
    <b>, <strong>, <span>, <small>, <i>) and fragments are split through, so
    the visible string and its markup are exactly what they were.
 
@@ -67,7 +69,12 @@ export const RevealText = memo(function RevealText({
             <span
               key={key}
               className="tr-c"
-              style={{ "--tr-p": (index++ / Math.max(1, total - 1)).toFixed(3) } as CSSProperties}
+              style={
+                {
+                  "--tr-p": (index++ / Math.max(1, total - 1)).toFixed(3),
+                  "--tr-d": (1 / Math.max(1, total - 1)).toFixed(3),
+                } as CSSProperties
+              }
             >
               {part}
             </span>

@@ -1,11 +1,11 @@
 /* Reveal edition — scroll-lit type on /world.
 
-   Chapter headings write themselves one character at a time, and their lead
-   paragraphs ink in progressively, in reading order, as the reader scrolls:
-   each character goes from a faint ghost through the projector's ice scan
-   front to full ink. The words are always in the DOM at full colour; the
-   only animated property is `color` on inline spans, so no layer is created
-   per character and line breaking (kinsoku) is untouched.
+   Chapter headings and their lead paragraphs are typed out one character at
+   a time, in reading order, as the reader scrolls: an ice block cursor sits
+   on the next cell, and each character appears at full ink the moment it is
+   typed. The words are always in the DOM at full colour; the only animated
+   properties are `color` and `background-color` on inline spans, so no layer
+   is created per character and line breaking (kinsoku) is untouched.
 
    Blocks: the story, riders, records and finale headings, the story copy and
    the riders copy. Blocks that change with a rail (the archive title and
@@ -19,9 +19,11 @@
    span.tr-c per character.
 
    Timing: every block owns a named view timeline (--tr). Character k of n
-   has --tr-p = k/(n-1) and lights between
-     cover (from + p*span)  and  cover (from + p*span + fade)
-   so the last character is lit once the block's top is (from+span+fade)
+   has --tr-p = k/(n-1) and --tr-d = 1/(n-1); it is typed at
+     cover (from + p*span + fade)
+   and the cursor sits on its cell for one character's step (d*span) before
+   that, so exactly one cursor shows while a block is being typed. The last
+   character is lit once the block's top is (from+span+fade)
    above the viewport bottom: 26svh for headings and copy alike (top at 74%
    of the viewport), so a nav jump or restored scroll leaves everything in
    the upper three quarters of the screen lit and only text still entering
@@ -79,15 +81,21 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       .site-shell.film-edition.mirage-edition
       [data-text-reveal]:not(.finale-content *)
       .tr-c {
-      animation: tr-ink linear both;
+      animation:
+        tr-ink steps(1, end) both,
+        tr-caret steps(1, end) none;
       /* Scroll-linked, so there is nothing to save by pausing it off screen
          (styles-world/21.css pauses [data-viewport-active="false"] regions).
          A paused character would hold its old ink, then snap to its scroll
          state a few frames after a jump lands. */
       animation-play-state: running !important;
       animation-timeline: --tr;
-      animation-range: cover calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span)) cover
-        calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span) + var(--tr-fade));
+      animation-range: cover
+        calc(
+          var(--tr-from) + var(--tr-p, 0) * var(--tr-span) + var(--tr-fade) - var(--tr-d, 0) *
+            var(--tr-span)
+        )
+        cover calc(var(--tr-from) + var(--tr-p, 0) * var(--tr-span) + var(--tr-fade));
     }
 
     /* The finale headline writes itself through the first 60% of its pinned
@@ -103,10 +111,13 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       .finale-content
       [data-text-reveal]
       .tr-c {
-      animation: tr-ink linear both;
+      animation:
+        tr-ink steps(1, end) both,
+        tr-caret steps(1, end) none;
       animation-play-state: running !important;
       animation-timeline: --mr-finale;
-      animation-range: contain calc(var(--tr-p, 0) * 45%) contain calc(var(--tr-p, 0) * 45% + 15%);
+      animation-range: contain calc(var(--tr-p, 0) * 45% + 15% - var(--tr-d, 0) * 45%) contain
+        calc(var(--tr-p, 0) * 45% + 15%);
     }
 
     /* Short landscape screens unpin the stage (styles-world/11.css): the
@@ -124,7 +135,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
         .finale-content
         [data-text-reveal]
         .tr-c {
-        animation-range: cover calc(40svh + var(--tr-p, 0) * 20svh) cover
+        animation-range: cover calc(48svh + var(--tr-p, 0) * 20svh - var(--tr-d, 0) * 20svh) cover
           calc(48svh + var(--tr-p, 0) * 20svh);
       }
 
@@ -165,17 +176,23 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   }
 }
 
-/* Ghost, then the projector's ice scan front, then full ink. `currentColor`
-   in a keyframe for `color` is the parent's colour, so one keyframe serves
-   white headings, ice <em>s and grey copy; the implicit `to` is that colour.
-   The front passes each character once and only while the reader scrolls,
-   so nothing changes on a still page. No text-shadow here: it would re-run
-   overflow layout every frame. */
+/* Typing. Until its turn a character is transparent (its cell keeps its
+   place, so nothing reflows); at its turn it appears at once at its own
+   colour (the implicit `to`), which serves white headings, ice <em>s and grey
+   copy alike. The cursor is the ice block on the next cell: tr-caret fills
+   only while its range is active (fill none), so it moves one cell per
+   character and only while the reader scrolls; nothing blinks or changes on
+   a still page. No text-shadow here: it would re-run overflow layout every
+   frame. */
 @keyframes tr-ink {
   from {
-    color: color-mix(in oklab, currentColor 14%, transparent);
+    color: transparent;
   }
-  50% {
-    color: color-mix(in oklab, var(--mr-ice, #7ae8ff) 85%, transparent);
+}
+
+@keyframes tr-caret {
+  from,
+  to {
+    background-color: color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent);
   }
 }

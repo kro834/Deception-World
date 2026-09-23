@@ -217,7 +217,7 @@ test("the reveal finishes at 26svh: headings and copy are whole with their top a
     assert.equal(vars["--tr-from"] + vars["--tr-span"] + vars["--tr-fade"], 26, name);
   }
   const design = await read("DESIGN.md");
-  assert.match(design, /fully lit when their top reaches 74% of the viewport/);
+  assert.match(design, /fully typed when their top reaches 74% of the viewport/);
 });
 
 test("rail locks clip <body> on /world so the reveal holds still under them", async () => {
@@ -239,19 +239,29 @@ test("rail locks clip <body> on /world so the reveal holds still under them", as
   assert.match(lock, /body\.style\.overflow = "hidden";/);
 });
 
-test("only colour is animated, per inline character, and full-contrast modes opt out", async () => {
+test("only colour and the cursor cell are animated, per inline character, and full-contrast modes opt out", async () => {
   const css = await readCss();
   const { rules, keyframes } = parse(css);
-  assert.deepEqual(Object.keys(keyframes), ["tr-ink"]);
-  for (const { body } of keyframes["tr-ink"]) {
-    const properties = [...body.matchAll(/([\w-]+)\s*:/g)].map((match) => match[1]);
-    assert.deepEqual([...new Set(properties)], ["color"]);
+  assert.deepEqual(Object.keys(keyframes).sort(), ["tr-caret", "tr-ink"]);
+  const properties = (name) => [
+    ...new Set(
+      keyframes[name].flatMap(({ body }) => [...body.matchAll(/([\w-]+)\s*:/g)].map((m) => m[1])),
+    ),
+  ];
+  assert.deepEqual(properties("tr-ink"), ["color"]);
+  assert.deepEqual(properties("tr-caret"), ["background-color"]);
+  // Typing: a character is invisible until its turn, then appears at once at
+  // its own colour (the implicit `to`); the ice cursor holds its cell for one step.
+  assert.deepEqual(
+    keyframes["tr-ink"].map(({ stop }) => stop),
+    ["from"],
+  );
+  assert.match(keyframes["tr-ink"][0].body, /color: transparent/);
+  assert.match(keyframes["tr-caret"][0].body, /color-mix\(in oklab, var\(--mr-ice/);
+  for (const { body } of rules.filter(({ body }) => /animation:\s*tr-ink/.test(body))) {
+    assert.match(body, /tr-ink steps\(1, end\) both,\s*tr-caret steps\(1, end\) none/);
+    assert.match(body, /var\(--tr-d, 0\)/);
   }
-  const from = keyframes["tr-ink"].find(({ stop }) => stop === "from");
-  assert.match(from.body, /color-mix\(in oklab, currentColor \d+%, transparent\)/);
-  // One scan front per character, in the projector's ice.
-  const stops = keyframes["tr-ink"].map(({ stop }) => stop);
-  assert.deepEqual(stops, ["from", "50%"]);
   for (const { selector, body } of rules) {
     if (!/\.tr-c(?![\w-])/.test(selector)) continue;
     assert.doesNotMatch(
@@ -269,7 +279,7 @@ test("only colour is animated, per inline character, and full-contrast modes opt
   assert.equal(flat(optOut.body), "animation: none;");
   // The same selectors as the animation rules, later, so they outrank them.
   const animatedSelectors = rules
-    .filter(({ body }) => /animation: tr-ink/.test(body))
+    .filter(({ body }) => /animation:\s*tr-ink/.test(body))
     .flatMap(({ selector }) => splitSelectors(selector));
   assert.deepEqual(splitSelectors(optOut.selector), animatedSelectors);
   // No other sheet styles the character spans.
@@ -361,6 +371,7 @@ test("RevealText is memoised, hydration-stable and readable by screen readers", 
   assert.match(source, /Array\.from\(String\(child\), \(part, key\) =>/);
   assert.match(source, /className="tr-c"/);
   assert.match(source, /"--tr-p": \(index\+\+ \/ Math\.max\(1, total - 1\)\)\.toFixed\(3\)/);
+  assert.match(source, /"--tr-d": \(1 \/ Math\.max\(1, total - 1\)\)\.toFixed\(3\)/);
   // Inline host elements are split through; aria-hidden ones are passed on.
   assert.match(label, /new Set\(\["em", "strong", "b", "i", "span", "small"\]\)/);
   assert.match(label, /!\(node as Parent\)\.props\["aria-hidden"\]/);
