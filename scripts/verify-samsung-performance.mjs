@@ -72,7 +72,10 @@
  * that variant in the same session. The targets were written against the
  * pre-plan commit, so BASE_REF_URL must serve the branch point, not an
  * already-improved build. If none of the requested cells has targets,
- * --enforce exits 1 too, because nothing was checked.
+ * --enforce exits 1 too, because nothing was checked, and so does a run that
+ * stopped before the end of the page. The load long-task limit is also a
+ * ratio to the base: the plan's absolute numbers included its own
+ * instrumentation (see TARGETS.load).
  * Loopback URLs only, unless BROWSER_ALLOW_EXTERNAL_HOST=1 is set.
  * A full scroll matrix (5 cells, 3 variants, 3 runs) takes about 20 minutes;
  * gpu and load take about 4 minutes each.
@@ -80,6 +83,11 @@
  * Chrome (PERFORMANCE_TARGETS.md): main thread, UpdateLayoutTree and Paint
  * medians matched to within 10%, but dropped frames at 4x spread 0.81-1.37x
  * and checkerboarded tiles 0.64-0.71x. Rerun a borderline cell with --runs=5.
+ * Load runs fetch Google Fonts over the network in a fresh browser each time,
+ * so where the "Fonts changed" relayouts land varies: at 4x, TBT per run on
+ * d0a9da8 was either about 440-490 ms or 780-960 ms, and one median of 3
+ * read 1.62x for the same build. Use --runs=5 or more for load and read the
+ * per-run lists, not only the medians.
  */
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -198,14 +206,22 @@ export const TARGETS = {
     "g360-1x-si28-128mb": { checkerTiles: { max: 60 } },
   },
   // Load targets depend on the CPU rate only (keyed <device>-<cpu>x).
+  // The plan's long-task baselines (1257-1331 ms at 4x, 2470 ms at 6x) came
+  // from load.mjs, whose document-wide MutationObserver adds a ~400 ms long
+  // task before FCP at 4x. This harness has no such observer and reads the
+  // unchanged d0a9da8 at 478-1171 ms per run (medians 581-963) at 4x and
+  // 1140-2093 ms at 6x, so the absolute limits alone often pass the base.
+  // The ratio (plan limit / plan baseline: 900/1294, 1800/2470) keeps the
+  // cut the plan asks for. TBT starts at FCP, so the observer's task never
+  // reached it.
   load: {
     "g360-4x": {
       tbt: { max: 550 },
-      longTaskMs: { max: 900 },
+      longTaskMs: { max: 900, vsBase: 0.7 },
       forcedLoafsAfterHydration: { max: 0 },
       lcp: { max: 2200 },
     },
-    "g360-6x": { tbt: { max: 1000 }, longTaskMs: { max: 1800 } },
+    "g360-6x": { tbt: { max: 1000 }, longTaskMs: { max: 1800, vsBase: 0.73 } },
   },
 };
 
@@ -822,7 +838,7 @@ const ratioText = (value, reference) =>
         : "inf"
       : (value / reference).toFixed(2);
 
-function report(mode, cells, variants, results, gesture) {
+export function report(mode, cells, variants, results, gesture) {
   const lines = [];
   let failures = 0;
   let missing = 0;
@@ -899,10 +915,20 @@ function report(mode, cells, variants, results, gesture) {
       lines.push("", "Targets: the definition of done names none for this cell.");
       untargeted++;
     }
+    // A run that stopped short scrolled less page over a longer time, so its
+    // per-run totals and ms/s read lower than a full pass: under --enforce it
+    // makes the cell unmeasurable rather than a pass.
     const incomplete = results.filter(
       (r) => r.cell === cell.id && r.metrics && r.metrics.reachedEnd === false,
-    ).length;
-    if (incomplete) lines.push(`- note: ${incomplete} run(s) stopped before the end of the page`);
+    );
+    if (incomplete.length) {
+      lines.push(
+        `- MISSING ${incomplete.length} run(s) stopped before the end of the page (${incomplete
+          .map((r) => `${r.variant} round ${r.round + 1}`)
+          .join(", ")}); their totals are not comparable`,
+      );
+      missing += incomplete.length;
+    }
     const failed = results.filter((r) => r.cell === cell.id && r.error);
     for (const r of failed)
       lines.push(`- run failed: ${r.variant} round ${r.round + 1}: ${r.error}`);

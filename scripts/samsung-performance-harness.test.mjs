@@ -10,6 +10,7 @@ import {
   parseArgs,
   parseCell,
   rafStats,
+  report,
   schedule,
   summarizeLoad,
   summarizeTrace,
@@ -72,13 +73,27 @@ test("Samsung harness enforces the definition of done", () => {
   );
   assert.deepEqual(TARGETS.gpu["g412-1x-si28-256mb"], { checkerTiles: { max: 40 } });
   assert.deepEqual(TARGETS.gpu["g360-1x-si28-128mb"], { checkerTiles: { max: 60 } });
+  // Long tasks are also a ratio to the base (plan limit / plan baseline): the
+  // plan's baselines included load.mjs's own MutationObserver task, and without
+  // it the unchanged base already reads under the absolute limits.
   assert.deepEqual(TARGETS.load["g360-4x"], {
     tbt: { max: 550 },
-    longTaskMs: { max: 900 },
+    longTaskMs: { max: 900, vsBase: 0.7 },
     forcedLoafsAfterHydration: { max: 0 },
     lcp: { max: 2200 },
   });
-  assert.deepEqual(TARGETS.load["g360-6x"], { tbt: { max: 1000 }, longTaskMs: { max: 1800 } });
+  assert.deepEqual(TARGETS.load["g360-6x"], {
+    tbt: { max: 1000 },
+    longTaskMs: { max: 1800, vsBase: 0.73 },
+  });
+  const unchanged = evaluate(TARGETS.load["g360-6x"], {
+    candidate: { tbt: 900, longTaskMs: 1735 },
+    base: { tbt: 1220, longTaskMs: 1735 },
+  });
+  assert.deepEqual(
+    unchanged.filter((verdict) => verdict.status === "fail").map((verdict) => verdict.kind),
+    ["vsBase"],
+  );
   // Load targets depend on the CPU rate, not on the flag setting.
   assert.equal(targetsFor("load", parseCell("g360-4x-si28", "load")), TARGETS.load["g360-4x"]);
   assert.equal(targetsFor("load", parseCell("g360-4x-si30", "load")), TARGETS.load["g360-4x"]);
@@ -273,4 +288,46 @@ test("Samsung harness targets: ratios need the same session's base, and a missin
   // Zero over zero is parity, not a division error.
   const zero = evaluate({ loafs: { vsBase: 1 } }, { candidate: { loafs: 0 }, base: { loafs: 0 } });
   assert.equal(zero[0].status, "pass");
+});
+
+test("Samsung harness report: a run that stopped short of the page end cannot pass the gate", () => {
+  const cell = parseCell("g360-4x-si28");
+  const full = { over34: 0, rafP50: 8.3, rafP99: 17, wholeDocumentRecalcs: 0, loafs: 0 };
+  const run = (variant, round, metrics) => ({
+    cell: cell.id,
+    variant,
+    round,
+    metrics,
+    error: null,
+  });
+  const results = [0, 1, 2].flatMap((round) => [
+    run("base", round, {
+      ...full,
+      dropped: 200,
+      mainMsPerSec: 450,
+      paintMs: 100,
+      updateLayoutTreeMs: 1200,
+      reachedEnd: true,
+    }),
+    run("floor", round, { ...full, dropped: 60, reachedEnd: true }),
+    // Stuck halfway: less work over more time reads as a large gain.
+    run("candidate", round, {
+      ...full,
+      dropped: 50,
+      mainMsPerSec: 100,
+      paintMs: 20,
+      updateLayoutTreeMs: 200,
+      reachedEnd: round !== 1,
+    }),
+  ]);
+  const { failures, missing, text } = report(
+    "scroll",
+    [cell],
+    ["base", "candidate", "floor"],
+    results,
+    "drag",
+  );
+  assert.equal(failures, 0);
+  assert.equal(missing, 1);
+  assert.match(text, /MISSING 1 run\(s\) stopped before the end of the page \(candidate round 2\)/);
 });

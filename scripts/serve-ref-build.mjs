@@ -35,6 +35,8 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -86,13 +88,19 @@ function run(command, commandArgs, cwd) {
   }
 }
 
-/** `git archive <sha> | tar -x -C <dir>` without a shell. */
+/**
+ * `git archive <sha> | tar -x -C <dir>` without a shell. It extracts into a
+ * sibling directory and renames it into place, so an interrupted export is
+ * never mistaken for a complete one on the next run.
+ */
 async function exportTree(sha, dir) {
-  mkdirSync(dir, { recursive: true });
+  const partial = `${dir}.partial`;
+  rmSync(partial, { recursive: true, force: true });
+  mkdirSync(partial, { recursive: true });
   const archive = spawn("git", ["-C", repoRoot, "archive", "--format=tar", sha], {
     stdio: ["ignore", "pipe", "inherit"],
   });
-  const untar = spawn("tar", ["-x", "-f", "-", "-C", dir], {
+  const untar = spawn("tar", ["-x", "-f", "-", "-C", partial], {
     stdio: ["pipe", "inherit", "inherit"],
   });
   archive.stdout.pipe(untar.stdin);
@@ -102,8 +110,11 @@ async function exportTree(sha, dir) {
     console.error(
       `[serve-ref-build] export of ${sha} failed (git ${archiveStatus}, tar ${untarStatus})`,
     );
+    rmSync(partial, { recursive: true, force: true });
     process.exit(1);
   }
+  rmSync(dir, { recursive: true, force: true });
+  renameSync(partial, dir);
 }
 
 /** Copy-on-write where the filesystem allows it (APFS, btrfs, XFS); a symlink otherwise. */
@@ -135,7 +146,9 @@ if (option("dir")) {
   sha = git(buildDir, "rev-parse", "HEAD") ?? "unknown";
   const dirty = git(buildDir, "status", "--porcelain", "--untracked-files=no");
   label = `${buildDir} @ ${sha.slice(0, 12)}${dirty ? " + uncommitted changes" : ""}`;
-  if (!flag("no-build")) run("npx", ["vite", "build"], buildDir);
+  // With --no-build the served output may predate HEAD; say so in the banner.
+  if (flag("no-build")) label += " (existing build, not rebuilt)";
+  else run("npx", ["vite", "build"], buildDir);
 } else {
   const ref = positional[0];
   sha = git(repoRoot, "rev-parse", "--verify", "--quiet", `${ref}^{commit}`);
