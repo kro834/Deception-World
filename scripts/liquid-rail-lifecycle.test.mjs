@@ -121,6 +121,7 @@ function mountRailRuntime() {
     document: doc,
     getComputedStyle: () => ({ getPropertyValue: () => "" }),
     getRenderer: () => renderer,
+    isFrosted: () => true,
     mix: (from, to, amount) => from + (to - from) * amount,
     mq: () => ({ matches: true }),
     nearestTab: () => 0,

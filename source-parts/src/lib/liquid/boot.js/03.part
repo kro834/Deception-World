@@ -1,29 +1,3 @@
-    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
-    moveFrame = null;
-    reset();
-    unlockPage();
-    if (wasActive) settle(active);
-  };
-
-  const process = () => {
-    moveFrame = null;
-    if (!gesture || !pending) return;
-    const m = pending; pending = null;
-    const dt = Math.max(1, m.t - gesture.lastT);
-    const ivx = (m.x - gesture.lastX) / dt, ivy = (m.y - gesture.lastY) / dt;
-    const blend = 1 - Math.exp(-dt / 24);
-    gesture.vx = Math.sign(ivx) !== Math.sign(gesture.vx) ? ivx : mix(gesture.vx, ivx, blend);
-    gesture.vy = Math.sign(ivy) !== Math.sign(gesture.vy) ? ivy : mix(gesture.vy, ivy, blend);
-    gesture.lastX = m.x; gesture.lastY = m.y; gesture.lastT = m.t;
-    if (gesture.axis === 'pending') { contact(m.x, m.y); return; }
-
-    if (lockScroll) {
-      const startGeo = gesture.geos[gesture.start];
-      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
-      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
-      const geos = gesture.geos;
-      const preview = nearestTab(px, py, geos);
-      gesture.raw = preview;
       setContact(preview);
       const g = geos[preview];
       const tab = tabs()[preview];
@@ -80,8 +54,57 @@
     contact(m.x, m.y);
   };
 
+  // Rider grid, touch: note the contact and wait for the hold.
+  const arm = (e) => {
+    const target = e.target.closest('button[role="tab"]');
+    gesture = {
+      axis: 'pending', hold: 'armed', start: target ? tabs().indexOf(target) : -1, raw: 0, held: false,
+      pointerId: e.pointerId, pointerType: e.pointerType,
+      startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
+      vx: 0, vy: 0, geos: null, rect: null, sx: 1, sy: 1,
+    };
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(engage, TOUCH_HOLD_MS);
+  };
+  const tabAt = (x, y, rect, geos) => {
+    const sx = rect.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = rect.height / Math.max(root.offsetHeight, 1) || 1;
+    return nearestTab((x - rect.left) / sx, (y - rect.top) / sy, geos);
+  };
+  // The hold engaged: the finger owns the rail from here to release. Read
+  // every geometry first, while style is clean, then lock the page and show
+  // the held lens on the pressed tab.
+  const engage = () => {
+    const g = gesture;
+    if (!g || g.hold !== 'armed') return;
+    isFrosted();
+    const rect = root.getBoundingClientRect();
+    const geos = measure();
+    const start = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, rect, geos);
+    const target = tabs()[start];
+    if (!target || !geos[start]) { disarm(); return; }
+    Object.assign(g, {
+      hold: 'engaged', held: true, start, raw: start, geos, rect,
+      sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
+      sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
+    });
+    settle(start, geos);
+    root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'true';
+    lockPage();
+    try { root.setPointerCapture(g.pointerId); } catch { /* Window handlers still release the lock. */ }
+    setContact(start);
+    if (!reduce() && getRenderer().activate(root)) {
+      getRenderer().setAccent(getComputedStyle(target).getPropertyValue('--liquid-accent').trim());
+      getRenderer().setGeometry(geos[start]);
+      getRenderer().setPhase('held');
+    }
+    contact(g.lastX, g.lastY);
+  };
+
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    if (holdToDrag && e.pointerType === 'touch') { arm(e); return; }
+    isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
     let start = target ? list.indexOf(target) : -1;
@@ -125,6 +148,14 @@
 
   on(root, 'pointermove', (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
+    if (gesture.hold === 'armed') {
+      // Moving before the hold is a swipe, not a selection: a vertical one is
+      // a page scroll (the browser cancels the pointer), a sideways one simply
+      // lets the grid go.
+      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm();
+      else { gesture.lastX = e.clientX; gesture.lastY = e.clientY; gesture.lastT = e.timeStamp; }
+      return;
+    }
     if (gesture.axis === 'pending') {
       const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
       const threshold = (gesture.pointerType === 'mouse' ? 7 : 11) + (gesture.held ? 6 : 0);
@@ -161,13 +192,28 @@
   const finish = (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
     const g = gesture;
+    if (g.hold === 'armed') {
+      // A quick tap selects the tab under the finger; a lift away from the
+      // contact point ended a swipe.
+      disarm();
+      if (Math.hypot(e.clientX - g.startX, e.clientY - g.startY) >= TOUCH_SLOP) return;
+      const i = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, root.getBoundingClientRect(), measure());
+      select(i); settle(i);
+      return;
+    }
     if (g.axis === 'pending') {
       const moved = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
       const threshold = (g.pointerType === 'mouse' ? 7 : 11) + (g.held ? 6 : 0);
-      const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const over = hit ? hit.closest('button[role="tab"]') : null;
       // A sloppy tap still counts when the finger lifts over the same tab.
-      if (moved >= threshold && over !== tabs()[g.start]) { cancel(); return; }
+      // Hit-test the geometry measured at pointerdown (the page is locked, so
+      // it still holds): elementFromPoint here forced style and layout after
+      // the lock, a whole-document recalculation on every tap.
+      if (moved >= threshold) {
+        const box = g.geos[g.start];
+        const px = (e.clientX - g.rect.left) / g.sx, py = (e.clientY - g.rect.top) / (g.sy || 1);
+        const over = Boolean(box) && px >= box.x && px <= box.x + box.width && py >= box.y && py <= box.y + box.height;
+        if (!over) { cancel(); return; }
+      }
       gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
     }
     if (g.axis === 'free') {
@@ -195,34 +241,15 @@
     if (e.target === root && gesture) cancel();
   });
   on(root, 'contextmenu', (e) => e.preventDefault());
+  if (holdToDrag) {
+    // The browser decides at touchstart whether a touch sequence waits for the
+    // page, so the rider grid keeps one non-passive touchmove listener for the
+    // page's life. It lets every move through until the rail owns the finger
+    // (a hold engaged, or a pen press), then keeps the page from panning.
+    root.addEventListener('touchmove', (e) => {
+      if (gesture && gesture.hold !== 'armed' && e.cancelable) e.preventDefault();
+    }, { passive: false, signal: events.signal });
+  }
 
   // Pointer capture is not guaranteed in Samsung Internet and embedded
   // Android WebViews. Finish/cancel at the window boundary as well so a lift
-  // outside the rail, app backgrounding or route transition can never leave
-  // the document-wide touchmove lock behind.
-  window.addEventListener('pointerup', finish, true);
-  window.addEventListener('pointercancel', cancel, true);
-  window.addEventListener('blur', cancel);
-  window.addEventListener('pagehide', cancel);
-  // Rotation invalidates captured coordinates. Toolbar height changes do not:
-  // cancelling on every visualViewport resize would interrupt normal iOS drags.
-  window.addEventListener('orientationchange', cancel);
-  let viewportWidth = window.innerWidth;
-  const handleViewportResize = () => {
-    if (window.innerWidth === viewportWidth) return;
-    viewportWidth = window.innerWidth;
-    cancel();
-  };
-  window.addEventListener('resize', handleViewportResize);
-  const handleVisibilityChange = () => {
-    if (document.hidden) cancel();
-  };
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-
-  let swallowClick = false;
-  tabs().forEach((t, i) => on(t, 'click', (ev) => {
-    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
-    select(i); settle(i);
-  }));
-
-  on(root, 'keydown', (e) => {

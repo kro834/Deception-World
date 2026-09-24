@@ -53,6 +53,96 @@ try {
           ["vertical-full-length", [0, 7]],
           ["vertical-backtrack", [0, 3, 1]],
         ];
+    // Touch ownership of the rider grid (Chrome only: WebKit here drives a
+    // mouse, which keeps the immediate press-and-drag). A vertical swipe that
+    // starts on the grid scrolls the page; a quick tap selects; a hold then a
+    // vertical drag selects and keeps the page still.
+    if (cdp) {
+      const place = async () => {
+        await rail.evaluate((node) => {
+          const headerBottom = document.querySelector(".topbar").getBoundingClientRect().bottom;
+          window.scrollBy({
+            top: node.getBoundingClientRect().top - headerBottom - 24,
+            behavior: "instant",
+          });
+        });
+        await page.waitForTimeout(250);
+      };
+      const lockNow = () =>
+        page.evaluate(() => document.documentElement.hasAttribute("data-rail-lock"));
+      await tabs.first().click();
+      await place();
+      const boxes = await tabs.evaluateAll((nodes) =>
+        nodes.map((node) => node.getBoundingClientRect().toJSON()),
+      );
+      const start = center(boxes.at(-1));
+      const distance = Math.min(260, start.y - 90);
+      const before = await page.evaluate(() => scrollY);
+      await event("touchStart", start);
+      let locked = false;
+      for (let step = 1; step <= 16; step++) {
+        await event("touchMove", { x: start.x, y: start.y - (distance * step) / 16 });
+        await page.waitForTimeout(16);
+        locked ||= await lockNow();
+      }
+      // Measured under the finger, before the lift can add a fling.
+      await page.waitForTimeout(50);
+      const scrolled = (await page.evaluate(() => scrollY)) - before;
+      await event("touchEnd");
+      await page.waitForTimeout(250);
+      assert.equal(locked, false, `${viewport.width}: a swipe on the grid locked the page`);
+      assert.ok(
+        scrolled >= distance * 0.9,
+        `${viewport.width}: a swipe on the grid scrolled ${scrolled}px of ${distance}px`,
+      );
+      assert.equal(await tabs.first().getAttribute("aria-selected"), "true", "swipe selected");
+
+      await place();
+      const tapTarget = center(await tabs.nth(3).boundingBox());
+      await event("touchStart", tapTarget);
+      await page.waitForTimeout(90);
+      assert.equal(await lockNow(), false, "a tap locked the page");
+      await event("touchEnd");
+      await page.waitForFunction(
+        (id) =>
+          document.querySelector("#rider-active-panel")?.getAttribute("aria-labelledby") === id,
+        await tabs.nth(3).getAttribute("id"),
+      );
+      assert.equal(await lockNow(), false);
+
+      await tabs.first().click();
+      await place();
+      const column = await tabs.evaluateAll((nodes) =>
+        nodes.map((node) => node.getBoundingClientRect().toJSON()),
+      );
+      const from = center(column[0]);
+      const toIndex = column.findLastIndex((box) => Math.abs(box.x - column[0].x) < 2);
+      const to = center(column[toIndex]);
+      const held = await page.evaluate(() => scrollY);
+      await event("touchStart", from);
+      await page.waitForTimeout(450);
+      assert.equal(await lockNow(), true, "the hold did not engage");
+      assert.equal(await rail.getAttribute("data-liquid-held"), "true");
+      for (let step = 1; step <= 14; step++) {
+        await event("touchMove", { x: from.x, y: from.y + ((to.y - from.y) * step) / 14 });
+        await page.waitForTimeout(17);
+      }
+      assert.ok(
+        Math.abs((await page.evaluate(() => scrollY)) - held) < 2,
+        "a held vertical drag scrolled the page",
+      );
+      await event("touchEnd");
+      await page.waitForFunction(
+        (id) =>
+          document.querySelector("#rider-active-panel")?.getAttribute("aria-labelledby") === id,
+        await tabs.nth(toIndex).getAttribute("id"),
+      );
+      assert.equal(await lockNow(), false);
+      console.log(
+        `${engine} ${viewport.width} touch: swipe scrolled ${Math.round(scrolled)}/${Math.round(distance)}px, tap selected, held drag selected tab ${toIndex} without scrolling`,
+      );
+    }
+
     for (const [name, indices] of paths) {
       await tabs.first().click();
       for (let attempt = 0; attempt < 2; attempt++) {
@@ -93,7 +183,8 @@ try {
       );
       const before = await page.evaluate(() => scrollY);
       await event("touchStart", points[0]);
-      await page.waitForTimeout(160);
+      // Long-press-to-select: the hold (350 ms) hands the finger to the rail.
+      await page.waitForTimeout(450);
       assert.equal(
         await rail.getAttribute("data-liquid-held"),
         "true",

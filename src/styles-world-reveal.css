@@ -4,8 +4,15 @@
    a time, in reading order, as the reader scrolls: an ice block cursor sits
    on the next cell, and each character appears at full ink the moment it is
    typed. The words are always in the DOM at full colour; the only animated
-   properties are `color` and `background-color` on inline spans, so no layer
+   properties are `color` and `background-image` on inline spans, so no layer
    is created per character and line breaking (kinsoku) is untouched.
+
+   Paint budget (scripts/scroll-paint-budget.test.mjs): never animate
+   `background-color`, `color` (except tr-ink) or `clip-path` on a scroll or
+   view timeline. Chromium 142+ (Chrome, Samsung Internet 30) treats a
+   background-color animation as compositable and repaints the page under it
+   every frame; a stepped background-image cursor only repaints its own cell
+   when it moves.
 
    Blocks: the story, riders, records and finale headings, the story copy and
    the riders copy. Blocks that change with a rail (the archive title and
@@ -48,8 +55,10 @@
    the lock (the root stays hidden and the rail blocks touch and wheel
    scrolling) while the timelines stay on the document, so the reveal simply
    holds still under a rail lock. */
-html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open])
-  body:has(.site-shell.film-edition.mirage-edition):not(:has(dialog[open])) {
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(.site-shell.film-edition.mirage-edition) {
   overflow: clip !important;
 }
 
@@ -64,7 +73,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 @supports (animation-timeline: view()) and (animation-range: cover 0% cover 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal] {
@@ -75,7 +84,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal="copy"] {
@@ -84,7 +93,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        :has(dialog[open])
+        [data-dialog-open]
       )
       .site-shell.film-edition.mirage-edition
       [data-text-reveal]
@@ -92,6 +101,11 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       animation:
         tr-ink steps(1, end) both,
         tr-caret steps(1, end) none;
+      /* Each character's range, not a zero-length step at its start. The
+         production minifier (lightningcss) expands this shorthand, because of
+         the longhands below, into longhands with `animation-duration: 0s`:
+         the cursor's range was then never active and it never showed. */
+      animation-duration: auto;
       /* Scroll-linked, so there is nothing to save by pausing it off screen
          (styles-world/21.css pauses [data-viewport-active="false"] regions).
          A paused character would hold its old ink, then snap to its scroll
@@ -111,7 +125,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
          short landscape screen, below the 74% line: headings there are lit
          by 11svh instead of 26svh, and still write themselves. */
       html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-          :has(dialog[open])
+          [data-dialog-open]
         )
         .site-shell.film-edition.mirage-edition
         [data-text-reveal="heading"] {
@@ -128,7 +142,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
    selector repeats its animation rule so it outranks it. */
 @media (prefers-contrast: more), (forced-colors: active), (prefers-reduced-transparency: reduce) {
   html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-      :has(dialog[open])
+      [data-dialog-open]
     )
     .site-shell.film-edition.mirage-edition
     [data-text-reveal]
@@ -154,6 +168,9 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 @keyframes tr-caret {
   from,
   to {
-    background-color: color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent);
+    background-image: linear-gradient(
+      color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent),
+      color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent)
+    );
   }
 }

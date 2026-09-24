@@ -69,6 +69,140 @@ async function waitRoute(page, path) {
   await page.waitForTimeout(260);
 }
 
+// html[data-dialog-open] (src/lib/dialog-open-flag.js) stands in for
+// :has(dialog[open]) in the World motion gates. It must match "a dialog is
+// open" in every rendered frame, whichever way the dialog opened or closed:
+// showModal()/close(), Escape, a close button, or React mounting a portal.
+async function watchDialogFrames(page) {
+  await page.evaluate(() => {
+    const record = { frames: 0, stale: [] };
+    window.__dialogFlagFrames = record;
+    const tick = () => {
+      if (window.__dialogFlagFrames !== record) return;
+      const open = document.querySelector("dialog[open]") !== null;
+      const flag = document.documentElement.hasAttribute("data-dialog-open");
+      record.frames += 1;
+      if (open !== flag && record.stale.length < 8) record.stale.push({ open, flag });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+async function staleDialogFrames(page) {
+  return page.evaluate(() => {
+    const record = window.__dialogFlagFrames;
+    window.__dialogFlagFrames = null;
+    return record;
+  });
+}
+
+const dialogFlag = (page) =>
+  page.evaluate(() => ({
+    open: document.querySelectorAll("dialog[open]").length,
+    flag: document.documentElement.hasAttribute("data-dialog-open"),
+  }));
+
+async function expectDialogFlag(page, viewport, name, open, close) {
+  assert.deepEqual(
+    await dialogFlag(page),
+    { open: 0, flag: false },
+    `${name}: flag before opening`,
+  );
+  await watchDialogFrames(page);
+  await open();
+  await page.waitForFunction(() => document.querySelector("dialog[open]"));
+  await page.waitForTimeout(160);
+  const opened = await dialogFlag(page);
+  assert.ok(opened.open > 0 && opened.flag, `${name}: flag while open ${JSON.stringify(opened)}`);
+  await close();
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
+  await page.waitForTimeout(160);
+  const closed = await dialogFlag(page);
+  const frames = await staleDialogFrames(page);
+  assert.deepEqual(closed, { open: 0, flag: false }, `${name}: flag after closing`);
+  assert.ok(frames.frames >= 4, `${name}: ${frames.frames} frames watched`);
+  assert.deepEqual(frames.stale, [], `${name}: a frame drawn with a stale dialog flag`);
+  record(viewport, `${name}: html[data-dialog-open] follows the dialog`, {
+    frames: frames.frames,
+  });
+}
+
+async function checkDialogFlag(page, viewport) {
+  await waitRoute(page, "/world");
+  const bring = (selector) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
+  const escape = () => page.keyboard.press("Escape");
+
+  await bring(".episode-archive");
+  await page.waitForTimeout(160);
+  await bring(".episode-pickup-plus");
+  await page.waitForTimeout(160);
+  await expectDialogFlag(
+    page,
+    viewport,
+    "episode pickup",
+    () => page.locator(".episode-pickup-plus").first().click(),
+    escape,
+  );
+
+  await bring(".world-column-slide-open");
+  await page.waitForTimeout(160);
+  await expectDialogFlag(
+    page,
+    viewport,
+    "world column pickup",
+    async () => {
+      await page.locator(".world-column-slide-open").focus();
+      await page.keyboard.press("Enter");
+    },
+    escape,
+  );
+
+  // A React portal: the dialog is inserted, then removed on close. The cards
+  // sit in the manager archive's third tab.
+  await bring(".manager-archive-tabs");
+  await page.waitForTimeout(160);
+  await page.locator(".manager-archive-tabs [role='tab']").nth(2).click();
+  await page.locator(".other-artwork-card").first().waitFor({ state: "attached" });
+  await bring(".other-artwork-card");
+  await page.waitForTimeout(160);
+  await expectDialogFlag(
+    page,
+    viewport,
+    "character artwork",
+    () => page.locator(".other-artwork-card").first().click(),
+    escape,
+  );
+
+  await bring(".rw-gate-button");
+  await page.waitForTimeout(160);
+  await expectDialogFlag(
+    page,
+    viewport,
+    "RISING",
+    () => page.locator(".rw-gate-button").click(),
+    () => page.locator(".rw-close").click(),
+  );
+
+  await waitRoute(page, "/riders/saga");
+  await bring(".rider-nightmare-pickup-button");
+  await page.waitForTimeout(160);
+  await expectDialogFlag(
+    page,
+    viewport,
+    "rider nightmare",
+    async () => {
+      await page.locator(".rider-nightmare-pickup-button").focus();
+      await page.keyboard.press("Enter");
+    },
+    escape,
+  );
+}
+
 async function checkSidePanel(page, viewport) {
   await waitRoute(page, "/world");
   await page.locator(".side-panel-trigger").click();
@@ -96,6 +230,11 @@ async function checkSidePanel(page, viewport) {
   await panel.locator(".side-panel-announcement-trigger").click();
   const announcement = page.locator("#site-announcement-dialog[open]");
   await announcement.waitFor({ state: "visible" });
+  assert.equal(
+    (await dialogFlag(page)).flag,
+    true,
+    "announcement open without html[data-dialog-open]",
+  );
   const stage = announcement.locator(".site-announcement-stage");
   const firstNotice = announcement.locator(".site-announcement-list-item").first();
   await firstNotice.focus();
@@ -171,6 +310,11 @@ async function checkSidePanel(page, viewport) {
 
   await announcement.locator(".site-announcement-close").click();
   await announcement.waitFor({ state: "hidden" });
+  assert.deepEqual(
+    await dialogFlag(page),
+    { open: 0, flag: false },
+    "announcement closed, flag left",
+  );
   const lockedWhileMenuOpen = await page.evaluate(() => ({
     rootOverflow: getComputedStyle(document.documentElement).overflow,
     bodyOverflow: getComputedStyle(document.body).overflow,
@@ -203,6 +347,11 @@ async function checkDreamDialog(page, viewport) {
   await trigger.click();
   const dialog = page.locator(".dream-dossier-dialog[open]").first();
   await dialog.waitFor({ state: "visible" });
+  assert.equal(
+    (await dialogFlag(page)).flag,
+    true,
+    "dream dossier open without html[data-dialog-open]",
+  );
   const metrics = await dialog.evaluate((element) => ({
     scrollHeight: element.scrollHeight,
     clientHeight: element.clientHeight,
@@ -212,6 +361,11 @@ async function checkDreamDialog(page, viewport) {
   record(viewport, "dream dossier scroll", { ...scroll, documentBefore: before });
   await dialog.locator(".dream-dossier-close").click();
   await dialog.waitFor({ state: "hidden" });
+  assert.deepEqual(
+    await dialogFlag(page),
+    { open: 0, flag: false },
+    "dream dossier closed, flag left",
+  );
   const after = await page.evaluate(() => window.scrollY);
   assert.ok(Math.abs(after - before) < 8, `dream close did not restore document position (${before} -> ${after})`);
   record(viewport, "dream close restores document position", { before, after });
@@ -283,6 +437,7 @@ try {
     try {
       await checkSidePanel(page, viewport);
       await checkDreamDialog(page, viewport);
+      await checkDialogFlag(page, viewport);
       await checkArchiveFromMenu(page, viewport);
       console.log(`${engine} ${viewport.name} modal scroll checks passed`);
     } finally {

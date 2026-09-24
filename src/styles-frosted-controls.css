@@ -63,9 +63,17 @@ html body .liquid-selection-surface {
 }
 /* Decide touch ownership before pointerdown; changing touch-action on hold
    is too late for Safari. Only slider surfaces suppress page panning. */
-html body .liquid-swipe-tabs,
-html body .liquid-swipe-tabs * {
+html body .liquid-swipe-tabs:not(.rider-tabs),
+html body .liquid-swipe-tabs:not(.rider-tabs) * {
   touch-action: none !important;
+}
+/* The rider grid is the exception: on touch it is long-press-to-select
+   (liquid/boot.js), so a vertical swipe that starts on it pans the page.
+   Once a hold engages, the rail's non-passive touchmove listener keeps the
+   page still while the finger drags across the tabs. */
+html body .rider-tabs.liquid-swipe-tabs,
+html body .rider-tabs.liquid-swipe-tabs * {
+  touch-action: pan-y pinch-zoom !important;
 }
 
 /* Scale the material, not the positioning layer: scaling the latter also

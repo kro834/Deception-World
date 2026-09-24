@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
@@ -5,6 +6,7 @@ import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
+import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
 import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
@@ -21,6 +23,13 @@ const ogImage = host ? `https://${host}/og.jpg` : undefined;
 const xBanner = host
   ? `https://og.grok.me/v1/banner.png?host=${encodeURIComponent(host)}&title=${encodeURIComponent(APP_NAME)}&color=000000`
   : undefined;
+
+/* html[data-dialog-open] stands in for :has(dialog[open]) in the World
+   sheets' motion gates (src/lib/dialog-open-flag.js). */
+function DialogOpenFlag() {
+  useEffect(() => watchOpenDialogs(), []);
+  return null;
+}
 
 export const Route = createRootRoute({
   head: () => ({
@@ -90,6 +99,7 @@ export const Route = createRootRoute({
           <LoadGateProvider>
             <ZeusButtonProvider>
               <AppGuards />
+              <DialogOpenFlag />
               <Outlet />
             </ZeusButtonProvider>
           </LoadGateProvider>

@@ -30,6 +30,18 @@ function nearestTab(px, py, geos) {
 
 const mqCache = new Map();
 const mq = (q) => { let l = mqCache.get(q); if (!l) { l = matchMedia(q); mqCache.set(q, l); } return l; };
+
+// Frosted controls (styles-frosted-controls.css) set --liquid-frosted on :root
+// for the life of the page. Read it once, at the top of the first press while
+// style is still clean: read after the rail's page lock it forced a
+// whole-document style recalculation inside every tap handler.
+let frostedControls = null;
+function isFrosted() {
+  if (frostedControls === null) {
+    frostedControls = getComputedStyle(document.documentElement).getPropertyValue('--liquid-frosted').trim() === '1';
+  }
+  return frostedControls;
+}
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
 function parseColor(color) {
@@ -182,7 +194,7 @@ class GlassRenderer {
   activate(root) {
     // Frosted controls use the DOM lens, including during hold and drag.
     // Do not compile shaders or rasterize text behind an opaque surface.
-    if (getComputedStyle(root).getPropertyValue('--liquid-frosted').trim() === '1') {
+    if (isFrosted()) {
       root.dataset.liquidWebgl = 'fallback';
       return false;
     }
@@ -376,8 +388,7 @@ function initRail(root) {
       return { x: (r.left - rr.left) / sx, y: (r.top - rr.top) / sy, width: r.width / sx, height: r.height / sy };
     });
   };
-  const settle = (i) => {
-    const geos = measure();
+  const settle = (i, geos = measure()) => {
     const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
@@ -437,6 +448,16 @@ function initRail(root) {
     clearTimeout(holdTimer);
   };
   const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  // The rider grid covers most of a phone's width in the middle of the page,
+  // so on touch it is a page-scroll surface first (touch-action: pan-y,
+  // styles-frosted-controls.css). A swipe that starts on it scrolls the page
+  // natively: nothing is measured, locked or drawn until a long press
+  // engages. Only then does the finger own the rail, and dragging across the
+  // tabs selects as before. A quick tap still selects the tapped tab. Mouse
+  // and pen keep the immediate press-and-drag.
+  const holdToDrag = root.classList.contains('rider-tabs');
+  const TOUCH_HOLD_MS = 350;
+  const TOUCH_SLOP = 11;
   let releasePageLock = null;
   const lockPage = () => {
     if (!lockScroll || releasePageLock) return;
@@ -446,7 +467,15 @@ function initRail(root) {
     releasePageLock?.();
     releasePageLock = null;
   };
+  // An armed touch has written nothing yet, so letting it go writes nothing:
+  // it usually ends because the browser took the finger for a page scroll.
+  const disarm = () => {
+    clearTimeout(holdTimer);
+    gesture = null;
+    pending = null;
+  };
   const cancel = () => {
+    if (gesture?.hold === 'armed') { disarm(); return; }
     const pointerId = gesture?.pointerId;
     const wasActive = Boolean(gesture);
     gesture = null;
@@ -536,8 +565,57 @@ function initRail(root) {
     contact(m.x, m.y);
   };
 
+  // Rider grid, touch: note the contact and wait for the hold.
+  const arm = (e) => {
+    const target = e.target.closest('button[role="tab"]');
+    gesture = {
+      axis: 'pending', hold: 'armed', start: target ? tabs().indexOf(target) : -1, raw: 0, held: false,
+      pointerId: e.pointerId, pointerType: e.pointerType,
+      startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
+      vx: 0, vy: 0, geos: null, rect: null, sx: 1, sy: 1,
+    };
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(engage, TOUCH_HOLD_MS);
+  };
+  const tabAt = (x, y, rect, geos) => {
+    const sx = rect.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = rect.height / Math.max(root.offsetHeight, 1) || 1;
+    return nearestTab((x - rect.left) / sx, (y - rect.top) / sy, geos);
+  };
+  // The hold engaged: the finger owns the rail from here to release. Read
+  // every geometry first, while style is clean, then lock the page and show
+  // the held lens on the pressed tab.
+  const engage = () => {
+    const g = gesture;
+    if (!g || g.hold !== 'armed') return;
+    isFrosted();
+    const rect = root.getBoundingClientRect();
+    const geos = measure();
+    const start = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, rect, geos);
+    const target = tabs()[start];
+    if (!target || !geos[start]) { disarm(); return; }
+    Object.assign(g, {
+      hold: 'engaged', held: true, start, raw: start, geos, rect,
+      sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
+      sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
+    });
+    settle(start, geos);
+    root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'true';
+    lockPage();
+    try { root.setPointerCapture(g.pointerId); } catch { /* Window handlers still release the lock. */ }
+    setContact(start);
+    if (!reduce() && getRenderer().activate(root)) {
+      getRenderer().setAccent(getComputedStyle(target).getPropertyValue('--liquid-accent').trim());
+      getRenderer().setGeometry(geos[start]);
+      getRenderer().setPhase('held');
+    }
+    contact(g.lastX, g.lastY);
+  };
+
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    if (holdToDrag && e.pointerType === 'touch') { arm(e); return; }
+    isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
     let start = target ? list.indexOf(target) : -1;
@@ -581,6 +659,14 @@ function initRail(root) {
 
   on(root, 'pointermove', (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
+    if (gesture.hold === 'armed') {
+      // Moving before the hold is a swipe, not a selection: a vertical one is
+      // a page scroll (the browser cancels the pointer), a sideways one simply
+      // lets the grid go.
+      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm();
+      else { gesture.lastX = e.clientX; gesture.lastY = e.clientY; gesture.lastT = e.timeStamp; }
+      return;
+    }
     if (gesture.axis === 'pending') {
       const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
       const threshold = (gesture.pointerType === 'mouse' ? 7 : 11) + (gesture.held ? 6 : 0);
@@ -617,13 +703,28 @@ function initRail(root) {
   const finish = (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
     const g = gesture;
+    if (g.hold === 'armed') {
+      // A quick tap selects the tab under the finger; a lift away from the
+      // contact point ended a swipe.
+      disarm();
+      if (Math.hypot(e.clientX - g.startX, e.clientY - g.startY) >= TOUCH_SLOP) return;
+      const i = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, root.getBoundingClientRect(), measure());
+      select(i); settle(i);
+      return;
+    }
     if (g.axis === 'pending') {
       const moved = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
       const threshold = (g.pointerType === 'mouse' ? 7 : 11) + (g.held ? 6 : 0);
-      const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const over = hit ? hit.closest('button[role="tab"]') : null;
       // A sloppy tap still counts when the finger lifts over the same tab.
-      if (moved >= threshold && over !== tabs()[g.start]) { cancel(); return; }
+      // Hit-test the geometry measured at pointerdown (the page is locked, so
+      // it still holds): elementFromPoint here forced style and layout after
+      // the lock, a whole-document recalculation on every tap.
+      if (moved >= threshold) {
+        const box = g.geos[g.start];
+        const px = (e.clientX - g.rect.left) / g.sx, py = (e.clientY - g.rect.top) / (g.sy || 1);
+        const over = Boolean(box) && px >= box.x && px <= box.x + box.width && py >= box.y && py <= box.y + box.height;
+        if (!over) { cancel(); return; }
+      }
       gesture = null; reset(); unlockPage(); select(g.start); settle(g.start); return;
     }
     if (g.axis === 'free') {
@@ -651,6 +752,15 @@ function initRail(root) {
     if (e.target === root && gesture) cancel();
   });
   on(root, 'contextmenu', (e) => e.preventDefault());
+  if (holdToDrag) {
+    // The browser decides at touchstart whether a touch sequence waits for the
+    // page, so the rider grid keeps one non-passive touchmove listener for the
+    // page's life. It lets every move through until the rail owns the finger
+    // (a hold engaged, or a pen press), then keeps the page from panning.
+    root.addEventListener('touchmove', (e) => {
+      if (gesture && gesture.hold !== 'armed' && e.cancelable) e.preventDefault();
+    }, { passive: false, signal: events.signal });
+  }
 
   // Pointer capture is not guaranteed in Samsung Internet and embedded
   // Android WebViews. Finish/cancel at the window boundary as well so a lift

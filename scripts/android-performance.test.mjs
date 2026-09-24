@@ -86,9 +86,21 @@ test("lightweight glass exits before shader setup and texture generation", () =>
 
 test("frosted controls keep capable Android on the CSS lens (no WebGL)", () => {
   assert.match(readSource("src/styles-frosted-controls.css"), /:root \{\s*--liquid-frosted: 1;/);
+  const boot = readSource("src/lib/liquid/boot.js");
   assert.match(
-    readSource("src/lib/liquid/boot.js"),
-    /activate\(root\) \{[\s\S]*?--liquid-frosted'\)\.trim\(\) === '1'\)[\s\S]*?return false;[\s\S]*?this\.ensure\(\)/,
+    boot,
+    /activate\(root\) \{[\s\S]*?if \(isFrosted\(\)\) \{[\s\S]*?return false;[\s\S]*?this\.ensure\(\)/,
+  );
+  // Read once from :root and cached: read after the rail's page lock it
+  // forced a whole-document style recalculation inside the tap handler.
+  assert.match(
+    boot,
+    /function isFrosted\(\) \{\s*if \(frostedControls === null\) \{\s*frostedControls = getComputedStyle\(document\.documentElement\)\.getPropertyValue\('--liquid-frosted'\)\.trim\(\) === '1';/,
+  );
+  const press = boot.slice(boot.indexOf("on(root, 'pointerdown'"));
+  assert.ok(
+    press.indexOf("isFrosted();") < press.indexOf("lockPage();"),
+    "frosted read after the lock",
   );
 });
 

@@ -140,7 +140,7 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
   // <body> would otherwise capture every view timeline and freeze it.
   assert.match(
     css,
-    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\):not\(:has\(dialog\[open\]\)\) \{\s*overflow: visible;\s*overflow-x: clip;/,
+    /html\[data-mode="world"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\)\s+body:has\(\.site-shell\.film-edition\.mirage-edition\) \{\s*overflow: visible;\s*overflow-x: clip;/,
   );
   const gate = css.indexOf("@supports (animation-timeline: view())");
   assert.ok(gate > 0);
@@ -152,19 +152,22 @@ test("scroll choreography binds to the document, never to a clipping panel", asy
     assert.doesNotMatch(selector, clipping, selector);
   }
   // A scroll lock turns <body> back into a scroll container; the choreography
-  // is switched off meanwhile instead of rebinding to it.
+  // is switched off meanwhile instead of rebinding to it. A rail lock clips
+  // <body> instead (styles-world-reveal.css), so the choreography holds still
+  // under it: gating it on the rail lock restyled and restarted every scroll
+  // animation at each tap.
   for (const { selector, body } of styleRules(css.slice(gate))) {
     if (!/animation-timeline|view-timeline/.test(body)) continue;
     for (const part of splitSelectors(selector)) {
+      const flat = part.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
       for (const lock of [
         ":not([data-side-menu-open])",
-        ":not([data-rail-lock])",
         ":not([data-loading])",
-        ":not(:has(dialog[open]))",
+        ":not([data-dialog-open])",
       ]) {
-        const flat = part.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
         assert.ok(flat.includes(lock), `${part} lacks ${lock}`);
       }
+      assert.doesNotMatch(flat, /data-rail-lock/, part);
     }
   }
   for (const name of ["--mr-hero", "--mr-archive", "--mr-column", "--mr-records", "--mr-finale"]) {

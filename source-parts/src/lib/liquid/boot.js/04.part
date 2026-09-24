@@ -1,3 +1,31 @@
+  // outside the rail, app backgrounding or route transition can never leave
+  // the document-wide touchmove lock behind.
+  window.addEventListener('pointerup', finish, true);
+  window.addEventListener('pointercancel', cancel, true);
+  window.addEventListener('blur', cancel);
+  window.addEventListener('pagehide', cancel);
+  // Rotation invalidates captured coordinates. Toolbar height changes do not:
+  // cancelling on every visualViewport resize would interrupt normal iOS drags.
+  window.addEventListener('orientationchange', cancel);
+  let viewportWidth = window.innerWidth;
+  const handleViewportResize = () => {
+    if (window.innerWidth === viewportWidth) return;
+    viewportWidth = window.innerWidth;
+    cancel();
+  };
+  window.addEventListener('resize', handleViewportResize);
+  const handleVisibilityChange = () => {
+    if (document.hidden) cancel();
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  let swallowClick = false;
+  tabs().forEach((t, i) => on(t, 'click', (ev) => {
+    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+    select(i); settle(i);
+  }));
+
+  on(root, 'keydown', (e) => {
     const tab = e.target.closest('button[role="tab"]');
     if (!tab || !root.contains(tab)) return;
     const list = tabs();

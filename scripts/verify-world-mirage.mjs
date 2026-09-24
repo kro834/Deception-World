@@ -24,6 +24,79 @@ const CAPABLE = () => {
   }
 };
 
+// A rail press takes the page lock (viewport-scroll-lock.js, html[data-rail-lock]).
+// The choreography must hold still under it: the same scroll-driven
+// animations keep running (none cancelled and restarted) and nothing beside
+// the rail moves. The rail's own press transitions are not counted, nor
+// RISING's rw-* entrances until its sheet drops the same rail-lock gate
+// (styles-world-rising.css is being rewritten separately).
+async function heldPress(page, name) {
+  const watched = [".hero-backdrop", ".signal > img", ".story-copy .tr-c"];
+  const snapshot = () =>
+    page.evaluate((selectors) => {
+      const running = document
+        .getAnimations()
+        .filter(
+          (animation) =>
+            animation.playState === "running" &&
+            !animation.animationName?.startsWith("rw-") &&
+            (animation.timeline instanceof ViewTimeline ||
+              animation.timeline instanceof ScrollTimeline),
+        );
+      window.__heldPressAnimations ??= running;
+      const kept = window.__heldPressAnimations;
+      return {
+        lock: document.documentElement.hasAttribute("data-rail-lock"),
+        top: Math.round(window.scrollY),
+        running: running.length,
+        replaced: kept
+          .filter((animation) => !running.includes(animation))
+          .map((animation) => `${animation.animationName} ${animation.playState}`),
+        styles: selectors.map((selector) => {
+          const node = document.querySelector(selector);
+          if (!node) return `${selector}: missing`;
+          const style = getComputedStyle(node);
+          return [style.transform, style.translate, style.scale, style.opacity, style.color].join();
+        }),
+      };
+    }, watched);
+  await page.evaluate(() => {
+    const rail = document.querySelector(".manager-archive-tabs");
+    const box = rail.getBoundingClientRect();
+    window.scrollBy({ top: box.top + box.height / 2 - innerHeight / 2, behavior: "instant" });
+  });
+  await page.waitForTimeout(400);
+  const point = await page.evaluate(() => {
+    const tab = document.querySelector('.manager-archive-tabs [aria-selected="true"]');
+    const box = tab.getBoundingClientRect();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  });
+  const cdp = await page.context().newCDPSession(page);
+  const before = await snapshot();
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+  await page.waitForTimeout(260); // past the 105 ms hold
+  const held = await snapshot();
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await page.waitForTimeout(300);
+  const after = await snapshot();
+  await page.evaluate(() => delete window.__heldPressAnimations);
+  await cdp.detach();
+  assert.equal(before.lock, false, `${name}: rail lock before the press`);
+  assert.equal(held.lock, true, `${name}: no rail lock while held`);
+  assert.equal(after.lock, false, `${name}: rail lock left after release`);
+  assert.ok(before.running > 0, `${name}: nothing running`);
+  for (const [phase, state] of [
+    ["held", held],
+    ["released", after],
+  ]) {
+    assert.equal(state.top, before.top, `${name}: page moved ${phase}`);
+    assert.deepEqual(state.replaced, [], `${name}: animations restarted ${phase}`);
+    assert.equal(state.running, before.running, `${name}: running animations ${phase}`);
+    assert.deepEqual(state.styles, before.styles, `${name}: choreography moved ${phase}`);
+  }
+  return before.running;
+}
+
 const viewports = [
   { name: "phone-320", width: 320, height: 740 },
   { name: "phone-390", width: 390, height: 844 },
@@ -289,8 +362,11 @@ for (const device of [
     return Boolean(hit && h2.contains(hit));
   });
   assert.equal(heading, true, `${device.name}: story heading hit-test`);
+  const running = await heldPress(page, device.name);
   assert.equal(errors.length, 0, errors.join("\n"));
-  console.log(`${device.name}: boot played, choreography on, key art shown`);
+  console.log(
+    `${device.name}: boot played, choreography on, key art shown, ${running} animations held still under a rail press`,
+  );
   await context.close();
 }
 

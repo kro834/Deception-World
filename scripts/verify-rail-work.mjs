@@ -10,6 +10,9 @@ try {
       isMobile: true,
     });
     await page.goto(`${process.env.BASE_URL || "http://127.0.0.1:8082"}/world`);
+    // The settling attribute is absent in SSR too; first wait for hydration,
+    // or the load gate's scroll reset lands after the rail was positioned.
+    await page.locator('.rider-tabs[data-liquid-initialized="true"]').waitFor({ state: "attached" });
     await page.waitForFunction(
       () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
     );
@@ -29,12 +32,20 @@ try {
       { x, y },
     );
     assert.ok(hit, `Slider covered at ${x}, ${y}`);
+    // The rider grid is long-press-to-select on touch: contact alone leaves
+    // the page free, and the hold (350 ms) hands the finger to the rail.
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
     await page.waitForTimeout(180);
     assert.equal(
       await page.evaluate(() => document.documentElement.hasAttribute("data-rail-lock")),
+      false,
+      "Contact alone locked the page",
+    );
+    await page.waitForTimeout(270);
+    assert.equal(
+      await page.evaluate(() => document.documentElement.hasAttribute("data-rail-lock")),
       true,
-      "Initial contact missed slider",
+      "The hold missed the slider",
     );
     await rail.evaluate((root) => {
       window.railRectReads = 0;
