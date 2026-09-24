@@ -2707,7 +2707,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   background:
     linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
     linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
-    linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+    linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%),
+    var(--mr-deck);
   background-repeat: no-repeat;
   background-blend-mode: normal;
 }
@@ -2741,7 +2742,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     .episode-archive {
     background:
       linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
-      linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px, var(--mr-deck);
+      linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
+      var(--mr-deck);
     background-repeat: no-repeat;
     background-blend-mode: normal;
   }
@@ -2750,8 +2752,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(
         .section-index > small,
@@ -2766,8 +2768,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     /* Its eyebrow already rises in (mr-rise-soft); a composited child under
        that fade would add a render pass. */
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .section-title
       .eyebrow
@@ -2776,8 +2778,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     }
 
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-copy
       h3 {
@@ -2789,8 +2791,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     /* The archive label is an inline box, which translate does not move:
        with it in the keyframes the reveal fell back to the main thread. */
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
@@ -2800,24 +2802,24 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     }
 
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       :is(.signal > img, .other-archive-card > img, .dante-visual img) {
       animation: none;
     }
 
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-sticky::before {
       animation: none;
     }
 
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .finale-content
       > span {
@@ -2827,8 +2829,8 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     }
 
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-rail-lock]
-      ):not([data-loading]):not(:has(dialog[open]))
+        [data-loading]
+      ):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .mr-endmark
       :is(span, b) {
