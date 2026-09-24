@@ -429,7 +429,10 @@ void main() {
     // have already dulled, so it never reads as an outline.
     float w = 0.004 + 0.006 * edgeFine;
     float run = 0.3 + 0.7 * smoothstep(0.3, 0.62, midN * 0.55 + edgeFine * 0.45);
-    float lipGlow = exp(-(d + 0.008) * (d + 0.008) / (w * w)) * run;
+    // Divided by w, not by w * w: at FP16 (no highp) w * w is subnormal and
+    // may flush to zero (the lip would vanish, and 0 / 0 is NaN).
+    float lz = (d + 0.008) / w;
+    float lipGlow = exp(-lz * lz) * run;
     float halo = exp(-(d + 0.01) * (d + 0.01) / 0.0004) * run;
     float bed = exp(min(d, 0.0) / 0.035) * burnt * (0.6 + 0.4 * smoothstep(0.04, 0.3, cells));
     emit += (blackbody(0.92 * hot) * lipGlow * 0.9 + blackbody(0.66) * halo * 0.22)

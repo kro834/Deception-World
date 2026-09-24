@@ -73,19 +73,14 @@ const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
 
 /**
- * The gate after the footer. Scrolling past END OF RECORD raises the RISING
- * THE WORLD button (scroll-linked, styles-world-rising.css). The button opens
- * a modal sequence: a dive into the world, the world consumed by red flames
- * and, mid-burn, a hard cut to EP7 REXONANCE. The engine is loaded on
- * approach, and the WebGL context exists only while the sequence plays.
- */
-/**
  * The calm tier's fire (static markup: the tiers move it with WAAPI): raster
- * sprites rendered from the same fire model (scripts/render-rising-calm-sprites.mjs):
- * the burn-edge strip over tiled char, flame sprites seated along its lip
- * behind it (two frames per seat that take turns), smoke billows, and embers. The images load lazily, so only a run that
- * shows this tier fetches them. Memoised with no props, so opening the dialog
- * does not re-render it inside the press's click handler.
+ * sprites rendered from the same fire model
+ * (scripts/render-rising-calm-sprites.mjs): the burn-edge strip over tiled
+ * char, flame sprites seated along its lip behind it (two frames per seat
+ * that take turns), smoke billows, and embers. The images load lazily, so
+ * only a run that shows this tier fetches them (reduced motion hides the
+ * whole burn layer). Memoised with no props, so opening the dialog does not
+ * re-render it inside the press's click handler.
  */
 const CalmFire = memo(function CalmFire() {
   return (
@@ -166,6 +161,14 @@ const CalmFire = memo(function CalmFire() {
   );
 });
 
+/**
+ * The gate after the footer. Scrolling past END OF RECORD raises the RISING
+ * THE WORLD button (scroll-linked, styles-world-rising.css). The button opens
+ * a modal sequence: a dive into the rider print (rising-art.ts), the print
+ * burned away by red flames from below and, mid-burn, a hard cut to EP7
+ * REXONANCE. The engine is loaded on approach, and the WebGL context exists
+ * only while the sequence plays.
+ */
 export function RisingWorld() {
   const gateRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);

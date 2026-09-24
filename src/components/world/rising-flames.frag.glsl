@@ -85,7 +85,10 @@ void main() {
   // lips with low flames instead of filling its outline with a solid blaze.
   float fu = coarseField(bq + vec2(0.0, 0.07)) - level;
   float island = d > 0.0 && fu <= 0.0 ? 1.0 : 0.0;
-  float fuel = mix((1.0 - 0.6 * island) * (1.0 - 0.45 * downwards), exp(hy / 0.035), under);
+  // (hy <= 0 wherever under is 1. Clamped for every pixel anyway: mix()
+  // evaluates both sides, and at FP16 (no highp) the unclamped exponential
+  // overflows to inf over intact print, where inf x 0 makes the flame NaN.)
+  float fuel = mix((1.0 - 0.6 * island) * (1.0 - 0.45 * downwards), exp(min(hy, 0.0) / 0.035), under);
 
   // ---- Flames: domain-warped, upward-advected turbulence rising off the
   // front. The sway bends the tips far more than the roots; small eddies,

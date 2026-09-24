@@ -806,6 +806,10 @@ export function runRising({
         // still covers the screen.
         stats.probeMs = await active.probe();
         if (stale()) return;
+        // The probe yields between its steps, before the listener below
+        // exists: a context lost meanwhile falls back to the calm tier
+        // instead of playing the run on a dead canvas.
+        if (active.lost) throw new Error("context-lost");
         active.render(0); // the canvas holds frame 0 when it appears
         stats.size = active.size;
         canvas.addEventListener("webglcontextlost", onContextLost);

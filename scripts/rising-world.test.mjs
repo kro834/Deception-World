@@ -198,7 +198,7 @@ test("the rider art is the standard Rexonance artwork through the shared helpers
 });
 
 test("the shader runs at high precision where available and avoids undefined smoothstep", async () => {
-  for (const file of ["rising.frag.glsl", "rising-flames.frag.glsl"]) {
+  for (const file of ["rising.frag.glsl", "rising-flames.frag.glsl", "rising-noise.frag.glsl"]) {
     const source = await read(`src/components/world/${file}`);
     assert.match(source, /#ifdef GL_FRAGMENT_PRECISION_HIGH\s+precision highp float;/, file);
     for (const [, a, b] of source.matchAll(/smoothstep\((-?[\d.]+),\s*(-?[\d.]+)/g)) {
@@ -207,12 +207,28 @@ test("the shader runs at high precision where available and avoids undefined smo
         `${file}: smoothstep(${a}, ${b}) is undefined in GLSL ES 1.00`,
       );
     }
+    // fall(e0, e1, x) is 1 - smoothstep(e1, e0, x): its edges must fall, or
+    // the smoothstep inside it runs reversed.
+    for (const [, a, b] of source.matchAll(/\bfall\((-?[\d.]+),\s*(-?[\d.]+)/g)) {
+      assert.ok(Number(a) > Number(b), `${file}: fall(${a}, ${b}) reverses its smoothstep`);
+    }
   }
   const shader = await read("src/components/world/rising.frag.glsl");
   // The Hoskins hash (no large sin() products that collapse at FP16).
   assert.match(shader, /fract\(vec3\(p\.xyx\) \* 0\.1031\)/);
   assert.doesNotMatch(shader, /sin\([^)]*43758/);
   assert.match(shader, /uniform float uHeat;/);
+  // Where a GPU has no highp in the fragment shader (mediump, FP16): no
+  // exp() of a large positive argument (it overflows to inf, and mix(a, inf,
+  // 0.0) is NaN), and no division by a squared width that is subnormal at FP16
+  // and may flush to zero.
+  const flames = await read("src/components/world/rising-flames.frag.glsl");
+  assert.match(flames, /exp\(min\(hy, 0\.0\) \/ 0\.035\)/);
+  assert.doesNotMatch(flames, /exp\(hy \//);
+  assert.match(
+    shader,
+    /float lz = \(d \+ 0\.008\) \/ w;\s*float lipGlow = exp\(-lz \* lz\) \* run;/,
+  );
 });
 
 test("the renderer is opaque, refuses software GL and never uploads an <img> mid-run", async () => {
@@ -732,9 +748,12 @@ test("the calm tier's fire: sprites on the compositor, finite, and off under red
   assert.match(block, /fill: round \? "forwards" : "both"/);
   assert.doesNotMatch(block, /iterations/);
   const css = await readCss();
+  // Reduced motion hides the whole burn layer (flames, smoke, strips, char)
+  // and the embers: nothing of it moves there, and hidden, its lazy sprites
+  // (about 120 KB of strips and char) are never fetched.
   assert.match(
     css,
-    /\.rw-viewport\[data-tier="reduced"\]\s*:is\(\.rw-calm-flames, \.rw-calm-smoke, \.rw-calm-embers\) \{\s*display: none;/,
+    /\.rw-viewport\[data-tier="reduced"\]\s*:is\(\.rw-calm-burn, \.rw-calm-embers\) \{\s*display: none;/,
   );
   // The char under the burn layer never lets its bottom edge rise into view.
   assert.match(css, /\.rw-calm-burn::after \{[^}]*top: 99\.5%;[^}]*background: #070203;/);
@@ -762,6 +781,14 @@ test("the calm tier's fire: sprites on the compositor, finite, and off under red
     component.indexOf("export function RisingWorld"),
   );
   for (const [image] of calmFire.matchAll(/<img[^>]*>/g)) assert.match(image, /loading="lazy"/);
+  // Every sprite sits in the burn layer (the embers are CSS only), so the
+  // reduced tier, which hides that layer, fetches none of them.
+  const burnLayer = calmFire.slice(
+    calmFire.indexOf('<span className="rw-calm-burn">'),
+    calmFire.indexOf('<span className="rw-calm-embers">'),
+  );
+  assert.equal([...burnLayer.matchAll(/<img /g)].length, [...calmFire.matchAll(/<img /g)].length);
+  assert.match(burnLayer, /backgroundImage: `url\(\$\{RISING_CALM_CHAR\}\)`/);
   // Flames sit behind the strip, so the char cuts their roots along the lip.
   assert.ok(
     calmFire.indexOf('className="rw-calm-flames"') < calmFire.indexOf('className="rw-calm-char"'),
@@ -870,11 +897,18 @@ test("every run starts sharp; a GPU probe during the portal picks the rung; the 
   for (const [index, scale] of RISING_RESOLUTION_RUNGS.entries()) {
     assert.match(fire, new RegExp(`scale: RISING_RESOLUTION_RUNGS\\[${index}\\]`), String(scale));
   }
-  // The sequence probes before the canvas shows, and puts frame 0 back.
+  // The sequence probes before the canvas shows, and puts frame 0 back. The
+  // probe yields between its steps, and the context-lost listener only comes
+  // after it: a context lost meanwhile falls back to the calm tier instead of
+  // playing on a dead canvas.
   const sequence = stripComments(await read("src/components/world/rising-sequence.ts"));
   assert.match(
     sequence,
-    /stats\.probeMs = await active\.probe\(\);\s*if \(stale\(\)\) return;\s*active\.render\(0\);/,
+    /stats\.probeMs = await active\.probe\(\);\s*if \(stale\(\)\) return;\s*(?:\/\/[^\n]*\n\s*)*if \(active\.lost\) throw new Error\("context-lost"\);\s*active\.render\(0\);/,
+  );
+  assert.ok(
+    sequence.indexOf("if (active.lost)") <
+      sequence.indexOf('canvas.addEventListener("webglcontextlost", onContextLost)'),
   );
   // The last rungs buy GPU time: the second spark layer, the embers, the ash,
   // the haze and the smoke's detail go at octaves 3; smoke and sparks at 2.
@@ -1016,12 +1050,16 @@ test("review 3, 2026-09-24: flames rise straight up, capped and translucent; the
   );
   // The ember lip glows unevenly along its length.
   assert.match(shader, /float run = 0\.3 \+ 0\.7 \* smoothstep\(/);
-  // The ladder's blur taps: 12 in the dive (the burn is off then).
-  const { RISING_LADDER } = await import("../src/components/world/rising-fire.ts").catch(
-    () => ({}),
-  );
-  if (RISING_LADDER) assert.equal(RISING_LADDER[0].taps, 12);
+  // The ladder's blur taps: 12 in the dive (the burn is off then) on every
+  // resolution rung, fewer on the two last resorts. (rising-fire.ts imports
+  // GLSL with ?raw, which node cannot load, so the source is read.)
   assert.match(fire, /\{ scale: RISING_RESOLUTION_RUNGS\[0\], octaves: 4, taps: 12 \}/);
+  const taps = [...fire.matchAll(/octaves: (\d), taps: (\d+) \}/g)].map((match) =>
+    Number(match[2]),
+  );
+  assert.equal(taps.length, 6, "six rungs");
+  assert.deepEqual(taps.slice(0, 4), [12, 12, 12, 12]);
+  assert.ok(taps[4] < 12 && taps[5] < taps[4], String(taps));
 });
 
 test("review 3: the calm tier's front re-forms halfway up, burning forward only, with a scorch", async () => {

@@ -112,6 +112,25 @@ const STALL_COMPILE = () => {
 const HOLD_BITMAPS = () => {
   window.createImageBitmap = () => new Promise(() => {});
 };
+// The context is lost in the GPU probe (its first synchronous readPixels),
+// before the sequence listens for webglcontextlost: the run must still fall
+// back to the calm tier instead of playing on a dead canvas.
+const LOSE_IN_PROBE = () => {
+  const readPixels = WebGLRenderingContext.prototype.readPixels;
+  let lost = false;
+  WebGLRenderingContext.prototype.readPixels = function (...args) {
+    const result = readPixels.apply(this, args);
+    if (
+      !lost &&
+      this.canvas instanceof HTMLCanvasElement &&
+      this.canvas.classList.contains("rw-canvas")
+    ) {
+      lost = true;
+      this.getExtension("WEBGL_lose_context")?.loseContext();
+    }
+    return result;
+  };
+};
 
 async function openWorld(
   browser,
@@ -850,6 +869,30 @@ async function checkTiers(browser, name) {
     assert.deepEqual(lost, { canvases: 0, fallback: "context-lost", title: 1 });
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ check: "context-lost", name, ...lost }));
+    await context.close();
+  }
+  // Context loss inside the GPU probe (before the listener exists): the run
+  // plays on the calm tier, it does not end early or draw on a dead canvas.
+  {
+    const { context, page, errors } = await openWorld(browser, name, { init: [LOSE_IN_PROBE] });
+    await scrollToGate(page);
+    await press(page, name);
+    await page.waitForTimeout(1500);
+    const early = await page.evaluate(() => ({
+      tier: document.querySelector(".rw-viewport").dataset.tier ?? null,
+      ready: document.querySelector(".rw-viewport").dataset.ready ?? null,
+      canvases: document.querySelectorAll(".rw-gl canvas").length,
+      fallback: window.__risingStats?.fallback,
+      playing: Boolean(document.querySelector(".rw-skip")),
+    }));
+    assert.deepEqual(
+      early,
+      { tier: "css", ready: null, canvases: 0, fallback: "context-lost", playing: true },
+      `${name}: lost in the probe`,
+    );
+    await page.waitForSelector(".rw-replay", { timeout: 12_000 });
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: "context-lost-in-probe", name, ...early }));
     await context.close();
   }
   // Hidden tab: the clock stops, so the cut does not happen behind the user's back.
