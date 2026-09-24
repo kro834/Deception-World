@@ -93,3 +93,50 @@ AndroidかつCSSスクロールタイムライン対応環境では、ヘッダ�
 - Google Pixel仕様: https://support.google.com/pixelphone/answer/7158570?hl=en
 - Chromium UA縮小: https://www.chromium.org/updates/ua-reduction/
 - Chromeスクロールアニメーションの処理経路: https://developer.chrome.com/blog/scroll-animation-performance-case-study/
+
+## Samsung Internetの計測（2026-09-24）
+
+Samsung Internet（SI）はChromeと同じBlinkを使うが、Googleのサーバー側設定（Finch）を受けない。このため120Hzのギャラクシーでは、エンジン144以前のSIがメインスレッドのフレームを60Hzに抑えない。SI 30（エンジン143）はCompositeBGColorAnimationが有効、SI 28/29（130/136）は無効。この条件をPlaywrightのChromeで再現する計測を `scripts/verify-samsung-performance.mjs` にまとめた（`npm test` には含めない）。
+
+- 端末: g360（360×780、DPR 3）、g412（412×915、DPR 3.5）。どちらも `SamsungBrowser/28.0 … Chrome/130` のUAとタッチを使う。`hardwareConcurrency` と `deviceMemory` を8に固定し、軽量描画の判定にならない端末として扱う。
+- 設定: SI28は `--disable-features=CompositeBGColorAnimation`、SI30は既定フラグ。CPUは4倍（S2x相当）と6倍（A3x/A5x相当）。どちらの対応も推定であり、CPU制限はGPU・ラスター処理を遅くしない。
+- 操作: /worldを上から下まで17回タッチでドラッグする（約15秒）。
+- 指標:
+  - スクロール中のrAF間隔のp50/p99と、34msを超えたフレームの数
+  - 合成スレッドのDroppedFrame
+  - メインスレッドのms/s
+  - トレースのPaint・UpdateLayoutTree・Layerize・Commitの合計
+  - 文書全体の再計算（500要素超）
+  - 50ms以上のLoAF
+  - rAFのp95と「17ms超」の数は120Hzでは二峰性になるため使わない。
+- `--mode=gpu`: `--force-gpu-mem-available-mb`（既定256）の下で、タイル不足（チェッカーボード）を数える。
+- `--mode=load`: TBT、ロングタスク、LCP、ハイドレーション後に50ms以上のスタイル強制計算を含むLoAFを測る。
+- 比較: 変更前（base、`BASE_REF_URL`）、候補（`BASE_URL`）、全アニメーション停止の下限（floor）を同じセッションで順番を入れ替えながら各3回実行し、中央値と比率を出す。`--enforce` は計画書第9節の完了条件（スクリプト内の `TARGETS`）で判定し、比率の基準は変更前のコミットとする。完了条件のないセルだけを指定した場合は、何も判定していないので失敗として終了する。ページの最後まで届かなかった回があるセルも、合計値を比べられないので判定不能（失敗）とする。
+
+```sh
+node scripts/serve-ref-build.mjs d0a9da8 --port=8171 &   # 変更前: git archiveで書き出してビルド
+node scripts/serve-ref-build.mjs --dir=. --port=8172 &   # 候補: 作業ツリーをその場でビルド
+BASE_REF_URL=http://127.0.0.1:8171 BASE_URL=http://127.0.0.1:8172 PW_BROWSER_CHANNEL=chrome \
+  node scripts/verify-samsung-performance.mjs [--enforce] [--cells=g360-6x-si28] [--runs=5]
+```
+
+`serve-ref-build.mjs` はproductionビルドをループバックでGET/HEADのみ配信する。`db:migrate` は実行しない。
+
+d0a9da8同士の比較（別々にビルドした2つの配信、他のエージェントのChromeが動作中、各3回の中央値、候補÷変更前）:
+
+| 項目             | g360 4× SI28 | g360 4× SI30 | g412 4× SI28 | g360 6× SI28 | g360 6× SI30 |
+| ---------------- | ------------ | ------------ | ------------ | ------------ | ------------ |
+| メインスレッド   | 1.00         | 0.99         | 0.90         | 1.04         | 1.00         |
+| UpdateLayoutTree | 0.99         | 1.06         | 0.99         | 0.99         | 0.98         |
+| Paint            | 0.91         | 0.98         | 0.94         | 0.94         | 1.07         |
+| DroppedFrame     | 1.18         | 1.37         | 0.81         | 1.02         | 1.02         |
+
+同じビルド同士でも、4倍でのDroppedFrameの比率は0.81〜1.37に散る。変更前の3回の値は、4倍SI30で280〜577だった。0.6〜0.7倍の判定が境界付近のときは、`--runs=5` 以上で測り直す。変更前は6倍SI30でrAF p50が16.6ms（約60fps）、DroppedFrameが815、Paintが9.3秒だった。これは計画書の測定値（16.5ms、815、9.7秒）と一致する。どの設定でも、スクロール中の文書全体の再計算は4回あった。
+
+`--mode=gpu` の同一ビルド比較では、タイル不足の数の比率が0.64（g412、256MB）と0.71（g360、128MB）だった。1回ごとの値は112〜1156と大きく変わる。完了条件（40以下、60以下）はd0a9da8の中央値（160〜657）より一桁小さいため判定には使えるが、2倍未満の差は読まない。`--mode=load` のTBTの比率は0.95（4倍）と1.08（6倍）だった。4倍では、ハイドレーション後に254msのスタイル強制計算を含むLoAFが1回あった（計画書の値と同じ）。
+
+ロングタスク合計の完了条件は、計画書の絶対値（4倍900ms以下、6倍1800ms以下）に加えて、変更前との比（4倍0.7倍以下、6倍0.73倍以下＝計画書の目標÷基準値）でも判定する。計画書の基準値（4倍1257〜1331ms、6倍2470ms）は計測用 `load.mjs` の文書全体のMutationObserverがFCP前に作る約400msのロングタスクを含んでいた。このハーネスにはそれがないため、d0a9da8のままでも1回あたり4倍で478〜1171ms（中央値581〜963ms）、6倍で1140〜2093msとなり、絶対値だけでは変更前が合格することが多い。TBTはFCP以降だけを数えるので影響を受けない。LCPも計画書の基準値（2.06〜2.15秒、トレース記録中の計測）より低く、d0a9da8で約1.4〜1.7秒のため、2.2秒以下の条件は大きな悪化だけを検出する。
+
+`--mode=load` は毎回新しいブラウザでGoogle Fontsをネットワークから取得するため、フォント差し替えによる再レイアウトの位置が回ごとに変わる。d0a9da8では4倍のTBTが1回ごとに約440〜490msか780〜960msのどちらかになり、同じビルド同士の3回の中央値で1.62倍と出たこともあった。loadは `--runs=5` 以上で測り、中央値だけでなく各回の値も確認する。
+
+これはChromeでSIの条件を模した計測であり、実機のfps・発熱・GPUタイル上限の測定ではない。実機では chrome://inspect で、スクロール中のBeginMainFrameの間隔を確認する（SI 30以前は8.3ms）。
