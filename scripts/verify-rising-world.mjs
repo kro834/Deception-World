@@ -8,20 +8,21 @@
 //   BASE_URL=http://127.0.0.1:8091 PW_BROWSER_CHANNEL=chrome node scripts/verify-rising-world.mjs
 //
 // RISING_PROFILES=pixel,galaxy,desktop  limit the viewports (default: all)
-// RISING_SECTIONS=gate,sequence,tiers,perf,flash  limit the checks (default: all)
+// RISING_SECTIONS=gate,sequence,tiers,perf,flash,redive  limit the checks (default: all)
 // RISING_TIERS=webgl,css,reduced  limit the flash-audit tiers (default: all)
 // RISING_SHOTS_DIR=/abs/dir  also save keyframe PNGs from the flash audit
 import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
+import { RE_DIVE } from "../src/components/world/re-dive-timing.ts";
 import { RISING_TIMING } from "../src/components/world/rising-timing.ts";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const channel = process.env.PW_BROWSER_CHANNEL || "chrome";
 const shotsDir = process.env.RISING_SHOTS_DIR || "";
 const sections = new Set(
-  (process.env.RISING_SECTIONS || "gate,sequence,tiers,perf,flash").split(","),
+  (process.env.RISING_SECTIONS || "gate,sequence,tiers,perf,flash,redive").split(","),
 );
 
 const PIXEL_UA =
@@ -1225,6 +1226,151 @@ async function auditFlashes(browser, name, tier) {
   await context.close();
 }
 
+// RE DIVE…? at the end still: from the press to the section, in each tier.
+const REDIVE_INIT = { webgl: [], css: [SAVE_DATA], reduced: [] };
+const REDIVE_CARDS = [
+  "六詠I シエルの個別資料を開く",
+  "六詠II レックス・ロワの個別資料を開く",
+  "六詠III 欠番",
+  "六詠IV レジャスの個別資料を開く",
+  "六詠V オパスの個別資料を開く",
+  "六詠VI 欠番",
+];
+
+/** The dialog at its end still with RE DIVE…? offered (SKIP taken). */
+async function openReDive(browser, name, tier) {
+  const opened = await openWorld(browser, name, {
+    query: "?rising-audit",
+    init: REDIVE_INIT[tier],
+    reducedMotion: tier === "reduced",
+  });
+  const { page } = opened;
+  await scrollToGate(page);
+  await press(page, name);
+  await page.waitForFunction(() => window.__risingTest?.run, null, { timeout: 5000 });
+  await page.evaluate(() => window.__risingTest.run.skip());
+  await page.waitForSelector(".rw-redive-button", { timeout: 5000 });
+  // Past the SKIP / もう一度 swap guard, and the offer's own fade-in.
+  await page.waitForTimeout(1900);
+  assert.equal(
+    await page.evaluate(() => document.querySelector(".rw-controls button")?.className),
+    "rw-replay",
+    `${name} ${tier}: もう一度 keeps the first control spot`,
+  );
+  return opened;
+}
+
+async function pressReDive(page, name) {
+  if (PROFILES[name].options.hasTouch) await page.tap(".rw-redive-button");
+  else await page.click(".rw-redive-button");
+}
+
+async function checkReDive(browser, name, tier) {
+  const { context, page, errors } = await openReDive(browser, name, tier);
+  await pressReDive(page, name);
+  await page.waitForFunction(() => window.__reDiveTest?.run, null, { timeout: 5000 });
+  const actualTier = await page.evaluate(() => window.__reDiveTest.run.tier);
+  await page.waitForFunction(() => !document.querySelector(".rw-dialog").open, null, {
+    timeout: (RE_DIVE.landed + RE_DIVE.leave) * 1000 + 4000,
+  });
+  await page.waitForTimeout(300);
+  const state = await page.evaluate(() => {
+    const section = document.getElementById("re-dive");
+    const topbar = document.querySelector(".site-shell .topbar");
+    return {
+      top: section ? Math.round(section.getBoundingClientRect().top) : null,
+      header: topbar ? Math.round(topbar.getBoundingClientRect().bottom) : 0,
+      focus: document.activeElement?.id ?? null,
+      arrived: section?.hasAttribute("data-arrived") ?? false,
+      cards: section
+        ? [...section.querySelectorAll(".signal-array > .signal")].map((card) =>
+            card.getAttribute("aria-label"),
+          )
+        : [],
+      ciel: section?.querySelector(".ciel-signal img")?.getAttribute("src") ?? null,
+      dialogFlag: document.documentElement.hasAttribute("data-dialog-open"),
+      bodyPosition: document.body.style.position,
+      unlocked: sessionStorage.getItem("dw-re-dive"),
+      endArtAnimations: document.querySelector(".rw-end-art")?.getAnimations().length ?? 0,
+    };
+  });
+  assert.equal(actualTier, tier, `${name}: RE DIVE tier`);
+  assert.ok(
+    state.top !== null && Math.abs(state.top - state.header) <= 2,
+    `${name} ${tier}: the section lands under the header ${JSON.stringify(state)}`,
+  );
+  assert.equal(state.focus, "re-dive");
+  assert.ok(state.arrived);
+  assert.deepEqual(state.cards, REDIVE_CARDS);
+  assert.equal(state.ciel, "/ciel-thumb-20260924.jpeg");
+  assert.equal(state.dialogFlag, false);
+  assert.equal(state.bodyPosition, "");
+  assert.equal(state.unlocked, "1");
+  assert.equal(state.endArtAnimations, 0, `${name} ${tier}: the end still is left as it was`);
+  assert.deepEqual(errors, []);
+  console.log(
+    JSON.stringify({ check: "re-dive", name, tier, ...state, cards: state.cards.length }),
+  );
+  await context.close();
+}
+
+// Frame-exact, like auditFlashes: the end still at rest, then 60 fps through
+// the transition to its landing (the dialog then fades out over a picture of
+// the section it lands on).
+async function auditReDiveFlashes(browser, name, tier) {
+  const { context, page, errors } = await openReDive(browser, name, tier);
+  const viewport = PROFILES[name].options.viewport;
+  const cell = viewport.width >= 1024 ? { w: 341, h: 256 } : { w: 160, h: 160 };
+  const analyser = await createAnalyser(browser, cell, viewport);
+  const shot = async (t) => {
+    const buffer = await page.screenshot({ type: "jpeg", quality: 80, scale: "css" });
+    await analyser.evaluate(
+      ([time, data]) => window.addFrame(time, data),
+      [t, buffer.toString("base64")],
+    );
+  };
+  await shot(-1);
+  await pressReDive(page, name);
+  await page.waitForFunction(
+    (webgl) =>
+      window.__reDiveTest?.run &&
+      (!webgl || window.__reDiveTest.run.stats.size || window.__reDiveTest.run.tier !== "webgl"),
+    tier === "webgl",
+    { timeout: 5000 },
+  );
+  await page.evaluate(() => window.__reDiveTest.seek(0));
+  assert.equal(await page.evaluate(() => window.__reDiveTest.run.tier), tier, `${name}: tier`);
+  const end = tier === "reduced" ? RE_DIVE.reducedLanded : RE_DIVE.landed;
+  for (let frame = 0; frame <= Math.ceil(end * FPS); frame += 1) {
+    const t = frame / FPS;
+    await page.evaluate((time) => window.__reDiveTest.seek(time), t);
+    await shot(t);
+    if (shotsDir && frame % 15 === 0) {
+      mkdirSync(shotsDir, { recursive: true });
+      await page.screenshot({
+        path: join(shotsDir, `redive-${tier}-${name}-${t.toFixed(2).replace(".", "_")}.png`),
+      });
+    }
+  }
+  const result = await analyser.evaluate(() => window.countFlashes());
+  await analyser.close();
+  assert.deepEqual(errors, []);
+  const worst = Math.max(result.general.perSecond, result.red.perSecond);
+  console.log(
+    JSON.stringify({
+      check: "re-dive-flashes",
+      name,
+      tier,
+      frames: result.frames,
+      cells: result.cells,
+      general: { perSecond: result.general.perSecond, at: result.general.at },
+      red: { perSecond: result.red.perSecond, at: result.red.at },
+    }),
+  );
+  assert.ok(worst <= 1, `${name} ${tier}: RE DIVE ${worst} flashes/s`);
+  await context.close();
+}
+
 // The controls on a real clock: a held Enter (33 ms key repeat) on SKIP, then
 // clicks on the SKIP / もう一度 spot every 100 ms. The two swap the picture
 // between the void and the end still, so each must stay at one flash a second:
@@ -1456,6 +1602,16 @@ try {
     if (profileNames.includes("desktop")) {
       for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
         await auditControlFlashes(browser, "desktop", tier);
+      }
+    }
+  }
+  if (sections.has("redive")) {
+    for (const name of profileNames.filter((entry) =>
+      ["pixel", "galaxy", "desktop"].includes(entry),
+    )) {
+      for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
+        await checkReDive(browser, name, tier);
+        await auditReDiveFlashes(browser, name, tier);
       }
     }
   }

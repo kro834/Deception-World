@@ -74,6 +74,10 @@ export const MANAGER_THUMBNAILS: Record<string, ImageSet & { aspect: number }> =
   reemu: { ...manager("/manager-reemu-thumb", 540), aspect: 540 / 960 },
 };
 
+// RE DIVE's 六詠 I, シエル: an upper-body crop of his illustration
+// (/ciel-illustration-20260924.webp, as supplied), in the managers' card slot.
+export const CIEL_THUMBNAIL = { ...manager("/ciel-thumb-20260924", 640), aspect: 640 / 800 };
+
 // Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;
 // 821-1100 px up to 150 x 179; wider up to 240 x 179.
 const managerSizes = (aspect: number) => {
@@ -93,6 +97,10 @@ export function episodeThumbnail(source: string) {
 export function managerThumbnail(name: keyof typeof MANAGER_THUMBNAILS) {
   const set = MANAGER_THUMBNAILS[name];
   return { srcSet: srcSet(set), sizes: managerSizes(set.aspect) };
+}
+
+export function cielThumbnail() {
+  return { srcSet: srcSet(CIEL_THUMBNAIL), sizes: managerSizes(CIEL_THUMBNAIL.aspect) };
 }
 
 // The button's image box is 48 px on phones (the button is 60 px) and at most

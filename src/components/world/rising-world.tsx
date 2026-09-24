@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
@@ -21,6 +22,8 @@ import {
 } from "./rising-art";
 import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_SMOKE } from "./rising-calm";
 import type { RisingRun, RisingStats } from "./rising-sequence";
+import type { ReDiveRun } from "./re-dive-sequence";
+import { RE_DIVE_SECTION_ID, ReDiveSection } from "./re-dive-section";
 
 // The image the fire consumes is chosen per device at the press
 // (rising-art.ts). The art that emerges from the ash is the standard
@@ -48,9 +51,101 @@ const prewarm = () => {
     .catch(() => undefined);
 };
 
+// RE DIVE…?: the transition into the RE DIVE section, loaded when the end
+// still settles (re-dive-sequence.ts). The section stays unlocked for the
+// session (and a link to #re-dive opens it), and browser back from a card
+// opened in it comes back to it.
+type ReDiveEngine = typeof import("./re-dive-sequence");
+let reDiveEngine: Promise<ReDiveEngine> | null = null;
+let reDiveModule: ReDiveEngine | null = null;
+const loadReDive = () =>
+  (reDiveEngine ??= import("./re-dive-sequence").then((module) => {
+    reDiveModule = module;
+    return module;
+  }));
+const RE_DIVE_UNLOCKED_KEY = "dw-re-dive";
+const RE_DIVE_RETURN_KEY = "dw-re-dive-return";
+const RE_DIVE_EDGE = RISING_CALM_EDGES[0];
+
+// The cards come up out of the ground once (styles-world-re-dive.css).
+const markArrived = (section: HTMLElement) => {
+  section.removeAttribute("data-arrived");
+  void section.offsetWidth;
+  section.setAttribute("data-arrived", "");
+};
+
+// The header's bottom: the section lands just under it.
+const headerBottom = () => {
+  const topbar = document.querySelector<HTMLElement>(".site-shell .topbar");
+  return topbar ? Math.max(0, Math.round(topbar.getBoundingClientRect().bottom)) : 0;
+};
+
+const readSession = (key: string) => {
+  try {
+    return window.sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+};
+const writeSession = (key: string, on: boolean) => {
+  try {
+    if (on) window.sessionStorage.setItem(key, "1");
+    else window.sessionStorage.removeItem(key);
+  } catch {
+    // Private mode without storage: the section simply is not remembered.
+  }
+};
+
+// Unlocked, as a store: the section is in the first render of a client-side
+// return (so the router's restored position exists), and after hydration on
+// a page load (the server never renders it).
+let unlockedHere = false;
+const unlockListeners = new Set<() => void>();
+const subscribeUnlock = (listener: () => void) => {
+  unlockListeners.add(listener);
+  return () => {
+    unlockListeners.delete(listener);
+  };
+};
+const readUnlocked = () =>
+  unlockedHere ||
+  readSession(RE_DIVE_UNLOCKED_KEY) ||
+  window.location.hash === `#${RE_DIVE_SECTION_ID}`;
+const unlockReDive = () => {
+  unlockedHere = true;
+  writeSession(RE_DIVE_UNLOCKED_KEY, true);
+  unlockListeners.forEach((listener) => listener());
+};
+
+// A card opened from the section: the World's history entry gets the
+// section's hash, so browser back is not reset to the top (load-gate.tsx
+// AppGuards resets a hashless /world) and lands on the section.
+const leaveForDossier = () => {
+  writeSession(RE_DIVE_RETURN_KEY, true);
+  try {
+    const { pathname, search } = window.location;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${pathname}${search}#${RE_DIVE_SECTION_ID}`,
+    );
+  } catch {
+    // The return simply starts at the top.
+  }
+};
+
+// Once per document: a page opened on #re-dive (a link, a reload) lands on
+// the section after hydration renders it.
+let alignedOnLoad = false;
+
 type RisingTestHook = {
   readonly run: RisingRun | null;
   readonly stats: RisingStats | null;
+  seek: (T: number) => void;
+};
+
+type ReDiveTestHook = {
+  readonly run: ReDiveRun | null;
   seek: (T: number) => void;
 };
 
@@ -58,6 +153,7 @@ declare global {
   interface Window {
     __risingTest?: RisingTestHook;
     __risingStats?: RisingStats;
+    __reDiveTest?: ReDiveTestHook;
   }
 }
 
@@ -190,6 +286,16 @@ export function RisingWorld() {
   const [ended, setEnded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [live, setLive] = useState("");
+  // RE DIVE…?: idle, the transition playing, or landed and fading out.
+  const [reDive, setReDive] = useState<"idle" | "diving" | "leaving">("idle");
+  const unlocked = useSyncExternalStore(subscribeUnlock, readUnlocked, () => false);
+  const reDiveStateRef = useRef<"idle" | "diving" | "leaving">("idle");
+  const reDiveStageRef = useRef<HTMLDivElement>(null);
+  const reDiveRunRef = useRef<ReDiveRun | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const leaveTimerRef = useRef(0);
+  const titleFadesRef = useRef<Animation[]>([]);
+  const groundTopRef = useRef(0);
 
   // Warm the engine, the images and the shader when the gate nears the view.
   useEffect(() => {
@@ -206,6 +312,46 @@ export function RisingWorld() {
     observer.observe(gate);
     return () => observer.disconnect();
   }, []);
+
+  // Back from a card opened in the section, or a page opened on #re-dive:
+  // once the route's own scroll handling has settled, land on the section.
+  // Any other return keeps the position the router restores. The marks are
+  // spent only when the section is reached (the route may mount twice).
+  useEffect(() => {
+    if (!unlocked) return;
+    if (window.location.hash !== `#${RE_DIVE_SECTION_ID}`) {
+      alignedOnLoad = true;
+      writeSession(RE_DIVE_RETURN_KEY, false);
+      return;
+    }
+    if (alignedOnLoad && !readSession(RE_DIVE_RETURN_KEY)) return;
+    let frame = 0;
+    const since = performance.now();
+    const settle = () => {
+      frame = 0;
+      if (
+        document.documentElement.hasAttribute("data-route-scroll-settling") &&
+        performance.now() - since < 2500
+      ) {
+        frame = window.requestAnimationFrame(settle);
+        return;
+      }
+      alignedOnLoad = true;
+      writeSession(RE_DIVE_RETURN_KEY, false);
+      sectionRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    };
+    frame = window.requestAnimationFrame(settle);
+    return () => window.cancelAnimationFrame(frame);
+  }, [unlocked]);
+
+  // The end still has settled: have the RE DIVE images ready for the press.
+  useEffect(() => {
+    if (!open || !ended) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    void loadReDive()
+      .then((module) => module.prepareReDive(RIDER_ART, RISING_CALM_CHAR, RE_DIVE_EDGE))
+      .catch(() => undefined);
+  }, [open, ended]);
 
   // SKIP and もう一度 replace each other; keep keyboard focus on the control.
   useLayoutEffect(() => {
@@ -366,10 +512,36 @@ export function RisingWorld() {
     generationRef.current += 1;
     runRef.current?.dispose();
     runRef.current = null;
+    reDiveRunRef.current?.dispose();
+    reDiveRunRef.current = null;
+    window.clearTimeout(leaveTimerRef.current);
+    titleFadesRef.current.forEach((animation) => animation.cancel());
+    titleFadesRef.current = [];
+    const reDiving = reDiveStateRef.current !== "idle";
+    const landed = reDiveStateRef.current === "leaving";
+    reDiveStateRef.current = "idle";
     skipRequestedRef.current = false;
     setOpen(false);
     setEnded(false);
     setLive("");
+    setReDive("idle");
+    if (reDiving) {
+      // RE DIVE (landed, or closed on the way): the page stays at the section.
+      releaseLockRef.current?.();
+      releaseLockRef.current = null;
+      const section = sectionRef.current;
+      if (section) {
+        window.scrollTo({
+          top: section.getBoundingClientRect().top + window.scrollY - groundTopRef.current,
+          left: 0,
+          behavior: "instant",
+        });
+        section.focus({ preventScroll: true });
+        // Closed before landing (Esc on the way): the cards come up now.
+        if (!landed) markArrived(section);
+      }
+      return;
+    }
     // Focus first (the body is still frozen), then restore the scroll position.
     triggerRef.current?.focus({ preventScroll: true });
     releaseLockRef.current?.();
@@ -381,6 +553,83 @@ export function RisingWorld() {
     if (dialog?.open) dialog.close();
     finishClose();
   }, [finishClose]);
+
+  // Landed: under the still frame, move the page to the section (the lock
+  // gives the gate's position back first), then fade the dialog out over it.
+  const landReDive = useCallback(() => {
+    if (reDiveStateRef.current !== "diving" || !openRef.current) return;
+    reDiveStateRef.current = "leaving";
+    releaseLockRef.current?.();
+    releaseLockRef.current = null;
+    const section = sectionRef.current;
+    if (section) {
+      window.scrollTo({
+        top: section.getBoundingClientRect().top + window.scrollY - groundTopRef.current,
+        left: 0,
+        behavior: "instant",
+      });
+      // The cards come up while the dialog fades out over them.
+      markArrived(section);
+    }
+    setReDive("leaving");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    leaveTimerRef.current = window.setTimeout(closeDialog, reduced ? 0 : 600);
+  }, [closeDialog]);
+
+  const reDiveNow = () => {
+    if (!settled() || reDiveStateRef.current !== "idle") return;
+    const dialog = dialogRef.current;
+    const stage = reDiveStageRef.current;
+    if (!dialog?.open || !stage) return;
+    reDiveStateRef.current = "diving";
+    groundTopRef.current = headerBottom();
+    unlockReDive();
+    setReDive("diving");
+    setLive("");
+    // The title steps aside with the controls (its opacity is the RISING run's
+    // filled animation, so this one is layered over it and cancelled on close).
+    titleFadesRef.current = [
+      ...dialog.querySelectorAll<HTMLElement>(".rw-title-wrap, .rw-title-scrim"),
+    ].map((element) =>
+      element.animate([{ opacity: getComputedStyle(element).opacity }, { opacity: 0 }], {
+        duration: 280,
+        easing: "ease-out",
+        fill: "forwards",
+      }),
+    );
+    // Keyboard focus leaves the fading controls for the dialog surface.
+    dialog.focus({ preventScroll: true });
+    const generation = generationRef.current;
+    void loadReDive()
+      .then((module) => {
+        if (
+          !dialogRef.current?.open ||
+          generation !== generationRef.current ||
+          reDiveStateRef.current !== "diving"
+        ) {
+          return;
+        }
+        const run = module.runReDive({
+          stage,
+          art: RIDER_ART,
+          char: RISING_CALM_CHAR,
+          edge: RE_DIVE_EDGE,
+          groundTop: groundTopRef.current,
+          onLanded: landReDive,
+        });
+        reDiveRunRef.current = run;
+        if (auditRequested()) {
+          window.__reDiveTest = {
+            get run() {
+              return reDiveRunRef.current;
+            },
+            seek: (T: number) => reDiveRunRef.current?.seek(T),
+          };
+        }
+      })
+      // The chunk failed: arrive without the transition.
+      .catch(landReDive);
+  };
 
   // bfcache and route changes release the context and the lock.
   useEffect(() => {
@@ -396,6 +645,10 @@ export function RisingWorld() {
       runRef.current = null;
       // After the run: close the prepared bitmaps; the next approach prepares again.
       engineModule?.releaseRising();
+      reDiveRunRef.current?.dispose();
+      reDiveRunRef.current = null;
+      window.clearTimeout(leaveTimerRef.current);
+      reDiveModule?.releaseReDive();
       releaseLockRef.current?.();
       releaseLockRef.current = null;
     };
@@ -422,11 +675,15 @@ export function RisingWorld() {
         </button>
       </section>
 
+      {unlocked ? <ReDiveSection ref={sectionRef} onLeave={leaveForDossier} /> : null}
+
       <dialog
         ref={dialogRef}
         id="rising-world-dialog"
         className="rw-dialog"
         aria-label="RISING THE WORLD"
+        data-redive={reDive === "idle" ? undefined : ""}
+        data-leaving={reDive === "leaving" ? "" : undefined}
         tabIndex={-1}
         onCancel={(event) => {
           event.preventDefault();
@@ -482,6 +739,25 @@ export function RisingWorld() {
               decoding="async"
             />
           </div>
+          {/* RE DIVE…?: the WebGL tier draws on a canvas it adds here; the
+              CSS and reduced tiers move these layers (re-dive-sequence.ts). */}
+          <div ref={reDiveStageRef} className="rw-redive" aria-hidden="true">
+            <span className="rw-redive-lines" />
+            <span className="rw-redive-glow" />
+            <span className="rw-redive-ground">
+              <span
+                className="re-dive-char"
+                style={
+                  reDive === "idle" ? undefined : { backgroundImage: `url(${RISING_CALM_CHAR})` }
+                }
+              />
+              <span
+                className="re-dive-edge"
+                style={reDive === "idle" ? undefined : { backgroundImage: `url(${RE_DIVE_EDGE})` }}
+              />
+              <span className="re-dive-embers" />
+            </span>
+          </div>
         </div>
         <p className="rw-live" aria-live="polite" aria-atomic="true">
           {live}
@@ -499,6 +775,16 @@ export function RisingWorld() {
             </button>
           )}
         </div>
+        {ended && reDive === "idle" ? (
+          <button
+            type="button"
+            className="rw-redive-button"
+            onPointerDown={() => void loadReDive()}
+            onClick={reDiveNow}
+          >
+            RE DIVE…?
+          </button>
+        ) : null}
         <button ref={closeRef} type="button" className="rw-close" onClick={closeDialog}>
           <span>CLOSE</span>
           <i aria-hidden="true" />

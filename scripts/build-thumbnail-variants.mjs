@@ -2,12 +2,13 @@
 // the six-manager cards and the Zeus button. No image library is installed,
 // so Chrome draws them: createImageBitmap with high-quality resampling, then
 // canvas WebP at the quality build-dossier-images.mjs uses (84).
-// Regenerate with `node scripts/build-thumbnail-variants.mjs` (needs the
-// Chrome channel for Playwright). The variants and their slots are listed in
-// src/lib/thumbnail-images.ts.
+// Regenerate with `node scripts/build-thumbnail-variants.mjs [source]` (needs
+// the Chrome channel for Playwright; a source path limits it to that set). The
+// variants and their slots are listed in src/lib/thumbnail-images.ts.
 import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import {
+  CIEL_THUMBNAIL,
   EPISODE_THUMBNAILS,
   MANAGER_THUMBNAILS,
   ZEUS_BUTTON_IMAGES,
@@ -18,9 +19,12 @@ const jobs = [];
 const sets = [
   ...Object.values(EPISODE_THUMBNAILS).map((set) => [set, 0.84]),
   ...Object.values(MANAGER_THUMBNAILS).map((set) => [set, 0.84]),
+  [CIEL_THUMBNAIL, 0.78],
   ...Object.values(ZEUS_BUTTON_IMAGES).map((set) => [set, 0.86]),
 ];
+const only = process.argv[2];
 for (const [set, quality] of sets) {
+  if (only && set.source !== only) continue;
   for (const variant of set.variants) {
     if (variant.build) jobs.push({ source: set.source, output: variant.path, width: variant.width, quality });
   }

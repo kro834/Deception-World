@@ -178,6 +178,26 @@ The dive's zoom blur takes 12 taps, jittered per pixel and per frame by white no
 
 The calm CSS tier burns the same image with raster sprites that only move by transform and opacity, rendered offline from the same fire model by `scripts/render-rising-calm-sprites.mjs` (`public/rising-calm-*-20260924*.webp`, about 180 KB: prepared on approach when the device will get this tier, loaded lazily when a WebGL run falls back to it, and never fetched by a WebGL or reduced-motion run): a burn-edge strip on a fixed fractal profile (`rising-calm.ts`, low-passed so it tears into tongues and bays instead of zig-zagging) whose incandescent lip varies in width and brightness along it, fresh char behind it with cracks that glow and cool, and a tiled char texture below; under the flames, a scorch strip on the same profile, where the print yellows, browns and blisters ahead of the lip; three flame frames seated along the lip at irregular sizes and gaps, behind the strip so the char cuts their roots, two frames per seat taking turns while rising a little (fake advection, each seat on its own beat); lit grey-brown smoke billows that swell, drift and thin; and embers whose streaks lean along their wandering paths. Halfway up, the front re-forms, so it is never recognised as one stamped silhouette climbing the print: a second strip and scorch fade in over the first, drawn wherever either of two differently shaped profiles has burned further. It only ever burns forward, and each flame seat slides up onto the new lip. Landscape screens deepen the edge's tears. Reduced motion keeps only the cross-fade to the still: the burn layer and the embers are hidden, so none of the sprites loads.
 
+### RE DIVE…? — 2026-09-24
+
+At the end still, RE DIVE…? appears above もう一度, in its own spot, so SKIP and もう一度 keep theirs, and the same 600 ms guard applies. It takes the reader into the World after it burned: a section right after the gate (`src/components/world/re-dive-section.tsx`, `src/styles-world-re-dive.css`). The section is rendered only once it has been reached in the session, or when a link opens `#re-dive`, and never by the server.
+
+- **The transition** (`re-dive-sequence.ts`, `re-dive.frag.glsl`, `re-dive-timing.ts`; 2.55 s). Frame 0 is the end still itself. The camera plunges into the Rexonance art's core (zoom blur, ember speed lines, a darkening tunnel) and passes one amber swell. It lands on the section's ground, framed exactly as the page shows it: the burning lip just under the header, char below, ember light. Only then is the page moved to the section, under that still frame. The dialog fades out over it in 0.6 s while the six signals rise from the ground once. Esc on the way lands on the section at once.
+- **Tiers**, by capability as everywhere:
+  - WebGL: one full-screen pass on the opening's ShaderPass kit, loaded with `import()` when the end still settles. The context is released on landing.
+  - CSS (Save-Data, 2G, low memory, two cores, no WebGL, or GL not ready in 450 ms): the end still's own art zooms into the core under speed lines and a glow, with transform and opacity only.
+  - Reduced motion: the ground fades in over 0.7 s.
+- **The ground.** The calm tier's burn-edge strip runs across the section's top, stretched to the width as in the calm tier (it does not tile seamlessly). The calm tier's char tile starts 0.8 of the strip's height down. The shader reads its textures y-down with `texture2D()`, as uploaded; `sampleTop()` takes y-up coordinates.
+- **The 六詠 box** is the Deception World archive's box, with the same markup and words.
+  - I is シエル (月城悠真). His card uses an upper-body crop of his illustration in the managers' card slot (`CIEL_THUMBNAIL`); the illustration is kept as supplied in `public/ciel-illustration-20260924.webp`. For now it opens the dossier the eight riders open for him (Kamen Rider Saga).
+  - II レックス・ロワ, IV レジャス and V オパス are the archive's cards.
+  - III and VI are 欠番: burned-out slots that are not links.
+- **Returning.** A card opened from the section gives the World's history entry the `#re-dive` hash. Browser back is then not reset to the top and lands on the section. Any other return keeps the position the router restores.
+
+Photosensitivity follows RISING THE WORLD: one amber swell, and nothing pulses. The flash audit (60 fps, frame-exact, Pixel, Galaxy and desktop, every tier) measures at most one flash a second on WebGL (the swell) and none on the CSS and reduced tiers. Guards:
+- `scripts/re-dive.test.mjs`;
+- the `redive` section of `scripts/verify-rising-world.mjs`: the landing, focus, the six signals, the end still left as it was, and the flash audit.
+
 ## Opening: the burn and the dive — 2026-09-24
 
 The title (`/`) now tells one story in 7.2 s: the ice logo arrives, is consumed by red flames climbing from its lower left, and the prism logo emerges from the ash, ember-hot, cooling to its own colours; it stays for ENTER THE WORLD and もう一度. SKIP (Esc, Enter, Space, S) lands on the prism logo in one change. Reduced motion shows the prism logo directly.

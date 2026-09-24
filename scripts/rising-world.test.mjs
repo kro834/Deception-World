@@ -60,6 +60,8 @@ const ALLOWED_WORDS = new Set([
   "CLOSE",
   "SKIP",
   "もう一度",
+  // The way on after the end still (re-dive-section.tsx carries the section's own words).
+  "RE DIVE…?",
 ]);
 
 test("the rising sheet is linked before the Mirage face, so Mirage stays last", async () => {
