@@ -93,7 +93,6 @@
     0 0 0 8rem rgba(244, 215, 142, 0.028),
     0 0 0 18rem rgba(244, 215, 142, 0.018),
     0 0 140px rgba(244, 215, 142, 0.08);
-  animation-duration: 18s;
 }
 
 .is-sovereign .manager-topbar {
@@ -868,6 +867,19 @@
     padding-right: 4px;
     padding-left: 4px;
   }
+}
+
+/* Android: the seal's pulse (box-shadow and filter) and the title's shine
+   (background-position) cannot run on the compositor, so each repainted the
+   portrait frame and the status block every frame. The seal still arrives
+   and rests unlit; the title rests on the gold end of its shine. */
+html[data-android-renderer] .sovereign-apex-seal {
+  animation: sovereignSealIn 0.92s 0.44s cubic-bezier(0.16, 0.9, 0.2, 1) both;
+}
+
+html[data-android-renderer] .is-sovereign .manager-display-name {
+  background-position: 0 50%;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

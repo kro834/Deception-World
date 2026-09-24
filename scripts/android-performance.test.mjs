@@ -152,6 +152,75 @@ test("capable Android keeps the key art and the Mirage boot; only economy freeze
   }
 });
 
+test("the Android lite tier touches only the floor, halo, curtains, bracket overlays, clip-path reveals and iris", () => {
+  const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const mirage = readSource("src/styles-world-mirage.css");
+  const header = mirage.indexOf("   Android lite tier\n");
+  assert.ok(header > 0);
+  const tier = strip(mirage.slice(mirage.lastIndexOf("/*", header)));
+  const rules = [...tier.matchAll(/(?<=^|[{};])\s*([^{};@\s][^{};]*)\{([^{}]*)\}/g)]
+    .map((match) => ({ selector: match[1].trim().replace(/\s+/g, " "), body: match[2].trim() }))
+    .filter(({ selector }) => !/^(?:from|to|[\d.]+%)$/.test(selector));
+  const changes = rules.map(({ selector, body }) => {
+    const target = selector.slice(selector.indexOf(".site-shell.film-edition.mirage-edition") + 40);
+    const properties = [...body.matchAll(/(?:^|;)\s*([\w-]+):/g)].map((match) => match[1]);
+    return `${target} {${properties.join(",")}}`;
+  });
+  assert.deepEqual(changes, [
+    ".mr-hero-floor {display}",
+    ".mr-hero-beam {mix-blend-mode}",
+    ".poster-frame {box-shadow}",
+    ":is(.story-section, .riders-section, .records-section)::after {display}",
+    ":is(.story-layout, .threat-panel, .world-column, .episode-archive, .rider-console)::after {content}",
+    ".story-layout {background,background-repeat,background-origin}",
+    ".threat-panel {background,background-repeat,background-blend-mode}",
+    ".world-column {background,background-repeat,background-blend-mode}",
+    ".rider-console {background,background-repeat,background-origin,background-blend-mode}",
+    ".episode-archive {background,background-repeat,background-blend-mode}",
+    ".topbar {box-shadow,transition}",
+    ":is(.story-layout, .threat-panel, .world-column) {background,background-repeat,background-blend-mode}",
+    ".rider-console {background,background-repeat,background-blend-mode}",
+    ".episode-archive {background,background-repeat,background-blend-mode}",
+    ":is( .section-index > small, .story-heading .eyebrow > span, .records-heading .eyebrow > span ) {animation,animation-timeline,animation-range}",
+    ".section-title .eyebrow > span {animation}",
+    ".threat-copy h3 {animation,animation-timeline,animation-range}",
+    ".threat-copy .system-label {animation,animation-timeline,animation-range}",
+    ":is(.signal > img, .other-archive-card > img, .dante-visual img) {animation}",
+    ".finale-sticky::before {animation}",
+    ".finale-content > span {animation,animation-timeline,animation-range}",
+    ".mr-endmark :is(span, b) {animation,animation-timeline,animation-range}",
+  ]);
+  // Every clip-path reveal it replaces keeps its timeline and range, on the compositor.
+  for (const { body } of rules) {
+    const name = body.match(/animation: (mr-[\w-]+) /)?.[1];
+    if (name) assert.ok(["mr-rise-in", "mr-fade-in"].includes(name), body);
+  }
+  assert.match(
+    tier,
+    /@keyframes mr-rise-in \{\s*from \{\s*opacity: 0;\s*translate: 0 8px;\s*\}\s*\}/,
+  );
+  // The inline archive label, which translate would not move, only fades.
+  assert.match(tier, /@keyframes mr-fade-in \{\s*from \{\s*opacity: 0;\s*\}\s*\}/);
+  // The boot, the key art and the typed headings and copy are the same on every renderer.
+  const boot = strip(
+    mirage.slice(mirage.indexOf("Boot: finite"), mirage.indexOf("Scroll-linked choreography")),
+  );
+  assert.doesNotMatch(boot, /data-android-renderer/);
+  assert.doesNotMatch(
+    tier,
+    /hero-backdrop|poster-media|poster-image|mr-word|mr-redact|tr-c|data-text-reveal/,
+  );
+  // Motion keeps every timeline; the panels only lose their fade and the finale art its settle.
+  const motion = strip(readSource("src/styles-motion-edition.css"));
+  const android = [...motion.matchAll(/\[data-android-renderer\]([^{]*)\{([^}]*)\}/g)].map(
+    (match) => `${match[1].trim().replace(/\s+/g, " ")} {${match[2].trim()}}`,
+  );
+  assert.deepEqual(android, [
+    ".site-shell.film-edition.motion-on :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive) {animation-name: mx-lift-flat;}",
+    ".site-shell.film-edition.motion-on .finale-backdrop img {animation: none;}",
+  ]);
+});
+
 test("Android keeps the edge stretch and uses small-viewport min-heights", () => {
   const css = readSource("src/styles-world/18.css");
   const root = css.match(/html\[data-android-renderer\] \{([^}]*)\}/)?.[1] ?? "";

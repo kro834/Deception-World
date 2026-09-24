@@ -284,6 +284,25 @@
       animation-timeline: --mx-finale;
       animation-range: entry 10% entry 90%;
     }
+
+    /* ---------- Android lite tier ---------- */
+    /* An opacity animation keeps a render surface on a panel with composited
+       children (the rider console, the column and episode rails), an extra
+       full-panel pass on Android GPUs. The panels still slide up and settle,
+       on the same timeline, without the fade. The finale key art holds still
+       instead of settling from 1.16x, so it keeps a single tiling. */
+    html:not([data-world-effects="economy"])[data-android-renderer]
+      .site-shell.film-edition.motion-on
+      :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive) {
+      animation-name: mx-lift-flat;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]
+      .site-shell.film-edition.motion-on
+      .finale-backdrop
+      img {
+      animation: none;
+    }
   }
 }
 
@@ -372,6 +391,17 @@
   }
   to {
     opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes mx-lift-flat {
+  from {
+    translate: 0 72px;
+    scale: 0.96;
+  }
+  to {
     translate: 0 0;
     scale: 1;
   }

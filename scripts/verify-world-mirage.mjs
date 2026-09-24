@@ -346,6 +346,35 @@ for (const device of [
   assert.deepEqual(state.detached, [], `${device.name}: scroll animations bound to a panel`);
   assert.deepEqual(state.infinite, [], `${device.name}: perpetual animations`);
   assert.ok(state.mirage > 0, `${device.name}: no Mirage choreography`);
+  // The Android lite tier: the heavy layers and main-thread wipes are gone,
+  // and the reveals that replace them run on the compositor.
+  const lite = await page.evaluate(() => {
+    const names = new Set(document.getAnimations().map((animation) => animation.animationName));
+    const style = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo);
+    return {
+      heavy: [
+        "mr-par-floor",
+        "mr-curtain",
+        "mr-lock",
+        "mr-materialize",
+        "mr-wipe",
+        "mr-type",
+        "mr-iris",
+        "mx-lift",
+        "mx-settle",
+      ].filter((name) => names.has(name)),
+      rise: ["mr-rise-in", "mr-fade-in", "mx-lift-flat"].every((name) => names.has(name)),
+      floor: style(".mr-hero-floor").display,
+      overlay: style(".story-layout", "::after").content,
+      brackets: style(".story-layout").backgroundImage.split("linear-gradient").length - 1,
+      hud: style(".mr-hero-hud").overflow,
+    };
+  });
+  assert.deepEqual(
+    lite,
+    { heavy: [], rise: true, floor: "none", overlay: "none", brackets: 10, hud: "clip" },
+    device.name,
+  );
   await page.evaluate(() =>
     document
       .querySelector(".story-heading h2")

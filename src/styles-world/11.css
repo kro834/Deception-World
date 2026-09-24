@@ -320,10 +320,6 @@
   stroke-width: 1.4;
 }
 
-@keyframes managerOrbit {
-  to { transform: rotate(360deg); }
-}
-
 @keyframes managerPortraitIn {
   from { opacity: 0; transform: translateY(24px) scale(0.985); }
 }

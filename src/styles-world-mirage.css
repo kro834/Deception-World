@@ -233,12 +233,14 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     linear-gradient(0deg, var(--mr-ink) 0%, transparent 34%, rgb(4 8 15 / 48%) 100%);
 }
 
-/* HUD layer: decoration only, never a grid cell or a hit target. */
+/* HUD layer: decoration only, never a grid cell or a hit target. It clips
+   without being a scroll container: as `overflow: hidden` the rotated beam
+   overflowed it, and it became a composited scroller the height of the hero. */
 .site-shell.film-edition.mirage-edition .mr-hero-hud {
   position: absolute;
   inset: 0;
   z-index: -2;
-  overflow: hidden;
+  overflow: clip;
   pointer-events: none;
 }
 
@@ -2579,5 +2581,275 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   .site-shell.film-edition.mirage-edition .topbar nav a[aria-current="location"] {
     text-decoration: underline 2px;
     text-underline-offset: 6px;
+  }
+}
+
+/* ================================================================
+   Android lite tier
+   Scope: html:not([data-world-effects="economy"])[data-android-renderer],
+   every capable Android renderer (economy has its own, stricter path).
+   The boot, the key art, the typed headings and copy (styles-world-reveal.css)
+   and the compositor scroll choreography stay. Only what was measured as
+   heavy on Android goes. At DPR 3-3.5 /world held 145-204 MB of tiles, over
+   the budget where Chromium starts to checkerboard:
+   - the Tron floor: a perspective layer and a 3D-transformed grid;
+   - the poster frame's 80-160px shadows, which made the frame's layer about
+     840 x 1020 CSS px: one 44px ice glow keeps the halo;
+   - the light curtains, full-width bands composited while they sweep;
+   - the bracket overlays: each panel paints the brackets in its own
+     background instead of an ::after layer that locked on (mr-lock);
+   - the iris's opening, a 1100px composited ring: it rests at its
+     resting frame;
+   - the topbar's 44px drop shadow on a fixed layer that is always on screen.
+   Clip-path reveals run on the main thread (CompositeClipPathAnimation is
+   off in Samsung Internet 28-30) and repaint every frame of their range:
+   - the card images no longer materialize; their cards and panels still rise
+     in with their own motion;
+   - the HUD labels and the archive title rise in on the compositor over the
+     same ranges, the labels in the same steps as their typing.
+   The Motion panels lose only their fade (styles-motion-edition.css), and
+   the Zeus button its halo (styles-android-performance.css).
+   Scroll rules restate the gates of the rules they refine plus
+   [data-android-renderer], so they win by specificity only while those rules
+   apply.
+   ================================================================ */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .mr-hero-floor {
+  display: none;
+}
+
+/* Screen-blending the beam while its boot sweep runs cost a render pass over
+   the hero; at 5-12% alpha on the dark bay, normal blending reads the same. */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .mr-hero-beam {
+  mix-blend-mode: normal;
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .poster-frame {
+  box-shadow:
+    0 0 0 1px var(--mr-void),
+    0 0 0 2px rgb(122 232 255 / 14%),
+    0 22px 44px rgb(0 0 0 / 55%),
+    0 0 44px rgb(122 232 255 / 13%);
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  :is(.story-section, .riders-section, .records-section)::after {
+  display: none;
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  :is(.story-layout, .threat-panel, .world-column, .episode-archive, .rider-console)::after {
+  content: none;
+}
+
+/* The story overlay sat on the border box (inset: -1px), the archive and
+   column overlays on the padding box (inset: 0); the origins follow. The
+   archive, column, console and record bay screen-blend their layers
+   (`screen, normal`, styles-world/13.css and 25.css); over the bracket layers
+   that list would repeat and brighten each corner where two strokes cross, so
+   they blend normally, as the overlays did (the 5% tint reads the same). */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .story-layout {
+  background:
+    var(--mr-brackets), linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
+    linear-gradient(315deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .threat-panel {
+  background:
+    var(--mr-brackets), linear-gradient(135deg, rgb(122 232 255 / 5%), transparent 40%),
+    var(--mr-deck);
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .world-column {
+  background:
+    var(--mr-brackets), linear-gradient(135deg, rgb(240 207 134 / 5%), transparent 38%),
+    var(--mr-deck);
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
+}
+
+/* The rider console's brackets stood 8-12px outside it, above its content;
+   they now sit on its border box, replacing Neo's 1px ones. */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .rider-console {
+  background:
+    var(--mr-brackets), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-panel);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-blend-mode: normal;
+}
+
+/* The record bay's overlay is sized to 2 x 68px at its top-left corner
+   (styles-world/06.css), so its brackets show as one accent stroke: 26px of
+   ice, then 26px of gold ending at 68px. It is painted in the same place. */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .episode-archive {
+  background:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
+    linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
+    linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
+}
+
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .topbar {
+  box-shadow: 0 1px 0 rgb(122 232 255 / 7%);
+  transition: none;
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    .site-shell.film-edition.mirage-edition
+    :is(.story-layout, .threat-panel, .world-column) {
+    background: var(--mr-brackets), var(--mr-deck);
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
+  }
+
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    .site-shell.film-edition.mirage-edition
+    .rider-console {
+    background: var(--mr-brackets), #070d16;
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
+  }
+
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    .site-shell.film-edition.mirage-edition
+    .episode-archive {
+    background:
+      linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
+      linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px, var(--mr-deck);
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      :is(
+        .section-index > small,
+        .story-heading .eyebrow > span,
+        .records-heading .eyebrow > span
+      ) {
+      animation: mr-rise-in steps(14, jump-end) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* Its eyebrow already rises in (mr-rise-soft); a composited child under
+       that fade would add a render pass. */
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .section-title
+      .eyebrow
+      > span {
+      animation: none;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .threat-copy
+      h3 {
+      animation: mr-rise-in var(--mr-ease-io) both;
+      animation-timeline: --mr-archive;
+      animation-range: entry 0px entry 140px;
+    }
+
+    /* The archive label is an inline box, which translate does not move:
+       with it in the keyframes the reveal fell back to the main thread. */
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .threat-copy
+      .system-label {
+      animation: mr-fade-in steps(14, jump-end) both;
+      animation-timeline: --mr-archive;
+      animation-range: entry 0px entry 60px;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      :is(.signal > img, .other-archive-card > img, .dante-visual img) {
+      animation: none;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .finale-sticky::before {
+      animation: none;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .finale-content
+      > span {
+      animation: mr-rise-in steps(21, jump-end) both;
+      animation-timeline: --mr-finale;
+      animation-range: entry 40px entry 220px;
+    }
+
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-rail-lock]
+      ):not([data-loading]):not(:has(dialog[open]))
+      .site-shell.film-edition.mirage-edition
+      .mr-endmark
+      :is(span, b) {
+      animation: mr-rise-in steps(12, jump-end) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+/* The compositor stand-in for the clip-path reveals: to each element's
+   resting opacity and position. */
+@keyframes mr-rise-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@keyframes mr-fade-in {
+  from {
+    opacity: 0;
   }
 }
