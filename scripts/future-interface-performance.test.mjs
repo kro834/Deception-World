@@ -36,7 +36,9 @@ test("pointer lighting coalesces work and pauses with the page", async () => {
   assert.match(pointer, /if \(!active && pointerId === null\) return/);
   assert.match(pointer, /visibilitychange/);
   assert.match(pointer, /requestAnimationFrame\(flush\)/);
-  assert.match(mode, /worldEffects/);
+  // The economy flag (data-world-effects) is set before the first paint by the
+  // root's device profile; the World hook keeps the page-visibility flag.
+  assert.match(await read("src/lib/device-profile-gate.js"), /data-world-effects", "economy"/);
   assert.match(mode, /worldPageVisible/);
 });
 

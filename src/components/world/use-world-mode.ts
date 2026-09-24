@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLiquidPointerLight } from "./use-liquid-pointer-light";
 import {
   prefersLightweightRendering,
-  prefersIOS18Rendering,
+  prefersNativeScrollProgress,
   supportsIOS27Enhancements,
 } from "@/lib/rendering-profile";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
@@ -21,29 +21,27 @@ const PROGRESS_HOST_CLASSES = [
    selectors in sync: that host needs no per-frame value there. */
 const PRISM_TOPBAR = ".site-shell.film-edition.motion-on .topbar";
 
+/* The device attributes (data-android-renderer, data-one-ui-renderer,
+   data-ios18-renderer, data-world-effects, data-native-scroll-progress) belong
+   to the document: the root's pre-paint script (device-profile-gate.js) sets
+   them before the first paint. Writing them here, after hydration, restyled
+   and relaid out the whole page in one forced task. This hook only keeps
+   native progress in step with reduced motion. */
 export function useWorldMode() {
   useLiquidPointerLight();
   useEffect(() => {
     const html = document.documentElement;
-    const prev = html.dataset.mode;
-    const previousAndroid = html.dataset.androidRenderer;
-    const previousIOS18 = html.dataset.ios18Renderer;
+    // /world enters world mode before the first paint (mirage-boot-gate.js).
+    // That value is this page's own, so leaving the page removes it.
+    const prepaintMode = html.dataset.modeOrigin === "prepaint";
+    const prev = prepaintMode ? undefined : html.dataset.mode;
+    if (prepaintMode) delete html.dataset.modeOrigin;
     const previousIOS27 = html.dataset.ios27Enhanced;
-    const previousOneUi = html.dataset.oneUiRenderer;
-    const previousEffects = html.dataset.worldEffects;
     const previousVisibility = html.dataset.worldPageVisible;
     const previousPageScrolled = html.dataset.pageScrolled;
-    const previousNativeProgress = html.dataset.nativeScrollProgress;
-    html.dataset.mode = "world";
+    if (html.dataset.mode !== "world") html.dataset.mode = "world";
     html.dataset.scrollMotionReady = "true";
-    const userAgent = navigator.userAgent;
     const economyEffects = prefersLightweightRendering(navigator);
-    if (prefersIOS18Rendering(navigator)) html.dataset.ios18Renderer = "true";
-    else delete html.dataset.ios18Renderer;
-    if (/Android/i.test(userAgent)) html.dataset.androidRenderer = "true";
-    if (/SamsungBrowser|SM-[A-Z0-9]+/i.test(userAgent)) html.dataset.oneUiRenderer = "true";
-    if (economyEffects) html.dataset.worldEffects = "economy";
-    else delete html.dataset.worldEffects;
 
     const syncVisibility = () => {
       html.dataset.worldPageVisible = String(!document.hidden);
@@ -54,21 +52,22 @@ export function useWorldMode() {
     let progressFrame = 0;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
-    const enhancedIOS27 =
-      supportsIOS27Enhancements(navigator) &&
-      !economyEffects &&
+    const viewTimeline =
       window.CSS?.supports("animation-timeline", "view()") === true &&
       window.CSS?.supports("animation-range", "entry 0% entry 100%") === true;
-    const supportsNativeProgress =
-      (/Android/i.test(userAgent) || enhancedIOS27) &&
-      window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
-    let nativeProgress = supportsNativeProgress && !reducedMotion.matches;
+    const enhancedIOS27 = supportsIOS27Enhancements(navigator) && !economyEffects && viewTimeline;
+    // The same rule as the pre-paint script, so mounting changes nothing.
+    const scrollTimeline = window.CSS?.supports("animation-timeline", "scroll(root block)") === true;
+    const nativeProgressFor = (reduced: boolean) =>
+      prefersNativeScrollProgress(navigator, {
+        scrollTimeline,
+        viewTimeline,
+        reducedMotion: reduced,
+      });
+    let nativeProgress = nativeProgressFor(reducedMotion.matches);
     // The prism line replaces the World topbar's hairline under the same
     // conditions as its CSS (not economy, scroll timelines, motion allowed).
-    const prismLineCapable =
-      !economyEffects &&
-      window.CSS?.supports("animation-timeline", "view()") === true &&
-      window.CSS?.supports("animation-range", "entry 0% entry 100%") === true;
+    const prismLineCapable = !economyEffects && viewTimeline;
     let prismLine = false;
     let lastScrolled: boolean | undefined;
     const progressHosts = PROGRESS_HOST_CLASSES.map((name) =>
@@ -115,11 +114,15 @@ export function useWorldMode() {
       if (enhancedIOS27 && !reducedMotion.matches && !reducedTransparency.matches)
         html.dataset.ios27Enhanced = "true";
       else delete html.dataset.ios27Enhanced;
-      nativeProgress = supportsNativeProgress && !reducedMotion.matches;
-      if (nativeProgress) html.dataset.nativeScrollProgress = "true";
-      else delete html.dataset.nativeScrollProgress;
+      nativeProgress = nativeProgressFor(reducedMotion.matches);
+      if (nativeProgress !== (html.dataset.nativeScrollProgress === "true")) {
+        if (nativeProgress) html.dataset.nativeScrollProgress = "true";
+        else delete html.dataset.nativeScrollProgress;
+      }
       prismLine = prismLineCapable && !reducedMotion.matches;
-      syncPageProgress();
+      // The scroll position and height are read in the next frame, with that
+      // frame's own layout, not forced here right after hydration.
+      progressFrame = window.requestAnimationFrame(syncPageProgress);
     };
     let resizeSettleTimer = 0;
     const significantResize = createViewportResizeFilter();
@@ -146,20 +149,10 @@ export function useWorldMode() {
       window.clearTimeout(resizeSettleTimer);
       reducedMotion.removeEventListener("change", syncProgressMode);
       reducedTransparency.removeEventListener("change", syncProgressMode);
-      if (previousNativeProgress) html.dataset.nativeScrollProgress = previousNativeProgress;
-      else delete html.dataset.nativeScrollProgress;
       if (prev) html.dataset.mode = prev;
       else delete html.dataset.mode;
-      if (previousAndroid) html.dataset.androidRenderer = previousAndroid;
-      else delete html.dataset.androidRenderer;
-      if (previousIOS18) html.dataset.ios18Renderer = previousIOS18;
-      else delete html.dataset.ios18Renderer;
       if (previousIOS27) html.dataset.ios27Enhanced = previousIOS27;
       else delete html.dataset.ios27Enhanced;
-      if (previousOneUi) html.dataset.oneUiRenderer = previousOneUi;
-      else delete html.dataset.oneUiRenderer;
-      if (previousEffects) html.dataset.worldEffects = previousEffects;
-      else delete html.dataset.worldEffects;
       if (previousVisibility) html.dataset.worldPageVisible = previousVisibility;
       else delete html.dataset.worldPageVisible;
       if (previousPageScrolled) html.dataset.pageScrolled = previousPageScrolled;

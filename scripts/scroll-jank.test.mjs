@@ -30,6 +30,34 @@ test("toolbar-only resizes are ignored, real viewport changes are not", (t) => {
   assert.equal(significant(), true);
 });
 
+test("the resize filter reads the viewport at its first call, not when it is created", (t) => {
+  const originalWindow = globalThis.window;
+  t.after(() => {
+    globalThis.window = originalWindow;
+  });
+  let reads = 0;
+  const viewport = { width: 360, height: 780, scale: 1 };
+  globalThis.window = {
+    get visualViewport() {
+      reads += 1;
+      return viewport;
+    },
+  };
+  // Created in a mount effect right after style writes: no forced layout there.
+  const significant = createViewportResizeFilter();
+  assert.equal(reads, 0);
+  // The first event only records the baseline and takes the settle path.
+  viewport.width = 780;
+  viewport.height = 360;
+  assert.equal(significant(), false);
+  assert.ok(reads > 0);
+  viewport.height = 416; // URL bar collapsed in landscape
+  assert.equal(significant(), false);
+  viewport.width = 360; // rotation back
+  viewport.height = 780;
+  assert.equal(significant(), true);
+});
+
 test("JS scroll progress restyles only the headers that draw it", () => {
   const mode = read("src/components/world/use-world-mode.ts");
   assert.doesNotMatch(mode, /html\.style\.setProperty\("--page-progress"/);
@@ -96,6 +124,10 @@ test("World scroll milestones stay out of the page-wide render", () => {
   assert.match(nav, /if \(significantResize\(\)\) requestSectionSync\(\);/);
   assert.match(nav, /else resizeSettleTimer = window\.setTimeout\(requestSectionSync, 150\)/);
   assert.match(nav, /window\.clearTimeout\(resizeSettleTimer\);/);
+  // The first section read waits for a frame instead of forcing layout in the
+  // hydration effects.
+  assert.match(nav, /requestSectionSync\(\);\s*return \(\) => \{/);
+  assert.doesNotMatch(nav, /syncActiveSection\(\);\s*return \(\) => \{/);
   // Anchor jumps land a section at its scroll-margin-top: the marker reaches it
   // (related-return-navigation.test.mjs pins the exact comparison).
   assert.match(nav, /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0/);

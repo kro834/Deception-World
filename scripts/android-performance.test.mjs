@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
-import { prefersLightweightRendering } from "../src/lib/rendering-profile.js";
+import {
+  prefersLightweightRendering,
+  prefersNativeScrollProgress,
+} from "../src/lib/rendering-profile.js";
 
 const PIXEL_9 =
   "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36";
@@ -93,10 +96,22 @@ test("frosted controls keep capable Android on the CSS lens (no WebGL)", () => {
 });
 
 test("Android keeps compositor-driven reading progress, independent of economy", () => {
+  const timelines = { scrollTimeline: true, viewTimeline: true, reducedMotion: false };
+  for (const userAgent of [PIXEL_9, GALAXY_S24, SAMSUNG_INTERNET, WEBVIEW]) {
+    for (const hardwareConcurrency of [2, 4, 8]) {
+      assert.equal(
+        prefersNativeScrollProgress({ userAgent, hardwareConcurrency }, timelines),
+        true,
+        `${userAgent} ${hardwareConcurrency}`,
+      );
+    }
+    assert.equal(
+      prefersNativeScrollProgress({ userAgent }, { ...timelines, reducedMotion: true }),
+      false,
+    );
+  }
   const mode = readSource("src/components/world/use-world-mode.ts");
-  const supports = mode.match(/const supportsNativeProgress =([\s\S]*?);/)?.[1] ?? "";
-  assert.match(supports, /\/Android\/i\.test\(userAgent\)/);
-  assert.doesNotMatch(supports, /economy/i);
+  assert.match(mode, /prefersNativeScrollProgress\(navigator,/);
   const css = readSource("src/styles-android-performance.css");
   assert.match(
     css,

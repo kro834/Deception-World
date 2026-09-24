@@ -1,4 +1,3 @@
-        width: 1024,
         height: 1536,
         to: "/characters/luna",
         assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
@@ -336,7 +335,9 @@ const WorldSectionNav = memo(function WorldSectionNav() {
     window.addEventListener("scroll", requestSectionSync, { passive: true });
     window.addEventListener("resize", requestResizeSync, { passive: true });
     window.visualViewport?.addEventListener("resize", requestResizeSync, { passive: true });
-    syncActiveSection();
+    // The first read waits for the next frame: here, right after hydration, it
+    // forced the whole page's style and layout in the middle of the effects.
+    requestSectionSync();
     return () => {
       window.removeEventListener("scroll", requestSectionSync);
       window.removeEventListener("resize", requestResizeSync);
@@ -450,4 +451,3 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;

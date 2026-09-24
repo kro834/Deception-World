@@ -788,7 +788,9 @@ const WorldSectionNav = memo(function WorldSectionNav() {
     window.addEventListener("scroll", requestSectionSync, { passive: true });
     window.addEventListener("resize", requestResizeSync, { passive: true });
     window.visualViewport?.addEventListener("resize", requestResizeSync, { passive: true });
-    syncActiveSection();
+    // The first read waits for the next frame: here, right after hydration, it
+    // forced the whole page's style and layout in the middle of the effects.
+    requestSectionSync();
     return () => {
       window.removeEventListener("scroll", requestSectionSync);
       window.removeEventListener("resize", requestResizeSync);

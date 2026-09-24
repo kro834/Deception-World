@@ -1,3 +1,4 @@
+        .then(() => true)
         .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
       Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
     const waitForFinalImage = () =>
