@@ -1,5 +1,3 @@
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
     syncRail(managerRail.current, 1);
   }, [locationHash]);
 
@@ -451,3 +449,6 @@
     const finalReady =
       finalImage
         .decode?.()
+        .then(() => true)
+        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
+      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);

@@ -57,7 +57,7 @@ try {
         width: image.naturalWidth,
         height: image.naturalHeight,
       }));
-      assert.match(state.src, /-delivery\.webp$/);
+      assert.match(state.src, /-delivery(?:-\d+)?\.webp$/);
       assert.ok(state.width > 0 && state.height > 0);
       console.log(JSON.stringify({ engine, viewportWidth: width, route, ...state }));
     }

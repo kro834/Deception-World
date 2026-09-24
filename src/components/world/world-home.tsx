@@ -1952,6 +1952,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-zeus-thumb.jpeg"
+                      {...managerThumbnail("zeus")}
                       alt="ゼウスのキャラクタービジュアル"
                       width={640}
                       height={497}
@@ -1978,6 +1979,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-rex-loi-thumb.jpeg"
+                      {...managerThumbnail("rex-loi")}
                       alt="レックス・ロワのキャラクタービジュアル"
                       width={640}
                       height={960}
@@ -1999,6 +2001,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-shuza-thumb.jpeg"
+                      {...managerThumbnail("shuza")}
                       alt="シュザのキャラクタービジュアル"
                       width={640}
                       height={913}
@@ -2020,6 +2023,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-lejas-portrait-thumb.jpeg"
+                      {...managerThumbnail("lejas-portrait")}
                       alt="レジャスの顔アップ"
                       width={640}
                       height={799}
@@ -2041,6 +2045,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-opus-thumb.jpeg"
+                      {...managerThumbnail("opus")}
                       alt="オパスのキャラクタービジュアル"
                       width={640}
                       height={851}
@@ -2062,6 +2067,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/manager-reemu-thumb.jpeg"
+                      {...managerThumbnail("reemu")}
                       alt="リームーのキャラクタービジュアル"
                       width={540}
                       height={960}
@@ -2422,7 +2428,7 @@ export function WorldHome() {
                   <div className="episode-thumbnail">
                     <img
                       src={ep.src}
-                      {...dossierImage(ep.src)}
+                      {...episodeThumbnail(ep.src)}
                       alt={ep.alt}
                       style={{ objectPosition: ep.pos }}
                       loading="lazy"
@@ -2716,3 +2722,4 @@ export function WorldHome() {
   );
 }
 import { dossierImage } from "@/lib/dossier-images";
+import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";

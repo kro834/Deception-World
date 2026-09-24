@@ -1,4 +1,3 @@
-        height: 1536,
         to: "/characters/luna",
         assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
       },
@@ -451,3 +450,5 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
