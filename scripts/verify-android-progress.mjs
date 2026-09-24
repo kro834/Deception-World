@@ -60,6 +60,7 @@ try {
     await page.waitForFunction(
       () =>
         document.documentElement.dataset.mode === "world" &&
+        document.documentElement.dataset.worldPageVisible !== undefined &&
         !document.documentElement.hasAttribute("data-route-scroll-settling"),
     );
     await page.waitForTimeout(1000);

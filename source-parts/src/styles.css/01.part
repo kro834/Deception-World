@@ -1173,6 +1173,11 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: cinematic-scan 3.35s cubic-bezier(0.45, 0, 0.25, 1) 0.42s forwards;
 }
 
+/* Transparent once the sweep is over: no screen-blend pass while the title holds. */
+.is-complete .cine-scanline {
+  display: none;
+}
+
 .cine-flare {
   position: absolute;
   z-index: 3;
@@ -1943,9 +1948,10 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: shine-sweep 1s ease-in-out 6.2s forwards;
 }
 
+/* Finished and fully transparent: out of the frame, so its overlay blend
+   costs no render pass while the title holds. */
 .is-complete .cine-logo-shine {
-  animation: none;
-  opacity: 0;
+  display: none;
 }
 
 .cine-logo-frame {
@@ -2139,3 +2145,25 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   pointer-events: none;
   color: rgb(232 238 248 / 0.62);
   font: 600 0.5rem/1 var(--font-sans);
+  letter-spacing: 0.3em;
+}
+
+.cine-cue span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+/* The ice logo arrives, burns, and the prism logo is locked in. */
+.is-playing .cine-cue span:nth-child(1) {
+  animation: cue-phase 2.1s ease 0.34s both;
+}
+.is-playing .cine-cue span:nth-child(2) {
+  animation: cue-phase 2.7s ease 2.6s both;
+}
+.is-playing .cine-cue span:nth-child(3) {
+  animation: cue-phase 1.7s ease 5.4s both;
+}
+
+.is-complete .cine-cue {

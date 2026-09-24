@@ -1173,6 +1173,11 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: cinematic-scan 3.35s cubic-bezier(0.45, 0, 0.25, 1) 0.42s forwards;
 }
 
+/* Transparent once the sweep is over: no screen-blend pass while the title holds. */
+.is-complete .cine-scanline {
+  display: none;
+}
+
 .cine-flare {
   position: absolute;
   z-index: 3;
@@ -1943,9 +1948,10 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: shine-sweep 1s ease-in-out 6.2s forwards;
 }
 
+/* Finished and fully transparent: out of the frame, so its overlay blend
+   costs no render pass while the title holds. */
 .is-complete .cine-logo-shine {
-  animation: none;
-  opacity: 0;
+  display: none;
 }
 
 .cine-logo-frame {
@@ -2177,7 +2183,9 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0) scale(1);
-  filter: blur(0);
+  /* Interpolates from blur(4px) like blur(0), but leaves no filter (and no
+     render pass) behind once the controls are in. */
+  filter: none;
   transition:
     opacity 0.45s ease 0.05s,
     transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
@@ -3304,6 +3312,13 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: pulse-hint 2.4s ease-in-out infinite;
 }
 
+/* The hint fades out as the sequence starts; it holds its pulse where it is
+   instead of running (and drawing frames) under zero opacity for good. */
+.is-playing .cine-pulse,
+.is-complete .cine-pulse {
+  animation-play-state: paused;
+}
+
 @media (max-width: 700px) {
   .cine-editorial {
     --editorial-inset-x: max(14px, calc(env(safe-area-inset-left) + 10px));
@@ -3473,6 +3488,47 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .cine-stage.is-economy-opening .cine-editorial-word b {
   text-shadow: none;
+}
+
+/* Android opening budget (html[data-android-renderer], set before the first
+   paint by the root's device profile). Measured on a Galaxy profile at DPR
+   3.5: the grain was a 35 MB full-screen overlay pass for a texture at 6%
+   opacity, and once the title held, the HUD's slow SVG rotations (main
+   thread) and the grain's steps kept 120 main and compositor frames a second
+   going, with every scene layer still composited (262 MB of tiles). The
+   sequence, the burn and the dive are unchanged; the held title is still and
+   its scene paints into a few layers. The dive keeps that (the scene holds
+   still under the dive; only the interface animates). */
+html[data-android-renderer] .cine-grain {
+  display: none;
+}
+
+html[data-android-renderer] .cine-impact-bloom::before {
+  filter: none;
+}
+
+html[data-android-renderer]
+  .cine-stage.is-complete
+  :is(.cine-hud-spin, .cine-hud-spin-rev, .cine-hud-orbits) {
+  animation-play-state: paused;
+}
+
+html[data-android-renderer]
+  .cine-stage.is-complete
+  :is(
+    .cine-camera,
+    .cine-atmosphere,
+    .cine-light-field,
+    .cine-depth-field,
+    .cine-depth-grid,
+    .cine-aperture,
+    .cine-orbit,
+    .cine-flare,
+    .cine-hud,
+    .cine-logo-wrap,
+    .cine-logo-echo
+  ) {
+  will-change: auto;
 }
 
 @media (max-height: 560px) and (orientation: landscape) {

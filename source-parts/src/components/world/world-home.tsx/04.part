@@ -1,5 +1,3 @@
-        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
-      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
     const waitForFinalImage = () =>
       Promise.race([
         finalReady,
@@ -450,3 +448,7 @@
                   <small>{locked ? "LOCKED" : "AUTO"}</small>
                   {locked ? "固定中" : "自動切替"}
                 </b>
+              </button>
+            </div>
+            <output
+              aria-label="表示中のポスター"

@@ -44,6 +44,7 @@ async function open(path, options) {
   await page.waitForFunction(
     () =>
       document.documentElement.dataset.mode === "world" &&
+      document.documentElement.dataset.worldPageVisible !== undefined &&
       !document.documentElement.hasAttribute("data-route-scroll-settling"),
     undefined,
     { timeout: 30_000 },

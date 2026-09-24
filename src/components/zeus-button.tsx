@@ -13,6 +13,11 @@ import { createPortal } from "react-dom";
 import { useRouterState } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
+import {
+  ZEUS_BUTTON_RETURN_SRCSET,
+  ZEUS_BUTTON_SIZES,
+  ZEUS_BUTTON_SRCSET,
+} from "@/lib/thumbnail-images";
 
 type ZeusButtonPosition = { x: number; y: number };
 
@@ -732,6 +737,8 @@ function ZeusButton({
       <img
         className="zeus-button-image is-default"
         src="/zeus-button-360.webp"
+        srcSet={ZEUS_BUTTON_SRCSET}
+        sizes={ZEUS_BUTTON_SIZES}
         width={360}
         height={360}
         alt=""
@@ -742,6 +749,8 @@ function ZeusButton({
       <img
         className="zeus-button-image is-returning"
         src="/zeus-button-return-360.webp"
+        srcSet={ZEUS_BUTTON_RETURN_SRCSET}
+        sizes={ZEUS_BUTTON_SIZES}
         width={360}
         height={360}
         alt=""

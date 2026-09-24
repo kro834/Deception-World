@@ -16,6 +16,8 @@ import routeTransitionsCss from "../styles-route-transitions.css?url";
 import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
 import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
+import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
+import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -59,8 +61,18 @@ export const Route = createRootRoute({
           ]
         : []),
     ],
+    // Runs while the HTML is parsed: the device attributes on <html> (Android,
+    // One UI, iOS 18, economy, native progress) are there at the first paint.
+    scripts: [{ children: DEVICE_PROFILE_SCRIPT }],
     links: [
-      { rel: "preload", as: "image", type: "image/webp", href: "/zeus-button-360.webp" },
+      {
+        rel: "preload",
+        as: "image",
+        type: "image/webp",
+        href: "/zeus-button-360.webp",
+        imageSrcSet: ZEUS_BUTTON_SRCSET,
+        imageSizes: ZEUS_BUTTON_SIZES,
+      },
       { rel: "stylesheet", href: androidPerformanceCss },
       { rel: "stylesheet", href: ios18PerformanceCss },
       { rel: "stylesheet", href: ios27EnhancementsCss },

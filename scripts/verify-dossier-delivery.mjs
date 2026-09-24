@@ -17,6 +17,7 @@ try {
       await page.waitForFunction(
         () =>
           document.documentElement.dataset.mode === "world" &&
+          document.documentElement.dataset.worldPageVisible !== undefined &&
           !document.documentElement.hasAttribute("data-route-scroll-settling"),
       );
       await page.waitForTimeout(500);
@@ -56,7 +57,7 @@ try {
         width: image.naturalWidth,
         height: image.naturalHeight,
       }));
-      assert.match(state.src, /-delivery\.webp$/);
+      assert.match(state.src, /-delivery(?:-\d+)?\.webp$/);
       assert.ok(state.width > 0 && state.height > 0);
       console.log(JSON.stringify({ engine, viewportWidth: width, route, ...state }));
     }
