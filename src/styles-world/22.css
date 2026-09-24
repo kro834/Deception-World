@@ -1110,3 +1110,142 @@
     opacity: 0;
   }
 }
+
+/* CIEL — RE DIVE's 六詠 I. Emerald and light-blue silk ribbons drift in over a
+   deep green sky around a four-pointed star, then part to open his page.
+   Transform and opacity only; the sky stays a dim teal and the star is small
+   and never white, so nothing flashes. */
+.ciel-cutin-stage {
+  background: transparent;
+  animation: cielStageIn 0.2s ease-out both;
+}
+
+.ciel-sky,
+.ciel-ribbons,
+.ciel-star {
+  position: absolute;
+  pointer-events: none;
+}
+
+.ciel-sky {
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(134, 217, 255, 0.2), transparent 42%),
+    radial-gradient(ellipse at 16% 82%, rgba(28, 207, 157, 0.22), transparent 50%),
+    radial-gradient(ellipse at 86% 14%, rgba(134, 217, 255, 0.16), transparent 46%),
+    linear-gradient(160deg, #041a16, #04121c 55%, #020a0c);
+  transition: opacity 0.44s ease-out 0.12s;
+}
+
+.ciel-ribbons {
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ciel-ribbons > i {
+  --angle: calc(-14deg + var(--ribbon) * 5deg);
+  position: absolute;
+  top: calc(6% + var(--ribbon) * 16%);
+  left: -30%;
+  width: 160%;
+  height: clamp(22px, 5.5vh, 60px);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(28, 207, 157, 0.5) 28%,
+    rgba(134, 217, 255, 0.46) 72%,
+    transparent
+  );
+  box-shadow: 0 0 28px rgba(28, 207, 157, 0.16);
+  opacity: 0.6;
+  transform: translate3d(0, 0, 0) rotate(var(--angle));
+  animation: cielRibbonInLeft 0.62s calc(var(--ribbon) * 45ms) cubic-bezier(0.2, 0.72, 0.18, 1) both;
+}
+
+.ciel-ribbons > i:nth-child(even) {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(134, 217, 255, 0.48) 28%,
+    rgba(28, 207, 157, 0.42) 72%,
+    transparent
+  );
+  animation-name: cielRibbonInRight;
+}
+
+.ciel-star {
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  width: clamp(86px, 13vmin, 150px);
+  aspect-ratio: 1;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+.ciel-star > i {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #d3f3ff 0 12%, #86d9ff 34%, #1ccf9d 70%);
+  clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
+  filter: drop-shadow(0 0 18px rgba(28, 207, 157, 0.5));
+  opacity: 0.88;
+  animation: cielStarIn 0.52s 0.1s cubic-bezier(0.2, 0.72, 0.18, 1) both;
+}
+
+.is-ciel-cutin .rider-cutin-caption {
+  top: calc(50% + clamp(78px, 11vmin, 128px));
+}
+
+.is-ciel-cutin .rider-cutin-caption small { color: #86d9ff; }
+.is-ciel-cutin .rider-cutin-caption b {
+  color: #e8fff8;
+  text-shadow: 0 0 22px rgba(28, 207, 157, 0.55), 0 3px 24px rgba(0, 0, 0, 0.82);
+}
+
+.is-ciel-cutin.is-revealing .ciel-sky {
+  opacity: 0;
+}
+
+.is-ciel-cutin.is-revealing .ciel-ribbons > i {
+  animation: cielRibbonOutLeft 0.6s calc(var(--ribbon) * 35ms) cubic-bezier(0.5, 0, 0.8, 0.4) both;
+}
+
+.is-ciel-cutin.is-revealing .ciel-ribbons > i:nth-child(even) {
+  animation-name: cielRibbonOutRight;
+}
+
+.is-ciel-cutin.is-revealing .ciel-star > i {
+  animation: cielStarOut 0.6s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+
+@keyframes cielStageIn {
+  from { opacity: 0; }
+}
+
+@keyframes cielRibbonInLeft {
+  from { opacity: 0; transform: translate3d(-70%, 0, 0) rotate(var(--angle)); }
+}
+
+@keyframes cielRibbonInRight {
+  from { opacity: 0; transform: translate3d(70%, 0, 0) rotate(var(--angle)); }
+}
+
+@keyframes cielRibbonOutLeft {
+  to { opacity: 0; transform: translate3d(80%, 0, 0) rotate(var(--angle)); }
+}
+
+@keyframes cielRibbonOutRight {
+  to { opacity: 0; transform: translate3d(-80%, 0, 0) rotate(var(--angle)); }
+}
+
+@keyframes cielStarIn {
+  from { opacity: 0; transform: scale(0.2) rotate(-45deg); }
+}
+
+@keyframes cielStarOut {
+  from { opacity: 0.88; transform: scale(1); }
+  to { opacity: 0; transform: scale(4.5) rotate(20deg); }
+}

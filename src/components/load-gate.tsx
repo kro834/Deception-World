@@ -22,7 +22,7 @@ import { preloadAssets } from "@/lib/asset-loader";
 
 type RiderDiveVariant =
   "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
-type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher";
+type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher" | "ciel";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
 type GateState = {
@@ -63,6 +63,7 @@ const RIDER_CUT_IN_ROUTES = {
   "/riders/argenome": "argenome",
   "/riders/over-zeztz": "over-zeztz",
   "/riders/cipher": "cipher",
+  "/characters/ciel": "ciel",
 } as const satisfies Record<string, RiderCutInVariant>;
 
 const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: number }> = {
@@ -70,6 +71,7 @@ const RIDER_CUT_IN_TIMINGS: Record<RiderCutInVariant, { cover: number; reveal: n
   argenome: { cover: 320, reveal: 640 },
   "over-zeztz": { cover: 360, reveal: 760 },
   cipher: { cover: 400, reveal: 720 },
+  ciel: { cover: 560, reveal: 760 },
 };
 
 const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: number }> = {
@@ -633,7 +635,8 @@ function LoadOverlay({
     variant === "leddic" ||
     variant === "argenome" ||
     variant === "over-zeztz" ||
-    variant === "cipher";
+    variant === "cipher" ||
+    variant === "ciel";
   if (isRiderCutIn) {
     return (
       <div
@@ -763,10 +766,33 @@ function cutInLabel(variant: RiderCutInVariant) {
   if (variant === "leddic") return "レディック";
   if (variant === "argenome") return "アルゲノム";
   if (variant === "cipher") return "サイファー";
+  if (variant === "ciel") return "シエル";
   return "オーバーゼッツ";
 }
 
 function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
+  // シエル (RE DIVE's 六詠 I): emerald and light-blue ribbons drift in over a
+  // deep green sky around a four-pointed star, then part to open his page.
+  if (variant === "ciel") {
+    return (
+      <div className="rider-cutin-stage ciel-cutin-stage" aria-hidden="true">
+        <span className="ciel-sky" />
+        <span className="ciel-ribbons">
+          {Array.from({ length: 6 }, (_, index) => (
+            <i key={index} style={{ ["--ribbon" as string]: index }} />
+          ))}
+        </span>
+        <span className="ciel-star">
+          <i />
+        </span>
+        <span className="rider-cutin-caption">
+          <small>EMERALD × AQUA // RIKUEI I</small>
+          <b>CIEL</b>
+        </span>
+      </div>
+    );
+  }
+
   if (variant === "leddic") {
     return (
       <div className="rider-cutin-stage leddic-cutin-stage" aria-hidden="true">

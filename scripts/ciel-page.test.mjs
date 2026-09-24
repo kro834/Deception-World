@@ -89,3 +89,23 @@ test("his portrait is right-sized from the supplied illustration", () => {
     "/ciel-illustration-20260924-640.webp 640w, /ciel-illustration-20260924-960.webp 960w",
   );
 });
+
+test("opening his page plays his own cut-in, in his colours", async () => {
+  const gate = await read("src/components/load-gate.tsx");
+  assert.match(gate, /"\/characters\/ciel": "ciel",/);
+  assert.match(gate, /ciel: \{ cover: 560, reveal: 760 \}/);
+  assert.match(gate, /variant === "ciel"\) return "シエル"/);
+  assert.match(gate, /className="rider-cutin-stage ciel-cutin-stage"/);
+  const css = await read("src/styles-world/22.css");
+  const block = css.slice(css.indexOf("/* CIEL"));
+  assert.match(block, /rgba\(28, 207, 157/);
+  assert.match(block, /rgba\(134, 217, 255/);
+  // Compositor properties only.
+  for (const [, frames] of block.matchAll(/@keyframes \w+ \{([\s\S]*?)\n\}/g)) {
+    for (const [, property] of frames.matchAll(/([a-z-]+):/g)) {
+      assert.ok(["opacity", "transform"].includes(property), property);
+    }
+  }
+  // Reduced motion: the shared cut-in rule stops every animation.
+  assert.match(css, /\.rider-route-cutin \.rider-cutin-stage \*[\s\S]*?animation: none !important/);
+});
