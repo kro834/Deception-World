@@ -6,6 +6,15 @@
 export const RISING_BURN_ART = "/rising-burn-rider-20260924.webp";
 export const RISING_BURN_ART_COMPACT = "/rising-burn-rider-20260924-683.webp";
 
+// The flashback between the press and the title cut (supplied 2026-09-24, in
+// the order supplied, cut to 800 px on the long side): scenes that flash back
+// over the dive and the start of the burn. Warmed on approach, never on the
+// page's own load, and not shown under reduced motion.
+export const RISING_FLASHBACK = Array.from(
+  { length: 11 },
+  (_, index) => `/rising-flashback-${String(index + 1).padStart(2, "0")}-20260924.webp`,
+);
+
 // The calm (CSS) tier's sprites, rendered by scripts/render-rising-calm-sprites.mjs:
 // three flame frames, the burn-edge strips and the scorch ahead of them (one
 // per edge profile, rising-calm.ts), a tileable char texture and a smoke

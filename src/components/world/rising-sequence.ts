@@ -19,12 +19,15 @@ import {
 import { CALM_FLAME_SEATS } from "./rising-calm";
 import {
   RISING_ART_ASPECT,
+  RISING_FLASHBACK_OPACITY,
+  RISING_FLASHBACK_WINDOW,
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
   RISING_WORLD_FOCUS,
   RISING_WORLD_POSITION,
   pickRisingTier,
   portalEase,
+  risingFlashbackSlot,
   risingFramesPerDraw,
   type RisingTier,
 } from "./rising-timing";
@@ -256,6 +259,7 @@ export function runRising({
   const scrim = find(".rw-title-scrim");
   const calm = find(".rw-calm");
   const calmWorld = find(".rw-calm-world");
+  const flashback = find(".rw-flashback");
   const calmBurn = find(".rw-calm-burn");
   const calmFlames = find(".rw-calm-flames");
   const calmSmoke = find(".rw-calm-smoke");
@@ -391,6 +395,35 @@ export function runRising({
     const cut = tier === "reduced" ? 600 : 1;
     add(titleWrap, [{ opacity: 0 }, { opacity: 1 }], { delay: ms(s.title), duration: cut });
     add(scrim, [{ opacity: 0 }, { opacity: 1 }], { delay: ms(s.title), duration: cut });
+    const flashTier = tier;
+    if (flashTier !== "reduced" && flashback) {
+      // The flashback: one layer at a memory's strength, its scenes
+      // cross-fading one into the next, each settling from a slight push-in.
+      const scenes = [...flashback.querySelectorAll<HTMLElement>("img")];
+      const [start, end] = RISING_FLASHBACK_WINDOW[flashTier];
+      add(
+        flashback,
+        [
+          { opacity: 0 },
+          { opacity: RISING_FLASHBACK_OPACITY, offset: 0.08 },
+          { opacity: RISING_FLASHBACK_OPACITY, offset: 0.92 },
+          { opacity: 0 },
+        ],
+        { delay: ms(start), duration: ms(end - start), easing: "linear" },
+      );
+      scenes.forEach((scene, index) => {
+        const slot = risingFlashbackSlot(flashTier, index, scenes.length);
+        add(
+          scene,
+          [
+            { opacity: 0, scale: 1.08 },
+            { opacity: 1, scale: 1.04, offset: 0.5 },
+            { opacity: 0, scale: 1 },
+          ],
+          { delay: ms(slot.from), duration: ms(slot.to - slot.from), easing: "ease-in-out" },
+        );
+      });
+    }
     if (tier !== "reduced") {
       add(titleName, [{ scale: 1.22 }, { scale: 1 }], {
         delay: ms(s.title),

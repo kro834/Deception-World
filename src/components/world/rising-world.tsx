@@ -18,6 +18,7 @@ import {
   RISING_CALM_FLAMES,
   RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
+  RISING_FLASHBACK,
   risingBurnArt,
 } from "./rising-art";
 import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_SMOKE } from "./rising-calm";
@@ -45,7 +46,21 @@ const loadEngine = () => {
   });
   return engine;
 };
+// The flashback's scenes go into the HTTP cache on approach, so the dialog's
+// lazy images find them there when it opens.
+let flashbackWarmed = false;
+const warmFlashback = () => {
+  if (flashbackWarmed || typeof Image === "undefined") return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  flashbackWarmed = true;
+  for (const src of RISING_FLASHBACK) {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+  }
+};
 const prewarm = () => {
+  warmFlashback();
   void loadEngine()
     .then((module) => module.prepareRising(risingBurnArt(), RIDER_ART))
     .catch(() => undefined);
@@ -722,6 +737,13 @@ export function RisingWorld() {
             <CalmFire />
           </div>
           <div className="rw-gl" aria-hidden="true" />
+          {/* Scenes flashing back over the dive and the burn, before the title
+              (rising-sequence.ts moves them; reduced motion hides them). */}
+          <span className="rw-flashback" aria-hidden="true">
+            {RISING_FLASHBACK.map((src) => (
+              <img key={src} src={src} alt="" loading="lazy" decoding="async" />
+            ))}
+          </span>
           <span className="rw-title-scrim" aria-hidden="true" />
           <div className="rw-title-wrap" aria-hidden="true">
             <p className="rw-title">

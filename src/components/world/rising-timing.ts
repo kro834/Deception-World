@@ -49,6 +49,37 @@ export const RISING_TIMING: Record<RisingTier, TierTiming> = {
 };
 
 /**
+ * The flashback (rising-art.ts RISING_FLASHBACK): scenes that come and go over
+ * the dive and the burn, under the title once it cuts in, and gone before the
+ * print has burned away. Each scene fades in over one step and out over the
+ * next while the following one comes up, so the picture is always a
+ * cross-fade, never a cut. A scene comes up every 0.42-0.45 s; with the
+ * scenes' grade that keeps every spot at one flash a second (the RISING flash
+ * audit, scripts/verify-rising-world.mjs).
+ */
+export const RISING_FLASHBACK_WINDOW: Record<
+  Exclude<RisingTier, "reduced">,
+  readonly [number, number]
+> = {
+  webgl: [0.3, 5.7],
+  css: [0.3, 5.4],
+};
+/** The layer's opacity at full: the scenes stay a memory over the fire. */
+export const RISING_FLASHBACK_OPACITY = 0.85;
+
+/** Pure: when scene `index` of `count` fades in, peaks and fades out (seconds). */
+export function risingFlashbackSlot(
+  tier: Exclude<RisingTier, "reduced">,
+  index: number,
+  count: number,
+) {
+  const [start, end] = RISING_FLASHBACK_WINDOW[tier];
+  const step = (end - start) / (count + 1);
+  const from = start + index * step;
+  return { from, peak: from + step, to: from + 2 * step, step };
+}
+
+/**
  * The burning image is framed like object-fit: cover with this object-position
  * (x, y as fractions) everywhere it appears: the portal, the calm tier and the
  * shader's first frame. Portrait phones see the whole height; landscape
