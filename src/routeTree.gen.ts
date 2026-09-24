@@ -22,6 +22,7 @@ import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as ApiExportRouteImport } from './routes/api/export'
+import { Route as CharactersCielRouteImport } from './routes/characters/ciel'
 import { Route as CharactersDanteRouteImport } from './routes/characters/dante'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
@@ -99,6 +100,11 @@ const ApiExportRoute = ApiExportRouteImport.update({
   path: '/api/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CharactersCielRoute = CharactersCielRouteImport.update({
+  id: '/ciel',
+  path: '/ciel',
+  getParentRoute: () => CharactersRoute,
+} as any)
 const CharactersDanteRoute = CharactersDanteRouteImport.update({
   id: '/dante',
   path: '/dante',
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
+  '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
+  '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
+  '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/riders'
     | '/world'
     | '/api/export'
+    | '/characters/ciel'
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/riders'
     | '/world'
     | '/api/export'
+    | '/characters/ciel'
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/riders'
     | '/world'
     | '/api/export'
+    | '/characters/ciel'
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
@@ -425,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/characters/ciel': {
+      id: '/characters/ciel'
+      path: '/ciel'
+      fullPath: '/characters/ciel'
+      preLoaderRoute: typeof CharactersCielRouteImport
+      parentRoute: typeof CharactersRoute
+    }
     '/characters/dante': {
       id: '/characters/dante'
       path: '/dante'
@@ -506,12 +525,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface CharactersRouteChildren {
+  CharactersCielRoute: typeof CharactersCielRoute
   CharactersDanteRoute: typeof CharactersDanteRoute
   CharactersLunaRoute: typeof CharactersLunaRoute
   CharactersTerraRoute: typeof CharactersTerraRoute
 }
 
 const CharactersRouteChildren: CharactersRouteChildren = {
+  CharactersCielRoute: CharactersCielRoute,
   CharactersDanteRoute: CharactersDanteRoute,
   CharactersLunaRoute: CharactersLunaRoute,
   CharactersTerraRoute: CharactersTerraRoute,

@@ -113,14 +113,11 @@ test("the shader, the stage and the section draw the same ground", async () => {
   assert.match(shader, /float gy = px\.y - uGroundTop;/);
 });
 
-test("the six signals: シエル first with his illustration and the eight riders' dossier", async () => {
+test("the six signals: シエル first with his illustration and his own page", async () => {
   const section = await read("src/components/world/re-dive-section.tsx");
   const home = await read("src/components/world/world-home.tsx");
-  // His dossier, for now, is the one the eight riders open for 月城悠真.
-  const saga = home.match(/id: "saga",[\s\S]*?\n {2}\},/)?.[0] ?? "";
-  assert.match(saga, /person: "シエル ／ 月城悠真"/);
-  assert.match(section, /RIDER_NAV\.find\(\(item\) => item\.id === "saga"\)/);
-  assert.match(section, /to=\{CIEL_DOSSIER\?\.href \?\? "\/riders\/saga"\}/);
+  assert.match(section, /const CIEL = RE_DIVE_RIKUEI_NAV\[0\];/);
+  assert.match(section, /to=\{CIEL\.href \?\? "\/characters\/ciel"\}/);
   // His card carries his illustration, in the managers' card slot.
   assert.match(
     section,

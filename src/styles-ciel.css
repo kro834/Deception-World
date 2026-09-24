@@ -1,0 +1,93 @@
+/* シエル's page (/characters/ciel, ciel-page.tsx) in his colours: emerald
+   green and light blue. The rider dossier's layout is unchanged. Emerald is
+   the accent (--manager-accent, set on the page) and light blue the soft
+   accent (--manager-accent-soft: the grid and the glow's outer ring); this
+   sheet tints the ground and carries both colours into the name, the labels,
+   the quotes, the facts and the portrait's frame. Colour only: nothing here
+   moves. Rules are scoped main.manager-page.ciel-dossier-page so they sit
+   above the dossier sheets' own selectors. */
+
+main.manager-page.ciel-dossier-page {
+  --ciel-emerald: #1ccf9d;
+  --ciel-emerald-deep: #0b7d61;
+  --ciel-aqua: #86d9ff;
+  --ciel-aqua-pale: #d3f3ff;
+}
+
+main.manager-page.ciel-dossier-page:not(.is-sovereign) {
+  background:
+    radial-gradient(circle at 84% 2%, rgb(134 217 255 / 0.2), transparent 34rem),
+    radial-gradient(circle at 4% 30%, rgb(28 207 157 / 0.15), transparent 36rem),
+    radial-gradient(circle at 96% 62%, rgb(134 217 255 / 0.1), transparent 32rem),
+    radial-gradient(circle at 8% 92%, rgb(28 207 157 / 0.1), transparent 34rem),
+    linear-gradient(180deg, #03120f 0%, #04101a 48%, #030b0e 100%);
+}
+
+main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-grid {
+  opacity: 0.08;
+}
+
+/* The name reads from emerald into light blue. */
+main.manager-page.ciel-dossier-page .dossier-identity .manager-display-name {
+  background: linear-gradient(
+    100deg,
+    var(--ciel-emerald) 0%,
+    #5fe3c4 30%,
+    var(--ciel-aqua) 68%,
+    var(--ciel-aqua-pale) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+main.manager-page.ciel-dossier-page .manager-introduction .dossier-identity h1 small,
+main.manager-page.ciel-dossier-page .dossier-identity .manager-title,
+main.manager-page.ciel-dossier-page .dossier-identity .manager-file-number {
+  color: var(--ciel-aqua);
+}
+
+main.manager-page.ciel-dossier-page .dossier-identity .manager-file-number {
+  border-left-color: var(--ciel-emerald);
+  background: linear-gradient(90deg, rgb(28 207 157 / 0.12), rgb(134 217 255 / 0.04));
+}
+
+main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-portrait-frame {
+  border-color: rgb(134 217 255 / 0.45);
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 0.42),
+    -18px 0 64px rgb(28 207 157 / 0.14),
+    18px 0 64px rgb(134 217 255 / 0.14),
+    inset 0 1px 0 rgb(211 243 255 / 0.24);
+}
+
+main.manager-page.ciel-dossier-page .manager-quotes {
+  border-color: rgb(134 217 255 / 0.32);
+  background: linear-gradient(
+    135deg,
+    rgb(28 207 157 / 0.08),
+    rgb(134 217 255 / 0.06) 60%,
+    transparent
+  );
+}
+
+main.manager-page.ciel-dossier-page .manager-quotes q {
+  color: var(--ciel-aqua-pale);
+}
+
+main.manager-page.ciel-dossier-page .manager-facts dt,
+main.manager-page.ciel-dossier-page .manager-copy-heading p,
+main.manager-page.ciel-dossier-page .dossier-contents-copy small {
+  color: var(--ciel-aqua);
+}
+
+main.manager-page.ciel-dossier-page .manager-facts > div {
+  border-color: rgb(134 217 255 / 0.22);
+}
+
+@media (forced-colors: active) {
+  main.manager-page.ciel-dossier-page .dossier-identity .manager-display-name {
+    background: none;
+    color: CanvasText;
+  }
+}

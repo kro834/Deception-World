@@ -189,7 +189,7 @@ At the end still, RE DIVE…? appears above もう一度, in its own spot, so SK
   - Reduced motion: the ground fades in over 0.7 s.
 - **The ground.** The calm tier's burn-edge strip runs across the section's top, stretched to the width as in the calm tier (it does not tile seamlessly). The calm tier's char tile starts 0.8 of the strip's height down. The shader reads its textures y-down with `texture2D()`, as uploaded; `sampleTop()` takes y-up coordinates.
 - **The 六詠 box** is the Deception World archive's box, with the same markup and words.
-  - I is シエル (月城悠真). His card uses an upper-body crop of his illustration in the managers' card slot (`CIEL_THUMBNAIL`); the illustration is kept as supplied in `public/ciel-illustration-20260924.webp`. For now it opens the dossier the eight riders open for him (Kamen Rider Saga).
+  - I is シエル (月城悠真). His card uses an upper-body crop of his illustration in the managers' card slot (`CIEL_THUMBNAIL`); the illustration is kept as supplied in `public/ciel-illustration-20260924.webp`. The card opens his own page (below).
   - II レックス・ロワ, IV レジャス and V オパス are the archive's cards.
   - III and VI are 欠番: burned-out slots that are not links.
 - **Returning.** A card opened from the section gives the World's history entry the `#re-dive` hash. Browser back is then not reset to the top and lands on the section. Any other return keeps the position the router restores.
@@ -197,6 +197,13 @@ At the end still, RE DIVE…? appears above もう一度, in its own spot, so SK
 Photosensitivity follows RISING THE WORLD: one amber swell, and nothing pulses. The flash audit (60 fps, frame-exact, Pixel, Galaxy and desktop, every tier) measures at most one flash a second on WebGL (the swell) and none on the CSS and reduced tiers. Guards:
 - `scripts/re-dive.test.mjs`;
 - the `redive` section of `scripts/verify-rising-world.mjs`: the landing, focus, the six signals, the end still left as it was, and the flash audit.
+
+### シエル's page — 2026-09-24
+
+`/characters/ciel` (`src/components/world/ciel-page.tsx`, `src/routes/characters/ciel.tsx`, `src/styles-ciel.css`) is his own dossier. For now its record is the one the eight riders keep for 月城悠真: it reads the Saga entry of `RIDER_DOSSIERS`, so the profile, quotes, facts, chapters, Kamen Rider forms and special site stay in step with it. The nightmare pickup (マキャベル) is left out. It is headed by CIEL / シエル and his illustration (`CIEL_PORTRAIT`: 640 and 960 px, from the file as supplied).
+- **Colours.** Emerald green (`#1ccf9d`, the accent) and light blue (`#86d9ff`, the soft accent). The sheet tints the ground and carries both into the name (a gradient from emerald into light blue), the labels, the quotes, the facts and the portrait's frame. It adds no motion, and every rule is scoped to the page.
+- **Navigation.** The top bar and the index link return to RE DIVE's 六詠 (`#re-dive`). The pagination follows that box (`RE_DIVE_RIKUEI_NAV`): I シエル, II レックス・ロワ, IV レジャス, V オパス; III and VI are 欠番 and have no page.
+- **Guard:** `scripts/ciel-page.test.mjs`.
 
 ## Opening: the burn and the dive — 2026-09-24
 

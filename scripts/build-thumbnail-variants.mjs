@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import {
+  CIEL_PORTRAIT,
   CIEL_THUMBNAIL,
   EPISODE_THUMBNAILS,
   MANAGER_THUMBNAILS,
@@ -20,6 +21,7 @@ const sets = [
   ...Object.values(EPISODE_THUMBNAILS).map((set) => [set, 0.84]),
   ...Object.values(MANAGER_THUMBNAILS).map((set) => [set, 0.84]),
   [CIEL_THUMBNAIL, 0.78],
+  [CIEL_PORTRAIT, 0.8],
   ...Object.values(ZEUS_BUTTON_IMAGES).map((set) => [set, 0.86]),
 ];
 const only = process.argv[2];

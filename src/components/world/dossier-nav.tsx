@@ -55,6 +55,23 @@ export const RIKUEI_NAV: DossierLink[] = [
   },
 ];
 
+// RE DIVE's 六詠 (re-dive-section.tsx): シエル first, then the archive's II, IV
+// and V; III and VI are 欠番 (no page).
+export const RE_DIVE_RIKUEI_NAV: DossierLink[] = [
+  {
+    id: "I",
+    name: "シエル",
+    href: "/characters/ciel",
+    assets: ["/ciel-illustration-20260924-960.webp"],
+    kicker: "RIKUEI I",
+  },
+  RIKUEI_NAV[1],
+  { id: "III", name: "欠番", href: null, assets: [], kicker: "RIKUEI III" },
+  RIKUEI_NAV[3],
+  RIKUEI_NAV[4],
+  { id: "VI", name: "欠番", href: null, assets: [], kicker: "RIKUEI VI" },
+];
+
 export const RIDER_NAV: DossierLink[] = [
   {
     id: "saga",
@@ -175,20 +192,24 @@ export function DossierNav({
   items,
   currentHref,
   indexLabel,
+  returnHash: listHash,
 }: {
   items: DossierLink[];
   currentHref: string;
   indexLabel: string;
+  /** The list on the World page to return to, when the path does not say. */
+  returnHash?: string;
 }) {
   const { idx, prev, next } = neighbors(items, currentHref);
   if (idx < 0) return null;
-  const returnHash = currentHref.startsWith("/riders/")
+  const pathHash = currentHref.startsWith("/riders/")
     ? "riders-return"
     : currentHref === "/characters/dante"
       ? "manager-archive-unmanaged"
       : currentHref.startsWith("/characters/")
         ? "manager-archive-other"
         : "manager-archive";
+  const returnHash = listHash ?? pathHash;
 
   return (
     <nav className="manager-pagination" aria-label="前後の資料">

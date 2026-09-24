@@ -78,6 +78,19 @@ export const MANAGER_THUMBNAILS: Record<string, ImageSet & { aspect: number }> =
 // (/ciel-illustration-20260924.webp, as supplied), in the managers' card slot.
 export const CIEL_THUMBNAIL = { ...manager("/ciel-thumb-20260924", 640), aspect: 640 / 800 };
 
+// His page's portrait (/characters/ciel): the whole illustration, right-sized
+// for the dossier hero (phones 92vw, then 46vw, at most 520 px). 960 px serves
+// a 3x phone; a 520 px hero at 2x upscales it by 8%, where the file as
+// supplied (1122 px, 462 KB) would cost more than twice as much.
+export const CIEL_PORTRAIT: ImageSet = {
+  source: "/ciel-illustration-20260924.webp",
+  variants: [
+    { path: "/ciel-illustration-20260924-640.webp", width: 640, build: true },
+    { path: "/ciel-illustration-20260924-960.webp", width: 960, build: true },
+  ],
+};
+export const CIEL_PORTRAIT_SIZES = "(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px";
+
 // Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;
 // 821-1100 px up to 150 x 179; wider up to 240 x 179.
 const managerSizes = (aspect: number) => {
@@ -101,6 +114,10 @@ export function managerThumbnail(name: keyof typeof MANAGER_THUMBNAILS) {
 
 export function cielThumbnail() {
   return { srcSet: srcSet(CIEL_THUMBNAIL), sizes: managerSizes(CIEL_THUMBNAIL.aspect) };
+}
+
+export function cielPortrait() {
+  return { srcSet: srcSet(CIEL_PORTRAIT), sizes: CIEL_PORTRAIT_SIZES };
 }
 
 // The button's image box is 48 px on phones (the button is 60 px) and at most

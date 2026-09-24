@@ -5,6 +5,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/world",
   "/characters",
   "/characters/terra",
+  "/characters/ciel",
   "/riders",
   "/riders/saga",
   "/dream-chapter",

@@ -2,7 +2,7 @@ import { forwardRef, memo } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { MANAGER_ASSETS } from "@/lib/asset-loader";
 import { cielThumbnail, managerThumbnail } from "@/lib/thumbnail-images";
-import { RIDER_NAV } from "./dossier-nav";
+import { RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
 import { RISING_CALM_CHAR, RISING_CALM_EDGES } from "./rising-art";
 
 /* RE DIVE: the World after it burned. Reached from the end of RISING THE
@@ -12,14 +12,14 @@ import { RISING_CALM_CHAR, RISING_CALM_EDGES } from "./rising-art";
 
    The box is the Deception World archive's 六詠 box with the same markup and
    classes (.threat-panel, .signal …), so every edition's styling applies:
-   I is シエル (月城悠真), with his own illustration on the card and, for now,
-   the dossier the eight riders open for him (Kamen Rider Saga), II, IV and V
-   are the archive's own cards, and III and VI are 欠番 (vacant). */
+   I is シエル (月城悠真), with his own illustration on the card and his own
+   page (ciel-page.tsx), II, IV and V are the archive's own cards, and III
+   and VI are 欠番 (vacant). */
 
 export const RE_DIVE_SECTION_ID = "re-dive";
 
-// The eight riders' dossier for シエル / 月城悠真 (rider 01).
-const CIEL_DOSSIER = RIDER_NAV.find((item) => item.id === "saga");
+// シエル's page (/characters/ciel).
+const CIEL = RE_DIVE_RIKUEI_NAV[0];
 
 function VacantSignal({ numeral, delay }: { numeral: string; delay: string }) {
   return (
@@ -77,8 +77,8 @@ export const ReDiveSection = memo(
               <div className="manager-slot-grid signal-array" aria-label="六詠を示す6つのシグナル">
                 <GuardedLink
                   className="signal has-visual is-accessible ciel-signal"
-                  to={CIEL_DOSSIER?.href ?? "/riders/saga"}
-                  assets={CIEL_DOSSIER?.assets ?? []}
+                  to={CIEL.href ?? "/characters/ciel"}
+                  assets={CIEL.assets}
                   style={{ ["--delay" as string]: "0s" }}
                   beforeNavigate={onLeave}
                   aria-label="六詠I シエルの個別資料を開く"
