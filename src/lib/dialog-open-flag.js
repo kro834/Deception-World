@@ -12,8 +12,48 @@
 // sync() runs in the MutationObserver's microtask, so the attribute is set
 // before the next rendering update and no frame is drawn with a stale gate.
 // Do not defer it to requestAnimationFrame.
+//
+// A dialog opened by script is flagged earlier still. showModal() and show()
+// run the dialog focusing steps, which update style at once; the observer's
+// microtask comes after them, so the gate change cost a second
+// whole-document style update on every open (pickup and RISING INP up 15-20%
+// at 4x CPU). The wrappers raise the flag before the original runs, so both
+// changes land in the one update, then re-read the page in case it threw.
 
 const ATTRIBUTE = "data-dialog-open";
+const OPENERS = /** @type {const} */ (["showModal", "show"]);
+
+/**
+ * @param {Document} doc
+ * @param {() => void} raise
+ * @param {() => void} sync
+ */
+function flagScriptedOpens(doc, raise, sync) {
+  const proto = doc.defaultView?.HTMLDialogElement?.prototype;
+  if (!proto) return () => {};
+  /** @type {Map<string, { original: Function, wrapper: Function }>} */
+  const wrapped = new Map();
+  for (const name of OPENERS) {
+    const original = proto[name];
+    if (typeof original !== "function") continue;
+    /** @this {HTMLDialogElement} @param {unknown[]} args */
+    const wrapper = function (...args) {
+      raise();
+      try {
+        return original.apply(this, args);
+      } finally {
+        sync();
+      }
+    };
+    proto[name] = wrapper;
+    wrapped.set(name, { original, wrapper });
+  }
+  return () => {
+    for (const [name, { original, wrapper }] of wrapped) {
+      if (proto[name] === wrapper) proto[name] = original;
+    }
+  };
+}
 
 /** @param {Node} node */
 const holdsDialog = (node) =>
@@ -33,6 +73,13 @@ export function watchOpenDialogs(doc = document) {
     if (open !== root.hasAttribute(ATTRIBUTE)) root.toggleAttribute(ATTRIBUTE, open);
   };
   sync();
+  const restoreOpeners = flagScriptedOpens(
+    doc,
+    () => {
+      if (!root.hasAttribute(ATTRIBUTE)) root.toggleAttribute(ATTRIBUTE, true);
+    },
+    sync,
+  );
   const observer = new MutationObserver((records) => {
     // Only records that can change the answer: an `open` attribute, or a
     // subtree holding a dialog added or removed.
@@ -55,6 +102,7 @@ export function watchOpenDialogs(doc = document) {
   });
   return () => {
     observer.disconnect();
+    restoreOpeners();
     root.removeAttribute(ATTRIBUTE);
   };
 }

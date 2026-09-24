@@ -119,6 +119,47 @@ test("an already open dialog is flagged at install, and unrelated DOM churn is i
   assert.equal(page.open(), false);
 });
 
+test("a dialog opened by script is flagged before its focusing steps update style", () => {
+  const page = fakeDocument();
+  const seen = [];
+  class FakeDialog {
+    constructor(dialog) {
+      this.dialog = dialog;
+    }
+  }
+  // showModal() sets `open`, then focuses (a style update): record what the
+  // gate reads at that moment. show() throws, as it does on a modal dialog.
+  FakeDialog.prototype.showModal = function () {
+    this.dialog.open = true;
+    seen.push(["showModal", page.open()]);
+  };
+  FakeDialog.prototype.show = function () {
+    seen.push(["show", page.open()]);
+    throw new Error("InvalidStateError");
+  };
+  const { showModal, show } = FakeDialog.prototype;
+  page.doc.defaultView = { HTMLDialogElement: FakeDialog };
+  const dispose = watchOpenDialogs(page.doc);
+
+  const modal = new FakeDialog(page.dialog());
+  modal.showModal();
+  assert.deepEqual(seen.at(-1), ["showModal", true], "flag raised before the focusing steps");
+  assert.equal(page.open(), true);
+
+  modal.dialog.open = false; // close(): the observer drops the flag
+  page.deliver({ type: "attributes", attributeName: "open", addedNodes: [], removedNodes: [] });
+  assert.equal(page.open(), false);
+
+  const failing = new FakeDialog(page.dialog());
+  assert.throws(() => failing.show(), /InvalidStateError/);
+  assert.deepEqual(seen.at(-1), ["show", true]);
+  assert.equal(page.open(), false, "a failed open leaves no stale flag");
+
+  dispose();
+  assert.equal(FakeDialog.prototype.showModal, showModal, "showModal restored");
+  assert.equal(FakeDialog.prototype.show, show, "show restored");
+});
+
 test("the flag is set in the observer's microtask, never deferred to a frame", () => {
   const source = read("src/lib/dialog-open-flag.js");
   assert.doesNotMatch(source.replace(/\/\/.*$/gm, ""), /requestAnimationFrame|setTimeout/);
