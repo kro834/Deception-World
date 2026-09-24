@@ -10,11 +10,73 @@ type LiquidTarget = HTMLElement & {
   };
 };
 
+/* Android hides the World's pointer glows (styles-android-performance.css),
+   so there the light follows presses only: a press sets the pressed and
+   active flags (the Dream chapter's pressed scale and its touch glow) and
+   places the light once, in the next frame. No hover or focus tracking and no
+   pointermove listener, so a rail scrub or a drag reads no geometry and
+   writes no position per frame. */
+function trackPressesOnly() {
+  let pressed: LiquidTarget | null = null;
+  let pointerId: number | null = null;
+  let frame = 0;
+  let point: { x: number; y: number } | null = null;
+  const place = () => {
+    frame = 0;
+    if (!pressed || !point) return;
+    const rect = pressed.getBoundingClientRect();
+    pressed.style.setProperty("--liquid-pointer-x", `${point.x - rect.left}px`);
+    pressed.style.setProperty("--liquid-pointer-y", `${point.y - rect.top}px`);
+    point = null;
+  };
+  const release = () => {
+    if (frame) window.cancelAnimationFrame(frame);
+    frame = 0;
+    point = null;
+    if (pressed?.dataset.liquidPointerPressed) delete pressed.dataset.liquidPointerPressed;
+    if (pressed?.dataset.liquidPointerActive) delete pressed.dataset.liquidPointerActive;
+    pressed = null;
+    pointerId = null;
+  };
+  const onPointerDown = (event: PointerEvent) => {
+    if (!event.isPrimary || !(event.target instanceof Element)) return;
+    const target = event.target.closest(SELECTOR) as LiquidTarget | null;
+    if (!target) return;
+    release();
+    pressed = target;
+    pointerId = event.pointerId;
+    target.dataset.liquidPointerPressed = "true";
+    target.dataset.liquidPointerActive = "true";
+    point = { x: event.clientX, y: event.clientY };
+    frame = window.requestAnimationFrame(place);
+  };
+  const onPointerUp = (event: PointerEvent) => {
+    if (pointerId === event.pointerId) release();
+  };
+  const onVisibilityChange = () => {
+    if (document.hidden) release();
+  };
+  document.addEventListener("pointerdown", onPointerDown, { passive: true });
+  document.addEventListener("pointerup", onPointerUp, { passive: true });
+  document.addEventListener("pointercancel", onPointerUp, { passive: true });
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("blur", release);
+  return () => {
+    document.removeEventListener("pointerdown", onPointerDown);
+    document.removeEventListener("pointerup", onPointerUp);
+    document.removeEventListener("pointercancel", onPointerUp);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    window.removeEventListener("blur", release);
+    release();
+  };
+}
+
 export function useLiquidPointerLight() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
     if (reducedMotion.matches || reducedTransparency.matches || prefersLightweightRendering(navigator)) return;
+    if (document.documentElement.hasAttribute("data-android-renderer")) return trackPressesOnly();
 
     let active: LiquidTarget | null = null;
     let pressed: LiquidTarget | null = null;
