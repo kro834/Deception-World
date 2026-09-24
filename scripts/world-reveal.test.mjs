@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { COPY_CHUNK, typedCells } from "../src/components/world/reveal-label.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -344,15 +343,10 @@ test("RevealText is memoised, hydration-stable and readable by screen readers", 
   const label = strip(await read("src/components/world/reveal-label.ts"));
   assert.match(source, /export const RevealText = memo\(function RevealText\(/);
   assert.match(label, /export function revealLabel\(/);
-  assert.match(
-    source,
-    /import \{ BLANK, COPY_CHUNK, revealLabel, splittable, typedCells \} from "\.\/reveal-label";/,
-  );
+  assert.match(source, /import \{ BLANK, revealLabel, splittable \} from "\.\/reveal-label";/);
   // Code points, not ICU: server and browser always split alike.
-  assert.doesNotMatch(source + label, /Segmenter/);
-  assert.match(label, /for \(const part of Array\.from\(text\)\)/);
-  assert.match(source, /const size = copy \? COPY_CHUNK : 1;/);
-  assert.match(source, /typedCells\(String\(child\), size\)\.map\(\(part, key\) =>/);
+  assert.doesNotMatch(source, /Segmenter/);
+  assert.match(source, /Array\.from\(String\(child\), \(part, key\) =>/);
   assert.match(source, /className="tr-c"/);
   assert.match(source, /"--tr-p": \(index\+\+ \/ Math\.max\(1, total - 1\)\)\.toFixed\(3\)/);
   assert.match(source, /"--tr-d": \(1 \/ Math\.max\(1, total - 1\)\)\.toFixed\(3\)/);
@@ -379,49 +373,4 @@ test("the reveal is documented with the Mirage edition", async () => {
   for (const phrase of ["styles-world-reveal.css", "reveal-text.tsx", "verify-world-reveal.mjs"]) {
     assert.ok(section.includes(phrase), phrase);
   }
-});
-
-test("headings type one character at a time, copy one short phrase at a time", async () => {
-  // Headings: exactly the code points, as before.
-  for (const text of ["救うべき世界は、", "八人が、世界へ。", "サーガは、"]) {
-    assert.deepEqual(typedCells(text, 1), Array.from(text));
-  }
-  // Copy: up to COPY_CHUNK characters per cell, a cell closing early after
-  // punctuation (an IME commit), punctuation never opening a cell, blanks
-  // left loose, nothing lost or reordered.
-  assert.equal(COPY_CHUNK, 3);
-  const source = await read("src/components/world/world-home.tsx");
-  const copies = [...source.matchAll(/<RevealText copy>\s*([^<]+?)\s*<\/RevealText>/g)].map(
-    (match) => match[1],
-  );
-  assert.equal(copies.length, 3);
-  let copyCells = 0;
-  let copyCharacters = 0;
-  for (const text of copies) {
-    const cells = typedCells(text, COPY_CHUNK);
-    assert.equal(cells.join(""), text);
-    for (const cell of cells) {
-      const characters = Array.from(cell);
-      const closed = /[、。，．！？]$/.test(cell);
-      assert.ok(characters.length <= COPY_CHUNK + (closed ? 1 : 0), cell);
-      assert.ok(
-        characters.slice(0, -1).every((character) => !/[、。，．！？]/.test(character)),
-        `punctuation inside a phrase: ${cell}`,
-      );
-    }
-    copyCells += cells.length;
-    copyCharacters += Array.from(text).length;
-  }
-  // The copy is most of the page's characters; phrases cut its scroll-linked
-  // animations (ink and cursor per span) to about a third.
-  assert.ok(copyCharacters >= 170, String(copyCharacters));
-  assert.ok(copyCells <= copyCharacters * 0.4, `${copyCells} cells for ${copyCharacters}`);
-  assert.deepEqual(typedCells("あい、うえお、か。き く。", 3), [
-    "あい、",
-    "うえお、",
-    "か。",
-    "き",
-    " ",
-    "く。",
-  ]);
 });
