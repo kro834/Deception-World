@@ -2648,7 +2648,11 @@ html:not([data-world-effects="economy"])[data-android-renderer]
 }
 
 /* The story overlay sat on the border box (inset: -1px), the archive and
-   column overlays on the padding box (inset: 0); the origins follow. */
+   column overlays on the padding box (inset: 0); the origins follow. The
+   archive, column, console and record bay screen-blend their layers
+   (`screen, normal`, styles-world/13.css and 25.css); over the bracket layers
+   that list would repeat and brighten each corner where two strokes cross, so
+   they blend normally, as the overlays did (the 5% tint reads the same). */
 html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition
   .story-layout {
@@ -2666,6 +2670,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     var(--mr-brackets), linear-gradient(135deg, rgb(122 232 255 / 5%), transparent 40%),
     var(--mr-deck);
   background-repeat: no-repeat;
+  background-blend-mode: normal;
 }
 
 html:not([data-world-effects="economy"])[data-android-renderer]
@@ -2675,11 +2680,11 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     var(--mr-brackets), linear-gradient(135deg, rgb(240 207 134 / 5%), transparent 38%),
     var(--mr-deck);
   background-repeat: no-repeat;
+  background-blend-mode: normal;
 }
 
 /* The rider console's brackets stood 8-12px outside it, above its content;
-   they now sit on its border box, replacing Neo's 1px ones. (The record bay's
-   overlay was sized to 2 x 68px by styles-world/06.css and never showed.) */
+   they now sit on its border box, replacing Neo's 1px ones. */
 html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition
   .rider-console {
@@ -2688,6 +2693,21 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     var(--neo-panel);
   background-repeat: no-repeat;
   background-origin: border-box;
+  background-blend-mode: normal;
+}
+
+/* The record bay's overlay is sized to 2 x 68px at its top-left corner
+   (styles-world/06.css), so its brackets show as one accent stroke: 26px of
+   ice, then 26px of gold ending at 68px. It is painted in the same place. */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .episode-archive {
+  background:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
+    linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
+    linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
 }
 
 html:not([data-world-effects="economy"])[data-android-renderer]
@@ -2703,6 +2723,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     :is(.story-layout, .threat-panel, .world-column) {
     background: var(--mr-brackets), var(--mr-deck);
     background-repeat: no-repeat;
+    background-blend-mode: normal;
   }
 
   html:not([data-world-effects="economy"])[data-android-renderer]
@@ -2710,6 +2731,17 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     .rider-console {
     background: var(--mr-brackets), #070d16;
     background-repeat: no-repeat;
+    background-blend-mode: normal;
+  }
+
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    .site-shell.film-edition.mirage-edition
+    .episode-archive {
+    background:
+      linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
+      linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px, var(--mr-deck);
+    background-repeat: no-repeat;
+    background-blend-mode: normal;
   }
 }
 

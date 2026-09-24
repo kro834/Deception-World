@@ -118,7 +118,29 @@ test("the Tron floor, the curtains and the bracket overlays leave the Android la
     assert.ok(rule, panel);
     assert.match(declaration(rule.body, "background"), /^var\(--mr-brackets\),/, panel);
     assert.equal(declaration(rule.body, "background-repeat"), "no-repeat", panel);
+    // styles-world/13.css and 25.css screen-blend these panels' layers; the
+    // overlays drew the brackets normally, so the strokes must too.
+    if (panel !== ".story-layout") {
+      assert.equal(declaration(rule.body, "background-blend-mode"), "normal", panel);
+    }
   }
+  // The record bay's overlay is a 2 x 68px box (styles-world/06.css), so its
+  // brackets read as one ice-and-gold stroke; the background keeps it.
+  const bay = rules.filter(
+    ({ selector }) =>
+      selector === `${ANDROID_FULL} .site-shell.film-edition.mirage-edition .episode-archive`,
+  );
+  assert.equal(bay.length, 2, "the record bay, in both transparency modes");
+  for (const { body } of bay) {
+    assert.match(
+      declaration(body, "background"),
+      /^linear-gradient\(var\(--mr-ice\) 0 0\) 0 0 \/ 2px 26px, linear-gradient\(var\(--mr-gold\) 0 0\) 0 42px \/ 2px 26px,/,
+    );
+    assert.equal(declaration(body, "background-repeat"), "no-repeat");
+    assert.equal(declaration(body, "background-blend-mode"), "normal");
+  }
+  const archive = await read("src/styles-world/06.css");
+  assert.match(archive, /\.episode-archive::after \{[^}]*width: 2px;\s*height: 68px;/);
 });
 
 test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus button", async () => {
