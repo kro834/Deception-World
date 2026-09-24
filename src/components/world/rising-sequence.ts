@@ -11,10 +11,12 @@ import {
 } from "./rising-fire";
 import {
   RISING_CALM_CHAR,
-  RISING_CALM_EDGE,
+  RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
 } from "./rising-art";
+import { CALM_FLAME_SEATS } from "./rising-calm";
 import {
   RISING_ART_ASPECT,
   RISING_READY_TIMEOUT_MS,
@@ -58,7 +60,13 @@ function decode(src: string) {
   return pending;
 }
 
-const CALM_SPRITES = [...RISING_CALM_FLAMES, RISING_CALM_EDGE, RISING_CALM_CHAR, RISING_CALM_SMOKE];
+const CALM_SPRITES = [
+  ...RISING_CALM_FLAMES,
+  ...RISING_CALM_EDGES,
+  ...RISING_CALM_SCORCHES,
+  RISING_CALM_CHAR,
+  RISING_CALM_SMOKE,
+];
 
 /**
  * Warms what the run will need before the press: resized ImageBitmaps for the
@@ -153,6 +161,8 @@ export type RisingStats = {
   readyMs: number | null;
   clockStartMs: number | null;
   size: { width: number; height: number; scale: number; rung: number } | null;
+  /** The GPU probe's burn frame (both passes), ms; null when it could not run. */
+  probeMs: number | null;
   cadenceMs: number | null;
   framesPerDraw: number;
   draws: number;
@@ -249,7 +259,8 @@ export function runRising({
   const calmBurn = find(".rw-calm-burn");
   const calmFlames = find(".rw-calm-flames");
   const calmSmoke = find(".rw-calm-smoke");
-  const edge = [find(".rw-calm-char"), find(".rw-calm-flames")];
+  const edge = [find(".rw-calm-scorch"), find(".rw-calm-char"), find(".rw-calm-flames")];
+  const reformed = [...viewport.querySelectorAll<HTMLElement>('.rw-calm-edge[data-profile="1"]')];
   const puffs = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-smoke img")];
   const seats = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames i")];
   const embers = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-embers i")];
@@ -263,6 +274,7 @@ export function runRising({
     readyMs: null,
     clockStartMs: null,
     size: null,
+    probeMs: null,
     cadenceMs: null,
     framesPerDraw: 1,
     draws: 0,
@@ -437,6 +449,21 @@ export function runRising({
           duration: ms(burn),
         });
       }
+      // Halfway up, the front re-forms: a second strip (and its scorch)
+      // fades in over the first, drawn wherever either of two profiles has
+      // burned further (rising-calm.ts), so it only ever burns forward; each
+      // flame seat slides up onto the new lip. The silhouette is never
+      // recognised as one shape climbing the print.
+      const reform = { delay: ms(s.burnStart + burn * 0.3), duration: 800, easing: "ease-in-out" };
+      for (const element of reformed) add(element, [{ opacity: 0 }, { opacity: 1 }], reform);
+      // The seats' box is 56% of the burn layer, which is 120% of the frame.
+      const stretch = window.matchMedia("(min-aspect-ratio: 1/1)").matches ? 1.3 : 1;
+      seats.forEach((seat, index) => {
+        const place = CALM_FLAME_SEATS[index];
+        if (!place) return;
+        const shift = (((place.dipB - place.dip) / 100) * 56 * 1.2 * stretch).toFixed(2);
+        add(seat, [{ translate: "-50% 0" }, { translate: `-50% ${shift}cqh` }], reform);
+      });
       // The fire takes hold, burns, and dies down with the settle.
       const span = s.settle[1] - s.burnStart;
       add(
@@ -774,7 +801,12 @@ export function runRising({
         await withDeadline(compiled, deadline);
         if (stale()) return;
         const active: FireRenderer = renderer;
-        active.render(0); // warm the pipeline: the canvas holds frame 0 when it appears
+        active.render(0); // warm the dive
+        // Time a burn frame and pick the rung that fits, while the portal
+        // still covers the screen.
+        stats.probeMs = await active.probe();
+        if (stale()) return;
+        active.render(0); // the canvas holds frame 0 when it appears
         stats.size = active.size;
         canvas.addEventListener("webglcontextlost", onContextLost);
         resizeObserver = new ResizeObserver(() => {

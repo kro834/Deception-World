@@ -1,17 +1,23 @@
 // Renders the RISING THE WORLD calm (CSS) tier's sprites into public/:
-// three flame frames, a burn-edge strip (from the same fractal profile the
-// flames are seated on, rising-calm.ts), a tileable char texture and a smoke
-// billow. Each is drawn by a small WebGL 2 shader in headless Chrome and
+// three flame frames, two burn-edge strips and the scorch ahead of each (from
+// the two fractal profiles the flames are seated on, rising-calm.ts), a
+// tileable char texture and a smoke billow. Each is drawn by a small WebGL 2 shader in headless Chrome and
 // encoded by Chrome's WebP encoder (alpha included), so the assets can be
 // regenerated from this file alone:
 //   PW_BROWSER_CHANNEL=chrome node scripts/render-rising-calm-sprites.mjs [previewDir]
 import { mkdirSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
-import { CALM_EDGE_SEED, CALM_EDGE_STRIP, burnEdge } from "../src/components/world/rising-calm.ts";
+import {
+  CALM_EDGE_SEED,
+  CALM_EDGE_STRIP,
+  burnEdge,
+  calmEdgeAhead,
+} from "../src/components/world/rising-calm.ts";
 import {
   RISING_CALM_CHAR,
-  RISING_CALM_EDGE,
+  RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
 } from "../src/components/world/rising-art.ts";
 
@@ -123,12 +129,9 @@ void main() {
   outColor = straight(tm * fade, a * fade);
 }`;
 
-// A burn edge strip: an incandescent lip whose width and brightness vary
-// along it (the print blackens just ahead of it), fresh char behind it with
-// plates and cracks glowing orange that cool to dull red and grey-rimmed black
-// further down, fading out at the bottom onto the tile. The tier draws the
-// flames behind the strips, so the char cuts their roots along the lip.
-const EDGE = `${COMMON}
+// The profile (Catmull-Rom through the 129 heights) and its fray, shared by
+// the strip and its scorch so both hug the same lip. Box units, y down.
+const EDGE_PROFILE = `${COMMON}
 uniform float uYs[129];
 uniform float uTop;
 uniform float uBottom;
@@ -140,16 +143,26 @@ float edgeAt(float x) {
   return 0.5 * (2.0 * y1 + (-y0 + y2) * f + (2.0 * y0 - 5.0 * y1 + 4.0 * y2 - y3) * f * f
     + (-y0 + 3.0 * y1 - 3.0 * y2 + y3) * f * f * f);
 }
+float frayAt(vec2 b) {
+  return (fbm(b / 1100.0) - 0.5) * 26.0
+       + (abs(fbm(b / 260.0 + 3.3) - 0.5) * 2.0 - 0.4) * 8.0
+       + (fbm(b / 70.0 + 7.1) - 0.5) * 5.0
+       + (abs(fbm(b / 22.0 + 1.9) - 0.5) * 2.0 - 0.4) * 4.0;
+}
+`;
+
+// A burn edge strip: an incandescent lip whose width and brightness vary
+// along it (the print blackens just ahead of it), fresh char behind it with
+// plates and cracks glowing orange that cool to dull red and grey-rimmed black
+// further down, fading out at the bottom onto the tile. The tier draws the
+// flames behind the strips, so the char cuts their roots along the lip.
+const EDGE = `${EDGE_PROFILE}
 void main() {
   vec2 px = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);          // pixels, y down
   float x = px.x / uRes.x * 1000.0;
   float y = uTop + px.y / uRes.y * (uBottom - uTop);                  // box units
   vec2 b = vec2(x, y);
-  float fray = (fbm(b / 1100.0) - 0.5) * 26.0
-             + (abs(fbm(b / 260.0 + 3.3) - 0.5) * 2.0 - 0.4) * 8.0
-             + (fbm(b / 70.0 + 7.1) - 0.5) * 5.0
-             + (abs(fbm(b / 22.0 + 1.9) - 0.5) * 2.0 - 0.4) * 4.0;
-  float d = y - edgeAt(x) - fray;                                     // > 0 burnt
+  float d = y - edgeAt(x) - frayAt(b);                                // > 0 burnt
 
   // Just ahead of the lip the print blackens (the flames, drawn behind the
   // strip, rise from here).
@@ -193,6 +206,30 @@ void main() {
   outColor = straight(pm * bottom, a * bottom);
 }`;
 
+// The print ahead of the lip, drawn under the flames: it yellows, browns and
+// blisters, then blackens at the lip; the reach varies along the front (hot
+// spots scorch first). Transparent at and below the lip, where the strip's
+// char covers it.
+const SCORCH = `${EDGE_PROFILE}
+void main() {
+  vec2 px = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+  float x = px.x / uRes.x * 1000.0;
+  float y = uTop + px.y / uRes.y * (uBottom - uTop);
+  vec2 b = vec2(x, y);
+  float d = y - edgeAt(x) - frayAt(b);
+  float reach = 12.0 + 26.0 * fbm(vec2(x / 260.0, 3.0)) + 10.0 * (fbm(b / 60.0 + 5.0) - 0.5);
+  float t = clamp(-d / reach, 0.0, 1.0);                             // 0 at the lip
+  float ahead = (1.0 - smoothstep(0.35, 1.0, t)) * (1.0 - smoothstep(-1.0, 3.0, d));
+  vec3 col = mix(vec3(0.05, 0.02, 0.008), vec3(0.3, 0.17, 0.06), smoothstep(0.05, 0.7, t));
+  float a = ahead * mix(0.9, 0.2, smoothstep(0.0, 0.8, t));
+  // Blisters: raised bubbles in the brown band catch the firelight.
+  float e = cellEdge(px / 7.0 + 7.0, 0.0);
+  float bubble = smoothstep(0.35, 0.6, e) * smoothstep(0.15, 0.4, t) * (1.0 - smoothstep(0.55, 0.85, t))
+               * smoothstep(0.42, 0.62, fbm(b / 90.0 + 11.0));
+  col = mix(col, vec3(0.5, 0.24, 0.08), bubble * 0.6);
+  outColor = vec4(col, clamp(a, 0.0, 1.0));
+}`;
+
 // Cold char, tileable: plates, cracks, greying rims and ash, a few dull embers.
 const CHAR = `${COMMON}
 void main() {
@@ -234,18 +271,26 @@ const sprites = [
     uniforms: { uT: index * 0.16, uSeed: 0 },
     quality: 0.82,
   })),
-  {
-    path: RISING_CALM_EDGE,
-    shader: EDGE,
-    size: [800, 540],
-    uniforms: {
+  // The first front, and the front it re-forms into halfway up.
+  ...[burnEdge(CALM_EDGE_SEED).ys, calmEdgeAhead().ys].flatMap((ys, index) => {
+    const uniforms = {
       uSeed: 0,
       uTop: CALM_EDGE_STRIP.top,
       uBottom: CALM_EDGE_STRIP.bottom,
-      uYs: burnEdge(CALM_EDGE_SEED).ys,
-    },
-    quality: 0.7,
-  },
+      uYs: ys,
+    };
+    return [
+      { path: RISING_CALM_EDGES[index], shader: EDGE, size: [800, 540], uniforms, quality: 0.7 },
+      // Soft by nature: half the strip's resolution.
+      {
+        path: RISING_CALM_SCORCHES[index],
+        shader: SCORCH,
+        size: [400, 270],
+        uniforms,
+        quality: 0.7,
+      },
+    ];
+  }),
   { path: RISING_CALM_CHAR, shader: CHAR, size: [256, 256], uniforms: { uSeed: 3 }, quality: 0.72 },
   {
     path: RISING_CALM_SMOKE,

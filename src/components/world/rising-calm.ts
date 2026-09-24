@@ -18,6 +18,15 @@ export const CALM_EDGE_STRIP = { top: -60, bottom: 290 } as const;
 export const CALM_EDGE_SEED = 0x2b17;
 
 /**
+ * A second profile at the same mean depth but shaped differently (its
+ * tongues where the first has bays). Halfway up, the front re-forms
+ * (rising-sequence.ts): a second strip fades in over the first, drawn on
+ * whichever of the two profiles has burned further at each point
+ * (calmEdgeAhead), so the silhouette changes without any print un-burning.
+ */
+export const CALM_EDGE_SEED_B = 0x6e03;
+
+/**
  * A ragged, fractal front: 1-D midpoint displacement from a fixed seed, 128
  * segments, then low-passed (a 7-tap kernel), so it tears into tongues and
  * bays instead of zig-zagging like a chart. Returned as y (0-400, y down) at
@@ -59,13 +68,29 @@ export function burnEdge(seed: number) {
     });
     return Math.min(200, Math.max(-15, (sum / weight) * 2.2 + CALM_EDGE_BOX.mean));
   });
+  return profile(ys);
+}
+
+function profile(ys: number[]) {
+  const segments = ys.length - 1;
   /** The edge's y (0-400) at x (0-1000). */
   const at = (x: number) => {
-    const position = (Math.min(1000, Math.max(0, x)) / 1000) * SEGMENTS;
-    const index = Math.min(SEGMENTS - 1, Math.floor(position));
+    const position = (Math.min(1000, Math.max(0, x)) / 1000) * segments;
+    const index = Math.min(segments - 1, Math.floor(position));
     return ys[index] + (ys[index + 1] - ys[index]) * (position - index);
   };
   return { ys, at };
+}
+
+/**
+ * The front after it re-forms: at each point, whichever profile has burned
+ * further (the higher lip; y is down). It covers all the char of the first
+ * profile, so fading it in over the first only ever burns forward.
+ */
+export function calmEdgeAhead() {
+  const first = burnEdge(CALM_EDGE_SEED).ys;
+  const second = burnEdge(CALM_EDGE_SEED_B).ys;
+  return profile(first.map((y, index) => Math.min(y, second[index])));
 }
 
 // Flame sprites seated along the edge: [centre in % across, width in cqmin,
@@ -89,24 +114,29 @@ const CALM_SEATS = [
 
 export const CALM_FLAME_FRAMES = 3;
 
-const CALM_EDGE = burnEdge(CALM_EDGE_SEED);
+const CALM_EDGES = [burnEdge(CALM_EDGE_SEED), calmEdgeAhead()];
 
 export const CALM_FLAME_SEATS = CALM_SEATS.map(([centre, width, height], index) => {
   // The edge under the seat: halfway between its depth at the centre and its
   // deepest point across the seat, so the sprite's foot stays behind the
   // char while its bright base still clears the lip.
   const x = centre * 10;
-  const deepest = Math.max(...[-50, -25, 0, 25, 50].map((offset) => CALM_EDGE.at(x + offset)));
-  const lip = (CALM_EDGE.at(x) + deepest) / 2;
+  const [dip, dipB] = CALM_EDGES.map((edge) => {
+    const deepest = Math.max(...[-50, -25, 0, 25, 50].map((offset) => edge.at(x + offset)));
+    const lip = (edge.at(x) + deepest) / 2;
+    // How far the edge dips below its mean line here, in % of the box:
+    // landscape screens stretch the edge (--rw-edge-k).
+    return Number((((lip - CALM_EDGE_BOX.mean) / CALM_EDGE_BOX.height) * 100).toFixed(2));
+  });
   return {
     centre,
     width,
     height,
     frame: (index * 2) % CALM_FLAME_FRAMES,
     mirror: index % 4 >= 2,
-    // How far the edge dips below its mean line here, in % of the box:
-    // landscape screens stretch the edge (--rw-edge-k).
-    dip: Number((((lip - CALM_EDGE_BOX.mean) / CALM_EDGE_BOX.height) * 100).toFixed(2)),
+    dip,
+    // The re-formed front's dip (never deeper): the seat slides up onto it.
+    dipB,
   };
 });
 

@@ -1,13 +1,16 @@
-// RISING THE WORLD — one full-screen pass: the dive, then the image burning
-// like a print held over a fire (scorch, blisters, an ember edge eating
-// inward, char with cooling cracks and ash), flames, smoke, heat haze, sparks.
-// GLSL ES 1.00 (WebGL 1 and 2). OCTAVES / BLUR_TAPS are injected as #defines
-// so the adaptive quality ladder can recompile a cheaper variant:
+// RISING THE WORLD — the main pass: the dive, then the image burning like a
+// print held over a fire (scorch, blisters, an ember edge eating inward, char
+// with cooling cracks and ash), with the flames and smoke of the half-
+// resolution pass (rising-flames.frag.glsl) composited over it, heat haze,
+// ash and sparks. GLSL ES 1.00 (WebGL 1 and 2). OCTAVES / BLUR_TAPS are
+// injected as #defines so the adaptive quality ladder can recompile a
+// cheaper variant:
 //   OCTAVES 4  everything
-//   OCTAVES 3  no smoke detail or self-shadow, no ash, no haze, no large
-//              blisters, one spark layer and no drifting embers
-//   OCTAVES 2  also no smoke, no sparks, no small flame eddies, no crack
-//              breaks or ember specks, and the firelight flickers with the tongues
+//   OCTAVES 3  no ash, no haze, no large blisters, one spark layer and no
+//              drifting embers (the flame pass: no smoke detail or self-shadow)
+//   OCTAVES 2  also no sparks, no crack breaks or ember specks, and the
+//              firelight flickers with the flames (the flame pass: no smoke,
+//              no small flame eddies)
 //
 // Turbulence comes from uNoise, a tileable noise texture baked once per run
 // (rising-noise.frag.glsl), so the burn costs texture fetches, not per-pixel
@@ -22,7 +25,7 @@ precision mediump float;
 #define OCTAVES 4
 #endif
 #ifndef BLUR_TAPS
-#define BLUR_TAPS 8
+#define BLUR_TAPS 12
 #endif
 
 uniform vec2 uRes;          // drawing-buffer size (px)
@@ -45,6 +48,7 @@ uniform vec2 uFocus;        // dive focal point in world UV (reached as the zoom
 uniform sampler2D uWorld;
 uniform sampler2D uRider;
 uniform sampler2D uNoise;   // r, g: fbm; b: cell edge distance (F2 - F1); a: fine fbm. Tileable, mipmapped.
+uniform sampler2D uFire;    // the flame pass: flame opacity, temperature, smoke cover, smoke light
 
 // GLSL ES 1.00 leaves smoothstep(e0, e1, x) undefined for e0 >= e1 (some mobile drivers
 // return garbage), so falling edges use this instead.
@@ -131,10 +135,11 @@ vec2 ashLayer(vec2 q, vec2 cells, float speed, float seed) {
   return vec2(flake, rim * step(0.9, h));
 }
 
-// Sheets of ash lifting off the front: torn, curled (one side lit by the
-// fire, the other in shadow), turning as they rise, with a burning rim on the
-// edge turned to the fire. q is aspect-correct, so they keep their shape on
-// any screen. Returns (cover, lit side 0..1, rim).
+// Sheets of ash lifting off the front: torn and curled charred paper (one
+// side turned to the fire, the other in shadow), fibrous and blotched across
+// its face, turning as it rises, with a thin, broken burning rim on the edge
+// turned to the fire. q is aspect-correct, so they keep their shape on any
+// screen. Returns (cover, light on the face 0..1, rim).
 vec3 ashSheet(vec2 q, vec2 cells, float speed, float seed) {
   vec2 g = q * cells;
   g.x += sin(q.y * 2.4 + seed + uTime * 0.45) * 0.22;
@@ -150,14 +155,18 @@ vec3 ashSheet(vec2 q, vec2 cells, float speed, float seed) {
   r = vec2(cs * r.x - sn * r.y, sn * r.x + cs * r.y);
   float turn = sin(uTime * (0.9 + 0.8 * h) + h * 9.0);
   // Foreshortened as it turns, and bowed: curled paper.
-  vec2 s = r / ((0.02 + 0.02 * hash12(id + seed + 9.1)) * vec2(0.3 + 0.7 * abs(turn), 1.0));
+  vec2 s = r / ((0.016 + 0.016 * hash12(id + seed + 9.1)) * vec2(0.3 + 0.7 * abs(turn), 1.0));
   s.y += 0.35 * s.x * s.x * sign(turn);
   float ang = atan(s.y, s.x);
-  float torn = length(s) / (1.0 + 0.26 * sin(3.0 * ang + h * 20.0) + 0.13 * sin(7.0 * ang + h * 7.0));
-  float cover = fall(1.0, 0.86, torn) * step(0.5, h);
+  float torn = length(s) / (1.0 + 0.26 * sin(3.0 * ang + h * 20.0) + 0.13 * sin(7.0 * ang + h * 7.0)
+                                + 0.06 * sin(13.0 * ang + h * 3.0));
+  // Fibres and blotches that turn with the sheet: the face is never smooth.
+  float fibre = 0.5 + 0.28 * sin(s.x * 9.0 + s.y * 3.0 + h * 40.0) * sin(s.y * 6.0 - s.x * 2.0 + h * 13.0)
+              + 0.22 * sin(s.x * 4.0 - s.y * 11.0 + h * 17.0);
+  float cover = fall(1.0, 0.84, torn) * step(0.5, h) * (0.72 + 0.28 * smoothstep(0.2, 0.6, fibre));
   float lit = clamp(0.5 + 0.5 * s.x * sign(turn) - 0.35 * s.y, 0.0, 1.0);
-  float rim = cover * smoothstep(0.6, 0.98, torn) * smoothstep(0.25, 0.75, lit);
-  return vec3(cover, lit, rim);
+  float rim = cover * smoothstep(0.8, 0.97, torn) * smoothstep(0.4, 0.62, fibre) * smoothstep(0.3, 0.8, lit);
+  return vec3(cover, lit * lit * (0.35 + 0.65 * fibre), rim);
 }
 
 void main() {
@@ -166,8 +175,6 @@ void main() {
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0);          // centred, aspect-correct
   float r = length(p);
   float T = uTime;
-  // Interleaved gradient noise: dithers the blur taps and the breakthrough edge.
-  float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
 
   // ---- Shockwave: a refractive ring after the title cut (no brightness strobe).
   // Kept gentle: a stronger push drags the flame pattern back and forth across a
@@ -182,15 +189,13 @@ void main() {
     r = length(p);
   }
 
-  // Flame space: tongue density follows the screen width, so a portrait phone
-  // gets as many tongues across as a desktop instead of two giant blobs.
   float kx = max(1.0, 0.75 / aspect);
   vec2 fq = vec2(p.x * kx, uv.y);
   float burning = step(0.0001, uFlame + uBurn);     // uniform: off during the dive
 
   // ---- Burn field: the print burns from the bottom edge. A low octave tears
   // the front into tongues and islands, finer octaves fray the edge.
-  float d = 1.0;          // > 0 intact (height of the front below, in field units), < 0 burnt
+  float d = 1.0;          // > 0 intact, < 0 burnt (field units: 0.8 a screen height)
   float scorch = 0.0;
   float burnt = 0.0;
   float edgeFine = 0.5;
@@ -213,16 +218,13 @@ void main() {
     // A soft step (a couple of pixels even when the canvas is upscaled), under the lip.
     burnt = fall(0.0, -0.02, d);
   }
-  float hy = d / 0.8;                                // height above the front (screen heights)
+  float hy = d / 0.8;                                // distance from the front (screen heights)
   float hyc = max(hy, 0.0);
   // The front climbs about 0.23 field units a second: seconds since it passed here.
   float since = max(-d, 0.0) * 4.3;
 
-  // ---- Flames: domain-warped, upward-advected turbulence rising off the front.
-  // Big eddies rise slower than small ones; the sway bends the tips most and
-  // pinches them off. A tongue is wherever the turbulence beats a threshold
-  // that climbs with the height above the front: a continuous sheet at the
-  // lip, tongues of mixed height above it, and detached flamelets at the tips.
+  // ---- The flame pass (half resolution): flames rising straight up off the
+  // front, their opacity from optical depth, and the smoke plumes.
   vec3 emit = vec3(0.0);
   float flameA = 0.0;
   float light = 0.0;
@@ -231,93 +233,35 @@ void main() {
   vec3 smokeCol = vec3(0.0);
   float hot = 0.9;
   if (burning > 0.5) {
-    vec2 sway = nz(fq * vec2(0.42, 0.3) + vec2(0.13, -fract(T * 0.17))).rg - 0.5;
-    float tall = nz(vec2(fq.x * 0.31 + 0.71, 0.37 + fract(T * 0.043))).g;   // tongue height along the front
-    // Each tongue swells and sinks on its own slow beat (about once a second),
-    // never all together: no global brightness pulse.
-    float pulse = nz(vec2(fq.x * 0.83 + 0.33, 0.61 + fract(T * 0.21))).r;
-    float H = (0.2 + 0.32 * smoothstep(0.25, 0.8, tall)) * (0.45 + 0.55 * uFlame) * (0.78 + 0.44 * pulse);
-    float h = hyc / H;
-    // The sway bends the tips far more than the roots: the tongues lick, and
-    // the vertical warp pinches their tips off into flamelets.
-    float bend = 0.1 + 0.42 * min(h, 1.8) * min(h, 1.8);
-    vec2 q = fq * vec2(1.5, 0.72) + sway * vec2(0.34, 0.15) * bend;
-    float n1 = nz(q + vec2(0.0, -fract(T * 0.44))).r;
-#if OCTAVES >= 3
-    // Small eddies stretched upright: they split the sheet into separate tongues.
-    float n2 = nz(q * vec2(2.4, 1.6) + vec2(0.37, -fract(T * 0.95))).g;
-    float turb = n1 * 0.55 + n2 * 0.45;
-#else
-    float n2 = n1;
-    float turb = n1;
-#endif
-    // Only the freshest char still feeds the flames.
-    float fuel = exp(min(hy, 0.0) / 0.04);
-    float th = 0.12 + 0.74 * (1.0 - exp(-1.2 * h)) + 0.3 * smoothstep(1.6, 2.6, h);
-    // No holes in the sheet at the root: the threshold only bites above it.
-    float dens = (turb - th + 0.3 * fall(0.45, 0.1, h)) * fuel - (1.0 - fuel) * 0.3;
-    // After the image is gone, low fire keeps licking along the bottom edge.
-    // Patchy: it keeps burning only where the last fuel lies along the edge.
-    float resH = uv.y / (0.05 + 0.08 * tall);
-    float resDens = (turb - min(0.36 + 0.6 * resH, 0.95)) * smoothstep(0.72, 0.97, uBurn)
-                  * smoothstep(0.3, 0.6, tall);
-    dens = max(dens, resDens);
-    // A crisp edge (a flame is a thin reaction sheet), a translucent body.
-    float body = smoothstep(0.0, 0.06, dens);
-    flameA = body * uFlame;
-    // Blackbody: the soot is hottest at the root and cools as it rises, so the
-    // tongues run yellow-white at the base, orange in the body and dim deep red
-    // at the tips; the folds of the flame (small eddies) glow brighter.
-    float core = smoothstep(0.0, 0.32, max((turb - th) * fuel, resDens)) * (0.8 + 0.4 * n2);
-    float temp = (0.38 + 0.46 * core) * (1.0 - 0.46 * smoothstep(0.0, 1.35, h))
-               + 0.1 * exp(-h * 6.0) * fuel;
-    emit += blackbody(temp) * body * uFlame;
+    vec4 fire = texture2D(uFire, uv);
+    // The flames just below, which light this part of the print.
+    vec4 fireBelow = texture2D(uFire, uv - vec2(0.0, 0.05));
+    flameA = fire.r * uFlame;
+    float temp = fire.g * 1.25 / max(fire.r, 0.004);
+    emit += blackbody(temp) * flameA;
     // The glow a lens sees around a fire.
-    emit += vec3(0.5, 0.12, 0.02) * exp(-hyc / 0.07) * fuel * uFlame * 0.35;
-    hot = 0.84 + 0.4 * sway.y;
+    float fuel = exp(min(hy, 0.0) / 0.04);
+    emit += vec3(0.5, 0.12, 0.02) * exp(-hyc / 0.07) * fuel * uFlame * 0.3;
 
-    // Warm, flickering light from the fire on what is left of the print.
+    // Warm, flickering light from the fire on what is left of the print: it
+    // follows the flames below (each tongue on its own beat: local, gentle).
 #if OCTAVES >= 3
-    float flick = nz(vec2(fq.x * 0.22 + 0.4, fract(T * 0.31))).r;
+    float flick = 0.8 + 0.34 * fireBelow.r;
 #else
-    float flick = pulse;
+    float flick = 0.8 + 0.34 * fire.r;
 #endif
-    light = uFlame * exp(-hyc / 0.24) * (0.86 + 0.3 * (flick - 0.5)) * (1.0 - burnt * 0.6);
+    light = uFlame * exp(-hyc / 0.24) * flick * 0.8 * (1.0 - burnt * 0.6);
 
-    // Heat haze: shimmer in a narrow band of hot air just above the flame bodies.
-    hazeAmt = uFlame * exp(-((hy - 0.08) * (hy - 0.08)) / 0.0128) * step(-0.02, hy);
+    // Heat haze: shimmer in the hot air over the flame bodies and just above them.
+    hazeAmt = uFlame * exp(-((hy - 0.12) * (hy - 0.12)) / 0.02) * step(-0.02, hy);
 
-    // Smoke: a lit medium, not a darkener. Billows rise faster than the front
-    // climbs and spread as they go; they thicken above the tongue tips and
-    // collect towards the top of the frame. Grey-brown in the dark, warm on
-    // the underside the fire lights, shadowed on top (one more fetch towards
-    // the fire gives the self-shadow).
-#if OCTAVES >= 3
-    float sh = hy - 0.1;
-    float widen = 1.0 / (1.0 + 0.9 * max(sh, 0.0));
-    vec2 sq = vec2(p.x * kx * 0.8 * widen, uv.y * 0.7);
-    vec2 sw = nz(sq * 0.6 + vec2(0.71, -fract(T * 0.11))).gr - 0.5;
-    vec2 sp0 = sq + sw * 0.3 + vec2(0.29, -fract(T * 0.3));
-    float s1 = nz(sp0).r;
-#if OCTAVES >= 4
-    float s2 = nz(sq * 2.3 + sw * 0.2 + vec2(0.55, -fract(T * 0.5))).g;
-    float below = nz(sp0 - vec2(0.0, 0.04)).r;
-    float sn = s1 * 0.7 + s2 * 0.3;
-#else
-    float below = s1 - 0.02;
-    float sn = s1;
-#endif
-    // Plumes rise off the tallest tongues and merge higher up.
-    float plume = mix(smoothstep(0.35, 0.7, tall), 1.0, smoothstep(0.1, 0.6, sh));
-    float envelope = smoothstep(0.02, 0.2, sh) * (0.5 + 0.5 * smoothstep(0.35, 0.95, uv.y)) * plume;
-    smoke = smoothstep(0.48, 0.66, sn) * envelope * uFlame;
-    float facing = clamp(0.5 + (s1 - below) * 7.0, 0.0, 1.0);
-    float warm = exp(-max(sh, 0.0) / 0.4) * uFlame;
-    // Brighter than the night road, darker than the lit armour; denser cores
-    // and the tops (turned away from the fire) darker, the underside warm.
-    smokeCol = vec3(0.27, 0.25, 0.23) * (0.55 + 0.45 * facing) * (1.0 - 0.3 * smoothstep(0.62, 0.8, sn))
-             + vec3(0.6, 0.23, 0.07) * warm * (0.2 + 0.8 * facing);
-#endif
+    // Smoke: grey billows, cool blue-grey away from the fire, warm only on
+    // the undersides the flames light; the veil stays thin outside the cores.
+    smoke = fire.b;
+    float shade = fire.a / max(fire.b, 0.004);
+    float warm = exp(-max(hy - 0.12, 0.0) / 0.22) * uFlame;
+    smokeCol = mix(vec3(0.07, 0.075, 0.085), vec3(0.36, 0.355, 0.365), shade)
+             + vec3(0.62, 0.24, 0.07) * warm * shade * shade;
   }
 
   // ---- The print: cover fit, dive zoom, radial blur. At zoom 1 the frame is
@@ -334,24 +278,29 @@ void main() {
   if (burning > 0.5) {
     // Mostly vertical, low across: shimmer, not a liquified print.
     vec2 hn = nz(vec2(p.x * 1.4, uv.y * 2.2) + vec2(0.5, -fract(T * 0.62))).rg - 0.5;
-    haze = hn * vec2(0.006, 0.01) * hazeAmt;
+    haze = hn * vec2(0.007, 0.012) * hazeAmt;
   }
 #endif
   vec2 wuv = (uv + haze - 0.5) * uWorldScale * zoom + focus;
   vec3 world;
   if (uBlur > 0.002) {
-    // Taps jittered per pixel: the ghost copies become fine grain. Around the
-    // opening's edge each tap picks its side by its own jitter, so the two
-    // views cross-dissolve over a soft ring instead of a seam.
+    // Taps jittered per pixel by white noise that changes every frame: the
+    // ghost copies become fine moving grain, with no diagonal weave. Around
+    // the opening's edge each tap picks its side by its own jitter, so the
+    // two views cross-dissolve over a soft ring instead of a seam.
+    float grain = hash12(gl_FragCoord.xy + fract(T * 7.31) * vec2(419.0, 173.0));
+    vec2 w0 = 0.5 * uWorldScale * uZoom;
+    vec2 c0 = clamp(mix(uFrame, uFocus, clamp((1.0 - uZoom) * 5.0, 0.0, 1.0)), w0, 1.0 - w0);
+    vec2 w1 = 0.5 * uWorldScale * uArrive;
+    vec2 c1 = clamp(mix(uFrame, uFocus, clamp((1.0 - uArrive) * 5.0, 0.0, 1.0)), w1, 1.0 - w1);
+    vec2 span = (uv - 0.5) * uWorldScale;
     world = vec3(0.0);
     for (int i = 0; i < BLUR_TAPS; i++) {
-      float jitter = fract(ign + float(i) * 0.618034);
-      float k = (float(i) + ign) / float(BLUR_TAPS);
-      float z = mix(uZoom, uArrive, opened * step(r, uOpen + (jitter - 0.5) * 0.36));
-      vec2 w = 0.5 * uWorldScale * z;
-      vec2 fc = clamp(mix(uFrame, uFocus, clamp((1.0 - z) * 5.0, 0.0, 1.0)), w, 1.0 - w);
-      vec2 tuv = (uv + haze - 0.5) * uWorldScale * z + fc;
-      world += tex(uWorld, fc + (tuv - fc) * (1.0 - uBlur * k));
+      // Stratified: each tap jittered within its own slice of the streak.
+      float jitter = fract(grain + float(i) * 0.618034);
+      float k = (float(i) + jitter) / float(BLUR_TAPS);
+      float side = opened * step(r, uOpen + (jitter - 0.5) * 0.36);
+      world += tex(uWorld, mix(c0, c1, side) + span * mix(uZoom, uArrive, side) * (1.0 - uBlur * k));
     }
     world /= float(BLUR_TAPS);
   } else {
@@ -367,16 +316,28 @@ void main() {
   float lum0 = dot(world, vec3(0.299, 0.587, 0.114));
   world = world * (1.0 + light * vec3(1.25, 0.55, 0.22)) + light * vec3(0.055, 0.016, 0.003);
 
+  // The surface of the print: plates about 40 and about 22 px across (on a
+  // 915 px screen), their outlines wobbled by a fine field. Ahead of the
+  // front they are blisters; behind it the same cells are the char's plates.
+  vec4 cf = vec4(0.5, 0.5, 0.3, 0.5);               // fine: fibres, crazing, specks
+  float breathe = 0.6;                              // each patch's slow beat
+  vec4 chA = vec4(0.5);
+  vec4 chB = vec4(0.5);
+  if (burning > 0.5) {
+#if OCTAVES >= 3
+    cf = nz(uv * vec2(4.1 * aspect, 4.1) + vec2(0.71, 0.43));
+    breathe = nz(uv * vec2(2.3 * aspect, 2.3) + vec2(0.13, fract(T * 0.23))).r;
+#endif
+    vec2 wob = (cf.rg - 0.5) * 0.035;
+    chA = nz(uv * vec2(1.45 * aspect, 1.45) + wob + vec2(0.37, 0.19));
+    chB = nz(uv * vec2(2.6 * aspect, 2.6) + wob + vec2(0.83, 0.61));
+  }
+
   // ---- Scorch ahead of the front: the emulsion yellows, browns, blisters and
   // blackens at the lip before it catches.
-  float cells = 0.5;
+  float cells = chB.b;
   if (burning > 0.5) {
-    cells = nz(uv * vec2(3.4 * aspect, 3.4) + vec2(0.3, 0.8)).b;
-#if OCTAVES >= 4
-    float cellsL = nz(uv * vec2(1.6 * aspect, 1.6) + vec2(0.62, 0.21)).b;
-#else
-    float cellsL = cells;
-#endif
+    float cellsL = chA.b;
     float lum = dot(world, vec3(0.299, 0.587, 0.114));
     vec3 sepia = lum * vec3(1.16, 0.8, 0.5) + vec3(0.018, 0.007, 0.0);
     world = mix(world, sepia, smoothstep(0.0, 0.45, scorch) * 0.9);
@@ -385,57 +346,58 @@ void main() {
     // Blisters: raised bubbles catch the firelight, their rims stay dark. They
     // come in patches, small here and large there, and the rims melt under
     // the flames instead of speckling through them.
-    float band = smoothstep(0.2, 0.45, scorch) * fall(0.95, 0.75, scorch);
+    float band = smoothstep(0.15, 0.4, scorch) * fall(0.75, 0.55, scorch);
     float patchy = smoothstep(0.4, 0.62, midN);
     float large = smoothstep(0.35, 0.55, lowN) * (1.0 - patchy);
     float bubble = max(smoothstep(0.42, 0.62, cells) * patchy, smoothstep(0.4, 0.6, cellsL) * large);
     float rim = smoothstep(0.3, 0.38, cells) * fall(0.46, 0.38, cells) * patchy;
-    world = mix(world, world * 1.7 + vec3(0.05, 0.02, 0.004) * (0.4 + light), bubble * band * 0.7);
+    world = mix(world, world * 1.45 + vec3(0.04, 0.016, 0.003) * (0.4 + light), bubble * band * 0.7);
     world *= 1.0 - rim * band * 0.4 * (1.0 - flameA);
     world = mix(world, vec3(0.014, 0.007, 0.004), smoothstep(0.72, 1.0, scorch));
   }
 
-  // ---- Char: carbon that keeps a ghost of the print, plates split by
-  // fissures whose edges curl up grey-white, greying to ash where it has burned
-  // longest; the fissures and ember specks glow and cool slowly (breathing
-  // locally); the rider emerges from the ash.
+  // ---- Char: carbon that keeps a ghost of the print, in patches of large
+  // and of small plates. Most fissures stay shut (dark hairlines); a
+  // minority gape, glow and cool slowly (breathing locally), their edges
+  // curled up grey-white; the ash greys where it has burned longest; the
+  // carbon has a faint sheen. The rider emerges from the ash, and the net
+  // fades out as it does.
   vec3 col = world;
   if (burning > 0.5) {
-#if OCTAVES >= 3
-    vec4 cf = nz(uv * vec2(4.1 * aspect, 4.1) + vec2(0.71, 0.43));   // fine: fibres, crazing, specks
-    float breathe = nz(uv * vec2(2.3 * aspect, 2.3) + vec2(0.13, fract(T * 0.23))).r;
-#else
-    vec4 cf = vec4(0.5, 0.5, 0.3, 0.5);
-    float breathe = 0.6;
-#endif
-    // Plates about 40 px across, their outlines wobbled by the fine field.
-    vec4 ch = nz(uv * vec2(1.45 * aspect, 1.45) + (cf.rg - 0.5) * 0.035 + vec2(0.37, 0.19));
+    hot = 0.78 + 0.2 * midN + 0.12 * breathe;
     // Everything below only shows on the char: skipped above the front. The
     // noise fetches stay outside, in uniform control flow for the mipmaps;
     // the rider art inside has no mipmaps.
     if (burnt > 0.001) {
       float cool = exp(-since * 0.55);                    // 1 at the front, a third after 2 s
       float lingering = smoothstep(0.28, 0.7, uFlame);    // everything goes out as the fire dies
-      float ashN = ch.a;
-      // Each plate domes a little (its middle catches more light), and keeps a
-      // ghost of the print: the emulsion chars unevenly.
-      float dome = smoothstep(0.05, 0.5, ch.b);
+      float emerge = uReveal * smoothstep(0.05, 0.65, since);
+      float big = smoothstep(0.46, 0.54, lowN);
+      float e = mix(chB.b, chA.b, big);                   // distance to the nearest fissure
+      float plateN = mix(chB.r, chA.r, big);
+      // Drawing-buffer pixels across a plate: on the ladder's coarse rungs the
+      // net widens to a pixel and then fades instead of stair-stepping.
+      float platePx = uRes.y / mix(41.6, 23.2, big);
+      float px = 1.8 / platePx;                           // one pixel, in edge-distance units
+      float net = smoothstep(9.0, 18.0, platePx) * (1.0 - emerge);
+      float ashN = chA.a;
+      float dome = smoothstep(0.05, 0.5, e);
       vec3 charCol = vec3(0.018, 0.015, 0.013) * (0.6 + 0.5 * ashN + 0.4 * dome)
                    + lum0 * vec3(0.05, 0.046, 0.043);
       float greyAsh = smoothstep(0.58, 0.8, ashN * 0.55 + cf.a * 0.45) * smoothstep(0.4, 2.2, since);
       charCol = mix(charCol, vec3(0.1, 0.094, 0.088) * (0.7 + 0.5 * dome), greyAsh * 0.6);
-      // Cracks: the char shrinks into plates (the edges of a Voronoi net), a
-      // finer crazing inside them; a few gaps stay shut. The plates' edges curl
-      // up and whiten to ash, lit warm by the glow in the crack while it lasts.
-      // Cracks run everywhere, but only gape (and glow) in some stretches.
-      float open = smoothstep(0.38, 0.62, ch.r) * smoothstep(0.3, 0.5, cf.r);
-      float crack = fall(0.05, 0.012, ch.b) * (0.45 + 0.55 * open);
-      float lip = smoothstep(0.03, 0.07, ch.b) * fall(0.15, 0.07, ch.b) * (0.3 + 0.7 * open);
-      float craze = fall(0.06, 0.02, cf.b) * (1.0 - crack);
+      // A faint glossy sheen where the plates dome.
+      charCol += vec3(0.02, 0.022, 0.026) * smoothstep(0.55, 0.85, cf.g) * dome * (1.0 - greyAsh);
+      // Gaping in stretches, and only along some edges of a plate there.
+      float open = smoothstep(0.58, 0.7, plateN) * smoothstep(0.42, 0.6, cf.r) * smoothstep(0.4, 0.58, cf.a);
+      float hair = fall(0.012 + px, 0.0, e) * (1.0 - open);
+      float gap = fall(0.05 + px, 0.012, e) * open;
+      float lip = smoothstep(0.04, 0.08, e) * fall(0.16, 0.08, e) * open;
+      float craze = fall(0.05, 0.015, cf.b) * (1.0 - hair) * (1.0 - gap);
       vec3 ashRim = vec3(0.17, 0.16, 0.15) + blackbody(0.5) * 0.14 * cool * lingering;
       float whiten = smoothstep(0.02, 0.4, since);
-      charCol = mix(charCol, ashRim, (lip * 0.7 + craze * 0.22) * whiten);
-      charCol = mix(charCol, vec3(0.006, 0.004, 0.004), crack * 0.8);
+      charCol = mix(charCol, ashRim, (lip * 0.75 + craze * 0.14) * whiten * net);
+      charCol = mix(charCol, vec3(0.006, 0.004, 0.004), max(hair * 0.65, gap * 0.9) * net);
       charCol += light * vec3(0.12, 0.04, 0.01) * cool;
       vec2 ruv = (uv + haze * 0.5 - 0.5) * uRiderScale + vec2(0.5, 0.5);
       float inFrame = step(0.0, ruv.x) * step(ruv.x, 1.0) * smoothstep(0.0, 0.08, ruv.x) * fall(1.0, 0.92, ruv.x);
@@ -448,49 +410,57 @@ void main() {
       float settled = clamp((1.0 - uFlame) / 0.72, 0.0, 1.0) * uReveal;
       vec3 rider = mix(rtex * vec3(1.0, 0.58, 0.46) * 0.58, rtex * 0.448 + vec3(0.066, 0.014, 0.005), settled) * inFrame;
       charCol += vec3(0.066, 0.014, 0.005) * settled;
-      float emerge = uReveal * smoothstep(0.05, 0.65, since);
       charCol = max(charCol, rider * emerge * (0.88 + 0.24 * ashN));
       col = mix(world, charCol, burnt);
 
-      // The fissures cool from orange to dull red over a couple of seconds, each
-      // patch breathing on its own slow beat (local and gentle: no strobe).
-      float crackGlow = crack * open * (0.2 + 0.8 * cool) * (0.78 + 0.44 * breathe) * lingering;
+      // The open fissures cool from orange to dull red over a couple of
+      // seconds, each patch breathing on its own slow beat (local and
+      // gentle: no strobe).
+      float crackGlow = gap * (0.2 + 0.8 * cool) * (0.78 + 0.44 * breathe) * lingering * net;
       emit += blackbody(mix(0.35, 0.6, cool) * hot) * crackGlow * burnt * 1.3;
       // Ember speckles in the char, each breathing on its own beat as it cools.
-      float speck = smoothstep(0.6, 0.78, cf.b) * smoothstep(0.56, 0.8, breathe) * smoothstep(0.5, 0.7, ch.r);
-      emit += blackbody(mix(0.4, 0.62, cool) * hot) * speck * exp(-since * 0.7) * burnt * lingering;
+      float speck = smoothstep(0.6, 0.78, cf.b) * smoothstep(0.56, 0.8, breathe) * smoothstep(0.5, 0.7, chA.r);
+      emit += blackbody(mix(0.4, 0.62, cool) * hot) * speck * exp(-since * 0.7) * burnt * lingering * (1.0 - emerge);
     }
 
     // Ember edge: an incandescent lip with a fractal edge over the soft step
     // to char, and the ember bed behind it cooling from orange to dull red.
-    float w = 0.006 + 0.009 * edgeFine;
-    float lipGlow = exp(-(d + 0.009) * (d + 0.009) / (w * w));
-    float bed = exp(min(d, 0.0) / 0.05) * burnt * (0.35 + 0.65 * smoothstep(0.04, 0.3, cells));
-    emit += blackbody(0.92 * hot) * lipGlow * 0.9 * smoothstep(0.0, 0.25, uFlame + uBurn * 2.0);
-    emit += blackbody(0.55 * hot) * bed * 0.8;
+    // It glows unevenly along its length: bright runs, and stretches that
+    // have already dulled, so it never reads as an outline.
+    float w = 0.004 + 0.006 * edgeFine;
+    float run = 0.3 + 0.7 * smoothstep(0.3, 0.62, midN * 0.55 + edgeFine * 0.45);
+    float lipGlow = exp(-(d + 0.008) * (d + 0.008) / (w * w)) * run;
+    float halo = exp(-(d + 0.01) * (d + 0.01) / 0.0004) * run;
+    float bed = exp(min(d, 0.0) / 0.035) * burnt * (0.6 + 0.4 * smoothstep(0.04, 0.3, cells));
+    emit += (blackbody(0.92 * hot) * lipGlow * 0.9 + blackbody(0.66) * halo * 0.22)
+          * smoothstep(0.0, 0.25, uFlame + uBurn * 2.0);
+    emit += blackbody(0.55 * hot) * bed * 0.7;
 
-    // Smoke over the print: it lifts the dark road into a grey-brown haze and
-    // veils the bright armour (at most 0.6), lit warm from below.
+    // Smoke over the print: defined plumes, veiling at most 0.62 in the cores
+    // and about 0.3 at their edges, so the road's reflections survive.
     col = mix(col, smokeCol, smoke * 0.62);
-    // Soot in the flame bodies dims what is behind them.
+    // Soot in the flame bodies dims what is behind them (thin flames barely).
     col *= 1.0 - flameA * 0.3;
 
     // Ash lifting off the fire in front of everything: large curled sheets
-    // with a lit face and a burning rim near the front, small flakes higher up.
-    // Both hide the flames behind them.
+    // with a dark fibrous face and a thin, broken burning rim near the front,
+    // small flakes higher up. Both hide the flames behind them.
     // Both are hash-only (no texture fetches), so they are skipped where no
     // ash can be.
-    float ashNear = uFlame * exp(-max(hy, 0.0) / 0.45) * smoothstep(-0.03, 0.03, hy);
+    float ashNear = uFlame * exp(-max(hy, 0.0) / 0.45) * smoothstep(-0.03, 0.03, hy)
+                  * fall(1.05, 0.75, hy);
 #if OCTAVES >= 4
-    if (ashNear > 0.01) {
+    float sheetEnv = uFlame * fall(0.3, 0.12, hy) * smoothstep(-0.02, 0.03, hy);
+    if (sheetEnv > 0.002) {
       vec3 sheet = ashSheet(p + vec2(0.37, 0.0), vec2(7.0, 5.0), 0.36, 23.0);
-      float sheetEnv = uFlame * fall(0.3, 0.12, hy) * smoothstep(-0.02, 0.03, hy);
       float sheetA = sheet.x * sheetEnv;
-      vec3 sheetCol = mix(vec3(0.03, 0.026, 0.024), vec3(0.26, 0.245, 0.23), sheet.y * sheet.y)
-                    + vec3(0.32, 0.12, 0.03) * sheet.y * light;
+      vec3 sheetCol = vec3(0.02, 0.018, 0.017) + vec3(0.13, 0.122, 0.115) * sheet.y
+                    + vec3(0.2, 0.075, 0.02) * sheet.y * light;
       col = mix(col, sheetCol, sheetA);
       emit *= 1.0 - sheetA;
-      emit += blackbody(0.62 * hot) * sheet.z * sheetEnv * 1.4;
+      emit += blackbody(0.6 * hot) * sheet.z * sheetEnv * 1.2;
+    }
+    if (ashNear > 0.002) {
       vec2 ash = ashLayer(fq + vec2(0.2, 0.1), vec2(9.0, 6.0), 0.2, 13.0);
       float flakeA = ash.x * ashNear * 0.9;
       col = mix(col, vec3(0.15, 0.14, 0.13) + light * vec3(0.4, 0.16, 0.05), flakeA);
@@ -502,9 +472,10 @@ void main() {
     // Sparks: orange-yellow points with short curved trails, dense near the
     // flames and burning out as they climb; embers drift up slower and cool.
     float rise = max(hy, 0.0);
-    float near = uFlame * exp(-rise / 0.55) * smoothstep(-0.05, 0.02, hy);
+    // Gone about 0.85 screen heights above the fire (faded out before the cut-off).
+    float near = uFlame * exp(-rise / 0.55) * smoothstep(-0.05, 0.02, hy) * fall(0.85, 0.55, rise);
 #if OCTAVES >= 3
-    if (near > 0.02) {
+    if (near > 0.002) {
       // At least about 1.3 drawing-buffer pixels across, whatever the ladder's scale.
       float px = 1.3 / uRes.y;
       // Half the cells hold a spark just over the flames, a tenth higher up.
@@ -542,9 +513,13 @@ void main() {
     col += lineCol * streak * 1.1;
   }
 
-  // Breakthrough: one slow swell of saturated amber light from the core. It
-  // multiplies what is lit, so the blacks stay black; never a strobe.
+  // Breakthrough: one slow swell of amber light from the core. The picture
+  // first leans towards amber (the rider's pinks and blues would otherwise
+  // bloom pastel), then the light multiplies what is lit, so the blacks stay
+  // black; never a strobe.
   float bloom = uWarp * exp(-r * r / 0.22);
+  float lumB = dot(col, vec3(0.299, 0.587, 0.114));
+  col = mix(col, lumB * vec3(1.0, 0.62, 0.3), bloom * 0.4);
   col *= 1.0 + vec3(1.1, 0.5, 0.14) * bloom;
   col += vec3(0.5, 0.2, 0.05) * bloom * 0.12;
 

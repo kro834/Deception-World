@@ -13,8 +13,9 @@ import { rexonanceImage } from "@/lib/rexonance-images";
 import {
   RISING_BURN_ART,
   RISING_CALM_CHAR,
-  RISING_CALM_EDGE,
+  RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
   risingBurnArt,
 } from "./rising-art";
@@ -103,6 +104,20 @@ const CalmFire = memo(function CalmFire() {
           ))}
         </span>
         <span className="rw-calm-ash" style={{ backgroundImage: `url(${RISING_CALM_CHAR})` }} />
+        {/* Under the flames: the print browning and blistering ahead of the lip. */}
+        <span className="rw-calm-scorch">
+          {RISING_CALM_SCORCHES.map((src, index) => (
+            <img
+              key={src}
+              className="rw-calm-edge"
+              data-profile={index}
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </span>
         {/* Behind the strip: the char cuts the flames' roots along the lip. */}
         <span className="rw-calm-flames">
           {CALM_FLAME_SEATS.map(({ centre, width, height, dip, frame, mirror }) => (
@@ -129,13 +144,17 @@ const CalmFire = memo(function CalmFire() {
           ))}
         </span>
         <span className="rw-calm-char">
-          <img
-            className="rw-calm-edge"
-            src={RISING_CALM_EDGE}
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
+          {RISING_CALM_EDGES.map((src, index) => (
+            <img
+              key={src}
+              className="rw-calm-edge"
+              data-profile={index}
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
         </span>
       </span>
       <span className="rw-calm-embers">

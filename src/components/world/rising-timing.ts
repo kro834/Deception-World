@@ -65,21 +65,44 @@ export const RISING_WORLD_FOCUS = [0.5, 0.71] as const;
 /**
  * Render pixels per frame (CSS px; the device pixel ratio is ignored: the fire
  * is soft and the DOM title stays at native resolution). Compact screens are
- * coarse-pointer or narrow ones (rising-sequence.ts).
+ * coarse-pointer or narrow ones (rising-sequence.ts). Phones fit at one pixel
+ * per CSS pixel (412 x 915 is 377k), so the print is as sharp as the portal it
+ * takes over from; a 1440 x 900 window renders 1145 x 716, more pixels across
+ * than the 1024 px texture holds.
  */
 export const RISING_COMPACT_PIXEL_BUDGET = 420_000;
 export const RISING_WIDE_PIXEL_BUDGET = 820_000;
 
 /**
- * The quality-ladder rung a run starts on (rising-fire.ts). A compact screen
- * that fits its pixel budget at one pixel per CSS pixel (phones: 412 x 915 is
- * 377k) starts at full resolution, so the print is as sharp as the portal it
- * takes over from, where a 3.5x upscale would soften it. Everything else
- * starts a step down, as before. The ladder still steps down at runtime when
- * frames run late.
+ * The quality ladder's resolution-only rungs (rising-fire.ts: RISING_LADDER),
+ * as a share of the budget's width and height.
  */
-export function risingStartRung(compact: boolean, cssWidth: number, cssHeight: number) {
-  return compact && cssWidth * cssHeight <= RISING_COMPACT_PIXEL_BUDGET ? 0 : 1;
+export const RISING_RESOLUTION_RUNGS = [1, 0.75, 0.62, 0.5] as const;
+
+/** The probe times this frame of the sequence: mid-burn, just after the cut. */
+export const RISING_PROBE_T = 5.0;
+
+/** A burn frame (both passes) should take at most this long on the GPU. */
+export const RISING_PROBE_BUDGET_MS = 8;
+
+/**
+ * Every run starts on rung 0. During the portal, the renderer times one burn
+ * frame on the GPU (rising-fire.ts: probe) and moves to the first
+ * resolution-only rung whose share of the pixels brings it within the
+ * budget, before the first frame shows: a slow GPU never starts with a
+ * resolution pop mid-burn, and a fast one keeps the sharpest picture. The
+ * ladder still steps down at runtime when frames run late.
+ */
+export function risingProbeRung(frameMs: number, fromRung = 0) {
+  if (!(frameMs > 0)) return fromRung;
+  const last = RISING_RESOLUTION_RUNGS.length - 1;
+  if (fromRung >= last) return fromRung;
+  const area = (rung: number) => RISING_RESOLUTION_RUNGS[rung] ** 2;
+  let rung = fromRung;
+  while (rung < last && (frameMs * area(rung)) / area(fromRung) > RISING_PROBE_BUDGET_MS) {
+    rung += 1;
+  }
+  return rung;
 }
 
 /** GL (assets + shader) must be ready this long after the press, or the run goes calm. */

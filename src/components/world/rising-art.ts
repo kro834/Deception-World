@@ -7,14 +7,22 @@ export const RISING_BURN_ART = "/rising-burn-rider-20260924.webp";
 export const RISING_BURN_ART_COMPACT = "/rising-burn-rider-20260924-683.webp";
 
 // The calm (CSS) tier's sprites, rendered by scripts/render-rising-calm-sprites.mjs:
-// three flame frames, the burn-edge strip, a tileable char texture and a
-// smoke billow. Loaded only when that tier shows (or is prepared for).
+// three flame frames, the burn-edge strips and the scorch ahead of them (one
+// per edge profile, rising-calm.ts), a tileable char texture and a smoke
+// billow. Loaded only when that tier shows (or is prepared for).
 export const RISING_CALM_FLAMES = [
   "/rising-calm-flame-20260924-1.webp",
   "/rising-calm-flame-20260924-2.webp",
   "/rising-calm-flame-20260924-3.webp",
 ] as const;
-export const RISING_CALM_EDGE = "/rising-calm-edge-20260924.webp";
+export const RISING_CALM_EDGES = [
+  "/rising-calm-edge-20260924.webp",
+  "/rising-calm-edge-20260924-b.webp",
+] as const;
+export const RISING_CALM_SCORCHES = [
+  "/rising-calm-scorch-20260924.webp",
+  "/rising-calm-scorch-20260924-b.webp",
+] as const;
 export const RISING_CALM_CHAR = "/rising-calm-char-20260924.webp";
 export const RISING_CALM_SMOKE = "/rising-calm-smoke-20260924.webp";
 

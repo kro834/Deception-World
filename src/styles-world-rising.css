@@ -396,7 +396,7 @@
    to 72.5% down (rising-calm.ts);
    the tiled char below takes over as the strip fades out. Static raster on
    a layer that only moves. */
-.site-shell.film-edition.mirage-edition :is(.rw-calm-char, .rw-calm-flames) {
+.site-shell.film-edition.mirage-edition :is(.rw-calm-scorch, .rw-calm-char, .rw-calm-flames) {
   position: absolute;
   top: 44%;
   left: 0;
@@ -417,6 +417,12 @@
      as on a phone. The flames are seated with the same factor. */
   transform: scaleY(var(--rw-edge-k));
   transform-origin: 50% 34.3%;
+}
+
+/* Two profiles per layer (the strip and the scorch under the flames): the
+   second fades in halfway up (rising-sequence.ts). */
+.site-shell.film-edition.mirage-edition .rw-calm-edge[data-profile="1"] {
+  opacity: 0;
 }
 
 /* Cold char under the strip, tiled (its texture is set inline), from below
