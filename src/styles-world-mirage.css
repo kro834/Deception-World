@@ -2752,13 +2752,15 @@ html:not([data-world-effects="economy"])[data-android-renderer]
       animation-range: entry 0px entry 140px;
     }
 
+    /* The archive label is an inline box, which translate does not move:
+       with it in the keyframes the reveal fell back to the main thread. */
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
         [data-rail-lock]
       ):not([data-loading]):not(:has(dialog[open]))
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
-      animation: mr-rise-in steps(14, jump-end) both;
+      animation: mr-fade-in steps(14, jump-end) both;
       animation-timeline: --mr-archive;
       animation-range: entry 0px entry 60px;
     }
@@ -2809,5 +2811,11 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   from {
     opacity: 0;
     translate: 0 8px;
+  }
+}
+
+@keyframes mr-fade-in {
+  from {
+    opacity: 0;
   }
 }

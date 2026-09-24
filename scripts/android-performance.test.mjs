@@ -179,12 +179,14 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
   // Every clip-path reveal it replaces keeps its timeline and range, on the compositor.
   for (const { body } of rules) {
     const name = body.match(/animation: (mr-[\w-]+) /)?.[1];
-    if (name) assert.equal(name, "mr-rise-in", body);
+    if (name) assert.ok(["mr-rise-in", "mr-fade-in"].includes(name), body);
   }
   assert.match(
     tier,
     /@keyframes mr-rise-in \{\s*from \{\s*opacity: 0;\s*translate: 0 8px;\s*\}\s*\}/,
   );
+  // The inline archive label, which translate would not move, only fades.
+  assert.match(tier, /@keyframes mr-fade-in \{\s*from \{\s*opacity: 0;\s*\}\s*\}/);
   // The boot, the key art and the typed headings and copy are the same on every renderer.
   const boot = strip(
     mirage.slice(mirage.indexOf("Boot: finite"), mirage.indexOf("Scroll-linked choreography")),

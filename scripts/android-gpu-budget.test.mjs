@@ -195,7 +195,7 @@ test("Android animates no image clip-path, no iris and no panel opacity surface"
 test("the compositor reveals keep the timeline, range and cadence of the wipes they replace", async () => {
   const all = styleRules(stripComments(await read("src/styles-world-mirage.css")));
   const rises = styleRules(await mirageTier()).filter(({ body }) =>
-    /animation: mr-rise-in /.test(body),
+    /animation: mr-(?:rise|fade)-in /.test(body),
   );
   assert.equal(rises.length, 5);
   const members = (selector) => {
@@ -223,11 +223,21 @@ test("the compositor reveals keep the timeline, range and cadence of the wipes t
       timing(declaration(wipe.body, "animation")),
     );
   }
-  const frames = (await mirageTier()).match(/@keyframes mr-rise-in \{([\s\S]*?\})\s*\}/)?.[1];
-  assert.ok(frames);
-  for (const [, property] of frames.matchAll(/([\w-]+)\s*:/g)) {
-    assert.ok(["opacity", "translate"].includes(property), property);
+  for (const name of ["mr-rise-in", "mr-fade-in"]) {
+    const frames = (await mirageTier()).match(
+      new RegExp(`@keyframes ${name} \\{([\\s\\S]*?\\})\\s*\\}`),
+    )?.[1];
+    assert.ok(frames, name);
+    for (const [, property] of frames.matchAll(/([\w-]+)\s*:/g)) {
+      assert.ok(["opacity", "translate"].includes(property), property);
+    }
   }
+  // An inline box ignores translate, and a reveal that animates it there
+  // falls back to the main thread: the inline archive label only fades.
+  const label = styleRules(await mirageTier()).find(({ selector }) =>
+    selector.endsWith(".threat-copy .system-label"),
+  );
+  assert.match(declaration(label.body, "animation"), /^mr-fade-in /);
 });
 
 test("no blend mode on a layer that animates on Android", async () => {
