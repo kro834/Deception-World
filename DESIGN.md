@@ -123,6 +123,15 @@ As the reader scrolls, the story, riders, records and finale headings and the st
 
 Guards: `scripts/world-reveal.test.mjs` and `scripts/verify-world-reveal.mjs`.
 
+### Rider grid on touch
+
+The eight-rider grid (`.rider-tabs`) fills most of a phone's width in the middle of `/world`, so on touch it is a page-scroll surface first and a rail second. It is long-press-to-select:
+- **Swipe.** A vertical swipe that starts on the grid scrolls the page natively (`touch-action: pan-y pinch-zoom`, `styles-frosted-controls.css`). The rail measures, locks and draws nothing until a hold engages, so a scroll that begins there costs the page nothing and never freezes it.
+- **Tap.** A quick tap selects the tapped rider, without a page lock.
+- **Hold, then drag.** After a 350 ms hold with less than 11px of movement, the held lens appears on the pressed rider and the rail takes the page lock. Dragging across the grid then selects as before, and a non-passive `touchmove` listener on the grid keeps the page still. A move before the hold engages is a swipe and never selects.
+- **Unchanged.** Mouse and pen keep the immediate press-and-drag, and every other rail (manager archive, columns, the form-archive switcher, the special sites) keeps its touch handling: it owns a touch from contact.
+- **Guards.** `src/lib/liquid/boot.js` (`holdToDrag`), `scripts/liquid-rail-grid.test.mjs`, `scripts/archive-switcher-gesture.test.mjs`, and, in the browser, `scripts/verify-liquid-grid.mjs` (a swipe from the grid scrolls at least 90% of the finger's distance; a tap selects; a held drag selects without scrolling), `verify-rail-work.mjs` and `verify-hero-touch.mjs`.
+
 ## Rising the World — 2026-09-23
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.

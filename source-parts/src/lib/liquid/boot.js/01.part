@@ -230,3 +230,26 @@ class GlassRenderer {
   detach(root) {
     if (this.activeRoot !== root) return;
     this.stop(); this.canvas.remove();
+    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
+    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
+  }
+  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
+  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
+  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
+  setPhase(phase) {
+    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
+    this.releasing = phase === 'rest';
+    if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
+    this.schedule();
+  }
+  schedule() {
+    if (this.frame !== null || !this.activeRoot || !this.geometry || !this.source) return;
+    this.frame = requestAnimationFrame(this.draw);
+  }
+  stop() { if (this.frame !== null) cancelAnimationFrame(this.frame); this.frame = null; }
+  applyScissor(gl, g) {
+    const ex = g.width * (this.pressExpansion.x + this.heldExpansion.x + this.dragExpansion.x + 0.24);
+    const ey = g.height * (this.pressExpansion.y + this.heldExpansion.y + this.dragExpansion.y);
+    const halo = 30, ratio = this.dpr;
+    const left = g.x - ex - halo + this.overscan, top = g.y - ey - halo + this.overscan;
+    const w = g.width + ex * 2 + halo * 2, h = g.height + ey * 2 + halo * 2;

@@ -29,7 +29,8 @@ const WHOLE = [
   ".episode-card-copy h4",
   ".rw-gate",
 ];
-// Rails take the page scroll lock at pointerdown; the reveal holds still.
+// Rails take the page scroll lock at pointerdown (the rider grid, on touch,
+// once its 350 ms hold engages); the reveal holds still.
 const RAILS = [
   ".manager-archive-tabs",
   ".world-column-tabs:not(.world-column-dialog-tabs)",
@@ -512,7 +513,7 @@ async function railHold(page, touch) {
       if (!point) continue;
       const before = await state();
       await press("down", point.x, point.y);
-      await page.waitForTimeout(220);
+      await page.waitForTimeout(450); // past the rider grid's touch hold
       const held = await state();
       await press("move", point.x + 12, point.y);
       await page.waitForTimeout(80);

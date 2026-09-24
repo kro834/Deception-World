@@ -39,5 +39,15 @@ test("archive rails capture contact and release through the shared viewport owne
   assert.match(liquidRail, /acquireViewportScrollLock\(\{ rail: true \}\)/);
   assert.match(liquidRail, /releasePageLock\?\.\(\)/);
   const frosted = readFileSync(new URL("../src/styles-frosted-controls.css", import.meta.url), "utf8");
-  assert.match(frosted, /\.liquid-swipe-tabs \*\s*\{[^}]*touch-action:\s*none\s*!important/);
+  // Every rail except the rider grid owns the touch from contact. The rider
+  // grid is long-press-to-select: its vertical swipes pan the page.
+  assert.match(
+    frosted,
+    /\.liquid-swipe-tabs:not\(\.rider-tabs\) \*\s*\{[^}]*touch-action:\s*none\s*!important/,
+  );
+  assert.match(
+    frosted,
+    /\.rider-tabs\.liquid-swipe-tabs \*\s*\{[^}]*touch-action:\s*pan-y pinch-zoom\s*!important/,
+  );
+  assert.doesNotMatch(frosted, /\.liquid-swipe-tabs \*\s*\{[^}]*touch-action:\s*none/);
 });

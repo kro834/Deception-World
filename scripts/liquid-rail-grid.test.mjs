@@ -67,7 +67,7 @@ function makeStyle() {
   };
 }
 
-function mountRail(boxes) {
+function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
   const source = readFileSync(new URL("../src/lib/liquid/boot.js", import.meta.url), "utf8");
   const initRailSource = extractFunction(source, "initRail");
   const win = new FakeTarget();
@@ -96,7 +96,7 @@ function mountRail(boxes) {
   const root = new FakeTarget();
   Object.assign(root, {
     dataset: {},
-    classList: { contains: (name) => name === "liquid-swipe-tabs" },
+    classList: { contains: (name) => classes.includes(name) },
     querySelector: (selector) => (selector === ":scope > .liquid-selection-lens" ? lens : null),
     querySelectorAll: (selector) => (selector === ':scope > button[role="tab"]' ? tabs : []),
     getBoundingClientRect: () => ({ left: 0, top: 0, width, height }),
@@ -126,6 +126,18 @@ function mountRail(boxes) {
     frames.clear();
     queued.forEach((callback) => callback(16));
   };
+  // Timers run only when a test advances the clock (the hold delays).
+  let now = 0;
+  let nextTimer = 1;
+  const timers = new Map();
+  const advance = (ms) => {
+    now += ms;
+    for (const [id, timer] of [...timers].sort((a, b) => a[1].at - b[1].at)) {
+      if (timer.at > now) continue;
+      timers.delete(id);
+      timer.callback();
+    }
+  };
   let lockOwners = 0;
   const context = {
     AbortController,
@@ -154,7 +166,7 @@ function mountRail(boxes) {
     },
     cancelAnimationFrame: (id) => frames.delete(id),
     clamp: (value, min, max) => Math.min(max, Math.max(min, value)),
-    clearTimeout,
+    clearTimeout: (id) => timers.delete(id),
     document: doc,
     getComputedStyle: () => ({ getPropertyValue: () => "" }),
     getRenderer: () => ({
@@ -184,17 +196,21 @@ function mountRail(boxes) {
       return best;
     },
     requestAnimationFrame,
-    setTimeout,
+    setTimeout: (callback, ms) => {
+      const id = nextTimer++;
+      timers.set(id, { callback, at: now + ms });
+      return id;
+    },
     window: win,
   };
   runInNewContext(`${initRailSource}; this.initRail = initRail;`, context);
   const dispose = context.initRail(root);
   flushFrames();
 
-  const pointer = (type, x, y, target = tabs[0]) =>
+  const pointer = (type, x, y, target = tabs[0], pointerType = "touch") =>
     root.dispatch(type, {
       isPrimary: true,
-      pointerType: "touch",
+      pointerType,
       button: 0,
       pointerId: 7,
       clientX: x,
@@ -203,7 +219,15 @@ function mountRail(boxes) {
       target,
     });
 
-  return { dispose, flushFrames, lens, pointer, root, tabs, win };
+  // A touchmove as the browser would send it while it waits for the page:
+  // returns whether the page kept it from panning.
+  const touchmove = () => {
+    let prevented = false;
+    root.dispatch("touchmove", { cancelable: true, preventDefault: () => (prevented = true) });
+    return prevented;
+  };
+
+  return { advance, dispose, flushFrames, lens, pointer, root, tabs, touchmove, win };
 }
 
 const cell = (left, top) => ({ left, top, width: 50, height: 50 });
@@ -296,6 +320,141 @@ test("a sloppy tap that lifts over another tab is cancelled", () => {
     assert.equal(ui.tabs[3].getAttribute("aria-selected"), "false");
     assert.equal(ui.root.dataset.railLock, undefined);
     assert.equal(ui.root.dataset.liquidPressed, "false");
+  } finally {
+    ui.dispose();
+  }
+});
+
+// The rider grid (.rider-tabs) is long-press-to-select on touch: a vertical
+// swipe that starts on it scrolls the page natively, and nothing is locked,
+// measured or drawn until a hold engages.
+const riderGrid = () =>
+  mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)], {
+    classes: ["rider-tabs", "liquid-swipe-tabs"],
+  });
+
+test("a swipe that starts on the rider grid leaves the page free to scroll", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    assert.equal(ui.root.dataset.liquidPressed, undefined, "no press state before the hold");
+    assert.equal(ui.touchmove(), false, "the browser may pan the page");
+    ui.pointer("pointermove", 26, 60);
+    ui.advance(1000);
+    assert.equal(ui.root.dataset.railLock, undefined, "a swipe never engages the hold");
+    assert.equal(ui.root.dataset.liquidHeld, undefined);
+    // The browser took the finger for the page scroll.
+    ui.win.dispatch("pointercancel", { pointerId: 7 });
+    assert.equal(ui.touchmove(), false);
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    assert.equal(ui.tabs[2].getAttribute("aria-selected"), "false");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a quick tap on the rider grid selects the tab without locking the page", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 75, 75, ui.tabs[3]);
+    ui.advance(120);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.pointer("pointerup", 78, 77, ui.tabs[3]);
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.advance(1000);
+    assert.equal(ui.root.dataset.railLock, undefined, "no hold fires after the tap");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a sideways swipe before the hold selects nothing", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    ui.pointer("pointermove", 80, 26);
+    ui.pointer("pointerup", 80, 26, ui.tabs[1]);
+    ui.advance(1000);
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "false");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a long press on the rider grid takes the finger and drags across tabs", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    ui.pointer("pointermove", 29, 28); // a resting finger drifts a little
+    ui.advance(349);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.advance(1);
+    assert.equal(ui.root.dataset.railLock, "true", "the hold locks the page");
+    assert.equal(ui.root.dataset.liquidPressed, "true");
+    assert.equal(ui.root.dataset.liquidHeld, "true", "the held lens shows");
+    assert.match(ui.lens.style.transform, /translate3d\(0\.00px,0\.00px,0\)/);
+    assert.equal(ui.touchmove(), true, "the page stays still under a held drag");
+
+    ui.pointer("pointermove", 80, 20);
+    ui.flushFrames();
+    assert.match(ui.lens.style.transform, /translate3d\(49\.00px,1\.00px,0\)/);
+    ui.pointer("pointermove", 80, 80);
+    ui.flushFrames();
+    assert.match(ui.lens.style.transform, /translate3d\(49\.00px,49\.00px,0\)/);
+    assert.equal(ui.touchmove(), true);
+
+    ui.pointer("pointerup", 80, 80);
+    ui.flushFrames();
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+    assert.equal(ui.root.dataset.liquidHeld, "false");
+    assert.equal(ui.touchmove(), false);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a long press released in place selects the pressed tab", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 75, 75, ui.tabs[3]);
+    ui.advance(500);
+    assert.equal(ui.root.dataset.railLock, "true");
+    ui.pointer("pointerup", 76, 75, ui.tabs[3]);
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a pen on the rider grid keeps the immediate press-and-drag", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 25, 25, ui.tabs[0], "pen");
+    assert.equal(ui.root.dataset.railLock, "true");
+    assert.equal(ui.touchmove(), true);
+    ui.pointer("pointermove", 80, 80, ui.tabs[0], "pen");
+    ui.flushFrames();
+    ui.pointer("pointerup", 80, 80, ui.tabs[0], "pen");
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("other rails keep owning a touch from contact", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(100, 0)]);
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    assert.equal(ui.root.dataset.railLock, "true");
+    assert.equal(ui.touchmove(), false, "no listener: touch-action: none owns their touches");
+    ui.pointer("pointerup", 25, 25);
   } finally {
     ui.dispose();
   }

@@ -1,26 +1,3 @@
-    root.dataset.liquidWebgl = 'false'; root.dataset.liquidWebglActive = 'false';
-    this.activeRoot = null; this.geometry = null; this.targetGeometry = null;
-  }
-  setAccent(c) { this.accent = parseColor(c); this.schedule(); }
-  setGeometry(g) { this.targetGeometry = g; if (!this.geometry) this.geometry = g; this.schedule(); }
-  setContact(p, v) { this.pointer = p; this.velocity = v; this.schedule(); }
-  setPhase(phase) {
-    this.targetPhase = phase === 'pressed' ? 0.33 : phase === 'held' ? 0.72 : phase === 'dragging' ? 1 : 0;
-    this.releasing = phase === 'rest';
-    if (this.releasing && this.activeRoot) this.activeRoot.dataset.liquidWebglActive = 'false';
-    this.schedule();
-  }
-  schedule() {
-    if (this.frame !== null || !this.activeRoot || !this.geometry || !this.source) return;
-    this.frame = requestAnimationFrame(this.draw);
-  }
-  stop() { if (this.frame !== null) cancelAnimationFrame(this.frame); this.frame = null; }
-  applyScissor(gl, g) {
-    const ex = g.width * (this.pressExpansion.x + this.heldExpansion.x + this.dragExpansion.x + 0.24);
-    const ey = g.height * (this.pressExpansion.y + this.heldExpansion.y + this.dragExpansion.y);
-    const halo = 30, ratio = this.dpr;
-    const left = g.x - ex - halo + this.overscan, top = g.y - ey - halo + this.overscan;
-    const w = g.width + ex * 2 + halo * 2, h = g.height + ey * 2 + halo * 2;
     const pl = Math.max(0, Math.floor(left * ratio));
     const pb = Math.max(0, Math.floor(this.canvas.height - (top + h) * ratio));
     const pr = Math.min(this.canvas.width, Math.ceil((left + w) * ratio));
@@ -156,8 +133,7 @@ function initRail(root) {
       return { x: (r.left - rr.left) / sx, y: (r.top - rr.top) / sy, width: r.width / sx, height: r.height / sy };
     });
   };
-  const settle = (i) => {
-    const geos = measure();
+  const settle = (i, geos = measure()) => {
     const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
     lens.style.width = g.width.toFixed(2) + 'px';
@@ -217,6 +193,16 @@ function initRail(root) {
     clearTimeout(holdTimer);
   };
   const lockScroll = root.classList.contains('liquid-swipe-tabs') || root.classList.contains('rider-tabs');
+  // The rider grid covers most of a phone's width in the middle of the page,
+  // so on touch it is a page-scroll surface first (touch-action: pan-y,
+  // styles-frosted-controls.css). A swipe that starts on it scrolls the page
+  // natively: nothing is measured, locked or drawn until a long press
+  // engages. Only then does the finger own the rail, and dragging across the
+  // tabs selects as before. A quick tap still selects the tapped tab. Mouse
+  // and pen keep the immediate press-and-drag.
+  const holdToDrag = root.classList.contains('rider-tabs');
+  const TOUCH_HOLD_MS = 350;
+  const TOUCH_SLOP = 11;
   let releasePageLock = null;
   const lockPage = () => {
     if (!lockScroll || releasePageLock) return;
@@ -226,8 +212,45 @@ function initRail(root) {
     releasePageLock?.();
     releasePageLock = null;
   };
+  // An armed touch has written nothing yet, so letting it go writes nothing:
+  // it usually ends because the browser took the finger for a page scroll.
+  const disarm = () => {
+    clearTimeout(holdTimer);
+    gesture = null;
+    pending = null;
+  };
   const cancel = () => {
+    if (gesture?.hold === 'armed') { disarm(); return; }
     const pointerId = gesture?.pointerId;
     const wasActive = Boolean(gesture);
     gesture = null;
     if (pointerId !== undefined) {
+      try { root.releasePointerCapture(pointerId); } catch { /* Capture may already be lost. */ }
+    }
+    pending = null;
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    reset();
+    unlockPage();
+    if (wasActive) settle(active);
+  };
+
+  const process = () => {
+    moveFrame = null;
+    if (!gesture || !pending) return;
+    const m = pending; pending = null;
+    const dt = Math.max(1, m.t - gesture.lastT);
+    const ivx = (m.x - gesture.lastX) / dt, ivy = (m.y - gesture.lastY) / dt;
+    const blend = 1 - Math.exp(-dt / 24);
+    gesture.vx = Math.sign(ivx) !== Math.sign(gesture.vx) ? ivx : mix(gesture.vx, ivx, blend);
+    gesture.vy = Math.sign(ivy) !== Math.sign(gesture.vy) ? ivy : mix(gesture.vy, ivy, blend);
+    gesture.lastX = m.x; gesture.lastY = m.y; gesture.lastT = m.t;
+    if (gesture.axis === 'pending') { contact(m.x, m.y); return; }
+
+    if (lockScroll) {
+      const startGeo = gesture.geos[gesture.start];
+      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
+      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
+      const geos = gesture.geos;
+      const preview = nearestTab(px, py, geos);
+      gesture.raw = preview;

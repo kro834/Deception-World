@@ -106,14 +106,30 @@ try {
     await rail.scrollIntoViewIfNeeded();
     await page.waitForTimeout(180);
     if (cdp) {
-      const first = await rail.locator('button').first().boundingBox();
-      const x = first.x + first.width / 2, y = first.y + first.height / 2;
-      const before = await page.evaluate(() => scrollY);
+      // Centre the tab: scrollIntoViewIfNeeded can leave it under the topbar.
+      const centreFirst = async () => {
+        await rail.locator('button').first().evaluate(e => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+        await page.waitForTimeout(180);
+        const box = await rail.locator('button').first().boundingBox();
+        return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+      };
+      const { x, y } = await centreFirst();
+      // Long-press-to-select: a swipe that starts on the rider grid scrolls
+      // the page, and only a held touch (350 ms) keeps it still.
       await cdp.send('Input.dispatchTouchEvent', {type:'touchStart',touchPoints:[{x,y}]});
-      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), true);
-      await cdp.send('Input.dispatchTouchEvent', {type:'touchMove',touchPoints:[{x,y:y+35}]});
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), false, 'contact alone locked the page');
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchEnd',touchPoints:[]});
+      await page.waitForTimeout(120);
+      await swipe(page, cdp, x, y);
+      const { x: hx, y: hy } = await centreFirst();
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchStart',touchPoints:[{x:hx,y:hy}]});
+      await page.waitForTimeout(450);
+      assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), true, 'the hold did not engage');
+      // Scroll anchoring may still settle a pixel after the centring scroll.
+      const before = await page.evaluate(() => scrollY);
+      await cdp.send('Input.dispatchTouchEvent', {type:'touchMove',touchPoints:[{x:hx,y:hy+35}]});
       await page.waitForTimeout(60);
-      assert.equal(await page.evaluate(() => scrollY), before, 'immediate slider touch scrolled the page');
+      assert.ok(Math.abs(await page.evaluate(() => scrollY) - before) < 2, 'held slider touch scrolled the page');
       await cdp.send('Input.dispatchTouchEvent', {type:'touchEnd',touchPoints:[]});
       assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-rail-lock')), false);
       await page.waitForTimeout(120);
@@ -177,7 +193,7 @@ try {
     const tx = to.x + to.width/2, ty = to.y + to.height/2;
     if (cdp) await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
     else { await page.mouse.move(x,y); await page.mouse.down(); }
-    await page.waitForTimeout(260);
+    await page.waitForTimeout(450); // past the touch hold (350 ms)
     for(let step=1;step<=12;step++) {
       const point={x:x+(tx-x)*step/12,y:y+(ty-y)*step/12};
       if(cdp) await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[point]});
@@ -195,7 +211,8 @@ try {
     await swipe(page, cdp, 3, height * 0.7);
     // A resized/rotated viewport must cancel a captured press even if its
     // pointerup is lost. Height-only Safari toolbar changes keep contact intact.
-    await rail.scrollIntoViewIfNeeded();
+    await tabs.first().evaluate(e => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await page.waitForTimeout(120);
     const recoveryTarget = await tabs.first().boundingBox();
     await page.mouse.move(recoveryTarget.x + recoveryTarget.width / 2, recoveryTarget.y + recoveryTarget.height / 2);
     await page.mouse.down();
