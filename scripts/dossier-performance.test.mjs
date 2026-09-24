@@ -37,6 +37,18 @@ test("the manager glow ring is static: its rotation was invisible and kept a 58r
   const ring = styleRules(stripComments(await read("src/styles-world/10.css"))).find(
     ({ selector }) => selector === ".manager-glow",
   );
+  // Nothing else promotes it on its own: on Android a backface-visibility hint
+  // alone kept it a 4512-5264px square layer (30-93 MB of tiles).
+  for (const { path, css } of await allCss()) {
+    for (const { selector, body } of styleRules(css)) {
+      if (!/\.manager-glow(?![\w-])/.test(selector)) continue;
+      assert.doesNotMatch(
+        body,
+        /(?:backface-visibility:\s*hidden|will-change:(?!\s*auto)|transform:|translate:|rotate:|scale:)/,
+        `${path}: ${selector}`,
+      );
+    }
+  }
   // The ring itself is kept: border and concentric spread shadows.
   assert.match(ring.body, /border-radius: 50%;/);
   assert.match(ring.body, /box-shadow:/);
