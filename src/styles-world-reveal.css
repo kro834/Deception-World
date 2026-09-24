@@ -101,6 +101,11 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       animation:
         tr-ink steps(1, end) both,
         tr-caret steps(1, end) none;
+      /* Each character's range, not a zero-length step at its start. The
+         production minifier (lightningcss) expands this shorthand, because of
+         the longhands below, into longhands with `animation-duration: 0s`:
+         the cursor's range was then never active and it never showed. */
+      animation-duration: auto;
       /* Scroll-linked, so there is nothing to save by pausing it off screen
          (styles-world/21.css pauses [data-viewport-active="false"] regions).
          A paused character would hold its old ink, then snap to its scroll

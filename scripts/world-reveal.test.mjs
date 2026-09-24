@@ -94,10 +94,12 @@ test("reveal motion is scroll-linked, gated and bound to named timelines", async
   assert.doesNotMatch(css, /\[data-reveal/);
   let animated = 0;
   for (const { selector, body, context } of rules) {
-    // Anonymous timelines would bind to the nearest clipping panel.
+    // Anonymous timelines would bind to the nearest clipping panel. Timing
+    // comes from the ranges alone: the only duration is `auto` (fill the
+    // range), which the production minifier would otherwise write as 0s.
     assert.doesNotMatch(
       body,
-      /view\(|scroll\(|infinite|animation-iteration-count|animation-duration|animation-delay/,
+      /view\(|scroll\(|infinite|animation-iteration-count|animation-duration:(?!\s*auto;)|animation-delay/,
       selector,
     );
     const moves =
@@ -263,6 +265,35 @@ test("only colour and the cursor cell are animated, per inline character, and fu
   // No other sheet styles the character spans.
   for (const path of ["src/styles-world-mirage.css", "src/styles-motion-edition.css"]) {
     assert.doesNotMatch(await read(path), /\.tr-c\b|data-text-reveal/, path);
+  }
+});
+
+test("the production CSS keeps each character's range, so the cursor shows", async () => {
+  // lightningcss (Vite's CSS minifier) expands the `animation` shorthand into
+  // longhands when longhands follow it, and writes `animation-duration: 0s`.
+  // Every character then flipped at a zero-length step at the start of its
+  // range, and the cursor (fill none) was never drawn in production builds.
+  const source = await readCss();
+  const { rules } = parse(source);
+  const typing = rules.filter(({ body }) => /animation:\s*tr-ink/.test(body));
+  assert.ok(typing.length > 0);
+  for (const { body } of typing) {
+    assert.match(body, /animation:[^;]*tr-caret steps\(1, end\) none;\s*animation-duration: auto;/);
+  }
+  const { transform } = await import("lightningcss");
+  const { code } = transform({
+    filename: "styles-world-reveal.css",
+    code: Buffer.from(await read("src/styles-world-reveal.css")),
+    minify: true,
+  });
+  const minified = code
+    .toString()
+    .split("}")
+    .filter((part) => /\.tr-c\{/.test(part) && /tr-ink/.test(part));
+  assert.equal(minified.length, typing.length, "minified typing rules");
+  for (const rule of minified) {
+    const durations = [...rule.matchAll(/animation-duration:([^;]+)/g)].map((match) => match[1]);
+    assert.equal(durations.at(-1), "auto", rule);
   }
 });
 
