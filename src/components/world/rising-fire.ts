@@ -1,9 +1,24 @@
-// RISING THE WORLD: the WebGL renderer. One full-screen fragment shader draws
-// the dive, the burn, the flames and the embers (rising.frag.glsl). This
-// module is loaded with import() from the gate, so the World bundle does not
-// carry it.
+// RISING THE WORLD: the WebGL renderer. Two full-screen passes a frame: the
+// flames and the smoke at half resolution into a texture
+// (rising-flames.frag.glsl), then the main pass (rising.frag.glsl), which
+// draws the dive, the burning print, the char, the ash and the sparks and
+// composites the flame texture. Both read their turbulence from a small
+// tileable noise texture that a third shader bakes once per run
+// (rising-noise.frag.glsl). This module is loaded with import() from the
+// gate, so the World bundle does not carry it.
 import FRAGMENT_SOURCE from "./rising.frag.glsl?raw";
-import { risingUniformsAt } from "./rising-timing";
+import FLAMES_SOURCE from "./rising-flames.frag.glsl?raw";
+import NOISE_SOURCE from "./rising-noise.frag.glsl?raw";
+import {
+  RISING_COMPACT_PIXEL_BUDGET,
+  RISING_PROBE_T,
+  RISING_RESOLUTION_RUNGS,
+  RISING_WIDE_PIXEL_BUDGET,
+  RISING_WORLD_FOCUS,
+  RISING_WORLD_POSITION,
+  risingProbeRung,
+  risingUniformsAt,
+} from "./rising-timing";
 
 export type RisingImage = {
   source: TexImageSource;
@@ -21,6 +36,8 @@ const UNIFORM_NAMES = [
   "uRes",
   "uTime",
   "uZoom",
+  "uArrive",
+  "uOpen",
   "uBlur",
   "uDive",
   "uWarp",
@@ -31,30 +48,43 @@ const UNIFORM_NAMES = [
   "uHeat",
   "uWorldScale",
   "uRiderScale",
+  "uFrame",
   "uFocus",
   "uWorld",
   "uRider",
+  "uNoise",
+  "uFire",
 ] as const;
 
 type UniformName = (typeof UNIFORM_NAMES)[number];
 
-// Resolution first (a canvas resize, no recompile); fewer octaves only as the
-// last resorts. The run starts on rung 1.
+const FLAME_UNIFORM_NAMES = ["uRes", "uTime", "uBurn", "uFlame", "uNoise"] as const;
+
+type FlameUniformName = (typeof FLAME_UNIFORM_NAMES)[number];
+
+/** The flame pass draws at this share of the main pass's width and height. */
+export const RISING_FLAME_PASS_SCALE = 0.5;
+
+// Resolution first (a canvas resize, no recompile); then the last resorts
+// drop whole layers (rising.frag.glsl, rising-flames.frag.glsl): octaves 3
+// loses the smoke detail and self-shadow, the ash, the haze, the large
+// blisters, the second spark layer and the drifting embers; octaves 2 also
+// the smoke, the sparks, the small flame eddies, the crack breaks and the
+// ember specks. Fewer blur taps with them (the blur only runs in the dive,
+// before the burn, so its taps cost the burn nothing). Every run starts on
+// rung 0; a GPU probe during the portal picks a lower one before the first
+// frame shows when a burn frame would run long (risingProbeRung).
 export const RISING_LADDER = [
-  { scale: 1.0, octaves: 4, taps: 8 },
-  { scale: 0.75, octaves: 4, taps: 8 },
-  { scale: 0.62, octaves: 4, taps: 8 },
-  { scale: 0.5, octaves: 4, taps: 8 },
-  { scale: 0.42, octaves: 3, taps: 6 },
-  { scale: 0.36, octaves: 2, taps: 4 },
+  { scale: RISING_RESOLUTION_RUNGS[0], octaves: 4, taps: 12 },
+  { scale: RISING_RESOLUTION_RUNGS[1], octaves: 4, taps: 12 },
+  { scale: RISING_RESOLUTION_RUNGS[2], octaves: 4, taps: 12 },
+  { scale: RISING_RESOLUTION_RUNGS[3], octaves: 4, taps: 12 },
+  { scale: 0.42, octaves: 3, taps: 8 },
+  { scale: 0.36, octaves: 2, taps: 6 },
 ] as const;
 
-export const RISING_START_RUNG = 1;
-
-// Render pixels per frame (CSS px; device pixel ratio is ignored: the fire is
-// soft and the DOM title stays at native resolution).
-const COMPACT_PIXEL_BUDGET = 420_000;
-const WIDE_PIXEL_BUDGET = 820_000;
+// The baked noise tile: power of two (REPEAT and mipmaps in WebGL 1), 256 KB.
+const NOISE_SIZE = 256;
 
 /**
  * A resized ImageBitmap: uploads in 1-3 ms instead of 20-90 ms. The source is
@@ -145,24 +175,33 @@ export type FireRendererOptions = {
 
 export class FireRenderer {
   readonly canvas: HTMLCanvasElement;
-  rung = RISING_START_RUNG;
-  size = { width: 0, height: 0, scale: 0, rung: RISING_START_RUNG };
+  rung: number;
+  size: { width: number; height: number; scale: number; rung: number };
   private gl: WebGLRenderingContext | null;
   private readonly parallel: { COMPLETION_STATUS_KHR: number } | null;
   private readonly compact: boolean;
   private readonly buffer: WebGLBuffer | null;
   private readonly worldTexture: WebGLTexture | null;
   private readonly riderTexture: WebGLTexture | null;
+  private readonly noiseTexture: WebGLTexture | null;
+  private readonly fireTexture: WebGLTexture | null;
+  private readonly fireFramebuffer: WebGLFramebuffer | null;
+  private fireSize = { width: 0, height: 0 };
+  private noiseBaked = false;
   private readonly worldAspect: number;
   private readonly riderAspect: number;
   private program: WebGLProgram | null = null;
+  private flameProgram: WebGLProgram | null = null;
   private locations: Partial<Record<UniformName, WebGLUniformLocation | null>> = {};
+  private flameLocations: Partial<Record<FlameUniformName, WebGLUniformLocation | null>> = {};
   private compiling: Promise<void> | null = null;
 
   /** Throws when WebGL is unavailable or software-only; the caller goes calm. */
   constructor(canvas: HTMLCanvasElement, { assets, compact }: FireRendererOptions) {
     this.canvas = canvas;
     this.compact = compact;
+    this.rung = 0;
+    this.size = { width: 0, height: 0, scale: 0, rung: this.rung };
     const gl = canvas.getContext("webgl", {
       // Opaque: an alpha canvas over the page forces blending on Android.
       alpha: false,
@@ -186,6 +225,9 @@ export class FireRenderer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     this.worldTexture = this.texture(assets.world.source);
     this.riderTexture = this.texture(assets.rider.source);
+    this.noiseTexture = this.noiseTarget();
+    this.fireTexture = gl.createTexture();
+    this.fireFramebuffer = gl.createFramebuffer();
     this.worldAspect = assets.world.aspect;
     this.riderAspect = assets.rider.aspect;
   }
@@ -207,68 +249,183 @@ export class FireRenderer {
     return texture;
   }
 
-  /** Compiles the current rung. With KHR_parallel_shader_compile the wait never blocks. */
+  /** The noise tile's storage: rendered into by the bake, then mipmapped. */
+  private noiseTarget() {
+    const gl = this.gl!;
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // RGBA / UNSIGNED_BYTE: the one colour attachment WebGL 1 guarantees complete.
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      NOISE_SIZE,
+      NOISE_SIZE,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    return texture;
+  }
+
+  /**
+   * Draws the noise tile once (about 65k pixels) and mipmaps it, so the flames
+   * sampled far below texel size stay smooth instead of shimmering.
+   */
+  private bakeNoise(program: WebGLProgram) {
+    const gl = this.gl!;
+    const framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.noiseTexture,
+      0,
+    );
+    gl.useProgram(program);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1f(gl.getUniformLocation(program, "uSize"), NOISE_SIZE);
+    gl.viewport(0, 0, NOISE_SIZE, NOISE_SIZE);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.deleteFramebuffer(framebuffer);
+    gl.bindTexture(gl.TEXTURE_2D, this.noiseTexture);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.deleteProgram(program);
+    this.noiseBaked = true;
+  }
+
+  /**
+   * Compiles the current rung (and, the first time, the noise bake). With
+   * KHR_parallel_shader_compile the wait never blocks.
+   */
   async compile() {
     const gl = this.gl;
     if (!gl) throw new Error("disposed");
     const quality = RISING_LADDER[this.rung];
-    const shader = (type: number, source: string) => {
-      const created = gl.createShader(type)!;
-      gl.shaderSource(created, source);
-      gl.compileShader(created);
-      return created;
+    const link = (source: string) => {
+      const shader = (type: number, text: string) => {
+        const created = gl.createShader(type)!;
+        gl.shaderSource(created, text);
+        gl.compileShader(created);
+        return created;
+      };
+      const vertex = shader(gl.VERTEX_SHADER, VERTEX_SOURCE);
+      const fragment = shader(gl.FRAGMENT_SHADER, source);
+      const program = gl.createProgram()!;
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.bindAttribLocation(program, 0, "aPos");
+      gl.linkProgram(program);
+      return { program, vertex, fragment };
     };
-    const vertex = shader(gl.VERTEX_SHADER, VERTEX_SOURCE);
-    const fragment = shader(
-      gl.FRAGMENT_SHADER,
+    const main = link(
       `#define OCTAVES ${quality.octaves}\n#define BLUR_TAPS ${quality.taps}\n${FRAGMENT_SOURCE}`,
     );
-    const program = gl.createProgram()!;
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.bindAttribLocation(program, 0, "aPos");
-    gl.linkProgram(program);
+    const flames = link(`#define OCTAVES ${quality.octaves}\n${FLAMES_SOURCE}`);
+    const bake = this.noiseBaked ? null : link(NOISE_SOURCE);
+    const linked = [main, flames, ...(bake ? [bake] : [])];
     if (this.parallel) {
+      const status = this.parallel.COMPLETION_STATUS_KHR;
       while (
         this.gl === gl &&
         !gl.isContextLost() &&
-        !gl.getProgramParameter(program, this.parallel.COMPLETION_STATUS_KHR)
+        !linked.every(({ program }) => gl.getProgramParameter(program, status))
       ) {
         await new Promise((resolve) => requestAnimationFrame(resolve));
       }
     }
     if (this.gl !== gl || gl.isContextLost()) throw new Error("context-lost");
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      const log = gl.getProgramInfoLog(program) || gl.getShaderInfoLog(fragment) || "link";
-      gl.deleteProgram(program);
-      throw new Error(log);
+    for (const { program, fragment } of linked) {
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        const log = gl.getProgramInfoLog(program) || gl.getShaderInfoLog(fragment) || "link";
+        for (const entry of linked) gl.deleteProgram(entry.program);
+        throw new Error(log);
+      }
     }
-    gl.deleteShader(vertex);
-    gl.deleteShader(fragment);
+    for (const { vertex, fragment } of linked) {
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    if (bake) this.bakeNoise(bake.program);
     if (this.program) gl.deleteProgram(this.program);
-    this.program = program;
-    gl.useProgram(program);
+    if (this.flameProgram) gl.deleteProgram(this.flameProgram);
+    this.program = main.program;
+    this.flameProgram = flames.program;
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    this.flameLocations = Object.fromEntries(
+      FLAME_UNIFORM_NAMES.map((name) => [name, gl.getUniformLocation(flames.program, name)]),
+    );
     this.locations = Object.fromEntries(
-      UNIFORM_NAMES.map((name) => [name, gl.getUniformLocation(program, name)]),
+      UNIFORM_NAMES.map((name) => [name, gl.getUniformLocation(main.program, name)]),
     );
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.worldTexture);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.riderTexture);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.noiseTexture);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, this.fireTexture);
+    // The flame pass samples only the noise (unit 2), never its own target (unit 3).
+    gl.useProgram(flames.program);
+    gl.uniform1i(this.flameLocations.uNoise ?? null, 2);
+    gl.useProgram(main.program);
     gl.uniform1i(this.locations.uWorld ?? null, 0);
     gl.uniform1i(this.locations.uRider ?? null, 1);
+    gl.uniform1i(this.locations.uNoise ?? null, 2);
+    gl.uniform1i(this.locations.uFire ?? null, 3);
     this.resize();
+  }
+
+  /**
+   * The flame pass's target: RGBA / UNSIGNED_BYTE (the one colour attachment
+   * WebGL 1 guarantees complete), not a power of two, so no mipmaps and
+   * CLAMP_TO_EDGE; LINEAR, so the main pass reads it smoothly upscaled.
+   */
+  private fireTarget(width: number, height: number) {
+    const gl = this.gl!;
+    if (this.fireSize.width === width && this.fireSize.height === height) return;
+    this.fireSize = { width, height };
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, this.fireTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fireFramebuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.fireTexture,
+      0,
+    );
+    const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (status !== gl.FRAMEBUFFER_COMPLETE && !gl.isContextLost()) {
+      throw new Error(`flame-target ${status}`);
+    }
   }
 
   resize() {
     const gl = this.gl;
-    if (!gl || !this.program) return;
+    if (!gl || !this.program || !this.flameProgram) return;
     const rect = this.canvas.getBoundingClientRect();
     const cssWidth = Math.max(1, rect.width || window.innerWidth);
     const cssHeight = Math.max(1, rect.height || window.innerHeight);
-    const budget = this.compact ? COMPACT_PIXEL_BUDGET : WIDE_PIXEL_BUDGET;
+    const budget = this.compact ? RISING_COMPACT_PIXEL_BUDGET : RISING_WIDE_PIXEL_BUDGET;
     const budgetScale = Math.min(1, Math.sqrt(budget / (cssWidth * cssHeight)));
     const scale = budgetScale * RISING_LADDER[this.rung].scale;
     const width = Math.max(64, Math.round(cssWidth * scale));
@@ -277,11 +434,24 @@ export class FireRenderer {
       this.canvas.width = width;
       this.canvas.height = height;
     }
+    const flameWidth = Math.max(16, Math.round(width * RISING_FLAME_PASS_SCALE));
+    const flameHeight = Math.max(16, Math.round(height * RISING_FLAME_PASS_SCALE));
+    this.fireTarget(flameWidth, flameHeight);
+    gl.useProgram(this.flameProgram);
+    gl.uniform2f(this.flameLocations.uRes ?? null, flameWidth, flameHeight);
+    gl.useProgram(this.program);
     gl.viewport(0, 0, width, height);
     const screen = width / height;
     const cover = (aspect: number): [number, number] =>
       screen > aspect ? [1, aspect / screen] : [screen / aspect, 1];
     const worldScale = cover(this.worldAspect);
+    // The centre of the crop that object-fit: cover with RISING_WORLD_POSITION
+    // shows (the portal and calm images), in the shader's y-up image space.
+    const [px, py] = RISING_WORLD_POSITION;
+    const frame: [number, number] = [
+      px * (1 - worldScale[0]) + worldScale[0] / 2,
+      1 - (py * (1 - worldScale[1]) + worldScale[1] / 2),
+    ];
     // The rider is fitted by height on landscape screens (never cropped to the chest).
     const riderScale: [number, number] =
       screen > this.riderAspect ? [screen / this.riderAspect, 1] : cover(this.riderAspect);
@@ -289,7 +459,8 @@ export class FireRenderer {
     gl.uniform2f(at.uRes ?? null, width, height);
     gl.uniform2f(at.uWorldScale ?? null, worldScale[0], worldScale[1]);
     gl.uniform2f(at.uRiderScale ?? null, riderScale[0], riderScale[1]);
-    gl.uniform2f(at.uFocus ?? null, 0.5, 0.56);
+    gl.uniform2f(at.uFrame ?? null, frame[0], frame[1]);
+    gl.uniform2f(at.uFocus ?? null, RISING_WORLD_FOCUS[0], RISING_WORLD_FOCUS[1]);
     this.size = { width, height, scale: Number(scale.toFixed(3)), rung: this.rung };
   }
 
@@ -313,14 +484,63 @@ export class FireRenderer {
 
   render(T: number) {
     const gl = this.gl;
-    if (!gl || !this.program) return;
+    if (!gl || !this.program || !this.flameProgram) return;
     const uniforms = risingUniformsAt(T);
+    // The flame pass only runs while something burns (not in the dive).
+    if (uniforms.uFlame + uniforms.uBurn > 0.0001) {
+      const flame = this.flameLocations;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fireFramebuffer);
+      gl.viewport(0, 0, this.fireSize.width, this.fireSize.height);
+      gl.useProgram(this.flameProgram);
+      gl.uniform1f(flame.uTime ?? null, T);
+      gl.uniform1f(flame.uBurn ?? null, uniforms.uBurn);
+      gl.uniform1f(flame.uFlame ?? null, uniforms.uFlame);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      gl.useProgram(this.program);
+    }
     const at = this.locations;
     gl.uniform1f(at.uTime ?? null, T);
     for (const name of Object.keys(uniforms) as (keyof typeof uniforms)[]) {
       gl.uniform1f(at[name] ?? null, uniforms[name]);
     }
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /**
+   * GPU probe, before the first frame shows: one burn frame (both passes)
+   * timed with a synchronous readPixels, less the readPixels round trip on
+   * its own. Each step is its own task, so a slow GPU never adds up to one
+   * long task. Then the run moves to the rung that fits (risingProbeRung):
+   * a resize, never a recompile, and never mid-burn.
+   */
+  async probe() {
+    const gl = this.gl;
+    if (!gl || !this.program || gl.isContextLost()) return null;
+    const pixel = new Uint8Array(4);
+    const sync = () => gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+    const yieldTask = () => new Promise((resolve) => window.setTimeout(resolve, 0));
+    // Warm the burn path (first use can compile driver variants).
+    this.render(RISING_PROBE_T);
+    sync();
+    await yieldTask();
+    if (this.gl !== gl || gl.isContextLost()) return null;
+    let started = performance.now();
+    sync();
+    const roundTrip = performance.now() - started;
+    await yieldTask();
+    if (this.gl !== gl || gl.isContextLost()) return null;
+    started = performance.now();
+    this.render(RISING_PROBE_T + 0.02);
+    sync();
+    const frameMs = Math.max(0, performance.now() - started - roundTrip);
+    const rung = risingProbeRung(frameMs, this.rung);
+    if (rung !== this.rung) {
+      this.rung = rung;
+      this.resize();
+    }
+    return Number(frameMs.toFixed(2));
   }
 
   /** Frees GPU memory now rather than at GC, and leaves a 1x1 canvas. */
@@ -331,11 +551,16 @@ export class FireRenderer {
     if (!gl.isContextLost()) {
       gl.deleteTexture(this.worldTexture);
       gl.deleteTexture(this.riderTexture);
+      gl.deleteTexture(this.noiseTexture);
+      gl.deleteTexture(this.fireTexture);
+      gl.deleteFramebuffer(this.fireFramebuffer);
       gl.deleteBuffer(this.buffer);
       if (this.program) gl.deleteProgram(this.program);
+      if (this.flameProgram) gl.deleteProgram(this.flameProgram);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     }
     this.program = null;
+    this.flameProgram = null;
     this.canvas.width = 1;
     this.canvas.height = 1;
   }

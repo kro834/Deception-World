@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
+import { RISING_TIMING } from "../src/components/world/rising-timing.ts";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const channel = process.env.PW_BROWSER_CHANNEL || "chrome";
@@ -110,6 +111,25 @@ const STALL_COMPILE = () => {
 };
 const HOLD_BITMAPS = () => {
   window.createImageBitmap = () => new Promise(() => {});
+};
+// The context is lost in the GPU probe (its first synchronous readPixels),
+// before the sequence listens for webglcontextlost: the run must still fall
+// back to the calm tier instead of playing on a dead canvas.
+const LOSE_IN_PROBE = () => {
+  const readPixels = WebGLRenderingContext.prototype.readPixels;
+  let lost = false;
+  WebGLRenderingContext.prototype.readPixels = function (...args) {
+    const result = readPixels.apply(this, args);
+    if (
+      !lost &&
+      this.canvas instanceof HTMLCanvasElement &&
+      this.canvas.classList.contains("rw-canvas")
+    ) {
+      lost = true;
+      this.getExtension("WEBGL_lose_context")?.loseContext();
+    }
+    return result;
+  };
 };
 
 async function openWorld(
@@ -441,7 +461,7 @@ async function checkSequence(browser, name) {
   assert.ok(cut.title > 0.99, `${name}: the title is cut in ${JSON.stringify(cut)}`);
   assert.equal(cut.visibleText, "EP7 REXONANCE");
   assert.equal(cut.hidden, "true");
-  // End still by ~9 s of sequence time.
+  // End still by ~10 s of sequence time (RISING_TIMING.webgl.end: 9.6 s).
   await page.waitForSelector(".rw-replay", { timeout: 9000 });
   const endAfter = Date.now() - pressedAt;
   const end = await page.evaluate(async () => {
@@ -619,7 +639,7 @@ async function checkTiers(browser, name) {
     }));
     assert.deepEqual(pending, { tier: null, end: "hidden" }, `${name}: pending engine`);
     // SKIP while the chunk loads is kept: the run starts at the end still
-    // instead of playing the whole sequence (8.8 s) once the chunk arrives.
+    // instead of playing the whole sequence (9.6 s) once the chunk arrives.
     await page.focus(".rw-skip");
     await page.keyboard.press("Enter");
     // The delayed chunks arrive in turn (the module graph loads in steps); the
@@ -851,6 +871,30 @@ async function checkTiers(browser, name) {
     console.log(JSON.stringify({ check: "context-lost", name, ...lost }));
     await context.close();
   }
+  // Context loss inside the GPU probe (before the listener exists): the run
+  // plays on the calm tier, it does not end early or draw on a dead canvas.
+  {
+    const { context, page, errors } = await openWorld(browser, name, { init: [LOSE_IN_PROBE] });
+    await scrollToGate(page);
+    await press(page, name);
+    await page.waitForTimeout(1500);
+    const early = await page.evaluate(() => ({
+      tier: document.querySelector(".rw-viewport").dataset.tier ?? null,
+      ready: document.querySelector(".rw-viewport").dataset.ready ?? null,
+      canvases: document.querySelectorAll(".rw-gl canvas").length,
+      fallback: window.__risingStats?.fallback,
+      playing: Boolean(document.querySelector(".rw-skip")),
+    }));
+    assert.deepEqual(
+      early,
+      { tier: "css", ready: null, canvases: 0, fallback: "context-lost", playing: true },
+      `${name}: lost in the probe`,
+    );
+    await page.waitForSelector(".rw-replay", { timeout: 12_000 });
+    assert.deepEqual(errors, []);
+    console.log(JSON.stringify({ check: "context-lost-in-probe", name, ...early }));
+    await context.close();
+  }
   // Hidden tab: the clock stops, so the cut does not happen behind the user's back.
   {
     const { context, page, errors } = await openWorld(browser, name);
@@ -905,13 +949,14 @@ async function checkPerformance(browser, name) {
   await page.waitForFunction(() => document.querySelector(".rw-viewport").dataset.ready === "true");
   await page.waitForSelector(".rw-replay", { timeout: 15_000 });
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  const perf = await page.evaluate(() => {
+  const perf = await page.evaluate((drawWindow) => {
     const stats = window.__risingStats;
     const sorted = [...stats.renderMs].sort((a, b) => a - b);
     const pick = (q) => Number((sorted[Math.floor((sorted.length - 1) * q)] ?? 0).toFixed(2));
     return {
       draws: stats.draws,
-      drawsPerSecond: Number((stats.draws / 8.8).toFixed(1)),
+      // The canvas draws until its fade has finished (the sequence clock's draw window).
+      drawsPerSecond: Number((stats.draws / drawWindow).toFixed(1)),
       jsPerDrawP50: pick(0.5),
       jsPerDrawP95: pick(0.95),
       readyMs: stats.readyMs,
@@ -919,7 +964,7 @@ async function checkPerformance(browser, name) {
       rungChanges: stats.rungChanges,
       longTasks: window.__longTasks,
     };
-  });
+  }, RISING_TIMING.webgl.fade[1]);
   const longest = Math.max(0, ...perf.longTasks);
   assert.ok(perf.drawsPerSecond >= 40, `${name}: draw rate ${perf.drawsPerSecond}`);
   assert.ok(perf.jsPerDrawP95 < 4, `${name}: JS per draw p95 ${perf.jsPerDrawP95} ms`);
@@ -934,9 +979,9 @@ async function checkPerformance(browser, name) {
 
 // ---------------------------------------------------------------- flashes
 const FPS = 60;
-const AUDIT_END = { webgl: 9.2, css: 7.6, reduced: 3.0 };
+const AUDIT_END = { webgl: 10.0, css: 8.0, reduced: 3.0 };
 const KEYFRAMES = [
-  -0.3, -0.15, 0, 0.3, 1.0, 1.7, 2.05, 2.5, 3.4, 4.3, 4.5, 4.55, 4.8, 5.6, 6.6, 7.6, 9.0,
+  -0.3, -0.15, 0, 0.3, 1.0, 1.7, 2.05, 2.5, 3.4, 4.3, 4.5, 4.55, 4.8, 5.6, 6.6, 7.6, 8.8, 9.7,
 ];
 
 async function createAnalyser(browser, cell, viewport) {
@@ -1065,7 +1110,7 @@ async function createAnalyser(browser, cell, viewport) {
           cells,
           general,
           red,
-          meanL: [0, 1, 2.05, 3, 4.4, 4.6, 6, 8.8].map((t) => `${t}:${mean(t)}`).join(" "),
+          meanL: [0, 1, 2.05, 3, 4.4, 4.6, 6, 8.8, 9.6].map((t) => `${t}:${mean(t)}`).join(" "),
         };
       };
     },

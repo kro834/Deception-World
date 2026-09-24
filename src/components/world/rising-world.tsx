@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -9,11 +10,21 @@ import {
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import {
+  RISING_BURN_ART,
+  RISING_CALM_CHAR,
+  RISING_CALM_EDGES,
+  RISING_CALM_FLAMES,
+  RISING_CALM_SCORCHES,
+  RISING_CALM_SMOKE,
+  risingBurnArt,
+} from "./rising-art";
+import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_SMOKE } from "./rising-calm";
 import type { RisingRun, RisingStats } from "./rising-sequence";
 
-// The key visual is already cached by the finale backdrop. The rider is the
-// standard Rexonance artwork (gold on dark reads under red), 640w candidate.
-const WORLD_ART = "/deception-world-poster-delivery.webp";
+// The image the fire consumes is chosen per device at the press
+// (rising-art.ts). The art that emerges from the ash is the standard
+// Rexonance artwork (gold on dark reads under red), 640w candidate.
 const RIDER_ART =
   rexonanceImage(REXONANCE_SITE_ARTWORK.standard).srcSet?.split(",")[0]?.trim().split(" ")[0] ??
   REXONANCE_SITE_ARTWORK.standard;
@@ -33,7 +44,7 @@ const loadEngine = () => {
 };
 const prewarm = () => {
   void loadEngine()
-    .then((module) => module.prepareRising(WORLD_ART, RIDER_ART))
+    .then((module) => module.prepareRising(risingBurnArt(), RIDER_ART))
     .catch(() => undefined);
 };
 
@@ -62,11 +73,101 @@ const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
 
 /**
+ * The calm tier's fire (static markup: the tiers move it with WAAPI): raster
+ * sprites rendered from the same fire model
+ * (scripts/render-rising-calm-sprites.mjs): the burn-edge strip over tiled
+ * char, flame sprites seated along its lip behind it (two frames per seat
+ * that take turns), smoke billows, and embers. The images load lazily, so
+ * only a run that shows this tier fetches them (reduced motion hides the
+ * whole burn layer). Memoised with no props, so opening the dialog does not
+ * re-render it inside the press's click handler.
+ */
+const CalmFire = memo(function CalmFire() {
+  return (
+    <>
+      <span className="rw-calm-burn">
+        <span className="rw-calm-smoke">
+          {CALM_SMOKE.map((left) => (
+            <img
+              key={left}
+              src={RISING_CALM_SMOKE}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ left: `${left}%` }}
+            />
+          ))}
+        </span>
+        <span className="rw-calm-ash" style={{ backgroundImage: `url(${RISING_CALM_CHAR})` }} />
+        {/* Under the flames: the print browning and blistering ahead of the lip. */}
+        <span className="rw-calm-scorch">
+          {RISING_CALM_SCORCHES.map((src, index) => (
+            <img
+              key={src}
+              className="rw-calm-edge"
+              data-profile={index}
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </span>
+        {/* Behind the strip: the char cuts the flames' roots along the lip. */}
+        <span className="rw-calm-flames">
+          {CALM_FLAME_SEATS.map(({ centre, width, height, dip, frame, mirror }) => (
+            <i
+              key={centre}
+              className={mirror ? "rw-calm-mirror" : undefined}
+              style={{
+                left: `${centre}%`,
+                bottom: `calc(79% - ${dip}% * var(--rw-edge-k))`,
+                width: `min(${width}cqmin, ${(height * 0.9).toFixed(1)}cqh)`,
+                height: `${height}cqh`,
+              }}
+            >
+              {[frame, frame + 1].map((index) => (
+                <img
+                  key={index}
+                  src={RISING_CALM_FLAMES[index % RISING_CALM_FLAMES.length]}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ))}
+            </i>
+          ))}
+        </span>
+        <span className="rw-calm-char">
+          {RISING_CALM_EDGES.map((src, index) => (
+            <img
+              key={src}
+              className="rw-calm-edge"
+              data-profile={index}
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+        </span>
+      </span>
+      <span className="rw-calm-embers">
+        {CALM_EMBERS.map((left) => (
+          <i key={left} style={{ left: `${left}%` }} />
+        ))}
+      </span>
+    </>
+  );
+});
+
+/**
  * The gate after the footer. Scrolling past END OF RECORD raises the RISING
  * THE WORLD button (scroll-linked, styles-world-rising.css). The button opens
- * a modal sequence: a dive into the world, the world consumed by red flames
- * and, mid-burn, a hard cut to EP7 REXONANCE. The engine is loaded on
- * approach, and the WebGL context exists only while the sequence plays.
+ * a modal sequence: a dive into the rider print (rising-art.ts), the print
+ * burned away by red flames from below and, mid-burn, a hard cut to EP7
+ * REXONANCE. The engine is loaded on approach, and the WebGL context exists
+ * only while the sequence plays.
  */
 export function RisingWorld() {
   const gateRef = useRef<HTMLElement>(null);
@@ -83,6 +184,8 @@ export function RisingWorld() {
   const generationRef = useRef(0);
   const swappedAtRef = useRef(Number.NEGATIVE_INFINITY);
   const skipRequestedRef = useRef(false);
+  const artRef = useRef(RISING_BURN_ART);
+  const [art, setArt] = useState(RISING_BURN_ART);
   const [open, setOpen] = useState(false);
   const [ended, setEnded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -160,7 +263,7 @@ export function RisingWorld() {
     const run = module.runRising({
       viewport,
       origin: originRef.current,
-      world: WORLD_ART,
+      world: artRef.current,
       rider: RIDER_ART,
       audit,
       onTitle: () => setLive("EP7 REXONANCE"),
@@ -198,7 +301,7 @@ export function RisingWorld() {
   };
   const primeNow = () => {
     cancelPrime();
-    engineModule?.primeRising(WORLD_ART, RIDER_ART);
+    engineModule?.primeRising(risingBurnArt(), RIDER_ART);
   };
   const prime = (event: ReactPointerEvent<HTMLButtonElement>) => {
     prewarm();
@@ -220,6 +323,7 @@ export function RisingWorld() {
       if (!dialog || !trigger || dialog.open) return;
       const rect = trigger.getBoundingClientRect();
       originRef.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      artRef.current = risingBurnArt();
       try {
         dialog.showModal(); // top layer: covers the Zeus button, the header and the page
       } catch {
@@ -232,6 +336,7 @@ export function RisingWorld() {
       // Pointer: focus the dialog surface (no ring flash). Keyboard: CLOSE.
       (keyboard ? closeRef.current : dialog)?.focus({ preventScroll: true });
       setEnded(false);
+      setArt(artRef.current);
       setOpen(true);
       void begin();
     },
@@ -351,13 +456,13 @@ export function RisingWorld() {
           <div className="rw-calm" aria-hidden="true">
             <img
               className="rw-calm-world"
-              src={open ? WORLD_ART : undefined}
+              src={open ? art : undefined}
               alt=""
               width={1024}
               height={1536}
               decoding="async"
             />
-            <span className="rw-calm-burn" />
+            <CalmFire />
           </div>
           <div className="rw-gl" aria-hidden="true" />
           <span className="rw-title-scrim" aria-hidden="true" />
@@ -370,7 +475,7 @@ export function RisingWorld() {
           <div className="rw-portal" aria-hidden="true">
             <img
               className="rw-portal-art"
-              src={open ? WORLD_ART : undefined}
+              src={open ? art : undefined}
               alt=""
               width={1024}
               height={1536}
@@ -394,12 +499,7 @@ export function RisingWorld() {
             </button>
           )}
         </div>
-        <button
-          ref={closeRef}
-          type="button"
-          className="rw-close"
-          onClick={closeDialog}
-        >
+        <button ref={closeRef} type="button" className="rw-close" onClick={closeDialog}>
           <span>CLOSE</span>
           <i aria-hidden="true" />
         </button>
