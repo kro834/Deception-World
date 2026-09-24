@@ -4,7 +4,15 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { hasConstrainedResources } from "../src/lib/rendering-profile.js";
 import {
+  CALM_EDGE_BOX,
+  CALM_EDGE_SEED,
+  CALM_EDGE_STRIP,
+  CALM_FLAME_SEATS,
+  burnEdge,
+} from "../src/components/world/rising-calm.ts";
+import {
   RISING_ART_ASPECT,
+  RISING_COMPACT_PIXEL_BUDGET,
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
   RISING_WORLD_FOCUS,
@@ -12,6 +20,7 @@ import {
   pickRisingTier,
   portalEase,
   risingFramesPerDraw,
+  risingStartRung,
   risingUniformsAt,
 } from "../src/components/world/rising-timing.ts";
 
@@ -93,7 +102,7 @@ test("only the supplied words reach the reader", async () => {
   const markup = [...component.matchAll(/\n {2}return \(\n {4}<>([\s\S]*?)\n {2}\);\n/g)]
     .map((match) => match[1])
     .join("\n");
-  assert.ok(markup.includes("<dialog") && markup.includes("rw-calm-defs"));
+  assert.ok(markup.includes("<dialog") && markup.includes("rw-calm-flames"));
   const text = [...markup.matchAll(/>([^<>{}]*)</g)]
     .map((match) => match[1].trim())
     .filter((token) => /[\p{L}\p{N}]/u.test(token));
@@ -581,13 +590,15 @@ test("the burning image is the supplied rider art, shipped as-is plus a compact 
     art,
     /export const RISING_BURN_ART_COMPACT = "\/rising-burn-rider-20260924-683\.webp";/,
   );
-  // The same compact test as the renderer's pixel budget (rising-sequence.ts).
-  assert.match(art, /\(any-pointer: coarse\)"\)\.matches \|\| window\.innerWidth < 760/);
-  const sequence = await read("src/components/world/rising-sequence.ts");
-  assert.match(sequence, /\(any-pointer: coarse\)"\)\.matches \|\| window\.innerWidth < 760/);
+  // Chosen by the image pixels a cover fit needs (2026-09-24 review), not by
+  // pointer type: phones and touch laptops get the full file.
+  assert.doesNotMatch(art, /any-pointer/);
   assert.doesNotMatch(art, /^import /m, "static and dependency-free");
   const component = await read("src/components/world/rising-world.tsx");
-  assert.match(component, /import \{ RISING_BURN_ART, risingBurnArt \} from "\.\/rising-art";/);
+  assert.match(
+    component,
+    /import \{\s*RISING_BURN_ART,[^}]*\brisingBurnArt,?\s*\} from "\.\/rising-art";/,
+  );
   assert.doesNotMatch(component, /deception-world-poster/, "the key visual no longer burns");
   // Chosen once at the press and used by the portal, the calm tier and the shader.
   assert.match(component, /artRef\.current = risingBurnArt\(\);/);
@@ -677,7 +688,7 @@ test("no global strobe: every uniform turns at most once, flicker stays in the s
   }
 });
 
-test("the calm tier's fire: compositor-only, finite, and off under reduced motion", async () => {
+test("the calm tier's fire: sprites on the compositor, finite, and off under reduced motion", async () => {
   const sequence = stripComments(await read("src/components/world/rising-sequence.ts"));
   const calm = sequence.slice(sequence.indexOf('if (tier === "css") {'));
   const block = calm.slice(0, calm.indexOf("\n    add(calm, ["));
@@ -687,10 +698,11 @@ test("the calm tier's fire: compositor-only, finite, and off under reduced motio
   for (const [, property] of block.matchAll(/[{,]\s*([a-zA-Z]+):/g)) {
     assert.ok(["opacity", "scale", "translate", "rotate", ...options].includes(property), property);
   }
-  for (const group of ["tongues", "embers", "puffs"])
+  for (const group of ["seats", "embers", "puffs"])
     assert.match(block, new RegExp(`${group}\\.forEach`));
-  assert.match(block, /add\(edgeA, /);
-  assert.match(block, /add\(edgeB, /);
+  // Each seat's two sprite frames take turns (fake advection), on their own beat.
+  assert.match(block, /seat\.querySelectorAll\("img"\)\.forEach\(\(frame, turn\) =>/);
+  assert.match(block, /for \(const element of edge\) \{\s*add\(element, /);
   assert.match(block, /fill: round \? "forwards" : "both"/);
   assert.doesNotMatch(block, /iterations/);
   const css = await readCss();
@@ -700,24 +712,186 @@ test("the calm tier's fire: compositor-only, finite, and off under reduced motio
   );
   // The char under the burn layer never lets its bottom edge rise into view.
   assert.match(css, /\.rw-calm-burn::after \{[^}]*top: 99\.5%;[^}]*background: #070203;/);
-  // Tongue roots fade into the ember bed; landscape deepens the tears, and the
-  // tongues are seated with the same factor.
+  // The strip spans its box as rising-calm.ts says; landscape deepens the tears.
+  const top = (CALM_EDGE_STRIP.top / CALM_EDGE_BOX.height) * 100;
+  const height = ((CALM_EDGE_STRIP.bottom - CALM_EDGE_STRIP.top) / CALM_EDGE_BOX.height) * 100;
+  const origin =
+    ((CALM_EDGE_BOX.mean - CALM_EDGE_STRIP.top) / (CALM_EDGE_STRIP.bottom - CALM_EDGE_STRIP.top)) *
+    100;
+  const edge = css.match(/\.rw-calm-edge \{([^}]*)\}/)[1];
+  assert.match(edge, new RegExp(`top: ${top}%;`));
+  assert.match(edge, new RegExp(`height: ${height}%;`));
+  assert.match(edge, /transform: scaleY\(var\(--rw-edge-k\)\);/);
+  assert.match(edge, new RegExp(`transform-origin: 50% ${origin.toFixed(1)}%;`));
   assert.match(
     css,
-    /\.rw-calm-flames i \{[^}]*(?<!-webkit-)mask-image: linear-gradient\(0deg, transparent, #000 24%\);/,
-  );
-  assert.match(css, /\.rw-calm-char > svg \{[^}]*transform: scaleY\(var\(--rw-edge-k\)\);/);
-  assert.match(
-    css,
-    /@media \(min-aspect-ratio: 1\/1\) \{\s*\.site-shell\.film-edition\.mirage-edition \.rw-calm-burn \{\s*--rw-edge-k: 1\.8;/,
+    /@media \(min-aspect-ratio: 1\/1\) \{\s*\.site-shell\.film-edition\.mirage-edition \.rw-calm-burn \{\s*--rw-edge-k: [\d.]+;/,
   );
   const component = await read("src/components/world/rising-world.tsx");
-  // Two fractal edges from fixed seeds (the server render and every run agree),
-  // each carrying its tongues, drawn from three shared flame symbols.
-  assert.match(component, /burnEdge\(edgeIndex \? 0x51c3 : 0x2b17\)/);
-  assert.doesNotMatch(component.slice(component.indexOf("function burnEdge")), /Math\.random\(/);
-  assert.match(component, /className=\{`rw-calm-char rw-calm-char-\$\{id\}`\}/);
-  assert.match(component, /bottom: `calc\(80\.5% - \$\{dip\}% \* var\(--rw-edge-k\)\)`/);
-  assert.match(component, /<use href=\{`#rw-flame-\$\{shape\}`\} fill="url\(#rw-flame-body\)" \/>/);
-  assert.equal([...component.matchAll(/^ {2}"M[\d .CMZ-]+Z",$/gm)].length, 3, "three flame shapes");
+  // Raster sprites (scripts/render-rising-calm-sprites.mjs), not vector art;
+  // lazy, so a WebGL run never fetches them.
+  assert.doesNotMatch(component.slice(component.indexOf("const CalmFire")), /<svg|<path|<use/);
+  const calmFire = component.slice(
+    component.indexOf("const CalmFire"),
+    component.indexOf("export function RisingWorld"),
+  );
+  for (const [image] of calmFire.matchAll(/<img[^>]*>/g)) assert.match(image, /loading="lazy"/);
+  // Flames sit behind the strip, so the char cuts their roots along the lip.
+  assert.ok(
+    calmFire.indexOf('className="rw-calm-flames"') < calmFire.indexOf('className="rw-calm-char"'),
+  );
+  assert.match(component, /bottom: `calc\(\d+% - \$\{dip\}% \* var\(--rw-edge-k\)\)`/);
+  const renderer = await read("scripts/render-rising-calm-sprites.mjs");
+  assert.match(
+    renderer,
+    /uYs: burnEdge\(CALM_EDGE_SEED\)\.ys/,
+    "the strip draws the seats' profile",
+  );
+  // A flame frame fades out towards its sides along a turbulent line, so a
+  // squeezed or mirrored seat never shows its box's straight side as a seam.
+  const flame = renderer.slice(
+    renderer.indexOf("const FLAME = "),
+    renderer.indexOf("const EDGE = "),
+  );
+  assert.match(flame, /float edgeX = min\(uv\.x, 1\.0 - uv\.x\) \+ \(n2 - 0\.5\) \* [\d.]+;/);
+  assert.match(flame, /float fade = [^;]*smoothstep\(0\.0, 0\.[12]\d*, edgeX\)/);
+});
+
+test("the calm tier's burn edge: a fixed, smooth, ragged profile the flames are seated on", () => {
+  const { ys } = burnEdge(CALM_EDGE_SEED);
+  assert.equal(ys.length, 129);
+  assert.deepEqual(burnEdge(CALM_EDGE_SEED).ys, ys, "a fixed seed: the server render agrees");
+  // Ragged (tongues and bays across most of the box)...
+  assert.ok(Math.max(...ys) - Math.min(...ys) > 100, `${Math.min(...ys)}..${Math.max(...ys)}`);
+  // ...but low-passed: no zig-zag facets from one segment to the next.
+  const kinks = ys.slice(1, -1).map((y, index) => Math.abs(ys[index] - 2 * y + ys[index + 2]));
+  assert.ok(Math.max(...kinks) < 12, `second difference ${Math.max(...kinks).toFixed(1)}`);
+  // Inside the strip, which the tiled char takes over from at its bottom.
+  for (const y of ys)
+    assert.ok(y > CALM_EDGE_STRIP.top + 30 && y < CALM_EDGE_STRIP.bottom - 60, String(y));
+  // Irregular seats: sizes and gaps vary, and sprites alternate and mirror.
+  const widths = new Set(CALM_FLAME_SEATS.map((seat) => seat.width));
+  const heights = new Set(CALM_FLAME_SEATS.map((seat) => seat.height));
+  const gaps = new Set(
+    CALM_FLAME_SEATS.slice(1).map((seat, index) => seat.centre - CALM_FLAME_SEATS[index].centre),
+  );
+  assert.ok(widths.size >= 5 && heights.size >= 8 && gaps.size >= 3);
+  assert.ok(new Set(CALM_FLAME_SEATS.map((seat) => seat.frame)).size >= 3);
+  assert.ok(
+    CALM_FLAME_SEATS.some((seat) => seat.mirror) && CALM_FLAME_SEATS.some((seat) => !seat.mirror),
+  );
+});
+
+test("the burning image is chosen by the pixels a cover fit needs, not by pointer type", async () => {
+  const { RISING_BURN_ART, RISING_BURN_ART_COMPACT, risingBurnArt } =
+    await import("../src/components/world/rising-art.ts");
+  const saved = {
+    window: globalThis.window,
+    navigator: Object.getOwnPropertyDescriptor(globalThis, "navigator"),
+  };
+  const pick = (innerWidth, innerHeight, devicePixelRatio, connection) => {
+    globalThis.window = { innerWidth, innerHeight, devicePixelRatio };
+    Object.defineProperty(globalThis, "navigator", { configurable: true, value: { connection } });
+    return risingBurnArt();
+  };
+  try {
+    assert.equal(pick(412, 915, 2.625), RISING_BURN_ART, "Pixel: about 1600 px across");
+    assert.equal(pick(360, 780, 3), RISING_BURN_ART, "Galaxy");
+    assert.equal(pick(1366, 768, 1), RISING_BURN_ART, "touch laptop");
+    assert.equal(pick(1024, 1366, 2), RISING_BURN_ART, "large tablet");
+    assert.equal(pick(1440, 900, 1), RISING_BURN_ART, "desktop");
+    assert.equal(pick(640, 480, 1), RISING_BURN_ART_COMPACT, "a small, low-density window");
+    assert.equal(pick(320, 740, 1), RISING_BURN_ART_COMPACT, "a 1x phone");
+    assert.equal(pick(412, 915, 2.625, { saveData: true }), RISING_BURN_ART_COMPACT, "Save-Data");
+    assert.equal(pick(412, 915, 2.625, { effectiveType: "slow-2g" }), RISING_BURN_ART_COMPACT);
+    assert.equal(pick(412, 915, 2.625, { effectiveType: "2g" }), RISING_BURN_ART_COMPACT);
+    assert.equal(pick(412, 915, 2.625, { effectiveType: "4g" }), RISING_BURN_ART);
+  } finally {
+    globalThis.window = saved.window;
+    if (saved.navigator) Object.defineProperty(globalThis, "navigator", saved.navigator);
+  }
+});
+
+test("phones start at full resolution within their pixel budget; the ladder drops whole layers", async () => {
+  assert.equal(risingStartRung(true, 412, 915), 0, "Pixel: 377k px, no 3.5x upscale");
+  assert.equal(risingStartRung(true, 360, 780), 0, "Galaxy");
+  assert.equal(risingStartRung(true, 844, 390), 0, "landscape phone");
+  assert.equal(risingStartRung(true, 1024, 1366), 1, "large tablet: over the compact budget");
+  assert.equal(risingStartRung(false, 1440, 900), 1, "desktop starts a step down, as before");
+  assert.equal(risingStartRung(false, 800, 500), 1);
+  assert.ok(412 * 915 <= RISING_COMPACT_PIXEL_BUDGET);
+  const fire = stripComments(await read("src/components/world/rising-fire.ts"));
+  assert.match(
+    fire,
+    /this\.rung = risingStartRung\(compact, window\.innerWidth, window\.innerHeight\);/,
+  );
+  // The last rungs buy GPU time: the second spark layer, the embers, the ash,
+  // the haze and the smoke's detail go at octaves 3; smoke and sparks at 2.
+  const shader = await read("src/components/world/rising.frag.glsl");
+  const gated = (needle) => {
+    const at = shader.indexOf(needle);
+    assert.ok(at > 0, needle);
+    const before = shader.slice(0, at);
+    const open = [...before.matchAll(/#if OCTAVES >= (\d)|#endif/g)];
+    const stack = [];
+    for (const [token, level] of open) {
+      if (token === "#endif") stack.pop();
+      else stack.push(Number(level));
+    }
+    return Math.max(0, ...stack);
+  };
+  assert.equal(gated("ashSheet(p"), 4);
+  assert.equal(gated("ashLayer(fq"), 4);
+  assert.equal(gated("sparkLayer(p + vec2(0.31"), 4);
+  assert.equal(gated("sparkLayer(p + vec2(0.13"), 4);
+  assert.equal(gated("haze = hn *"), 4);
+  assert.equal(gated("float below = nz("), 4);
+  assert.equal(gated("float s1 = nz("), 3);
+  assert.equal(gated("vec2 sp = sparkLayer(p,"), 3);
+  assert.equal(gated("float n2 = nz("), 3);
+});
+
+test("review 2026-09-24: char that cools slowly, lit smoke, a clean breakthrough, sparks, haze", async () => {
+  const shader = await read("src/components/world/rising.frag.glsl");
+  // The char glows and cools over seconds since the front passed (the front
+  // climbs about 0.23 field units a second), not within a thin band behind it.
+  assert.match(shader, /float since = max\(-d, 0\.0\) \* 4\.3;/);
+  assert.match(shader, /float cool = exp\(-since \* 0\.55\);/);
+  assert.doesNotMatch(shader, /exp\(-age \* 4\.2\)/);
+  // Smoke is a lit medium that veils (at most about 0.6), not a black multiply.
+  const veil = Number(shader.match(/col = mix\(col, smokeCol, smoke \* ([\d.]+)\);/)[1]);
+  assert.ok(veil <= 0.65, String(veil));
+  const base = shader
+    .match(/smokeCol = vec3\(([\d.]+), ([\d.]+), ([\d.]+)\)/)
+    .slice(1)
+    .map(Number);
+  assert.ok(Math.min(...base) >= 0.07, `smoke base ${base}`);
+  // Blur taps jittered per pixel (interleaved gradient noise): no ghost copies.
+  assert.match(shader, /float ign = fract\(52\.9829189 \* fract\(dot\(gl_FragCoord\.xy/);
+  assert.match(shader, /float k = \(float\(i\) \+ ign\) \/ float\(BLUR_TAPS\);/);
+  // The bloom multiplies what is lit (blacks stay black) and the breakthrough
+  // opens from the core instead of popping from one zoom to the other.
+  assert.match(shader, /col \*= 1\.0 \+ vec3\([\d., ]+\) \* bloom;/);
+  const s = RISING_TIMING.webgl;
+  for (let T = s.breakthrough - 0.3; T <= s.breakthrough + 0.5; T += 0.01) {
+    const u = risingUniformsAt(T);
+    assert.ok(u.uArrive >= 0.8 && u.uArrive <= 1, `uArrive ${u.uArrive} at ${T}`);
+  }
+  assert.ok(risingUniformsAt(s.breakthrough - 0.2).uOpen === 0);
+  assert.ok(risingUniformsAt(s.breakthrough + 0.2).uOpen > 1.2, "open over the whole frame");
+  assert.ok(risingUniformsAt(s.breakthrough).uWarp > 0.9, "the opening happens under the bloom");
+  // Sparks: the scroll wraps (FP16), wind bends each path, tails are short.
+  assert.match(shader, /g\.y -= fract\(uTime \* speed \* cells\.y \/ 16\.0\) \* 16\.0;/);
+  assert.match(shader, /id\.y = mod\(id\.y, 16\.0\);/);
+  // Dense over the flames, thinning with height: each particle goes out where
+  // the share of live cells drops below its hash, so none pops mid-air.
+  assert.match(shader, /float alive = smoothstep\(0\.0, 0\.05, h - \(1\.0 - keep\)\) \* twinkle;/);
+  const keep = shader.match(/float keep = ([\d.]+) \+ ([\d.]+) \* exp\(-rise \/ ([\d.]+)\);/);
+  assert.ok(keep, "spark density falls with the height above the fire");
+  assert.ok(Number(keep[1]) < 0.15 && Number(keep[1]) + Number(keep[2]) >= 0.4, keep[0]);
+  // Heat haze: a narrow band just above the flames, mostly vertical, small.
+  assert.match(shader, /haze = hn \* vec2\(0\.006, 0\.01\) \* hazeAmt;/);
+  assert.match(shader, /exp\(-\(\(hy - 0\.08\) \* \(hy - 0\.08\)\) \/ 0\.0128\)/);
+  // The step to char is soft enough to survive an upscale, under the lip.
+  assert.match(shader, /burnt = fall\(0\.0, -0\.02, d\);/);
 });

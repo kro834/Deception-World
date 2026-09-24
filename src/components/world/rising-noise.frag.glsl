@@ -3,7 +3,9 @@
 // main pass reads turbulence with a few texture fetches instead of evaluating
 // value noise per pixel (rising.frag.glsl). GLSL ES 1.00.
 //   r, g: independent fbm (gradient noise, 5 octaves, periods 4..64)
-//   b:    cellular distance (Worley F1, 16 cells a side): blisters, ash plates
+//   b:    cell edge distance (Worley F2 - F1, 16 cells a side): 0 on the
+//         edges of a Voronoi net, high in the middle of each cell: the
+//         cracks between char plates, blisters, ember specks
 //   a:    fine fbm (4 octaves, periods 16..128): edge detail, sparkle
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -51,20 +53,24 @@ float fbm(vec2 t, float period, float seed, int octaves) {
   return clamp(0.5 + v / norm * 1.9, 0.0, 1.0);
 }
 
-float worley(vec2 t, float period) {
+// F2 - F1: grows linearly away from every cell edge, so a threshold near 0
+// draws a crack net of even width. 5 x 5 neighbours, so F2 is always found.
+float worleyEdge(vec2 t, float period) {
   vec2 p = t * period;
   vec2 i = floor(p);
   vec2 f = fract(p);
-  float best = 8.0;
-  for (int y = -1; y <= 1; y++) {
-    for (int x = -1; x <= 1; x++) {
+  float f1 = 8.0;
+  float f2 = 8.0;
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
       vec2 o = vec2(float(x), float(y));
       vec2 c = hash22(mod(i + o, period) + 91.7);
-      vec2 r = o + c - f;
-      best = min(best, dot(r, r));
+      float dist = length(o + c - f);
+      f2 = min(f2, max(f1, dist));
+      f1 = min(f1, dist);
     }
   }
-  return clamp(sqrt(best) / 1.1, 0.0, 1.0);
+  return clamp((f2 - f1) * 0.9, 0.0, 1.0);
 }
 
 void main() {
@@ -72,7 +78,7 @@ void main() {
   gl_FragColor = vec4(
     fbm(t, 4.0, 0.0, 5),
     fbm(t, 4.0, 131.0, 5),
-    worley(t, 16.0),
+    worleyEdge(t, 16.0),
     fbm(t, 16.0, 257.0, 4)
   );
 }

@@ -62,6 +62,26 @@ export const RISING_ART_ASPECT = 2 / 3;
 /** The dive's focal point in the image (x from the left, y up): the rider's chest core. */
 export const RISING_WORLD_FOCUS = [0.5, 0.71] as const;
 
+/**
+ * Render pixels per frame (CSS px; the device pixel ratio is ignored: the fire
+ * is soft and the DOM title stays at native resolution). Compact screens are
+ * coarse-pointer or narrow ones (rising-sequence.ts).
+ */
+export const RISING_COMPACT_PIXEL_BUDGET = 420_000;
+export const RISING_WIDE_PIXEL_BUDGET = 820_000;
+
+/**
+ * The quality-ladder rung a run starts on (rising-fire.ts). A compact screen
+ * that fits its pixel budget at one pixel per CSS pixel (phones: 412 x 915 is
+ * 377k) starts at full resolution, so the print is as sharp as the portal it
+ * takes over from, where a 3.5x upscale would soften it. Everything else
+ * starts a step down, as before. The ladder still steps down at runtime when
+ * frames run late.
+ */
+export function risingStartRung(compact: boolean, cssWidth: number, cssHeight: number) {
+  return compact && cssWidth * cssHeight <= RISING_COMPACT_PIXEL_BUDGET ? 0 : 1;
+}
+
 /** GL (assets + shader) must be ready this long after the press, or the run goes calm. */
 export const RISING_READY_TIMEOUT_MS = 700;
 
@@ -103,6 +123,8 @@ const burnEase = (t: number) => 0.8 * clamp01(t) + 0.2 * easeInOutSine(t);
 export type RisingUniforms = {
   uDive: number;
   uZoom: number;
+  uArrive: number;
+  uOpen: number;
   uBlur: number;
   uWarp: number;
   uBurn: number;
@@ -119,10 +141,14 @@ export function risingUniformsAt(T: number): RisingUniforms {
   const diveT = clamp01(T / s.breakthrough);
   return {
     uDive: pre ? diveT : Math.max(0, 1 - (T - s.breakthrough) / 0.35),
-    // Past the breakthrough the camera eases back out to the whole print while it burns.
-    uZoom: pre
-      ? 1 - 0.8 * easeInCubic(diveT)
-      : 0.88 + 0.12 * easeOutCubic(clamp01((T - s.breakthrough) / 5)),
+    // The dive closes in on the chest core and stays there...
+    uZoom: 1 - 0.8 * easeInCubic(diveT),
+    // ...until the breakthrough tears open from the core, under the brightest
+    // amber: inside the opening the camera is already through, a little
+    // closer than the cover fit, and eases back out to the whole print while
+    // it burns. No frame jumps from one zoom to the other.
+    uArrive: 0.82 + 0.18 * easeOutCubic(clamp01((T - s.breakthrough) / 4.5)),
+    uOpen: 1.6 * easeInCubic(clamp01((T - (s.breakthrough - 0.14)) / 0.32)),
     uBlur: pre ? 0.42 * diveT ** 3 : 0.3 * (1 - smooth(s.breakthrough, s.breakthrough + 0.55, T)),
     // One amber swell over 0.5 s, decaying over 0.85 s: never a strobe.
     uWarp: smooth(1.55, s.breakthrough, T) * (1 - smooth(s.breakthrough, 2.9, T)),

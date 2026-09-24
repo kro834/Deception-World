@@ -10,6 +10,12 @@ import {
   releaseRisingAssets,
 } from "./rising-fire";
 import {
+  RISING_CALM_CHAR,
+  RISING_CALM_EDGE,
+  RISING_CALM_FLAMES,
+  RISING_CALM_SMOKE,
+} from "./rising-art";
+import {
   RISING_ART_ASPECT,
   RISING_READY_TIMEOUT_MS,
   RISING_TIMING,
@@ -52,16 +58,21 @@ function decode(src: string) {
   return pending;
 }
 
+const CALM_SPRITES = [...RISING_CALM_FLAMES, RISING_CALM_EDGE, RISING_CALM_CHAR, RISING_CALM_SMOKE];
+
 /**
  * Warms what the run will need before the press: resized ImageBitmaps for the
  * WebGL tier, decoded images for the calm tiers (the portal shows the key
- * visual in every tier). Idempotent.
+ * visual in every tier), and the calm fire's sprites for the CSS tier (a
+ * WebGL run that falls back loads them lazily). Idempotent.
  */
 export function prepareRising(world: string, rider: string) {
   const images = Promise.all([decode(world), decode(rider)]);
-  if (currentRisingTier() === "webgl") {
+  const tier = currentRisingTier();
+  if (tier === "webgl") {
     return Promise.all([images, prepareRisingAssets(world, rider)]).then(() => undefined);
   }
+  if (tier === "css") for (const sprite of CALM_SPRITES) void decode(sprite);
   return images.then(() => undefined);
 }
 
@@ -236,12 +247,11 @@ export function runRising({
   const calm = find(".rw-calm");
   const calmWorld = find(".rw-calm-world");
   const calmBurn = find(".rw-calm-burn");
-  const calmFlames = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames")];
+  const calmFlames = find(".rw-calm-flames");
   const calmSmoke = find(".rw-calm-smoke");
-  const edgeA = find(".rw-calm-char-a");
-  const edgeB = find(".rw-calm-char-b");
-  const puffs = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-smoke i")];
-  const tongues = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames i")];
+  const edge = [find(".rw-calm-char"), find(".rw-calm-flames")];
+  const puffs = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-smoke img")];
+  const seats = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames i")];
   const embers = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-embers i")];
 
   let tier = currentRisingTier();
@@ -418,30 +428,27 @@ export function runRising({
         duration: ms(burn),
         easing: "linear",
       });
-      // The two fractal edges slide past each other as they climb, so the
-      // front they make together keeps tearing into new shapes.
-      add(edgeA, [{ translate: "0 0" }, { translate: "-4% 1%" }], {
-        delay: ms(s.burnStart),
-        duration: ms(burn),
-      });
-      add(edgeB, [{ translate: "-4% 2.5%" }, { translate: "4% -2.5%" }], {
-        delay: ms(s.burnStart),
-        duration: ms(burn),
-      });
+      // The edge (and the flames seated on it) drifts sideways as it
+      // climbs, so the front shifts across the print instead of rising as
+      // a stamped shape.
+      for (const element of edge) {
+        add(element, [{ translate: "-3% 1.5%" }, { translate: "3% -1.5%" }], {
+          delay: ms(s.burnStart),
+          duration: ms(burn),
+        });
+      }
       // The fire takes hold, burns, and dies down with the settle.
       const span = s.settle[1] - s.burnStart;
-      for (const flames of calmFlames) {
-        add(
-          flames,
-          [
-            { offset: 0, opacity: 0 },
-            { offset: 0.5 / span, opacity: 1 },
-            { offset: (s.settle[0] - s.burnStart) / span, opacity: 1 },
-            { offset: 1, opacity: 0.3 },
-          ],
-          { delay: ms(s.burnStart), duration: ms(span) },
-        );
-      }
+      add(
+        calmFlames,
+        [
+          { offset: 0, opacity: 0 },
+          { offset: 0.5 / span, opacity: 1 },
+          { offset: (s.settle[0] - s.burnStart) / span, opacity: 1 },
+          { offset: 1, opacity: 0.3 },
+        ],
+        { delay: ms(s.burnStart), duration: ms(span) },
+      );
       add(
         calmSmoke,
         [
@@ -453,7 +460,7 @@ export function runRising({
       );
       // Billows well up off the flames, swell and thin out, one after another.
       puffs.forEach((puff, index) => {
-        const rise = 1.9 + (index % 2) * 0.4;
+        const rise = 2.1 + (index % 2) * 0.5;
         const count = Math.max(1, Math.floor((burn - 0.2) / rise));
         for (let round = 0; round < count; round += 1) {
           // One billow per element at a time: each round is its own animation,
@@ -461,12 +468,19 @@ export function runRising({
           // would hide the one playing).
           const at = s.burnStart + 0.2 + index * (rise / puffs.length) + round * rise;
           if (at + rise > s.settle[1]) break;
+          const drift = (index % 2 ? 1 : -1) * (6 + 4 * round);
           add(
             puff,
             [
-              { offset: 0, opacity: 0, translate: "0 12%", scale: 0.55 },
-              { offset: 0.3, opacity: 0.9, translate: "0 -18%", scale: 0.9 },
-              { offset: 1, opacity: 0, translate: "0 -64%", scale: 1.5 },
+              { offset: 0, opacity: 0, translate: "0 14%", scale: 0.5, rotate: "0deg" },
+              { offset: 0.3, opacity: 0.85, translate: `${drift / 3}% -16%`, scale: 0.85 },
+              {
+                offset: 1,
+                opacity: 0,
+                translate: `${drift}% -70%`,
+                scale: 1.55,
+                rotate: `${drift}deg`,
+              },
             ],
             {
               delay: ms(at),
@@ -477,44 +491,78 @@ export function runRising({
           );
         }
       });
-      // Licking: every tongue stretches, narrows, leans and dims on its own
-      // beat (a sample every ~0.36 s, each eased), so the fire moves and
-      // flickers locally without the row ever pulsing together.
-      tongues.forEach((tongue, index) => {
-        const steps = Math.max(2, Math.round(burn / 0.36));
-        add(
-          tongue,
-          Array.from({ length: steps + 1 }, (_, step) => {
-            const phase = index * 1.7 + step * 2.1;
-            const stretch = 0.82 + 0.3 * Math.abs(Math.sin(phase * 0.63 + index * 0.9));
-            const narrow = 0.88 + 0.14 * Math.sin(phase * 1.1);
-            return {
-              offset: step / steps,
-              easing: "ease-in-out",
-              opacity: Number((0.8 + 0.2 * Math.abs(Math.cos(phase * 0.7))).toFixed(2)),
-              rotate: `${(Math.sin(phase * 0.8 + index) * 6).toFixed(1)}deg`,
-              scale: `${narrow.toFixed(3)} ${stretch.toFixed(3)}`,
-              translate: `${(Math.sin(phase * 1.3) * 5).toFixed(1)}% 0`,
+      // Flames: each seat's two sprite frames take turns. A frame fades in
+      // low and small, holds, and fades out higher and taller, so the fire
+      // flows upwards (fake advection) and re-forms as the frames swap; the
+      // two overlap, so a seat never goes dark. Every seat has its own beat
+      // and sway: the row never pulses together.
+      seats.forEach((seat, index) => {
+        const cycle = 0.6 + 0.3 * ((index * 0.618) % 1);
+        const lean = (index % 3) - 1;
+        seat.querySelectorAll("img").forEach((frame, turn) => {
+          const keyframes: Keyframe[] = [];
+          const span = burn;
+          for (let start = (turn - 1) * cycle * 0.5; start < span; start += cycle) {
+            const beat = Math.round(start / cycle) + index;
+            const sway = Math.sin(beat * 1.9 + index) * 4 + lean * 2;
+            const wide = 0.92 + 0.12 * Math.abs(Math.sin(beat * 1.3 + index * 0.7));
+            const tall = 0.9 + 0.2 * Math.abs(Math.cos(beat * 0.9 + index));
+            const point = (at: number, keyframe = {} as Keyframe) => {
+              const t = start + at * cycle;
+              if (t < 0 || t > span) return;
+              keyframes.push({ ...keyframe, offset: Number((t / span).toFixed(4)) });
             };
-          }),
-          { delay: ms(s.burnStart), duration: ms(burn) },
-        );
+            point(0, {
+              opacity: 0,
+              translate: "0 5%",
+              scale: `${(wide * 0.94).toFixed(3)} ${(tall * 0.88).toFixed(3)}`,
+              rotate: `${(sway * 0.5).toFixed(1)}deg`,
+            });
+            point(0.3, { opacity: 1 });
+            point(0.7, { opacity: 1 });
+            point(1, {
+              opacity: 0,
+              translate: "0 -7%",
+              scale: `${wide.toFixed(3)} ${(tall * 1.1).toFixed(3)}`,
+              rotate: `${sway.toFixed(1)}deg`,
+            });
+          }
+          if (keyframes.length < 2) return;
+          if (keyframes[0].offset !== 0) keyframes.unshift({ ...keyframes[0], offset: 0 });
+          if (keyframes.at(-1)?.offset !== 1) keyframes.push({ ...keyframes.at(-1), offset: 1 });
+          add(frame, keyframes, { delay: ms(s.burnStart), duration: ms(span), easing: "linear" });
+        });
       });
       // Embers leave the front where it is when they are thrown (the burn
-      // layer climbs linearly: its lip crosses the frame from 119.6% to 0%).
+      // layer climbs linearly: its lip crosses the frame from 119.6% to 0%),
+      // wander on the draught and burn out as they climb.
       embers.forEach((ember, index) => {
-        const rise = 1.7 + (index % 3) * 0.3;
+        const rise = 1.5 + (index % 3) * 0.35;
         const at =
           s.burnStart + 0.3 + ((index * 5) % embers.length) * ((burn - rise) / embers.length);
         const lip = Math.max(2, ((at - s.burnStart) / burn) * 120 - 20);
-        const drift = Math.round(Math.sin(index * 2.7) * 36);
+        // Waypoints [x px, height vh] and the heading between them (a vh is
+        // about 9 px), so each streak leans along its path.
+        const path = [0, 0.35, 0.7, 1].map((step) => [
+          Math.round(
+            Math.sin(index * 2.7 + step * 4.2) * 26 * step + step * (index % 2 ? 14 : -14),
+          ),
+          lip + 44 * step,
+        ]);
+        const at2 = (index2: number) => `${path[index2][0]}px -${path[index2][1].toFixed(1)}vh`;
+        const heading = (index2: number) => {
+          const [x0, y0] = path[index2];
+          const [x1, y1] = path[index2 + 1];
+          return `${((Math.atan2(x1 - x0, (y1 - y0) * 9) * 180) / Math.PI).toFixed(0)}deg`;
+        };
         add(
           ember,
           [
-            { offset: 0, opacity: 0, translate: `0 -${lip.toFixed(1)}vh` },
+            { offset: 0, opacity: 0, translate: at2(0), rotate: heading(0) },
             { offset: 0.1, opacity: 1 },
-            { offset: 0.65, opacity: 0.85 },
-            { offset: 1, opacity: 0, translate: `${drift}px -${(lip + 46).toFixed(1)}vh` },
+            { offset: 0.35, translate: at2(1), rotate: heading(1) },
+            { offset: 0.7, opacity: 0.8, translate: at2(2), rotate: heading(2) },
+            { offset: 1, opacity: 0, translate: at2(3) },
           ],
           { delay: ms(at), duration: ms(rise), easing: "cubic-bezier(0.3, 0.5, 0.6, 1)" },
         );

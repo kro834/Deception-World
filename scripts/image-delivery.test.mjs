@@ -31,6 +31,14 @@ const optimizedAssets = [
   // the 683 x 1024 cut that compact screens load (rising-art.ts).
   ["rising-burn-rider-20260924.webp", 340_000],
   ["rising-burn-rider-20260924-683.webp", 160_000],
+  // The calm (CSS) tier's sprites (scripts/render-rising-calm-sprites.mjs),
+  // about 110 KB together: three flame frames, the burn edge, char, smoke.
+  ["rising-calm-flame-20260924-1.webp", 22_000],
+  ["rising-calm-flame-20260924-2.webp", 22_000],
+  ["rising-calm-flame-20260924-3.webp", 22_000],
+  ["rising-calm-edge-20260924.webp", 60_000],
+  ["rising-calm-char-20260924.webp", 8_000],
+  ["rising-calm-smoke-20260924.webp", 14_000],
 ];
 
 test("critical and rider images ship as bounded, valid WebP assets", () => {

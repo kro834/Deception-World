@@ -5,7 +5,14 @@
 // with import() from the gate, so the World bundle does not carry it.
 import FRAGMENT_SOURCE from "./rising.frag.glsl?raw";
 import NOISE_SOURCE from "./rising-noise.frag.glsl?raw";
-import { RISING_WORLD_FOCUS, RISING_WORLD_POSITION, risingUniformsAt } from "./rising-timing";
+import {
+  RISING_COMPACT_PIXEL_BUDGET,
+  RISING_WIDE_PIXEL_BUDGET,
+  RISING_WORLD_FOCUS,
+  RISING_WORLD_POSITION,
+  risingStartRung,
+  risingUniformsAt,
+} from "./rising-timing";
 
 export type RisingImage = {
   source: TexImageSource;
@@ -23,6 +30,8 @@ const UNIFORM_NAMES = [
   "uRes",
   "uTime",
   "uZoom",
+  "uArrive",
+  "uOpen",
   "uBlur",
   "uDive",
   "uWarp",
@@ -42,8 +51,13 @@ const UNIFORM_NAMES = [
 
 type UniformName = (typeof UNIFORM_NAMES)[number];
 
-// Resolution first (a canvas resize, no recompile); less flame detail and
-// fewer blur taps only as the last resorts. The run starts on rung 1.
+// Resolution first (a canvas resize, no recompile); then the last resorts
+// drop whole layers (rising.frag.glsl): octaves 3 loses the smoke detail and
+// self-shadow, the ash, the haze, the large blisters, the second spark layer
+// and the drifting embers; octaves 2 also the smoke, the sparks, the small
+// flame eddies, the crack breaks and the ember specks. Fewer blur taps with
+// them. Compact screens within budget start on rung 0, the rest on rung 1
+// (risingStartRung).
 export const RISING_LADDER = [
   { scale: 1.0, octaves: 4, taps: 8 },
   { scale: 0.75, octaves: 4, taps: 8 },
@@ -52,13 +66,6 @@ export const RISING_LADDER = [
   { scale: 0.42, octaves: 3, taps: 6 },
   { scale: 0.36, octaves: 2, taps: 4 },
 ] as const;
-
-export const RISING_START_RUNG = 1;
-
-// Render pixels per frame (CSS px; device pixel ratio is ignored: the fire is
-// soft and the DOM title stays at native resolution).
-const COMPACT_PIXEL_BUDGET = 420_000;
-const WIDE_PIXEL_BUDGET = 820_000;
 
 // The baked noise tile: power of two (REPEAT and mipmaps in WebGL 1), 256 KB.
 const NOISE_SIZE = 256;
@@ -152,8 +159,8 @@ export type FireRendererOptions = {
 
 export class FireRenderer {
   readonly canvas: HTMLCanvasElement;
-  rung = RISING_START_RUNG;
-  size = { width: 0, height: 0, scale: 0, rung: RISING_START_RUNG };
+  rung: number;
+  size: { width: number; height: number; scale: number; rung: number };
   private gl: WebGLRenderingContext | null;
   private readonly parallel: { COMPLETION_STATUS_KHR: number } | null;
   private readonly compact: boolean;
@@ -172,6 +179,9 @@ export class FireRenderer {
   constructor(canvas: HTMLCanvasElement, { assets, compact }: FireRendererOptions) {
     this.canvas = canvas;
     this.compact = compact;
+    // Window size: the canvas may still be detached (primed at pointerdown).
+    this.rung = risingStartRung(compact, window.innerWidth, window.innerHeight);
+    this.size = { width: 0, height: 0, scale: 0, rung: this.rung };
     const gl = canvas.getContext("webgl", {
       // Opaque: an alpha canvas over the page forces blending on Android.
       alpha: false,
@@ -351,7 +361,7 @@ export class FireRenderer {
     const rect = this.canvas.getBoundingClientRect();
     const cssWidth = Math.max(1, rect.width || window.innerWidth);
     const cssHeight = Math.max(1, rect.height || window.innerHeight);
-    const budget = this.compact ? COMPACT_PIXEL_BUDGET : WIDE_PIXEL_BUDGET;
+    const budget = this.compact ? RISING_COMPACT_PIXEL_BUDGET : RISING_WIDE_PIXEL_BUDGET;
     const budgetScale = Math.min(1, Math.sqrt(budget / (cssWidth * cssHeight)));
     const scale = budgetScale * RISING_LADDER[this.rung].scale;
     const width = Math.max(64, Math.round(cssWidth * scale));
