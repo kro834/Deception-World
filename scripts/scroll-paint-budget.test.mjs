@@ -28,9 +28,8 @@ const cssFiles = [
     .map((name) => `src/styles-world/${name}`),
 ].sort();
 
-// RISING is being rewritten in its own stream; its gates move to the same
-// attribute when that lands. Nothing else may use the old gates.
-const PENDING_GATES = new Set(["src/styles-world-rising.css"]);
+// Every sheet uses the dialog flag; nothing may use the old :has() gates.
+const PENDING_GATES = new Set();
 // Timeline keyframes that still animate clip-path (main-thread paint).
 // Shrink this list; never grow it.
 const CLIP_PATH_ALLOWED = new Set(["mr-type", "mr-wipe", "mr-materialize"]);

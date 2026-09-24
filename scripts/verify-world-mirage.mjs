@@ -27,9 +27,7 @@ const CAPABLE = () => {
 // A rail press takes the page lock (viewport-scroll-lock.js, html[data-rail-lock]).
 // The choreography must hold still under it: the same scroll-driven
 // animations keep running (none cancelled and restarted) and nothing beside
-// the rail moves. The rail's own press transitions are not counted, nor
-// RISING's rw-* entrances until its sheet drops the same rail-lock gate
-// (styles-world-rising.css is being rewritten separately).
+// the rail moves. The rail's own press transitions are not counted.
 async function heldPress(page, name) {
   const watched = [".hero-backdrop", ".signal > img", ".story-copy .tr-c"];
   const snapshot = () =>
@@ -39,7 +37,6 @@ async function heldPress(page, name) {
         .filter(
           (animation) =>
             animation.playState === "running" &&
-            !animation.animationName?.startsWith("rw-") &&
             (animation.timeline instanceof ViewTimeline ||
               animation.timeline instanceof ScrollTimeline),
         );

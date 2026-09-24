@@ -481,7 +481,7 @@ test("the sheet: finite, compositor-only, gated like Mirage, legible and scoped"
   const reduced = gate.indexOf("@media (prefers-reduced-motion: no-preference)");
   assert.ok(reduced > 0);
   const guard =
-    "html:not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(:has(dialog[open]))";
+    "html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])";
   for (const target of [".rw-gate-button {", ".rw-gate-horizon {", ".rw-gate-rule {"]) {
     const at = gate.indexOf(target);
     assert.ok(at > reduced, target);

@@ -145,9 +145,7 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(
-        :has(dialog[open])
-      )
+    html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .rw-gate-button {
       animation: rw-rise linear both;
@@ -155,9 +153,7 @@
       animation-range: entry 12% entry 88%;
     }
 
-    html:not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(
-        :has(dialog[open])
-      )
+    html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .rw-gate-horizon {
       animation: rw-horizon linear both;
@@ -165,9 +161,7 @@
       animation-range: entry 0% entry 100%;
     }
 
-    html:not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(
-        :has(dialog[open])
-      )
+    html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .rw-gate-rule {
       animation: rw-rule linear both;
@@ -176,9 +170,7 @@
     }
 
     /* Keyboard focus shows the control at rest, wherever the scroll is. */
-    html:not([data-side-menu-open]):not([data-rail-lock]):not([data-loading]):not(
-        :has(dialog[open])
-      )
+    html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])
       .site-shell.film-edition.mirage-edition
       .rw-gate-button:focus-visible {
       animation: none;
