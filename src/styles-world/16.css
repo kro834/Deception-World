@@ -253,10 +253,13 @@
   z-index: 3;
   top: 22px;
   left: 22px;
-  padding-left: 28px;
+  /* A dark pill of its own: the label also sits on pale photographs. */
+  padding: 7px 12px 7px 38px;
+  border-radius: 999px;
+  background: rgba(3, 5, 8, 0.68);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.28em;
   text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
@@ -266,7 +269,7 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 0;
+  left: 12px;
   width: 18px;
   height: 1px;
   background: var(--archive-accent);

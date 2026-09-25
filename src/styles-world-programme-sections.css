@@ -457,3 +457,14 @@
     border-color: rgb(242 238 229 / 54%);
   }
 }
+
+/* Legibility: the rider numbers keep their tone, lifted towards white so the
+   dark tones (the reds, the magentas) read on the rail, and the active 六詠
+   tab's label reads on its lit glass. */
+.site-shell.film-edition .rider-tabs small {
+  color: color-mix(in srgb, var(--tab-tone) 58%, #fff);
+}
+
+.site-shell.film-edition .manager-archive-tabs button.is-active small {
+  color: #fff;
+}

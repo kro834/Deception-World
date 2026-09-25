@@ -91,3 +91,7 @@ main.manager-page.ciel-dossier-page .manager-facts > div {
     color: CanvasText;
   }
 }
+
+main.manager-page.ciel-dossier-page .manager-topbar .brand small {
+  color: var(--ciel-aqua-pale);
+}

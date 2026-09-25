@@ -78,8 +78,9 @@
   isolation: isolate;
   box-sizing: border-box;
   min-height: 100svh;
-  /* A third of a screen of burned ground above the box. */
-  padding: max(calc(var(--re-dive-edge-h) * 0.6), 34svh)
+  /* A quarter of a screen of burned ground above the box, so the first
+     signals already show where the transition lands. */
+  padding: max(calc(var(--re-dive-edge-h) * 0.9), 26svh)
     max(16px, calc(env(safe-area-inset-right) + 12px), 4vw) clamp(88px, 12vw, 160px)
     max(16px, calc(env(safe-area-inset-left) + 12px), 4vw);
   color: var(--rw-ash, #f7e9df);
@@ -143,7 +144,7 @@
 }
 
 .site-shell.film-edition.mirage-edition .re-dive-section .signal.is-vacant > span {
-  color: rgb(255 214 190 / 0.34);
+  color: rgb(255 214 190 / 0.6);
 }
 
 .site-shell.film-edition.mirage-edition .re-dive-section .signal.is-vacant > i {
@@ -152,7 +153,7 @@
 }
 
 .site-shell.film-edition.mirage-edition .re-dive-section .signal.is-vacant > b {
-  color: rgb(255 226 206 / 0.5);
+  color: rgb(255 226 206 / 0.74);
   letter-spacing: 0.3em;
 }
 
@@ -235,8 +236,11 @@
   }
 }
 
+/* Hidden (not only transparent) until it has faded in: no press lands on it
+   while it cannot be seen. */
 @keyframes re-dive-offer {
   from {
+    visibility: hidden;
     opacity: 0;
     translate: -50% 12px;
   }

@@ -227,3 +227,13 @@ test("the RE DIVE sheet sits between the rising sheet and the Mirage face", asyn
     String(order),
   );
 });
+
+test("usability: RE DIVE in the menu once reached, the offer not pressable while unseen", async () => {
+  const menu = await read("src/components/world/world-chrome.tsx");
+  assert.match(menu, /window\.sessionStorage\.getItem\("dw-re-dive"\) === "1"/);
+  assert.match(menu, /\{reDiveReached \? \(\s*<GuardedLink to="\/world" hash="re-dive"/);
+  const css = stripComments(await read("src/styles-world-re-dive.css"));
+  assert.match(css, /@keyframes re-dive-offer \{\s*from \{\s*visibility: hidden;/);
+  // The vacant slots stay readable.
+  assert.match(css, /\.signal\.is-vacant > span \{\s*color: rgb\(255 214 190 \/ 0\.6\);/);
+});

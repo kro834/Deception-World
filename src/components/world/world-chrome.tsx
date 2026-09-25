@@ -211,6 +211,17 @@ export function SideMenuLayer({
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
+  // RE DIVE (rising-world.tsx) joins the World's sections once reached this
+  // session; read when the menu opens.
+  const [reDiveReached, setReDiveReached] = useState(false);
+  useEffect(() => {
+    if (!isOpen) return;
+    try {
+      setReDiveReached(window.sessionStorage.getItem("dw-re-dive") === "1");
+    } catch {
+      setReDiveReached(false);
+    }
+  }, [isOpen]);
   const close = () => onOpenChange?.(false);
   const selectedAnnouncement: SiteAnnouncement | null =
     SITE_ANNOUNCEMENTS.find((notice) => notice.id === selectedAnnouncementId) ?? null;
@@ -661,6 +672,12 @@ export function SideMenuLayer({
                   <span>六詠</span>
                   <i>ARCHIVE</i>
                 </GuardedLink>
+                {reDiveReached ? (
+                  <GuardedLink to="/world" hash="re-dive" assets={[]} beforeNavigate={close}>
+                    <span>RE DIVE</span>
+                    <i>RIKUEI</i>
+                  </GuardedLink>
+                ) : null}
               </>
             )}
           </div>

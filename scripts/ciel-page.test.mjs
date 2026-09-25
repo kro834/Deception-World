@@ -109,3 +109,10 @@ test("opening his page plays his own cut-in, in his colours", async () => {
   // Reduced motion: the shared cut-in rule stops every animation.
   assert.match(css, /\.rider-route-cutin \.rider-cutin-stage \*[\s\S]*?animation: none !important/);
 });
+
+test("the BEFORE label reads on pale photographs", async () => {
+  const css = await read("src/styles-world/16.css");
+  const rule = css.match(/\.rider-archive-civilian-visual > span \{([^}]+)\}/)?.[1] ?? "";
+  assert.match(rule, /background: rgba\(3, 5, 8, 0\.68\)/);
+  assert.match(rule, /font-size: 10px/);
+});
