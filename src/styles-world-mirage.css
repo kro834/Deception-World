@@ -945,6 +945,11 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   letter-spacing: 0.14em;
 }
 
+/* The signal red at 58% alpha read at about 2.2:1 on the card. */
+.site-shell.film-edition.mirage-edition .dante-copy i {
+  color: rgb(255 138 165 / 90%);
+}
+
 .site-shell.film-edition.mirage-edition .dante-copy b {
   font-family: var(--mr-mono);
   font-weight: 700;
@@ -953,28 +958,62 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     2px 0 rgb(122 232 255 / 55%);
 }
 
-/* Related records and unresolved slots. */
+/* Related records and unresolved slots. The code chip runs up the card's
+   left edge like a file tab: across the top it sat over the faces (the art
+   is framed at 12-18% from the top), which the holo-cards above avoid. */
 .site-shell.film-edition.mirage-edition .other-card-code {
-  max-width: calc(100% - 64px);
-  padding: 3px 14px 3px 8px;
+  top: 12px;
+  left: 0;
+  max-width: none;
+  padding: 10px 4px 12px;
   box-sizing: border-box;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   color: #03141c;
   background: var(--mr-ice);
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  /* The chip's cut corner, at its free end once the tab is turned. */
+  clip-path: polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px);
   font-family: var(--mr-mono);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  /* A 20 px tab: every pixel it takes is one the name beside it loses. */
+  line-height: 1;
+  letter-spacing: 0.1em;
 }
 
+.site-shell.film-edition.mirage-edition .manager-slot-grid .other-card-copy {
+  left: 26px;
+}
+
+/* The form name wraps at its space rather than losing its last characters
+   to an ellipsis. On the narrowest cards its longest word sets the column,
+   which then takes a few pixels of the right margin. */
+.site-shell.film-edition.mirage-edition .manager-slot-grid .other-card-copy i {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+/* Square like the real cards beside it; the dashed rule marks it unresolved. */
 .site-shell.film-edition.mirage-edition .archive-placeholder {
   border-color: rgb(122 232 255 / 18%);
+  border-radius: 0;
   background:
     repeating-linear-gradient(45deg, rgb(122 232 255 / 5%) 0 2px, transparent 2px 9px),
     var(--mr-deck);
+}
+
+/* Unresolved numerals and marks: dim enough to read as empty slots next to
+   the real cards (the dashed rule and the hatch say the rest), bright enough
+   to read at 4.5:1, with the red and the green at a similar strength. */
+.site-shell.film-edition.mirage-edition .archive-placeholder.is-unmanaged {
+  color: rgb(255 112 136 / 82%);
+}
+
+.site-shell.film-edition.mirage-edition .archive-placeholder.is-other {
+  color: rgb(105 223 116 / 65%);
 }
 
 .site-shell.film-edition.mirage-edition .archive-placeholder small {
@@ -1003,6 +1042,12 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   text-shadow: 0 1px 8px rgb(0 0 0 / 90%);
 }
 
+/* ハイク and フェイブル open the image viewer in place, so their corner badge
+   is an expand mark; the ↗ stays on the cards that go to a dossier. */
+.site-shell.film-edition.mirage-edition .other-artwork-card::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 /* ================================================================
    World column: the archive terminal
    ================================================================ */
@@ -1018,6 +1063,14 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   background: var(--mr-brackets);
   background-repeat: no-repeat;
   pointer-events: none;
+}
+
+/* One frame, as the manager archive has: the shared panel card inside it had
+   no padding, so the label, the tab rail and the copy sat on its border. */
+.site-shell.film-edition.mirage-edition .world-column-content {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
 }
 
 .site-shell.film-edition.mirage-edition .world-column-index > span {
@@ -1610,8 +1663,12 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
     animation: mr-redact 460ms var(--mr-ease-io) 1240ms both;
   }
 
+  /* A dive lands on this key visual: the HUD variant leaves it projected
+     rather than shutting it to a slit and opening it again. */
   html:not([data-world-effects="economy"]):not([data-mirage-quiet])
-    .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"])
+    .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
+      [data-mirage-boot="hud"]
+    )
     .poster-media {
     animation: mr-project 900ms var(--mr-ease-out) 600ms both;
   }
@@ -2443,31 +2500,46 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   }
 }
 
-/* Narrow related cards: the chip keeps its full label and the arrow badge
-   drops below it. */
+/* Narrow archive cards: the anomalous-record tag keeps its full label. */
 @media (max-width: 480px), (max-height: 560px) and (orientation: landscape) {
-  .site-shell.film-edition.mirage-edition .other-card-code {
-    max-width: calc(100% - 20px);
-    letter-spacing: 0.04em;
-  }
-
-  .site-shell.film-edition.mirage-edition .other-archive-card::after {
-    top: 50px;
-  }
-
   .site-shell.film-edition.mirage-edition .dante-copy small {
     letter-spacing: 0.04em;
   }
 }
 
-@media (max-width: 360px) {
-  .site-shell.film-edition.mirage-edition .other-card-code {
-    white-space: normal;
-    text-overflow: clip;
+/* Related cards below desktop width: tighter tracking keeps the English
+   name on one line down to the 120 px three-up grid of a landscape phone,
+   and the form name on one line on landscape tablets (two lines below). */
+@media (max-width: 1279px) {
+  .site-shell.film-edition.mirage-edition .manager-slot-grid .other-card-copy :is(small, i) {
+    letter-spacing: 0.04em;
   }
+}
 
-  .site-shell.film-edition.mirage-edition .other-archive-card::after {
-    top: 66px;
+/* Phone archive tabs: "REVERSE / 02" and "RELATED / 03" broke onto two lines
+   beside a one-line "FRONT / 01", and the Japanese names were no larger than
+   the codes. The names lead, and tighter tracking keeps every code on one
+   line wherever it fits: portrait rails from about 350 px, where a tab still
+   leaves the 73 px "REVERSE / 02" needs, and landscape phones, whose rail
+   shares the row with the archive intro (tabs of 114-127 px keep their
+   padding). Narrower portrait rails keep the old wrap, which breaks all
+   three codes alike. */
+@media (max-width: 560px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button b {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 560px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button[role="tab"] {
+    padding-inline: 4px;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 560px), (max-height: 560px) and (orientation: landscape) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+    white-space: nowrap;
+    letter-spacing: 0.02em;
   }
 }
 

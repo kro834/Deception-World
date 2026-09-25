@@ -646,6 +646,19 @@
     0 0 90px rgb(200 20 8 / 0.5);
 }
 
+/* Landscape phones: RE DIVE…? and もう一度 take the bottom ~140px of a short
+   screen, so the title centres in the band above them (from the cut on, so
+   it does not jump when they appear) and sizes to that band's height. */
+@media (max-height: 540px) {
+  .site-shell.film-edition.mirage-edition .rw-title-wrap {
+    padding-bottom: calc(max(24px, calc(env(safe-area-inset-bottom) + 16px)) + 124px);
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-title-name {
+    font-size: clamp(44px, min(14.6cqw, 26cqh), 224px);
+  }
+}
+
 .site-shell.film-edition.mirage-edition .rw-live {
   position: absolute;
   width: 1px;
@@ -723,6 +736,30 @@
 
 .site-shell.film-edition.mirage-edition .rw-close i::after {
   rotate: -45deg;
+}
+
+/* Hover and press answer every control, including a press SKIP/もう一度's
+   swap guard ignores, which otherwise reads as a dead button. The tap
+   highlight is off, so :active is the only acknowledgement on touch. */
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
+    transition:
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    :is(.rw-controls button, .rw-close):hover:not(:focus-visible, :active) {
+    background-color: rgb(52 14 8 / 0.9);
+    box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
+  }
+}
+
+/* The keyboard ring (:focus-visible, below) still wins while Space is held. */
+.site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):active {
+  scale: 0.97;
+  background-color: rgb(70 18 10 / 0.92);
+  box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
 }
 
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):focus-visible {

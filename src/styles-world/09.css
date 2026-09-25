@@ -279,6 +279,14 @@
   }
 }
 
+/* Tablets: the full-width box was landscape (about 643 x 553 at 768) for
+   portrait art, so the helmet crowns and horns were cut. */
+@media (min-width: 561px) and (max-width: 840px) {
+  .rider-visual {
+    height: clamp(430px, 88vw, 680px);
+  }
+}
+
 @media (max-width: 560px) {
   .world-column-dialog {
     width: calc(100vw - 16px);
@@ -704,8 +712,17 @@
     font-size: 24px;
   }
 
+  /* The count keeps its label beside it; a bare "06" next to the "01 / 06"
+     pager read as a second counter. Below 380 px the label would push the
+     172 px pager past the panel edge, so the count stands alone there. */
   .episode-archive-meta p span {
-    display: none;
+    display: block;
+  }
+
+  @media (max-width: 379px) {
+    .episode-archive-meta p span {
+      display: none;
+    }
   }
 
   .episode-grid {

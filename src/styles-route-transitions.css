@@ -62,6 +62,17 @@ html[data-route-scroll-settling="true"] {
   cursor: wait;
 }
 
+/* The rail's shared type (styles.css) drew SAGA / REALM at 7-8px and the
+   names at 11px. The two tabs have room for 11px and 13px at every width. */
+.form-archive-switcher button small {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.form-archive-switcher button b {
+  font-size: 0.8125rem;
+}
+
 .form-archive-page .form-archive-toolbar .side-panel-trigger.form-archive-menu-trigger {
   position: absolute;
   z-index: 3;
@@ -387,6 +398,23 @@ html[data-route-scroll-settling="true"] {
   animation: dw-dive-velocity-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Dives end on their exit light; unmounting then cut from near-white to the
+   page in one frame. Hold the light briefly, then dissolve the whole gate so
+   the destination comes up through it (still one flash per dive). */
+.load-gate.archive-route-dive.is-arriving {
+  animation: dw-gate-dissolve 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes dw-gate-dissolve {
+  0%,
+  52% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 560px) {
   .form-archive-page {
     --archive-toolbar-height: calc(env(safe-area-inset-top) + 68px);
@@ -401,13 +429,7 @@ html[data-route-scroll-settling="true"] {
     translate: 0 0;
   }
 
-  .form-archive-switcher button small {
-    font-size: 0.44rem;
-    letter-spacing: 0.2em;
-  }
-
   .form-archive-switcher button b {
-    font-size: 0.68rem;
     letter-spacing: 0.08em;
   }
 
@@ -766,6 +788,11 @@ html[data-route-scroll-settling="true"] {
   .is-diving .cine-dive-status {
     opacity: 1;
     transform: translate(-50%, 0);
+  }
+
+  /* The short reduced reveal still fades the gate instead of cutting it. */
+  .load-gate.archive-route-dive.is-arriving {
+    animation-duration: 0.16s;
   }
 }
 
@@ -1564,6 +1591,12 @@ html[data-route-scroll-settling="true"] {
   outline: none;
 }
 
+/* A keyboard route arrival parks focus on the section or heading it opened
+   (load-gate focusRouteDestination); that is a reading position, not a control. */
+[data-route-focus="true"]:focus {
+  outline: none;
+}
+
 @media (max-width: 640px) {
   [data-opening-handoff-root] {
     --opening-handoff-blue: 110 229 255;
@@ -1591,4 +1624,17 @@ html[data-route-scroll-settling="true"] {
   [data-opening-handoff-bloom] {
     display: none !important;
   }
+}
+
+/* ENTER THE WORLD: the floating button arrives with the page, under the dive's still. */
+html[data-opening-handoff-active] .zeus-button {
+  z-index: 2147483100;
+}
+
+/* Route dives and cut-ins: the button fades out with the page and waits until
+   the overlay has gone. Its own return (data-navigating) stays in view. */
+body:has(.load-gate) .zeus-button:not([data-navigating="true"]) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }

@@ -307,6 +307,20 @@
   animation: rxsScrollCue 1.8s ease-in-out infinite;
 }
 
+/* The cue can be a single 20px line of text: give it a 44px hit area without
+   moving it. Layout containment makes the cue the pseudo's containing block
+   whether a hero sets it absolute or (the showcase's column hero) static.
+   `html` outranks the showcase's doubled .rxs-page, which loads later. */
+html .rxs-page.rxs-page .rxs-scroll-cue {
+  contain: layout;
+}
+
+html .rxs-page.rxs-page .rxs-scroll-cue::before {
+  position: absolute;
+  inset: -12px -10px;
+  content: "";
+}
+
 .rxs-section {
   position: relative;
   padding: clamp(110px, 13vw, 190px) max(24px, calc((100vw - 1180px) / 2));

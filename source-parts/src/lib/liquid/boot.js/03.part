@@ -1,4 +1,3 @@
-      setContact(preview);
       const g = geos[preview];
       const tab = tabs()[preview];
       if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
@@ -253,3 +252,5 @@
 
   // Pointer capture is not guaranteed in Samsung Internet and embedded
   // Android WebViews. Finish/cancel at the window boundary as well so a lift
+  // outside the rail, app backgrounding or route transition can never leave
+  // the document-wide touchmove lock behind.

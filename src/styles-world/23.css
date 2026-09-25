@@ -138,7 +138,7 @@
   margin: 0 0 7px;
   color: rgba(132, 205, 255, 0.78);
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.3em;
 }
@@ -156,9 +156,9 @@
   padding: 8px 13px;
   border: 1px solid rgba(145, 207, 246, 0.16);
   border-radius: 999px;
-  color: rgba(163, 218, 252, 0.65);
+  color: rgba(163, 218, 252, 0.72);
   font-family: var(--font-display);
-  font-size: 7px;
+  font-size: 11px;
   letter-spacing: 0.22em;
   white-space: nowrap;
 }
@@ -240,9 +240,9 @@
 }
 
 .site-announcement-index-copy span {
-  color: rgba(132, 205, 255, 0.64);
+  color: rgba(132, 205, 255, 0.8);
   font-family: var(--font-display);
-  font-size: 7px;
+  font-size: 11px;
   letter-spacing: 0.26em;
   white-space: nowrap;
 }
@@ -468,13 +468,13 @@
   margin: 0 0 17px;
   color: rgba(132, 205, 255, 0.86);
   font-family: var(--font-display);
-  font-size: clamp(7px, 0.75vw, 10px);
+  font-size: clamp(11px, 0.75vw, 12px);
   font-weight: 700;
   letter-spacing: 0.28em;
 }
 
 .site-announcement-copy time {
-  color: rgba(222, 238, 248, 0.44);
+  color: rgba(222, 238, 248, 0.72);
 }
 
 .site-announcement-copy h3 {
@@ -521,7 +521,7 @@
   margin: 0 0 13px;
   color: #e9c47b;
   font-family: var(--font-display);
-  font-size: clamp(8px, 0.72vw, 11px);
+  font-size: clamp(11px, 0.72vw, 12px);
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -544,9 +544,9 @@
 
 .site-announcement-release-title {
   margin: 0 0 14px;
-  color: rgba(216, 230, 242, 0.52);
+  color: rgba(216, 230, 242, 0.72);
   font-family: var(--font-display);
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.24em;
 }
@@ -591,15 +591,15 @@
 .site-announcement-metric span {
   margin-top: 9px;
   color: rgba(224, 239, 250, 0.74);
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.17em;
+  letter-spacing: 0.12em;
 }
 
 .site-announcement-metric small {
   margin-top: 5px;
-  color: rgba(185, 210, 229, 0.43);
-  font-size: 7px;
+  color: rgba(185, 210, 229, 0.72);
+  font-size: 11px;
   letter-spacing: 0.08em;
 }
 
@@ -616,8 +616,8 @@
   margin-top: 15px;
   padding-left: 12px;
   border-left: 1px solid rgba(233, 196, 123, 0.38);
-  color: rgba(182, 201, 218, 0.42);
-  font-size: 8px;
+  color: rgba(182, 201, 218, 0.74);
+  font-size: 12px;
   letter-spacing: 0.06em;
   line-height: 1.75;
 }
@@ -892,7 +892,7 @@
 
   .site-announcement-body {
     margin-top: 12px;
-    font-size: 9px;
+    font-size: 12px;
     line-height: 1.7;
   }
 

@@ -50,6 +50,8 @@ export function DossierReader({
     if (!sections.length) return;
     let observer: IntersectionObserver | undefined;
     let resizeFrame = 0;
+    let scrollTimer = 0;
+    let syncNow: (() => void) | null = null;
 
     const observePosition = () => {
       observer?.disconnect();
@@ -69,20 +71,42 @@ export function DossierReader({
         // Resolve from document order so upward scrolling and gaps stay stable.
         // Keep the observer's visibility result: fractional layout/animation
         // coordinates can differ slightly from a fresh bounding-rect read.
-        const current = sections
-          .filter(
-            (section) =>
-              intersecting.has(section) || section.getBoundingClientRect().top <= line + 1,
-          )
-          .at(-1);
+        // A short final section can never reach the line on a tall screen, so
+        // at the end of the page the last section in view is the current one.
+        const doc = document.documentElement;
+        const atEnd =
+          window.scrollY > 0 && window.scrollY + window.innerHeight >= doc.scrollHeight - 2;
+        const current = (
+          atEnd
+            ? sections.filter(
+                (section) => section.getBoundingClientRect().top < window.innerHeight - 1,
+              )
+            : sections.filter(
+                (section) =>
+                  intersecting.has(section) || section.getBoundingClientRect().top <= line + 1,
+              )
+        ).at(-1);
         setActive((current ?? sections[0]).id);
       };
+      syncNow = syncActive;
       observer = new IntersectionObserver(syncActive, {
         rootMargin: `-${line}px 0px -${Math.max(0, height - line - 1)}px 0px`,
         threshold: 0,
       });
       sections.forEach((section) => observer?.observe(section));
       syncActive();
+    };
+    // Reaching the page end crosses no observer line, so settle once the
+    // scroll stops. Chrome can drop scrollend when a late layout change clamps
+    // a wheel scroll, and Safari may lack it, so a trailing debounce on scroll
+    // always backs it up; scrollend only settles sooner where it does fire.
+    const onScrollEnd = () => syncNow?.();
+    const onScroll = () => {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrollTimer = 0;
+        syncNow?.();
+      }, 120);
     };
     const onResize = () => {
       if (resizeFrame) return;
@@ -95,10 +119,18 @@ export function DossierReader({
     // effects; measure on the next frame, once that shared chrome is applied.
     onResize();
     window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    if ("onscrollend" in window) {
+      window.addEventListener("scrollend", onScrollEnd, { passive: true });
+    }
     return () => {
       observer?.disconnect();
+      syncNow = null;
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scrollend", onScrollEnd);
       if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+      if (scrollTimer) window.clearTimeout(scrollTimer);
     };
   }, [ids]);
 

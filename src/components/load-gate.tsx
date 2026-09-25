@@ -38,6 +38,7 @@ type GoOptions = {
   assets?: readonly string[];
   transition?: "dream";
   transitionCovered?: boolean;
+  focusDestination?: boolean;
 };
 
 type LoadGateApi = {
@@ -226,6 +227,37 @@ async function settleRouteHash(hash: string) {
   }
 }
 
+// A keyboard activation hands focus to what it opened: the named section, or
+// the page's heading. Otherwise focus stays with the menu trigger (or falls
+// to <body>) and the next Tab jumps back to the top of the page.
+function focusRouteDestination(hash?: string) {
+  let target =
+    (hash && hash !== "top" ? document.getElementById(hash) : null) ??
+    document.querySelector<HTMLElement>("main h1") ??
+    document.querySelector<HTMLElement>("h1") ??
+    document.querySelector<HTMLElement>("main");
+  // Return anchors are hidden markers; their section is the destination.
+  const hidden = target?.closest<HTMLElement>('[aria-hidden="true"]');
+  if (hidden) target = hidden.parentElement;
+  if (!target) return;
+  if (!target.matches("a[href],button,input,select,textarea,summary,[tabindex]")) {
+    const focusTarget = target;
+    focusTarget.tabIndex = -1;
+    focusTarget.dataset.routeFocus = "true";
+    // Only this arrival makes it focusable, so a later click on its text
+    // does not select the whole section.
+    focusTarget.addEventListener(
+      "blur",
+      () => {
+        focusTarget.removeAttribute("tabindex");
+        focusTarget.removeAttribute("data-route-focus");
+      },
+      { once: true },
+    );
+  }
+  target.focus({ preventScroll: true });
+}
+
 export function useLoadGate() {
   const ctx = useContext(LoadGateContext);
   if (!ctx) throw new Error("LoadGateProvider missing");
@@ -383,7 +415,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const go = useCallback(
-    async ({ to, hash, assets = [], transition, transitionCovered }: GoOptions) => {
+    async ({
+      to,
+      hash,
+      assets = [],
+      transition,
+      transitionCovered,
+      focusDestination,
+    }: GoOptions) => {
       if (transitionCovered) {
         const runtime = openingHandoff.current;
         if (!runtime || to !== "/world") return;
@@ -460,6 +499,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           : null;
         try {
           await navigate({ to: to as never, hash });
+          if (focusDestination) focusRouteDestination(hash);
           if (hash) await settleRouteHash(hash);
         } finally {
           void assetWarmup;
@@ -504,6 +544,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
+          if (focusDestination) focusRouteDestination(hash);
           // The destination is now visible. The remaining reveal is visual
           // only and must not keep a new touch gesture scroll-locked.
           document.documentElement.removeAttribute("data-loading");
@@ -539,6 +580,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
           if (!isCurrent()) return;
+          if (focusDestination) focusRouteDestination(hash);
           document.documentElement.removeAttribute("data-loading");
           setGate({ active: true, percent: 0, variant: "zeus", phase: "revealing" });
           await wait(timings.reveal);
@@ -576,6 +618,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         setGate({ active: true, percent: 100, variant: "archive", phase: "covering" });
         await navigate({ to: to as never, hash });
         if (!isCurrent()) return;
+        if (focusDestination) focusRouteDestination(hash);
         document.documentElement.removeAttribute("data-loading");
         setGate({ active: true, percent: 100, variant: "archive", phase: "revealing" });
         await wait(timings.reveal);
@@ -948,7 +991,8 @@ export function GuardedLink({
     e.preventDefault();
     e.stopPropagation();
     beforeNavigate?.();
-    void go({ to, hash, assets, transition });
+    // detail 0: activated from the keyboard (Enter), not a pointer.
+    void go({ to, hash, assets, transition, focusDestination: e.detail === 0 });
   };
 
   return (
@@ -971,16 +1015,43 @@ export function AppGuards() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const previousPathname = useRef<string | null>(null);
+  const router = useRouter();
+  const historyTraversal = useRef(false);
+  const [topRepeat, setTopRepeat] = useState(0);
+
+  // History notifies subscribers before the router commits the location, so
+  // the layout effect below knows whether it is answering Back/Forward.
+  useEffect(() => {
+    let previousHref = router.history.location.href;
+    return router.history.subscribe(({ action, location }) => {
+      const pop = action.type === "BACK" || action.type === "FORWARD" || action.type === "GO";
+      const repeated = pop && location.href === previousHref;
+      previousHref = location.href;
+      // A native in-page link (href="#top") also arrives as a pop, but its
+      // entry has no router state; only Back/Forward returns to a keyed one.
+      historyTraversal.current = pop && !repeated && window.history.state?.__TSR_key != null;
+      // Pressed again while the world is already at #top, the link changes no
+      // location, so nothing below would run and the page would glide all the
+      // way up. Ask for the same instant reset as the first press.
+      if (repeated && location.pathname === "/world" && location.hash === "#top") {
+        setTopRepeat((count) => count + 1);
+      }
+    });
+  }, [router]);
 
   useLayoutEffect(() => {
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
+    // Back/Forward into the world returns the reader to where they were: the
+    // router restores that position, so only fresh entries start at the top.
+    const fromHistory = historyTraversal.current;
+    historyTraversal.current = false;
     const isDossierSectionHash =
       /^#?character-section-/.test(locationHash) ||
       /^#?(?:dossier-profile|dossier-index|identity-records|form-records)$/.test(locationHash);
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash) ||
-      (pathname === "/world" && (!locationHash || locationHash === "top"));
+      (pathname === "/world" && (!locationHash || locationHash === "top") && !fromHistory);
     if (!resetRouteTop) return;
     const releaseScrollMotion = holdRouteScrollMotion();
     const timers: number[] = [];
@@ -1054,7 +1125,7 @@ export function AppGuards() {
       window.setTimeout(releaseExitMotion, 360);
       stopResetting();
     };
-  }, [locationHash, pathname]);
+  }, [locationHash, pathname, topRepeat]);
 
   return null;
 }

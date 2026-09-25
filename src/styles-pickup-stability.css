@@ -78,6 +78,38 @@ html[data-mode="world"] .ios-slide-open .ios-slide-open-label b {
   overflow-wrap: anywhere;
 }
 
+/* A click anywhere on the pill opens it; only the thumb is draggable. Say so
+   with the cursor instead of a whole-pill resize arrow. */
+@media (hover: hover) and (pointer: fine) {
+  html .ios-slide-open {
+    cursor: pointer;
+  }
+  html .ios-slide-open .ios-slide-open-thumb {
+    cursor: grab;
+  }
+  html .ios-slide-open[data-dragging="true"],
+  html .ios-slide-open[data-dragging="true"] .ios-slide-open-thumb {
+    cursor: grabbing;
+  }
+}
+
+/* The lazy art has no size until it arrives, so the card grew from 280px to
+   its full height after a 変身記録 jump had already landed. Reserve 2:3 (most
+   of the art) until then; the loaded image's own ratio replaces it uncropped. */
+html[data-mode="world"] .form-pickup:not(.is-rexonance-pickup) .form-pickup-visual > img {
+  aspect-ratio: auto 2 / 3;
+}
+
+/* White text alone vanished on white art (Leddic): give the RIDER tag the
+   same dark chip as the BEFORE and SPECIAL SITE labels. */
+html[data-mode="world"] .form-pickup:not(.is-rexonance-pickup) .form-pickup-visual > span {
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(6, 10, 16, 0.62);
+  font-size: 10px;
+}
+
 /* A single inner scroller leaves the close control anchored in the dialog.
    Reserve a toolbar row so headings never sit underneath it. */
 html[data-mode="world"] .form-pickup-dialog {
@@ -156,6 +188,25 @@ html[data-mode="world"] .form-pickup-dialog:not(.is-rexonance-dialog) .form-pick
   font-size: 14px;
   font-style: normal;
   line-height: 1.6;
+}
+/* Two columns: keep the text column clear of the anchored close control (12px
+   inset + 48px, against the panel's 24px padding), and keep the art beside the
+   text while the long record scrolls. Short landscape screens are excluded: a
+   pinned figure taller than the panel hides its own caption until the end. */
+@media (min-width: 761px) {
+  html[data-mode="world"] .form-pickup-dialog:not(.is-rexonance-dialog) .form-pickup-layout {
+    padding-right: 48px;
+  }
+}
+@media (min-width: 761px) and (min-height: 680px) {
+  html[data-mode="world"]
+    .form-pickup-dialog:not(.is-rexonance-dialog)
+    .form-pickup-layout
+    > figure {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
 }
 @media (max-width: 760px) {
   html[data-mode="world"]

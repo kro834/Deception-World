@@ -2450,8 +2450,14 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     padding: 5px;
   }
 
+  /* Hidden from sight only: it is the link's whole accessible name. */
   .dream-back-link > span:last-child {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

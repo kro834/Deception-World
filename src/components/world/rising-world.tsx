@@ -133,8 +133,8 @@ const unlockReDive = () => {
 };
 
 // A card opened from the section: the World's history entry gets the
-// section's hash, so browser back is not reset to the top (load-gate.tsx
-// AppGuards resets a hashless /world) and lands on the section.
+// section's hash, so browser back finds the section still unlocked
+// (readUnlocked) and the return effect in RisingWorld lands on it.
 const leaveForDossier = () => {
   writeSession(RE_DIVE_RETURN_KEY, true);
   try {
@@ -179,6 +179,25 @@ const TOUCH_PRIME_DELAY_MS = 60;
 // SKIP and もう一度 share one spot and swap the picture between the end still
 // and the void: a press this soon after a swap is a double or repeated press.
 const SWAP_GUARD_MS = 600;
+
+// CLOSE sits over the header: the dialog closes on the first click, so the
+// second tap of a double tap would land on RECORDS or the menu underneath.
+// Swallow pointer input briefly after a pointer close (keyboard is detail 0).
+const TAP_THROUGH_GUARD_MS = 450;
+function guardTapThrough() {
+  const until = performance.now() + TAP_THROUGH_GUARD_MS;
+  const types = ["pointerdown", "mousedown", "click"] as const;
+  const swallow = (event: Event) => {
+    if (performance.now() > until) return;
+    // No focus move, no navigation, no handler below.
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  for (const type of types) window.addEventListener(type, swallow, { capture: true });
+  window.setTimeout(() => {
+    for (const type of types) window.removeEventListener(type, swallow, { capture: true });
+  }, TAP_THROUGH_GUARD_MS);
+}
 
 const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
@@ -807,7 +826,15 @@ export function RisingWorld() {
             RE DIVE…?
           </button>
         ) : null}
-        <button ref={closeRef} type="button" className="rw-close" onClick={closeDialog}>
+        <button
+          ref={closeRef}
+          type="button"
+          className="rw-close"
+          onClick={(event) => {
+            if (event.detail > 0) guardTapThrough();
+            closeDialog();
+          }}
+        >
           <span>CLOSE</span>
           <i aria-hidden="true" />
         </button>

@@ -52,6 +52,28 @@ html body .rider-tabs > button[role="tab"] {
   max-height: 74px;
   box-sizing: border-box;
 }
+/* Tablets: eight riders fill two rows of four instead of 3 + 3 + 2 with an
+   empty cell. Only the grid changes; the long-press gesture is untouched. */
+@media (min-width: 561px) and (max-width: 840px) {
+  html body .rider-tabs.liquid-swipe-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  html body .rider-tabs > button[role="tab"] {
+    padding-inline: 12px;
+    column-gap: 8px;
+  }
+}
+/* A mouse gets the same answer the nav links give: the pill under the pointer
+   lights in its rider's tone. Colour only, so nothing moves. */
+@media (hover: hover) and (pointer: fine) {
+  html body .rider-tabs > button[role="tab"]:not([aria-selected="true"]):hover {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: color-mix(in srgb, var(--tab-tone) 42%, transparent);
+  }
+  html body .rider-tabs > button[role="tab"]:not([aria-selected="true"]):hover span {
+    color: #fff;
+  }
+}
 html body .liquid-swipe-tabs > .liquid-selection-lens {
   scale: 1 !important;
   transition: transform 80ms linear, width 80ms linear, height 80ms linear, opacity 80ms linear !important;

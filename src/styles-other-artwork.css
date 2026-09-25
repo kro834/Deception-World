@@ -100,10 +100,21 @@
   box-shadow: none;
 }
 
+/* The whole artwork fits below the header (60px plus its border): on a laptop
+   a full-width portrait ran about 270px past the bottom of the screen. */
 .other-artwork-viewer > img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: calc(
+    100vh - 62px - 12px - max(16px, env(safe-area-inset-top)) -
+      max(16px, env(safe-area-inset-bottom))
+  );
+  max-height: calc(
+    100dvh - 62px - 12px - max(16px, env(safe-area-inset-top)) -
+      max(16px, env(safe-area-inset-bottom))
+  );
   margin: 12px auto 0;
   object-fit: contain;
 }

@@ -136,13 +136,41 @@ body:has(> main.manager-page .dossier-reader) {
   color: #aab8c9;
   font-size: 20px;
 }
+/* Added to the root scroll-padding, this lands a jump just under the sticky
+   reader instead of showing the tail of the previous section above it. */
 main.manager-page
   :is(#dossier-profile, #identity-records, #dossier-index, #form-records, .manager-copy-section) {
-  scroll-margin-top: 160px;
+  scroll-margin-top: 52px;
 }
 main.manager-page #dossier-profile .manager-portrait-frame > img {
   animation: none;
   transform: none;
+}
+/* The related records share the reader's column rather than the viewport. */
+main.manager-page .rider-archive-identity-records {
+  width: min(1200px, calc(100% - 48px));
+  margin-inline: auto;
+}
+/* Sit just above the RIKUEI / IV caption: clear of it, and of the face the
+   hint invites a tap on, in both the wide shot and the close-up. */
+main.manager-page .lejas-tap-hint {
+  top: auto;
+  right: 16px;
+  bottom: 52px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+/* One- or two-letter numerals (I, II) sit in a round badge, not a capsule. */
+main.manager-page:not(.is-sovereign) .manager-numeral {
+  box-sizing: border-box;
+  min-width: calc(1lh + 17px);
+  text-align: center;
+  background: rgba(4, 5, 8, 0.64);
+}
+@media (prefers-reduced-transparency: reduce) {
+  main.manager-page:not(.is-sovereign) .manager-numeral {
+    background: #0d0f14;
+  }
 }
 main.manager-page .manager-copy-body {
   max-width: 72ch;
@@ -282,9 +310,18 @@ main.manager-page .manager-facts dd .jp-atom {
   main.manager-page #dossier-index .manager-copy-heading h2 {
     font-size: 25px;
   }
-  main.manager-page
-    :is(#dossier-profile, #identity-records, #dossier-index, #form-records, .manager-copy-section) {
-    scroll-margin-top: calc(var(--detail-header-height, 68px) + 80px);
+  main.manager-page .rider-archive-identity-records {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+  main.manager-page .rider-archive-identity-records > * {
+    border-radius: 18px;
+  }
+}
+/* Tablet heroes give the facts a narrow column: two 135px cells split names
+   such as 仮面ライダーヴァンダール mid-word. Pair them only when both fit. */
+@media (min-width: 761px) and (max-width: 1180px) {
+  main.manager-page:not(.is-sovereign) .manager-facts {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5em), 1fr));
   }
 }
 @media (prefers-reduced-motion: reduce) {

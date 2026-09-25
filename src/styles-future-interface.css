@@ -463,9 +463,134 @@ html body .site-announcement-back {
     letter-spacing: 0.04em;
   }
 
+  /* One line per row: the code pill sits beside its label, as on desktop, so
+     the menu is about a fifth shorter. Where the two do not fit (a long label
+     on a narrow phone), the pill drops under the label instead of breaking
+     the name. */
   html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+  }
+
+  html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+    flex: 1 1 auto;
+  }
+
+  /* The riders list is one column now; its names no longer need a line of
+     their own above the number (styles-world/29.css). */
+  html body .side-panel .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) {
+    row-gap: 4px;
+  }
+
+  html
+    body
+    .side-panel
+    .side-panel-riders
+    .side-panel-links
+    :is(a, button.side-panel-link-button)
+    > span {
+    flex-basis: auto;
+  }
+}
+
+/* Japanese labels break at phrase edges (before 「, not inside a name). */
+html body .side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+/* The sticky head spans the panel's padding, so no row shows above or beside
+   it, and its text lines up with the rows. The two variables mirror the
+   panel's own padding (styles-world/19.css, 28.css). Focused rows scroll clear
+   of it. */
+html body .side-panel {
+  --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 26px);
+  --sp-pad-inline: clamp(20px, 4vw, 34px);
+  scroll-padding-block: 140px 24px;
+}
+
+@media (max-width: 760px) {
+  html body .side-panel {
+    --sp-pad-inline: 18px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  html body .side-panel {
+    --sp-pad-top: max(18px, env(safe-area-inset-top, 0px));
+  }
+}
+
+html body .side-panel > .side-panel-head {
+  top: calc(-1 * var(--sp-pad-top));
+  margin: calc(-1 * var(--sp-pad-top)) calc(-1 * var(--sp-pad-inline)) 12px;
+  padding: var(--sp-pad-top) var(--sp-pad-inline) 18px;
+}
+
+/* Each group already ends on its last row's hairline. */
+html body .side-panel .side-panel-group {
+  border-top: 0;
+}
+
+/* The page the reader is on: a full-height edge and a filled code pill. The
+   small marker bar stays for hover and focus on the other rows. */
+html body .side-panel .side-panel-links :is(a, button.side-panel-link-button)[aria-current="page"] {
+  box-shadow: inset 3px 0 0 rgb(126 231 255 / 0.9);
+  background: rgb(126 231 255 / 0.08);
+}
+
+html
+  body
+  .side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button)[aria-current="page"]:not(:focus-visible)::before {
+  opacity: 0;
+}
+
+html
+  body
+  .side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button)[aria-current="page"]
+  > i {
+  color: #07121c;
+  background: rgb(126 231 255 / 0.9);
+  border-color: transparent;
+}
+
+/* Windows High Contrast drops background images and repaints backgrounds as
+   Canvas: the trigger's bars (painted backgrounds) and the panel's gradient
+   fill would vanish, leaving no visible way into the menu. */
+@media (forced-colors: active) {
+  /* The special sites draw their trigger borderless at a higher specificity. */
+  html body .side-panel-trigger {
+    border: 1px solid ButtonText !important;
+  }
+
+  html body .side-panel-trigger-glyph i {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+
+  #site-side-panel.side-panel {
+    background: Canvas !important;
+    border-inline-start: 1px solid CanvasText;
+  }
+
+  html body .side-panel > .side-panel-head {
+    background: Canvas;
+  }
+
+  /* Box shadows are dropped here, so the current page keeps a real edge. */
+  html
+    body
+    .side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button)[aria-current="page"] {
+    border-inline-start: 4px solid Highlight;
   }
 }
 

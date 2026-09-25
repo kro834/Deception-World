@@ -452,6 +452,9 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .cine-stage {
   --seq: 7.2s;
+  /* The World's sheets redefine --font-display on :root and stay in the
+     document after a Back to the title; the opening keeps its own face. */
+  --font-display: "Cinzel", serif;
   position: relative;
   isolation: isolate;
   contain: layout paint style;
@@ -690,7 +693,9 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-editorial-kicker {
-  animation: editorial-meta-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  animation:
+    editorial-meta-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both,
+    editorial-meta-out 0.6s ease 6.3s forwards;
 }
 
 .is-playing .cine-editorial-kicker i {
@@ -698,11 +703,16 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-playing .cine-editorial-caption {
-  animation: editorial-meta-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 1.64s both;
+  animation:
+    editorial-meta-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 1.64s both,
+    editorial-meta-out 0.6s ease 6.3s forwards;
 }
 
+/* The two small lines belong to the intro. Once the title holds they would
+   ghost through the wordmark, so they retire (editorial-meta-out) as the prism
+   logo settles, and stay out of the finished title. */
 .is-complete :is(.cine-editorial-kicker, .cine-editorial-caption) {
-  opacity: 0.34;
+  opacity: 0;
   transform: none;
 }
 
@@ -2167,3 +2177,54 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-complete .cine-cue {
+  opacity: 0;
+}
+
+.cine-chrome {
+  position: absolute;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.985);
+  filter: blur(4px);
+}
+
+.is-complete .cine-chrome {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  /* Interpolates from blur(4px) like blur(0), but leaves no filter (and no
+     render pass) behind once the controls are in. */
+  filter: none;
+  transition:
+    opacity 0.45s ease 0.05s,
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
+    filter 0.35s ease 0.05s;
+}
+
+/* ENTER THE WORLD: the handoff layer's dive covers the title from its first
+   frame (the canvas fades in over it on the title's own framing), so the
+   scene holds still underneath; only the interface steps away. */
+.is-diving .cine-dive-tunnel {
+  animation: world-dive-tunnel-enter 0.28s cubic-bezier(0.12, 0.82, 0.12, 1) both;
+}
+
+.is-diving .cine-dive-tunnel::before {
+  animation: world-dive-ring-stream 0.36s linear 0.06s infinite;
+}
+
+.is-diving .cine-dive-tunnel::after {
+  animation: world-dive-vanishing-pulse 0.68s ease-in-out 0.08s infinite;
+}
+
+.is-diving .cine-dive-tunnel > i:nth-child(1) {
+  animation: world-dive-streak-stream 0.42s linear infinite;
+}
+
+.is-diving .cine-dive-tunnel > i:nth-child(2) {
+  animation: world-dive-streak-stream 0.54s linear -0.27s infinite;
+}
+
+.is-diving .cine-dive-flash {
+  animation: world-dive-flash 0.5s ease-out both;
+}

@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -211,6 +211,8 @@ export function SideMenuLayer({
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
+  // The dossier the reader is on is marked in the menu (aria-current).
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
   // session; read when the menu opens.
   const [reDiveReached, setReDiveReached] = useState(false);
@@ -461,7 +463,10 @@ export function SideMenuLayer({
         !panel.contains(document.activeElement))
     ) {
       event.preventDefault();
+      // The last row sits below the fold of a long menu: it scrolls into view,
+      // clear of the sticky head, so the wrapped focus is never hidden.
       last.focus({ preventScroll: true });
+      last.scrollIntoView({ block: "nearest" });
     } else if (
       !event.shiftKey &&
       (document.activeElement === last || !panel.contains(document.activeElement))
@@ -761,7 +766,13 @@ export function SideMenuLayer({
             <div className="side-panel-links">
               {RIDER_NAV.map((r, i) =>
                 r.href ? (
-                  <GuardedLink key={r.id} to={r.href} assets={r.assets} beforeNavigate={close}>
+                  <GuardedLink
+                    key={r.id}
+                    to={r.href}
+                    assets={r.assets}
+                    beforeNavigate={close}
+                    aria-current={pathname === r.href ? "page" : undefined}
+                  >
                     <span>{r.name}</span>
                     <i>{String(i + 1).padStart(2, "0")}</i>
                   </GuardedLink>
@@ -777,6 +788,7 @@ export function SideMenuLayer({
               to="/characters/dante"
               assets={["/character-dante.webp"]}
               beforeNavigate={close}
+              aria-current={pathname === "/characters/dante" ? "page" : undefined}
             >
               <span>ダンテ</span>
               <i>管理人殺し</i>
@@ -820,7 +832,23 @@ export function SideMenuLayer({
               </GuardedLink>
             )}
             <ZeusButtonToggle />
-            <Link to="/" onClick={controlled ? close : undefined}>
+            <Link
+              to="/"
+              onClick={(e) => {
+                // The title skips an opening already seen this session (a
+                // browser Back); asked for from here, it plays in full. A
+                // modified click opens a new tab with its own session, so it
+                // leaves this tab's Back alone.
+                if (e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                  try {
+                    window.sessionStorage.setItem("dw-opening-replay", "1");
+                  } catch {
+                    /* storage unavailable: the opening plays anyway */
+                  }
+                }
+                if (controlled) close();
+              }}
+            >
               <span>オープニング</span>
               <i>OPENING</i>
             </Link>

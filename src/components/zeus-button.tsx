@@ -45,6 +45,14 @@ const ZEUS_AVOID_SELECTOR = [
   ".dream-hero-actions a",
   ".dream-dossier-close",
   ".rw-gate-button",
+  '.manager-archive-tabs [role="tab"]',
+  '.world-column-tabs [role="tab"]',
+  ".finale-content .primary-action",
+  "footer > a",
+  ".manager-pagination > a > span:last-child",
+  ".dossier-index-return",
+  ".dossier-read-link",
+  ".rxs-footer > a",
 ].join(",");
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
@@ -245,10 +253,18 @@ function ZeusButton({
   const latestPointer = useRef({ x: 0, y: 0 });
   const grabOffset = useRef({ x: 0, y: 0 });
   const pendingPosition = useRef(position);
+  // pendingPosition is where the button is shown, which may be a spot it
+  // stepped to around a control. Scroll re-placement starts from the chosen
+  // home instead, so the button returns once that control has passed.
+  const preferredPosition = useRef(position);
   const placementFrame = useRef<number | null>(null);
   const placementTimer = useRef<number | null>(null);
   const dragFrame = useRef<number | null>(null);
   const gestureOrigin = useRef(position);
+
+  useEffect(() => {
+    preferredPosition.current = position;
+  }, [position]);
 
   const cancelDragFrame = useCallback(() => {
     if (dragFrame.current != null) window.cancelAnimationFrame(dragFrame.current);
@@ -334,6 +350,11 @@ function ZeusButton({
         { x: mirrorX, y: preferred.y },
         { x: preferred.x, y: preferred.y - lift },
         { x: mirrorX, y: preferred.y - lift },
+        // A page's closing stack of full-width links needs a second step up.
+        // That keeps the button near its spot instead of flipping it to the
+        // far edge of the screen, over the text there.
+        { x: preferred.x, y: preferred.y - lift * 2 },
+        { x: mirrorX, y: preferred.y - lift * 2 },
         { x: preferred.x, y: mirrorY },
         { x: mirrorX, y: mirrorY },
       ].map((candidate) => clampCenter(candidate.x, candidate.y));
@@ -465,7 +486,7 @@ function ZeusButton({
       placementFrame.current = window.requestAnimationFrame(() => {
         placementFrame.current = null;
         if (activePointer.current != null) return;
-        placeButton(pendingPosition.current);
+        placeButton(preferredPosition.current);
       });
     };
     const onScroll = () => {

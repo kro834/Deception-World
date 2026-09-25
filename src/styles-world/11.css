@@ -485,8 +485,17 @@
     padding-left: 42px;
   }
 
+  /* The narrower padding leaves 26px arrows touching the name beside them. */
+  .manager-pagination > a:first-child > span:last-child {
+    left: 12px;
+  }
+
   .manager-pagination > a:last-child {
     padding-right: 42px;
+  }
+
+  .manager-pagination > a:last-child > span:last-child {
+    right: 12px;
   }
 
   .manager-pagination-index {
@@ -500,7 +509,7 @@
 
 /* Narrow phones: two columns left 81-116px for a rider or manager name, so
    long names ended in an ellipsis ("オーバーゼ…"). Stack the previous and next
-   links full width and keep the index below them. */
+   links full width, with the index between them in document (tab) order. */
 @media (max-width: 520px) {
   .manager-pagination {
     grid-template-columns: minmax(0, 1fr);
@@ -512,7 +521,6 @@
 
   .manager-pagination > .manager-pagination-index {
     grid-row: auto;
-    order: 1;
   }
 
   .manager-pagination > a:first-child {

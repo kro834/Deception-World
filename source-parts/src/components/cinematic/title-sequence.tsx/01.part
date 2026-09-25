@@ -41,6 +41,28 @@ const loadDiveEngine = () => (diveEngine ??= import("./opening-dive"));
 // sooner; a quicker tap primes at pointerup (as RISING THE WORLD does).
 const DIVE_TOUCH_PRIME_DELAY_MS = 60;
 
+// Once the opening has finished in this tab, a return to "/" (browser Back from
+// the World) shows the settled title instead of seven seconds again. もう一度
+// and the menu's オープニング (which sets the replay flag) still play it.
+const OPENING_SEEN_KEY = "dw-opening-seen";
+const OPENING_REPLAY_KEY = "dw-opening-replay";
+
+// A reload of "/" asks for the opening again. The navigation entry belongs to
+// the document, so it is read for the first title of the document only; a later
+// Back to the title in the same document is still a return.
+let documentReloadChecked = false;
+function consumeTitleReload() {
+  if (documentReloadChecked) return false;
+  documentReloadChecked = true;
+  try {
+    const entry = performance.getEntriesByType("navigation")[0] as
+      PerformanceNavigationTiming | undefined;
+    return entry?.type === "reload" && new URL(entry.name).pathname === "/";
+  } catch {
+    return false;
+  }
+}
+
 const openingAuditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("opening-audit");
 
@@ -242,6 +264,9 @@ function LogoLayer({
 export function TitleSequence() {
   const [phase, setPhase] = useState<SequencePhase>("idle");
   const [muted, setMuted] = useState(false);
+  // True once the score has actually started in this run: until then nothing
+  // is audible, whatever the preference says.
+  const [soundLive, setSoundLive] = useState(false);
   const [economyOpening, setEconomyOpening] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
   const [audit] = useState(openingAuditRequested);
@@ -255,6 +280,14 @@ export function TitleSequence() {
   const burnHostRef = useRef<HTMLDivElement>(null);
   const hudRef = useRef<SVGSVGElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const enterRef = useRef<HTMLButtonElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
+  // A control pressed from the keyboard disables itself (SKIP when the title
+  // settles, もう一度 when the replay starts), which would drop focus to <body>.
+  // Focus goes on to the control that takes its place.
+  const keyboardFocusRef = useRef(false);
+  // Decided once per mount, so an effect re-run cannot consume the replay flag twice.
+  const skipIntroRef = useRef<boolean | null>(null);
   const videoStartTimerRef = useRef<number | null>(null);
   const burnTimerRef = useRef<number | null>(null);
   const burnModuleRef = useRef<BurnEngine | null>(null);
@@ -457,16 +490,35 @@ export function TitleSequence() {
     burnModuleRef.current?.releaseOpeningBurn();
     scoreRef.current?.stop();
     scoreRef.current = null;
+    setSoundLive(false);
     if (videoStartTimerRef.current != null) {
       window.clearTimeout(videoStartTimerRef.current);
       videoStartTimerRef.current = null;
     }
     videoRef.current?.pause();
+    try {
+      window.sessionStorage.setItem(OPENING_SEEN_KEY, "1");
+    } catch {
+      /* storage unavailable: every visit plays the opening */
+    }
   }, [stopBurn]);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
+    if (skipIntroRef.current === null) {
+      let seen = false;
+      let replayRequested = false;
+      try {
+        seen = window.sessionStorage.getItem(OPENING_SEEN_KEY) === "1";
+        replayRequested = window.sessionStorage.getItem(OPENING_REPLAY_KEY) === "1";
+        window.sessionStorage.removeItem(OPENING_REPLAY_KEY);
+      } catch {
+        /* storage unavailable: play the opening */
+      }
+      const reloaded = consumeTitleReload();
+      skipIntroRef.current = seen && !replayRequested && !reloaded;
+    }
+    if (reduced || (replayKey === 0 && skipIntroRef.current)) {
       finish();
       return;
     }
@@ -476,7 +528,12 @@ export function TitleSequence() {
 
   useEffect(() => {
     if (phase !== "playing" || audit) return;
-    const t = window.setTimeout(finish, SEQUENCE_MS);
+    const t = window.setTimeout(() => {
+      // SKIP disables as the title settles: a keyboard user waiting on it
+      // goes on to ENTER THE WORLD rather than to <body>.
+      if (document.activeElement === skipRef.current) keyboardFocusRef.current = true;
+      finish();
+    }, SEQUENCE_MS);
     return () => window.clearTimeout(t);
   }, [audit, finish, phase]);
 
@@ -498,10 +555,26 @@ export function TitleSequence() {
     if (video) video.currentTime = 0;
     phaseRef.current = "idle";
     setPhase("idle");
+    setSoundLive(false);
     setReplayKey((k) => k + 1);
     const score = getScore();
-    if (!score.muted()) score.start();
+    if (!score.muted()) {
+      score.start();
+      setSoundLive(true);
+    }
   }, [getScore, stopBurn]);
+
+  // The next control takes focus only after a keyboard press, so a tap or a
+  // click never leaves a ring behind. It is enabled in the same commit.
+  useEffect(() => {
+    if (!keyboardFocusRef.current) return;
+    const next =
+      phase === "complete" ? enterRef.current : phase === "playing" ? skipRef.current : null;
+    if (!next) return;
+    keyboardFocusRef.current = false;
+    const id = window.requestAnimationFrame(() => next.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(id);
+  }, [phase]);
 
   // The dive's images (the prism logo, the atmosphere still and the world key
   // visual) are decoded as ImageBitmaps once the title has settled.
@@ -667,47 +740,76 @@ export function TitleSequence() {
     };
   }, [audit, finish, startBurn]);
 
+  // SOUND shows what is audible. Before the score has started it reads SOUND
+  // OFF, so its first press starts the score instead of muting a silence.
+  const toggleMute = useCallback(() => {
+    const score = getScore();
+    const playing = phaseRef.current === "playing";
+    if (!muted && !soundLive && playing) {
+      void score.unlock().then(() => {
+        if (phaseRef.current !== "playing" || scoreRef.current !== score) return;
+        score.start();
+        setSoundLive(true);
+      });
+      return;
+    }
+    const next = !muted;
+    setMuted(next);
+    score.setMuted(next);
+    if (!next && playing) {
+      void score.unlock().then(() => {
+        if (phaseRef.current !== "playing" || scoreRef.current !== score) return;
+        score.start();
+        setSoundLive(true);
+      });
+    }
+  }, [getScore, muted, soundLive]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // A held key repeats. A held Enter or Space would skip the opening and
+      // then, once focus reaches it, press ENTER THE WORLD as well.
+      if (e.repeat) {
+        if (e.key === "Enter" || e.key === " ") e.preventDefault();
+        return;
+      }
       const target = e.target instanceof Element ? e.target : null;
+      // Enter and Space keep their native press on a focused control. The
+      // letters work there too, since a keyboard skip or replay leaves focus
+      // on a button. Text entry, and a browser shortcut held with Cmd, Ctrl
+      // or Alt, are left alone.
       const isInteractive = Boolean(
         target?.closest("button, a, input, textarea, select, [contenteditable='true']"),
       );
-      const isSkipKey =
-        e.key === "Escape" || e.key === " " || e.key === "Enter" || e.key.toLowerCase() === "s";
-      if (phase === "playing" && isSkipKey && (!isInteractive || e.key === "Escape")) {
+      const isTextEntry = Boolean(
+        target?.closest("input, textarea, select, [contenteditable='true']"),
+      );
+      const letter = isTextEntry || e.metaKey || e.ctrlKey || e.altKey ? "" : e.key.toLowerCase();
+      const isSkipKey = e.key === "Escape" || e.key === " " || e.key === "Enter";
+      if (
+        phase === "playing" &&
+        ((isSkipKey && (!isInteractive || e.key === "Escape")) || letter === "s")
+      ) {
         e.preventDefault();
+        keyboardFocusRef.current = true;
         skip();
-      } else if (phase === "complete" && !isInteractive && e.key.toLowerCase() === "r") {
+      } else if (phase === "complete" && letter === "r") {
+        keyboardFocusRef.current = true;
         replay();
-      } else if (phase !== "diving" && !isInteractive && e.key.toLowerCase() === "m") {
-        setMuted((m) => {
-          const next = !m;
-          scoreRef.current?.setMuted(next);
-          return next;
-        });
+      } else if (phase !== "diving" && letter === "m") {
+        toggleMute();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, replay, skip]);
-
-  const toggleMute = () => {
-    const score = getScore();
-    setMuted((m) => {
-      const next = !m;
-      score.setMuted(next);
-      if (!next && phaseRef.current === "playing") {
-        void score.unlock().then(() => score.start());
-      }
-      return next;
-    });
-  };
+  }, [phase, replay, skip, toggleMute]);
 
   const unlockAudio = () => {
     const score = getScore();
     void score.unlock().then(() => {
-      if (phaseRef.current === "playing" && !score.muted()) score.start();
+      if (phaseRef.current !== "playing" || scoreRef.current !== score || score.muted()) return;
+      score.start();
+      setSoundLive(true);
     });
   };
 
@@ -721,12 +823,24 @@ export function TitleSequence() {
           : "cine-stage";
   const stageClass = `${stageStateClass}${economyOpening ? " is-economy-opening" : ""}`;
   const isWorldTransitioning = phase === "diving";
+  // After the opening (and before it starts) nothing plays, so the control
+  // shows the preference that もう一度 will use.
+  const audible = !muted && (soundLive || phase !== "playing");
 
   return (
     <main
       ref={stageRef}
       className={stageClass}
-      onPointerDown={phase === "playing" ? unlockAudio : undefined}
+      onPointerDown={
+        phase === "playing"
+          ? (e) => {
+              // SKIP must not start the score only to fade it out, and SOUND
+              // decides for itself.
+              if ((e.target as Element).closest(".cine-skip, .cine-always")) return;
+              unlockAudio();
+            }
+          : undefined
+      }
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
     >
@@ -832,10 +946,15 @@ export function TitleSequence() {
       </div>
 
       <button
+        ref={skipRef}
         type="button"
         className="cine-ghost cine-skip"
         disabled={phase !== "playing"}
-        onClick={skip}
+        onClick={(e) => {
+          // detail 0: pressed with Enter or Space, not a pointer.
+          keyboardFocusRef.current = e.detail === 0;
+          skip();
+        }}
         aria-label="オープニングをスキップ"
         aria-keyshortcuts="Escape Enter Space S"
       >
@@ -850,11 +969,11 @@ export function TitleSequence() {
           className="cine-ghost inline-flex items-center gap-2"
           disabled={phase === "idle" || isWorldTransitioning}
           onClick={toggleMute}
-          aria-label={muted ? "音声をオン" : "音声をオフ"}
+          aria-label={audible ? "音声をオフ" : "音声をオン"}
           aria-keyshortcuts="M"
         >
-          {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
-          <span className="hidden sm:inline">{muted ? "SOUND OFF" : "SOUND ON"}</span>
+          {audible ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+          <span className="hidden sm:inline">{audible ? "SOUND ON" : "SOUND OFF"}</span>
         </button>
       </div>
 
@@ -863,8 +982,9 @@ export function TitleSequence() {
         aria-hidden={phase !== "complete"}
       >
         <button
+          ref={enterRef}
           type="button"
-          className="cine-btn"
+          className="cine-btn cine-btn-primary"
           disabled={phase !== "complete"}
           onPointerDown={primeDive}
           onPointerUp={primeDivePending}
@@ -876,9 +996,12 @@ export function TitleSequence() {
         </button>
         <button
           type="button"
-          className="cine-btn"
+          className="cine-btn cine-btn-secondary"
           disabled={phase !== "complete"}
-          onClick={replay}
+          onClick={(e) => {
+            keyboardFocusRef.current = e.detail === 0;
+            replay();
+          }}
           aria-keyshortcuts="R"
         >
           <span className="inline-flex items-center gap-2">

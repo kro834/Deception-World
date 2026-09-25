@@ -405,6 +405,17 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   .dream-page .dream-case-list li::before { display: block; width: 6px; height: 6px; left: -3px; top: 36px; background: var(--dream-scarlet); }
 }
 
+/* Portrait tablets (iPad mini at 768, 800-834 px): the legacy <=840 layout
+   dropped the nav to a second row, a 127 px header that also made the hero
+   jump once the measured height arrived. Brand, nav and menu fit on one row.
+   Phones turned sideways (780-812 x 360-375) keep their own 64 px bar. */
+@media (min-width: 761px) and (max-width: 840px) and (min-height: 561px) {
+  .site-shell.film-edition .topbar { grid-template-columns: auto minmax(0, 1fr) 48px !important; grid-template-rows: auto; gap: 12px; min-height: 76px; height: auto; }
+  .site-shell.film-edition .topbar-leading { grid-column: 1; grid-row: 1; }
+  .site-shell.film-edition .topbar nav { grid-column: 2; grid-row: 1; display: flex; justify-content: center; gap: clamp(12px, 3vw, 28px); width: 100%; min-width: 0; padding: 0; border: 0; }
+  .site-shell.film-edition .topbar-actions { grid-column: 3 !important; grid-row: 1; }
+}
+
 @media (min-width: 981px) and (max-width: 1440px) and (min-height: 600px) and (orientation: landscape) {
   .dream-page .dream-hero-copy { width: min(440px, 37vw); margin-right: 56px; }
   .dream-page .dream-poster-stage {

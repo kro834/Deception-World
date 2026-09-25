@@ -465,6 +465,13 @@
   color: color-mix(in srgb, var(--tab-tone) 58%, #fff);
 }
 
+/* The lit lens under the selected tab is lighter than the rail, brightest at
+   its left end where the number sits, so the number keeps only a trace of its
+   tone there (the lens carries the accent): 4.5:1 or more for every rider. */
+.site-shell.film-edition .rider-tabs button[aria-selected="true"] small {
+  color: color-mix(in srgb, var(--tab-tone) 5%, #fff);
+}
+
 .site-shell.film-edition .manager-archive-tabs button.is-active small {
   color: #fff;
 }

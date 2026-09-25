@@ -287,6 +287,11 @@
   transition: opacity 0.12s ease-out, transform 0.3s ease-out;
 }
 
+/* Like Ciel's: under the door pulls, which sit either side of the seam at mid-height. */
+.is-leddic-cutin .rider-cutin-caption {
+  top: calc(50% + clamp(78px, 11vmin, 128px));
+}
+
 .is-leddic-cutin .rider-cutin-caption small { color: #f4ffed; }
 .is-leddic-cutin .rider-cutin-caption b { color: #effff3; }
 

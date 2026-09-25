@@ -8,5 +8,8 @@ export function getRouter() {
     defaultErrorComponent: AppErrorComponent,
     defaultNotFoundComponent: NotFoundComponent,
     scrollRestoration: true,
+    // Restore Back/Forward positions in one jump. A smooth restore is
+    // cancelled by the first layout shift of the returning page.
+    scrollRestorationBehavior: "instant",
   });
 }

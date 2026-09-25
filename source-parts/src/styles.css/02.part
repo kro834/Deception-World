@@ -1,54 +1,3 @@
-  opacity: 0;
-}
-
-.cine-chrome {
-  position: absolute;
-  z-index: 30;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(10px) scale(0.985);
-  filter: blur(4px);
-}
-
-.is-complete .cine-chrome {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0) scale(1);
-  /* Interpolates from blur(4px) like blur(0), but leaves no filter (and no
-     render pass) behind once the controls are in. */
-  filter: none;
-  transition:
-    opacity 0.45s ease 0.05s,
-    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
-    filter 0.35s ease 0.05s;
-}
-
-/* ENTER THE WORLD: the handoff layer's dive covers the title from its first
-   frame (the canvas fades in over it on the title's own framing), so the
-   scene holds still underneath; only the interface steps away. */
-.is-diving .cine-dive-tunnel {
-  animation: world-dive-tunnel-enter 0.28s cubic-bezier(0.12, 0.82, 0.12, 1) both;
-}
-
-.is-diving .cine-dive-tunnel::before {
-  animation: world-dive-ring-stream 0.36s linear 0.06s infinite;
-}
-
-.is-diving .cine-dive-tunnel::after {
-  animation: world-dive-vanishing-pulse 0.68s ease-in-out 0.08s infinite;
-}
-
-.is-diving .cine-dive-tunnel > i:nth-child(1) {
-  animation: world-dive-streak-stream 0.42s linear infinite;
-}
-
-.is-diving .cine-dive-tunnel > i:nth-child(2) {
-  animation: world-dive-streak-stream 0.54s linear -0.27s infinite;
-}
-
-.is-diving .cine-dive-flash {
-  animation: world-dive-flash 0.5s ease-out both;
-}
 
 .is-diving .cine-dive-flash::before {
   animation: world-dive-core 0.5s cubic-bezier(0.12, 0.7, 0.1, 1) both;
@@ -101,6 +50,22 @@
   animation: world-dive-interface 0.16s ease-in both;
 }
 
+/* The quiet base for SKIP and SOUND. It comes before .cine-skip, which shares
+   its specificity, so SKIP keeps its own pill (fill, border, 48 px). */
+.cine-ghost {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: rgb(232 238 248 / 0.55);
+  background: transparent;
+  border: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.4rem 0.7rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 160ms ease;
+}
 
 .cine-skip {
   position: absolute;
@@ -182,6 +147,15 @@
   bottom: max(9vh, 64px);
 }
 
+/* The title never runs under the ENTER THE WORLD row: its height leaves room
+   for the row (its offset plus about 60 px) above and below, so the lockup
+   stays centred and the HUD rings stay concentric with it. dvh, as the stage. */
+@media (min-width: 701px) {
+  .cine-title-lockup {
+    width: min(1120px, 92vw, calc(min(78vh, 100dvh - 2 * (max(9vh, 64px) + 60px)) * 1.5));
+  }
+}
+
 .cine-particles {
   z-index: 5;
 }
@@ -203,9 +177,9 @@
   isolation: isolate;
   overflow: hidden;
   font-family: var(--font-display);
-  letter-spacing: 0.28em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--color-gold-bright);
   border: 1px solid rgb(255 255 255 / 0.28);
   border-radius: 999px;
@@ -258,6 +232,39 @@
   z-index: 1;
 }
 
+/* ENTER THE WORLD is the way in: a warmer, gold-edged pill with a still glow
+   (nothing pulses). もう一度 steps back to quiet glass, and its kana take a
+   tighter tracking than the Latin label. */
+.cine-btn-primary {
+  border-color: rgb(240 215 138 / 0.62);
+  color: #fff3cf;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.2) 0%,
+      rgb(255 255 255 / 0.04) 42%,
+      rgb(212 176 86 / 0.22) 100%
+    ),
+    rgb(22 17 6 / 0.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.55),
+    inset 0 -1px 0 rgb(212 176 86 / 0.3),
+    0 10px 28px rgb(0 0 0 / 0.38),
+    0 0 26px rgb(212 176 86 / 0.2);
+}
+
+.cine-btn-secondary {
+  color: rgb(232 238 248 / 0.8);
+  border-color: rgb(255 255 255 / 0.16);
+  letter-spacing: 0.12em;
+  background: rgb(8 10 16 / 0.32);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.cine-btn-secondary::before {
+  opacity: 0.35;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .cine-skip:hover {
     border-color: rgb(159 212 255 / 0.72);
@@ -275,6 +282,23 @@
       0 0 24px rgb(212 176 86 / 0.18);
   }
 
+  .cine-btn-primary:hover {
+    border-color: rgb(240 215 138 / 0.86);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.65),
+      inset 0 -1px 0 rgb(212 176 86 / 0.36),
+      0 14px 34px rgb(0 0 0 / 0.42),
+      0 0 32px rgb(212 176 86 / 0.3);
+  }
+
+  .cine-btn-secondary:hover {
+    border-color: rgb(255 255 255 / 0.36);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 10px 26px rgb(0 0 0 / 0.32);
+  }
+
   .cine-ghost:hover {
     color: var(--color-ice);
   }
@@ -288,21 +312,6 @@
 .cine-ghost:focus-visible {
   outline: 2px solid var(--color-ice);
   outline-offset: 3px;
-}
-
-.cine-ghost {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  color: rgb(232 238 248 / 0.55);
-  background: transparent;
-  border: none;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.4rem 0.7rem;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 160ms ease;
 }
 
 .cine-btn:disabled,
@@ -327,6 +336,12 @@
   opacity: 0;
 }
 
+/* A return to the title goes straight from idle to complete: the hint leaves
+   at once instead of fading over the settled logo. */
+.is-complete .cine-enter-hint {
+  transition: none;
+}
+
 @keyframes editorial-frame-x {
   from {
     opacity: 0;
@@ -346,6 +361,15 @@
   to {
     opacity: 0.24;
     transform: scaleY(1);
+  }
+}
+
+@keyframes editorial-meta-out {
+  from {
+    opacity: 0.34;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -1377,6 +1401,35 @@ html[data-android-renderer]
   .cine-editorial-coordinate {
     display: none;
   }
+
+  /* A landscape phone has no room for the row under a centred title: the row
+     drops to the foot of the screen, and the title rises above it with the
+     rings and the flare around it, so they stay concentric. The title's corner
+     marks stay below the top letterbox. */
+  .cine-stage {
+    --cine-lift: calc(28px + env(safe-area-inset-bottom, 0px) / 2);
+  }
+
+  .cine-replay-slot {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .cine-stack {
+    bottom: calc(2 * var(--cine-lift));
+  }
+
+  .cine-hud,
+  .cine-line,
+  .cine-aperture,
+  .cine-orbit,
+  .cine-impact-bloom,
+  .cine-flare {
+    translate: 0 calc(-1 * var(--cine-lift));
+  }
+
+  .cine-title-lockup {
+    width: min(92vw, calc((100dvh - 110px - env(safe-area-inset-bottom, 0px)) * 1.5));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1440,7 +1493,7 @@ html[data-android-renderer]
 
   .cine-editorial-kicker,
   .cine-editorial-caption {
-    opacity: 0.3;
+    opacity: 0;
     transform: none;
   }
 
@@ -1534,6 +1587,14 @@ html[data-android-renderer]
   .cine-always,
   .cine-skip {
     transition: none !important;
+  }
+
+  /* The title is already still here: a replay would only finish at once, and
+     the score plays only during the opening, so neither control would do
+     anything. ENTER THE WORLD stands alone. */
+  .cine-replay-slot .cine-btn-secondary,
+  .cine-always {
+    display: none;
   }
 
   .cine-chrome {

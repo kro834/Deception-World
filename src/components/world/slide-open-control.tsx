@@ -58,6 +58,10 @@ export function SlideOpenControl({
   const resetFrame = useRef<number | null>(null);
   const completingRef = useRef(false);
   const suppressFocusRing = useRef(false);
+  // A press that starts on the label or arrows rather than the thumb. The
+  // browser's own click then decides whether it was a tap, so page panning
+  // (which cancels the pointer and never clicks) keeps its native ownership.
+  const bodyTapStart = useRef<{ x: number; y: number } | null>(null);
 
   const setButtonRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -88,6 +92,7 @@ export function SlideOpenControl({
     grabOffset.current = 0;
     motionSample.current = { offset: 0, at: 0 };
     dragMetrics.current = null;
+    bodyTapStart.current = null;
     completingRef.current = false;
     const button = internalButtonRef.current;
     if (button) {
@@ -246,6 +251,7 @@ export function SlideOpenControl({
   };
 
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    bodyTapStart.current = null;
     if (
       completingRef.current ||
       !event.isPrimary ||
@@ -263,8 +269,12 @@ export function SlideOpenControl({
     if (
       event.clientX < metrics.thumbRect.left - hitPadding ||
       event.clientX > metrics.thumbRect.right + hitPadding
-    )
+    ) {
+      // Only the thumb drags. Elsewhere the pill is an ordinary button: the
+      // page keeps panning, and onClick opens it once the press ends in place.
+      bodyTapStart.current = { x: event.clientX, y: event.clientY };
       return;
+    }
 
     activePointer.current = event.pointerId;
     pointerIntent.current = "pending";
@@ -452,7 +462,21 @@ export function SlideOpenControl({
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        if (event.detail === 0) complete("keyboard");
+        if (event.detail === 0) {
+          complete("keyboard");
+          return;
+        }
+        // Thumb gestures settle in finishDrag and leave no body press here. A
+        // label press that travelled (a short mouse drag) is not a tap.
+        const start = bodyTapStart.current;
+        bodyTapStart.current = null;
+        if (
+          start &&
+          !completingRef.current &&
+          Math.abs(event.clientX - start.x) < TAP_TOLERANCE &&
+          Math.abs(event.clientY - start.y) < TAP_TOLERANCE
+        )
+          complete("pointer");
       }}
       onDragStart={(event) => event.preventDefault()}
     >

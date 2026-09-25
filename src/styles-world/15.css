@@ -341,8 +341,15 @@
   font-size: clamp(30px, 3.3vw, 46px);
   line-height: 1.08;
   letter-spacing: -0.045em;
+  word-break: keep-all;
   overflow-wrap: anywhere;
   text-wrap: balance;
+}
+
+/* Break names such as マキャベル ゴアナイトメア at the space, never inside
+   a word; overflow-wrap still rescues a word wider than the line. */
+.rider-nightmare-dialog-heading h2 {
+  word-break: keep-all;
 }
 
 .rider-nightmare-card-copy > h2 > span,

@@ -253,3 +253,4 @@ class GlassRenderer {
     const halo = 30, ratio = this.dpr;
     const left = g.x - ex - halo + this.overscan, top = g.y - ey - halo + this.overscan;
     const w = g.width + ex * 2 + halo * 2, h = g.height + ey * 2 + halo * 2;
+    const pl = Math.max(0, Math.floor(left * ratio));

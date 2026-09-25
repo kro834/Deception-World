@@ -405,9 +405,19 @@
 .film-edition .rider-detail {
   background: linear-gradient(110deg, #07101a, #172633);
 }
+/* The heading scales with its own column as well as the viewport: in the
+   272-340 px desktop column 「仮面ライダー」 and the longest name (seven
+   characters) broke mid-word, and the panel height jumped between riders. */
+.film-edition .rider-copy-block {
+  container-type: inline-size;
+}
 .film-edition .rider-detail h3 {
   font-family: var(--film-display);
-  font-size: clamp(32px, 4vw, 54px);
+  font-size: min(clamp(32px, 4vw, 54px), 13.5cqi);
+}
+.film-edition .rider-detail h3 .rider-name-line,
+.film-edition .rider-line b {
+  white-space: nowrap;
 }
 .film-edition .episode-archive {
   padding-inline: clamp(16px, 3vw, 36px);

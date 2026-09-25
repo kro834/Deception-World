@@ -96,6 +96,14 @@
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
+/* On short laptop screens a width-only size pushes ENTER THE WORLD below the
+   fold and half-hides the key visual. The height cap still keeps the two-line
+   lockup at 1280x800 and 1440x900. */
+@media (min-width: 761px) and (orientation: landscape) {
+  .site-shell.film-edition .film-hero-identity .anime-work-title b {
+    font-size: clamp(64px, min(11vw, 15svh), 168px);
+  }
+}
 .site-shell.film-edition .film-edition-mark {
   color: #ff8088;
   border-color: var(--programme-red);

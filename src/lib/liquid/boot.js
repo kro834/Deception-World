@@ -798,10 +798,13 @@ function initRail(root) {
     const current = list.indexOf(tab);
     if (current < 0 || !list.length) return;
     let next = current;
+    // The rider tabs stack as a column on desktop and a grid elsewhere, so
+    // Down/Up step through them too instead of scrolling the page. The
+    // single-row rails keep the horizontal keys only.
     if (e.key === 'Home') next = 0;
     else if (e.key === 'End') next = list.length - 1;
-    else if (e.key === 'ArrowRight') next = (current + 1) % list.length;
-    else if (e.key === 'ArrowLeft') next = (current - 1 + list.length) % list.length;
+    else if (e.key === 'ArrowRight' || (holdToDrag && e.key === 'ArrowDown')) next = (current + 1) % list.length;
+    else if (e.key === 'ArrowLeft' || (holdToDrag && e.key === 'ArrowUp')) next = (current - 1 + list.length) % list.length;
     else return;
     e.preventDefault();
     select(next, true);

@@ -2035,6 +2035,26 @@
   }
 }
 
+/* Where RETURN TO DECEPTION WORLD is read only by assistive tech, the arrow
+   alone is the button: the same 48 px square as the menu across the header. */
+@media (max-width: 520px) {
+  .dream-page.dream-page .dream-back-link {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 4px;
+  }
+
+  .dream-page.dream-page .dream-back-link > span:first-child {
+    width: auto;
+    height: auto;
+    background: none;
+    font-size: 18px;
+    line-height: 1;
+  }
+}
+
 /* Narrow phones: each playbill slip lies on its side, portrait left and
    billing right, so katakana names keep their full width. */
 @media (max-width: 560px) {
