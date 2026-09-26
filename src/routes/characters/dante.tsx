@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DantePage } from "@/components/world/dante-page";
-import { createWorldHead, WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import { createWorldHead, DOSSIER_STYLESHEET_LINKS } from "@/lib/world-head";
 import danteCss from "@/styles-dante.css?url";
 
 export const Route = createFileRoute("/characters/dante")({
@@ -11,6 +11,6 @@ export const Route = createFileRoute("/characters/dante")({
       description:
         "スカーズNo.1・ダンテの人物記録と、仮面ライダールーラーのポラリス／エニグマ両モードの能力・必殺技。",
       image: "/character-dante.webp",
-      stylesheetLinks: [...WORLD_STYLESHEET_LINKS, { rel: "stylesheet", href: danteCss }],
+      stylesheetLinks: [...DOSSIER_STYLESHEET_LINKS, { rel: "stylesheet", href: danteCss }],
     }),
 });

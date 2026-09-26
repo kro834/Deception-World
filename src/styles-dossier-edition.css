@@ -1,0 +1,552 @@
+/* Dossier edition — the World page's projection language carried into the
+   character files (/riders/*, /managers/*, /characters/*).
+
+   The files keep their layout, their copy and each character's accent. This
+   sheet re-skins them in the World page's grammar (styles-world-mirage.css):
+   square panels that lock on with brackets (the character's accent across
+   the top, gold along the bottom), prism hairlines, chrome-ink names with a
+   misregistered ghost, outlined numerals, HUD labels in the Michroma subset
+   and the ice grid on ink. The sovereign file (Zeus, .is-sovereign) keeps
+   its own gold design, so every rule is scoped to
+   main.manager-page:not(.is-sovereign). Page sheets that load after this one
+   (シエル's, ダンテ's) keep their colours.
+
+   Motion: the brackets lock on and the numerals step in on the page's view
+   timelines, once each, finished at `entry 100%`. Nothing loops and nothing
+   moves on a still page. Reduced motion, economy rendering and the side
+   menu, loading covers and dialogs keep everything still. */
+
+/* ================================================================
+   Tokens and ground
+   ================================================================ */
+main.manager-page:not(.is-sovereign) {
+  --dossier-radius: 4px;
+  --dm-lock: color-mix(in srgb, var(--manager-accent, #7ae8ff) 62%, #dff9ff);
+  --dm-gold: #f0cf86;
+  --dm-violet: #a48bff;
+  --dm-magenta: #ff5cc8;
+  --dm-text-2: #b9cad8;
+  --dm-text-3: #8fa6ba;
+  --dm-focus: #fff0b5;
+  --dm-deck: #0a1220;
+  --dm-edge: color-mix(in srgb, var(--manager-accent, #7ae8ff) 30%, rgb(122 232 255 / 16%));
+  --dm-prism: linear-gradient(
+    90deg,
+    var(--dm-lock) 0%,
+    var(--dm-violet) 34%,
+    var(--dm-magenta) 66%,
+    var(--dm-gold) 100%
+  );
+  --dm-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --dm-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --dm-arm: 22px;
+  --dm-brackets:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / var(--dm-arm) 2px,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px var(--dm-arm),
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / var(--dm-arm) 2px,
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 2px var(--dm-arm),
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / var(--dm-arm) 2px,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px var(--dm-arm),
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / var(--dm-arm) 2px,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px var(--dm-arm);
+  background:
+    radial-gradient(
+      ellipse 70% 38% at 86% 3%,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 13%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 94% 62%, rgb(255 92 200 / 5%), transparent 70%),
+    radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%),
+    #04080f;
+}
+
+/* The page's end (the room kept below the file for the floating controls)
+   continues the ink. */
+body:has(> main.manager-page:not(.is-sovereign)) {
+  background-color: #04080f;
+}
+
+/* The ice grid of the World page, a little clearer than before. */
+main.manager-page:not(.is-sovereign) .manager-grid {
+  background-size: 96px 96px;
+  opacity: 0.09;
+}
+
+main.manager-page:not(.is-sovereign) .manager-topbar {
+  border-bottom-color: rgb(122 232 255 / 18%);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 10%, transparent),
+      transparent 28%,
+      transparent 70%,
+      rgb(255 92 200 / 6%)
+    ),
+    #03060c;
+  box-shadow:
+    0 1px 0 rgb(122 232 255 / 7%),
+    0 18px 44px rgb(0 0 0 / 45%);
+}
+
+/* ================================================================
+   Panels: square, on the deck, locked on with brackets
+   ================================================================ */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .manager-portrait-frame,
+    .manager-quotes,
+    .manager-facts,
+    .manager-copy-section,
+    .rider-archive-civilian,
+    .rider-nightmare-card,
+    .form-pickup-card,
+    .rider-special-site-card,
+    .dossier-reader
+  ) {
+  border-radius: var(--dossier-radius);
+}
+
+main.manager-page:not(.is-sovereign) :is(.manager-quotes, .manager-copy-section) {
+  border-color: var(--dm-edge);
+  background:
+    var(--dm-prism) top / 100% 1px no-repeat,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 7%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(315deg, rgb(164 139 255 / 5%), transparent 40%),
+    rgb(10 18 32 / 82%);
+}
+
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts {
+  border-color: var(--dm-edge);
+  background:
+    var(--dm-prism) top / 100% 1px no-repeat,
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 7%, #0d1724),
+      #070d17 85%
+    );
+}
+
+/* Brackets. Panels that clip their contents draw them on their own edge;
+   the rest a pixel outside it, over the border, as on the World page. */
+main.manager-page:not(.is-sovereign) .manager-quotes {
+  position: relative;
+}
+
+main.manager-page:not(.is-sovereign) .manager-portrait-frame::before,
+main.manager-page:not(.is-sovereign) .manager-quotes::after,
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts::after,
+main.manager-page:not(.is-sovereign) .manager-copy-section::before,
+main.manager-page:not(.is-sovereign) :is(.rider-archive-civilian, .rider-nightmare-card)::after,
+main.manager-page:not(.is-sovereign)
+  .form-pickup:not(.is-rexonance-pickup)
+  .form-pickup-card::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: var(--dm-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) :is(.manager-quotes, .manager-copy-section)::after,
+main.manager-page:not(.is-sovereign) .manager-copy-section::before {
+  inset: -1px;
+}
+
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts {
+  position: relative;
+}
+
+main.manager-page:not(.is-sovereign) .form-pickup:not(.is-rexonance-pickup) .form-pickup-card {
+  position: relative;
+}
+
+/* The special-site card already carries two corner marks; they take the
+   bracket colours. */
+main.manager-page:not(.is-sovereign) .rider-special-site-card::before {
+  border-color: var(--dm-lock);
+  border-radius: 0;
+}
+
+main.manager-page:not(.is-sovereign) .rider-special-site-card::after {
+  border-color: var(--dm-gold);
+  border-radius: 0;
+}
+
+/* The portrait sits in a projection frame: the character's edge light and
+   a cool inner rim. */
+main.manager-page:not(.is-sovereign) .manager-portrait-frame {
+  border-color: var(--dm-edge);
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 42%),
+    0 0 0 1px rgb(122 232 255 / 4%),
+    0 0 48px color-mix(in srgb, var(--manager-accent, #7ae8ff) 10%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+/* The file numeral on the portrait: a square HUD tag instead of a disc. */
+main.manager-page:not(.is-sovereign) .manager-portrait-frame .manager-numeral {
+  border-color: color-mix(in srgb, var(--dm-lock) 55%, transparent);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 78%);
+  box-shadow:
+    -2px 0 0 rgb(255 92 200 / 40%),
+    2px 0 0 rgb(122 232 255 / 45%);
+}
+
+/* The reader bar: a deck strip ruled by the prism. */
+main.manager-page:not(.is-sovereign) .dossier-reader {
+  border-color: rgb(122 232 255 / 18%);
+  background-color: rgb(8 14 24 / 96%);
+}
+
+main.manager-page:not(.is-sovereign) .dossier-reader::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  left: -1px;
+  height: 1px;
+  background: var(--dm-prism);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) .dossier-reader-links a {
+  border-radius: 2px;
+}
+
+main.manager-page:not(.is-sovereign) .dossier-reader-links a[aria-current] {
+  border-color: color-mix(in srgb, var(--dm-lock) 44%, transparent);
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 50% 100% / calc(100% - 24px) 2px no-repeat,
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 14%, transparent),
+      rgb(255 255 255 / 3%)
+    );
+}
+
+/* Controls in the file's own voice: square plates, not pills. */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-read-link,
+    .manager-back,
+    .rider-special-site-link,
+    .manager-pagination .dossier-index-return
+  ) {
+  border-radius: 2px;
+}
+
+main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link) {
+  border-color: color-mix(in srgb, var(--dm-lock) 46%, transparent);
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 10px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 10px no-repeat,
+    color-mix(in srgb, var(--manager-accent, #7ae8ff) 9%, #0a1220);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link):hover {
+    background-color: color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, #0a1220);
+  }
+}
+
+/* ================================================================
+   Identity: chrome-ink name, HUD labels
+   ================================================================ */
+main.manager-page:not(.is-sovereign) .dossier-identity .manager-display-name {
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #eefaff 34%,
+    color-mix(in srgb, var(--dm-lock) 55%, #eafbff) 66%,
+    var(--dm-lock) 100%
+  );
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* The misregistered channel, under the ink. */
+  filter: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+
+html[data-world-effects="economy"]
+  main.manager-page:not(.is-sovereign)
+  .dossier-identity
+  .manager-display-name {
+  filter: none;
+}
+
+main.manager-page:not(.is-sovereign) .dossier-identity .manager-file-number {
+  border-left-color: var(--dm-lock);
+  border-radius: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--manager-accent, #7ae8ff) 16%, transparent),
+    rgb(122 232 255 / 3%)
+  );
+}
+
+main.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-identity .manager-file-number,
+    .manager-introduction .dossier-identity h1 small,
+    .manager-facts dt,
+    .manager-section-index small,
+    .manager-copy-heading p,
+    .dossier-contents-copy small,
+    .manager-pagination > a small,
+    .manager-pagination .dossier-index-return > span
+  ) {
+  font-family: var(--dm-hud);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+/* Every label at least 12px, as on the World page. */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-identity .manager-file-number,
+    .manager-facts dt,
+    .manager-section-index small,
+    .manager-pagination > a small,
+    .manager-pagination .dossier-index-return > :is(span, i)
+  ) {
+  font-size: 12px;
+}
+
+/* ================================================================
+   Chapters: prism rules and outlined numerals
+   ================================================================ */
+main.manager-page:not(.is-sovereign) .manager-section-index {
+  position: relative;
+}
+
+main.manager-page:not(.is-sovereign) .manager-section-index::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--dm-lock) 0,
+    var(--dm-violet) 7%,
+    var(--dm-magenta) 12%,
+    rgb(122 232 255 / 20%) 12.2%,
+    rgb(122 232 255 / 20%) 100%
+  );
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) .manager-section-index > span {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--dm-lock);
+  text-shadow:
+    0.07em 0.07em 0 rgb(164 139 255 / 36%),
+    0 0 36px color-mix(in srgb, var(--dm-lock) 24%, transparent);
+}
+
+main.manager-page:not(.is-sovereign) .manager-copy-heading > span {
+  color: var(--dm-lock);
+  font-family: var(--dm-hud);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+main.manager-page:not(.is-sovereign) .manager-copy-heading > span::after {
+  content: "";
+  display: inline-block;
+  width: 44px;
+  height: 1px;
+  margin-left: 12px;
+  vertical-align: middle;
+  background: var(--dm-prism);
+}
+
+main.manager-page:not(.is-sovereign) .dossier-contents {
+  position: relative;
+}
+
+main.manager-page:not(.is-sovereign) .dossier-contents::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--dm-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) .dossier-contents-number {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--dm-lock);
+}
+
+/* ================================================================
+   Records and pagination
+   ================================================================ */
+main.manager-page:not(.is-sovereign) .rider-archive-civilian-visual > span {
+  border-radius: 0;
+}
+
+main.manager-page:not(.is-sovereign) .manager-pagination > a {
+  border-radius: 0;
+}
+
+main.manager-page:not(.is-sovereign) .manager-pagination::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--dm-prism);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) .manager-pagination .dossier-index-return {
+  position: relative;
+}
+
+main.manager-page:not(.is-sovereign) .manager-pagination .dossier-index-return::after {
+  --dm-arm: 12px;
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--dm-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* ================================================================
+   Focus and forced colours
+   ================================================================ */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-read-link,
+    .manager-back,
+    .dossier-reader-links a,
+    .dossier-contents > a,
+    .manager-pagination a
+  ):focus-visible {
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 3px;
+}
+
+@media (forced-colors: active) {
+  main.manager-page:not(.is-sovereign) .dossier-identity .manager-display-name {
+    color: CanvasText;
+    background: none;
+    filter: none;
+  }
+
+  main.manager-page:not(.is-sovereign) :is(.manager-section-index > span, .dossier-contents-number) {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}
+
+/* ================================================================
+   Motion: lock-on and numerals, on the page's view timelines
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .manager-quotes::after,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .manager-copy-section::before,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .dossier-contents::after,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .manager-pagination
+      .dossier-index-return::after {
+      animation: dossier-lock steps(4, jump-end) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .manager-section-index
+      > span {
+      animation: dossier-numeral steps(6, jump-end) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page:not(.is-sovereign)
+      .manager-section-index::after {
+      animation: dossier-draw-x cubic-bezier(0.77, 0, 0.18, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes dossier-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes dossier-numeral {
+  0% {
+    opacity: 0;
+    scale: 1.9;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes dossier-draw-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}

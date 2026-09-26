@@ -3,6 +3,7 @@ import worldAddonCssUrl from "@/styles-world-addon.css?url";
 import filmDirectionCssUrl from "@/styles-film-direction.css?url";
 import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
 import cinematicEditionCssUrl from "@/styles-cinematic-edition.css?url";
+import dossierEditionCssUrl from "@/styles-dossier-edition.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -33,6 +34,18 @@ export const CINEMATIC_STYLESHEET_LINK: RouteStylesheetLink = {
 export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_CORE_STYLESHEET_LINKS,
   CINEMATIC_STYLESHEET_LINK,
+];
+
+// The character files (riders, managers, characters) in the World page's
+// projection grammar: its HUD face (the same capitals-and-digits Michroma
+// subset as /world, so a file opened from there reuses it) and the dossier
+// edition sheet, after the World sheets. Page sheets go after these.
+export const DOSSIER_HUD_FONTS_URL =
+  "https://fonts.googleapis.com/css2?family=Michroma&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%2F-.%3A%2B%23%25%26%C2%B7%7C%3C%3E%20";
+export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
+  ...WORLD_STYLESHEET_LINKS,
+  { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+  { rel: "stylesheet", href: dossierEditionCssUrl },
 ];
 
 type WorldHeadInput = {
@@ -83,11 +96,13 @@ export function createRiderHead(id: string) {
     return createWorldHead({
       title: "ライダー資料｜Deception World",
       description: "Deception Worldのライダー資料アーカイブ。",
+      stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
     });
   }
   return createWorldHead({
     title: `仮面ライダー${rider.name}｜Deception World`,
     description: `仮面ライダー${rider.name}の人物記録、能力、フォーム、装備を収録した公式資料。`,
     image: rider.image,
+    stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
   });
 }

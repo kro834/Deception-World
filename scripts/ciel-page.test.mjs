@@ -8,14 +8,14 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const stripComments = (source) =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-test("/characters/ciel is a World route with its own sheet after the World's", async () => {
+test("/characters/ciel is a World route with its own sheet after the dossier sheets", async () => {
   const route = await read("src/routes/characters/ciel.tsx");
   assert.match(route, /createFileRoute\("\/characters\/ciel"\)/);
   assert.match(route, /component: CielPage/);
   assert.match(route, /import cielCssUrl from "@\/styles-ciel\.css\?url";/);
   assert.match(
     route,
-    /stylesheetLinks: \[\.\.\.WORLD_STYLESHEET_LINKS, \{ rel: "stylesheet", href: cielCssUrl \}\]/,
+    /stylesheetLinks: \[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: cielCssUrl \}\]/,
   );
   assert.match(route, /title: "シエル｜人物資料｜Deception World"/);
   const tree = await read("src/routeTree.gen.ts");

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ManagerStub, OPUS } from "@/components/world/manager-stub";
-import { createWorldHead } from "@/lib/world-head";
+import { DOSSIER_STYLESHEET_LINKS, createWorldHead } from "@/lib/world-head";
 
 export const Route = createFileRoute("/managers/opus")({
   component: () => <ManagerStub profile={OPUS} />,
@@ -9,5 +9,6 @@ export const Route = createFileRoute("/managers/opus")({
       title: "オパス｜六詠資料｜Deception World",
       description: "六詠第五位、オパスの人物・能力記録。",
       image: "/manager-opus.jpeg",
+      stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
     }),
 });
