@@ -199,7 +199,7 @@
               <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b>{rider.special.name}</b>
+                <b>{withWordBreaks(rider.special.name)}</b>
               </h2>
               {rider.special.sub ? <em>{rider.special.sub}</em> : null}
               <q>{rider.special.quote}</q>

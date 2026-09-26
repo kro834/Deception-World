@@ -358,6 +358,7 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   color: var(--rxs-muted);
   font-size: 14px;
   line-height: 1.8;
+  word-break: auto-phrase;
   text-wrap: pretty;
 }
 
@@ -487,9 +488,12 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   outline-offset: 3px;
 }
 
+/* The key wraps as whole entries: squeezed, レクソナンス broke as
+   レクソナン／ス at 320px. */
 .rxs-comparison-key {
   display: flex;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: 8px 22px;
   justify-content: flex-end;
   margin-bottom: 40px;
   color: var(--rxs-muted);
@@ -1030,12 +1034,16 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   background: rgb(0 4 10 / 54%);
 }
 
+/* Each caption breaks between phrases into even lines (瞬間的な／負荷変動への
+   追従率), never before its last character (…追従／率). */
 .rxs-p14-metrics article > small {
   display: block;
   min-height: 3.2em;
   color: #98a2af;
   font-size: 11px;
   line-height: 1.55;
+  word-break: auto-phrase;
+  text-wrap: balance;
 }
 
 .rxs-p14-values {
@@ -1071,8 +1079,10 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   letter-spacing: -0.04em;
 }
 
+/* 約 stays with its figure (約11.4%, not 約／11.4%). */
 .rxs-p14-values strong {
   color: #effaff;
+  word-break: keep-all;
 }
 
 .rxs-p14-metrics article > p {
@@ -2271,6 +2281,10 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
     box-sizing: border-box;
     min-width: 0;
     padding-inline: 12px;
+  }
+
+  .rxs-page .rxs-comparison-key {
+    column-gap: 14px;
   }
 }
 

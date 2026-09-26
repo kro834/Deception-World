@@ -1,13 +1,3 @@
-        to: "/characters/luna",
-        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
-      },
-    ],
-  },
-  {
-    no: "03",
-    title: "DECEPTION WORLD",
-    src: "/episode-03-deception-world.jpeg",
-    pos: "50% 18%",
     alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル",
   },
   {
@@ -217,6 +207,7 @@ const RiderRail = memo(
         className="rider-tabs liquid-swipe-tabs"
         role="tablist"
         aria-label="八人のメインライダー"
+        aria-orientation="vertical"
       >
         <LiquidLens />
         {RIDERS.map((r, i) => (
@@ -453,3 +444,22 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",

@@ -1,5 +1,3 @@
-          <p className="eyebrow">
-            <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
@@ -63,10 +61,11 @@
                 ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
                 label="個別資料"
                 opensDialog={false}
-                onOpen={() => {
+                onOpen={(source) => {
                   void go({
                     to: `/riders/${rider.id}`,
                     assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
+                    focusDestination: source === "keyboard",
                   });
                 }}
               />
@@ -142,6 +141,17 @@
             role="region"
             tabIndex={0}
             aria-label="判明済みエピソードのハイライト。左右キーでも切り替えられます"
+            onKeyDownCapture={(event) => {
+              // Home/End on the region go to the first or last record instead
+              // of scrolling the page. They sit in their own handler so the
+              // arrows below keep their region-only rule: a focused card's keys
+              // never move the rail.
+              if (event.target !== event.currentTarget) return;
+              if (event.key !== "Home" && event.key !== "End") return;
+              if (event.altKey || event.ctrlKey || event.metaKey) return;
+              event.preventDefault();
+              goEpisode(event.key === "Home" ? 0 : EPISODES.length - 1);
+            }}
             onKeyDown={(event) => {
               if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
               event.preventDefault();

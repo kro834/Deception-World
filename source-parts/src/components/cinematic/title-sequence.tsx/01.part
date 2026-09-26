@@ -41,6 +41,11 @@ const loadDiveEngine = () => (diveEngine ??= import("./opening-dive"));
 // sooner; a quicker tap primes at pointerup (as RISING THE WORLD does).
 const DIVE_TOUCH_PRIME_DELAY_MS = 60;
 
+// スキップ and もう一度 share one spot and the end still replaces the void, so
+// a press this soon after the title settles is the second half of a double
+// tap (and a replay would swap the picture twice within a second).
+const REPLAY_GUARD_MS = 600;
+
 // Once the opening has finished in this tab, a return to "/" (browser Back from
 // the World) shows the settled title instead of seven seconds again. もう一度
 // and the menu's オープニング (which sets the replay flag) still play it.
@@ -296,6 +301,7 @@ export function TitleSequence() {
   const diveModuleRef = useRef<DiveEngine | null>(null);
   const divePrimeTimerRef = useRef(0);
   const phaseRef = useRef(phase);
+  const completedAtRef = useRef(Number.NEGATIVE_INFINITY);
   const mountedRef = useRef(true);
   const { beginOpeningHandoff, go } = useLoadGate();
   const router = useRouter();
@@ -485,6 +491,7 @@ export function TitleSequence() {
   const finish = useCallback(() => {
     phaseRef.current = "complete";
     setPhase("complete");
+    completedAtRef.current = performance.now();
     stopBurn();
     // Anything primed and unused (a skip before the burn) is released.
     burnModuleRef.current?.releaseOpeningBurn();
@@ -999,6 +1006,8 @@ export function TitleSequence() {
           className="cine-btn cine-btn-secondary"
           disabled={phase !== "complete"}
           onClick={(e) => {
+            if (e.detail > 0 && performance.now() - completedAtRef.current < REPLAY_GUARD_MS)
+              return;
             keyboardFocusRef.current = e.detail === 0;
             replay();
           }}

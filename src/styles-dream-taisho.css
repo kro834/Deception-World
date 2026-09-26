@@ -2138,6 +2138,43 @@
   }
 }
 
+/* Under 360px the words keep together. ドルミネンス holds its one line at
+   28px. A playbill's billing column was 107px, too narrow for 仮面ライダー
+   at 19px: a slimmer portrait and a 17px name give it room, so a name
+   breaks only at its seam (仮面ライダー／ドレッド, ロード／ケイオス). The 記録途中
+   seal moves under its title, which had 34px beside it (叛／く, RE／VO／LT). */
+@media (max-width: 359px) {
+  .dream-page.dream-page .dream-section-heading h2 {
+    font-size: 28px;
+  }
+
+  .dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy b {
+    font-size: 17px;
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy small {
+    letter-spacing: 0.04em;
+  }
+
+  .dream-page.dream-page .dream-story-case > summary {
+    grid-template-columns: 64px minmax(0, 1fr) 24px;
+  }
+
+  .dream-page.dream-page .dream-story-case-status {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .dream-page.dream-page .dream-story-case-toggle {
+    grid-column: 3;
+  }
+}
+
 /* ---------- Accessibility modes ---------- */
 @media (prefers-reduced-transparency: reduce) {
   .dream-page.dream-page .dream-site-header {

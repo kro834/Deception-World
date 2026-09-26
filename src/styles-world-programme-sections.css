@@ -724,3 +724,17 @@ main.site-shell.film-edition.mirage-edition > footer {
     border-color: var(--mr-ice);
   }
 }
+
+/* Under 360px 自動切替 broke as 自動切／替 in its 42px label column: the
+   control's inner gap and the label give up a pixel or two so it keeps its
+   one word. */
+@media (max-width: 359px) {
+  main.site-shell.film-edition .poster-control-cluster > .poster-lock {
+    column-gap: 4px;
+  }
+
+  main.site-shell.film-edition .poster-control-cluster > .poster-lock b {
+    font-size: 11px;
+    word-break: keep-all;
+  }
+}

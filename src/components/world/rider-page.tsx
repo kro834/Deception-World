@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
@@ -1333,7 +1334,9 @@ export function RiderPage({ id }: { id: string }) {
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
+            <p className="manager-file-number">
+              CHARACTER FILE // {rider.no} {rider.name}
+            </p>
             <h1>
               <small>{rider.enPerson}</small>
               <span className="manager-display-name">
@@ -1551,7 +1554,7 @@ export function RiderPage({ id }: { id: string }) {
               <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b>{rider.special.name}</b>
+                <b>{withWordBreaks(rider.special.name)}</b>
               </h2>
               {rider.special.sub ? <em>{rider.special.sub}</em> : null}
               <q>{rider.special.quote}</q>

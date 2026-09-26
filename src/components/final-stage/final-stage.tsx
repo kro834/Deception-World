@@ -9,6 +9,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import {
   CAST,
@@ -218,9 +219,9 @@ function RiderPickup({
           <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
-            <b>{name}</b>
+            <b>{withWordBreaks(name)}</b>
           </h3>
-          <em>{sub}</em>
+          <em>{withWordBreaks(sub)}</em>
           <q>{quote}</q>
         </div>
       </article>
@@ -260,11 +261,19 @@ function RiderPickup({
             <small>{eyebrow}</small>
             <h2>
               <span>仮面ライダー</span>
-              <b>{name}</b>
+              <b>{withWordBreaks(name)}</b>
             </h2>
-            <em>{sub}</em>
+            <em>{withWordBreaks(sub)}</em>
           </div>
           <div className="fst-pickup-record">{children}</div>
+          {/* The record's own way out at its end (styles-pickup-stability.css),
+              named by its visible CLOSE beside the corner's 閉じる. */}
+          <button type="button" className="form-pickup-end-close" onClick={close}>
+            <span>CLOSE</span>
+            <i aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </i>
+          </button>
         </div>
       </dialog>
     </section>

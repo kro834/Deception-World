@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouterState } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
+import { guardTapThrough } from "@/lib/tap-through-guard";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import {
   ZEUS_BUTTON_RETURN_SRCSET,
@@ -56,7 +57,82 @@ const ZEUS_AVOID_SELECTOR = [
   ".dossier-read-link",
   ".rxs-footer > a",
 ].join(",");
+/* Words the button never rests on: titles and the labels of controls. They are
+   measured by their glyph boxes, not their element boxes, so a wide heading or
+   a whole-card link moves the button only when it would cover the words
+   themselves (レクソナンスサー|ガ). Display figures count as titles. */
+const ZEUS_AVOID_TEXT_SELECTOR = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  '[role="heading"]',
+  "a[href]",
+  "button",
+  '[role="tab"]',
+  "summary",
+  "label",
+].join(",");
+const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
+const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
+// At the end of the page nothing more scrolls out from under the button, so
+// any text there counts.
+const ZEUS_END_TEXT_SELECTOR = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";
+const ZEUS_TEXT_GAP = 6;
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
+
+type ZeusRect = { left: number; right: number; top: number; bottom: number };
+
+const meetsAny = (rect: ZeusRect, zones: ZeusRect[]) =>
+  zones.some(
+    (zone) =>
+      rect.left < zone.right &&
+      rect.right > zone.left &&
+      rect.top < zone.bottom &&
+      rect.bottom > zone.top,
+  );
+
+/* The glyph boxes of the words inside the candidate spots. Only elements whose
+   box meets a spot are walked, so this is a handful of ranges, read once when
+   scrolling settles. Inside a dialog only its own words count: the page
+   behind it is covered anyway. */
+function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean) {
+  const root: ParentNode = button.closest("dialog") ?? document;
+  const glyphs: ZeusRect[] = [];
+  const walked = new Set<Element>();
+  const range = document.createRange();
+  const collect = (selector: string, accept?: (element: HTMLElement) => boolean) => {
+    for (const element of root.querySelectorAll<HTMLElement>(selector)) {
+      if (element === button || button.contains(element)) continue;
+      if (!meetsAny(element.getBoundingClientRect(), zones)) continue;
+      // A title inside a card link is walked once, with the link.
+      if (walked.has(element) || element.parentElement?.closest(selector)) continue;
+      const style = window.getComputedStyle(element);
+      if (style.visibility === "hidden" || style.opacity === "0") continue;
+      if (accept && !accept(element)) continue;
+      walked.add(element);
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.nodeValue?.trim()) continue;
+        // Words kept for screen readers only overflow a clipped 1px box.
+        const holder = node.parentElement?.getBoundingClientRect();
+        if (holder && (holder.width < 2 || holder.height < 2)) continue;
+        range.selectNodeContents(node);
+        for (const rect of Array.from(range.getClientRects())) {
+          if (rect.width > 0 && rect.height > 0 && meetsAny(rect, zones)) glyphs.push(rect);
+        }
+      }
+    }
+  };
+  collect(ZEUS_AVOID_TEXT_SELECTOR);
+  collect(
+    ZEUS_DISPLAY_TEXT_SELECTOR,
+    (element) =>
+      Number.parseFloat(window.getComputedStyle(element).fontSize) >= ZEUS_DISPLAY_TEXT_MIN_PX,
+  );
+  if (pageEnd && root === document) collect(ZEUS_END_TEXT_SELECTOR);
+  return glyphs;
+}
 
 function readPosition(): ZeusButtonPosition {
   try {
@@ -263,6 +339,7 @@ function ZeusButton({
   const placementTimer = useRef<number | null>(null);
   const dragFrame = useRef<number | null>(null);
   const gestureOrigin = useRef(position);
+  const droppedHere = useRef(false);
 
   useEffect(() => {
     preferredPosition.current = position;
@@ -357,6 +434,12 @@ function ZeusButton({
         // far edge of the screen, over the text there.
         { x: preferred.x, y: preferred.y - lift * 2 },
         { x: mirrorX, y: preferred.y - lift * 2 },
+        // A tall title under the spot: one step down, then a third up, still
+        // before the far side of the screen.
+        { x: preferred.x, y: preferred.y + lift },
+        { x: mirrorX, y: preferred.y + lift },
+        { x: preferred.x, y: preferred.y - lift * 3 },
+        { x: mirrorX, y: preferred.y - lift * 3 },
         { x: preferred.x, y: mirrorY },
         { x: mirrorX, y: mirrorY },
       ].map((candidate) => clampCenter(candidate.x, candidate.y));
@@ -377,14 +460,45 @@ function ZeusButton({
           return style.visibility !== "hidden" && style.pointerEvents !== "none";
         });
       const gap = 10;
+      const candidateRects = candidates.map((candidate) => ({
+        left: candidate.x - rect.width / 2,
+        right: candidate.x + rect.width / 2,
+        top: candidate.y - rect.height / 2,
+        bottom: candidate.y + rect.height / 2,
+      }));
+      const scroller = document.scrollingElement ?? document.documentElement;
+      const pageEnd = scroller.scrollTop + window.innerHeight >= scroller.scrollHeight - 2;
+      // A spot the reader has just dropped the button on is theirs: only the
+      // controls move it off. Words count again once the page scrolls.
+      const words = droppedHere.current
+        ? []
+        : readAvoidText(
+            button,
+            candidateRects.map((candidateRect) => ({
+              left: candidateRect.left - ZEUS_TEXT_GAP,
+              right: candidateRect.right + ZEUS_TEXT_GAP,
+              top: candidateRect.top - ZEUS_TEXT_GAP,
+              bottom: candidateRect.bottom + ZEUS_TEXT_GAP,
+            })),
+            pageEnd,
+          );
+      const coveredWords = (candidateRect: ZeusRect) =>
+        words.reduce((covered, word) => {
+          const width =
+            Math.min(candidateRect.right + ZEUS_TEXT_GAP, word.right) -
+            Math.max(candidateRect.left - ZEUS_TEXT_GAP, word.left);
+          const height =
+            Math.min(candidateRect.bottom + ZEUS_TEXT_GAP, word.bottom) -
+            Math.max(candidateRect.top - ZEUS_TEXT_GAP, word.top);
+          return width > 0 && height > 0 ? covered + width * height : covered;
+        }, 0);
 
-      for (const candidate of candidates) {
-        const candidateRect = {
-          left: candidate.x - rect.width / 2,
-          right: candidate.x + rect.width / 2,
-          top: candidate.y - rect.height / 2,
-          bottom: candidate.y + rect.height / 2,
-        };
+      // Clear of the controls and of the words: the first such spot. Words
+      // everywhere (a column of titles): the spot clear of the controls that
+      // covers the least of them. Controls everywhere: stay home, as before.
+      let fallback: { candidate: ZeusButtonPosition; covered: number } | null = null;
+      for (const [index, candidate] of candidates.entries()) {
+        const candidateRect = candidateRects[index];
         const obstructed = controls.some(
           ({ rect: controlRect }) =>
             candidateRect.left < controlRect.right + gap &&
@@ -392,9 +506,12 @@ function ZeusButton({
             candidateRect.top < controlRect.bottom + gap &&
             candidateRect.bottom > controlRect.top - gap,
         );
-        if (!obstructed) return candidate;
+        if (obstructed) continue;
+        const covered = coveredWords(candidateRect);
+        if (covered === 0) return candidate;
+        if (!fallback || covered < fallback.covered) fallback = { candidate, covered };
       }
-      return candidates[0] ?? preferred;
+      return fallback?.candidate ?? candidates[0] ?? preferred;
     },
     [clampCenter, getViewport],
   );
@@ -493,6 +610,7 @@ function ZeusButton({
     };
     const onScroll = () => {
       if (activePointer.current != null) return;
+      droppedHere.current = false;
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
       // Collision checks read the geometry of every visible critical control.
       // Run that work once scrolling settles instead of on every scroll frame.
@@ -646,6 +764,7 @@ function ZeusButton({
     const wasHeld = held.current;
     activePointer.current = null;
     if (wasHeld && !cancelled) {
+      droppedHere.current = true;
       moveToPointer(event.clientX, event.clientY);
       onPositionChange(pendingPosition.current);
     } else if (wasHeld && cancelled) {
@@ -666,6 +785,10 @@ function ZeusButton({
       clearHoldTimer();
       activePointer.current = null;
       held.current = false;
+      // data-navigating turns pointer-events off before the touch's click is
+      // hit-tested, so that click would open the card beneath. A mouse click
+      // still targets the pressed button.
+      if (event.pointerType !== "mouse") guardTapThrough();
       void onNavigate();
     }
   };

@@ -13,6 +13,15 @@ html[data-mode="world"]:has(.site-shell) {
   scroll-margin-top: calc(96px + env(safe-area-inset-top));
 }
 
+/* The World's scroll-padding is 0 because its targets carry their own margin,
+   so a control the browser scrolls into view for focus (Shift+Tab back up the
+   page) would stop under the fixed header. Controls carry the header's height
+   too. The menu and dialogs scroll their own boxes and keep theirs. */
+.site-shell :where(a[href], button, [role="tab"], [tabindex="0"]):where(:not(#site-side-panel *, dialog *)) {
+  scroll-margin-top: calc(88px + env(safe-area-inset-top));
+  scroll-margin-bottom: 16px;
+}
+
 .site-shell #riders-return {
   position: absolute;
   /* Keep this return-only target inside the section so the heading and the

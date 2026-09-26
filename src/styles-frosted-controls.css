@@ -73,6 +73,23 @@ html body .rider-tabs > button[role="tab"] {
   html body .rider-tabs > button[role="tab"]:not([aria-selected="true"]):hover span {
     color: #fff;
   }
+  /* The 六詠 and column rails, the 個別資料 pill and the record cards answer
+     the pointer the same way. .site-shell outranks the film edition's own
+     surfaces; the Mirage sheet, loaded last, sets none of these. A record's
+     transparent select button covers its surface, so the card's own hover
+     lights the frame that lifts with it (a :hover on the surface never
+     matched). */
+  html body :is(.manager-archive-tabs, .world-column-tabs) > button[role="tab"]:not([aria-selected="true"]):hover {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgb(122 232 255 / 42%);
+  }
+  html body .site-shell .rider-dossier-open:hover {
+    border-color: rgb(122 232 255 / 86%);
+    background: #183049 !important;
+  }
+  html body .site-shell .episode-card:not(.is-active):hover .episode-card-surface {
+    border-color: rgb(122 232 255 / 72%);
+  }
 }
 html body .liquid-swipe-tabs > .liquid-selection-lens {
   scale: 1 !important;

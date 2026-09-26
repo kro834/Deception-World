@@ -437,7 +437,8 @@ export function SlideOpenControl({
       aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
       aria-expanded={opensDialog ? expanded : undefined}
-      aria-label={`${ariaLabel}。プラスをタップ、または長押ししてから右へスライドして開きます`}
+      aria-label={ariaLabel}
+      aria-description="プラスをタップ、または長押ししてから右へスライドして開きます"
       onPointerDown={startDrag}
       onPointerMove={drag}
       onPointerUp={finishDrag}

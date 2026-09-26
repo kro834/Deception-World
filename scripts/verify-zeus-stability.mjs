@@ -42,7 +42,10 @@ try {
     assert.ok(Math.abs(reloaded.x + reloaded.width / 2 - viewport.width / 2) < 2);
     const cdp = await page.context().newCDPSession(page);
     const touch = (type, points) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points });
-    const point = { x: viewport.width / 2, y: viewport.height / 2 };
+    // The saved spot holds across the reload; at rest the button may step off
+    // a control label under it (ENTER THE WORLD at 390px), so the held drag
+    // starts wherever it rests.
+    const point = { x: reloaded.x + reloaded.width / 2, y: reloaded.y + reloaded.height / 2 };
     const scrollBefore = await page.evaluate(() => window.scrollY);
     await touch("touchStart", [point]);
     await page.waitForTimeout(500);

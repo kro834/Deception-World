@@ -312,6 +312,7 @@
 }
 .film-edition .section-index > small::before {
   content: "//";
+  content: "//" / "";
   margin-inline-end: 0.6em;
   color: var(--film-cyan);
 }

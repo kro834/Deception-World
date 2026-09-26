@@ -1,3 +1,21 @@
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    for (let index = previewPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previewPosters = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
+    const finalImage = new Image();
+    finalImage.decoding = "async";
+    finalImage.fetchPriority = "high";
+    finalImage.src = POSTERS[finalPoster].src;
+    const finalReady =
+      finalImage
+        .decode?.()
+        .then(() => true)
+        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
       Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
     const waitForFinalImage = () =>
       Promise.race([
@@ -444,11 +462,3 @@
                       />
                     </svg>
                   )}
-                </span>
-                <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}
-                </b>
-              </button>
-            </div>
-            <output

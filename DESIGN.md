@@ -143,6 +143,25 @@ A browser audit of every surface found 65 issues; 52 were verified and fixed (co
 - **Skip link** (本文へスキップ) on every route. The route dives arrive without the white bloom.
 - **Guards:** scripts/{A-opening-menu,B-routing-zeus-rising,C-world-page,d-dossiers}-polish.test.mjs, scripts/{E1-dossiers,E2-world,E3-global-menu-special,E4-press-skip}-elevation.test.mjs and scripts/elevation-walkthrough.test.mjs. The RISING and opening flash audits still hold at one flash a second.
 
+The leftovers from that pass were fixed afterwards:
+- **The Zeus button never rests on words.** When scrolling settles, it also steps off the glyphs of titles, control labels and display figures of 24 px or more, and off any text at the very end of a page. It measures the glyphs, not the element boxes, so a wide heading or a card link moves it only when it would cover the words. It tries the nearer spots first (one step down, then a third step up) before the far side of the screen. Its home spot, drag and control dodges are unchanged. The words are read once per settle, never on a scroll frame.
+- **Names keep their words.** `src/lib/name-breaks.ts` puts a zero-width seam after 仮面ライダー, after a leading ロード, after ・ and ／, and before a closing サーガ, and the name styles keep katakana whole. So names break as レクソナンス／サーガ (not レクソナ／ンスサーガ) and 仮面ライダー／ドレッド. The stored names, labels and alt text keep their own spelling. Under 360 px:
+  - the special-site name, Final Stage's closing title and the P14 figures (約11.4%) step down a size;
+  - the Dream playbills give their billing column more room;
+  - the 記録途中 seal moves under its title;
+  - short captions and leads break between phrases.
+- **The skip link shows where it landed.** A keyboard skip marks the heading with the skip link's warm ring until focus moves on. A heading kept for screen readers only is marked on its block. A page without a heading, the form archive, lands in its embedded document, and its frame shows briefly. Pointer use never shows the mark, and route arrivals stay unmarked.
+- **Cold deep links land in one jump.** A new tab on /world#manager-archive (or #story, #riders or #records) no longer glides from the top and overshoots by the panel's scroll-linked lift. The /world head script holds smooth scrolling off from the first paint, and LoadGateProvider aligns the landing as the page settles.
+- **Guard:** scripts/leftover-usability.test.mjs.
+
+A usability round then walked the main journeys by touch, keyboard and screen reader (opening → World → dossier → form record → 六詠 → special site → RISING → RE DIVE → シエル) and fixed 20 issues:
+- **Touch, pointer and history.** A tap on the Zeus button no longer also opens the card under it (`src/lib/tap-through-guard.ts`). A double tap on スキップ no longer replays the opening. Back and Forward into a dossier return to the reading position, measured on the full layout, and its record placeholders are sized to one pickup or two. With a mouse, the archive tabs, the 個別資料 pill and the record cards answer hover.
+- **Finding the result.** Choosing a rider on a phone brings its panel into view once. A dossier's first screen names the rider (CHARACTER FILE // 05 LEDDIC). The menu opens with the current dossier's row in view, closes with the Android back gesture or a clear swipe to the right, and hides the page behind it from screen readers. Every form record ends on its own CLOSE. On short screens the dossier reader scrolls away with the file.
+- **Keyboard.** A keyboard open from the rider rail lands on the dossier. Shift+Tab on /world stops clear of the fixed header. The records region answers Home/End. Tab from RISING's CLOSE stays in the dialog. The Form Archive shows focus on its nav, hero actions and detail arrows.
+- **Semantics.** The rider tablist is vertical, the slide hint is a description rather than part of every control's name, forced colours keep the reader's current section, and decorative generated text is silent.
+- **Walkthrough fixes.** A reader or contents jump inside a dossier is aligned again while the records above it lay out (変身記録 could land 650 px short on a phone, or under the reader bar on a desktop). A native in-page link, such as the World header's RIDERS, keeps the key the router gave it, so Back from a dossier returns to where the reader was, not to the section's top.
+- **Guards:** scripts/ux-round-{a,b,c,final}.test.mjs.
+
 ## Rising the World — 2026-09-23
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.

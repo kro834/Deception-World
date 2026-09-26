@@ -236,6 +236,9 @@ async function checkBurnWebgl(browser, name) {
     { first: 0, core: 1, burn: null, canvas: 0 },
   );
   // もう一度 burns again, from the ice logo.
+  // もう一度 ignores a pointer press for 600 ms after the title settles
+  // (REPLAY_GUARD_MS): that press is the second half of a double tap on スキップ.
+  await page.waitForTimeout(650);
   await page.getByRole("button", { name: "もう一度" }).click();
   await page.locator(".cine-stage.is-playing").waitFor();
   assert.equal((await logoOpacity(page)).first, 1, `${name}: replay starts on the ice logo`);

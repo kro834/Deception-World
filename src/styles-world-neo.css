@@ -159,6 +159,7 @@
 }
 .site-shell.film-edition .film-hero-identity .anime-work-title span::before {
   content: "//";
+  content: "//" / "";
   margin-inline-end: 0.7em;
   color: var(--neo-gold);
 }
@@ -357,6 +358,7 @@
 }
 .site-shell.film-edition .story-layout::before {
   content: "STORY // RECORD 01";
+  content: "STORY // RECORD 01" / "";
   color: var(--neo-ink);
   background: linear-gradient(90deg, var(--neo-cyan), #a9efff);
   font-family: var(--neo-mono);

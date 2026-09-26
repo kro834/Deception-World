@@ -144,6 +144,9 @@ function dispatchOpeningHandoffState(active: boolean) {
   );
 }
 const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
+// The dossier reader's and contents' in-page links.
+const DOSSIER_SECTION_LINK =
+  /^#(?:character-section-[\w-]+|dossier-profile|dossier-index|identity-records|form-records)$/;
 const SCROLL_KEYS = new Set([
   "ArrowDown",
   "ArrowLeft",
@@ -156,6 +159,9 @@ const SCROLL_KEYS = new Set([
   " ",
 ]);
 let routeScrollMotionLocks = 0;
+// Only the latest hash landing keeps aligning: a second jump made while the
+// first is settling must not be pulled back to the first section.
+let routeHashSettle = 0;
 
 function holdRouteScrollMotion() {
   routeScrollMotionLocks += 1;
@@ -175,6 +181,7 @@ async function settleRouteHash(hash: string) {
   // TanStack restores the previous document position after the destination
   // route commits, and mobile WebKit can repeat that restoration after layout.
   // Keep aligning briefly, but stop the moment the user starts scrolling.
+  const settle = ++routeHashSettle;
   let userInteracted = false;
   let stopWaiting: () => void = () => undefined;
   const userScrollIntent = new Promise<void>((resolve) => {
@@ -189,6 +196,7 @@ async function settleRouteHash(hash: string) {
     stopWaiting();
   };
   const align = () => {
+    if (settle !== routeHashSettle) userInteracted = true;
     if (!userInteracted) {
       document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
     }
@@ -412,6 +420,29 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       dispatchOpeningHandoffState(false);
       busy.current = false;
     };
+  }, []);
+
+  // A deep link opened from outside the site (/world#manager-archive in a new
+  // tab) lands like one followed inside it: in one jump, flush under the
+  // header, and aligned again while the page settles. A single landing is
+  // measured while the panel is still lifted by its scroll-linked entrance,
+  // so it overshot by the lift. The /world head script holds smooth scrolling
+  // off from the first paint (mirage-boot-gate.js); this hold takes it over
+  // before the router's landing runs, and lets it go.
+  useLayoutEffect(() => {
+    if (!window.location.hash) return;
+    const releaseScrollMotion = holdRouteScrollMotion();
+    let hash = "";
+    try {
+      hash = decodeURIComponent(window.location.hash.slice(1));
+    } catch {
+      /* A malformed hash names no section. */
+    }
+    if (!hash || hash === "top" || !document.getElementById(hash)) {
+      releaseScrollMotion();
+      return;
+    }
+    void settleRouteHash(hash).finally(() => window.setTimeout(releaseScrollMotion, 360));
   }, []);
 
   const go = useCallback(
@@ -1019,6 +1050,31 @@ export function AppGuards() {
   const historyTraversal = useRef(false);
   const [topRepeat, setTopRepeat] = useState(0);
 
+  // A jump from a dossier's reader or contents is a native anchor. It lands
+  // before the records above the section are laid out, so their
+  // content-visibility placeholders give way to the real height after it and
+  // 変身記録 could open 650 px short on a phone. Align again from the next
+  // frame while they settle, as a route's own hash landing does; any scroll
+  // stops it.
+  useEffect(() => {
+    const onClick = (event: globalThis.MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!DETAIL_ROUTE.test(window.location.pathname)) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const href = target?.closest("a")?.getAttribute("href") ?? "";
+      if (!DOSSIER_SECTION_LINK.test(href)) return;
+      const releaseJumpMotion = holdRouteScrollMotion();
+      window.requestAnimationFrame(() => {
+        void settleRouteHash(href.slice(1)).finally(() =>
+          window.setTimeout(releaseJumpMotion, 360),
+        );
+      });
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
   // History notifies subscribers before the router commits the location, so
   // the layout effect below knows whether it is answering Back/Forward.
   useEffect(() => {
@@ -1030,6 +1086,20 @@ export function AppGuards() {
       // A native in-page link (href="#top") also arrives as a pop, but its
       // entry has no router state; only Back/Forward returns to a keyed one.
       historyTraversal.current = pop && !repeated && window.history.state?.__TSR_key != null;
+      // That entry (the World header's #riders) then keeps the key the router
+      // made up for it. The router files the reader's position under that key
+      // as they leave, and with a new key made up again on Back it found
+      // nothing and fell back to the section's top, not where they had read
+      // to. The native replaceState leaves the router's own copy untouched.
+      if (pop && window.history.state == null && location.state.__TSR_key) {
+        History.prototype.replaceState.call(window.history, location.state, "");
+      }
+      // Back/Forward into a dossier lays its long records out in full before
+      // the router restores the offset (25.css), so the offset lands on the
+      // words it was measured on.
+      if (historyTraversal.current && DETAIL_ROUTE.test(location.pathname)) {
+        document.documentElement.dataset.routeRestoring = "true";
+      }
       // Pressed again while the world is already at #top, the link changes no
       // location, so nothing below would run and the page would glide all the
       // way up. Ask for the same instant reset as the first press.
@@ -1042,17 +1112,48 @@ export function AppGuards() {
   useLayoutEffect(() => {
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
-    // Back/Forward into the world returns the reader to where they were: the
-    // router restores that position, so only fresh entries start at the top.
+    // Back/Forward into the world returns the reader to where they were, and
+    // into a dossier to where they left it: the router restores that
+    // position, so only fresh entries start at the top.
     const fromHistory = historyTraversal.current;
     historyTraversal.current = false;
+    const root = document.documentElement;
+    // The full layout is held while the router's delayed restoration settles
+    // (set again here: the outgoing route's cleanup has just let it go), then
+    // content-visibility skips the off-screen records again, now sized from
+    // what was laid out.
+    const historyDossier = fromHistory && DETAIL_ROUTE.test(pathname);
+    let restoringTimer = 0;
+    if (historyDossier) {
+      root.dataset.routeRestoring = "true";
+      restoringTimer = window.setTimeout(() => {
+        restoringTimer = 0;
+        delete root.dataset.routeRestoring;
+      }, 1500);
+    } else {
+      delete root.dataset.routeRestoring;
+    }
+    const releaseRestoring = () => {
+      if (restoringTimer) window.clearTimeout(restoringTimer);
+      restoringTimer = 0;
+      delete root.dataset.routeRestoring;
+    };
     const isDossierSectionHash =
       /^#?character-section-/.test(locationHash) ||
       /^#?(?:dossier-profile|dossier-index|identity-records|form-records)$/.test(locationHash);
     const resetRouteTop =
-      (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash) ||
+      (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash && !fromHistory) ||
       (pathname === "/world" && (!locationHash || locationHash === "top") && !fromHistory);
-    if (!resetRouteTop) return;
+    if (!resetRouteTop) {
+      if (!historyDossier) return releaseRestoring;
+      // A dossier reached by Back/Forward is left like any other: its exit is
+      // covered as below.
+      return () => {
+        const releaseExitMotion = holdRouteScrollMotion();
+        window.setTimeout(releaseExitMotion, 360);
+        releaseRestoring();
+      };
+    }
     const releaseScrollMotion = holdRouteScrollMotion();
     const timers: number[] = [];
     let firstFrame = 0;
@@ -1124,6 +1225,7 @@ export function AppGuards() {
       const releaseExitMotion = holdRouteScrollMotion();
       window.setTimeout(releaseExitMotion, 360);
       stopResetting();
+      releaseRestoring();
     };
   }, [locationHash, pathname, topRepeat]);
 

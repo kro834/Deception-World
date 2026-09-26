@@ -8,6 +8,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
+import { withWordBreaks } from "@/lib/name-breaks";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -47,7 +48,10 @@ type Profile = {
   sovereign?: boolean;
 };
 
-export function FormPickup({ rider }: { rider: RiderForm }) {
+export function FormPickup({ rider: record }: { rider: RiderForm }) {
+  // The name as shown breaks only between its words (name-breaks.ts); labels
+  // and alt text keep the record's own spelling.
+  const rider = { ...record, name: withWordBreaks(record.name) };
   const dlg = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const pointerOpened = useRef(false);
@@ -154,7 +158,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
   return (
     <section
       className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`}
-      aria-label={`${riderPrefix}${rider.name}の記録`}
+      aria-label={`${riderPrefix}${record.name}の記録`}
       aria-busy={gateActive}
     >
       <article className="form-pickup-card">
@@ -169,7 +173,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         <div className="form-pickup-visual">
           <img
             src={rider.img}
-            alt={`${riderPrefix}${rider.name}のフォームビジュアル`}
+            alt={`${riderPrefix}${record.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
             fetchPriority={isRexonance ? "high" : "auto"}
@@ -179,7 +183,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
           <SlideOpenControl
             buttonRef={opener}
             className="form-pickup-plus"
-            ariaLabel={`${riderPrefix}${rider.name}をピックアップ`}
+            ariaLabel={`${riderPrefix}${record.name}をピックアップ`}
             label="フォーム詳細"
             onOpen={open}
           />
@@ -199,7 +203,7 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
         ref={dlg}
         className={`form-pickup-dialog${isRexonance ? " is-rexonance-dialog" : ""}`}
         tabIndex={-1}
-        aria-label={`${riderPrefix}${rider.name}`}
+        aria-label={`${riderPrefix}${record.name}`}
         onClose={resetScroll}
         onCancel={(e) => {
           e.preventDefault();
@@ -386,6 +390,15 @@ export function FormPickup({ rider }: { rider: RiderForm }) {
               </div>
             </section>
           ) : null}
+          {/* The record ends on its own way out, so a long read never has to
+              climb back to the corner. Named by its visible CLOSE: the
+              corner control keeps the one 閉じる. */}
+          <button type="button" className="form-pickup-end-close" onClick={close}>
+            <span>CLOSE</span>
+            <i aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </i>
+          </button>
         </div>
       </dialog>
       {gateActive && typeof document !== "undefined"

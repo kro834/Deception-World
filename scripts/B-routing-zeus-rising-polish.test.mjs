@@ -10,6 +10,7 @@ const transitions = read("src/styles-route-transitions.css");
 const cutIns = read("src/styles-world/22.css");
 const zeus = read("src/components/zeus-button.tsx");
 const rising = read("src/components/world/rising-world.tsx");
+const tapThroughGuard = read("src/lib/tap-through-guard.ts");
 const risingStyles = read("src/styles-world-rising.css");
 const reDive = read("src/styles-world-re-dive.css");
 const specialSites = read("src/styles-rexonance-saga.css");
@@ -134,8 +135,10 @@ test("the form-archive switcher labels and the special-site scroll cue are legib
 });
 
 test("a pointer CLOSE swallows the double tap's second press; keyboard closes are immediate", () => {
-  assert.match(rising, /const TAP_THROUGH_GUARD_MS = 450;/);
-  assert.match(rising, /const types = \["pointerdown", "mousedown", "click"\] as const;/);
+  // The guard is shared with the Zeus button (src/lib/tap-through-guard.ts).
+  assert.match(tapThroughGuard, /const TAP_THROUGH_GUARD_MS = 450;/);
+  assert.match(tapThroughGuard, /const types = \["pointerdown", "mousedown", "click"\] as const;/);
+  assert.match(rising, /import \{ guardTapThrough \} from "@\/lib\/tap-through-guard";/);
   assert.match(
     rising,
     /className="rw-close"\s*onClick=\{\(event\) => \{\s*if \(event\.detail > 0\) guardTapThrough\(\);\s*closeDialog\(\);/,

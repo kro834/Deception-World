@@ -452,3 +452,13 @@ const EPISODES: EpisodeRecord[] = [
         alt: "仮面ライダーレルム ムーンフォーム",
         width: 1024,
         height: 1536,
+        to: "/characters/luna",
+        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
+      },
+    ],
+  },
+  {
+    no: "03",
+    title: "DECEPTION WORLD",
+    src: "/episode-03-deception-world.jpeg",
+    pos: "50% 18%",

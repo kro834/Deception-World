@@ -671,6 +671,7 @@ const RiderRail = memo(
         className="rider-tabs liquid-swipe-tabs"
         role="tablist"
         aria-label="八人のメインライダー"
+        aria-orientation="vertical"
       >
         <LiquidLens />
         {RIDERS.map((r, i) => (
@@ -1017,10 +1018,57 @@ export function WorldHome() {
     }, 220);
   }, []);
 
+  /* A pointer choice on a phone brings the chosen panel's top into view once,
+     keeping the whole rail in sight: below 760 px the panel sits under the rail,
+     often past the fold, so a tap only moved the highlight. One user-initiated
+     scroll, no loop. It runs two frames after a completed selection, so a hold
+     that is still dragging, the rail's page lock and a keyboard step (its tab
+     is focus-visible) all leave the page where it is. #riders-return and
+     syncRail dispatch no railselect, so a return never scrolls. */
+  const revealRiderPanel = useCallback(() => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (!window.matchMedia("(max-width: 760px)").matches) return;
+        const rail = riderRail.current;
+        if (!rail || rail.dataset.liquidDragging === "true") return;
+        if (document.documentElement.hasAttribute("data-rail-lock")) return;
+        const tab = rail.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+        if (!tab || tab.matches(":focus-visible")) return;
+        const panel = document.getElementById("rider-active-panel");
+        if (!panel) return;
+        const top = panel.getBoundingClientRect().top;
+        if (top <= window.innerHeight - 140) return;
+        const headerBottom =
+          document.querySelector(".site-shell > .topbar")?.getBoundingClientRect().bottom ?? 0;
+        // Measure the layout, not the paint: the console's scroll-linked
+        // entrance (mx-lift) still holds it low while it enters, and it has
+        // settled by the time this scroll ends. The cap keeps the whole rail,
+        // frame and corners, clear of the header.
+        const layoutTop = (el: HTMLElement) => {
+          let y = -window.scrollY;
+          for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) {
+            y += n.offsetTop + (n === el ? 0 : n.clientTop);
+          }
+          return y;
+        };
+        const dy = Math.min(
+          layoutTop(panel) - window.innerHeight * 0.6,
+          layoutTop(rail) - headerBottom - 12,
+        );
+        if (dy <= 24) return;
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollBy({ top: dy, behavior: reducedMotion ? "auto" : "smooth" });
+      }),
+    );
+  }, []);
+
   useEffect(() => {
     const off1 = bindRail(managerRail.current, setManagerTab);
     const off2 = bindRail(columnRail.current, setColumnTab);
-    const off3 = bindRail(riderRail.current, selectRider);
+    const off3 = bindRail(riderRail.current, (i) => {
+      selectRider(i);
+      revealRiderPanel();
+    });
     const off4 = bindRail(pickupRail.current, setColumnTab);
     let disposeGlass: (() => void) | undefined;
     const id = requestAnimationFrame(() => {
@@ -1034,7 +1082,7 @@ export function WorldHome() {
       cancelAnimationFrame(id);
       disposeGlass?.();
     };
-  }, [selectRider]);
+  }, [selectRider, revealRiderPanel]);
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
@@ -2336,10 +2384,11 @@ export function WorldHome() {
                 ariaLabel={`仮面ライダー${rider.ja}の個別資料を開く`}
                 label="個別資料"
                 opensDialog={false}
-                onOpen={() => {
+                onOpen={(source) => {
                   void go({
                     to: `/riders/${rider.id}`,
                     assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],
+                    focusDestination: source === "keyboard",
                   });
                 }}
               />
@@ -2415,6 +2464,17 @@ export function WorldHome() {
             role="region"
             tabIndex={0}
             aria-label="判明済みエピソードのハイライト。左右キーでも切り替えられます"
+            onKeyDownCapture={(event) => {
+              // Home/End on the region go to the first or last record instead
+              // of scrolling the page. They sit in their own handler so the
+              // arrows below keep their region-only rule: a focused card's keys
+              // never move the rail.
+              if (event.target !== event.currentTarget) return;
+              if (event.key !== "Home" && event.key !== "End") return;
+              if (event.altKey || event.ctrlKey || event.metaKey) return;
+              event.preventDefault();
+              goEpisode(event.key === "Home" ? 0 : EPISODES.length - 1);
+            }}
             onKeyDown={(event) => {
               if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
               event.preventDefault();

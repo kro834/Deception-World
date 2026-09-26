@@ -1,4 +1,12 @@
-          ) : null}
+          {/* The record ends on its own way out, so a long read never has to
+              climb back to the corner. Named by its visible CLOSE: the
+              corner control keeps the one 閉じる. */}
+          <button type="button" className="form-pickup-end-close" onClick={close}>
+            <span>CLOSE</span>
+            <i aria-hidden="true">
+              <UiVectorIcon kind="close" size={16} />
+            </i>
+          </button>
         </div>
       </dialog>
       {gateActive && typeof document !== "undefined"
@@ -382,7 +390,3 @@ export const SHUZA: Profile = {
   ],
   facts: [
     { dt: "NAME", dd: "シュザ" },
-    { dt: "RANK", dd: "六詠・第三位" },
-    { dt: "AGE", dd: "不明" },
-    { dt: "SEX", dd: "女性" },
-    { dt: "HEIGHT", dd: "176.8cm" },

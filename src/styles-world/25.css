@@ -117,6 +117,7 @@ html[data-side-menu-open="true"] body {
 
 .section-index small::after {
   content: "NODE / ONLINE";
+  content: "NODE / ONLINE" / "";
   color: color-mix(in srgb, var(--cyan) 62%, var(--dim));
   font-size: 6px;
   letter-spacing: 0.22em;
@@ -221,9 +222,30 @@ html[data-side-menu-open="true"] body {
 }
 
 /* .world-column and .episode-archive stay laid out so World anchors land exactly. */
-:is(.manager-archive-identity-records, .rider-form-pickup-stack) {
+.manager-archive-identity-records {
   content-visibility: auto;
   contain-intrinsic-size: auto 960px;
+}
+
+/* Sized to the form records they hold, one or two, so End lands where the
+   page ends. */
+.rider-form-pickup-stack {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 810px;
+}
+
+.rider-form-pickup-stack:has(> .form-pickup + .form-pickup) {
+  contain-intrinsic-size: auto 1640px;
+}
+
+/* Back/Forward restores an offset measured on the real layout, so a history
+   arrival lays these out in full for a moment (load-gate.tsx), and `auto` then
+   remembers their real sizes. One layout on a history arrival only: nothing
+   keeps running, and a first visit is unchanged. Chrome records the release
+   as a layout shift, but nothing on screen moves. */
+html[data-route-restoring]
+  :is(.manager-dossier, .manager-archive-identity-records, .rider-form-pickup-stack) {
+  content-visibility: visible;
 }
 
 /* Background tabs and low-capability devices should never spend time

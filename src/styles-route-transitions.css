@@ -1634,6 +1634,20 @@ html[data-route-scroll-settling="true"] {
   outline: none;
 }
 
+/* A keyboard skip (本文へスキップ, skip-link.tsx) was asked for, so where
+   reading starts is marked with the skip link's own warm ring, drawn clear of
+   the heading, until focus moves on. A pointer never sets the mark. */
+html [data-skip-mark="true"][data-skip-mark] {
+  outline: 2px solid rgb(255 240 181 / 80%);
+  outline-offset: 8px;
+}
+
+/* A whole <main> or embedded document (a page without a heading) is framed
+   from the inside. */
+html :is(main, iframe)[data-skip-mark="true"][data-skip-mark] {
+  outline-offset: -4px;
+}
+
 @media (max-width: 640px) {
   [data-opening-handoff-root] {
     --opening-handoff-blue: 110 229 255;

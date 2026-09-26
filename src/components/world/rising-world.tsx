@@ -9,6 +9,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
+import { guardTapThrough } from "@/lib/tap-through-guard";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import {
@@ -180,24 +181,9 @@ const TOUCH_PRIME_DELAY_MS = 60;
 // and the void: a press this soon after a swap is a double or repeated press.
 const SWAP_GUARD_MS = 600;
 
-// CLOSE sits over the header: the dialog closes on the first click, so the
-// second tap of a double tap would land on RECORDS or the menu underneath.
-// Swallow pointer input briefly after a pointer close (keyboard is detail 0).
-const TAP_THROUGH_GUARD_MS = 450;
-function guardTapThrough() {
-  const until = performance.now() + TAP_THROUGH_GUARD_MS;
-  const types = ["pointerdown", "mousedown", "click"] as const;
-  const swallow = (event: Event) => {
-    if (performance.now() > until) return;
-    // No focus move, no navigation, no handler below.
-    event.preventDefault();
-    event.stopPropagation();
-  };
-  for (const type of types) window.addEventListener(type, swallow, { capture: true });
-  window.setTimeout(() => {
-    for (const type of types) window.removeEventListener(type, swallow, { capture: true });
-  }, TAP_THROUGH_GUARD_MS);
-}
+// The dialog's first control in the Tab order: SKIP while the run plays, then
+// もう一度 (or RE DIVE…? where there is no replay).
+const FIRST_CONTROL = ".rw-controls button:not(:disabled), .rw-redive-button";
 
 const auditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("rising-audit");
@@ -731,6 +717,12 @@ export function RisingWorld() {
         onKeyDown={(event) => {
           // A held Enter or Space would click the control under focus on every repeat.
           if (event.repeat && (event.key === "Enter" || event.key === " ")) event.preventDefault();
+          // Shift+Tab from the first control goes round to CLOSE, as Tab from
+          // CLOSE comes round to it: neither direction leaves the dialog.
+          if (event.key !== "Tab" || !event.shiftKey) return;
+          if (event.target !== dialogRef.current?.querySelector(FIRST_CONTROL)) return;
+          event.preventDefault();
+          closeRef.current?.focus();
         }}
       >
         <div ref={viewportRef} className="rw-viewport">
@@ -826,6 +818,9 @@ export function RisingWorld() {
             RE DIVE…?
           </button>
         ) : null}
+        {/* CLOSE sits over the header: the dialog closes on the first click, so
+            the second tap of a double tap would land on RECORDS or the menu
+            underneath. */}
         <button
           ref={closeRef}
           type="button"
@@ -833,6 +828,15 @@ export function RisingWorld() {
           onClick={(event) => {
             if (event.detail > 0) guardTapThrough();
             closeDialog();
+          }}
+          onKeyDown={(event) => {
+            // CLOSE is last in the DOM but first on screen, so Tab goes on to
+            // the dialog's first control instead of out of the dialog.
+            if (event.key !== "Tab" || event.shiftKey) return;
+            const first = dialogRef.current?.querySelector<HTMLButtonElement>(FIRST_CONTROL);
+            if (!first) return;
+            event.preventDefault();
+            first.focus();
           }}
         >
           <span>CLOSE</span>

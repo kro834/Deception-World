@@ -1,4 +1,3 @@
-        title: "陽気な顔と、任務の最適解。",
         body: [
           "コードナンバー：セヴン。CODE英国支部のエージェント。陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆る。近接、銃器、潜入、解析、情報回収を一人でこなす。",
         ],
@@ -319,7 +318,9 @@ export function RiderPage({ id }: { id: string }) {
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">CHARACTER FILE // {rider.no}</p>
+            <p className="manager-file-number">
+              CHARACTER FILE // {rider.no} {rider.name}
+            </p>
             <h1>
               <small>{rider.enPerson}</small>
               <span className="manager-display-name">

@@ -7,6 +7,7 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
@@ -1134,7 +1135,7 @@ export function DreamChapter() {
                 <span className="dream-dolminence-number">{record.order}</span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
-                  <b>{record.name}</b>
+                  <b>{withWordBreaks(record.name)}</b>
                   <i>{record.roman}</i>
                   <em>機密記録を開く</em>
                 </span>

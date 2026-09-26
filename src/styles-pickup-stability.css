@@ -138,6 +138,62 @@ html[data-mode="world"] .form-pickup-dialog > .form-pickup-close {
   height: 48px;
 }
 
+/* The record ends on its own way out: a full-width CLOSE at the foot of the
+   panel, so a reader at the end of a long record (2,700px on a phone) need
+   not climb back to the corner. It wears the corner control's colours, is
+   never sticky, and moves only with the site's press response (a wide pill
+   sinks less, as the large cards do). Its name is its visible CLOSE; the
+   corner keeps the one 閉じる. Tablets and desktops take a centred button
+   (a 1,000px pill read as a bar); phones keep the thumb's full width. */
+.form-pickup-dialog .form-pickup-end-close {
+  --dw-press-scale: 0.982;
+  --dw-press-light: 1.08;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  margin: 24px 0 0;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: #101b29;
+  color: #fff;
+  font: 700 12px/1.5 var(--font-display);
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+@media (min-width: 761px) {
+  .form-pickup-dialog .form-pickup-end-close {
+    width: min(100%, 420px);
+    margin-inline: auto;
+  }
+}
+.form-pickup-dialog .form-pickup-end-close > i {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  font-style: normal;
+  line-height: 0;
+}
+.form-pickup-dialog.is-rexonance-dialog .form-pickup-end-close {
+  border-color: rgba(159, 232, 255, 0.36);
+}
+.form-pickup-dialog .form-pickup-end-close:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--manager-accent, var(--cyan)) 76%, white);
+  outline-offset: 4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .form-pickup-dialog .form-pickup-end-close:hover {
+    border-color: color-mix(in srgb, var(--manager-accent, var(--cyan)) 48%, transparent);
+  }
+}
+
 html[data-mode="world"] .form-pickup-heading,
 html[data-mode="world"] .form-pickup-layout > *,
 html[data-mode="world"] .form-pickup-stats > div {

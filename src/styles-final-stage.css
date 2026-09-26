@@ -369,6 +369,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
+  word-break: auto-phrase;
 }
 
 .fst-cast-copy p {
@@ -541,6 +542,15 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   font-size: 12px;
   font-style: normal;
   letter-spacing: 0.08em;
+}
+
+/* Names and form lists break only at the seams name-breaks.ts marks
+   (ファーフロム／サーガ; after each ／), never inside a word
+   (ファーフロムサー／ガ, ネ／ハン). */
+:is(.fst-pickup-copy h3, .fst-pickup-heading h2) b,
+:is(.fst-pickup-copy, .fst-pickup-heading) em {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .fst-pickup-copy q {
@@ -1394,6 +1404,14 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   .fst-form-specs .fst-specs,
   .fst-arsenal ul {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Under 360px the closing title keeps its first phrase on one line
+   (ファイナルステージ、／開幕。, not ファイナルステー／ジ、開幕。). */
+@media (max-width: 359px) {
+  .fst-page .rxs-footer h2 {
+    font-size: 28px;
   }
 }
 

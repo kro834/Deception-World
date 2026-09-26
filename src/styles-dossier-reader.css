@@ -126,10 +126,12 @@ body:has(> main.manager-page .dossier-reader) {
   letter-spacing: 0.08em;
   overflow-wrap: anywhere;
 }
+/* A chapter's name is a title: it breaks into even lines between phrases
+   (欲望を処理する、／二つの方式), not before its last word. */
 .dossier-contents-copy b {
   color: #e7ebf2;
   font: 600 16px/1.6 var(--dossier-font-jp);
-  text-wrap: pretty;
+  text-wrap: balance;
   overflow-wrap: anywhere;
 }
 .dossier-contents-arrow {
@@ -436,6 +438,32 @@ main.manager-page .manager-facts dd .jp-atom {
     line-height: 1.5;
   }
 }
+/* Short screens (a phone on its side, 200% zoom): the fixed header already
+   takes a fifth of the height, and the bar under it made that a third. The
+   reader stays at the head of the file and scrolls away with it, and its
+   jumps no longer leave the bar's room above them: the root's padding drops
+   to the header alone, so a section lands just under it. The current
+   section follows, as it reads scroll-padding and scroll-margin, not the
+   bar's box. */
+@media (max-height: 500px) {
+  main.manager-page .dossier-reader {
+    position: relative;
+    top: auto;
+  }
+  html[data-mode="world"]:has(> body > main.manager-page .dossier-reader) {
+    scroll-padding-top: calc(44px + env(safe-area-inset-top));
+  }
+}
+/* Forced colours drop the current section's tint and inset line: it takes
+   the system highlight instead, so the reader still says where you are. */
+@media (forced-colors: active) {
+  main.manager-page .dossier-reader a[aria-current] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    border-color: Highlight;
+  }
+}
 /* Tablet heroes give the facts a narrow column: two 135px cells split names
    such as 仮面ライダーヴァンダール mid-word. Pair them only when both fit. */
 @media (min-width: 761px) and (max-width: 1180px) {
@@ -669,6 +697,26 @@ html[data-mode]
 }
 main.manager-page .is-rexonance-pickup .form-pickup-copy h2 > span {
   font-size: max(12px, 0.3em);
+}
+
+/* ---------- Names keep their words ----------
+   A form's or a special site's name breaks only at the seams name-breaks.ts
+   marks (レクソナンス／サーガ, サイファー・／ブラックサイト), never inside a word
+   (レクソナ／ンスサーガ); a word too long for its column still wraps. Under
+   360px the special site's name steps down two pixels to stay on one line
+   (ファーフロムサーガ), as it is from 360px up. */
+main.manager-page :is(.form-pickup-copy, .form-pickup-heading, .rider-special-site-copy) h2 b {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 359px) {
+  main.manager-page .rider-special-site-copy h2 {
+    font-size: 26px;
+  }
+}
+/* The sovereign's status line keeps its rank whole (RANK I, not RANK／I). */
+main.manager-page .sovereign-status-copy > small {
+  text-wrap: balance;
 }
 
 /* ---------- Artwork matte ----------

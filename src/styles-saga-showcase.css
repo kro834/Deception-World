@@ -678,6 +678,13 @@
   letter-spacing: 0;
 }
 
+/* Under 360px a value column is 85px: 約11.4% fits it on one line at 22px. */
+@media (max-width: 359px) {
+  .rxs-page.rxs-page .rxs-p14-values strong {
+    font-size: 22px;
+  }
+}
+
 .rxs-page.rxs-page .rxs-p14-metrics article > p {
   border-top-color: var(--sc-hairline-soft);
 }

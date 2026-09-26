@@ -5,6 +5,7 @@ import {
   useState,
   type KeyboardEvent,
   type MouseEvent,
+  type PointerEvent,
 } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
@@ -92,6 +93,21 @@ const SITE_ANNOUNCEMENTS = [
 type AnnouncementId = (typeof SITE_ANNOUNCEMENTS)[number]["id"];
 
 const SIDE_MENU_OPEN_INPUT_EVENT = "deception-world:side-menu-open-input";
+
+// A finger swipe to the right closes the menu (touch only). The first 10px
+// decide the gesture: it is the menu's when it runs right and 1.4 times wider
+// than it is tall; otherwise the list keeps its native vertical scroll. On
+// release it closes past 72px, or when flicked past 24px faster than
+// 0.5px/ms. The flick's speed is the finger's over its last ~100ms, so a flick
+// after a hold still counts, and a tap that rolls a few pixels stays a tap.
+const SIDE_MENU_SWIPE_SLOP_PX = 10;
+const SIDE_MENU_SWIPE_RATIO = 1.4;
+const SIDE_MENU_SWIPE_CLOSE_PX = 72;
+const SIDE_MENU_SWIPE_FLICK_MIN_PX = 24;
+const SIDE_MENU_SWIPE_CLOSE_PX_PER_MS = 0.5;
+const SIDE_MENU_SWIPE_SAMPLE_MS = 100;
+
+type SideMenuCloseWatcher = { onclose: (() => void) | null; destroy(): void };
 
 export function SideMenuTrigger({
   open,
@@ -208,6 +224,18 @@ export function SideMenuLayer({
   const announcementReturnIdRef = useRef<AnnouncementId | null>(null);
   const announcementOpenedByKeyboardRef = useRef(false);
   const sideMenuRestoreFocusRef = useRef(false);
+  const swipeRef = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    dragging: boolean;
+    // The release speed is read from sample to release: a point on the path
+    // that trails the finger by up to SIDE_MENU_SWIPE_SAMPLE_MS.
+    sampleX: number;
+    sampleTime: number;
+    lastX: number;
+    lastTime: number;
+  } | null>(null);
   const [announcementOpen, setAnnouncementOpen] = useState(false);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
@@ -277,6 +305,36 @@ export function SideMenuLayer({
     const previousFocus =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     panel.scrollTop = 0;
+    // The reader's own row (a dossier in RIDERS or UNMANAGED) sits below the
+    // fold of the long menu on a laptop as on a phone: the menu opens with it
+    // in view, clear of the bottom edge by the panel's own bottom padding
+    // (32px, plus the home indicator's inset on an iPhone). Only the panel
+    // scrolls; scrollIntoView could also move the locked page behind it.
+    const current = panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]');
+    if (current) {
+      const clearance = parseFloat(window.getComputedStyle(panel).paddingBottom) || 24;
+      const overflow =
+        current.getBoundingClientRect().bottom + clearance - panel.getBoundingClientRect().bottom;
+      if (overflow > 0) panel.scrollTop += overflow;
+    }
+    // Android's back gesture (and Esc from outside the menu) asks the
+    // browser's CloseWatcher to close the menu instead of leaving the page.
+    // Feature-detected, and no history entries are touched; the panel's own
+    // Escape handler cancels its key, so Esc inside the menu closes it once.
+    const Watcher = (window as unknown as { CloseWatcher?: new () => SideMenuCloseWatcher })
+      .CloseWatcher;
+    let watcher: SideMenuCloseWatcher | null = null;
+    if (typeof Watcher === "function") {
+      try {
+        watcher = new Watcher();
+        watcher.onclose = () => {
+          sideMenuRestoreFocusRef.current = false;
+          onOpenChange?.(false);
+        };
+      } catch {
+        watcher = null;
+      }
+    }
     root.dataset.sideMenuOpen = "true";
     const releaseViewportScrollLock = acquireViewportScrollLock();
     const containBackgroundScroll = (event: TouchEvent | WheelEvent) => {
@@ -321,8 +379,31 @@ export function SideMenuLayer({
       focusTarget?.focus({ preventScroll: true });
     };
     focusFrame = window.requestAnimationFrame(focusPanel);
+    // Tab already stays inside the menu; the page behind it leaves the
+    // accessibility tree too, so a screen reader cannot wander out. Every
+    // branch beside the panel's path up to <body> goes inert, except the
+    // announcement dialog opened from the menu, the scrim that closes it and
+    // non-content nodes. Only the branches set here are released.
+    const inerted: HTMLElement[] = [];
+    let node: HTMLElement = panel;
+    while (node !== document.body && node.parentElement) {
+      const parent: HTMLElement = node.parentElement;
+      for (const sibling of Array.from(parent.children)) {
+        if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue;
+        if (sibling.matches("dialog, .side-panel-scrim, script, style, link")) continue;
+        sibling.inert = true;
+        inerted.push(sibling);
+      }
+      node = parent;
+    }
     return () => {
+      watcher?.destroy();
+      // Released before focus returns: an inert opener cannot take it.
+      for (const element of inerted) element.inert = false;
       window.cancelAnimationFrame(focusFrame);
+      swipeRef.current = null;
+      panel.style.removeProperty("translate");
+      panel.style.removeProperty("transition");
       document.removeEventListener("touchmove", containBackgroundScroll, true);
       document.removeEventListener("wheel", containBackgroundScroll, true);
       document.removeEventListener("focusin", containBackgroundFocus, true);
@@ -338,7 +419,7 @@ export function SideMenuLayer({
       }
       sideMenuRestoreFocusRef.current = false;
     };
-  }, [controlled, isOpen]);
+  }, [controlled, isOpen, onOpenChange]);
 
   useEffect(() => {
     const dialog = announcementRef.current;
@@ -464,6 +545,82 @@ export function SideMenuLayer({
     if (event.target === event.currentTarget) closeAnnouncement(false);
   };
 
+  // Swipe right to close (SIDE_MENU_SWIPE_*). Only the finger moves the
+  // panel; on release the menu's own transition carries it out or back.
+  const releaseSwipe = () => {
+    swipeRef.current = null;
+    panelRef.current?.style.removeProperty("translate");
+    panelRef.current?.style.removeProperty("transition");
+  };
+
+  const onPanelPointerDown = (event: PointerEvent<HTMLElement>) => {
+    sideMenuRestoreFocusRef.current = false;
+    if (!controlled || !isOpen || event.pointerType !== "touch" || !event.isPrimary) return;
+    swipeRef.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      dragging: false,
+      sampleX: event.clientX,
+      sampleTime: event.timeStamp,
+      lastX: event.clientX,
+      lastTime: event.timeStamp,
+    };
+  };
+
+  const onPanelPointerMove = (event: PointerEvent<HTMLElement>) => {
+    const swipe = swipeRef.current;
+    const panel = panelRef.current;
+    if (!swipe || !panel || event.pointerId !== swipe.id) return;
+    if (event.timeStamp - swipe.sampleTime > SIDE_MENU_SWIPE_SAMPLE_MS) {
+      swipe.sampleX = swipe.lastX;
+      swipe.sampleTime = swipe.lastTime;
+    }
+    swipe.lastX = event.clientX;
+    swipe.lastTime = event.timeStamp;
+    const dx = event.clientX - swipe.x;
+    const dy = event.clientY - swipe.y;
+    if (!swipe.dragging) {
+      if (Math.abs(dx) <= SIDE_MENU_SWIPE_SLOP_PX && Math.abs(dy) <= SIDE_MENU_SWIPE_SLOP_PX) {
+        return;
+      }
+      if (dx <= SIDE_MENU_SWIPE_SLOP_PX || dx <= SIDE_MENU_SWIPE_RATIO * Math.abs(dy)) {
+        swipeRef.current = null;
+        return;
+      }
+      swipe.dragging = true;
+      try {
+        panel.setPointerCapture(event.pointerId);
+      } catch {
+        /* the pointer has already gone */
+      }
+      panel.style.transition = "none";
+    }
+    panel.style.translate = `${Math.max(0, dx)}px 0`;
+  };
+
+  const onPanelPointerUp = (event: PointerEvent<HTMLElement>) => {
+    const swipe = swipeRef.current;
+    if (!swipe || event.pointerId !== swipe.id) return;
+    releaseSwipe();
+    if (!swipe.dragging) return;
+    const dx = event.clientX - swipe.x;
+    const speed = (event.clientX - swipe.sampleX) / Math.max(1, event.timeStamp - swipe.sampleTime);
+    if (
+      dx > SIDE_MENU_SWIPE_CLOSE_PX ||
+      (dx > SIDE_MENU_SWIPE_FLICK_MIN_PX && speed > SIDE_MENU_SWIPE_CLOSE_PX_PER_MS)
+    ) {
+      sideMenuRestoreFocusRef.current = false;
+      close();
+    }
+  };
+
+  const onPanelPointerCancel = (event: PointerEvent<HTMLElement>) => {
+    // A row handing its implicit touch capture to the panel is not an end.
+    if (event.type === "lostpointercapture" && event.target !== event.currentTarget) return;
+    if (swipeRef.current?.id === event.pointerId) releaseSwipe();
+  };
+
   const onPanelKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!controlled || !isOpen) return;
     if (event.key === "Escape") {
@@ -532,9 +689,11 @@ export function SideMenuLayer({
         aria-label="サイトメニュー"
         tabIndex={-1}
         inert={controlled ? !isOpen : undefined}
-        onPointerDown={() => {
-          sideMenuRestoreFocusRef.current = false;
-        }}
+        onPointerDown={onPanelPointerDown}
+        onPointerMove={onPanelPointerMove}
+        onPointerUp={onPanelPointerUp}
+        onPointerCancel={onPanelPointerCancel}
+        onLostPointerCapture={onPanelPointerCancel}
         onKeyDown={controlled ? onPanelKeyDown : undefined}
       >
         <LiquidPointerGlow />
