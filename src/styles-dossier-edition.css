@@ -61,8 +61,11 @@ main.manager-page:not(.is-sovereign) {
     #04080f;
 }
 
-/* The page's end (the room kept below the file for the floating controls)
-   continues the ink. */
+/* The page's end continues the ink. The pagination's bottom margin collapses
+   through <main> and <body> (body clips with overflow: clip, which is not a
+   block formatting context), so the root paints that last strip: it takes
+   the page's ink. A page sheet with its own ground (シエル's) sets its own. */
+html:has(> body > main.manager-page:not(.is-sovereign)),
 body:has(> main.manager-page:not(.is-sovereign)) {
   background-color: #04080f;
 }
@@ -460,6 +463,16 @@ main.manager-page:not(.is-sovereign)
   main.manager-page:not(.is-sovereign) :is(.manager-section-index > span, .dossier-contents-number) {
     color: CanvasText;
     -webkit-text-stroke: 0;
+  }
+
+  /* An opaque bar (forced colours keep a background's alpha) ... */
+  main.manager-page:not(.is-sovereign) .dossier-reader {
+    background-color: Canvas;
+  }
+
+  /* ... and the current section keeps the reader sheet's system highlight. */
+  main.manager-page:not(.is-sovereign) .dossier-reader-links a[aria-current] {
+    background: Highlight;
   }
 }
 

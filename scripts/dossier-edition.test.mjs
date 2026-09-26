@@ -118,3 +118,32 @@ test("motion is scroll-linked, finite, compositor-only and gated", async () => {
     }
   }
 });
+
+test("the page end, Dante's paper and forced colours hold", async () => {
+  const css = stripComments(await read("src/styles-dossier-edition.css"));
+  // The pagination's margin collapses out of <body>: the root paints it in ink.
+  assert.match(
+    css,
+    /html:has\(> body > main\.manager-page:not\(\.is-sovereign\)\),\s*body:has\(> main\.manager-page:not\(\.is-sovereign\)\) \{\s*background-color: #04080f;/,
+  );
+  const ciel = stripComments(await read("src/styles-ciel.css"));
+  assert.match(ciel, /html:has\(> body > main\.manager-page\.ciel-dossier-page\),[\s\S]*?background-color: #030b0e;/);
+  // Dante's frame takes the illustration's paper, above the shared dark rule.
+  const dante = await read("src/styles-dante.css");
+  assert.match(
+    dante,
+    /\.dante-page\.manager-page:not\(\.is-sovereign\) \.manager-portrait-frame \{\s*background: #ede8ea;/,
+  );
+  // Forced colours: an opaque bar, the current section highlighted, and the
+  // name drawn without the backplate that covered the romanised name.
+  const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
+  assert.match(forced, /\.dossier-reader \{\s*background-color: Canvas;/);
+  assert.match(forced, /\.dossier-reader-links a\[aria-current\] \{\s*background: Highlight;/);
+  const reader = stripComments(await read("src/styles-dossier-reader.css"));
+  const readerForced = reader.slice(reader.indexOf("@media (forced-colors: active)"));
+  assert.match(readerForced, /main\.manager-page \.dossier-reader \{\s*background-color: Canvas;/);
+  assert.match(
+    readerForced,
+    /main\.manager-page \.dossier-identity \.manager-display-name \{\s*forced-color-adjust: none;\s*color: CanvasText;\s*-webkit-text-fill-color: CanvasText;\s*background: none;/,
+  );
+});

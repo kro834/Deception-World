@@ -23,6 +23,13 @@ main.manager-page.ciel-dossier-page:not(.is-sovereign) {
     linear-gradient(180deg, #03120f 0%, #04101a 48%, #030b0e 100%);
 }
 
+/* The strip below the file (the pagination's collapsed margin, painted by
+   the root) ends on the same ink as the ground above it. */
+html:has(> body > main.manager-page.ciel-dossier-page),
+body:has(> main.manager-page.ciel-dossier-page) {
+  background-color: #030b0e;
+}
+
 main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-grid {
   opacity: 0.08;
 }

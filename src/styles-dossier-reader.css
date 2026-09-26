@@ -463,6 +463,22 @@ main.manager-page .manager-facts dd .jp-atom {
     background: Highlight;
     border-color: Highlight;
   }
+  /* Forced colours keep a background's alpha: the sticky bar showed the
+     chapters scrolling under it. */
+  main.manager-page .dossier-reader {
+    background-color: Canvas;
+  }
+  /* The name's glyphs overhang its tight line box, and the system backplate
+     drawn behind them covered the romanised name above it. The page is
+     Canvas already, so the name is drawn in CanvasText without a plate. */
+  main.manager-page .dossier-identity .manager-display-name {
+    forced-color-adjust: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    text-shadow: none;
+    filter: none;
+  }
 }
 /* Tablet heroes give the facts a narrow column: two 135px cells split names
    such as 仮面ライダーヴァンダール mid-word. Pair them only when both fit. */

@@ -1,5 +1,8 @@
-.dante-page .manager-portrait-frame {
-  background: #e8e5e3;
+/* The illustration is shown whole (contain) on its own paper; the frame
+   takes that paper so the room below the figure reads as part of it. The
+   shared dark frame rule is more specific than a page class alone. */
+.dante-page.manager-page:not(.is-sovereign) .manager-portrait-frame {
+  background: #ede8ea;
 }
 .dante-page .form-pickup-visual img,
 .dante-page .form-pickup-layout img {

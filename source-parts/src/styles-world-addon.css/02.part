@@ -1,3 +1,7 @@
+.manager-slot-grid > .other-archive-card,
+.manager-slot-grid > .archive-placeholder {
+  min-block-size: 0;
+  block-size: 178px;
 }
 
 .manager-slot-grid .dante-archive {

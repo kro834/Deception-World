@@ -1011,7 +1011,14 @@ br.tab-br {
   font-size: 12px;
 }
 .export-page-alt {
+  position: relative;
   text-decoration: underline;
+}
+/* An 18px line of text: a 44px hit area without moving it. */
+.export-page-alt::before {
+  position: absolute;
+  inset: -13px -12px;
+  content: "";
 }
 
 /* ── iOS-style slide-to-open controls ───────────────────────────── */
@@ -1151,7 +1158,3 @@ br.tab-br {
 
 .manager-slot-grid > .signal,
 .manager-slot-grid > .dante-archive,
-.manager-slot-grid > .other-archive-card,
-.manager-slot-grid > .archive-placeholder {
-  min-block-size: 0;
-  block-size: 178px;
