@@ -941,13 +941,10 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
 
 .dream-poster-thumbnails button.is-active {
   opacity: 1;
-}
-
-.dream-poster-thumbnails button.is-active {
   border-color: color-mix(in srgb, var(--dream-gold) 72%, white);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 0 0 1px rgba(255, 183, 75, 0.14),
+    0 0 0 2px rgba(255, 183, 75, 0.58),
     0 12px 30px rgba(0, 0, 0, 0.24);
   transform: translateZ(0);
 }

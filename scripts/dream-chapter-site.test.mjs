@@ -420,6 +420,14 @@ test("poster transition ignores the shorter shuffle animation before removing th
   assert.match(styleSource, /dream-poster-enter 620ms/);
 });
 
+test("the selected poster thumbnail keeps a visible outline without changing its size", () => {
+  assert.match(
+    styleSource,
+    /\.dream-poster-thumbnails button\.is-active\s*\{[^}]*opacity:\s*1;[^}]*0 0 0 2px rgba\(255, 183, 75, 0\.58\)/s,
+  );
+  assert.equal((styleSource.match(/\.dream-poster-thumbnails button\.is-active\s*\{/g) ?? []).length, 1);
+});
+
 test("poster shuffle preserves keyboard focus while exposing its busy state", () => {
   const shuffleControl = pageSource.slice(
     pageSource.indexOf('className="dream-poster-shuffle ios26-glass"'),
