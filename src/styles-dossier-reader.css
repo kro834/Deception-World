@@ -178,32 +178,149 @@ main.manager-page .manager-copy-body {
 main.manager-page .manager-copy-body p + p {
   margin-top: 1.15em;
 }
+/* A chapter title is the reader's anchor: sized to its column, it breaks
+   between phrases into two even lines instead of three or four ragged ones.
+   Phones keep their own size (below). */
 main.manager-page #dossier-index .manager-copy-heading h2 {
-  font-size: clamp(24px, 2.7vw, 38px);
-  line-height: 1.5;
-  text-wrap: pretty;
+  font-size: clamp(24px, 2.1vw, 30px);
+  line-height: 1.45;
+  word-break: auto-phrase;
+  text-wrap: balance;
 }
 main.manager-page .manager-facts dd .jp-atom {
   white-space: normal !important;
   overflow-wrap: anywhere;
 }
-.dossier-index-return {
+/* End of file: the way back to the list is a control in the dossier's own
+   pill grammar (as 人物資料を読む), with a four-tile index glyph, the list's
+   name and this file's place in it. A lone neighbour spans the missing side
+   instead of leaving an empty panel beside the list. */
+.manager-page .manager-pagination .manager-pagination-index {
+  width: auto;
+  min-width: 196px;
+  padding: 14px 18px;
+}
+.manager-page .manager-pagination .dossier-index-return {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
-  min-height: 100px;
-  color: #aeb8c6;
+  min-height: 96px;
+  padding: 14px 20px;
+  border: 1px solid color-mix(in srgb, var(--manager-accent) 34%, transparent);
+  /* A tile where it sits beside a neighbour: the file's surface corner (the
+     reader bar, chapters and records); a pill where it has its own row. */
+  border-radius: var(--dossier-radius, 12px);
+  color: #eef2f7;
+  background-color: color-mix(in srgb, var(--manager-accent) 7%, #0e141c);
   text-decoration: none;
 }
-.dossier-index-return b {
-  color: #e7ebf2;
-  font: 500 13px/1.5 var(--dossier-font-jp);
-  letter-spacing: 0;
+.manager-page .manager-pagination .dossier-index-return::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(currentColor 0 0) 0 0 / 6px 6px no-repeat,
+    linear-gradient(currentColor 0 0) 100% 0 / 6px 6px no-repeat,
+    linear-gradient(currentColor 0 0) 0 100% / 6px 6px no-repeat,
+    linear-gradient(currentColor 0 0) 100% 100% / 6px 6px no-repeat;
+  color: var(--manager-accent);
 }
-.dossier-index-return i {
-  font-size: 10px;
+.manager-page .manager-pagination .dossier-index-return > :is(span, i) {
+  font-family: var(--dossier-font-interface);
+}
+.manager-page .manager-pagination .dossier-index-return > span {
+  color: #9fb0c1;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+.manager-page .manager-pagination .dossier-index-return > b {
+  font: 700 15px/1.3 var(--dossier-font-jp);
+  letter-spacing: 0.06em;
+}
+.manager-page .manager-pagination .dossier-index-return > i {
+  color: var(--manager-accent);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .manager-page .manager-pagination .dossier-index-return {
+    transition:
+      background-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      border-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .manager-page .manager-pagination .dossier-index-return:hover {
+    border-color: color-mix(in srgb, var(--manager-accent) 62%, transparent);
+    background-color: color-mix(in srgb, var(--manager-accent) 14%, #0e141c);
+  }
+}
+@media (min-width: 521px) {
+  .manager-page .manager-pagination > .manager-pagination-spacer {
+    display: none;
+  }
+}
+@media (min-width: 761px) {
+  .manager-page .manager-pagination:has(> .manager-pagination-spacer:first-child) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .manager-page .manager-pagination:has(> .manager-pagination-spacer:last-child) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  /* A list of one has no neighbours: the list sits alone, centred. */
+  .manager-page
+    .manager-pagination:has(> .manager-pagination-spacer:first-child):has(
+      > .manager-pagination-spacer:last-child
+    ) {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+}
+/* Two columns with the list on its own row: the lone neighbour takes both. */
+@media (min-width: 521px) and (max-width: 760px) {
+  .manager-page .manager-pagination:has(> .manager-pagination-spacer) > a {
+    grid-column: 1 / -1;
+  }
+}
+/* Wherever the list has a row of its own it is a compact pill. The header
+   chip already names the list, so the kicker steps aside. */
+@media (max-width: 760px) {
+  .manager-page .manager-pagination .manager-pagination-index {
+    min-width: 0;
+    padding: 12px 0;
+  }
+  .manager-page .manager-pagination .dossier-index-return {
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    min-height: 48px;
+    margin-inline: auto;
+    padding: 0 20px;
+    border-radius: 999px;
+  }
+  .manager-page .manager-pagination .dossier-index-return > span {
+    display: none;
+  }
+}
+/* Stacked phones set PREV and NEXT flush left, clear of the floating Zeus
+   button at the right edge: the pill's glyph joins their name column, so at
+   the end of a file Zeus keeps its corner beside it instead of jumping to
+   the top of the screen. Under 360px it sits on the column edge. */
+@media (max-width: 520px) {
+  .manager-page .manager-pagination .manager-pagination-index {
+    border-top: 0;
+  }
+  .manager-page .manager-pagination .dossier-index-return {
+    margin-inline: 22px auto;
+  }
+}
+@media (max-width: 359px) {
+  .manager-page .manager-pagination .dossier-index-return {
+    margin-inline: 0 auto;
+  }
 }
 :is(
   .dossier-read-link,
@@ -215,7 +332,7 @@ main.manager-page .manager-facts dd .jp-atom {
   outline-offset: 4px;
 }
 @media (hover: hover) {
-  :is(.dossier-read-link, .dossier-reader a, .dossier-contents a, .dossier-index-return):hover {
+  :is(.dossier-read-link, .dossier-reader a, .dossier-contents a):hover {
     background-color: #ffffff0d;
     border-color: color-mix(in srgb, var(--manager-accent) 48%, transparent);
   }
@@ -226,8 +343,13 @@ main.manager-page .manager-facts dd .jp-atom {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
     min-height: auto;
-    width: calc(100% - 36px);
     padding: calc(var(--detail-header-height, 68px) + 28px) 0 44px;
+  }
+  /* One column edge from the portrait to the last record. */
+  main.manager-page .manager-hero#dossier-profile,
+  main.manager-page:not(.is-sovereign) .manager-dossier,
+  main.manager-page .rider-archive-identity-records {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
   }
   main.manager-page .manager-hero#dossier-profile .manager-introduction {
     display: contents;
@@ -275,9 +397,11 @@ main.manager-page .manager-facts dd .jp-atom {
   main.manager-page .manager-hero .manager-facts {
     margin: 0;
   }
+  /* The bar rides on the column's edge, as it does beside the portrait on
+     wider screens, instead of overhanging every panel under it. */
   .dossier-reader {
     top: calc(var(--detail-header-height, 68px) + 4px);
-    width: calc(100% - 24px);
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
     min-height: 56px;
     padding: 5px;
   }
@@ -309,12 +433,7 @@ main.manager-page .manager-facts dd .jp-atom {
   }
   main.manager-page #dossier-index .manager-copy-heading h2 {
     font-size: 25px;
-  }
-  main.manager-page .rider-archive-identity-records {
-    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
-  }
-  main.manager-page .rider-archive-identity-records > * {
-    border-radius: 18px;
+    line-height: 1.5;
   }
 }
 /* Tablet heroes give the facts a narrow column: two 135px cells split names
@@ -329,5 +448,498 @@ main.manager-page .manager-facts dd .jp-atom {
   .dossier-read-link,
   .dossier-contents a {
     transition: none;
+  }
+}
+
+/* ---------- One column, one corner ----------
+   The hero and the closing pagination sit on the reader bar's column (the
+   portrait's edge on the bar's edge), and every framed surface in a file
+   shares one radius. */
+main.manager-page {
+  --dossier-radius: 12px;
+}
+@media (min-width: 761px) {
+  main.manager-page:not(.is-sovereign) .manager-hero {
+    width: min(1256px, calc(100% - 48px));
+  }
+  main.manager-page:not(.is-sovereign) .manager-pagination {
+    width: min(1200px, calc(100% - 48px));
+  }
+}
+main.manager-page:not(.is-sovereign) .manager-hero :is(.manager-portrait-frame, .manager-quotes),
+main.manager-page .rider-archive-identity-records > * {
+  border-radius: var(--dossier-radius);
+}
+
+/* ---------- Chapter cards ----------
+   Phrase breaking makes a title's narrowest width its longest phrase; the
+   card's columns must still shrink to the page on phones. */
+main.manager-page .manager-copy-section > :is(.manager-copy-heading, .manager-copy-body) {
+  min-width: 0;
+}
+@media (min-width: 1181px) {
+  main.manager-page:not(.is-sovereign) .manager-copy-section {
+    grid-template-columns: minmax(260px, 0.84fr) minmax(0, 1.16fr);
+  }
+}
+/* Tablets: the title over its prose, and the prose held to a reading measure
+   rather than a 220px title column beside a cramped one. */
+@media (min-width: 761px) and (max-width: 1180px) {
+  main.manager-page .manager-copy-section.manager-copy-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  main.manager-page .manager-copy-section.manager-copy-section .manager-copy-body {
+    max-width: 38em;
+  }
+}
+/* The related records' names join the dossier's bold heading voice. */
+main.manager-page :is(.rider-archive-civilian > figcaption > h2, .rider-nightmare-card-copy > h2) {
+  font-weight: 700;
+}
+
+/* ---------- Profile facts: one ruled spec sheet ----------
+   One panel ruled by accent hairlines, as the sovereign file already is,
+   instead of a stack of separate capsules. The rules are each cell's top and
+   left shadows, clipped by the panel, so they hold for one, two or auto-fit
+   columns. On phones each fact is a label and value row, the name first on
+   a line of its own; an odd last fact spans its row. */
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts {
+  --facts-rule: color-mix(in srgb, var(--manager-accent, #83e4ff) 16%, rgb(255 255 255 / 8%));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--manager-accent, #83e4ff) 26%, #223043);
+  border-radius: var(--dossier-radius);
+  background:
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--manager-accent, #83e4ff) 60%, white),
+        transparent 72%
+      )
+      top / 100% 1px no-repeat,
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--manager-accent, #83e4ff) 7%, #0d1724),
+      #080f19 85%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 4%),
+    0 10px 30px rgb(0 0 0 / 14%);
+}
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+  min-height: 0;
+  padding: 16px 20px 15px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: -1px -1px 0 var(--facts-rule);
+}
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div:nth-child(odd):last-child {
+  grid-column: 1 / -1;
+}
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts dt {
+  margin-bottom: 4px;
+}
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts dd {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 560px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 14px;
+    padding: 13px 18px;
+  }
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts dt {
+    margin: 0;
+  }
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div:first-child {
+    display: block;
+    padding-block: 16px 15px;
+  }
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div:first-child dt {
+    margin-bottom: 4px;
+  }
+}
+/* Under 375px the value column is too narrow for 仮面ライダーヴァンダール,
+   which would split mid-name: each row stacks its label over its value. */
+@media (max-width: 374px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+    display: block;
+  }
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts dt {
+    margin-bottom: 4px;
+  }
+}
+@media (forced-colors: active) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+    border-top: 1px solid CanvasText;
+  }
+}
+
+/* ---------- Micro-labels: one voice ----------
+   Kickers and sub-labels share the dossier's Oxanium label face, one size,
+   weight and tracking each (kickers 12px, sub-labels 11px); every card keeps
+   its own colour. Chips on the art share that face and the 11px floor. */
+main.manager-page.manager-page
+  :is(
+    .manager-copy-heading > p,
+    .form-pickup-copy > p,
+    .form-pickup-copy > small,
+    .rider-special-site-copy > p,
+    .rider-special-site-copy > small,
+    .manager-pagination a small
+  ) {
+  font-family: var(--dossier-font-display);
+  font-feature-settings: normal;
+}
+main.manager-page.manager-page
+  :is(
+    .manager-copy-heading > p,
+    .form-pickup-copy > p,
+    .rider-special-site-copy > p,
+    .rider-archive-civilian > figcaption > p:first-child,
+    .rider-nightmare-card-copy > p,
+    .rider-partner-forms > header > p
+  ) {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+}
+/* The partner's romanised name was 9px, set with !important in
+   styles-world/26.css: it takes the sub-label floor. */
+main.manager-page.manager-page .rider-partner-card .rider-partner-en-name {
+  font-size: 11px !important;
+  letter-spacing: 0.2em !important;
+}
+/* The partner's facts set each label beside its value with no gap, so
+   OCCUPATION ran into 警察官. In one column (phones) the label column fits
+   the longest label and every value starts on one line; in two columns a
+   cell is 140-240px wide, so each label sits over its value, as the hero's
+   facts do there, instead of leaving the value 40-100px (ないか／み／ちぎり). */
+main.manager-page .rider-partner-card dl > div {
+  grid-template-columns: minmax(84px, max-content) minmax(0, 1fr);
+  column-gap: 12px;
+}
+@media (min-width: 761px) {
+  main.manager-page .rider-partner-card dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+  }
+  main.manager-page .rider-partner-card dl > div > dt {
+    padding-bottom: 4px;
+  }
+  main.manager-page .rider-partner-card dl > div > dd {
+    padding-top: 0;
+  }
+}
+main.manager-page.manager-page
+  :is(
+    .form-pickup-copy > small,
+    .rider-special-site-copy > small,
+    .rider-nightmare-card-copy > small,
+    .dossier-contents-copy small,
+    .manager-section-index small,
+    .manager-file-number,
+    .manager-facts dt,
+    .manager-pagination a small
+  ) {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+html[data-mode]
+  main.manager-page.manager-page
+  :is(
+    .rider-archive-civilian-visual > span,
+    .rider-nightmare-card-visual > span,
+    .form-pickup-visual > span,
+    .rider-special-site-visual > span,
+    .is-rexonance-pickup .form-pickup-copy > em,
+    .sovereign-status-copy > :is(p, small)
+  ) {
+  font-size: 11px;
+}
+html[data-mode]
+  main.manager-page.manager-page
+  :is(.form-pickup-visual > span, .rider-special-site-visual > span) {
+  font-family: var(--dossier-font-interface);
+}
+main.manager-page .is-rexonance-pickup .form-pickup-copy h2 > span {
+  font-size: max(12px, 0.3em);
+}
+
+/* ---------- Artwork matte ----------
+   Portraits: a soft mounted edge, so paper-white art keeps its own colours
+   but no longer ends in a hard lit rectangle. The related records' art
+   dissolves into its caption instead of ending on a grey floor and a rule. */
+main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-frame::after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 130% 95% at 50% 40%, transparent 66%, rgb(5 8 14 / 18%) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 6%),
+    inset 0 0 28px rgb(5 8 14 / 12%);
+  pointer-events: none;
+}
+main.manager-page.rider-dossier-page
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual) {
+  border-bottom: 0;
+}
+main.manager-page.rider-dossier-page .rider-archive-civilian-shade {
+  background:
+    linear-gradient(180deg, transparent 54%, rgb(12 14 19 / 55%) 80%, rgb(12 14 19 / 96%) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 34%, transparent 62%, rgb(5 8 14 / 26%) 100%);
+}
+main.manager-page.rider-dossier-page .rider-nightmare-card-shade {
+  background: linear-gradient(
+    180deg,
+    transparent 50%,
+    rgb(12 10 18 / 60%) 78%,
+    rgb(12 12 18 / 97%) 100%
+  );
+}
+
+/* ---------- Header return chip ----------
+   One 戻る grammar across the site: the arrow leads and the chip names where
+   it goes, on phones too (arrow only under 360px). The arrow is aria-hidden,
+   so row-reverse moves it for the eye only. */
+.manager-page .manager-topbar .manager-back {
+  flex-direction: row-reverse;
+  gap: 9px;
+  padding-inline: 14px 18px;
+  border-color: color-mix(in srgb, var(--manager-accent) 30%, rgb(255 255 255 / 12%));
+  color: #e6edf5;
+}
+.manager-page .manager-topbar .manager-back > span {
+  display: inline;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .manager-page .manager-topbar .manager-back {
+    width: auto;
+    min-width: 48px;
+    height: 44px;
+    min-height: 44px;
+    padding-inline: 12px 15px;
+  }
+  .manager-page .manager-topbar .manager-back > span {
+    letter-spacing: 0.03em;
+  }
+}
+@media (max-width: 359px) {
+  .manager-page .manager-topbar .manager-back {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    padding: 0;
+  }
+  .manager-page .manager-topbar .manager-back > span {
+    display: none;
+  }
+}
+
+/* ---------- Hover completion (mouse only) ----------
+   Every control that had no hover answers in its own palette: the DW sigil
+   glows, back arrows lean back, the HOLD + SLIDE chevrons lean the way they
+   slide, BACK TO TOP underlines. The dossier's return chip lights in the
+   character's accent. Nothing here reaches touch, so nothing can stick. */
+@media (hover: hover) and (pointer: fine) {
+  :is(.topbar, .manager-topbar, .rider-archive-topbar) .brand .brand-sigil {
+    transition:
+      border-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      box-shadow 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  :is(.topbar, .manager-topbar, .rider-archive-topbar) .brand:hover .brand-sigil {
+    border-color: rgb(122 232 255 / 95%);
+    color: #e8fbff;
+    box-shadow:
+      0 0 0 1px rgb(122 232 255 / 18%),
+      0 0 18px rgb(122 232 255 / 22%);
+  }
+  /* A file's sigil wears the character's accent, and glows in it too. */
+  .manager-page .manager-topbar .brand:hover .brand-sigil {
+    border-color: color-mix(in srgb, var(--manager-accent) 95%, white);
+    color: color-mix(in srgb, var(--manager-accent) 22%, white);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--manager-accent) 18%, transparent),
+      0 0 18px color-mix(in srgb, var(--manager-accent) 24%, transparent);
+  }
+  .manager-page .manager-topbar .manager-back {
+    transition:
+      border-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      background-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      transform 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .manager-page .manager-topbar .manager-back:hover {
+    border-color: color-mix(in srgb, var(--manager-accent) 62%, transparent);
+    color: #f3f8fc;
+    background-color: color-mix(in srgb, var(--manager-accent) 10%, transparent);
+  }
+  .manager-back i {
+    transition: translate 240ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .manager-back:hover i {
+    translate: -3px 0;
+  }
+  .ios-slide-open[data-dragging="false"] .ios-slide-open-arrows {
+    transition: translate 260ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .ios-slide-open[data-dragging="false"]:hover .ios-slide-open-arrows {
+    translate: 5px 0;
+  }
+  .ios-slide-open[data-dragging="false"]:hover {
+    border-color: rgb(122 232 255 / 85%);
+  }
+  .site-shell footer a[href="#top"] {
+    text-decoration: underline 1px transparent;
+    text-underline-offset: 7px;
+    transition:
+      color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      text-decoration-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .site-shell footer a[href="#top"]:hover {
+    color: #f3fcff;
+    text-decoration-color: rgb(122 232 255 / 70%);
+  }
+  /* Pagination answers on the same 200 ms house curve as the rest. */
+  .manager-page .manager-pagination > a {
+    transition:
+      background-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      border-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      transform 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manager-back:hover i,
+  .ios-slide-open[data-dragging="false"]:hover .ios-slide-open-arrows {
+    translate: none;
+  }
+}
+
+/* ---------- HUD type ----------
+   Arial Narrow exists only on macOS, so the rail, tab and counter labels set
+   in --font-display fell to Roboto on Android and Helvetica on iPhone, beside
+   Oxanium labels. Oxanium leads everywhere now; Japanese falls through to the
+   same faces as before. Counters keep their width as they change. */
+:root {
+  --font-display:
+    "Oxanium", "Arial Narrow", "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Yu Gothic",
+    sans-serif;
+}
+:is(
+  .rider-tabs small,
+  .world-column-tabs small,
+  .manager-archive-tabs small,
+  .episode-controls output,
+  .episode-archive-meta p,
+  .dossier-contents-number,
+  .manager-numeral,
+  .dossier-index-return i
+) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Dossier choreography ----------
+   The Motion edition's language carried into the files: the contents,
+   pickups, special-site card and pagination rise in on the page's own view
+   timelines. Nothing loops and nothing moves on a still page; each entry
+   ends at `entry 100%`, so a jump lands on finished content. Chapter titles
+   and prose stay still for reading. On Android the large cards slide up
+   without the fade, as in the Motion edition's lite tier. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .manager-page
+      :is(
+        .manager-section-index,
+        .manager-pagination > a,
+        .manager-pagination-index,
+        .dossier-contents > a
+      ) {
+      animation: dossier-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .manager-page
+      .dossier-contents
+      > a:nth-child(2) {
+      animation-range: entry 8% entry 100%;
+    }
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .manager-page
+      .dossier-contents
+      > a:nth-child(n + 3) {
+      animation-range: entry 16% entry 100%;
+    }
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .manager-page
+      :is(.form-pickup-card, .rider-special-site-card) {
+      animation: dossier-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      .manager-page
+      :is(.form-pickup-card, .rider-special-site-card) {
+      animation-name: dossier-lift-flat;
+    }
+  }
+}
+@keyframes dossier-rise {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes dossier-lift {
+  from {
+    opacity: 0;
+    translate: 0 72px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+@keyframes dossier-lift-flat {
+  from {
+    translate: 0 72px;
+    scale: 0.96;
+  }
+  to {
+    translate: 0 0;
+    scale: 1;
   }
 }

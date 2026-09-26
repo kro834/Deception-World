@@ -744,6 +744,15 @@ export function ExtremeSaga() {
           <span>人物・能力の詳細を見る</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
+        <GuardedLink
+          to="/world"
+          hash="top"
+          assets={WORLD_ENTER_ASSETS}
+          className="rxs-footer-return"
+        >
+          <span>メインサイトへ戻る</span>
+          <i aria-hidden="true">←</i>
+        </GuardedLink>
       </footer>
     </main>
   );

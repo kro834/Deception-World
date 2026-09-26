@@ -20,6 +20,7 @@ import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { worldChapterLine } from "./world-chapter-marker";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -211,6 +212,8 @@ export function SideMenuLayer({
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<AnnouncementId | null>(null);
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
+  const isSpecialSite =
+    context === "rexonance" || context === "extreme" || context === "final-stage";
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
@@ -223,6 +226,35 @@ export function SideMenuLayer({
     } catch {
       setReDiveReached(false);
     }
+  }, [isOpen]);
+  // The World header marks the chapter in view (WorldSectionNav); its row in
+  // SECTIONS repeats that mark as aria-current="location", read when the menu
+  // opens (the page cannot scroll behind it). It is set on the rows directly:
+  // React never gives these /world# rows an aria-current of their own, and
+  // GuardedLink only types the "page" value.
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!isOpen || !panel) return;
+    const header = document
+      .querySelector('.topbar nav a[aria-current="location"]')
+      ?.getAttribute("href");
+    // 六詠 lies inside STORY on the page but has its own row here: while it
+    // spans the header's reading line (world-chapter-marker.ts), that row is
+    // the mark.
+    const archive = header === "#story" ? document.getElementById("manager-archive") : null;
+    let chapter = header;
+    if (archive) {
+      const { top, bottom } = archive.getBoundingClientRect();
+      const line = worldChapterLine(archive);
+      if (top <= line && bottom > line) chapter = "#manager-archive";
+    }
+    panel.querySelectorAll('.side-panel-links > a[href^="/world#"]').forEach((row) => {
+      if (chapter && row.getAttribute("href") === `/world${chapter}`) {
+        row.setAttribute("aria-current", "location");
+      } else {
+        row.removeAttribute("aria-current");
+      }
+    });
   }, [isOpen]);
   const close = () => onOpenChange?.(false);
   const selectedAnnouncement: SiteAnnouncement | null =
@@ -557,7 +589,7 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            {context === "rexonance" || context === "extreme" || context === "final-stage" ? (
+            {isSpecialSite ? (
               <>
                 {(context === "rexonance"
                   ? [
@@ -606,9 +638,9 @@ export function SideMenuLayer({
                 {[
                   ["top", "トップ", "TOP"],
                   ["story", "ストーリー", "STORY"],
+                  ["manager-archive", "六詠", "RIKUEI"],
                   ["riders", "八人のライダー", "RIDERS"],
                   ["records", "レコード", "RECORDS"],
-                  ["manager-archive", "六詠", "RIKUEI"],
                 ].map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
@@ -665,6 +697,10 @@ export function SideMenuLayer({
                   <span>ストーリー</span>
                   <i>STORY</i>
                 </GuardedLink>
+                <GuardedLink to="/world" hash="manager-archive" assets={[]} beforeNavigate={close}>
+                  <span>六詠</span>
+                  <i>ARCHIVE</i>
+                </GuardedLink>
                 <GuardedLink to="/world" hash="riders" assets={[]} beforeNavigate={close}>
                   <span>八人のライダー</span>
                   <i>RIDERS</i>
@@ -672,10 +708,6 @@ export function SideMenuLayer({
                 <GuardedLink to="/world" hash="records" assets={[]} beforeNavigate={close}>
                   <span>レコード</span>
                   <i>RECORDS</i>
-                </GuardedLink>
-                <GuardedLink to="/world" hash="manager-archive" assets={[]} beforeNavigate={close}>
-                  <span>六詠</span>
-                  <i>ARCHIVE</i>
                 </GuardedLink>
                 {reDiveReached ? (
                   <GuardedLink to="/world" hash="re-dive" assets={[]} beforeNavigate={close}>
@@ -739,14 +771,29 @@ export function SideMenuLayer({
                 </GuardedLink>
               </>
             ) : (
-              <GuardedLink
-                to="/dream-chapter"
-                assets={DREAM_CHAPTER_ENTER_ASSETS}
-                beforeNavigate={close}
-              >
-                <span>映画第一作「ドリームチャプター」</span>
-                <i>MOVIE 01</i>
-              </GuardedLink>
+              <>
+                <GuardedLink
+                  to="/dream-chapter"
+                  assets={DREAM_CHAPTER_ENTER_ASSETS}
+                  beforeNavigate={close}
+                >
+                  <span>映画第一作「ドリームチャプター」</span>
+                  <i>MOVIE 01</i>
+                </GuardedLink>
+                {/* The special sites stand apart from the World: its way home
+                    sits in story order, as it does on the Dream Chapter. */}
+                {isSpecialSite ? (
+                  <GuardedLink
+                    to="/world"
+                    hash="top"
+                    assets={WORLD_ENTER_ASSETS}
+                    beforeNavigate={close}
+                  >
+                    <span>ディセプションワールド</span>
+                    <i>MAIN SITE</i>
+                  </GuardedLink>
+                ) : null}
+              </>
             )}
             <GuardedLink
               to="/final-stage"

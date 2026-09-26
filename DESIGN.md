@@ -132,6 +132,17 @@ The eight-rider grid (`.rider-tabs`) fills most of a phone's width in the middle
 - **Unchanged.** Mouse and pen keep the immediate press-and-drag, and every other rail (manager archive, columns, the form-archive switcher, the special sites) keeps its touch handling: it owns a touch from contact.
 - **Guards.** `src/lib/liquid/boot.js` (`holdToDrag`), `scripts/liquid-rail-grid.test.mjs`, `scripts/archive-switcher-gesture.test.mjs`, and, in the browser, `scripts/verify-liquid-grid.mjs` (a swipe from the grid scrolls at least 90% of the finger's distance; a tap selects; a held drag selects without scrolling), `verify-rail-work.mjs` and `verify-hero-touch.mjs`.
 
+## Site-wide polish — 2026-09-26
+
+A browser audit of every surface found 65 issues; 52 were verified and fixed (commit 069979f). A design pass then added 24 elevations, each prototyped in the browser, judged, implemented, independently reviewed and walked through as a whole.
+- **Japanese composition** (styles-future-interface.css): a zero-specificity baseline for every route. It uses strict line breaking, 和欧間 autospace, and phrase breaking (word-break:auto-phrase). Headings, labels and controls are balanced; short copy has no orphans. Long-form prose stays flush, and route rules still win.
+- **One press response** (src/lib/press-feedback.js, styles-press-feedback.css): a passive capturing pointerdown marks the pressed control with data-press. The styles hold it back 45 ms on touch, so a swipe that starts on a card never dips. Rails, HOLD + SLIDE and the Zeus button own their gestures and are skipped.
+- **One 戻る grammar:** the arrow comes first and the destination is named. The dossier end-of-file list return is a real control. The special sites carry a visible way home.
+- **Dossiers:** chapter headings are sized to their column, the facts form one ruled spec sheet, and there is one radius family and one shared column. Micro-labels have an 11 px floor. The scroll-linked rise is cheap and gated by reduced motion.
+- **/world:** chapters land flush under the header, and the header speaks the chapter numbers. Record cards are square in square frames, and vacant slots read as empty sockets. The footer hands off to the RISING gate.
+- **Skip link** (本文へスキップ) on every route. The route dives arrive without the white bloom.
+- **Guards:** scripts/{A-opening-menu,B-routing-zeus-rising,C-world-page,d-dossiers}-polish.test.mjs, scripts/{E1-dossiers,E2-world,E3-global-menu-special,E4-press-skip}-elevation.test.mjs and scripts/elevation-walkthrough.test.mjs. The RISING and opening flash audits still hold at one flash a second.
+
 ## Rising the World — 2026-09-23
 
 After END OF RECORD, the World page continues into a dark ember gate (`src/components/world/rising-world.tsx`, `src/styles-world-rising.css`). As the reader keeps scrolling, an ember horizon climbs and the RISING THE WORLD button rises into place on a named view timeline. The rise reverses when they scroll back, never loops, and is not gated on economy rendering: it is one opacity/translate/scale on a single control, and it is how the button is discovered. Keyboard focus shows the button at rest. It is centred in the gate, and the Zeus button steps off it.

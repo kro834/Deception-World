@@ -839,9 +839,14 @@ export function FinalStage() {
           <span>レルムの人物・能力を見る</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
-        <GuardedLink to="/world" hash="top" assets={WORLD_ENTER_ASSETS}>
+        <GuardedLink
+          to="/world"
+          hash="top"
+          assets={WORLD_ENTER_ASSETS}
+          className="rxs-footer-return"
+        >
           <span>メインサイトへ戻る</span>
-          <i aria-hidden="true">↗</i>
+          <i aria-hidden="true">←</i>
         </GuardedLink>
       </footer>
     </main>

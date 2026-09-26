@@ -12,6 +12,74 @@
   --future-shadow: 0 18px 48px rgb(0 0 0 / 34%);
 }
 
+/* Japanese composition baseline (every route). Zero specificity (:where), so
+   any rule a route already sets for these properties on the element itself
+   (keep-all labels, anywhere on rider titles, the Taisho and Showcase
+   phrase rules, the pinned rider description) keeps winning. Only the wrap
+   style is set, never the text-wrap shorthand, so a container's nowrap still
+   reaches its links and labels. Layout only: no paint and no animation;
+   engines without support keep today's breaking. */
+:where(html:lang(ja)) {
+  line-break: strict; /* no small kana or ー at a line start */
+  text-spacing-trim: trim-start; /* 「 and （ sit flush at a line start */
+  text-autospace: normal; /* 1/8em between Japanese and Latin or digits */
+}
+
+/* Headings, names, labels and controls break between phrases, never inside
+   a word, and share their lines evenly. */
+:where(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  dt,
+  dd,
+  figcaption,
+  blockquote,
+  q,
+  caption,
+  legend,
+  summary,
+  label,
+  button,
+  a
+) {
+  word-break: auto-phrase;
+  text-wrap-style: balance;
+}
+
+/* Short copy breaks between phrases too, and never leaves one or two
+   characters alone on its last line. */
+:where(p, li) {
+  word-break: auto-phrase;
+  text-wrap-style: pretty;
+}
+
+/* Long-form prose stays flush like a printed page (character breaking with
+   strict kinsoku); only its last line is protected. */
+:where(.manager-copy-body, .fst-story-copy, .dream-story-case-body, .dream-prologue-card)
+  :where(p, li) {
+  word-break: normal;
+}
+
+/* So does the prose that runs five lines and more in a phone column: a
+   partner's record, the P14 read-out and the Final Stage cast notes. Phrase
+   breaking left their right edge ragged by up to a third of the line. */
+:where(.rider-partner-copy, .rxs-p14-copy, .fst-cast-copy) :where(p, li) {
+  word-break: normal;
+}
+
+/* Below 350px a Dolminence card's name column is too narrow for 仮面ライダー
+   on one line; strict kinsoku would then set 仮面ライ／ダードレッ／ド on three
+   lines, so those names keep the default rules (仮面ライダ／ードレッド). */
+@media (max-width: 349px) {
+  :where(.dream-dolminence-copy b) {
+    line-break: normal;
+  }
+}
+
 :is(.site-shell, .manager-page, .rider-dossier-page) {
   color: var(--future-text);
 }
@@ -561,6 +629,83 @@ html
   border-color: transparent;
 }
 
+/* On /world, the chapter in view (aria-current="location", repeated from the
+   header when the menu opens) reads exactly like the page the reader is on.
+   The panel's id outranks the World editions' own row rules (up to 0,6,1). */
+#site-side-panel .side-panel-links :is(a, button.side-panel-link-button)[aria-current="location"] {
+  color: #fff;
+  background: rgb(126 231 255 / 0.08);
+  box-shadow: inset 3px 0 0 rgb(126 231 255 / 0.9);
+}
+
+#site-side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button)[aria-current="location"]:not(:focus-visible)::before {
+  opacity: 0;
+}
+
+#site-side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button)[aria-current="location"]
+  > i {
+  color: #07121c;
+  background: rgb(126 231 255 / 0.9);
+  border-color: transparent;
+}
+
+/* Phones and tablets: the eight riders in two columns of four rows, name left
+   and number right, instead of eight full-width rows. Below 390px a column is
+   too narrow for オーバーゼッツ at 13px, so those phones keep one column. */
+@media (max-width: 840px) {
+  #site-side-panel .side-panel-riders .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #site-side-panel .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 8px;
+    padding-inline: 16px 10px; /* names start on the same line as every other row */
+  }
+
+  #site-side-panel
+    .side-panel-riders
+    .side-panel-links
+    :is(a, button.side-panel-link-button)
+    > span {
+    overflow: hidden;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 389px) {
+  #site-side-panel .side-panel-riders .side-panel-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* While there are two columns, a short rule between them, so each number
+   reads with its own name and not the next column's. A lit rider already
+   marks that edge with its rail (its Highlight border in forced colors). */
+@media (min-width: 390px) and (max-width: 840px) {
+  #site-side-panel
+    .side-panel-riders
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):nth-child(even):not([aria-current])::after {
+    content: "";
+    position: absolute;
+    inset-block: 16px;
+    inset-inline-start: 0;
+    border-inline-start: 1px solid rgb(167 190 205 / 0.26);
+    pointer-events: none;
+  }
+}
+
 /* Windows High Contrast drops background images and repaints backgrounds as
    Canvas: the trigger's bars (painted backgrounds) and the panel's gradient
    fill would vanish, leaving no visible way into the menu. */
@@ -590,6 +735,12 @@ html
     .side-panel
     .side-panel-links
     :is(a, button.side-panel-link-button)[aria-current="page"] {
+    border-inline-start: 4px solid Highlight;
+  }
+
+  #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button)[aria-current="location"] {
     border-inline-start: 4px solid Highlight;
   }
 }

@@ -243,8 +243,70 @@
   }
 }
 
+/* Mouse hover: a closed CASE record's gilt frame warms from 金深 to 金 and its
+   mark brightens; the return link leans back toward the World. Nothing here
+   reaches touch, so nothing can stick. */
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-story-case {
+    transition:
+      border-color 220ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      outline-color 220ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .dream-page.dream-page .dream-story-case:not([open]):has(> summary:hover) {
+    border-color: var(--ts-kin, #c8a45c);
+    outline-color: rgb(230 194 142 / 85%);
+  }
+  .dream-page .dream-story-case-toggle {
+    transition:
+      transform 160ms ease-out,
+      scale 220ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      color 220ms ease;
+  }
+  .dream-page .dream-story-case > summary:hover .dream-story-case-toggle {
+    color: #f6d7a4;
+    scale: 1.15;
+  }
+  .dream-page.dream-page .dream-back-link,
+  .dream-page.dream-page .dream-back-link > span:first-child {
+    transition:
+      border-color 220ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      color 220ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      translate 240ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .dream-page.dream-page .dream-back-link:hover {
+    border-color: var(--ts-kin, #c8a45c);
+    color: var(--ts-kin-hi, #f3e0b0);
+  }
+  .dream-page.dream-page .dream-back-link:hover > span:first-child {
+    translate: -3px 0;
+  }
+}
+
+/* Opening a record lets its bright page settle in over 420 ms instead of
+   snapping into the dark in one frame. Started by the reader, and finite. */
+@media (prefers-reduced-motion: no-preference) {
+  .dream-story-case[open] > .dream-story-case-body {
+    animation: dream-case-open 420ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .dream-story-case-toggle {
+  .dream-story-case-toggle,
+  .dream-page.dream-page .dream-story-case-toggle {
     transition: none;
+  }
+  .dream-page.dream-page .dream-back-link:hover > span:first-child {
+    translate: none;
+  }
+}
+
+@keyframes dream-case-open {
+  from {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
   }
 }

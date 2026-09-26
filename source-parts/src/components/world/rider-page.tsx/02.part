@@ -1,3 +1,5 @@
+            img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
+            pos: "50% 50%",
             name: "アクシスレイカー・マークⅦ　ランチャーモード",
             label: "AXIS RAKER / LAUNCHER MODE",
           },
@@ -334,5 +336,3 @@
     id: "leddic",
     no: "05",
     name: "LEDDIC",
-    ja: "レディック",
-    person: "在原華火",

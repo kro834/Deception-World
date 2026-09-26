@@ -12,7 +12,7 @@
 .world-column-dialog-close:active,
 .rider-nightmare-dialog-close:active,
 .rider-nightmare-pickup-button:active {
-  scale: 1.034;
+  scale: 0.97; /* pressed controls sink into the glass; they never grow past it */
   opacity: 1;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -36,8 +36,8 @@
 
 .signal.is-accessible:active,
 .dante-archive:active {
-  transform: translateY(-1px);
-  scale: 1.018;
+  transform: none;
+  scale: 0.985;
   opacity: 1;
 }
 

@@ -1012,6 +1012,43 @@ html[data-route-scroll-settling="true"] {
   );
 }
 
+/* Rider and special-site dives land on a page that is already mounted, so
+   they arrive onto it instead of whiting out first: the exit light (and the
+   core inside it) peaks at about half strength, and the gate dissolves from a
+   third of the reveal. Opacity only, on the gate's own layer; the cover
+   timing and the reduced reveal above are unchanged. */
+@media (prefers-reduced-motion: no-preference) {
+  .load-gate.rider-route-dive.is-arriving {
+    animation: dw-dive-gate-open 0.48s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .rider-route-dive.is-arriving .cine-dive-flash {
+    animation-name: dw-dive-exit-light-soft;
+  }
+}
+
+@keyframes dw-dive-gate-open {
+  0%,
+  34% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dw-dive-exit-light-soft {
+  from {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0.56;
+  }
+}
+
 .rider-dive-vector-field {
   position: absolute;
   z-index: 12;

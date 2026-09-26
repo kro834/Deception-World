@@ -132,7 +132,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "03",
         kicker: "POWER / SAGA SYSTEM",
-        title: "万物を拒絶する、半汎用式ライダーシステム。",
+        // A zero-width space lets the title break between 半汎用式 and
+        // ライダーシステム: phrase breaking otherwise keeps the compound whole,
+        // and a phone column of 360-390px then splits it as システ／ム。
+        title: "万物を拒絶する、半汎用式\u200bライダーシステム。",
         body: [
           "『拒絶』は他者から拒まれる恐怖、喪失、受け入れ難い事実、希死念慮までを含む。融合から生まれたクリスタルコアは、後の究極形態を成立させる中核となる。",
         ],

@@ -1,0 +1,306 @@
+/* Press feedback and the keyboard skip link: the two answers every route
+   gives, whatever its edition. Root sheet, linked after
+   styles-pickup-visibility.css.
+
+   Press feedback: one response for every tap, click and pen press, driven by
+   data-press from src/lib/press-feedback.js. The pressed control sinks
+   slightly and lights up, then settles back on the house curve. Only scale
+   and filter move, both on the compositor. The transition list is replaced
+   only while data-press is present (the press and a 340 ms settle), so the
+   controls' own hover and selection transitions are untouched the rest of
+   the time. Without script (or before hydration) <html> has no
+   data-press-ready and nothing here applies.
+
+   Route sheets are linked after this one and some weigh more (the menu
+   rows' transition in styles-world/28.css, the hover-only ones on Dream's
+   and the dossiers' back links), so the press rules carry an extra `body`
+   and the timing rules a doubled [data-press], as .dream-page.dream-page
+   does: while a press is live its list keeps scale and filter, and touch
+   keeps its hold-back. */
+:root {
+  --dw-ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* the house curve: glass, Mirage, Dream */
+  --dw-ease-press: cubic-bezier(0.2, 0, 0, 1);
+  --dw-dur-press: 90ms;
+  --dw-dur-settle: 320ms;
+  --dw-dur-state: 180ms;
+  --dw-press-scale: 0.96;
+  --dw-press-light: 1.14;
+}
+
+html[data-press-ready] body [data-press][data-press] {
+  transition-property:
+    scale, filter, transform, translate, opacity, color, background-color, border-color, box-shadow;
+  transition-duration:
+    var(--dw-dur-settle), var(--dw-dur-settle), var(--dw-dur-state), var(--dw-dur-state),
+    var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state),
+    var(--dw-dur-state);
+  transition-timing-function: var(--dw-ease-out);
+  transition-delay: 0s;
+}
+
+html[data-press-ready]
+  body
+  :is([data-press="in"], [data-press="touch"]):not(.rw-gate-button, .episode-card-select) {
+  filter: brightness(var(--dw-press-light));
+  transition-duration: var(--dw-dur-press);
+  transition-timing-function: var(--dw-ease-press);
+}
+
+/* A swipe that starts on a control is released before this delay ends. */
+html[data-press-ready] body [data-press][data-press="touch"] {
+  transition-delay: 45ms;
+}
+
+/* The press owns the sink: legacy :active transforms would multiply with it. */
+html[data-press-ready] :is(.episode-pickup-plus, .cine-btn)[data-press]:active {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready]
+    body
+    :is([data-press="in"], [data-press="touch"]):not(.rw-gate-button, .episode-card-select) {
+    scale: var(--dw-press-scale);
+  }
+}
+
+/* Sizes: a large card moves less, a small icon a little more. */
+html[data-press-ready]
+  :is(
+    .signal,
+    .dante-archive,
+    .dossier-contents > a,
+    .manager-pagination > a,
+    .dream-character-grid button,
+    .dream-dolminence-grid button,
+    .manager-portrait-frame
+  ) {
+  --dw-press-scale: 0.982;
+  --dw-press-light: 1.08;
+}
+
+/* Dream's portraits sit on white paper: a lift would clip them, so the
+   press shades them a little instead, like a card pressed into the page. */
+html[data-press-ready] :is(.dream-character-grid button, .dream-dolminence-grid button) {
+  --dw-press-light: 0.93;
+}
+
+html[data-press-ready]
+  :is(.side-panel-trigger, .episode-controls button, .episode-pickup-plus, .rxs-scroll-cue) {
+  --dw-press-scale: 0.92;
+}
+
+/* The brand and the two return chips are icons only where their words are
+   hidden (the sigil alone, the arrow alone) and sink like one there; wider,
+   they carry a label and keep the default, as their keyboard press does. */
+@media (max-width: 560px) {
+  html[data-press-ready] .brand {
+    --dw-press-scale: 0.92;
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-press-ready] .dream-back-link {
+    --dw-press-scale: 0.92;
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-press-ready] .manager-back {
+    --dw-press-scale: 0.92;
+  }
+}
+
+/* Text tabs and links have no surface of their own; the press gives them a
+   faint ice plate instead of relying on the light alone. */
+html[data-press-ready]
+  :is(.topbar nav a, .dossier-reader-links a, .rxs-local-nav nav a, .site-shell footer a):is(
+    [data-press="in"],
+    [data-press="touch"]
+  ) {
+  background-color: rgb(126 231 255 / 0.1);
+  --dw-press-light: 1.3;
+}
+
+/* Menu rows are full-width, each with its own divider: they take the light
+   and the plate but keep their width, so the dividers stay in line. The
+   plate outweighs the film edition's resting row fill. */
+html[data-press-ready] .side-panel-links :is(a, button.side-panel-link-button) {
+  --dw-press-scale: 1;
+}
+
+html[data-press-ready]
+  body
+  .side-panel-links
+  :is(a, button.side-panel-link-button):is([data-press="in"], [data-press="touch"]) {
+  background-color: rgb(126 231 255 / 0.1);
+  --dw-press-light: 1.3;
+}
+
+/* Dream's act tabs are the same kind of full-bleed cell between gold
+   dividers: they keep their width too, and their plate is the dividers'
+   gold rather than ice, on the plum and gold of the Taisho page. */
+html[data-press-ready] .dream-chapter-nav a {
+  --dw-press-scale: 1;
+}
+
+html[data-press-ready] body .dream-chapter-nav a:is([data-press="in"], [data-press="touch"]) {
+  background-color: rgb(200 164 92 / 0.12);
+  --dw-press-light: 1.3;
+}
+
+/* The episode card is pressed through its full-size select button. */
+html[data-press-ready] .episode-card:has(> .episode-card-select[data-press]) {
+  transition:
+    scale var(--dw-dur-settle) var(--dw-ease-out),
+    filter var(--dw-dur-settle) var(--dw-ease-out);
+}
+
+html[data-press-ready]
+  .episode-card:has(> .episode-card-select:is([data-press="in"], [data-press="touch"])) {
+  filter: brightness(1.08);
+  transition-duration: var(--dw-dur-press);
+  transition-timing-function: var(--dw-ease-press);
+}
+
+html[data-press-ready] .episode-card:has(> .episode-card-select[data-press="touch"]) {
+  transition-delay: 45ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready]
+    .episode-card:has(> .episode-card-select:is([data-press="in"], [data-press="touch"])) {
+    scale: 0.982;
+  }
+}
+
+/* A closed Dream CASE is pressed as a whole record, gilt frames and all,
+   through its header, which itself only lights. An open record is too tall
+   to move, so there the light alone answers. */
+html[data-press-ready] .dream-story-case > summary {
+  --dw-press-scale: 1;
+  --dw-press-light: 1.08;
+}
+
+html[data-press-ready] .dream-story-case:has(> summary[data-press]) {
+  transition: scale var(--dw-dur-settle) var(--dw-ease-out);
+}
+
+html[data-press-ready]
+  .dream-story-case:not([open]):has(> summary:is([data-press="in"], [data-press="touch"])) {
+  transition-duration: var(--dw-dur-press);
+  transition-timing-function: var(--dw-ease-press);
+}
+
+html[data-press-ready] .dream-story-case:has(> summary[data-press="touch"]) {
+  transition-delay: 45ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready]
+    .dream-story-case:not([open]):has(> summary:is([data-press="in"], [data-press="touch"])) {
+    scale: 0.982;
+  }
+}
+
+/* RISING THE WORLD: its rise owns scale and translate, and the sequence
+   reads its box, so the press only lights the existing sheen (excluded
+   from the generic scale and filter above), and lets it fade on release. */
+html[data-press-ready] .site-shell .rw-gate-button[data-press]::after {
+  transition: opacity var(--dw-dur-settle) var(--dw-ease-out);
+}
+
+html[data-press-ready]
+  .site-shell
+  .rw-gate-button:is([data-press="in"], [data-press="touch"])::after {
+  opacity: 1;
+  transition-duration: var(--dw-dur-press);
+  transition-timing-function: var(--dw-ease-press);
+}
+
+html[data-press-ready] .site-shell .rw-gate-button[data-press="touch"]::after {
+  transition-delay: 45ms;
+}
+
+/* Its overlay controls already answer :active with a small sink and a
+   darker fill: the press keeps to that sink and leaves the fill unlit. */
+html[data-press-ready] .site-shell :is(.rw-controls button, .rw-close, .rw-redive-button) {
+  --dw-press-scale: 0.97;
+  --dw-press-light: 1;
+}
+
+/* Economy renderers skip the filter pass. */
+html[data-world-effects="economy"][data-press-ready]
+  body
+  :is([data-press="in"], [data-press="touch"]),
+html[data-world-effects="economy"][data-press-ready]
+  .episode-card:has(> .episode-card-select[data-press]) {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  html[data-press-ready] body [data-press][data-press] {
+    filter: none;
+  }
+}
+
+/* ---------- Keyboard skip link (src/components/skip-link.tsx) ----------
+   The first Tab stop on every route but the opening: a cyan Mirage pill
+   that comes down only while focused, and is otherwise out of view and
+   transparent, so its shadow never shades the top of the page. */
+.dw-skip-link {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 2147483000; /* under the opening handoff (2147483200) */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px 0 14px;
+  border: 1px solid rgb(126 231 255 / 70%);
+  border-radius: 999px;
+  color: #03121b;
+  background: #7ee7ff;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 50%);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(calc(-100% - 28px));
+  pointer-events: none;
+}
+
+.dw-skip-link::before {
+  content: "↓";
+  content: "↓" / "";
+  font-size: 14px;
+  line-height: 1;
+}
+
+.dw-skip-link:focus,
+.dw-skip-link:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 3px;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dw-skip-link {
+    transition:
+      transform var(--dw-dur-state) var(--dw-ease-out),
+      opacity var(--dw-dur-state) var(--dw-ease-out);
+  }
+}
+
+@media (forced-colors: active) {
+  .dw-skip-link {
+    border-color: LinkText;
+  }
+}

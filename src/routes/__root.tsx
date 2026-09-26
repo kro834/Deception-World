@@ -6,7 +6,9 @@ import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
+import { SkipLink } from "@/components/skip-link";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
+import { watchPresses } from "@/lib/press-feedback.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
 import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
@@ -16,6 +18,7 @@ import routeTransitionsCss from "../styles-route-transitions.css?url";
 import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
 import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
+import pressFeedbackCss from "../styles-press-feedback.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
@@ -30,6 +33,13 @@ const xBanner = host
    sheets' motion gates (src/lib/dialog-open-flag.js). */
 function DialogOpenFlag() {
   useEffect(() => watchOpenDialogs(), []);
+  return null;
+}
+
+/* html[data-press-ready] + [data-press]: one press response on every control
+   (src/lib/press-feedback.js, src/styles-press-feedback.css). */
+function PressFeedback() {
+  useEffect(() => watchPresses(), []);
   return null;
 }
 
@@ -86,6 +96,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: frostedControlsCss },
       { rel: "stylesheet", href: futureInterfaceCss },
       { rel: "stylesheet", href: pickupVisibilityCss },
+      { rel: "stylesheet", href: pressFeedbackCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -104,6 +115,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body className="antialiased">
+        <SkipLink />
         <ContentProtection />
         <LegacyDataRetirement />
         <PreviewHostBridge />
@@ -112,6 +124,7 @@ export const Route = createRootRoute({
             <ZeusButtonProvider>
               <AppGuards />
               <DialogOpenFlag />
+              <PressFeedback />
               <Outlet />
             </ZeusButtonProvider>
           </LoadGateProvider>

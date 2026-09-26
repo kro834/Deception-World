@@ -88,9 +88,17 @@
   transition: color 180ms ease;
 }
 
-.rxs-local-nav nav a:hover,
 .rxs-local-nav nav a:focus-visible {
   color: #fff;
+}
+
+/* Hover answers a fine pointer only: after a tap, touch browsers keep :hover
+   on the link, which would leave it lit (and the tabs and footer links below
+   lifted) until the next tap elsewhere. */
+@media (hover: hover) and (pointer: fine) {
+  .rxs-local-nav nav a:hover {
+    color: #fff;
+  }
 }
 
 .rxs-local-nav .rxs-menu-trigger {
@@ -1191,8 +1199,10 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:hover {
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:hover {
+    transform: translateY(-1px);
+  }
 }
 
 .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"] {
@@ -1433,11 +1443,16 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   background: #000207;
 }
 
+/* The World's footer rules (styles-world/07.css, 09.css) reach this kicker
+   too: they centred it over a left-set title and hid it below 841px. It
+   stands where the title starts, on every width, at the 11px label floor. */
 .rxs-footer > div p {
+  display: block;
   margin: 0 0 14px;
   color: var(--rxs-cyan);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.18em;
+  text-align: start;
 }
 
 .rxs-footer h2 {
@@ -1467,10 +1482,12 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
     transform 180ms ease;
 }
 
-.rxs-footer > a:hover {
-  border-color: rgb(105 234 255 / 35%);
-  background: rgb(105 234 255 / 7%);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .rxs-footer > a:hover {
+    border-color: rgb(105 234 255 / 35%);
+    background: rgb(105 234 255 / 7%);
+    transform: translateY(-2px);
+  }
 }
 
 .rxs-footer > a i {
@@ -2331,5 +2348,135 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
 @media (prefers-reduced-transparency: reduce) {
   .rxs-page .rxs-local-nav {
     background: #0b1725;
+  }
+}
+
+/* ---------- A visible way home from the special sites ---------- */
+/* The brand is already the link back to the World (aria-label
+   "ディセプションワールドへ戻る") but read as this site's title only. The
+   World's own DW sigil in front of it says where it leads: DW > this site.
+   The 48px row height of the brand above is kept. */
+.rxs-page .rxs-brand {
+  position: relative;
+  padding-left: 42px;
+}
+
+.rxs-page .rxs-brand::before,
+.rxs-page .rxs-brand::after {
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+}
+
+.rxs-page .rxs-brand::before {
+  content: "";
+  left: 7px;
+  width: 21px;
+  height: 21px;
+  border: 1px solid rgb(126 231 255 / 55%);
+  background: rgb(126 231 255 / 6%);
+  transform: translateY(-50%) rotate(45deg);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+/* A sigil, not a word: the link's name is its aria-label. */
+.rxs-page .rxs-brand::after {
+  content: "DW";
+  content: "DW" / "";
+  left: 0;
+  width: 35px;
+  color: #9eeeff;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-indent: 0.1em;
+  transform: translateY(-50%);
+}
+
+.rxs-page .rxs-brand:focus-visible::before {
+  border-color: rgb(126 231 255 / 90%);
+  background-color: rgb(126 231 255 / 14%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page .rxs-brand:hover::before {
+    border-color: rgb(126 231 255 / 90%);
+    background-color: rgb(126 231 255 / 14%);
+  }
+}
+
+/* The Fold cover screen (280px) has no room for the sigil beside the name:
+   Extreme's would run under the menu trigger. */
+@media (max-width: 300px) {
+  .rxs-page .rxs-brand {
+    padding-left: 0;
+  }
+
+  .rxs-page .rxs-brand::before,
+  .rxs-page .rxs-brand::after {
+    content: none;
+  }
+}
+
+/* The closing links end on the same way home on all three sites. A return
+   reads backwards (arrow first) and sits a step back; the onward links keep
+   their ↗. */
+.rxs-footer > a.rxs-footer-return {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 12px;
+  border-color: rgb(255 255 255 / 9%);
+  color: #b9bfc8;
+}
+
+/* The showcase (Rexonance, Extreme) restyles every footer link at (0,3,1):
+   the step back there is its local nav's tone. :where keeps this at (0,4,1),
+   so the showcase's own hover (same weight, later sheet) still lights the
+   border; Final Stage has no showcase tokens and keeps the rule above. */
+.rxs-page.rxs-page:where(:not(.fst-page)) .rxs-footer > a.rxs-footer-return {
+  border-color: var(--sc-hairline-soft);
+  color: rgb(245 245 247 / 80%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-footer > a.rxs-footer-return:hover {
+    border-color: rgb(105 234 255 / 35%);
+    color: #d9dce2;
+  }
+
+  .rxs-page.rxs-page:where(:not(.fst-page)) .rxs-footer > a.rxs-footer-return:hover {
+    color: var(--sc-text);
+  }
+}
+
+/* Rexonance ends on three links and Extreme on two: one column per link
+   after the title, however many there are. Final Stage lays out its own. */
+@media (min-width: 901px) {
+  .rxs-footer:not(.fst-footer) {
+    grid-template-columns: minmax(280px, 1fr);
+    grid-auto-columns: auto;
+    grid-auto-flow: column;
+  }
+}
+
+/* Three links need the full 1180px row beside the title. Narrower (a laptop,
+   an iPad in landscape) the title takes its own row and the links keep one
+   row under it, right-aligned as beside it, instead of running off the edge. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .rxs-footer:not(.fst-footer):has(> a:nth-of-type(3)) {
+    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+    grid-auto-flow: row;
+  }
+
+  .rxs-footer:not(.fst-footer):has(> a:nth-of-type(3)) > div {
+    grid-column: 1 / -1;
+  }
+
+  .rxs-footer:not(.fst-footer):has(> a:nth-of-type(3)) > a:first-of-type {
+    grid-column-start: 2;
   }
 }

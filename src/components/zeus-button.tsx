@@ -50,6 +50,8 @@ const ZEUS_AVOID_SELECTOR = [
   ".finale-content .primary-action",
   "footer > a",
   ".manager-pagination > a > span:last-child",
+  // PREV / NEXT kicker and name: a mirrored step must not land on the text.
+  ".manager-pagination > a > :is(small, b)",
   ".dossier-index-return",
   ".dossier-read-link",
   ".rxs-footer > a",

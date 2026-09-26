@@ -110,6 +110,11 @@
   color: #cdd6e2;
 }
 
+/* Labels hold the 11px floor, the shared hero kicker included. */
+.fst-page .rxs-hero-copy > p:first-child {
+  font-size: 11px;
+}
+
 .fst-page .rxs-hero h1,
 .fst-page .rxs-section-heading h2 {
   pointer-events: none;
@@ -166,15 +171,27 @@
   background: linear-gradient(90deg, var(--rxs-cyan), var(--rxs-gold));
 }
 
-.fst-story-copy {
+/* The site's longest read, set to a book measure: about 36 characters a line
+   on desktop, a medium lead rather than a bold block, and 16px body. */
+.fst-story-layout .fst-story-copy {
   max-width: none;
   margin: 0;
+}
+
+.fst-story-copy p {
+  max-inline-size: 36em;
+  letter-spacing: 0.02em;
 }
 
 .fst-story-copy p:first-child {
   color: var(--fst-text);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.95;
+}
+
+.fst-story-copy p:not(:first-child) {
+  font-size: 16px;
 }
 
 /* ---------- Cast: eight characters on a two-row liquid rail ---------- */
@@ -266,7 +283,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   border-radius: 999px;
   color: #eef3f8;
   background: rgb(3 5 10 / 72%);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.2em;
 }
@@ -323,7 +340,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
 
 .fst-cast-copy small {
   color: var(--fst-accent);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.22em;
 }
@@ -390,6 +407,30 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   outline-offset: 3px;
 }
 
+/* Mouse hover: the chip warms in the character's accent and ↗ leans the way
+   it points. */
+@media (hover: hover) and (pointer: fine) {
+  .fst-cast-copy > a {
+    transition:
+      background-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+      border-color 200ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  .fst-cast-copy > a i {
+    display: inline-block;
+    transition: translate 240ms var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  .fst-cast-copy > a:hover {
+    border-color: color-mix(in srgb, var(--fst-accent) 75%, transparent);
+    background-color: color-mix(in srgb, var(--fst-accent) 16%, transparent);
+  }
+
+  .fst-cast-copy > a:hover i {
+    translate: 2px -2px;
+  }
+}
+
 /* ---------- Rider pickups ---------- */
 .fst-riders-section {
   background:
@@ -443,7 +484,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   left: 18px;
   z-index: 2;
   color: #fff;
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.28em;
 }
@@ -460,7 +501,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
 .fst-pickup-copy small {
   margin: 0;
   color: var(--fst-accent);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.24em;
 }
@@ -1047,7 +1088,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   border-radius: 999px;
   color: #eef3f8;
   background: rgb(3 5 10 / 72%);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.2em;
 }
@@ -1150,6 +1191,24 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
 .fst-page .rxs-footer {
   grid-template-columns: minmax(280px, 1fr) auto auto auto;
   background: radial-gradient(circle at 14% 100%, rgb(67 181 255 / 8%), transparent 28rem), #01030a;
+}
+
+/* Beside three links the title had a 340px column and set as ファイナルス／
+   テージ、／開幕。: it takes the row above them, and the links keep one row
+   under it, right-aligned as beside it (as Rexonance and Extreme do between
+   901 and 1180px). Narrower, the footer stacks (below). */
+@media (min-width: 1101px) {
+  .fst-page .rxs-footer {
+    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+  }
+
+  .fst-page .rxs-footer > div {
+    grid-column: 1 / -1;
+  }
+
+  .fst-page .rxs-footer > a:first-of-type {
+    grid-column-start: 2;
+  }
 }
 
 .fst-page[data-motion-ready="true"] .rxs-hero-visual,
@@ -1311,9 +1370,10 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
     padding: 8px 11px;
   }
 
-  .fst-copy p {
-    font-size: 14px;
-    line-height: 1.9;
+  .fst-copy p,
+  .fst-story-copy p:not(:first-child) {
+    font-size: 15px;
+    line-height: 1.95;
   }
 
   .fst-ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"],
@@ -1348,6 +1408,10 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   .fst-cast-detail figure,
   .fst-cast-copy {
     animation: none;
+  }
+
+  .fst-cast-copy > a:hover i {
+    translate: none;
   }
 }
 

@@ -763,6 +763,9 @@ const WorldSectionNav = memo(function WorldSectionNav() {
           current = section.id as WorldSectionId;
         }
       });
+      // Past the end of the last chapter (the finale, the footer, the RISING
+      // gate) no chapter is current, so RECORDS stops lighting the header.
+      if (sections[sections.length - 1].getBoundingClientRect().bottom <= marker) current = null;
       // An identical update still schedules a render right after a real one.
       if (current === lastActiveRef.current) return;
       lastActiveRef.current = current;

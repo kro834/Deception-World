@@ -270,10 +270,15 @@
   letter-spacing: -0.035em;
 }
 
+/* The description keeps its pinned `word-break: normal` (styles-world/06.css)
+   and, on this page, breaks between phrases like the rest of the short copy
+   (the Japanese baseline in styles-future-interface.css): no 「踏／み込む」. */
 .site-shell.film-edition .rider-description {
   color: var(--programme-muted);
   font-size: 16px;
   line-height: 1.9;
+  word-break: auto-phrase;
+  text-wrap: pretty;
 }
 
 .site-shell.film-edition .rider-dossier-open {
@@ -474,4 +479,248 @@
 
 .site-shell.film-edition .manager-archive-tabs button.is-active small {
   color: #fff;
+}
+
+/* Desktop column tabs: 11px labels floated in 70px pills. One step up keeps
+   them in proportion with the rail; phones keep their pinned 11px. The
+   pickup dialog's rail follows (its numbers were 7px). */
+@media (min-width: 900px) {
+  .site-shell.film-edition .world-column-tabs.liquid-swipe-tabs > button[role="tab"] b {
+    font-size: 13px;
+  }
+
+  .site-shell.film-edition .world-column-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    font-size: 12px;
+  }
+}
+
+/* ---------- Wayfinding: chapter landings ---------- */
+/* 01 / 02 / 03 land at the header's measured height (WorldSectionNav sets it),
+   as RE DIVE does, one pixel under it so no hairline of the previous section
+   shows. The 96px landing left a 20-32px band of the section before (on
+   phones, the ticker's outline type) under the 64-76px header. 六詠 keeps a
+   little air, so its bracket frame is not clipped. The return anchors from
+   ダンテ and the related dossiers (1px spans just inside the panel's border)
+   land it with the side menu's 六詠, over the 96px in styles-world/21.css. */
+.site-shell.film-edition :is(#story, #riders, #records) {
+  scroll-margin-top: calc(var(--film-topbar-height, calc(76px + env(safe-area-inset-top))) - 1px);
+}
+
+.site-shell.film-edition :is(#manager-archive, #manager-archive-unmanaged, #manager-archive-other) {
+  scroll-margin-top: calc(var(--film-topbar-height, calc(76px + env(safe-area-inset-top))) + 14px);
+}
+
+/* A fresh load of /world#story lands before the header is measured. Phones
+   and short landscape phones carry the 64px header (styles-world-neo.css
+   uses the same fallback), so their first landing is flush as well. */
+@media (max-width: 760px), (max-width: 920px) and (max-height: 560px) and (orientation: landscape) {
+  .site-shell.film-edition :is(#story, #riders, #records) {
+    scroll-margin-top: calc(var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) - 1px);
+  }
+
+  .site-shell.film-edition
+    :is(#manager-archive, #manager-archive-unmanaged, #manager-archive-other) {
+    scroll-margin-top: calc(
+      var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 14px
+    );
+  }
+}
+
+/* ================================================================
+   Mirage edition
+   This sheet loads before styles-world-mirage.css, which stays last. The
+   rules below must win over Mirage's own selectors for the same elements,
+   so a leading `main` (the shell) lifts them one step without moving the
+   sheets.
+   ================================================================ */
+
+/* ---------- Wayfinding: the header speaks the chapter numbers ---------- */
+/* The chapters are numbered 01 / 02 / 03 on the page (.section-index); the
+   header carries the same numerals, dim at rest and lit with the chapter.
+   At rest they are set like Mirage's other HUD mono (12px) and hold 4.5:1
+   on the header, as the rider tab numbers do. Phones keep the three bare
+   words, which already fill their row. */
+@media (min-width: 761px) {
+  main.site-shell.film-edition.mirage-edition .topbar nav {
+    counter-reset: dw-chapter;
+  }
+
+  main.site-shell.film-edition.mirage-edition .topbar nav a {
+    counter-increment: dw-chapter;
+    gap: 8px;
+  }
+
+  main.site-shell.film-edition.mirage-edition .topbar nav a::before {
+    content: counter(dw-chapter, decimal-leading-zero);
+    color: rgb(122 232 255 / 56%);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+  }
+
+  main.site-shell.film-edition.mirage-edition .topbar nav a[aria-current="location"]::before {
+    color: var(--mr-ice);
+  }
+}
+
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  main.site-shell.film-edition.mirage-edition .topbar nav a::before {
+    transition: color 0.25s;
+  }
+}
+
+/* Forced colours mark the current link with an underline (styles-world-
+   mirage.css); a numeral beside it, a flex item of its own, split the mark
+   in two. The words carry the chapters there. */
+@media (min-width: 761px) and (forced-colors: active) {
+  main.site-shell.film-edition.mirage-edition .topbar nav a::before {
+    content: none;
+  }
+}
+
+/* ---------- Rider art: the edge fade paints ---------- */
+/* Mirage's fade from the art into the deck sat under the art: the ::before
+   and img.is-on share z-index 1 and the image comes later, so the pale art
+   ended on a hard, bright edge. One step up it paints. The image, its
+   selection fade and the multiply grade on ::after are untouched. */
+main.site-shell.film-edition.mirage-edition .rider-visual::before {
+  z-index: 2;
+}
+
+/* The tone rule between the art and the copy (below it when stacked, beside
+   it on desktop) takes the deck's colour, so the fade runs on into the copy.
+   Transparent, it showed the visual's near-black ground as a dark hairline. */
+main.site-shell.film-edition.mirage-edition .rider-visual {
+  border-color: var(--mr-deck);
+}
+
+/* Stacked (tablets and phones): the art settles into the copy below it. */
+@media (max-width: 1120px) {
+  main.site-shell.film-edition.mirage-edition .rider-visual::before {
+    background:
+      linear-gradient(
+        0deg,
+        var(--mr-deck) 0%,
+        rgb(10 18 32 / 66%) 12%,
+        rgb(10 18 32 / 18%) 26%,
+        transparent 38%
+      ),
+      radial-gradient(ellipse 110% 85% at 50% 38%, transparent 62%, rgb(10 18 32 / 38%) 100%);
+  }
+}
+
+/* Side by side (desktop): a short fade into the copy column and a light
+   floor; no full-frame vignette, so the art stays bright. */
+@media (min-width: 1121px) {
+  main.site-shell.film-edition.mirage-edition .rider-visual::before {
+    background:
+      linear-gradient(
+        90deg,
+        var(--mr-deck) 0%,
+        rgb(10 18 32 / 38%) 6%,
+        rgb(10 18 32 / 8%) 13%,
+        transparent 18%
+      ),
+      linear-gradient(0deg, rgb(10 18 32 / 46%), transparent 16%);
+  }
+}
+
+/* ---------- Records: square art, one emphasis for the selected card ---------- */
+/* The 15px radius was left from the rounded theme (styles-world/28.css) and
+   floated rounded art inside the square bracket frame. The art's foot now
+   settles into the card body (--neo-panel-raised). The selected card is
+   carried by its brackets, scale and full opacity, so its outline drops from
+   full ice to a quieter rule with a top highlight. */
+main.site-shell.film-edition.mirage-edition .episode-thumbnail,
+main.site-shell.film-edition.mirage-edition .episode-thumbnail img {
+  border-radius: 0;
+}
+
+main.site-shell.film-edition.mirage-edition .episode-thumbnail::after {
+  background:
+    linear-gradient(180deg, transparent 46%, rgb(15 27 45 / 58%) 80%, rgb(15 27 45 / 92%) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--episode-tone) 9%, transparent), transparent 42%);
+}
+
+main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-surface {
+  border-color: rgb(122 232 255 / 48%);
+  box-shadow:
+    inset 0 1px 0 rgb(198 245 255 / 22%),
+    0 0 0 1px var(--mr-ink),
+    0 18px 50px rgb(0 0 0 / 45%);
+}
+
+/* ---------- 六詠 archive: one card family, vacant slots as empty sockets ---------- */
+/* The related cards' round arrow badge becomes the square, ice-rimmed chip of
+   the 六詠 cards, at its size (the ハイク and フェイブル expand mark keeps its
+   image). */
+main.site-shell.film-edition.mirage-edition .other-archive-card::after {
+  width: 26px;
+  height: 26px;
+  border-color: rgb(122 232 255 / 62%);
+  border-radius: 0;
+  background-color: rgb(4 8 15 / 86%);
+  background-size: 11px 11px;
+}
+
+/* Vacant slots: a rule in their tone and a fine hatch gathered at the foot,
+   quieter than the real cards; the numeral is set like the 六詠 numerals.
+   The numeral and mark colours stay at 4.5:1 (styles-world-mirage.css). */
+main.site-shell.film-edition.mirage-edition .archive-placeholder {
+  border-color: color-mix(in srgb, currentColor 34%, transparent);
+  background: linear-gradient(180deg, rgb(255 255 255 / 2.5%), transparent 46%), var(--mr-deck);
+}
+
+main.site-shell.film-edition.mirage-edition .archive-placeholder::before {
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 9px,
+    color-mix(in srgb, currentColor 9%, transparent) 9px 10px
+  );
+  -webkit-mask: linear-gradient(180deg, transparent 0%, #000 55%);
+  mask: linear-gradient(180deg, transparent 0%, #000 55%);
+}
+
+main.site-shell.film-edition.mirage-edition .archive-placeholder span {
+  font-family: var(--mr-mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+main.site-shell.film-edition.mirage-edition .archive-placeholder b {
+  font-size: 18px;
+  letter-spacing: 0.3em;
+}
+
+/* ---------- Footer: a seamless hand-off to the RISING gate ---------- */
+/* The side tints ran to the footer's last row, a visible step above the
+   gate's flat void. They are glows from the top corners now, spent before
+   the foot. The flat top rule becomes a prism hairline that signs off the
+   record, drawn in the (now transparent) border itself: right under the
+   closing ticker's rule, with no gap to read as a second line, and nothing
+   moves. */
+main.site-shell.film-edition.mirage-edition > footer {
+  border-top-color: transparent;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 4%,
+        rgb(122 232 255 / 42%) 30%,
+        rgb(164 139 255 / 34%) 50%,
+        rgb(240 207 134 / 36%) 70%,
+        transparent 96%
+      )
+      top / 100% 1px no-repeat border-box,
+    radial-gradient(70% 120% at 0% 0%, rgb(122 232 255 / 7%), transparent 70%),
+    radial-gradient(70% 120% at 100% 0%, rgb(255 92 200 / 6%), transparent 70%),
+    var(--mr-void);
+}
+
+/* More contrast, less transparency: the selected record keeps its full ice
+   outline, as every card's rule is raised there (styles-world-neo.css). */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-surface {
+    border-color: var(--mr-ice);
+  }
 }

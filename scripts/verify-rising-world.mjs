@@ -1406,12 +1406,20 @@ async function auditControlFlashes(browser, name, tier) {
   await page.evaluate(() => {
     window.__controls = { swaps: [], clicks: 0, gateClicks: 0 };
     const controls = document.querySelector(".rw-controls");
-    new MutationObserver(() =>
-      window.__controls.swaps.push({
-        t: performance.now(),
-        control: controls.querySelector("button")?.className ?? null,
-      }),
-    ).observe(controls, { childList: true, subtree: true, attributes: true });
+    new MutationObserver(
+      () =>
+        window.__controls.swaps.push({
+          t: performance.now(),
+          control: controls.querySelector("button")?.className ?? null,
+        }),
+      // Swaps mount one button in place of the other (or change its class); the
+      // site-wide press marker (data-press) is not a swap.
+    ).observe(controls, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
     document.addEventListener(
       "click",
       (event) => {
