@@ -324,3 +324,38 @@ img {
     flex-shrink: 0;
   }
 }
+
+/* Keyboard focus stays visible on the archive's own navigation. The source
+   rules for the section nav (フォーム / 詳細 / 性能比較 ...), the hero actions and
+   the detail arrows set outline: none on :focus-visible, at 1,2,1 in Saga and
+   2,2,1 in Realm, whose rules sit under #edition-panel-realm. Naming the
+   edition panels lifts this one to 2,2,2 for both, without editing either
+   generated archive. Pointer clicks match no :focus-visible and stay
+   ring-free. */
+html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-nav a, .hero-action, .detail-nav button):focus-visible {
+  outline: 2px solid var(--active-2, #c3aaff);
+  outline-offset: 3px;
+}
+
+/* The section nav is a rounded, scrolling pill: a ring outside a link at
+   its edge was cut off by the scroller. Its links draw the ring inside. */
+html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav a:focus-visible {
+  outline-offset: -3px;
+}
+
+/* Under 390px the four section links outgrew their pill: 2形態比較 was cut to
+   2形態比 at 360px (a Galaxy) and 375px, with nothing to say the nav scrolls.
+   A slightly tighter header and link spacing lets all four fit from 360px,
+   and the pill keeps its own padding so a focus ring at either end clears
+   its rounded clip. Narrower screens still scroll the pill. */
+@media (max-width: 389px) {
+  html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-topline {
+    column-gap: 10px;
+    padding-inline: 0.6rem;
+  }
+
+  html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav a {
+    padding-inline: 0.4rem;
+    letter-spacing: 0.04em;
+  }
+}
