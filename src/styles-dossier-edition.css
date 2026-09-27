@@ -123,6 +123,14 @@ main.manager-page:not(.is-sovereign) :is(.manager-quotes, .manager-copy-section)
     rgb(10 18 32 / 82%);
 }
 
+/* A file without quotes (夜明護尊) keeps the quotes' room above the facts on
+   the two-column hero; on phones the portrait sits between them already. */
+@media (min-width: 761px) {
+  main.manager-page:not(.is-sovereign) .dossier-identity + .manager-facts {
+    margin-top: 38px;
+  }
+}
+
 main.manager-page:not(.is-sovereign) .manager-hero .manager-facts {
   border-color: var(--dm-edge);
   background:

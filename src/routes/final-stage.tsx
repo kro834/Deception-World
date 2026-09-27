@@ -3,8 +3,10 @@ import { FinalStage } from "@/components/final-stage/final-stage";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
   CINEMATIC_STYLESHEET_LINK,
+  DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
 import finalStageCssUrl from "@/styles-final-stage.css?url";
+import finalStageElevationCssUrl from "@/styles-final-stage-elevation.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -28,8 +30,11 @@ export const Route = createFileRoute("/final-stage")({
     ],
     links: [
       ...WORLD_STYLESHEET_LINKS,
+      // The World's HUD face (capitals and digits only) for the page's labels.
+      { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: finalStageCssUrl },
+      { rel: "stylesheet", href: finalStageElevationCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {

@@ -1,0 +1,1923 @@
+/* Final Stage — elevation over the skin (styles-final-stage.css).
+
+   The special site keeps its layout, its rails, its pickups and every word;
+   this sheet re-sets it in the site's projection grammar (the Mirage and
+   Dossier editions): ink ground, ice and gold, the prism hairline, Michroma
+   HUD labels at the 12px floor, outlined numerals, chrome-ink titles with a
+   misregistered ghost, and square plates that lock on with brackets (ice
+   along the top, gold along the bottom).
+
+   The logo is lit, not pasted: its JPEG-black ground is screened into the
+   hero, which now clips instead of hiding its overflow so the Motion
+   hand-over can follow the page again.
+
+   Motion: two boot strokes (the title wipe, the cue line), once; the prism
+   rules, the lock-on and the story mark on named view timelines, finished
+   at or before `entry 100%`; the record's position line on its panel's
+   scroll timeline. Nothing loops. Reduced motion, economy rendering, the
+   side menu, loading covers and dialogs keep the page still. */
+
+/* ================================================================
+   Tokens and ground
+   ================================================================ */
+.fst-page {
+  --fst-ice: #7ae8ff;
+  --fst-ice-hi: #c6f5ff;
+  --fst-gold: #f0cf86;
+  --fst-violet: #a48bff;
+  --fst-magenta: #ff5cc8;
+  --fst-ink: #04080f;
+  --fst-void: #02040a;
+  --fst-plate: #0a1220;
+  --fst-plate-raised: #0f1b2d;
+  --fst-text: #f1f7fb;
+  --fst-text-2: #b9cad8;
+  --fst-text-3: #8fa6ba;
+  --fst-muted: var(--fst-text-2);
+  --fst-focus: #fff0b5;
+  --fst-line: rgb(122 232 255 / 16%);
+  --fst-panel: var(--fst-plate);
+  --fst-hud: "Michroma", "Oxanium", var(--rxs-font-text);
+  --fst-mono: "Oxanium", var(--rxs-font-text);
+  --fst-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
+  --fst-arm: 22px;
+  --fst-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --fst-prism-r: linear-gradient(90deg, #f0cf86 0%, #ff5cc8 34%, #a48bff 66%, #7ae8ff 100%);
+  /* The prism as a plate's top rule: a background layer takes no opacity,
+     so the rule carries its 62% in the stops. */
+  --fst-prism-soft: linear-gradient(
+    90deg,
+    rgb(122 232 255 / 62%) 0%,
+    rgb(164 139 255 / 62%) 34%,
+    rgb(255 92 200 / 62%) 66%,
+    rgb(240 207 134 / 62%) 100%
+  );
+  --fst-chrome: linear-gradient(180deg, #fff 0%, #eafbff 30%, #9eeeff 60%, #5aa8ff 100%);
+  --rxs-cyan: #7ae8ff;
+  --rxs-pink: #a48bff;
+  --rxs-gold: #f0cf86;
+  --rxs-muted: #8fa6ba;
+  background:
+    radial-gradient(ellipse 70% 30% at 50% 0%, rgb(122 232 255 / 6%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 6% 42%, rgb(164 139 255 / 5%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 94% 72%, rgb(255 92 200 / 4%), transparent 70%),
+    #04080f;
+}
+
+/* The page's end continues the ink behind the footer's safe-area strip. */
+html:has(main.fst-page),
+body:has(main.fst-page) {
+  background-color: #04080f;
+}
+
+/* The document scrolls on <html>. The World base gives <body> overflow-x:
+   hidden (styles-world-addon.css), which made it a scroll container that
+   never scrolls: every view() timeline here (Motion's hand-over, lifts and
+   headlines; this sheet's rules and lock-on) bound to it and froze. `clip`
+   keeps the horizontal clipping without a scroller, as on /world
+   (styles-world-mirage.css). Loading covers and open dialogs keep their
+   locks; the scroll choreography holds still while they do. */
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dialog-open])
+  body:has(> main.fst-page) {
+  overflow: visible;
+  overflow-x: clip;
+}
+
+/* A rail drag locks the page with an inline overflow:hidden on <body>
+   (viewport-scroll-lock.js); clipping it instead keeps the lock while the
+   timelines stay on the document, so nothing beside the rail flips at each
+   tap (styles-world-reveal.css does the same on /world). */
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(> main.fst-page) {
+  overflow: clip !important;
+}
+
+/* Hosts that carry a rider's or a character's accent lock their top arms in
+   it (mixed toward ice-white so every accent stays light). */
+.fst-page :is(.fst-pickup, .fst-cast-detail, .rxs-stage-panel) {
+  --fst-lock: color-mix(in srgb, var(--fst-accent) 62%, #dff9ff);
+}
+
+/* Section grounds: the same ink, each with its own faint light. */
+.fst-page .fst-story {
+  background:
+    radial-gradient(circle at 82% 8%, rgb(122 232 255 / 7%), transparent 32rem),
+    radial-gradient(circle at 8% 92%, rgb(240 207 134 / 5%), transparent 30rem),
+    var(--fst-ink);
+}
+
+.fst-page .fst-cast-section {
+  background:
+    radial-gradient(circle at 12% 18%, rgb(164 139 255 / 7%), transparent 30rem),
+    radial-gradient(circle at 88% 72%, rgb(122 232 255 / 7%), transparent 32rem),
+    var(--fst-ink);
+}
+
+.fst-page .fst-riders-section {
+  background:
+    radial-gradient(circle at 10% 10%, rgb(122 232 255 / 8%), transparent 34rem),
+    radial-gradient(circle at 90% 44%, rgb(240 207 134 / 5%), transparent 30rem),
+    var(--fst-ink);
+}
+
+/* ================================================================
+   Brackets: one paint for every panel that locks on
+   ================================================================ */
+/* Eight 2px arms, ice (or the host's lock) at the top corners and gold at
+   the bottom. Written where they are painted, so var(--fst-lock) resolves on
+   each host rather than once on the page. Grid tiles (articles, gallery
+   frames) take none: brackets mark a panel, not a list item. */
+.fst-page :is(.fst-story-layout, .fst-cast-console, .fst-pickup-card, .fst-finishers article)::after,
+.fst-page .fst-cast-detail figure::after,
+.fst-page .fst-pickup-dialog::after,
+.fst-page .rxs-stage-panel figure > span,
+.fst-page .fst-cast-monogram i {
+  background:
+    linear-gradient(var(--fst-lock) 0 0) 0 0 / var(--fst-arm) 2px no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 0 0 / 2px var(--fst-arm) no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 100% 0 / var(--fst-arm) 2px no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 100% 0 / 2px var(--fst-arm) no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 100% / var(--fst-arm) 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 100% / 2px var(--fst-arm) no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% 100% / var(--fst-arm) 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% 100% / 2px var(--fst-arm) no-repeat;
+}
+
+.fst-page :is(.fst-story-layout, .fst-cast-console, .fst-pickup-card, .fst-finishers article)::after,
+.fst-page .fst-cast-detail figure::after,
+.fst-page .fst-pickup-dialog::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+/* ================================================================
+   Local navigation
+   ================================================================ */
+.fst-page .rxs-local-nav {
+  border-bottom-color: rgb(122 232 255 / 16%);
+  background: rgb(4 8 15 / 94%);
+}
+
+.fst-page .rxs-brand span {
+  background: none;
+  color: var(--fst-ice);
+}
+
+.fst-page .rxs-local-nav nav a {
+  color: var(--fst-text-2);
+}
+
+/* The section the reader jumped to keeps a prism underline. */
+.fst-page:has(#story:target) .rxs-local-nav nav a[href="#story"],
+.fst-page:has(#characters:target) .rxs-local-nav nav a[href="#characters"],
+.fst-page:has(#riders:target) .rxs-local-nav nav a[href="#riders"] {
+  color: var(--fst-text);
+  background: var(--fst-prism) 50% calc(100% - 8px) / 100% 1px no-repeat;
+}
+
+.fst-page .rxs-local-nav nav a:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}
+
+/* Motion's reading line under the bar, ice to gold. */
+.fst-page[data-motion-ready="true"] {
+  --mx-progress-from: #7ae8ff;
+  --mx-progress-to: #f0cf86;
+}
+
+/* ================================================================
+   Hero: the logo floats as light, framed and grounded
+   ================================================================ */
+/* A true-black stage under the logo: the art's own black ground screens
+   into it without an edge. The hero clips (not hides) its overflow, so it
+   is no scroll container and the copy's hand-over follows the page. */
+.fst-page .fst-hero {
+  overflow: clip;
+  background:
+    radial-gradient(ellipse 46% 36% at 50% 34%, #000 0 40%, transparent 100%),
+    radial-gradient(ellipse 60% 40% at 50% 38%, rgb(122 232 255 / 8%), transparent 70%),
+    linear-gradient(180deg, #02040a, #04080f 72%);
+}
+
+/* The flat base grid gives way to a stage floor under the logo: rays from
+   a vanishing point behind the logo's lower third and rules that widen
+   toward the reader, drawn flat (no 3D layer). Its top follows the logo's
+   size tokens (--fst-hero-top, --fst-logo-w, set with the hero flow below);
+   the logo screens over it, so the floor shows through the art's black. */
+.fst-page .fst-hero::before {
+  background: none;
+}
+
+.fst-page .fst-hero::after {
+  position: absolute;
+  z-index: -1;
+  top: calc(var(--fst-hero-top) + var(--fst-logo-w) * 0.42);
+  left: 50%;
+  width: calc(var(--fst-logo-w) * 2);
+  height: calc(var(--fst-logo-w) * 0.46);
+  content: "";
+  background:
+    linear-gradient(rgb(122 232 255 / 22%) 0 0) 0 4% / 100% 1px no-repeat,
+    linear-gradient(rgb(122 232 255 / 20%) 0 0) 0 11% / 100% 1px no-repeat,
+    linear-gradient(rgb(122 232 255 / 18%) 0 0) 0 22% / 100% 1px no-repeat,
+    linear-gradient(rgb(122 232 255 / 16%) 0 0) 0 38% / 100% 1px no-repeat,
+    linear-gradient(rgb(122 232 255 / 14%) 0 0) 0 60% / 100% 1px no-repeat,
+    linear-gradient(rgb(122 232 255 / 12%) 0 0) 0 90% / 100% 1px no-repeat,
+    repeating-conic-gradient(
+      from 90deg at 50% 0%,
+      rgb(122 232 255 / 22%) 0deg 0.25deg,
+      transparent 0.25deg 6deg
+    );
+  translate: -50% 0;
+  -webkit-mask-image: radial-gradient(
+    ellipse 50% 100% at 50% 0%,
+    rgb(0 0 0 / 30%) 0%,
+    #000 20%,
+    rgb(0 0 0 / 45%) 60%,
+    transparent 92%
+  );
+  mask-image: radial-gradient(
+    ellipse 50% 100% at 50% 0%,
+    rgb(0 0 0 / 30%) 0%,
+    #000 20%,
+    rgb(0 0 0 / 45%) 60%,
+    transparent 92%
+  );
+  pointer-events: none;
+}
+
+.fst-page .rxs-hero-ambient i:nth-child(1) {
+  background: radial-gradient(circle, rgb(122 232 255 / 12%), transparent 68%);
+}
+
+.fst-page .rxs-hero-ambient i:nth-child(2) {
+  background: radial-gradient(circle, rgb(164 139 255 / 11%), transparent 70%);
+}
+
+.fst-page .rxs-hero-ambient i:nth-child(3) {
+  background: radial-gradient(circle, rgb(240 207 134 / 9%), transparent 70%);
+}
+
+.fst-page .fst-hero .rxs-hero-visual {
+  mix-blend-mode: screen;
+}
+
+.fst-page .fst-hero .rxs-hero-visual img {
+  filter: saturate(1.08) contrast(1.05);
+}
+
+/* A bloom under the logo, ice over gold. */
+.fst-page .fst-hero .rxs-hero-visual::before {
+  position: absolute;
+  z-index: -1;
+  inset: -12% -10%;
+  content: "";
+  background:
+    radial-gradient(ellipse 50% 42% at 50% 58%, rgb(122 232 255 / 12%), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 70%, rgb(240 207 134 / 8%), transparent 70%);
+  pointer-events: none;
+}
+
+/* The key visual locks on: hero-frame brackets (26px arms) around the
+   logo, and a prism rule 24px under the frame, all on the one pseudo. */
+.fst-page .fst-hero .rxs-hero-visual::after {
+  inset: 4% 5% calc(4% - 24px);
+  background:
+    linear-gradient(var(--fst-lock) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 0 0 / 2px 26px no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(var(--fst-lock) 0 0) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 calc(100% - 24px) / 26px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 calc(100% - 24px) / 2px 26px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% calc(100% - 24px) / 26px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% calc(100% - 24px) / 2px 26px no-repeat,
+    var(--fst-prism) 50% 100% / 64% 1px no-repeat;
+  pointer-events: none;
+}
+
+/* Hero flow: logo, copy and cue stack in flow (the cue no longer sits over
+   the lede), and the logo is sized to the first screen. The skin's rules and
+   the cinematic landscape grid are (0,2,0); these are (0,3,0). */
+.fst-page.fst-page .fst-hero {
+  --fst-hero-top: clamp(64px, 7vw, 88px);
+  --fst-logo-w: min(88vw, 900px, calc((100svh - 62px) * 0.72));
+  justify-content: flex-start;
+  gap: clamp(18px, 2.6vw, 30px);
+  min-height: max(720px, calc(100svh - 62px));
+  padding-top: var(--fst-hero-top);
+  padding-bottom: clamp(48px, 6vw, 72px);
+}
+
+.fst-page.fst-page .fst-hero .rxs-hero-visual {
+  width: var(--fst-logo-w);
+}
+
+.fst-page.fst-page .fst-hero .rxs-scroll-cue {
+  position: relative;
+  inset: auto;
+  translate: none;
+  margin-top: clamp(8px, 1.6vw, 20px);
+}
+
+/* Hero type: HUD kicker between prism ticks, the gold mark, the chrome-ink
+   title with its ghost, a quieter lede. */
+.fst-page .rxs-hero-copy > p:first-child {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  max-width: 100%;
+  margin: 0 0 18px;
+  color: var(--fst-ice);
+  font: 400 12px/1.4 var(--fst-hud);
+  font-synthesis: none;
+  letter-spacing: 0.18em;
+  text-shadow: none;
+}
+
+.fst-page .rxs-hero-copy > p:first-child::before,
+.fst-page .rxs-hero-copy > p:first-child::after {
+  flex: 0 0 44px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page .rxs-hero-copy > p:first-child::after {
+  background: var(--fst-prism-r);
+}
+
+/* One chrome ramp per line of the title, started under the gold mark
+   (its 14px x 1.4 line and 14px gap). */
+.fst-page .rxs-hero h1 {
+  color: transparent;
+  background: var(--fst-chrome) 0 calc(14px * 1.4 + 14px) / 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+
+.fst-page .rxs-hero h1 span {
+  margin-bottom: 14px;
+  background: none;
+  color: var(--fst-gold);
+  font: 400 14px/1.4 var(--fst-hud);
+  font-synthesis: none;
+  letter-spacing: 0.24em;
+  filter: none;
+}
+
+.fst-page .rxs-hero-lede {
+  color: var(--fst-text-2);
+  font-size: clamp(15px, 1.5vw, 20px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-shadow: none;
+}
+
+.fst-page .rxs-scroll-cue {
+  color: var(--fst-text-2);
+  font-size: 12px;
+}
+
+.fst-page .rxs-scroll-cue i {
+  height: 40px;
+  background: linear-gradient(180deg, var(--fst-ice), var(--fst-violet) 50%, transparent);
+  transform-origin: 50% 0;
+}
+
+.fst-page .rxs-scroll-cue:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   HUD labels: the 12px floor, in the Michroma voice
+   ================================================================ */
+/* All-capitals Latin labels only: the subset has no kana or lowercase, so
+   Japanese labels keep the page's face (below). Michroma is wide, so the
+   tracking comes down from the skin's .16–.28em. */
+.fst-page
+  :is(
+    .rxs-brand span,
+    .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span,
+    .fst-cast-detail figcaption,
+    .fst-cast-copy em,
+    .fst-cast-monogram small,
+    .fst-pickup-visual > span,
+    .fst-pickup-copy p,
+    .fst-pickup-copy small,
+    .fst-pickup-heading p,
+    .fst-pickup-heading small,
+    .fst-subheading p,
+    .fst-articles article header small,
+    .fst-finishers small,
+    .fst-form-copy small,
+    .fst-gallery figcaption,
+    .rxs-stage-panel > div > small,
+    .rxs-footer > div p
+  ) {
+  font-family: var(--fst-hud);
+  font-size: 12px;
+  font-weight: 400;
+  font-synthesis: none;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+}
+
+/* Japanese labels: the page's face at 12px. */
+.fst-page
+  :is(
+    .fst-cast-copy small,
+    .fst-cast-copy > a,
+    .fst-specs dt,
+    .rxs-stage-hint,
+    .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small
+  ) {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* The shared slide control's HOLD + SLIDE line, at the floor
+   (styles-pickup-stability.css sets 11px at (0,3,2)). */
+html[data-mode="world"] .fst-page .fst-pickup-plus .ios-slide-open-label small {
+  font-size: 12px;
+}
+
+.fst-page .rxs-stage-hint {
+  color: var(--fst-text-3);
+}
+
+/* Body sizes: record prose at 14px and more. */
+.fst-page :is(.fst-articles p, .fst-arsenal li, .fst-arsenal p) {
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.fst-page .fst-note {
+  color: var(--fst-text-3);
+  font-size: 13px;
+}
+
+/* ================================================================
+   Section openings
+   ================================================================ */
+/* The kicker is a HUD label between prism ticks, not a boxed chip (base
+   :2347 and styles-world/32.css are (0,2,1)). */
+.fst-page.fst-page .rxs-section-heading > p {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  max-width: 100%;
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--fst-ice);
+  font: 400 12px/1.4 var(--fst-hud);
+  font-synthesis: none;
+  letter-spacing: 0.18em;
+  text-shadow: none;
+}
+
+.fst-page.fst-page .rxs-section-heading > p::before,
+.fst-page.fst-page .rxs-section-heading > p::after {
+  flex: 0 0 44px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page.fst-page .rxs-section-heading > p::after {
+  background: var(--fst-prism-r);
+}
+
+/* A prism rule opens each section. */
+.fst-page .rxs-section::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(1180px, 100% - 48px);
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+  opacity: 0.55;
+  translate: -50% 0;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* A light curtain falls on each heading; the heading isolates so the
+   curtain stays above the section's ground with or without motion. */
+.fst-page .rxs-section-heading {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: clamp(44px, 6vw, 76px);
+}
+
+.fst-page .rxs-section-heading::before {
+  position: absolute;
+  z-index: -1;
+  top: -80px;
+  right: -20%;
+  left: -20%;
+  height: 320px;
+  content: "";
+  background: radial-gradient(ellipse 50% 50% at 50% 42%, rgb(122 232 255 / 9%), transparent 70%);
+  pointer-events: none;
+}
+
+/* Chrome-ink headlines, one ramp per line. No filter here: Motion's
+   mx-headline moves them. */
+.fst-page .rxs-section-heading h2 {
+  color: transparent;
+  background: var(--fst-chrome) 0 0 / 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.fst-page .rxs-section-heading > span {
+  color: var(--fst-text-2);
+}
+
+/* Tighter rhythm: less ink between the sections, and a nav jump lands the
+   kicker a step under the bar (html keeps a 96px scroll padding). */
+.fst-page .rxs-section {
+  padding-top: clamp(80px, 8vw, 112px);
+  padding-bottom: clamp(80px, 8vw, 112px);
+  scroll-margin-top: calc(-1 * clamp(40px, 6vw, 80px));
+}
+
+/* ================================================================
+   Story
+   ================================================================ */
+.fst-page :is(.fst-story-layout, .fst-cast-console) {
+  position: relative;
+  border-color: rgb(122 232 255 / 18%);
+  border-radius: 6px;
+  background:
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    linear-gradient(150deg, rgb(122 232 255 / 5%), transparent 55%),
+    var(--fst-plate);
+  box-shadow: none;
+}
+
+.fst-page :is(.fst-story-layout, .fst-cast-console)::after {
+  inset: -1px;
+}
+
+/* The story mark as outlined letters; the index travels with the read. */
+.fst-page .fst-story-layout {
+  grid-template-columns: minmax(0, 0.28fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.fst-page .fst-story-index {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  font-family: "Oxanium", var(--rxs-font-display);
+  letter-spacing: -0.01em;
+}
+
+.fst-page .fst-story-index span {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--fst-lock);
+  text-shadow: 0.06em 0.06em 0 rgb(164 139 255 / 36%);
+}
+
+.fst-page .fst-story-index span:nth-child(2) {
+  -webkit-text-stroke-color: var(--fst-gold);
+  text-shadow: 0.06em 0.06em 0 rgb(255 92 200 / 28%);
+}
+
+.fst-page .fst-story-index i {
+  width: 120px;
+  height: 1px;
+  margin-top: 18px;
+  background: var(--fst-prism);
+}
+
+.fst-page .fst-story-copy {
+  padding-left: clamp(24px, 3vw, 48px);
+  border-left: 1px solid rgb(122 232 255 / 14%);
+  background: linear-gradient(180deg, var(--fst-ice), var(--fst-violet) 40%, transparent) left top /
+    1px 140px no-repeat;
+}
+
+/* The skin's 36em book measure stands. */
+.fst-page .fst-story-copy p {
+  color: var(--fst-text-2);
+}
+
+.fst-page .fst-story-copy p:first-child {
+  color: var(--fst-text);
+  font-size: 17px;
+}
+
+/* ================================================================
+   Cast console
+   ================================================================ */
+/* The rails keep their geometry (the cast grid, 28px shell, 60px tabs; the
+   record rails' five columns); only their material moves from frosted slate
+   to the HUD's ink, the lens to a raised deck plate. The shared frosted
+   sheet paints both with !important, so this answers in kind. */
+html body .fst-page .rxs-stage-tabs.liquid-swipe-tabs,
+html body .fst-page .rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 6%), transparent 40%),
+    rgb(4 8 15 / 72%) !important;
+  box-shadow: inset 0 1px 0 rgb(122 232 255 / 10%) !important;
+}
+
+html body .fst-page .rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  border-color: rgb(122 232 255 / 22%);
+}
+
+html body .fst-page .rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 6%)),
+    var(--fst-plate-raised) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(198 245 255 / 28%),
+    inset 0 0 0 1px rgb(122 232 255 / 30%) !important;
+}
+
+.fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"]
+  small {
+  color: var(--fst-text-2);
+}
+
+.fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]
+  :is(span, small) {
+  color: #fff;
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+  color: var(--fst-text-3);
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  color: var(--fst-text-2);
+}
+
+.fst-page .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"] :is(span, small) {
+  color: #fff;
+}
+
+.fst-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: -3px;
+}
+
+/* Portrait: a locked frame in the character's accent, the caption off the
+   face, the white-ground art eased into the frame. */
+.fst-page .fst-cast-detail figure {
+  --fst-arm: 20px;
+  border-color: color-mix(in srgb, var(--fst-accent) 34%, transparent);
+  border-radius: 6px;
+  background:
+    radial-gradient(
+      circle at 50% 32%,
+      color-mix(in srgb, var(--fst-accent) 16%, transparent),
+      transparent 62%
+    ),
+    var(--fst-plate);
+  box-shadow: none;
+}
+
+.fst-page .fst-cast-detail figure::after {
+  z-index: 2;
+}
+
+.fst-page .fst-cast-detail figure img {
+  -webkit-mask-image: linear-gradient(180deg, #000 78%, rgb(0 0 0 / 70%));
+  mask-image: linear-gradient(180deg, #000 78%, rgb(0 0 0 / 70%));
+}
+
+.fst-page .fst-cast-detail figcaption {
+  top: auto;
+  bottom: 14px;
+  left: 14px;
+  z-index: 3;
+  padding: 8px 12px;
+  border: 0;
+  border-left: 2px solid var(--fst-accent);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 84%);
+  color: var(--fst-text);
+}
+
+.fst-page .fst-cast-monogram i {
+  border-color: color-mix(in srgb, var(--fst-accent) 24%, transparent);
+  border-radius: 4px;
+}
+
+/* The name in chrome ink toward the character's lock colour, with the
+   ghost; the role on a ruled line; the file link as a square plate. */
+.fst-page .fst-cast-copy h3 {
+  color: transparent;
+  background: linear-gradient(
+      180deg,
+      #fff 0%,
+      #eefaff 34%,
+      color-mix(in srgb, var(--fst-lock) 55%, #eafbff) 66%,
+      var(--fst-lock) 100%
+    )
+    0 0 / 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(3px 0 color-mix(in srgb, var(--fst-accent) 30%, transparent))
+    drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+
+.fst-page .fst-cast-copy small {
+  color: var(--fst-accent);
+  font-weight: 600;
+}
+
+.fst-page .fst-cast-copy em {
+  color: var(--fst-text-3);
+}
+
+.fst-page .fst-cast-copy strong {
+  margin-top: 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--fst-accent);
+  color: var(--fst-text);
+  font-size: 15px;
+}
+
+.fst-page .fst-cast-copy p {
+  color: var(--fst-text-2);
+}
+
+.fst-page .fst-cast-copy > a {
+  min-height: 46px;
+  padding: 12px 18px;
+  border-color: color-mix(in srgb, var(--fst-accent) 45%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fst-accent) 12%, rgb(4 8 15 / 60%));
+  color: var(--fst-text);
+  font-weight: 600;
+}
+
+.fst-page .fst-cast-copy > a:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   Rider pickups
+   ================================================================ */
+/* A square plate that locks on; the rider's painting bleeds into the copy. */
+.fst-page .fst-pickup-card {
+  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+  border-color: rgb(122 232 255 / 20%);
+  border-radius: 6px;
+  background:
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    radial-gradient(
+      circle at 92% 8%,
+      color-mix(in srgb, var(--fst-accent) 14%, transparent),
+      transparent 34%
+    ),
+    var(--fst-ink);
+  box-shadow: none;
+}
+
+/* Above the art, its scrims and the RIDER tag; below the slide control. */
+.fst-page .fst-pickup-card::after {
+  z-index: 5;
+}
+
+.fst-page .fst-pickup-visual {
+  background: var(--fst-ink);
+}
+
+.fst-page .fst-pickup-visual::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, transparent 62%, var(--fst-ink) 100%),
+    linear-gradient(0deg, rgb(4 8 15 / 70%), transparent 30%);
+  pointer-events: none;
+}
+
+.fst-page .fst-pickup-visual > .fst-pickup-plus {
+  z-index: 6;
+}
+
+/* RIDER on its own scrim: white on the armour read at 1:1. */
+.fst-page .fst-pickup-visual > span {
+  top: 14px;
+  left: 14px;
+  z-index: 4;
+  padding: 6px 10px;
+  border-left: 2px solid var(--fst-accent);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 80%);
+  color: var(--fst-text);
+}
+
+.fst-page .fst-pickup-plus.ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 4px;
+}
+
+/* A ring of the rider's light behind the copy, clipped by the card. */
+.fst-page .fst-pickup-copy {
+  position: relative;
+  max-width: none;
+}
+
+.fst-page .fst-pickup-copy > * {
+  position: relative;
+  z-index: 1;
+  max-width: 58ch;
+}
+
+.fst-page .fst-pickup-copy::before {
+  position: absolute;
+  z-index: 0;
+  top: -120px;
+  right: -140px;
+  width: 460px;
+  height: 460px;
+  border: 1px solid color-mix(in srgb, var(--fst-accent) 22%, transparent);
+  border-radius: 50%;
+  content: "";
+  background: radial-gradient(
+    circle,
+    transparent 58%,
+    color-mix(in srgb, var(--fst-accent) 8%, transparent) 59% 60%,
+    transparent 61%
+  );
+  pointer-events: none;
+}
+
+.fst-page .fst-pickup-copy p {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--fst-accent);
+}
+
+.fst-page .fst-pickup-copy p::after {
+  flex: 0 0 44px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page .fst-pickup-copy small {
+  color: var(--fst-text-3);
+}
+
+.fst-page .fst-pickup-copy h3 span {
+  color: var(--fst-text-2);
+  font-size: 0.4em;
+  letter-spacing: 0.12em;
+}
+
+.fst-page .fst-pickup-copy h3 b,
+.fst-page .fst-pickup-heading h2 b {
+  color: transparent;
+  background: linear-gradient(
+      180deg,
+      #fff 0%,
+      #eefaff 34%,
+      color-mix(in srgb, var(--fst-lock) 55%, #eafbff) 66%,
+      var(--fst-lock) 100%
+    )
+    0 0 / 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(3px 0 color-mix(in srgb, var(--fst-accent) 30%, transparent))
+    drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+
+.fst-page .fst-pickup-copy em {
+  color: var(--fst-text-2);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.fst-page .fst-pickup-copy q {
+  padding-left: 16px;
+  border-left: 0;
+  background: linear-gradient(180deg, var(--fst-accent), var(--fst-violet) 60%, transparent) left
+    top / 2px 100% no-repeat;
+  color: var(--fst-text-2);
+  font-size: 15px;
+}
+
+/* ================================================================
+   Record dialog
+   ================================================================ */
+/* One square sheet: an 8px record, brackets 8px in, the prism along the
+   top of the reading panel. The panel scrolls; the sheet and its brackets
+   hold still. */
+.fst-page .fst-pickup-dialog {
+  border-color: rgb(122 232 255 / 30%);
+  border-radius: 8px;
+  timeline-scope: --fst-record;
+}
+
+.fst-page .fst-pickup-dialog::backdrop {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 20%, rgb(122 232 255 / 6%), transparent 70%),
+    rgb(2 4 10 / 86%);
+}
+
+.fst-page .fst-pickup-dialog::after {
+  z-index: 11;
+  inset: 8px;
+}
+
+.fst-page .fst-pickup-dialog .fst-pickup-panel {
+  background:
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    radial-gradient(
+      circle at 90% 0%,
+      color-mix(in srgb, var(--fst-accent) 10%, transparent),
+      transparent 30rem
+    ),
+    var(--fst-ink);
+  color: var(--fst-text);
+  scroll-timeline: --fst-record block;
+}
+
+/* The record's position: a 2px prism line along the sheet's top edge,
+   driven by the panel's scroll (below); a full static rule without it. */
+.fst-page .fst-pickup-dialog::before {
+  position: absolute;
+  z-index: 12;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: var(--fst-prism);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.fst-page .fst-pickup-dialog > .form-pickup-close.form-pickup-close {
+  border: 1px solid rgb(122 232 255 / 34%);
+  border-radius: 4px;
+  background: var(--fst-plate);
+}
+
+html[data-mode="world"] .fst-page .fst-pickup-dialog .form-pickup-close:focus-visible {
+  outline-color: var(--fst-focus) !important;
+}
+
+.fst-page .fst-pickup-dialog .form-pickup-end-close {
+  border-color: rgb(122 232 255 / 30%);
+  border-radius: 4px;
+  background: var(--fst-plate);
+  font-family: var(--fst-hud);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+}
+
+.fst-page .fst-pickup-dialog .form-pickup-end-close:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 4px;
+}
+
+/* No slab behind the stage rail: the rail is the control. */
+.fst-page .fst-pickup-dialog .rxs-stage-switcher {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Stage art stays whole (contain 3:4); the base's orbit ring becomes the
+   figure's static bracket set, in the stage's accent. */
+.fst-page .rxs-stage-panel figure {
+  border-color: color-mix(in srgb, var(--fst-accent) 30%, transparent);
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.fst-page .rxs-stage-panel figure > span {
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+.fst-page .rxs-stage-panel > div > p {
+  color: var(--fst-text-2);
+}
+
+/* Heading and calls set left, like the rest of the record. */
+.fst-page .fst-pickup-heading {
+  max-width: none;
+  margin: 0 0 8px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgb(122 232 255 / 14%);
+  background: var(--fst-prism) left bottom / 220px 1px no-repeat;
+  text-align: start;
+}
+
+.fst-page .fst-pickup-heading p {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--fst-ice);
+}
+
+.fst-page .fst-pickup-heading p::after {
+  flex: 0 0 44px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page .fst-pickup-heading small {
+  color: var(--fst-text-3);
+}
+
+.fst-page .fst-pickup-heading h2 span {
+  color: var(--fst-ice);
+}
+
+.fst-page .fst-pickup-heading em {
+  color: var(--fst-text-2);
+  font-size: 13px;
+}
+
+.fst-page .fst-pickup-record > .fst-calls {
+  justify-content: flex-start;
+  margin: 0 0 clamp(32px, 4vw, 48px);
+}
+
+.fst-page .fst-pickup-record .fst-copy {
+  max-width: 46em;
+  margin-inline: 0;
+}
+
+.fst-page .fst-pickup-record .fst-arsenal {
+  max-width: none;
+}
+
+.fst-page .fst-pickup-record :is(.fst-arsenal p, .fst-finishers p) {
+  max-width: 48em;
+}
+
+.fst-page .fst-pickup-record .fst-note {
+  margin-inline: 0;
+}
+
+.fst-page .fst-pickup-record .fst-copy p {
+  color: var(--fst-text-2);
+}
+
+/* The skin stills the record's reveals with transform:none, but the base
+   offsets them with translate: headings and cards jumped 32px as they
+   scrolled into the panel. */
+.fst-page .fst-pickup-record .rxs-reveal {
+  translate: none;
+}
+
+/* Subheadings: tighter, ticked, prism-ruled. */
+.fst-page .fst-pickup-record .fst-subheading {
+  margin-top: clamp(48px, 6vw, 80px);
+  margin-bottom: clamp(24px, 2.6vw, 32px);
+  padding-bottom: 14px;
+  border-bottom-color: rgb(122 232 255 / 14%);
+  background: var(--fst-prism) left bottom / 220px 1px no-repeat;
+}
+
+.fst-page .fst-subheading p {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--fst-ice);
+}
+
+.fst-page .fst-subheading p::before {
+  flex: 0 0 28px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page .fst-subheading h3 {
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+
+/* Transformation calls as square call-outs; lowercase in the calls takes
+   Oxanium, not the capitals-only subset. */
+.fst-page .fst-calls b {
+  padding: 8px 12px 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--fst-accent) 28%, transparent);
+  border-left: 2px solid var(--fst-accent);
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--fst-accent) 16%, transparent), transparent 70%),
+    rgb(4 8 15 / 80%);
+  color: var(--fst-text);
+  font-family: var(--fst-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+/* Spec grid as HUD plates. */
+.fst-page .fst-specs div {
+  padding: 14px 16px 13px;
+  border-color: rgb(122 232 255 / 14%);
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--fst-accent) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 5%), transparent 60%),
+    rgb(4 8 15 / 60%);
+}
+
+.fst-page .fst-specs dt {
+  color: var(--fst-text-3);
+}
+
+/* Oxanium sets wider than the system face: a step smaller, so a code such
+   as 20000YOPS/200Core keeps to one line in a two-column cell. */
+.fst-page .fst-specs dd {
+  color: var(--fst-text);
+  font-family: "Oxanium", var(--rxs-font-display);
+  font-size: clamp(16px, 1.3vw, 20px);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+
+.fst-page .fst-form-specs .fst-specs {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+/* Article cards: square plates with outlined numerals. */
+.fst-page .fst-articles article {
+  position: relative;
+  border-color: rgb(122 232 255 / 14%);
+  border-radius: 6px;
+  background:
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    linear-gradient(150deg, rgb(122 232 255 / 5%), transparent 55%),
+    var(--fst-plate);
+}
+
+.fst-page .fst-articles article header {
+  align-items: flex-end;
+}
+
+.fst-page .fst-articles article header span {
+  color: transparent;
+  font: 700 clamp(28px, 2.4vw, 40px) / 1 "Oxanium", var(--rxs-font-display);
+  -webkit-text-stroke: 1px var(--fst-lock);
+  text-shadow: 0.06em 0.06em 0 rgb(164 139 255 / 36%);
+}
+
+.fst-page .fst-articles article header small {
+  color: var(--fst-text-2);
+}
+
+.fst-page .fst-articles h3 {
+  margin: 18px 0 12px;
+}
+
+.fst-page .fst-articles p {
+  color: var(--fst-text-2);
+}
+
+/* Finishers: the record's gold lock-on. */
+.fst-page .fst-finishers article {
+  --fst-lock: var(--fst-gold);
+  position: relative;
+  padding: clamp(24px, 3vw, 40px);
+  border-color: rgb(240 207 134 / 22%);
+  border-radius: 6px;
+  background:
+    var(--fst-prism-r) top / 100% 1px no-repeat,
+    radial-gradient(circle at 92% 0%, rgb(240 207 134 / 10%), transparent 30rem),
+    var(--fst-plate);
+}
+
+.fst-page .fst-finishers small {
+  color: var(--fst-gold);
+}
+
+.fst-page .fst-finishers h4 {
+  font-weight: 640;
+}
+
+.fst-page .fst-finishers p {
+  color: var(--fst-text-2);
+}
+
+/* Arsenal: a drawn diamond instead of a 9px glyph. */
+.fst-page .fst-arsenal li {
+  border-color: rgb(122 232 255 / 16%);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 60%);
+}
+
+.fst-page .fst-arsenal li::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 12px;
+  content: "";
+  background: var(--fst-gold);
+  rotate: 45deg;
+  vertical-align: 2px;
+}
+
+.fst-page .fst-arsenal p {
+  color: var(--fst-text-2);
+}
+
+/* Gallery frames: square, captions on a scrim, the art eased at its foot. */
+.fst-page .fst-gallery figure {
+  border-color: rgb(122 232 255 / 16%);
+  border-radius: 4px;
+}
+
+.fst-page .fst-gallery img {
+  -webkit-mask-image: linear-gradient(180deg, #000 76%, rgb(0 0 0 / 65%));
+  mask-image: linear-gradient(180deg, #000 76%, rgb(0 0 0 / 65%));
+}
+
+.fst-page .fst-gallery figcaption {
+  padding: 8px 12px;
+  border: 0;
+  border-left: 2px solid var(--fst-accent);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 84%);
+  color: var(--fst-text);
+}
+
+/* Realm Royal form panel: the name at a size that keeps its phrases, and
+   two tied columns. */
+.fst-page .fst-form-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.fst-page .fst-form-copy {
+  padding-right: clamp(0px, 2vw, 24px);
+  border-right: 1px solid rgb(122 232 255 / 12%);
+}
+
+.fst-page .fst-form-copy small {
+  color: var(--fst-accent);
+}
+
+/* The form's name keeps its katakana whole: it may break only after its
+   ・ (the list seam name-breaks.ts also allows), and the size keeps
+   仮面ライダーレルムロイヤル・ on the first line in either column. */
+.fst-page .fst-form-copy h3 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+/* ================================================================
+   Footer
+   ================================================================ */
+.fst-page .rxs-footer {
+  border-top: 0;
+  background:
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    radial-gradient(circle at 14% 100%, rgb(122 232 255 / 7%), transparent 28rem),
+    var(--fst-ink);
+}
+
+.fst-page .rxs-footer > div p {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--fst-ice);
+}
+
+.fst-page .rxs-footer > div p::after {
+  flex: 0 0 44px;
+  height: 1px;
+  content: "";
+  background: var(--fst-prism);
+}
+
+.fst-page .rxs-footer h2 {
+  color: transparent;
+  background: var(--fst-chrome) 0 0 / 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.fst-page .rxs-footer > a {
+  min-height: 48px;
+  padding: 16px 20px;
+  border-color: rgb(122 232 255 / 22%);
+  border-radius: 4px;
+  background:
+    linear-gradient(var(--fst-ice) 0 0) 0 0 / 14px 2px no-repeat,
+    rgb(4 8 15 / 60%);
+  color: var(--fst-text);
+}
+
+.fst-page .rxs-footer > a.rxs-footer-return {
+  border-color: rgb(122 232 255 / 16%);
+  background:
+    linear-gradient(var(--fst-gold) 0 0) 0 0 / 14px 2px no-repeat,
+    rgb(4 8 15 / 60%);
+  color: var(--fst-text-2);
+}
+
+.fst-page .rxs-footer > a i {
+  color: var(--fst-ice);
+}
+
+.fst-page .rxs-footer > a:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   Hover (fine pointers)
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  .fst-page .fst-articles article:hover {
+    border-color: rgb(122 232 255 / 30%);
+    box-shadow: inset 0 0 0 1px rgb(122 232 255 / 22%);
+    transform: none;
+  }
+
+  .fst-page .rxs-footer > a:hover,
+  .fst-page .rxs-footer > a.rxs-footer-return:hover {
+    border-color: rgb(122 232 255 / 56%);
+    background-color: rgb(122 232 255 / 8%);
+    color: var(--fst-text);
+    transform: none;
+    translate: 0 -1px;
+  }
+
+  .fst-page .fst-cast-copy > a:hover {
+    border-color: color-mix(in srgb, var(--fst-accent) 70%, transparent);
+    background-color: color-mix(in srgb, var(--fst-accent) 18%, rgb(4 8 15 / 60%));
+  }
+
+  .fst-page .fst-pickup-dialog .form-pickup-end-close:hover {
+    border-color: rgb(122 232 255 / 56%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .fst-page .rxs-footer > a {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      translate 180ms ease;
+  }
+
+  /* A gallery frame answers the pointer by leaning its art in, once. */
+  html:not([data-world-effects="economy"]) .fst-page .fst-gallery img {
+    transition: scale 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page .fst-gallery figure:hover img {
+    scale: 1.04;
+  }
+}
+
+/* ================================================================
+   Tablets and narrow desktops
+   ================================================================ */
+@media (min-width: 681px) and (max-width: 1440px) and (max-height: 1100px) and (orientation: landscape) {
+  .fst-page.fst-page .fst-hero {
+    --fst-hero-top: clamp(56px, 7vh, 88px);
+    --fst-logo-w: min(64vw, 760px, calc((100svh - 62px) * 0.72));
+    overflow: clip;
+    padding: var(--fst-hero-top) 5vw clamp(40px, 6vh, 64px);
+  }
+}
+
+/* Below 1100px the pickup's copy column is narrow: its eyebrow wraps (a
+   tick beside two lines reads as stray) and the ring would cross the copy. */
+@media (max-width: 1099px) {
+  .fst-page .fst-pickup-copy p::after,
+  .fst-page .fst-pickup-copy::before {
+    display: none;
+  }
+}
+
+/* Short laptop screens (1280x720): the logo gives up a little height so
+   the lede stays in the first screen. */
+@media (min-width: 681px) and (min-height: 501px) and (max-height: 760px) and (orientation: landscape) {
+  .fst-page.fst-page .fst-hero {
+    --fst-logo-w: min(64vw, 760px, calc((100svh - 62px) * 0.62));
+  }
+}
+
+/* Beside a long note on a tablet, the portrait stands at the top of its
+   column rather than floating mid-way. */
+@media (min-width: 681px) and (max-width: 1024px) {
+  .fst-page .fst-cast-detail {
+    align-items: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .fst-page .fst-form-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fst-page .fst-form-copy {
+    padding-right: 0;
+    border-right: 0;
+  }
+}
+
+/* ================================================================
+   Phones
+   ================================================================ */
+@media (max-width: 680px) {
+  .fst-page.fst-page .fst-hero {
+    --fst-hero-top: 64px;
+    --fst-logo-w: min(96vw, 520px, calc((100svh - 58px) * 0.72));
+    gap: 22px;
+    min-height: max(640px, calc(100svh - 58px));
+    padding-bottom: 64px;
+  }
+
+  /* Tracking may come down on phones; the size never does. */
+  .fst-page .rxs-hero-copy > p:first-child,
+  .fst-page.fst-page .rxs-section-heading > p {
+    gap: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .fst-page .rxs-hero-copy > p:first-child::before,
+  .fst-page .rxs-hero-copy > p:first-child::after,
+  .fst-page.fst-page .rxs-section-heading > p::before,
+  .fst-page.fst-page .rxs-section-heading > p::after {
+    flex-basis: 24px;
+  }
+
+  .fst-page .rxs-section {
+    padding-top: clamp(64px, 14vw, 88px);
+    padding-bottom: clamp(64px, 14vw, 88px);
+  }
+
+  .fst-page .rxs-section-heading {
+    margin-bottom: 40px;
+  }
+
+  .fst-page .fst-story-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fst-page .fst-story-index {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    font-size: 26px;
+  }
+
+  .fst-page .fst-story-index i {
+    display: block;
+    width: 72px;
+    margin: 0 0 0 12px;
+  }
+
+  .fst-page .fst-story-copy {
+    padding-left: 0;
+    border-left: 0;
+    background: none;
+  }
+
+  .fst-page .fst-pickup-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fst-page .fst-pickup-visual {
+    min-height: min(118vw, 520px);
+  }
+
+  .fst-page .fst-pickup-visual::after {
+    background: linear-gradient(0deg, var(--fst-ink), transparent 40%);
+  }
+
+  .fst-page .fst-calls b {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    :is(span, small) {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  /* Specs: one key/value row each. */
+  .fst-page .fst-specs,
+  .fst-page .fst-form-specs .fst-specs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fst-page .fst-specs div {
+    display: grid;
+    grid-template-columns: minmax(64px, 0.36fr) minmax(0, 1fr);
+    gap: 0 12px;
+    align-items: baseline;
+    padding: 12px 14px;
+  }
+
+  .fst-page .fst-specs dd {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  /* Record and cast prose set flush (character breaking, strict kinsoku)
+     in a phone column; headings keep their phrases. */
+  .fst-page :is(.fst-pickup-record p, .fst-cast-copy p, .rxs-stage-panel > div > p) {
+    word-break: normal;
+  }
+
+  .fst-page :is(.fst-pickup-record > .fst-calls, .fst-form-copy .fst-calls) {
+    padding-inline-end: 44px;
+  }
+
+  .fst-page .fst-pickup-dialog .form-pickup-end-close {
+    width: calc(100% - 72px);
+    margin-inline-end: 72px;
+  }
+}
+
+/* Zeus clearance where the button meets the record's foot and the hint. */
+@media (max-width: 680px), (max-height: 500px) {
+  html[data-mode="world"] .fst-page .fst-pickup-dialog > .fst-pickup-panel {
+    padding-bottom: 104px;
+    scroll-padding-bottom: 80px;
+  }
+
+  .fst-page .fst-cast-console .rxs-stage-hint {
+    padding-inline-end: 56px;
+  }
+}
+
+@media (max-width: 430px) {
+  /* The modal UA sheet caps a dialog at 100% - 2em - 6px; the record takes
+     the phone's width less 8px a side. */
+  .fst-page .fst-pickup-dialog {
+    width: calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-width: none;
+  }
+
+  .fst-page .fst-pickup-dialog .fst-pickup-panel {
+    padding-inline: 14px;
+  }
+
+  .fst-page :is(.fst-articles article, .fst-finishers article) {
+    padding: 20px 12px;
+  }
+
+  /* 仮面ライダーレルムロイヤル・ keeps one line down to 320px. */
+  .fst-page .fst-form-copy h3 {
+    font-size: clamp(19px, 6.2vw, 24px);
+  }
+
+  .fst-page .fst-story-layout {
+    gap: 18px;
+    padding: 22px 16px 26px;
+  }
+
+  .fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"] {
+    padding-inline: 0;
+  }
+}
+
+/* Long HUD labels wrap in a phone column; a tick beside two lines reads as
+   stray, so the long ones drop theirs. */
+@media (max-width: 480px) {
+  .fst-page .rxs-hero-copy > p:first-child {
+    letter-spacing: 0.06em;
+    text-wrap: balance;
+  }
+
+  .fst-page .rxs-hero-copy > p:first-child::before,
+  .fst-page .rxs-hero-copy > p:first-child::after,
+  .fst-page .rxs-footer > div p::after {
+    display: none;
+  }
+}
+
+/* Landscape phones: logo and title side by side in the first screen; the
+   record's heading and first calls in the first screen too. */
+@media (max-width: 1024px) and (max-height: 500px) and (orientation: landscape) {
+  .fst-page.fst-page .fst-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 12px 24px;
+    align-content: center;
+    align-items: center;
+    min-height: calc(100svh - 62px);
+    padding: 70px 32px 40px;
+  }
+
+  .fst-page.fst-page .fst-hero .rxs-hero-visual {
+    grid-row: 1 / span 2;
+    width: 100%;
+    translate: 0 0;
+  }
+
+  /* The floor is measured for the stacked hero; beside the title it would
+     sit under the copy. */
+  .fst-page .fst-hero::after {
+    display: none;
+  }
+
+  .fst-page.fst-page .fst-hero .rxs-hero-copy {
+    width: auto;
+    text-align: start;
+  }
+
+  /* Set left beside the logo, the kicker keeps one line: no mirrored ticks,
+     phone tracking. */
+  .fst-page .rxs-hero-copy > p:first-child {
+    letter-spacing: 0.1em;
+  }
+
+  .fst-page .rxs-hero-copy > p:first-child::before,
+  .fst-page .rxs-hero-copy > p:first-child::after {
+    display: none;
+  }
+
+  .fst-page.fst-page .fst-hero h1 {
+    font-size: clamp(28px, 7vh, 40px);
+  }
+
+  .fst-page.fst-page .rxs-hero-lede {
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .fst-page.fst-page .fst-hero .rxs-scroll-cue {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0;
+  }
+
+  .fst-page .fst-pickup-heading h2 {
+    margin: 6px 0 4px;
+    font-size: clamp(24px, 7vh, 32px);
+  }
+
+  .fst-page .fst-pickup-record {
+    margin-top: 16px;
+  }
+}
+
+@media (max-height: 500px) {
+  html[data-mode="world"] .fst-page .fst-pickup-dialog > .fst-pickup-panel {
+    padding-top: 56px;
+  }
+}
+
+/* ================================================================
+   Motion
+   ================================================================ */
+/* Boot, once: the title wipes in and the cue's line draws down. They wait
+   for a loading cover to lift, so the wipe is seen. The cue rule outranks
+   Motion's `.fst-page .rxs-scroll-cue i { animation: none }`. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page .rxs-hero h1 {
+    animation: fst-title-wipe 720ms 120ms cubic-bezier(0.77, 0, 0.18, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page .rxs-scroll-cue i {
+    animation: fst-draw-y 700ms 900ms cubic-bezier(0.77, 0, 0.18, 1) both;
+  }
+}
+
+/* Scroll-linked, on named view timelines (the subject names its own, so no
+   clipping ancestor can capture it). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  .fst-page .rxs-section {
+    view-timeline: --fst-section block;
+  }
+
+  .fst-page :is(.fst-story-layout, .fst-cast-console) {
+    view-timeline: --fst-plate block;
+  }
+
+  .fst-page .fst-story-index {
+    view-timeline: --fst-mark block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page[data-motion-ready="true"]
+      .rxs-section::before {
+      animation: fst-draw-x cubic-bezier(0.77, 0, 0.18, 1) both;
+      animation-timeline: --fst-section;
+      animation-range: entry 0% entry 40%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page[data-motion-ready="true"]
+      :is(.fst-story-layout, .fst-cast-console)::after {
+      animation: fst-lock steps(4, jump-end) both;
+      animation-timeline: --fst-plate;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page[data-motion-ready="true"]
+      .fst-story-index
+      span {
+      animation: fst-numeral steps(6, jump-end) both;
+      animation-timeline: --fst-mark;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+/* The record's position line runs only inside the open dialog, on the
+   panel's own scroll timeline (the page timelines stop while it is open). */
+@supports (animation-timeline: scroll()) and (timeline-scope: --fst-record) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"])[data-dialog-open] .fst-page .fst-pickup-dialog::before {
+      animation: fst-draw-x linear both;
+      animation-timeline: --fst-record;
+    }
+  }
+}
+
+@keyframes fst-title-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes fst-draw-y {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes fst-draw-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes fst-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes fst-numeral {
+  0% {
+    opacity: 0;
+    scale: 1.9;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Economy, contrast, transparency
+   ================================================================ */
+/* Economy rendering drops the ghost filters (the panel swaps stop in the
+   skin, beside its reduced-motion block). */
+html[data-world-effects="economy"]
+  .fst-page
+  :is(.rxs-hero h1, .fst-cast-copy h3, .fst-pickup-copy h3 b, .fst-pickup-heading h2 b) {
+  filter: none;
+}
+
+@media (prefers-contrast: more) {
+  .fst-page {
+    --fst-text-2: #d5e2ec;
+    --fst-text-3: #b9cad8;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .fst-page .rxs-local-nav {
+    background: var(--fst-ink);
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  .fst-page
+    :is(
+      .rxs-brand span,
+      .rxs-hero h1,
+      .rxs-hero h1 span,
+      .rxs-section-heading h2,
+      .fst-story-index span,
+      .fst-cast-copy h3,
+      .fst-pickup-copy h3 b,
+      .fst-pickup-heading h2 b,
+      .fst-pickup-heading h2 span,
+      .fst-articles article header span,
+      .rxs-footer h2
+    ) {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+    filter: none;
+  }
+
+  .fst-page .rxs-local-nav,
+  .fst-page .fst-pickup-dialog,
+  .fst-page .fst-pickup-dialog .fst-pickup-panel,
+  .fst-page .fst-pickup-dialog > .form-pickup-close.form-pickup-close {
+    background: Canvas;
+  }
+
+  .fst-page :is(.fst-cast-detail figcaption, .fst-pickup-visual > span, .fst-gallery figcaption, .fst-calls b) {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  .fst-page .fst-story-index i,
+  .fst-page .fst-pickup-dialog::before {
+    background: CanvasText;
+  }
+
+  .fst-page :is(.fst-story-layout, .fst-cast-console, .fst-pickup-card, .fst-finishers article)::after,
+  .fst-page .fst-cast-detail figure::after,
+  .fst-page .fst-pickup-dialog::after,
+  .fst-page .rxs-stage-panel figure > span,
+  .fst-page .rxs-section::before,
+  .fst-page .rxs-section-heading::before,
+  .fst-page .fst-hero::after,
+  .fst-page .fst-hero .rxs-hero-visual::before,
+  .fst-page .fst-hero .rxs-hero-visual::after,
+  .fst-page .fst-pickup-copy::before,
+  .fst-page .fst-pickup-visual::after {
+    display: none;
+  }
+
+  .fst-page .fst-hero .rxs-hero-visual {
+    mix-blend-mode: normal;
+  }
+
+  .fst-page .fst-pickup-dialog .form-pickup-end-close,
+  .fst-page .rxs-footer > a,
+  .fst-page .fst-cast-copy > a {
+    border-color: ButtonText;
+  }
+}

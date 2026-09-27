@@ -110,16 +110,10 @@
   color: #cdd6e2;
 }
 
-/* Labels hold the 11px floor, the shared hero kicker included. */
+/* Labels hold the 11px floor here, the shared hero kicker included;
+   styles-final-stage-elevation.css raises every label to the 12px HUD floor. */
 .fst-page .rxs-hero-copy > p:first-child {
   font-size: 11px;
-}
-
-.fst-page .rxs-hero h1,
-.fst-page .rxs-section-heading h2 {
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 /* ---------- Story ---------- */
@@ -1415,6 +1409,27 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   }
 }
 
+/* The base's record-figure orbit ring loops forever; here it is the
+   figure's static bracket set (styles-final-stage-elevation.css). */
+.fst-page .rxs-stage-panel figure > span {
+  animation: none;
+}
+
+/* Economy rendering keeps the panel swaps still, as reduced motion does
+   (the record's stage swap too). */
+html[data-world-effects="economy"]
+  .fst-page
+  :is(
+    .fst-cast-detail figure,
+    .fst-cast-copy,
+    .fst-form-copy,
+    .fst-form-specs,
+    .rxs-stage-panel figure,
+    .rxs-stage-panel > div
+  ) {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fst-page .fst-hero .rxs-hero-visual {
     translate: 0 0;
@@ -1441,7 +1456,7 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   .fst-pickup-card,
   .fst-story-layout,
   .fst-specs div {
-    background: #070b14;
-    border-color: rgb(127 230 255 / 40%);
+    background: var(--fst-plate, #0a1220);
+    border-color: rgb(122 232 255 / 40%);
   }
 }
