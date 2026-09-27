@@ -1063,13 +1063,16 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   }
 }
 
+/* The heading scale's :is() outweighs a plain .selector-title h2, so the
+   iPad size names the heading as well. */
 @media (min-width: 901px) and (max-width: 1180px) {
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-kicker {
     letter-spacing: 0.06em !important;
   }
 
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-title h2 {
-    font-size: 1.35rem !important;
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-heading .selector-title h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
   }
 }
 
@@ -1097,9 +1100,12 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 /* Chips: square ink plates; the selected one an ice plate with a 3px
-   inset edge. Names never break inside a word. */
+   inset edge. Names never break inside a word. The tier list scrolls, so
+   a chip brought into view by the keyboard keeps room for its ring (3px
+   out, 2px wide) inside the list's edge. */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip {
   min-height: 48px;
+  scroll-margin: 6px;
   border: 1px solid rgb(122 232 255 / 10%) !important;
   background: rgb(4 8 15 / 70%) !important;
   box-shadow: none !important;
@@ -1168,7 +1174,8 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
     grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)) !important;
   }
 
-  /* A chip a column wide has room for its code beside the name. */
+  /* A chip a column wide has room for its code beside the name (the
+     iPad console below sets the code over the name again). */
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:has(.chip-code) {
     grid-template-columns: auto minmax(0, 1fr) auto !important;
     grid-template-rows: auto;
@@ -1343,6 +1350,212 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   border-top-color: rgb(122 232 255 / 12%) !important;
   color: var(--ar-text-2) !important;
   line-height: 1.8 !important;
+}
+
+/* The iPad console (901-1180). Beside the record, the sticky console
+   held its heading, the readout, the search and the footnote over a tier
+   list one or two chips tall. The readout keeps its reserved height (the
+   update sheets pin it); the plates and the gaps around it close up, a
+   tier's head keeps to one line, and the chips drop the 5rem the
+   stability layer holds for two-line names: at 1024x768 the list opens
+   on two tiers. Saga keeps the source's columns (two chips a row up to
+   tier 04, one for 05 and 06, whose names are long) with the code over
+   the name; Realm keeps one chip a row and sets each tier's head as a
+   rail beside its chips, so a one-form tier costs a chip's height. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-console {
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-heading {
+    gap: 4px !important;
+    padding: 0 2px 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-title {
+    gap: 2px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-kicker {
+    margin-bottom: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-count {
+    padding: 3px 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .telemetry-state {
+    row-gap: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .telemetry-name {
+    margin-block: 1px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .search-summary {
+    column-gap: 8px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* The HUD list's :is() outweighs a plain .search-summary span. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-console .search-summary span {
+    letter-spacing: 0.06em !important;
+  }
+
+  /* The wider line left 統。 alone on the last line; pretty wrapping
+     moves the break, never the words. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-footnote {
+    padding-top: 8px !important;
+    line-height: 1.5 !important;
+    text-wrap: pretty;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .files-form-progress-v14 {
+    margin: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .files-form-progress-v14 > b {
+    line-height: 1.4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression {
+    gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage {
+    padding: 6px 8px !important;
+    row-gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-head {
+    min-height: 0 !important;
+    padding: 0 0 5px !important;
+  }
+
+  /* The count sits at the end of the head's line; it wraps under the
+     name only when the line is full (BASE / MAX / ULTRA). */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-meta {
+    flex: 0 1 auto !important;
+    margin-left: auto;
+    text-align: right !important;
+  }
+
+  /* A 6px gap keeps a focused chip's ring (3px out, 2px wide) off its
+     neighbour. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-forms {
+    margin-top: 0 !important;
+    gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip {
+    min-height: 44px !important;
+    padding: 6px 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:has(.chip-code) {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:has(.chip-code) .chip-code {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:has(.chip-code) .chip-name {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:has(.chip-code) .chip-mark {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    .stage:is([data-tier="01"], [data-tier="02"], [data-tier="03"], [data-tier="04"]) .stage-forms {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    .stage:is([data-tier="05"], [data-tier="06"]) .stage-forms {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage {
+    grid-template-columns: 5.75rem minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+    align-items: start !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-head {
+    flex-flow: row wrap !important;
+    align-content: flex-start !important;
+    align-items: baseline !important;
+    gap: 2px 6px !important;
+    padding: 2px 0 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-head :is(.stage-index, .stage-meta) {
+    letter-spacing: 0.06em !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-label {
+    line-height: 1.3 !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-meta {
+    flex: 1 0 100% !important;
+    margin-left: 0;
+    text-align: left !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage[data-tier] .stage-forms {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* From 1024 the rail holds TIER 01 and its name on one line. */
+@media (min-width: 1024px) and (max-width: 1180px) {
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage {
+    grid-template-columns: 7rem minmax(0, 1fr) !important;
+  }
+}
+
+/* Phones: a chip's name holds one line. Two chips a row left Realm's
+   names (ステラフォーム, バーストフォーム ...) 84px and Saga's tier 05
+   (ラストヴィンクルム, エクスプリーム・ウルトラ) 98px, so they broke inside
+   the word; those tiers take one chip a row, as every tier already does
+   under 371px. With one line per name the chips drop the stability
+   layer's 4.5rem to 3.5rem (code and name, 8px in). */
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip {
+    min-height: 3.5rem !important;
+    padding: 8px 10px !important;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage[data-tier="05"] .stage-forms,
+  html[data-embedded-archive][data-archive-kind="realm"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage[data-tier] .stage-forms {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* The head's three grid columns gave BASE / MAX / ULTRA its full width
+     and set TIER 06 and 超究極 a character a line. As a wrapping row the
+     count ends the line when it fits and drops under the name when not. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-head {
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: baseline !important;
+    justify-content: flex-start !important;
+    gap: 2px 10px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-meta {
+    margin-left: auto;
+    text-align: right !important;
+  }
 }
 
 /* ================================================================
@@ -1917,6 +2130,111 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"][aria-modal="true"] {
   background: #04080f !important;
+}
+
+/* The open sheet is a flex column capped at 78dvh: everything in it
+   shrank, so the readout lost a third of its height (its status badge
+   ran under the progress rail) while the tier list got nothing at 375px.
+   Every block keeps its natural height and the tier list takes what is
+   left. The list stays the one scroller the stability layer allows (the
+   root stays locked); it scrolls down a tall tier as well as across.
+   The sheet may rise to 2rem under the top, the plates close up, and a
+   short phone keeps a working list. */
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] {
+    max-height: min(calc(100dvh - 2rem), 46rem) !important;
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] > :not(.progression) {
+    flex-shrink: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .progression {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-heading {
+    row-gap: 6px !important;
+    padding-bottom: 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-kicker {
+    margin-bottom: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-heading .selector-title h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* The count takes the row under the close button, so it keeps one line
+     at 320px. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-heading .selector-count {
+    grid-column: 1 / -1 !important;
+    justify-self: start;
+    padding: 3px 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-heading .selector-sheet-close {
+    grid-row: 1 !important;
+    align-self: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-collapse {
+    min-height: 44px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .search-summary {
+    column-gap: 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-footnote {
+    padding-top: 8px !important;
+    line-height: 1.5 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .files-form-progress-v14 {
+    margin: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .stage {
+    padding: 8px !important;
+    row-gap: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .stage-head {
+    min-height: 0 !important;
+    padding: 0 2px 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .stage-forms {
+    margin-top: 0 !important;
+  }
+}
+
+/* A short phone (a 568px screen leaves the framed archive 500px) closes
+   the sheet's gaps further and lets it rise to 1rem under the top, so the
+   list still holds a chip and its focus ring. */
+@media (max-width: 620px) and (max-height: 540px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] {
+    max-height: calc(100dvh - 1rem) !important;
+    padding: 8px !important;
+    gap: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-heading {
+    row-gap: 4px !important;
+    padding-bottom: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5.is-selector-sheet-open, #edition-panel-realm #realm--saga-forms-performance-v5.is-selector-sheet-open) [id$="form-selector"] .selector-footnote {
+    padding-top: 6px !important;
+  }
 }
 
 /* The lightbox: an ink sheet, brackets 8px inside it, a 44px close. */
