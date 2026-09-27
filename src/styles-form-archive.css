@@ -1,0 +1,410 @@
+/* Form Archive route chrome: the SAGA / REALM switcher, the toolbar it sits
+   in, the frame's loading cover and the page ground, in the projection
+   grammar of /world and the character files (styles-dossier-edition.css,
+   styles-chrome-elevation.css).
+
+   Linked after WORLD_STYLESHEET_LINKS, so it is the route's last sheet. The
+   rail's geometry (styles.css, styles-route-transitions.css) and its gesture
+   (lib/liquid/boot.js) are untouched: only corners, material and type move.
+   The frosted sheet paints every rail and glass plate with !important, so
+   those few declarations answer with !important and the switcher's id.
+
+   The embedded archive documents carry their own sheet
+   (public/archive-elevation.css); nothing here reaches into the iframe.
+
+   Motion: the cover's reticle locks on once per load. The bottom telemetry
+   ticks (futureHudSignal) stop here: nothing on this page loops. */
+
+/* ================================================================
+   Tokens and ground
+   ================================================================ */
+.form-archive-page {
+  --archive-cyan: #7ae8ff;
+  --archive-violet: #a48bff;
+  --archive-gold: #f0cf86;
+  --fa-ink: #04080f;
+  --fa-head: #03060c;
+  --fa-ice: #7ae8ff;
+  --fa-gold: #f0cf86;
+  --fa-text: #f1f7fb;
+  --fa-text-2: #b9cad8;
+  --fa-text-3: #8fa6ba;
+  --fa-focus: #fff0b5;
+  /* The page accent: ice for Saga, the Realm edition keeps its violet. */
+  --fa-accent: #7ae8ff;
+  --fa-lock: color-mix(in srgb, var(--fa-accent) 62%, #dff9ff);
+  --fa-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --fa-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  background: var(--fa-ink);
+}
+
+.form-archive-page[data-archive-kind="realm"] {
+  --fa-accent: #a48bff;
+}
+
+/* The frame's own ground shows until the document paints. */
+.form-archive-page > iframe {
+  background: var(--fa-ink);
+}
+
+/* ================================================================
+   Viewport frame: the future-interface corner ticks become the
+   projection frame's brackets (lock along the top, gold along the
+   bottom, 2px arms). The telemetry ticks along the bottom stay, still.
+   The shared rule names three pages in one :is() (0,2,1), so these
+   carry the element and the kind attribute to outrank it.
+   ================================================================ */
+main.form-archive-page[data-archive-kind]::before {
+  background:
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 26px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 26px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 26px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 26px no-repeat;
+  opacity: 0.5;
+}
+
+@media (min-width: 720px) {
+  main.form-archive-page[data-archive-kind]::after {
+    background:
+      linear-gradient(90deg, transparent, #7ae8ff 18%, #a48bff 40%, #ff5cc8 62%, #f0cf86 84%, transparent)
+        0 0 / 100% 1px no-repeat,
+      repeating-linear-gradient(90deg, transparent 0 14px, rgb(122 232 255 / 42%) 14px 15px) 0 3px /
+        100% 4px no-repeat;
+    opacity: 0.34;
+    animation: none;
+  }
+}
+
+/* ================================================================
+   Toolbar: an ink bar ruled by the prism. No drop shadow: it is a bar,
+   not a floating sheet.
+   ================================================================ */
+.form-archive-page .form-archive-toolbar {
+  border-bottom-color: transparent;
+  background:
+    radial-gradient(ellipse 60% 120% at 50% 118%, rgb(122 232 255 / 8%), transparent 70%),
+    linear-gradient(180deg, var(--fa-head), rgb(4 8 15 / 97%));
+  box-shadow: none;
+}
+
+.form-archive-page .form-archive-toolbar::after {
+  right: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7ae8ff 14%,
+    #a48bff 38%,
+    #ff5cc8 62%,
+    #f0cf86 86%,
+    transparent
+  );
+  opacity: 0.62;
+}
+
+/* FORM INTERFACE // LINKED: a 12px HUD label. Between 700 and 1023px the
+   gutter beside the rail is narrower than the label, so it sets in two
+   lines there; the rail never moves. */
+@media (min-width: 700px) {
+  .form-archive-page .form-archive-toolbar::before {
+    top: calc(env(safe-area-inset-top, 0px) + 36px);
+    bottom: auto;
+    max-width: calc(50vw - 155px - 40px);
+    color: rgb(122 232 255 / 78%);
+    font-family: var(--fa-hud);
+    font-size: 12px;
+    font-synthesis: none;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    translate: 0 -50%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-archive-page .form-archive-toolbar::before {
+    max-width: none;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+}
+
+/* ================================================================
+   Switcher: square ink plates. The shell, the lens and the tabs keep
+   their boxes; the stadium becomes a 6px plate and the lens a raised
+   deck plate in the archive's accent.
+   ================================================================ */
+html body .form-archive-page #archive-switcher.form-archive-switcher.liquid-swipe-tabs {
+  --liquid-shell-radius: 6px !important;
+  --liquid-control-radius: 4px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body .form-archive-page #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+  border: 1px solid rgb(122 232 255 / 24%);
+  border-radius: 6px !important;
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 6%), transparent 46%),
+    rgb(4 8 15 / 86%) !important;
+  box-shadow: inset 0 1px 0 rgb(122 232 255 / 10%) !important;
+}
+
+html body .form-archive-page #archive-switcher.form-archive-switcher > .liquid-selection-lens,
+html body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-radius: 4px !important;
+}
+
+html body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-color: color-mix(in srgb, var(--liquid-current-accent) 58%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--liquid-current-accent) 22%, transparent), transparent 70%),
+    #0f1b2d !important;
+  box-shadow:
+    inset 0 1px 0 rgb(198 245 255 / 26%),
+    inset 0 0 0 1px color-mix(in srgb, var(--liquid-current-accent) 26%, transparent) !important;
+}
+
+/* The lens's lower seam in the page's prism. */
+html body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface::after {
+  right: 12%;
+  left: 12%;
+  background: var(--fa-prism);
+  opacity: 0.8;
+}
+
+html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"] {
+  border-color: transparent;
+  border-radius: 4px !important;
+  color: var(--fa-text-3);
+}
+
+html body .form-archive-page #archive-switcher.form-archive-switcher > button[aria-selected="true"] {
+  color: #fff;
+  text-shadow: none;
+}
+
+/* SAGA / REALM: 12px HUD label over the Japanese name. */
+.form-archive-page .form-archive-switcher button small {
+  color: var(--fa-text-2);
+  font-family: var(--fa-hud);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+}
+
+.form-archive-page .form-archive-switcher button[aria-selected="true"] small {
+  color: var(--fa-lock);
+}
+
+.form-archive-page .form-archive-switcher button b {
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .form-archive-page .form-archive-switcher button small {
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"]:not([aria-selected="true"]):hover {
+    color: var(--fa-text);
+    background: rgb(122 232 255 / 6%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    .form-archive-page
+    #archive-switcher.form-archive-switcher
+    > button[role="tab"] {
+    transition:
+      color 180ms ease,
+      background-color 180ms ease;
+  }
+}
+
+/* ================================================================
+   Menu trigger: the page's ink plate (the dossier bar's), square.
+   ================================================================ */
+html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border: 1px solid rgb(122 232 255 / 30%);
+  border-radius: 4px;
+  background: rgb(4 8 15 / 92%) !important;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
+}
+
+html body .form-archive-page .form-archive-menu-trigger :is(.side-panel-trigger-ring, .liquid-pointer-glow) {
+  display: none;
+}
+
+html body .form-archive-page .form-archive-menu-trigger::before {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: rgb(122 232 255 / 58%);
+    background: rgb(122 232 255 / 8%) !important;
+    box-shadow: inset 0 0 0 1px rgb(122 232 255 / 12%) !important;
+    scale: none;
+  }
+}
+
+/* ================================================================
+   Loading cover: ink, a reticle that locks on, a 12px gold status and a
+   prism seam, as the route covers are drawn.
+   ================================================================ */
+.form-archive-page > .form-archive-frame-status {
+  gap: 16px;
+  background:
+    linear-gradient(rgb(122 232 255 / 2.6%) 1px, transparent 1px) 50% 50% / 96px 96px,
+    linear-gradient(90deg, rgb(122 232 255 / 2.6%) 1px, transparent 1px) 50% 50% / 96px 96px,
+    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--fa-accent) 10%, transparent), transparent 20rem),
+    rgb(4 8 15 / 94%);
+  color: var(--fa-gold);
+}
+
+.form-archive-page .form-archive-frame-status i {
+  width: 64px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 14px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 14px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 14px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 14px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 14px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 14px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 14px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 14px no-repeat,
+    radial-gradient(circle, color-mix(in srgb, var(--fa-accent) 70%, #fff) 0 2px, transparent 2.5px);
+  animation: none;
+}
+
+.form-archive-page .form-archive-frame-status span {
+  font-family: var(--fa-hud);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
+}
+
+/* The seam under the status, fading at both ends. */
+.form-archive-page .form-archive-frame-status::after {
+  content: "";
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7ae8ff 18%,
+    #a48bff 40%,
+    #ff5cc8 62%,
+    #f0cf86 84%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .form-archive-page
+    .form-archive-frame-status:not(.is-loaded)
+    i {
+    animation: fa-cover-lock 320ms steps(4, jump-end) 120ms both;
+  }
+}
+
+@keyframes fa-cover-lock {
+  from {
+    opacity: 0;
+    scale: 1.3;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Focus: the site's one warm ring. The tabs draw it inside the rail,
+   whose surface clips; the trigger outside its plate.
+   ================================================================ */
+html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"]:focus-visible {
+  outline: 2px solid var(--fa-focus);
+  outline-offset: -3px;
+}
+
+html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus-visible {
+  outline: 2px solid var(--fa-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   Forced colours: opaque bars and covers, system edges.
+   ================================================================ */
+@media (forced-colors: active) {
+  .form-archive-page .form-archive-toolbar,
+  .form-archive-page > .form-archive-frame-status {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .form-archive-page .form-archive-toolbar::before {
+    color: CanvasText;
+  }
+
+  main.form-archive-page[data-archive-kind]::before,
+  main.form-archive-page[data-archive-kind]::after,
+  .form-archive-page .form-archive-frame-status::after {
+    display: none;
+  }
+
+  .form-archive-page .form-archive-frame-status i {
+    border: 2px solid CanvasText;
+    background: none;
+  }
+
+  html body .form-archive-page #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+    border-color: CanvasText;
+    background: Canvas !important;
+  }
+
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"] {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[aria-selected="true"] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[aria-selected="true"] small {
+    color: HighlightText;
+  }
+}

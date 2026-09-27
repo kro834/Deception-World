@@ -5,6 +5,7 @@ import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { initRail } from "@/lib/liquid/boot.js";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import formArchiveCssUrl from "@/styles-form-archive.css?url";
 
 export const Route = createFileRoute("/form-archive")({
   component: FormArchive,
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/form-archive")({
         content: "仮面ライダーサーガと仮面ライダーレルムのフォーム一覧・スペック・比較アーカイブ。",
       },
     ],
-    links: WORLD_STYLESHEET_LINKS,
+    // The route chrome sheet goes after the World sheets; the Michroma HUD
+    // subset it names is already loaded root-wide.
+    links: [...WORLD_STYLESHEET_LINKS, { rel: "stylesheet", href: formArchiveCssUrl }],
   }),
 });
 
