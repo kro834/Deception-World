@@ -1,0 +1,1354 @@
+/* Chrome elevation: the side menu, the announcement dialog, the route
+   covers, the Zeus button and the skip link in the World page's projection
+   grammar, so every route carries the same instrument.
+
+   The chrome is styled across several older sheets that stay as they are
+   (styles.css and styles-world/ are mirrored or shared; frosted-controls,
+   future-interface and press-feedback are pinned by tests). This sheet only
+   overrides them from outside. It is the last root link, but route sheets
+   load after it, so every rule carries `html body` and, inside the menu and
+   the dialog, their ids: they outweigh the route sheets without !important.
+   The frosted material sheet paints the menu and its close plates with
+   !important, so those few declarations answer with !important and more
+   weight.
+
+   The grammar: ink #04080f under a faint ice grid, square plates (2px chips,
+   4px controls, 6px sheets), HUD labels in the Michroma subset at 12px
+   (Japanese words fall through the stack to their own face), chrome-ink
+   titles with a still misregistered ghost, brackets that lock on (ice at the
+   top corners, gold at the bottom) and the prism as the only decorated rule.
+   Geometry, hit areas, copy and behaviour are unchanged.
+
+   Motion: two finite arrivals (the announcement sheet's lock-on and the
+   cover frame's) and one hover nudge, each gated on no-preference and on
+   rendering that is not economy. Nothing loops; the two sheen and aura loops
+   of the announcement sheet stop here. */
+
+/* ================================================================
+   Tokens
+   ================================================================ */
+:root {
+  --dwc-ink: #04080f;
+  --dwc-head: #03060c;
+  --dwc-deck: #0a1220;
+  --dwc-ice: #7ae8ff;
+  --dwc-ice-hi: #c6f5ff;
+  --dwc-gold: #f0cf86;
+  --dwc-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
+  --dwc-text: #f1f7fb;
+  --dwc-text-2: #b9cad8;
+  --dwc-text-3: #8fa6ba;
+  --dwc-focus: #fff0b5;
+  --dwc-line: rgb(122 232 255 / 20%);
+  --dwc-line-strong: rgb(122 232 255 / 52%);
+  --dwc-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  /* The prism at the plate strength (.62) for the top edge of a card. */
+  --dwc-prism-soft: linear-gradient(
+    90deg,
+    rgb(122 232 255 / 62%) 0%,
+    rgb(164 139 255 / 62%) 34%,
+    rgb(255 92 200 / 62%) 66%,
+    rgb(240 207 134 / 62%) 100%
+  );
+  --dwc-chrome-ink: linear-gradient(180deg, #fff 0%, #eafbff 30%, #9eeeff 60%, #5aa8ff 100%);
+  --dwc-ghost: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+  --dwc-grid:
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px);
+  --dwc-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --dwc-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --dwc-display-jp: "Oxanium", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+}
+
+/* ================================================================
+   Brackets: eight 2px arms on an aria-hidden pseudo, ice (lock) at the
+   top corners and gold at the bottom. Arm length per frame in --dwc-arm.
+   Everything framed here sits in a dialog, a scroll container or a cover,
+   so the brackets are static.
+   ================================================================ */
+html body #site-side-panel > .side-panel-head::after,
+html body #site-announcement-dialog .site-announcement-hub::after,
+html body #site-announcement-dialog .site-announcement-visual::before,
+html body .load-gate .cine-dive-status::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--dwc-lock) 0 0) 0 0 / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(var(--dwc-lock) 0 0) 0 0 / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(var(--dwc-lock) 0 0) 100% 0 / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(var(--dwc-lock) 0 0) 100% 0 / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(var(--dwc-gold) 0 0) 0 100% / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(var(--dwc-gold) 0 0) 0 100% / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(var(--dwc-gold) 0 0) 100% 100% / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(var(--dwc-gold) 0 0) 100% 100% / 2px var(--dwc-arm, 22px) no-repeat;
+}
+
+/* ================================================================
+   HUD faces: capitals and digits in the Michroma subset. A Japanese
+   code (管理人殺し) falls through the stack to Noto Sans JP; the menu's
+   Japanese labels keep each page's own face.
+   ================================================================ */
+html
+  body
+  :is(
+    #site-side-panel .side-panel-head p,
+    #site-side-panel .side-panel-group > p,
+    #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) > i,
+    #site-side-panel .side-panel-zeus-toggle > i em,
+    #site-announcement-dialog .site-announcement-header p,
+    #site-announcement-dialog .site-announcement-count,
+    #site-announcement-dialog .site-announcement-index-copy span,
+    #site-announcement-dialog .site-announcement-list-copy small,
+    #site-announcement-dialog .site-announcement-list-copy time,
+    #site-announcement-dialog .site-announcement-list-copy i,
+    #site-announcement-dialog .site-announcement-meta,
+    #site-announcement-dialog .site-announcement-copy time,
+    #site-announcement-dialog .site-announcement-eyebrow
+  ) {
+  font-family: var(--dwc-hud);
+  font-weight: 400;
+  font-synthesis: none;
+  font-style: normal;
+}
+
+/* ================================================================
+   Side menu: the sheet
+   ================================================================ */
+/* Ink under the ice grid, one ice edge, one drop shadow (a floating
+   sheet). Opaque, so it needs no blur. */
+html body #site-side-panel.side-panel[data-liquid-pointer] {
+  border-left-color: var(--dwc-line-strong);
+  background:
+    radial-gradient(ellipse 70% 30% at 100% 0%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 60% 28% at 0% 100%, rgb(240 207 134 / 5%), transparent 70%),
+    var(--dwc-grid),
+    var(--dwc-ink) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow:
+    -24px 0 60px rgb(0 0 0 / 55%),
+    inset 1px 0 0 rgb(122 232 255 / 14%) !important;
+  color: var(--dwc-text);
+}
+
+/* The two-tone glow line along the left edge and the depth rings repeat
+   the edge above; the border is the edge now. The tick ruler sat under
+   the head and showed below the compact landscape head; the prism under
+   the head replaces it. */
+html body #site-side-panel.side-panel::before,
+html body #site-side-panel.side-panel::after,
+html body #site-side-panel .side-panel-depth {
+  display: none;
+}
+
+html body .side-panel-scrim {
+  background:
+    radial-gradient(ellipse 70% 60% at 100% 50%, rgb(122 232 255 / 7%), transparent 60%),
+    rgb(2 4 10 / 72%);
+}
+
+/* The sticky head continues the sheet's ink (no tonal step) and ends on
+   the prism, drawn across the rows' measure. The border stays, clear, so
+   the head keeps its height. */
+html body #site-side-panel > .side-panel-head {
+  border-bottom-color: transparent;
+  background:
+    var(--dwc-prism) var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px
+      no-repeat,
+    var(--dwc-ink);
+}
+
+/* The head locks on: brackets around its title and close plate. */
+html body #site-side-panel > .side-panel-head::after {
+  --dwc-arm: 18px;
+  inset: calc(var(--sp-pad-top) - 12px) calc(var(--sp-pad-inline) - 10px) 8px;
+}
+
+html body #site-side-panel .side-panel-head p {
+  color: var(--dwc-ice);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
+}
+
+/* The menu's name in chrome ink with a still, misregistered ghost. */
+html body #site-side-panel .side-panel-head b {
+  color: var(--dwc-text);
+  background: var(--dwc-chrome-ink);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: var(--dwc-ghost);
+}
+
+/* DECEPTION WORLD and REXONANCE SAGA stay on one line beside the close
+   plate on a 320px phone. */
+@media (max-width: 359px) {
+  html body #site-side-panel .side-panel-head b {
+    font-size: clamp(17px, 6.4vw, 24px);
+  }
+}
+
+/* Close plate: ink, one ice edge, 4px corners. No red and no spin on
+   hover. */
+html body #site-side-panel .side-panel-close.ios26-glass,
+html body #site-announcement-dialog .site-announcement-close.ios26-glass {
+  border: 1px solid rgb(122 232 255 / 36%);
+  border-radius: 4px;
+  background: rgb(4 8 15 / 92%) !important;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
+  color: var(--dwc-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body #site-side-panel .side-panel-close.ios26-glass:hover,
+  html body #site-announcement-dialog .site-announcement-close.ios26-glass:hover {
+    border-color: rgb(122 232 255 / 58%);
+    background: rgb(122 232 255 / 8%) !important;
+    rotate: none;
+  }
+}
+
+/* The dossier bar's menu trigger: the same ink plate as the file's back
+   link beside it. Its border and glyph keep the character's accent. The
+   page triggers with an identity of their own (the World's clipped plate,
+   Dream's velvet, the showcase sites') are not touched. */
+html body .detail-topbar-actions > .side-panel-trigger.ios26-glass {
+  background: rgb(4 8 15 / 92%) !important;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
+}
+
+/* ================================================================
+   Side menu: groups and rows
+   ================================================================ */
+/* Section kickers: a square cell, the label, a prism arm. An odd line
+   height centres the 1px arm on a whole pixel. */
+html body #site-side-panel .side-panel-group > p {
+  gap: 10px;
+  color: var(--dwc-ice);
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.18em;
+}
+
+html body #site-side-panel .side-panel-group > p::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border: 1px solid currentColor;
+  transform: none;
+}
+
+html body #site-side-panel .side-panel-group > p::after {
+  content: "";
+  flex: 0 0 40px;
+  height: 1px;
+  background: var(--dwc-prism);
+}
+
+/* Rows stay full-bleed hairline rows; only their ink changes. */
+html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+  border-bottom-color: rgb(122 232 255 / 16%);
+  color: var(--dwc-text);
+}
+
+/* The older marker ticks: the current and hover edges below replace them. */
+html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button)::before {
+  display: none;
+}
+
+/* Codes: 12px HUD chips. */
+html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+  padding: 4px 8px;
+  border: 1px solid rgb(122 232 255 / 26%);
+  border-radius: 2px;
+  background: rgb(122 232 255 / 6%);
+  color: var(--dwc-text-2);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.12em;
+}
+
+/* Phones: the codes close up to the allowed tracking, so more of them
+   stay beside their label. */
+@media (max-width: 700px) {
+  html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) > i {
+    padding-inline: 6px;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* The riders' numbers are figures: the numeral face, tabular, in the lock
+   colour. Michroma's wide digits would cut the longer names in the two
+   phone columns. */
+html body #site-side-panel .side-panel-riders .side-panel-links :is(a, button.side-panel-link-button) > i {
+  padding-inline: 7px;
+  color: var(--dwc-lock);
+  font-family: var(--dwc-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* One current state for the page the reader is on and, on /world, the
+   chapter in view: an ice edge, an ice wash and a filled code. The page
+   rows keep the 2px edge the editions draw as a border; the chapter rows
+   draw the same 2px as a shadow. */
+html
+  body
+  #site-side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+  color: #fff;
+  background: linear-gradient(90deg, rgb(122 232 255 / 10%), transparent 72%);
+  box-shadow: none;
+  border-left-color: var(--dwc-ice);
+}
+
+html
+  body
+  #site-side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button)[aria-current="location"] {
+  box-shadow: inset 2px 0 0 var(--dwc-ice);
+}
+
+html
+  body
+  #site-side-panel
+  .side-panel-links
+  :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"])
+  > i {
+  border-color: var(--dwc-ice);
+  background: var(--dwc-ice);
+  color: var(--dwc-ink);
+}
+
+/* While the riders sit in two columns, the rule between them is an ice
+   hairline. */
+html
+  body
+  #site-side-panel
+  .side-panel-riders
+  .side-panel-links
+  > :is(a, button.side-panel-link-button):nth-child(even):not([aria-current])::after {
+  border-inline-start-color: rgb(122 232 255 / 24%);
+}
+
+/* Hover (mouse only): light and an ice edge; the row itself never moves,
+   so a pointer aimed at it stays on it. A live press keeps the press
+   sheet's own light. */
+@media (hover: hover) and (pointer: fine) {
+  html
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button):hover:not([data-press]) {
+    color: #fff;
+    transform: none;
+    translate: none;
+  }
+
+  html
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button):not([aria-current]):hover:not([data-press]) {
+    background: rgb(122 232 255 / 6%);
+    box-shadow: inset 2px 0 0 rgb(122 232 255 / 55%);
+  }
+}
+
+/* Only the label nudges, and only where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button)
+    > span {
+    transition: translate 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button):hover
+    > span {
+    translate: 3px 0;
+  }
+}
+
+/* On a wide screen the labels take one step up. */
+@media (min-width: 1180px) {
+  html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) > span {
+    font-size: 15px;
+  }
+}
+
+/* ================================================================
+   Side menu: the Zeus button switch
+   ================================================================ */
+html body #site-side-panel .side-panel-zeus-toggle {
+  border-color: rgb(122 232 255 / 22%);
+  border-radius: 4px;
+  background: rgb(122 232 255 / 4%);
+  color: var(--dwc-text);
+}
+
+html body #site-side-panel .side-panel-zeus-toggle > span b {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+html body #site-side-panel .side-panel-zeus-toggle > span small {
+  color: var(--dwc-text-3);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* The track is wide enough for OFF beside the knob at 12px, so the word
+   and the knob never overlap. */
+html body #site-side-panel .side-panel-zeus-toggle > i {
+  width: 72px;
+  padding: 0 6px;
+  border-color: rgb(122 232 255 / 30%);
+  border-radius: 2px;
+  background: var(--dwc-deck);
+  color: var(--dwc-text-3);
+}
+
+html body #site-side-panel .side-panel-zeus-toggle > i em {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+html body #site-side-panel .side-panel-zeus-toggle > i u {
+  border-radius: 2px;
+  background: var(--dwc-text-3);
+  box-shadow: none;
+}
+
+html body #site-side-panel .side-panel-zeus-toggle[aria-pressed="true"] {
+  border-color: rgb(122 232 255 / 45%);
+  background: linear-gradient(90deg, rgb(122 232 255 / 8%), rgb(240 207 134 / 5%));
+}
+
+/* ON: the word at the left, the knob at the right. */
+html body #site-side-panel .side-panel-zeus-toggle[aria-pressed="true"] > i {
+  justify-content: flex-start;
+  border-color: var(--dwc-line-strong);
+  background: linear-gradient(90deg, rgb(122 232 255 / 26%), rgb(240 207 134 / 20%));
+  color: var(--dwc-text);
+}
+
+html body #site-side-panel .side-panel-zeus-toggle[aria-pressed="true"] > i u {
+  background: linear-gradient(145deg, var(--dwc-ice-hi), var(--dwc-ice));
+  box-shadow: none;
+  translate: 42px 0;
+}
+
+/* ================================================================
+   Side menu: landscape phones keep six rows in view
+   ================================================================ */
+@media (orientation: landscape) and (max-height: 600px) {
+  html body #site-side-panel.side-panel {
+    scroll-padding-block: 72px 16px;
+  }
+
+  html body #site-side-panel > .side-panel-head {
+    align-items: center;
+    margin-bottom: 6px;
+    padding-bottom: 10px;
+  }
+
+  html body #site-side-panel .side-panel-head > div {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  html body #site-side-panel .side-panel-head p {
+    margin: 0;
+  }
+
+  html body #site-side-panel .side-panel-head b {
+    margin-top: 0;
+    font-size: 20px;
+  }
+
+  html body #site-side-panel .side-panel-group {
+    padding-block: 10px;
+  }
+
+  html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) {
+    min-height: 48px;
+    padding-block: 8px;
+  }
+}
+
+/* ================================================================
+   Announcements: the sheet
+   ================================================================ */
+html body #site-announcement-dialog::backdrop {
+  background:
+    radial-gradient(circle at 50% 40%, rgb(122 232 255 / 8%), transparent 45%),
+    rgb(2 4 10 / 86%);
+}
+
+/* Ink under the ice grid, square 6px corners, one drop shadow. The sheen
+   and aura loops stop; the sheet arrives once (below). */
+html body #site-announcement-dialog .site-announcement-hub {
+  border: 1px solid rgb(122 232 255 / 28%);
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(164 139 255 / 7%), transparent 70%),
+    var(--dwc-grid),
+    var(--dwc-ink);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 36px 100px rgb(0 0 0 / 62%);
+  animation: none;
+}
+
+html body #site-announcement-dialog .site-announcement-hub::before {
+  content: none;
+  animation: none;
+}
+
+html body #site-announcement-dialog .site-announcement-aura {
+  display: none;
+  animation: none;
+}
+
+/* The sheet's brackets, 8px inside its edge, above the header. */
+html body #site-announcement-dialog .site-announcement-hub::after {
+  --dwc-arm: 26px;
+  z-index: 5;
+  inset: 8px;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Header on the deeper ink, ruled by the prism. */
+html body #site-announcement-dialog .site-announcement-header {
+  border-bottom-color: transparent;
+  background:
+    var(--dwc-prism) 0 100% / 100% 1px no-repeat,
+    var(--dwc-head);
+}
+
+html body #site-announcement-dialog .site-announcement-header p {
+  color: var(--dwc-ice);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
+}
+
+html body #site-announcement-dialog .site-announcement-header h2 {
+  color: var(--dwc-text);
+  font-family: var(--dwc-display-jp);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+html body #site-announcement-dialog .site-announcement-count {
+  border-color: rgb(122 232 255 / 30%);
+  border-radius: 2px;
+  background: rgb(122 232 255 / 6%);
+  color: var(--dwc-ice-hi);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+}
+
+/* ================================================================
+   Announcements: the index
+   ================================================================ */
+html body #site-announcement-dialog .site-announcement-index-copy {
+  border-bottom-color: rgb(122 232 255 / 14%);
+}
+
+html body #site-announcement-dialog .site-announcement-index-copy p {
+  color: var(--dwc-text-2);
+}
+
+html body #site-announcement-dialog .site-announcement-index-copy span {
+  color: var(--dwc-ice);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+}
+
+/* Cards: square deck plates with the prism along the top. No brackets:
+   they mark the sheet, not each record in it. */
+html body #site-announcement-dialog .site-announcement-list-item {
+  border: 1px solid rgb(122 232 255 / 18%);
+  border-radius: 4px;
+  background:
+    var(--dwc-prism-soft) top / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
+    rgb(10 18 32 / 82%);
+  box-shadow: none;
+}
+
+html body #site-announcement-dialog .site-announcement-list-visual {
+  border-color: rgb(122 232 255 / 35%);
+  border-radius: 2px;
+}
+
+html body #site-announcement-dialog .site-announcement-list-arrow {
+  border-color: rgb(240 207 134 / 40%);
+  border-radius: 2px;
+  color: var(--dwc-gold);
+}
+
+html body #site-announcement-dialog .site-announcement-list-copy > span {
+  row-gap: 4px;
+}
+
+html body #site-announcement-dialog .site-announcement-list-copy small {
+  color: var(--dwc-ice);
+}
+
+html
+  body
+  #site-announcement-dialog
+  :is(.site-announcement-list-copy small, .site-announcement-list-copy time, .site-announcement-list-copy i) {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+}
+
+html body #site-announcement-dialog .site-announcement-list-copy time {
+  color: var(--dwc-text-2);
+}
+
+html body #site-announcement-dialog .site-announcement-list-copy i {
+  color: var(--dwc-gold);
+  letter-spacing: 0.18em;
+}
+
+html body #site-announcement-dialog .site-announcement-list-copy b {
+  color: var(--dwc-text);
+  font-family: var(--dwc-display-jp);
+  font-weight: 600;
+}
+
+/* Hover (mouse only): the edge brightens and the plate lifts a pixel. */
+@media (hover: hover) and (pointer: fine) {
+  html body #site-announcement-dialog .site-announcement-list-item:hover {
+    border-color: rgb(122 232 255 / 55%);
+    background:
+      var(--dwc-prism) top / 100% 1px no-repeat,
+      linear-gradient(135deg, rgb(122 232 255 / 10%), transparent 46%),
+      rgb(10 18 32 / 92%);
+    transform: none;
+    translate: 0 -1px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-item:hover .site-announcement-list-arrow {
+    border-color: rgb(240 207 134 / 70%);
+    transform: none;
+  }
+}
+
+/* A press sinks a card less than an icon. */
+html[data-press-ready] body #site-announcement-dialog .site-announcement-list-item {
+  --dw-press-scale: 0.982;
+  --dw-press-light: 1.08;
+}
+
+/* Phones: the picture spans the card's height and the arrow sits in its
+   bottom corner, so the title gets the width the arrow's column took. */
+@media (max-width: 420px) {
+  html body #site-announcement-dialog .site-announcement-list-item {
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-areas:
+      "visual copy"
+      "visual arrow";
+    gap: 8px 14px;
+    padding: 12px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-visual {
+    grid-area: visual;
+    align-self: start;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy {
+    grid-area: copy;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-arrow {
+    grid-area: arrow;
+    justify-self: end;
+    width: 32px;
+    height: 32px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy b {
+    font-size: 17px;
+    line-height: 1.45;
+  }
+}
+
+/* ================================================================
+   Announcements: a transmission
+   ================================================================ */
+html body #site-announcement-dialog .site-announcement-back {
+  border: 1px solid rgb(122 232 255 / 30%);
+  border-radius: 4px;
+  background: var(--dwc-ink);
+  color: var(--dwc-text);
+  letter-spacing: 0.1em;
+}
+
+html body #site-announcement-dialog .site-announcement-back span {
+  color: var(--dwc-ice);
+  font-size: 14px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body #site-announcement-dialog .site-announcement-back:hover {
+    border-color: rgb(122 232 255 / 58%);
+    background: rgb(122 232 255 / 8%);
+  }
+}
+
+/* Phones: the back link is an opaque ink bar across the stage, so the
+   copy scrolling under it never shows through. */
+@media (max-width: 700px) {
+  html body #site-announcement-dialog .site-announcement-back {
+    justify-self: stretch;
+    width: calc(100% + 32px);
+    margin: -16px -16px 0;
+    padding-inline: 16px;
+    border-width: 0 0 1px;
+    border-color: rgb(122 232 255 / 22%);
+    border-radius: 0;
+    background: var(--dwc-ink);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  html body #site-announcement-dialog .site-announcement-back::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    height: 14px;
+    background: linear-gradient(var(--dwc-ink), transparent);
+    pointer-events: none;
+  }
+}
+
+/* The key visual locks on: square corners and its own brackets, which is
+   why it no longer clips. */
+html body #site-announcement-dialog .site-announcement-visual {
+  overflow: visible;
+  border-color: rgb(122 232 255 / 40%);
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+html body #site-announcement-dialog .site-announcement-visual img {
+  border-radius: inherit;
+}
+
+html body #site-announcement-dialog .site-announcement-visual::before {
+  --dwc-arm: 20px;
+  z-index: 2;
+  inset: -1px;
+}
+
+html body #site-announcement-dialog .site-announcement-detail.is-product-release .site-announcement-visual {
+  border-color: rgb(240 207 134 / 55%);
+  box-shadow: none;
+}
+
+html body #site-announcement-dialog .site-announcement-meta {
+  color: var(--dwc-ice);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+}
+
+html body #site-announcement-dialog .site-announcement-copy time {
+  color: var(--dwc-text-2);
+}
+
+html body #site-announcement-dialog .site-announcement-eyebrow {
+  color: var(--dwc-gold);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-wrap: balance;
+}
+
+/* Phones: the two HUD lines close up to the allowed tracking so they
+   keep to one line where they can. */
+@media (max-width: 700px) {
+  html
+    body
+    #site-announcement-dialog
+    :is(.site-announcement-meta, .site-announcement-eyebrow, .site-announcement-list-copy small) {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* The headline in the site's display faces, sized to the stage, in
+   chrome ink with the still ghost. */
+html body #site-announcement-dialog .site-announcement-copy h3 {
+  color: var(--dwc-text);
+  background: var(--dwc-chrome-ink);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--dwc-display-jp);
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: 0;
+  text-shadow: none;
+  text-wrap: balance;
+  /* Japanese lines break between phrases, not inside a name. */
+  word-break: auto-phrase;
+  filter: var(--dwc-ghost);
+}
+
+@media (max-width: 700px) {
+  html body #site-announcement-dialog .site-announcement-copy h3 {
+    font-size: clamp(24px, 7.2vw, 32px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  html body #site-announcement-dialog .site-announcement-copy h3 {
+    font-size: clamp(22px, 5vh, 30px);
+  }
+}
+
+html body #site-announcement-dialog .site-announcement-lede {
+  color: var(--dwc-text);
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-weight: 500;
+}
+
+html body #site-announcement-dialog .site-announcement-release {
+  border-top-color: rgb(122 232 255 / 16%);
+}
+
+html body #site-announcement-dialog .site-announcement-release-title {
+  color: var(--dwc-text-2);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+}
+
+/* Metrics: deck plates with the prism along the top. */
+html body #site-announcement-dialog .site-announcement-metric {
+  border: 1px solid rgb(122 232 255 / 20%);
+  border-radius: 4px;
+  background:
+    var(--dwc-prism-soft) top / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(122 232 255 / 7%), transparent 42%),
+    rgb(10 18 32 / 82%);
+  box-shadow: none;
+}
+
+html body #site-announcement-dialog .site-announcement-metric b {
+  background: linear-gradient(90deg, #c6f5ff 0%, #7ae8ff 40%, #a48bff 75%, #f0cf86 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--dwc-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* One of the four labels carries a unit in lower case (100m): the set
+   reads in the mono face, which has every glyph. */
+html body #site-announcement-dialog .site-announcement-metric span {
+  color: var(--dwc-text);
+  font-family: var(--dwc-mono);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+/* The figures carry lower-case units (t, m, s): the mono face. */
+html body #site-announcement-dialog .site-announcement-metric small {
+  color: var(--dwc-text-2);
+  font-family: var(--dwc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+/* The running text never drops under 12px on a phone. */
+html body #site-announcement-dialog .site-announcement-body {
+  color: var(--dwc-text-2);
+  font-size: clamp(12px, 1vw, 14px);
+}
+
+html body #site-announcement-dialog .site-announcement-note {
+  border-left-color: rgb(240 207 134 / 60%);
+  color: var(--dwc-text-3);
+}
+
+/* ================================================================
+   Announcements: landscape phones
+   ================================================================ */
+@media (orientation: landscape) and (max-height: 600px) {
+  html body #site-announcement-dialog .site-announcement-header {
+    grid-template-columns: minmax(0, 1fr) auto 44px;
+    gap: 12px;
+    padding: 8px 24px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header h2 {
+    font-size: 20px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-count {
+    padding: 6px 10px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-close {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ================================================================
+   Route covers: the dive status, its mark and the cut-in caption. Scoped
+   to .load-gate: the opening's own dive keeps its title faces.
+   ================================================================ */
+html body .load-gate .cine-dive-status {
+  padding: 12px 18px;
+}
+
+/* The frame: brackets at 14px arms. */
+html body .load-gate .cine-dive-status::after {
+  --dwc-arm: 14px;
+  inset: 0;
+}
+
+/* The seam is the prism, fading at both ends. */
+html body .load-gate .cine-dive-status::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #7ae8ff 18%,
+    #a48bff 40%,
+    #ff5cc8 62%,
+    #f0cf86 84%,
+    transparent
+  );
+  box-shadow: none;
+}
+
+/* Status: 12px HUD label, 13px Japanese line. A rider's dive keeps the
+   rider's colour on the label; the archive dive's is gold. */
+html body .load-gate .cine-dive-status small {
+  font: 400 12px/1.4 var(--dwc-hud);
+  font-synthesis: none;
+  letter-spacing: 0.16em;
+  text-wrap: balance;
+}
+
+html body .load-gate:not(.rider-route-dive) .cine-dive-status small {
+  color: var(--dwc-gold);
+}
+
+html body .load-gate .cine-dive-status > span {
+  color: var(--dwc-text);
+  font: 500 13px/1.4 "Noto Sans JP", "Hiragino Sans", sans-serif;
+  letter-spacing: 0.18em;
+}
+
+@media (max-width: 560px) {
+  html body .load-gate .cine-dive-status small {
+    letter-spacing: 0.1em;
+  }
+}
+
+/* The reticle: the rider's colour mixed toward ice, gold on the orbit. */
+html body .load-gate.rider-route-dive .rider-dive-mark {
+  border-color: color-mix(in srgb, rgb(var(--rider-dive-secondary)) 60%, #7ae8ff);
+}
+
+html body .load-gate.rider-route-dive .rider-dive-mark::before {
+  border-color: rgb(122 232 255 / 35%);
+}
+
+html body .load-gate.rider-route-dive .rider-dive-mark::after {
+  border-color: rgb(240 207 134 / 45%);
+}
+
+html body .load-gate.rider-route-dive .rider-dive-mark > i {
+  font: 400 clamp(13px, 1.4vmax, 17px) / 1 var(--dwc-hud);
+  font-synthesis: none;
+  letter-spacing: 0.08em;
+}
+
+html
+  body
+  .load-gate.rider-route-dive:is(.is-rexonance-dive, .is-extreme-dive, .is-final-stage-dive)
+  .rider-dive-mark
+  > i {
+  font-size: clamp(12px, 2vw, 16px);
+  letter-spacing: 0;
+}
+
+/* Cut-ins: the eyebrow at 12px or more over a prism seam. Each variant
+   keeps its own colour (styles-world/22.css sets only that). */
+html body .load-gate.rider-route-cutin .rider-cutin-caption {
+  gap: 12px;
+}
+
+html body .load-gate.rider-route-cutin .rider-cutin-caption small {
+  padding-bottom: 8px;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      #7ae8ff 18%,
+      #a48bff 40%,
+      #ff5cc8 62%,
+      #f0cf86 84%,
+      transparent
+    )
+    50% 100% / 60% 1px no-repeat;
+  font-family: var(--dwc-hud);
+  font-size: clamp(12px, 0.95vw, 14px);
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+}
+
+@media (max-width: 560px) {
+  html body .load-gate.rider-route-cutin .rider-cutin-caption small {
+    letter-spacing: 0.14em;
+  }
+}
+
+/* The sovereign gate keeps its gold, its face and its motion; its kicker
+   is lifted to a size that reads, on one line. */
+html body .load-gate.is-sovereign-gate .load-gate-kicker {
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+}
+
+/* ================================================================
+   The Zeus button: the sovereign control keeps its gold and its light,
+   with ice where the teal was. Its ring is an outline: the button
+   contains its paint, which clips anything drawn outside its box.
+   ================================================================ */
+html body .zeus-button {
+  border-color: rgb(240 207 134 / 78%);
+  background:
+    linear-gradient(
+      145deg,
+      rgb(255 255 255 / 65%),
+      rgb(122 232 255 / 18%) 54%,
+      rgb(240 207 134 / 30%)
+    ),
+    rgb(4 8 15 / 90%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    0 0 0 3px rgb(4 8 15 / 80%),
+    0 12px 34px rgb(0 0 0 / 50%),
+    0 0 24px rgb(122 232 255 / 16%),
+    0 0 34px rgb(240 207 134 / 16%);
+  outline: 1px solid rgb(122 232 255 / 42%);
+  outline-offset: 6px;
+}
+
+html body .zeus-button::before {
+  display: none;
+}
+
+html body .zeus-button-aura {
+  border-color: color-mix(in srgb, #f0cf86 55%, #fff);
+  box-shadow: inset 0 -12px 22px rgb(122 232 255 / 10%);
+}
+
+/* MOVE: an ink tag inside the button at 12px. */
+html body .zeus-button-move {
+  right: 5px;
+  bottom: 6px;
+  left: 5px;
+  padding: 3px 0;
+  border-color: rgb(240 207 134 / 70%);
+  border-radius: 2px;
+  background: var(--dwc-ink);
+  color: var(--dwc-text);
+  font-family: var(--dwc-mono);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+html body .zeus-button[data-dragging="true"] {
+  outline: 2px solid var(--dwc-gold);
+  outline-offset: 8px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 90%),
+    0 0 0 4px rgb(4 8 15 / 82%),
+    0 18px 42px rgb(0 0 0 / 54%),
+    0 0 34px rgb(122 232 255 / 34%),
+    0 0 46px rgb(240 207 134 / 24%);
+}
+
+html body .zeus-button[data-return-loading="true"] {
+  border-color: rgb(240 207 134 / 92%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 92%),
+    0 0 0 3px rgb(4 8 15 / 80%),
+    0 12px 34px rgb(0 0 0 / 50%),
+    0 0 28px rgb(122 232 255 / 34%),
+    0 0 42px rgb(240 207 134 / 24%);
+}
+
+html body .zeus-button:focus-visible {
+  outline: 2px solid var(--dwc-focus);
+  outline-offset: 6px;
+}
+
+/* ================================================================
+   The skip link: a chamfered ice plate on a gold seam. The chamfer
+   clips anything outside the plate, so its focus ring is drawn inside.
+   ================================================================ */
+html body .dw-skip-link {
+  padding: 0 19px 0 15px;
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%,
+    0 8px
+  );
+  background:
+    linear-gradient(var(--dwc-gold) 0 0) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, #dff9ff, #7ae8ff);
+  box-shadow: none;
+  color: var(--dwc-ink);
+}
+
+html body .dw-skip-link:is(:focus, :focus-visible) {
+  outline: 2px solid var(--dwc-ink);
+  outline-offset: -4px;
+}
+
+/* ================================================================
+   Focus: one ring for the chrome's controls. Rows draw it inside their
+   edges (they sit edge to edge); the Zeus button and the skip link have
+   theirs above.
+   ================================================================ */
+html
+  body
+  :is(
+    #site-side-panel .side-panel-close,
+    #site-side-panel .side-panel-zeus-toggle,
+    .detail-topbar-actions > .side-panel-trigger,
+    #site-announcement-dialog .site-announcement-close,
+    #site-announcement-dialog .site-announcement-back,
+    #site-announcement-dialog .site-announcement-list-item
+  ):focus-visible {
+  outline: 2px solid var(--dwc-focus);
+  outline-offset: 3px;
+}
+
+html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-button):focus-visible {
+  outline: 2px solid var(--dwc-focus);
+  outline-offset: -3px;
+}
+
+html body #site-side-panel .side-panel-zeus-toggle:focus-visible {
+  border-color: rgb(122 232 255 / 58%);
+}
+
+@media (max-width: 700px) {
+  html body #site-announcement-dialog .site-announcement-back:focus-visible {
+    outline-offset: -4px;
+  }
+}
+
+/* ================================================================
+   Arrivals: the announcement sheet locks on once as it opens, its
+   brackets stepping in; a cover's frame does the same. Finite, opacity
+   and scale only, never in economy rendering or under a loading cover.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-loading])
+    body
+    #site-announcement-dialog[open]
+    .site-announcement-hub {
+    animation: dw-hub-lock 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    body
+    #site-announcement-dialog[open]
+    .site-announcement-hub::after {
+    animation: dw-bracket-lock 320ms steps(4, jump-end) 100ms both;
+  }
+
+  html:not([data-world-effects="economy"]) body .load-gate.is-diving .cine-dive-status::after {
+    animation: dw-bracket-lock 320ms steps(4, jump-end) 280ms both;
+  }
+}
+
+@keyframes dw-hub-lock {
+  from {
+    opacity: 0;
+    scale: 1.02;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes dw-bracket-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Economy rendering: no blur and no ghost filters.
+   ================================================================ */
+html[data-world-effects="economy"] body .side-panel-scrim {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgb(2 4 10 / 84%);
+}
+
+html[data-world-effects="economy"] body #site-announcement-dialog::backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-world-effects="economy"]
+  body
+  :is(#site-side-panel .side-panel-head b, #site-announcement-dialog .site-announcement-copy h3) {
+  filter: none;
+}
+
+/* ================================================================
+   Forced colours: system colours, opaque sheets and bars, real edges.
+   ================================================================ */
+@media (forced-colors: active) {
+  html
+    body
+    :is(
+      #site-side-panel .side-panel-head b,
+      #site-announcement-dialog .site-announcement-copy h3,
+      #site-announcement-dialog .site-announcement-metric b
+    ) {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+    filter: none;
+  }
+
+  html body #site-side-panel.side-panel[data-liquid-pointer] {
+    background: Canvas !important;
+  }
+
+  html
+    body
+    :is(
+      #site-side-panel > .side-panel-head,
+      #site-announcement-dialog .site-announcement-hub,
+      #site-announcement-dialog .site-announcement-header,
+      #site-announcement-dialog .site-announcement-back,
+      .load-gate .cine-dive-status
+    ) {
+    background: Canvas;
+  }
+
+  /* Pseudo-elements cannot sit inside :is(), so this is a plain list. */
+  html body #site-side-panel > .side-panel-head::after,
+  html body #site-announcement-dialog .site-announcement-hub::after,
+  html body #site-announcement-dialog .site-announcement-visual::before,
+  html body .load-gate .cine-dive-status::after,
+  html body #site-side-panel .side-panel-group > p::after {
+    display: none;
+  }
+
+  html body #site-announcement-dialog .site-announcement-hub {
+    border-color: CanvasText;
+  }
+
+  html body #site-side-panel .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-pressed="false"]) > i u {
+    forced-color-adjust: none;
+    border: 2px solid ButtonText;
+    background: ButtonText;
+  }
+
+  html body #site-side-panel .side-panel-zeus-toggle[aria-pressed="true"] > i {
+    border-color: Highlight;
+  }
+
+  html
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+    border-inline-start: 4px solid Highlight;
+  }
+
+  html
+    body
+    #site-side-panel
+    .side-panel-links
+    :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"])
+    > i {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  html body .dw-skip-link {
+    clip-path: none;
+    border: 1px solid LinkText;
+  }
+
+  html body .zeus-button:not(:focus-visible) {
+    outline-color: ButtonText;
+  }
+}

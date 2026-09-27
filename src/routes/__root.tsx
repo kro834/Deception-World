@@ -19,7 +19,9 @@ import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
 import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 import pressFeedbackCss from "../styles-press-feedback.css?url";
+import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
+import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
@@ -97,6 +99,9 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: futureInterfaceCss },
       { rel: "stylesheet", href: pickupVisibilityCss },
       { rel: "stylesheet", href: pressFeedbackCss },
+      // The shared chrome (menu, announcements, covers, Zeus button, skip
+      // link) in one grammar on every route; it outweighs the route sheets.
+      { rel: "stylesheet", href: chromeElevationCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -107,6 +112,9 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600&family=Oxanium:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@500;600;700&display=swap",
       },
+      // The chrome's HUD labels: the Michroma subset of capitals and digits
+      // the character files already load (a few KB, display=swap).
+      { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
     ],
   }),
   component: () => (
