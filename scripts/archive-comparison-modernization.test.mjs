@@ -10,7 +10,7 @@ const comparisonCss = readFileSync(
 const comparisonJs = readFileSync(
   new URL("../public/archive-comparison-modern.js", import.meta.url),
   "utf8",
-);
+).replaceAll("\r\n", "\n");
 const archives = [
   { file: "saga-form-archive-standalone.html", dir: "archives" },
   { file: "realm-form-archive-standalone.html", dir: "archives" },

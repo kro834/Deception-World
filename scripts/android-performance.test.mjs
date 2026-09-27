@@ -15,7 +15,8 @@ const SAMSUNG_INTERNET =
 const WEBVIEW =
   "Mozilla/5.0 (Linux; Android 12; SM-A536B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.0.0 Mobile Safari/537.36";
 
-const readSource = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const readSource = (path) =>
+  readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll("\r\n", "\n");
 
 test("capable Android Chrome, Samsung Internet and WebView keep the full renderer", () => {
   for (const userAgent of [PIXEL_9, GALAXY_S24, SAMSUNG_INTERNET, WEBVIEW]) {

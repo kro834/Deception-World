@@ -28,7 +28,8 @@ import {
   risingUniformsAt,
 } from "../src/components/world/rising-timing.ts";
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const read = async (path) =>
+  (await readFile(new URL(`../${path}`, import.meta.url), "utf8")).replaceAll("\r\n", "\n");
 const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, "");
 // Comments stripped, and prettier's line breaks inside :not( ... ) undone.
 const readCss = async () =>
@@ -482,8 +483,7 @@ test("the sheet: finite, compositor-only, gated like Mirage, legible and scoped"
   const gate = css.slice(css.indexOf("@supports (animation-timeline: view())"));
   const reduced = gate.indexOf("@media (prefers-reduced-motion: no-preference)");
   assert.ok(reduced > 0);
-  const guard =
-    "html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])";
+  const guard = "html:not([data-side-menu-open]):not([data-loading]):not([data-dialog-open])";
   for (const target of [".rw-gate-button {", ".rw-gate-horizon {", ".rw-gate-rule {"]) {
     const at = gate.indexOf(target);
     assert.ok(at > reduced, target);

@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const read = async (path) =>
+  (await readFile(new URL(`../${path}`, import.meta.url), "utf8")).replaceAll("\r\n", "\n");
 const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const readCss = async () => stripComments(await read("src/styles-world-reveal.css"));
 
@@ -173,9 +174,7 @@ test("the reveal finishes at 26svh: headings and copy are whole with their top a
   );
   assert.ok(base, "the view-timeline rule");
   const heading = readVars(base);
-  const copyRule = rules.find(({ selector }) =>
-    selector.endsWith('[data-text-reveal="copy"]'),
-  );
+  const copyRule = rules.find(({ selector }) => selector.endsWith('[data-text-reveal="copy"]'));
   assert.ok(copyRule, "the copy rule");
   // Copy inherits --tr-from from the base rule.
   const copy = { ...heading, ...readVars(copyRule) };

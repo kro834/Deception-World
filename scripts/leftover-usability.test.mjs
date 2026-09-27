@@ -44,7 +44,7 @@ test("the Zeus button steps off titles and control labels, measured by their gly
   );
   assert.match(
     zeus,
-    /const onScroll = \(\) => \{\s*if \(activePointer\.current != null\) return;\s*droppedHere\.current = false;/,
+    /const onScroll = \(\) => \{\s*if \(activePointer\.current != null && !held\.current\) cancelPointer\.current\(\);\s*if \(activePointer\.current != null\) return;\s*droppedHere\.current = false;/,
   );
   // Inside a dialog only the dialog's own words count.
   assert.match(zeus, /const root: ParentNode = button\.closest\("dialog"\) \?\? document;/);
