@@ -62,9 +62,10 @@ test("the Other archive keeps Terra and Luna and fills exactly six slots", () =>
   assert.match(panel, /to="\/characters\/luna"/);
   assert.match(panel, /value="ルナ・アレイン"/);
   assert.match(panel, /OTHER_ARTWORK\.map\(\(artwork\) =>/);
-  assert.match(panel, /Array\.from\(\{ length: 2 \}/);
-  assert.match(panel, /index=\{index \+ 5\}/);
-  assert.equal(2 + artwork.length + 2, 6);
+  assert.match(panel, /to="\/characters\/yoake-mamori"/);
+  assert.match(panel, /Array\.from\(\{ length: 1 \}/);
+  assert.match(panel, /index=\{index \+ 6\}/);
+  assert.equal(2 + artwork.length + 1 + 1, 6);
 });
 
 test("native dialog close paths cannot leave the page scroll lock behind", () => {

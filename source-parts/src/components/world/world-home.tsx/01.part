@@ -462,3 +462,14 @@ const EPISODES: EpisodeRecord[] = [
     title: "DECEPTION WORLD",
     src: "/episode-03-deception-world.jpeg",
     pos: "50% 18%",
+    alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダールーラー",
+        src: "/manager-shuza-rider.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダールーラー",
+        width: 1085,
+        height: 1449,
+        to: "/managers/shuza",
+        assets: MANAGER_ASSETS.shuza,

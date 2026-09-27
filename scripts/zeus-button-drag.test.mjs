@@ -8,7 +8,10 @@ const source = readFileSync(
 ).replaceAll("\r\n", "\n");
 
 test("queued placement cannot interrupt a gesture and interrupted drags restore their origin", () => {
-  assert.match(source, /placementFrame\.current = null;\s*if \(activePointer\.current != null\) return;/);
+  assert.match(
+    source,
+    /placementFrame\.current = null;\s*if \(activePointer\.current != null\) return;/,
+  );
   assert.match(source, /if \(activePointer\.current == null\) placeButton\(position\)/);
   assert.match(source, /gestureOrigin\.current = \{ \.\.\.pendingPosition\.current \}/);
   assert.match(source, /if \(wasHeld\) restoreGestureOrigin\(\)/);
@@ -16,8 +19,14 @@ test("queued placement cannot interrupt a gesture and interrupted drags restore 
 });
 
 test("drag drawing is frame-coalesced and the release flushes the final position", () => {
-  assert.match(source, /if \(dragFrame\.current == null\) \{\s*dragFrame\.current = window\.requestAnimationFrame/);
-  assert.match(source, /const finishPointer[\s\S]*?cancelDragFrame\(\);[\s\S]*?moveToPointer\(event.clientX, event.clientY\);\s*onPositionChange/);
+  assert.match(
+    source,
+    /if \(dragFrame\.current == null\) \{\s*dragFrame\.current = window\.requestAnimationFrame/,
+  );
+  assert.match(
+    source,
+    /const finishPointer[\s\S]*?cancelDragFrame\(\);[\s\S]*?moveToPointer\(event.clientX, event.clientY\);[\s\S]*?setVisualCenter\([\s\S]*?onPositionChange/,
+  );
 });
 
 test("Zeus dragging corrects viewport coordinates inside transformed dialogs", () => {
@@ -25,7 +34,7 @@ test("Zeus dragging corrects viewport coordinates inside transformed dialogs", (
   assert.match(source, /const parent = button\.offsetParent/);
   assert.match(source, /left \+= deltaX \/ scaleX/);
   assert.match(source, /top \+= deltaY \/ scaleY/);
-  assert.match(source, /const actual = setVisualCenter\(centerX, centerY\)/);
+  assert.match(source, /const next = getZeusDragPosition\(geometry, clientX, clientY\)/);
 });
 
 test("the long-press activation frame keeps the latest finger position", () => {

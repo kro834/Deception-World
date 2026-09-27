@@ -6,7 +6,8 @@ import test from "node:test";
 // DPR 3-3.5 (measured: 145-204 MB of active tiles before, 70-120 MB after).
 // These pins keep the heavy layers from coming back.
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const read = async (path) =>
+  (await readFile(new URL(`../${path}`, import.meta.url), "utf8")).replaceAll("\r\n", "\n");
 const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const ANDROID_FULL = 'html:not([data-world-effects="economy"])[data-android-renderer]';
 

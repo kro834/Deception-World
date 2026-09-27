@@ -1,3 +1,14 @@
+
+      <section className="riders-section" id="riders" data-performance-region>
+        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
+        <div className="section-index" data-film-reveal>
+          <span>02</span>
+          <small>EIGHT RIDERS</small>
+          <i className="film-boundary-line" aria-hidden="true" />
+        </div>
+        <div className="section-title">
+          <p className="eyebrow">
+            <span>EIGHT RIDERS / ONE WORLD</span>
             <i />
           </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>

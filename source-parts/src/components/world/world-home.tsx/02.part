@@ -1,4 +1,37 @@
-    alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル",
+      },
+      {
+        label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",
+        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
+      },
+      {
+        label: "仮面ライダーレディック",
+        src: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーレディック",
+        width: 750,
+        height: 1400,
+        to: "/riders/leddic",
+        assets: RIDER_NAV.find((item) => item.id === "leddic")?.assets ?? [
+          "/rider-leddic-ishihen.jpeg",
+        ],
+      },
+      {
+        label: "夜明護尊",
+        src: "/character-yoake-mamori.jpeg",
+        pos: "50% 12%",
+        alt: "夜明護尊",
+        width: 736,
+        height: 976,
+        to: "/characters/yoake-mamori",
+        assets: ["/character-yoake-mamori.jpeg"],
+      },
+    ],
   },
   {
     no: "04",
@@ -441,25 +474,3 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-other") return;
     setManagerTab(2);
     syncRail(managerRail.current, 2);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    let firstFrame = 0;
-    let secondFrame = 0;
-    let retryFrame = 0;
-    let cancelled = false;
-    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
-    // connected targets for almost that whole window instead of assuming a
-    // fixed 24-frame budget, which can expire early on throttled devices.
-    const destinationReadyDeadline = window.performance.now() + 2_000;
-
-    const announceDestination = () => {
-      if (cancelled) return;
-      const destination = {
-        path: "/world",

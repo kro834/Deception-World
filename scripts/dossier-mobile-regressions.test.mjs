@@ -93,7 +93,10 @@ test("all rider dossiers return deeper without a doubled fixed-header inset", ()
   assert.equal((worldChrome.match(/hash=\{returnHash\}/g) ?? []).length, 2);
   assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
   assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*clamp\(64px, 6vw, 88px\)/);
-  assert.match(worldPolishStyles, /#riders-return[\s\S]*?scroll-margin-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/);
+  assert.match(
+    worldPolishStyles,
+    /#riders-return[\s\S]*?scroll-margin-top:\s*calc\(96px \+ env\(safe-area-inset-top\)\)/,
+  );
 });
 
 test("the rider selected before opening a dossier is restored once on return", () => {
@@ -131,8 +134,9 @@ test("Zeus ignores iOS rubber-band offsets and coalesces viewport placement", ()
   assert.match(zeusButton, /activePointer\.current != null \|\| placementFrame\.current != null/);
   assert.match(
     zeusButton,
-    /window\.setTimeout\(\(\) => \{[\s\S]*?schedulePlacement\(\);[\s\S]*?\}, 72\)/,
+    /window\.setTimeout\(\(\) => \{[\s\S]*?schedulePlacement\(\);[\s\S]*?\}, settleMs\)/,
   );
+  assert.match(zeusButton, /const settleMs = isAndroidRenderer\(navigator\) \? 140 : 72;/);
 });
 
 test("form sliders size their fill from the rendered Liquid Glass thumb", () => {

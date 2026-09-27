@@ -1,3 +1,25 @@
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",
         brand: openingBrandRef.current,
         sigil: openingSigilRef.current,
         hero: openingHeroRef.current,
@@ -452,14 +474,3 @@
     const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
     for (let index = posterSequence.length - 1; index > 0; index -= 1) {
       const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [
-        posterSequence[swapIndex],
-        posterSequence[index],
-      ];
-    }
-    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
-    const previewPool = [
-      poster,
-      prevPoster ?? poster,
-      (poster + 1) % POSTERS.length,
-      (poster + 2) % POSTERS.length,

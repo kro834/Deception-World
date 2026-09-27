@@ -14,6 +14,13 @@ import { useRouterState } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
 import { guardTapThrough } from "@/lib/tap-through-guard";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
+import { isAndroidRenderer } from "@/lib/rendering-profile.js";
+import {
+  clampZeusCenter,
+  getZeusDragPosition,
+  type ZeusBounds,
+  type ZeusDragGeometry,
+} from "@/lib/zeus-drag";
 import {
   ZEUS_BUTTON_RETURN_SRCSET,
   ZEUS_BUTTON_SIZES,
@@ -184,7 +191,17 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
       setPortalTarget(openDialogs.at(-1) ?? document.body);
       setSideMenuOpen(Boolean(document.querySelector('.side-panel[data-open="true"]')));
     };
-    const scheduleTargetUpdate = () => {
+    const scheduleTargetUpdate = (records: MutationRecord[]) => {
+      // Animated text and card updates do not change the portal surface.
+      const containsSurface = (node: Node) =>
+        node instanceof Element &&
+        (node.matches("dialog, .side-panel") || Boolean(node.querySelector("dialog, .side-panel")));
+      const surfacesChanged = records.some((record) =>
+        record.type === "attributes"
+          ? record.target instanceof Element && record.target.matches("dialog, .side-panel")
+          : [...record.addedNodes, ...record.removedNodes].some(containsSurface),
+      );
+      if (!surfacesChanged) return;
       if (frame) return;
       frame = window.requestAnimationFrame(updateTarget);
     };
@@ -338,6 +355,8 @@ function ZeusButton({
   const placementFrame = useRef<number | null>(null);
   const placementTimer = useRef<number | null>(null);
   const dragFrame = useRef<number | null>(null);
+  const dragGeometry = useRef<ZeusDragGeometry | null>(null);
+  const cancelPointer = useRef<() => void>(() => {});
   const gestureOrigin = useRef(position);
   const droppedHere = useRef(false);
 
@@ -380,15 +399,15 @@ function ZeusButton({
     holdTimer.current = null;
   }, []);
 
-  const clampCenter = useCallback(
-    (clientX: number, clientY: number) => {
+  const readBounds = useCallback(
+    (
+      viewport: ReturnType<typeof getViewport>,
+      rect: { width: number; height: number },
+    ): ZeusBounds => {
       const button = buttonRef.current;
-      if (!button) return { x: clientX, y: clientY };
-      const rect = button.getBoundingClientRect();
-      const viewport = getViewport();
-      const computed = window.getComputedStyle(button);
+      const computed = button ? window.getComputedStyle(button) : null;
       const safeInset = (name: string) => {
-        const value = Number.parseFloat(computed.getPropertyValue(name));
+        const value = Number.parseFloat(computed?.getPropertyValue(name) ?? "0");
         return Number.isFinite(value) ? Math.max(0, value) : 0;
       };
       const safe = 12;
@@ -406,11 +425,9 @@ function ZeusButton({
         minY,
         viewport.offsetTop + viewport.height - rect.height / 2 - safeBottom,
       );
-      const centerX = Math.max(minX, Math.min(maxX, clientX));
-      const centerY = Math.max(minY, Math.min(maxY, clientY));
-      return { x: centerX, y: centerY };
+      return { minX, maxX, minY, maxY };
     },
-    [getViewport],
+    [],
   );
 
   const avoidCriticalControls = useCallback(
@@ -419,6 +436,7 @@ function ZeusButton({
       if (!button) return preferred;
       const viewport = getViewport();
       const rect = button.getBoundingClientRect();
+      const bounds = readBounds(viewport, rect);
       const localX = preferred.x - viewport.offsetLeft;
       const localY = preferred.y - viewport.offsetTop;
       const mirrorX = viewport.offsetLeft + viewport.width - localX;
@@ -442,7 +460,7 @@ function ZeusButton({
         { x: mirrorX, y: preferred.y - lift * 3 },
         { x: preferred.x, y: mirrorY },
         { x: mirrorX, y: mirrorY },
-      ].map((candidate) => clampCenter(candidate.x, candidate.y));
+      ].map((candidate) => clampZeusCenter(candidate.x, candidate.y, bounds));
       const controls = Array.from(document.querySelectorAll<HTMLElement>(ZEUS_AVOID_SELECTOR))
         .filter((control) => control !== button && !button.contains(control))
         .filter((control) => !(control instanceof HTMLButtonElement && control.disabled))
@@ -513,7 +531,7 @@ function ZeusButton({
       }
       return fallback?.candidate ?? candidates[0] ?? preferred;
     },
-    [clampCenter, getViewport],
+    [readBounds, getViewport],
   );
 
   const setVisualCenter = useCallback((targetX: number, targetY: number) => {
@@ -565,9 +583,10 @@ function ZeusButton({
       const button = buttonRef.current;
       if (!button) return next;
       const viewport = getViewport();
-      const { x: centerX, y: centerY } = clampCenter(
+      const { x: centerX, y: centerY } = clampZeusCenter(
         viewport.offsetLeft + next.x * viewport.width,
         viewport.offsetTop + next.y * viewport.height,
+        readBounds(viewport, button.getBoundingClientRect()),
       );
       const safeCenter = avoidCriticalControls({ x: centerX, y: centerY });
       const actual = setVisualCenter(safeCenter.x, safeCenter.y);
@@ -578,10 +597,12 @@ function ZeusButton({
       pendingPosition.current = normalized;
       return normalized;
     },
-    [avoidCriticalControls, clampCenter, getViewport, setVisualCenter],
+    [avoidCriticalControls, readBounds, getViewport, setVisualCenter],
   );
 
   const restoreGestureOrigin = useCallback(() => {
+    buttonRef.current?.style.removeProperty("translate");
+    dragGeometry.current = null;
     const viewport = getViewport();
     // Restore the displayed origin, not the expanded drag bounds or a new
     // collision candidate. Otherwise cancellation itself shifts the button.
@@ -600,6 +621,7 @@ function ZeusButton({
   }, [placeButton, position]);
 
   useEffect(() => {
+    const settleMs = isAndroidRenderer(navigator) ? 140 : 72;
     const schedulePlacement = () => {
       if (activePointer.current != null || placementFrame.current != null) return;
       placementFrame.current = window.requestAnimationFrame(() => {
@@ -609,6 +631,7 @@ function ZeusButton({
       });
     };
     const onScroll = () => {
+      if (activePointer.current != null && !held.current) cancelPointer.current();
       if (activePointer.current != null) return;
       droppedHere.current = false;
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
@@ -617,15 +640,28 @@ function ZeusButton({
       placementTimer.current = window.setTimeout(() => {
         placementTimer.current = null;
         schedulePlacement();
-      }, 72);
+      }, settleMs);
     };
     const significantResize = createViewportResizeFilter();
     const onResize = () => {
+      if (dragGeometry.current) {
+        const before = dragGeometry.current.viewport;
+        const after = getViewport();
+        if (
+          Math.abs(after.width - before.width) >= 1 ||
+          Math.abs(after.height - before.height) >= 160
+        ) {
+          cancelPointer.current();
+        }
+      }
       // A URL bar collapsing mid-scroll only re-clamps once the gesture settles.
       if (!significantResize()) {
         onScroll();
         return;
       }
+      // Rotation, split view or a keyboard changes the cached drag bounds.
+      // Cancel the gesture before the next sample can use obsolete geometry.
+      cancelPointer.current();
       if (placementTimer.current != null) {
         window.clearTimeout(placementTimer.current);
         placementTimer.current = null;
@@ -648,7 +684,7 @@ function ZeusButton({
       if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
       placementFrame.current = null;
     };
-  }, [placeButton]);
+  }, [placeButton, getViewport]);
 
   /* A permanent non-passive window touchmove listener makes every page scroll
      wait for the main thread. Install it only while a held drag owns the
@@ -656,6 +692,10 @@ function ZeusButton({
      current button node either. */
   const touchGuardArmed = useRef(false);
   const preventHeldTouchScroll = useCallback((event: TouchEvent) => {
+    if (event.touches.length > 1) {
+      cancelPointer.current();
+      return;
+    }
     if (held.current && activePointer.current != null && event.cancelable) {
       event.preventDefault();
     }
@@ -733,28 +773,26 @@ function ZeusButton({
     window.addEventListener("blur", cancelOnBlur);
     window.addEventListener("pagehide", cancelOnBlur);
     document.addEventListener("visibilitychange", cancelWhenHidden);
+    cancelPointer.current = cancelOnBlur;
     return () => {
       window.removeEventListener("pointerup", cancelDanglingPointer);
       window.removeEventListener("pointercancel", cancelDanglingPointer);
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
       document.removeEventListener("visibilitychange", cancelWhenHidden);
+      cancelPointer.current = () => {};
     };
   }, [clearHoldTimer, cancelDragFrame, disarmTouchGuard, restoreGestureOrigin]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
-    if (!button) return;
-    const viewport = getViewport();
-    const { x: centerX, y: centerY } = clampCenter(
-      clientX - grabOffset.current.x,
-      clientY - grabOffset.current.y,
-    );
-    const actual = setVisualCenter(centerX, centerY);
-    pendingPosition.current = {
-      x: (actual.x - viewport.offsetLeft) / viewport.width,
-      y: (actual.y - viewport.offsetTop) / viewport.height,
-    };
+    const geometry = dragGeometry.current;
+    if (!button || !geometry) return;
+    const next = getZeusDragPosition(geometry, clientX, clientY);
+    // Individual translate composes with the existing press/return scale.
+    // Unlike left/top + getBoundingClientRect, it does not relayout each frame.
+    button.style.translate = `${next.translate.x}px ${next.translate.y}px`;
+    pendingPosition.current = next.normalized;
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
@@ -766,6 +804,13 @@ function ZeusButton({
     if (wasHeld && !cancelled) {
       droppedHere.current = true;
       moveToPointer(event.clientX, event.clientY);
+      event.currentTarget.style.removeProperty("translate");
+      dragGeometry.current = null;
+      const viewport = getViewport();
+      setVisualCenter(
+        viewport.offsetLeft + pendingPosition.current.x * viewport.width,
+        viewport.offsetTop + pendingPosition.current.y * viewport.height,
+      );
       onPositionChange(pendingPosition.current);
     } else if (wasHeld && cancelled) {
       restoreGestureOrigin();
@@ -781,7 +826,11 @@ function ZeusButton({
     } catch {
       /* Pointer capture may already be released by the browser. */
     }
-    if (!cancelled && !wasHeld && !moved.current) {
+    const releaseDistance = Math.hypot(
+      event.clientX - start.current.x,
+      event.clientY - start.current.y,
+    );
+    if (!cancelled && !wasHeld && !moved.current && releaseDistance <= MOVE_TOLERANCE) {
       clearHoldTimer();
       activePointer.current = null;
       held.current = false;
@@ -826,6 +875,27 @@ function ZeusButton({
         clearHoldTimer();
         holdTimer.current = window.setTimeout(() => {
           if (activePointer.current !== event.pointerId) return;
+          holdTimer.current = null;
+          const rect = target.getBoundingClientRect();
+          const viewport = getViewport();
+          const parent = target.offsetParent;
+          const scale = { x: 1, y: 1 };
+          if (parent instanceof HTMLElement) {
+            const parentRect = parent.getBoundingClientRect();
+            if (parent.offsetWidth > 0) scale.x = parentRect.width / parent.offsetWidth || 1;
+            if (parent.offsetHeight > 0) scale.y = parentRect.height / parent.offsetHeight || 1;
+          }
+          dragGeometry.current = {
+            origin: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+            grab: { ...grabOffset.current },
+            // Reserve the expanded hold size before its scale transition starts.
+            bounds: readBounds(viewport, {
+              width: rect.width * 1.075,
+              height: rect.height * 1.075,
+            }),
+            scale,
+            viewport,
+          };
           held.current = true;
           armTouchGuard();
           target.dataset.dragging = "true";
@@ -876,6 +946,13 @@ function ZeusButton({
       onClick={(event) => {
         event.preventDefault();
         if (event.detail === 0) void onNavigate();
+      }}
+      onContextMenu={(event) => event.preventDefault()}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && activePointer.current != null) {
+          event.preventDefault();
+          cancelPointer.current();
+        }
       }}
       onDragStart={(event) => event.preventDefault()}
     >

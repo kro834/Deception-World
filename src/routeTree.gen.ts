@@ -26,6 +26,7 @@ import { Route as CharactersCielRouteImport } from './routes/characters/ciel'
 import { Route as CharactersDanteRouteImport } from './routes/characters/dante'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
+import { Route as CharactersYoakeMamoriRouteImport } from './routes/characters/yoake-mamori'
 import { Route as ManagersLejasRouteImport } from './routes/managers/lejas'
 import { Route as ManagersOpusRouteImport } from './routes/managers/opus'
 import { Route as ManagersReemuRouteImport } from './routes/managers/reemu'
@@ -120,6 +121,11 @@ const CharactersTerraRoute = CharactersTerraRouteImport.update({
   path: '/terra',
   getParentRoute: () => CharactersRoute,
 } as any)
+const CharactersYoakeMamoriRoute = CharactersYoakeMamoriRouteImport.update({
+  id: '/yoake-mamori',
+  path: '/yoake-mamori',
+  getParentRoute: () => CharactersRoute,
+} as any)
 const ManagersLejasRoute = ManagersLejasRouteImport.update({
   id: '/lejas',
   path: '/lejas',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
+  '/characters/yoake-mamori': typeof CharactersYoakeMamoriRoute
   '/managers/lejas': typeof ManagersLejasRoute
   '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
+  '/characters/yoake-mamori': typeof CharactersYoakeMamoriRoute
   '/managers/lejas': typeof ManagersLejasRoute
   '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/characters/dante': typeof CharactersDanteRoute
   '/characters/luna': typeof CharactersLunaRoute
   '/characters/terra': typeof CharactersTerraRoute
+  '/characters/yoake-mamori': typeof CharactersYoakeMamoriRoute
   '/managers/lejas': typeof ManagersLejasRoute
   '/managers/opus': typeof ManagersOpusRoute
   '/managers/reemu': typeof ManagersReemuRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
+    | '/characters/yoake-mamori'
     | '/managers/lejas'
     | '/managers/opus'
     | '/managers/reemu'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
+    | '/characters/yoake-mamori'
     | '/managers/lejas'
     | '/managers/opus'
     | '/managers/reemu'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/characters/dante'
     | '/characters/luna'
     | '/characters/terra'
+    | '/characters/yoake-mamori'
     | '/managers/lejas'
     | '/managers/opus'
     | '/managers/reemu'
@@ -465,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CharactersTerraRouteImport
       parentRoute: typeof CharactersRoute
     }
+    '/characters/yoake-mamori': {
+      id: '/characters/yoake-mamori'
+      path: '/yoake-mamori'
+      fullPath: '/characters/yoake-mamori'
+      preLoaderRoute: typeof CharactersYoakeMamoriRouteImport
+      parentRoute: typeof CharactersRoute
+    }
     '/managers/lejas': {
       id: '/managers/lejas'
       path: '/lejas'
@@ -529,6 +548,7 @@ interface CharactersRouteChildren {
   CharactersDanteRoute: typeof CharactersDanteRoute
   CharactersLunaRoute: typeof CharactersLunaRoute
   CharactersTerraRoute: typeof CharactersTerraRoute
+  CharactersYoakeMamoriRoute: typeof CharactersYoakeMamoriRoute
 }
 
 const CharactersRouteChildren: CharactersRouteChildren = {
@@ -536,6 +556,7 @@ const CharactersRouteChildren: CharactersRouteChildren = {
   CharactersDanteRoute: CharactersDanteRoute,
   CharactersLunaRoute: CharactersLunaRoute,
   CharactersTerraRoute: CharactersTerraRoute,
+  CharactersYoakeMamoriRoute: CharactersYoakeMamoriRoute,
 }
 
 const CharactersRouteWithChildren = CharactersRoute._addFileChildren(
