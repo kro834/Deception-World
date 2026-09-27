@@ -2301,7 +2301,8 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
     line-height: 1.4;
   }
   .rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
-    font-size: 11px;
+    /* 12px floor: the tab code is the only text that told the stages apart. */
+    font-size: 12px;
   }
 }
 

@@ -1,0 +1,1556 @@
+/* Showcase elevation — a lit stage and one voice for the Rexonance and
+   Extreme special sites. Loaded after the showcase sheet (and the Michroma
+   HUD subset) and before the motion sheet, so every selector doubles
+   .rxs-page to meet the showcase at its own weight and wins by source order.
+   It keeps the Apple discipline (two neutrals, 28px tiles, weight-600
+   headlines, naked stats) and adds one light per site (Rexonance ice,
+   Extreme gold), HUD labels at 12px, alternating ink and #1d1d1f bands, prism
+   rules, static brackets on the two art panels and a 1px inset edge on
+   tiles. No drop shadows or glows. !important appears only where the frosted
+   sheet paints the liquid rail and the P14 slider with html body …
+   !important, and where a rail drag's inline overflow on <body> becomes a
+   clip. Geometry the verify scripts measure (rail, slider, selects, local
+   nav, figure heights) is left to the earlier sheets. */
+
+/* ---------- Tokens ---------- */
+.rxs-page.rxs-page.rxs-page {
+  --sc-light: #7ae8ff;
+  --sc-accent: var(--sc-light);
+  --sc-lock: color-mix(in srgb, var(--sc-light) 62%, #dff9ff);
+  --sc-gold: #f0cf86;
+  --sc-kicker: color-mix(in srgb, var(--sc-light) 80%, #fff);
+  --sc-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --sc-prism-reverse: linear-gradient(270deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --sc-prism-down: linear-gradient(180deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --sc-ghost: rgb(164 139 255 / 36%);
+  --sc-body: rgb(245 245 247 / 76%);
+  --sc-label: rgb(245 245 247 / 60%);
+  --sc-note: rgb(245 245 247 / 56%);
+  --sc-baseline: #6e6e73;
+  --sc-hairline-soft: rgb(255 255 255 / 18%);
+  --sc-hud: "Michroma", "Oxanium", var(--rxs-font-text);
+  --sc-mono: "Oxanium", var(--rxs-font-text);
+  --sc-focus: #fff0b5;
+  --sc-arm: 28px;
+  --sc-brackets:
+    linear-gradient(var(--sc-lock) 0 0) 0 0 / var(--sc-arm) 2px,
+    linear-gradient(var(--sc-lock) 0 0) 0 0 / 2px var(--sc-arm),
+    linear-gradient(var(--sc-lock) 0 0) 100% 0 / var(--sc-arm) 2px,
+    linear-gradient(var(--sc-lock) 0 0) 100% 0 / 2px var(--sc-arm),
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / var(--sc-arm) 2px,
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / 2px var(--sc-arm),
+    linear-gradient(var(--sc-gold) 0 0) 100% 100% / var(--sc-arm) 2px,
+    linear-gradient(var(--sc-gold) 0 0) 100% 100% / 2px var(--sc-arm);
+  /* Under the brackets, a soft ink fall-off in each corner, so the arms still
+     read on the bright P14 art. A vignette on the picture, not a shadow. */
+  --sc-corner-scrim:
+    radial-gradient(circle at 0 0, rgb(0 0 0 / 44%), transparent 64px),
+    radial-gradient(circle at 100% 0, rgb(0 0 0 / 44%), transparent 64px),
+    radial-gradient(circle at 0 100%, rgb(0 0 0 / 44%), transparent 64px),
+    radial-gradient(circle at 100% 100%, rgb(0 0 0 / 44%), transparent 64px);
+}
+
+/* Extreme's one light is its gold; its rules run gold to ice to white and its
+   brackets keep the site gold at the bottom corners. */
+.rxs-page.rxs-page.rxs-page.exs-page {
+  --sc-light: #ffd57a;
+  --sc-prism: linear-gradient(90deg, #ffd57a 0%, #7ae8ff 50%, #fff 100%);
+  --sc-prism-reverse: linear-gradient(270deg, #ffd57a 0%, #7ae8ff 50%, #fff 100%);
+  --sc-prism-down: linear-gradient(180deg, #ffd57a 0%, #7ae8ff 50%, #fff 100%);
+  --sc-ghost: rgb(255 213 122 / 22%);
+}
+
+/* ---------- Hero: a lit stage ---------- */
+/* A faint key light behind the figure; the floor (a hairline and a pool of
+   the site light) sits above the fade so the figure stands on something. */
+.rxs-page.rxs-page .rxs-hero-visual {
+  background: radial-gradient(ellipse 46% 60% at 50% 40%, rgb(255 255 255 / 5%), transparent 70%);
+}
+
+.rxs-page.rxs-page .rxs-hero-visual::before {
+  position: absolute;
+  z-index: 1;
+  right: 4%;
+  bottom: 2%;
+  left: 4%;
+  height: 20%;
+  content: "";
+  background:
+    linear-gradient(90deg, transparent, var(--sc-light) 30% 70%, transparent) 50% 64% / 76% 1px
+      no-repeat,
+    radial-gradient(
+      ellipse 48% 44% at 50% 64%,
+      color-mix(in srgb, var(--sc-light) 18%, transparent),
+      transparent 72%
+    );
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-hero-visual::after {
+  background: linear-gradient(180deg, transparent 76%, var(--sc-ink) 100%);
+}
+
+/* The art's own night sky runs to its edges, so the mask feathers the image
+   rectangle itself: a short fall-off at the top (the horns), a long one at
+   the feet, and the sides from a tall ellipse. The oval vignette it replaces
+   left a hard edge around the figure. */
+.rxs-page.rxs-page .rxs-hero-visual img {
+  mask-image:
+    linear-gradient(180deg, transparent 0, #000 8%, #000 66%, transparent 96%),
+    radial-gradient(ellipse 50% 92% at 50% 42%, #000 58%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede) {
+  margin: 0 0 18px;
+  color: var(--sc-kicker);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+}
+
+/* The wordmark is the hero's one head label: widest tracking, plain white. */
+.rxs-page.rxs-page .rxs-hero h1 span {
+  margin-bottom: 18px;
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.24em;
+}
+
+.rxs-page.rxs-page .rxs-hero h1 {
+  font-size: clamp(48px, 7.4vw, 108px);
+  line-height: 1.04;
+}
+
+.rxs-page.rxs-page .rxs-hero-lede {
+  margin-top: 22px;
+  color: var(--sc-body);
+  font-size: clamp(18px, 1.6vw, 24px);
+  font-weight: 400;
+}
+
+.rxs-page.rxs-page .rxs-scroll-cue {
+  gap: 12px;
+  color: rgb(245 245 247 / 72%);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+/* Extreme does not load the Rexonance motion sheet, whose rule is the only
+   thing that stops the base sheet's infinite cue pulse: the line stays still. */
+.rxs-page.rxs-page .rxs-scroll-cue i {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(var(--sc-light), transparent);
+  animation: none;
+}
+
+/* Side-by-side heroes: the copy starts on the page column (the nav brand and
+   the tiles), with a prism arm leading into the kicker. */
+@media (min-width: 761px) and (orientation: landscape), (min-width: 1441px) {
+  .rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede)::before {
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    margin-right: 14px;
+    content: "";
+    vertical-align: 0.3em;
+    background: var(--sc-prism);
+  }
+}
+
+/* In the side-by-side heroes the art is contained in a wider box; the img
+   takes the drawn image's own width (centred, top-aligned as before) so the
+   mask above feathers the picture, not the empty box around it. The box the
+   verify scripts measure (.rxs-hero-visual) is untouched. */
+@media (min-width: 761px) and (orientation: landscape), (min-width: 1441px) {
+  .rxs-page.rxs-page .rxs-hero-visual img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1440px) and (orientation: landscape) {
+  .rxs-page.rxs-page .rxs-hero {
+    padding-inline: max(5vw, calc((100vw - 1180px) / 2));
+  }
+
+  .rxs-page.rxs-page .rxs-hero h1 {
+    font-size: clamp(54px, 6.2vw, 92px);
+    line-height: 1.06;
+  }
+}
+
+/* Phones turned sideways: the headline fits the short screen. */
+@media (min-width: 761px) and (max-width: 1024px) and (max-height: 500px) and (orientation: landscape) {
+  .rxs-page.rxs-page .rxs-hero h1 {
+    font-size: clamp(36px, 8.5vh, 48px);
+  }
+
+  .rxs-page.rxs-page .rxs-hero-lede {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+
+  /* The kicker keeps one line in the short copy column. */
+  .rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede) {
+    letter-spacing: 0.1em;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede)::before {
+    display: none;
+  }
+}
+
+/* Wide displays: the stacked column cut the figure at the chest below the
+   copy. Copy left, contained art right, on the page column; every property
+   the showcase's column hero sets is restated. */
+@media (min-width: 1441px) {
+  .rxs-page.rxs-page .rxs-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    justify-content: normal;
+    gap: 32px;
+    min-height: calc(100svh - 62px);
+    padding: 44px max(5vw, calc((100vw - 1180px) / 2)) 96px;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-copy {
+    width: 100%;
+    max-width: 640px;
+    text-align: left;
+  }
+
+  .rxs-page.rxs-page .rxs-hero h1 {
+    font-size: clamp(54px, 6.2vw, 100px);
+    line-height: 1.06;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: min(72svh, 800px);
+    aspect-ratio: auto;
+    margin: 0;
+    translate: none;
+    scale: none;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual img {
+    object-fit: contain;
+    object-position: center top;
+  }
+
+  .rxs-page.rxs-page .rxs-scroll-cue {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    margin: 0;
+    translate: -50% 0;
+  }
+}
+
+/* Portrait tablets: the art keeps ink margins on both sides. */
+@media (min-width: 681px) and (max-width: 1024px) and (orientation: portrait) {
+  .rxs-page.rxs-page .rxs-hero {
+    gap: 32px;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual {
+    width: min(100%, 620px);
+  }
+}
+
+/* Column heroes: aspect-ratio alone is only a minimum while the img keeps its
+   natural height, which made the art taller than its box on Extreme. */
+@media (max-width: 760px), (min-width: 761px) and (max-width: 1440px) and (orientation: portrait) {
+  .rxs-page.rxs-page .rxs-hero-visual {
+    min-height: 0;
+  }
+}
+
+/* Phones: the hero is one screen, the cue stays above the fold. */
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-hero {
+    gap: 16px;
+    min-height: calc(100svh - 58px);
+    padding-top: clamp(32px, 4.5vh, 48px);
+  }
+
+  .rxs-page.rxs-page .rxs-scroll-cue {
+    gap: 10px;
+  }
+
+  .rxs-page.rxs-page .rxs-scroll-cue i {
+    height: 28px;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede) {
+    letter-spacing: 0.1em;
+  }
+
+  .rxs-page.rxs-page .rxs-hero h1 {
+    font-size: clamp(40px, 11.5vw, 48px);
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual {
+    width: min(100%, 360px);
+    aspect-ratio: 4 / 5;
+  }
+
+  .rxs-page.rxs-page .rxs-scroll-cue {
+    margin: 0 0 24px;
+  }
+}
+
+/* ---------- Chapter rhythm: ink and #1d1d1f bands ---------- */
+.rxs-page.rxs-page .rxs-section {
+  padding-block: clamp(80px, 8vw, 112px) clamp(88px, 9vw, 128px);
+  scroll-margin-top: -64px;
+}
+
+.rxs-page.rxs-page .rxs-section.rxs-p14,
+.rxs-page.rxs-page .rxs-section.rxs-system {
+  background: var(--sc-tile);
+}
+
+/* Each chapter after the first opens on the prism; static, 1px. */
+.rxs-page.rxs-page .rxs-section.rxs-p14::before,
+.rxs-page.rxs-page .rxs-section.rxs-stages::before,
+.rxs-page.rxs-page .rxs-section.rxs-system::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: var(--sc-prism);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-section-heading {
+  margin-bottom: clamp(36px, 4.5vw, 56px);
+}
+
+.rxs-page.rxs-page .rxs-section-heading > p {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 26px;
+  color: var(--sc-kicker);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+  text-wrap: balance;
+}
+
+/* Arms run from the kicker outward: ice at the text, gold at the ends. The
+   left arm also absorbs the trailing tracking so the label sits centred. */
+.rxs-page.rxs-page .rxs-section-heading > p::before,
+.rxs-page.rxs-page .rxs-section-heading > p::after {
+  flex: none;
+  width: 36px;
+  height: 1px;
+  content: "";
+  background: var(--sc-prism);
+}
+
+.rxs-page.rxs-page .rxs-section-heading > p::before {
+  margin-right: 0.18em;
+  background: var(--sc-prism-reverse);
+}
+
+.rxs-page.rxs-page .rxs-section-heading > span {
+  max-width: 680px;
+  color: var(--sc-body);
+  font-size: clamp(17px, 1.3vw, 20px);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-section {
+    padding: 72px 20px 80px;
+    scroll-margin-top: -32px;
+  }
+
+  .rxs-page.rxs-page .rxs-section-heading > p {
+    gap: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .rxs-page.rxs-page .rxs-section-heading > p::before,
+  .rxs-page.rxs-page .rxs-section-heading > p::after {
+    width: 16px;
+  }
+
+  .rxs-page.rxs-page .rxs-section-heading > p::before {
+    margin-right: 0.08em;
+  }
+}
+
+@media (max-width: 359px) {
+  .rxs-page.rxs-page .rxs-section-heading > p {
+    letter-spacing: 0.06em;
+  }
+
+  .rxs-page.rxs-page .rxs-section-heading > p::before,
+  .rxs-page.rxs-page .rxs-section-heading > p::after {
+    display: none;
+  }
+}
+
+/* ---------- Performance: naked stats ---------- */
+.rxs-page.rxs-page .rxs-headline-metrics article {
+  border-top-color: var(--sc-hairline);
+}
+
+.rxs-page.rxs-page .rxs-headline-metrics small {
+  color: var(--sc-kicker);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+}
+
+.rxs-page.rxs-page .rxs-headline-metrics strong span {
+  margin-left: 0.1em;
+  color: var(--sc-light);
+  -webkit-text-fill-color: var(--sc-light);
+  font-size: 0.28em;
+}
+
+.rxs-page.rxs-page .rxs-headline-metrics p {
+  color: rgb(245 245 247 / 66%);
+  font-size: 17px;
+}
+
+@media (min-width: 681px) {
+  .rxs-page.rxs-page .rxs-headline-metrics article strong {
+    font-size: clamp(72px, 9vw, 128px);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* ---------- Comparison tile ---------- */
+.rxs-page.rxs-page .rxs-comparison {
+  margin-top: clamp(40px, 5vw, 64px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
+}
+
+.rxs-page.rxs-page .rxs-comparison-selector > span {
+  color: var(--sc-label);
+}
+
+.rxs-page.rxs-page .rxs-comparison-selector select,
+.rxs-page.rxs-page .rxs-p14-native-select select {
+  border-color: var(--sc-hairline-soft);
+  color: var(--sc-text);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+.rxs-page.rxs-page .rxs-comparison-key i {
+  width: 10px;
+  height: 3px;
+  border-radius: 0;
+}
+
+.rxs-page.rxs-page .rxs-comparison-key .is-rexonance {
+  background: var(--sc-light);
+}
+
+.rxs-page.rxs-page .rxs-comparison-key .is-extreme {
+  background: var(--sc-baseline);
+}
+
+/* The hairline separates the rows; the base sheet's 42px row margin stacked
+   on the showcase padding left 98px of dead space between them. */
+.rxs-page.rxs-page .rxs-comparison-metrics article + article {
+  margin-top: 0;
+}
+
+.rxs-page.rxs-page .rxs-comparison article strong {
+  color: rgb(245 245 247 / 94%);
+}
+
+.rxs-page.rxs-page .rxs-comparison-result b {
+  color: var(--sc-light);
+  font-size: clamp(30px, 2.6vw, 38px);
+  letter-spacing: -0.01em;
+}
+
+.rxs-page.rxs-page .rxs-comparison-result i,
+.rxs-page.rxs-page .rxs-comparison-result em,
+.rxs-page.rxs-page .rxs-comparison article > p {
+  font-size: 13px;
+}
+
+/* Flat 3px bars: the result is read in the light, the baseline in a gray
+   that holds 3.5:1 on the tile. */
+.rxs-page.rxs-page .rxs-bars {
+  gap: 6px;
+}
+
+.rxs-page.rxs-page .rxs-bars i {
+  height: 3px;
+  border-radius: 0;
+}
+
+.rxs-page.rxs-page .rxs-bars .is-rexonance {
+  background: linear-gradient(
+    90deg,
+    var(--sc-light),
+    color-mix(in srgb, var(--sc-light) 55%, #fff)
+  );
+}
+
+.rxs-page.rxs-page .rxs-bars .is-extreme {
+  min-width: 4px;
+  background: var(--sc-baseline);
+}
+
+/* The header row: formula and key close up under the select. */
+@media (min-width: 681px) {
+  .rxs-page.rxs-page .rxs-comparison-formula {
+    max-inline-size: 40em;
+    margin: 0;
+    margin-inline-start: auto;
+    font-size: 14px;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-key {
+    margin: 10px 0 12px;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-metrics article {
+    padding: 28px 0;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-metrics article:first-child {
+    padding-top: 8px;
+    border-top: 0;
+  }
+}
+
+/* Phones: the value gets the row and the result sits under it, clear of the
+   fixed Zeus avatar at the right edge. */
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-comparison article header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison article strong {
+    font-size: clamp(28px, 8vw, 34px);
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-result {
+    justify-items: start;
+    width: 100%;
+    margin-inline-start: 0;
+    padding-right: 72px;
+    text-align: start;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-result b {
+    font-size: 22px;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-result em {
+    max-width: none;
+    text-align: start;
+  }
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison > header small {
+  color: var(--sc-label);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison > div > section {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison h4 {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--sc-hairline-soft);
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison li {
+  color: var(--sc-body);
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison li::before {
+  color: var(--sc-light);
+}
+
+/* The verdict hangs on a 1px vertical prism. */
+.rxs-page.rxs-page .rxs-processing-comparison > p {
+  max-inline-size: 64ch;
+  margin: 20px 0 0;
+  padding: 4px 0 4px 16px;
+  color: var(--sc-body);
+  background: var(--sc-prism-down) 0 0 / 1px 100% no-repeat;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Extreme's unconverted items read as hairline rows, not a stack of pills. */
+.rxs-page.rxs-page .exs-unavailable {
+  gap: 0;
+  margin-top: 20px;
+}
+
+.rxs-page.rxs-page .exs-unavailable li {
+  max-inline-size: 44em;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--sc-hairline-soft);
+  border-radius: 0;
+  color: var(--sc-note);
+  background: none;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.rxs-page.rxs-page .exs-unavailable li::before {
+  color: var(--sc-light);
+}
+
+/* ---------- Notes: one tier, one measure ---------- */
+.rxs-page.rxs-page .rxs-comparison-note,
+.rxs-page.rxs-page .rxs-p14-method-note {
+  max-inline-size: 44em;
+  margin-inline: auto;
+  color: var(--sc-note);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.rxs-page.rxs-page .rxs-comparison-note::before,
+.rxs-page.rxs-page .rxs-p14-method-note::before {
+  display: block;
+  width: 28px;
+  height: 1px;
+  margin: 0 0 12px;
+  content: "";
+  background: var(--sc-prism);
+}
+
+/* ---------- P14 band ---------- */
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-overview figure,
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-comparator,
+.rxs-page.rxs-page .rxs-p14 .exs-p14-comparison article {
+  background: var(--sc-ink);
+}
+
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-metrics article,
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-native-select select {
+  background: var(--sc-tile);
+}
+
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-comparator,
+.rxs-page.rxs-page .rxs-p14 .exs-p14-comparison article {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 9%);
+}
+
+.rxs-page.rxs-page .rxs-p14-metrics article {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
+}
+
+.rxs-page.rxs-page .rxs-p14-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.rxs-page.rxs-page .rxs-p14-copy > small,
+.rxs-page.rxs-page .rxs-p14-comparator > header small {
+  color: var(--sc-label);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+}
+
+.rxs-page.rxs-page .rxs-p14-copy h3 {
+  font-size: clamp(34px, 3.8vw, 52px);
+}
+
+.rxs-page.rxs-page .rxs-p14-copy > p {
+  color: var(--sc-body);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.rxs-page.rxs-page .rxs-p14-copy dl {
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.rxs-page.rxs-page .rxs-p14-copy dl div {
+  padding-top: 18px;
+  border-top-color: var(--sc-hairline);
+}
+
+.rxs-page.rxs-page .rxs-p14-copy dt {
+  color: var(--sc-note);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+/* Sized so Extreme's longest value (20,000YOPS) fits its third of the copy
+   column at every width instead of breaking inside the word. */
+.rxs-page.rxs-page .rxs-p14-copy dd {
+  font-size: clamp(20px, 2.1vw, 30px);
+  letter-spacing: -0.01em;
+}
+
+/* The readout says the value; the slider is the control. */
+.rxs-page.rxs-page .rxs-p14-comparator output {
+  border-color: var(--sc-hairline);
+  color: var(--sc-light);
+  background: transparent;
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+/* The readout never breaks P1 from 比. */
+.rxs-page.rxs-page .rxs-p14-comparator output {
+  white-space: nowrap;
+}
+
+/* Phones: the label takes its own row, the title and the readout share the
+   next one (the Michroma label no longer fits beside the pill). The wrapper
+   div is a plain group with no role, so display: contents drops nothing. */
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-p14-comparator > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    align-items: center;
+  }
+
+  .rxs-page.rxs-page .rxs-p14-comparator > header > div {
+    display: contents;
+  }
+
+  .rxs-page.rxs-page .rxs-p14-comparator > header small {
+    grid-column: 1 / -1;
+  }
+
+  .rxs-page.rxs-page .rxs-p14-comparator > header h3 {
+    margin: 0;
+  }
+
+  .rxs-page.rxs-page .rxs-p14-comparator output {
+    letter-spacing: 0.06em;
+  }
+}
+
+.rxs-page.rxs-page .rxs-p14-range-labels button {
+  color: rgb(245 245 247 / 62%);
+}
+
+.rxs-page.rxs-page .rxs-p14-range-control > p {
+  max-inline-size: 44em;
+  margin-inline: auto;
+  color: var(--sc-note);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* The frosted sheet paints the slider with html body … !important; the page's
+   neutrals take it back. Geometry stays with the base sheet. */
+html body .rxs-page.rxs-page .rxs-p14-ios-slider {
+  background: var(--sc-tile) !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%) !important;
+}
+
+.rxs-page.rxs-page .rxs-p14-ios-track {
+  background: #3a3a3c;
+  box-shadow: none;
+}
+
+.rxs-page.rxs-page .rxs-p14-ios-track i {
+  background: var(--sc-light);
+  box-shadow: none;
+}
+
+html body .rxs-page.rxs-page .rxs-p14-ios-thumb {
+  background: var(--sc-text) !important;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 25%) !important;
+}
+
+/* Extreme's pipeline: a prism runs behind both tiles through the arrow. */
+.rxs-page.rxs-page .exs-p14-comparison {
+  position: relative;
+}
+
+.rxs-page.rxs-page .exs-p14-comparison::before {
+  position: absolute;
+  top: 50%;
+  right: 8%;
+  left: 8%;
+  height: 1px;
+  content: "";
+  background: var(--sc-prism);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .exs-p14-comparison article {
+  position: relative;
+  z-index: 1;
+}
+
+.rxs-page.rxs-page .exs-p14-comparison > span {
+  position: relative;
+  z-index: 1;
+  padding: 0 10px;
+  color: var(--sc-light);
+  background: var(--sc-tile);
+  font-size: 28px;
+}
+
+.rxs-page.rxs-page .exs-p14-comparison small {
+  color: var(--sc-label);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+}
+
+.rxs-page.rxs-page .exs-p14-comparison h3 {
+  font-size: clamp(26px, 2.6vw, 34px);
+}
+
+.rxs-page.rxs-page .exs-p14-comparison p {
+  color: var(--sc-body);
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page .exs-p14-comparison::before {
+    top: 8%;
+    right: auto;
+    bottom: 8%;
+    left: 50%;
+    width: 1px;
+    height: auto;
+    background: var(--sc-prism-down);
+  }
+}
+
+/* ---------- Art panels lock on: brackets on 8px corners ---------- */
+/* Both figures clip (overflow: hidden), so the brackets stay static. The
+   stage figure re-uses its aria-hidden ring; the second selector outranks the
+   Rexonance motion sheet's convergence rule on it. */
+.rxs-page.rxs-page .rxs-p14-overview figure,
+.rxs-page.rxs-page .rxs-stage-panel figure {
+  border-radius: 8px;
+}
+
+.rxs-page.rxs-page .rxs-p14-overview figure::after,
+.rxs-page.rxs-page .rxs-stage-panel figure > span,
+.rxs-page.rxs-page[data-motion-ready="true"] .rxs-stage-panel figure > span {
+  display: block;
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border: 0;
+  border-radius: inherit;
+  opacity: 1;
+  background: var(--sc-brackets), var(--sc-corner-scrim);
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+  transform: none;
+  animation: none;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-stage-panel figure::after {
+  background: linear-gradient(180deg, transparent 84%, rgb(0 0 0 / 28%));
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.rxs-page {
+    --sc-arm: 20px;
+  }
+}
+
+/* ---------- Stages ---------- */
+/* The frosted sheet paints the liquid rail with html body … !important; the
+   rail and its lens return to the page's neutrals with the site light as the
+   lens edge. Paint only: width, padding, height and the lens translate stay. */
+html body .rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs,
+html body .rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  background: var(--sc-tile) !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 10%) !important;
+}
+
+html body .rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs .liquid-selection-surface {
+  background: linear-gradient(180deg, rgb(255 255 255 / 16%), rgb(255 255 255 / 9%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 0 0 1px color-mix(in srgb, var(--sc-light) 45%, transparent) !important;
+}
+
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  text-shadow: none;
+}
+
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+  color: rgb(245 245 247 / 80%);
+}
+
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"].is-active span {
+  color: #fff;
+}
+
+/* Colour and face only: the tab's line boxes set the rail height the verify
+   scripts measure. */
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  color: rgb(245 245 247 / 62%);
+  font-family: var(--sc-mono);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"].is-active small {
+  color: var(--sc-light);
+}
+
+/* The phone tab code rose from 11px to 12px (base sheet); an 18px line box
+   keeps the 60px tab the rail was measured at. */
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    line-height: 18px;
+  }
+}
+
+.rxs-page.rxs-page .rxs-stage-hint {
+  color: var(--sc-note);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.rxs-page.rxs-page .rxs-stage-panel > div > small {
+  color: var(--rxs-stage-accent, var(--sc-light));
+  font-family: var(--sc-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+/* Extreme has no inline stage accent: its two stages take the site light and
+   the lock tint through the rail's data-stage. */
+.rxs-page.rxs-page.exs-page .rxs-stage-tabs[data-stage="middle"] ~ .rxs-stage-panel {
+  --rxs-stage-accent: var(--sc-light);
+}
+
+.rxs-page.rxs-page.exs-page .rxs-stage-tabs[data-stage="ultra"] ~ .rxs-stage-panel {
+  --rxs-stage-accent: var(--sc-lock);
+}
+
+/* 56px keeps Extreme's longer title on two balanced lines in the copy column. */
+.rxs-page.rxs-page .rxs-stage-panel h3 {
+  margin: 16px 0 22px;
+  font-size: clamp(40px, 4vw, 56px);
+}
+
+.rxs-page.rxs-page .rxs-stage-panel > div > p {
+  color: var(--sc-body);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.rxs-page.rxs-page .rxs-stage-panel ul {
+  border-bottom: 1px solid var(--sc-hairline-soft);
+}
+
+.rxs-page.rxs-page .rxs-stage-panel li {
+  padding: 16px 0;
+  font-size: 17px;
+}
+
+.rxs-page.rxs-page .rxs-stage-panel li::before {
+  color: var(--rxs-stage-accent, var(--sc-light));
+}
+
+/* ---------- System band ---------- */
+.rxs-page.rxs-page .rxs-system .rxs-system-grid article {
+  background: var(--sc-ink);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 9%);
+}
+
+.rxs-page.rxs-page .rxs-system-grid article header {
+  gap: 14px;
+  align-items: flex-start;
+}
+
+/* Outlined numerals in the lock tint with a static ghost, as on the
+   character files. */
+.rxs-page.rxs-page .rxs-system-grid article header span {
+  color: transparent;
+  font-family: var(--sc-mono);
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  -webkit-text-stroke: 1.5px var(--sc-lock);
+  text-shadow: 0.06em 0.06em 0 var(--sc-ghost);
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page .rxs-system-grid article header span {
+  text-shadow: none;
+}
+
+.rxs-page.rxs-page .rxs-system-grid article header small {
+  padding-top: 6px;
+  color: var(--sc-label);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+  text-align: right;
+}
+
+.rxs-page.rxs-page .rxs-system-grid h3 {
+  margin: 36px 0 12px;
+  font-size: clamp(26px, 2.4vw, 34px);
+}
+
+.rxs-page.rxs-page .rxs-system-grid p {
+  color: var(--sc-body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.rxs-page.rxs-page .rxs-specs {
+  margin-top: clamp(48px, 6vw, 80px);
+}
+
+.rxs-page.rxs-page .rxs-specs > div > small {
+  color: var(--sc-label);
+  font-family: var(--sc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.rxs-page.rxs-page .rxs-specs strong span {
+  color: var(--sc-light);
+  -webkit-text-fill-color: var(--sc-light);
+}
+
+.rxs-page.rxs-page .rxs-specs p {
+  color: var(--sc-note);
+  font-size: 13px;
+}
+
+.rxs-page.rxs-page .rxs-specs > i {
+  color: var(--sc-light);
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 300;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-headline-metrics {
+    gap: 24px;
+  }
+
+  .rxs-page.rxs-page .rxs-headline-metrics p {
+    font-size: 15px;
+  }
+
+  .rxs-page.rxs-page .rxs-system-grid p,
+  .rxs-page.rxs-page .rxs-stage-panel > div > p,
+  .rxs-page.rxs-page .rxs-p14-copy > p {
+    font-size: 16px;
+  }
+
+  .rxs-page.rxs-page .rxs-p14-copy dd {
+    font-size: 24px;
+  }
+
+  /* Label and figure share a baseline in the one-row stats. */
+  .rxs-page.rxs-page .rxs-p14-copy dl div {
+    align-items: baseline;
+  }
+
+  /* The × is a joint between the two figures, not a row of its own. */
+  .rxs-page.rxs-page .rxs-specs {
+    gap: 8px;
+  }
+
+  .rxs-page.rxs-page .rxs-specs > i {
+    margin: 6px 0;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .rxs-page.rxs-page .rxs-specs > div:last-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* ---------- Footer: the closing act ---------- */
+.rxs-page.rxs-page .rxs-footer {
+  position: relative;
+  padding-top: clamp(80px, 9vw, 128px);
+  border-top: 0;
+}
+
+.rxs-page.rxs-page .rxs-footer::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: var(--sc-prism);
+  pointer-events: none;
+}
+
+/* The Mirage END mark without its word: a gold corner on the page column. */
+.rxs-page.rxs-page .rxs-footer::after {
+  position: absolute;
+  bottom: 28px;
+  left: max(24px, calc((100vw - 1180px) / 2));
+  width: 20px;
+  height: 20px;
+  content: "";
+  background:
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / 20px 2px no-repeat,
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / 2px 20px no-repeat;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-footer > div p {
+  margin-bottom: 18px;
+  color: var(--sc-kicker);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+}
+
+.rxs-page.rxs-page .rxs-footer h2 {
+  font-size: clamp(34px, 4.4vw, 64px);
+}
+
+.rxs-page.rxs-page .rxs-footer > a {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-hero,
+  .rxs-page.rxs-page .rxs-footer {
+    padding-inline: 20px;
+  }
+
+  .rxs-page.rxs-page .rxs-footer > div p {
+    letter-spacing: 0.08em;
+  }
+
+  .rxs-page.rxs-page .rxs-footer::after {
+    left: 20px;
+  }
+}
+
+/* ---------- Local nav ---------- */
+.rxs-page.rxs-page .rxs-local-nav nav a {
+  position: relative;
+}
+
+.rxs-page.rxs-page .rxs-local-nav nav a::after {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  left: 8px;
+  height: 1px;
+  content: "";
+  background: var(--sc-light);
+  scale: 0 1;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-local-nav nav a:focus-visible::after {
+  scale: 1 1;
+}
+
+/* The DW sigil at a size the Michroma subset can hold, in the site light. */
+.rxs-page.rxs-page .rxs-brand::before {
+  left: 7px;
+  width: 26px;
+  height: 26px;
+  border-color: color-mix(in srgb, var(--sc-light) 60%, transparent);
+  background: color-mix(in srgb, var(--sc-light) 8%, transparent);
+}
+
+/* Michroma's DW overruns the diamond at the 12px floor; Oxanium fits it. */
+.rxs-page.rxs-page .rxs-brand::after {
+  width: 40px;
+  color: var(--sc-light);
+  font-family: var(--sc-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-indent: 0.04em;
+}
+
+.rxs-page.rxs-page .rxs-brand span {
+  color: var(--sc-label);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+/* The reading progress line agrees with the site light. */
+html:not([data-world-effects="economy"]) .rxs-page.rxs-page[data-motion-ready="true"] {
+  --mx-progress-from: var(--sc-light);
+  --mx-progress-to: #a48bff;
+}
+
+html:not([data-world-effects="economy"]) .rxs-page.rxs-page.exs-page[data-motion-ready="true"] {
+  --mx-progress-from: #ffd57a;
+  --mx-progress-to: #fff;
+}
+
+/* ---------- Pointer response (fine pointers) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page .rxs-scroll-cue:hover {
+    color: var(--sc-text);
+  }
+
+  .rxs-page.rxs-page .rxs-scroll-cue:hover i {
+    translate: 0 4px;
+  }
+
+  .rxs-page.rxs-page .rxs-local-nav nav a:hover::after {
+    scale: 1 1;
+  }
+
+  .rxs-page.rxs-page .rxs-system-grid article:hover,
+  .rxs-page.rxs-page .exs-p14-comparison article:hover {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sc-light) 35%, transparent);
+  }
+
+  .rxs-page.rxs-page .rxs-system-grid article:hover header span {
+    -webkit-text-stroke-color: #fff;
+  }
+
+  .rxs-page.rxs-page .rxs-footer > a:not(:first-of-type):hover {
+    border-color: var(--sc-light);
+    color: #fff;
+  }
+
+  .rxs-page.rxs-page .rxs-footer > a:first-of-type:hover {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-light) 40%, transparent);
+  }
+
+  .rxs-page.rxs-page .rxs-comparison-selector select:hover,
+  .rxs-page.rxs-page .rxs-p14-native-select select:hover {
+    border-color: var(--sc-text);
+  }
+}
+
+/* Transitions run only with motion allowed and outside economy rendering. */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-scroll-cue {
+    transition: color 200ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-scroll-cue i {
+    transition: translate 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-local-nav nav a::after {
+    transition: scale 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-system-grid article,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .exs-p14-comparison article {
+    transition:
+      transform 300ms cubic-bezier(0, 0, 0.5, 1),
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-footer > a {
+    transition:
+      border-color 220ms ease,
+      background-color 220ms ease,
+      box-shadow 220ms ease,
+      transform 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-comparison-selector select,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page .rxs-p14-native-select select {
+    transition: border-color 160ms ease;
+  }
+}
+
+/* ---------- Focus: one warm ring ---------- */
+/* Scoped to the page's own regions: the side panel inside <main> belongs to
+   the chrome sheet. Pointer-focused selects stay ringless (base behaviour). */
+.rxs-page.rxs-page
+  :is(.rxs-local-nav, .rxs-hero, .rxs-section, .rxs-footer)
+  :is(a, button, input, [tabindex]):focus-visible,
+.rxs-page.rxs-page :is(.rxs-section) select:not([data-pointer-focus="true"]):focus-visible,
+.rxs-page.rxs-page .rxs-local-nav nav a:focus-visible,
+.rxs-page.rxs-page .rxs-comparison-selector select:not([data-pointer-focus="true"]):focus-visible,
+.rxs-page.rxs-page .rxs-p14-range-labels button:focus-visible,
+.rxs-page.rxs-page .rxs-footer > a:focus-visible {
+  outline: 2px solid var(--sc-focus);
+  outline-offset: 3px;
+}
+
+.rxs-page.rxs-page .rxs-p14-ios-slider:has(input:focus-visible) {
+  outline: 2px solid var(--sc-focus);
+  outline-offset: 3px;
+}
+
+/* Inside the clipped rail the ring sits inset. */
+.rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:focus-visible {
+  outline: 2px solid var(--sc-focus);
+  outline-offset: -3px;
+}
+
+/* ---------- The document keeps its view timelines ---------- */
+/* The document scrolls on <html>. The World base gives <body> overflow-x:
+   hidden (styles-world-addon.css), which made it a scroll container that
+   never scrolls: every view() timeline on both special sites (the motion
+   sheet's hand-over, headlines and lifts; this sheet's arms and numerals)
+   bound to it and froze. `clip` keeps the horizontal clipping without a
+   scroller, as on /world (styles-world-mirage.css) and Final Stage. Loading
+   covers and open dialogs keep their locks (inline styles win anyway). */
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dialog-open])
+  body:has(> main.rxs-page:not(.fst-page)) {
+  overflow: visible;
+  overflow-x: clip;
+}
+
+/* A rail drag locks the page with an inline overflow:hidden on <body>
+   (viewport-scroll-lock.js); clipping it instead keeps the lock while the
+   timelines stay on the document, so nothing beside the rail flips at each
+   tap (styles-world-reveal.css does the same on /world). */
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(> main.rxs-page:not(.fst-page)) {
+  overflow: clip !important;
+}
+
+/* ---------- Scroll-linked ornament ---------- */
+/* Named view timelines: a 1px arm would otherwise run on its own 1px entry
+   range. Kicker arms and the footer rule draw from their anchored end, the
+   system numerals step in; all end by entry 100% and rest drawn without
+   motion. Band rules, brackets and note ticks stay static. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-section-heading {
+      view-timeline: --sc-chapter block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-footer {
+      view-timeline: --sc-end block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article {
+      view-timeline: --sc-tile block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > p::before {
+      transform-origin: 100% 50%;
+      animation: sc-draw cubic-bezier(0.65, 0, 0.35, 1) both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > p::after {
+      transform-origin: 0 50%;
+      animation: sc-draw cubic-bezier(0.65, 0, 0.35, 1) both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-footer::before {
+      transform-origin: 0 50%;
+      animation: sc-draw cubic-bezier(0.65, 0, 0.35, 1) both;
+      animation-timeline: --sc-end;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article
+      header
+      span {
+      animation: sc-step cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+@keyframes sc-draw {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes sc-step {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.92;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+/* ---------- Forced colours ---------- */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page .rxs-local-nav {
+    border-bottom-color: CanvasText;
+    background: Canvas;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual img {
+    mask-image: none;
+  }
+
+  .rxs-page.rxs-page .rxs-hero h1,
+  .rxs-page.rxs-page .rxs-hero h1 span,
+  .rxs-page.rxs-page .rxs-headline-metrics strong,
+  .rxs-page.rxs-page .rxs-headline-metrics strong span,
+  .rxs-page.rxs-page .rxs-specs strong,
+  .rxs-page.rxs-page .rxs-specs strong span,
+  .rxs-page.rxs-page .rxs-system-grid article header span,
+  .rxs-page.rxs-page .rxs-comparison-result b {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+
+  .rxs-page.rxs-page .rxs-hero-visual::before,
+  .rxs-page.rxs-page .rxs-hero-visual::after,
+  .rxs-page.rxs-page .rxs-hero-copy > p:not(.rxs-hero-lede)::before,
+  .rxs-page.rxs-page .rxs-section.rxs-p14::before,
+  .rxs-page.rxs-page .rxs-section.rxs-stages::before,
+  .rxs-page.rxs-page .rxs-section.rxs-system::before,
+  .rxs-page.rxs-page .rxs-section-heading > p::before,
+  .rxs-page.rxs-page .rxs-section-heading > p::after,
+  .rxs-page.rxs-page .rxs-comparison-note::before,
+  .rxs-page.rxs-page .rxs-p14-method-note::before,
+  .rxs-page.rxs-page .exs-p14-comparison::before,
+  .rxs-page.rxs-page .rxs-p14-overview figure::after,
+  .rxs-page.rxs-page .rxs-stage-panel figure > span,
+  .rxs-page.rxs-page[data-motion-ready="true"] .rxs-stage-panel figure > span,
+  .rxs-page.rxs-page .rxs-footer::before,
+  .rxs-page.rxs-page .rxs-footer::after,
+  .rxs-page.rxs-page .rxs-local-nav nav a::after {
+    display: none;
+  }
+
+  .rxs-page.rxs-page .rxs-processing-comparison > p {
+    border-left: 1px solid CanvasText;
+    background: none;
+  }
+
+  /* Data fills keep their meaning: result in the text colour, baseline gray. */
+  .rxs-page.rxs-page :is(.rxs-bars i, .rxs-comparison-key i, .rxs-p14-ios-track i) {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .rxs-page.rxs-page :is(.rxs-bars, .rxs-comparison-key) .is-extreme {
+    background: GrayText;
+  }
+
+  .rxs-page.rxs-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"].is-active {
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  .rxs-page.rxs-page
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"].is-active
+    :is(span, small) {
+    color: HighlightText;
+  }
+}

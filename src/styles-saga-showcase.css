@@ -1,11 +1,13 @@
 /* Showcase edition — a product-page skin for the Rexonance and Extreme
    special sites, after the Apple product pages: two neutrals (#000 and
-   #1d1d1f), one type family at weight 600/400, 28px tiles with no borders
-   or shadows, gray body copy with white headlines, and gradients only
-   inside the hero headline. Loaded after each site's own skin and before
-   the cinematic sheet, so every selector doubles the page class to outrank
-   the later cascade. Geometry that scripts measure (local nav, liquid rail,
-   selects, slider, landscape hero grid) is left to the earlier sheets. */
+   #1d1d1f), one type family at weight 600/400, 28px borderless tiles with no
+   drop shadows or glows (styles-showcase-elevation.css, loaded after this
+   sheet, allows a 1px inset edge and one light per site), white headlines,
+   and gradients only inside the hero headline. Loaded after each site's own
+   skin and before the cinematic sheet, so every selector doubles the page
+   class to outrank the later cascade. Geometry that scripts measure (local
+   nav, liquid rail, selects, slider, landscape hero grid) is left to the
+   earlier sheets. */
 .rxs-page.rxs-page.rxs-page {
   --rxs-font-text:
     -apple-system, BlinkMacSystemFont, "SF Pro JP", "SF Pro Text", "Helvetica Neue",

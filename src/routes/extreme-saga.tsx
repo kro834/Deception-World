@@ -3,10 +3,12 @@ import { ExtremeSaga } from "@/components/extreme-saga/extreme-saga";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
   CINEMATIC_STYLESHEET_LINK,
+  DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
 import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
+import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
@@ -31,6 +33,8 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: extremeSagaCssUrl },
       { rel: "stylesheet", href: sagaShowcaseCssUrl },
+      { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+      { rel: "stylesheet", href: showcaseElevationCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
