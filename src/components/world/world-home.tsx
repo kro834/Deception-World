@@ -463,6 +463,50 @@ const EPISODES: EpisodeRecord[] = [
     src: "/episode-03-deception-world.jpeg",
     pos: "50% 18%",
     alt: "紅い夜の和風都市に青金と紅黒の仮面ライダーが並ぶEP3のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダールーラー",
+        src: "/manager-shuza-rider.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダールーラー",
+        width: 1085,
+        height: 1449,
+        to: "/managers/shuza",
+        assets: MANAGER_ASSETS.shuza,
+      },
+      {
+        label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",
+        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
+      },
+      {
+        label: "仮面ライダーレディック",
+        src: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーレディック",
+        width: 750,
+        height: 1400,
+        to: "/riders/leddic",
+        assets: RIDER_NAV.find((item) => item.id === "leddic")?.assets ?? [
+          "/rider-leddic-ishihen.jpeg",
+        ],
+      },
+      {
+        label: "夜明護尊",
+        src: "/character-yoake-mamori.jpeg",
+        pos: "50% 12%",
+        alt: "夜明護尊",
+        width: 736,
+        height: 976,
+        to: "/characters/yoake-mamori",
+        assets: ["/character-yoake-mamori.jpeg"],
+      },
+    ],
   },
   {
     no: "04",
@@ -2242,8 +2286,31 @@ export function WorldHome() {
                   {OTHER_ARTWORK.map((artwork) => (
                     <OtherArtworkCard key={artwork.id} artwork={artwork} />
                   ))}
-                  {Array.from({ length: 2 }, (_, index) => (
-                    <ArchivePlaceholder key={index} index={index + 5} tone="other" />
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/yoake-mamori"
+                    assets={["/character-yoake-mamori.jpeg"]}
+                    aria-label="夜明護尊の個別資料を開く"
+                  >
+                    <img
+                      src="/character-yoake-mamori.jpeg"
+                      alt="夜明護尊のキャラクタービジュアル"
+                      width={736}
+                      height={976}
+                      style={{ objectPosition: "50% 12%" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 05</span>
+                    <span className="other-card-copy">
+                      <small>よあけまもりのみこと</small>
+                      <b>夜明護尊</b>
+                      <i>人物資料を開く</i>
+                    </span>
+                  </GuardedLink>
+                  {Array.from({ length: 1 }, (_, index) => (
+                    <ArchivePlaceholder key={index} index={index + 6} tone="other" />
                   ))}
                 </div>
               </div>
