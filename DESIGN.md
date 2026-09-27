@@ -219,6 +219,19 @@ Between the press and the print burning away, eleven supplied scenes flash back 
 - **Reduced motion** hides the layer.
 - **Guards:** `scripts/rising-flashback.test.mjs` and the flash audit.
 
+### The burn eats the print — 2026-09-28
+
+The fire eats the print from several places and burns it away completely.
+- **Erosion from within.** Round the peaks of the burn field's middle octave, a lead that only grows with `uBurn` (identical in both passes) pulls the fire's arrival forward by up to about half a screen height, so burn holes open ahead of the front, the lower ones first, and riddle the upper print as the fire builds. Each hole browns a spot before it catches, blackens only at the lip, ignites as a speckled glow, opens with an incandescent rim in bright runs and dull stretches, spreads with a ragged edge and merges into the front; every edge gets the same scorch, lip, ember bed and char. The flame pass looks down 0.035 screen heights, so flames stand on a hole's upper rim and stay low while it is young.
+- **A building advance.** The burn gathers pace from a slow catch (`uBurn = t^1.3`, level from -0.27) to a roar, and nothing of the print survives: it is gone by about 7.1 s on phones and 7.4 s on a desktop. The title cut (4.5 s), the Rexonance emergence and the end still are unchanged.
+- **Burned away.** A second or two after the front passes, the char breaks along its fissures and holes through its plates into an ash-grey lace that thins into a dark void, some breaking edges glowing for a moment and flakes lifting off on the draught; none is left once the Rexonance art has emerged.
+- **The fire.** A `roar` factor raises the flames from about 0.05–0.18 to 0.11–0.37 screen heights (a fifth lower on portrait screens, nothing past 1.3 H) and grows the firelight, lens glow, heat haze (now also refracting the print through the flame bodies and higher up), sparks and smoke with it. The flames part into fingers that narrow to points and lick with the sway; their small eddies are rounder, their edges defined, their roots yellow-white, and a taller, cooler, see-through second sheet fills the gaps behind them. Sparks are a white-hot point in a small glow. The residual fire no longer throws stray streaks up the frame.
+- **Cost.** On the ladder, octaves 3 drops the breaking char's flakes with the ash and octaves 2 the second sheet of flame. A burn frame costs about a tenth more GPU time (0.29 → 0.32 ms at 412 × 915, 0.59 → 0.66 ms at 1145 × 716, Apple GPU).
+- **Calm tier.** Eight burn-hole sprites (`public/rising-calm-hole-20260928.webp`, 10 KB; `RISING_CALM_ONLY=hole` renders it alone so RE DIVE's shared sprites keep their bytes) open ahead of the front, in a box held still against the burn layer's climb, each spreading from a point and going under the char as the lip passes.
+- **Flash margin.** The audit holds every tier at one flash a second with no red flashes, but the tightest top-left cells now carry the flashback's two transitions near 4.8 s plus the fire's arrival at 5.5–5.85 s: three opposing transitions in a second, where four would fail. A change that makes the top of the print catch before about 5.8 s must re-run the audit.
+
+Guard: `scripts/rising-world.test.mjs`.
+
 ### RE DIVE…? — 2026-09-24
 
 At the end still, RE DIVE…? appears above もう一度, in its own spot, so SKIP and もう一度 keep theirs, and the same 600 ms guard applies. It takes the reader into the World after it burned: a section right after the gate (`src/components/world/re-dive-section.tsx`, `src/styles-world-re-dive.css`). The section is rendered only once it has been reached in the session, or when a link opens `#re-dive`, and never by the server.

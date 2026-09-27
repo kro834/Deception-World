@@ -17,12 +17,13 @@ import {
   RISING_CALM_CHAR,
   RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_HOLE,
   RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
   RISING_FLASHBACK,
   risingBurnArt,
 } from "./rising-art";
-import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_SMOKE } from "./rising-calm";
+import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_HOLES, CALM_SMOKE } from "./rising-calm";
 import type { RisingRun, RisingStats } from "./rising-sequence";
 import type { ReDiveRun } from "./re-dive-sequence";
 import { RE_DIVE_SECTION_ID, ReDiveSection } from "./re-dive-section";
@@ -193,10 +194,11 @@ const auditRequested = () =>
  * sprites rendered from the same fire model
  * (scripts/render-rising-calm-sprites.mjs): the burn-edge strip over tiled
  * char, flame sprites seated along its lip behind it (two frames per seat
- * that take turns), smoke billows, and embers. The images load lazily, so
- * only a run that shows this tier fetches them (reduced motion hides the
- * whole burn layer). Memoised with no props, so opening the dialog does not
- * re-render it inside the press's click handler.
+ * that take turns), burn holes opening ahead of it, smoke billows, and
+ * embers. The images load lazily, so only a run that shows this tier fetches
+ * them (reduced motion hides the whole burn layer). Memoised with no props,
+ * so opening the dialog does not re-render it inside the press's click
+ * handler.
  */
 const CalmFire = memo(function CalmFire() {
   return (
@@ -212,6 +214,26 @@ const CalmFire = memo(function CalmFire() {
               decoding="async"
               style={{ left: `${left}%` }}
             />
+          ))}
+        </span>
+        {/* Burn holes the embers open ahead of the front: the box is held
+            still while the layer climbs, so each stays on its spot of the
+            print until the char swallows it (rising-sequence.ts). The layer
+            is 120% of the frame tall from -10%, 112% wide from -6%. */}
+        <span className="rw-calm-holes">
+          {CALM_HOLES.map(({ left, top, size, turn, mirror }) => (
+            <i
+              key={`${left}-${top}`}
+              style={{
+                left: `${((left + 6) / 1.12).toFixed(2)}%`,
+                top: `${((top + 10) / 1.2).toFixed(2)}%`,
+                width: `${size}cqmin`,
+                rotate: `${turn}deg`,
+                scale: mirror ? "-1 1" : undefined,
+              }}
+            >
+              <img src={RISING_CALM_HOLE} alt="" loading="lazy" decoding="async" />
+            </i>
           ))}
         </span>
         <span className="rw-calm-ash" style={{ backgroundImage: `url(${RISING_CALM_CHAR})` }} />

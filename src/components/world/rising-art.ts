@@ -17,8 +17,8 @@ export const RISING_FLASHBACK = Array.from(
 
 // The calm (CSS) tier's sprites, rendered by scripts/render-rising-calm-sprites.mjs:
 // three flame frames, the burn-edge strips and the scorch ahead of them (one
-// per edge profile, rising-calm.ts), a tileable char texture and a smoke
-// billow. Loaded only when that tier shows (or is prepared for).
+// per edge profile, rising-calm.ts), a tileable char texture, a smoke billow
+// and a burn hole. Loaded only when that tier shows (or is prepared for).
 export const RISING_CALM_FLAMES = [
   "/rising-calm-flame-20260924-1.webp",
   "/rising-calm-flame-20260924-2.webp",
@@ -34,6 +34,7 @@ export const RISING_CALM_SCORCHES = [
 ] as const;
 export const RISING_CALM_CHAR = "/rising-calm-char-20260924.webp";
 export const RISING_CALM_SMOKE = "/rising-calm-smoke-20260924.webp";
+export const RISING_CALM_HOLE = "/rising-calm-hole-20260928.webp";
 
 // The cut's width, plus about 5%: a softer upscale than that shows.
 const COMPACT_ART_WIDTH = 720;

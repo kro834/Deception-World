@@ -67,13 +67,14 @@ export const RISING_FLAME_PASS_SCALE = 0.5;
 
 // Resolution first (a canvas resize, no recompile); then the last resorts
 // drop whole layers (rising.frag.glsl, rising-flames.frag.glsl): octaves 3
-// loses the smoke detail and self-shadow, the ash, the haze, the large
-// blisters, the second spark layer and the drifting embers; octaves 2 also
-// the smoke, the sparks, the small flame eddies, the crack breaks and the
-// ember specks. Fewer blur taps with them (the blur only runs in the dive,
-// before the burn, so its taps cost the burn nothing). Every run starts on
-// rung 0; a GPU probe during the portal picks a lower one before the first
-// frame shows when a burn frame would run long (risingProbeRung).
+// loses the smoke detail and self-shadow, the ash (the breaking char's
+// flakes included), the haze, the large blisters, the second spark layer and
+// the drifting embers; octaves 2 also the smoke, the sparks, the small flame
+// eddies, the second sheet of flame, the crack breaks and the ember specks.
+// Fewer blur taps with them (the blur only runs in the dive, before the
+// burn, so its taps cost the burn nothing). Every run starts on rung 0; a
+// GPU probe during the portal picks a lower one before the first frame shows
+// when a burn frame would run long (risingProbeRung).
 export const RISING_LADDER = [
   { scale: RISING_RESOLUTION_RUNGS[0], octaves: 4, taps: 12 },
   { scale: RISING_RESOLUTION_RUNGS[1], octaves: 4, taps: 12 },

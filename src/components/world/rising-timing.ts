@@ -170,9 +170,11 @@ const smooth = (a: number, b: number, value: number) => {
 };
 const easeInCubic = (t: number) => t * t * t;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
-const easeInOutSine = (t: number) => -(Math.cos(Math.PI * clamp01(t)) - 1) / 2;
-// Mostly ease-in-out, with a linear share so the front is already moving at ignition.
-const burnEase = (t: number) => 0.8 * clamp01(t) + 0.2 * easeInOutSine(t);
+// A slow catch that gathers pace (already moving at ignition), so the fire
+// roars through the upper print once the burn holes have opened it up: the
+// print is gone by about 7.2 s (the burn holes take it sooner than the level
+// alone would), and the level runs on under the char until 8 s.
+const burnEase = (t: number) => clamp01(t) ** 1.3;
 
 export type RisingUniforms = {
   uDive: number;

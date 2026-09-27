@@ -1,10 +1,12 @@
 // Renders the RISING THE WORLD calm (CSS) tier's sprites into public/:
 // three flame frames, two burn-edge strips and the scorch ahead of each (from
 // the two fractal profiles the flames are seated on, rising-calm.ts), a
-// tileable char texture and a smoke billow. Each is drawn by a small WebGL 2 shader in headless Chrome and
+// tileable char texture, a smoke billow and a burn hole. Each is drawn by a small WebGL 2 shader in headless Chrome and
 // encoded by Chrome's WebP encoder (alpha included), so the assets can be
 // regenerated from this file alone:
 //   PW_BROWSER_CHANNEL=chrome node scripts/render-rising-calm-sprites.mjs [previewDir]
+// RISING_CALM_ONLY=hole renders only the sprites whose path contains it (the
+// others keep their bytes; the RE DIVE ground reuses the edge and the char).
 import { mkdirSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import {
@@ -17,6 +19,7 @@ import {
   RISING_CALM_CHAR,
   RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_HOLE,
   RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
 } from "../src/components/world/rising-art.ts";
@@ -263,6 +266,44 @@ void main() {
   outColor = vec4(col, a);
 }`;
 
+// A burn hole, as the WebGL tier opens them ahead of the front: a ragged
+// rim (low lobes, fine fray) glowing unevenly, an ember bed just inside it
+// and char with a few hot cracks in the middle, then outside a blackened lip
+// and a brown halo that fades into the print. The tier scales it up from a
+// point, so it spreads from where the ember landed.
+const HOLE = `${COMMON}
+void main() {
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 c = uv - 0.5;
+  float dist = length(c);
+  vec2 dir = c / max(dist, 1e-4);
+  float lobes = (fbm(dir * 0.32 + 3.0) - 0.5) * 0.55 + (fbm(dir * 1.1 + 7.0) - 0.5) * 0.2;
+  float r0 = 0.26 * (1.0 + lobes) + (fbm(uv * 5.0 + 1.3) - 0.5) * 0.035;
+  float d = (dist - r0) / r0;                                        // < 0 inside
+  // Inside: char, glowing close to the rim and along a few cracks.
+  float e = cellEdge(uv * 11.0 + 3.0, 0.0);
+  vec3 col = vec3(0.02, 0.016, 0.014) * (0.7 + 0.6 * fbm(uv * 3.0 + 9.0));
+  col = mix(col, vec3(0.006, 0.004, 0.004), (1.0 - smoothstep(0.02, 0.07, e)) * 0.8);
+  float inside = 1.0 - smoothstep(-0.02, 0.02, d);
+  vec3 emit = blackbody(0.56) * exp(min(d, 0.0) / 0.12) * inside * 0.9;
+  emit += blackbody(0.5) * (1.0 - smoothstep(0.02, 0.06, e)) * exp(min(d, 0.0) / 0.35) * inside * 0.6;
+  // The rim: bright runs and dull stretches along it.
+  float run = 0.2 + 1.05 * smoothstep(0.42, 0.66, fbm(dir * 1.3 + 5.0));
+  emit += blackbody(0.95) * exp(-pow(d / 0.045, 2.0)) * run * 1.3;
+  emit += blackbody(0.66) * exp(-pow((d - 0.02) / 0.12, 2.0)) * run * 0.35;
+  // Outside: blackened at the lip, browning further out, fading away.
+  float outside = smoothstep(-0.02, 0.02, d);
+  vec3 scorchCol = mix(vec3(0.02, 0.01, 0.006), vec3(0.26, 0.13, 0.05), smoothstep(0.05, 0.45, d));
+  col = mix(col, scorchCol, outside);
+  float a = mix(1.0, 0.9 * (1.0 - smoothstep(0.12, 0.75, d)), outside);
+  vec3 tm = 1.0 - exp(-emit);
+  vec3 pm = col * a + tm;
+  a = max(a, clamp(max(tm.r, max(tm.g, tm.b)) * 1.1, 0.0, 1.0));
+  // Nothing reaches the sprite's edge.
+  float fade = 1.0 - smoothstep(0.4, 0.49, dist);
+  outColor = straight(pm * fade, a * fade);
+}`;
+
 const sprites = [
   ...RISING_CALM_FLAMES.map((path, index) => ({
     path,
@@ -299,13 +340,15 @@ const sprites = [
     uniforms: { uSeed: 5 },
     quality: 0.75,
   },
+  { path: RISING_CALM_HOLE, shader: HOLE, size: [160, 160], uniforms: { uSeed: 7 }, quality: 0.78 },
 ];
 
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || undefined });
 const page = await browser.newPage();
 await page.setContent("<!doctype html><body></body>");
 if (previewDir) mkdirSync(previewDir, { recursive: true });
-for (const sprite of sprites) {
+const only = process.env.RISING_CALM_ONLY || "";
+for (const sprite of sprites.filter((entry) => entry.path.includes(only))) {
   const { webp, png, error } = await page.evaluate(
     async ({ shader, size, uniforms, quality }) => {
       const canvas = document.createElement("canvas");

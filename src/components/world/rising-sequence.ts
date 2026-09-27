@@ -13,10 +13,11 @@ import {
   RISING_CALM_CHAR,
   RISING_CALM_EDGES,
   RISING_CALM_FLAMES,
+  RISING_CALM_HOLE,
   RISING_CALM_SCORCHES,
   RISING_CALM_SMOKE,
 } from "./rising-art";
-import { CALM_FLAME_SEATS } from "./rising-calm";
+import { CALM_FLAME_SEATS, CALM_HOLES } from "./rising-calm";
 import {
   RISING_ART_ASPECT,
   RISING_FLASHBACK_OPACITY,
@@ -69,6 +70,7 @@ const CALM_SPRITES = [
   ...RISING_CALM_SCORCHES,
   RISING_CALM_CHAR,
   RISING_CALM_SMOKE,
+  RISING_CALM_HOLE,
 ];
 
 /**
@@ -263,11 +265,13 @@ export function runRising({
   const calmBurn = find(".rw-calm-burn");
   const calmFlames = find(".rw-calm-flames");
   const calmSmoke = find(".rw-calm-smoke");
+  const calmHoles = find(".rw-calm-holes");
   const edge = [find(".rw-calm-scorch"), find(".rw-calm-char"), find(".rw-calm-flames")];
   const reformed = [...viewport.querySelectorAll<HTMLElement>('.rw-calm-edge[data-profile="1"]')];
   const puffs = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-smoke img")];
   const seats = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-flames i")];
   const embers = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-embers i")];
+  const holes = [...viewport.querySelectorAll<HTMLElement>(".rw-calm-holes img")];
 
   let tier = currentRisingTier();
   const openedAt = performance.now();
@@ -482,6 +486,33 @@ export function runRising({
           duration: ms(burn),
         });
       }
+      // Burn holes: their box is held still against the layer's climb (the
+      // same keyframes reversed, on the same clock), so each opens on its
+      // spot of the print. It opens well before the lip (which crosses the
+      // frame from 119.6% to 0% linearly) gets there, ahead of the flames,
+      // spreads, and goes under the char as the lip passes: the print is
+      // attacked from several places, the lower holes first.
+      add(calmHoles, [{ translate: "0 -58%" }, { translate: "0 42%" }], {
+        delay: ms(s.burnStart),
+        duration: ms(burn),
+        easing: "linear",
+      });
+      holes.forEach((hole, index) => {
+        const place = CALM_HOLES[index];
+        if (!place) return;
+        const reach = s.burnStart + (burn * (119.6 - place.top)) / 120;
+        const opens = Math.max(s.burnStart, reach - 2.3 - 0.5 * ((index * 0.618) % 1));
+        add(
+          hole,
+          [
+            { opacity: 0, scale: 0.1 },
+            { opacity: 1, scale: 0.4, offset: 0.2 },
+            { opacity: 1, scale: 0.95, offset: 0.7 },
+            { opacity: 1, scale: 1.08 },
+          ],
+          { delay: ms(opens), duration: ms(reach + 0.3 - opens), easing: "linear" },
+        );
+      });
       // Halfway up, the front re-forms: a second strip (and its scorch)
       // fades in over the first, drawn wherever either of two profiles has
       // burned further (rising-calm.ts), so it only ever burns forward; each

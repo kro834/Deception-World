@@ -417,6 +417,30 @@
   opacity: 0;
 }
 
+/* Burn holes ahead of the front (rising-world.tsx): the box is the layer's
+   own, held still against its climb (rising-sequence.ts moves both on one
+   clock), so each hole opens on its spot of the print, spreads, and goes
+   under the char when the lip passes. */
+.site-shell.film-edition.mirage-edition .rw-calm-holes {
+  position: absolute;
+  inset: 0;
+  translate: 0 -58%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-calm-holes i {
+  position: absolute;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+
+.site-shell.film-edition.mirage-edition .rw-calm-holes img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  opacity: 0;
+}
+
 /* Cold char under the strip, tiled (its texture is set inline), from below
    the deepest tear down past the bottom of the layer. */
 .site-shell.film-edition.mirage-edition .rw-calm-ash {

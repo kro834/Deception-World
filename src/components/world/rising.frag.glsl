@@ -1,16 +1,17 @@
 // RISING THE WORLD — the main pass: the dive, then the image burning like a
-// print held over a fire (scorch, blisters, an ember edge eating inward, char
-// with cooling cracks and ash), with the flames and smoke of the half-
-// resolution pass (rising-flames.frag.glsl) composited over it, heat haze,
-// ash and sparks. GLSL ES 1.00 (WebGL 1 and 2). OCTAVES / BLUR_TAPS are
-// injected as #defines so the adaptive quality ladder can recompile a
-// cheaper variant:
+// print held over a fire (scorch, blisters, an ember edge eating inward and
+// burn holes opening ahead of it, char with cooling cracks that flakes away
+// into the void), with the flames and smoke of the half-resolution pass
+// (rising-flames.frag.glsl) composited over it, heat haze, ash and sparks.
+// GLSL ES 1.00 (WebGL 1 and 2). OCTAVES / BLUR_TAPS are injected as #defines
+// so the adaptive quality ladder can recompile a cheaper variant:
 //   OCTAVES 4  everything
-//   OCTAVES 3  no ash, no haze, no large blisters, one spark layer and no
-//              drifting embers (the flame pass: no smoke detail or self-shadow)
+//   OCTAVES 3  no ash (sheets, flakes, the breaking char's flakes), no haze,
+//              no large blisters, one spark layer and no drifting embers (the
+//              flame pass: no smoke detail or self-shadow)
 //   OCTAVES 2  also no sparks, no crack breaks or ember specks, and the
 //              firelight flickers with the flames (the flame pass: no smoke,
-//              no small flame eddies)
+//              no small flame eddies, no second sheet of flame)
 //
 // Turbulence comes from uNoise, a tileable noise texture baked once per run
 // (rising-noise.frag.glsl), so the burn costs texture fetches, not per-pixel
@@ -70,6 +71,15 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
+// Burn holes (kept identical in rising-flames.frag.glsl): embers carried ahead
+// of the front land where the middle octave peaks and set the print alight
+// there first, up to about half a screen height ahead, more and further as
+// the fire builds. Only ever grows (uBurn only rises), so nothing un-burns.
+float holeLead(float midN) {
+  float site = smoothstep(0.52, 0.92, midN);
+  return (0.2 * smoothstep(0.02, 0.2, uBurn) + 0.3 * smoothstep(0.15, 0.55, uBurn)) * site * site;
+}
+
 // Incandescence for a normalised temperature (0 ~ 800 K, 1 ~ 2400 K): the hue
 // runs deep red -> orange -> yellow, and the radiance climbs steeply with it,
 // so red only ever shows dim and yellow-white only in the hottest cores. HDR:
@@ -109,7 +119,8 @@ vec2 sparkLayer(vec2 q, vec2 cells, float speed, float seed, float radius, float
   float t = clamp(-r.y / (tail * cells.x), 0.0, 1.0);
   float w = rad * (1.0 - 0.6 * t);
   float trail = fall(1.0, 0.0, t) * step(r.y, 0.0) * exp(-(r.x * r.x) / (w * w));
-  float head = exp(-dot(r, r) / (rad * rad));
+  // A white-hot point in a small glow: it reads as a hot particle.
+  float head = exp(-dot(r, r) / (rad * rad)) + 0.16 * exp(-dot(r, r) / (9.0 * rad * rad));
   float twinkle = 0.7 + 0.3 * sin(uTime * (6.0 + 5.0 * h) + h * 40.0);
   float alive = smoothstep(0.0, 0.05, h - (1.0 - keep)) * twinkle;
   return vec2(head, trail * 0.7) * alive;
@@ -194,13 +205,18 @@ void main() {
   float burning = step(0.0001, uFlame + uBurn);     // uniform: off during the dive
 
   // ---- Burn field: the print burns from the bottom edge. A low octave tears
-  // the front into tongues and islands, finer octaves fray the edge.
+  // the front into tongues and islands, finer octaves fray the edge, and the
+  // middle octave's peaks catch ahead of it as burn holes that open, spread
+  // and merge into it: every edge, the holes' included, gets the same
+  // browning halo, blackening lip, incandescent rim and char.
   float d = 1.0;          // > 0 intact, < 0 burnt (field units: 0.8 a screen height)
   float scorch = 0.0;
+  float browned = 0.0;    // the scorch, spread wider round the burn holes
   float burnt = 0.0;
   float edgeFine = 0.5;
   float midN = 0.5;
   float lowN = 0.5;
+  float lead = 0.0;        // how far ahead of the front a burn hole catches here
   if (burning > 0.5) {
     vec2 bq = uv * vec2(max(aspect, 0.7), 1.0);
     lowN = nz(bq * 0.36 + vec2(0.17, 0.53)).r;
@@ -209,12 +225,20 @@ void main() {
     // The fine octave as turbulence (|n|): sharp notches, so the edge frays
     // into fibres instead of rounding off like a cloud.
     float fibre = abs(edgeFine - 0.5) * 2.0;
-    float field = uv.y * 0.8 + (lowN - 0.5) * 0.5 + (midN - 0.5) * 0.2 + (fibre - 0.4) * 0.028 + (edgeFine - 0.5) * 0.02;
-    float level = mix(-0.3, 1.12, uBurn);
+    lead = holeLead(midN);
+    float field = uv.y * 0.8 + (lowN - 0.5) * 0.5 + (midN - 0.5) * 0.2 + (fibre - 0.4) * 0.028 + (edgeFine - 0.5) * 0.02
+                - lead;
+    float level = mix(-0.27, 1.12, uBurn);
     d = field - level;
-    // Browning creeps ahead of the front, unevenly (hot spots scorch first).
-    float reach = max(0.004, (0.08 + 0.12 * midN) * smoothstep(0.0, 0.6, uFlame + uBurn * 4.0));
+    // Browning creeps ahead of every edge, unevenly (hot spots scorch first),
+    // and further as the fire builds (never back: uBurn only rises). Round a
+    // burn hole it spreads wider and starts well before the print there
+    // catches: the ember browns a spot, which blackens only at the lip (the
+    // lead only grows, so the halo never recedes).
+    float grow = smoothstep(0.0, 0.6, uFlame + uBurn * 4.0);
+    float reach = max(0.004, (0.08 + 0.12 * midN) * (0.8 + 0.5 * smoothstep(0.1, 0.55, uBurn)) * grow);
     scorch = fall(reach, 0.0, d);
+    browned = max(scorch, fall(reach + 0.4 * lead * grow, 0.0, d - 0.45 * lead));
     // A soft step (a couple of pixels even when the canvas is upscaled), under the lip.
     burnt = fall(0.0, -0.02, d);
   }
@@ -232,6 +256,10 @@ void main() {
   float smoke = 0.0;
   vec3 smokeCol = vec3(0.0);
   float hot = 0.9;
+  float crumbleEnv = 0.0;   // where the char is breaking away (its flakes lift off)
+  // The fire builds from a slow catch to a roar (as in the flame pass): its
+  // glow, light, haze and sparks grow with it (uBurn only rises).
+  float roar = smoothstep(0.02, 0.45, uBurn);
   if (burning > 0.5) {
     vec4 fire = texture2D(uFire, uv);
     // The flames just below, which light this part of the print.
@@ -241,7 +269,7 @@ void main() {
     emit += blackbody(temp) * flameA;
     // The glow a lens sees around a fire.
     float fuel = exp(min(hy, 0.0) / 0.04);
-    emit += vec3(0.5, 0.12, 0.02) * exp(-hyc / 0.07) * fuel * uFlame * 0.3;
+    emit += vec3(0.5, 0.12, 0.02) * exp(-hyc / (0.07 + 0.05 * roar)) * fuel * uFlame * (0.26 + 0.14 * roar);
 
     // Warm, flickering light from the fire on what is left of the print: it
     // follows the flames below (each tongue on its own beat: local, gentle).
@@ -250,10 +278,14 @@ void main() {
 #else
     float flick = 0.8 + 0.34 * fire.r;
 #endif
-    light = uFlame * exp(-hyc / 0.24) * flick * 0.8 * (1.0 - burnt * 0.6);
+    // It reaches further and burns brighter as the fire roars.
+    light = uFlame * exp(-hyc / (0.2 + 0.1 * roar)) * flick * (0.7 + 0.45 * roar) * (1.0 - burnt * 0.6);
 
-    // Heat haze: shimmer in the hot air over the flame bodies and just above them.
+    // Heat haze: shimmer in the hot air over the flame bodies and just above
+    // them, and the print wavering through the flames themselves; it climbs
+    // higher as the fire roars.
     hazeAmt = uFlame * exp(-((hy - 0.12) * (hy - 0.12)) / 0.02) * step(-0.02, hy);
+    hazeAmt = max(hazeAmt, max(flameA * 1.3, uFlame * roar * 0.7 * exp(-((hy - 0.26) * (hy - 0.26)) / 0.03)));
 
     // Smoke: grey billows, cool blue-grey away from the fire, warm only on
     // the undersides the flames light; the veil stays thin outside the cores.
@@ -277,7 +309,7 @@ void main() {
 #if OCTAVES >= 4
   if (burning > 0.5) {
     // Mostly vertical, low across: shimmer, not a liquified print.
-    vec2 hn = nz(vec2(p.x * 1.4, uv.y * 2.2) + vec2(0.5, -fract(T * 0.62))).rg - 0.5;
+    vec2 hn = nz(vec2(p.x * 2.2, uv.y * 3.0) + vec2(0.5, -fract(T * 0.8))).rg - 0.5;
     haze = hn * vec2(0.007, 0.012) * hazeAmt;
   }
 #endif
@@ -340,9 +372,9 @@ void main() {
     float cellsL = chA.b;
     float lum = dot(world, vec3(0.299, 0.587, 0.114));
     vec3 sepia = lum * vec3(1.16, 0.8, 0.5) + vec3(0.018, 0.007, 0.0);
-    world = mix(world, sepia, smoothstep(0.0, 0.45, scorch) * 0.9);
+    world = mix(world, sepia, smoothstep(0.0, 0.45, browned) * 0.9);
     vec3 brown = vec3(0.15, 0.065, 0.024) * (0.3 + lum * 1.4);
-    world = mix(world, brown, smoothstep(0.35, 0.85, scorch));
+    world = mix(world, brown, smoothstep(0.35, 0.85, browned));
     // Blisters: raised bubbles catch the firelight, their rims stay dark. They
     // come in patches, small here and large there, and the rims melt under
     // the flames instead of speckling through them.
@@ -399,6 +431,24 @@ void main() {
       charCol = mix(charCol, ashRim, (lip * 0.75 + craze * 0.14) * whiten * net);
       charCol = mix(charCol, vec3(0.006, 0.004, 0.004), max(hair * 0.65, gap * 0.9) * net);
       charCol += light * vec3(0.12, 0.04, 0.01) * cool;
+      // The char falls apart: a second or two after the front has passed it
+      // flakes away, breaking along its fissures and holing through the
+      // plates, into a lace that thins until nothing is left but the void the
+      // art emerges from; some breaking edges glow for a moment. Once the art
+      // has fully emerged, every piece has gone.
+      float crumble = clamp((since - 0.7 - 0.9 * ashN - 0.4 * plateN) / 1.0, 0.0, 1.0);
+      crumble = max(crumble, smoothstep(0.55, 1.0, uReveal) * smoothstep(0.0, 0.5, since));
+      crumble = max(crumble, smoothstep(0.96, 1.0, uReveal));
+      float thr = crumble * 1.08 - 0.04;
+      float broken = 0.45 * smoothstep(0.0, 0.45, e) + 0.3 * cf.a + 0.25 * plateN;
+      float plate = smoothstep(thr, thr + 0.025 + px * 0.5, broken) * fall(1.0, 0.92, crumble);
+      float breaking = plate * fall(thr + 0.09 + px * 0.5, thr + 0.025 + px * 0.5, broken) * smoothstep(0.0, 0.08, crumble);
+      // The breaking pieces are ash already: grey, their parting edges curled up paler.
+      charCol = mix(charCol, vec3(0.062, 0.058, 0.054) * (0.45 + 0.6 * dome + 0.6 * (cf.a - 0.5)),
+                    smoothstep(0.0, 0.35, crumble) * 0.7);
+      charCol = mix(charCol, ashRim, breaking * 0.35);
+      charCol = mix(vec3(0.006, 0.004, 0.004) + light * vec3(0.04, 0.012, 0.003), charCol, plate);
+      crumbleEnv = crumble * (1.0 - crumble) * 4.0 * burnt;
       vec2 ruv = (uv + haze * 0.5 - 0.5) * uRiderScale + vec2(0.5, 0.5);
       float inFrame = step(0.0, ruv.x) * step(ruv.x, 1.0) * smoothstep(0.0, 0.08, ruv.x) * fall(1.0, 0.92, ruv.x);
       // Landscape (fitted by height): the art's top melts into the dark, as in the end still.
@@ -416,11 +466,15 @@ void main() {
       // The open fissures cool from orange to dull red over a couple of
       // seconds, each patch breathing on its own slow beat (local and
       // gentle: no strobe).
-      float crackGlow = gap * (0.2 + 0.8 * cool) * (0.78 + 0.44 * breathe) * lingering * net;
+      float crackGlow = gap * (0.2 + 0.8 * cool) * (0.78 + 0.44 * breathe) * lingering * net * plate;
       emit += blackbody(mix(0.35, 0.6, cool) * hot) * crackGlow * burnt * 1.3;
       // Ember speckles in the char, each breathing on its own beat as it cools.
       float speck = smoothstep(0.6, 0.78, cf.b) * smoothstep(0.56, 0.8, breathe) * smoothstep(0.5, 0.7, chA.r);
-      emit += blackbody(mix(0.4, 0.62, cool) * hot) * speck * exp(-since * 0.7) * burnt * lingering * (1.0 - emerge);
+      emit += blackbody(mix(0.4, 0.62, cool) * hot) * speck * exp(-since * 0.7) * burnt * lingering * (1.0 - emerge) * plate;
+      // Breaking edges: still hot inside, some glow dully for a moment as a
+      // piece parts (in stretches, never round every piece).
+      float parting = breaking * smoothstep(0.45, 0.7, cf.r * 0.6 + breathe * 0.4) * fall(0.6, 0.1, crumble);
+      emit += blackbody(0.47 * hot) * parting * (0.4 + 0.6 * cool) * lingering * burnt;
     }
 
     // Ember edge: an incandescent lip with a fractal edge over the soft step
@@ -429,6 +483,8 @@ void main() {
     // have already dulled, so it never reads as an outline.
     float w = 0.004 + 0.006 * edgeFine;
     float run = 0.3 + 0.7 * smoothstep(0.3, 0.62, midN * 0.55 + edgeFine * 0.45);
+    // ...and round a burn hole too, where the middle octave is high all round.
+    run *= 0.45 + 0.55 * smoothstep(0.3, 0.66, cf.g);
     // Divided by w, not by w * w: at FP16 (no highp) w * w is subnormal and
     // may flush to zero (the lip would vanish, and 0 / 0 is NaN).
     float lz = (d + 0.008) / w;
@@ -463,6 +519,15 @@ void main() {
       emit *= 1.0 - sheetA;
       emit += blackbody(0.6 * hot) * sheet.z * sheetEnv * 1.2;
     }
+    // Flakes of the breaking char, lifted by the draft where the plates part:
+    // dark, and a few still glowing at the rim.
+    if (crumbleEnv > 0.002) {
+      vec2 flake = ashLayer(fq + vec2(0.61, 0.33), vec2(11.0, 8.0), 0.14, 29.0);
+      float flakeA = flake.x * crumbleEnv;
+      col = mix(col, vec3(0.13, 0.12, 0.11) + light * vec3(0.4, 0.16, 0.05), flakeA);
+      emit *= 1.0 - flakeA * 0.6;
+      emit += blackbody(0.52) * flake.y * crumbleEnv * smoothstep(0.28, 0.7, uFlame) * 1.2;
+    }
     if (ashNear > 0.002) {
       vec2 ash = ashLayer(fq + vec2(0.2, 0.1), vec2(9.0, 6.0), 0.2, 13.0);
       float flakeA = ash.x * ashNear * 0.9;
@@ -483,6 +548,8 @@ void main() {
       float px = 1.3 / uRes.y;
       // Half the cells hold a spark just over the flames, a tenth higher up.
       float keep = 0.08 + 0.42 * exp(-rise / 0.2);
+      // Fewer at the catch, more at the roar.
+      keep *= 0.55 + 0.55 * roar;
       vec2 sp = sparkLayer(p, vec2(22.0, 5.0), 0.62, 1.0, max(px, 0.0017), 0.022, 1.0, keep);
 #if OCTAVES >= 4
       sp += sparkLayer(p + vec2(0.31, 0.0), vec2(15.0, 3.6), 0.48, 5.0, max(px, 0.0021), 0.028, 1.4, keep) * 0.8;

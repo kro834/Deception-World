@@ -140,6 +140,33 @@ export const CALM_FLAME_SEATS = CALM_SEATS.map(([centre, width, height], index) 
   };
 });
 
+/**
+ * Burn holes ahead of the front, the WebGL tier's erosion in sprites:
+ * [centre across, centre down (both in % of the frame), width in cqmin,
+ * turn in degrees]. Each opens two seconds or more before the front gets
+ * there, ahead of its flames, spreads, and is swallowed by the char as the lip
+ * passes (rising-sequence.ts); the lower ones go first, so the print is
+ * attacked progressively.
+ */
+const CALM_HOLE_PLACES = [
+  [26, 70, 24, 20],
+  [74, 60, 28, 150],
+  [42, 48, 20, 260],
+  [85, 40, 24, 80],
+  [14, 33, 27, 200],
+  [60, 28, 22, 320],
+  [33, 17, 25, 110],
+  [80, 13, 21, 40],
+] as const;
+
+export const CALM_HOLES = CALM_HOLE_PLACES.map(([left, top, size, turn], index) => ({
+  left,
+  top,
+  size,
+  turn,
+  mirror: index % 2 === 1,
+}));
+
 /** Smoke billows (left, in %) and embers thrown from the front (left, in %). */
 export const CALM_SMOKE = [8, 30, 52, 74] as const;
 export const CALM_EMBERS = [4, 9, 15, 22, 27, 33, 40, 46, 51, 58, 64, 69, 76, 82, 88, 95] as const;

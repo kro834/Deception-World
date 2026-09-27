@@ -9,6 +9,7 @@ import {
   CALM_EDGE_SEED_B,
   CALM_EDGE_STRIP,
   CALM_FLAME_SEATS,
+  CALM_HOLES,
   burnEdge,
   calmEdgeAhead,
 } from "../src/components/world/rising-calm.ts";
@@ -937,7 +938,12 @@ test("every run starts sharp; a GPU probe during the portal picks the rung; the 
   const flames = await read("src/components/world/rising-flames.frag.glsl");
   assert.equal(gated(flames, "float below = nz("), 4);
   assert.equal(gated(flames, "float s1 = nz("), 3);
-  assert.equal(gated(flames, "float n2 = nz("), 3);
+  // (2026-09-28) The small eddies' fetch feeds both flame sheets; the sheet
+  // behind goes with it at octaves 2, and the flakes of the breaking char
+  // with the ash at octaves 3.
+  assert.equal(gated(flames, "vec4 eddy = nz("), 3);
+  assert.equal(gated(flames, "float densB = "), 3);
+  assert.equal(gated(shader, "ashLayer(fq + vec2(0.61"), 4);
 });
 
 test("review 2026-09-24: char that cools slowly, lit smoke, a clean breakthrough, sparks, haze", async () => {
@@ -1006,11 +1012,13 @@ test("review 3, 2026-09-24: flames rise straight up, capped and translucent; the
   // Capped at about 0.3 screen heights (lower on portrait), and a hard
   // envelope: nothing past 1.3 H, so no stray puffs high above the fire.
   const H = flames.match(
-    /float H = \(([\d.]+) \+ ([\d.]+) \* smoothstep[^;]*\(0\.85 \+ ([\d.]+) \* pulse\)/,
+    /float H = \(([\d.]+) \+ ([\d.]+) \* smoothstep[^;]*\(0\.85 \+ ([\d.]+) \* pulse\)\s*\* \(([\d.]+) \+ ([\d.]+) \* roar\)/,
   );
   assert.ok(H, "flame height");
-  const top = (Number(H[1]) + Number(H[2])) * (0.85 + Number(H[3]));
-  assert.ok(top <= 0.34 && Number(H[1]) >= 0.08, `H up to ${top.toFixed(2)}`);
+  // 2026-09-28: the fire builds to a roar and its flames stand taller at the
+  // peak (about 0.37 screen heights), so the cap moved from 0.34 to 0.4.
+  const top = (Number(H[1]) + Number(H[2])) * (0.85 + Number(H[3])) * (Number(H[4]) + Number(H[5]));
+  assert.ok(top <= 0.4 && Number(H[1]) >= 0.08, `H up to ${top.toFixed(2)}`);
   assert.match(flames, /\* fuel \* fall\(1\.3, 0\.95, h\)/);
   // Opacity from optical depth: thin edges and tips are dim and see-through.
   assert.match(flames, /float flame = 1\.0 - exp\(-6\.0 \* max\(dens, 0\.0\)\);/);
@@ -1019,7 +1027,9 @@ test("review 3, 2026-09-24: flames rise straight up, capped and translucent; the
   // Tongue noise stretched upright; some stretches burn low with no sheet at
   // the lip (the scorch shows there); downward-burning edges and thin islands
   // burn low.
-  assert.match(flames, /q \* vec2\(2\.4, 0\.9\)/);
+  // 2026-09-28: the small eddies are rounder (they curl the tongues' edges
+  // instead of combing them into streaks): 0.9 became 2.8.
+  assert.match(flames, /q \* vec2\(2\.4, 2\.8\)/);
   assert.match(flames, /float lively = smoothstep\(/);
   assert.match(flames, /\* lively \* \(1\.0 - downwards\) \* \(1\.0 - island\)/);
   // Smoke: few defined plumes rising off the tallest stretches, denser in
@@ -1104,4 +1114,59 @@ test("review 3: the calm tier's front re-forms halfway up, burning forward only,
   const renderer = await read("scripts/render-rising-calm-sprites.mjs");
   assert.match(renderer, /\[burnEdge\(CALM_EDGE_SEED\)\.ys, calmEdgeAhead\(\)\.ys\]/);
   assert.match(renderer, /const SCORCH = /);
+});
+
+test("2026-09-28: the fire eats the print from several places, builds to a roar, and the char flakes away", async () => {
+  const shader = await read("src/components/world/rising.frag.glsl");
+  const flames = await read("src/components/world/rising-flames.frag.glsl");
+  // Burn holes: one lead, kept identical in both passes, pulls the fire's
+  // arrival forward round the middle octave's peaks; it grows only with
+  // uBurn (which only rises), so nothing un-burns, and the flame pass's
+  // look-down (a closer sample included) sees the holes' rims.
+  const lead = (source) =>
+    source.slice(
+      source.indexOf("float holeLead("),
+      source.indexOf("\n}\n", source.indexOf("float holeLead(")),
+    );
+  assert.ok(lead(shader).includes("uBurn") && lead(shader) === lead(flames));
+  assert.doesNotMatch(lead(shader), /uTime|uFlame|uReveal/);
+  assert.match(shader, /\+ \(edgeFine - 0\.5\) \* 0\.02\s*- lead;/);
+  assert.match(flames, /\+ \(midN - 0\.5\) \* 0\.2 - holeLead\(midN\);/);
+  assert.match(flames, /coarseField\(bq - vec2\(0\.0, 0\.035\)\)/);
+  assert.match(flames, /hv = g0 <= 0\.0 \? h0 : hv;/);
+  // The halo round a hole browns the print before it catches; the scorch
+  // never recedes (it reads the lead, which only grows).
+  assert.match(
+    shader,
+    /browned = max\(scorch, fall\(reach \+ 0\.4 \* lead \* grow, 0\.0, d - 0\.45 \* lead\)\);/,
+  );
+  // The same level in both passes, so the flames stand on the main pass's lip.
+  const level = /float level = mix\((-?[\d.]+), ([\d.]+), uBurn\);/;
+  assert.deepEqual(shader.match(level).slice(1), flames.match(level).slice(1));
+  // The fire builds from a slow catch to a roar: the burn gathers pace and
+  // the print is mostly left for the second half; it is burning at the cut.
+  const u = (T) => risingUniformsAt(T).uBurn;
+  assert.ok(u(3.0) < 0.1 && u(4.5) > 0.25 && u(4.5) < 0.35, `${u(3)} ${u(4.5)}`);
+  assert.ok(u(5.5) - u(4.5) > u(3.5) - u(2.5), "the burn gathers pace");
+  // The char falls apart into the void the art emerges from, and none is
+  // left once the art has emerged; the flakes that lift off go with the ash
+  // on the ladder's coarse rungs.
+  assert.match(shader, /crumble = max\(crumble, smoothstep\(0\.96, 1\.0, uReveal\)\);/);
+  assert.match(shader, /float plate = smoothstep\(thr, [^;]*\* fall\(1\.0, 0\.92, crumble\);/);
+  // Calm tier: burn-hole sprites in a box held still against the burn
+  // layer's climb (the same keyframes, reversed, on one clock).
+  assert.ok(CALM_HOLES.length >= 6);
+  for (const hole of CALM_HOLES)
+    assert.ok(hole.top > 10 && hole.top < 75 && hole.left > 5 && hole.left < 95);
+  const sequence = stripComments(await read("src/components/world/rising-sequence.ts"));
+  assert.match(sequence, /add\(calmBurn, \[\{ translate: "0 58%" \}, \{ translate: "0 -42%" \}\]/);
+  assert.match(
+    sequence,
+    /add\(calmHoles, \[\{ translate: "0 -58%" \}, \{ translate: "0 42%" \}\], \{\s*delay: ms\(s\.burnStart\),\s*duration: ms\(burn\),\s*easing: "linear",/,
+  );
+  assert.match(sequence, /RISING_CALM_HOLE,\s*\];/);
+  const css = await readCss();
+  assert.match(css, /\.rw-calm-holes \{[^}]*inset: 0;[^}]*translate: 0 -58%;/);
+  const renderer = await read("scripts/render-rising-calm-sprites.mjs");
+  assert.match(renderer, /\{ path: RISING_CALM_HOLE, shader: HOLE,/);
 });
