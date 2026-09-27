@@ -184,6 +184,28 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   outline-offset: 3px;
 }
 
+/* The menu trigger: the ink plate the dossier bar's trigger wears
+   (styles-chrome-elevation.css) with the page's ice edge, instead of the
+   grey frosted plate the shared sheets give every .ios26-glass. The
+   !important answers the frosted sheet's own; the 48px box is untouched. */
+html body .fst-page .rxs-menu-trigger.side-panel-trigger.ios26-glass {
+  border-color: rgb(122 232 255 / 34%);
+  background: rgb(4 8 15 / 92%) !important;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
+}
+
+html body .fst-page .rxs-menu-trigger.side-panel-trigger.ios26-glass:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html body .fst-page .rxs-menu-trigger.side-panel-trigger.ios26-glass:hover {
+    border-color: rgb(122 232 255 / 58%);
+    background: rgb(122 232 255 / 8%) !important;
+  }
+}
+
 /* Motion's reading line under the bar, ice to gold. */
 .fst-page[data-motion-ready="true"] {
   --mx-progress-from: #7ae8ff;
@@ -654,6 +676,24 @@ html body .fst-page .rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens >
   > button[role="tab"]
   small {
   color: var(--fst-text-2);
+}
+
+/* Phones: the record rails' stage names. The 12px floor with an 18px line
+   box keeps the rail at its old height (as on the showcase sites); palt
+   closes the katakana, so エックスハイ holds one line from 414px; below
+   that it splits into even halves (エック／スハイ) instead of leaving one
+   kana on its own line. */
+@media (max-width: 680px) {
+  .fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    small {
+    line-height: 18px;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt";
+    word-break: normal;
+    line-break: strict;
+    text-wrap: balance;
+  }
 }
 
 .fst-page :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs

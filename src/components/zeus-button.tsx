@@ -99,6 +99,67 @@ const meetsAny = (rect: ZeusRect, zones: ZeusRect[]) =>
       rect.bottom > zone.top,
   );
 
+/* A sandboxed frame (the form archive) cannot be read from here, so it
+   reports its own words and fixed controls (public/archive-zeus-bridge.js)
+   as boxes in its viewport. They are kept per frame and placed on screen
+   through the frame's box when a spot is chosen. */
+const FRAME_AVOID_MESSAGE = "deception-world:frame-avoid";
+const FRAME_AVOID_MAX = 480;
+type FrameAvoid = { words: ZeusRect[]; controls: ZeusRect[] };
+const frameAvoid = new Map<MessageEventSource, FrameAvoid>();
+
+const readFrameBoxes = (value: unknown): ZeusRect[] => {
+  if (!Array.isArray(value)) return [];
+  const boxes: ZeusRect[] = [];
+  for (const item of value.slice(0, FRAME_AVOID_MAX)) {
+    if (!Array.isArray(item) || item.length !== 4) continue;
+    const [left, top, right, bottom] = item as unknown[];
+    if (![left, top, right, bottom].every((n) => typeof n === "number" && Number.isFinite(n)))
+      continue;
+    boxes.push({
+      left: left as number,
+      top: top as number,
+      right: right as number,
+      bottom: bottom as number,
+    });
+  }
+  return boxes;
+};
+
+/* Each reporting frame's boxes moved onto the page, cut to the frame's own
+   box. A frame that has left the page (the archive switched) is forgotten. */
+function readFrameAvoid(pick: (entry: FrameAvoid) => ZeusRect[]) {
+  const placed: ZeusRect[] = [];
+  if (frameAvoid.size === 0) return placed;
+  const frames = Array.from(document.querySelectorAll("iframe"));
+  for (const [source, entry] of frameAvoid) {
+    const frame = frames.find((candidate) => candidate.contentWindow === source);
+    if (!frame) {
+      frameAvoid.delete(source);
+      continue;
+    }
+    const rect = frame.getBoundingClientRect();
+    const left = rect.left + frame.clientLeft;
+    const top = rect.top + frame.clientTop;
+    const clip = {
+      left,
+      top,
+      right: left + frame.clientWidth,
+      bottom: top + frame.clientHeight,
+    };
+    for (const box of pick(entry)) {
+      const onPage = {
+        left: Math.max(clip.left, box.left + left),
+        top: Math.max(clip.top, box.top + top),
+        right: Math.min(clip.right, box.right + left),
+        bottom: Math.min(clip.bottom, box.bottom + top),
+      };
+      if (onPage.right > onPage.left && onPage.bottom > onPage.top) placed.push(onPage);
+    }
+  }
+  return placed;
+}
+
 /* The glyph boxes of the words inside the candidate spots. Only elements whose
    box meets a spot are walked, so this is a handful of ranges, read once when
    scrolling settles. Inside a dialog only its own words count: the page
@@ -138,6 +199,12 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
       Number.parseFloat(window.getComputedStyle(element).fontSize) >= ZEUS_DISPLAY_TEXT_MIN_PX,
   );
   if (pageEnd && root === document) collect(ZEUS_END_TEXT_SELECTOR);
+  // A framed archive's words, as it last reported them.
+  if (root === document) {
+    for (const word of readFrameAvoid((entry) => entry.words)) {
+      if (meetsAny(word, zones)) glyphs.push(word);
+    }
+  }
   return glyphs;
 }
 
@@ -477,6 +544,10 @@ function ZeusButton({
           const style = window.getComputedStyle(control);
           return style.visibility !== "hidden" && style.pointerEvents !== "none";
         });
+      // A framed archive's fixed controls (its dock, an open sheet) count too.
+      for (const controlRect of readFrameAvoid((entry) => entry.controls)) {
+        controls.push({ control: button, rect: controlRect as DOMRect });
+      }
       const gap = 10;
       const candidateRects = candidates.map((candidate) => ({
         left: candidate.x - rect.width / 2,
@@ -642,6 +713,31 @@ function ZeusButton({
         schedulePlacement();
       }, settleMs);
     };
+    // A framed archive reports its words once its own scroll settles. A
+    // report never cancels a press on the button (a tap in the archive can
+    // land just before one); only an archive scroll lets words count again
+    // over a spot the reader dropped the button on.
+    const onFrameAvoid = (event: MessageEvent) => {
+      const data = event.data as {
+        type?: unknown;
+        reason?: unknown;
+        words?: unknown;
+        controls?: unknown;
+      } | null;
+      if (!data || data.type !== FRAME_AVOID_MESSAGE || !event.source) return;
+      const source = event.source;
+      const frame = Array.from(document.querySelectorAll("iframe")).find(
+        (candidate) => candidate.contentWindow === source,
+      );
+      if (!frame) return;
+      frameAvoid.set(source, {
+        words: readFrameBoxes(data.words),
+        controls: readFrameBoxes(data.controls),
+      });
+      if (activePointer.current != null) return;
+      if (data.reason === "scroll") droppedHere.current = false;
+      schedulePlacement();
+    };
     const significantResize = createViewportResizeFilter();
     const onResize = () => {
       if (dragGeometry.current) {
@@ -670,12 +766,14 @@ function ZeusButton({
     };
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("message", onFrameAvoid);
     window.addEventListener("orientationchange", onResize, { passive: true });
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
     window.visualViewport?.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("message", onFrameAvoid);
       window.removeEventListener("orientationchange", onResize);
       window.visualViewport?.removeEventListener("resize", onResize);
       window.visualViewport?.removeEventListener("scroll", onScroll);

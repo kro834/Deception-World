@@ -503,6 +503,14 @@ html body #site-announcement-dialog::backdrop {
     rgb(2 4 10 / 86%);
 }
 
+/* The sheet reads in the site's face on every page. It is portalled inside
+   the page, so on Dream Chapter it inherited Shippori Mincho; the menu's
+   row labels still keep each page's face. The HUD and headline faces set
+   below apply over this. */
+html body #site-announcement-dialog {
+  font-family: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+}
+
 /* Ink under the ice grid, square 6px corners, one drop shadow. The sheen
    and aura loops stop; the sheet arrives once (below). */
 html body #site-announcement-dialog .site-announcement-hub {
