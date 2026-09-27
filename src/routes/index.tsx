@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleSequence } from "@/components/cinematic/title-sequence";
 import { OPENING_LOGO_FIRST, OPENING_LOGO_SIZES } from "@/lib/opening-logo";
+import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
+import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -20,6 +22,10 @@ export const Route = createFileRoute("/")({
         fetchPriority: "high",
       },
       { rel: "preload", as: "image", href: "/atmosphere-poster.jpg" },
+      // The World's HUD face (the same Michroma subset /world and the
+      // dossiers load) and the title's elevation sheet, last on this route.
+      { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+      { rel: "stylesheet", href: openingElevationCssUrl },
     ],
   }),
 });

@@ -111,5 +111,9 @@ test("special routes append their CSS after world base and addon styles", () => 
       finalStageRexonanceLink < finalStageLink,
   );
   assert.match(archive, /links:\s*WORLD_STYLESHEET_LINKS/);
-  assert.match(download, /stylesheetLinks:\s*\[WORLD_ADDON_STYLESHEET_LINK\]/);
+  // The download page gets the dossier HUD subset and its own sheet after the addon sheet.
+  assert.match(
+    download,
+    /stylesheetLinks:\s*\[\s*WORLD_ADDON_STYLESHEET_LINK,\s*\{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL \},\s*\{ rel: "stylesheet", href: downloadCssUrl \},?\s*\]/,
+  );
 });

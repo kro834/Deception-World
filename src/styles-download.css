@@ -1,0 +1,499 @@
+/* /download in the Mirage/dossier grammar: the archive's export slip, one
+   square plate locked onto the ink deck. The sheet adds no text and no
+   markup: .export-page::before is the fixed ice grid ground (out of flow so
+   it takes no grid cell), ::after is the plate, a grid item spanning rows. */
+
+/* ================================================================
+   Tokens and ground
+   ================================================================ */
+.export-page {
+  --dl-ink: #04080f;
+  --dl-deck: #0a1220;
+  --dl-ice: #7ae8ff;
+  --dl-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
+  --dl-gold: #f0cf86;
+  --dl-violet: #a48bff;
+  --dl-magenta: #ff5cc8;
+  --dl-text-2: #b9cad8;
+  --dl-text-3: #8fa6ba;
+  --dl-focus: #fff0b5;
+  --dl-prism: linear-gradient(
+    90deg,
+    var(--dl-ice) 0%,
+    var(--dl-violet) 34%,
+    var(--dl-magenta) 66%,
+    var(--dl-gold) 100%
+  );
+  /* The same run, read from the right (the left flag ends ice at the word). */
+  --dl-prism-rev: linear-gradient(
+    270deg,
+    var(--dl-ice) 0%,
+    var(--dl-violet) 34%,
+    var(--dl-magenta) 66%,
+    var(--dl-gold) 100%
+  );
+  --dl-chrome: linear-gradient(180deg, #fff 0%, #eafbff 30%, #9eeeff 60%, #5aa8ff 100%);
+  --dl-hud: Michroma, Oxanium, "Noto Sans JP", sans-serif;
+  /* Plate inner side padding, carried by the children's inline margins. */
+  --dl-inset: clamp(16px, 5vw, 48px);
+
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  /* body is the site's overflow lock: the page is its own scroller. */
+  height: 100dvh;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  grid-template-columns: min(100%, 640px);
+  grid-template-rows: repeat(6, auto);
+  gap: 0;
+  align-content: safe center;
+  justify-content: center;
+  justify-items: center;
+  padding: clamp(40px, 8vh, 72px) 16px calc(clamp(40px, 8vh, 72px) + 4vh);
+  text-align: center;
+  color: #f4f6fb;
+  font-family: var(--font-sans, "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif);
+  background:
+    radial-gradient(ellipse 70% 38% at 86% 3%, rgb(122 232 255 / 13%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%),
+    var(--dl-ink);
+}
+
+/* Overscroll and the pre-hydration paint match the ink. */
+html:has(main.export-page),
+body:has(main.export-page) {
+  background-color: #04080f;
+}
+
+/* Fixed grid ground: out of flow, so it is not a grid item. */
+.export-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.09;
+  background-image:
+    linear-gradient(rgb(122 232 255 / 14%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(122 232 255 / 14%) 1px, transparent 1px);
+  background-size: 96px 96px;
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, #000, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 40%, #000, transparent 78%);
+}
+
+.export-page ::selection {
+  background: rgb(122 232 255 / 28%);
+  color: #fff;
+}
+
+/* ================================================================
+   The plate: ::after spans every row; children sit above it
+   ================================================================ */
+.export-page > * {
+  grid-column: 1;
+  position: relative;
+  z-index: 1;
+  margin-inline: var(--dl-inset);
+}
+/* Explicit rows: auto-placement would push the children below the plate's span. */
+.export-page > :nth-child(1) {
+  grid-row: 1;
+}
+.export-page > :nth-child(2) {
+  grid-row: 2;
+}
+.export-page > :nth-child(3) {
+  grid-row: 3;
+}
+.export-page > :nth-child(4) {
+  grid-row: 4;
+}
+.export-page > :nth-child(5) {
+  grid-row: 5;
+}
+.export-page > :nth-child(6) {
+  grid-row: 6;
+}
+
+.export-page::after {
+  content: "";
+  grid-column: 1;
+  grid-row: 1 / -1;
+  /* Fill the area: the page centres its children. */
+  justify-self: stretch;
+  align-self: stretch;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid rgb(122 232 255 / 16%);
+  border-radius: 4px;
+  background:
+    var(--dl-prism) top / 100% 1px no-repeat,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 22px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 22px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
+    linear-gradient(135deg, rgb(122 232 255 / 7%), transparent 42%),
+    linear-gradient(315deg, rgb(164 139 255 / 5%), transparent 40%),
+    rgb(10 18 32 / 82%);
+  background-repeat: no-repeat;
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 55%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+/* ================================================================
+   Type: HUD label, chrome-ink wordmark, file-number strip
+   ================================================================ */
+.export-page p {
+  margin: clamp(28px, 5vw, 44px) 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--dl-hud);
+  font-size: 12px;
+  font-weight: 400;
+  font-synthesis: none;
+  line-height: 1.4;
+  letter-spacing: 0.3em;
+  /* Trailing tracking counts as width: lead by the same amount. */
+  text-indent: 0.3em;
+  color: rgb(122 232 255 / 84%);
+}
+
+/* Prism flags either side of the label; each draws from the word outward. */
+.export-page p::before,
+.export-page p::after {
+  content: "";
+  display: inline-block;
+  flex: none;
+  width: 36px;
+  height: 1px;
+  background: var(--dl-prism);
+  transform-origin: 0 50%;
+}
+.export-page p::before {
+  background: var(--dl-prism-rev);
+  transform-origin: 100% 50%;
+}
+
+.export-page h1 {
+  margin: 10px 0 0;
+  font-family: Oxanium, "Zen Kaku Gothic New", sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 3.2vw + 18px, 56px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  color: transparent;
+  background: var(--dl-chrome);
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  /* The misregistered ghost, static. Stays on the h1: a filter on the page
+     would turn the fixed grid ::before into a scrolled child. */
+  filter: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+html[data-world-effects="economy"] .export-page h1 {
+  filter: none;
+}
+
+.export-page b {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 7px 14px 6px 12px;
+  font-family: var(--dl-hud);
+  font-size: 12px;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  color: var(--dl-lock);
+  border-left: 2px solid var(--dl-ice);
+  background: linear-gradient(90deg, rgb(122 232 255 / 16%), rgb(122 232 255 / 3%));
+}
+
+/* ================================================================
+   Controls
+   ================================================================ */
+.export-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 34px;
+  /* The plate's inner width, capped: the inline margins are outside it. */
+  min-width: min(100% - 2 * var(--dl-inset), 320px);
+  min-height: 52px;
+  padding: 0 clamp(16px, 4vw, 28px);
+  border-radius: 4px;
+  border: 1px solid rgb(122 232 255 / 60%);
+  color: #04080f;
+  background: linear-gradient(180deg, #dff9ff, var(--dl-ice));
+  /* 600: the loaded Noto Sans JP weights are 400/500/600, 700 was synthetic. */
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  text-decoration: none;
+  /* The page's one glow. */
+  box-shadow:
+    0 0 0 1px rgb(4 8 15 / 60%),
+    0 12px 32px rgb(122 232 255 / 18%);
+}
+
+/* The control's own brackets, 12px arms. */
+.export-page-btn::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  background:
+    linear-gradient(#dff9ff 0 0) 0 0 / 12px 2px,
+    linear-gradient(#dff9ff 0 0) 0 0 / 2px 12px,
+    linear-gradient(#dff9ff 0 0) 100% 0 / 12px 2px,
+    linear-gradient(#dff9ff 0 0) 100% 0 / 2px 12px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 12px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 12px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 12px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 12px;
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 360px) {
+  .export-page-btn {
+    justify-self: stretch;
+    min-width: 0;
+    padding-inline: 14px;
+    font-size: 15px;
+  }
+}
+
+.export-page-alt {
+  position: relative;
+  margin-top: 18px;
+  border-radius: 2px;
+  font-size: 13px;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  color: var(--dl-text-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgb(122 232 255 / 55%);
+  text-underline-offset: 4px;
+}
+/* ::before is the addon sheet's 44px hit area; the tick goes on ::after. */
+.export-page-alt::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: var(--dl-ice);
+  opacity: 0.85;
+}
+
+.export-page small {
+  display: block;
+  margin: 22px 0 clamp(24px, 5vw, 40px);
+  padding-top: 14px;
+  /* 17em: the first line holds exactly the clause before the ／ separator
+     (197px at 12px) and the second the rest, so nothing breaks mid-word.
+     Balance would prefer an even split inside a word. */
+  max-width: 17em;
+  border-top: 1px solid rgb(122 232 255 / 14%);
+  font-size: 12px;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--dl-text-3);
+  text-wrap: pretty;
+}
+
+.export-page :is(.export-page-btn, .export-page-alt):focus-visible {
+  outline: 2px solid var(--dl-focus);
+  outline-offset: 3px;
+}
+
+.export-page-btn:active {
+  translate: 0 0;
+  box-shadow:
+    0 0 0 1px rgb(4 8 15 / 60%),
+    0 6px 18px rgb(122 232 255 / 18%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .export-page-btn:hover {
+    background: linear-gradient(180deg, #fff, #a6f0ff);
+    box-shadow:
+      0 0 0 1px rgb(4 8 15 / 60%),
+      0 16px 40px rgb(122 232 255 / 28%);
+    translate: 0 -1px;
+  }
+  .export-page-alt:hover {
+    color: #dff9ff;
+    text-decoration-color: var(--dl-ice);
+  }
+}
+
+/* ================================================================
+   Short viewports
+   ================================================================ */
+@media (max-height: 480px) {
+  .export-page {
+    padding-block: 20px 28px;
+  }
+  .export-page h1 {
+    font-size: 30px;
+  }
+  .export-page > p {
+    margin-top: 18px;
+  }
+  .export-page-btn {
+    margin-top: 20px;
+    min-height: 48px;
+  }
+  .export-page-alt {
+    margin-top: 12px;
+  }
+  .export-page small {
+    margin-top: 12px;
+    padding-top: 10px;
+    margin-bottom: 18px;
+  }
+}
+
+/* Small phones: the plate ends above the fixed Zeus button. */
+@media (max-width: 400px) and (max-height: 640px) {
+  .export-page {
+    align-content: start;
+    padding-top: 24px;
+    padding-bottom: 140px;
+  }
+}
+
+/* ================================================================
+   Motion: one finite boot (plate lock, prism draw, title wipe, button lock).
+   Every keyframe ends at the natural state, so the fill is backwards only:
+   a finished boot leaves no live animation on the page.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .export-page-btn,
+  html:not([data-world-effects="economy"]) .export-page-alt {
+    transition:
+      translate 160ms ease-out,
+      box-shadow 160ms ease-out,
+      background-color 160ms ease-out,
+      color 160ms ease-out,
+      text-decoration-color 160ms ease-out;
+  }
+
+  html:not([data-world-effects="economy"]) .export-page::after {
+    animation: dl-lock 560ms steps(4, jump-end) backwards;
+  }
+  html:not([data-world-effects="economy"]) .export-page h1 {
+    animation: dl-title 820ms cubic-bezier(0.77, 0, 0.18, 1) 120ms backwards;
+  }
+  html:not([data-world-effects="economy"]) .export-page p::before,
+  html:not([data-world-effects="economy"]) .export-page p::after {
+    animation: dl-draw 600ms cubic-bezier(0.77, 0, 0.18, 1) 240ms backwards;
+  }
+  html:not([data-world-effects="economy"]) .export-page-btn::before {
+    animation: dl-lock 420ms steps(3, jump-end) 520ms backwards;
+  }
+}
+
+@keyframes dl-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes dl-title {
+  from {
+    clip-path: inset(-20% 100% -30% -4%);
+  }
+  to {
+    clip-path: inset(-20% -4% -30% -4%);
+  }
+}
+@keyframes dl-draw {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+/* ================================================================
+   Reduced transparency and forced colours
+   ================================================================ */
+@media (prefers-reduced-transparency: reduce) {
+  .export-page h1 {
+    filter: none;
+  }
+  .export-page::after {
+    background-color: #0a1220;
+  }
+}
+
+@media (forced-colors: active) {
+  .export-page {
+    background: Canvas;
+  }
+  .export-page::before {
+    display: none;
+  }
+  .export-page::after {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .export-page h1 {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    filter: none;
+  }
+  .export-page p,
+  .export-page b,
+  .export-page small {
+    color: CanvasText;
+  }
+  .export-page b {
+    border-left-color: CanvasText;
+    background: none;
+  }
+  .export-page small {
+    border-top-color: CanvasText;
+  }
+  .export-page p::before,
+  .export-page p::after,
+  .export-page-btn::before,
+  .export-page-alt::after {
+    display: none;
+  }
+  .export-page-btn {
+    color: ButtonText;
+    background: ButtonFace;
+    border: 2px solid ButtonText;
+    box-shadow: none;
+  }
+  .export-page-alt {
+    color: LinkText;
+  }
+}

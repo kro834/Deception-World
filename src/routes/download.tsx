@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createWorldHead, WORLD_ADDON_STYLESHEET_LINK } from "@/lib/world-head";
+import {
+  createWorldHead,
+  DOSSIER_HUD_FONTS_URL,
+  WORLD_ADDON_STYLESHEET_LINK,
+} from "@/lib/world-head";
+import downloadCssUrl from "@/styles-download.css?url";
 
 const MAIN_ARCHIVE_URL = "https://github.com/kro834/Deception-World/archive/refs/heads/main.zip";
 
@@ -9,7 +14,13 @@ export const Route = createFileRoute("/download")({
     createWorldHead({
       title: "サイトデータ｜Deception World",
       description: "Deception Worldの公開中mainソースをZIPで取得できます。",
-      stylesheetLinks: [WORLD_ADDON_STYLESHEET_LINK],
+      // Addon first: the page sheet wins the cascade; the HUD subset is the
+      // dossiers' Michroma (capitals and digits) for the EXPORT / MAIN ARCHIVE labels.
+      stylesheetLinks: [
+        WORLD_ADDON_STYLESHEET_LINK,
+        { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+        { rel: "stylesheet", href: downloadCssUrl },
+      ],
     }),
 });
 

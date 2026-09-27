@@ -1,0 +1,1271 @@
+/* Opening elevation: the title's resting frame in the World's projection
+   grammar. Loaded last on / only. It re-skins what surrounds the untouched
+   prism logo (the letterbox gate, the HUD row, the editorial frame, the
+   controls, the caption, the rest light) onto one measuring system and onto
+   the Mirage palette (ice on ink, gold, the prism), with the HUD labels in
+   the Michroma subset the World and the dossiers load. The 7.2 s sequence,
+   the burn, the dive, the handoff timing and every measured rect stay in
+   styles.css and the opening-*.ts modules, which this sheet does not edit:
+   it only overrides colour, size, position and a few finite boot keyframes,
+   and every new end value is set on .is-complete too, so a skip lands on the
+   same frame the boot lands on. */
+
+/* Tokens and the measuring system -------------------------------------------
+   One letterbox height (--cine-bar), one gutter (--cine-inset-x) and one gap
+   under the bar (--cine-gap-y) that the meta row, the frame, SOUND, SKIP, the
+   cue and the progress rail share. The palette lives here once; later rules
+   mix from these instead of repeating a hex. --color-ice / --color-gold are
+   remapped on the stage so the rules in styles.css that read them (the
+   logo's corner marks, the HUD's stroke through text-ice/80) take the
+   World's ice and gold without being rewritten. */
+.cine-stage {
+  --cine-bar: max(7.5vh, 42px);
+  --cine-inset-x: max(26px, 4.4vw);
+  --cine-gap-y: clamp(18px, 3vh, 30px);
+  --op-ink: #04080f;
+  --op-ice: #7ae8ff;
+  --op-ice-hi: #c6f5ff;
+  --op-ice-deep: #2bb6e3;
+  --op-gold: #f0cf86;
+  --op-violet: #a48bff;
+  --op-magenta: #ff5cc8;
+  --op-focus: #fff0b5;
+  --op-text: #f1f7fb;
+  --op-text-2: #b9cad8;
+  --op-lock: color-mix(in srgb, var(--op-ice) 62%, #dff9ff);
+  --op-hud: "Michroma", "Oxanium", var(--font-sans);
+  --op-prism: linear-gradient(
+    90deg,
+    var(--op-ice) 0%,
+    var(--op-violet) 34%,
+    var(--op-magenta) 66%,
+    var(--op-gold) 100%
+  );
+  --color-ice: var(--op-ice);
+  --color-ice-dim: var(--op-ice-deep);
+  --color-gold: var(--op-gold);
+  --op-plate: color-mix(in srgb, var(--op-ink) 82%, transparent);
+  --op-plate-edge: 0 0 0 1px color-mix(in srgb, var(--op-ink) 60%, transparent);
+  --op-plate-drop: 0 12px 32px rgb(0 0 0 / 0.5);
+  /* The first frame is ink with a faint pool of light, never a flat #000. */
+  background: var(--op-ink)
+    radial-gradient(ellipse at 50% 46%, rgb(74 137 214 / 0.1), transparent 56%);
+}
+
+@media (max-width: 700px) {
+  .cine-stage {
+    --cine-inset-x: max(14px, calc(env(safe-area-inset-left) + 10px));
+    --cine-gap-y: 16px;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .cine-stage {
+    --cine-bar: 24px;
+    --cine-gap-y: 10px;
+  }
+}
+
+.cine-letterbox {
+  height: var(--cine-bar);
+}
+
+.cine-editorial {
+  --editorial-inset-x: var(--cine-inset-x);
+  --editorial-inset-y: calc(var(--cine-bar) + var(--cine-gap-y));
+}
+
+/* The SVG group's text-ice/80 reads var(--color-ice) at use time. */
+.cine-hud {
+  color: var(--op-ice);
+}
+
+/* HUD labels: Michroma at 12 px -----------------------------------------------
+   The subset carries capitals, digits and / - . : + # % & · | < >. Every
+   all-caps label takes it; the kana (スキップ, もう一度) keep the page's sans, and
+   the film serif stays on the idle kicker and the title caption. The 7 px
+   vertical coordinates retire: ° and ′ are outside the subset and the strings
+   were unreadable at any size. */
+.cine-sequence-meta,
+.cine-cue,
+.cine-editorial-kicker,
+.cine-editorial-caption,
+.cine-skip kbd,
+.cine-always .cine-ghost {
+  font-family: var(--op-hud);
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+.cine-sequence-meta {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.cine-cue {
+  width: min(320px, 60vw);
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: 0.2em;
+  color: var(--op-text-2);
+}
+
+.cine-editorial-kicker,
+.cine-editorial-caption {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
+  color: color-mix(in srgb, var(--op-ice-hi) 70%, transparent);
+}
+
+.cine-editorial-caption {
+  color: color-mix(in srgb, var(--op-gold) 66%, transparent);
+}
+
+.cine-skip {
+  font-size: 13px;
+}
+
+.cine-skip span {
+  font-family: var(--font-sans);
+}
+
+.cine-skip kbd {
+  min-width: 32px;
+  min-height: 24px;
+  border-radius: 2px;
+  border-color: color-mix(in srgb, var(--op-ice) 22%, transparent);
+  background: color-mix(in srgb, var(--op-ice) 6%, transparent);
+  color: var(--op-ice-hi);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+.cine-kicker {
+  font-size: 12px;
+  letter-spacing: 0.36em;
+  color: var(--op-gold);
+}
+
+.cine-editorial-coordinate {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .cine-sequence-meta {
+    letter-spacing: 0.08em;
+  }
+
+  .cine-cue {
+    width: calc(100vw - var(--cine-inset-x) - 150px);
+    letter-spacing: 0.1em;
+  }
+
+  .cine-editorial-kicker,
+  .cine-editorial-caption {
+    letter-spacing: 0.06em;
+  }
+
+  .cine-editorial-kicker {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    gap: 12px;
+  }
+
+  .cine-editorial-kicker i {
+    display: none;
+  }
+
+  .cine-editorial-caption {
+    white-space: normal;
+    line-height: 1.5;
+  }
+}
+
+/* The meta row: HUD tags centred in the bar ------------------------------------
+   Two empty pseudo ticks (no text) mark the tags the way the dossier labels
+   are marked. The row's boot is the existing sequence-meta-in, re-keyed to
+   end at full opacity, which is also its .is-complete value. */
+.cine-sequence-meta {
+  top: calc((var(--cine-bar) - 12px) / 2);
+  right: var(--cine-inset-x);
+  left: var(--cine-inset-x);
+  color: color-mix(in srgb, var(--op-ice) 85%, transparent);
+}
+
+.is-complete .cine-sequence-meta {
+  opacity: 1;
+}
+
+.is-playing .cine-sequence-meta {
+  animation-name: op-meta-in;
+}
+
+@keyframes op-meta-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cine-sequence-meta span {
+  position: relative;
+  padding-left: 14px;
+}
+
+.cine-sequence-meta span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-width: 1px 0 0 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.cine-sequence-meta span:last-child {
+  padding-right: 14px;
+  padding-left: 0;
+}
+
+.cine-sequence-meta span:last-child::before {
+  right: 2px;
+  left: auto;
+  border-width: 0 1px 1px 0;
+}
+
+/* Michroma capitals are wide: under 420 px the two meta labels at 0.08em need
+   more than the bar's width, so they stack, two 12 px lines inside the bar. */
+@media (max-width: 420px) {
+  .cine-sequence-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    top: calc((var(--cine-bar) - 28px) / 2);
+  }
+
+  .cine-sequence-meta span:last-child {
+    padding-right: 0;
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cine-sequence-meta span:last-child::before {
+    right: auto;
+    left: 2px;
+    border-width: 1px 0 0 1px;
+  }
+}
+
+/* The editorial frame: tied to the bar, locked on with brackets ----------------
+   The frame's inset is bar + gap, so its hairlines sit below the bars at every
+   width. Ice brackets on the top corners, gold on the bottom, on two empty
+   pseudo layers; they arrive with a finite lock (gated) and hold the same
+   value on .is-complete and on the still idle stage. */
+.is-complete .cine-editorial-frame > i {
+  opacity: 0.45;
+}
+
+.cine-editorial-frame::before,
+.cine-editorial-frame::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  opacity: 0;
+  background-repeat: no-repeat;
+}
+
+.cine-editorial-frame::before {
+  background:
+    linear-gradient(var(--op-lock) 0 0) left top / 28px 2px,
+    linear-gradient(var(--op-lock) 0 0) left top / 2px 28px,
+    linear-gradient(var(--op-lock) 0 0) right top / 28px 2px,
+    linear-gradient(var(--op-lock) 0 0) right top / 2px 28px;
+  background-repeat: no-repeat;
+}
+
+.cine-editorial-frame::after {
+  background:
+    linear-gradient(var(--op-gold) 0 0) left bottom / 28px 2px,
+    linear-gradient(var(--op-gold) 0 0) left bottom / 2px 28px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 28px 2px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 2px 28px;
+  background-repeat: no-repeat;
+}
+
+.cine-stage:not(.is-playing) .cine-editorial-frame::before,
+.cine-stage:not(.is-playing) .cine-editorial-frame::after,
+.is-complete .cine-editorial-frame::before,
+.is-complete .cine-editorial-frame::after {
+  opacity: 0.75;
+}
+
+@media (max-width: 700px) {
+  .cine-editorial-frame::before {
+    background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px;
+  }
+
+  .cine-editorial-frame::after {
+    background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px;
+  }
+}
+
+/* SOUND: inside the frame's top-left corner, a quiet ice plate ---------------- */
+.cine-always {
+  top: calc(var(--cine-bar) + var(--cine-gap-y) + 12px);
+  left: calc(var(--cine-inset-x) + 8px);
+}
+
+.cine-always .cine-ghost {
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--op-ice) 22%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--op-ink) 60%, transparent);
+  color: color-mix(in srgb, var(--op-ice-hi) 80%, transparent);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+/* The telemetry strip: SKIP, the cue and the rail on the bottom bar ------------
+   SKIP sits 12 px above the bar, the cue on the same line to the left, and the
+   progress rail inside the bar as a prism fill with diamond markers. The
+   markers' lit state is the existing progress-marker keyframe re-keyed so the
+   diamond keeps its rotation and takes the warm highlight. */
+.cine-skip {
+  right: var(--cine-inset-x);
+  bottom: calc(var(--cine-bar) + 12px);
+  border-color: color-mix(in srgb, var(--op-ice) 36%, transparent);
+  border-radius: 4px;
+  background: var(--op-plate);
+  box-shadow: var(--op-plate-edge), var(--op-plate-drop);
+}
+
+.cine-cue {
+  left: var(--cine-inset-x);
+  bottom: calc(var(--cine-bar) + 12px + 14px);
+}
+
+.cine-progress {
+  right: var(--cine-inset-x);
+  left: var(--cine-inset-x);
+  height: 2px;
+  background: color-mix(in srgb, var(--op-ice) 14%, transparent);
+  opacity: 0.9;
+}
+
+.cine-progress > span {
+  background: var(--op-prism);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--op-ice) 35%, transparent);
+}
+
+.cine-progress > i {
+  width: 8px;
+  height: 8px;
+  border-color: color-mix(in srgb, var(--op-ice) 60%, transparent);
+  border-radius: 0;
+  background: var(--op-ink);
+  transform: translate(-50%, -50%) rotate(45deg) scale(0.7);
+}
+
+.is-playing .cine-progress > i {
+  animation-name: op-marker;
+}
+
+@keyframes op-marker {
+  to {
+    border-color: color-mix(in srgb, var(--op-gold) 85%, transparent);
+    background: var(--op-focus);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--op-gold) 50%, transparent);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(45deg) scale(1);
+  }
+}
+
+@media (max-width: 360px) {
+  .cine-cue {
+    width: calc(100vw - 2 * var(--cine-inset-x));
+    bottom: calc(var(--cine-bar) + 12px + 64px);
+  }
+}
+
+/* Controls: square plates, ice top / gold bottom brackets ----------------------
+   The glass pill goes; the plates are ink with an ice edge and 14 px bracket
+   arms on the existing ::before. ENTER THE WORLD is the gold-keyed primary
+   (gold 62% border, the warm highlight on its label, the page's one glow)
+   and answers a fine pointer with a prism underline and a 1 px lift. */
+.cine-btn {
+  min-height: 48px;
+  padding: 0 1.6rem;
+  border: 1px solid color-mix(in srgb, var(--op-ice) 28%, transparent);
+  border-radius: 4px;
+  background: var(--op-plate);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: var(--op-plate-edge), var(--op-plate-drop);
+}
+
+.cine-btn::before {
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  opacity: 1;
+  background:
+    linear-gradient(var(--op-lock) 0 0) left top / 14px 2px,
+    linear-gradient(var(--op-lock) 0 0) left top / 2px 14px,
+    linear-gradient(var(--op-lock) 0 0) right top / 14px 2px,
+    linear-gradient(var(--op-lock) 0 0) right top / 2px 14px,
+    linear-gradient(var(--op-gold) 0 0) left bottom / 14px 2px,
+    linear-gradient(var(--op-gold) 0 0) left bottom / 2px 14px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 14px 2px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 2px 14px;
+  background-repeat: no-repeat;
+}
+
+.cine-btn-primary {
+  font: 400 13px/1 var(--op-hud);
+  font-synthesis: none;
+  letter-spacing: 0.18em;
+  color: var(--op-focus);
+  border-color: color-mix(in srgb, var(--op-gold) 62%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--op-gold) 16%, transparent),
+    color-mix(in srgb, var(--op-ink) 92%, transparent) 60%
+  );
+  box-shadow:
+    var(--op-plate-edge),
+    var(--op-plate-drop),
+    0 0 28px color-mix(in srgb, var(--op-gold) 16%, transparent);
+}
+
+.cine-btn-primary::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: 10px;
+  bottom: 0;
+  left: 10px;
+  height: 2px;
+  background: var(--op-prism);
+  opacity: 0;
+  transform: scaleX(0.4);
+}
+
+.cine-btn-secondary {
+  font: 600 13px/1 var(--font-sans);
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--op-ice-hi) 85%, transparent);
+  border-color: color-mix(in srgb, var(--op-ice) 22%, transparent);
+}
+
+.cine-btn-secondary::before {
+  opacity: 0.7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cine-btn:hover {
+    color: var(--op-text);
+    border-color: color-mix(in srgb, var(--op-ice) 50%, transparent);
+    box-shadow: var(--op-plate-edge), var(--op-plate-drop);
+  }
+
+  .cine-btn-primary:hover {
+    translate: 0 -1px;
+    color: var(--op-text);
+    border-color: color-mix(in srgb, var(--op-gold) 95%, transparent);
+    box-shadow:
+      var(--op-plate-edge),
+      0 16px 36px rgb(0 0 0 / 0.55),
+      0 0 32px color-mix(in srgb, var(--op-gold) 20%, transparent);
+  }
+
+  .cine-btn-primary:hover::after,
+  .cine-btn-primary:focus-visible::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .cine-btn-secondary:hover {
+    color: var(--op-text);
+    border-color: color-mix(in srgb, var(--op-ice) 50%, transparent);
+  }
+
+  .cine-skip:hover {
+    color: var(--op-text);
+    border-color: color-mix(in srgb, var(--op-ice) 60%, transparent);
+    background: color-mix(in srgb, var(--op-ink) 92%, transparent);
+  }
+
+  .cine-always .cine-ghost:hover {
+    color: var(--op-text);
+    border-color: color-mix(in srgb, var(--op-ice) 55%, transparent);
+    background: color-mix(in srgb, var(--op-ice) 8%, var(--op-plate));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-btn-primary {
+    transition:
+      translate 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-btn-primary::after {
+    transition:
+      opacity 180ms ease,
+      transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* One focus ring family: the warm ring, outside the plate. */
+.cine-btn:focus-visible,
+.cine-ghost:focus-visible,
+.cine-skip:focus-visible {
+  outline: 2px solid var(--op-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .cine-btn {
+    padding-inline: 1.1rem;
+  }
+
+  .cine-btn-primary {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* Title caption: 12 px Cinzel on a prism rule ---------------------------------
+   The caption keeps the film serif; its tracking is the one thing the
+   existing title-caption-in keyframe animates, so the boot is re-keyed to
+   land on the rest tracking of each breakpoint (read from the token). */
+.cine-title-caption {
+  --op-caption-track: 0.3em;
+  right: 6%;
+  bottom: 2.5%;
+  left: 6%;
+  font-size: clamp(12px, 0.85vw, 13px);
+  letter-spacing: var(--op-caption-track);
+  color: color-mix(in srgb, var(--op-text) 82%, transparent);
+}
+
+.cine-title-caption i {
+  background: var(--op-prism);
+  opacity: 0.8;
+}
+
+.is-playing .cine-title-caption {
+  animation-name: op-caption-in;
+}
+
+@keyframes op-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    letter-spacing: calc(var(--op-caption-track) + 0.12em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: var(--op-caption-track);
+  }
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-title-caption {
+    --op-caption-track: 0.12em;
+    right: 0;
+    bottom: -7%;
+    left: 0;
+    gap: 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-title-caption {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    bottom: -18%;
+    white-space: normal;
+  }
+
+  .cine-title-caption i {
+    display: none;
+  }
+}
+
+/* Logo corner marks: 2 px, ice top / gold bottom --------------------------------
+   The existing logo-frame-lock keyframe is re-keyed so its end value is the
+   new rest opacity (also set on .is-complete). The marks keep the base
+   sheet's inset (8% 6%): verify-opening-cinematic samples the logo box at
+   3-4% in from its corners to prove the logo has no matte, and marks at the
+   edge would read as one. */
+.cine-logo-frame {
+  background:
+    linear-gradient(var(--op-lock) 0 0) left top / 30px 2px,
+    linear-gradient(var(--op-lock) 0 0) left top / 2px 30px,
+    linear-gradient(var(--op-lock) 0 0) right top / 30px 2px,
+    linear-gradient(var(--op-lock) 0 0) right top / 2px 30px,
+    linear-gradient(var(--op-gold) 0 0) left bottom / 30px 2px,
+    linear-gradient(var(--op-gold) 0 0) left bottom / 2px 30px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 30px 2px,
+    linear-gradient(var(--op-gold) 0 0) right bottom / 2px 30px;
+  background-repeat: no-repeat;
+}
+
+.is-complete .cine-logo-frame {
+  opacity: 0.82;
+}
+
+.is-playing .cine-logo-frame {
+  animation-name: op-logo-frame-lock;
+}
+
+@keyframes op-logo-frame-lock {
+  0% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  48% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+}
+
+/* The rest light: the dial, the rings, the vignette ----------------------------
+   The held title lifts its light so the frame and the outer rings read; the
+   logo stays the brightest object. The reticle and the second orbit take
+   gold, the first orbit ice. The dial never runs under the bars. */
+.is-complete .cine-light-field {
+  opacity: 0.9;
+}
+
+.is-complete .cine-depth-field {
+  opacity: 0.55;
+}
+
+.is-complete .cine-atmosphere {
+  opacity: 0.55;
+  filter: brightness(0.5) saturate(1.1);
+}
+
+.cine-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 46%,
+    color-mix(in srgb, var(--op-ink) 42%, transparent) 82%,
+    color-mix(in srgb, var(--op-ink) 82%, transparent) 100%
+  );
+}
+
+.cine-hud {
+  width: min(72vw, 820px, calc(100dvh - 2 * var(--cine-bar) - 24px));
+}
+
+.is-complete .cine-hud {
+  opacity: 0.34;
+}
+
+.cine-hud-reticle {
+  opacity: 0.9;
+}
+
+.cine-hud-reticle circle {
+  stroke: var(--op-gold);
+}
+
+.cine-hud-reticle path:last-of-type {
+  fill: color-mix(in srgb, var(--op-gold) 50%, transparent);
+  stroke: var(--op-gold);
+}
+
+.is-complete .cine-aperture {
+  opacity: 0.5;
+}
+
+.is-complete .cine-orbit-a {
+  opacity: 0.42;
+}
+
+.is-complete .cine-orbit-b {
+  opacity: 0.34;
+}
+
+.cine-orbit::before,
+.cine-orbit::after {
+  width: 5px;
+  height: 5px;
+  background: var(--op-ice);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--op-ice) 80%, transparent);
+}
+
+.cine-orbit-b::before,
+.cine-orbit-b::after {
+  background: var(--op-gold);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--op-gold) 70%, transparent);
+}
+
+.cine-aperture::before {
+  border-color: color-mix(in srgb, var(--op-ice) 22%, transparent);
+}
+
+.cine-aperture > i:nth-child(2) {
+  border-color: color-mix(in srgb, var(--op-gold) 30%, transparent);
+}
+
+/* Every rule and the flare on the prism. */
+.cine-editorial-kicker i,
+.cine-line {
+  background: var(--op-prism);
+}
+
+.cine-flare {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--op-ice) 30%,
+    #fff 50%,
+    var(--op-magenta) 62%,
+    var(--op-gold) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 34px color-mix(in srgb, var(--op-ice) 32%, transparent),
+    0 0 86px color-mix(in srgb, var(--op-gold) 16%, transparent);
+}
+
+/* The ghost wordmark: outlined Oxanium, quiet at rest -------------------------
+   The Cinzel smear behind the logo becomes the site's outlined trace, with a
+   misregistered magenta channel on desktop only (off under economy). */
+.cine-editorial-word {
+  font-family: "Oxanium", var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.cine-editorial-word b {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--op-ice) 55%, transparent);
+  text-shadow: none;
+}
+
+.cine-editorial-word > span:nth-child(2) b {
+  -webkit-text-stroke-color: color-mix(in srgb, var(--op-gold) 50%, transparent);
+  letter-spacing: 0.12em;
+}
+
+.is-complete .cine-editorial-word b {
+  opacity: 0.08;
+}
+
+@media (min-width: 701px) {
+  html:not([data-world-effects="economy"]) .is-complete .cine-editorial-word > span:first-child b {
+    filter: drop-shadow(3px 0 0 color-mix(in srgb, var(--op-magenta) 35%, transparent));
+  }
+}
+
+@media (max-width: 360px) {
+  .cine-editorial-word b {
+    -webkit-text-stroke-width: 0.75px;
+  }
+}
+
+/* Intro kicker and caption anchor to the frame, off the logo's ring ----------- */
+.cine-editorial-type {
+  top: var(--editorial-inset-y);
+  bottom: var(--editorial-inset-y);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform: none;
+}
+
+.cine-editorial-type::after {
+  top: 0;
+  bottom: 0;
+}
+
+/* The word is centred on the picture itself (its rise animates the <b>, not
+   this box); the two lines shrink to their text so their boxes do not span
+   the frame, and their offsets are margins, outside the boxes. */
+.cine-editorial-word {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.cine-editorial-kicker,
+.cine-editorial-caption {
+  width: fit-content;
+  max-width: 100%;
+  margin: 12px auto 0;
+}
+
+.cine-editorial-caption {
+  margin: 0 auto 12px;
+}
+
+/* Under 1140 px the centred lines would meet the SOUND plate and the cue on
+   the frame's edges: they step in, under the plate and above the strip. */
+@media (max-width: 1140px) {
+  .cine-editorial-kicker {
+    margin-top: 64px;
+  }
+
+  .cine-editorial-caption {
+    margin-bottom: 72px;
+  }
+}
+
+@media (max-width: 360px) {
+  .cine-editorial-kicker {
+    margin-top: 57px;
+  }
+
+  .cine-editorial-caption {
+    margin-bottom: 96px;
+  }
+}
+
+/* The film gate: a prism hairline and thirds ticks on each bar ------------------
+   Both pseudo layers stay inside the bar box (the bars keep their #000, their
+   z-index and their bar-in transform; the ornament rides with them). */
+.cine-letterbox::before,
+.cine-letterbox::after {
+  content: "";
+  position: absolute;
+  right: var(--cine-inset-x);
+  left: var(--cine-inset-x);
+  pointer-events: none;
+}
+
+.cine-letterbox::after {
+  height: 1px;
+  background: var(--op-prism);
+  opacity: 0.32;
+  transform-origin: 0 50%;
+}
+
+.cine-letterbox::before {
+  height: 6px;
+  opacity: 0.5;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--op-ice) 45%, transparent) 0 1px,
+      transparent 1px 33.333%
+    ),
+    linear-gradient(color-mix(in srgb, var(--op-ice) 45%, transparent) 0 0) right / 1px 100%
+      no-repeat;
+}
+
+.cine-letterbox.top::before,
+.cine-letterbox.top::after {
+  bottom: 0;
+}
+
+.cine-letterbox.bottom::before,
+.cine-letterbox.bottom::after {
+  top: 0;
+}
+
+/* Portrait: the dial circles the logo, the stack lifts, the row balances ------
+   Scoped to portrait so the landscape --cine-lift rule in styles.css is not
+   doubled. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-stage {
+    --op-lift: 3vh;
+  }
+
+  .cine-hud {
+    width: min(112vw, 560px);
+  }
+
+  .cine-stack {
+    bottom: calc(2 * var(--op-lift));
+  }
+
+  .cine-hud,
+  .cine-line,
+  .cine-aperture,
+  .cine-orbit,
+  .cine-impact-bloom,
+  .cine-flare {
+    translate: 0 calc(-1 * var(--op-lift));
+  }
+
+  .cine-replay-slot {
+    bottom: max(10vh, 72px);
+    gap: 10px;
+    padding-inline: max(16px, env(safe-area-inset-left));
+  }
+
+  .cine-btn {
+    flex: 0 1 auto;
+    min-height: 52px;
+  }
+
+  .cine-btn-primary {
+    flex: 1 1 200px;
+    max-width: 320px;
+  }
+
+  .cine-btn-secondary {
+    flex: 0 0 auto;
+    min-width: 112px;
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-stage {
+    --op-lift: 4vh;
+  }
+
+  .cine-replay-slot {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    bottom: max(8vh, 56px);
+  }
+
+  .cine-btn,
+  .cine-btn-primary,
+  .cine-btn-secondary {
+    flex: 0 0 auto;
+    width: min(100%, 280px);
+    max-width: none;
+    min-height: 48px;
+  }
+}
+
+/* Portrait tablet: the dial grows with the picture. */
+@media (min-width: 701px) and (max-width: 1023px) and (orientation: portrait) {
+  .cine-hud {
+    width: min(90vw, 720px, calc(100dvh - 2 * var(--cine-bar) - 24px));
+  }
+}
+
+/* Tablet and short desktop: the lockup clear of the frame lines ---------------
+   Between 701 and 900 px the lockup took 92vw while the frame inset is 4.4vw,
+   so the hairlines ran through the art; at 80vw it sits 40 px inside them. Portrait and tall viewports only: the
+   landscape-phone formula in styles.css is pinned. */
+@media (min-width: 701px) and (max-width: 900px) and (min-height: 561px) {
+  .cine-title-lockup {
+    width: min(80vw, calc(min(78vh, 100dvh - 2 * (max(9vh, 64px) + 60px)) * 1.5));
+  }
+}
+
+/* Landscape phone: thin bars, the row fully above the gate --------------------- */
+@media (max-height: 560px) and (orientation: landscape) {
+  .cine-replay-slot {
+    bottom: 30px;
+  }
+
+  /* The landscape lockup is 420 px wide: the caption fits it at a tighter
+     tracking. */
+  .cine-title-caption {
+    --op-caption-track: 0.2em;
+    right: 2%;
+    left: 2%;
+  }
+
+  .cine-btn {
+    min-height: 46px;
+  }
+
+  .cine-skip {
+    bottom: calc(var(--cine-bar) + 12px);
+  }
+
+  .cine-cue {
+    bottom: calc(var(--cine-bar) + 12px + 14px);
+  }
+}
+
+/* Portrait: a projector beam and a horizon behind the title --------------------
+   Two paints inside .cine-editorial (contain: paint), no layers; the alphas
+   stay low so the logo stays the brightest object. The horizon is masked out
+   of the logo's span. Complete values are set on the still stage too. */
+@media (orientation: portrait) {
+  .cine-editorial::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(
+        60% 34% at 50% 50%,
+        color-mix(in srgb, var(--op-ice) 10%, transparent),
+        transparent 70%
+      ),
+      conic-gradient(
+        from 168deg at 50% -6%,
+        transparent 0deg,
+        color-mix(in srgb, var(--op-ice) 7%, transparent) 8deg,
+        transparent 22deg
+      );
+  }
+
+  .cine-editorial::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: var(--editorial-inset-x);
+    left: var(--editorial-inset-x);
+    height: 1px;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--op-prism);
+    transform-origin: 50% 50%;
+    -webkit-mask-image: linear-gradient(90deg, #000 0 14%, transparent 30% 70%, #000 86%);
+    mask-image: linear-gradient(90deg, #000 0 14%, transparent 30% 70%, #000 86%);
+  }
+
+  .cine-stage:not(.is-playing) .cine-editorial::before,
+  .is-complete .cine-editorial::before {
+    opacity: 1;
+  }
+
+  .cine-stage:not(.is-playing) .cine-editorial::after,
+  .is-complete .cine-editorial::after {
+    opacity: 0.35;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  .cine-editorial::before {
+    background:
+      radial-gradient(
+        60% 34% at 50% 50%,
+        color-mix(in srgb, var(--op-ice) 14%, transparent),
+        transparent 70%
+      ),
+      conic-gradient(
+        from 168deg at 50% -6%,
+        transparent 0deg,
+        color-mix(in srgb, var(--op-ice) 10%, transparent) 8deg,
+        transparent 22deg
+      );
+  }
+}
+
+/* The boot of the new ornament ------------------------------------------------
+   Finite, once, opacity and transform only, ending on the rest values above;
+   gated by the motion preference and the economy renderer. The existing
+   reduced-motion block in styles.css already cancels every re-keyed boot. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial-frame::before {
+    animation: op-bracket-lock 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial-frame::after {
+    animation: op-bracket-lock 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-letterbox::after {
+    animation: op-hairline-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-sequence-meta span::before {
+    animation: op-tick-in 0.4s ease 0.6s both;
+  }
+
+  @media (orientation: portrait) {
+    html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial::before {
+      animation: op-beam-in 2.4s ease-out 0.3s both;
+    }
+
+    html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial::after {
+      animation: op-horizon-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both;
+    }
+  }
+}
+
+@keyframes op-bracket-lock {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+}
+
+@keyframes op-hairline-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+  to {
+    opacity: 0.32;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes op-tick-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) rotate(45deg) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) rotate(45deg) scale(1);
+  }
+}
+
+@keyframes op-beam-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes op-horizon-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.3);
+  }
+  to {
+    opacity: 0.35;
+    transform: scaleX(1);
+  }
+}
+
+/* Economy rendering: the held title is still ----------------------------------
+   The documented loops (dial spin and precession, grain, idle pulse) stay on
+   the normal path; the lightweight renderer pauses them, as Android does. */
+html[data-world-effects="economy"]
+  .cine-stage.is-complete
+  :is(.cine-hud-spin, .cine-hud-spin-rev, .cine-hud-orbits) {
+  animation-play-state: paused;
+}
+
+html[data-world-effects="economy"] .cine-grain,
+html[data-world-effects="economy"] .cine-pulse {
+  animation: none;
+}
+
+html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word > span:first-child b {
+  filter: none;
+}
+
+/* Forced colours: plain ink, the logo art intact, system buttons ----------------
+   forced-color-adjust is inherited, so the scene opts out once (black behind
+   the logo <img>, which is not adjusted) and every text and control opts back
+   in, so Chrome backplates the labels and draws the buttons in system ink. */
+@media (forced-colors: active) {
+  .cine-stage,
+  .cine-camera {
+    forced-color-adjust: none;
+    background: #000;
+  }
+
+  .cine-atmosphere,
+  .cine-light-field,
+  .cine-depth-field,
+  .cine-vignette,
+  .cine-grain,
+  .cine-flare,
+  .cine-scanline,
+  .cine-editorial-word,
+  .cine-editorial-type::after,
+  .cine-hud,
+  .cine-particles,
+  .cine-editorial::before,
+  .cine-editorial::after,
+  .cine-editorial-frame > i,
+  .cine-editorial-frame::before,
+  .cine-editorial-frame::after,
+  .cine-letterbox::before,
+  .cine-letterbox::after,
+  .cine-logo-glow,
+  .cine-logo-echo,
+  .cine-btn::before,
+  .cine-btn::after {
+    display: none;
+  }
+
+  /* Frames and rules drawn in CanvasText would be black on the black scene
+     under a light forced scheme: they go, the labels carry the frame. */
+  .cine-editorial-frame,
+  .cine-logo-frame,
+  .cine-title-caption i,
+  .cine-editorial-kicker i {
+    display: none;
+  }
+
+  .cine-letterbox {
+    forced-color-adjust: auto;
+    background: Canvas;
+  }
+
+  .cine-progress {
+    forced-color-adjust: auto;
+    background: Canvas;
+    opacity: 1;
+  }
+
+  .cine-progress > span {
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  .cine-progress > i {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .cine-sequence-meta,
+  .cine-cue,
+  .cine-title-caption,
+  .cine-editorial-kicker,
+  .cine-editorial-caption,
+  .cine-kicker {
+    forced-color-adjust: auto;
+    color: CanvasText;
+    opacity: 1;
+  }
+
+  .cine-btn,
+  .cine-skip,
+  .cine-ghost,
+  .cine-always .cine-ghost {
+    forced-color-adjust: auto;
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+    box-shadow: none;
+  }
+
+  .cine-btn:focus-visible,
+  .cine-skip:focus-visible,
+  .cine-ghost:focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
