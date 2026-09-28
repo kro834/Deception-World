@@ -2579,6 +2579,94 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
 }
 
 /* ================================================================
+   Brush-up (2026-09-29): one film site, chapters 01-03 back to back.
+   Static rules only; nothing here moves. .section-index stays as is,
+   because the annex 04-06 openers clone it by measurement.
+   ================================================================ */
+
+/* The copy block was end-aligned in a 1fr row, 137px under the wordmark
+   rule and past the fold at 1440x900. It now sits under the rule; the
+   poster spans rows 2-3, so its box does not move. Short landscape phones
+   keep their own template. */
+@media (min-width: 1100px) and (min-height: 561px) {
+  .site-shell.film-edition.mirage-edition > .hero {
+    grid-template-rows: auto auto 1fr;
+  }
+}
+
+/* 六詠 arrives as the story's payoff on desktop, not a screen later.
+   Phones keep 03.css's margin (the 412px reveal verify reads it). */
+@media (min-width: 761px) {
+  .site-shell.film-edition.mirage-edition .story-section .threat-panel {
+    margin-top: clamp(72px, 7.5vw, 112px);
+  }
+}
+
+/* Chapter breaks: each chapter keeps its 129.6px opening pad; the pad that
+   closes 01 and 02 is trimmed, so the dead band before the next numeral
+   halves. Phones keep 64px (verify-world-reveal presses the column rail
+   beside the part-lit riders heading at 412px). */
+@media (min-width: 761px) {
+  .site-shell.film-edition.mirage-edition :is(.story-section, .riders-section) {
+    padding-bottom: clamp(48px, 4vw, 64px);
+  }
+}
+
+/* The heading column left a 240px empty plate under 救うべき世界は、;
+   it centres against the copy and carries a still HUD stem below. */
+@media (min-width: 1100px) {
+  .site-shell.film-edition.mirage-edition .story-layout {
+    align-items: center;
+  }
+
+  .site-shell.film-edition.mirage-edition .story-heading {
+    position: relative;
+  }
+
+  .site-shell.film-edition.mirage-edition .story-heading::after {
+    content: "";
+    position: absolute;
+    top: calc(100% + 28px);
+    left: 0;
+    width: 7px;
+    height: 64px;
+    background:
+      linear-gradient(var(--mr-gold) 0 0) 0 0 / 7px 1px,
+      linear-gradient(rgb(122 232 255 / 60%) 0 0) 0 33% / 5px 1px,
+      linear-gradient(rgb(122 232 255 / 30%) 0 0) 0 66% / 5px 1px,
+      linear-gradient(180deg, var(--mr-ice), rgb(122 232 255 / 0%)) 0 0 / 1px 100%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+}
+
+/* The record bay's overlay inherited 06.css's 2 x 68px accent box, so
+   its brackets collapsed into one stroke at the top-left. It now spans
+   the bay, locking on at the corners as the story plate does. */
+.site-shell.film-edition.mirage-edition .episode-archive::after {
+  width: auto;
+  height: auto;
+}
+
+/* The art read only 350px into the finale; the top ink ramp is shorter,
+   so the key art starts about 100px under the section top. The centre,
+   where the headline sits, keeps its vignette. */
+.site-shell.film-edition.mirage-edition .finale-sticky::after {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 50%, rgb(4 8 15 / 40%), rgb(4 8 15 / 88%) 100%),
+    linear-gradient(180deg, var(--mr-ink), transparent 9%, transparent 78%, var(--mr-ink));
+}
+
+@media (forced-colors: active) {
+  /* The thumb's + is pinned to #fff !important (styles-pickup-visibility)
+     and Chrome keeps an svg's own colour, so it vanished on the Canvas
+     thumb. Forcing it takes the system colour. */
+  .site-shell.film-edition.mirage-edition .ios-slide-open .ios-slide-open-thumb svg {
+    forced-color-adjust: auto;
+  }
+}
+
+/* ================================================================
    Accessibility modes
    ================================================================ */
 @media (prefers-reduced-transparency: reduce) {
@@ -2770,16 +2858,13 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   background-blend-mode: normal;
 }
 
-/* The record bay's overlay is sized to 2 x 68px at its top-left corner
-   (styles-world/06.css), so its brackets show as one accent stroke: 26px of
-   ice, then 26px of gold ending at 68px. It is painted in the same place. */
+/* The record bay's overlay now spans the bay (the brush-up above), so its
+   brackets are painted at the four corners here too, on the padding box. */
 html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition
   .episode-archive {
   background:
-    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
-    linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
-    linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%),
+    var(--mr-brackets), linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%),
     var(--mr-deck);
   background-repeat: no-repeat;
   background-blend-mode: normal;
@@ -2813,9 +2898,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
     .site-shell.film-edition.mirage-edition
     .episode-archive {
     background:
-      linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
-      linear-gradient(var(--mr-gold) 0 0) 0 42px / 2px 26px,
-      var(--mr-deck);
+      var(--mr-brackets), var(--mr-deck);
     background-repeat: no-repeat;
     background-blend-mode: normal;
   }

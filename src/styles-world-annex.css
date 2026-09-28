@@ -1,60 +1,99 @@
 /* ================================================================
-   World annex (world-annex.tsx): 資料目次, 世界と組織, 人物一覧,
-   エピソードの言葉, 用語集 and 名台詞, from the owner's story source.
-   Linked before the Mirage face and written in its grammar: ice on ink,
-   prism hairlines, square plates locked on with ice-top / gold-bottom
+   World annex (world-annex.tsx): chapters 04-06 after 03 RECORDS.
+   ARCHIVE INDEX (資料目次), 04 CAST FILES (人物一覧, a portrait wall),
+   05 WORLD FILES (世界と組織, 舞台), 06 ARCHIVE LOG (エピソードの言葉,
+   用語集, 名台詞), from the owner's story source. Linked before the Mirage
+   face and written in its grammar: ice on ink, prism hairlines, gold bottom
    brackets, Michroma HUD codes (capitals only, the route's subset), chrome
-   ink titles with a still misregistered ghost. The annex is a static
-   document: no animation, no scroll timeline, no layer that tracks the
-   scroll. Tokens (--mr-*) come from the Mirage sheet through the shell.
-   Every label is 12px or larger; controls are 44px tall.
+   ink titles with a still ghost. Chapter openers are a still clone of the
+   page's .section-index (never the class: no choreography, no generated
+   suffix). The annex is a static document: no animation, no scroll
+   timeline, no layer that tracks the scroll. It sits transparent over the
+   fixed ambient grid like 01-03; only 名台詞 fades to ink for the finale.
+   Tokens (--mr-*) come from the Mirage sheet through the shell. Every label
+   is 12px or larger; controls are 44px tall.
    ================================================================ */
 
 .site-shell.film-edition.mirage-edition {
   --wa-bracket: 14px;
-  --wa-brackets:
-    linear-gradient(var(--mr-ice) 0 0) 0 0 / var(--wa-bracket) 2px,
-    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px var(--wa-bracket),
-    linear-gradient(var(--mr-ice) 0 0) 100% 0 / var(--wa-bracket) 2px,
-    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 2px var(--wa-bracket),
+  --wa-plate-pad: clamp(20px, 2.6vw, 30px);
+  --wa-gold-brackets:
     linear-gradient(var(--mr-gold) 0 0) 0 100% / var(--wa-bracket) 2px,
     linear-gradient(var(--mr-gold) 0 0) 0 100% / 2px var(--wa-bracket),
     linear-gradient(var(--mr-gold) 0 0) 100% 100% / var(--wa-bracket) 2px,
     linear-gradient(var(--mr-gold) 0 0) 100% 100% / 2px var(--wa-bracket);
+  --wa-brackets:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / var(--wa-bracket) 2px,
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px var(--wa-bracket),
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / var(--wa-bracket) 2px,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 2px var(--wa-bracket), var(--wa-gold-brackets);
 }
 
 /* ---------------------------------------------------------------- frame */
+/* Sub-sections break at clamp(40px, 5vw, 72px) each side; a chapter opens
+   at the core chapters' own clamp(64px, 9vw, 129.6px). A jump from the
+   contents lands the opener (or kicker) just under the topbar. */
 .site-shell.film-edition.mirage-edition .world-annex,
 .site-shell.film-edition.mirage-edition .wa-contents {
+  --wa-pad-top: clamp(40px, 5vw, 72px);
   position: relative;
   z-index: 1;
-  padding: clamp(64px, 8vw, 120px) clamp(16px, 8vw, 144px);
-  background: var(--mr-ink);
+  padding: var(--wa-pad-top) clamp(16px, 8vw, 144px) clamp(40px, 5vw, 72px);
+  background: transparent;
   color: var(--mr-text);
-  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+  scroll-margin-top: calc(
+    var(--film-topbar-height, calc(76px + env(safe-area-inset-top))) - 1px - var(--wa-pad-top) +
+      20px
+  );
+}
+
+.site-shell.film-edition.mirage-edition .world-annex.is-chapter {
+  --wa-pad-top: clamp(64px, 9vw, 129.6px);
 }
 
 .site-shell.film-edition.mirage-edition .wa-contents {
-  padding-block: clamp(40px, 5vw, 72px);
-  background:
-    linear-gradient(180deg, transparent, rgb(122 232 255 / 4%) 50%, transparent), var(--mr-ink);
+  --wa-pad-top: clamp(32px, 4vw, 56px);
+  padding-bottom: clamp(28px, 3.4vw, 48px);
+}
+
+/* The chapters' boundary: a prism head running into a faint ice rule. */
+.site-shell.film-edition.mirage-edition .world-annex.is-chapter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--mr-ice) 0,
+    var(--mr-violet) 7%,
+    var(--mr-magenta) 12%,
+    rgb(122 232 255 / 20%) 12.2%,
+    rgb(122 232 255 / 20%) 100%
+  );
+  pointer-events: none;
 }
 
 .site-shell.film-edition.mirage-edition .wa-inner,
 .site-shell.film-edition.mirage-edition .wa-contents-inner {
   position: relative;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-/* The prism hairline that opens every annex. */
+/* The prism hairline that opens a sub-section (chapters use the tick rule). */
 .site-shell.film-edition.mirage-edition .wa-inner::before {
   content: "";
   display: block;
   height: 1px;
-  margin-bottom: clamp(28px, 4vw, 44px);
+  margin-bottom: clamp(20px, 2.4vw, 28px);
   background: var(--mr-prism);
   opacity: 0.72;
+}
+
+.site-shell.film-edition.mirage-edition .world-annex.is-chapter .wa-inner::before {
+  content: none;
 }
 
 /* HUD code: Michroma capitals at the 12px floor. */
@@ -68,17 +107,155 @@
   line-height: 1.5;
 }
 
-/* ---------------------------------------------------------------- headings */
-.site-shell.film-edition.mirage-edition .wa-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px 24px;
-  align-items: end;
-  margin-bottom: clamp(28px, 4vw, 48px);
+.site-shell.film-edition.mirage-edition .wa-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
-.site-shell.film-edition.mirage-edition .wa-heading .wa-code {
+/* ---------------------------------------------------------------- chapter openers */
+/* Measured off #records .section-index at 390 and 1440: numeral, gold //,
+   label, ticks along the foot, a short ice-to-gold rule, a lit diamond. */
+.site-shell.film-edition.mirage-edition .wa-chapter {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 24px;
+  margin-bottom: clamp(28px, 4vw, 48px);
+  padding: 0 0 18px 18px;
+  border-bottom: 1px solid rgb(122 232 255 / 20%);
+  background: repeating-linear-gradient(90deg, rgb(122 232 255 / 52%) 0 1px, transparent 1px 24px) 0
+    100% / 100% 6px no-repeat;
+  color: var(--mr-text-2);
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #67d8ff;
+  box-shadow: 0 0 14px rgb(103 216 255 / 34%);
+  rotate: 45deg;
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter > span {
+  position: relative;
+  color: transparent;
+  font-family: var(--mr-mono);
+  font-size: clamp(38px, 5vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  -webkit-text-stroke: 1.5px var(--mr-ice);
+  text-shadow: 0 0 36px rgb(122 232 255 / 24%);
+}
+
+/* The plasma ghost behind the numeral. */
+.site-shell.film-edition.mirage-edition .wa-chapter > span::after {
+  position: absolute;
+  top: 0.07em;
+  left: 0.07em;
+  z-index: -1;
+  color: rgb(164 139 255 / 36%);
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter-04 > span::after {
+  content: "04" / "";
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter-05 > span::after {
+  content: "05" / "";
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter-06 > span::after {
+  content: "06" / "";
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter > small {
+  display: inline-flex;
+  align-items: center;
+  color: var(--mr-text);
+  font-family: var(--mr-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter > small::before {
+  content: "//" / "";
+  margin-inline-end: 0.6em;
+  color: var(--mr-gold);
+}
+
+.site-shell.film-edition.mirage-edition .wa-chapter > i {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(240px, 40%);
+  height: 2px;
+  background: linear-gradient(90deg, var(--mr-ice), var(--mr-gold) 60%, transparent);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- headings */
+/* Row 1: [sub-code] KICKER, a prism line, COUNT. Row 2: the title. */
+.site-shell.film-edition.mirage-edition .wa-heading {
+  display: grid;
+  grid-template-columns: auto minmax(24px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(20px, 2.6vw, 32px);
+}
+
+.site-shell.film-edition.mirage-edition .wa-heading.has-no {
+  grid-template-columns: auto auto minmax(24px, 1fr) auto;
+}
+
+.site-shell.film-edition.mirage-edition .wa-heading::before {
+  content: "";
+  grid-row: 1;
+  grid-column: -3 / -2;
+  height: 1px;
+  background: var(--mr-prism);
+  opacity: 0.6;
+}
+
+.site-shell.film-edition.mirage-edition .wa-heading > :is(.wa-no, .wa-code) {
+  grid-row: 1;
+  min-width: 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-heading > .wa-count {
+  grid-row: 1;
+  grid-column: -2 / -1;
+}
+
+.site-shell.film-edition.mirage-edition .wa-heading > h2 {
+  grid-row: 2;
   grid-column: 1 / -1;
+}
+
+.site-shell.film-edition.mirage-edition .wa-no {
+  color: var(--mr-gold);
+  font-family: var(--mr-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
 }
 
 .site-shell.film-edition.mirage-edition .wa-heading h2,
@@ -90,10 +267,10 @@
   color: transparent;
   -webkit-text-fill-color: transparent;
   font-family: var(--mr-display-jp);
-  font-size: clamp(30px, 4.4vw, 56px);
+  font-size: clamp(26px, 3vw, 40px);
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1.2;
+  line-height: 1.25;
   filter: drop-shadow(3px 0 0 rgb(164 139 255 / 34%));
 }
 
@@ -107,26 +284,21 @@
 }
 
 /* ---------------------------------------------------------------- plates */
+/* Documents lock on with ice-top / gold-bottom brackets, painted as
+   background layers (no overlay element to composite). */
 .site-shell.film-edition.mirage-edition .wa-plate {
   position: relative;
-  padding: clamp(20px, 2.6vw, 30px);
+  padding: var(--wa-plate-pad);
   border: 1px solid var(--mr-line);
   border-radius: 4px;
-  background: linear-gradient(135deg, rgb(122 232 255 / 5%), transparent 46%), var(--mr-deck);
-}
-
-/* Static brackets: ice along the top, gold along the bottom. */
-.site-shell.film-edition.mirage-edition .wa-plate::after,
-.site-shell.film-edition.mirage-edition .wa-contents-inner::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  background: var(--wa-brackets);
+  background:
+    var(--wa-brackets), linear-gradient(135deg, rgb(122 232 255 / 5%), transparent 46%),
+    var(--mr-deck);
   background-repeat: no-repeat;
-  pointer-events: none;
+  background-origin: border-box;
 }
 
-/* Prism top rule, inside the brackets. */
+/* Prism top rule, inside the brackets (documents only). */
 .site-shell.film-edition.mirage-edition .wa-plate::before {
   content: "";
   position: absolute;
@@ -213,37 +385,81 @@
 
 .site-shell.film-edition.mirage-edition .wa-quote figcaption::before {
   content: "";
+  flex: none;
   width: 18px;
   height: 1px;
   background: var(--mr-ice);
 }
 
-/* ---------------------------------------------------------------- contents */
-.site-shell.film-edition.mirage-edition .wa-contents-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  padding: clamp(20px, 3vw, 32px);
-  border: 1px solid var(--mr-line);
-  border-radius: 4px;
-  background: var(--mr-deck);
+/* The speaker's face from the wall: the same file and crop, 28px. */
+.site-shell.film-edition.mirage-edition .wa-quote figcaption.has-voice::before {
+  content: none;
 }
 
-.site-shell.film-edition.mirage-edition .wa-contents h2 {
-  font-size: clamp(24px, 2.6vw, 32px);
+.site-shell.film-edition.mirage-edition .wa-voice {
+  flex: none;
+  display: block;
+  width: 28px;
+  height: 28px;
+  overflow: hidden;
+  border: 1px solid rgb(122 232 255 / 36%);
+  border-radius: 2px;
+  background: #070d16;
+}
+
+.site-shell.film-edition.mirage-edition .wa-voice img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--pos);
+  transform: scale(var(--zoom, 1));
+  transform-origin: var(--origin, 50% 10%);
+}
+
+/* ---------------------------------------------------------------- contents */
+/* The chapter index: unframed, kicker and title on one line, then five
+   equal plates numbered with the chapter codes. */
+.site-shell.film-edition.mirage-edition .wa-contents-inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-contents-inner::before {
+  content: "";
+  grid-column: 1 / -1;
+  height: 1px;
+  margin-bottom: 4px;
+  background: var(--mr-prism);
+  opacity: 0.72;
+}
+
+.site-shell.film-edition.mirage-edition .wa-contents-inner::after {
+  content: none;
 }
 
 .site-shell.film-edition.mirage-edition .wa-contents ol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 12px 0 0;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
 }
 
+.site-shell.film-edition.mirage-edition .wa-contents li:last-child {
+  grid-column: 1 / -1;
+}
+
 .site-shell.film-edition.mirage-edition .wa-contents small {
-  margin-right: 10px;
+  flex: none;
+  margin-right: 8px;
   color: var(--mr-ice);
   font-family: var(--mr-mono);
   font-size: 12px;
@@ -270,6 +486,14 @@
   text-decoration: none;
 }
 
+.site-shell.film-edition.mirage-edition .wa-contents a {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 6px 12px;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
 .site-shell.film-edition.mirage-edition .wa-contents a:focus-visible,
 .site-shell.film-edition.mirage-edition .wa-open:focus-visible {
   outline: 2px solid var(--mr-focus);
@@ -282,27 +506,428 @@
     border-color: var(--mr-ice);
     color: var(--mr-ice-hi);
   }
+
+  /* Pointing at a file lights its frame at once (no transition). */
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-open:hover) {
+    border-color: var(--mr-ice);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-open:hover) .wa-portrait img {
+    filter: brightness(1.08) saturate(1.05);
+  }
+}
+
+@media (min-width: 560px) {
+  .site-shell.film-edition.mirage-edition .wa-contents ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-contents li:last-child {
+    grid-column: auto;
+  }
 }
 
 @media (min-width: 900px) {
-  .site-shell.film-edition.mirage-edition .wa-contents-inner {
-    grid-template-columns: minmax(200px, 0.34fr) minmax(0, 1fr);
-    align-items: center;
-    column-gap: 40px;
-  }
-
   .site-shell.film-edition.mirage-edition .wa-contents ol {
-    grid-row: 1 / span 2;
-    grid-column: 2;
-    margin: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
-/* ---------------------------------------------------------------- 世界と組織 */
+/* ---------------------------------------------------------------- 04 人物一覧 */
+/* A portrait wall: faces first, the name plate below, the profile folded
+   into a disclosure. Tiles are lines with gold bottom brackets, not
+   documents. */
+.site-shell.film-edition.mirage-edition .wa-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-roster > li {
+  display: flex;
+  min-width: 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person {
+  --wa-kind: var(--mr-text-3);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  border-radius: 2px;
+  background: var(--wa-gold-brackets), var(--mr-deck);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person::before {
+  content: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person.is-riders {
+  --wa-kind: var(--mr-ice);
+}
+
+.site-shell.film-edition.mirage-edition .wa-person.is-managers {
+  --wa-kind: var(--mr-violet);
+}
+
+.site-shell.film-edition.mirage-edition .wa-person.is-characters {
+  --wa-kind: var(--mr-gold);
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid var(--mr-line);
+  background: #070d16;
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--pos);
+  transform: scale(var(--zoom, 1));
+  transform-origin: var(--origin, 50% 10%);
+}
+
+/* The rider art's projection grade, so white and red grounds sit under
+   六詠 rather than over it; a foot shade and a faint ice frame. */
+.site-shell.film-edition.mirage-edition .wa-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #aebfd4;
+  mix-blend-mode: multiply;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(0deg, rgb(10 18 32 / 70%), transparent 40%), rgb(6 12 22 / var(--veil, 12%));
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 24%);
+  pointer-events: none;
+}
+
+/* No file: the records' empty socket, hatch and crosshair. */
+.site-shell.film-edition.mirage-edition .wa-portrait.is-vacant {
+  background:
+    repeating-linear-gradient(135deg, rgb(122 232 255 / 7%) 0 1px, transparent 1px 12px), #070d16;
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait.is-vacant::before,
+.site-shell.film-edition.mirage-edition .wa-portrait.is-vacant::after {
+  inset: 50% auto auto 50%;
+  background: var(--mr-ice);
+  box-shadow: none;
+  mix-blend-mode: normal;
+  opacity: 0.7;
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait.is-vacant::before {
+  width: 24px;
+  height: 1px;
+  translate: -12px 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-portrait.is-vacant::after {
+  width: 1px;
+  height: 24px;
+  translate: 0 -12px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person .wa-index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  padding: 0 5px;
+  background: rgb(4 8 15 / 82%);
+  color: var(--mr-ice);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  -webkit-text-stroke: 0;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px 14px 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-role {
+  margin: 0;
+  color: var(--wa-kind);
+  font-family: var(--mr-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+.site-shell.film-edition.mirage-edition .wa-role::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  margin-right: 8px;
+  background: currentColor;
+  vertical-align: middle;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person h3 {
+  margin: 4px 0 0;
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.4;
+  word-break: keep-all;
+  text-shadow: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-quote.is-signature {
+  margin: 8px 0 10px;
+  padding-left: 12px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-quote.is-signature blockquote p {
+  color: var(--mr-ice-hi);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* PROFILE: a native disclosure, closed by default (find-in-page opens it). */
+.site-shell.film-edition.mirage-edition .wa-profile {
+  margin-top: auto;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary,
+.site-shell.film-edition.mirage-edition .wa-doc > summary {
+  position: relative;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--mr-line);
+  list-style: none;
+  cursor: pointer;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary {
+  color: var(--mr-ice);
+  font-family: var(--mr-hud);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary::-webkit-details-marker,
+.site-shell.film-edition.mirage-edition .wa-doc > summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary::after {
+  content: "+" / "";
+  color: var(--mr-gold);
+  font-family: var(--mr-mono);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after {
+  content: "\2212" / "";
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary:focus-visible,
+.site-shell.film-edition.mirage-edition .wa-doc > summary:focus-visible {
+  outline: 2px solid var(--mr-focus);
+  outline-offset: 3px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile-body {
+  padding: 2px 0 14px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile-body > :last-child {
+  margin-bottom: 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile-body > .wa-quote:first-child {
+  margin-top: 4px;
+}
+
+/* OPEN DOSSIER closes the file; the face opens it too (pointer only: the
+   link's box covers the portrait, the accessibility tree is unchanged). */
+.site-shell.film-edition.mirage-edition .wa-person .wa-open {
+  display: flex;
+  width: 100%;
+  margin-top: 0;
+  padding: 0 14px;
+  border: 0;
+  border-top: 1px solid var(--mr-line);
+  border-radius: 0;
+  font-family: var(--mr-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person .wa-open::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  aspect-ratio: 4 / 5;
+}
+
+/* An opened file takes the row below its own: the face on the left, the
+   text beside it. Dense packing lets the next tiles close the cell it left,
+   so the wall keeps no hole; a closed wall never moves. */
+.site-shell.film-edition.mirage-edition .wa-roster > li:has(.wa-profile[open]) {
+  grid-column: 1 / -1;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(120px, 34%) minmax(0, 1fr);
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-portrait {
+  grid-row: 1 / span 2;
+  grid-column: 1;
+  align-self: start;
+  border-right: 1px solid var(--mr-line);
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-person-body {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-profile {
+  margin-top: 4px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-open {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+  inset: 0 auto auto 0;
+  width: max(120px, 34%);
+}
+
+@media (min-width: 560px) {
+  .site-shell.film-edition.mirage-edition .wa-roster {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .site-shell.film-edition.mirage-edition .wa-roster {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote.is-signature blockquote p {
+    font-size: 15px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) {
+    grid-template-columns: minmax(200px, 26%) minmax(0, 1fr);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+    width: max(200px, 26%);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile-body {
+    max-inline-size: 40em;
+  }
+}
+
+@media (min-width: 1100px) {
+  .site-shell.film-edition.mirage-edition .wa-roster {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person-body {
+    padding: 14px 18px 0;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person .wa-open {
+    padding: 0 18px;
+  }
+}
+
+/* ---------------------------------------------------------------- 05 世界と組織 */
 .site-shell.film-edition.mirage-edition .wa-brief-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 20px;
+}
+
+/* 六詠: the six card faces as one still signal row. */
+.site-shell.film-edition.mirage-edition .wa-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-signals img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  object-position: 50% 18%;
+  border: 1px solid rgb(122 232 255 / 30%);
+}
+
+/* CODE: the agent's file photo. */
+.site-shell.film-edition.mirage-edition .wa-id-photo {
+  float: right;
+  display: block;
+  width: 88px;
+  height: 117px;
+  margin: 0 0 10px 16px;
+  overflow: hidden;
+  border: 1px solid rgb(122 232 255 / 36%);
+  background: #070d16;
+}
+
+.site-shell.film-edition.mirage-edition .wa-id-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 8%;
 }
 
 @media (min-width: 900px) {
@@ -314,25 +939,32 @@
     grid-column: 1 / -1;
   }
 
-  /* CODE: the brief and mission on the left, the agent's own words beside. */
+  /* CODE: the photo, the brief and mission, the agent's own words beside. */
   .site-shell.film-edition.mirage-edition .wa-brief.is-code {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 36px;
+    grid-template-columns: 88px minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
     align-content: start;
   }
 
   .site-shell.film-edition.mirage-edition .wa-brief.is-code > * {
-    grid-column: 1;
+    grid-column: 2;
   }
 
   .site-shell.film-edition.mirage-edition .wa-brief.is-code > :is(.wa-code, h3) {
     grid-column: 1 / -1;
   }
 
+  .site-shell.film-edition.mirage-edition .wa-brief.is-code > .wa-id-photo {
+    float: none;
+    grid-row: 3 / span 2;
+    grid-column: 1;
+    margin: 4px 0 0;
+  }
+
   .site-shell.film-edition.mirage-edition .wa-brief.is-code > .wa-quote {
     grid-row: 3 / span 2;
-    grid-column: 2;
+    grid-column: 3;
     align-self: start;
     margin-top: 0;
   }
@@ -381,10 +1013,33 @@
   overflow-wrap: anywhere;
 }
 
+/* REALMS: the two submitted documents fold shut under their offices. */
 .site-shell.film-edition.mirage-edition .wa-doc {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--mr-line-strong);
+  margin-top: 18px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-doc > summary {
+  padding: 8px 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-doc > summary > i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 1.5px solid var(--mr-ice);
+  border-bottom: 1.5px solid var(--mr-ice);
+  rotate: 45deg;
+  translate: 0 -2px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i {
+  rotate: -135deg;
+  translate: 0 2px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-doc[open] > summary {
+  margin-bottom: 10px;
 }
 
 @media (min-width: 900px) {
@@ -400,8 +1055,10 @@
   }
 }
 
-.site-shell.film-edition.mirage-edition .wa-doc h4 {
-  margin: 0 0 10px;
+.site-shell.film-edition.mirage-edition .wa-doc-office {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--mr-gold);
   font-size: 13px;
   font-weight: 700;
@@ -443,7 +1100,7 @@
 
 /* 舞台 */
 .site-shell.film-edition.mirage-edition .wa-locations {
-  margin-top: clamp(36px, 5vw, 56px);
+  margin-top: clamp(28px, 4vw, 44px);
 }
 
 .site-shell.film-edition.mirage-edition .wa-locations h3 {
@@ -483,7 +1140,8 @@
   letter-spacing: 0.04em;
 }
 
-.site-shell.film-edition.mirage-edition .wa-locations p {
+/* Scoped to the list, so the LOCATIONS kicker keeps the HUD code style. */
+.site-shell.film-edition.mirage-edition .wa-locations li p {
   margin: 0;
   color: var(--mr-text-2);
   font-size: 15px;
@@ -501,79 +1159,9 @@
   }
 }
 
-/* ---------------------------------------------------------------- 人物一覧 */
-.site-shell.film-edition.mirage-edition .wa-roster {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.site-shell.film-edition.mirage-edition .wa-roster > li {
-  display: flex;
-}
-
-.site-shell.film-edition.mirage-edition .wa-person {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.site-shell.film-edition.mirage-edition .wa-person .wa-index {
-  position: absolute;
-  top: 18px;
-  right: 20px;
-  opacity: 0.8;
-}
-
-.site-shell.film-edition.mirage-edition .wa-role {
-  margin: 0;
-  padding-right: 48px;
-  color: var(--mr-ice);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  line-height: 1.6;
-}
-
-.site-shell.film-edition.mirage-edition .wa-person h3 {
-  padding-right: 40px;
-}
-
-/* The dossier link rests at the foot of its plate, clear of the last line. */
-.site-shell.film-edition.mirage-edition .wa-person .wa-open {
-  align-self: flex-start;
-  margin-top: auto;
-  font-family: var(--mr-hud);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.16em;
-}
-
-.site-shell.film-edition.mirage-edition .wa-person > :nth-last-child(2):not(.wa-index) {
-  margin-bottom: 20px;
-}
-
-.site-shell.film-edition.mirage-edition .wa-person > :last-child:not(.wa-open) {
-  margin-bottom: 0;
-}
-
-@media (min-width: 700px) {
-  .site-shell.film-edition.mirage-edition .wa-roster {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1100px) {
-  .site-shell.film-edition.mirage-edition .wa-roster {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* ---------------------------------------------------------------- エピソードの言葉 */
+/* ---------------------------------------------------------------- 06.1 エピソードの言葉 */
+/* Each episode opens on the records' own key art (the same files and
+   crops), its head a chip on the banner's lower-left corner. */
 .site-shell.film-edition.mirage-edition .wa-episodes {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -583,18 +1171,67 @@
   list-style: none;
 }
 
-@media (min-width: 1100px) {
-  .site-shell.film-edition.mirage-edition .wa-episodes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.site-shell.film-edition.mirage-edition .wa-episode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+}
+
+/* The art covers the plate top, so these brackets ride above it. */
+.site-shell.film-edition.mirage-edition .wa-episode::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  background: var(--wa-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-episode::before {
+  z-index: 1;
+}
+
+.site-shell.film-edition.mirage-edition .wa-episode-art {
+  position: relative;
+  display: block;
+  grid-area: 1 / 1;
+  aspect-ratio: 16 / 7;
+  margin: calc(var(--wa-plate-pad) * -1) calc(var(--wa-plate-pad) * -1) 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--mr-line);
+  border-radius: 3px 3px 0 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-episode-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--pos);
+}
+
+.site-shell.film-edition.mirage-edition .wa-episode-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, var(--mr-deck), transparent 55%);
+  pointer-events: none;
 }
 
 .site-shell.film-edition.mirage-edition .wa-episode-head {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 6px;
-  margin: 0 0 6px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--mr-line);
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: start;
+  gap: 2px;
+  max-width: calc(100% - 8px);
+  margin: 0 0 12px;
+  padding: 8px 12px 9px;
+  border-left: 2px solid var(--mr-ice);
+  background: rgb(4 8 15 / 82%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-episode-head span {
@@ -611,7 +1248,7 @@
 .site-shell.film-edition.mirage-edition .wa-episode-head strong {
   color: var(--mr-text);
   font-family: var(--mr-mono);
-  font-size: clamp(22px, 2.4vw, 28px);
+  font-size: clamp(18px, 1.8vw, 22px);
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.2;
@@ -634,7 +1271,19 @@
   letter-spacing: 0.16em;
 }
 
-/* ---------------------------------------------------------------- 用語集 */
+@media (min-width: 560px) and (max-width: 1099px) {
+  .site-shell.film-edition.mirage-edition .wa-episode-art {
+    aspect-ratio: 3 / 1;
+  }
+}
+
+@media (min-width: 1100px) {
+  .site-shell.film-edition.mirage-edition .wa-episodes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---------------------------------------------------------------- 06.2 用語集 */
 .site-shell.film-edition.mirage-edition .wa-glossary {
   margin: 0;
   border-top: 1px solid var(--mr-line);
@@ -679,47 +1328,245 @@
   margin-top: 0;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 700px) and (max-width: 1099px) {
   .site-shell.film-edition.mirage-edition .wa-glossary > div {
-    grid-template-columns: minmax(200px, 0.3fr) minmax(0, 1fr);
+    grid-template-columns: minmax(160px, 0.28fr) minmax(0, 1fr);
     gap: 32px;
   }
 }
 
-/* ---------------------------------------------------------------- 名台詞 */
+/* Wide: two columns of term-over-definition, lines about 40em. */
+@media (min-width: 1100px) {
+  .site-shell.film-edition.mirage-edition .wa-glossary {
+    display: block;
+    columns: 2;
+    column-gap: 56px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary > div {
+    break-inside: avoid;
+    padding: 18px 0;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary dd {
+    max-inline-size: 40em;
+  }
+}
+
+/* ---------------------------------------------------------------- 06.3 名台詞 */
+/* A transmission log: an outlined index, the line, the speaker. No plates.
+   Below 700px the log is a sideways snap rail (the region scrolls; a
+   vertical swipe on it still scrolls the page). */
+.site-shell.film-edition.mirage-edition .wa-quotes {
+  padding-bottom: clamp(96px, 10vw, 136px);
+  background: linear-gradient(180deg, transparent calc(100% - 240px), var(--mr-ink));
+}
+
 .site-shell.film-edition.mirage-edition .wa-quote-band {
+  counter-reset: wa-q;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.site-shell.film-edition.mirage-edition .wa-quote-band > li {
+  counter-increment: wa-q;
+  min-width: 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-quote-band > li::before {
+  content: counter(wa-q, decimal-leading-zero) / "";
+  color: transparent;
+  font-family: var(--mr-mono);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  -webkit-text-stroke: 1px var(--mr-ice);
+}
+
 .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote {
   margin: 0;
+  padding: 0;
+}
+
+.site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote::before {
+  content: none;
 }
 
 .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote blockquote p {
-  font-size: clamp(17px, 1.6vw, 20px);
-  line-height: 1.75;
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
-@media (min-width: 900px) {
+.site-shell.film-edition.mirage-edition .wa-quote-rail:focus-visible {
+  outline: 2px solid var(--mr-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 699px) {
+  .site-shell.film-edition.mirage-edition .wa-quote-rail {
+    margin-inline: -20px;
+    padding: 0 20px 14px;
+    overflow-x: auto;
+    scroll-padding-inline: 20px;
+    scroll-snap-type: x mandatory;
+    scrollbar-color: var(--mr-ice) transparent;
+    scrollbar-width: thin;
+  }
+
   .site-shell.film-edition.mirage-edition .wa-quote-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: none;
+    grid-auto-columns: min(82%, 300px);
+    grid-auto-flow: column;
+    gap: 12px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band > li {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 16px 0 16px 14px;
+    border-left: 1px solid var(--mr-line);
+    scroll-snap-align: start;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote blockquote p {
+    font-size: 17px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote figcaption {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 700px) {
+  .site-shell.film-edition.mirage-edition .wa-quote-band {
+    border-top: 1px solid var(--mr-line);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band > li {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--mr-line);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+    column-gap: 32px;
+    align-items: baseline;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-band .wa-quote figcaption {
+    margin-top: 0;
   }
 }
 
 /* ---------------------------------------------------------------- phones */
+@media (max-width: 760px) {
+  .site-shell.film-edition.mirage-edition :is(.world-annex, .wa-contents) {
+    padding-inline: 20px;
+    scroll-margin-top: calc(
+      var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) - 1px - var(--wa-pad-top) +
+        20px
+    );
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-chapter {
+    align-items: flex-end;
+    gap: 12px 18px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-chapter > span {
+    font-size: 42px;
+  }
+}
+
+@media (max-width: 920px) and (max-height: 560px) and (orientation: landscape) {
+  .site-shell.film-edition.mirage-edition :is(.world-annex, .wa-contents) {
+    scroll-margin-top: calc(
+      var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) - 1px - var(--wa-pad-top) +
+        20px
+    );
+  }
+}
+
 @media (max-width: 560px) {
-  .site-shell.film-edition.mirage-edition .wa-heading {
-    grid-template-columns: minmax(0, 1fr);
+  .site-shell.film-edition.mirage-edition .wa-person-body {
+    padding: 10px 12px 0;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person .wa-open {
+    padding: 6px 12px;
+    letter-spacing: 0.08em;
   }
 
   .site-shell.film-edition.mirage-edition .wa-prose,
-  .site-shell.film-edition.mirage-edition .wa-locations p {
+  .site-shell.film-edition.mirage-edition .wa-locations li p {
     font-size: 14.5px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary > div {
+    gap: 4px;
+    padding: 14px 0;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary dt {
+    font-size: 17px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary .wa-quote {
+    margin-top: 10px;
+    padding-left: 12px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-glossary .wa-quote blockquote p {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+}
+
+/* Under 360px two faces a row crush the names: one file a row, the face
+   beside the plate (the opened layout, closed). */
+@media (max-width: 359px) {
+  .site-shell.film-edition.mirage-edition .wa-roster {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person,
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person > .wa-portrait {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    align-self: start;
+    border-right: 1px solid var(--mr-line);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person > .wa-person-body {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person > .wa-open {
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-person .wa-open::after,
+  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+    inset: 0 auto auto 0;
+    width: 104px;
   }
 }
 
@@ -727,6 +1574,17 @@
 html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-heading h2,
 html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-contents h2 {
   filter: none;
+}
+
+/* ---------------------------------------------------------------- contrast */
+@media (prefers-contrast: more) {
+  .site-shell.film-edition.mirage-edition :is(.wa-person .wa-index, .wa-episode-head) {
+    background: var(--mr-ink);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-portrait::after {
+    opacity: 0.35;
+  }
 }
 
 /* ---------------------------------------------------------------- forced colours */
@@ -739,20 +1597,57 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-c
     filter: none;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-index {
+  .site-shell.film-edition.mirage-edition .wa-quote-band > li::before,
+  .site-shell.film-edition.mirage-edition .wa-index,
+  .site-shell.film-edition.mirage-edition .wa-chapter > span {
     color: CanvasText;
     -webkit-text-stroke: 0;
   }
 
+  .site-shell.film-edition.mirage-edition .wa-chapter > span::after {
+    display: none;
+  }
+
   .site-shell.film-edition.mirage-edition .wa-plate,
-  .site-shell.film-edition.mirage-edition .wa-contents-inner,
-  .site-shell.film-edition.mirage-edition .wa-readout {
+  .site-shell.film-edition.mirage-edition .wa-readout,
+  .site-shell.film-edition.mirage-edition .wa-portrait,
+  .site-shell.film-edition.mirage-edition .wa-voice,
+  .site-shell.film-edition.mirage-edition .wa-episode-art,
+  .site-shell.film-edition.mirage-edition .wa-quote-band > li {
     border-color: CanvasText;
   }
 
+  .site-shell.film-edition.mirage-edition :is(.wa-portrait, .wa-voice, .wa-episode-art) {
+    border: 1px solid CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-portrait.is-vacant {
+    border-style: dashed;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-portrait::before,
+  .site-shell.film-edition.mirage-edition .wa-portrait::after,
+  .site-shell.film-edition.mirage-edition .wa-episode-art::after {
+    display: none;
+  }
+
   .site-shell.film-edition.mirage-edition .wa-quote::before,
-  .site-shell.film-edition.mirage-edition .wa-quote figcaption::before {
+  .site-shell.film-edition.mirage-edition .wa-quote figcaption::before,
+  .site-shell.film-edition.mirage-edition .wa-role::before {
     background: CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile > summary,
+  .site-shell.film-edition.mirage-edition .wa-doc > summary {
+    color: LinkText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-doc > summary > i {
+    border-color: LinkText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-rail:focus-visible {
+    outline-color: Highlight;
   }
 
   .site-shell.film-edition.mirage-edition .wa-contents a,

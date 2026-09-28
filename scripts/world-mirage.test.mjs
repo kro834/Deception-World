@@ -272,8 +272,13 @@ test("ornaments never take input, and pinned controls are left alone", async () 
   }
   assert.doesNotMatch(css, /touch-action:|overscroll-behavior:|scroll-snap|@layer/);
   assert.doesNotMatch(css, /backdrop-filter:(?!\s*none)/);
+  // One exception, forced colours only: the HOLD + SLIDE thumb's + is pinned
+  // to #fff !important and vanished on the Canvas thumb (2026-09-29).
+  const forcedThumb =
+    /@media \(forced-colors: active\) \{\s*\.site-shell\.film-edition\.mirage-edition \.ios-slide-open \.ios-slide-open-thumb svg \{\s*forced-color-adjust: auto;\s*\}\s*\}/;
+  assert.match(css, forcedThumb);
   assert.doesNotMatch(
-    css,
+    css.replace(forcedThumb, ""),
     /ios-slide-open|liquid-selection-lens|liquid-rail-surface|rider-tabs|episode-pickup-plus/,
   );
   for (const match of css.matchAll(/([^;{}]+)!important/g)) {

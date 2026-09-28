@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import {
   WORLD_BRIEF,
@@ -39,9 +39,12 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
     createHash("sha256").update(stripped).digest("hex"),
     "50bdfab3cbf6fe8e8e9c1d3aed6ba1ecc2a100346c647993f796f1ed10becc98",
   );
-  // Each group follows the chapter it extends. Nothing sits between the
-  // column rail and the riders heading (verify-world-reveal presses the rail
-  // beside that part-lit heading on a 412px phone).
+  // The WorldAnnexRiders hook stays where it was (this file is pinned), but
+  // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
+  // annex follows RECORDS as chapters 04-06. Nothing sits between the column
+  // rail and the riders heading (verify-world-reveal presses the rail beside
+  // that part-lit heading on a 412px phone).
+  assert.match(annex, /export function WorldAnnexRiders\(\)\s*\{\s*return null;/);
   assert.match(home, /<\/section>\s*<\/section>\s*<section className="riders-section"/);
   assert.match(home, /<\/section>\s*<WorldAnnexRiders \/>\s*<section className="records-section"/);
   assert.match(
@@ -88,7 +91,8 @@ test("the annex data is complete", () => {
 });
 
 test("each annex is its own section, listed in the contents", () => {
-  const ids = ["world-brief", "cast-roster", "episode-notes", "glossary", "quotes"];
+  // The annex now follows 03 RECORDS in chapter order 04-06.
+  const ids = ["cast-roster", "world-brief", "episode-notes", "glossary", "quotes"];
   for (const id of ids) {
     assert.match(annex, new RegExp(`<section\\s+id="${id}"\\s+className="world-annex[ "]`), id);
     assert.match(annex, new RegExp(`aria-labelledby="${id}-title"`), id);
@@ -149,4 +153,40 @@ test("the annex sheet keeps the page rules", () => {
       );
     }
   }
+});
+
+test("the annex presentation: chapter openers, portraits, disclosures, the quote rail", () => {
+  // Chapter openers are a still clone, never the choreographed class.
+  assert.doesNotMatch(annex, /className="section-index"/);
+  // Every image is decorative and lazy.
+  const imgs = [...annex.matchAll(/<img\b[\s\S]*?\/>/g)].map((match) => match[0]);
+  assert.ok(imgs.length >= 4, String(imgs.length));
+  for (const img of imgs) {
+    assert.match(img, /alt=""/, img);
+    assert.match(img, /loading="lazy"/, img);
+  }
+  // Portrait and episode art: existing site files only.
+  const paths = [...annex.matchAll(/"(\/[\w-]+\.(?:jpe?g|webp|png))"/g)].map((match) => match[1]);
+  assert.ok(paths.length >= 13, String(paths.length));
+  for (const path of paths) {
+    assert.ok(existsSync(new URL(`../public${path}`, import.meta.url)), path);
+  }
+  for (const key of ["rex-loi", "reemu", "shuza"]) {
+    assert.ok(existsSync(new URL(`../public/manager-${key}-thumb.jpeg`, import.meta.url)), key);
+  }
+  assert.match(
+    annex,
+    /<div className="wa-quote-rail" role="region" tabIndex=\{0\} aria-labelledby="quotes-title">/,
+  );
+  assert.match(css, /scroll-margin-top: calc\(\s*var\(--film-topbar-height/);
+  assert.match(css, /summary:focus-visible \{\s*outline: 2px solid var\(--mr-focus\);/);
+  // REALMS documents keep the office as their accessible name (it was the
+  // old section's aria-label), and no heading sits inside a summary.
+  assert.match(
+    annex,
+    /<details key=\{doc\.office\} className="wa-doc" aria-label=\{doc\.office\}>/,
+  );
+  assert.doesNotMatch(annex, /<summary>\s*<h\d/);
+  // An opened profile takes the next row; dense packing closes the cell it left.
+  assert.match(css, /\.wa-roster \{[^}]*grid-auto-flow: row dense;/);
 });

@@ -125,8 +125,8 @@ test("the Tron floor, the curtains and the bracket overlays leave the Android la
       assert.equal(declaration(rule.body, "background-blend-mode"), "normal", panel);
     }
   }
-  // The record bay's overlay is a 2 x 68px box (styles-world/06.css), so its
-  // brackets read as one ice-and-gold stroke; the background keeps it.
+  // The record bay's overlay spans the bay again (Mirage undoes 06.css's
+  // 2 x 68px box, 2026-09-29), so its background paints the four corners.
   const bay = rules.filter(
     ({ selector }) =>
       selector === `${ANDROID_FULL} .site-shell.film-edition.mirage-edition .episode-archive`,
@@ -135,7 +135,7 @@ test("the Tron floor, the curtains and the bracket overlays leave the Android la
   for (const { body } of bay) {
     assert.match(
       declaration(body, "background"),
-      /^linear-gradient\(var\(--mr-ice\) 0 0\) 0 0 \/ 2px 26px, linear-gradient\(var\(--mr-gold\) 0 0\) 0 42px \/ 2px 26px,/,
+      /^var\(--mr-brackets\),/,
     );
     assert.equal(declaration(body, "background-repeat"), "no-repeat");
     assert.equal(declaration(body, "background-blend-mode"), "normal");
