@@ -191,8 +191,17 @@ test("the reveal finishes at 26svh: headings and copy are whole with their top a
 test("rail locks clip <body> on /world so the reveal holds still under them", async () => {
   const css = await readCss();
   const { rules } = parse(css);
-  const clip = rules.filter(({ body }) => /overflow/.test(body));
+  // Overflow clipping only: the wrap rule below is overflow-wrap.
+  const clip = rules.filter(({ body }) => /overflow(?!-wrap)/.test(body));
   assert.equal(clip.length, 2);
+  // Typed blocks never run past their box (Safari's pretty wrapping of the
+  // split spans did on iPhones): greedy wrapping where auto-phrase is missing,
+  // and a last-resort break everywhere.
+  assert.match(css, /\.site-shell \[data-text-reveal\] \{\s*overflow-wrap: anywhere;/);
+  assert.match(
+    css,
+    /@supports not \(word-break: auto-phrase\) \{\s*\.site-shell \[data-text-reveal\] \{\s*text-wrap-style: auto;/,
+  );
   const lockClip = clip.find(({ selector }) => selector.includes("[data-rail-lock]"));
   assert.equal(
     lockClip.selector,

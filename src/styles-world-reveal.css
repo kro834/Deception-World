@@ -70,6 +70,23 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow: clip;
 }
 
+/* Wrapping. Each character is its own inline span. Safari has the site's
+   `text-wrap-style: pretty` (styles-future-interface.css) but not the
+   `word-break: auto-phrase` it is paired with, and its pretty wrapping
+   mis-measured the split lines: on iPhones the story copy ran past its
+   card. Where auto-phrase is missing, the typed blocks wrap greedily; and in
+   every engine a line that still cannot fit breaks where it must instead of
+   overflowing. */
+.site-shell [data-text-reveal] {
+  overflow-wrap: anywhere;
+}
+
+@supports not (word-break: auto-phrase) {
+  .site-shell [data-text-reveal] {
+    text-wrap-style: auto;
+  }
+}
+
 @supports (animation-timeline: view()) and (animation-range: cover 0% cover 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
