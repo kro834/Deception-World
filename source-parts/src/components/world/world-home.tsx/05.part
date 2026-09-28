@@ -1,5 +1,3 @@
-                <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
                   {locked ? "固定中" : "自動切替"}
                 </b>
               </button>
@@ -474,3 +472,6 @@
           </div>
         </section>
       </section>
+
+      <section className="riders-section" id="riders" data-performance-region>
+        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />

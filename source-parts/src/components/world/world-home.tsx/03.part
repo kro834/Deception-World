@@ -1,4 +1,3 @@
-  }, [locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-unmanaged") return;
@@ -474,3 +473,5 @@
     const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
     for (let index = posterSequence.length - 1; index > 0; index -= 1) {
       const swapIndex = randomBelow(index + 1);
+      [posterSequence[index], posterSequence[swapIndex]] = [
+        posterSequence[swapIndex],

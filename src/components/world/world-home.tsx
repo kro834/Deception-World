@@ -20,6 +20,7 @@ import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
 import { RisingWorld } from "./rising-world";
+import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 
 const POSTERS = [
@@ -2464,6 +2465,8 @@ export function WorldHome() {
         </div>
       </section>
 
+      <WorldAnnexRiders />
+
       <section className="records-section" id="records" data-performance-region>
         <div className="section-index" data-film-reveal>
           <span>03</span>
@@ -2608,6 +2611,8 @@ export function WorldHome() {
           </div>
         </section>
       </section>
+
+      <WorldAnnexRecords />
 
       <section className="finale-section" data-performance-region>
         <div className="finale-sticky">

@@ -474,3 +474,4 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-other") return;
     setManagerTab(2);
     syncRail(managerRail.current, 2);
+  }, [locationHash]);

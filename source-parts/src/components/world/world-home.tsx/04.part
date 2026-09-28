@@ -1,5 +1,3 @@
-      [posterSequence[index], posterSequence[swapIndex]] = [
-        posterSequence[swapIndex],
         posterSequence[index],
       ];
     }
@@ -474,3 +472,5 @@
                     </svg>
                   )}
                 </span>
+                <b>
+                  <small>{locked ? "LOCKED" : "AUTO"}</small>

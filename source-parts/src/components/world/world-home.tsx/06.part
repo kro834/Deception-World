@@ -1,6 +1,3 @@
-
-      <section className="riders-section" id="riders" data-performance-region>
-        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>
@@ -84,6 +81,8 @@
           </div>
         </div>
       </section>
+
+      <WorldAnnexRiders />
 
       <section className="records-section" id="records" data-performance-region>
         <div className="section-index" data-film-reveal>
@@ -229,6 +228,8 @@
           </div>
         </section>
       </section>
+
+      <WorldAnnexRecords />
 
       <section className="finale-section" data-performance-region>
         <div className="finale-sticky">

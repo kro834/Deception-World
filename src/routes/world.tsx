@@ -11,6 +11,7 @@ import worldRevealCssUrl from "@/styles-world-reveal.css?url";
 import worldMirageCssUrl from "@/styles-world-mirage.css?url";
 import worldRisingCssUrl from "@/styles-world-rising.css?url";
 import worldReDiveCssUrl from "@/styles-world-re-dive.css?url";
+import worldAnnexCssUrl from "@/styles-world-annex.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldRevealCssUrl },
         { rel: "stylesheet", href: worldRisingCssUrl },
         { rel: "stylesheet", href: worldReDiveCssUrl },
+        { rel: "stylesheet", href: worldAnnexCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],
