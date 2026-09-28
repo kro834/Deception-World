@@ -721,3 +721,494 @@ export const DREAM_DOLMINENCE: readonly DreamDolminence[] = [
     ],
   },
 ] as const;
+
+// ---------------------------------------------------------------------------
+// Expansion from the owner's story source (the Dream Chapter role-play log).
+// Every string below is the source's own wording: lines are verbatim and
+// profiles join sentences of the narration. Source line references for each
+// string are kept outside the repo (scratchpad dream-src/provenance.json).
+
+export type DreamCastEntry = {
+  id: string;
+  name: string;
+  affiliation: string;
+  profile: readonly string[];
+  line: string;
+};
+export const DREAM_CAST_ROSTER: readonly DreamCastEntry[] = [
+  {
+    id: "reimu",
+    name: "博麗霊夢",
+    affiliation: "博麗神社",
+    profile: [
+      "幻想郷の均衡を保つ者。妖怪も人間も、“異変”という言葉を聞けば真っ先にその名を思い浮かべる存在。",
+    ],
+    line: "今日は博麗神社に来なさい。布団くらいは貸してあげる",
+  },
+  {
+    id: "yukari",
+    name: "八雲紫",
+    affiliation: "幻想郷",
+    profile: [
+      "境界を操る幻想郷の管理人である妖怪。",
+      "金色の髪。柔らかな微笑み。しかし底知れない何かを感じさせる瞳。",
+    ],
+    line: "その決着、博麗神社で付けなさい",
+  },
+  {
+    id: "sanae",
+    name: "東風谷早苗",
+    affiliation: "守矢神社",
+    profile: ["長い緑髪。白と青を基調とした巫女服。", "風祝―――東風谷早苗。"],
+    line: "……本当に、来たんですね",
+  },
+  {
+    id: "marisa",
+    name: "霧雨魔理沙",
+    affiliation: "魔法の森",
+    profile: ["境内へ箒に乗った金髪の魔法使いが勢いよく飛び込んでくる。"],
+    line: "お前がその“仮面ライダー”なんだろ？",
+  },
+  {
+    id: "youmu",
+    name: "魂魄妖夢",
+    affiliation: "白玉楼",
+    profile: ["緑の衣装に二本の刀を身にまとった半人半霊の庭師"],
+    line: "――白玉楼の庭師を、あまり侮らないでもらいたいですね",
+  },
+  {
+    id: "remilia",
+    name: "レミリア・スカーレット",
+    affiliation: "紅魔館",
+    profile: [
+      "装飾の施された帽子に、血のように紅い瞳。背中には悪魔の翼を誇らしげに広げている。",
+      "別世界において、かつて慶弥が忠誠を誓い、その背中を追い求め、共に戦いの日々を駆け抜けた主の面影。",
+    ],
+    line: "私の前で、私のものを傷つけることは……運命が許しても、この私が許さないわ",
+  },
+  {
+    id: "yugi",
+    name: "星熊勇儀",
+    affiliation: "旧地獄",
+    profile: [
+      "赤い角。岩盤みたいに分厚い肩。",
+      "旧地獄を統べる鬼の中でも、特に“怪力”と“喧嘩”で知られる大妖。",
+    ],
+    line: "新聞の仮面ライダーってのァ、お前か",
+  },
+  {
+    id: "aya",
+    name: "射命丸文",
+    affiliation: "烏天狗",
+    profile: [
+      "風を裂きながら飛ぶ彼女の手には、大量の新聞束。",
+      "幻想郷中へ向けて、文字通り“ばら撒かれて”いく。",
+    ],
+    line: "号外ですよォーーーッ！！　号外！！！",
+  },
+  {
+    id: "yuka",
+    name: "暁夕夏",
+    affiliation: "暁慶弥の妹",
+    profile: [
+      "ややウェーブのかかった白髪の中に薄緑のメッシュがかかった、やや大柄な少女",
+      "万物の再生を司る程度の能力",
+    ],
+    line: "アタシの名前は暁夕夏！暁慶弥の妹の夕夏だよ！！",
+  },
+  {
+    id: "dynamite",
+    name: "Dyna・Mite",
+    affiliation: "人里の花火屋",
+    profile: [
+      "派手さはない。装飾もない。腰に刀も差していない。どこにでもいそうな花火屋の男。",
+      "この幻想郷で最強と呼ばれた花火屋",
+    ],
+    line: "Dyna・Mite。人里の花火屋だ",
+  },
+  {
+    id: "nagamori",
+    name: "永守荘司",
+    affiliation: "永守組",
+    profile: ["長身。黒い羽織に鋭い眼光。", "人里の反社会組織――永守組を束ねる男。"],
+    line: "困ってる奴ァ拾う",
+  },
+  {
+    id: "banzo",
+    name: "伴蔵",
+    affiliation: "永守組",
+    profile: ["若い組員・伴蔵が前へ出ると、手際よく廊下へと三人を誘導する。"],
+    line: "貧困層の人も保護してるんでこういう“転がり込み”は慣れてるんですよ",
+  },
+  {
+    id: "kugawara",
+    name: "狗瓦",
+    affiliation: "浪人",
+    profile: ["黒髪の細身。腰に一本、静かに存在感を放つ刀。", "霹靂を宿す程度の能力"],
+    line: "俺の名は狗瓦........ただの浪人だ",
+  },
+  {
+    id: "waldmann",
+    name: "ヴァルトマン",
+    affiliation: "ベルベットルーム",
+    profile: [
+      "初老。白髪は整えられ、皺の刻まれた顔には過剰な感情が無い。",
+      "グラスを一つ、静かに磨いている。",
+    ],
+    line: "まずは、一人で抱え込まないことです",
+  },
+  {
+    id: "bell",
+    name: "ベル",
+    affiliation: "ベルベットルーム",
+    profile: ["姿は見えない。ベルベットルームのどこを探しても、その男の輪郭は存在しない。"],
+    line: "罪悪感なんて感じんな",
+  },
+  {
+    id: "machiavel",
+    name: "マキャベル",
+    affiliation: "拒絶の悪夢",
+    profile: [
+      "ここは悪夢。シエルの超深層心理の世界。",
+      "幾つものシエルの顔を模った花が咲き誇り、血のような海が赤い月の光を映す不気味な世界。",
+    ],
+    line: "アナタは\nワタシの\n主人公でしょ？",
+  },
+] as const;
+
+export type DreamRecordRow = { label: string; text: string; note?: string; by?: string };
+export const DREAM_DOLMINENCE_RECORD: readonly DreamRecordRow[] = [
+  {
+    label: "拠点",
+    text: "夢の最深部に存在する、悪夢のアクアリウム",
+    note: "その中央会議室では、円卓を囲むエージェント達の影が、青い光の中へ長く伸びている。",
+  },
+  {
+    label: "構成",
+    text: "彼等は恐らく数十人構成のマフィアのような組織…凡ゆる世界を渡り歩く手段を持っている",
+    by: "シエル",
+  },
+  {
+    label: "行動",
+    text: "悪夢を喰らい。悪夢を増やし。世界を渡り続ける。",
+  },
+  {
+    label: "目的",
+    text: "俺たちの目的は、怪作という男一人の確保だけだ。",
+    by: "コードナンバー：ワン",
+  },
+] as const;
+
+export type DreamAgentEntry = {
+  code: string;
+  name?: string;
+  note?: string;
+  line?: string;
+  filed?: DreamDolminence["id"];
+};
+export const DREAM_AGENT_ROSTER: readonly DreamAgentEntry[] = [
+  {
+    code: "0",
+    name: "ムツキ",
+    note: "組織の頂点に君臨する",
+    line: "もうすぐだね",
+  },
+  {
+    code: "1",
+    filed: "lord-knight",
+  },
+  {
+    code: "2",
+    name: "クロク",
+    note: "ドルミネンスの最高幹部。白髪のドス黒い瞳を持つ男。",
+    line: "さぁ、見せてやれ。最悪の悪夢を",
+  },
+  {
+    code: "3",
+    name: "ウツロ",
+    note: "中性的な顔立ちの少年",
+    line: "どうでもいいけど.......",
+  },
+  {
+    code: "4",
+    name: "ヒトヨ",
+    line: "悪夢からは逃れられない……",
+  },
+  {
+    code: "5",
+    name: "セン",
+    note: "双子の青年達",
+    line: "1,000%騒がしいですね",
+  },
+  {
+    code: "6",
+    name: "セオ",
+    note: "双子の青年達",
+    line: "パーフェクトにうるさいです",
+  },
+  {
+    code: "8",
+    filed: "dread",
+  },
+  {
+    code: "9",
+    name: "コードナンバー：ナイン",
+    note: "黒髪の青年",
+    line: "……これも人々を幸せな夢の中に導くためだ",
+  },
+  {
+    code: "17",
+    name: "ネル",
+    note: "処刑人代理。",
+    line: "湿っぽい空気ねぇここ♡",
+  },
+  {
+    code: "18",
+    name: "テツヤ",
+    note: "眼鏡を掛けた青年",
+    line: "ネルさんには少しは静かにしてほしいものです……",
+  },
+  {
+    code: "21",
+    name: "ソル",
+    note: "腰には――煤けたハイパーゼクター。",
+    line: "……随分減ったな",
+  },
+  {
+    code: "X",
+    name: "イネム",
+    note: "地雷系ファッションに身を包んだ少女みたいな外見。",
+    line: "幻想郷、美味しそうなんだもん",
+  },
+  {
+    code: "CHAOS",
+    filed: "lord-chaos",
+  },
+  {
+    code: "24",
+    filed: "lupin",
+  },
+] as const;
+
+export type DreamFaction = {
+  id: string;
+  name: string;
+  statements: readonly { text: string; by: string }[];
+  members?: readonly { name: string; note: string; spoken?: boolean }[];
+  pact?: { term: string; text: string };
+  creed?: readonly string[];
+  limit?: string;
+};
+export const DREAM_FACTIONS: readonly DreamFaction[] = [
+  {
+    id: "hoyoshi",
+    name: "縫妖師",
+    statements: [
+      {
+        text: "幻想郷の異変側でも特に危険視されている連中だ",
+        by: "八雲藍",
+      },
+      {
+        text: "連中は妖怪退治もしない、人助けもしない、ただ、自分達の目的のためだけに動く",
+        by: "アリス",
+      },
+      {
+        text: "境界も、生命も、魂も、運命も使えるなら何でも使う",
+        by: "八雲紫",
+      },
+    ],
+    members: [
+      {
+        name: "如月狡",
+        note: "赤いフードを深く被った少年――縫妖師のリーダー",
+      },
+      {
+        name: "廟堂刃",
+        note: "我の名は廟堂刃。幻想郷の支配を狙う『縫妖師』の一人が一角。",
+        spoken: true,
+      },
+    ],
+    pact: {
+      term: "厄災協定",
+      text: "幻想郷を本当の地獄へと叩き落とす、最悪の『厄災協定』が静かに結ばれた。",
+    },
+  },
+  {
+    id: "nagamori-gumi",
+    name: "永守組",
+    statements: [
+      {
+        text: "永守組は、人里を守るための組織だ",
+        by: "永守荘司",
+      },
+    ],
+    creed: [
+      "薬物が流れりゃ、その根本を潰す",
+      "武器密輸がありゃ叩く",
+      "人攫いが出りゃ取り返す",
+      "暴れる妖怪が居りゃ制裁する",
+    ],
+    limit: "守れるのは、この人里の範囲までだ",
+  },
+] as const;
+
+export type DreamGlossaryEntry = {
+  term: string;
+  body: readonly string[];
+  said?: string;
+  by?: string;
+};
+export const DREAM_GLOSSARY: readonly DreamGlossaryEntry[] = [
+  {
+    term: "ナイトメア",
+    body: ["紫色の神秘的な蝶。人々の体内に侵入し、悪夢を引き起こす存在。"],
+    said: "ナイトメアとは——人類が“心”を獲得した時から存在する影そのもの",
+    by: "ヴァルトマン",
+  },
+  {
+    term: "夢主",
+    said: "対象となる人間——“夢主”の精神世界へ侵入し、その深層心理へ接触する",
+    by: "ヴァルトマン",
+    body: [],
+  },
+  {
+    term: "心の扉",
+    body: ["裸婦像と融合したような白い。不気味な扉。"],
+    said: "夢主の深層心理には、複数の“心の扉”が存在しています",
+    by: "ヴァルトマン",
+  },
+  {
+    term: "ゴアナイトメア",
+    said: "それはナイトメアの中でも、より深層——“精神最奥”へ存在する上位存在",
+    by: "ヴァルトマン",
+    body: [],
+  },
+  {
+    term: "超深層",
+    said: "シエル様は今、自身の深層よりさらに下……“超深層”へ沈んでいます",
+    by: "ヴァルトマン",
+    body: [],
+  },
+  {
+    term: "ベルベットルーム",
+    body: ["そしてその蒼の只中を、無数の鎖が垂れていた。"],
+    said: "夢と現実の狭間。精神と物質の中間に位置する場所",
+    by: "ヴァルトマン",
+  },
+  {
+    term: "破滅の魔の手",
+    said: "破滅の魔の手——それはこの時空の理から外れた存在による世界の侵蝕です",
+    by: "ヴァルトマン",
+    body: [],
+  },
+  {
+    term: "ネクストピース",
+    body: [
+      "黄金に輝く鉱石。それは都市崩壊の原因であり、同時に再生の鍵とも言われている未知の結晶体。",
+    ],
+  },
+  {
+    term: "カオスカプセム",
+    body: ["“悪夢の怪物『ナイトメア』そのものを封じた禁断のカプセム”。"],
+  },
+  {
+    term: "オーロラカーテン",
+    body: ["空間を裂くのではない。重ねる。この世界に、別の位相を“重ねてくる”侵入方法。"],
+  },
+  {
+    term: "仮面ライダー",
+    body: [
+      "故に、新聞に書かれている名称は全て一括りだった。───“仮面ライダー”。そのたった一つの単語が、幻想郷全土へ一気に拡散されていく。",
+    ],
+  },
+  {
+    term: "幻想郷",
+    said: "……幻想郷の名の通り、忘れ去られた幻想の故郷って感じかな",
+    by: "怪作",
+    body: [],
+  },
+  {
+    term: "博麗大結界",
+    said: "博麗大結界。幻想郷最大の境界",
+    by: "八雲紫",
+    body: [],
+  },
+] as const;
+
+export const DREAM_QUOTES: readonly { text: string; by: string }[] = [
+  {
+    text: "夢だろうが何だろうが、痛かったものは痛かった。怖かったものは怖かった。お前が守ろうとしたものも、見捨てたくなかったものも、その時お前の中では本物だった",
+    by: "シエル",
+  },
+  {
+    text: "夢なのに護るんじゃない。夢だからこそ護るんだ。夢ですら大切なものを護れないやつが現実で何を護るんだ？",
+    by: "東風谷 慶弥",
+  },
+  {
+    text: "その時、守りたいと思ったなら——それはもう“本物”です",
+    by: "怪作",
+  },
+  {
+    text: "人は一人では届かない場所へ辿り着く為に、他者と繋がるのです",
+    by: "ヴァルトマン",
+  },
+  {
+    text: "あんたにやってもらうことは一つだけ。……この異変を、私と一緒に完璧に解決することよ",
+    by: "博麗霊夢",
+  },
+  {
+    text: "必ず生きて帰ってきなさい",
+    by: "八雲紫",
+  },
+  {
+    text: "ガキ守るのに理由が要るか？",
+    by: "永守荘司",
+  },
+  {
+    text: "守りたいものがある奴を、俺は嫌いになれません",
+    by: "狗瓦",
+  },
+  {
+    text: "ワタシの名はロストナイトメア、アナタの悪夢を叶える存在",
+    by: "ロストナイトメア",
+  },
+] as const;
+
+export type DreamCaseNote = { no: string; motto?: string; line: string; by: string };
+export const DREAM_CASE_NOTES: readonly DreamCaseNote[] = [
+  {
+    no: "0",
+    line: "胡蝶の夢から目醒める時間だ",
+    by: "シエル",
+  },
+  {
+    no: "1",
+    line: "忘れられたものが流れ着く場所だよ",
+    by: "怪作",
+    motto: "Safeguard the Nightmare.",
+  },
+  {
+    no: "2",
+    line: "私は幻想郷の均衡を守る",
+    by: "博麗霊夢",
+    motto: "Protect Gensokyo.",
+  },
+  {
+    no: "3",
+    line: "涙で滲んだ桜より、こういうド派手な花火の方が、アンタの笑顔にはお似合いだ",
+    by: "Dyna・Mite",
+    motto: "Protect Gensokyo.",
+  },
+  {
+    no: "4",
+    line: "しかし、このまま歩み続ければ、その先に待つのは紛れもない『破滅』です。",
+    by: "ヴァルトマン",
+    motto: "Confront The Nightmare.",
+  },
+  {
+    no: "5",
+    line: "怪作は、俺が連れて帰る",
+    by: "シエル",
+    motto: "Take back the SAKU.",
+  },
+] as const;

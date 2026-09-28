@@ -11,10 +11,17 @@ import { withWordBreaks } from "@/lib/name-breaks";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
+  DREAM_AGENT_ROSTER,
+  DREAM_CASE_NOTES,
   DREAM_CASES,
+  DREAM_CAST_ROSTER,
   DREAM_CHARACTERS,
   DREAM_DOLMINENCE,
+  DREAM_DOLMINENCE_RECORD,
+  DREAM_FACTIONS,
+  DREAM_GLOSSARY,
   DREAM_POSTERS,
+  DREAM_QUOTES,
   DREAM_STORY_CROSSINGS,
   type DreamCharacter,
   type DreamDolminence,
@@ -28,6 +35,59 @@ const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string; act: st
   { id: "dolminence", label: "ドルミネンス", act: "第三幕" },
   { id: "cases", label: "物語", act: "第四幕" },
 ];
+
+// The programme's contents: the four acts keep the act index above; each act
+// gains its annex, and the appendix closes the page.
+const DREAM_CONTENTS: readonly {
+  act: string;
+  links: readonly { href: string; label: string }[];
+}[] = [
+  { act: "第一幕", links: [{ href: "#posters", label: "絵看板" }] },
+  {
+    act: "第二幕",
+    links: [
+      { href: "#characters", label: "登場人物" },
+      { href: "#cast-roster", label: "人物一覧" },
+    ],
+  },
+  {
+    act: "第三幕",
+    links: [
+      { href: "#dolminence", label: "ドルミネンス" },
+      { href: "#factions", label: "組織と勢力" },
+    ],
+  },
+  {
+    act: "第四幕",
+    links: [
+      { href: "#cases", label: "物語" },
+      { href: "#case-notes", label: "章の言葉" },
+    ],
+  },
+  {
+    act: "附録",
+    links: [
+      { href: "#glossary", label: "用語集" },
+      { href: "#quotes", label: "名台詞" },
+    ],
+  },
+];
+
+/** "0" → "00"; letters stay as they are. */
+function agentCode(code: string) {
+  return /^\d+$/.test(code) ? code.padStart(2, "0") : code;
+}
+
+function QuoteFigure({ text, by }: { text: string; by?: string }) {
+  return (
+    <figure className="dream-annex-quote">
+      <blockquote>
+        <p>「{text}」</p>
+      </blockquote>
+      {by ? <figcaption>{by}</figcaption> : null}
+    </figure>
+  );
+}
 
 const KANJI_DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"] as const;
 
@@ -853,6 +913,22 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <nav className="dream-contents" aria-labelledby="dream-contents-title" data-dream-reveal>
+        <h2 id="dream-contents-title">目次</h2>
+        <ol>
+          {DREAM_CONTENTS.map(({ act, links }) => (
+            <li key={act}>
+              <small>{act}</small>
+              {links.map(({ href, label }) => (
+                <a key={href} href={href}>
+                  {label}
+                </a>
+              ))}
+            </li>
+          ))}
+        </ol>
+      </nav>
+
       <section
         id="posters"
         ref={posterSectionRef}
@@ -1087,6 +1163,33 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <section id="cast-roster" className="dream-annex" aria-labelledby="cast-roster-title">
+        <header className="dream-annex-heading">
+          <p>CHARACTERS</p>
+          <h2 id="cast-roster-title">人物一覧</h2>
+          <span>{String(DREAM_CAST_ROSTER.length).padStart(2, "0")} PERSONS</span>
+        </header>
+        <ol className="dream-roster" data-dream-reveal>
+          {DREAM_CAST_ROSTER.map((entry, index) => (
+            <li key={entry.id}>
+              <article aria-labelledby={`dream-roster-${entry.id}`}>
+                <span className="dream-roster-seal" aria-hidden="true">
+                  {toKanjiNumber(index + 1)}
+                </span>
+                <p className="dream-roster-affiliation">{entry.affiliation}</p>
+                <h3 id={`dream-roster-${entry.id}`}>{entry.name}</h3>
+                {entry.profile.map((paragraph) => (
+                  <p key={paragraph} className="dream-roster-profile">
+                    {paragraph}
+                  </p>
+                ))}
+                <QuoteFigure text={entry.line} />
+              </article>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       <section
         id="dolminence"
         className="dream-section dream-dolminence-section"
@@ -1141,6 +1244,115 @@ export function DreamChapter() {
                 </span>
               </button>
             </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="factions" className="dream-annex" aria-labelledby="factions-title">
+        <header className="dream-annex-heading">
+          <p>ORGANIZATION</p>
+          <h2 id="factions-title">組織と勢力</h2>
+          <span>{String(DREAM_FACTIONS.length + 1).padStart(2, "0")} FACTIONS</span>
+        </header>
+        <div className="dream-factions">
+          <section
+            className="dream-faction is-dolminence"
+            aria-labelledby="dream-faction-dolminence"
+          >
+            <h3 id="dream-faction-dolminence">
+              <small>機密概要</small>
+              ドルミネンス
+            </h3>
+            <dl className="dream-record-sheet">
+              {DREAM_DOLMINENCE_RECORD.map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>
+                    {row.by ? <QuoteFigure text={row.text} by={row.by} /> : <p>{row.text}</p>}
+                    {row.note ? <p className="dream-record-note">{row.note}</p> : null}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <h4 className="dream-agent-title">エージェント名簿</h4>
+            <ol className="dream-agent-roster">
+              {DREAM_AGENT_ROSTER.map((agent) => {
+                const filed = agent.filed
+                  ? DREAM_DOLMINENCE.find((record) => record.id === agent.filed)
+                  : undefined;
+                return (
+                  <li key={agent.code} className={filed ? "is-filed" : undefined}>
+                    <span className="dream-agent-code">
+                      <small>CODE</small>
+                      <b className={agent.code.length > 2 ? "is-long" : undefined}>
+                        {agentCode(agent.code)}
+                      </b>
+                    </span>
+                    <div className="dream-agent-copy">
+                      <h5>{filed ? filed.name : agent.name}</h5>
+                      {filed ? (
+                        <p className="dream-agent-note">{filed.agent}</p>
+                      ) : agent.note ? (
+                        <p className="dream-agent-note">{agent.note}</p>
+                      ) : null}
+                      {agent.line ? <p className="dream-agent-line">「{agent.line}」</p> : null}
+                      {filed ? (
+                        <button
+                          type="button"
+                          className="dream-agent-open"
+                          aria-label={`${filed.name} 機密記録を開く`}
+                          onClick={(event) => {
+                            dolminenceTriggerRef.current = event.currentTarget;
+                            setDolminenceOpenedByKeyboard(event.detail === 0);
+                            setCharacter(null);
+                            setDolminenceRecord(filed);
+                            if (event.detail !== 0) event.currentTarget.blur();
+                          }}
+                        >
+                          機密記録を開く
+                        </button>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+          {DREAM_FACTIONS.map((faction) => (
+            <section
+              key={faction.id}
+              className={`dream-faction is-${faction.id}`}
+              aria-labelledby={`dream-faction-${faction.id}`}
+            >
+              <h3 id={`dream-faction-${faction.id}`}>{faction.name}</h3>
+              {faction.statements.map((statement) => (
+                <QuoteFigure key={statement.text} text={statement.text} by={statement.by} />
+              ))}
+              {faction.creed?.length ? (
+                <ul className="dream-faction-creed">
+                  {faction.creed.map((rule) => (
+                    <li key={rule}>「{rule}」</li>
+                  ))}
+                </ul>
+              ) : null}
+              {faction.limit ? <p className="dream-faction-limit">「{faction.limit}」</p> : null}
+              {faction.members?.length ? (
+                <dl className="dream-faction-members">
+                  {faction.members.map((member) => (
+                    <div key={member.name}>
+                      <dt>{member.name}</dt>
+                      <dd>{member.spoken ? `「${member.note}」` : member.note}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              {faction.pact ? (
+                <p className="dream-faction-pact">
+                  <b>{faction.pact.term}</b>
+                  <span>{faction.pact.text}</span>
+                </p>
+              ) : null}
+            </section>
           ))}
         </div>
       </section>
@@ -1218,6 +1430,72 @@ export function DreamChapter() {
             ))}
           </ol>
         </div>
+      </section>
+
+      <section id="case-notes" className="dream-annex" aria-labelledby="case-notes-title">
+        <header className="dream-annex-heading">
+          <p>CASE NOTES</p>
+          <h2 id="case-notes-title">章の言葉</h2>
+          <span>CASE 0–5</span>
+        </header>
+        <ol className="dream-case-notes" data-dream-reveal>
+          {DREAM_CASE_NOTES.map((note) => {
+            const episode = DREAM_CASES.find((item) => item.no === note.no);
+            return (
+              <li key={note.no}>
+                <p className="dream-case-note-head">
+                  <span>
+                    CASE <b>{note.no}</b>
+                  </span>
+                  <strong>{episode?.title}</strong>
+                  <small>{episode?.reading}</small>
+                </p>
+                {note.motto ? (
+                  <p className="dream-case-note-motto" lang="en">
+                    {note.motto}
+                  </p>
+                ) : null}
+                <QuoteFigure text={note.line} by={note.by} />
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <section id="glossary" className="dream-annex" aria-labelledby="glossary-title">
+        <header className="dream-annex-heading">
+          <p>KEYWORDS</p>
+          <h2 id="glossary-title">用語集</h2>
+          <span>{String(DREAM_GLOSSARY.length).padStart(2, "0")} TERMS</span>
+        </header>
+        <dl className="dream-glossary" data-dream-reveal>
+          {DREAM_GLOSSARY.map((entry) => (
+            <div key={entry.term}>
+              <dt>{entry.term}</dt>
+              <dd>
+                {entry.body.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+                {entry.said ? <QuoteFigure text={entry.said} by={entry.by} /> : null}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section id="quotes" className="dream-annex dream-quotes" aria-labelledby="quotes-title">
+        <header className="dream-annex-heading">
+          <p>QUOTES</p>
+          <h2 id="quotes-title">名台詞</h2>
+          <span>{String(DREAM_QUOTES.length).padStart(2, "0")} LINES</span>
+        </header>
+        <ol className="dream-quote-band" data-dream-reveal>
+          {DREAM_QUOTES.map((quote) => (
+            <li key={quote.text}>
+              <QuoteFigure text={quote.text} by={quote.by} />
+            </li>
+          ))}
+        </ol>
       </section>
 
       <footer className="dream-footer">
