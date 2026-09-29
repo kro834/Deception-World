@@ -38,8 +38,20 @@ const ENABLED_KEY = "deception-world:zeus-button-enabled";
 const POSITION_KEY = "deception-world:zeus-button-position";
 const DEFAULT_POSITION: ZeusButtonPosition = { x: 0.95, y: 0.82 };
 const LONG_PRESS_MS = 420;
+// A press still down at this point shows the hold filling in, so it reads as
+// a hold before the drag takes over at LONG_PRESS_MS.
+const HOLD_CUE_MS = 160;
+// A touch or pen release after this is an abandoned hold, not a tap: it
+// stays put. Close to LONG_PRESS_MS, so a slow tap still counts. A mouse has
+// no abandoned hold (it drags on the first move), so its click always counts.
+const TAP_MAX_MS = 380;
 const MOVE_TOLERANCE = 9;
 const RETURN_IMAGE_MIN_MS = 360;
+// Relocations glide; the timer cleans up after the 220ms transition, or at
+// once where reduced motion or economy leave no transition.
+const GLIDE_MS = 260;
+// A drop this close to a side edge docks on it.
+const EDGE_SNAP_PX = 48;
 const ZEUS_AVOID_SELECTOR = [
   ".ios-slide-open",
   ".episode-pickup-plus",
@@ -63,7 +75,41 @@ const ZEUS_AVOID_SELECTOR = [
   ".dossier-index-return",
   ".dossier-read-link",
   ".rxs-footer > a",
+  // Disclosure rows: the whole summary, so its drawn open cue counts too.
+  ".wa-profile > summary",
+  ".wa-doc > summary",
+  ".dream-story-case > summary",
+  ".wa-open",
+  ".wa-contents a",
+  ".dream-contents a",
+  // Full-width, but a sideways swipe that starts on the button cannot move it.
+  ".wa-quote-rail",
+  '.rider-tabs [role="tab"]',
+  '.rxs-stage-tabs [role="tab"]',
+  ".dream-poster-thumbnails button",
+  ".dream-poster-controls button",
+  ".rxs-comparison-selector select",
+  ".rxs-p14-range-labels button",
+  "#rxs-p14-baseline",
+  ".rider-special-site-link",
+  ".dream-agent-open",
+  ".dream-chapter-nav a",
+  ".dossier-reader-links a",
+  ".hero-actions .primary-action",
 ].join(",");
+// A control taller than this share of the screen would block every spot and
+// pin the button home over it; its words still count through the glyphs.
+const ZEUS_AVOID_MAX_HEIGHT = 0.45;
+// Candidates past this index (the far corner rows) are taken only when clear.
+const ZEUS_NEAR_CANDIDATES = 10;
+// The fallback weighs covered words (px²) against distance from home (px).
+const ZEUS_FALLBACK_DISTANCE_WEIGHT = 12;
+// A flip wider than this (a tablet or desktop, a landscape phone) crosses the
+// whole page: the third step up on its own side is tried before it.
+const ZEUS_FLIP_MAX_PX = 480;
+// A step held for one clear settle goes home once the page has stayed still
+// this long, so it does not stay off a clear home until the next scroll.
+const ZEUS_STEP_RECHECK_MS = 900;
 /* Words the button never rests on: titles and the labels of controls. They are
    measured by their glyph boxes, not their element boxes, so a wide heading or
    a whole-card link moves the button only when it would cover the words
@@ -207,6 +253,30 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
   }
   return glyphs;
 }
+
+/* A fixed or sticky bar across the top of the screen (a header, a chapter
+   nav). Only the steps away from home are kept off it; a spot the reader
+   chose is theirs. One hit test and a short ancestor walk per settle. */
+function readTopBar(button: HTMLElement, x: number, y: number): ZeusRect | null {
+  const hit = document.elementFromPoint?.(x, y) ?? null;
+  for (
+    let element: Element | null = hit;
+    element && element !== document.body && element !== document.documentElement;
+    element = element.parentElement
+  ) {
+    if (element === button || button.contains(element)) return null;
+    const { position } = window.getComputedStyle(element);
+    if (position !== "fixed" && position !== "sticky") continue;
+    const rect = element.getBoundingClientRect();
+    return rect.height > 0 && rect.height < window.innerHeight * 0.4 ? rect : null;
+  }
+  return null;
+}
+
+// The stylesheet has no glide under reduced motion or economy; skip the writes.
+const reducedGlide = () =>
+  document.documentElement?.dataset?.worldEffects === "economy" ||
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
 function readPosition(): ZeusButtonPosition {
   try {
@@ -426,6 +496,16 @@ function ZeusButton({
   const cancelPointer = useRef<() => void>(() => {});
   const gestureOrigin = useRef(position);
   const droppedHere = useRef(false);
+  const cueTimer = useRef<number | null>(null);
+  const pressStartedAt = useRef(0);
+  // The pending press's hold activation, so a mouse drag can start it early.
+  const holdActivate = useRef<(() => void) | null>(null);
+  const glideTimer = useRef<number | null>(null);
+  // Set by the settle, toggle and dock paths: the next placement glides.
+  const glideNext = useRef(false);
+  // While the button has stepped off home: where the page was when it did,
+  // and how many settles in a row home has been clear since.
+  const stepAway = useRef<{ scrollTop: number; clearSettles: number } | null>(null);
 
   useEffect(() => {
     preferredPosition.current = position;
@@ -464,7 +544,37 @@ function ZeusButton({
   const clearHoldTimer = useCallback(() => {
     if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
     holdTimer.current = null;
+    if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
+    cueTimer.current = null;
+    holdActivate.current = null;
+    if (buttonRef.current) delete buttonRef.current.dataset.holding;
   }, []);
+
+  /* A glide is an individual translate from the old spot back to zero, so it
+     never touches left/top and ends with no translate left behind. */
+  const endGlide = useCallback(() => {
+    if (glideTimer.current != null) window.clearTimeout(glideTimer.current);
+    glideTimer.current = null;
+    const button = buttonRef.current;
+    if (!button || button.dataset.relocating !== "true") return;
+    delete button.dataset.relocating;
+    button.style.removeProperty("translate");
+  }, []);
+
+  const startGlide = useCallback(
+    (button: HTMLElement, fromX: number, fromY: number, toX: number, toY: number) => {
+      const dx = fromX - toX;
+      const dy = fromY - toY;
+      if (Math.hypot(dx, dy) < 2) return;
+      button.style.translate = `${dx}px ${dy}px`;
+      // Commit the old spot before the transition is switched on.
+      void button.offsetWidth;
+      button.dataset.relocating = "true";
+      button.style.translate = "0px 0px";
+      glideTimer.current = window.setTimeout(endGlide, GLIDE_MS);
+    },
+    [endGlide],
+  );
 
   const readBounds = useCallback(
     (
@@ -497,43 +607,85 @@ function ZeusButton({
     [],
   );
 
+  /* The button's box at rest: its layout size through a scaled dialog. The
+     drawn rect still carries the hold's 1.075 scale while it eases out after
+     a drop, which would clamp an edge dock a few pixels short. */
+  const restingSize = useCallback((button: HTMLElement) => {
+    const parent = button.offsetParent;
+    let scaleX = 1;
+    let scaleY = 1;
+    if (parent instanceof HTMLElement) {
+      const parentRect = parent.getBoundingClientRect();
+      if (parent.offsetWidth > 0) scaleX = parentRect.width / parent.offsetWidth || 1;
+      if (parent.offsetHeight > 0) scaleY = parentRect.height / parent.offsetHeight || 1;
+    }
+    return { width: button.offsetWidth * scaleX, height: button.offsetHeight * scaleY };
+  }, []);
+
   const avoidCriticalControls = useCallback(
     (preferred: { x: number; y: number }) => {
       const button = buttonRef.current;
       if (!button) return preferred;
       const viewport = getViewport();
-      const rect = button.getBoundingClientRect();
+      const drawnRect = button.getBoundingClientRect();
+      const size = restingSize(button);
+      const shown = {
+        x: drawnRect.left + drawnRect.width / 2,
+        y: drawnRect.top + drawnRect.height / 2,
+      };
+      const rect = {
+        width: size.width,
+        height: size.height,
+        left: shown.x - size.width / 2,
+        right: shown.x + size.width / 2,
+        top: shown.y - size.height / 2,
+        bottom: shown.y + size.height / 2,
+      };
       const bounds = readBounds(viewport, rect);
       const localX = preferred.x - viewport.offsetLeft;
       const localY = preferred.y - viewport.offsetTop;
       const mirrorX = viewport.offsetLeft + viewport.width - localX;
       const mirrorY = viewport.offsetTop + viewport.height - localY;
       const lift = rect.height + 28;
+      // Its own side first: the screen-wide flip (306px on a phone, 1296px
+      // on a desktop) is the longest jump, taken only when the near steps on
+      // this side are blocked. A third step up lands mid-screen over the
+      // prose, so it comes after the flip.
       const candidates = [
         preferred,
-        { x: mirrorX, y: preferred.y },
         { x: preferred.x, y: preferred.y - lift },
-        { x: mirrorX, y: preferred.y - lift },
         // A page's closing stack of full-width links needs a second step up.
         // That keeps the button near its spot instead of flipping it to the
         // far edge of the screen, over the text there.
         { x: preferred.x, y: preferred.y - lift * 2 },
-        { x: mirrorX, y: preferred.y - lift * 2 },
-        // A tall title under the spot: one step down, then a third up, still
-        // before the far side of the screen.
+        // A tall title under the spot: one step down, still before the far
+        // side of the screen.
         { x: preferred.x, y: preferred.y + lift },
+        { x: mirrorX, y: preferred.y },
+        { x: mirrorX, y: preferred.y - lift },
+        { x: mirrorX, y: preferred.y - lift * 2 },
         { x: mirrorX, y: preferred.y + lift },
         { x: preferred.x, y: preferred.y - lift * 3 },
         { x: mirrorX, y: preferred.y - lift * 3 },
+        // The far rows: taken only when clear (ZEUS_NEAR_CANDIDATES).
         { x: preferred.x, y: mirrorY },
         { x: mirrorX, y: mirrorY },
       ].map((candidate) => clampZeusCenter(candidate.x, candidate.y, bounds));
-      const controls = Array.from(document.querySelectorAll<HTMLElement>(ZEUS_AVOID_SELECTOR))
+      if (Math.abs(mirrorX - preferred.x) > ZEUS_FLIP_MAX_PX) {
+        // A page-wide flip goes after the third step up on this side
+        // (index 8); the far side's own steps keep their order after it.
+        candidates.splice(4, 0, ...candidates.splice(8, 1));
+      }
+      // Inside a dialog only its own controls count, as with its words: the
+      // page behind it is covered and cannot be pressed.
+      const controlRoot: ParentNode = button.closest("dialog") ?? document;
+      const controls = Array.from(controlRoot.querySelectorAll<HTMLElement>(ZEUS_AVOID_SELECTOR))
         .filter((control) => control !== button && !button.contains(control))
         .filter((control) => !(control instanceof HTMLButtonElement && control.disabled))
         .map((control) => ({ control, rect: control.getBoundingClientRect() }))
         .filter(({ control, rect: controlRect }) => {
           if (controlRect.width < 1 || controlRect.height < 1) return false;
+          if (controlRect.height > viewport.height * ZEUS_AVOID_MAX_HEIGHT) return false;
           if (
             controlRect.right <= viewport.offsetLeft ||
             controlRect.left >= viewport.offsetLeft + viewport.width ||
@@ -555,6 +707,30 @@ function ZeusButton({
         top: candidate.y - rect.height / 2,
         bottom: candidate.y + rect.height / 2,
       }));
+      // Where it is shown now, when that is a step away from home.
+      const away = stepAway.current;
+      const shownRect =
+        away && Math.hypot(shown.x - preferred.x, shown.y - preferred.y) > 1
+          ? {
+              left: rect.left,
+              right: rect.right,
+              top: rect.top,
+              bottom: rect.bottom,
+            }
+          : null;
+      const topBar = readTopBar(
+        button,
+        viewport.offsetLeft + viewport.width / 2,
+        bounds.minY - rect.height / 2 + 4,
+      );
+      const blocked = (candidateRect: ZeusRect) =>
+        controls.some(
+          ({ rect: controlRect }) =>
+            candidateRect.left < controlRect.right + gap &&
+            candidateRect.right > controlRect.left - gap &&
+            candidateRect.top < controlRect.bottom + gap &&
+            candidateRect.bottom > controlRect.top - gap,
+        );
       const scroller = document.scrollingElement ?? document.documentElement;
       const pageEnd = scroller.scrollTop + window.innerHeight >= scroller.scrollHeight - 2;
       // A spot the reader has just dropped the button on is theirs: only the
@@ -563,7 +739,7 @@ function ZeusButton({
         ? []
         : readAvoidText(
             button,
-            candidateRects.map((candidateRect) => ({
+            [...candidateRects, ...(shownRect ? [shownRect] : [])].map((candidateRect) => ({
               left: candidateRect.left - ZEUS_TEXT_GAP,
               right: candidateRect.right + ZEUS_TEXT_GAP,
               top: candidateRect.top - ZEUS_TEXT_GAP,
@@ -582,27 +758,47 @@ function ZeusButton({
           return width > 0 && height > 0 ? covered + width * height : covered;
         }, 0);
 
+      // Stepped off and still clear there: home has to be clear for two
+      // settles in a row, or the page has to move on by most of a screen,
+      // before it goes back. Otherwise every control passing the home band
+      // sends it off and back (A-B-A) as the reader goes.
+      if (away && shownRect && !droppedHere.current) {
+        const homeClear = !blocked(candidateRects[0]) && coveredWords(candidateRects[0]) === 0;
+        const shownClear =
+          !blocked(shownRect) &&
+          !(topBar && meetsAny(shownRect, [topBar])) &&
+          coveredWords(shownRect) === 0;
+        const movedOn = Math.abs(scroller.scrollTop - away.scrollTop) > viewport.height * 0.6;
+        if (!homeClear) away.clearSettles = 0;
+        else if (shownClear && !movedOn && away.clearSettles < 1) {
+          away.clearSettles += 1;
+          return shown;
+        }
+      }
+
       // Clear of the controls and of the words: the first such spot. Words
-      // everywhere (a column of titles): the spot clear of the controls that
-      // covers the least of them. Controls everywhere: stay home, as before.
-      let fallback: { candidate: ZeusButtonPosition; covered: number } | null = null;
+      // everywhere (a column of titles): the nearby spot clear of the
+      // controls that covers the least of them, weighed by how far it goes.
+      // Controls everywhere: stay home, as before.
+      let fallback: { candidate: ZeusButtonPosition; score: number } | null = null;
       for (const [index, candidate] of candidates.entries()) {
         const candidateRect = candidateRects[index];
-        const obstructed = controls.some(
-          ({ rect: controlRect }) =>
-            candidateRect.left < controlRect.right + gap &&
-            candidateRect.right > controlRect.left - gap &&
-            candidateRect.top < controlRect.bottom + gap &&
-            candidateRect.bottom > controlRect.top - gap,
-        );
+        const obstructed =
+          blocked(candidateRect) ||
+          (index > 0 && topBar !== null && meetsAny(candidateRect, [topBar]));
         if (obstructed) continue;
         const covered = coveredWords(candidateRect);
         if (covered === 0) return candidate;
-        if (!fallback || covered < fallback.covered) fallback = { candidate, covered };
+        if (index >= ZEUS_NEAR_CANDIDATES) continue;
+        const score =
+          covered +
+          ZEUS_FALLBACK_DISTANCE_WEIGHT *
+            Math.hypot(candidate.x - preferred.x, candidate.y - preferred.y);
+        if (!fallback || score < fallback.score) fallback = { candidate, score };
       }
       return fallback?.candidate ?? candidates[0] ?? preferred;
     },
-    [readBounds, getViewport],
+    [readBounds, getViewport, restingSize],
   );
 
   const setVisualCenter = useCallback((targetX: number, targetY: number) => {
@@ -653,14 +849,41 @@ function ZeusButton({
     (next: ZeusButtonPosition) => {
       const button = buttonRef.current;
       if (!button) return next;
+      const glide = glideNext.current;
+      glideNext.current = false;
+      // Where it is drawn now, mid-glide included; then settle any glide so
+      // the placement below measures the real spot.
+      const drawn = button.getBoundingClientRect();
+      endGlide();
       const viewport = getViewport();
       const { x: centerX, y: centerY } = clampZeusCenter(
         viewport.offsetLeft + next.x * viewport.width,
         viewport.offsetTop + next.y * viewport.height,
-        readBounds(viewport, button.getBoundingClientRect()),
+        readBounds(viewport, restingSize(button)),
       );
       const safeCenter = avoidCriticalControls({ x: centerX, y: centerY });
+      const shownBefore = pendingPosition.current;
       const actual = setVisualCenter(safeCenter.x, safeCenter.y);
+      if (Math.hypot(safeCenter.x - centerX, safeCenter.y - centerY) <= 1) {
+        stepAway.current = null;
+      } else if (
+        !stepAway.current ||
+        Math.abs(shownBefore.x * viewport.width + viewport.offsetLeft - actual.x) > 1 ||
+        Math.abs(shownBefore.y * viewport.height + viewport.offsetTop - actual.y) > 1
+      ) {
+        // A new step: count from here.
+        const scroller = document.scrollingElement ?? document.documentElement;
+        stepAway.current = { scrollTop: scroller.scrollTop, clearSettles: 0 };
+      }
+      if (glide && !reducedGlide()) {
+        startGlide(
+          button,
+          drawn.left + drawn.width / 2,
+          drawn.top + drawn.height / 2,
+          actual.x,
+          actual.y,
+        );
+      }
       const normalized = {
         x: (actual.x - viewport.offsetLeft) / viewport.width,
         y: (actual.y - viewport.offsetTop) / viewport.height,
@@ -668,7 +891,15 @@ function ZeusButton({
       pendingPosition.current = normalized;
       return normalized;
     },
-    [avoidCriticalControls, readBounds, getViewport, setVisualCenter],
+    [
+      avoidCriticalControls,
+      readBounds,
+      getViewport,
+      setVisualCenter,
+      endGlide,
+      startGlide,
+      restingSize,
+    ],
   );
 
   const restoreGestureOrigin = useCallback(() => {
@@ -699,6 +930,15 @@ function ZeusButton({
         placementFrame.current = null;
         if (activePointer.current != null) return;
         placeButton(preferredPosition.current);
+        // A step kept for the hysteresis (one clear settle counted) gets one
+        // more look on a still page; any scroll or press clears this first.
+        if (stepAway.current?.clearSettles === 1 && placementTimer.current == null) {
+          placementTimer.current = window.setTimeout(() => {
+            placementTimer.current = null;
+            glideNext.current = true;
+            schedulePlacement();
+          }, ZEUS_STEP_RECHECK_MS);
+        }
       });
     };
     const onScroll = () => {
@@ -710,8 +950,33 @@ function ZeusButton({
       // Run that work once scrolling settles instead of on every scroll frame.
       placementTimer.current = window.setTimeout(() => {
         placementTimer.current = null;
+        glideNext.current = true;
         schedulePlacement();
       }, settleMs);
+    };
+    /* Opening or closing a disclosure (a cast PROFILE, a Dream case) moves
+       the page under the button without a scroll. toggle does not bubble,
+       so it is caught on the way down; the wait covers an opening that
+       animates its height. */
+    const onLayoutChange = () => {
+      if (activePointer.current != null) return;
+      if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
+      placementTimer.current = window.setTimeout(
+        () => {
+          placementTimer.current = null;
+          glideNext.current = true;
+          schedulePlacement();
+        },
+        Math.max(settleMs, 220),
+      );
+    };
+    // A dossier dialog scrolls inside itself, not the window. Only a scroll
+    // inside the dialog that holds the button counts; page rails do not.
+    const onInnerScroll = (event: Event) => {
+      const dialog = buttonRef.current?.closest("dialog");
+      if (!dialog || event.target === dialog.ownerDocument) return;
+      if (!dialog.contains(event.target as Node)) return;
+      onScroll();
     };
     // A framed archive reports its words once its own scroll settles. A
     // report never cancels a press on the button (a tap in the archive can
@@ -758,6 +1023,7 @@ function ZeusButton({
       // Rotation, split view or a keyboard changes the cached drag bounds.
       // Cancel the gesture before the next sample can use obsolete geometry.
       cancelPointer.current();
+      stepAway.current = null;
       if (placementTimer.current != null) {
         window.clearTimeout(placementTimer.current);
         placementTimer.current = null;
@@ -770,7 +1036,11 @@ function ZeusButton({
     window.addEventListener("orientationchange", onResize, { passive: true });
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
     window.visualViewport?.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("toggle", onLayoutChange, { capture: true, passive: true });
+    document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
+      document.removeEventListener("toggle", onLayoutChange, { capture: true });
+      document.removeEventListener("scroll", onInnerScroll, { capture: true });
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("message", onFrameAvoid);
@@ -829,8 +1099,9 @@ function ZeusButton({
       cancelDragFrame();
       cancelPlacement();
       disarmTouchGuard();
+      endGlide();
     },
-    [clearHoldTimer, cancelDragFrame, cancelPlacement, disarmTouchGuard],
+    [clearHoldTimer, cancelDragFrame, cancelPlacement, disarmTouchGuard, endGlide],
   );
 
   /* Pointer capture is not guaranteed in Samsung Internet or embedded
@@ -891,6 +1162,25 @@ function ZeusButton({
     // Unlike left/top + getBoundingClientRect, it does not relayout each frame.
     button.style.translate = `${next.translate.x}px ${next.translate.y}px`;
     pendingPosition.current = next.normalized;
+    // The MOVE tag rides above the finger, or below it at the top edge.
+    const side = next.center.y - geometry.bounds.minY < 40 ? "below" : "above";
+    if (button.dataset.moveTag !== side) button.dataset.moveTag = side;
+  };
+
+  /* A drop close to a side edge docks on it, so a spot meant for the edge
+     does not end up a few pixels short of it. A drop elsewhere stays. */
+  const dockToEdge = (button: HTMLElement, spot: ZeusButtonPosition) => {
+    const viewport = getViewport();
+    const bounds = readBounds(viewport, {
+      width: button.offsetWidth,
+      height: button.offsetHeight,
+    });
+    const x = viewport.offsetLeft + spot.x * viewport.width;
+    let dockX: number | null = null;
+    if (x - bounds.minX < EDGE_SNAP_PX) dockX = bounds.minX;
+    else if (bounds.maxX - x < EDGE_SNAP_PX) dockX = bounds.maxX;
+    if (dockX == null || Math.abs(dockX - x) < 1) return null;
+    return { x: (dockX - viewport.offsetLeft) / viewport.width, y: spot.y };
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
@@ -909,6 +1199,12 @@ function ZeusButton({
         viewport.offsetLeft + pendingPosition.current.x * viewport.width,
         viewport.offsetTop + pendingPosition.current.y * viewport.height,
       );
+      const docked = dockToEdge(event.currentTarget, pendingPosition.current);
+      if (docked) {
+        // The saved spot is the edge; the placement that follows glides there.
+        glideNext.current = true;
+        pendingPosition.current = docked;
+      }
       onPositionChange(pendingPosition.current);
     } else if (wasHeld && cancelled) {
       restoreGestureOrigin();
@@ -928,7 +1224,16 @@ function ZeusButton({
       event.clientX - start.current.x,
       event.clientY - start.current.y,
     );
-    if (!cancelled && !wasHeld && !moved.current && releaseDistance <= MOVE_TOLERANCE) {
+    // A hold let go before the drag took over is an abandoned move, not a tap.
+    const abandonedHold =
+      event.pointerType !== "mouse" && event.timeStamp - pressStartedAt.current > TAP_MAX_MS;
+    if (
+      !cancelled &&
+      !wasHeld &&
+      !moved.current &&
+      !abandonedHold &&
+      releaseDistance <= MOVE_TOLERANCE
+    ) {
       clearHoldTimer();
       activePointer.current = null;
       held.current = false;
@@ -958,7 +1263,10 @@ function ZeusButton({
         if (activePointer.current != null) return;
         cancelPlacement();
         cancelDragFrame();
+        // A glide in flight lands now, so the grab measures the real spot.
+        endGlide();
         gestureOrigin.current = { ...pendingPosition.current };
+        pressStartedAt.current = event.timeStamp;
         const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
@@ -971,9 +1279,21 @@ function ZeusButton({
         moved.current = false;
         held.current = false;
         clearHoldTimer();
-        holdTimer.current = window.setTimeout(() => {
+        holdTimer.current = window.setTimeout(activateHold, LONG_PRESS_MS);
+        holdActivate.current = activateHold;
+        // Past a tap's length the hold starts filling in (styles), so the
+        // wait before the drag reads as progress, not as nothing happening.
+        cueTimer.current = window.setTimeout(() => {
+          cueTimer.current = null;
+          if (activePointer.current === event.pointerId && !held.current) {
+            target.dataset.holding = "true";
+          }
+        }, HOLD_CUE_MS);
+        function activateHold() {
           if (activePointer.current !== event.pointerId) return;
+          if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
           holdTimer.current = null;
+          holdActivate.current = null;
           const rect = target.getBoundingClientRect();
           const viewport = getViewport();
           const parent = target.offsetParent;
@@ -996,15 +1316,22 @@ function ZeusButton({
           };
           held.current = true;
           armTouchGuard();
+          delete target.dataset.holding;
           target.dataset.dragging = "true";
           target.setAttribute("aria-grabbed", "true");
+          // A short tick where the platform has one (Android); iOS has none.
+          try {
+            if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(10);
+          } catch {
+            /* Vibration is optional. */
+          }
           try {
             target.setPointerCapture(event.pointerId);
           } catch {
             /* The document-wide guards still terminate an uncaptured drag. */
           }
           moveToPointer(latestPointer.current.x, latestPointer.current.y);
-        }, LONG_PRESS_MS);
+        }
       }}
       onPointerMove={(event) => {
         if (activePointer.current !== event.pointerId) return;
@@ -1014,6 +1341,14 @@ function ZeusButton({
           event.clientY - start.current.y,
         );
         if (!held.current) {
+          // A mouse drag cannot be a page scroll, so it moves the button at
+          // once instead of waiting out the hold.
+          if (distance > MOVE_TOLERANCE && event.pointerType === "mouse" && holdActivate.current) {
+            const activate = holdActivate.current;
+            clearHoldTimer();
+            activate();
+            return;
+          }
           if (distance > MOVE_TOLERANCE) {
             moved.current = true;
             clearHoldTimer();

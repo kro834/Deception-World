@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEvent, SyntheticEvent } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { dossierImage } from "@/lib/dossier-images";
 import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";
@@ -226,6 +226,42 @@ function CastPortrait({ entry }: { entry: WorldCastEntry }) {
   );
 }
 
+/* An opened profile takes the row below its own and the next tile slides
+   into the cell it left, so the switch would leave the finger (and a second
+   tap would open the next person). The summary's top is noted on click and
+   put back after the toggle with one instant scroll; opening then brings the
+   text into view when it fits, never lifting the switch under the topbar
+   (its scroll-margin-top). No click (find-in-page opening it): no scroll. */
+const profileTops = new WeakMap<Element, number>();
+
+function noteProfileTop(event: MouseEvent<HTMLElement>) {
+  profileTops.set(event.currentTarget, event.currentTarget.getBoundingClientRect().top);
+}
+
+function keepProfileInPlace(event: SyntheticEvent<HTMLDetailsElement>) {
+  const details = event.currentTarget;
+  const summary = details.querySelector(":scope > summary");
+  const before = summary ? profileTops.get(summary) : undefined;
+  if (!summary || before === undefined) return;
+  profileTops.delete(summary);
+  const settle = (target: number, again: boolean) => {
+    const shift = summary.getBoundingClientRect().top - target;
+    if (Math.abs(shift) >= 1) window.scrollBy({ top: shift, behavior: "instant" });
+    // Scroll anchoring may still move the page on the next layout.
+    if (again) requestAnimationFrame(() => settle(target, false));
+  };
+  requestAnimationFrame(() => {
+    let target = before;
+    if (details.open) {
+      const floor = Number.parseFloat(getComputedStyle(summary).scrollMarginTop) || 0;
+      const shift = summary.getBoundingClientRect().top - before;
+      const overflow = details.getBoundingClientRect().bottom - shift - (window.innerHeight - 16);
+      target = before - Math.min(Math.max(overflow, 0), before - floor);
+    }
+    settle(target, true);
+  });
+}
+
 /** 04 CAST FILES: the portrait wall. */
 function CastFiles() {
   return (
@@ -259,8 +295,8 @@ function CastFiles() {
                     <NameText value={entry.name} />
                   </h3>
                   {entry.line ? <AnnexQuote text={entry.line} signature /> : null}
-                  <details className="wa-profile">
-                    <summary>
+                  <details className="wa-profile" onToggle={keepProfileInPlace}>
+                    <summary onClick={noteProfileTop}>
                       <span className="wa-sr">{entry.name}</span> <span lang="en">PROFILE</span>
                     </summary>
                     <div className="wa-profile-body">

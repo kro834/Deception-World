@@ -460,11 +460,12 @@
   color: var(--sc-label);
 }
 
+/* The selects keep the base sheet's weight (700): verify-reading-polish
+   measures the native P14 labels at that weight so both options fit. */
 .rxs-page.rxs-page .rxs-comparison-selector select,
 .rxs-page.rxs-page .rxs-p14-native-select select {
   border-color: var(--sc-hairline-soft);
   color: var(--sc-text);
-  font-weight: 600;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 

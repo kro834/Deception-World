@@ -718,9 +718,15 @@
   line-height: 1.5;
 }
 
-/* PROFILE: a native disclosure, closed by default (find-in-page opens it). */
+/* PROFILE: a native disclosure, closed by default (find-in-page opens it).
+   The summary is a switch plate inside the file: an ice-lit box with a gold
+   state cell at its end, a chevron pointing down while shut and up while
+   open. Open, the plate lights and the cell fills gold. No gold brackets on
+   the plate, so OPEN DOSSIER stays the file's exit. REALMS documents share
+   the plate and the cell. Every state change is instant (a still annex). */
 .site-shell.film-edition.mirage-edition .wa-profile {
   margin-top: auto;
+  padding: 10px 0 12px;
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary,
@@ -730,17 +736,22 @@
   min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--mr-line);
+  gap: 6px;
+  padding: 0 7px 0 10px;
+  border: 1px solid var(--mr-line-strong);
+  border-radius: 2px;
+  background: rgb(122 232 255 / 6%);
   list-style: none;
   cursor: pointer;
+  scroll-margin-top: calc(var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 12px);
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary {
   color: var(--mr-ice);
   font-family: var(--mr-hud);
   font-size: 12px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary::-webkit-details-marker,
@@ -748,17 +759,89 @@
   display: none;
 }
 
-.site-shell.film-edition.mirage-edition .wa-profile > summary::after {
-  content: "+" / "";
-  color: var(--mr-gold);
-  font-family: var(--mr-mono);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1;
+/* The state cell (the profile's ::after, the document's aria-hidden <i>)
+   and its chevron, drawn with borders so forced colours keep them. */
+.site-shell.film-edition.mirage-edition .wa-profile > summary::after,
+.site-shell.film-edition.mirage-edition .wa-doc > summary > i {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(240 207 134 / 72%);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 55%);
 }
 
-.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after {
-  content: "\2212" / "";
+.site-shell.film-edition.mirage-edition .wa-profile > summary::after {
+  content: "" / "";
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary::before,
+.site-shell.film-edition.mirage-edition .wa-doc > summary > i::before {
+  content: "" / "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--mr-gold);
+  border-bottom: 2px solid var(--mr-gold);
+  rotate: 45deg;
+  z-index: 1;
+  translate: 0 -70%;
+  pointer-events: none;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary::before {
+  right: 17px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-doc > summary > i::before {
+  left: 9px;
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary,
+.site-shell.film-edition.mirage-edition .wa-doc[open] > summary {
+  border-color: var(--mr-ice);
+  background: rgb(122 232 255 / 16%);
+  color: var(--mr-ice-hi);
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after,
+.site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i {
+  border-color: var(--mr-gold);
+  background: var(--mr-gold);
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::before,
+.site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i::before {
+  border-color: var(--mr-ink);
+  rotate: -135deg;
+  translate: 0 -25%;
+}
+
+/* Open, and where the plate has room, the cell reads CLOSE beside its
+   chevron (silent: the native expanded state is what gets announced). */
+.site-shell.film-edition.mirage-edition .wa-profile {
+  container-type: inline-size;
+}
+
+@container (min-width: 196px) {
+  .site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after {
+    content: "CLOSE" / "";
+    width: auto;
+    padding: 0 26px 0 8px;
+    color: var(--mr-ink);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 26px;
+  }
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile > summary:active,
+.site-shell.film-edition.mirage-edition .wa-doc > summary:active {
+  background: rgb(122 232 255 / 22%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary:focus-visible,
@@ -767,8 +850,22 @@
   outline-offset: 3px;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition.mirage-edition .wa-profile > summary:hover,
+  .site-shell.film-edition.mirage-edition .wa-doc > summary:hover {
+    border-color: var(--mr-ice);
+    background: rgb(122 232 255 / 12%);
+    color: var(--mr-ice-hi);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile > summary:hover::after,
+  .site-shell.film-edition.mirage-edition .wa-doc > summary:hover > i {
+    border-color: var(--mr-gold);
+  }
+}
+
 .site-shell.film-edition.mirage-edition .wa-profile-body {
-  padding: 2px 0 14px;
+  padding: 12px 0 2px;
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile-body > :last-child {
@@ -869,6 +966,11 @@
 
   .site-shell.film-edition.mirage-edition .wa-profile-body {
     max-inline-size: 40em;
+  }
+
+  /* The switch stays one glance wide in an opened file. */
+  .site-shell.film-edition.mirage-edition .wa-profile > summary {
+    max-inline-size: 30rem;
   }
 }
 
@@ -1019,23 +1121,7 @@
 }
 
 .site-shell.film-edition.mirage-edition .wa-doc > summary {
-  padding: 8px 0;
-}
-
-.site-shell.film-edition.mirage-edition .wa-doc > summary > i {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  margin-right: 4px;
-  border-right: 1.5px solid var(--mr-ice);
-  border-bottom: 1.5px solid var(--mr-ice);
-  rotate: 45deg;
-  translate: 0 -2px;
-}
-
-.site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i {
-  rotate: -135deg;
-  translate: 0 2px;
+  padding-block: 8px;
 }
 
 .site-shell.film-edition.mirage-edition .wa-doc[open] > summary {
@@ -1637,13 +1723,48 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-c
     background: CanvasText;
   }
 
+  /* The switch plate as a system button; open reads as Highlight on the
+     plate edge and a filled cell, not by colour of text alone. */
   .site-shell.film-edition.mirage-edition .wa-profile > summary,
   .site-shell.film-edition.mirage-edition .wa-doc > summary {
-    color: LinkText;
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
   }
 
+  .site-shell.film-edition.mirage-edition .wa-profile > summary::after,
   .site-shell.film-edition.mirage-edition .wa-doc > summary > i {
-    border-color: LinkText;
+    border-color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile > summary::before,
+  .site-shell.film-edition.mirage-edition .wa-doc > summary > i::before {
+    border-color: ButtonText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile[open] > summary,
+  .site-shell.film-edition.mirage-edition .wa-doc[open] > summary,
+  .site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after,
+  .site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i {
+    border-color: Highlight;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after,
+  .site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile[open] > summary::before,
+  .site-shell.film-edition.mirage-edition .wa-doc[open] > summary > i::before {
+    border-color: HighlightText;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-profile > summary:focus-visible,
+  .site-shell.film-edition.mirage-edition .wa-doc > summary:focus-visible {
+    outline-color: Highlight;
   }
 
   .site-shell.film-edition.mirage-edition .wa-quote-rail:focus-visible {

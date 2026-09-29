@@ -1142,6 +1142,82 @@ html body .zeus-button:focus-visible {
   outline-offset: 6px;
 }
 
+/* The hold fills in. From 160ms a gold ring is drawn up from the base and
+   closes as the drag takes over at 420ms, so a long press reads as one
+   while it waits. Let go before it closes and it drains back. The ring
+   stays full while dragging. The button's scale is left alone: the drag
+   measures its box when the hold activates. */
+html body .zeus-button-aura::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--dwc-gold);
+  border-radius: inherit;
+  background: linear-gradient(0deg, rgb(240 207 134 / 26%), transparent 72%);
+  clip-path: inset(100% 0 0 0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+html body .zeus-button:is([data-holding="true"], [data-dragging="true"]) .zeus-button-aura::before {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+/* MOVE rides above the finger while dragging (below it at the top edge),
+   not under the thumb. Paint containment would clip it there, so it is
+   dropped for the drag only. */
+html body .zeus-button[data-dragging="true"] {
+  contain: layout style;
+}
+
+html body .zeus-button[data-dragging="true"] .zeus-button-move {
+  top: auto;
+  bottom: calc(100% + 12px);
+}
+
+html body .zeus-button[data-dragging="true"][data-move-tag="below"] .zeus-button-move {
+  top: calc(100% + 12px);
+  bottom: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) body .zeus-button-aura::before {
+    transition:
+      clip-path 0.12s ease-out,
+      opacity 0.12s ease-out;
+  }
+
+  html:not([data-world-effects="economy"]) body .zeus-button[data-holding="true"] .zeus-button-aura::before {
+    transition:
+      clip-path 0.26s linear,
+      opacity 0.08s linear;
+  }
+
+  /* A step off a control glides (FLIP on the individual translate, set by
+     zeus-button.tsx) instead of jumping as the reader's eyes settle. Only
+     placements glide; the drag, drop and cancel never do. */
+  html:not([data-world-effects="economy"]) body .zeus-button[data-relocating="true"] {
+    transition: translate 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* A mouse can drag it straight away, so the grab cursor now tells the
+   truth; hover lights the ring. */
+@media (hover: hover) and (pointer: fine) {
+  html body .zeus-button:not([data-dragging="true"]):hover:not(:focus-visible) {
+    outline-color: rgb(240 207 134 / 86%);
+  }
+}
+
+/* Landscape phones: the phone size, so a 390px-tall screen keeps room for
+   the steps off a control (the lift drops from 100px to 88px). */
+@media (max-height: 500px) and (orientation: landscape) {
+  html body .zeus-button {
+    --zeus-button-size: 60px;
+  }
+}
+
 /* ================================================================
    The skip link: a chamfered ice plate on a gold seam. The chamfer
    clips anything outside the plate, so its focus ring is drawn inside.
@@ -1358,5 +1434,11 @@ html[data-world-effects="economy"]
 
   html body .zeus-button:not(:focus-visible) {
     outline-color: ButtonText;
+  }
+
+  /* The hold ring as a plain system-colour line. */
+  html body .zeus-button-aura::before {
+    border-color: Highlight;
+    background: none;
   }
 }

@@ -322,3 +322,81 @@ test("rotation cancels stale geometry, and unmount removes queued drawing and th
   ui.win.dispatchEvent(scroll);
   assert.equal(scroll.defaultPrevented, false);
 });
+
+// 2026-09-29: a hold let go before the drag takes over used to navigate as a
+// tap. Past TAP_MAX_MS it is an abandoned move; the hold also shows a cue
+// from HOLD_CUE_MS so the wait reads as progress.
+test("a hold let go before the drag is not a tap; a quick tap still navigates", () => {
+  const quick = mount();
+  quick.handlers.onPointerDown({ ...quick.event(), timeStamp: 1000 });
+  quick.handlers.onPointerUp({ ...quick.event(), timeStamp: 1150 });
+  assert.equal(quick.navigated(), 1);
+  const slow = mount();
+  slow.handlers.onPointerDown({ ...slow.event(), timeStamp: 1000 });
+  assert.ok(slow.timerDelays.includes(160), "hold cue is scheduled");
+  slow.handlers.onPointerUp({ ...slow.event(), timeStamp: 1400 });
+  assert.equal(slow.navigated(), 0);
+  assert.equal(slow.timers.size, 0);
+  assert.equal(slow.button.dataset.holding, undefined);
+  assert.equal(slow.saved.length, 0);
+});
+
+// 2026-09-29 review: a mouse drags on its first move, so a slow click (a
+// trackpad press) is still a click, and a touch tap up to TAP_MAX_MS counts.
+test("a slow mouse click and a slow touch tap still navigate", () => {
+  const mouse = mount({ android: false });
+  const click = (timeStamp) => ({ ...mouse.event(), pointerType: "mouse", timeStamp });
+  mouse.handlers.onPointerDown(click(1000));
+  mouse.handlers.onPointerUp(click(1350));
+  assert.equal(mouse.navigated(), 1);
+  const touch = mount();
+  touch.handlers.onPointerDown({ ...touch.event(), timeStamp: 1000 });
+  touch.handlers.onPointerUp({ ...touch.event(), timeStamp: 1360 });
+  assert.equal(touch.navigated(), 1);
+});
+
+test("the hold cue hands over to the drag and is cleared by a swipe", () => {
+  const ui = mount();
+  ui.hold();
+  assert.equal(ui.button.dataset.dragging, "true");
+  assert.equal(ui.button.dataset.holding, undefined);
+  const swipe = mount();
+  swipe.handlers.onPointerDown(swipe.event());
+  swipe.button.dataset.holding = "true";
+  swipe.handlers.onPointerMove(swipe.event(swipe.origin.x, swipe.origin.y - 30));
+  assert.equal(swipe.button.dataset.holding, undefined);
+  assert.equal(swipe.timers.size, 0);
+});
+
+test("a mouse drag moves the button at once and never navigates", () => {
+  const ui = mount();
+  const mouse = (x, y) => ({ ...ui.event(x, y), pointerType: "mouse" });
+  ui.handlers.onPointerDown(mouse(ui.origin.x, ui.origin.y));
+  ui.handlers.onPointerMove(mouse(ui.origin.x - 40, ui.origin.y - 40));
+  assert.equal(ui.button.dataset.dragging, "true");
+  ui.handlers.onPointerMove(mouse(195, 422));
+  ui.handlers.onPointerUp(mouse(195, 422));
+  assert.equal(ui.navigated(), 0);
+  assert.equal(ui.saved.length, 1);
+  assert.equal(ui.button.style.translate, undefined);
+});
+
+test("a press during a relocation glide starts from the settled spot", () => {
+  const ui = mount();
+  ui.button.dataset.relocating = "true";
+  ui.button.style.translate = "0px 40px";
+  ui.handlers.onPointerDown(ui.event());
+  assert.equal(ui.button.dataset.relocating, undefined);
+  assert.equal(ui.button.style.translate, undefined);
+  ui.handlers.onPointerUp(ui.event());
+  assert.equal(ui.navigated(), 1);
+});
+
+test("opening a disclosure re-places the button once the page settles", () => {
+  const ui = mount();
+  ui.doc.dispatchEvent(new Event("toggle"));
+  assert.equal(ui.timers.size, 1);
+  assert.equal(ui.timerDelays.at(-1), 220);
+  ui.unmount();
+  assert.equal(ui.timers.size, 0);
+});

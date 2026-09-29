@@ -190,3 +190,41 @@ test("the annex presentation: chapter openers, portraits, disclosures, the quote
   // An opened profile takes the next row; dense packing closes the cell it left.
   assert.match(css, /\.wa-roster \{[^}]*grid-auto-flow: row dense;/);
 });
+
+test("the PROFILE switch reads as a control and stays under the finger", () => {
+  // Native disclosure and its naming stay as they were (find-in-page opens it).
+  assert.match(
+    annex,
+    /<details className="wa-profile" onToggle=\{keepProfileInPlace\}>\s*<summary onClick=\{noteProfileTop\}>\s*<span className="wa-sr">\{entry\.name\}<\/span> <span lang="en">PROFILE<\/span>\s*<\/summary>/,
+  );
+  // Opening moves the tile to the next row: the summary's top is noted on
+  // click and restored with an instant scroll (no smooth scroll, no motion),
+  // only after a click, and never above the topbar (its scroll-margin-top).
+  assert.match(
+    annex,
+    /profileTops\.set\(event\.currentTarget, event\.currentTarget\.getBoundingClientRect\(\)\.top\)/,
+  );
+  assert.match(annex, /if \(!summary \|\| before === undefined\) return;/);
+  assert.match(annex, /window\.scrollBy\(\{ top: shift, behavior: "instant" \}\)/);
+  assert.match(annex, /getComputedStyle\(summary\)\.scrollMarginTop/);
+  // The plate: a boxed, filled switch with a 44px hit area and a gold state
+  // cell; open lights the plate and fills the cell. CLOSE is generated with
+  // an empty alt so the accessible name stays "<name> PROFILE".
+  assert.match(
+    css,
+    /\.wa-profile > summary,\s*\.site-shell\.film-edition\.mirage-edition \.wa-doc > summary \{[^}]*min-height: 44px;[^}]*border: 1px solid var\(--mr-line-strong\);[^}]*background: rgb\(122 232 255 \/ 6%\);/,
+  );
+  assert.match(
+    css,
+    /\.wa-profile\[open\] > summary::after,\s*\.site-shell\.film-edition\.mirage-edition \.wa-doc\[open\] > summary > i \{\s*border-color: var\(--mr-gold\);\s*background: var\(--mr-gold\);/,
+  );
+  assert.match(css, /\.wa-profile\[open\] > summary::before,[^{]*\{[^}]*rotate: -135deg;/);
+  assert.match(
+    css,
+    /@container \(min-width: 196px\) \{[^}]*content: "CLOSE" \/ "";[^}]*font-size: 12px;/,
+  );
+  assert.match(
+    css,
+    /@media \(forced-colors: active\)[\s\S]*\.wa-profile\[open\] > summary::after,[^{]*\{\s*background: Highlight;/,
+  );
+});
