@@ -500,6 +500,156 @@ html[data-world-effects="economy"]
   }
 }
 
+/* ---------- Skipped acts: measured estimates ---------- */
+/* The older estimates (styles-dream-chapter.css) predate the Taisho layouts:
+   第三幕 was held at 2,810px on phones against a drawn content box of about
+   1,130px, and 第一幕 and 第二幕 at 1,440 and 1,380px on desktop against
+   about 880 and 820. A first jump from the act index or the 目次 past them
+   landed short or long by the difference (up to 1,500px). These are content
+   boxes (the estimate excludes padding) measured at 1440, 1194, 1024, 768,
+   412, 390, 320, 844 x 390 and 667 x 375; `auto` keeps a drawn size. */
+.dream-page.dream-page #posters {
+  contain-intrinsic-size: auto 860px;
+}
+
+.dream-page.dream-page #characters {
+  contain-intrinsic-size: auto 780px;
+}
+
+.dream-page.dream-page #dolminence {
+  contain-intrinsic-size: auto 860px;
+}
+
+@media (max-width: 1180px) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 770px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 630px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1680px;
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1080px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1350px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1410px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 945px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1840px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1135px;
+  }
+}
+
+@media (max-width: 359px) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 940px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1490px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1415px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 895px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 525px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1470px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
+  .dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 935px;
+  }
+
+  .dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 560px;
+  }
+
+  .dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1320px;
+  }
+}
+
+/* ---------- Landscape phones: acts land in the screen ---------- */
+/* Under 112px of chrome a 390px-tall frame kept 278px, and a jump from the
+   act index landed each heading about 260px down (the 164px anchor margin
+   plus a 96px opening): a heading at the foot of the screen, cut. The
+   anchor margin clears the chrome by 12px and the acts open on 40px, so
+   the heading lands whole in the top half. Portrait phones, tablets and
+   desktop keep their margins. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page :is(.dream-section, .dream-annex),
+  .dream-page.dream-page #cases.dream-section {
+    scroll-margin-top: max(124px, calc(112px + env(safe-area-inset-top)));
+  }
+
+  .dream-page.dream-page .dream-section {
+    padding-top: 40px;
+  }
+
+  /* The story act's rule sits under its 青海波 band (38px). */
+  .dream-page.dream-page #cases.dream-section {
+    padding-top: 64px;
+  }
+
+  .dream-page.dream-page .dream-section-heading {
+    margin-bottom: 32px;
+  }
+
+  /* The three arches stood one per row (3,070px at 667 x 375); billed right
+     to left in one row as on desktop, the act fits in about two screens. */
+  .dream-page.dream-page .dream-character-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-character-grid > article:first-child {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  /* A banner longer than its arch (東風谷 慶弥 at 667px) set the row: the
+     arch grows to the row, so its seal stays on the portrait's foot. */
+  .dream-page.dream-page .dream-character-grid button img {
+    align-self: stretch;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
 /* ---------- Forced colours ---------- */
 /* Drawn corners and curtain rules are ornament: they step aside. The
    dossier's section bands keep a system-colour edge, and the rail drops

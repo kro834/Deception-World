@@ -10,6 +10,7 @@ import dreamStoryCssUrl from "@/styles-dream-story.css?url";
 import dreamTaishoCssUrl from "@/styles-dream-taisho.css?url";
 import dreamElevationCssUrl from "@/styles-dream-elevation.css?url";
 import dreamAnnexCssUrl from "@/styles-dream-annex.css?url";
+import dreamArrivalCssUrl from "@/styles-dream-arrival.css?url";
 
 // Shippori Mincho carries the Taisho letterpress voice of the film site.
 const DREAM_FONTS_URL =
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: dreamTaishoCssUrl },
       { rel: "stylesheet", href: dreamElevationCssUrl },
       { rel: "stylesheet", href: dreamAnnexCssUrl },
+      { rel: "stylesheet", href: dreamArrivalCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       { rel: "preload", as: "image", href: "/dream-chapter-poster-05.jpeg" },
       {

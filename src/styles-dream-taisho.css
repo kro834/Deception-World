@@ -2309,9 +2309,59 @@
     justify-content: center;
     text-align: center;
   }
+}
+
+/* A compact case list on phones and landscape phones: the six slips stood
+   about 670px tall at 390, full width, so the floating Zeus button had
+   nowhere to rest over them. Each slip is now one 64px row (the mark, the
+   title with its reading on one baseline, the cross) on a lighter frame,
+   8px apart: about 450px. The paper that opens under a slip is unchanged,
+   and the rules under 360px below still place the 記録途中 seal. */
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page .dream-story-cases {
+    gap: 8px;
+  }
+
+  .dream-page.dream-page .dream-story-case {
+    border-width: 2px;
+    outline-offset: -6px;
+  }
 
   .dream-page.dream-page .dream-story-case > summary {
-    min-height: 84px;
+    min-height: 64px;
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .dream-page.dream-page .dream-story-case-number {
+    gap: 0 5px;
+    letter-spacing: 0.14em;
+  }
+
+  .dream-page.dream-page .dream-story-case-number::before {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+  }
+
+  .dream-page.dream-page .dream-story-case-number b {
+    font-size: 20px;
+  }
+
+  .dream-page.dream-page .dream-story-case-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 10px;
+  }
+
+  .dream-page.dream-page .dream-story-case-heading > span {
+    font-size: 20px;
+    line-height: 1.45;
+    letter-spacing: 0.18em;
+  }
+
+  .dream-page.dream-page .dream-story-case-heading > small {
+    letter-spacing: 0.22em;
   }
 }
 

@@ -51,20 +51,201 @@
   }
 }
 
+/* Skipped annexes hold a measured estimate per layout, so a jump from the
+   act index or the 目次 lands on its heading on a first visit instead of
+   short or long by a section (one 1600px guess stood for 640 to 4,300px).
+   `auto` keeps the real size once a section has been drawn. Measured at
+   1440, 1194, 1024, 768, 412, 390, 320, 844 x 390 and 667 x 375. */
+.dream-page.dream-page #cast-roster {
+  contain-intrinsic-size: auto 1590px;
+}
+
+.dream-page.dream-page #factions {
+  contain-intrinsic-size: auto 1930px;
+}
+
+.dream-page.dream-page #case-notes {
+  contain-intrinsic-size: auto 710px;
+}
+
+.dream-page.dream-page #glossary {
+  contain-intrinsic-size: auto 970px;
+}
+
+.dream-page.dream-page #quotes {
+  contain-intrinsic-size: auto 510px;
+}
+
+@media (max-width: 1299px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2160px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 2050px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 760px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 1110px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 800px;
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2620px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 2840px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 880px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 1360px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 990px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2245px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3610px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1330px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 1885px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1420px;
+  }
+}
+
+@media (max-width: 359px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2800px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 4190px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1405px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2000px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1690px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1240px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 2795px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 855px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 1360px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 695px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1660px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3230px;
+  }
+
+  .dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1280px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 1565px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 890px;
+  }
+}
+
 /* ---------- Heading: a kicker, a gilt title and a count on one rule ---------- */
 .dream-page.dream-page .dream-annex-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    "kicker count"
-    "title title";
+    "mark kicker count"
+    "mark title title";
   align-items: end;
+  column-gap: clamp(12px, 1.4vw, 18px);
   margin: 0 0 clamp(28px, 4vw, 44px);
   padding-bottom: 14px;
   background: var(--ts-komochi);
   background-position:
     bottom 3px left 0,
     bottom 0 left 0;
+}
+
+/* A 栞 hangs where the act has its 幟 tab: the same two gilt threads on
+   海老茶 and a swallowtail foot, slimmer and without words, so each annex
+   reads as a leaf bound into the act before it. */
+.dream-page.dream-page .dream-annex-heading::before {
+  content: "";
+  grid-area: mark;
+  align-self: stretch;
+  width: 14px;
+  margin-bottom: -8px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 2px,
+      var(--ts-kin) 2px 3px,
+      transparent 3px calc(100% - 3px),
+      var(--ts-kin) calc(100% - 3px) calc(100% - 2px),
+      transparent 0
+    ),
+    var(--ts-ebicha-deep);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
+  pointer-events: none;
 }
 
 .dream-page.dream-page .dream-annex-heading > p {
@@ -240,22 +421,60 @@
     clip-path: none;
   }
 
+  /* One ruled row per act, like a programme's contents page: the act in
+     vermilion at the start, its sections after it (490px at 390, now about
+     310). The links keep their 44px rows. */
   .dream-page.dream-page .dream-contents ol {
     grid-row: 2;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    border-bottom: 1px solid var(--ts-hair-soft);
     direction: ltr;
   }
 
   .dream-page.dream-page .dream-contents li,
   .dream-page.dream-page .dream-contents li:last-child {
-    padding-inline: 0 12px;
+    display: grid;
+    grid-template-columns: 4.4em repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 0 8px;
+    padding: 0;
     border-inline-start: 0;
+    border-top: 1px solid var(--ts-hair-soft);
   }
 
-  .dream-page.dream-page .dream-contents li:nth-child(2n) {
-    padding-inline: 12px 0;
-    border-inline-start: 1px solid var(--ts-hair-soft);
+  .dream-page.dream-page .dream-contents small {
+    padding: 0;
+    letter-spacing: 0.2em;
+  }
+
+  .dream-page.dream-page .dream-contents a {
+    padding: 0 4px;
+    border-top: 0;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* Under 360px the contents rows give their links the room: a narrower act
+   column and untracked labels keep ドルミネンス and 組織と勢力 on one line. */
+@media (max-width: 359px) {
+  .dream-page.dream-page .dream-contents {
+    padding-inline: 14px;
+  }
+
+  .dream-page.dream-page .dream-contents li,
+  .dream-page.dream-page .dream-contents li:last-child {
+    grid-template-columns: 3.6em repeat(2, minmax(0, 1fr));
+    column-gap: 6px;
+  }
+
+  .dream-page.dream-page .dream-contents small {
+    letter-spacing: 0.08em;
+  }
+
+  .dream-page.dream-page .dream-contents a {
+    padding-inline: 2px;
+    letter-spacing: 0;
   }
 }
 
@@ -357,6 +576,224 @@
   margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid var(--ts-hair-soft);
+}
+
+/* The profile paragraphs share one box, which the phone switch controls.
+   On tablets and desktops every profile is shown and the switch is not
+   rendered. The line follows the name in the source (the order phones read
+   it in); here the profile stands between them and the line keeps the
+   card's foot. */
+.dream-page.dream-page .dream-roster-body {
+  display: grid;
+  gap: 10px;
+  order: 1;
+}
+
+.dream-page.dream-page .dream-roster .dream-annex-quote {
+  order: 2;
+}
+
+.dream-page.dream-page .dream-roster-switch {
+  display: none;
+}
+
+/* Phones and landscape phones: 16 full cards ran 4,860px at 390. The list
+   becomes the World cast wall's grammar in the programme's materials: tiles
+   two abreast (one below 360px), each the person's billing (the seal and
+   affiliation, the name, the spoken line) with a PROFILE switch at its
+   foot: a 44px gilt-edged plate with its state in a cell, 海老茶 with a
+   vermilion cell when open, and instant (the annex stays still). The
+   profile opens under the switch. The tiles share their rows' tracks
+   (subgrid), so switches line up across a row and opening one profile
+   moves neither switch in that row. */
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page .dream-roster {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+    gap: 0 10px;
+  }
+
+  .dream-page.dream-page .dream-roster > li {
+    display: grid;
+    grid-row: span 5;
+    grid-template-rows: subgrid;
+    padding-bottom: 10px;
+  }
+
+  .dream-page.dream-page .dream-roster article {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: 0 8px;
+    padding: 14px 12px 12px;
+  }
+
+  .dream-page.dream-page .dream-roster-seal {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 2px;
+    outline-offset: 1px;
+    font-size: 12px;
+  }
+
+  .dream-page.dream-page .dream-roster-affiliation {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    padding-right: 0;
+    letter-spacing: 0.12em;
+  }
+
+  .dream-page.dream-page .dream-roster-affiliation::before {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-roster h3 {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 8px 0 0;
+    font-size: 18px;
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+  }
+
+  .dream-page.dream-page .dream-roster-switch {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    align-self: end;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 12px 0 0;
+    padding: 0 9px 0 12px;
+    border: 1px solid var(--ts-hair);
+    border-radius: 0;
+    outline: 1px solid var(--ts-hair-soft);
+    outline-offset: -5px;
+    color: var(--ts-kin-light);
+    background:
+      linear-gradient(var(--ts-kin) 0 0) 0 100% / 10px 2px no-repeat,
+      linear-gradient(var(--ts-kin) 0 0) 100% 100% / 10px 2px no-repeat,
+      var(--ts-ink);
+    font-family: var(--ts-latin);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  /* The state cell: a gilt square with a drawn cross. */
+  .dream-page.dream-page .dream-roster-switch > i {
+    position: relative;
+    display: block;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--ts-kin);
+  }
+
+  /* The cross is drawn with borders, which forced colours keep. */
+  .dream-page.dream-page .dream-roster-switch > i::before,
+  .dream-page.dream-page .dream-roster-switch > i::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+  }
+
+  .dream-page.dream-page .dream-roster-switch > i::before {
+    width: 10px;
+    border-top: 2px solid currentColor;
+  }
+
+  .dream-page.dream-page .dream-roster-switch > i::after {
+    height: 10px;
+    border-left: 2px solid currentColor;
+  }
+
+  .dream-page.dream-page .dream-roster-switch[aria-expanded="true"] {
+    border-color: var(--ts-kin);
+    outline-color: rgb(243 224 176 / 45%);
+    color: var(--ts-kinari);
+    background:
+      linear-gradient(var(--ts-kin-light) 0 0) 0 100% / 10px 2px no-repeat,
+      linear-gradient(var(--ts-kin-light) 0 0) 100% 100% / 10px 2px no-repeat,
+      var(--ts-ebicha-deep);
+  }
+
+  /* Open, the cell turns into the band's diamond in vermilion with the
+     cross as a saltire, scaled so its corners stay inside the plate. */
+  .dream-page.dream-page .dream-roster-switch[aria-expanded="true"] > i {
+    border-color: var(--ts-shu-text);
+    background-color: var(--ts-shu-deep);
+    rotate: 45deg;
+    scale: 0.86;
+  }
+
+  .dream-page.dream-page .dream-roster-switch[aria-expanded="false"] + .dream-roster-body {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-roster-body {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    gap: 8px;
+    padding: 12px 2px 4px;
+  }
+
+  .dream-page.dream-page .dream-roster-profile {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .dream-page.dream-page .dream-roster .dream-annex-quote {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+
+  .dream-page.dream-page .dream-roster .dream-annex-quote blockquote {
+    padding-left: 10px;
+  }
+
+  .dream-page.dream-page .dream-roster .dream-annex-quote blockquote p {
+    font-size: 14px;
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* Under 360px the tiles stand one to a row, so the switch moves up beside
+   the seal and the name instead of taking a row of its own. */
+@media (max-width: 359px) {
+  .dream-page.dream-page .dream-roster article {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .dream-page.dream-page .dream-roster h3 {
+    grid-column: 1 / 3;
+  }
+
+  .dream-page.dream-page .dream-roster-switch {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin: 0 0 0 4px;
+  }
+}
+
+.dream-page.dream-page .dream-roster-switch:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
 }
 
 /* ---------- 組織と勢力 ---------- */
@@ -662,6 +1099,84 @@
   }
 }
 
+/* Phones: the agent roster is a ledger, not fifteen boxed cards. Rows are
+   ruled like the record sheet above them; a filed agent carries a vermilion
+   edge and a 海老茶 wash, and its button. The plates lose a little padding
+   so the ledger keeps a readable measure. 組織と勢力 ran 4,300px at 390. */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-faction {
+    gap: 14px;
+    padding: 20px 16px;
+    outline-offset: -6px;
+  }
+
+  .dream-page.dream-page .dream-record-sheet > div {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .dream-page.dream-page .dream-agent-roster {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .dream-page.dream-page .dream-agent-roster > li {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 8px 12px 6px;
+    border: 0;
+    border-top: 1px solid var(--ts-hair-soft);
+    background: none;
+  }
+
+  .dream-page.dream-page .dream-agent-roster > li:last-child {
+    border-bottom: 1px solid var(--ts-hair-soft);
+  }
+
+  .dream-page.dream-page .dream-agent-roster > li.is-filed {
+    border-top-color: var(--ts-hair);
+    background: linear-gradient(90deg, rgb(110 44 53 / 34%), rgb(110 44 53 / 8%) 70%, transparent);
+    box-shadow: inset 2px 0 0 var(--ts-shu);
+  }
+
+  .dream-page.dream-page .dream-agent-code {
+    padding: 6px 0 7px;
+  }
+
+  .dream-page.dream-page .dream-agent-code small {
+    letter-spacing: 0.1em;
+  }
+
+  .dream-page.dream-page .dream-agent-code b {
+    font-size: 19px;
+  }
+
+  .dream-page.dream-page .dream-agent-code b.is-long {
+    font-size: 12px;
+  }
+
+  .dream-page.dream-page .dream-agent-copy {
+    gap: 3px;
+  }
+
+  .dream-page.dream-page .dream-agent-copy h5 {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .dream-page.dream-page .dream-agent-note {
+    line-height: 1.6;
+  }
+
+  .dream-page.dream-page .dream-agent-line {
+    line-height: 1.65;
+  }
+
+  .dream-page.dream-page .dream-agent-open {
+    margin-top: 6px;
+  }
+}
+
 /* ---------- 章の言葉 ---------- */
 .dream-page.dream-page .dream-case-notes {
   display: grid;
@@ -741,6 +1256,48 @@
   letter-spacing: 0.08em;
 }
 
+/* Phones: the six intertitle cards keep their gilt frame on a lighter
+   border and a tighter paper margin (1,660px at 390). */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-case-notes {
+    gap: 10px;
+  }
+
+  .dream-page.dream-page .dream-case-notes > li {
+    gap: 10px;
+    padding: 16px 16px 18px;
+    border-width: 2px;
+    outline-offset: -7px;
+  }
+
+  .dream-page.dream-page .dream-case-note-head {
+    column-gap: 12px;
+    padding-bottom: 10px;
+  }
+
+  .dream-page.dream-page .dream-case-note-head > span {
+    padding-right: 12px;
+  }
+
+  .dream-page.dream-page .dream-case-note-head > span b {
+    font-size: 22px;
+  }
+
+  .dream-page.dream-page .dream-case-note-head strong {
+    font-size: 20px;
+    letter-spacing: 0.2em;
+  }
+
+  .dream-page.dream-page .dream-case-notes .dream-annex-quote blockquote p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .dream-page.dream-page .dream-case-notes .dream-annex-quote figcaption {
+    margin-top: 6px;
+  }
+}
+
 /* ---------- 用語集 ---------- */
 .dream-page.dream-page .dream-glossary {
   display: grid;
@@ -807,28 +1364,62 @@
 @media (max-width: 520px) {
   .dream-page.dream-page .dream-glossary > div {
     grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding: 14px 0 16px;
+  }
+
+  .dream-page.dream-page .dream-glossary dt {
+    font-size: 16px;
+  }
+
+  .dream-page.dream-page .dream-glossary dd {
     gap: 8px;
+  }
+
+  .dream-page.dream-page .dream-glossary dd > p {
+    line-height: 1.8;
+  }
+
+  .dream-page.dream-page .dream-glossary .dream-annex-quote blockquote p {
+    line-height: 1.75;
+  }
+
+  .dream-page.dream-page .dream-glossary .dream-annex-quote figcaption {
+    margin-top: 4px;
   }
 }
 
 /* ---------- 名台詞 ---------- */
-/* Tanzaku: from 1100px each line hangs as a vertical strip, read right to
-   left; below that the strips lie flat as cards. */
+/* Tanzaku at every width: each line hangs as a vertical strip, read right
+   to left, and the speaker signs at its foot. Phones and tablets had them
+   lying flat as cards, nine deep (1,700px at 390); the strips are shorter
+   there (16em at 16px, 18em on tablets, 23em from 1100px) and wrap onto as
+   many rows as they need, centred. */
 .dream-page.dream-page .dream-quote-band {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: 14px;
+  display: flex;
+  flex-flow: row-reverse wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .dream-page.dream-page .dream-quote-band > li {
-  padding: 22px 20px;
+  padding: 18px 10px;
   border: 1px solid var(--ts-hair);
   outline: 1px solid var(--ts-hair-soft);
   outline-offset: -6px;
-  background: linear-gradient(180deg, rgb(110 44 53 / 22%), transparent 60%), var(--ts-night);
+  background: linear-gradient(270deg, rgb(110 44 53 / 22%), transparent 70%), var(--ts-night);
+  writing-mode: vertical-rl;
+  inline-size: 16em;
+}
+
+.dream-page.dream-page .dream-quote-band .dream-annex-quote {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote {
@@ -838,36 +1429,42 @@
 
 .dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p {
   font-family: var(--ts-display);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
-  line-height: 1.9;
-  letter-spacing: 0.06em;
+  line-height: 1.7;
+  letter-spacing: 0.1em;
 }
 
 .dream-page.dream-page .dream-quote-band .dream-annex-quote figcaption {
-  margin: 14px 0 0;
+  margin: auto 0 0;
+  padding-top: 14px;
   color: var(--ts-shu-text);
+  text-align: end;
+}
+
+.dream-page.dream-page .dream-quote-band .dream-annex-quote figcaption::before {
+  content: "";
+}
+
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-quote-band > li {
+    padding: 22px 12px;
+    inline-size: 18em;
+  }
+
+  .dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p {
+    font-size: 17px;
+  }
 }
 
 @media (min-width: 1100px) {
   .dream-page.dream-page .dream-quote-band {
-    display: flex;
-    flex-flow: row-reverse wrap;
-    justify-content: center;
-    align-items: stretch;
     gap: 12px;
   }
 
   .dream-page.dream-page .dream-quote-band > li {
     padding: 24px 14px;
-    writing-mode: vertical-rl;
     inline-size: 23em;
-  }
-
-  .dream-page.dream-page .dream-quote-band .dream-annex-quote {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
   }
 
   .dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p {
@@ -876,23 +1473,22 @@
   }
 
   .dream-page.dream-page .dream-quote-band .dream-annex-quote figcaption {
-    margin: auto 0 0;
     padding-top: 18px;
-    text-align: end;
-  }
-
-  .dream-page.dream-page .dream-quote-band .dream-annex-quote figcaption::before {
-    content: "";
   }
 }
 
 /* ---------- Pointer response (fine pointers only) ---------- */
 @media (hover: hover) and (pointer: fine) {
-  .dream-page.dream-page :is(.dream-contents a, .dream-agent-open) {
+  .dream-page.dream-page :is(.dream-contents a, .dream-agent-open, .dream-roster-switch) {
     transition:
       background-color 200ms ease,
       color 200ms ease,
       border-color 200ms ease;
+  }
+
+  .dream-page.dream-page .dream-roster-switch:hover {
+    border-color: var(--ts-kin-light);
+    color: var(--ts-kin-hi);
   }
 
   .dream-page.dream-page .dream-contents a:hover {
@@ -907,14 +1503,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dream-page.dream-page :is(.dream-contents a, .dream-agent-open) {
+  .dream-page.dream-page :is(.dream-contents a, .dream-agent-open, .dream-roster-switch) {
     transition: none;
   }
 }
 
 html[data-world-effects="economy"]
   .dream-page.dream-page
-  :is(.dream-contents a, .dream-agent-open) {
+  :is(.dream-contents a, .dream-agent-open, .dream-roster-switch) {
   transition: none;
 }
 
@@ -932,6 +1528,10 @@ html[data-world-effects="economy"]
     border-bottom: 3px double CanvasText;
   }
 
+  .dream-page.dream-page .dream-annex-heading::before {
+    display: none;
+  }
+
   .dream-page.dream-page :is(.dream-roster-seal, .dream-faction-pact b, .dream-contents h2) {
     border: 1px solid CanvasText;
     clip-path: none;
@@ -945,5 +1545,39 @@ html[data-world-effects="economy"]
     border: 1px solid ButtonText;
     color: ButtonText;
     background: ButtonFace;
+  }
+
+  /* The PROFILE switch is a system button; open, its cell is Highlight. */
+  .dream-page.dream-page .dream-roster-switch,
+  .dream-page.dream-page .dream-roster-switch[aria-expanded="true"] {
+    border: 1px solid ButtonText;
+    outline: 0;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .dream-page.dream-page .dream-roster-switch > i {
+    border-color: ButtonText;
+  }
+
+  .dream-page.dream-page .dream-roster-switch[aria-expanded="true"] > i {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .dream-page.dream-page .dream-roster-switch:focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  /* A filed agent's edge was a shadow and a wash; it keeps a rule. */
+  .dream-page.dream-page .dream-agent-roster > li.is-filed {
+    border-left: 2px solid CanvasText;
+  }
+
+  /* The tanzaku keep their strip edges. */
+  .dream-page.dream-page .dream-quote-band > li {
+    border: 1px solid CanvasText;
+    outline: 0;
   }
 }

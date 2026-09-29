@@ -473,6 +473,10 @@ export function DreamChapter() {
   const [dolminenceRecord, setDolminenceRecord] = useState<DreamDolminence | null>(null);
   const [characterOpenedByKeyboard, setCharacterOpenedByKeyboard] = useState(false);
   const [dolminenceOpenedByKeyboard, setDolminenceOpenedByKeyboard] = useState(false);
+  // 人物一覧 on phones: each profile sits behind its PROFILE switch
+  // (styles-dream-annex.css shows every profile on tablets and desktops and
+  // hides the switch there, so the server markup is right at every width).
+  const [openProfiles, setOpenProfiles] = useState<ReadonlySet<string>>(() => new Set());
   const characterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const dolminenceTriggerRef = useRef<HTMLButtonElement | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
@@ -1178,12 +1182,37 @@ export function DreamChapter() {
                 </span>
                 <p className="dream-roster-affiliation">{entry.affiliation}</p>
                 <h3 id={`dream-roster-${entry.id}`}>{entry.name}</h3>
-                {entry.profile.map((paragraph) => (
-                  <p key={paragraph} className="dream-roster-profile">
-                    {paragraph}
-                  </p>
-                ))}
                 <QuoteFigure text={entry.line} />
+                <button
+                  type="button"
+                  className="dream-roster-switch"
+                  aria-expanded={openProfiles.has(entry.id)}
+                  aria-controls={`dream-roster-${entry.id}-profile`}
+                  aria-labelledby={`dream-roster-${entry.id} dream-roster-${entry.id}-switch`}
+                  onClick={(event) => {
+                    setOpenProfiles((current) => {
+                      const next = new Set(current);
+                      if (next.has(entry.id)) next.delete(entry.id);
+                      else next.add(entry.id);
+                      return next;
+                    });
+                    // The re-place signal a native disclosure sends (the Zeus
+                    // button listens for toggle in the capture phase).
+                    event.currentTarget.dispatchEvent(new Event("toggle"));
+                  }}
+                >
+                  <span id={`dream-roster-${entry.id}-switch`} lang="en">
+                    PROFILE
+                  </span>
+                  <i aria-hidden="true" />
+                </button>
+                <div className="dream-roster-body" id={`dream-roster-${entry.id}-profile`}>
+                  {entry.profile.map((paragraph) => (
+                    <p key={paragraph} className="dream-roster-profile">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </article>
             </li>
           ))}

@@ -1,0 +1,48 @@
+/* Dream arrival: how the one-sheet meets the dive.
+
+   Linked after styles-dream-annex.css and before the cinematic skin.
+
+   The dive's ground gives way with the shutter. The older route sheet
+   paints the Dream dive its own ground (styles-route-transitions.css,
+   .load-gate.rider-route-dive.is-dream-dive, 0-3-0), and that outranks the
+   file shutter's clear ground (styles-transition-cinema.css,
+   html body .load-gate.has-cine, 0-2-2). The four ink panels therefore
+   opened onto that ground, not onto the page: about eight flat dark frames
+   after the hand-over, then a cut to the lit page when the gate unmounted.
+   While a full-tier shutter lifts onto this page (html[data-dream-chapter],
+   which the page sets on mount), the ground is clear, so the panels open
+   onto the one-sheet itself. The rule sits in a Dream sheet, so it applies
+   only once the page's own styles are in. The covering phase, the calm and
+   reduced tiers (one opacity shutter) and the dive back to the World keep
+   their ground.
+
+   The one-sheet rests fully drawn under the cover. The Taisho opening (the
+   art settles, the title and the catch are brushed in, the cue rises) ran
+   on mount, under the cover, and was partly spent before the ink opened.
+   While html[data-loading] is present the hero parts carry no animation;
+   when the load gate removes it as the cover starts to lift, CSS starts the
+   opening afresh (styles-dream-taisho.css and styles-dream-elevation.css keep
+   its keyframes, delays and gates), so it plays as the shutter opens. A
+   load without a cover (a direct visit) has no data-loading and plays it on
+   mount, as before. Every beat only rises into place: no flash. */
+
+html[data-dream-chapter="true"]:not([data-world-effects="economy"])
+  body
+  .load-gate.has-cine.is-cine-full.rider-route-dive.is-dream-dive.is-revealing {
+  background: transparent;
+}
+
+html[data-loading]
+  .dream-page.dream-page
+  .dream-hero
+  :is(
+    .dream-hero-art,
+    .dream-hero-title-label,
+    .dream-hero-title-name > span,
+    .dream-hero-catch > span,
+    .dream-hero-copy > p,
+    .dream-hero-actions,
+    .dream-hero-obi
+  ) {
+  animation: none;
+}
