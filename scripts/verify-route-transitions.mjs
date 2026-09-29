@@ -72,6 +72,9 @@ const SCENARIOS = {
   "menu-rexonance": menuDive("/world", "/rexonance-saga#top", "/rexonance-saga"),
   "menu-extreme": menuDive("/world", "/extreme-saga#top", "/extreme-saga"),
   "menu-final": menuDive("/world", "/final-stage#top", "/final-stage"),
+  // The dream dive back to the World (the Dream Chapter's return link): its
+  // ground clears from the World side (styles-world-mirage.css).
+  "dream-world": { start: "/dream-chapter", dest: "/world", target: ".dream-back-link" },
 };
 
 // Budgets from the press (fake clock): the slide control's 260 ms completion

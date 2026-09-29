@@ -125,6 +125,20 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
   overflow-x: clip;
 }
 
+/* The dream dive back from the Dream Chapter opens onto the World. Its older
+   ground (styles-route-transitions.css, .load-gate.rider-route-dive
+   .is-dream-dive, 0-3-0) outranks the file shutter's clear gate, so the
+   panels opened onto that ground and the World arrived in one cut when the
+   gate unmounted: 9-10 flat frames after the hand-over on desktop, phone and
+   Android. The Dream sheet clears it for dives into the Dream Chapter; this
+   clears it once the World is mounted under a full-tier shutter. The
+   covering phase and the calm and reduced fades keep their ground. */
+html[data-mode="world"]:not([data-world-effects="economy"])
+  body:has(.site-shell.film-edition.mirage-edition)
+  .load-gate.has-cine.is-cine-full.rider-route-dive.is-dream-dive.is-revealing {
+  background: transparent;
+}
+
 /* ================================================================
    Chrome: opaque topbar and brand
    ================================================================ */
@@ -2663,6 +2677,89 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dial
      thumb. Forcing it takes the system colour. */
   .site-shell.film-edition.mirage-edition .ios-slide-open .ios-slide-open-thumb svg {
     forced-color-adjust: auto;
+  }
+}
+
+/* ================================================================
+   Rail labels at the 12px floor (2026-09-30). The 六詠 archive and column
+   rails' codes and names still read 11px from styles-world/28.css. They
+   take 12px inside the line boxes the 11px labels had, so no rail or tab
+   changes size: the liquid geometry stays as measured. (The rider rail
+   and the HOLD + SLIDE labels are lifted in their own sheets, which this
+   sheet leaves alone.) Static; nothing here moves.
+   ================================================================ */
+.site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+  font-size: 12px;
+  line-height: 16.5px;
+}
+
+@media (max-width: 560px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+    line-height: 14.85px;
+  }
+}
+
+/* Under 350px the codes wrap (above); tighter tracking keeps the longest
+   word, REVERSE, inside the tab's old width. From 350px to 379px the
+   one-line "REVERSE / 02" needs 76px at 12px: untracked, in a 2px inset,
+   it keeps its line in the same tab. */
+@media (max-width: 349px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 379px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button[role="tab"] {
+    padding-inline: 2px;
+  }
+
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+    letter-spacing: 0;
+  }
+}
+
+/* Wider rails track the codes at 0.22em; at 12px 0.155em sets them no
+   wider than before, so they break where they broke at 11px. Landscape
+   phones keep their one-line tracking (above). */
+@media (min-width: 561px) and (min-height: 561px), (min-width: 561px) and (orientation: portrait) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button small {
+    letter-spacing: 0.155em;
+  }
+}
+
+/* Phones set the names to 13px above; wider rails had them at 11px. */
+@media (min-width: 561px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button b {
+    font-size: 12px;
+    line-height: 14.85px;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 840px) {
+  .site-shell.film-edition.mirage-edition .manager-archive-tabs button b {
+    line-height: 15.4px;
+  }
+}
+
+/* From 900px the programme sheet sets 12px and 13px. */
+@media (max-width: 899px) {
+  .site-shell.film-edition.mirage-edition
+    .world-column-tabs:not(.world-column-dialog-tabs)
+    > button[role="tab"]
+    :is(small, b) {
+    font-size: 12px;
+    line-height: 16.5px;
+  }
+}
+
+/* Under 360px the 52px tab holds レジェンズ at 12px only a hair tighter. */
+@media (max-width: 359px) {
+  .site-shell.film-edition.mirage-edition
+    .world-column-tabs:not(.world-column-dialog-tabs)
+    > button[role="tab"]
+    b {
+    letter-spacing: -0.02em;
   }
 }
 

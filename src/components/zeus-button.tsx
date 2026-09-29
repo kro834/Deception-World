@@ -79,6 +79,12 @@ const ZEUS_AVOID_SELECTOR = [
   ".wa-profile > summary",
   ".wa-doc > summary",
   ".dream-story-case > summary",
+  // Dream's phone PROFILE switch on the cast tiles (a button, same role).
+  ".dream-roster-switch",
+  // RE DIVE's 欠番 tags on the sealed III and VI plates: small words the
+  // glyph pass skips (only display figures of 24px count), so on phones the
+  // button could rest on the VI strip's tag.
+  ".re-dive-section .signal.is-vacant > b",
   ".wa-open",
   ".wa-contents a",
   ".dream-contents a",

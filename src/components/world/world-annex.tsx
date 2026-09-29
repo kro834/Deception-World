@@ -1,7 +1,7 @@
-import type { CSSProperties, MouseEvent, SyntheticEvent } from "react";
+import type { CSSProperties, MouseEvent, ReactNode, SyntheticEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { dossierImage } from "@/lib/dossier-images";
-import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";
+import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thumbnail-images";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import {
   WORLD_BRIEF,
@@ -44,10 +44,15 @@ const pad = (value: number) => String(value).padStart(2, "0");
 /* Portrait crops for the cast wall, keyed by roster id. Existing files only:
    the civilians' dossier photos, the 六詠 card thumbnails (the same URLs the
    cards load) and the related characters' key art. アザト has no file: an
-   empty socket. Crops are static (object-position, a fixed scale). */
+   empty socket. Crops are static (object-position, a fixed scale).
+   Delivery: the dossier portraits come as right-sized candidates for the
+   tile (portraitThumbnail: 360 / 720 px and the full file); the 六詠 faces
+   keep the cards' own candidates and sizes, so they stay cache hits. A quote
+   chip and the ID photo ask with the tile's sizes, so they reuse its file. */
 type Portrait = {
   src: string;
   srcSet?: string;
+  sizes?: string;
   width: number;
   height: number;
   pos: string;
@@ -57,15 +62,13 @@ type Portrait = {
   pale?: boolean;
 };
 
-const PORTRAIT_SIZES = "(max-width: 559px) 44vw, (max-width: 1099px) 24vw, 220px";
-
 const civilian = (src: string, width: number, height: number, pos: string, zoom?: number) =>
-  ({ src, srcSet: dossierImage(src).srcSet, width, height, pos, zoom }) satisfies Portrait;
+  ({ src, ...portraitThumbnail(src), width, height, pos, zoom }) satisfies Portrait;
 
 const manager = (key: "rex-loi" | "reemu" | "shuza", width: number, height: number, pos: string) =>
   ({
     src: `/manager-${key}-thumb.jpeg`,
-    srcSet: managerThumbnail(key).srcSet,
+    ...managerThumbnail(key),
     width,
     height,
     pos,
@@ -87,14 +90,34 @@ const CAST_PORTRAITS: Record<string, Portrait> = {
   mamoru: civilian("/civilian-argenome.jpeg", 1102, 1427, "50% 14%"),
   james: {
     src: "/character-james-20260829.webp",
+    ...portraitThumbnail("/character-james-20260829.webp"),
     width: 720,
     height: 1165,
     pos: "50% 8%",
     pale: true,
   },
-  luna: { src: "/character-luna.webp", width: 1028, height: 1800, pos: "50% 12%" },
-  terra: { src: "/character-terra.webp", width: 1080, height: 1431, pos: "50% 10%", pale: true },
-  yoake: { src: "/character-yoake-mamori.jpeg", width: 736, height: 976, pos: "50% 12%" },
+  luna: {
+    src: "/character-luna.webp",
+    ...portraitThumbnail("/character-luna.webp"),
+    width: 1028,
+    height: 1800,
+    pos: "50% 12%",
+  },
+  terra: {
+    src: "/character-terra.webp",
+    ...portraitThumbnail("/character-terra.webp"),
+    width: 1080,
+    height: 1431,
+    pos: "50% 10%",
+    pale: true,
+  },
+  yoake: {
+    src: "/character-yoake-mamori.jpeg",
+    ...portraitThumbnail("/character-yoake-mamori.jpeg"),
+    width: 736,
+    height: 976,
+    pos: "50% 12%",
+  },
 };
 
 /* A quoted speaker who is on the wall gets the wall's own crop as a chip. */
@@ -142,7 +165,7 @@ function AnnexQuote({ text, by, signature }: { text: string; by?: string; signat
               <img
                 src={voice.src}
                 srcSet={voice.srcSet}
-                sizes="28px"
+                sizes={voice.sizes}
                 alt=""
                 width={28}
                 height={28}
@@ -214,7 +237,7 @@ function CastPortrait({ entry }: { entry: WorldCastEntry }) {
       <img
         src={portrait.src}
         srcSet={portrait.srcSet}
-        sizes={PORTRAIT_SIZES}
+        sizes={portrait.sizes}
         alt=""
         width={portrait.width}
         height={portrait.height}
@@ -376,6 +399,7 @@ function WorldFiles() {
                 <span className="wa-id-photo" aria-hidden="true">
                   <img
                     src="/character-james-20260829.webp"
+                    {...portraitThumbnail("/character-james-20260829.webp")}
                     alt=""
                     width={720}
                     height={1165}
@@ -440,6 +464,37 @@ function WorldFiles() {
         </section>
       </div>
     </section>
+  );
+}
+
+/* The quotes log scrolls sideways below 700px and is a still list above.
+   Only a rail that scrolls is a Tab stop (its lines hold no control, so the
+   keyboard needs the stop to scroll it); on a desktop the still list was an
+   empty stop. The server and the first client render keep the stop, so
+   hydration matches; a resize past 700px updates it. */
+function QuoteRail({ children }: { children: ReactNode }) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const [scrolls, setScrolls] = useState(true);
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const update = () => setScrolls(rail.scrollWidth > rail.clientWidth + 1);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(rail);
+    if (rail.firstElementChild) observer.observe(rail.firstElementChild);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div
+      ref={railRef}
+      className="wa-quote-rail"
+      role="region"
+      tabIndex={scrolls ? 0 : undefined}
+      aria-labelledby="quotes-title"
+    >
+      {children}
+    </div>
   );
 }
 
@@ -538,7 +593,7 @@ function ArchiveLog() {
           />
           {/* A snap rail on phones (the region scrolls sideways; a vertical
               swipe still scrolls the page), a plate-less log from 700px. */}
-          <div className="wa-quote-rail" role="region" tabIndex={0} aria-labelledby="quotes-title">
+          <QuoteRail>
             <ol className="wa-quote-band">
               {WORLD_QUOTES.map((quote) => (
                 <li key={quote.text}>
@@ -546,7 +601,7 @@ function ArchiveLog() {
                 </li>
               ))}
             </ol>
-          </div>
+          </QuoteRail>
         </div>
       </section>
     </>

@@ -19,6 +19,9 @@ test("disclosure rows and the new controls are stepped off as whole boxes", () =
     '".wa-profile > summary"',
     '".wa-doc > summary"',
     '".dream-story-case > summary"',
+    // 2026-09-30: Dream's phone PROFILE switch and RE DIVE's 欠番 tags.
+    '".dream-roster-switch"',
+    '".re-dive-section .signal.is-vacant > b"',
     '".wa-open"',
     '".wa-contents a"',
     '".dream-contents a"',

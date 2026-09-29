@@ -1526,6 +1526,17 @@
   }
 }
 
+/* Economy rendering freezes decoration loops (the site's rule): the crown
+   line, the floating portrait and the orbit rings rest as reduced motion
+   leaves them. They had kept looping on the Saga and シエル files. */
+html[data-world-effects="economy"] .form-pickup.is-rexonance-pickup::after,
+html[data-world-effects="economy"] .is-rexonance-pickup .form-pickup-visual img,
+html[data-world-effects="economy"] .rexonance-card-ornaments i,
+html[data-world-effects="economy"] .rexonance-panel-ambient i,
+html[data-world-effects="economy"] .rexonance-weapon-grid figure > div::after {
+  animation: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .form-pickup.is-rexonance-pickup::after,
   .is-rexonance-pickup .form-pickup-visual img,

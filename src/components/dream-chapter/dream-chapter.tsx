@@ -9,6 +9,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
+import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_AGENT_ROSTER,
@@ -688,7 +689,7 @@ export function DreamChapter() {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = DREAM_POSTERS[(posterIndex + 1) % DREAM_POSTERS.length].src;
+      preparePosterImage(image, DREAM_POSTERS[(posterIndex + 1) % DREAM_POSTERS.length].src);
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [
@@ -777,7 +778,7 @@ export function DreamChapter() {
     const finalImage = new Image();
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
-    finalImage.src = DREAM_POSTERS[finalPoster].src;
+    preparePosterImage(finalImage, DREAM_POSTERS[finalPoster].src);
     const finalReady = finalImage.decode?.().catch(() => undefined) ?? Promise.resolve();
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(async () => {
@@ -964,6 +965,7 @@ export function DreamChapter() {
             <figure className="dream-poster-previous" aria-hidden="true">
               <img
                 src={previousPoster.src}
+                {...posterImage(previousPoster.src)}
                 alt=""
                 width={previousPoster.width}
                 height={previousPoster.height}
@@ -987,6 +989,7 @@ export function DreamChapter() {
             <img
               key={activePoster.src}
               src={activePoster.src}
+              {...posterImage(activePoster.src)}
               alt={activePoster.alt}
               width={activePoster.width}
               height={activePoster.height}

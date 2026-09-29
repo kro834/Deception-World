@@ -33,6 +33,44 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
     assert.equal(home.split(`<${name} />`).length, 2, name);
     stripped = stripped.replace(`\n      <${name} />\n`, "");
   }
+  // 2026-09-30: the poster deck asks for right-sized WebPs (posterImage and
+  // preparePosterImage, src/lib/thumbnail-images.ts). Undoing exactly those
+  // edits gives back the pinned file, so no string on /world moved with them.
+  const backCard = (indent) =>
+    `<img\n${indent}  src={current.src}\n${indent}  {...posterImage(current.src)}\n${indent}  alt=""\n${indent}  loading="lazy"\n${indent}  decoding="async"\n${indent}  fetchPriority="low"\n${indent}/>`;
+  const posterHooks = [
+    [
+      'import {\n  episodeThumbnail,\n  managerThumbnail,\n  posterImage,\n  preparePosterImage,\n} from "@/lib/thumbnail-images";',
+      'import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";',
+      1,
+    ],
+    ["preparePosterImage(image, POSTERS[nextIndex].src);", "image.src = POSTERS[nextIndex].src;", 1],
+    [
+      "preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);",
+      "image.src = POSTERS[(poster + 1) % POSTERS.length].src;",
+      1,
+    ],
+    [
+      "preparePosterImage(finalImage, POSTERS[finalPoster].src);",
+      "finalImage.src = POSTERS[finalPoster].src;",
+      1,
+    ],
+    [
+      backCard("              "),
+      '<img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />',
+      3,
+    ],
+    ["\n                {...posterImage(nextPoster.src)}", "", 1],
+    ["\n                    {...posterImage(previous.src)}", "", 1],
+    ["\n                  {...posterImage(current.src)}", "", 1],
+    // The hero backdrop shows the same poster, so it asks for the same file.
+    ["\n                {...posterImage(previous.src)}", "", 1],
+    ["\n              {...posterImage(current.src)}", "", 1],
+  ];
+  for (const [edited, original, count] of posterHooks) {
+    assert.equal(stripped.split(edited).length - 1, count, edited);
+    stripped = stripped.replaceAll(edited, original);
+  }
   // SHA-256 of world-home.tsx before the annex (every existing string on
   // /world). Update only on the owner's request to change that copy.
   assert.equal(
@@ -174,10 +212,14 @@ test("the annex presentation: chapter openers, portraits, disclosures, the quote
   for (const key of ["rex-loi", "reemu", "shuza"]) {
     assert.ok(existsSync(new URL(`../public/manager-${key}-thumb.jpeg`, import.meta.url)), key);
   }
+  // 2026-09-30: the rail is a keyboard stop only while it scrolls (below
+  // 700px); the still desktop list is no longer an empty Tab stop.
   assert.match(
     annex,
-    /<div className="wa-quote-rail" role="region" tabIndex=\{0\} aria-labelledby="quotes-title">/,
+    /<div\s+ref=\{railRef\}\s+className="wa-quote-rail"\s+role="region"\s+tabIndex=\{scrolls \? 0 : undefined\}\s+aria-labelledby="quotes-title"\s*>/,
   );
+  assert.match(annex, /setScrolls\(rail\.scrollWidth > rail\.clientWidth \+ 1\)/);
+  assert.match(annex, /const \[scrolls, setScrolls\] = useState\(true\);/);
   assert.match(css, /scroll-margin-top: calc\(\s*var\(--film-topbar-height/);
   assert.match(css, /summary:focus-visible \{\s*outline: 2px solid var\(--mr-focus\);/);
   // REALMS documents keep the office as their accessible name (it was the

@@ -21,7 +21,8 @@ test("rider action gives labels and arrows readable contrast at tablet sizes", (
       new RegExp(`\\.rider-dossier-open \\.ios-slide-open-label ${part} \\{([^}]+)\\}`),
     )?.[1];
   assert.match(label("small"), /color: #b9ebfa/);
-  assert.match(label("small"), /font-size: 11px/);
+  // 12px since 2026-09-30: the site's floor (the label read 11px).
+  assert.match(label("small"), /font-size: 12px/);
   assert.match(label("b"), /color: #fff/);
   assert.match(label("b"), /font-size: 13px/);
   assert.match(css, /\.rider-dossier-open \.ios-slide-open-arrows \{[^}]*opacity: 1/s);

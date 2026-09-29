@@ -726,15 +726,17 @@ main.site-shell.film-edition.mirage-edition > footer {
 }
 
 /* Under 360px 自動切替 broke as 自動切／替 in its 42px label column: the
-   control's inner gap and the label give up a pixel or two so it keeps its
-   one word. */
+   control's inner gap and inset give up a few pixels, so the word keeps its
+   line at the 12px floor. (At 11px LOCKED still broke, and the control grew
+   16px taller whenever the poster was locked.) */
 @media (max-width: 359px) {
   main.site-shell.film-edition .poster-control-cluster > .poster-lock {
     column-gap: 4px;
+    padding-inline: 4px;
   }
 
   main.site-shell.film-edition .poster-control-cluster > .poster-lock b {
-    font-size: 11px;
+    font-size: 12px;
     word-break: keep-all;
   }
 }

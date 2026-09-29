@@ -38,13 +38,26 @@ html body .rider-tabs.liquid-swipe-tabs {
 }
 html body .rider-tabs button span {
   color: #e0e8f2;
-  font-size: clamp(11px, 0.85vw, 13px);
+  font-size: clamp(12px, 0.85vw, 13px);
   line-height: 1.45;
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
 html body .rider-tabs button[aria-selected="true"] span {
   color: #fff;
+}
+/* The rider codes keep the site's 12px floor: they read 11px below 1412px,
+   and the World addon sheet sets every rail span to 11px (and lets it wrap)
+   under 841px, so this outranks it. The codes keep one line (OVER ZEZTZ
+   tracks tighter under 360px) and the 74px tabs do not change size. */
+html body .rider-tabs.liquid-swipe-tabs > button[role="tab"] span {
+  font-size: clamp(12px, 0.85vw, 13px);
+  white-space: nowrap;
+}
+@media (max-width: 359px) {
+  html body .rider-tabs.liquid-swipe-tabs > button[role="tab"] span {
+    letter-spacing: 0.04em;
+  }
 }
 html body .rider-tabs > button[role="tab"] {
   height: 74px;

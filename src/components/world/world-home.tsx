@@ -1142,7 +1142,7 @@ export function WorldHome() {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[nextIndex].src;
+      preparePosterImage(image, POSTERS[nextIndex].src);
       try {
         await image.decode();
         if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
@@ -1180,7 +1180,7 @@ export function WorldHome() {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
+      preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
@@ -1449,7 +1449,7 @@ export function WorldHome() {
     const finalImage = new Image();
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
-    finalImage.src = POSTERS[finalPoster].src;
+    preparePosterImage(finalImage, POSTERS[finalPoster].src);
     const finalReady =
       finalImage
         .decode?.()
@@ -1660,6 +1660,7 @@ export function WorldHome() {
             >
               <img
                 src={previous.src}
+                {...posterImage(previous.src)}
                 alt=""
                 style={{ objectPosition: previous.pos }}
                 decoding="async"
@@ -1669,6 +1670,7 @@ export function WorldHome() {
           <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
             <img
               src={current.src}
+              {...posterImage(current.src)}
               alt=""
               style={{ objectPosition: current.pos }}
               fetchPriority="high"
@@ -1749,6 +1751,7 @@ export function WorldHome() {
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img
                 src={nextPoster.src}
+                {...posterImage(nextPoster.src)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -1756,13 +1759,34 @@ export function WorldHome() {
               />
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
@@ -1772,6 +1796,7 @@ export function WorldHome() {
                     className="poster-image poster-image-previous"
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
+                    {...posterImage(previous.src)}
                     alt=""
                     style={{
                       objectPosition: previous.pos,
@@ -1788,6 +1813,7 @@ export function WorldHome() {
                   }
                   key={`poster-${poster}`}
                   src={current.src}
+                  {...posterImage(current.src)}
                   alt={current.alt}
                   style={{
                     objectPosition: current.pos,
@@ -2857,4 +2883,9 @@ export function WorldHome() {
   );
 }
 import { dossierImage } from "@/lib/dossier-images";
-import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";
+import {
+  episodeThumbnail,
+  managerThumbnail,
+  posterImage,
+  preparePosterImage,
+} from "@/lib/thumbnail-images";

@@ -12,6 +12,9 @@ export const dossierImageSources = [
   "/episode-03-deception-world.jpeg",
   "/episode-04-kill.jpeg",
   "/episode-05-farce.jpeg",
+  // The Saga file's nightmare pickup (and its Final Stage card): 721 KB as
+  // supplied, for a card that stays under 600 px.
+  "/nightmare-machiavel-gore.jpeg",
 ] as const;
 const sources = new Set<string>(dossierImageSources);
 const managerSources = new Set([

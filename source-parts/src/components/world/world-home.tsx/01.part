@@ -474,3 +474,8 @@ const EPISODES: EpisodeRecord[] = [
         height: 1449,
         to: "/managers/shuza",
         assets: MANAGER_ASSETS.shuza,
+      },
+      {
+        label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",

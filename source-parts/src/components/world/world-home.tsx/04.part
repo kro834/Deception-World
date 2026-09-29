@@ -1,25 +1,10 @@
-        posterSequence[index],
-      ];
-    }
-    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
-    const previewPool = [
-      poster,
-      prevPoster ?? poster,
-      (poster + 1) % POSTERS.length,
-      (poster + 2) % POSTERS.length,
-    ].filter((value, index, values) => values.indexOf(value) === index);
-    for (let index = previewPool.length - 1; index > 0; index -= 1) {
-      const swapIndex = randomBelow(index + 1);
-      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
-    }
-    const previewPosters = Array.from(
       { length: 9 },
       (_, index) => previewPool[index % previewPool.length],
     );
     const finalImage = new Image();
     finalImage.decoding = "async";
     finalImage.fetchPriority = "high";
-    finalImage.src = POSTERS[finalPoster].src;
+    preparePosterImage(finalImage, POSTERS[finalPoster].src);
     const finalReady =
       finalImage
         .decode?.()
@@ -230,6 +215,7 @@
             >
               <img
                 src={previous.src}
+                {...posterImage(previous.src)}
                 alt=""
                 style={{ objectPosition: previous.pos }}
                 decoding="async"
@@ -239,6 +225,7 @@
           <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
             <img
               src={current.src}
+              {...posterImage(current.src)}
               alt=""
               style={{ objectPosition: current.pos }}
               fetchPriority="high"
@@ -319,6 +306,7 @@
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img
                 src={nextPoster.src}
+                {...posterImage(nextPoster.src)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -326,13 +314,34 @@
               />
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />
+              <img
+                src={current.src}
+                {...posterImage(current.src)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+              />
             </div>
             <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
@@ -342,6 +351,7 @@
                     className="poster-image poster-image-previous"
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
+                    {...posterImage(previous.src)}
                     alt=""
                     style={{
                       objectPosition: previous.pos,
@@ -358,6 +368,7 @@
                   }
                   key={`poster-${poster}`}
                   src={current.src}
+                  {...posterImage(current.src)}
                   alt={current.alt}
                   style={{
                     objectPosition: current.pos,
@@ -469,8 +480,3 @@
                         stroke="currentColor"
                         strokeWidth="1.8"
                       />
-                    </svg>
-                  )}
-                </span>
-                <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>

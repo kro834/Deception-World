@@ -1,4 +1,3 @@
-          "コードナンバー：セヴン。CODE英国支部のエージェント。陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆る。近接、銃器、潜入、解析、情報回収を一人でこなす。",
         ],
       },
       {
@@ -337,3 +336,4 @@ export function RiderPage({ id }: { id: string }) {
               <q key={q}>{q}</q>
             ))}
           </div>
+          <dl className="manager-facts">

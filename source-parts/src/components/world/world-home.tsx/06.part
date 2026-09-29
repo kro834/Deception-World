@@ -474,4 +474,9 @@
   );
 }
 import { dossierImage } from "@/lib/dossier-images";
-import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";
+import {
+  episodeThumbnail,
+  managerThumbnail,
+  posterImage,
+  preparePosterImage,
+} from "@/lib/thumbnail-images";

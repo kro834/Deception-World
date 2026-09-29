@@ -47,7 +47,7 @@ function PressFeedback() {
 }
 
 export const Route = createRootRoute({
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" },
@@ -78,14 +78,22 @@ export const Route = createRootRoute({
     // One UI, iOS 18, economy, native progress) are there at the first paint.
     scripts: [{ children: DEVICE_PROFILE_SCRIPT }],
     links: [
-      {
-        rel: "preload",
-        as: "image",
-        type: "image/webp",
-        href: "/zeus-button-360.webp",
-        imageSrcSet: ZEUS_BUTTON_SRCSET,
-        imageSizes: ZEUS_BUTTON_SIZES,
-      },
+      // The Zeus button's image, for every route that shows the button. The
+      // opening (/) never renders it, so there the preload went unused (a
+      // console warning on every visit, and a fetch beside the title's logo).
+      // (The root's head sees every match; its type knows only its own id.)
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [
+            {
+              rel: "preload",
+              as: "image",
+              type: "image/webp",
+              href: "/zeus-button-360.webp",
+              imageSrcSet: ZEUS_BUTTON_SRCSET,
+              imageSizes: ZEUS_BUTTON_SIZES,
+            },
+          ]),
       { rel: "stylesheet", href: androidPerformanceCss },
       { rel: "stylesheet", href: ios18PerformanceCss },
       { rel: "stylesheet", href: ios27EnhancementsCss },

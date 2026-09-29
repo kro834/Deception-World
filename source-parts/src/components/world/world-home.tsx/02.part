@@ -1,8 +1,3 @@
-      },
-      {
-        label: "仮面ライダーサイファー",
-        src: "/rider-cipher.jpeg",
-        pos: "50% 12%",
         alt: "仮面ライダーサイファー",
         width: 1024,
         height: 1280,
@@ -475,3 +470,13 @@ export function WorldHome() {
     setManagerTab(2);
     syncRail(managerRail.current, 2);
   }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;

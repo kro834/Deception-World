@@ -79,10 +79,12 @@ async function assertSelectedImage(page, expectedIndex, label) {
     complete: node.complete,
   }));
   assert.ok(result.complete && result.naturalWidth > 0, `${label}: selected poster decoded`);
-  assert.equal(
-    result.src,
-    new URL(`/dream-chapter-poster-${String(expectedIndex + 1).padStart(2, "0")}.jpeg`, base).href,
-    `${label}: main poster URL matches its selected thumbnail`,
+  // The poster or, since 2026-09-30, its WebP delivery copy of the same
+  // pixels (posterImage, src/lib/thumbnail-images.ts); poster 05 is the JPEG.
+  const stem = `/dream-chapter-poster-${String(expectedIndex + 1).padStart(2, "0")}`;
+  assert.ok(
+    [`${stem}.jpeg`, `${stem}-delivery.webp`].map((path) => new URL(path, base).href).includes(result.src),
+    `${label}: main poster URL matches its selected thumbnail (${result.src})`,
   );
 }
 

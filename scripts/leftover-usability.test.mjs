@@ -244,8 +244,10 @@ test("narrow phones keep short labels and figures whole", () => {
   assert.match(narrow, /\.dream-story-case-status \{\s*grid-column: 2;\s*grid-row: 2;/);
   assert.match(narrow, /\.dream-story-case-toggle \{\s*grid-column: 3;/);
 
+  // 12px since 2026-09-30 (the site's floor): the control's inset gives the
+  // word its room, and LOCKED no longer breaks either.
   assert.match(
     read("src/styles-world-programme-sections.css"),
-    /@media \(max-width: 359px\) \{[\s\S]*?\.poster-lock b \{\s*font-size: 11px;\s*word-break: keep-all;/,
+    /@media \(max-width: 359px\) \{[\s\S]*?\.poster-lock \{\s*column-gap: 4px;\s*padding-inline: 4px;[\s\S]*?\.poster-lock b \{\s*font-size: 12px;\s*word-break: keep-all;/,
   );
 });

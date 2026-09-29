@@ -91,6 +91,14 @@ main.manager-page:not(.is-sovereign) .manager-topbar {
     0 18px 44px rgb(0 0 0 / 45%);
 }
 
+/* The brand reads at 12px or larger, as on the sovereign file: the sigil,
+   DECEPTION WORLD and the file line were 10-11px. */
+main.manager-page:not(.is-sovereign) .manager-topbar .brand-sigil i,
+main.manager-page:not(.is-sovereign) .manager-topbar .brand b,
+main.manager-page:not(.is-sovereign) .manager-topbar .brand small {
+  font-size: 12px;
+}
+
 /* ================================================================
    Panels: square, on the deck, locked on with brackets
    ================================================================ */
@@ -215,10 +223,12 @@ main.manager-page:not(.is-sovereign) .manager-portrait-frame .manager-numeral {
     2px 0 0 rgb(122 232 255 / 45%);
 }
 
-/* The reader bar: a deck strip ruled by the prism. */
+/* The reader bar: a deck strip ruled by the prism, on an opaque plate (at
+   96% the chapters showed through it while scrolling; the sovereign file's
+   bar is opaque too). */
 main.manager-page:not(.is-sovereign) .dossier-reader {
   border-color: rgb(122 232 255 / 18%);
-  background-color: rgb(8 14 24 / 96%);
+  background-color: #080e18;
 }
 
 main.manager-page:not(.is-sovereign) .dossier-reader::after {
@@ -443,12 +453,22 @@ main.manager-page:not(.is-sovereign) .manager-pagination .dossier-index-return {
   position: relative;
 }
 
+/* 12px arms on the list return. --dm-brackets is resolved on <main> with
+   22px arms, so a local --dm-arm cannot shorten it: the list is spelled out
+   here, as the sovereign file does with its --sv-brackets-s. */
 main.manager-page:not(.is-sovereign) .manager-pagination .dossier-index-return::after {
-  --dm-arm: 12px;
   content: "";
   position: absolute;
   inset: -1px;
-  background: var(--dm-brackets);
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 12px 2px,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 12px,
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 12px 2px,
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 2px 12px,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 12px 2px,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 12px,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 12px 2px,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 12px;
   background-repeat: no-repeat;
   pointer-events: none;
 }
@@ -862,6 +882,12 @@ main.manager-page:not(.is-sovereign)
 
   /* The stage's light and ramp are ornament; the art is drawn as it is. */
   main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-frame::after {
+    display: none;
+  }
+
+  /* The ambient ring loses its glow and is drawn as a system line straight
+     through the name and the contents; the sovereign file hides it too. */
+  main.manager-page:not(.is-sovereign) .manager-glow {
     display: none;
   }
 

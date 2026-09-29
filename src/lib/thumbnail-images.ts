@@ -91,6 +91,170 @@ export const CIEL_PORTRAIT: ImageSet = {
 };
 export const CIEL_PORTRAIT_SIZES = "(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px";
 
+// The World cast wall (04 CAST FILES) shows the dossiers' own portraits in
+// 4:5 tiles, and its quote chips and the 05 ID photo show the same crops.
+// They loaded the full files (up to 1200 px, 248-456 KB) for tiles of 103-345
+// px; 360 and 720 px candidates are drawn from the files as supplied by
+// scripts/build-portrait-variants.mjs, and the full file stays the largest
+// candidate (for a 3x landscape phone or a 2x desktop with a profile open).
+// A source without a delivery copy gets one at its own width (`build`).
+const portrait = (source: string, full: string, fullWidth: number, buildFull = false): ImageSet => {
+  const stem = full.replace(/\.webp$/, "");
+  return {
+    source,
+    variants: [
+      { path: `${stem}-360.webp`, width: 360, build: true },
+      // A source not much wider than 720 px serves that step itself.
+      ...(fullWidth >= 840 ? [{ path: `${stem}-720.webp`, width: 720, build: true }] : []),
+      { path: full, width: fullWidth, ...(buildFull ? { build: true } : null) },
+    ],
+  };
+};
+
+/* Keyed by the URL the tile's `src` keeps. */
+export const PORTRAIT_THUMBNAILS: Record<string, ImageSet> = {
+  "/civilian-yuma-20260826.jpeg": portrait(
+    "/civilian-yuma-20260826.jpeg",
+    "/civilian-yuma-20260826-delivery.webp",
+    960,
+  ),
+  "/civilian-bell-20260826.jpeg": portrait(
+    "/civilian-bell-20260826.jpeg",
+    "/civilian-bell-20260826-delivery.webp",
+    853,
+  ),
+  "/civilian-lore.jpeg": portrait("/civilian-lore.jpeg", "/civilian-lore-delivery.webp", 1200),
+  "/civilian-leddic.jpeg": portrait("/civilian-leddic.jpeg", "/civilian-leddic-delivery.webp", 1086),
+  "/civilian-naikami-chigiri.jpeg": portrait(
+    "/civilian-naikami-chigiri.jpeg",
+    "/civilian-naikami-chigiri-delivery.webp",
+    1050,
+    true,
+  ),
+  "/civilian-argenome.jpeg": portrait(
+    "/civilian-argenome.jpeg",
+    "/civilian-argenome-delivery.webp",
+    1102,
+  ),
+  "/character-james-20260829.webp": portrait(
+    "/character-james-20260829.jpg",
+    "/character-james-20260829.webp",
+    720,
+  ),
+  "/character-luna.webp": portrait("/character-luna.jpeg", "/character-luna.webp", 1028),
+  "/character-terra.webp": portrait("/character-terra.jpeg", "/character-terra.webp", 1080),
+  "/character-yoake-mamori.jpeg": portrait(
+    "/character-yoake-mamori.jpeg",
+    "/character-yoake-mamori-delivery.webp",
+    736,
+    true,
+  ),
+};
+
+// Tiles, measured at 320-1920 px with their crop zoom (up to 1.3): two
+// columns under 560 px, three to 899 px, four to 1099 px, then five, and an
+// opened profile's face at about 28% of the row (at most 480 px).
+export const PORTRAIT_THUMBNAIL_SIZES =
+  "(max-width: 559px) 56vw, (max-width: 899px) 37vw, (max-width: 1099px) 29vw, min(28.3vw, 480px)";
+
+export function portraitThumbnail(source: string) {
+  const set = PORTRAIT_THUMBNAILS[source];
+  return set ? { srcSet: srcSet(set), sizes: PORTRAIT_THUMBNAIL_SIZES } : {};
+}
+
+// The World hero's poster deck turns every 5.2s and fetches the next poster:
+// 32 supplied JPEGs of 225-800 KB (11.9 MB for the round). The same file
+// fills the full-bleed hero backdrop, so each poster is fetched once, at its
+// own width. It gains a WebP delivery copy of the same pixels (a re-encode by
+// scripts/build-card-variants.mjs, 3-5 times smaller), offered as a 1x srcset
+// so the intrinsic size stays the JPEG's; the JPEG stays the `src`. The first
+// poster keeps its delivery file, which the opening's handoff and the route
+// preload share, and the two rider key visuals reuse the rider panel's WebPs.
+const POSTER_SOURCES: readonly (readonly [string, number])[] = [
+  ["/poster-card-03.jpeg", 1086],
+  ["/poster-card-04.jpeg", 1023],
+  ["/poster-card-05.jpeg", 1086],
+  ["/poster-card-06.jpeg", 1086],
+  ["/poster-card-07.jpeg", 1254],
+  ["/poster-card-08.jpeg", 1254],
+  ["/poster-card-10.jpeg", 1122],
+  ["/poster-card-11.jpeg", 1122],
+  ["/poster-card-12.jpeg", 1122],
+  ["/poster-card-13.jpeg", 1086],
+  ["/poster-card-14.jpeg", 1086],
+  ["/poster-card-15.jpeg", 1536],
+  ["/poster-card-16.jpeg", 1672],
+  ["/poster-card-17.jpeg", 960],
+  ["/poster-card-18.jpeg", 876],
+  ["/poster-card-19.jpeg", 1280],
+  ["/poster-card-20.jpeg", 1024],
+  ["/poster-card-21.jpeg", 1280],
+  ["/poster-card-22.jpeg", 853],
+  ["/poster-card-23.jpeg", 1024],
+  ["/poster-card-24.jpeg", 960],
+  ["/poster-card-25.jpeg", 861],
+  ["/poster-card-26.jpeg", 1024],
+  ["/poster-card-27.jpeg", 1122],
+  ["/poster-card-28.jpeg", 1024],
+  ["/poster-card-29.jpeg", 1024],
+  ["/poster-card-30.jpeg", 1023],
+  ["/poster-card-31.jpeg", 1122],
+  ["/poster-card-32-20260825.jpeg", 1122],
+  ["/poster-card-33.jpeg", 1122],
+  // The Dream Chapter's poster console turns the same way (15 JPEGs of
+  // 190-700 KB). Poster 05 is also the page's hero and a warmed route asset
+  // (DREAM_CHAPTER_ENTER_ASSETS), so it keeps its JPEG.
+  ["/dream-chapter-poster-01.jpeg", 1126],
+  ["/dream-chapter-poster-02.jpeg", 1024],
+  ["/dream-chapter-poster-03.jpeg", 1448],
+  ["/dream-chapter-poster-04.jpeg", 1448],
+  ["/dream-chapter-poster-06.jpeg", 1086],
+  ["/dream-chapter-poster-07.jpeg", 1024],
+  ["/dream-chapter-poster-08.jpeg", 1086],
+  ["/dream-chapter-poster-09.jpeg", 1024],
+  ["/dream-chapter-poster-10.jpeg", 1280],
+  ["/dream-chapter-poster-11.jpeg", 1280],
+  ["/dream-chapter-poster-12.jpeg", 1254],
+  ["/dream-chapter-poster-13.jpeg", 1280],
+  ["/dream-chapter-poster-14.jpeg", 1280],
+  ["/dream-chapter-poster-15.jpeg", 1280],
+];
+
+export const POSTER_IMAGES: Record<string, ImageSet> = {
+  ...Object.fromEntries(
+    POSTER_SOURCES.map(([source, width]) => [
+      source,
+      {
+        source,
+        variants: [
+          { path: source.replace(/\.jpe?g$/, "-delivery.webp"), width, build: true },
+        ],
+      },
+    ]),
+  ),
+  "/rider-saga-rexonance-thumbnail-20260827.jpeg": {
+    source: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    variants: [{ path: "/rider-saga-rexonance-thumbnail-20260827.webp", width: 680 }],
+  },
+  "/rider-vandal-thumbnail-20260827.jpeg": {
+    source: "/rider-vandal-thumbnail-20260827.jpeg",
+    variants: [{ path: "/rider-vandal-thumbnail-20260827.webp", width: 720 }],
+  },
+};
+
+export function posterImage(source: string) {
+  const set = POSTER_IMAGES[source];
+  return set ? { srcSet: set.variants[0].path } : {};
+}
+
+/* The deck warms and decodes the next poster in a detached Image before it
+   turns: it asks for the same file the cards and the backdrop then show. */
+export function preparePosterImage(image: HTMLImageElement, source: string) {
+  const set = POSTER_IMAGES[source];
+  if (set) image.srcset = set.variants[0].path;
+  image.src = source;
+}
+
 // Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;
 // 821-1100 px up to 150 x 179; wider up to 240 x 179.
 const managerSizes = (aspect: number) => {

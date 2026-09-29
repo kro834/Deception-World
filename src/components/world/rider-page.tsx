@@ -1442,6 +1442,7 @@ export function RiderPage({ id }: { id: string }) {
             <div className="rider-nightmare-card-visual">
               <img
                 src={rider.nightmare.img}
+                {...dossierImage(rider.nightmare.img)}
                 alt={`${rider.nightmare.name}のビジュアル`}
                 style={{ objectPosition: rider.nightmare.pos }}
                 loading="lazy"
@@ -1649,6 +1650,7 @@ export function RiderPage({ id }: { id: string }) {
               <figure>
                 <img
                   src={rider.nightmare.img}
+                  {...dossierImage(rider.nightmare.img)}
                   alt=""
                   style={{ objectPosition: rider.nightmare.pos }}
                   loading="lazy"

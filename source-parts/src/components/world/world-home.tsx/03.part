@@ -1,13 +1,3 @@
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    let firstFrame = 0;
-    let secondFrame = 0;
     let retryFrame = 0;
     let cancelled = false;
     // LoadGate keeps the destination handshake open for 2.2s. Keep probing
@@ -189,7 +179,7 @@
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[nextIndex].src;
+      preparePosterImage(image, POSTERS[nextIndex].src);
       try {
         await image.decode();
         if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
@@ -227,7 +217,7 @@
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";
-      image.src = POSTERS[(poster + 1) % POSTERS.length].src;
+      preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
@@ -475,3 +465,18 @@
       const swapIndex = randomBelow(index + 1);
       [posterSequence[index], posterSequence[swapIndex]] = [
         posterSequence[swapIndex],
+        posterSequence[index],
+      ];
+    }
+    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
+    const previewPool = [
+      poster,
+      prevPoster ?? poster,
+      (poster + 1) % POSTERS.length,
+      (poster + 2) % POSTERS.length,
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    for (let index = previewPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previewPosters = Array.from(
