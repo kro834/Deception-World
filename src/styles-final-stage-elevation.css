@@ -11,11 +11,12 @@
    hero, which now clips instead of hiding its overflow so the Motion
    hand-over can follow the page again.
 
-   Motion: two boot strokes (the title wipe, the cue line), once; the prism
-   rules, the lock-on and the story mark on named view timelines, finished
-   at or before `entry 100%`; the record's position line on its panel's
-   scroll timeline. Nothing loops. Reduced motion, economy rendering, the
-   side menu, loading covers and dialogs keep the page still. */
+   Motion: the prism rules, the lock-on and the story mark on named view
+   timelines, finished at or before `entry 100%`; the record's position line
+   on its panel's scroll timeline. Nothing loops. Reduced motion, economy
+   rendering, the side menu, loading covers and dialogs keep the page still.
+   The hero's arrival (once, keyed to the load gate) is in
+   styles-final-stage-cinema.css. */
 
 /* ================================================================
    Tokens and ground
@@ -1745,18 +1746,8 @@ html[data-mode="world"] .fst-page .fst-pickup-dialog .form-pickup-close:focus-vi
 /* ================================================================
    Motion
    ================================================================ */
-/* Boot, once: the title wipes in and the cue's line draws down. They wait
-   for a loading cover to lift, so the wipe is seen. The cue rule outranks
-   Motion's `.fst-page .rxs-scroll-cue i { animation: none }`. */
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page .rxs-hero h1 {
-    animation: fst-title-wipe 720ms 120ms cubic-bezier(0.77, 0, 0.18, 1) both;
-  }
-
-  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page .rxs-scroll-cue i {
-    animation: fst-draw-y 700ms 900ms cubic-bezier(0.77, 0, 0.18, 1) both;
-  }
-}
+/* The hero's boot (the title wipe and the cue's line) is now part of its
+   arrival, keyed to the load gate: styles-final-stage-cinema.css. */
 
 /* Scroll-linked, on named view timelines (the subject names its own, so no
    clipping ancestor can capture it). */
@@ -1815,24 +1806,6 @@ html[data-mode="world"] .fst-page .fst-pickup-dialog .form-pickup-close:focus-vi
       animation: fst-draw-x linear both;
       animation-timeline: --fst-record;
     }
-  }
-}
-
-@keyframes fst-title-wipe {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes fst-draw-y {
-  from {
-    scale: 1 0;
-  }
-  to {
-    scale: 1 1;
   }
 }
 

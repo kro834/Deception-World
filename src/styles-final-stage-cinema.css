@@ -1,0 +1,479 @@
+/* Final Stage cinema — the second pass on /final-stage: how the logo
+   arrives, and how the page hands the reader on to the character files.
+   Loaded after the elevation (styles-final-stage-elevation.css) and before
+   the motion sheet, on this route only; every selector doubles .fst-page,
+   and the only other rule answers the load gate's reveal on this dive.
+
+   The arrival is keyed to the load gate's hand-over, as the character files'
+   is (styles-dossier-cinema.css): the gate removes html[data-loading] as its
+   cover starts to lift; while the attribute is present the hero has none of
+   these animations and rests fully drawn under the cover, and when it goes
+   CSS starts them. A direct load has no cover and plays them from the first
+   paint. Every beat is finite (at rest by about 1.3s), uses only opacity,
+   transform, the individual transforms and clip-path, and ends on the
+   page's rest state. Reduced motion and economy rendering show that rest
+   state at once. The side menu and dialogs do not gate it, so closing one
+   never replays it. */
+
+/* ================================================================
+   Tokens
+   ================================================================ */
+.fst-page.fst-page {
+  /* No hold: the first beats run under the still-closed cover (the
+     gate's entrance lead finds a beat at 0ms and lifts at once), so by the
+     time its panels have opened the logo is mostly open and settling. */
+  --fsc-delay: 0ms;
+  --fsc-ease: cubic-bezier(0.77, 0, 0.18, 1);
+  --fsc-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --fsc-project: cubic-bezier(0.3, 0.6, 0.2, 1);
+}
+
+/* ================================================================
+   The hand-over: the shutter opens onto the page
+   ================================================================ */
+/* The dive's older ground (styles-route-transitions.css, a (0,3,0) rule)
+   outranks the file shutter's transparent gate (html body .load-gate.has-cine,
+   (0,2,2)), so it stayed up through the whole reveal: the panels opened onto
+   its orbs and the page arrived in one cut when the gate unmounted. This
+   sheet is live once the route has committed under the cover; from the
+   reveal on the ground gives way, so the opening shows the logo arriving.
+   The covering phase and the calm tier's fade are untouched. */
+html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.is-revealing {
+  background: transparent;
+}
+
+/* ================================================================
+   The logo opens like the shutter: from the centre, two edges of light
+   ================================================================ */
+/* The two orbit rings are aria-hidden spans the skin had switched off. Here
+   each is one half of the logo's box with a line on its outer edge; they
+   ride the iris out from the centre and fade. At rest they are out of
+   sight, and still: the base sheet spins the rings forever, so only the
+   arrival below moves them, once. */
+.fst-page.fst-page .fst-hero .rxs-hero-visual > .rxs-orbit {
+  display: block;
+  position: absolute;
+  z-index: 3;
+  top: 6%;
+  bottom: 6%;
+  width: 50%;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  opacity: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+.fst-page.fst-page .fst-hero .rxs-hero-visual > .rxs-orbit-a {
+  inset-inline: 0 auto;
+  background: linear-gradient(
+      180deg,
+      transparent,
+      var(--fst-ice) 28%,
+      var(--fst-violet) 72%,
+      transparent
+    )
+    0 0 / 2px 100% no-repeat;
+}
+
+.fst-page.fst-page .fst-hero .rxs-hero-visual > .rxs-orbit-b {
+  inset-inline: auto 0;
+  background: linear-gradient(
+      180deg,
+      transparent,
+      var(--fst-gold) 28%,
+      var(--fst-magenta) 72%,
+      transparent
+    )
+    100% 0 / 2px 100% no-repeat;
+}
+
+/* ================================================================
+   Floors the first pass missed
+   ================================================================ */
+/* The DW sigil was still the base's 8px: at the 12px floor in Oxanium (the
+   Michroma subset overruns the diamond), in a 26px diamond, as the showcase
+   sites set it. */
+.fst-page.fst-page .rxs-brand::before {
+  left: 7px;
+  width: 26px;
+  height: 26px;
+  border-color: rgb(122 232 255 / 60%);
+  background: rgb(122 232 255 / 8%);
+}
+
+.fst-page.fst-page .rxs-brand::after {
+  width: 40px;
+  color: var(--fst-ice);
+  font-family: var(--fst-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-indent: 0.04em;
+}
+
+/* 仮面ライダー over a record's name is 0.4em of it; on a landscape phone the
+   name is 7vh and the line fell to 11px. */
+.fst-page.fst-page :is(.fst-pickup-heading h2, .fst-pickup-copy h3) span {
+  font-size: max(12px, 0.4em);
+}
+
+/* Under 360px a finisher's name (ロイヤルモディフィカーレ is one unbroken
+   word) was wider than the record's column and pushed its plate under the
+   panel's edge; it steps down with the width instead. */
+@media (max-width: 359px) {
+  .fst-page.fst-page .fst-finishers h4 {
+    font-size: clamp(20px, 6.6vw, 24px);
+  }
+}
+
+/* ================================================================
+   The way on: entry plates into the files
+   ================================================================ */
+/* The cast console's 人物資料 and the footer's two rider links open the
+   character files: square plates in the file grammar (a lit tab at the
+   top, gold feet at the bottom corners) with the arrow in a gold-edged cell
+   at the end, as the World's cast wall opens its dossiers. The console's
+   plate takes the character's accent; the footer's the page's ice. The way
+   home keeps its gold tab and stays a step back. 9px + the 28px cell + 9px
+   + the border keep the 48px plate. */
+.fst-page.fst-page .fst-cast-copy > a,
+.fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return) {
+  --fsc-door: var(--fst-accent, var(--fst-ice));
+  gap: 16px;
+  min-height: 48px;
+  padding: 9px 10px 9px 18px;
+  border: 1px solid color-mix(in srgb, var(--fsc-door) 50%, transparent);
+  border-radius: 4px;
+  color: var(--fst-text);
+  background:
+    linear-gradient(var(--fsc-door) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    color-mix(in srgb, var(--fsc-door) 8%, var(--fst-ink));
+}
+
+.fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return) {
+  --fsc-door: var(--fst-ice);
+}
+
+/* A door reads at 14px, not at the 12px of the console's labels (the
+   elevation's label list outranks a class here, so the panel's id). */
+.fst-page.fst-page #fst-cast-panel .fst-cast-copy > a {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+/* The way home stands the same 48px as the plates beside it (the cinematic
+   sheet, linked last, would take every footer link to 44px). */
+.fst-page.fst-page .rxs-footer > a.rxs-footer-return {
+  min-height: 48px;
+  padding-block: 0;
+}
+
+/* The footer's labels inherit the shared footer's 0.2em HUD tracking,
+   which spaced the Japanese out letter by letter. */
+.fst-page.fst-page .rxs-footer > a {
+  letter-spacing: 0.06em;
+}
+
+.fst-page.fst-page :is(.fst-cast-copy > a, .rxs-footer > a:not(.rxs-footer-return)) i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid color-mix(in srgb, var(--fst-gold) 60%, transparent);
+  color: var(--fsc-door);
+  font-style: normal;
+  line-height: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fst-page.fst-page .fst-cast-copy > a:hover,
+  .fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return):hover {
+    border-color: var(--fsc-door);
+    background-color: color-mix(in srgb, var(--fsc-door) 14%, var(--fst-ink));
+  }
+
+  /* The cell answers instead of the arrow leaning out of it. */
+  .fst-page.fst-page :is(.fst-cast-copy > a, .rxs-footer > a:not(.rxs-footer-return)):hover i {
+    border-color: var(--fst-gold);
+    color: var(--fst-ink);
+    background: var(--fst-gold);
+    translate: none;
+  }
+}
+
+/* ================================================================
+   The arrival
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The key visual's frame locks on first. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-visual::after {
+    animation: fsc-lock 240ms steps(4, jump-end) var(--fsc-delay) both;
+  }
+
+  /* The logo opens from its centre, the bloom and the floor come up under
+     it. `transform` composes with the motion sheet's scale (below). */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-visual
+    img {
+    animation: fsc-logo 720ms var(--fsc-project) var(--fsc-delay) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-visual
+    > .rxs-orbit-a {
+    animation:
+      fsc-iris-left 720ms var(--fsc-project) var(--fsc-delay) both,
+      fsc-edge 720ms linear var(--fsc-delay) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-visual
+    > .rxs-orbit-b {
+    animation:
+      fsc-iris-right 720ms var(--fsc-project) var(--fsc-delay) both,
+      fsc-edge 720ms linear var(--fsc-delay) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-visual::before {
+    animation: fsc-fade 720ms var(--fsc-out) var(--fsc-delay) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fst-hero::after {
+    animation: fsc-floor 640ms var(--fsc-out) calc(var(--fsc-delay) + 160ms) both;
+  }
+
+  /* Identity: the kicker rises between its ticks, the gold mark, the
+     title is struck from left to right, the lede and the cue follow. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-copy
+    > p:first-child {
+    animation: fsc-rise 440ms var(--fsc-out) calc(var(--fsc-delay) + 80ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-copy
+    > p:first-child::before {
+    transform-origin: 100% 50%;
+    animation: fsc-draw-x 480ms var(--fsc-ease) calc(var(--fsc-delay) + 140ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-copy
+    > p:first-child::after {
+    transform-origin: 0 50%;
+    animation: fsc-draw-x 480ms var(--fsc-ease) calc(var(--fsc-delay) + 140ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    h1
+    > span {
+    animation: fsc-rise 440ms var(--fsc-out) calc(var(--fsc-delay) + 140ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fst-hero h1 {
+    animation: fsc-strike 680ms var(--fsc-project) calc(var(--fsc-delay) + 180ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-hero-lede {
+    animation: fsc-rise 480ms var(--fsc-out) calc(var(--fsc-delay) + 320ms) both;
+  }
+
+  /* The cue is positioned with `translate` in some heroes: it only fades,
+     and its line draws down (it outranks the motion sheet's stop). */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-scroll-cue {
+    animation: fsc-fade 360ms linear calc(var(--fsc-delay) + 560ms) both;
+  }
+
+  /* A record locks on as it opens: the sheet's bracket frame (a pseudo, so
+     nothing the pickup's scroll and focus handling measures moves). */
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open]::after {
+    animation: fsc-lock 240ms steps(4, jump-end) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .fst-page.fst-page
+    .fst-hero
+    .rxs-scroll-cue
+    i {
+    animation: fsc-draw-y 640ms var(--fsc-ease) calc(var(--fsc-delay) + 620ms) both;
+  }
+}
+
+/* The motion sheet recedes the same image on the page's scroll. While a
+   cover is down the list carries its recede alone; when the cover lifts the
+   arrival joins ahead of it (the recede keeps its place and progress), as
+   the character files' plate does with its depth push. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-loading])
+      .fst-page.fst-page[data-motion-ready="true"]
+      .fst-hero
+      .rxs-hero-visual
+      img {
+      animation:
+        fsc-logo 720ms var(--fsc-project) var(--fsc-delay) backwards,
+        mx-recede linear both;
+      animation-timeline: auto, view(block);
+      animation-range:
+        normal,
+        exit 0% exit 100%;
+    }
+  }
+}
+
+@keyframes fsc-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+/* Backwards fill: the iris ends on the rest state, so no clip is left on
+   the logo the motion sheet scales. */
+@keyframes fsc-logo {
+  from {
+    clip-path: inset(0 50% 0 50%);
+    transform: scale(1.03);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+@keyframes fsc-iris-left {
+  from {
+    translate: 100% 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes fsc-iris-right {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes fsc-edge {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fsc-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fsc-floor {
+  from {
+    opacity: 0;
+    scale: 0.4 1;
+  }
+}
+
+@keyframes fsc-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes fsc-draw-x {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes fsc-draw-y {
+  from {
+    scale: 1 0;
+  }
+}
+
+/* Backwards fill only: once struck, the title drops the clip, which would
+   otherwise trim its misregistered ghost. */
+@keyframes fsc-strike {
+  from {
+    clip-path: inset(-0.3em 100% -0.3em -0.3em);
+    translate: -0.1em 0;
+  }
+  to {
+    clip-path: inset(-0.3em -0.3em -0.3em -0.3em);
+    translate: 0 0;
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  .fst-page.fst-page .fst-hero .rxs-hero-visual > .rxs-orbit {
+    display: none;
+  }
+
+  /* Plates and cells as system buttons. */
+  .fst-page.fst-page .fst-cast-copy > a,
+  .fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return) {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .fst-page.fst-page :is(.fst-cast-copy > a, .rxs-footer > a:not(.rxs-footer-return)) i,
+  .fst-page.fst-page :is(.fst-cast-copy > a, .rxs-footer > a:not(.rxs-footer-return)):hover i {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: none;
+  }
+}

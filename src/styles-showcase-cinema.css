@@ -1,0 +1,624 @@
+/* Showcase cinema — the second pass on the Rexonance and Extreme sites: how
+   the hero arrives, the stage it stands on, how each chapter opens and how
+   the page hands the reader on to the character files. Loaded after the
+   showcase elevation and before the motion sheet, on those two routes only
+   (Final Stage has its own, styles-final-stage-cinema.css). Every selector
+   doubles .rxs-page, as the elevation does; the only other rule answers the
+   load gate's reveal on these two dives.
+
+   The arrival is keyed to the load gate's hand-over, as the character files'
+   is (styles-dossier-cinema.css): the gate removes html[data-loading] as its
+   cover starts to lift; while the attribute is present the hero has none of
+   these animations and rests fully drawn under the cover, and when it goes
+   CSS starts them. A direct load has no cover and plays them from the first
+   paint. Every beat is finite (at rest by about 1.1s; Rexonance's rings by
+   1.9s), uses only opacity, transform, the individual transforms and
+   clip-path, and ends on the page's rest state. Reduced motion and economy
+   rendering show that rest state at once. The side menu and dialogs do not
+   gate it, so closing one never replays it. */
+
+/* ================================================================
+   Tokens
+   ================================================================ */
+.rxs-page.rxs-page.rxs-page {
+  /* No hold: the first beats run under the still-closed cover (the
+     gate's entrance lead finds a beat at 0ms and lifts at once), so by the
+     time its panels have opened the hero is mostly composed and settling. */
+  --sx-delay: 0ms;
+  --sx-ease: cubic-bezier(0.77, 0, 0.18, 1);
+  --sx-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --sx-project: cubic-bezier(0.3, 0.6, 0.2, 1);
+  /* The figure's own proportions: the side-by-side heroes contain it in a
+     wider box, and the stage frame hugs the drawn picture, not the box. */
+  --sx-art-ratio: 1086 / 1448;
+}
+
+.rxs-page.rxs-page.rxs-page.exs-page {
+  --sx-art-ratio: 851 / 1280;
+}
+
+/* ================================================================
+   The hand-over: the shutter opens onto the page
+   ================================================================ */
+/* The two dives' older ground (styles-route-transitions.css, a (0,3,0) rule)
+   outranks the file shutter's transparent gate (html body .load-gate.has-cine,
+   (0,2,2)), so it stayed up through the whole reveal: the panels opened onto
+   its orbs and the page arrived in one cut when the gate unmounted. This
+   sheet is live once the route has committed under the cover; from the
+   reveal on the ground gives way, so the opening shows the hero arriving.
+   The covering phase and the calm tier's fade are untouched. */
+html
+  body
+  .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+    .is-rexonance-dive,
+    .is-extreme-dive
+  ).is-revealing {
+  background: transparent;
+}
+
+/* The hero clipped with overflow: hidden (the base's landscape hero, and
+   Extreme's hero always), which made it a scroll container that never
+   scrolls: the motion sheet's hand-over (the copy lifting away, the figure
+   receding) bound its view() timelines to it and never moved. `clip` keeps
+   the clipping without a scroller, as on Final Stage. */
+.rxs-page.rxs-page .rxs-hero {
+  overflow: clip;
+}
+
+/* ================================================================
+   The stage: a frame that locks on, a floor that is measured
+   ================================================================ */
+/* The two orbit rings are aria-hidden spans the showcase had switched off.
+   The first becomes the stage frame: the elevation's brackets (the site
+   light at the top, gold at the foot) with a centre tick on each side. The
+   second is the arrival's leading edge; at rest it is out of sight. The
+   base sheet still spins the rings forever (only Rexonance's motion sheet
+   and coarse pointers stopped it); shown again, they hold still, and only
+   the arrival below moves them, once. */
+.rxs-page.rxs-page .rxs-hero-visual > .rxs-orbit {
+  display: block;
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  animation: none;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page .rxs-hero-visual > .rxs-orbit-a {
+  background:
+    var(--sc-brackets),
+    linear-gradient(var(--sc-lock) 0 0) 0 50% / 10px 1px,
+    linear-gradient(var(--sc-lock) 0 0) 100% 50% / 10px 1px;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+}
+
+/* The site's own rule rides the wipe: the prism on Rexonance, gold to ice
+   to white on Extreme. */
+.rxs-page.rxs-page .rxs-hero-visual > .rxs-orbit-b {
+  z-index: 4;
+  background:
+    var(--sc-prism) bottom / 100% 2px no-repeat,
+    linear-gradient(0deg, color-mix(in srgb, var(--sc-light) 22%, transparent), transparent 72px)
+      bottom / 100% 72px no-repeat;
+  opacity: 0;
+}
+
+/* Side by side the figure is contained in a wider box: frame and edge take
+   the drawn picture's own width (its height times its ratio), centred. */
+@media (min-width: 761px) and (orientation: landscape), (min-width: 1441px) {
+  .rxs-page.rxs-page .rxs-hero-visual > .rxs-orbit {
+    inset: 0 auto auto 50%;
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    aspect-ratio: var(--sx-art-ratio);
+    translate: -50% 0;
+  }
+}
+
+/* The floor is measured: under the elevation's light line, twelve ticks
+   centred on the figure and a gold mark at its centre. */
+.rxs-page.rxs-page .rxs-hero-visual::before {
+  background:
+    linear-gradient(var(--sc-gold) 0 0) 50% calc(64% + 3px) / 2px 9px no-repeat,
+    repeating-linear-gradient(
+        90deg,
+        transparent 0 calc(100% / 24 - 0.5px),
+        color-mix(in srgb, var(--sc-light) 50%, transparent) 0 calc(100% / 24 + 0.5px),
+        transparent 0 calc(100% / 12)
+      )
+      50% calc(64% + 5px) / 60% 4px no-repeat,
+    linear-gradient(90deg, transparent, var(--sc-light) 30% 70%, transparent) 50% 64% / 76% 1px
+      no-repeat,
+    radial-gradient(
+      ellipse 48% 44% at 50% 64%,
+      color-mix(in srgb, var(--sc-light) 18%, transparent),
+      transparent 72%
+    );
+}
+
+/* The headline keeps the one gradient ink the showcase allows and gains the
+   character files' still, misregistered ghost: a cool channel to the right,
+   a warm one to the left. Its offset follows the headline's size (about 3px
+   at desktop, 1.5px on a phone), so the small wordmark inside it is never
+   doubled. Off under economy rendering. */
+.rxs-page.rxs-page .rxs-hero h1 {
+  filter: drop-shadow(0.035em 0 rgb(122 232 255 / 26%))
+    drop-shadow(-0.025em 0 rgb(255 92 200 / 22%));
+}
+
+.rxs-page.rxs-page.exs-page .rxs-hero h1 {
+  filter: drop-shadow(0.035em 0 rgb(255 213 122 / 24%))
+    drop-shadow(-0.025em 0 rgb(122 232 255 / 22%));
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page .rxs-hero h1 {
+  filter: none;
+}
+
+/* ================================================================
+   Chapters open on their number
+   ================================================================ */
+/* An outlined numeral over each chapter's kicker, as the World's chapters
+   and the character files open: Oxanium, the lock tint, a still ghost.
+   Generated with an empty alt, so the heading reads as before. */
+.rxs-page.rxs-page .rxs-section-heading::before {
+  display: block;
+  margin: 0 auto 16px;
+  color: transparent;
+  font-family: var(--sc-mono);
+  font-size: clamp(48px, 5.4vw, 80px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 1.5px var(--sc-lock);
+  text-shadow: 0.06em 0.06em 0 var(--sc-ghost);
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page #performance .rxs-section-heading::before {
+  content: "01";
+  content: "01" / "";
+}
+
+.rxs-page.rxs-page #p14 .rxs-section-heading::before {
+  content: "02";
+  content: "02" / "";
+}
+
+.rxs-page.rxs-page #stages .rxs-section-heading::before {
+  content: "03";
+  content: "03" / "";
+}
+
+.rxs-page.rxs-page #system .rxs-section-heading::before {
+  content: "04";
+  content: "04" / "";
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page .rxs-section-heading::before {
+  text-shadow: none;
+}
+
+/* ================================================================
+   The figures: one light, spent where the page is measuring
+   ================================================================ */
+/* Each headline stat's hairline starts on a short lit segment. */
+.rxs-page.rxs-page .rxs-headline-metrics article {
+  background: linear-gradient(var(--sc-light) 0 0) 0 0 / 48px 2px no-repeat;
+}
+
+/* The comparison tile opens on the site rule, between its corners. */
+.rxs-page.rxs-page .rxs-comparison {
+  background:
+    var(--sc-prism) 50% 0 / calc(100% - 56px) 1px no-repeat,
+    var(--sc-tile);
+}
+
+/* Every bar runs over a measured track: a faint tick each tenth, so the
+   baseline's shorter bar reads against a scale, not against nothing. */
+.rxs-page.rxs-page .rxs-comparison .rxs-bars {
+  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 10%) 0 1px, transparent 1px 10%);
+}
+
+/* The two architectures are told apart the way the bars are: the site's
+   column carries its light at the top, the baseline a gray. */
+.rxs-page.rxs-page .rxs-processing-comparison > div > section {
+  background:
+    linear-gradient(var(--sc-baseline) 0 0) 24px 0 / 44px 2px no-repeat,
+    var(--sc-ink);
+}
+
+.rxs-page.rxs-page .rxs-processing-comparison > div > section:last-child {
+  background:
+    linear-gradient(var(--sc-light) 0 0) 24px 0 / 44px 2px no-repeat,
+    var(--sc-ink);
+}
+
+/* P14's generation cards: a lit tab in from the corner, as the Final Stage
+   spec plates carry. */
+.rxs-page.rxs-page .rxs-p14 .rxs-p14-metrics article {
+  background:
+    linear-gradient(var(--sc-light) 0 0) 24px 0 / 22px 2px no-repeat,
+    var(--sc-tile);
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page .rxs-comparison {
+    background:
+      var(--sc-prism) 50% 0 / calc(100% - 40px) 1px no-repeat,
+      var(--sc-tile);
+  }
+}
+
+/* ================================================================
+   The way on: entry plates into the files
+   ================================================================ */
+/* The closing links are the page's doors into the character file and the
+   form archive: square plates in the file grammar (a lit tab at the top,
+   gold feet at the bottom corners) with the arrow in a gold-edged cell at
+   the end, as the World's cast wall opens its dossiers. The first link is
+   the character file itself and carries the site light on its edge. The
+   way home stays a step back. Paint only: the footer's grid, the links'
+   48px height and their hit areas are the earlier sheets'. */
+.rxs-page.rxs-page .rxs-footer > a {
+  border-radius: 4px;
+}
+
+/* 9px + the 28px cell + 9px + the border: the same 48px as the way home. */
+.rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return) {
+  padding-block: 9px;
+  padding-inline: 18px 10px;
+  border-color: var(--sc-hairline);
+  color: var(--sc-text);
+  background:
+    linear-gradient(var(--sc-light) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--sc-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    var(--sc-ink);
+  font-weight: 600;
+}
+
+.rxs-page.rxs-page .rxs-footer > a:first-of-type {
+  border-color: color-mix(in srgb, var(--sc-light) 55%, transparent);
+  background:
+    linear-gradient(var(--sc-light) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--sc-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--sc-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    color-mix(in srgb, var(--sc-light) 7%, var(--sc-ink));
+}
+
+.rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return) i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid color-mix(in srgb, var(--sc-gold) 60%, transparent);
+  color: var(--sc-light);
+  font-style: normal;
+  line-height: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return):hover {
+    border-color: var(--sc-light);
+  }
+
+  .rxs-page.rxs-page .rxs-footer > a:first-of-type:hover {
+    background:
+      linear-gradient(var(--sc-light) 0 0) 0 0 / 28px 2px no-repeat,
+      linear-gradient(var(--sc-gold) 0 0) 0 100% / 10px 2px no-repeat,
+      linear-gradient(var(--sc-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+      color-mix(in srgb, var(--sc-light) 14%, var(--sc-ink));
+  }
+
+  .rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return):hover i {
+    border-color: var(--sc-gold);
+    color: var(--sc-ink);
+    background: var(--sc-gold);
+  }
+}
+
+/* ================================================================
+   The arrival
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The frame locks on first. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero-visual
+    > .rxs-orbit-a {
+    animation: sx-lock 240ms steps(4, jump-end) var(--sx-delay) both;
+  }
+
+  /* The figure is projected in from the top: a clip wipe paced by the
+     leading edge, settling from a slight push. `transform` composes with
+     the motion sheet's scale on the same image (below). */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero-visual
+    img {
+    animation: sx-art 720ms var(--sx-project) var(--sx-delay) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero-visual
+    > .rxs-orbit-b {
+    animation:
+      sx-travel 720ms var(--sx-project) var(--sx-delay) both,
+      sx-edge 720ms linear var(--sx-delay) both;
+  }
+
+  /* The floor draws out from the centre under the figure. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero-visual::before {
+    animation: sx-floor 560ms var(--sx-out) calc(var(--sx-delay) + 160ms) both;
+  }
+
+  /* Identity: the kicker and the wordmark rise, the headline is struck
+     from left to right, the lede and the cue follow. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero-copy
+    > p:first-child {
+    animation: sx-rise 440ms var(--sx-out) calc(var(--sx-delay) + 40ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .rxs-page.rxs-page .rxs-hero h1 {
+    animation: sx-strike 600ms var(--sx-project) calc(var(--sx-delay) + 100ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-hero
+    h1
+    > span {
+    animation: sx-rise 440ms var(--sx-out) calc(var(--sx-delay) + 80ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .rxs-page.rxs-page .rxs-hero-lede {
+    animation: sx-rise 480ms var(--sx-out) calc(var(--sx-delay) + 240ms) both;
+  }
+
+  /* The cue is positioned with `translate` in some heroes: it only fades,
+     and its line draws down. */
+  html:not([data-world-effects="economy"]):not([data-loading]) .rxs-page.rxs-page .rxs-scroll-cue {
+    animation: sx-fade 360ms linear calc(var(--sx-delay) + 480ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-scroll-cue
+    i {
+    transform-origin: 50% 0;
+    animation: sx-draw-y 520ms var(--sx-ease) calc(var(--sx-delay) + 540ms) both;
+  }
+
+  /* Rexonance's three rings converge once on the figure. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-resonance-field
+    i {
+    animation: sx-converge 1500ms var(--sx-out) calc(var(--sx-delay) + 80ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-resonance-field
+    i:nth-child(2) {
+    animation-delay: calc(var(--sx-delay) + 220ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page
+    .rxs-resonance-field
+    i:nth-child(3) {
+    animation-delay: calc(var(--sx-delay) + 360ms);
+  }
+}
+
+/* The motion sheet recedes the same image on the page's scroll. While a
+   cover is down the list carries its recede alone; when the cover lifts the
+   arrival joins ahead of it (the recede keeps its place and progress), as
+   the character files' plate does with its depth push. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-loading])
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      img {
+      animation:
+        sx-art 720ms var(--sx-project) var(--sx-delay) backwards,
+        mx-recede linear both;
+      animation-timeline: auto, view(block);
+      animation-range:
+        normal,
+        exit 0% exit 100%;
+    }
+  }
+}
+
+/* Each chapter's numeral steps into place as its heading arrives, on the
+   heading's own named timeline (the elevation's --sc-chapter, behind the
+   same gate), finished by entry 100%. Longhands, with the duration auto:
+   a zero duration in the shorthand would collapse the range into a step. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page[data-motion-ready="true"]
+      .rxs-section-heading::before {
+      animation-name: sx-numeral;
+      animation-duration: auto;
+      animation-timing-function: var(--sx-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes sx-numeral {
+  from {
+    opacity: 0;
+    scale: 1.5;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes sx-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+/* Backwards fill: the wipe ends on the rest state, so no clip is left on
+   the image the motion sheet scales. */
+@keyframes sx-art {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.04);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+@keyframes sx-travel {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes sx-edge {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes sx-floor {
+  from {
+    opacity: 0;
+    scale: 0.2 1;
+  }
+}
+
+@keyframes sx-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Backwards fill only: once struck, the headline drops the clip, which
+   would otherwise trim its misregistered ghost. */
+@keyframes sx-strike {
+  from {
+    clip-path: inset(-0.3em 100% -0.3em -0.3em);
+    translate: -0.1em 0;
+  }
+  to {
+    clip-path: inset(-0.3em -0.3em -0.3em -0.3em);
+    translate: 0 0;
+  }
+}
+
+@keyframes sx-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sx-draw-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes sx-converge {
+  0% {
+    opacity: 0;
+    transform: scale(1.35) rotate(-24deg);
+  }
+  30% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.82) rotate(18deg);
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page .rxs-hero-visual > .rxs-orbit {
+    display: none;
+  }
+
+  .rxs-page.rxs-page .rxs-hero h1 {
+    filter: none;
+  }
+
+  .rxs-page.rxs-page .rxs-section-heading::before {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+
+  /* Plates and cells as system buttons; the bars' scale drops out. */
+  .rxs-page.rxs-page .rxs-footer > a,
+  .rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return),
+  .rxs-page.rxs-page .rxs-footer > a:first-of-type,
+  .rxs-page.rxs-page .rxs-footer > a:first-of-type:hover {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return) i,
+  .rxs-page.rxs-page .rxs-footer > a:not(.rxs-footer-return):hover i {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: none;
+  }
+
+  .rxs-page.rxs-page .rxs-comparison .rxs-bars,
+  .rxs-page.rxs-page .rxs-headline-metrics article {
+    background: none;
+  }
+}

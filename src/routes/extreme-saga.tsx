@@ -9,6 +9,7 @@ import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
+import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: sagaShowcaseCssUrl },
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
       { rel: "stylesheet", href: showcaseElevationCssUrl },
+      { rel: "stylesheet", href: showcaseCinemaCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {

@@ -7,6 +7,7 @@ import {
 } from "@/lib/world-head";
 import finalStageCssUrl from "@/styles-final-stage.css?url";
 import finalStageElevationCssUrl from "@/styles-final-stage-elevation.css?url";
+import finalStageCinemaCssUrl from "@/styles-final-stage-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/final-stage")({
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: finalStageCssUrl },
       { rel: "stylesheet", href: finalStageElevationCssUrl },
+      { rel: "stylesheet", href: finalStageCinemaCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
