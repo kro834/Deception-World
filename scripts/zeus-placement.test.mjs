@@ -26,6 +26,7 @@ test("disclosure rows and the new controls are stepped off as whole boxes", () =
     '".wa-contents a"',
     '".dream-contents a"',
     '".wa-quote-rail"',
+    '".wa-quote-controls"',
     "'.rider-tabs [role=\"tab\"]'",
     "'.rxs-stage-tabs [role=\"tab\"]'",
     '".dossier-reader-links a"',

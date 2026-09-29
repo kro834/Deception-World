@@ -90,6 +90,7 @@ const ZEUS_AVOID_SELECTOR = [
   ".dream-contents a",
   // Full-width, but a sideways swipe that starts on the button cannot move it.
   ".wa-quote-rail",
+  ".wa-quote-controls",
   '.rider-tabs [role="tab"]',
   '.rxs-stage-tabs [role="tab"]',
   ".dream-poster-thumbnails button",
