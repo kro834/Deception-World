@@ -701,6 +701,7 @@ export function RisingWorld() {
       <section ref={gateRef} className="rw-gate" aria-label="RISING THE WORLD">
         <span className="rw-gate-horizon" aria-hidden="true" />
         <span className="rw-gate-rule" aria-hidden="true" />
+        <span className="rw-gate-frame" aria-hidden="true" />
         <button
           ref={triggerRef}
           type="button"
@@ -817,6 +818,7 @@ export function RisingWorld() {
         <p className="rw-live" aria-live="polite" aria-atomic="true">
           {live}
         </p>
+        <span className="rw-end-frame" aria-hidden="true" />
         <div ref={controlsRef} className="rw-controls">
           {ended ? (
             failed ? null : (

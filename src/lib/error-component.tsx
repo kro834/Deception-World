@@ -1,5 +1,6 @@
 import { Link, type ErrorComponentProps } from "@tanstack/react-router";
 import { TriangleAlert } from "lucide-react";
+import notFoundCss from "@/styles-not-found.css?url";
 
 export function AppErrorComponent({ error }: ErrorComponentProps) {
   return (
@@ -18,6 +19,9 @@ export function AppErrorComponent({ error }: ErrorComponentProps) {
 export function NotFoundComponent() {
   return (
     <main className="app-not-found">
+      {/* Hoisted by React into <head>, and only where a 404 renders. */}
+      <link rel="stylesheet" href={notFoundCss} precedence="default" />
+      <i className="app-not-found-plate" aria-hidden="true" />
       <span aria-hidden="true">404 / LOST RECORD</span>
       <p>DECEPTION WORLD</p>
       <h1>記録が見つかりません。</h1>

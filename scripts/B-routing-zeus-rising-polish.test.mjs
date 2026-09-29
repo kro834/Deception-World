@@ -170,7 +170,8 @@ test("RE DIVE's FRONT / 01 label is content-sized and 欠番 matches the names b
   assert.match(tab, /justify-self: start;/);
   assert.match(tab, /min-width: 112px;/);
   assert.match(tab, /align-items: center;/);
-  assert.match(reDive, /\.re-dive-tab small \{\s*font: 400 11px \/ 1/);
+  // 12px since the 2026-09-29 brush-up: every label meets the site's 12px floor.
+  assert.match(reDive, /\.re-dive-tab small \{\s*font: 400 12px \/ 1/);
   assert.match(
     reDive,
     /\.re-dive-section \.signal\.is-vacant > b \{\s*color: rgb\(255 226 206 \/ 0\.74\);\s*font-size: 16px;/,

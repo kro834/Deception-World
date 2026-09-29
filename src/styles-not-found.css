@@ -1,0 +1,352 @@
+/* 404 / LOST RECORD: the not-found surface as a Mirage record plate.
+
+   Linked by NotFoundComponent itself (src/lib/error-component.tsx) as a
+   hoisted stylesheet, so no other route loads it. React may put it ahead of
+   the root sheets, so every selector doubles the page class and outranks
+   the fallback in styles.css (kept, so a deep link still reads before this
+   sheet arrives).
+
+   The page keeps its words and their order. It becomes the World's grammar:
+   ice on ink under the 96px grid, one plate locked on with ice brackets over
+   gold and topped by the prism, a HUD header in Michroma, the heading in
+   ice ink with a still misregistered ghost, a large outlined 404 left in
+   the plate as a watermark (generated, silent), and the way back as the
+   page's one filled ice plate, its arrow first.
+
+   Motion is one finite boot (the plate locks on, the prism draws, the
+   heading is wiped in), under 1.2 s, with transform, opacity and clip-path
+   only, and only without reduced motion or economy rendering. Nothing
+   flashes: the plate is dark and the control is already lit. */
+
+.app-not-found.app-not-found {
+  --lr-ink: #04080f;
+  --lr-deck: #0a1220;
+  --lr-ice: #7ae8ff;
+  --lr-ice-hi: #c6f5ff;
+  --lr-violet: #a48bff;
+  --lr-magenta: #ff5cc8;
+  --lr-gold: #f0cf86;
+  --lr-signal: #ff5a7e;
+  --lr-text-2: #b9cad8;
+  --lr-text-3: #8fa6ba;
+  --lr-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --lr-pad-x: clamp(22px, 5vw, 48px);
+  --lr-pad-y: clamp(26px, 5vw, 44px);
+  /* The plate is the grid's middle column and rows; the words sit inside. */
+  display: grid;
+  grid-template-columns:
+    minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [copy-start] minmax(0, 560px)
+    [copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
+  grid-template-rows:
+    minmax(32px, 1fr) [plate-start] var(--lr-pad-y) [head-start] auto auto [head-end] auto auto
+    auto var(--lr-pad-y) [plate-end] minmax(32px, 1fr);
+  place-content: stretch;
+  gap: 0;
+  min-height: 100svh;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  overflow: hidden;
+  color: #f1f7fb;
+  text-align: left;
+  background:
+    radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(164 139 255 / 7%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
+    var(--lr-ink);
+}
+
+/* The plate: deck ink, an ice line, ice brackets over gold, the prism on
+   top (::before) and the outlined 404 watermark (::after). */
+.app-not-found.app-not-found > .app-not-found-plate {
+  position: relative;
+  z-index: 0;
+  grid-column: plate-start / plate-end;
+  grid-row: plate-start / plate-end;
+  overflow: hidden;
+  border: 1px solid rgb(122 232 255 / 20%);
+  background:
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 26px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 26px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 26px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 26px no-repeat,
+    linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
+    var(--lr-deck);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 45%);
+  pointer-events: none;
+}
+
+.app-not-found.app-not-found > .app-not-found-plate::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--lr-ice),
+    var(--lr-violet) 34%,
+    var(--lr-magenta) 66%,
+    var(--lr-gold)
+  );
+  transform-origin: 0 50%;
+}
+
+/* The lost record's number, left in the plate: outlined, cut by its edge. */
+.app-not-found.app-not-found > .app-not-found-plate::after {
+  position: absolute;
+  right: -0.08em;
+  bottom: -0.2em;
+  content: "404" / "";
+  color: transparent;
+  font:
+    700 clamp(120px, 30vw, 240px) / 1 "Oxanium",
+    sans-serif;
+  letter-spacing: -0.04em;
+  -webkit-text-stroke: 1px rgb(122 232 255 / 22%);
+}
+
+/* :where() keeps this under the per-element margins below. */
+.app-not-found.app-not-found > :where(:not(.app-not-found-plate)) {
+  position: relative;
+  z-index: 1;
+  grid-column: copy-start / copy-end;
+  margin: 0;
+}
+
+/* The header: the record's status on the left, the archive on the right. */
+.app-not-found.app-not-found > span {
+  grid-row: head-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  color: var(--lr-ice);
+  font: 400 12px / 1.4 var(--lr-hud);
+  letter-spacing: 0.18em;
+}
+
+/* Signal red marks where the record is missing: a still cell, no blink. */
+.app-not-found.app-not-found > span::before {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: var(--lr-signal);
+  box-shadow: 0 0 10px rgb(255 90 126 / 50%);
+}
+
+.app-not-found.app-not-found > p:first-of-type {
+  grid-row: 4;
+  margin-top: 8px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgb(122 232 255 / 16%);
+  background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px) 0
+    100% / 100% 5px no-repeat;
+  color: var(--lr-text-3);
+  font: 400 12px / 1.4 var(--lr-hud);
+  letter-spacing: 0.18em;
+}
+
+.app-not-found.app-not-found > h1 {
+  grid-row: 5;
+  margin: clamp(22px, 4vw, 34px) 0 0;
+  color: var(--lr-ice-hi);
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(26px, 6vw, 44px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-shadow:
+    -2px 0 rgb(255 92 200 / 32%),
+    2px 0 rgb(122 232 255 / 38%),
+    0 0 30px rgb(122 232 255 / 16%);
+}
+
+.app-not-found.app-not-found > p:last-of-type {
+  grid-row: 6;
+  max-width: 34em;
+  margin: 14px 0 0;
+  color: var(--lr-text-2);
+  font-size: clamp(14px, 3.6vw, 16px);
+  line-height: 1.9;
+}
+
+/* The way back: the page's one filled ice plate, its arrow first, held in
+   12px brackets like the /download ZIP plate. Square, not cut: a clip-path
+   would clip the focus ring away. */
+.app-not-found.app-not-found > a {
+  grid-row: 7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  gap: 14px;
+  box-sizing: border-box;
+  min-height: 48px;
+  margin: clamp(26px, 4vw, 34px) 6px 6px;
+  padding: 0 24px 0 20px;
+  border: 0;
+  border-radius: 0;
+  color: #03141c;
+  background:
+    linear-gradient(rgb(255 255 255 / 45%) 0 0) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #9ff0ff, var(--lr-ice));
+  box-shadow: 0 0 28px rgb(122 232 255 / 22%);
+  font: 400 13px / 1.2 var(--lr-hud);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  transform: none;
+  transition: background-color 160ms ease;
+}
+
+.app-not-found.app-not-found > a::after {
+  position: absolute;
+  inset: -6px;
+  content: "";
+  background:
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1.5px 12px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 12px 1.5px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 1.5px 12px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1.5px 12px no-repeat;
+  pointer-events: none;
+}
+
+/* A drawn chevron, pointing back. */
+.app-not-found.app-not-found > a::before {
+  flex: none;
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  rotate: 45deg;
+}
+
+.app-not-found.app-not-found > a:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(rgb(255 255 255 / 60%) 0 0) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #c6f5ff, #8eedff);
+  transform: none;
+}
+
+/* The focus ring sits outside the brackets, in the site's warm family. */
+.app-not-found.app-not-found > a:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 9px;
+}
+
+@media (min-width: 560px) {
+  /* The header on one line: status left, archive right. */
+  .app-not-found.app-not-found > p:first-of-type {
+    grid-row: head-start;
+    margin-top: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+    background: none;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .app-not-found.app-not-found > span {
+    padding-bottom: 18px;
+  }
+
+  /* The ruler under the header runs the whole width of the words. */
+  .app-not-found.app-not-found > h1 {
+    padding-top: clamp(22px, 4vw, 34px);
+    margin-top: 0;
+    border-top: 1px solid rgb(122 232 255 / 16%);
+    background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px)
+      0 0 / 100% 5px no-repeat;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > .app-not-found-plate {
+    animation: lr-lock 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .app-not-found.app-not-found
+    > .app-not-found-plate::before {
+    animation: lr-draw 0.9s cubic-bezier(0.77, 0, 0.18, 1) 0.15s both;
+  }
+
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > h1 {
+    animation: lr-wipe 0.8s cubic-bezier(0.77, 0, 0.18, 1) 0.3s both;
+  }
+}
+
+@keyframes lr-lock {
+  from {
+    opacity: 0;
+    scale: 1.03;
+  }
+}
+
+@keyframes lr-draw {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes lr-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 -12px 0 0);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .app-not-found.app-not-found > .app-not-found-plate {
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .app-not-found.app-not-found {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-plate {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-plate::after,
+  .app-not-found.app-not-found > span::before {
+    display: none;
+  }
+
+  .app-not-found.app-not-found > :is(span, p, h1) {
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  .app-not-found.app-not-found > a {
+    border: 1px solid LinkText;
+    color: LinkText;
+    background: Canvas;
+  }
+
+  .app-not-found.app-not-found > a::after {
+    display: none;
+  }
+}

@@ -7,6 +7,13 @@
    red flames and, mid-burn, one hard cut to EP7 REXONANCE (rising-world.tsx,
    rising-sequence.ts, rising.frag.glsl).
 
+   The gate is staged as the page's closing act: the World's prism runs down
+   a fuse into ember, onto a still lock frame the button rises into, over the
+   hero's projection floor, now burning. Everything but the three existing
+   rises is still paint: no new motion, no 3D layer (the hero's Tron floor
+   is too heavy for Android tiles), and less light than the ember glow it
+   refines, so the press's first frames stay inside the flash budget.
+
    Nothing here runs at page load: the gate is scroll-linked and every
    animation inside the dialog is started by the press and ends by 9 s.
    No backdrop-filter, blend modes or filters (Android paints them late). */
@@ -18,6 +25,8 @@
   --rw-ember: #dc401d;
   --rw-ember-deep: #a3130a;
   --rw-ash: #f7e9df;
+  --rw-flare: #ff8a3d;
+  --rw-gold: #f0cf86;
   --rw-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --rw-chamfer: polygon(
     14px 0,
@@ -27,6 +36,11 @@
     0 100%,
     0 14px
   );
+  /* The control and the lock frame around it share one box. */
+  --rw-gate-w: min(100%, 336px);
+  --rw-gate-h: 56px;
+  --rw-frame-gap: 16px;
+  --rw-frame-h: calc(var(--rw-gate-h) + 2 * var(--rw-frame-gap));
   position: relative;
   display: grid;
   place-items: center;
@@ -39,55 +53,266 @@
   background: linear-gradient(180deg, #02040a 0%, #040204 46%, var(--rw-ink) 100%);
 }
 
+@media (min-width: 768px) {
+  .site-shell.film-edition.mirage-edition .rw-gate {
+    --rw-gate-w: min(100%, 372px);
+    --rw-gate-h: 60px;
+    --rw-frame-gap: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-shell.film-edition.mirage-edition .rw-gate {
+    --rw-frame-gap: 10px;
+  }
+}
+
+/* END OF RECORD's edge: the World's prism, lit ember where the fuse leaves it. */
+.site-shell.film-edition.mirage-edition .rw-gate::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent 6%,
+    rgb(122 232 255 / 0.3) 28%,
+    rgb(164 139 255 / 0.42) 40%,
+    rgb(255 92 200 / 0.5) 46%,
+    rgb(255 138 61 / 0.85) 50%,
+    rgb(255 92 200 / 0.5) 54%,
+    rgb(164 139 255 / 0.42) 60%,
+    rgb(122 232 255 / 0.3) 72%,
+    transparent 94%
+  );
+  pointer-events: none;
+}
+
 .site-shell.film-edition.mirage-edition .rw-gate-horizon,
 .site-shell.film-edition.mirage-edition .rw-gate-rule {
   position: absolute;
   pointer-events: none;
 }
 
+/* The ember light, a few embers in the air, and (pseudo-elements) the
+   horizon and the burning floor. All of it climbs with the horizon. */
 .site-shell.film-edition.mirage-edition .rw-gate-horizon {
+  /* The horizon sits 40px under the lock frame: this box starts at 38% of
+     the gate and the frame's bottom is 12% of the gate below that. */
+  --rw-horizon-at: calc(19.35% + var(--rw-frame-h) / 2 + 40px);
   inset: auto -10% 0;
   z-index: -1;
   height: 62%;
   background:
-    radial-gradient(40% 36% at 50% 100%, rgb(255 150 70 / 0.34), transparent 70%),
+    radial-gradient(circle, rgb(255 190 120 / 0.55) 0 1px, transparent 1.6px) 37px 29px / 173px
+      211px,
+    radial-gradient(circle, rgb(255 120 60 / 0.45) 0 0.8px, transparent 1.4px) 91px 71px / 257px
+      139px,
+    radial-gradient(circle, rgb(255 210 150 / 0.4) 0 0.7px, transparent 1.2px) 13px 101px / 311px
+      181px,
+    radial-gradient(34% 30% at 50% 100%, rgb(255 150 70 / 0.3), transparent 70%),
     radial-gradient(
-      120% 90% at 50% 100%,
-      rgb(255 78 32 / 0.42),
-      rgb(170 22 10 / 0.18) 42%,
+      120% 86% at 50% 100%,
+      rgb(255 78 32 / 0.36),
+      rgb(170 22 10 / 0.16) 42%,
       transparent 72%
     );
 }
 
+/* The horizon: a hairline that is hottest under the button. */
+.site-shell.film-edition.mirage-edition .rw-gate-horizon::after {
+  position: absolute;
+  top: var(--rw-horizon-at);
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent 4%,
+    rgb(255 120 60 / 0.3) 26%,
+    rgb(255 196 128 / 0.8) 50%,
+    rgb(255 120 60 / 0.3) 74%,
+    transparent 96%
+  );
+}
+
+/* The floor: the hero's projection grid again, in ember and flat (2D paint,
+   no perspective layer): rays from the vanishing point under the button and
+   depth lines that crowd towards the horizon. */
+.site-shell.film-edition.mirage-edition .rw-gate-horizon::before {
+  position: absolute;
+  top: var(--rw-horizon-at);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(7% - 1px),
+      rgb(255 150 90 / 0.2) calc(7% - 1px) 7%,
+      transparent 7% calc(16% - 1px),
+      rgb(255 150 90 / 0.22) calc(16% - 1px) 16%,
+      transparent 16% calc(29% - 1px),
+      rgb(255 150 90 / 0.24) calc(29% - 1px) 29%,
+      transparent 29% calc(47% - 1px),
+      rgb(255 150 90 / 0.26) calc(47% - 1px) 47%,
+      transparent 47% calc(72% - 1px),
+      rgb(255 150 90 / 0.28) calc(72% - 1px) 72%,
+      transparent 72%
+    ),
+    repeating-conic-gradient(
+      from 90deg at 50% 0,
+      rgb(255 140 80 / 0.24) 0deg 0.16deg,
+      transparent 0.32deg 6deg
+    );
+  /* Faint at the horizon and towards the sides, where the rays run long. */
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent, #000 34%, #000 78%, transparent),
+    linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, transparent, #000 34%, #000 78%, transparent),
+    linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-composite: intersect;
+}
+
+/* The fuse: the World's ice burns down through the prism into ember, and
+   meets the lock frame at its node. */
 .site-shell.film-edition.mirage-edition .rw-gate-rule {
-  top: 0;
+  top: 1px;
   left: 50%;
   width: 1px;
-  height: 38%;
-  background: linear-gradient(180deg, transparent, rgb(255 138 61 / 0.7));
+  height: calc(50% - 1px - var(--rw-frame-h) / 2 - env(safe-area-inset-bottom, 0px) / 2);
+  background: linear-gradient(
+    180deg,
+    rgb(122 232 255 / 0.1),
+    rgb(122 232 255 / 0.42) 26%,
+    rgb(164 139 255 / 0.5) 52%,
+    rgb(255 92 200 / 0.55) 72%,
+    rgb(255 138 61 / 0.9)
+  );
   transform-origin: 50% 0;
   translate: -50% 0;
 }
 
-.site-shell.film-edition.mirage-edition .rw-gate-button {
+/* The lock frame the button rises into: ember brackets over gold, a faint
+   reticle, a node where the fuse lands and a tick out to either side. Static,
+   in the button's own grid cell, so the two always share a centre. */
+.site-shell.film-edition.mirage-edition .rw-gate-frame {
   position: relative;
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  width: calc(var(--rw-gate-w) + 2 * var(--rw-frame-gap));
+  height: var(--rw-frame-h);
+  pointer-events: none;
+  background:
+    linear-gradient(var(--rw-flare) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--rw-flare) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--rw-flare) 0 0) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(var(--rw-flare) 0 0) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 100% 100% / 2px 22px no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(255 138 61 / 0.12);
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-frame::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  content: "";
+  border: 1px solid #ffc08a;
+  background: var(--rw-ink);
+  box-shadow: 0 0 12px rgb(255 120 50 / 0.45);
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+
+.site-shell.film-edition.mirage-edition .rw-gate-frame::after {
+  position: absolute;
+  top: 50%;
+  right: -40px;
+  left: -40px;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 138 61 / 0.6) 26px,
+    transparent 34px calc(100% - 34px),
+    rgb(255 138 61 / 0.6) calc(100% - 26px),
+    transparent
+  );
+}
+
+/* The page's final primary control: an ember plate whose rim follows its
+   cut corners (the two diagonal tiles; an inset shadow alone is clipped
+   away there) under a bevel of light along its top. */
+.site-shell.film-edition.mirage-edition .rw-gate-button {
+  /* The rim, and a second line inside it (the focus ring's ink). */
+  --rw-rim: rgb(255 214 170 / 0.55);
+  --rw-rim-w: 1px;
+  --rw-rim-in: var(--rw-rim);
+  --rw-rim-in-w: 0px;
+  position: relative;
+  z-index: 1;
+  grid-area: 1 / 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: min(100%, 300px);
+  box-sizing: border-box;
+  width: var(--rw-gate-w);
   max-width: 100%;
-  min-height: 56px;
+  min-height: var(--rw-gate-h);
   margin: 0;
-  padding: 0 30px;
+  padding: 0 22px;
   border: 0;
   border-radius: 0;
   clip-path: var(--rw-chamfer);
   color: #fff6ee;
-  background: linear-gradient(180deg, var(--rw-ember) 0%, var(--rw-ember-deep) 100%);
-  box-shadow: inset 0 0 0 1px rgb(255 214 170 / 0.55);
+  background:
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 1px),
+        var(--rw-rim) calc(50% - 0.5px),
+        var(--rw-rim) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w)),
+        transparent calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w) + 0.6px)
+      )
+      0 0 / 14px 14px no-repeat,
+    linear-gradient(
+        to top left,
+        transparent calc(50% - 1px),
+        var(--rw-rim) calc(50% - 0.5px),
+        var(--rw-rim) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w)),
+        transparent calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w) + 0.6px)
+      )
+      100% 100% / 14px 14px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 18px,
+        rgb(255 232 196 / 0.5) 32%,
+        rgb(255 232 196 / 0.5) 68%,
+        transparent calc(100% - 18px)
+      )
+      0 1px / 100% 1px no-repeat,
+    linear-gradient(180deg, var(--rw-ember) 0%, var(--rw-ember-deep) 100%);
+  box-shadow: inset 0 0 0 var(--rw-rim-w) var(--rw-rim);
   font: 400 14px / 1.2 var(--rw-hud);
   letter-spacing: 0.26em;
   text-indent: 0.26em; /* balances the trailing tracking */
+  text-shadow: 0 1px 0 rgb(90 10 4 / 0.55);
   text-transform: none;
   white-space: nowrap;
   cursor: pointer;
@@ -105,11 +330,16 @@
   pointer-events: none;
 }
 
-/* The ring is the inset shadow. The transparent outline is painted in a
-   system colour under forced colours, which drop box-shadow. */
+/* The ring is the inset shadow and, along the cuts, the rim tiles in the
+   ring's colour. The transparent outline is painted in a system colour under
+   forced colours, which drop box-shadow. */
 .site-shell.film-edition.mirage-edition .rw-gate-button:focus-visible {
   outline: 2px solid transparent;
   outline-offset: -5px;
+  --rw-rim: #fff0b5;
+  --rw-rim-w: 3px;
+  --rw-rim-in: var(--rw-ink);
+  --rw-rim-in-w: 2px;
   box-shadow:
     inset 0 0 0 3px #fff0b5,
     inset 0 0 0 5px var(--rw-ink);
@@ -127,7 +357,7 @@
 
 @media (max-width: 360px) {
   .site-shell.film-edition.mirage-edition .rw-gate-button {
-    padding: 0 18px;
+    padding: 0 16px;
     font-size: 13px;
     letter-spacing: 0.18em;
     text-indent: 0.18em;
@@ -138,7 +368,8 @@
    direct child of the page, never inside an overflow:hidden panel). Not gated
    on the economy profile: it is one compositor opacity/translate/scale, and it
    is how the button is discovered. Off while a scroll lock owns <body>, like
-   the Mirage choreography. */
+   the Mirage choreography. The lock frame, the floor's lines and the
+   boundary are still paint; they arrive only with the horizon and the fuse. */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   .site-shell.film-edition.mirage-edition .rw-gate {
     view-timeline: --rw-gate block;
@@ -220,6 +451,10 @@
 .site-shell.film-edition.mirage-edition .rw-dialog {
   --rw-void: #050203;
   --rw-ash: #f7e9df;
+  --rw-flare: #ff8a3d;
+  --rw-gold: #f0cf86;
+  /* RE DIVE…? and もう一度 share one width at the end still. */
+  --rw-deck-w: 216px;
   --rw-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --rw-chamfer: polygon(
     14px 0,
@@ -245,6 +480,12 @@
   background: var(--rw-void);
   overscroll-behavior: contain;
   color-scheme: dark; /* Samsung Internet's forced dark mode leaves it alone */
+}
+
+@media (min-width: 768px) {
+  .site-shell.film-edition.mirage-edition .rw-dialog {
+    --rw-deck-w: 240px;
+  }
 }
 
 /* Opaque: no page bleed through the portal, the shake or the fades. */
@@ -703,7 +944,18 @@
   translate: -50% 0;
 }
 
+/* Ink plates in the gate's grammar: a rim that follows the cut corners (two
+   diagonal tiles; an inset shadow alone is clipped away there), a bevel of
+   light along the top, and a lock mark in each square corner, ember over
+   gold. Hover, press and focus change the custom properties, so the rim
+   along the cuts always matches the straight edges. */
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
+  --rw-rim: rgb(255 138 61 / 0.55);
+  --rw-rim-w: 1px;
+  --rw-rim-in: var(--rw-rim);
+  --rw-rim-in-w: 0px;
+  --rw-fill: linear-gradient(180deg, rgb(30 10 8 / 0.88), rgb(12 4 4 / 0.9));
+  box-sizing: border-box;
   min-height: 48px;
   margin: 0;
   padding: 0 22px;
@@ -711,8 +963,41 @@
   border-radius: 0;
   clip-path: var(--rw-chamfer);
   color: var(--rw-ash);
-  background: rgb(20 6 5 / 0.82);
-  box-shadow: inset 0 0 0 1px rgb(255 138 61 / 0.55);
+  background:
+    linear-gradient(var(--rw-flare) 0 0) calc(100% - 4px) 4px / 7px 1.5px no-repeat,
+    linear-gradient(var(--rw-flare) 0 0) calc(100% - 4px) 4px / 1.5px 7px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 4px calc(100% - 4px) / 7px 1.5px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) 4px calc(100% - 4px) / 1.5px 7px no-repeat,
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 1px),
+        var(--rw-rim) calc(50% - 0.5px),
+        var(--rw-rim) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w)),
+        transparent calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w) + 0.6px)
+      )
+      0 0 / 14px 14px no-repeat,
+    linear-gradient(
+        to top left,
+        transparent calc(50% - 1px),
+        var(--rw-rim) calc(50% - 0.5px),
+        var(--rw-rim) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w)),
+        var(--rw-rim-in) calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w)),
+        transparent calc(50% + var(--rw-rim-w) + var(--rw-rim-in-w) + 0.6px)
+      )
+      100% 100% / 14px 14px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 16px,
+        rgb(255 200 150 / 0.24) 30%,
+        rgb(255 200 150 / 0.24) 70%,
+        transparent calc(100% - 16px)
+      )
+      0 1px / 100% 1px no-repeat,
+    var(--rw-fill);
+  box-shadow: inset 0 0 0 var(--rw-rim-w) var(--rw-rim);
   font: 400 12px / 1 var(--rw-hud);
   letter-spacing: 0.2em;
   white-space: nowrap;
@@ -720,11 +1005,75 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* The drawn glyphs below sit on the bottom plates (CLOSE stays absolute). */
+.site-shell.film-edition.mirage-edition .rw-controls button {
+  position: relative;
+}
+
+/* SKIP runs the film forward: a drawn double chevron after the label. */
+.site-shell.film-edition.mirage-edition .rw-controls .rw-skip {
+  padding-right: 42px;
+}
+
+.site-shell.film-edition.mirage-edition .rw-controls .rw-skip::before,
+.site-shell.film-edition.mirage-edition .rw-controls .rw-skip::after {
+  position: absolute;
+  top: 50%;
+  right: 25px;
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  content: "";
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  translate: 0 -50%;
+  rotate: 45deg;
+}
+
+.site-shell.film-edition.mirage-edition .rw-controls .rw-skip::after {
+  right: 19px;
+  opacity: 0.6;
+}
+
+/* もう一度 is the end still's second control: as wide as RE DIVE…? above
+   it, with a drawn replay arc before the label. The 44px left pad and the
+   arc's 50% - 44px place the pair (arc, 10px, label) on the plate's centre. */
 .site-shell.film-edition.mirage-edition .rw-controls .rw-replay {
+  min-width: var(--rw-deck-w);
+  padding-left: 44px;
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.12em;
+}
+
+.site-shell.film-edition.mirage-edition .rw-controls .rw-replay::before {
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 44px);
+  box-sizing: border-box;
+  width: 13px;
+  height: 13px;
+  content: "";
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  translate: 0 -50%;
+  rotate: 45deg;
+}
+
+/* The arrowhead at the arc's open end, turning clockwise. */
+.site-shell.film-edition.mirage-edition .rw-controls .rw-replay::after {
+  position: absolute;
+  top: calc(50% - 6.5px);
+  left: calc(50% - 38.5px);
+  width: 0;
+  height: 0;
+  content: "";
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  border-left: 5px solid currentColor;
+  translate: 0 -50%;
 }
 
 .site-shell.film-edition.mirage-edition .rw-close {
@@ -736,13 +1085,17 @@
   align-items: center;
   gap: 12px;
   min-width: 48px;
+  padding: 0 12px 0 20px;
 }
 
-/* A drawn cross: the Michroma subset has no ✕ and needs no extra font request. */
+/* A drawn cross in its own cell: the Michroma subset has no ✕ and needs no
+   extra font request. */
 .site-shell.film-edition.mirage-edition .rw-close i {
   position: relative;
-  width: 12px;
-  height: 12px;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgb(255 168 96 / 0.4);
 }
 
 .site-shell.film-edition.mirage-edition .rw-close i::before,
@@ -750,7 +1103,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 15px;
+  width: 14px;
   height: 1.5px;
   content: "";
   background: currentColor;
@@ -767,14 +1120,13 @@
    highlight is off, so :active is the only acknowledgement on touch. */
 @media (hover: hover) and (pointer: fine) {
   .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
-    transition:
-      background-color 160ms ease,
-      box-shadow 160ms ease;
+    transition: box-shadow 160ms ease;
   }
 
   .site-shell.film-edition.mirage-edition
     :is(.rw-controls button, .rw-close):hover:not(:focus-visible, :active) {
-    background-color: rgb(52 14 8 / 0.9);
+    --rw-rim: rgb(255 168 96 / 0.95);
+    --rw-fill: linear-gradient(180deg, rgb(64 17 9 / 0.92), rgb(30 8 5 / 0.92));
     box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
   }
 }
@@ -782,13 +1134,18 @@
 /* The keyboard ring (:focus-visible, below) still wins while Space is held. */
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):active {
   scale: 0.97;
-  background-color: rgb(70 18 10 / 0.92);
+  --rw-rim: rgb(255 168 96 / 0.95);
+  --rw-fill: linear-gradient(180deg, rgb(82 21 11 / 0.94), rgb(40 10 6 / 0.94));
   box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
 }
 
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):focus-visible {
   outline: 2px solid transparent;
   outline-offset: -5px;
+  --rw-rim: #fff0b5;
+  --rw-rim-w: 3px;
+  --rw-rim-in: var(--rw-void);
+  --rw-rim-in-w: 2px;
   box-shadow:
     inset 0 0 0 3px #fff0b5,
     inset 0 0 0 5px var(--rw-void);
@@ -796,7 +1153,50 @@
 
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
-    background: #140605;
+    --rw-fill: #140605;
+  }
+}
+
+/* The end still, composed: lock marks in three corners (CLOSE holds the
+   fourth) and a floor of shade under the controls, so they read on the
+   rider's legs. Shown with RE DIVE…? (the end still, or the static one when
+   the engine failed); it steps aside with the controls when RE DIVE starts
+   (styles-world-re-dive.css). Still paint, and darker than the frame it
+   covers, so the cut to it adds no flash. */
+.site-shell.film-edition.mirage-edition .rw-end-frame {
+  --rw-fi-t: max(14px, calc(env(safe-area-inset-top) + 8px));
+  --rw-fi-b: max(14px, calc(env(safe-area-inset-bottom) + 8px));
+  --rw-fi-l: max(14px, calc(env(safe-area-inset-left) + 8px));
+  --rw-fi-r: max(14px, calc(env(safe-area-inset-right) + 8px));
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--rw-flare) 0 0) var(--rw-fi-l) var(--rw-fi-t) / 28px 2px no-repeat,
+    linear-gradient(var(--rw-flare) 0 0) var(--rw-fi-l) var(--rw-fi-t) / 2px 28px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) var(--rw-fi-l) calc(100% - var(--rw-fi-b)) / 28px 2px
+      no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) var(--rw-fi-l) calc(100% - var(--rw-fi-b)) / 2px 28px
+      no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) calc(100% - var(--rw-fi-r)) calc(100% - var(--rw-fi-b)) /
+      28px 2px no-repeat,
+    linear-gradient(var(--rw-gold) 0 0) calc(100% - var(--rw-fi-r)) calc(100% - var(--rw-fi-b)) /
+      2px 28px no-repeat,
+    linear-gradient(0deg, rgb(5 2 3 / 0.72), rgb(5 2 3 / 0.36) 16%, transparent 34%);
+}
+
+.site-shell.film-edition.mirage-edition .rw-dialog:has(.rw-redive-button) .rw-end-frame {
+  opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .site-shell.film-edition.mirage-edition .rw-end-frame {
+    --rw-fi-t: max(22px, calc(env(safe-area-inset-top) + 8px));
+    --rw-fi-b: max(22px, calc(env(safe-area-inset-bottom) + 8px));
+    --rw-fi-l: max(22px, calc(env(safe-area-inset-left) + 8px));
+    --rw-fi-r: max(22px, calc(env(safe-area-inset-right) + 8px));
   }
 }
 
@@ -814,6 +1214,25 @@
   .site-shell.film-edition.mirage-edition :is(.rw-gate-button, .rw-controls button, .rw-close) {
     border: 1px solid ButtonText;
     clip-path: none;
+    background: ButtonFace;
+  }
+
+  /* The stage is light and paint only: the gate keeps its plain control. */
+  .site-shell.film-edition.mirage-edition
+    :is(.rw-gate-horizon, .rw-gate-rule, .rw-gate-frame, .rw-end-frame) {
+    display: none;
+  }
+
+  .site-shell.film-edition.mirage-edition .rw-gate::before {
+    display: none;
+  }
+
+  /* The replay arc's open end and arrowhead are transparent borders, which
+     forced colours would paint in: keep them, in the button's system ink. */
+  .site-shell.film-edition.mirage-edition .rw-controls .rw-replay::before,
+  .site-shell.film-edition.mirage-edition .rw-controls .rw-replay::after {
+    forced-color-adjust: none;
+    color: ButtonText;
   }
 
   /* Forced colours replace the cross's currentColor background with Canvas. */
