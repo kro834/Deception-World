@@ -608,6 +608,31 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   }
 }
 
+/* Keep the mobile transmission rule clear of the headline. The programme
+   sheet removes its inset; Neo restores the rule after that breakpoint. */
+@media (max-width: 760px) {
+  .site-shell.film-edition.mirage-edition .hero-copy {
+    padding-left: 12px;
+  }
+}
+
+/* The first/last episode cannot move farther. Give those controls a quiet
+   resting surface rather than the enabled glass highlight. */
+.site-shell.film-edition.mirage-edition .episode-controls button:disabled {
+  color: rgb(241 247 251 / 32%);
+  border-color: rgb(122 232 255 / 10%);
+  background: var(--mr-deck) !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition.mirage-edition .episode-controls button:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}
+
 /* Telemetry cells under the lead. */
 .site-shell.film-edition.mirage-edition .hero-metadata > span {
   box-shadow: inset 0 1px 0 var(--mr-line);
