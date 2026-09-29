@@ -772,7 +772,7 @@
     background: linear-gradient(120deg, #d2f8ff, #8fe9ff 45%, #6fd6ef) !important;
   }
   .site-shell.film-edition .poster-control-cluster > button:not(:disabled):hover,
-  .site-shell.film-edition .episode-controls button:hover,
+  .site-shell.film-edition .episode-controls button:not(:disabled):hover,
   .site-shell.film-edition .topbar .side-panel-trigger:hover {
     border-color: var(--neo-cyan);
     box-shadow:

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thumbnail-images";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
+import { UiVectorIcon } from "./ui-vector-icon";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -467,6 +468,18 @@ function WorldFiles() {
   );
 }
 
+function readQuoteStops(rail: HTMLDivElement) {
+  const inset = Number.parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0;
+  const origin = rail.getBoundingClientRect().left + rail.clientLeft;
+  const max = Math.max(0, rail.scrollWidth - rail.clientWidth);
+  return Array.from(rail.querySelectorAll<HTMLElement>(".wa-quote-band > li")).map((item) =>
+    Math.min(
+      max,
+      Math.max(0, rail.scrollLeft + item.getBoundingClientRect().left - origin - inset),
+    ),
+  );
+}
+
 /* The quotes log scrolls sideways below 700px and is a still list above.
    Only a rail that scrolls is a Tab stop (its lines hold no control, so the
    keyboard needs the stop to scroll it); on a desktop the still list was an
@@ -474,27 +487,129 @@ function WorldFiles() {
    hydration matches; a resize past 700px updates it. */
 function QuoteRail({ children }: { children: ReactNode }) {
   const railRef = useRef<HTMLDivElement>(null);
+  const targetsRef = useRef<number[]>([]);
+  const activeRef = useRef(0);
+  const cancelSettleRef = useRef<(() => void) | null>(null);
   const [scrolls, setScrolls] = useState(true);
+  const [active, setActive] = useState(0);
+
   useEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
-    const update = () => setScrolls(rail.scrollWidth > rail.clientWidth + 1);
+    let settleTimer = 0;
+    const sync = () => {
+      targetsRef.current = readQuoteStops(rail);
+      // On wider phones the final two cards can share the clamped endpoint.
+      // Keep an explicitly selected card when those distances are equal.
+      let nearest = Math.min(activeRef.current, Math.max(0, targetsRef.current.length - 1));
+      let distance = Math.abs(rail.scrollLeft - (targetsRef.current[nearest] ?? 0));
+      targetsRef.current.forEach((left, index) => {
+        const delta = Math.abs(rail.scrollLeft - left);
+        if (delta < distance) {
+          distance = delta;
+          nearest = index;
+        }
+      });
+      activeRef.current = nearest;
+      setActive(nearest);
+    };
+    const cancelSettle = () => window.clearTimeout(settleTimer);
+    cancelSettleRef.current = cancelSettle;
+    const onScroll = () => {
+      cancelSettle();
+      // Read the position once scrolling settles, not every animation frame.
+      // Rapid taps retain their requested index while smooth scrolling runs.
+      settleTimer = window.setTimeout(sync, 150);
+    };
+    const update = () => {
+      cancelSettle();
+      setScrolls(rail.scrollWidth > rail.clientWidth + 1);
+      sync();
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(rail);
     if (rail.firstElementChild) observer.observe(rail.firstElementChild);
-    return () => observer.disconnect();
+    rail.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      rail.removeEventListener("scroll", onScroll);
+      cancelSettle();
+      cancelSettleRef.current = null;
+    };
   }, []);
+
+  const moveTo = (index: number) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    // Fonts can change the overflow extent without resizing the rail itself.
+    const targets = readQuoteStops(rail);
+    targetsRef.current = targets;
+    if (!targets.length) return;
+    const next = Math.max(0, Math.min(targets.length - 1, index));
+    cancelSettleRef.current?.();
+    activeRef.current = next;
+    setActive(next);
+    rail.scrollTo({
+      left: targets[next],
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
+  };
+
   return (
-    <div
-      ref={railRef}
-      className="wa-quote-rail"
-      role="region"
-      tabIndex={scrolls ? 0 : undefined}
-      aria-labelledby="quotes-title"
-    >
-      {children}
-    </div>
+    <>
+      <div
+        ref={railRef}
+        className="wa-quote-rail"
+        role="region"
+        tabIndex={scrolls ? 0 : undefined}
+        aria-labelledby="quotes-title"
+        id="world-quotes-rail"
+        aria-describedby={scrolls ? "world-quotes-help" : undefined}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget || !scrolls) return;
+          if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+          let next = activeRef.current;
+          if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = targetsRef.current.length - 1;
+          else if (event.key === "ArrowLeft") next -= 1;
+          else if (event.key === "ArrowRight") next += 1;
+          else return;
+          event.preventDefault();
+          moveTo(next);
+        }}
+      >
+        {children}
+      </div>
+      <div className="wa-quote-controls" hidden={!scrolls}>
+        <div>
+          <output aria-live="polite" aria-atomic="true" aria-label="表示中の名台詞">
+            {pad(active + 1)} / {pad(WORLD_QUOTES.length)}
+          </output>
+          <span id="world-quotes-help">スワイプ・左右キーで切替</span>
+        </div>
+        <button
+          type="button"
+          aria-label="前の名台詞へ"
+          aria-controls="world-quotes-rail"
+          disabled={active === 0}
+          onClick={() => moveTo(activeRef.current - 1)}
+        >
+          <UiVectorIcon kind="arrow-left" size={20} />
+        </button>
+        <button
+          type="button"
+          aria-label="次の名台詞へ"
+          aria-controls="world-quotes-rail"
+          disabled={active === WORLD_QUOTES.length - 1}
+          onClick={() => moveTo(activeRef.current + 1)}
+        >
+          <UiVectorIcon kind="arrow-right" size={20} />
+        </button>
+      </div>
+    </>
   );
 }
 

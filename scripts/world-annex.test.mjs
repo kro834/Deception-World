@@ -216,7 +216,7 @@ test("the annex presentation: chapter openers, portraits, disclosures, the quote
   // 700px); the still desktop list is no longer an empty Tab stop.
   assert.match(
     annex,
-    /<div\s+ref=\{railRef\}\s+className="wa-quote-rail"\s+role="region"\s+tabIndex=\{scrolls \? 0 : undefined\}\s+aria-labelledby="quotes-title"\s*>/,
+    /<div\s+ref=\{railRef\}\s+className="wa-quote-rail"\s+role="region"\s+tabIndex=\{scrolls \? 0 : undefined\}\s+aria-labelledby="quotes-title"\s+id="world-quotes-rail"/,
   );
   assert.match(annex, /setScrolls\(rail\.scrollWidth > rail\.clientWidth \+ 1\)/);
   assert.match(annex, /const \[scrolls, setScrolls\] = useState\(true\);/);

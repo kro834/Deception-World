@@ -1492,7 +1492,66 @@
   outline-offset: 3px;
 }
 
+.site-shell.film-edition.mirage-edition .wa-quote-controls {
+  display: none;
+}
+
 @media (max-width: 699px) {
+  .site-shell.film-edition.mirage-edition .wa-quote-controls:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls > div {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls output {
+    color: var(--mr-ice-hi);
+    font: 600 14px/1.4 var(--mr-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls span {
+    color: var(--mr-text-2);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls button {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid var(--mr-line-strong);
+    background: var(--mr-deck-raised);
+    color: var(--mr-text);
+    cursor: pointer;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls button:not(:disabled):hover {
+    border-color: var(--mr-ice-hi);
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls button:disabled {
+    color: var(--mr-text-3);
+    border-color: var(--mr-line);
+    background: var(--mr-deck);
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .site-shell.film-edition.mirage-edition .wa-quote-controls button:focus-visible {
+    outline: 2px solid var(--mr-focus);
+    outline-offset: 3px;
+  }
+
   .site-shell.film-edition.mirage-edition .wa-quote-rail {
     margin-inline: -20px;
     padding: 0 20px 14px;
