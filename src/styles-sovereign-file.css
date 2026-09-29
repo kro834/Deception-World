@@ -1,0 +1,2250 @@
+/* The sovereign file — /managers/zeus, the 六詠 rank-I file
+   (main.manager-page.is-sovereign).
+
+   The other character files wear the Dossier edition (styles-dossier-edition
+   and styles-dossier-cinema), which leaves this file alone. This sheet brings
+   the sovereign up to that bar in its own register: gold, ivory and white on
+   the site's ink, a crown of brackets, Roman numerals in Cinzel (the site's
+   original display capital, loaded root-wide), HUD labels in the Michroma
+   subset at 12px or larger, figures in Oxanium, square plates that lock on
+   with ivory brackets over gold, and the prism read from its gold end.
+
+   Delivery: linked last on the Zeus route only (src/routes/managers/zeus.tsx),
+   after the World sheets. React keeps a route's stylesheet in the document
+   once it has loaded, so every rule is scoped to the sovereign <main> and
+   every keyframe is named sv-*. The copy and the markup are untouched: the
+   sheet restyles the file's existing aria-hidden ornaments (the aura, the
+   portrait effects, the emblem, the scale) and adds no text (generated text
+   is empty or silent).
+
+   Motion. The arrival is keyed to the load gate's hand-over, as the cinema
+   sheet's is: while html[data-loading] is present the hero rests fully
+   drawn under the seal; when it goes, the arrival plays (on mount when there
+   is no cover). It continues the sovereign gate: the gate's rays give way to
+   the crown behind the portrait, its brackets to the frame's own, and the
+   plate is unveiled from the halo's light outward (an iris, its rim riding
+   the edge over the dark ground, so luminance only rises); the seal stamps
+   on, the name is inscribed in gold, the status plate and the panels lock
+   on. Every beat is finite, at rest by about 1.4s, and animates only
+   opacity, transform and clip-path. The first screen of scroll pushes the
+   camera in and turns the crown; the dossier's numerals and plates lock on
+   along named view timelines. Reduced motion and economy rendering show the
+   rest state; the scroll-linked layer also stands down under the side menu,
+   a loading cover and dialogs. The loops the old sovereign file ran on a
+   still page (orbits, pulses, sweeps, the title shine) are retired here. */
+
+/* ================================================================
+   Tokens and ground
+   ================================================================ */
+main.manager-page.is-sovereign {
+  --sv-ink: #04080f;
+  --sv-gold: #f0cf86;
+  --sv-gold-hi: #f7dfa2;
+  --sv-gold-deep: #b98b40;
+  --sv-ivory: #fff8e8;
+  --sv-ice: #7ae8ff;
+  --sv-violet: #a48bff;
+  --sv-text: #f7f2e6;
+  --sv-rule: rgb(240 207 134 / 13%);
+  --sv-focus: #fff0b5;
+  --sv-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --sv-mono: "Oxanium", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --sv-roman: "Cinzel", "Times New Roman", serif;
+  --sv-jp: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
+  /* The prism, read from its gold end. */
+  --sv-prism: linear-gradient(
+    90deg,
+    var(--sv-ivory) 0%,
+    var(--sv-gold-hi) 28%,
+    var(--sv-gold) 56%,
+    var(--sv-violet) 84%,
+    var(--sv-ice) 100%
+  );
+  /* Gold chrome ink: white at the crown of each glyph, deep gold at its foot. */
+  --sv-chrome: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff6de 30%,
+    var(--sv-gold-hi) 60%,
+    var(--sv-gold-deep) 100%
+  );
+  /* Brackets: ivory across the top, gold along the bottom, 2px arms. */
+  --sv-brackets:
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 22px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 2px 22px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 22px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 2px 22px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 22px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 2px 22px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 22px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 2px 22px;
+  --sv-brackets-s:
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 12px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 2px 12px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 12px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 2px 12px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 12px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 2px 12px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 12px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 2px 12px;
+  --sv-brackets-l:
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 30px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 2px 30px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 30px 2px,
+    linear-gradient(var(--sv-ivory) 0 0) 100% 0 / 2px 30px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 30px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 0 100% / 2px 30px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 30px 2px,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 2px 30px;
+  /* The arrival: a short hold after the hand-over (the gate opens onto the
+     first beat), the house curves, and the iris's reach. */
+  --sv-arrive: 100ms;
+  --sv-ease: cubic-bezier(0.77, 0, 0.18, 1);
+  --sv-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Light spreads fast from its source and slows as it reaches the edges,
+     so the plate is already blooming as the gate opens onto it. */
+  --sv-bloom: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sv-write: cubic-bezier(0.55, 0, 0.3, 1);
+  /* The iris's reach: past the far corners of the largest plate (580 by
+     870px), so the clip lets go without a step. */
+  --sv-iris: 760px;
+  /* The viewport telemetry frame (styles-world/24.css) in ivory and gold. */
+  --future-hud-primary: var(--sv-ivory);
+  --future-hud-secondary: var(--sv-gold);
+  /* The ground: the site's ink under a key light from above the portrait,
+     a pale second light at the top right and a trace of ice. */
+  background:
+    radial-gradient(
+      ellipse min(920px, 72vw) 760px at 24% 160px,
+      rgb(246 220 154 / 12%),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse min(640px, 52vw) 480px at 88% 0,
+      rgb(255 248 232 / 6%),
+      transparent 70%
+    ),
+    radial-gradient(ellipse 60% 1100px at 98% 58%, rgb(122 232 255 / 3.5%), transparent 70%),
+    radial-gradient(ellipse 70% 900px at 10% 96%, rgb(240 207 134 / 4%), transparent 70%),
+    var(--sv-ink);
+}
+
+/* The page's end continues the ink (the pagination's margin collapses
+   through <main> and <body>, so the root paints the last strip). */
+html:has(> body > main.manager-page.is-sovereign),
+body:has(> main.manager-page.is-sovereign) {
+  background-color: #04080f;
+}
+
+main.manager-page.is-sovereign .manager-grid {
+  opacity: 0.1;
+  background-image:
+    linear-gradient(rgb(240 207 134 / 55%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(240 207 134 / 55%) 1px, transparent 1px);
+  background-size: 96px 96px;
+}
+
+/* The ring stays still and faint (the dossier performance test keeps it
+   free of animation and transforms). */
+main.manager-page.is-sovereign .manager-glow {
+  border-color: rgb(240 207 134 / 14%);
+  box-shadow:
+    0 0 0 8rem rgb(240 207 134 / 1.6%),
+    0 0 0 18rem rgb(255 248 232 / 1%),
+    0 0 140px rgb(240 207 134 / 5%);
+}
+
+/* The aura: three still rings (the dashed one turns with the scroll). */
+main.manager-page.is-sovereign .sovereign-aura {
+  opacity: 1;
+}
+
+main.manager-page.is-sovereign .sovereign-aura > i {
+  border: 1px solid rgb(240 207 134 / 12%);
+  box-shadow: none;
+  animation: none;
+}
+
+main.manager-page.is-sovereign .sovereign-aura > i:nth-child(1) {
+  border-style: dashed;
+  border-color: rgb(240 207 134 / 15%);
+}
+
+main.manager-page.is-sovereign .sovereign-aura > i:nth-child(2) {
+  border-color: rgb(255 248 232 / 9%);
+}
+
+main.manager-page.is-sovereign .sovereign-aura > i:nth-child(3) {
+  border-color: rgb(240 207 134 / 13%);
+  box-shadow:
+    0 0 60px rgb(240 207 134 / 4%),
+    inset 0 0 60px rgb(240 207 134 / 3%);
+}
+
+/* The aura's numeral is fixed behind the file and only ever showed as a bar
+   through the gaps between the plates: the seal carries the mark instead. */
+main.manager-page.is-sovereign .sovereign-aura > span {
+  display: none;
+}
+
+/* The introduction's watermark numeral: a monumental Roman I in outline,
+   silent, at the top of the column beside the name. */
+main.manager-page.is-sovereign #dossier-profile .manager-introduction::before {
+  content: "I" / "";
+  top: -40px;
+  right: 0;
+  color: transparent;
+  font-family: var(--sv-roman);
+  font-size: clamp(150px, 16vw, 250px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  -webkit-text-stroke: 1px rgb(240 207 134 / 16%);
+}
+
+@media (max-width: 1099px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-introduction::before {
+    content: none;
+  }
+}
+
+main.manager-page.is-sovereign::before {
+  opacity: 0.42;
+}
+
+/* The telemetry ticks rest instead of breathing on a still page. */
+main.manager-page.is-sovereign::after {
+  opacity: 0.3;
+  animation: none;
+}
+
+/* ================================================================
+   Header
+   ================================================================ */
+/* One opaque ink plate, ruled in gold. The reading-progress hairline
+   (::after, driven by --page-progress) keeps its geometry; it takes gold. */
+main.manager-page.is-sovereign .manager-topbar {
+  border-bottom-color: rgb(240 207 134 / 18%);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(240 207 134 / 8%),
+      transparent 30%,
+      transparent 72%,
+      rgb(122 232 255 / 4%)
+    ),
+    #03060c;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    0 1px 0 rgb(240 207 134 / 6%),
+    0 18px 44px rgb(0 0 0 / 45%);
+}
+
+main.manager-page.is-sovereign .manager-topbar::after {
+  background: linear-gradient(90deg, var(--sv-ivory), var(--sv-gold) 58%, transparent 96%);
+  opacity: 0.62;
+}
+
+main.manager-page.is-sovereign .manager-topbar .brand-sigil {
+  border-color: rgb(240 207 134 / 72%);
+  color: var(--sv-gold-hi);
+}
+
+/* Every label at 12px or larger (the brand read 10-11px). */
+main.manager-page.is-sovereign .manager-topbar .brand-sigil i,
+main.manager-page.is-sovereign .manager-topbar .brand b,
+main.manager-page.is-sovereign .manager-topbar .brand small {
+  font-size: 12px;
+}
+
+main.manager-page.is-sovereign .manager-topbar .brand small {
+  color: rgb(240 207 134 / 72%);
+}
+
+/* The node label, in the HUD face at 12px; it is decoration, so silent. */
+@media (min-width: 1040px) {
+  main.manager-page.is-sovereign .manager-topbar::before {
+    content: "AUTHORITY NODE // 01" / "";
+    color: rgb(240 207 134 / 78%);
+    font-family: var(--sv-hud);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+  }
+}
+
+/* The return chip as a square plate with lock corners. */
+main.manager-page.is-sovereign .manager-topbar .manager-back {
+  border-color: rgb(240 207 134 / 38%);
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 8px 1px no-repeat,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 1px 8px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 8px 1px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 1px 8px no-repeat,
+    rgb(240 207 134 / 7%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+main.manager-page.is-sovereign .manager-topbar .manager-back i {
+  color: var(--sv-gold);
+}
+
+/* ================================================================
+   Hero layout
+   ================================================================ */
+/* The portrait's edge on the reader bar's edge, as in the other files. */
+@media (min-width: 761px) {
+  main.manager-page.is-sovereign .manager-hero {
+    width: min(1256px, calc(100% - 48px));
+    grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(36px, 5vw, 72px);
+  }
+}
+
+/* Wide screens: the whole plate and its gold foot on the first screen. */
+@media (min-width: 1100px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame {
+    max-height: max(420px, calc(100svh - clamp(118px, 11vw, 166px) - 24px));
+  }
+}
+
+/* Tablets and phones on their side: the portrait rides beside the status,
+   the quotes and the facts instead of leaving its column empty. */
+@media (min-width: 761px) and (max-width: 1099px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-column {
+    align-self: stretch;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame {
+    position: sticky;
+    top: calc(var(--detail-header-height, 68px) + 16px);
+    max-height: calc(100svh - var(--detail-header-height, 68px) - 32px);
+  }
+}
+
+/* Phones: the authority line leads, as it does in the source order; then
+   the name, the portrait and the plates. */
+@media (max-width: 760px) {
+  main.manager-page.is-sovereign #dossier-profile .sovereign-dominance {
+    order: -3;
+    margin: 0;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .dossier-identity h1 {
+    font-size: clamp(56px, 17vw, 76px);
+    line-height: 1.02;
+    gap: 14px;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame {
+    border-radius: 4px;
+    outline-offset: 4px;
+  }
+}
+
+/* ================================================================
+   The portrait: a plate on a lit stage, under a crown
+   ================================================================ */
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame {
+  border: 1px solid rgb(240 207 134 / 44%);
+  border-radius: 4px;
+  /* The ground is lit before the plate is unveiled on it. */
+  background:
+    radial-gradient(ellipse 70% 42% at 50% 27%, rgb(255 244 214 / 15%), transparent 72%),
+    radial-gradient(ellipse 90% 60% at 18% 0%, rgb(240 207 134 / 10%), transparent 70%),
+    linear-gradient(180deg, #10121a, #05070b);
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 50%),
+    0 0 64px rgb(240 207 134 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+  outline: 1px solid rgb(240 207 134 / 16%);
+  outline-offset: 6px;
+  animation: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame > img {
+  transform-origin: 50% 27%;
+}
+
+/* The crown of brackets: ivory over gold at the corners, and a jewel on the
+   top edge's centre with a rule to either side. */
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame::before {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(to bottom right, transparent 50%, var(--sv-ivory) 50%) calc(50% - 4px) 12px /
+      8px 8px,
+    linear-gradient(to bottom left, transparent 50%, var(--sv-ivory) 50%) calc(50% + 4px) 12px / 8px
+      8px,
+    linear-gradient(to top right, transparent 50%, var(--sv-ivory) 50%) calc(50% - 4px) 20px / 8px
+      8px,
+    linear-gradient(to top left, transparent 50%, var(--sv-ivory) 50%) calc(50% + 4px) 20px / 8px
+      8px,
+    linear-gradient(90deg, transparent, var(--sv-ivory)) calc(50% - 22px) 19.5px / 28px 1px,
+    linear-gradient(270deg, transparent, var(--sv-ivory)) calc(50% + 22px) 19.5px / 28px 1px,
+    var(--sv-brackets-l);
+  background-repeat: no-repeat;
+  /* A hairline of ink under the lines, so they read on the white art. */
+  filter: drop-shadow(0 0 1px rgb(4 8 15 / 75%));
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame::after {
+  content: none;
+}
+
+/* The stage: a key light from above, a floor that settles the robe's hem
+   into the ink under the seal, a warm vignette and an inner gold rim. The
+   faces are untouched (the floor stays below the chest). */
+main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects {
+  z-index: 1;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects::before {
+  content: none;
+  animation: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects::after {
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(ellipse 80% 38% at 50% 0%, rgb(255 246 222 / 9%), transparent 70%),
+    linear-gradient(180deg, transparent 64%, rgb(4 8 15 / 18%) 80%, rgb(4 8 15 / 62%) 100%),
+    radial-gradient(ellipse 130% 95% at 50% 38%, transparent 64%, rgb(12 8 2 / 22%) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(240 207 134 / 26%),
+    inset 0 0 40px rgb(40 26 6 / 16%);
+}
+
+/* The unveiling's light front: a rim that rides the iris's edge on the
+   ground outside it, and leaves (opacity 0 at rest, and with no motion). */
+main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects > i:first-child {
+  position: absolute;
+  top: 27%;
+  left: 50%;
+  width: calc(var(--sv-iris) * 2.222);
+  height: auto;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 0 87%,
+    rgb(255 244 214 / 86%) 90%,
+    rgb(240 207 134 / 36%) 93.5%,
+    rgb(240 207 134 / 0%) 100%
+  );
+  box-shadow: none;
+  opacity: 0;
+  transform: none;
+  translate: -50% -50%;
+  animation: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects > i:last-child {
+  display: none;
+}
+
+/* The crown behind the plate: fine gold rays from behind the face (the
+   gate's rays, locked). Phones hide it: there the portrait spans the column
+   and the rays would only fall across the title above it. */
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-column::before {
+  --sv-ray-y: 190px;
+  top: var(--sv-ray-y);
+  left: 50%;
+  width: min(150%, 920px);
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(246 220 154 / 38%) 0 0.55deg,
+    transparent 0.55deg 7.5deg
+  );
+  opacity: 0.32;
+  -webkit-mask-image: radial-gradient(
+    circle closest-side,
+    transparent 0 30%,
+    #000 50%,
+    rgb(0 0 0 / 50%) 72%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle closest-side,
+    transparent 0 30%,
+    #000 50%,
+    rgb(0 0 0 / 50%) 72%,
+    transparent 100%
+  );
+  transform: none;
+  translate: -50% -50%;
+  animation: none;
+}
+
+@media (max-width: 1099px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-column::before {
+    --sv-ray-y: 118px;
+  }
+}
+
+@media (max-width: 760px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-column::before {
+    display: none;
+  }
+
+  /* The iris reaches the plate's far corners before it lets go of its clip
+     (the phone plate is the column wide at 4:5, its halo 27% down). */
+  main.manager-page.is-sovereign {
+    --sv-iris: calc((100vw - 36px) * 1.1);
+  }
+}
+
+/* The file numeral: a square HUD tag, the Roman numeral in gold. */
+main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame .manager-numeral {
+  top: 18px;
+  left: 18px;
+  z-index: 4;
+  display: grid;
+  min-width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0 12px;
+  border: 1px solid rgb(240 207 134 / 58%);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 76%);
+  box-shadow:
+    -2px 0 0 rgb(122 232 255 / 34%),
+    2px 0 0 rgb(240 207 134 / 44%);
+  color: var(--sv-gold-hi);
+  font-family: var(--sv-roman);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: none;
+}
+
+/* ================================================================
+   The apex seal: a square hallmark, double-ruled
+   ================================================================ */
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal {
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  display: grid;
+  width: clamp(132px, 30%, 164px);
+  min-height: 0;
+  aspect-ratio: 1;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  padding: 14px 12px 12px;
+  overflow: hidden;
+  border: 1px solid rgb(240 207 134 / 62%);
+  border-radius: 2px;
+  background:
+    radial-gradient(circle at 50% 48%, rgb(246 220 154 / 16%), transparent 62%),
+    linear-gradient(160deg, rgb(22 18 11 / 94%), rgb(5 7 11 / 96%));
+  box-shadow:
+    0 18px 40px rgb(0 0 0 / 42%),
+    inset 0 0 0 4px rgb(5 7 11 / 72%),
+    inset 0 0 0 5px rgb(240 207 134 / 26%);
+  text-align: center;
+  animation: none;
+}
+
+/* A sunburst behind the numeral (the old watermark "I" is gone: the
+   numeral itself is the mark). */
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgb(240 207 134 / 20%) 0 1deg,
+    transparent 1deg 15deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0 20%,
+    #000 30%,
+    transparent 64%
+  );
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0 20%, #000 30%, transparent 64%);
+  font-size: 0;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: var(--sv-brackets-s);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal :is(small, span) {
+  position: relative;
+  z-index: 1;
+  font-family: var(--sv-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal small {
+  color: var(--sv-gold);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal span {
+  color: rgb(255 248 232 / 78%);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal strong {
+  position: relative;
+  z-index: 1;
+  margin: 2px 0 4px;
+  color: transparent;
+  background: var(--sv-chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--sv-roman);
+  font-size: clamp(50px, 5.2vw, 70px);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.92;
+  text-shadow: none;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(2px 0 rgb(122 232 255 / 28%)) drop-shadow(-2px 0 rgb(240 207 134 / 30%));
+}
+
+/* ================================================================
+   Identity: the authority line, the file strip, the name in gold
+   ================================================================ */
+main.manager-page.is-sovereign #dossier-profile .sovereign-dominance {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-dominance span {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: rgb(240 207 134 / 88%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+}
+
+/* A lit diamond before the label and a prism rule after it. */
+main.manager-page.is-sovereign #dossier-profile .sovereign-dominance span::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: var(--sv-gold-hi);
+  box-shadow: 0 0 10px rgb(240 207 134 / 60%);
+  transform: rotate(45deg);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-dominance span::after {
+  content: "";
+  width: 48px;
+  height: 1px;
+  flex: none;
+  background: var(--sv-prism);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-dominance b {
+  padding: 0;
+  border: 0;
+  color: transparent;
+  background: var(--sv-chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--sv-jp);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-shadow: none;
+  -webkit-text-fill-color: transparent;
+}
+
+main.manager-page.is-sovereign #dossier-profile .dossier-identity .manager-file-number {
+  padding: 7px 14px 7px 12px;
+  border-left: 2px solid var(--sv-gold);
+  border-radius: 0;
+  background: linear-gradient(90deg, rgb(240 207 134 / 15%), rgb(240 207 134 / 3%));
+  color: rgb(255 248 232 / 84%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-shadow: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .dossier-identity h1 small {
+  color: var(--sv-gold);
+  font-family: var(--sv-hud);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+}
+
+/* The name: gold chrome ink with the site's still, misregistered ghost (a
+   gold channel and an ice channel under the ink). It sits on its own width,
+   so the inscription travels over the letters, not the empty column. */
+main.manager-page.is-sovereign #dossier-profile .dossier-identity .manager-display-name {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  color: transparent;
+  background: var(--sv-chrome);
+  background-position: 0 0;
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: -0.035em;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(3px 0 rgb(240 207 134 / 34%)) drop-shadow(-2px 0 rgb(122 232 255 / 22%));
+  animation: none;
+}
+
+/* The inscribing nib: a line of light that leads the strike. It rests
+   unseen. */
+main.manager-page.is-sovereign #dossier-profile .dossier-identity .manager-display-name::after {
+  content: "";
+  position: absolute;
+  top: 6%;
+  bottom: 6%;
+  left: -24px;
+  width: 100%;
+  background:
+    linear-gradient(90deg, transparent, rgb(255 244 214 / 45%)) 0 0 / 24px 100% no-repeat,
+    linear-gradient(180deg, transparent, var(--sv-ivory) 18%, var(--sv-gold-hi) 82%, transparent)
+      22px 0 / 2px 100% no-repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .dossier-identity .manager-title {
+  color: rgb(247 234 204 / 88%);
+  letter-spacing: 0.1em;
+}
+
+/* 人物資料を読む: a square plate locked on with ivory and gold corners. */
+main.manager-page.is-sovereign #dossier-profile .dossier-read-link {
+  border-color: rgb(240 207 134 / 44%);
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 2px 10px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 2px 10px no-repeat,
+    linear-gradient(135deg, rgb(240 207 134 / 12%), rgb(240 207 134 / 4%)),
+    #0a0c12;
+  color: var(--sv-text);
+}
+
+main.manager-page.is-sovereign #dossier-profile .dossier-read-link span {
+  color: var(--sv-gold);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page.is-sovereign #dossier-profile .dossier-read-link:hover {
+    border-color: rgb(240 207 134 / 72%);
+    background-color: #141118;
+  }
+}
+
+/* ================================================================
+   The status plate: authority protocol, emblem and scale
+   ================================================================ */
+main.manager-page.is-sovereign #dossier-profile .sovereign-status {
+  margin: 30px 0 0;
+  padding: 20px 22px;
+  overflow: visible;
+  border: 1px solid rgb(240 207 134 / 30%);
+  border-radius: 4px;
+  outline: 1px solid rgb(240 207 134 / 8%);
+  outline-offset: -6px;
+  background:
+    var(--sv-prism) top / 100% 1px no-repeat,
+    radial-gradient(ellipse 170px 120% at 56px 50%, rgb(246 220 154 / 12%), transparent 70%),
+    linear-gradient(120deg, rgb(255 248 232 / 5%), transparent 40%),
+    linear-gradient(160deg, rgb(20 17 12 / 94%), rgb(7 9 13 / 95%));
+  box-shadow:
+    0 20px 50px rgb(0 0 0 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+/* The scale takes a narrower column, so the protocol line breaks once. */
+@media (min-width: 1121px) {
+  main.manager-page.is-sovereign #dossier-profile .sovereign-status {
+    grid-template-columns: 76px minmax(0, 1fr) minmax(150px, 0.62fr);
+  }
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-status::before {
+  content: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-status::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -1px;
+  width: auto;
+  height: auto;
+  background: var(--sv-brackets);
+  background-repeat: no-repeat;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  pointer-events: none;
+  animation: none;
+}
+
+/* The emblem: a gold diamond inside a ring of ticks, the numeral in chrome
+   gold. Still. */
+main.manager-page.is-sovereign #dossier-profile .sovereign-emblem::before {
+  inset: 13px;
+  border: 1px solid rgb(240 207 134 / 72%);
+  background: radial-gradient(circle, rgb(246 220 154 / 16%), transparent 72%);
+  box-shadow: 0 0 18px rgb(240 207 134 / 14%);
+  transform: rotate(45deg);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-emblem > i {
+  inset: 0;
+  border: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(240 207 134 / 60%) 0 1.2deg,
+    transparent 1.2deg 15deg
+  );
+  box-shadow: inset 0 0 0 1px rgb(240 207 134 / 18%);
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 0 84%, #000 86%);
+  mask-image: radial-gradient(circle closest-side, transparent 0 84%, #000 86%);
+  animation: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-emblem > span {
+  color: transparent;
+  background: var(--sv-chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--sv-roman);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: none;
+  -webkit-text-fill-color: transparent;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-status-copy > small,
+main.manager-page.is-sovereign #dossier-profile .sovereign-status-copy > p {
+  color: rgb(240 207 134 / 86%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.55;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-status-copy > p {
+  color: rgb(255 248 232 / 66%);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-status-copy > strong {
+  margin: 8px 0 6px;
+  color: var(--sv-text);
+  font-family: var(--sv-jp);
+  font-size: clamp(28px, 2.6vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+  text-shadow:
+    2px 0 rgb(240 207 134 / 32%),
+    -2px 0 rgb(122 232 255 / 18%);
+}
+
+/* The scale: the six ranks as outlined gold bars, the first a solid bar of
+   light under a crown diamond. The numerals in Cinzel at 12px or larger. */
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale {
+  height: 104px;
+  gap: 8px;
+  padding: 14px 6px 0;
+  border-bottom: 1px solid rgb(240 207 134 / 30%);
+  background: repeating-linear-gradient(180deg, rgb(240 207 134 / 7%) 0 1px, transparent 1px 16px);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale > span {
+  gap: 8px;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale i {
+  border: 1px solid rgb(240 207 134 / 40%);
+  background: linear-gradient(180deg, rgb(240 207 134 / 28%), rgb(240 207 134 / 4%));
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  transform-origin: 50% 100%;
+  animation: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale > span:nth-child(6) i {
+  border-color: var(--sv-ivory);
+  background: linear-gradient(180deg, #fffdf6, var(--sv-gold-hi) 42%, var(--sv-gold-deep));
+  box-shadow: 0 0 22px rgb(240 207 134 / 26%);
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale b {
+  color: rgb(240 207 134 / 58%);
+  font-family: var(--sv-roman);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale .is-apex b {
+  color: var(--sv-ivory);
+  font-size: 13px;
+  text-shadow: none;
+}
+
+/* The crown diamond over the first rank, drawn (it was an 8px glyph). */
+main.manager-page.is-sovereign #dossier-profile .sovereign-scale .is-apex::after {
+  content: "";
+  top: auto;
+  bottom: calc(66px + 12px + 8px + 7px);
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  background: var(--sv-ivory);
+  box-shadow: 0 0 10px rgb(240 207 134 / 70%);
+  font-size: 0;
+  transform: none;
+  translate: -50% 0;
+  rotate: 45deg;
+}
+
+/* ================================================================
+   Quotes and facts: gilded plates
+   ================================================================ */
+main.manager-page.is-sovereign #dossier-profile .manager-quotes {
+  position: relative;
+  margin: 34px 0;
+  padding: 28px 30px 26px;
+  border: 1px solid rgb(240 207 134 / 24%);
+  border-radius: 4px;
+  background:
+    var(--sv-prism) top / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(240 207 134 / 7%), transparent 42%),
+    linear-gradient(315deg, rgb(122 232 255 / 3%), transparent 40%),
+    rgb(9 11 17 / 88%);
+  box-shadow:
+    0 18px 44px rgb(0 0 0 / 26%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-quotes::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -1px;
+  background: var(--sv-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* The first line is the file's voice: a pull quote. The rest step down. */
+main.manager-page.is-sovereign #dossier-profile .manager-quotes q:first-child {
+  color: #fbf6ea;
+  font-size: clamp(18px, 1.6vw, 23px);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-quotes q:not(:first-child) {
+  color: rgb(238 231 214 / 78%);
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-quotes q::before,
+main.manager-page.is-sovereign #dossier-profile .manager-quotes q::after {
+  color: var(--sv-gold);
+}
+
+/* The facts: one ruled spec sheet, each cell's rule its own top and left
+   shadow, clipped by the plate. */
+main.manager-page.is-sovereign #dossier-profile .manager-facts {
+  position: relative;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgb(240 207 134 / 26%);
+  border-radius: 4px;
+  background:
+    var(--sv-prism) top / 100% 1px no-repeat,
+    linear-gradient(125deg, rgb(240 207 134 / 8%), #080a10 78%);
+  box-shadow:
+    0 18px 44px rgb(0 0 0 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-facts::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: var(--sv-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-facts > div {
+  min-height: 0;
+  padding: 16px 20px 15px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(var(--sv-gold) 0 0) 0 0 / 6px 1px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 0 0 / 1px 6px no-repeat;
+  box-shadow: -1px -1px 0 var(--sv-rule);
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-facts dt {
+  margin-bottom: 6px;
+  color: rgb(240 207 134 / 74%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+
+main.manager-page.is-sovereign #dossier-profile .manager-facts dd {
+  color: var(--sv-text);
+  font-family: "Oxanium", var(--sv-jp);
+  font-size: clamp(16px, 1.25vw, 18px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Narrower plates (phones, tablets, phones on their side): a compact seal
+   that still sets its labels at 12px. */
+@media (max-width: 1099px) {
+  main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal {
+    right: 12px;
+    bottom: 12px;
+    width: 116px;
+    padding: 11px 8px 9px;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal :is(small, span) {
+    letter-spacing: 0.08em;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal strong {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-quotes {
+    margin: 0;
+    padding: 22px 20px 20px;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .manager-facts > div {
+    padding: 14px 16px 13px;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .sovereign-status {
+    margin: 0;
+    padding: 18px 16px 16px;
+  }
+}
+
+/* ================================================================
+   The reader bar
+   ================================================================ */
+/* An opaque plate: at 96% the chapters showed through it. */
+main.manager-page.is-sovereign > .dossier-reader {
+  border-color: rgb(240 207 134 / 22%);
+  border-radius: 4px;
+  background-color: #07090e;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 5%),
+    0 14px 36px rgb(0 0 0 / 40%);
+}
+
+main.manager-page.is-sovereign > .dossier-reader::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  left: -1px;
+  height: 1px;
+  background: var(--sv-prism);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign > .dossier-reader .dossier-reader-name {
+  color: var(--sv-gold-hi);
+  letter-spacing: 0.14em;
+}
+
+main.manager-page.is-sovereign > .dossier-reader .dossier-reader-links a {
+  border-radius: 2px;
+  color: rgb(238 231 214 / 74%);
+}
+
+main.manager-page.is-sovereign > .dossier-reader .dossier-reader-links a[aria-current] {
+  border-color: rgb(240 207 134 / 44%);
+  background:
+    linear-gradient(var(--sv-gold) 0 0) 50% 100% / calc(100% - 24px) 2px no-repeat,
+    linear-gradient(180deg, rgb(240 207 134 / 16%), rgb(255 255 255 / 3%));
+  box-shadow: none;
+  color: #fff;
+}
+
+/* ================================================================
+   The dossier: index, contents, chapters
+   ================================================================ */
+/* One column edge from the reader bar to the pagination. */
+@media (min-width: 761px) {
+  main.manager-page.is-sovereign #dossier-index,
+  main.manager-page.is-sovereign > .manager-pagination {
+    width: min(1200px, calc(100% - 48px));
+  }
+}
+
+/* The dossier skips layout until approached; on a phone its placeholder
+   follows this file's length, so the page does not grow mid-scroll. */
+@media (max-width: 560px) {
+  main.manager-page.is-sovereign #dossier-index {
+    contain-intrinsic-size: auto 2900px;
+  }
+}
+
+@media (max-width: 374px) {
+  main.manager-page.is-sovereign #dossier-index {
+    contain-intrinsic-size: auto 3400px;
+  }
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-section-index {
+  position: relative;
+  align-items: flex-end;
+  gap: 22px;
+  margin-bottom: 44px;
+  padding-bottom: 18px;
+  border-bottom: 0;
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-section-index::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--sv-ivory) 0,
+    var(--sv-gold) 6%,
+    var(--sv-violet) 11%,
+    rgb(240 207 134 / 18%) 11.2%,
+    rgb(240 207 134 / 18%) 100%
+  );
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* The file's numeral opens the dossier: the Roman I in outlined gold with
+   an ice ghost. */
+main.manager-page.is-sovereign #dossier-index .manager-section-index > span {
+  color: transparent;
+  font-family: var(--sv-roman);
+  font-size: clamp(64px, 7vw, 112px);
+  font-weight: 400;
+  line-height: 0.9;
+  text-shadow:
+    0.06em 0.06em 0 rgb(122 232 255 / 20%),
+    0 0 40px rgb(240 207 134 / 20%);
+  -webkit-text-stroke: 1.5px var(--sv-gold);
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-section-index > small {
+  padding-bottom: 6px;
+  color: rgb(240 207 134 / 84%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+
+/* The contents: one bracketed ledger. */
+main.manager-page.is-sovereign #dossier-index .dossier-contents {
+  position: relative;
+  gap: 0;
+  border: 1px solid rgb(240 207 134 / 22%);
+  border-radius: 4px;
+  background:
+    var(--sv-prism) top / 100% 1px no-repeat,
+    rgb(8 10 15 / 82%);
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--sv-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents > a {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: -1px -1px 0 var(--sv-rule);
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents-number {
+  color: transparent;
+  font-family: var(--sv-mono);
+  font-size: 24px;
+  font-weight: 500;
+  -webkit-text-stroke: 1px var(--sv-gold);
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents-copy small {
+  color: rgb(240 207 134 / 80%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents-copy b {
+  color: var(--sv-text);
+}
+
+main.manager-page.is-sovereign #dossier-index .dossier-contents-arrow {
+  color: var(--sv-gold);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page.is-sovereign #dossier-index .dossier-contents > a:hover {
+    background: rgb(240 207 134 / 6%);
+  }
+}
+
+/* The chapters: gilded plates that lock on. */
+main.manager-page.is-sovereign #dossier-index .manager-copy-section {
+  border: 1px solid rgb(240 207 134 / 20%);
+  border-radius: 4px;
+  background:
+    var(--sv-prism) top / 100% 1px no-repeat,
+    radial-gradient(ellipse 70% 220px at 0% 0%, rgb(240 207 134 / 7%), transparent 70%),
+    linear-gradient(160deg, rgb(13 14 20 / 94%), rgb(6 8 12 / 95%));
+  box-shadow:
+    0 22px 60px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-section::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: -1px;
+  background: var(--sv-brackets);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-section::after {
+  content: none;
+}
+
+/* Each chapter opens on its number: an outlined gold display numeral with
+   the ice ghost, the prism rule and a jewel under it, then the kicker and
+   the title. */
+main.manager-page.is-sovereign #dossier-index .manager-copy-heading > span {
+  display: block;
+  color: transparent;
+  font-family: var(--sv-mono);
+  font-size: clamp(48px, 5.2vw, 88px);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-shadow: 0.07em 0.07em 0 rgb(122 232 255 / 20%);
+  /* It steps in from its own left edge, inside the plate. */
+  transform-origin: 0 50%;
+  -webkit-text-stroke: 1.5px var(--sv-gold);
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-heading > span::after {
+  content: "";
+  display: block;
+  width: 84px;
+  height: 7px;
+  margin: 18px 0 0;
+  background:
+    linear-gradient(var(--sv-gold-hi) 0 0) 100% 50% / 5px 5px no-repeat,
+    var(--sv-prism) 0 50% / 70px 1px no-repeat;
+  transform-origin: 0 50%;
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-heading > p {
+  color: rgb(240 207 134 / 84%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-heading h2 {
+  color: var(--sv-text);
+}
+
+main.manager-page.is-sovereign #dossier-index .manager-copy-body p {
+  color: rgb(236 230 216 / 80%);
+}
+
+/* Each chapter's first paragraph leads, a step brighter and larger. */
+main.manager-page.is-sovereign #dossier-index .manager-copy-body p:first-child {
+  color: rgb(248 242 228 / 94%);
+  font-size: clamp(16px, 1.3vw, 18.5px);
+}
+
+/* Long chapters keep their title beside the prose (below the header and
+   the reader bar), as the other files do. */
+@media (min-width: 1181px) {
+  main.manager-page.is-sovereign #dossier-index .manager-copy-section {
+    grid-template-columns: minmax(260px, 0.84fr) minmax(0, 1.16fr);
+  }
+
+  main.manager-page.is-sovereign #dossier-index .manager-copy-heading {
+    position: sticky;
+    top: calc(var(--detail-header-height, 76px) + 66px + 24px);
+    align-self: start;
+  }
+}
+
+/* ================================================================
+   Pagination
+   ================================================================ */
+main.manager-page.is-sovereign > .manager-pagination {
+  border-top: 0;
+  border-bottom-color: rgb(240 207 134 / 14%);
+}
+
+main.manager-page.is-sovereign > .manager-pagination::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--sv-prism);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign > .manager-pagination > a {
+  border-color: rgb(240 207 134 / 14%);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgb(240 207 134 / 6%), transparent 55%), rgb(8 10 15 / 84%);
+}
+
+main.manager-page.is-sovereign > .manager-pagination > a > small {
+  color: rgb(240 207 134 / 80%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+main.manager-page.is-sovereign > .manager-pagination > a > b {
+  color: var(--sv-text);
+  font-family: var(--sv-jp);
+}
+
+main.manager-page.is-sovereign > .manager-pagination > a > span:last-child {
+  color: var(--sv-gold);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page.is-sovereign > .manager-pagination > a:hover {
+    background-color: rgb(20 17 12 / 92%);
+  }
+}
+
+main.manager-page.is-sovereign > .manager-pagination .dossier-index-return {
+  position: relative;
+  border-color: rgb(240 207 134 / 40%);
+  border-radius: 2px;
+  background-color: #0d0f15;
+  background-image: linear-gradient(135deg, rgb(240 207 134 / 12%), rgb(240 207 134 / 3%));
+}
+
+main.manager-page.is-sovereign > .manager-pagination .dossier-index-return::before {
+  color: var(--sv-gold);
+}
+
+main.manager-page.is-sovereign > .manager-pagination .dossier-index-return::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--sv-brackets-s);
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+main.manager-page.is-sovereign > .manager-pagination .dossier-index-return > span {
+  color: rgb(240 207 134 / 80%);
+  font-family: var(--sv-hud);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+main.manager-page.is-sovereign > .manager-pagination .dossier-index-return > i {
+  color: var(--sv-gold);
+  font-family: var(--sv-mono);
+  font-size: 12px;
+}
+
+/* ================================================================
+   Focus: one warm ring
+   ================================================================ */
+main.manager-page.is-sovereign
+  :is(
+    .brand,
+    .manager-back,
+    .dossier-read-link,
+    .dossier-reader-links a,
+    .dossier-contents > a,
+    .manager-pagination a
+  ):focus-visible {
+  outline: 2px solid var(--sv-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   Retired: the old entrance and the loops on a still page
+   ================================================================ */
+/* managerPortraitIn and managerCopyIn ran on mount, under the cover, and
+   ignored economy rendering; the arrival below replaces them. The orbits,
+   pulses, sweeps and the title shine looped for as long as the page was
+   open. Their rest frames are the page's rest state. */
+main.manager-page.is-sovereign :is(.manager-portrait-frame, .manager-introduction),
+main.manager-page.is-sovereign .sovereign-apex-seal,
+main.manager-page.is-sovereign .sovereign-emblem > i,
+main.manager-page.is-sovereign .sovereign-scale i,
+main.manager-page.is-sovereign .sovereign-portrait-effects > i {
+  animation: none;
+}
+
+/* ================================================================
+   Economy rendering: no ghost filters on the type
+   ================================================================ */
+html[data-world-effects="economy"]
+  main.manager-page.is-sovereign
+  #dossier-profile
+  :is(.dossier-identity .manager-display-name, .sovereign-apex-seal strong) {
+  filter: none;
+}
+
+/* ================================================================
+   Forced colours: plain ink, system plates
+   ================================================================ */
+@media (forced-colors: active) {
+  /* An opaque header (forced colours keep a background's alpha). */
+  main.manager-page.is-sovereign .manager-topbar {
+    background: Canvas;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .dossier-identity .manager-display-name,
+  main.manager-page.is-sovereign #dossier-profile .sovereign-dominance b,
+  main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal strong,
+  main.manager-page.is-sovereign #dossier-profile .sovereign-emblem > span {
+    forced-color-adjust: none;
+    color: CanvasText;
+    background: none;
+    filter: none;
+    text-shadow: none;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  main.manager-page.is-sovereign
+    :is(
+      #dossier-index .manager-section-index > span,
+      #dossier-index .manager-copy-heading > span,
+      #dossier-index .dossier-contents-number
+    ) {
+    color: CanvasText;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+  }
+
+  /* Light, rays, rims, rings, the watermark and the unveiling are ornament
+     (forced ink would draw the rings across the text and the watermark as a
+     solid glyph); the art is drawn as it is. */
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-column::before,
+  main.manager-page.is-sovereign #dossier-profile .manager-introduction::before,
+  main.manager-page.is-sovereign #dossier-profile .sovereign-portrait-effects,
+  main.manager-page.is-sovereign .sovereign-aura,
+  main.manager-page.is-sovereign .manager-glow {
+    display: none;
+  }
+
+  main.manager-page.is-sovereign > .dossier-reader {
+    background-color: Canvas;
+  }
+
+  /* The current section keeps the reader sheet's system highlight. */
+  main.manager-page.is-sovereign > .dossier-reader .dossier-reader-links a[aria-current] {
+    background: Highlight;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal,
+  main.manager-page.is-sovereign #dossier-profile .manager-portrait-frame .manager-numeral {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .manager-facts > div {
+    border-top: 1px solid CanvasText;
+  }
+}
+
+/* ================================================================
+   The arrival: the seal's continuation, keyed to the hand-over
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The frame comes up on its lit ground; its crown of brackets locks on as
+     the gate's brackets land on it. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-frame {
+    animation: sv-fade 200ms linear var(--sv-arrive) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-frame::before {
+    animation: sv-lock 240ms steps(4, jump-end) var(--sv-arrive) both;
+  }
+
+  /* The gate's rays give way to the crown: it turns into place. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-column::before {
+    animation: sv-crown 720ms var(--sv-out) calc(var(--sv-arrive) + 40ms) both;
+  }
+
+  /* Unveiled from light: an iris opens from the halo outward, its rim
+     riding the edge over the dark ground, and the plate settles from a
+     slight push. The id outranks the reader sheet's still image. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-frame
+    > img {
+    animation: sv-unveil 900ms var(--sv-bloom) var(--sv-arrive) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-portrait-effects
+    > i:first-child {
+    animation: sv-iris-rim 900ms var(--sv-bloom) var(--sv-arrive) both;
+  }
+
+  /* The seal stamps on as the gate's own mark lets go. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-apex-seal {
+    animation: sv-stamp 460ms var(--sv-out) calc(var(--sv-arrive) + 200ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-apex-seal::after {
+    animation: sv-lock 240ms steps(4, jump-end) calc(var(--sv-arrive) + 320ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-frame
+    .manager-numeral {
+    animation: sv-rise 360ms var(--sv-out) calc(var(--sv-arrive) + 260ms) both;
+  }
+
+  /* Identity: the authority line and the file strip draw in, the name is
+     inscribed in gold from left to right (backwards fill only, so the ghost
+     is never clipped at rest), and the lines around it rise. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-dominance {
+    animation: sv-strip 380ms var(--sv-ease) var(--sv-arrive) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .dossier-identity
+    .manager-file-number {
+    animation: sv-strip 340ms var(--sv-ease) calc(var(--sv-arrive) + 60ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name {
+    animation: sv-inscribe 640ms var(--sv-write) calc(var(--sv-arrive) + 100ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name::after {
+    animation: sv-nib 640ms var(--sv-write) calc(var(--sv-arrive) + 100ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    :is(
+      .dossier-identity h1 small,
+      .dossier-identity .manager-title,
+      .dossier-identity .dossier-read-link
+    ) {
+    animation: sv-rise 440ms var(--sv-out) calc(var(--sv-arrive) + 200ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .dossier-identity
+    .manager-title {
+    animation-delay: calc(var(--sv-arrive) + 280ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .dossier-identity
+    .dossier-read-link {
+    animation-delay: calc(var(--sv-arrive) + 340ms);
+  }
+}
+
+/* Beside the portrait (tablets and wider) the plates are on the first
+   screen: the status locks on, its emblem turns in and the ranks rise to
+   the first; then the quotes and the facts lock on and the facts step in.
+   On phones they are further down and lock on as they enter instead. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 761px) {
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    :is(.sovereign-status, .manager-quotes, .manager-facts) {
+    animation: sv-panel 480ms var(--sv-out) calc(var(--sv-arrive) + 380ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-quotes {
+    animation-delay: calc(var(--sv-arrive) + 500ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts {
+    animation-delay: calc(var(--sv-arrive) + 580ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    :is(.sovereign-status, .manager-quotes, .manager-facts)::after {
+    animation: sv-lock 240ms steps(4, jump-end) calc(var(--sv-arrive) + 460ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-quotes::after {
+    animation-delay: calc(var(--sv-arrive) + 580ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts::after {
+    animation-delay: calc(var(--sv-arrive) + 660ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-emblem::before {
+    animation: sv-emblem 560ms var(--sv-out) calc(var(--sv-arrive) + 440ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    i {
+    animation: sv-bar 420ms var(--sv-out) calc(var(--sv-arrive) + 500ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    > span:nth-child(2)
+    i {
+    animation-delay: calc(var(--sv-arrive) + 560ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    > span:nth-child(3)
+    i {
+    animation-delay: calc(var(--sv-arrive) + 620ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    > span:nth-child(4)
+    i {
+    animation-delay: calc(var(--sv-arrive) + 680ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    > span:nth-child(5)
+    i {
+    animation-delay: calc(var(--sv-arrive) + 740ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    > span:nth-child(6)
+    i {
+    animation-delay: calc(var(--sv-arrive) + 820ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-scale
+    .is-apex::after {
+    animation: sv-pop 280ms var(--sv-out) calc(var(--sv-arrive) + 1000ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts
+    > div {
+    animation: sv-row 240ms steps(3, jump-end) calc(var(--sv-arrive) + 640ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts
+    > div:nth-child(n + 3) {
+    animation-delay: calc(var(--sv-arrive) + 680ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts
+    > div:nth-child(n + 5) {
+    animation-delay: calc(var(--sv-arrive) + 720ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page.is-sovereign
+    #dossier-profile
+    .manager-facts
+    > div:nth-child(n + 7) {
+    animation-delay: calc(var(--sv-arrive) + 760ms);
+  }
+}
+
+/* ================================================================
+   Depth and lock-ons: scroll-linked, on the root scroller and on
+   named view timelines
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  /* The file's page timeline: the root scroller, named on <html> while the
+     sovereign file is mounted (the portrait frame clips, so an anonymous
+     view() on the plate would be captured by it). */
+  html:has(> body > main.manager-page.is-sovereign) {
+    scroll-timeline: --sv-page block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The first screen of scroll pushes the camera in toward the face (the
+       arrival never touches `scale`), and turns the crown a few degrees. The
+       aura's dashed ring turns with the whole file. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-profile
+      .manager-portrait-frame
+      > img {
+      animation:
+        sv-unveil 900ms var(--sv-bloom) var(--sv-arrive) backwards,
+        sv-depth linear both;
+      animation-timeline: auto, --sv-page;
+      animation-range:
+        normal,
+        0 100vh;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-profile
+      .manager-portrait-column::before {
+      animation:
+        sv-crown 720ms var(--sv-out) calc(var(--sv-arrive) + 40ms) both,
+        sv-turn linear both;
+      animation-timeline: auto, --sv-page;
+      animation-range:
+        normal,
+        0 100vh;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      .sovereign-aura
+      > i:nth-child(1) {
+      animation: sv-orbit-a linear both;
+      animation-timeline: --sv-page;
+    }
+
+    /* The dossier's own timelines, named on the subjects themselves. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-section-index {
+      view-timeline: --sv-index block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-section-index
+      > span {
+      animation: sv-numeral steps(6, jump-end) both;
+      animation-timeline: --sv-index;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-section-index::after {
+      animation: sv-draw-x cubic-bezier(0.77, 0, 0.18, 1) both;
+      animation-timeline: --sv-index;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .dossier-contents {
+      view-timeline: --sv-contents block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .dossier-contents::after {
+      animation: sv-lock steps(4, jump-end) both;
+      animation-timeline: --sv-contents;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-copy-section {
+      view-timeline: --sv-chapter block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-copy-section::before {
+      animation: sv-lock steps(4, jump-end) both;
+      animation-timeline: --sv-chapter;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-copy-heading
+      > span {
+      animation: sv-numeral steps(6, jump-end) both;
+      animation-timeline: --sv-chapter;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-index
+      .manager-copy-heading
+      > span::after {
+      animation: sv-draw-x cubic-bezier(0.77, 0, 0.18, 1) both;
+      animation-timeline: --sv-chapter;
+      animation-range: entry 10% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      > .manager-pagination
+      .dossier-index-return {
+      view-timeline: --sv-return block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      > .manager-pagination
+      .dossier-index-return::after {
+      animation: sv-lock steps(4, jump-end) both;
+      animation-timeline: --sv-return;
+      animation-range: entry 0% entry 60%;
+    }
+  }
+
+  /* Phones: the status, the quotes and the facts lie below the portrait;
+     their brackets lock on as each plate enters. */
+  @media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-profile
+      :is(.sovereign-status, .manager-quotes, .manager-facts) {
+      view-timeline: --sv-plate block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.manager-page.is-sovereign
+      #dossier-profile
+      :is(.sovereign-status, .manager-quotes, .manager-facts)::after {
+      animation: sv-lock steps(4, jump-end) both;
+      animation-timeline: --sv-plate;
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+/* ================================================================
+   Keyframes (sv-*: this sheet stays in the document after a visit)
+   ================================================================ */
+@keyframes sv-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sv-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes sv-crown {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(0.86);
+  }
+}
+
+@keyframes sv-unveil {
+  from {
+    clip-path: circle(0 at 50% 27%);
+    transform: scale(1.06);
+  }
+  to {
+    clip-path: circle(var(--sv-iris) at 50% 27%);
+    transform: scale(1);
+  }
+}
+
+@keyframes sv-iris-rim {
+  from {
+    opacity: 1;
+    scale: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes sv-stamp {
+  from {
+    opacity: 0;
+    scale: 1.22;
+  }
+  55% {
+    opacity: 1;
+    scale: 0.97;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes sv-strip {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes sv-inscribe {
+  from {
+    clip-path: inset(-16px 100% -16px -16px);
+    translate: -0.06em 0;
+  }
+  to {
+    clip-path: inset(-16px -16px -16px -16px);
+    translate: 0 0;
+  }
+}
+
+@keyframes sv-nib {
+  from {
+    opacity: 0;
+    translate: 0 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 100% 0;
+  }
+}
+
+@keyframes sv-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes sv-panel {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes sv-emblem {
+  from {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes sv-bar {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes sv-pop {
+  from {
+    opacity: 0;
+    scale: 0;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes sv-row {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sv-depth {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.06;
+  }
+}
+
+@keyframes sv-turn {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 10deg;
+  }
+}
+
+@keyframes sv-orbit-a {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 28deg;
+  }
+}
+
+@keyframes sv-numeral {
+  0% {
+    opacity: 0;
+    scale: 1.9;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes sv-draw-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}

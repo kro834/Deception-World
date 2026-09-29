@@ -57,7 +57,8 @@ test("the manager glow ring is static: its rotation was invisible and kept a 58r
 test("on Android the sovereign seal arrives but does not pulse, and the title shine rests", async () => {
   const css = stripComments(await read("src/styles-world/20.css"));
   const rules = styleRules(css);
-  // Every other renderer keeps both loops.
+  // Every other renderer keeps both loops in this sheet; the Zeus route's own
+  // sheet (styles-sovereign-file.css, sovereign-file.test.mjs) retires them.
   const seal = rules.find(({ selector }) => selector === ".sovereign-apex-seal");
   assert.match(seal.body, /sovereignSealIn [^;]*both,\s*sovereignSealPulse [^;]*infinite;/);
   const title = rules.find(({ selector }) => selector === ".is-sovereign .manager-display-name");
