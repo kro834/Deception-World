@@ -1,0 +1,1798 @@
+/* The file shutter: every covered route change in one move.
+   load-gate.tsx lays four ink panels, the carried file and four lock
+   brackets into each cover (.has-cine) and hands them the geometry as
+   custom properties, in CSS pixels:
+     --ox --oy --ow --oh  the pressed card (origin)
+     --fx --fy --fw --fh  the held frame (the file while the route changes)
+     --lx --ly --lw --lh  the destination's portrait frame (landing)
+   The ink closes onto the pressed card, the card's picture lifts into the
+   held frame and everything holds still while the route commits; then the
+   ink opens from the portrait frame outward, so the page builds around the
+   face it landed on, while the dossier's own entrance runs.
+   Photosensitivity: the panels are ink, nothing is white, the page only ever
+   appears (one rise per area), and nothing loops. Rider dives keep their
+   tunnel as a one-shot rush with no core; the cut-ins keep their stages.
+   Tiers: full motion; economy rendering and reduced motion get one opacity
+   shutter with the status (load-gate.tsx shortens their clocks). The opening's
+   own dive (.cine-stage, the handoff layer) is outside .load-gate and is not
+   touched here. */
+
+html body .load-gate.has-cine {
+  --dwc-accent: #7ae8ff;
+  --dwc-arm: 22px;
+  --dwc-close: 320ms;
+  background: transparent;
+}
+
+html body .load-gate.has-cine.rider-route-dive {
+  --dwc-accent: color-mix(in srgb, rgb(var(--rider-dive-secondary)) 55%, #7ae8ff);
+}
+
+html body .load-gate.has-cine.is-leddic-cutin {
+  --dwc-accent: #8cf0b0;
+}
+
+html body .load-gate.has-cine.is-argenome-cutin {
+  --dwc-accent: #ff8a98;
+}
+
+html body .load-gate.has-cine.is-cipher-cutin {
+  --dwc-accent: #ff9be4;
+}
+
+html body .load-gate.has-cine.is-over-zeztz-cutin {
+  --dwc-accent: #8cecff;
+}
+
+/* A cut-in's stage takes over sooner: its iris closes in 260 ms. */
+html body .load-gate.has-cine.rider-route-cutin {
+  --dwc-close: 260ms;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate {
+  --dwc-accent: #f0cf86;
+}
+
+/* ---- Layers ------------------------------------------------------------ */
+
+html body .load-gate.has-cine > .dwc-shutter {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Flat ink: the panels overlap while closed, and any gradient would seam. */
+html body .load-gate.has-cine > .dwc-shutter > i {
+  position: absolute;
+  inset: 0;
+  background: #04080f;
+  translate: 0 0;
+  will-change: translate;
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-top,
+html body .load-gate.has-cine > .dwc-shutter > i.is-bottom {
+  z-index: 1;
+}
+
+/* The inner edge of each panel is a prism hairline: the rim of the opening. */
+html body .load-gate.has-cine > .dwc-shutter > i::after {
+  position: absolute;
+  content: "";
+  opacity: 0;
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-left::after,
+html body .load-gate.has-cine > .dwc-shutter > i.is-right::after {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, #7ae8ff, #a48bff 34%, #ff5cc8 66%, #f0cf86);
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-left::after {
+  right: 0;
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-right::after {
+  left: 0;
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-top::after,
+html body .load-gate.has-cine > .dwc-shutter > i.is-bottom::after {
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--dwc-prism, linear-gradient(90deg, #7ae8ff, #a48bff, #ff5cc8, #f0cf86));
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-top::after {
+  bottom: 0;
+}
+
+html body .load-gate.has-cine > .dwc-shutter > i.is-bottom::after {
+  top: 0;
+}
+
+/* The carried file: laid out at the held frame, FLIPped from the card. */
+html body .load-gate.has-cine > .dwc-carry {
+  position: absolute;
+  z-index: 24;
+  top: calc(var(--cy, var(--fy)) * 1px);
+  left: calc(var(--cx, var(--fx)) * 1px);
+  width: calc(var(--cw, var(--fw)) * 1px);
+  height: calc(var(--ch, var(--fh)) * 1px);
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+}
+
+html body .load-gate.has-cine > .dwc-carry > i {
+  position: absolute;
+  inset: 0;
+  background: var(--art) var(--art-position, center) / cover no-repeat;
+}
+
+html body .load-gate.has-cine > .dwc-carry > i.is-file {
+  background: var(--file) var(--plate-position, 50% 18%) / cover no-repeat;
+}
+
+/* The page is the reader's again as soon as the shutter starts to lift. */
+html body .load-gate.has-cine.is-revealing {
+  pointer-events: none;
+}
+
+/* The numeral sits on the file's foot: an ink fall-off keeps it legible. */
+html body .load-gate.has-cine.rider-route-dive > .dwc-carry::after {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 38%;
+  content: "";
+  background: linear-gradient(180deg, transparent, rgb(4 8 15 / 0.82));
+}
+
+/* Lock brackets: ice at the top corners, gold at the foot, 2px arms. */
+html body .load-gate.has-cine > .dwc-lock {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  pointer-events: none;
+}
+
+html body .load-gate.has-cine > .dwc-lock > i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--dwc-arm);
+  height: var(--dwc-arm);
+  border: 0 solid var(--dwc-lock, #b4f1ff);
+  will-change: translate, opacity;
+}
+
+html body .load-gate.has-cine > .dwc-lock > i.is-tl {
+  border-width: 2px 0 0 2px;
+  transform-origin: 0 0;
+  translate: calc(var(--fx) * 1px - 10px) calc(var(--fy) * 1px - 10px);
+}
+
+html body .load-gate.has-cine > .dwc-lock > i.is-tr {
+  border-width: 2px 2px 0 0;
+  transform-origin: 100% 0;
+  translate: calc((var(--fx) + var(--fw)) * 1px + 10px - var(--dwc-arm))
+    calc(var(--fy) * 1px - 10px);
+}
+
+html body .load-gate.has-cine > .dwc-lock > i.is-bl {
+  border-width: 0 0 2px 2px;
+  border-color: var(--dwc-gold, #f0cf86);
+  transform-origin: 0 100%;
+  translate: calc(var(--fx) * 1px - 10px)
+    calc((var(--fy) + var(--fh)) * 1px + 10px - var(--dwc-arm));
+}
+
+html body .load-gate.has-cine > .dwc-lock > i.is-br {
+  border-width: 0 2px 2px 0;
+  border-color: var(--dwc-gold, #f0cf86);
+  transform-origin: 100% 100%;
+  translate: calc((var(--fx) + var(--fw)) * 1px + 10px - var(--dwc-arm))
+    calc((var(--fy) + var(--fh)) * 1px + 10px - var(--dwc-arm));
+}
+
+/* A dive with no picture to hold (a site, a menu entry) holds an empty
+   file plate in the frame instead: a faint glass in the rider's light. */
+html
+  body
+  .load-gate.has-cine.rider-route-dive:not(.has-carry-art):not(.has-carry-file)
+  > .dwc-lock::before {
+  position: absolute;
+  top: calc(var(--fy) * 1px);
+  left: calc(var(--fx) * 1px);
+  width: calc(var(--fw) * 1px);
+  height: calc(var(--fh) * 1px);
+  border: 1px solid color-mix(in srgb, var(--dwc-accent) 24%, transparent);
+  content: "";
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--dwc-accent) 7%, transparent), transparent 70%),
+    rgb(4 8 15 / 0.62);
+}
+
+/* The white cores and exit light are retired from the route covers: the
+   page is revealed, never bloomed. The tunnel's rings and the vector field
+   were loops. */
+html body .load-gate.has-cine .cine-dive-tunnel {
+  --dwc-o: 0.34;
+}
+
+html
+  body
+  .load-gate.has-cine.rider-route-dive:not(.has-carry-art):not(.has-carry-file)
+  .cine-dive-tunnel {
+  --dwc-o: 0.6;
+}
+
+html body .load-gate.has-cine .archive-dive-space {
+  --dwc-o: 0.9;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate::before {
+  --dwc-o: 0.7;
+}
+
+html body .load-gate.has-cine .cine-dive-flash,
+html body .load-gate.has-cine .cine-dive-tunnel::after,
+html body .load-gate.has-cine .cine-dive-tunnel::before,
+html body .load-gate.has-cine .rider-dive-vector-field {
+  display: none;
+}
+
+/* ---- The identity: numeral and status on the held file --------------- */
+
+html body .load-gate.has-cine.rider-route-dive .rider-dive-mark {
+  top: calc((var(--fy) + var(--fh)) * 1px - 0.62em);
+  z-index: 27;
+  width: auto;
+  min-width: 0;
+  aspect-ratio: auto;
+  padding: 0 0.12em;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: clamp(64px, 8.4vmin, 112px);
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+
+html
+  body
+  .load-gate.has-cine.rider-route-dive:not(.has-carry-art):not(.has-carry-file)
+  .rider-dive-mark {
+  top: calc((var(--fy) + var(--fh) / 2) * 1px);
+  font-size: clamp(80px, 11vmin, 132px);
+  transform: translate3d(-50%, -50%, 0);
+}
+
+html
+  body
+  .load-gate.has-cine.rider-route-dive:not(.has-carry-art):not(.has-carry-file)
+  .rider-dive-mark
+  > i {
+  color: color-mix(in srgb, var(--dwc-accent) 16%, transparent);
+}
+
+html body .load-gate.has-cine.rider-route-dive .rider-dive-mark::before,
+html body .load-gate.has-cine.rider-route-dive .rider-dive-mark::after {
+  display: none;
+}
+
+/* The rider number as an outlined numeral in the Dossier's face. */
+html body .load-gate.has-cine.rider-route-dive .rider-dive-mark > i {
+  display: block;
+  color: transparent;
+  font:
+    600 1em / 1 "Oxanium",
+    var(--dwc-hud, sans-serif);
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+  -webkit-text-stroke: 1.5px var(--dwc-accent);
+  transform: none;
+}
+
+html body .load-gate.has-cine.rider-route-dive .cine-dive-status {
+  top: calc((var(--fy) + var(--fh)) * 1px + clamp(52px, 7vmin, 78px));
+  bottom: auto;
+  transform: translate(-50%, 0);
+}
+
+html
+  body
+  .load-gate.has-cine.rider-route-dive:not(.has-carry-art):not(.has-carry-file)
+  .cine-dive-status {
+  top: calc((var(--fy) + var(--fh)) * 1px + 20px);
+}
+
+/* The sovereign seal: the rank-I mark inside the held frame, the kicker and
+   the label under it. The gate keeps its gold; its loops and brightness
+   filters are retired (one crown lock instead). */
+html body .load-gate.has-cine.is-sovereign-gate::after,
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-scan,
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-inner::after,
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-sovereign-orbit {
+  display: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate::before {
+  z-index: 2;
+  opacity: 0.7;
+  transform: translate(-50%, -50%) rotate(0deg) scale(0.9);
+  animation: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-inner {
+  position: absolute;
+  z-index: 26;
+  top: calc(var(--fy) * 1px);
+  right: 0;
+  left: 0;
+  width: auto;
+  min-width: 0;
+  padding: 0 16px;
+  gap: 10px;
+  justify-items: center;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-inner::before {
+  animation: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-mark {
+  width: 104px;
+  height: 104px;
+  margin: calc((var(--fh) * 1px - 104px) / 2) 0 calc((var(--fh) * 1px - 104px) / 2 + 8px);
+  font-size: 44px;
+  animation: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-mark::before {
+  animation: none;
+  transform: rotate(45deg);
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-mark::after {
+  animation: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate :is(.load-gate-kicker, .load-gate-label) {
+  animation: none;
+}
+
+html body .load-gate.has-cine.is-sovereign-gate .load-gate-label {
+  font-size: 13px;
+  letter-spacing: 0.24em;
+}
+
+/* Cut-in stages sit over the panels. */
+html body .load-gate.has-cine.rider-route-cutin > .rider-cutin-stage {
+  z-index: 2;
+}
+
+/* A cut-in's file waits under its stage and shows only once the stage
+   opens: the doors, the slash or the grid part onto the portrait, laid on
+   the page's own image, never onto an empty frame. */
+html body .load-gate.has-cine.rider-route-cutin > .dwc-carry {
+  z-index: 2;
+}
+
+html body .load-gate.has-cine.rider-route-cutin:not(.has-dock) > .dwc-carry {
+  visibility: hidden;
+}
+
+/* On a flip the name sits under the held file. */
+html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
+  top: calc((var(--fy) + var(--fh)) * 1px + 56px);
+}
+
+/* ---- Full motion ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) body .load-gate.has-cine.is-cine-full {
+    animation: none;
+  }
+
+  /* Close: onto the card (55 %), then shut behind the lifted file. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i {
+    animation: var(--dwc-close) cubic-bezier(0.3, 0.7, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i.is-left {
+    animation-name: dwc-close-left;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i.is-right {
+    animation-name: dwc-close-right;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i.is-top {
+    animation-name: dwc-close-top;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i.is-bottom {
+    animation-name: dwc-close-bottom;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i::after {
+    animation: dwc-rim-close var(--dwc-close) linear both;
+  }
+
+  /* PREV / NEXT: the next file slides in from the side that was pressed. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-flip.is-covering
+    > .dwc-shutter {
+    animation: dwc-flip-in 300ms cubic-bezier(0.25, 0.6, 0.2, 1) both;
+  }
+
+  /* Open: the portrait frame first (42 %), then the rest of the page. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i {
+    animation: var(--dwc-reveal) cubic-bezier(0.45, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i.is-left {
+    animation-name: dwc-open-left;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i.is-right {
+    animation-name: dwc-open-right;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i.is-top {
+    animation-name: dwc-open-top;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i.is-bottom {
+    animation-name: dwc-open-bottom;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-shutter
+    > i::after {
+    animation: dwc-rim-open var(--dwc-reveal) linear both;
+  }
+
+  /* A cut-in's own exit opens the page; the ink under it just lets go. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-revealing
+    > .dwc-shutter {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.3) linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-revealing
+    > .dwc-shutter
+    > i {
+    animation: none;
+  }
+
+  /* The file lifts off the card while the ink shuts behind it, and gives
+     way as the page opens. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-carry {
+    animation: dwc-carry-lift var(--dwc-close) cubic-bezier(0.5, 0, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering:not(.has-carry-art)
+    > .dwc-carry {
+    animation-name: dwc-carry-appear;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-flip.is-covering
+    > .dwc-carry {
+    animation: dwc-carry-slide 300ms cubic-bezier(0.3, 0.6, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-carry {
+    animation: dwc-carry-land var(--dwc-reveal) cubic-bezier(0.3, 0.6, 0.2, 1) both;
+  }
+
+  /* With the portrait measured, the file docks on it instead: one uniform
+     scale and a clip to the image's box, held opaque, so the frame is never
+     empty. The page's plate then takes over from it under the same seam
+     (load-gate.tsx, handOverDockedFile). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.has-dock.is-revealing
+    > .dwc-carry {
+    animation: dwc-carry-dock 200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.has-dock.is-revealing
+    > .dwc-carry::after {
+    animation: dwc-fade-out 160ms ease-out both;
+  }
+
+  /* The brackets lock onto the card, travel with the file, and lock onto the
+     portrait before they let go. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-lock
+    > i {
+    animation: var(--dwc-close) cubic-bezier(0.5, 0, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-lock
+    > i.is-tl {
+    animation-name: dwc-lock-tl;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-lock
+    > i.is-tr {
+    animation-name: dwc-lock-tr;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-lock
+    > i.is-bl {
+    animation-name: dwc-lock-bl;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-covering
+    > .dwc-lock
+    > i.is-br {
+    animation-name: dwc-lock-br;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-flip.is-covering
+    > .dwc-lock {
+    animation: dwc-carry-slide 300ms cubic-bezier(0.3, 0.6, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock
+    > i {
+    animation: var(--dwc-reveal) cubic-bezier(0.3, 0.6, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock
+    > i.is-tl {
+    animation-name: dwc-land-tl;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock
+    > i.is-tr {
+    animation-name: dwc-land-tr;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock
+    > i.is-bl {
+    animation-name: dwc-land-bl;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock
+    > i.is-br {
+    animation-name: dwc-land-br;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    > .dwc-lock::before {
+    animation: dwc-status-in 160ms ease-out 150ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    > .dwc-lock::before {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.36) ease-in calc(var(--dwc-reveal) * 0.36)
+      both;
+  }
+
+  /* Dives: the tunnel is one rush that settles before the route changes
+     (no core, no rings), under a texture of the rider's own. Every cover
+     layer is at rest by 320ms, inside the shortest cover, so the route's
+     commit lands on a still frame. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    .cine-dive-tunnel {
+    animation: dwc-tunnel-rush 280ms cubic-bezier(0.1, 0.8, 0.1, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    .cine-dive-tunnel
+    > i {
+    animation: dwc-streak-rush 280ms cubic-bezier(0.1, 0.8, 0.1, 1) 40ms both;
+  }
+
+  /* The streaks hold where the rush left them: the older sheet's loop
+     (styles-route-transitions.css) never restarts under the reveal. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    .cine-dive-tunnel
+    > i {
+    animation: dwc-streak-rush 280ms linear -280ms both;
+  }
+
+  /* The status's bracket locks inside the cover too (the chrome sheet's
+     lock ran to 600ms, over the hand-over). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-diving
+    .cine-dive-status::after {
+    animation: dw-bracket-lock 160ms steps(4, jump-end) 140ms both;
+  }
+
+  /* A site or a menu entry has no picture to lift: the dive itself is the
+     picture, from the first frame, a little stronger (still no core). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:not(.has-carry-art):not(
+      .has-carry-file
+    ).is-covering
+    .cine-dive-tunnel {
+    --dwc-o: 0.6;
+    animation-name: dwc-tunnel-rush-open;
+    animation-delay: 0ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:not(.has-carry-art):not(
+      .has-carry-file
+    ).is-covering
+    .cine-dive-tunnel
+    > i {
+    animation-delay: 0ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    .archive-dive-space {
+    animation: dwc-texture-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    .rider-dive-mark {
+    animation: dwc-mark-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:not(.has-carry-art):not(
+      .has-carry-file
+    ).is-covering
+    .rider-dive-mark {
+    animation-name: dwc-mark-in-centre;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-covering
+    .cine-dive-status {
+    animation: dwc-status-in 180ms ease-out 140ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    :is(.cine-dive-tunnel, .archive-dive-space, .cine-dive-status, .load-gate-inner) {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.36) ease-in calc(var(--dwc-reveal) * 0.36)
+      both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing
+    .rider-dive-mark {
+    animation: dwc-mark-out calc(var(--dwc-reveal) * 0.36) ease-in calc(var(--dwc-reveal) * 0.36)
+      both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:not(.has-carry-art):not(
+      .has-carry-file
+    ).is-revealing
+    .rider-dive-mark {
+    animation-name: dwc-mark-out-centre;
+  }
+
+  /* A docked file takes the portrait at once: the numeral and the status
+     that sat on its foot give way first, so neither is left over the page's
+     own image (on a phone the portrait sits where the held file did). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.has-dock.is-revealing
+    .rider-dive-mark {
+    animation: dwc-mark-out 160ms ease-in both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.has-dock.is-revealing
+    .cine-dive-status {
+    animation: dwc-fade-out 160ms ease-in both;
+  }
+
+  /* The sovereign seal locks once: the crown frame (the brackets) closes on
+     the mark, the kicker and the label rise under it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-sovereign-gate.is-covering
+    .load-gate-mark {
+    animation: dwc-seal-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) 90ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-sovereign-gate.is-covering
+    :is(.load-gate-kicker, .load-gate-label) {
+    animation: dwc-status-rise 240ms ease-out 180ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-sovereign-gate.is-covering::before {
+    animation: dwc-rays-in 360ms ease-out 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-sovereign-gate.is-revealing::before {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.3) ease-out both;
+  }
+
+  /* Cut-ins: the stage comes in over the closed ink, each in its own way.
+     The entrances move the individual transform properties only: a layer
+     whose transform or opacity was animated would not run its own exit
+     transition (Blink starts none from an animated value). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-covering
+    > .rider-cutin-stage {
+    animation: dwc-stage-in 260ms linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-leddic-cutin.is-covering
+    .leddic-shoji.is-left {
+    animation: dwc-shoji-left 200ms cubic-bezier(0.6, 0, 0.2, 1) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-leddic-cutin.is-covering
+    .leddic-shoji.is-right {
+    animation: dwc-shoji-right 200ms cubic-bezier(0.6, 0, 0.2, 1) 60ms both;
+  }
+
+  /* The room light between the doors would rise and then be shut away
+     within a second: the doors close on ink instead. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin
+    :is(.leddic-room-glow, .leddic-floor) {
+    visibility: hidden;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-over-zeztz-cutin.is-covering
+    .over-zeztz-shards
+    > i {
+    animation: dwc-shard-in 220ms cubic-bezier(0.3, 0.7, 0.1, 1) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-argenome-cutin.is-covering
+    .argenome-slash.is-main {
+    animation-delay: 0ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-cipher-cutin.is-covering
+    .cipher-scan-grid {
+    animation: dwc-grid-lock 220ms cubic-bezier(0.2, 0.8, 0.2, 1) 60ms both;
+  }
+
+  /* Their exits end inside the reveal, and nothing big crosses the page
+     once it shows: rings and flares stay small and are gone by halfway. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-revealing
+    > .rider-cutin-stage {
+    animation: dwc-stage-out var(--dwc-reveal) linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing
+    .leddic-shoji {
+    transition-duration: 0.44s, 0.3s;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin.is-revealing
+    .over-zeztz-shards
+    > i {
+    transition-duration: 0.4s, 0.32s;
+    transition-delay: 0.04s, 0.08s;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin.is-revealing
+    :is(.over-zeztz-pressure-ring, .over-zeztz-strike > i:last-child) {
+    animation: dwc-ring-out calc(var(--dwc-reveal) * 0.45) ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin.is-revealing
+    .over-zeztz-impact {
+    animation-duration: calc(var(--dwc-reveal) * 0.45);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin.is-revealing
+    .cipher-slash-field
+    > i {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.34) ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin.is-revealing
+    .cipher-cross-flare {
+    animation: dwc-fade-out calc(var(--dwc-reveal) * 0.3) ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin.is-revealing
+    .cipher-data-fragments
+    > i {
+    animation-duration: calc(var(--dwc-reveal) * 0.6);
+    animation-delay: 0s;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing
+    .argenome-slash.is-main {
+    animation-duration: calc(var(--dwc-reveal) * 0.5);
+  }
+
+  /* On a flip the rider's stage stays out: the file is the identity. */
+  html
+    body
+    .load-gate.has-cine.is-cine-flip.rider-route-cutin
+    > .rider-cutin-stage
+    > :not(.rider-cutin-caption),
+  html body .load-gate.has-cine.is-cine-flip :is(.cine-dive-tunnel, .archive-dive-space) {
+    display: none;
+  }
+}
+
+/* Each rider's own texture behind the file (one layer, still after it
+   settles). Realm's crimson is a stroke, never a field. */
+html body .load-gate.has-cine.rider-route-dive .archive-dive-space {
+  inset: 0;
+  opacity: 0.9;
+  background:
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 0.05) 0 1px, transparent 1px 7px),
+    linear-gradient(
+      112deg,
+      transparent 36%,
+      rgb(122 232 255 / 0.09) 46%,
+      rgb(164 139 255 / 0.08) 52%,
+      transparent 62%
+    );
+}
+
+html body .load-gate.has-cine.is-realm-dive .archive-dive-space {
+  background:
+    linear-gradient(
+      -16deg,
+      transparent 49.7%,
+      rgb(241 74 96 / 0.5) 49.85% 50.15%,
+      transparent 50.3%
+    ),
+    radial-gradient(ellipse at 50% 60%, rgb(80 20 32 / 0.35), transparent 60%);
+}
+
+html body .load-gate.has-cine.is-lore-dive .archive-dive-space {
+  background:
+    repeating-linear-gradient(90deg, rgb(200 245 255 / 0.05) 0 1px, transparent 1px 64px),
+    radial-gradient(ellipse at 50% 0%, rgb(160 230 255 / 0.12), transparent 58%);
+}
+
+html body .load-gate.has-cine.is-vandal-dive .archive-dive-space {
+  background: linear-gradient(
+    118deg,
+    rgb(231 26 156 / 0.1) 0 49.8%,
+    rgb(255 214 244 / 0.26) 49.8% 50.1%,
+    rgb(151 79 255 / 0.1) 50.1%
+  );
+}
+
+html body .load-gate.has-cine.is-dream-dive .archive-dive-space {
+  background:
+    repeating-linear-gradient(60deg, transparent 0 22px, rgb(255 196 92 / 0.07) 22px 23px),
+    repeating-linear-gradient(-60deg, transparent 0 22px, rgb(255 196 92 / 0.07) 22px 23px),
+    radial-gradient(ellipse at 50% 30%, rgb(255 180 62 / 0.12), transparent 55%);
+}
+
+html body .load-gate.has-cine.is-rexonance-dive .archive-dive-space {
+  background: linear-gradient(
+    112deg,
+    transparent 30%,
+    rgb(122 232 255 / 0.1) 42%,
+    rgb(164 139 255 / 0.09) 50%,
+    rgb(255 92 200 / 0.08) 58%,
+    transparent 70%
+  );
+}
+
+html body .load-gate.has-cine.is-extreme-dive .archive-dive-space {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        rgb(255 213 122 / 0.5) 30%,
+        rgb(122 232 255 / 0.5) 60%,
+        rgb(236 246 250 / 0.42) 80%,
+        transparent 94%
+      )
+      50% 74% / 100% 1px no-repeat,
+    radial-gradient(ellipse at 50% 74%, rgb(255 198 91 / 0.1), transparent 50%);
+}
+
+html body .load-gate.has-cine.is-final-stage-dive .archive-dive-space {
+  background:
+    linear-gradient(rgb(122 232 255 / 0.06), rgb(122 232 255 / 0.06)) 14% 30% / 22% 40% no-repeat,
+    linear-gradient(rgb(240 207 134 / 0.06), rgb(240 207 134 / 0.06)) 86% 64% / 22% 40% no-repeat;
+}
+
+/* ---- Economy rendering and reduced motion: one opacity shutter -------- */
+
+html[data-world-effects="economy"] body .load-gate.has-cine,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) {
+  animation: dwc-calm-in var(--dwc-cover, 180ms) ease-out both;
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine.is-revealing,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced).is-revealing {
+  animation: dwc-fade-out var(--dwc-reveal, 240ms) ease-out both;
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine *,
+html[data-world-effects="economy"] body .load-gate.has-cine *::before,
+html[data-world-effects="economy"] body .load-gate.has-cine *::after,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) *,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) *::before,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) *::after {
+  animation: none !important;
+}
+
+/* The ink, the status and the name; no travelling layers. */
+html[data-world-effects="economy"]
+  body
+  .load-gate.has-cine
+  :is(.cine-dive-tunnel, .archive-dive-space, .dwc-carry, .dwc-lock),
+html
+  body
+  .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced)
+  :is(.cine-dive-tunnel, .archive-dive-space, .dwc-carry, .dwc-lock),
+html[data-world-effects="economy"]
+  body
+  .load-gate.has-cine.rider-route-cutin
+  > .rider-cutin-stage
+  > :not(.rider-cutin-caption),
+html
+  body
+  .load-gate.has-cine.rider-route-cutin:is(.is-cine-calm, .is-cine-reduced)
+  > .rider-cutin-stage
+  > :not(.rider-cutin-caption),
+html[data-world-effects="economy"] body .load-gate.has-cine.is-sovereign-gate::before,
+html body .load-gate.has-cine.is-sovereign-gate:is(.is-cine-calm, .is-cine-reduced)::before {
+  display: none;
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine .dwc-shutter > i:last-child::after,
+html
+  body
+  .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced)
+  .dwc-shutter
+  > i:last-child::after {
+  top: 50%;
+  right: auto;
+  left: 50%;
+  width: min(220px, 48vw);
+  height: 1px;
+  background: var(--dwc-prism, linear-gradient(90deg, #7ae8ff, #f0cf86));
+  opacity: 0.8;
+  transform: translate(-50%, clamp(40px, 10vh, 96px));
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine.rider-route-dive .rider-dive-mark,
+html
+  body
+  .load-gate.has-cine.rider-route-dive:is(.is-cine-calm, .is-cine-reduced)
+  .rider-dive-mark {
+  top: 42%;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine .cine-dive-status,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .cine-dive-status {
+  top: auto;
+  bottom: max(18vh, calc(env(safe-area-inset-bottom) + 28px));
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+html[data-world-effects="economy"] body .load-gate.has-cine .rider-cutin-caption,
+html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-caption {
+  top: 50%;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .load-gate.has-cine {
+    animation: dwc-calm-in var(--dwc-cover, 100ms) ease-out both;
+  }
+
+  html body .load-gate.has-cine.is-revealing {
+    animation: dwc-fade-out var(--dwc-reveal, 160ms) ease-out both;
+  }
+
+  html body .load-gate.has-cine *,
+  html body .load-gate.has-cine *::before,
+  html body .load-gate.has-cine *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  html body .load-gate.has-cine :is(.cine-dive-tunnel, .archive-dive-space, .dwc-carry, .dwc-lock),
+  html
+    body
+    .load-gate.has-cine.rider-route-cutin
+    > .rider-cutin-stage
+    > :not(.rider-cutin-caption) {
+    display: none;
+  }
+}
+
+/* ---- Forced colours ---------------------------------------------------- */
+
+@media (forced-colors: active) {
+  html body .load-gate.has-cine > .dwc-shutter > i {
+    background: Canvas;
+  }
+
+  html body .load-gate.has-cine > .dwc-shutter > i::after {
+    display: none;
+  }
+
+  html body .load-gate.has-cine > .dwc-lock > i {
+    border-color: CanvasText;
+  }
+
+  html body .load-gate.has-cine.rider-route-dive .rider-dive-mark > i {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}
+
+/* ---- Keyframes ----------------------------------------------------------- */
+
+@keyframes dwc-close-left {
+  from {
+    translate: -100% 0;
+  }
+  55% {
+    translate: calc(var(--ox) * 1px - 100%) 0;
+  }
+  80%,
+  to {
+    translate: calc((var(--ox) + var(--ow) / 2) * 1px + 1px - 100%) 0;
+  }
+}
+
+@keyframes dwc-close-right {
+  from {
+    translate: 100% 0;
+  }
+  55% {
+    translate: calc((var(--ox) + var(--ow)) * 1px) 0;
+  }
+  80%,
+  to {
+    translate: calc((var(--ox) + var(--ow) / 2) * 1px - 1px) 0;
+  }
+}
+
+@keyframes dwc-close-top {
+  from {
+    translate: 0 -100%;
+  }
+  55% {
+    translate: 0 calc(var(--oy) * 1px - 100%);
+  }
+  80%,
+  to {
+    translate: 0 calc((var(--oy) + var(--oh) / 2) * 1px + 1px - 100%);
+  }
+}
+
+@keyframes dwc-close-bottom {
+  from {
+    translate: 0 100%;
+  }
+  55% {
+    translate: 0 calc((var(--oy) + var(--oh)) * 1px);
+  }
+  80%,
+  to {
+    translate: 0 calc((var(--oy) + var(--oh) / 2) * 1px - 1px);
+  }
+}
+
+@keyframes dwc-open-left {
+  from {
+    translate: calc((var(--lx) + var(--lw) / 2) * 1px + 1px - 100%) 0;
+  }
+  42% {
+    translate: calc(var(--lx) * 1px - 100%) 0;
+  }
+  to {
+    translate: -100% 0;
+  }
+}
+
+@keyframes dwc-open-right {
+  from {
+    translate: calc((var(--lx) + var(--lw) / 2) * 1px - 1px) 0;
+  }
+  42% {
+    translate: calc((var(--lx) + var(--lw)) * 1px) 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+
+@keyframes dwc-open-top {
+  from {
+    translate: 0 calc((var(--ly) + var(--lh) / 2) * 1px + 1px - 100%);
+  }
+  42% {
+    translate: 0 calc(var(--ly) * 1px - 100%);
+  }
+  to {
+    translate: 0 -100%;
+  }
+}
+
+@keyframes dwc-open-bottom {
+  from {
+    translate: 0 calc((var(--ly) + var(--lh) / 2) * 1px - 1px);
+  }
+  42% {
+    translate: 0 calc((var(--ly) + var(--lh)) * 1px);
+  }
+  to {
+    translate: 0 100%;
+  }
+}
+
+@keyframes dwc-rim-close {
+  from,
+  50% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dwc-rim-open {
+  from {
+    opacity: 0;
+  }
+  14%,
+  60% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The ink comes in over the frames it travels, not as one hard edge. */
+@keyframes dwc-flip-in {
+  from {
+    opacity: 0;
+    translate: calc(var(--dir) * 36%) 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dwc-carry-lift {
+  from,
+  50% {
+    transform: var(--carry-from);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes dwc-carry-appear {
+  from,
+  40% {
+    opacity: 0;
+    transform: var(--carry-from);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The next file comes up where its portrait will rest, with a short push
+   from the side pressed: it never sweeps across the page. */
+@keyframes dwc-carry-slide {
+  from {
+    opacity: 0;
+    translate: calc(var(--dir) * 32px) 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dwc-carry-dock {
+  from {
+    clip-path: inset(0px 0px);
+    transform: none;
+  }
+  to {
+    clip-path: var(--dock-clip);
+    transform: var(--dock);
+  }
+}
+
+/* The file gives way where it held: the portrait is the dossier's own to
+   project (styles-dossier-cinema.css), so a second face never lands on it
+   and the frame never goes dark between two pictures. */
+@keyframes dwc-carry-land {
+  from,
+  34% {
+    opacity: 1;
+    transform: none;
+  }
+  76%,
+  to {
+    opacity: 0;
+    transform: translate(calc(var(--fw) * -0.02px), calc(var(--fh) * -0.02px)) scale(1.04);
+  }
+}
+
+@keyframes dwc-lock-tl {
+  from {
+    scale: 1.5;
+    translate: calc(var(--ox) * 1px) calc(var(--oy) * 1px);
+  }
+  30%,
+  45% {
+    scale: 1;
+    translate: calc(var(--ox) * 1px) calc(var(--oy) * 1px);
+  }
+}
+
+@keyframes dwc-lock-tr {
+  from {
+    scale: 1.5;
+    translate: calc((var(--ox) + var(--ow)) * 1px - var(--dwc-arm)) calc(var(--oy) * 1px);
+  }
+  30%,
+  45% {
+    scale: 1;
+    translate: calc((var(--ox) + var(--ow)) * 1px - var(--dwc-arm)) calc(var(--oy) * 1px);
+  }
+}
+
+@keyframes dwc-lock-bl {
+  from {
+    scale: 1.5;
+    translate: calc(var(--ox) * 1px) calc((var(--oy) + var(--oh)) * 1px - var(--dwc-arm));
+  }
+  30%,
+  45% {
+    scale: 1;
+    translate: calc(var(--ox) * 1px) calc((var(--oy) + var(--oh)) * 1px - var(--dwc-arm));
+  }
+}
+
+@keyframes dwc-lock-br {
+  from {
+    scale: 1.5;
+    translate: calc((var(--ox) + var(--ow)) * 1px - var(--dwc-arm))
+      calc((var(--oy) + var(--oh)) * 1px - var(--dwc-arm));
+  }
+  30%,
+  45% {
+    scale: 1;
+    translate: calc((var(--ox) + var(--ow)) * 1px - var(--dwc-arm))
+      calc((var(--oy) + var(--oh)) * 1px - var(--dwc-arm));
+  }
+}
+
+@keyframes dwc-land-tl {
+  42%,
+  66% {
+    opacity: 1;
+    translate: calc(var(--lx) * 1px) calc(var(--ly) * 1px);
+  }
+  to {
+    opacity: 0;
+    translate: calc(var(--lx) * 1px) calc(var(--ly) * 1px);
+  }
+}
+
+@keyframes dwc-land-tr {
+  42%,
+  66% {
+    opacity: 1;
+    translate: calc((var(--lx) + var(--lw)) * 1px - var(--dwc-arm)) calc(var(--ly) * 1px);
+  }
+  to {
+    opacity: 0;
+    translate: calc((var(--lx) + var(--lw)) * 1px - var(--dwc-arm)) calc(var(--ly) * 1px);
+  }
+}
+
+@keyframes dwc-land-bl {
+  42%,
+  66% {
+    opacity: 1;
+    translate: calc(var(--lx) * 1px) calc((var(--ly) + var(--lh)) * 1px - var(--dwc-arm));
+  }
+  to {
+    opacity: 0;
+    translate: calc(var(--lx) * 1px) calc((var(--ly) + var(--lh)) * 1px - var(--dwc-arm));
+  }
+}
+
+@keyframes dwc-land-br {
+  42%,
+  66% {
+    opacity: 1;
+    translate: calc((var(--lx) + var(--lw)) * 1px - var(--dwc-arm))
+      calc((var(--ly) + var(--lh)) * 1px - var(--dwc-arm));
+  }
+  to {
+    opacity: 0;
+    translate: calc((var(--lx) + var(--lw)) * 1px - var(--dwc-arm))
+      calc((var(--ly) + var(--lh)) * 1px - var(--dwc-arm));
+  }
+}
+
+@keyframes dwc-tunnel-rush {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.32) rotate(-4deg);
+  }
+  35% {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0.34;
+    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
+  }
+}
+
+@keyframes dwc-tunnel-rush-open {
+  from {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.4) rotate(-4deg);
+  }
+  35% {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
+  }
+}
+
+@keyframes dwc-streak-rush {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  40% {
+    opacity: 0.42;
+  }
+  to {
+    opacity: 0.18;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes dwc-texture-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2vh, 0);
+  }
+  to {
+    opacity: 0.9;
+    transform: none;
+  }
+}
+
+@keyframes dwc-mark-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes dwc-mark-in-centre {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0);
+  }
+}
+
+@keyframes dwc-mark-out {
+  from {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -10px, 0);
+  }
+}
+
+@keyframes dwc-mark-out-centre {
+  from {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.92);
+  }
+}
+
+@keyframes dwc-status-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dwc-status-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dwc-seal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dwc-rays-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-6deg) scale(0.7);
+  }
+  to {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.9);
+  }
+}
+
+/* From the layer's own resting opacity (--dwc-o), never up to 1 first. */
+@keyframes dwc-fade-out {
+  from {
+    opacity: var(--dwc-o, 1);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dwc-calm-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dwc-stage-in {
+  from,
+  20% {
+    opacity: 0;
+  }
+  62%,
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dwc-stage-out {
+  from,
+  55% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* The doors draw shut and come up together: a full slide would sweep each
+   door's lit edge across the screen (a rise and a fall in one place). The
+   doors' own exit runs on transform and filter, so opacity is free here. */
+@keyframes dwc-shoji-left {
+  from {
+    opacity: 0;
+    translate: -26% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dwc-shoji-right {
+  from {
+    opacity: 0;
+    translate: 26% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dwc-shard-in {
+  from {
+    translate: var(--shard-x) var(--shard-y);
+    rotate: var(--shard-r);
+    scale: 1.07;
+  }
+  to {
+    translate: 0 0;
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@keyframes dwc-grid-lock {
+  from {
+    scale: 1.18;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes dwc-ring-out {
+  from {
+    opacity: 0.9;
+    transform: translate3d(-50%, -50%, 0) scale(0.3);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(3.2);
+  }
+}
+
+/* ---- Routes without a cover: the prism signal -------------------------- */
+
+.route-signal {
+  position: fixed;
+  z-index: 2147482000;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  pointer-events: none;
+  transform: scaleX(0.9);
+  transform-origin: 0 50%;
+}
+
+.route-signal.is-done {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .route-signal.is-running {
+    animation: dwc-signal-run 900ms cubic-bezier(0.16, 0.8, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .route-signal.is-done {
+    animation: dwc-signal-done 280ms ease-out both;
+  }
+}
+
+@keyframes dwc-signal-run {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.86);
+  }
+}
+
+@keyframes dwc-signal-done {
+  from {
+    opacity: 1;
+    transform: scaleX(0.86);
+  }
+  to {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@media (forced-colors: active) {
+  .route-signal {
+    background: Highlight;
+  }
+}
+
+/* ---- The document while a cover is up ---------------------------------- */
+
+/* The scroll lock keeps the scrollbar's gutter, so neither page shifts
+   sideways as the shutter closes or opens (classic scrollbars). */
+html[data-loading][data-route-cover] {
+  scrollbar-gutter: stable;
+}
+
+/* The Zeus button waits until the page's entrance has run, then comes back
+   on its own fade; its return image (data-navigating) stays in view. */
+html[data-route-cover] .zeus-button:not([data-navigating="true"]) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Gone at once when the shutter starts, rather than fading over it. */
+html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
+  transition: none;
+}

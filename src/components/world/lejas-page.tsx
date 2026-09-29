@@ -64,6 +64,7 @@ export function LejasPage() {
               decoding="async"
               fetchPriority="low"
             />
+            <i className="dossier-arrive-scan" aria-hidden="true" />
             <div className="manager-portrait-shade" aria-hidden="true" />
             <span className="manager-numeral" aria-hidden="true">
               IV

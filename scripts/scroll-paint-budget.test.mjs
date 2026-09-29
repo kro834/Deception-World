@@ -120,9 +120,18 @@ const timelineRules = sheets.flatMap(({ path, rules }) =>
     .map((rule) => {
       const shorthand = declaration(rule.body, "animation");
       const longhand = declaration(rule.body, "animation-name");
+      // Each animation layer is paired with its own timeline layer (the list
+      // repeats when shorter), so a finite time-based layer beside a
+      // scroll-linked one (a dossier's arrival next to its depth push) is
+      // not checked as scroll-linked.
+      const timelines = splitTopLevel(declaration(rule.body, "animation-timeline"));
       const names = splitTopLevel(longhand ?? shorthand ?? "")
         .map((layer) => splitTopLevel(layer, " ").find((token) => keyframeProperties.has(token)))
-        .filter(Boolean);
+        .filter((name, index) => {
+          if (!name) return false;
+          const timeline = timelines[index % timelines.length].trim();
+          return !/^(?:auto|none)$/.test(timeline);
+        });
       return { path, ...rule, names };
     }),
 );

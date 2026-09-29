@@ -1,0 +1,425 @@
+/* Dossier cinema — how a character file arrives, and how its hero answers
+   the first scroll. Loads after styles-dossier-edition.css; page sheets
+   (シエル's, ダンテ's) load after this one.
+
+   The arrival is keyed to the load gate's hand-over: the gate removes
+   html[data-loading] as its cover starts to lift, and only then does this
+   sheet give the hero its animations. While the attribute is present the
+   hero has none and rests fully drawn under the cover; when it goes, CSS
+   starts them afresh, so the entrance also plays on /riders/$id, which
+   reuses the same <main> and <img> from one rider to the next. A route
+   without a cover (most managers, the characters) plays it on mount.
+
+   Every beat is finite (the last one is at rest by about 1.2s), uses only
+   opacity, transform and clip-path, and ends on the page's rest state.
+   Reduced motion and economy rendering show that rest state at once, as
+   they do the older entrance this replaces (managerPortraitIn and
+   managerCopyIn, which ran on mount, under the cover). The sovereign file
+   (Zeus) does not load this sheet. */
+
+/* ================================================================
+   Tokens
+   ================================================================ */
+main.manager-page:not(.is-sovereign) {
+  /* A short hold after the hand-over: the cover's first lifted frame lands
+     60–380ms after the attribute goes, so the visible beats start once it
+     is thinning, not under the opaque plate. */
+  --dm-arrive-delay: 100ms;
+  --dm-arrive-ease: cubic-bezier(0.77, 0, 0.18, 1);
+  --dm-arrive-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dm-key: var(--manager-accent, #7ae8ff);
+  --dm-rim: var(--dm-lock, #7ae8ff);
+}
+
+/* ダンテ's file opens on his own signal glitch (styles-dante.css, 540ms):
+   the hero waits for it to thin instead of running under it. */
+main.manager-page.dante-page:not(.is-sovereign) {
+  --dm-arrive-delay: 420ms;
+}
+
+/* Characters with a colour pair carry it into the arrival's edge: the key
+   lights the wipe, the rim is its leading line. */
+main.manager-page.ciel-dossier-page:not(.is-sovereign) {
+  --dm-key: #1ccf9d;
+  --dm-rim: #86d9ff;
+}
+
+main.manager-page.dante-page:not(.is-sovereign) {
+  --dm-key: #369b89;
+  --dm-rim: #ed667e;
+}
+
+main.manager-page:not(.is-sovereign):has(img[src*="character-yoake-mamori"]) {
+  --dm-key: #a8c7ff;
+  --dm-rim: #f0cf86;
+}
+
+/* The older entrance ran on mount and ignored economy rendering: the files
+   this sheet serves drop it, and the arrival below takes its place. */
+main.manager-page:not(.is-sovereign) :is(.manager-portrait-frame, .manager-introduction) {
+  animation: none;
+}
+
+/* Lejas's scanline and scroll cue looped on a still page. The scan now
+   crosses once, as part of the arrival; the cue calls twice and rests. */
+main.manager-page:not(.is-sovereign) .manager-scanline {
+  animation: none;
+  opacity: 0;
+}
+
+main.manager-page:not(.is-sovereign) .manager-scroll-cue i::after {
+  animation-iteration-count: 2;
+}
+
+/* The wipe's leading edge: an aria-hidden rule in every portrait frame. It
+   is the full frame tall and draws the prism line on its bottom edge, so
+   translating it by its own height carries the line from the frame's top
+   to its foot with the wipe. At rest it is out of sight. */
+main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: block;
+  background:
+    linear-gradient(
+        90deg,
+        var(--dm-rim) 0%,
+        var(--dm-violet, #a48bff) 34%,
+        var(--dm-magenta, #ff5cc8) 66%,
+        var(--dm-gold, #f0cf86) 100%
+      )
+      bottom / 100% 2px no-repeat,
+    linear-gradient(0deg, color-mix(in srgb, var(--dm-key) 22%, transparent), transparent 72px)
+      bottom / 100% 72px no-repeat;
+  opacity: 0;
+  translate: 0 -100%;
+  pointer-events: none;
+}
+
+/* ================================================================
+   Economy: the calm tier shows every record at rest
+   ================================================================ */
+html[data-world-effects="economy"]
+  main.manager-page:not(.is-sovereign)
+  :is(.rider-archive-civilian, .rider-nightmare-card, .dante-entry-glitch) {
+  animation: none;
+}
+
+/* ================================================================
+   The arrival
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The frame comes up on its ground; its brackets lock on. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-portrait-frame {
+    animation: dm-arrive-fade 200ms linear var(--dm-arrive-delay) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-portrait-frame::before {
+    animation: dm-arrive-lock 240ms steps(4, jump-end) var(--dm-arrive-delay) both;
+  }
+
+  /* The plate is projected in from the top: a clip wipe paced by the
+     prism edge, the image settling from a slight push. The wipe also paces
+     the rise in brightness of a light-ground plate. The id outranks the
+     reader sheet's still image (animation: none, #dossier-profile). */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-portrait-frame
+    > img {
+    animation: dm-arrive-plate 640ms var(--dm-arrive-ease) calc(var(--dm-arrive-delay) + 60ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-arrive-scan {
+    animation:
+      dm-arrive-travel 640ms var(--dm-arrive-ease) calc(var(--dm-arrive-delay) + 60ms) both,
+      dm-arrive-edge 640ms linear calc(var(--dm-arrive-delay) + 60ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-scanline {
+    animation: dm-arrive-scanline 1100ms linear calc(var(--dm-arrive-delay) + 700ms) both;
+  }
+
+  /* Identity: the file strip draws in, the name is struck from left to
+     right, and the lines around it rise into place. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-identity
+    .manager-file-number {
+    animation: dm-arrive-strip 340ms var(--dm-arrive-ease) var(--dm-arrive-delay) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-identity
+    .manager-display-name {
+    animation: dm-arrive-name 560ms var(--dm-arrive-ease) calc(var(--dm-arrive-delay) + 80ms)
+      backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    :is(
+      .manager-eyebrow,
+      .dossier-identity h1 small,
+      .dossier-identity .manager-title,
+      .dossier-identity .dossier-read-link
+    ) {
+    animation: dm-arrive-rise 440ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 160ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-identity
+    .manager-title {
+    animation-delay: calc(var(--dm-arrive-delay) + 220ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-identity
+    .dossier-read-link {
+    animation-delay: calc(var(--dm-arrive-delay) + 280ms);
+  }
+
+  /* The panels lock on in turn, and the facts step in row by row. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    :is(.manager-quotes, .manager-facts) {
+    animation: dm-arrive-panel 460ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 320ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts {
+    animation-delay: calc(var(--dm-arrive-delay) + 400ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts
+    > div {
+    animation: dm-arrive-row 240ms steps(3, jump-end) calc(var(--dm-arrive-delay) + 460ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts
+    > div:nth-child(2) {
+    animation-delay: calc(var(--dm-arrive-delay) + 500ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts
+    > div:nth-child(3) {
+    animation-delay: calc(var(--dm-arrive-delay) + 540ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts
+    > div:nth-child(4) {
+    animation-delay: calc(var(--dm-arrive-delay) + 580ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-facts
+    > div:nth-child(n + 5) {
+    animation-delay: calc(var(--dm-arrive-delay) + 620ms);
+  }
+}
+
+/* ================================================================
+   Depth: the first scroll pushes the camera in
+   ================================================================ */
+/* The plate was frozen (the reader sheet stops its old breathing loop).
+   Over the first screen of scroll it pushes in by 6% toward the face, on
+   the root scroller (the frame clips, so an anonymous view() would be
+   captured by it). It animates `scale`, which the arrival leaves alone,
+   and starts at 1, where the arrival ends. The push holds while the side
+   menu opens or a route cover comes down (the menu's scroll lock keeps the
+   offset), so the plate never snaps back under them; only a dialog, which
+   freezes the page, and economy rendering stop it. While a cover is down
+   the list carries the push alone, so the arrival still waits for the
+   hand-over; when the cover lifts the arrival joins ahead of it. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-dialog-open])
+      main.manager-page:not(.is-sovereign)
+      #dossier-profile
+      .manager-portrait-frame
+      > img {
+      transform-origin: 50% 28%;
+      animation: dm-depth-push linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 100vh;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-loading]):not([data-dialog-open])
+      main.manager-page:not(.is-sovereign)
+      #dossier-profile
+      .manager-portrait-frame
+      > img {
+      animation:
+        dm-arrive-plate 640ms var(--dm-arrive-ease) calc(var(--dm-arrive-delay) + 60ms) both,
+        dm-depth-push linear both;
+      animation-timeline: auto, scroll(root block);
+      animation-range:
+        normal,
+        0 100vh;
+    }
+  }
+}
+
+@keyframes dm-depth-push {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.06;
+  }
+}
+
+@keyframes dm-arrive-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dm-arrive-lock {
+  from {
+    opacity: 0;
+    scale: 1.04;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes dm-arrive-plate {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.05);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes dm-arrive-travel {
+  from {
+    translate: 0 -100%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes dm-arrive-edge {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dm-arrive-scanline {
+  0% {
+    opacity: 0;
+    transform: translateY(-10%);
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(680%);
+  }
+}
+
+@keyframes dm-arrive-strip {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Backwards fill only: once struck, the name drops the clip, which would
+   otherwise trim its misregistered ghost. */
+@keyframes dm-arrive-name {
+  from {
+    clip-path: inset(-12px 100% -12px -12px);
+    translate: -0.12em 0;
+  }
+  to {
+    clip-path: inset(-12px -12px -12px -12px);
+    translate: 0 0;
+  }
+}
+
+@keyframes dm-arrive-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dm-arrive-panel {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes dm-arrive-row {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

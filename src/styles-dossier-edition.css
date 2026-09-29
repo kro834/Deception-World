@@ -57,8 +57,7 @@ main.manager-page:not(.is-sovereign) {
     ),
     radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
     radial-gradient(ellipse 60% 30% at 94% 62%, rgb(255 92 200 / 5%), transparent 70%),
-    radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%),
-    #04080f;
+    radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%), #04080f;
 }
 
 /* The page's end continues the ink. The pagination's bottom margin collapses
@@ -328,6 +327,14 @@ main.manager-page:not(.is-sovereign)
   letter-spacing: 0.12em;
 }
 
+/* Every label at least 12px, as on the World page. The romanised name was
+   11px from 761px up to the desktop step (tablets, phones on their side). */
+@media (max-width: 1099px) {
+  main.manager-page:not(.is-sovereign) .manager-introduction .dossier-identity h1 small {
+    font-size: 12px;
+  }
+}
+
 /* Every label at least 12px, as on the World page. */
 main.manager-page:not(.is-sovereign)
   :is(
@@ -447,6 +454,384 @@ main.manager-page:not(.is-sovereign) .manager-pagination .dossier-index-return::
 }
 
 /* ================================================================
+   The hero as a stage
+   ================================================================ */
+/* The frame's ground is lit before its plate lands, so an arrival (or an
+   image still decoding) opens on the character's key light rather than a
+   black hole. ダンテ's frame keeps his paper (styles-dante.css): his plate
+   is contained, and the room below his feet must read as that paper. */
+main.manager-page:not(.is-sovereign):not(.dante-page) .manager-hero .manager-portrait-frame {
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 16% 6%,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 18%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #0b1422, #04080f);
+}
+
+/* The matte becomes a projection stage: a key light from the upper left in
+   the character's accent, and a floor ramp that settles the plate's foot
+   into the ink. The ramp stays below the chest line; faces are untouched.
+   ダンテ's contained plate on paper takes no ramp (it would grey the paper). */
+main.manager-page:not(.is-sovereign):not(.dante-page) .manager-hero .manager-portrait-frame::after {
+  background:
+    radial-gradient(
+      ellipse 70% 42% at 0% 0%,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 12%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, transparent 68%, rgb(4 8 15 / 36%) 86%, rgb(4 8 15 / 72%) 100%),
+    radial-gradient(ellipse 130% 95% at 50% 40%, transparent 66%, rgb(5 8 14 / 18%) 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--dm-lock) 22%, transparent),
+    inset 0 0 28px rgb(5 8 14 / 12%);
+}
+
+/* Plates drawn on white sat on the ink like pasted prints, the brightest
+   things on the site. They are graded down a step and vignetted so they sit
+   under the name's chrome ink. Economy rendering keeps the plain image. */
+html:not([data-world-effects="economy"])
+  main.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame:has(
+    > img:is(
+        [src*="civilian-yuma"],
+        [src*="civilian-bell"],
+        [src*="civilian-vandal"],
+        [src*="character-terra"],
+        [src*="character-james"]
+      )
+  )
+  > img {
+  filter: saturate(0.92) brightness(0.9) contrast(1.05);
+}
+
+main.manager-page:not(.is-sovereign)
+  .manager-hero
+  .manager-portrait-frame:has(
+    > img:is(
+        [src*="civilian-yuma"],
+        [src*="civilian-bell"],
+        [src*="civilian-vandal"],
+        [src*="character-terra"],
+        [src*="character-james"]
+      )
+  )::after {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--dm-lock) 22%, transparent),
+    inset 0 0 64px rgb(5 8 14 / 22%);
+}
+
+/* The civilian record is a file photo, not a second print of the hero
+   plate: an ID grade, and a registration grid over the print. */
+main.manager-page:not(.is-sovereign)
+  .rider-archive-civilian:not(.rider-partner-card)
+  .rider-archive-civilian-visual
+  > img {
+  filter: grayscale(0.35) contrast(1.06);
+}
+
+/* A bust crop toward the face, so it does not repeat the hero plate.
+   Argenome's print is a close-up already and keeps its framing. */
+main.manager-page:not(.is-sovereign)
+  .rider-archive-civilian:not(.rider-partner-card)
+  .rider-archive-civilian-visual
+  > img:not([src*="argenome"]) {
+  scale: 1.24;
+  transform-origin: 50% 4%;
+}
+
+main.manager-page:not(.is-sovereign)
+  .rider-archive-civilian:not(.rider-partner-card)
+  .rider-archive-civilian-visual::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 5%) 0 1px, transparent 1px 4px),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 12%, transparent),
+      transparent 55%
+    );
+  pointer-events: none;
+}
+
+/* ================================================================
+   Identity on phones: one step up the scale
+   ================================================================ */
+@media (max-width: 760px) {
+  /* The name was 36px from 320 to 759px wide and 57px from 768. It now
+     grows with the column and meets the tablet size without a jump. */
+  main.manager-page:not(.is-sovereign) #dossier-profile .dossier-identity h1 {
+    font-size: clamp(40px, 12.4vw, 56px);
+    line-height: 1.06;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-introduction .dossier-identity h1 small {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  main.manager-page:not(.is-sovereign) .dossier-identity .manager-title {
+    font-size: 15px;
+  }
+
+  main.manager-page:not(.is-sovereign) .dossier-identity .manager-file-number {
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ================================================================
+   Portrait framing
+   ================================================================ */
+/* Wide screens: the whole plate and its gold foot land on the first screen
+   (the frame's foot was 26px under the fold at 1440x900). */
+@media (min-width: 1100px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-frame {
+    max-height: max(420px, calc(100svh - clamp(118px, 11vw, 166px) - 24px));
+  }
+}
+
+/* Tablets and phones on their side: the portrait rides beside the facts
+   instead of leaving the column empty under it. */
+@media (min-width: 761px) and (max-width: 1099px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-column {
+    align-self: stretch;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-frame {
+    position: sticky;
+    top: calc(var(--detail-header-height, 68px) + 16px);
+    max-height: calc(100svh - var(--detail-header-height, 68px) - 32px);
+  }
+}
+
+/* ================================================================
+   Quotes and facts
+   ================================================================ */
+/* The first line is the file's voice: a pull quote in chrome ink. The rest
+   step down behind it. */
+main.manager-page:not(.is-sovereign) .manager-hero .manager-quotes q:first-child {
+  color: #f3f9ff;
+  font-size: clamp(18px, 1.6vw, 23px);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+main.manager-page:not(.is-sovereign) .manager-hero .manager-quotes q:not(:first-child) {
+  color: rgb(222 232 243 / 80%);
+}
+
+/* Figures read as figures: Latin letters and digits take the HUD's Oxanium
+   (it has no kana, so Japanese stays in the text face). */
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts dd {
+  font-family: "Oxanium", var(--anime-display, "Zen Kaku Gothic New"), sans-serif;
+  font-size: clamp(16px, 1.25vw, 18px);
+}
+
+main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 6px 1px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 1px 6px no-repeat;
+}
+
+/* ================================================================
+   Labels at 12px or larger
+   ================================================================ */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-contents-copy small,
+    .rider-archive-civilian-visual > span,
+    .rider-archive-civilian figcaption > small,
+    .rider-archive-civilian figcaption > p,
+    .rider-partner-en-name,
+    .rider-partner-card dt,
+    .rider-nightmare-card-visual > span,
+    .rider-nightmare-card-copy > small,
+    .form-pickup-visual > span,
+    .form-pickup-copy > small,
+    .form-pickup-copy > em,
+    .rider-special-site-visual > span,
+    .rider-special-site-copy > small,
+    .ios-slide-open-label > small,
+    .lejas-tap-hint,
+    .manager-eyebrow > span,
+    .manager-scroll-cue > span,
+    .manager-portrait-meta > :is(span, b)
+  ) {
+  font-size: 12px;
+}
+
+/* The reader sheet's 11px floor for the plates' chips is set under
+   html[data-mode] with a doubled class; this outranks it. The partner's
+   romanised name was lifted there with !important. */
+html[data-mode]
+  main.manager-page:not(.is-sovereign).manager-page
+  :is(
+    .rider-archive-civilian-visual > span,
+    .rider-nightmare-card-visual > span,
+    .form-pickup-visual > span,
+    .rider-special-site-visual > span,
+    .is-rexonance-pickup .form-pickup-copy > em
+  ) {
+  font-size: 12px;
+}
+
+main.manager-page:not(.is-sovereign).manager-page .rider-partner-card .rider-partner-en-name {
+  font-size: 12px !important;
+}
+
+main.manager-page:not(.is-sovereign)
+  :is(.manager-eyebrow > span, .manager-scroll-cue > span, .manager-portrait-meta > span) {
+  letter-spacing: 0.12em;
+}
+
+main.manager-page:not(.is-sovereign) :is(.form-pickup-copy, .rider-special-site-copy) h2 > span {
+  font-size: max(12px, 0.42em);
+}
+
+main.manager-page:not(.is-sovereign) .is-rexonance-pickup .form-pickup-copy h2 > span {
+  font-size: max(12px, 0.3em);
+}
+
+/* ================================================================
+   Chapter openers
+   ================================================================ */
+/* The file's numeral opens the dossier at display size, as World's section
+   index does. */
+main.manager-page:not(.is-sovereign) .manager-section-index > span {
+  font-size: clamp(56px, 6.4vw, 104px);
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* Each chapter's number is its opener: an outlined display numeral with
+   the violet ghost, the prism rule under it, then the kicker and title. */
+main.manager-page:not(.is-sovereign) .manager-dossier .manager-copy-heading > span {
+  display: block;
+  color: transparent;
+  font-family: var(--dm-mono);
+  font-size: clamp(48px, 5.2vw, 88px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 1.5px var(--dm-lock);
+  text-shadow: 0.07em 0.07em 0 rgb(164 139 255 / 30%);
+}
+
+main.manager-page:not(.is-sovereign) .manager-dossier .manager-copy-heading > span::after {
+  display: block;
+  width: 64px;
+  margin: 16px 0 0;
+}
+
+/* Long chapters: the title stays with its prose instead of leaving the
+   heading column empty for hundreds of pixels. Below the header and the
+   reader bar. */
+@media (min-width: 1181px) {
+  main.manager-page:not(.is-sovereign) .manager-dossier .manager-copy-heading {
+    position: sticky;
+    top: calc(var(--detail-header-height, 76px) + 66px + 24px);
+    align-self: start;
+  }
+}
+
+/* An odd chapter count left half a cell empty in the bracketed list: the
+   last one spans the row. */
+main.manager-page:not(.is-sovereign) .dossier-contents > a:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+/* ================================================================
+   Records: one column, one plate
+   ================================================================ */
+/* The form records and the special site share the reading column. */
+main.manager-page:not(.is-sovereign) :is(.form-pickup, .rider-special-site) {
+  width: min(1200px, calc(100% - 48px));
+}
+
+@media (max-width: 760px) {
+  main.manager-page:not(.is-sovereign) :is(.form-pickup, .rider-special-site) {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+}
+
+/* The chips on the plates are square HUD tags, like the file strip. */
+main.manager-page:not(.is-sovereign)
+  :is(
+    .form-pickup:not(.is-rexonance-pickup) .form-pickup-visual > span,
+    .rider-special-site-visual > span,
+    .rider-nightmare-card-visual > span
+  ) {
+  border-color: color-mix(in srgb, var(--dm-lock) 42%, transparent);
+  border-radius: 2px;
+  background: rgb(4 8 15 / 78%);
+}
+
+/* ================================================================
+   End of file
+   ================================================================ */
+/* 夜明護尊's file has no pagination: it closes on a terminal mark (a prism
+   boundary, gold brackets and a diamond) instead of stopping dead. */
+main.manager-page:not(.is-sovereign):not(:has(.manager-pagination)) .manager-dossier {
+  padding-bottom: 96px;
+}
+
+main.manager-page:not(.is-sovereign):not(:has(.manager-pagination)) .manager-dossier::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 40px;
+  left: 0;
+  height: 16px;
+  background:
+    linear-gradient(to bottom right, transparent 50%, var(--dm-gold) 50%) calc(50% - 3px) 2px / 6px
+      6px no-repeat,
+    linear-gradient(to bottom left, transparent 50%, var(--dm-gold) 50%) calc(50% + 3px) 2px / 6px
+      6px no-repeat,
+    linear-gradient(to top right, transparent 50%, var(--dm-gold) 50%) calc(50% - 3px) 8px / 6px 6px
+      no-repeat,
+    linear-gradient(to top left, transparent 50%, var(--dm-gold) 50%) calc(50% + 3px) 8px / 6px 6px
+      no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 16px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 16px no-repeat,
+    var(--dm-prism) 50% 50% / 100% 1px no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ================================================================
+   The dossier's placeholder on phones
+   ================================================================ */
+/* The dossier skips layout until approached (content-visibility, 1200px
+   placeholder). On a phone a long file is several times that, so the page
+   grew by thousands of pixels mid-scroll (rex-loi at 320: 4457 to 9268).
+   The placeholder follows the chapter count; `auto` still keeps the real
+   size once laid out. */
+@media (max-width: 560px) {
+  main.manager-page:not(.is-sovereign) .manager-dossier {
+    contain-intrinsic-size: auto 1700px;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(3)) {
+    contain-intrinsic-size: auto 2600px;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(4)) {
+    contain-intrinsic-size: auto 4400px;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(5)) {
+    contain-intrinsic-size: auto 5400px;
+  }
+}
+
+/* ================================================================
    Focus and forced colours
    ================================================================ */
 main.manager-page:not(.is-sovereign)
@@ -468,9 +853,16 @@ main.manager-page:not(.is-sovereign)
     filter: none;
   }
 
-  main.manager-page:not(.is-sovereign) :is(.manager-section-index > span, .dossier-contents-number) {
+  main.manager-page:not(.is-sovereign)
+    :is(.manager-section-index > span, .dossier-contents-number, .manager-copy-heading > span) {
     color: CanvasText;
     -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+
+  /* The stage's light and ramp are ornament; the art is drawn as it is. */
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-portrait-frame::after {
+    display: none;
   }
 
   /* An opaque bar (forced colours keep a background's alpha) ... */

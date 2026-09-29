@@ -35,7 +35,10 @@ test("every dossier route but the sovereign file loads the dossier sheets", asyn
     "href: dossierEditionCssUrl",
   ].map((needle) => links.indexOf(needle));
   assert.ok(order[0] > 0, String(order));
-  assert.deepEqual([...order].sort((a, b) => a - b), order);
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order,
+  );
   assert.match(head, /import dossierEditionCssUrl from "@\/styles-dossier-edition\.css\?url";/);
   // The same HUD subset as /world, so a file opened from there reuses it.
   const world = await read("src/routes/world.tsx");
@@ -97,7 +100,10 @@ test("motion is scroll-linked, finite, compositor-only and gated", async () => {
   const css = stripComments(await read("src/styles-dossier-edition.css"));
   const gate = css.indexOf("@supports (animation-timeline: view())");
   assert.ok(gate > 0);
-  assert.match(css.slice(gate), /^@supports[^{]*\{\s*@media \(prefers-reduced-motion: no-preference\)/);
+  assert.match(
+    css.slice(gate),
+    /^@supports[^{]*\{\s*@media \(prefers-reduced-motion: no-preference\)/,
+  );
   assert.doesNotMatch(css.slice(0, gate), /animation/);
   const motion = css.slice(gate, css.indexOf("@keyframes"));
   const rules = [...motion.matchAll(/([^{}]+)\{([^{}]*animation:[^{}]*)\}/g)];
@@ -127,12 +133,30 @@ test("the page end, Dante's paper and forced colours hold", async () => {
     /html:has\(> body > main\.manager-page:not\(\.is-sovereign\)\),\s*body:has\(> main\.manager-page:not\(\.is-sovereign\)\) \{\s*background-color: #04080f;/,
   );
   const ciel = stripComments(await read("src/styles-ciel.css"));
-  assert.match(ciel, /html:has\(> body > main\.manager-page\.ciel-dossier-page\),[\s\S]*?background-color: #030b0e;/);
+  assert.match(
+    ciel,
+    /html:has\(> body > main\.manager-page\.ciel-dossier-page\),[\s\S]*?background-color: #030b0e;/,
+  );
   // Dante's frame takes the illustration's paper, above the shared dark rule.
   const dante = await read("src/styles-dante.css");
   assert.match(
     dante,
     /\.dante-page\.manager-page:not\(\.is-sovereign\) \.manager-portrait-frame \{\s*background: #ede8ea;/,
+  );
+  // ... and the hero stage's ink ground and floor ramp leave his paper alone.
+  for (const rule of css.match(
+    /main\.manager-page[^{]*\.manager-hero \.manager-portrait-frame(::after)? \{\s*background:/g,
+  ) ?? []) {
+    assert.match(rule, /:not\(\.dante-page\)/, rule);
+  }
+  assert.match(
+    css,
+    /:not\(\.is-sovereign\):not\(\.dante-page\) \.manager-hero \.manager-portrait-frame \{/,
+  );
+  // The romanised name is 12px up to the desktop step (tablets, landscape).
+  assert.match(
+    css,
+    /@media \(max-width: 1099px\) \{\s*main\.manager-page:not\(\.is-sovereign\) \.manager-introduction \.dossier-identity h1 small \{\s*font-size: 12px;/,
   );
   // Forced colours: an opaque bar, the current section highlighted, and the
   // name drawn without the backplate that covered the romanised name.
@@ -146,4 +170,53 @@ test("the page end, Dante's paper and forced colours hold", async () => {
     readerForced,
     /main\.manager-page \.dossier-identity \.manager-display-name \{\s*forced-color-adjust: none;\s*color: CanvasText;\s*-webkit-text-fill-color: CanvasText;\s*background: none;/,
   );
+});
+
+test("the hero stage, the 12px labels and the file's openers hold", async () => {
+  const css = stripComments(await read("src/styles-dossier-edition.css"));
+  // Light-ground plates are graded down, never under economy rendering.
+  assert.match(
+    css,
+    /html:not\(\[data-world-effects="economy"\]\)\s*main\.manager-page:not\(\.is-sovereign\)\s*#dossier-profile\s*\.manager-portrait-frame:has\([\s\S]*?\)\s*> img \{\s*filter: saturate\(0\.92\) brightness\(0\.9\) contrast\(1\.05\);/,
+  );
+  // Every micro-label these files had under 12px is lifted to 12px.
+  const labels = css.match(
+    /:is\(\s*\.dossier-contents-copy small,([\s\S]*?)\) \{\s*font-size: 12px;/,
+  );
+  assert.ok(labels);
+  for (const needle of [
+    ".rider-archive-civilian-visual > span",
+    ".form-pickup-visual > span",
+    ".form-pickup-copy > small",
+    ".ios-slide-open-label > small",
+    ".lejas-tap-hint",
+    ".manager-eyebrow > span",
+    ".manager-portrait-meta > :is(span, b)",
+  ]) {
+    assert.ok(labels[1].includes(needle), needle);
+  }
+  assert.match(css, /h2 > span \{\s*font-size: max\(12px, 0\.42em\);/);
+  // Phones: the name grows with the column (no 36px to 57px jump) and the
+  // romanised name is 12px.
+  assert.match(
+    css,
+    /#dossier-profile \.dossier-identity h1 \{\s*font-size: clamp\(40px, 12\.4vw, 56px\);/,
+  );
+  // An odd chapter count spans the last row of the contents.
+  assert.match(
+    css,
+    /\.dossier-contents > a:last-child:nth-child\(odd\) \{\s*grid-column: 1 \/ -1;/,
+  );
+  // A file without pagination (夜明護尊) closes on an end mark.
+  assert.match(
+    css,
+    /:not\(:has\(\.manager-pagination\)\) \.manager-dossier::after \{\s*content: "";/,
+  );
+  // Forced colours: plain ink for the chapter numerals, no stage over the art.
+  const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
+  assert.match(
+    forced,
+    /\.manager-copy-heading > span\) \{\s*color: CanvasText;\s*-webkit-text-stroke: 0;/,
+  );
+  assert.match(forced, /\.manager-portrait-frame::after \{\s*display: none;/);
 });

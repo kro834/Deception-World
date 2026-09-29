@@ -243,6 +243,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               decoding="async"
               fetchPriority="high"
             />
+            <i className="dossier-arrive-scan" aria-hidden="true" />
             <span className="manager-numeral">{person.code}</span>
           </div>
         </div>

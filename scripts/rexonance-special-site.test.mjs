@@ -317,7 +317,9 @@ test("P14 controls and metadata retain readable text at narrow widths", () => {
 
 test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
   assert.match(loadGate, /"\/rexonance-saga": "rexonance"/);
-  assert.match(loadGate, /rexonance:\s*\{ cover: 560, reveal: 520 \}/);
+  // 2026-09-29: the file shutter closes in 320 ms and holds for the commit,
+  // so every dive's clock is shorter (was 560/520).
+  assert.match(loadGate, /rexonance:\s*\{ cover: 380, reveal: 480 \}/);
   assert.match(loadGate, /REXONANCE \/\/ PERFORMANCE SITE/);
   assert.match(loadGate, /P14共鳴位相へダイブ中/);
   assert.match(transitions, /\.load-gate\.rider-route-dive\.is-rexonance-dive/);

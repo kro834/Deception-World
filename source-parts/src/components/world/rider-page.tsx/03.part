@@ -1,4 +1,3 @@
-    ja: "レディック",
     person: "在原華火",
     enPerson: "HANAKA ARIHARA",
     epithet: "規格外の幸運",
@@ -337,3 +336,4 @@
         no: "01",
         kicker: "AGENT PROFILE",
         title: "陽気な顔と、任務の最適解。",
+        body: [

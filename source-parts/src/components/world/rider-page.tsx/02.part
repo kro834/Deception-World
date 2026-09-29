@@ -1,4 +1,3 @@
-          {
             img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
             pos: "50% 50%",
             name: "アクシスレイカー・マークⅦ　ランチャーモード",
@@ -337,3 +336,4 @@
     id: "leddic",
     no: "05",
     name: "LEDDIC",
+    ja: "レディック",

@@ -20,6 +20,7 @@ import futureInterfaceCss from "../styles-future-interface.css?url";
 import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 import pressFeedbackCss from "../styles-press-feedback.css?url";
 import chromeElevationCss from "../styles-chrome-elevation.css?url";
+import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
@@ -102,6 +103,9 @@ export const Route = createRootRoute({
       // The shared chrome (menu, announcements, covers, Zeus button, skip
       // link) in one grammar on every route; it outweighs the route sheets.
       { rel: "stylesheet", href: chromeElevationCss },
+      // The file shutter: every covered route change closes onto what was
+      // pressed and opens from the destination's portrait (load-gate.tsx).
+      { rel: "stylesheet", href: transitionCinemaCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

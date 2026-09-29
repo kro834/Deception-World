@@ -49,6 +49,7 @@ export function DantePage() {
               decoding="async"
               style={{ objectFit: "contain", objectPosition: "50% 0%" }}
             />
+            <i className="dossier-arrive-scan" aria-hidden="true" />
             <span className="manager-numeral">01</span>
           </div>
         </div>
