@@ -212,6 +212,14 @@ function readFrameAvoid(pick: (entry: FrameAvoid) => ZeusRect[]) {
   return placed;
 }
 
+/* Words that are not drawn (a closed disclosure's contents) are passed over
+   before they are measured. Reading their box lays them out: at the end of
+   /world that laid out every closed PROFILE, fetched the Japanese font slices
+   for their rarer kanji, and each slice's arrival relaid the whole page
+   mid-scroll. Engines without checkVisibility measure everything, as before. */
+const drawn = (element: Element) =>
+  typeof element.checkVisibility !== "function" || element.checkVisibility();
+
 /* The glyph boxes of the words inside the candidate spots. Only elements whose
    box meets a spot are walked, so this is a handful of ranges, read once when
    scrolling settles. Inside a dialog only its own words count: the page
@@ -224,6 +232,7 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
   const collect = (selector: string, accept?: (element: HTMLElement) => boolean) => {
     for (const element of root.querySelectorAll<HTMLElement>(selector)) {
       if (element === button || button.contains(element)) continue;
+      if (!drawn(element)) continue;
       if (!meetsAny(element.getBoundingClientRect(), zones)) continue;
       // A title inside a card link is walked once, with the link.
       if (walked.has(element) || element.parentElement?.closest(selector)) continue;
@@ -234,6 +243,8 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
       const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         if (!node.nodeValue?.trim()) continue;
+        // A walked card's own closed disclosure is not drawn either.
+        if (node.parentElement && !drawn(node.parentElement)) continue;
         // Words kept for screen readers only overflow a clipped 1px box.
         const holder = node.parentElement?.getBoundingClientRect();
         if (holder && (holder.width < 2 || holder.height < 2)) continue;
