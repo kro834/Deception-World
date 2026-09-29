@@ -292,7 +292,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               ) : null}
               <div className="form-pickup-sections">
                 {abilities.length ? (
-                  <section>
+                  <section className="is-ability">
                     <header>
                       <span>01</span>
                       <p>ABILITY</p>
@@ -306,7 +306,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   </section>
                 ) : null}
                 {arsenal.length ? (
-                  <section>
+                  <section className="is-arsenal">
                     <header>
                       <span>02</span>
                       <p>ARSENAL</p>
@@ -320,7 +320,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   </section>
                 ) : null}
                 {finishers.length ? (
-                  <section>
+                  <section className="is-finisher">
                     <header>
                       <span>03</span>
                       <p>FINISHER</p>

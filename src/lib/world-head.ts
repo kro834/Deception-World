@@ -5,6 +5,7 @@ import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
 import cinematicEditionCssUrl from "@/styles-cinematic-edition.css?url";
 import dossierEditionCssUrl from "@/styles-dossier-edition.css?url";
 import dossierCinemaCssUrl from "@/styles-dossier-cinema.css?url";
+import pickupCinemaCssUrl from "@/styles-pickup-cinema.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -37,11 +38,19 @@ export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   CINEMATIC_STYLESHEET_LINK,
 ];
 
+// The record viewers (form, nightmare, episode and column pickups): linked
+// last among the dossier sheets and, on /world, just before its last sheet.
+export const PICKUP_CINEMA_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: pickupCinemaCssUrl,
+};
+
 // The character files (riders, managers, characters) in the World page's
 // projection grammar: its HUD face (the same capitals-and-digits Michroma
 // subset as /world, so a file opened from there reuses it) and the dossier
 // edition sheet, after the World sheets, then the cinema sheet (the hero's
-// arrival and scroll depth). Page sheets go after these.
+// arrival and scroll depth) and the record viewers. Page sheets go after
+// these.
 export const DOSSIER_HUD_FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Michroma&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%2F-.%3A%2B%23%25%26%C2%B7%7C%3C%3E%20";
 export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
@@ -49,6 +58,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
   { rel: "stylesheet", href: dossierEditionCssUrl },
   { rel: "stylesheet", href: dossierCinemaCssUrl },
+  PICKUP_CINEMA_STYLESHEET_LINK,
 ];
 
 type WorldHeadInput = {

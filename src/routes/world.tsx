@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { WorldHome } from "@/components/world/world-home";
-import { createWorldHead, WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
+import {
+  createWorldHead,
+  PICKUP_CINEMA_STYLESHEET_LINK,
+  WORLD_STYLESHEET_LINKS,
+} from "@/lib/world-head";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
 import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
@@ -38,6 +42,7 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldRisingCssUrl },
         { rel: "stylesheet", href: worldReDiveCssUrl },
         { rel: "stylesheet", href: worldAnnexCssUrl },
+        PICKUP_CINEMA_STYLESHEET_LINK,
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],
