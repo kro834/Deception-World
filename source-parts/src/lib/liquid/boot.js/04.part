@@ -1,6 +1,3 @@
-  window.addEventListener('pointerup', finish, true);
-  window.addEventListener('pointercancel', cancel, true);
-  window.addEventListener('blur', cancel);
   window.addEventListener('pagehide', cancel);
   // Rotation invalidates captured coordinates. Toolbar height changes do not:
   // cancelling on every visualViewport resize would interrupt normal iOS drags.
@@ -19,7 +16,11 @@
 
   let swallowClick = false;
   tabs().forEach((t, i) => on(t, 'click', (ev) => {
-    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+    if (swallowClick) {
+      swallowClick = false;
+      // Keyboard/assistive activation has no pointer click to suppress.
+      if (ev.detail !== 0) { ev.preventDefault(); ev.stopPropagation(); return; }
+    }
     select(i); settle(i);
   }));
 

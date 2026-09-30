@@ -43,39 +43,47 @@ class FakeTarget {
     event.stopPropagation ??= () => {};
     for (const listener of [...(this.listeners.get(type) ?? [])]) listener.call(this, event);
   }
+
+  dispatchEvent(event) {
+    this.dispatch(event.type, event);
+    return true;
+  }
 }
 
-function mountRailRuntime() {
+function mountRailRuntime(tabCount = 1) {
   const source = readFileSync(new URL("../src/lib/liquid/boot.js", import.meta.url), "utf8");
   const initRailSource = extractFunction(source, "initRail");
   const win = new FakeTarget();
   win.innerWidth = 1024;
   const doc = new FakeTarget();
   doc.hidden = false;
-  const tab = new FakeTarget();
-  const attributes = new Map([["aria-selected", "true"]]);
-  Object.assign(tab, {
-    closest: (selector) => (selector === 'button[role="tab"]' ? tab : null),
-    getAttribute: (name) => attributes.get(name) ?? null,
-    setAttribute: (name, value) => attributes.set(name, String(value)),
-    removeAttribute: (name) => attributes.delete(name),
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 44 }),
-    classList: { toggle() {} },
-    focus() {},
-    tabIndex: 0,
+  const tabs = Array.from({ length: tabCount }, (_, index) => {
+    const tab = new FakeTarget();
+    const attributes = new Map([["aria-selected", String(index === 0)]]);
+    return Object.assign(tab, {
+      closest: (selector) => (selector === 'button[role="tab"]' ? tab : null),
+      getAttribute: (name) => attributes.get(name) ?? null,
+      setAttribute: (name, value) => attributes.set(name, String(value)),
+      removeAttribute: (name) => attributes.delete(name),
+      getBoundingClientRect: () => ({ left: index * 100, top: 0, width: 100, height: 44 }),
+      classList: { toggle() {} },
+      focus() {},
+      tabIndex: index === 0 ? 0 : -1,
+    });
   });
+  const tab = tabs[0];
   const root = new FakeTarget();
   Object.assign(root, {
     dataset: {},
     classList: { contains: (name) => name === "liquid-swipe-tabs" },
     querySelector: () => null,
-    querySelectorAll: (selector) => (selector === ':scope > button[role="tab"]' ? [tab] : []),
-    getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 44 }),
-    offsetWidth: 100,
+    querySelectorAll: (selector) => (selector === ':scope > button[role="tab"]' ? tabs : []),
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: tabCount * 100, height: 44 }),
+    offsetWidth: tabCount * 100,
     offsetHeight: 44,
-    clientWidth: 100,
+    clientWidth: tabCount * 100,
     clientHeight: 44,
-    contains: (node) => node === tab,
+    contains: (node) => tabs.includes(node),
     setPointerCapture() {},
     releasePointerCapture() {},
   });
@@ -124,7 +132,7 @@ function mountRailRuntime() {
     isFrosted: () => true,
     mix: (from, to, amount) => from + (to - from) * amount,
     mq: () => ({ matches: true }),
-    nearestTab: () => 0,
+    nearestTab: (x) => Math.max(0, Math.min(tabCount - 1, Math.floor(x / 100))),
     requestAnimationFrame: () => 1,
     setTimeout,
     window: win,
@@ -141,7 +149,7 @@ function mountRailRuntime() {
       timeStamp: 1,
       target: tab,
     });
-  return { initRail: context.initRail, pointerDown, root, win, doc };
+  return { initRail: context.initRail, pointerDown, root, win, doc, tabs };
 }
 
 const releasePaths = {
@@ -225,4 +233,44 @@ test("a disposed Liquid rail is inert and can be safely rebound on the same DOM"
 
   disposeSecond();
   assert.equal(root.dataset.liquidBound, undefined);
+});
+
+test("a captured drag never swallows the next keyboard or assistive tab activation", () => {
+  const ui = mountRailRuntime(3);
+  const dispose = ui.initRail(ui.root);
+  try {
+    ui.pointerDown();
+    ui.root.dispatch("pointermove", { pointerId: 7, clientX: 150, clientY: 20, timeStamp: 20 });
+    ui.win.dispatch("pointerup", { pointerId: 7, clientX: 150, clientY: 20 });
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
+    // Capture retargets the generated click to the rail, so no tab handler
+    // consumes it. The next click below is Space/Enter (.detail === 0).
+    ui.root.dispatch("click", { detail: 1 });
+    ui.tabs[2].dispatch("click", { detail: 0 });
+    assert.equal(ui.tabs[2].getAttribute("aria-selected"), "true");
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "false");
+  } finally {
+    dispose();
+  }
+});
+
+test("a stale drag click guard does not swallow a new pointer press", () => {
+  const ui = mountRailRuntime(3);
+  const dispose = ui.initRail(ui.root);
+  try {
+    ui.pointerDown();
+    ui.root.dispatch("pointermove", { pointerId: 7, clientX: 150, clientY: 20, timeStamp: 20 });
+    ui.win.dispatch("pointerup", { pointerId: 7, clientX: 150, clientY: 20 });
+    ui.pointerDown();
+    let prevented = false;
+    ui.tabs[0].dispatch("click", {
+      detail: 1,
+      preventDefault: () => {
+        prevented = true;
+      },
+    });
+    assert.equal(prevented, false);
+  } finally {
+    dispose();
+  }
 });

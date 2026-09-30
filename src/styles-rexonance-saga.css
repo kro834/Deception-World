@@ -13,7 +13,7 @@
   --rxs-hero-progress: 0;
   min-height: 100vh;
   overflow-x: clip;
-  padding-top: 62px;
+  padding-top: var(--rxs-local-nav-reserve, 62px);
   color: var(--rxs-white);
   background: radial-gradient(circle at 50% 14%, rgb(48 61 91 / 28%), transparent 28rem), #000207;
   font-family: var(--rxs-font-text);
@@ -39,7 +39,8 @@
   top: 0;
   right: 0;
   left: 0;
-  height: 62px;
+  height: auto;
+  min-height: 62px;
   border-bottom: 1px solid rgb(255 255 255 / 10%);
   background: rgb(3 5 11 / 76%);
   backdrop-filter: saturate(155%) blur(24px);
@@ -52,7 +53,8 @@
   gap: 24px;
   align-items: center;
   width: min(1180px, calc(100% - 40px));
-  height: 100%;
+  height: auto;
+  min-height: 62px;
   margin: auto;
 }
 
@@ -1797,20 +1799,24 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
 
 @media (max-width: 680px) {
   .rxs-page {
-    padding-top: calc(58px + env(safe-area-inset-top, 0px));
+    padding-top: var(--rxs-local-nav-reserve, calc(58px + env(safe-area-inset-top, 0px)));
   }
 
   .rxs-local-nav {
-    height: calc(58px + env(safe-area-inset-top, 0px));
+    height: auto;
+    min-height: calc(58px + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
   }
 
   .rxs-local-nav-inner {
     width: calc(100% - 28px);
+    min-height: 58px;
   }
 
   .rxs-brand {
     display: block;
+    width: 100%;
+    min-width: 0;
   }
 
   .rxs-brand span {
@@ -1819,6 +1825,8 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
 
   .rxs-brand b {
     font-size: 13px;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .rxs-hero {

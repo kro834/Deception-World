@@ -20,6 +20,7 @@ function mount() {
   let serial = 0;
   let opened = 0;
   Object.assign(win, {
+    innerWidth: 1280,
     setTimeout: (fn) => {
       timers.set(++serial, fn);
       return serial;
@@ -80,6 +81,17 @@ function mount() {
       fn();
     }
   };
+  const pointer = (clientX) => ({
+    currentTarget: button,
+    isPrimary: true,
+    pointerType: "mouse",
+    button: 0,
+    pointerId: 7,
+    clientX,
+    clientY: 25,
+    preventDefault() {},
+    stopPropagation() {},
+  });
   return {
     click,
     flush,
@@ -87,6 +99,9 @@ function mount() {
     doc,
     button,
     frames,
+    startDrag: () => element.props.onPointerDown(pointer(29)),
+    drag: () => element.props.onPointerMove(pointer(149)),
+    release: () => element.props.onPointerUp(pointer(149)),
     opened: () => opened,
     unmount: () => cleanups.forEach((fn) => fn?.()),
   };
@@ -129,4 +144,36 @@ test("unmount during completion never opens the destination", () => {
   ui.unmount();
   ui.flush();
   assert.equal(ui.opened(), 0);
+});
+
+for (const event of ["orientationchange", "resize"]) {
+  test(`${event} cancels a captured slider before stale coordinates can open it`, () => {
+    const ui = mount();
+    ui.startDrag();
+    ui.drag();
+    assert.equal(ui.button.dataset.dragging, "true");
+    if (event === "resize") ui.win.innerWidth = 390;
+    ui.win.dispatchEvent(new Event(event));
+    assert.equal(ui.button.dataset.dragging, "false");
+    ui.release();
+    ui.flush();
+    assert.equal(ui.opened(), 0);
+    ui.click();
+    ui.flush();
+    assert.equal(ui.opened(), 1, "the next deliberate activation should still work");
+    ui.unmount();
+  });
+}
+
+test("mobile toolbar height changes do not interrupt a deliberate slider gesture", () => {
+  const ui = mount();
+  ui.startDrag();
+  ui.drag();
+  ui.win.innerHeight = 760;
+  ui.win.dispatchEvent(new Event("resize"));
+  assert.equal(ui.button.dataset.dragging, "true");
+  ui.release();
+  ui.flush();
+  assert.equal(ui.opened(), 1);
+  ui.unmount();
 });

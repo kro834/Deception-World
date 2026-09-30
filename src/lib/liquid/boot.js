@@ -614,6 +614,9 @@ function initRail(root) {
 
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    // A drag's click can target the capturing rail itself instead of a tab.
+    // That stale suppression must not consume a later, independent press.
+    swallowClick = false;
     if (holdToDrag && e.pointerType === 'touch') { arm(e); return; }
     isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
@@ -787,7 +790,11 @@ function initRail(root) {
 
   let swallowClick = false;
   tabs().forEach((t, i) => on(t, 'click', (ev) => {
-    if (swallowClick) { swallowClick = false; ev.preventDefault(); ev.stopPropagation(); return; }
+    if (swallowClick) {
+      swallowClick = false;
+      // Keyboard/assistive activation has no pointer click to suppress.
+      if (ev.detail !== 0) { ev.preventDefault(); ev.stopPropagation(); return; }
+    }
     select(i); settle(i);
   }));
 

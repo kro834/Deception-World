@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
@@ -50,6 +51,7 @@ type Profile = {
 };
 
 export function FormPickup({ rider: record }: { rider: RiderForm }) {
+  const router = useRouter();
   // The name as shown breaks only between its words (name-breaks.ts); labels
   // and alt text keep the record's own spelling.
   const rider = { ...record, name: withWordBreaks(record.name) };
@@ -58,6 +60,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const pointerOpened = useRef(false);
   const cancelScrollReset = useRef<(() => void) | null>(null);
   const gateTimer = useRef<number | null>(null);
+  const gateFrame = useRef<number | null>(null);
   const gatePending = useRef(false);
   const gateSource = useRef<"keyboard" | "pointer">("pointer");
   const gateImage = useRef<HTMLImageElement | null>(null);
@@ -107,7 +110,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
       gateTimer.current = null;
     }
     setGateActive(false);
-    window.requestAnimationFrame(() => showDialog(gateSource.current));
+    gateFrame.current = window.requestAnimationFrame(() => {
+      gateFrame.current = null;
+      showDialog(gateSource.current);
+    });
   };
   const open = (source: "keyboard" | "pointer") => {
     if (!isRexonance) {
@@ -151,10 +157,43 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const extraForms = rider.extraForms ?? [];
   const overview = rider.overview ?? [];
   const weaponGallery = rider.weaponGallery ?? [];
+  useEffect(() => {
+    if (!isRexonance) return;
+    const cancelPendingGate = () => {
+      if (!gatePending.current && gateFrame.current === null) return;
+      gatePending.current = false;
+      if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+      gateTimer.current = null;
+      if (gateFrame.current !== null) window.cancelAnimationFrame(gateFrame.current);
+      gateFrame.current = null;
+      gateImage.current = null;
+      setGateActive(false);
+    };
+    // A hash Back keeps the dossier mounted, so its pending form cover must
+    // be cancelled explicitly. The frame after the cover belongs to it too.
+    const stopHistory = router.history.subscribe(({ action }) => {
+      if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") {
+        cancelPendingGate();
+      }
+    });
+    const cancelWhenHidden = () => {
+      if (document.hidden) cancelPendingGate();
+    };
+    window.addEventListener("blur", cancelPendingGate);
+    window.addEventListener("pagehide", cancelPendingGate);
+    document.addEventListener("visibilitychange", cancelWhenHidden);
+    return () => {
+      stopHistory();
+      window.removeEventListener("blur", cancelPendingGate);
+      window.removeEventListener("pagehide", cancelPendingGate);
+      document.removeEventListener("visibilitychange", cancelWhenHidden);
+    };
+  }, [isRexonance, router]);
   useEffect(
     () => () => {
       gatePending.current = false;
       if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
+      if (gateFrame.current !== null) window.cancelAnimationFrame(gateFrame.current);
       gateImage.current = null;
       cancelScrollReset.current?.();
     },

@@ -664,6 +664,9 @@ const SCROLL_KEYS = new Set([
   "Home",
   "PageDown",
   "PageUp",
+  // Tab can scroll to the next focusable control. A delayed route landing
+  // must not pull that control back off-screen after keyboard navigation.
+  "Tab",
   " ",
 ]);
 let routeScrollMotionLocks = 0;

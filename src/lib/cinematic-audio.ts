@@ -1,5 +1,5 @@
 export type CinematicScore = {
-  unlock: () => Promise<void>;
+  unlock: () => Promise<boolean>;
   start: () => void;
   stop: () => void;
   setMuted: (muted: boolean) => void;
@@ -31,23 +31,37 @@ export function createCinematicScore(): CinematicScore {
   let ctx: AudioContext | null = null;
   let master: GainNode | null = null;
   let started = false;
+  let generation = 0;
   let isMuted = false;
   const nodes: AudioNode[] = [];
   const oscillators: OscillatorNode[] = [];
   const sources: AudioBufferSourceNode[] = [];
 
   async function unlock() {
-    if (typeof AudioContext === "undefined") return;
-    if (!ctx) ctx = new AudioContext();
-    if (ctx.state === "suspended") await ctx.resume();
+    if (typeof AudioContext === "undefined") return false;
+    try {
+      if (!ctx || ctx.state === "closed") ctx = new AudioContext();
+      const pendingContext = ctx;
+      // WebKit can also interrupt audio after calls or app switching.
+      if (pendingContext.state !== "running") await pendingContext.resume();
+      return ctx === pendingContext && pendingContext.state === "running";
+    } catch {
+      // Audio refusal must not reject the pointer/keyboard gesture or block
+      // the visual opening. A later user gesture may try again.
+      return false;
+    }
   }
 
   function start() {
     if (started) return;
     started = true;
+    const runGeneration = ++generation;
     void (async () => {
-      await unlock();
-      if (!ctx) return;
+      const ready = await unlock();
+      if (!ready || !ctx || !started || runGeneration !== generation) {
+        if (runGeneration === generation) started = false;
+        return;
+      }
 
       master = ctx.createGain();
       master.gain.value = isMuted ? 0 : 0.82;
@@ -222,37 +236,53 @@ export function createCinematicScore(): CinematicScore {
         osc.stop(t0 + 8);
         oscillators.push(osc);
       }
-    })();
+    })().catch(() => {
+      if (runGeneration === generation) stop();
+    });
   }
 
   function stop() {
+    generation += 1;
     started = false;
-    const fadeAt = ctx?.currentTime ?? 0;
-    if (master && ctx) {
-      master.gain.cancelScheduledValues(fadeAt);
-      master.gain.setValueAtTime(master.gain.value, fadeAt);
-      master.gain.linearRampToValueAtTime(0, fadeAt + 0.4);
+    // Retire only this run. A new start owns a fresh context/graph, so this
+    // run's fade timer cannot stop the next opening or clear its mute control.
+    const retiredContext = ctx;
+    const retiredMaster = master;
+    const retiredOscillators = oscillators.splice(0);
+    const retiredSources = sources.splice(0);
+    const retiredNodes = nodes.splice(0);
+    ctx = null;
+    master = null;
+    if (!retiredContext) return;
+    const fadeAt = retiredContext.currentTime;
+    if (retiredMaster && retiredContext.state !== "closed") {
+      retiredMaster.gain.cancelScheduledValues(fadeAt);
+      retiredMaster.gain.setValueAtTime(retiredMaster.gain.value, fadeAt);
+      retiredMaster.gain.linearRampToValueAtTime(0, fadeAt + 0.4);
     }
-    window.setTimeout(() => {
-      for (const osc of oscillators) {
+    const release = () => {
+      for (const osc of retiredOscillators) {
         try {
           osc.stop();
         } catch {
           /* already stopped */
         }
       }
-      for (const src of sources) {
+      for (const src of retiredSources) {
         try {
           src.stop();
         } catch {
           /* already stopped */
         }
       }
-      oscillators.length = 0;
-      sources.length = 0;
-      nodes.length = 0;
-      master = null;
-    }, 450);
+      for (const node of [...retiredOscillators, ...retiredSources, ...retiredNodes]) {
+        node.disconnect();
+      }
+      retiredMaster?.disconnect();
+      if (retiredContext.state !== "closed") void retiredContext.close().catch(() => undefined);
+    };
+    if (retiredMaster) window.setTimeout(release, 450);
+    else release();
   }
 
   function setMuted(muted: boolean) {

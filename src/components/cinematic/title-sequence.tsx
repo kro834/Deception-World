@@ -433,26 +433,23 @@ export function TitleSequence() {
     };
   }, [replayKey]);
 
-  const startBurn = useCallback(
-    (auditRun = false) => {
-      burnTimerRef.current = null;
-      const lockup = lockupRef.current;
-      const host = burnHostRef.current;
-      const logoBox = logoBoxRef.current;
-      if (!lockup || !host || !logoBox || burnRunRef.current || lockup.dataset.burn) return;
-      if (phaseRef.current !== "playing") return;
-      const engine = burnModuleRef.current;
-      if (!engine) {
-        // The engine chunk is not here (offline, slow network): the CSS burn.
-        lockup.dataset.burn = "css";
-        lockup.dataset.burnPhase = "burning";
-        return;
-      }
-      burnRunRef.current = engine.runOpeningBurn({ lockup, host, logoBox, audit: auditRun });
-      window.__openingBurnStats = burnRunRef.current.stats;
-    },
-    [],
-  );
+  const startBurn = useCallback((auditRun = false) => {
+    burnTimerRef.current = null;
+    const lockup = lockupRef.current;
+    const host = burnHostRef.current;
+    const logoBox = logoBoxRef.current;
+    if (!lockup || !host || !logoBox || burnRunRef.current || lockup.dataset.burn) return;
+    if (phaseRef.current !== "playing") return;
+    const engine = burnModuleRef.current;
+    if (!engine) {
+      // The engine chunk is not here (offline, slow network): the CSS burn.
+      lockup.dataset.burn = "css";
+      lockup.dataset.burnPhase = "burning";
+      return;
+    }
+    burnRunRef.current = engine.runOpeningBurn({ lockup, host, logoBox, audit: auditRun });
+    window.__openingBurnStats = burnRunRef.current.stats;
+  }, []);
 
   const getScore = useCallback(() => {
     if (!scoreRef.current) {
@@ -566,8 +563,17 @@ export function TitleSequence() {
     setReplayKey((k) => k + 1);
     const score = getScore();
     if (!score.muted()) {
-      score.start();
-      setSoundLive(true);
+      void score.unlock().then((ready) => {
+        if (
+          !ready ||
+          scoreRef.current !== score ||
+          phaseRef.current === "complete" ||
+          phaseRef.current === "diving"
+        )
+          return;
+        score.start();
+        setSoundLive(true);
+      });
     }
   }, [getScore, stopBurn]);
 
@@ -753,8 +759,8 @@ export function TitleSequence() {
     const score = getScore();
     const playing = phaseRef.current === "playing";
     if (!muted && !soundLive && playing) {
-      void score.unlock().then(() => {
-        if (phaseRef.current !== "playing" || scoreRef.current !== score) return;
+      void score.unlock().then((ready) => {
+        if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score) return;
         score.start();
         setSoundLive(true);
       });
@@ -764,8 +770,8 @@ export function TitleSequence() {
     setMuted(next);
     score.setMuted(next);
     if (!next && playing) {
-      void score.unlock().then(() => {
-        if (phaseRef.current !== "playing" || scoreRef.current !== score) return;
+      void score.unlock().then((ready) => {
+        if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score) return;
         score.start();
         setSoundLive(true);
       });
@@ -813,8 +819,9 @@ export function TitleSequence() {
 
   const unlockAudio = () => {
     const score = getScore();
-    void score.unlock().then(() => {
-      if (phaseRef.current !== "playing" || scoreRef.current !== score || score.muted()) return;
+    void score.unlock().then((ready) => {
+      if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score || score.muted())
+        return;
       score.start();
       setSoundLive(true);
     });

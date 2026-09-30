@@ -5403,6 +5403,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('keydown', event => {
+    // The visible modal owns its keyboard interaction; do not open a sheet
+    // behind it or consume the Escape meant to close the enlarged image.
+    if (lightbox.hasAttribute('open')) return;
     const target = event.target;
     const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
     if (sheetOpen && event.key === 'Escape') {

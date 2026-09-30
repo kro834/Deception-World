@@ -10,6 +10,14 @@ const code = ts.transpileModule(source, {
 }).outputText;
 
 function mount(pathname = "/world") {
+  class KeyboardEvent extends Event {
+    constructor(type, options = {}) {
+      super(type);
+      this.key = options.key;
+      this.shiftKey = options.shiftKey ?? false;
+    }
+  }
+  class PointerEvent extends Event {}
   const effects = [],
     frames = new Map(),
     timers = new Map(),
@@ -67,6 +75,8 @@ function mount(pathname = "/world") {
     document: doc,
     Event,
     CustomEvent,
+    KeyboardEvent,
+    PointerEvent,
     performance: { now: () => 1000 },
     require(name) {
       if (name === "react")
@@ -117,6 +127,8 @@ function mount(pathname = "/world") {
     alignments,
     releaseWarmup,
     history: (type) => subscribers.forEach((callback) => callback({ action: { type } })),
+    key: (key, shiftKey = false) =>
+      doc.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey })),
     flushFrames: () => flush(frames),
     flushTimers: () => flush(timers),
     cleanup: () => cleanups.forEach((callback) => callback()),
@@ -187,3 +199,24 @@ test("Back stops a pending in-page alignment before it can pull restored history
   assert.equal(ui.alignments.length, 1);
   ui.cleanup();
 });
+
+for (const shiftKey of [false, true]) {
+  test(`${shiftKey ? "Shift+Tab" : "Tab"} intent stops delayed hash alignment before focus is pulled off-screen`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to: "/world", hash: "riders" });
+    for (let index = 0; index < 8; index++) await Promise.resolve();
+    assert.equal(ui.alignments.length, 1);
+    ui.key("Tab", shiftKey);
+    for (let index = 0; index < 4; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    assert.equal(
+      ui.alignments.length,
+      1,
+      "later frames/timers must preserve the user's new focus position",
+    );
+    ui.cleanup();
+  });
+}

@@ -136,16 +136,28 @@ export function SlideOpenControl({
     const cancelWhenHidden = () => {
       if (document.hidden) cancelOnBlur();
     };
+    let viewportWidth = window.innerWidth;
+    const cancelAfterViewportChange = () => {
+      if (window.innerWidth === viewportWidth) return;
+      viewportWidth = window.innerWidth;
+      // The cached track and thumb rectangles no longer describe the control
+      // after rotation/split-view. A mobile toolbar height change keeps them.
+      cancelOnBlur();
+    };
     window.addEventListener("pointerup", cancelDanglingDrag);
     window.addEventListener("pointercancel", cancelDanglingDrag);
     window.addEventListener("blur", cancelOnBlur);
     window.addEventListener("pagehide", cancelOnBlur);
+    window.addEventListener("orientationchange", cancelOnBlur);
+    window.addEventListener("resize", cancelAfterViewportChange);
     document.addEventListener("visibilitychange", cancelWhenHidden);
     return () => {
       window.removeEventListener("pointerup", cancelDanglingDrag);
       window.removeEventListener("pointercancel", cancelDanglingDrag);
       window.removeEventListener("blur", cancelOnBlur);
       window.removeEventListener("pagehide", cancelOnBlur);
+      window.removeEventListener("orientationchange", cancelOnBlur);
+      window.removeEventListener("resize", cancelAfterViewportChange);
       document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
   }, [reset]);

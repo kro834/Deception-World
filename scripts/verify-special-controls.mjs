@@ -43,6 +43,74 @@ async function checkSelect(select, page) {
   );
 }
 
+async function checkTextEnlargement(route, width) {
+  const page = await browser.newPage({
+    viewport: { width, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    userAgent:
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1",
+  });
+  try {
+    await page.goto(base + route, { waitUntil: "networkidle" });
+    const baseMetrics = await page.evaluate(() => ({
+      font: parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize),
+      navHeight: document.querySelector(".rxs-local-nav").getBoundingClientRect().height,
+      pagePadding: parseFloat(getComputedStyle(document.querySelector(".rxs-page")).paddingTop),
+    }));
+    await page.evaluate(() =>
+      document.documentElement.style.setProperty("-webkit-text-size-adjust", "200%"),
+    );
+    await page.waitForFunction(
+      (font) =>
+        parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize) >=
+        font * 1.9,
+      baseMetrics.font,
+    );
+    const enlarged = await page.evaluate(() => {
+      const page = document.querySelector(".rxs-page");
+      const nav = document.querySelector(".rxs-local-nav");
+      const brand = document.querySelector(".rxs-brand").getBoundingClientRect();
+      const menu = document.querySelector(".side-panel-trigger").getBoundingClientRect();
+      return {
+        font: parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize),
+        navHeight: nav.getBoundingClientRect().height,
+        pagePadding: parseFloat(getComputedStyle(page).paddingTop),
+        brandRight: brand.right,
+        menuLeft: menu.left,
+        overflow: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    assert.ok(enlarged.font >= baseMetrics.font * 1.9, JSON.stringify(enlarged));
+    assert.ok(enlarged.brandRight <= enlarged.menuLeft + 1, JSON.stringify(enlarged));
+    assert.ok(enlarged.pagePadding >= enlarged.navHeight - 1, JSON.stringify(enlarged));
+    assert.ok(enlarged.overflow <= 1, JSON.stringify(enlarged));
+
+    await page.evaluate(() =>
+      document.documentElement.style.removeProperty("-webkit-text-size-adjust"),
+    );
+    await page.waitForFunction(
+      (font) =>
+        Math.abs(
+          parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize) - font,
+        ) < 1,
+      baseMetrics.font,
+    );
+    const restored = await page.evaluate(() => ({
+      navHeight: document.querySelector(".rxs-local-nav").getBoundingClientRect().height,
+      pagePadding: parseFloat(getComputedStyle(document.querySelector(".rxs-page")).paddingTop),
+    }));
+    assert.ok(Math.abs(restored.navHeight - baseMetrics.navHeight) < 1, JSON.stringify(restored));
+    assert.ok(restored.pagePadding >= restored.navHeight - 1, JSON.stringify(restored));
+    console.log(
+      `PASS ${width}px ${route}: 200% text-enlargement emulation preserves header separation and resets`,
+    );
+  } finally {
+    await page.close();
+  }
+}
+
 try {
   for (const width of [320, 390, 834, 1024]) {
     const page = await browser.newPage({
@@ -104,6 +172,11 @@ try {
       console.log(
         `PASS ${width}px ${route}: header alignment, keyboard/pointer selection, labelled tabs`,
       );
+    }
+    if (width === 320 || width === 390) {
+      for (const route of ["/rexonance-saga", "/extreme-saga", "/final-stage"]) {
+        await checkTextEnlargement(route, width);
+      }
     }
     await page.goto(base + "/riders/saga");
     const links = await page.locator(".dossier-reader-links a").evaluateAll((items) =>

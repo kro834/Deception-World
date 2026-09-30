@@ -7,7 +7,7 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -243,6 +243,7 @@ export function SideMenuLayer({
   const isOpen = controlled ? open : false;
   const isSpecialSite =
     context === "rexonance" || context === "extreme" || context === "final-stage";
+  const router = useRouter();
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
@@ -288,6 +289,21 @@ export function SideMenuLayer({
   const close = () => onOpenChange?.(false);
   const selectedAnnouncement: SiteAnnouncement | null =
     SITE_ANNOUNCEMENTS.find((notice) => notice.id === selectedAnnouncementId) ?? null;
+
+  useEffect(() => {
+    if (!isOpen && !announcementOpen) return;
+    // Hash history keeps this page mounted. Release transient UI as the
+    // browser restores its destination, rather than leaving it inert/locked
+    // behind the menu (or its nested announcement).
+    return router.history.subscribe(({ action }) => {
+      if (action.type !== "BACK" && action.type !== "FORWARD" && action.type !== "GO") return;
+      sideMenuRestoreFocusRef.current = false;
+      announcementOpenedByKeyboardRef.current = false;
+      onOpenChange?.(false);
+      setAnnouncementOpen(false);
+      setSelectedAnnouncementId(null);
+    });
+  }, [announcementOpen, isOpen, onOpenChange, router]);
 
   useEffect(() => {
     const rememberInput = (event: Event) => {

@@ -35,7 +35,9 @@ export function settlePickupScroll(
   const reset = () => {
     if (!cancelled && !userInteracted && dialog.open) resetPickupScroll(dialog, selectors);
   };
-  const scrollKeys = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]);
+  // Tab can scroll a distant close button into view just like a scroll key.
+  // Once the reader moves focus, delayed startup resets must not hide it.
+  const scrollKeys = new Set(["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", "Tab", " "]);
 
   const stopWatching = () => {
     if (!watching) return;

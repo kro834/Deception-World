@@ -1,7 +1,3 @@
-      const g = geos[preview];
-      const tab = tabs()[preview];
-      if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
-      const lw = g.width, lh = g.height;
       const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;
       const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
       const geo = {
@@ -102,6 +98,9 @@
 
   on(root, 'pointerdown', (e) => {
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || gesture) return;
+    // A drag's click can target the capturing rail itself instead of a tab.
+    // That stale suppression must not consume a later, independent press.
+    swallowClick = false;
     if (holdToDrag && e.pointerType === 'touch') { arm(e); return; }
     isFrosted(); // before lockPage(): a clean read, cached for activate()
     const list = tabs();
@@ -254,3 +253,6 @@
   // Android WebViews. Finish/cancel at the window boundary as well so a lift
   // outside the rail, app backgrounding or route transition can never leave
   // the document-wide touchmove lock behind.
+  window.addEventListener('pointerup', finish, true);
+  window.addEventListener('pointercancel', cancel, true);
+  window.addEventListener('blur', cancel);
