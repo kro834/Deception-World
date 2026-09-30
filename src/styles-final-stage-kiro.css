@@ -1,0 +1,1158 @@
+/* Final Stage — 帰路 (KIRO) edition: the way home.
+
+   Loaded after the cinema sheet (styles-final-stage-cinema.css) and before
+   the motion sheet, on this route only; every selector is scoped to
+   `html .fst-page.fst-page` (or to the gates in front of it), so nothing
+   here reaches another page.
+
+   The page is the relay station's guide board, drawn in Nagi's hand: a warm
+   chalk-and-lamp layer over the Archive's cold ink. The chalk line is the
+   route home; each chapter is a station on it (a ring that ticks, a sign
+   that flaps into place, a lamp that comes on); the story's paragraphs are
+   six stations along the read; the cast panel is a boarding pass with its
+   stamp; the rider cards are gates whose shutters lift as the reader
+   reaches them; the records open like a departure board (split-flap
+   calls). Time, which the Archive stopped, moves again in ticks: the
+   arrivals step (steps()) and then rest.
+
+   Motion: finite beats keyed to the load gate's hand-over (the hero map
+   draws itself once the cover lifts, as the cinema sheet's arrival does),
+   scroll-linked beats on named view timelines behind the full gate, and a
+   few finite beats on user actions (a cast tab, a record opening). Only
+   opacity and transforms move; nothing loops; reduced motion and economy
+   rendering show the drawn rest state. */
+
+/* ================================================================
+   Tokens
+   ================================================================ */
+html .fst-page.fst-page {
+  --fsk-lamp: #ffd9a3;
+  --fsk-chalk: #f5e7c6;
+  --fsk-chalk-70: rgb(245 231 198 / 70%);
+  --fsk-line: rgb(245 231 198 / 34%);
+  --fsk-line-dim: rgb(245 231 198 / 16%);
+  --fsk-glow: rgb(255 196 130 / 10%);
+  /* Map paper: a faint dot grid. */
+  --fsk-paper: radial-gradient(circle, rgb(245 231 198 / 5.5%) 0.8px, transparent 1.5px);
+  /* The hand-drawn dash: uneven strokes on a 41px period. */
+  --fsk-dash: repeating-linear-gradient(
+    90deg,
+    var(--fsk-chalk-70) 0 9px,
+    transparent 9px 14px,
+    var(--fsk-chalk-70) 14px 20px,
+    transparent 20px 23px,
+    var(--fsk-chalk-70) 23px 36px,
+    transparent 36px 41px
+  );
+  --fsk-dash-v: repeating-linear-gradient(
+    180deg,
+    var(--fsk-chalk-70) 0 9px,
+    transparent 9px 14px,
+    var(--fsk-chalk-70) 14px 20px,
+    transparent 20px 23px,
+    var(--fsk-chalk-70) 23px 36px,
+    transparent 36px 41px
+  );
+  /* A station ring: a gapped circle, masked to a stroke where it is used. */
+  --fsk-ring: conic-gradient(from 0deg, var(--fsk-chalk) 0 296deg, transparent 296deg);
+  --fsk-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* The sections' top padding (styles-final-stage-elevation.css), which
+     the incoming route segment spans. */
+  --fsk-pad: clamp(80px, 8vw, 112px);
+}
+
+/* Motion's reading line under the bar warms toward home. */
+html .fst-page.fst-page[data-motion-ready="true"] {
+  --mx-progress-from: #7ae8ff;
+  --mx-progress-to: #ffd9a3;
+}
+
+/* ================================================================
+   Hero: the platform, the map, the clock
+   ================================================================ */
+/* A lamp at the foot of the hero, under the stage's black and the ice. */
+html .fst-page.fst-page .fst-hero {
+  background:
+    radial-gradient(ellipse 50% 22% at 50% 100%, rgb(255 196 130 / 7%), transparent 70%),
+    radial-gradient(ellipse 46% 36% at 50% 34%, #000 0 40%, transparent 100%),
+    radial-gradient(ellipse 60% 40% at 50% 38%, rgb(122 232 255 / 8%), transparent 70%),
+    linear-gradient(180deg, #02040a, #04080f 72%);
+}
+
+/* Nagi's map: twelve strokes laid over the logo's box (its size tokens),
+   under the screened logo and above the floor. A route up the left, the
+   platform edge under the logo with the here-mark, a route down the
+   right, the sealed zone hatched at the top right, two crosses, and the
+   station clock: a ring of ticks around the logo's own ring. */
+html .fst-page.fst-page .fsk-map {
+  position: absolute;
+  z-index: 1;
+  top: var(--fst-hero-top);
+  right: 0;
+  left: 0;
+  width: var(--fst-logo-w);
+  aspect-ratio: 3 / 2;
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+html .fst-page.fst-page .fsk-map i {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(1) {
+  top: 30%;
+  left: 6%;
+  width: 2px;
+  height: 58%;
+  background: var(--fsk-dash-v);
+  rotate: 1.5deg;
+  transform-origin: 50% 100%;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(2),
+html .fst-page.fst-page .fsk-map i:nth-child(8) {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--fsk-chalk);
+  border-radius: 50%;
+  background: #04080f;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(2) {
+  top: calc(30% - 6px);
+  left: calc(6% - 6px);
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(3) {
+  top: calc(30% - 1px);
+  left: 6%;
+  width: 14%;
+  height: 2px;
+  background: var(--fsk-dash);
+  rotate: -1deg;
+  transform-origin: 0 50%;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(4),
+html .fst-page.fst-page .fsk-map i:nth-child(12) {
+  width: 12px;
+  height: 12px;
+  background:
+    linear-gradient(45deg, transparent 44%, var(--fsk-chalk) 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, var(--fsk-chalk) 44% 56%, transparent 56%);
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(4) {
+  top: 64%;
+  left: 17%;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(12) {
+  top: 14%;
+  left: 13%;
+  width: 10px;
+  height: 10px;
+}
+
+/* The platform edge and the here-mark. */
+html .fst-page.fst-page .fsk-map i:nth-child(5) {
+  top: 91%;
+  left: 24%;
+  width: 52%;
+  height: 2px;
+  background: var(--fsk-dash);
+  transform-origin: 50% 50%;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(6) {
+  top: calc(91% - 4px);
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fsk-lamp);
+  box-shadow:
+    0 0 0 4px #04080f,
+    0 0 0 5.5px var(--fsk-chalk-70),
+    0 0 18px 4px rgb(255 217 163 / 35%);
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(7) {
+  top: 18%;
+  left: 94%;
+  width: 2px;
+  height: 58%;
+  background: var(--fsk-dash-v);
+  rotate: -1.5deg;
+  transform-origin: 50% 0;
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(8) {
+  top: calc(76% - 6px);
+  left: calc(94% - 6px);
+}
+
+html .fst-page.fst-page .fsk-map i:nth-child(9) {
+  top: calc(76% - 1px);
+  left: 80%;
+  width: 14%;
+  height: 2px;
+  background: var(--fsk-dash);
+  rotate: 1deg;
+  transform-origin: 100% 50%;
+}
+
+/* The sealed zone. */
+html .fst-page.fst-page .fsk-map i:nth-child(10) {
+  top: 8%;
+  left: 78%;
+  width: 18%;
+  height: 17%;
+  border: 1px dashed var(--fsk-line);
+  background: repeating-linear-gradient(135deg, transparent 0 6px, rgb(245 231 198 / 6%) 6px 7px);
+  rotate: 2deg;
+  transform-origin: 0 0;
+}
+
+/* The station clock: sixty ticks and one index, around the logo's ring
+   (centre 60.5% x 44.4% of the art, so 38.5% / 11.4% for a 44% dial). */
+html .fst-page.fst-page .fsk-map i:nth-child(11) {
+  top: 11.4%;
+  left: 38.5%;
+  width: 44%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    conic-gradient(from -1.5deg, var(--fsk-chalk) 0 3deg, transparent 3deg),
+    repeating-conic-gradient(from 0deg, rgb(245 231 198 / 55%) 0 0.9deg, transparent 0.9deg 6deg);
+  opacity: 0.55;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+}
+
+/* The hero kicker's ticks and the lede's underline are the route, in
+   chalk; the cue's line is its next stretch. */
+html .fst-page.fst-page .rxs-hero-copy > p:first-child {
+  color: var(--fsk-chalk);
+}
+
+html .fst-page.fst-page .rxs-hero-copy > p:first-child::before,
+html .fst-page.fst-page .rxs-hero-copy > p:first-child::after {
+  height: 2px;
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+html .fst-page.fst-page .rxs-hero-lede {
+  padding-bottom: 16px;
+  background: var(--fsk-dash) 50% 100% / 164px 2px no-repeat;
+}
+
+html .fst-page.fst-page .rxs-scroll-cue {
+  color: var(--fsk-chalk-70);
+}
+
+html .fst-page.fst-page .rxs-scroll-cue i {
+  width: 2px;
+  height: 44px;
+  background: var(--fsk-dash-v);
+  transform-origin: 50% 0;
+}
+
+/* ================================================================
+   Sections: map paper, the incoming route, the station
+   ================================================================ */
+html .fst-page.fst-page .fst-story {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    radial-gradient(circle at 82% 8%, rgb(122 232 255 / 7%), transparent 32rem),
+    radial-gradient(circle at 8% 92%, rgb(255 196 130 / 6%), transparent 30rem),
+    var(--fst-ink);
+}
+
+html .fst-page.fst-page .fst-cast-section {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    radial-gradient(circle at 12% 18%, rgb(164 139 255 / 7%), transparent 30rem),
+    radial-gradient(circle at 88% 72%, rgb(255 196 130 / 6%), transparent 32rem),
+    var(--fst-ink);
+}
+
+html .fst-page.fst-page .fst-riders-section {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    radial-gradient(circle at 10% 10%, rgb(122 232 255 / 8%), transparent 34rem),
+    radial-gradient(circle at 90% 44%, rgb(255 196 130 / 6%), transparent 30rem),
+    var(--fst-ink);
+}
+
+/* The route comes down from the section's top rule to the station's ring
+   (2px short of it). */
+html .fst-page.fst-page .rxs-section::after {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: calc(var(--fsk-pad) - 2px);
+  content: "";
+  background: var(--fsk-dash-v);
+  translate: -50% 0;
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+/* The station lamp over each heading. */
+html .fst-page.fst-page .rxs-section-heading::before {
+  background: radial-gradient(ellipse 48% 52% at 50% 36%, rgb(255 196 130 / 11%), transparent 70%);
+}
+
+/* The sign: the chapter's kicker on a plate hung from its ring, with a
+   stretch of route under it toward the headline. */
+html .fst-page.fst-page .rxs-section-heading > p {
+  position: relative;
+  display: inline-block;
+  margin: 26px 0 22px;
+  padding: 8px 16px;
+  border: 1px solid var(--fsk-line);
+  border-radius: 3px;
+  color: var(--fsk-chalk);
+  background:
+    linear-gradient(90deg, rgb(255 196 130 / 10%), transparent 65%),
+    rgb(4 8 15 / 84%);
+  font: 400 12px/1.4 var(--fst-hud);
+  font-synthesis: none;
+  letter-spacing: 0.16em;
+  text-shadow: none;
+  transform-origin: 50% 0;
+}
+
+html .fst-page.fst-page .rxs-section-heading > p::before {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  content: "";
+  border-radius: 50%;
+  background: var(--fsk-ring);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}
+
+html .fst-page.fst-page .rxs-section-heading > p::after {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  flex: none;
+  width: 2px;
+  height: 16px;
+  margin-left: -1px;
+  content: "";
+  background: var(--fsk-dash-v);
+}
+
+/* ================================================================
+   Story: six stations along the read
+   ================================================================ */
+html .fst-page.fst-page .fst-story-layout,
+html .fst-page.fst-page .fst-cast-console {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    radial-gradient(ellipse 40% 34% at 0% 0%, rgb(255 196 130 / 9%), transparent 70%),
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    linear-gradient(150deg, rgb(122 232 255 / 5%), transparent 55%),
+    var(--fst-plate);
+}
+
+html .fst-page.fst-page .fst-story-index i {
+  width: 120px;
+  height: 2px;
+  margin-top: 18px;
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+/* The route runs down the copy's edge; each paragraph is a station on it.
+   The colours follow the story: the return (lamp), the Archive (ice), the
+   transformation (violet), the way home (lamp, lit). */
+html .fst-page.fst-page .fst-story-copy {
+  padding-left: clamp(28px, 3vw, 52px);
+  border-left: 0;
+  background: var(--fsk-dash-v) 0 0 / 2px 100% no-repeat;
+}
+
+html .fst-page.fst-page .fst-story-copy p {
+  position: relative;
+}
+
+html .fst-page.fst-page .fst-story-copy p::before {
+  position: absolute;
+  top: calc(0.975em - 6px);
+  left: calc(-1 * clamp(28px, 3vw, 52px) - 5px);
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  content: "";
+  border: 1.5px solid var(--fsk-chalk);
+  border-radius: 50%;
+  background: var(--fst-plate);
+}
+
+html .fst-page.fst-page .fst-story-copy p:nth-child(1)::before {
+  border-color: var(--fsk-lamp);
+}
+
+html .fst-page.fst-page .fst-story-copy p:nth-child(2)::before,
+html .fst-page.fst-page .fst-story-copy p:nth-child(3)::before {
+  border-color: rgb(122 232 255 / 70%);
+}
+
+html .fst-page.fst-page .fst-story-copy p:nth-child(4)::before,
+html .fst-page.fst-page .fst-story-copy p:nth-child(5)::before {
+  border-color: var(--fst-violet);
+}
+
+html .fst-page.fst-page .fst-story-copy p:nth-child(6)::before {
+  border-color: var(--fsk-lamp);
+  background: var(--fsk-lamp);
+  box-shadow: 0 0 14px 2px rgb(255 217 163 / 40%);
+}
+
+/* ================================================================
+   Cast: the boarding pass
+   ================================================================ */
+/* The caption is the pass's stub: chalk on ink, a lamp edge, a short
+   barcode, set a touch askew like a stamp. */
+html .fst-page.fst-page .fst-cast-detail figcaption {
+  bottom: 14px;
+  left: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--fsk-line);
+  border-left: 2px solid var(--fsk-lamp);
+  border-radius: 2px;
+  color: var(--fsk-chalk);
+  background: rgb(4 8 15 / 86%);
+  rotate: -1.5deg;
+  transform-origin: 0 100%;
+}
+
+html .fst-page.fst-page .fst-cast-detail figcaption::after {
+  display: inline-block;
+  width: 26px;
+  height: 10px;
+  margin-left: 10px;
+  content: "";
+  vertical-align: -1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--fsk-chalk) 0 1px,
+    transparent 1px 3px,
+    var(--fsk-chalk) 3px 5px,
+    transparent 5px 7px,
+    var(--fsk-chalk) 7px 8px,
+    transparent 8px 11px
+  );
+}
+
+html .fst-page.fst-page .fst-cast-copy em {
+  color: var(--fsk-chalk-70);
+}
+
+/* ================================================================
+   Riders: gates
+   ================================================================ */
+/* The RIDER tag is the platform's sign. */
+html .fst-page.fst-page .fst-pickup-visual > span {
+  border-left-color: var(--fsk-lamp);
+  color: var(--fsk-chalk);
+}
+
+/* The gate's shutter over the art: slats, a ring, the rider's light under
+   its edge. At rest it is lifted out of the frame (the visual clips it);
+   the scroll beat below brings it down and lifts it as the card arrives. */
+html .fst-page.fst-page .fst-pickup-visual::before {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(var(--fst-accent) 0 0) 0 100% / 100% 2px no-repeat,
+    radial-gradient(circle at 50% 50%, transparent 34px, var(--fsk-line) 34px 36px, transparent 37px),
+    repeating-linear-gradient(180deg, #0b1424 0 20px, #060c16 20px 22px);
+  translate: 0 -102%;
+  pointer-events: none;
+}
+
+html .fst-page.fst-page .fst-pickup-copy p::after {
+  height: 2px;
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+/* The ring behind the copy is the station clock in the rider's light. */
+html .fst-page.fst-page .fst-pickup-copy::before {
+  border: 0;
+  background:
+    conic-gradient(from -2deg, color-mix(in srgb, var(--fst-accent) 70%, transparent) 0 4deg, transparent 4deg),
+    repeating-conic-gradient(
+      from 0deg,
+      color-mix(in srgb, var(--fst-accent) 34%, transparent) 0 1deg,
+      transparent 1deg 5deg
+    );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+}
+
+/* ================================================================
+   Records: the departure board
+   ================================================================ */
+html .fst-page.fst-page .fst-pickup-dialog::backdrop {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgb(255 196 130 / 7%), transparent 70%),
+    rgb(2 4 10 / 88%);
+}
+
+html .fst-page.fst-page .fst-pickup-dialog::before {
+  background: linear-gradient(90deg, var(--fsk-lamp), var(--fsk-chalk) 60%, var(--fst-ice));
+}
+
+html .fst-page.fst-page .fst-pickup-dialog .fst-pickup-panel {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    radial-gradient(
+      circle at 90% 0%,
+      color-mix(in srgb, var(--fst-accent) 10%, transparent),
+      transparent 30rem
+    ),
+    var(--fst-ink);
+}
+
+html .fst-page.fst-page .fst-pickup-heading {
+  padding-bottom: 22px;
+  border-bottom: 0;
+  background: var(--fsk-dash) 0 100% / 41px 2px repeat-x;
+}
+
+html .fst-page.fst-page .fst-pickup-heading p {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 7px 12px 7px 10px;
+  border: 1px solid var(--fsk-line);
+  border-radius: 3px;
+  color: var(--fsk-chalk);
+  background:
+    linear-gradient(90deg, rgb(255 196 130 / 10%), transparent 65%),
+    rgb(4 8 15 / 84%);
+}
+
+html .fst-page.fst-page .fst-pickup-heading p::before,
+html .fst-page.fst-page .fst-subheading p::before {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  content: "";
+  border-radius: 50%;
+  background: var(--fsk-ring);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+}
+
+html .fst-page.fst-page .fst-pickup-heading p::after {
+  flex: 0 0 36px;
+  height: 2px;
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+html .fst-page.fst-page .fst-pickup-heading small {
+  color: var(--fsk-chalk-70);
+}
+
+/* Subheadings hang from a ring too, over a chalk rule. */
+html .fst-page.fst-page .fst-pickup-record .fst-subheading {
+  padding-bottom: 16px;
+  border-bottom: 0;
+  background: var(--fsk-dash) 0 100% / 41px 2px repeat-x;
+}
+
+html .fst-page.fst-page .fst-subheading p {
+  color: var(--fsk-chalk);
+}
+
+/* Transformation calls as split-flap cells: two tones with the hinge seam. */
+html .fst-page.fst-page .fst-calls b {
+  border: 1px solid rgb(245 231 198 / 20%);
+  border-left: 2px solid var(--fst-accent);
+  border-radius: 2px;
+  color: var(--fst-text);
+  background:
+    linear-gradient(#02040a 0 0) 0 50% / 100% 1px no-repeat,
+    linear-gradient(180deg, #182130 0 50%, #0b111c 50% 100%);
+  font-family: var(--fst-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  transform-origin: 50% 0;
+}
+
+/* The stage stands on a platform: a chalk edge with a lamp under the
+   figure's feet, over the base's scrims (the art paints under this pseudo). */
+html .fst-page.fst-page .fst-pickup-record .rxs-stage-panel figure::after {
+  background:
+    var(--fsk-dash) 50% calc(100% - 18px) / 68% 2px no-repeat,
+    radial-gradient(ellipse 30% 6% at 50% calc(100% - 17px), rgb(255 196 130 / 18%), transparent 70%),
+    linear-gradient(180deg, transparent 62%, rgb(0 2 7 / 72%)),
+    radial-gradient(circle at 50% 50%, transparent 45%, rgb(0 0 0 / 30%));
+}
+
+/* ================================================================
+   Footer: the terminus
+   ================================================================ */
+html .fst-page.fst-page .rxs-footer {
+  background:
+    var(--fsk-paper) 0 0 / 26px 26px,
+    var(--fst-prism-soft) top / 100% 1px no-repeat,
+    radial-gradient(circle at 14% 100%, rgb(255 196 130 / 9%), transparent 28rem),
+    var(--fst-ink);
+}
+
+html .fst-page.fst-page .rxs-footer > div p {
+  gap: 10px;
+  color: var(--fsk-chalk);
+}
+
+/* The last station is lit. */
+html .fst-page.fst-page .rxs-footer > div p::before {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  content: "";
+  border-radius: 50%;
+  background: var(--fsk-lamp);
+  box-shadow:
+    0 0 0 3px var(--fst-ink),
+    0 0 0 4.5px var(--fsk-chalk-70),
+    0 0 16px 3px rgb(255 217 163 / 35%);
+}
+
+html .fst-page.fst-page .rxs-footer > div p::after {
+  height: 2px;
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+html .fst-page.fst-page .rxs-footer h2::after {
+  display: block;
+  width: 140px;
+  height: 2px;
+  margin-top: 18px;
+  content: "";
+  background: var(--fsk-dash) 0 0 / 41px 2px;
+}
+
+/* ================================================================
+   Phones and landscape phones
+   ================================================================ */
+@media (max-width: 680px) {
+  html .fst-page.fst-page .rxs-section {
+    --fsk-pad: clamp(64px, 14vw, 88px);
+  }
+
+  html .fst-page.fst-page .rxs-section-heading > p {
+    padding: 7px 12px;
+    letter-spacing: 0.1em;
+  }
+
+  html .fst-page.fst-page .fst-story-index i {
+    display: block;
+    width: 72px;
+    margin: 0 0 0 12px;
+  }
+
+  html .fst-page.fst-page .fst-story-copy {
+    padding-left: 20px;
+  }
+
+  html .fst-page.fst-page .fst-story-copy p::before {
+    top: calc(0.975em - 5px);
+    left: -24px;
+    width: 10px;
+    height: 10px;
+  }
+
+  html .fst-page.fst-page .rxs-hero-lede {
+    background-size: 123px 2px;
+  }
+}
+
+/* Beside the title in a landscape phone's grid, the logo's box is not
+   where the map's tokens say; the floor is hidden there too. */
+@media (max-width: 1024px) and (max-height: 500px) and (orientation: landscape) {
+  html .fst-page.fst-page .fsk-map {
+    display: none;
+  }
+}
+
+/* ================================================================
+   Motion: the arrival (finite, keyed to the hand-over)
+   ================================================================ */
+/* While html[data-loading] is present the map rests drawn under the
+   cover; when the gate removes it (or from first paint on a direct load)
+   the strokes draw, the marks pop and the clock ticks, all at rest by
+   1.6s. Reduced motion and economy rendering keep the drawn map. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(1) {
+    animation: fsk-draw-y 520ms var(--fsk-ease) 520ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(2) {
+    animation: fsk-pop 220ms steps(2, jump-end) 1000ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(3) {
+    animation: fsk-draw-x 360ms var(--fsk-ease) 1040ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(4) {
+    animation: fsk-pop 200ms steps(2, jump-end) 1300ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(5) {
+    animation: fsk-draw-x 640ms var(--fsk-ease) 640ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(6) {
+    animation: fsk-pop 240ms steps(2, jump-end) 1200ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(7) {
+    animation: fsk-draw-y 520ms var(--fsk-ease) 620ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(8) {
+    animation: fsk-pop 220ms steps(2, jump-end) 1100ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(9) {
+    animation: fsk-draw-x 360ms var(--fsk-ease) 1140ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(10) {
+    animation: fsk-draw-box 480ms var(--fsk-ease) 900ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(11) {
+    animation: fsk-clock 900ms steps(6, jump-end) 300ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading]) .fst-page.fst-page .fsk-map i:nth-child(12) {
+    animation: fsk-pop 200ms steps(2, jump-end) 1380ms both;
+  }
+
+  /* A cast tab prints the pass: the portrait drops in in ticks while it
+     fades up; the stub is stamped on. */
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-cast-detail figure {
+    animation:
+      fsk-print 420ms steps(5, jump-end) both,
+      fsk-fade 420ms var(--fsk-ease) both;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-cast-detail figcaption {
+    animation: fsk-stamp 240ms steps(2, jump-end) 220ms both;
+  }
+
+  /* A record opens like a board: the heading's lines rise in turn, the
+     calls flap into place. */
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > * {
+    animation: fsk-rise 420ms var(--fsk-ease) both;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > :nth-child(3) {
+    animation-delay: 140ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > :nth-child(4) {
+    animation-delay: 210ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b {
+    animation: fsk-flap-in 320ms steps(3, jump-end) 120ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(2) {
+    animation-delay: 170ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(3) {
+    animation-delay: 220ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(4) {
+    animation-delay: 270ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(5) {
+    animation-delay: 320ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(6) {
+    animation-delay: 370ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(7) {
+    animation-delay: 420ms;
+  }
+
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(8) {
+    animation-delay: 470ms;
+  }
+}
+
+/* ================================================================
+   Motion: the walk (scroll-linked, named view timelines)
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  html .fst-page.fst-page .fsk-map {
+    view-timeline: --fsk-map block;
+  }
+
+  html .fst-page.fst-page .rxs-section-heading {
+    view-timeline: --fsk-sign block;
+  }
+
+  html .fst-page.fst-page .fst-story-copy p {
+    view-timeline: --fsk-para block;
+  }
+
+  html .fst-page.fst-page .fst-pickup-card {
+    view-timeline: --fsk-gate block;
+  }
+
+  html .fst-page.fst-page .rxs-footer > div {
+    view-timeline: --fsk-end block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The map recedes with the logo. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .fsk-map {
+      animation: fsk-recede linear both;
+      animation-timeline: --fsk-map;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* The route comes down to the station as the section's top enters. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .rxs-section::after {
+      animation: fsk-draw-y var(--fsk-ease) both;
+      animation-timeline: --fst-section;
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* The sign flaps down in four ticks; its ring turns a half circle in
+       four; the lamp comes on. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > p {
+      animation: fsk-flap steps(4, jump-end) both;
+      animation-timeline: --fsk-sign;
+      animation-range: entry 0% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > p::before {
+      animation: fsk-tick steps(4, jump-end) both;
+      animation-timeline: --fsk-sign;
+      animation-range: entry 0% entry 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .rxs-section-heading::before {
+      animation: fsk-lamp var(--fsk-ease) both;
+      animation-timeline: --fsk-sign;
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* Each paragraph's station lights as it is reached. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .fst-story-copy
+      p::before {
+      animation: fsk-station steps(3, jump-end) both;
+      animation-timeline: --fsk-para;
+      animation-range: entry 0% entry 60%;
+    }
+
+    /* The gate's shutter lifts as the card arrives; the clock behind the
+       copy turns in eight ticks over the card's whole pass. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .fst-pickup-visual::before {
+      animation: fsk-shutter linear both;
+      animation-timeline: --fsk-gate;
+      animation-range: entry 12% entry 96%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .fst-pickup-copy::before {
+      animation: fsk-gauge steps(8, jump-end) both;
+      animation-timeline: --fsk-gate;
+      animation-range: entry 0% exit 100%;
+    }
+
+    /* The terminus lights. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .fst-page.fst-page[data-motion-ready="true"]
+      .rxs-footer
+      > div
+      p::before {
+      animation: fsk-station steps(3, jump-end) both;
+      animation-timeline: --fsk-end;
+      animation-range: entry 0% entry 80%;
+    }
+  }
+}
+
+/* ================================================================
+   Keyframes: opacity and transforms only
+   ================================================================ */
+@keyframes fsk-draw-x {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes fsk-draw-y {
+  from {
+    scale: 1 0;
+  }
+}
+
+@keyframes fsk-draw-box {
+  from {
+    scale: 0;
+  }
+}
+
+@keyframes fsk-pop {
+  from {
+    opacity: 0;
+    scale: 0;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes fsk-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fsk-clock {
+  from {
+    opacity: 0;
+    rotate: -36deg;
+  }
+  to {
+    opacity: 0.55;
+    rotate: 0deg;
+  }
+}
+
+@keyframes fsk-recede {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0.1;
+    translate: 0 -40px;
+  }
+}
+
+@keyframes fsk-flap {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateX(-75deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fsk-tick {
+  from {
+    opacity: 0.3;
+    rotate: -180deg;
+  }
+  to {
+    opacity: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes fsk-lamp {
+  from {
+    opacity: 0;
+    scale: 0.7 1;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes fsk-station {
+  from {
+    opacity: 0.25;
+    scale: 0.45;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes fsk-shutter {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -102%;
+  }
+}
+
+@keyframes fsk-gauge {
+  from {
+    rotate: -60deg;
+  }
+  to {
+    rotate: 0deg;
+  }
+}
+
+@keyframes fsk-print {
+  from {
+    translate: 0 -18px;
+  }
+}
+
+@keyframes fsk-stamp {
+  from {
+    opacity: 0;
+    scale: 1.7;
+    rotate: -7deg;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: -1.5deg;
+  }
+}
+
+@keyframes fsk-rise {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@keyframes fsk-flap-in {
+  0% {
+    opacity: 0;
+    transform: perspective(400px) rotateX(-90deg);
+  }
+  55% {
+    opacity: 1;
+    transform: perspective(400px) rotateX(18deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  html .fst-page.fst-page .fsk-map,
+  html .fst-page.fst-page .fst-pickup-visual::before,
+  html .fst-page.fst-page .rxs-section::after,
+  html .fst-page.fst-page .rxs-section-heading > p::after,
+  html .fst-page.fst-page .rxs-footer h2::after,
+  html .fst-page.fst-page .fst-cast-detail figcaption::after {
+    display: none;
+  }
+
+  html .fst-page.fst-page .rxs-section-heading > p,
+  html .fst-page.fst-page .fst-pickup-heading p,
+  html .fst-page.fst-page .fst-calls b,
+  html .fst-page.fst-page .fst-cast-detail figcaption {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  html .fst-page.fst-page .rxs-section-heading > p::before,
+  html .fst-page.fst-page .fst-pickup-heading p::before,
+  html .fst-page.fst-page .fst-subheading p::before,
+  html .fst-page.fst-page .fst-story-copy p::before,
+  html .fst-page.fst-page .rxs-footer > div p::before {
+    border: 1px solid CanvasText;
+    background: none;
+    box-shadow: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  html .fst-page.fst-page .fst-story-copy,
+  html .fst-page.fst-page .fst-pickup-heading,
+  html .fst-page.fst-page .fst-pickup-record .fst-subheading,
+  html .fst-page.fst-page .fst-story-index i,
+  html .fst-page.fst-page .rxs-hero-lede {
+    background: none;
+  }
+
+  html .fst-page.fst-page .fst-story-copy {
+    border-left: 1px solid CanvasText;
+  }
+}

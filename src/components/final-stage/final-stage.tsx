@@ -27,6 +27,10 @@ import {
 
 const LOGO = "/final-stage-logo.webp";
 
+/* Nagi's map around the logo: twelve strokes, painted and drawn by
+   styles-final-stage-kiro.css. Ornament only, no text. */
+const MAP_STROKES = Array.from({ length: 12 }, (_, index) => index);
+
 /* The liquid rail owns tap, long-press, drag and keyboard selection; React
    only mirrors the chosen index back into state. One rail per ref. */
 function bindRail<K extends string>(
@@ -457,6 +461,11 @@ export function FinalStage() {
           <i />
           <i />
           <i />
+        </div>
+        <div className="fsk-map" aria-hidden="true">
+          {MAP_STROKES.map((stroke) => (
+            <i key={stroke} />
+          ))}
         </div>
         <div className="rxs-hero-visual fst-hero-logo" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />
