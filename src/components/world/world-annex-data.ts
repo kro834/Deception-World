@@ -187,7 +187,7 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
   {
     id: "rex",
     name: "レックス・ロワ",
-    role: "六詠第二位",
+    role: "六詠・第二位",
     profile: [
       {
         text: "その声には焦燥も緊張もなかった。",
@@ -202,7 +202,7 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
   {
     id: "reemu",
     name: "リームー",
-    role: "『六詠』の、六番目",
+    role: "六詠・第六位",
     profile: [
       {
         text: "羽根飾りを挿した帽子。夜明け前の白を背に、男が一人、悠然と立っている。腰に帯びた一振りを、鞘ごと右手で軽く提げていた。",
@@ -217,7 +217,7 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
   {
     id: "shuza",
     name: "シュザ",
-    role: "六詠のナンバースリー",
+    role: "六詠・第三位",
     profile: [
       {
         text: "白銀の髪をなびかせ、黒、紅、紫の重厚な着物の裾を優美にはためかせながら歩むのは、六詠のナンバースリーこと『シュザ』。",
