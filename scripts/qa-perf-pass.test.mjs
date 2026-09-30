@@ -159,10 +159,12 @@ test("the Dream Chapter's poster console asks for the same WebP copies", async (
   let jpeg = 0;
   let webp = 0;
   for (const poster of DREAM_POSTERS) {
-    // Poster 05 is also the hero and a warmed route asset: it keeps its JPEG.
+    // Poster 05 is also the hero and a warmed route asset: since the
+    // delivery-verify pass the console asks for the hero's own WebP.
     if (poster.src === "/dream-chapter-poster-05.jpeg") {
-      assert.deepEqual(posterImage(poster.src), {});
-      continue;
+      assert.deepEqual(posterImage(poster.src), {
+        srcSet: "/dream-chapter-poster-05-delivery.webp",
+      });
     }
     const set = POSTER_IMAGES[poster.src];
     assert.ok(set, poster.src);

@@ -48,8 +48,14 @@ try {
         // Let the compositor receive the new scroll offset, but begin the drag
         // before the 680 ms text scan has finished.
         await page.waitForTimeout(180);
+        // The lowest visible line of the heading: a heading at the top of its
+        // document (a dossier's h1 at y 146-225 on phones) cannot be centred,
+        // and its first line sat 4 px below the 150 px floor, which left a 49 px
+        // drag and a 45 +/- 1 px pan against the > 45 check. A centred heading
+        // keeps the full 200 px drag either way.
         const point = await heading.evaluate((node) => {
           const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+          let best = null;
           for (let text = walker.nextNode(); text; text = walker.nextNode()) {
             if (!text.textContent.trim() || text.parentElement.closest('[aria-hidden="true"]'))
               continue;
@@ -63,13 +69,14 @@ try {
               // Extreme deliberately passes heading touches to its pan-y copy
               // container. Accept that documented parent, never a foreign overlay.
               if (
-                node.contains(hit) ||
-                (getComputedStyle(node).pointerEvents === "none" && hit?.contains(node))
+                (node.contains(hit) ||
+                  (getComputedStyle(node).pointerEvents === "none" && hit?.contains(node))) &&
+                (!best || y > best.y)
               )
-                return { x, y, hit: hit.tagName };
+                best = { x, y, hit: hit.tagName };
             }
           }
-          return null;
+          return best;
         });
         assert.ok(point, `${width} ${route} ${selector}: no visible text hit target`);
         const before = await page.evaluate(() => scrollY);

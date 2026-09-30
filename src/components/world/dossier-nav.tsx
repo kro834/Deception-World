@@ -62,7 +62,10 @@ export const RE_DIVE_RIKUEI_NAV: DossierLink[] = [
     id: "I",
     name: "シエル",
     href: "/characters/ciel",
-    assets: ["/ciel-illustration-20260924-960.webp"],
+    // His illustration as supplied: the warm-up resolves it to the hero's own
+    // candidates (dossierImage), so a desktop no longer warms the 960 px file
+    // and then shows the 640.
+    assets: ["/ciel-illustration-20260924.webp"],
     kicker: "RIKUEI I",
   },
   RIKUEI_NAV[1],

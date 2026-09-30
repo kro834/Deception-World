@@ -202,12 +202,14 @@ const POSTER_SOURCES: readonly (readonly [string, number])[] = [
   ["/poster-card-32-20260825.jpeg", 1122],
   ["/poster-card-33.jpeg", 1122],
   // The Dream Chapter's poster console turns the same way (15 JPEGs of
-  // 190-700 KB). Poster 05 is also the page's hero and a warmed route asset
-  // (DREAM_CHAPTER_ENTER_ASSETS), so it keeps its JPEG.
+  // 190-700 KB). Poster 05 is also the page's hero and a warmed route asset:
+  // the hero, its preload, the dive's warm-up and the console all ask for its
+  // one WebP (DREAM_CHAPTER_HERO_ART in asset-loader.ts).
   ["/dream-chapter-poster-01.jpeg", 1126],
   ["/dream-chapter-poster-02.jpeg", 1024],
   ["/dream-chapter-poster-03.jpeg", 1448],
   ["/dream-chapter-poster-04.jpeg", 1448],
+  ["/dream-chapter-poster-05.jpeg", 1448],
   ["/dream-chapter-poster-06.jpeg", 1086],
   ["/dream-chapter-poster-07.jpeg", 1024],
   ["/dream-chapter-poster-08.jpeg", 1086],
@@ -239,6 +241,16 @@ export const POSTER_IMAGES: Record<string, ImageSet> = {
   "/rider-vandal-thumbnail-20260827.jpeg": {
     source: "/rider-vandal-thumbnail-20260827.jpeg",
     variants: [{ path: "/rider-vandal-thumbnail-20260827.webp", width: 720 }],
+  },
+};
+
+// The Dream Chapter's title logo: 1280 px as supplied, for a 220-480 px slot
+// (480 on portrait tablets, 420 on desktops). One WebP at twice the widest
+// slot; the hero and the dive's warm-up ask for it (DREAM_CHAPTER_LOGO).
+export const TITLE_LOGO_IMAGES: Record<string, ImageSet> = {
+  "/dream-chapter-logo.jpeg": {
+    source: "/dream-chapter-logo.jpeg",
+    variants: [{ path: "/dream-chapter-logo-delivery.webp", width: 960, build: true }],
   },
 };
 

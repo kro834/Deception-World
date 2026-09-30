@@ -3,6 +3,7 @@ import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
+import { dossierImage } from "@/lib/dossier-images";
 
 type Related = {
   id: string;
@@ -233,8 +234,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
           <div className="manager-portrait-frame">
             <img
               src={person.image}
-              srcSet={person.imageWebp}
-              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
+              {...dossierImage(person.image)}
               alt={`${person.name}のキャラクタービジュアル`}
               width={person.imageWidth}
               height={person.imageHeight}

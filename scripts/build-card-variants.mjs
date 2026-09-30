@@ -1,23 +1,36 @@
 // Right-sized WebP variants for two kinds of card: the World cast wall's
 // portraits (04 CAST FILES, its quote chips and the 05 ID photo) and the
-// hero's poster deck. The sources stay as supplied; the variants are drawn
-// by Chrome like build-thumbnail-variants.mjs does (createImageBitmap with
-// high-quality resampling, then canvas WebP at the dossier quality, 84). A
-// variant as wide as its source is a WebP re-encode of a file that had no
-// delivery copy.
+// hero's poster deck (with the Dream Chapter's console, whose poster 05 is
+// also that page's hero), plus the Dream Chapter's title logo and the
+// character files' 720 px hero candidates. The sources stay as supplied; the
+// variants are drawn by Chrome like build-thumbnail-variants.mjs does
+// (createImageBitmap with high-quality resampling, then canvas WebP at the
+// dossier quality, 84). A variant as wide as its source is a WebP re-encode
+// of a file that had no delivery copy.
 // Regenerate with `node scripts/build-card-variants.mjs [source]` (needs the
 // Chrome channel for Playwright; a source path limits it to that set). The
 // variants and their slots are listed in src/lib/thumbnail-images.ts
-// (PORTRAIT_THUMBNAILS, POSTER_IMAGES).
+// (PORTRAIT_THUMBNAILS, POSTER_IMAGES, TITLE_LOGO_IMAGES) and
+// src/lib/dossier-images.ts (DOSSIER_HERO_IMAGES).
 import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
-import { PORTRAIT_THUMBNAILS, POSTER_IMAGES } from "../src/lib/thumbnail-images.ts";
+import { DOSSIER_HERO_IMAGES } from "../src/lib/dossier-images.ts";
+import {
+  PORTRAIT_THUMBNAILS,
+  POSTER_IMAGES,
+  TITLE_LOGO_IMAGES,
+} from "../src/lib/thumbnail-images.ts";
 
 const publicPath = (path) => new URL(`../public${path}`, import.meta.url);
 const QUALITY = 0.84;
 const only = process.argv[2];
 const jobs = [];
-for (const set of [...Object.values(PORTRAIT_THUMBNAILS), ...Object.values(POSTER_IMAGES)]) {
+for (const set of [
+  ...Object.values(PORTRAIT_THUMBNAILS),
+  ...Object.values(POSTER_IMAGES),
+  ...Object.values(TITLE_LOGO_IMAGES),
+  ...Object.values(DOSSIER_HERO_IMAGES),
+]) {
   if (only && set.source !== only) continue;
   for (const variant of set.variants) {
     if (variant.build) jobs.push({ source: set.source, output: variant.path, width: variant.width });

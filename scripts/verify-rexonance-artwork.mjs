@@ -42,6 +42,9 @@ try {
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    // The duplicate-download check reads resource timing: keep every entry
+    // (the dev server's module requests fill the default 250 first).
+    await page.addInitScript(() => performance.setResourceTimingBufferSize(5000));
     await page.goto(new URL("/rexonance-saga", base).href);
     await page.locator('.rxs-stage-tabs[data-liquid-initialized="true"]').waitFor();
     const hero = page.locator(".rxs-hero-visual img");
@@ -88,11 +91,18 @@ try {
       assert.equal(await tab.getAttribute("aria-selected"), "true");
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       // Capture the settled view, not the existing stage-reveal animation's first frame.
+      // Only clock-driven animations settle: the motion edition's scroll-driven
+      // mx-settle on the panel art (5a71947, view() timeline) finishes only at
+      // the end of its range, so awaiting it hung here.
       await panel.evaluate((node) =>
         Promise.all(
           node
             .getAnimations({ subtree: true })
-            .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+            .filter(
+              (animation) =>
+                animation.timeline === document.timeline &&
+                animation.effect?.getTiming().iterations !== Infinity,
+            )
             .map((animation) => animation.finished.catch(() => {})),
         ),
       );

@@ -9,6 +9,7 @@ import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { withWordBreaks } from "@/lib/name-breaks";
+import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -122,6 +123,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     const preload = new window.Image();
     preload.decoding = "async";
     preload.fetchPriority = "high";
+    // The card's own candidate: the record then shows the warmed file.
+    const { srcSet, sizes } = formPickupImage(rider.img);
+    if (sizes) preload.sizes = sizes;
+    if (srcSet) preload.srcset = srcSet;
     preload.src = rider.img;
     gateImage.current = preload;
     void preload.decode?.().catch(() => undefined);
@@ -173,6 +178,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
         <div className="form-pickup-visual">
           <img
             src={rider.img}
+            {...formPickupImage(rider.img)}
             alt={`${riderPrefix}${record.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
@@ -255,6 +261,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             <figure>
               <img
                 src={rider.img}
+                {...formPickupImage(rider.img)}
                 alt=""
                 style={{ objectPosition: rider.pos }}
                 decoding="async"
@@ -494,8 +501,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <div className="manager-portrait-frame">
             <img
               src={profile.image}
-              srcSet={profile.imageWebp}
-              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
+              {...dossierImage(profile.image)}
               alt={`${profile.name}のキャラクタービジュアル`}
               style={{ objectPosition: profile.pos, objectFit: "cover" }}
               loading="eager"

@@ -17,6 +17,7 @@ const filmStyleSource = readProjectFile("src/styles-dream-film.css");
 const loadGateSource = readProjectFile("src/components/load-gate.tsx");
 const routeTransitionStyleSource = readProjectFile("src/styles-route-transitions.css");
 const pickupScrollResetSource = readProjectFile("src/components/world/pickup-scroll-reset.ts");
+const assetLoaderSource = readProjectFile("src/lib/asset-loader.ts");
 
 const routePath = "src/routes/dream-chapter.tsx";
 const posterAssets = Array.from(
@@ -143,7 +144,13 @@ test("Dream Chapter route and side menu expose the movie navigation", () => {
 });
 
 test("Dream Chapter renders its movie logo and maps all four Dolminence records", () => {
-  assert.match(pageSource, /src=["']\/dream-chapter-logo\.jpeg["']/);
+  // The logo comes as its delivery WebP (a copy of dream-chapter-logo.jpeg,
+  // scripts/delivery-verify.test.mjs), the file the dive warms.
+  assert.match(pageSource, /src=\{DREAM_CHAPTER_LOGO\}/);
+  assert.match(
+    assetLoaderSource,
+    /DREAM_CHAPTER_LOGO = "\/dream-chapter-logo-delivery\.webp"/,
+  );
   assert.match(pageSource, /DREAM_DOLMINENCE\.map/);
   assert.match(pageSource, /id=["']dolminence["']/);
   assert.match(menuSource, /to=["']\/dream-chapter["']\s+hash=["']dolminence["']/);
@@ -376,9 +383,16 @@ test("Dream Chapter collaboration hero uses approved art without intercepting to
     /className=["']dream-(?:ambient-backdrop|hero-field)["']/,
     "the hero needs a dedicated decorative backdrop",
   );
+  // Poster 05 comes as its delivery WebP (same pixels, the file the dive
+  // warms; scripts/delivery-verify.test.mjs).
   assert.match(
     heroSource,
-    /className="dream-hero-art"\s+src="\/dream-chapter-poster-05.jpeg"/,
+    /className="dream-hero-art"\s+src=\{DREAM_CHAPTER_HERO_ART\}/,
+    "the collaboration hero reuses the approved character and bamboo scene",
+  );
+  assert.match(
+    assetLoaderSource,
+    /DREAM_CHAPTER_HERO_ART = "\/dream-chapter-poster-05-delivery\.webp"/,
     "the collaboration hero reuses the approved character and bamboo scene",
   );
   assert.match(styleSource, /\.dream-(?:ambient-backdrop|hero-field)\s*\{/);

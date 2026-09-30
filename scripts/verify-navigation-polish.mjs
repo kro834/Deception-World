@@ -15,15 +15,36 @@ try {
     ]) {
       await page.goto(`${process.env.BASE_URL || "http://localhost:8082"}${route}`);
       const trigger = page.locator(".side-panel-trigger").first();
+      // The server-rendered trigger has no handler until React hydrates it:
+      // an Enter pressed before then opened nothing (the old hydration race).
+      await page.waitForFunction(() => {
+        const node = document.querySelector(".side-panel-trigger");
+        return Boolean(node && Object.keys(node).some((key) => key.startsWith("__reactProps")));
+      });
       await trigger.focus();
       await page.keyboard.press("Enter");
       await page.waitForFunction(
         () => document.querySelector(".side-panel")?.dataset.open === "true",
       );
+      // Measure the panel at rest: mid-slide, its fractional translate made
+      // the 48 px close read 47.99997 px (the /final-stage and /world flakes).
+      await page.locator(".side-panel").evaluate((panel) =>
+        Promise.all(
+          panel
+            .getAnimations({ subtree: true })
+            .filter(
+              (animation) =>
+                animation.timeline === document.timeline &&
+                animation.effect?.getTiming().iterations !== Infinity,
+            )
+            .map((animation) => animation.finished.catch(() => {})),
+        ),
+      );
       const defects = await page.locator(".side-panel").evaluate((panel) => {
         const problems = [];
         const close = panel.querySelector(".side-panel-close").getBoundingClientRect();
-        if (close.width < 48 || close.height < 48) problems.push("close target");
+        if (close.width < 48 || close.height < 48)
+          problems.push(`close target ${close.width.toFixed(1)}x${close.height.toFixed(1)}`);
         for (const link of panel.querySelectorAll(".side-panel-links a, .side-panel-link-button")) {
           const box = link.getBoundingClientRect();
           if (box.height < 48) problems.push("link target");

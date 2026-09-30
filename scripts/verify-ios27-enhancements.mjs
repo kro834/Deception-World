@@ -20,6 +20,10 @@ try {
     });
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
+    // The P14 check below reads resource timing. The default buffer holds 250
+    // entries, and the dev server's module requests fill it before the image
+    // loads; a buffer set before any page script keeps every entry.
+    await page.addInitScript(() => performance.setResourceTimingBufferSize(5000));
     if (mode === "ipad27")
       await page.addInitScript(() =>
         Object.defineProperty(navigator, "maxTouchPoints", { value: 5 }),

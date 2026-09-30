@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import {
+  DREAM_CHAPTER_HERO_ART,
+  DREAM_CHAPTER_LOGO,
+  WORLD_ENTER_ASSETS,
+} from "@/lib/asset-loader";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
@@ -851,7 +855,7 @@ export function DreamChapter() {
         <div className="dream-hero-field" aria-hidden="true">
           <img
             className="dream-hero-art"
-            src="/dream-chapter-poster-05.jpeg"
+            src={DREAM_CHAPTER_HERO_ART}
             alt=""
             width={1448}
             height={1086}
@@ -878,7 +882,7 @@ export function DreamChapter() {
           </h1>
           <img
             className="dream-title-logo"
-            src="/dream-chapter-logo.jpeg"
+            src={DREAM_CHAPTER_LOGO}
             alt="仮面ライダーサーガ Dream Chapter"
             width="1280"
             height="731"

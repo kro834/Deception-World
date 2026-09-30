@@ -1,3 +1,8 @@
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : null}
           {/* The record ends on its own way out, so a long read never has to
               climb back to the corner. Named by its visible CLOSE: the
               corner control keeps the one 閉じる. */}
@@ -102,8 +107,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <div className="manager-portrait-frame">
             <img
               src={profile.image}
-              srcSet={profile.imageWebp}
-              sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1120px) 42vw, 520px"
+              {...dossierImage(profile.image)}
               alt={`${profile.name}のキャラクタービジュアル`}
               style={{ objectPosition: profile.pos, objectFit: "cover" }}
               loading="eager"
@@ -388,5 +392,3 @@ export const SHUZA: Profile = {
     "我慢なんかせんでもええんよ。あんたの欲しいもん、うちにはぜぇんぶ見えてますさかい",
     "好きにしはったらええよ。───もっとも、何を“好き”やと思うかは、もう、うちが決めてしもうたけど",
     "嗚呼…この子、うちの物になったの",
-  ],
-  facts: [

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DreamChapter } from "@/components/dream-chapter/dream-chapter";
+import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO } from "@/lib/asset-loader";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
   CINEMATIC_STYLESHEET_LINK,
@@ -44,11 +45,12 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: dreamAnnexCssUrl },
       { rel: "stylesheet", href: dreamArrivalCssUrl },
       CINEMATIC_STYLESHEET_LINK,
-      { rel: "preload", as: "image", href: "/dream-chapter-poster-05.jpeg" },
+      // The same files the dive warms and the hero shows.
+      { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },
       {
         rel: "preload",
         as: "image",
-        href: "/dream-chapter-logo.jpeg",
+        href: DREAM_CHAPTER_LOGO,
       },
     ],
   }),

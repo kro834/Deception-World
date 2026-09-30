@@ -58,7 +58,10 @@ try {
     assert.equal(await panel.locator(".other-array > *").count(), 6);
     assert.equal(await panel.locator('a[href="/characters/terra"]').count(), 1);
     assert.equal(await panel.locator('a[href="/characters/luna"]').count(), 1);
-    assert.equal(await panel.locator(".archive-placeholder").count(), 2);
+    // de7f0e3 (夜明護尊's file) took the fifth slot; one placeholder is left
+    // (other-character-artwork.test.mjs pins the same six).
+    assert.equal(await panel.locator('a[href="/characters/yoake-mamori"]').count(), 1);
+    assert.equal(await panel.locator(".archive-placeholder").count(), 1);
     for (const [id, name] of [
       ["haiku", "ハイク"],
       ["fable", "フェイブル"],

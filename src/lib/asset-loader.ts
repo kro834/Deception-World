@@ -24,7 +24,8 @@ const KNOWN_BYTES: Record<string, number> = {
   "/manager-opus.jpeg": 342588,
   "/manager-opus-rider.jpeg": 451880,
   "/rider-saga.jpeg": 298800,
-  "/dream-chapter-logo.jpeg": 211523,
+  "/dream-chapter-logo-delivery.webp": 69332,
+  "/dream-chapter-poster-05-delivery.webp": 138154,
   "/rider-rexonance-saga-pickup-20260922.webp": 391098,
   [REXONANCE_SITE_ARTWORK.standard]: 440678,
   "/saga-extreme-middle.webp": 238554,
@@ -33,10 +34,14 @@ const KNOWN_BYTES: Record<string, number> = {
 
 export const WORLD_ENTER_ASSETS = ["/deception-world-poster-delivery.webp"] as const;
 
-export const DREAM_CHAPTER_ENTER_ASSETS = [
-  "/dream-chapter-logo.jpeg",
-  "/dream-chapter-poster-05.jpeg",
-] as const;
+// The Dream Chapter's hero art (poster 05) and title logo as delivered
+// (WebP copies of the supplied JPEGs, scripts/build-card-variants.mjs). The
+// dive warms these exact files, and the hero, its preload and the poster
+// console then ask for the same ones.
+export const DREAM_CHAPTER_HERO_ART = "/dream-chapter-poster-05-delivery.webp";
+export const DREAM_CHAPTER_LOGO = "/dream-chapter-logo-delivery.webp";
+
+export const DREAM_CHAPTER_ENTER_ASSETS = [DREAM_CHAPTER_LOGO, DREAM_CHAPTER_HERO_ART] as const;
 
 export const REXONANCE_SAGA_ENTER_ASSETS = [REXONANCE_SITE_ARTWORK.standard] as const;
 
