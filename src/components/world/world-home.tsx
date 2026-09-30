@@ -1408,6 +1408,7 @@ export function WorldHome() {
   const shufflePoster = () => {
     if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
+    setShuffling(true);
     setLocked(true);
     const runId = ++shuffleRunId.current;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -1467,11 +1468,11 @@ export function WorldHome() {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
         shuffleActive.current = false;
+        setShuffling(false);
       });
       return;
     }
 
-    setShuffling(true);
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;

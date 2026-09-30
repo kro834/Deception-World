@@ -168,7 +168,7 @@ test("covered navigation waits for destination readiness and is cancellation-saf
   const cancellationEffect = sliceBetween(
     gate,
     "useEffect(() => {\n    const cancelTransition",
-    "\n  }, []);",
+    "\n  }, [router]);",
     "route-transition cancellation effect",
   );
   assert.match(cancellationEffect, /deception-world:cancel-route-transition/);

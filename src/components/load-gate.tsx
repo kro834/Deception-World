@@ -927,6 +927,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const cancelTransition = () => {
       transitionId.current += 1;
+      routeHashSettle += 1;
+      window.clearTimeout(signalTimer.current);
+      window.clearTimeout(arrivalTimer.current);
       for (const frame of openingFocusFrames.current) {
         window.cancelAnimationFrame(frame);
       }
@@ -946,7 +949,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     };
     document.addEventListener("deception-world:cancel-route-transition", cancelTransition);
     window.addEventListener("pagehide", cancelTransition);
+    // Back/Forward can arrive while a cover is still warming its route. That
+    // earlier request must never commit after the browser has moved elsewhere.
+    const stopHistory = router.history.subscribe(({ action }) => {
+      if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") {
+        cancelTransition();
+      }
+    });
     return () => {
+      stopHistory();
       document.removeEventListener("deception-world:cancel-route-transition", cancelTransition);
       window.removeEventListener("pagehide", cancelTransition);
       for (const frame of openingFocusFrames.current) {
@@ -963,7 +974,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       dispatchOpeningHandoffState(false);
       busy.current = false;
     };
-  }, []);
+  }, [router]);
 
   // A deep link opened from outside the site (/world#manager-archive in a new
   // tab) lands like one followed inside it: in one jump, flush under the
@@ -1056,17 +1067,24 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (busy.current) return;
-      const isArchiveTransition = pathname === "/form-archive" || to === "/form-archive";
-      const isZeusTransition = to === "/managers/zeus";
+      const changesDocument = pathname !== to;
+      const isArchiveTransition =
+        changesDocument && (pathname === "/form-archive" || to === "/form-archive");
+      const isZeusTransition = changesDocument && to === "/managers/zeus";
       const isDreamTransition =
         pathname !== to && (to === "/dream-chapter" || transition === "dream");
       const diveVariant = isDreamTransition
         ? "dream"
-        : RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES];
-      const cutInVariant = RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES];
+        : changesDocument
+          ? RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES]
+          : undefined;
+      const cutInVariant = changesDocument
+        ? RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES]
+        : undefined;
       const riderTransitionVariant = diveVariant ?? cutInVariant;
+      const requestId = ++transitionId.current;
+      const isCurrent = () => transitionId.current === requestId;
       if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
-        const changesDocument = pathname !== to;
         const releaseScrollMotion = changesDocument || hash ? holdRouteScrollMotion() : null;
         const assetWarmup = assets.length
           ? preloadAssets(assets, () => undefined).catch(() => undefined)
@@ -1081,13 +1099,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             setSignal("running");
             await nextFrame();
           }
+          if (!isCurrent()) return;
           await navigate({ to: to as never, hash });
+          if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           if (hash) await settleRouteHash(hash);
         } finally {
           void assetWarmup;
           if (releaseScrollMotion) window.setTimeout(releaseScrollMotion, 360);
-          if (signalled) {
+          if (signalled && isCurrent()) {
             setSignal("done");
             signalTimer.current = window.setTimeout(() => setSignal("idle"), 320);
           }
@@ -1095,8 +1115,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         return;
       }
       busy.current = true;
-      const requestId = ++transitionId.current;
-      const isCurrent = () => transitionId.current === requestId;
       const startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const tier = cineTier(reduceMotion);
@@ -1117,7 +1135,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               ? FILE_FLIP_TIMINGS
               : diveVariant
                 ? RIDER_DIVE_TIMINGS[diveVariant]
-                : RIDER_CUT_IN_TIMINGS[cutInVariant];
+                : cutInVariant
+                  ? RIDER_CUT_IN_TIMINGS[cutInVariant]
+                  : CALM_TIMINGS;
         const scene =
           cutInVariant === "ciel"
             ? null

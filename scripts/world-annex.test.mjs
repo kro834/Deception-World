@@ -66,6 +66,23 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
     // The hero backdrop shows the same poster, so it asks for the same file.
     ["\n                {...posterImage(previous.src)}", "", 1],
     ["\n              {...posterImage(current.src)}", "", 1],
+    // Busy state covers the reduced-motion decode wait too; reversing these
+    // exact behavioral edits keeps the original-copy fingerprint intact.
+    [
+      "    shuffleActive.current = true;\n    setShuffling(true);\n    setLocked(true);",
+      "    shuffleActive.current = true;\n    setLocked(true);",
+      1,
+    ],
+    [
+      "        shuffleActive.current = false;\n        setShuffling(false);\n      });\n      return;",
+      "        shuffleActive.current = false;\n      });\n      return;",
+      1,
+    ],
+    [
+      "    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach",
+      "    setShuffling(true);\n    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach",
+      1,
+    ],
   ];
   // 2026-09-30: the テラ / ルナ cards and EP 02 pickups warm RELATED_NAV's
   // list (the file's hero only; scripts/rider-cover.test.mjs). Undoing exactly

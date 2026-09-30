@@ -43,7 +43,7 @@ test("Zeus keeps the same outer button size while its return image is active", (
 
 test("fullscreen route effects are limited to archive, Zeus, and rider dossiers", () => {
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
-  assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
+  assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
   assert.match(
     gate,
     /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate/,

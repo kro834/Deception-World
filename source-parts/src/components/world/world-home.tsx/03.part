@@ -1,4 +1,3 @@
-    let retryFrame = 0;
     let cancelled = false;
     // LoadGate keeps the destination handshake open for 2.2s. Keep probing
     // connected targets for almost that whole window instead of assuming a
@@ -444,6 +443,7 @@
   const shufflePoster = () => {
     if (ambientPaused || shuffleActive.current) return;
     shuffleActive.current = true;
+    setShuffling(true);
     setLocked(true);
     const runId = ++shuffleRunId.current;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -480,4 +480,3 @@
       [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
     }
     const previewPosters = Array.from(
-      { length: 9 },

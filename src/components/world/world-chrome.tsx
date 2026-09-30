@@ -133,7 +133,7 @@ export function SideMenuTrigger({
               const openedByKeyboard = event.detail === 0;
               window.dispatchEvent(
                 new CustomEvent(SIDE_MENU_OPEN_INPUT_EVENT, {
-                  detail: { keyboard: openedByKeyboard },
+                  detail: { keyboard: openedByKeyboard, opener: event.currentTarget },
                 }),
               );
               if (!openedByKeyboard) event.currentTarget.blur();
@@ -224,6 +224,7 @@ export function SideMenuLayer({
   const announcementReturnIdRef = useRef<AnnouncementId | null>(null);
   const announcementOpenedByKeyboardRef = useRef(false);
   const sideMenuRestoreFocusRef = useRef(false);
+  const sideMenuOpenerRef = useRef<HTMLButtonElement | null>(null);
   const swipeRef = useRef<{
     id: number;
     x: number;
@@ -290,8 +291,10 @@ export function SideMenuLayer({
 
   useEffect(() => {
     const rememberInput = (event: Event) => {
-      const detail = (event as CustomEvent<{ keyboard?: boolean }>).detail;
+      const detail = (event as CustomEvent<{ keyboard?: boolean; opener?: HTMLButtonElement }>)
+        .detail;
       sideMenuRestoreFocusRef.current = detail?.keyboard === true;
+      sideMenuOpenerRef.current = detail?.opener ?? null;
     };
     window.addEventListener(SIDE_MENU_OPEN_INPUT_EVENT, rememberInput);
     return () => window.removeEventListener(SIDE_MENU_OPEN_INPUT_EVENT, rememberInput);
@@ -302,8 +305,13 @@ export function SideMenuLayer({
     const panel = panelRef.current;
     if (!panel) return;
     const root = document.documentElement;
-    const previousFocus =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Pointer activation blurs the trigger before this effect runs. Remember
+    // its identity too, so a later Escape can still return keyboard focus.
+    const previousFocus = sideMenuOpenerRef.current?.isConnected
+      ? sideMenuOpenerRef.current
+      : document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     panel.scrollTop = 0;
     // The reader's own row (a dossier in RIDERS or UNMANAGED) sits below the
     // fold of the long menu on a laptop as on a phone: the menu opens with it
@@ -418,6 +426,7 @@ export function SideMenuLayer({
         document.activeElement.blur();
       }
       sideMenuRestoreFocusRef.current = false;
+      sideMenuOpenerRef.current = null;
     };
   }, [controlled, isOpen, onOpenChange]);
 
