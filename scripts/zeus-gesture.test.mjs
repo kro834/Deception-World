@@ -13,7 +13,7 @@ const component = compile("src/components/zeus-button.tsx") + "\nexports.TestBut
 const geometryCode = compile("src/lib/zeus-drag.ts");
 const resizeCode = compile("src/lib/viewport-resize.ts");
 
-function mount({ scale = 1, android = true } = {}) {
+function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = null } = {}) {
   const effects = [],
     timers = new Map(),
     frames = new Map(),
@@ -85,7 +85,17 @@ function mount({ scale = 1, android = true } = {}) {
     doc = new EventTarget();
   Object.assign(win, {
     innerWidth: 390,
-    innerHeight: 844,
+    innerHeight,
+    visualViewport: visualViewport
+      ? Object.assign(new EventTarget(), {
+          width: 390,
+          height: 844,
+          offsetLeft: 0,
+          offsetTop: 0,
+          scale: 1,
+          ...visualViewport,
+        })
+      : null,
     setTimeout(fn, delay) {
       timerDelays.push(delay);
       timers.set(++serial, fn);
@@ -262,6 +272,74 @@ for (const scale of [1, 0.75, 1.2]) {
     assert.ok(Math.abs(ui.center().x - 195) < 0.01);
     assert.equal(ui.button.style.translate, undefined);
     assert.equal(ui.navigated(), 0);
+  });
+}
+
+for (const scale of [1, 0.75, 1.2]) {
+  test(`a small viewport-height change during a held drag keeps the finger and saved position at scale ${scale}`, () => {
+    const ui = mount({ scale });
+    ui.hold();
+    ui.handlers.onPointerMove(ui.event(195, 422));
+    ui.flushFrames();
+    assert.ok(Math.abs(ui.center().y - 422) < 0.01);
+
+    ui.win.innerHeight = 784;
+    ui.win.dispatchEvent(new Event("resize"));
+    assert.equal(
+      ui.button.dataset.dragging,
+      "true",
+      "a toolbar-sized change must not cancel the drag",
+    );
+    const touchMove = Object.assign(new Event("touchmove", { cancelable: true }), {
+      touches: [{}],
+    });
+    ui.win.dispatchEvent(touchMove);
+    assert.equal(touchMove.defaultPrevented, true, "the held-drag touch guard stays armed");
+
+    ui.handlers.onPointerUp(ui.event(195, 422));
+    assert.equal(ui.saved.length, 1);
+    assert.deepEqual(
+      {
+        savedY: Number(ui.saved[0].y.toFixed(6)),
+        centerY: Number(ui.center().y.toFixed(3)),
+      },
+      { savedY: Number((422 / 784).toFixed(6)), centerY: 422 },
+      "release remains under the final pointer and is saved in the resized viewport",
+    );
+  });
+}
+
+for (const scale of [1, 0.75, 1.2]) {
+  test(`a small visualViewport offset change during a held drag keeps the finger and saved position at scale ${scale}`, () => {
+    const ui = mount({ scale, innerHeight: 900, visualViewport: { height: 844 } });
+    ui.hold();
+    ui.handlers.onPointerMove(ui.event(195, 422));
+    ui.flushFrames();
+    assert.ok(Math.abs(ui.center().y - 422) < 0.01);
+
+    ui.win.visualViewport.offsetTop = 14;
+    ui.win.visualViewport.dispatchEvent(new Event("scroll"));
+    assert.equal(
+      ui.button.dataset.dragging,
+      "true",
+      "a visual viewport pan must preserve the drag",
+    );
+    const touchMove = Object.assign(new Event("touchmove", { cancelable: true }), {
+      touches: [{}],
+    });
+    ui.win.dispatchEvent(touchMove);
+    assert.equal(touchMove.defaultPrevented, true, "the held-drag touch guard stays armed");
+
+    ui.handlers.onPointerUp(ui.event(195, 422));
+    assert.equal(ui.saved.length, 1);
+    assert.deepEqual(
+      {
+        savedY: Number(ui.saved[0].y.toFixed(6)),
+        centerY: Number(ui.center().y.toFixed(3)),
+      },
+      { savedY: Number(((422 - 14) / 844).toFixed(6)), centerY: 422 },
+      "release remains under the final pointer and is saved in the current visual viewport",
+    );
   });
 }
 

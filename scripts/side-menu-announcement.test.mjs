@@ -65,9 +65,11 @@ test("announcement interaction preserves the side menu and supports every modal 
 test("side-menu focus restoration follows the input modality on iPad", () => {
   assert.match(chrome, /const SIDE_MENU_OPEN_INPUT_EVENT/);
   assert.match(chrome, /const openedByKeyboard = event\.detail === 0/);
-  assert.match(chrome, /detail: \{ keyboard: openedByKeyboard \}/);
+  assert.match(chrome, /detail: \{ keyboard: openedByKeyboard, opener: event\.currentTarget \}/);
   assert.match(chrome, /if \(!openedByKeyboard\) event\.currentTarget\.blur\(\)/);
   assert.match(chrome, /sideMenuRestoreFocusRef\.current = detail\?\.keyboard === true/);
+  assert.match(chrome, /sideMenuOpenerRef\.current = detail\?\.opener \?\? null/);
+  assert.match(chrome, /const previousFocus = sideMenuOpenerRef\.current\?\.isConnected/);
   assert.match(
     chrome,
     /const focusTarget = sideMenuRestoreFocusRef\.current[\s\S]*?side-panel-close[\s\S]*?: panel/,

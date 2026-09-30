@@ -1,0 +1,78 @@
+/* Loaded only for a route failure. The normal dossiers and comparison
+   screens keep their own typography, images and layout. Static recovery
+   controls remain readable even when cinematic assets cannot be fetched. */
+.app-load-error {
+  box-sizing: border-box;
+  min-height: 100svh;
+  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 50% 20%, #122234, #04080f 70%);
+}
+
+.app-load-error-panel {
+  display: grid;
+  width: min(100%, 34rem);
+  gap: 18px;
+  justify-items: center;
+  padding: clamp(24px, 5vw, 40px);
+  border: 1px solid #53758c;
+  border-top: 2px solid #7ae8ff;
+  border-radius: 12px;
+  background: #0a1220;
+}
+
+.app-load-error h1,
+.app-load-error p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-load-error p {
+  color: #b9cad8;
+  line-height: 1.8;
+}
+
+.app-load-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.app-load-error-actions button,
+.app-load-error-actions a {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border: 1px solid #7ae8ff;
+  border-radius: 10px;
+  background: #c6f5ff;
+  color: #04080f;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-load-error-actions a {
+  border-color: #53758c;
+  background: #0a1220;
+  color: #f1f7fb;
+}
+
+.app-load-error-actions :focus-visible {
+  outline: 3px solid #fff0b5;
+  outline-offset: 4px;
+}
+
+@media (forced-colors: active) {
+  .app-load-error-actions button,
+  .app-load-error-actions a {
+    border-color: ButtonText;
+  }
+}

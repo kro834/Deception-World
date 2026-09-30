@@ -154,16 +154,38 @@ async function inspectControls(
 
 async function touchDragState(page, viewportName) {
   const rail = page.locator(".ios-slide-open").first();
-  // Reposition after offscreen content-visibility sections materialize. A single
-  // scrollIntoView can otherwise leave the thumb underneath the sticky header.
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // Offscreen inspection materializes many content-visibility sections. Wait
+  // for two consecutive actionable positions, rather than assuming a fixed
+  // number of scrolls has outlasted layout/scroll-restoration updates.
+  const thumb = rail.locator(".ios-slide-open-thumb");
+  let previousPoint = null;
+  let point = null;
+  for (let attempt = 0; attempt < 8; attempt++) {
     await rail.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
     await page.waitForTimeout(200);
+    const box = await thumb.boundingBox();
+    const candidate = box ? { x: box.x + box.width / 2, y: box.y + box.height / 2 } : null;
+    const actionable =
+      candidate &&
+      (await rail.evaluate(
+        (node, position) => node.contains(document.elementFromPoint(position.x, position.y)),
+        candidate,
+      ));
+    if (!actionable) {
+      previousPoint = null;
+      continue;
+    }
+    if (
+      previousPoint &&
+      Math.abs(previousPoint.x - candidate.x) < 1 &&
+      Math.abs(previousPoint.y - candidate.y) < 1
+    ) {
+      point = candidate;
+      break;
+    }
+    previousPoint = candidate;
   }
-  const thumb = rail.locator(".ios-slide-open-thumb");
-  const box = await thumb.boundingBox();
-  assert.ok(box, `${viewportName}: shared thumb is not visible`);
-  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  assert.ok(point, `${viewportName}: shared thumb did not settle into a visible touch position`);
   assert.equal(
     await rail.evaluate(
       (node, position) => node.contains(document.elementFromPoint(position.x, position.y)),

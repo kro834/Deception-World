@@ -28,6 +28,10 @@
   const readNumber = (value, label) => {
     const text = normalize(value).replaceAll(",", "");
     if (!text || UNRATED_VALUE.test(text)) return null;
+    // Mode switches and bounded ranges do not have one fixed value. Reading
+    // only the first endpoint can announce a winner that reverses in another
+    // declared mode (for example 3,000 ⇄ 60,000 TOPS against 50,000 TOPS).
+    if (/[⇄↔]/.test(text) || /\d[\d.]*\s*[–—-]\s*\d/.test(text)) return null;
     if (/無制限/.test(text)) return Number.POSITIVE_INFINITY;
     if (/演算/.test(label)) {
       const operation = text.match(/(-?\d+(?:\.\d+)?)\s*([YZEPTG])?OPS/i);
@@ -52,7 +56,9 @@
     const directions = COMPOSITES.get(label);
     if (!directions) return null;
     const parts = normalize(value).split(/[/／]/);
-    if (parts.length < directions.length) return null;
+    // Three values such as punch / right kick / left kick cannot be reduced
+    // to the two-value punch / kick model by silently dropping the last leg.
+    if (parts.length !== directions.length) return null;
     const vector = directions.map((direction, index) => ({
       number: readNumber(parts[index], label),
       direction,
@@ -173,7 +179,16 @@
     const headA = cardA.querySelector(".detail-head");
     const headB = cardB.querySelector(".detail-head");
     if (headA instanceof HTMLElement && headB instanceof HTMLElement) {
-      const height = Math.ceil(Math.max(headA.scrollHeight, headB.scrollHeight));
+      // scrollHeight rounds and excludes borders. A fractionally taller title
+      // can therefore exceed that shared minimum and offset every spec row.
+      const height = Math.ceil(
+        Math.max(
+          headA.scrollHeight,
+          headA.getBoundingClientRect().height,
+          headB.scrollHeight,
+          headB.getBoundingClientRect().height,
+        ),
+      );
       cardA.style.setProperty("--compare-head-height", `${height}px`);
       cardB.style.setProperty("--compare-head-height", `${height}px`);
     }

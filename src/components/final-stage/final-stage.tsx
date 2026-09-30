@@ -324,6 +324,30 @@ export function FinalStage() {
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeForm = REALM_ROYAL.forms[form];
 
+  useEffect(() => {
+    const page = pageRef.current;
+    const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
+    if (!page || !nav) return;
+    const syncNavReserve = () => {
+      const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
+      if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
+        page.style.setProperty("--rxs-local-nav-reserve", reserve);
+      }
+    };
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
+    observer?.observe(nav);
+    window.addEventListener("resize", syncNavReserve, { passive: true });
+    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
+    syncNavReserve();
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", syncNavReserve);
+      window.visualViewport?.removeEventListener("resize", syncNavReserve);
+      page.style.removeProperty("--rxs-local-nav-reserve");
+    };
+  }, []);
+
   const releaseControlFocus = (control: HTMLElement) => {
     window.requestAnimationFrame(() => {
       if (document.activeElement === control) control.blur();

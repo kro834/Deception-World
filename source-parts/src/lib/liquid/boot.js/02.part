@@ -1,5 +1,3 @@
-    const pb = Math.max(0, Math.floor(this.canvas.height - (top + h) * ratio));
-    const pr = Math.min(this.canvas.width, Math.ceil((left + w) * ratio));
     const pt = Math.min(this.canvas.height, Math.ceil(this.canvas.height - top * ratio));
     if (pr - pl <= 0 || pt - pb <= 0) return;
     gl.enable(gl.SCISSOR_TEST); gl.scissor(pl, pb, pr - pl, pt - pb);
@@ -254,3 +252,7 @@ function initRail(root) {
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
       setContact(preview);
+      const g = geos[preview];
+      const tab = tabs()[preview];
+      if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
+      const lw = g.width, lh = g.height;

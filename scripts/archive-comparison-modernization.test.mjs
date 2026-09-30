@@ -54,6 +54,77 @@ test("catalog metrics identify the leading side and respect lower running times"
   assert.match(comparisonCss, /\.compare-advantage-summary/);
 });
 
+function metricComparison(label, left, right) {
+  const helpers = comparisonJs.slice(
+    comparisonJs.indexOf("  const HIGHER_IS_BETTER"),
+    comparisonJs.indexOf("  const activeCard"),
+  );
+  const context = vm.createContext({});
+  vm.runInContext(
+    `${helpers}\nthis.compare = (label, a, b) => compareVectors(metricVector(label, a), metricVector(label, b));`,
+    context,
+  );
+  return context.compare(label, left, right);
+}
+
+test("mode-dependent and ranged catalog values never turn their first endpoint into a winner", () => {
+  assert.equal(
+    metricComparison("演算", "3,000TOPS / 200Core ⇄ 60,000TOPS / 300Core", "50,000TOPS / 100Core"),
+    null,
+  );
+  assert.equal(
+    metricComparison(
+      "マルチ比 P / K / 速 / 演",
+      "9.22× / 7.34× / 20.0× / 20.0–400×",
+      "8.24× / 5.05× / 1.90× / 333×",
+    ),
+    null,
+  );
+});
+
+test("composite comparisons preserve every declared value, including both kick legs", () => {
+  assert.equal(
+    metricComparison("パンチ・キック", "110t / 右脚260.0t / 左脚360.0t（est.）", "205.6t / 308.9t"),
+    null,
+  );
+  assert.equal(metricComparison("パンチ・キック", "332.2t / 480.5t", "205.6t / 308.9t"), 1);
+  assert.equal(metricComparison("ジャンプ・100m", "125.6m / 0.6秒", "42.0m / 8秒"), 1);
+  assert.equal(metricComparison("走力", "0.06s/100m", "0.6s/100m"), 1);
+  assert.equal(metricComparison("演算", "20,000YOPS / 200Core", "88,888TOPS / 110Core"), 1);
+});
+
+test("shared comparison headings include fractional layout and border height", () => {
+  const headingSizing = comparisonJs.match(
+    / {2}const headA = cardA\.querySelector\("\.detail-head"\);[\s\S]*?(?= {2}const leadA =)/,
+  )?.[0];
+  assert.ok(headingSizing);
+  class Element {
+    constructor(scrollHeight, height) {
+      this.scrollHeight = scrollHeight;
+      this.height = height;
+    }
+    getBoundingClientRect() {
+      return { height: this.height };
+    }
+  }
+  const heights = [];
+  const card = (heading) => ({
+    querySelector: () => heading,
+    style: {
+      setProperty(name, value) {
+        assert.equal(name, "--compare-head-height");
+        heights.push(value);
+      },
+    },
+  });
+  vm.runInNewContext(headingSizing, {
+    HTMLElement: Element,
+    cardA: card(new Element(126, 127.4375)),
+    cardB: card(new Element(125, 126)),
+  });
+  assert.deepEqual(heights, ["128px", "128px"]);
+});
+
 test("catalog metric results expose and refresh screen-reader text in the row DOM", () => {
   const helperSource = comparisonJs.match(
     / {2}const clearResults = \(root\) => \{[\s\S]*?\n {2}\};\n\n {2}const decorate = \(row, result, label\) => \{[\s\S]*?\n {2}\};/,

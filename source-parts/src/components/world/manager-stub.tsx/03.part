@@ -1,3 +1,17 @@
+
+export const SHUZA: Profile = {
+  id: "shuza",
+  numeral: "III",
+  name: "シュザ",
+  title: "欲望と支配を統べる主座",
+  image: "/manager-shuza.jpeg",
+  imageWebp: "/manager-shuza.webp",
+  pos: "50% 16%",
+  accent: "#f14a60",
+  quotes: [
+    "我慢なんかせんでもええんよ。あんたの欲しいもん、うちにはぜぇんぶ見えてますさかい",
+    "好きにしはったらええよ。───もっとも、何を“好き”やと思うかは、もう、うちが決めてしもうたけど",
+    "嗚呼…この子、うちの物になったの",
   ],
   facts: [
     { dt: "NAME", dd: "シュザ" },

@@ -28,7 +28,7 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.match(goBlock, /async\s*\(\s*\{[^}]*\btransitionCovered\b[^}]*\}\s*:\s*GoOptions/);
 
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
-  assert.match(gate, /const isZeusTransition = to === "\/managers\/zeus"/);
+  assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
   assert.match(
     gate,
     /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,

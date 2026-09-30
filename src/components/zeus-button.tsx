@@ -114,9 +114,6 @@ const ZEUS_FALLBACK_DISTANCE_WEIGHT = 12;
 // A flip wider than this (a tablet or desktop, a landscape phone) crosses the
 // whole page: the third step up on its own side is tried before it.
 const ZEUS_FLIP_MAX_PX = 480;
-// A step held for one clear settle goes home once the page has stayed still
-// this long, so it does not stay off a clear home until the next scroll.
-const ZEUS_STEP_RECHECK_MS = 900;
 /* Words the button never rests on: titles and the labels of controls. They are
    measured by their glyph boxes, not their element boxes, so a wide heading or
    a whole-card link moves the button only when it would cover the words
@@ -521,9 +518,9 @@ function ZeusButton({
   const glideTimer = useRef<number | null>(null);
   // Set by the settle, toggle and dock paths: the next placement glides.
   const glideNext = useRef(false);
-  // While the button has stepped off home: where the page was when it did,
-  // and how many settles in a row home has been clear since.
-  const stepAway = useRef<{ scrollTop: number; clearSettles: number } | null>(null);
+  // A safe temporary spot stays put until the reader moves on or that spot
+  // becomes obstructed. Passive layout/frame reports must not send it home.
+  const stepAway = useRef<{ scrollTop: number } | null>(null);
 
   useEffect(() => {
     preferredPosition.current = position;
@@ -639,6 +636,30 @@ function ZeusButton({
     }
     return { width: button.offsetWidth * scaleX, height: button.offsetHeight * scaleY };
   }, []);
+
+  // Mobile browser chrome can change the visual viewport without cancelling
+  // a held pointer. Refresh only that snapshot (not every move's layout), so
+  // release never reapplies an old normalized position to a new viewport.
+  const refreshDragViewport = useCallback(() => {
+    const geometry = dragGeometry.current;
+    const button = buttonRef.current;
+    if (!geometry || !button) return;
+    const viewport = getViewport();
+    const before = geometry.viewport;
+    if (
+      viewport.width === before.width &&
+      viewport.height === before.height &&
+      viewport.offsetLeft === before.offsetLeft &&
+      viewport.offsetTop === before.offsetTop
+    )
+      return;
+    const size = restingSize(button);
+    geometry.viewport = viewport;
+    geometry.bounds = readBounds(viewport, {
+      width: size.width * 1.075,
+      height: size.height * 1.075,
+    });
+  }, [getViewport, readBounds, restingSize]);
 
   const avoidCriticalControls = useCallback(
     (preferred: { x: number; y: number }) => {
@@ -776,22 +797,16 @@ function ZeusButton({
           return width > 0 && height > 0 ? covered + width * height : covered;
         }, 0);
 
-      // Stepped off and still clear there: home has to be clear for two
-      // settles in a row, or the page has to move on by most of a screen,
-      // before it goes back. Otherwise every control passing the home band
-      // sends it off and back (A-B-A) as the reader goes.
+      // Keep a clear step on a still page. Counting layout/frame reports as
+      // permission to return, or retrying on a timer, caused unsolicited
+      // A-B-A movement while the reader had already stopped scrolling.
       if (away && shownRect && !droppedHere.current) {
-        const homeClear = !blocked(candidateRects[0]) && coveredWords(candidateRects[0]) === 0;
         const shownClear =
           !blocked(shownRect) &&
           !(topBar && meetsAny(shownRect, [topBar])) &&
           coveredWords(shownRect) === 0;
         const movedOn = Math.abs(scroller.scrollTop - away.scrollTop) > viewport.height * 0.6;
-        if (!homeClear) away.clearSettles = 0;
-        else if (shownClear && !movedOn && away.clearSettles < 1) {
-          away.clearSettles += 1;
-          return shown;
-        }
+        if (shownClear && !movedOn) return shown;
       }
 
       // Clear of the controls and of the words: the first such spot. Words
@@ -891,7 +906,7 @@ function ZeusButton({
       ) {
         // A new step: count from here.
         const scroller = document.scrollingElement ?? document.documentElement;
-        stepAway.current = { scrollTop: scroller.scrollTop, clearSettles: 0 };
+        stepAway.current = { scrollTop: scroller.scrollTop };
       }
       if (glide && !reducedGlide()) {
         startGlide(
@@ -948,20 +963,14 @@ function ZeusButton({
         placementFrame.current = null;
         if (activePointer.current != null) return;
         placeButton(preferredPosition.current);
-        // A step kept for the hysteresis (one clear settle counted) gets one
-        // more look on a still page; any scroll or press clears this first.
-        if (stepAway.current?.clearSettles === 1 && placementTimer.current == null) {
-          placementTimer.current = window.setTimeout(() => {
-            placementTimer.current = null;
-            glideNext.current = true;
-            schedulePlacement();
-          }, ZEUS_STEP_RECHECK_MS);
-        }
       });
     };
     const onScroll = () => {
       if (activePointer.current != null && !held.current) cancelPointer.current();
-      if (activePointer.current != null) return;
+      if (activePointer.current != null) {
+        if (held.current) refreshDragViewport();
+        return;
+      }
       droppedHere.current = false;
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
       // Collision checks read the geometry of every visible critical control.
@@ -1070,7 +1079,7 @@ function ZeusButton({
       if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
       placementFrame.current = null;
     };
-  }, [placeButton, getViewport]);
+  }, [placeButton, getViewport, refreshDragViewport]);
 
   /* A permanent non-passive window touchmove listener makes every page scroll
      wait for the main thread. Install it only while a held drag owns the
@@ -1209,6 +1218,7 @@ function ZeusButton({
     activePointer.current = null;
     if (wasHeld && !cancelled) {
       droppedHere.current = true;
+      refreshDragViewport();
       moveToPointer(event.clientX, event.clientY);
       event.currentTarget.style.removeProperty("translate");
       dragGeometry.current = null;

@@ -1,3 +1,29 @@
+                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>
+                  <h3>共鳴武装群</h3>
+                </div>
+                <span>{String(weaponGallery.length).padStart(2, "0")} SYSTEMS</span>
+              </header>
+              <div className="rexonance-weapon-grid">
+                {weaponGallery.map((weapon, index) => (
+                  <figure
+                    key={weapon.name}
+                    className={index === weaponGallery.length - 1 ? "is-wide" : undefined}
+                  >
+                    <div>
+                      <img
+                        src={weapon.img}
+                        alt={`${weapon.name}の武装ビジュアル`}
+                        style={{ objectPosition: weapon.pos ?? "50% 50%" }}
+                        decoding="async"
+                        loading="lazy"
+                        fetchPriority="low"
+                      />
+                    </div>
+                    <figcaption>
+                      <small>{weapon.label}</small>
+                      <b>{weapon.name}</b>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                    </figcaption>
                   </figure>
                 ))}
               </div>
@@ -378,17 +404,3 @@ export const REX_LOI: Profile = {
     ],
   },
 };
-
-export const SHUZA: Profile = {
-  id: "shuza",
-  numeral: "III",
-  name: "シュザ",
-  title: "欲望と支配を統べる主座",
-  image: "/manager-shuza.jpeg",
-  imageWebp: "/manager-shuza.webp",
-  pos: "50% 16%",
-  accent: "#f14a60",
-  quotes: [
-    "我慢なんかせんでもええんよ。あんたの欲しいもん、うちにはぜぇんぶ見えてますさかい",
-    "好きにしはったらええよ。───もっとも、何を“好き”やと思うかは、もう、うちが決めてしもうたけど",
-    "嗚呼…この子、うちの物になったの",

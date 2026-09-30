@@ -49,6 +49,7 @@ function FormArchive() {
   const activeTransitionRef = useRef<ArchiveTransition>({ archive: "saga", generation: 0 });
   const loadedFrameTransitionRef = useRef<ArchiveTransition | null>(null);
   const readyFallbackRef = useRef<ArchiveReadyFallback | null>(null);
+  const restoreSwitcherFocusRef = useRef<ArchiveTransition | null>(null);
   const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
@@ -141,6 +142,9 @@ function FormArchive() {
       const generation = transitionGenerationRef.current + 1;
       transitionGenerationRef.current = generation;
       activeTransitionRef.current = { archive: next, generation };
+      restoreSwitcherFocusRef.current = switcherRef.current?.contains(document.activeElement)
+        ? activeTransitionRef.current
+        : null;
       loadedFrameTransitionRef.current = null;
       const fallback = readyFallbackRef.current;
       if (fallback) window.clearTimeout(fallback.timer);
@@ -155,6 +159,30 @@ function FormArchive() {
   useEffect(() => {
     selectArchiveRef.current = selectArchive;
   }, [selectArchive]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const pending = restoreSwitcherFocusRef.current;
+    restoreSwitcherFocusRef.current = null;
+    const current = activeTransitionRef.current;
+    const switcher = switcherRef.current;
+    if (
+      !pending ||
+      pending.archive !== current.archive ||
+      pending.generation !== current.generation ||
+      !switcher
+    ) {
+      return;
+    }
+    // Making the loading rail inert drops keyboard focus to the body. Restore
+    // the selected tab so the next arrow key still works, unless the visitor
+    // has moved to another control while this document was loading.
+    if (document.activeElement === document.body || switcher.contains(document.activeElement)) {
+      switcher
+        .querySelector<HTMLButtonElement>(`button[data-archive="${current.archive}"]`)
+        ?.focus({ preventScroll: true });
+    }
+  }, [loaded]);
 
   useEffect(() => {
     const switcher = switcherRef.current;

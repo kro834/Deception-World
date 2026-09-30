@@ -480,3 +480,4 @@ export function WorldHome() {
   useLayoutEffect(() => {
     let firstFrame = 0;
     let secondFrame = 0;
+    let retryFrame = 0;
