@@ -83,3 +83,50 @@ test("the World keeps its sections laid out, so its anchors land where they did"
     assert.ok(annex.includes(id), id);
   }
 });
+
+/* RE DIVE on landscape tablets (1024-1279px wide, wider than tall): the box
+   reads as one spread inside the landing view. I stands over three rows
+   beside II | III and IV | V, VI is the phones' sealed strip, the heading
+   column carries FRONT / 01 at its foot, and the ground above the box is the
+   quarter screen the section asks for. Still paint only; every other width
+   keeps its layout. */
+const reDive = strip(read("src/styles-world-re-dive.css"));
+const LANDSCAPE_TABLET =
+  "@media (min-width: 1024px) and (max-width: 1279px) and (orientation: landscape) {";
+
+function landscapeBlock() {
+  const start = reDive.indexOf(LANDSCAPE_TABLET);
+  assert.ok(start > 0, "the landscape tablet block exists");
+  let depth = 0;
+  for (let i = reDive.indexOf("{", start); i < reDive.length; i++) {
+    if (reDive[i] === "{") depth += 1;
+    else if (reDive[i] === "}" && --depth === 0) return reDive.slice(start, i + 1);
+  }
+  throw new Error("unclosed block");
+}
+
+test("RE DIVE on a landscape tablet: one spread in the landing view", () => {
+  const block = landscapeBlock();
+  // The lip keeps its height, so the transition's picture is unchanged; only
+  // the box comes up to a quarter screen under it.
+  assert.match(reDive, /--re-dive-edge-h: clamp\(170px, 30vw, 320px\);/);
+  assert.match(block, /--rd-band: max\(26svh, calc\(var\(--re-dive-edge-h\) \* 0\.62\)\);/);
+  assert.match(block, /padding-top: var\(--rd-band\);/);
+  assert.doesNotMatch(block, /--re-dive-edge-h:/);
+  // I over the three rows, II-V in DOM order, VI the sealed strip.
+  assert.match(block, /grid-template-columns: minmax\(0, 1\.3fr\) repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(block, /\.signal\.ciel-signal \{\s*grid-column: 1;\s*grid-row: 1 \/ 4;\s*\}/);
+  assert.match(block, /\.signal\.is-vacant:last-child \{\s*grid-column: 2 \/ -1;/);
+  // Rows come from what is left of the screen, never under 150px.
+  assert.match(block, /clamp\(\s*150px,\s*calc\([\s\S]*?100svh[\s\S]*?\/ 2\s*\),\s*240px\s*\)/);
+  assert.match(block, /\.re-dive-tab \{\s*align-self: end;\s*\}/);
+  // Still paint: nothing moves or is reordered, and no text is set here.
+  assert.doesNotMatch(block, /animation|transition|(^|[;{\s])order\s*:|font(-size)?\s*:/);
+  // The other layouts stay as they were.
+  assert.match(reDive, /@media \(min-width: 600px\) and \(max-width: 1279px\) \{/);
+  assert.match(reDive, /@media \(min-width: 1024px\) and \(max-width: 1279px\) \{/);
+  assert.match(reDive, /grid-template-columns: minmax\(0, 2fr\) repeat\(5, minmax\(0, 1fr\)\);/);
+  // Forced colours still draw every plate as a system line.
+  const forced = reDive.slice(reDive.indexOf("@media (forced-colors: active)"));
+  assert.match(forced, /\.manager-slot-grid > \.signal\) \{\s*border: 1px solid CanvasText;/);
+});

@@ -1288,6 +1288,13 @@ async function checkReDive(browser, name, tier) {
           )
         : [],
       ciel: section?.querySelector(".ciel-signal img")?.getAttribute("src") ?? null,
+      // How many of the six ranks sit wholly inside the landing view.
+      inView: section
+        ? [...section.querySelectorAll(".signal-array > .signal")].filter((card) => {
+            const rect = card.getBoundingClientRect();
+            return rect.top >= 0 && rect.bottom <= window.innerHeight + 0.5;
+          }).length
+        : 0,
       dialogFlag: document.documentElement.hasAttribute("data-dialog-open"),
       bodyPosition: document.body.style.position,
       unlocked: sessionStorage.getItem("dw-re-dive"),
@@ -1303,6 +1310,10 @@ async function checkReDive(browser, name, tier) {
   assert.ok(state.arrived);
   assert.deepEqual(state.cards, REDIVE_CARDS);
   assert.equal(state.ciel, "/ciel-thumb-20260924.jpeg");
+  // Landscape tablets and desktops land with all six ranks in view.
+  if (name === "tablet-1024" || name === "desktop") {
+    assert.equal(state.inView, 6, `${name} ${tier}: all six ranks in the landing view`);
+  }
   assert.equal(state.dialogFlag, false);
   assert.equal(state.bodyPosition, "");
   assert.equal(state.unlocked, "1");
@@ -1614,8 +1625,9 @@ try {
     }
   }
   if (sections.has("redive")) {
+    // tablet-1024 is the landscape tablet spread (styles-world-re-dive.css).
     for (const name of profileNames.filter((entry) =>
-      ["pixel", "galaxy", "desktop"].includes(entry),
+      ["pixel", "galaxy", "tablet-1024", "desktop"].includes(entry),
     )) {
       for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
         await checkReDive(browser, name, tier);

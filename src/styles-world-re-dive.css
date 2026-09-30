@@ -565,6 +565,85 @@
   }
 }
 
+/* ---- Landscape tablets (1024-1279px wide, wider than tall): one spread. ----
+   I at 2 x 2 ran the grid past the first screen (at 1180 x 820 IV-VI began
+   at 965px). Here the plate holds the landing view: the ground above it is
+   the quarter screen the section asks for (the lip's flame stays clear; the
+   lip itself, and so the transition's picture, is unchanged), the heading
+   column carries the FRONT / 01 label at its foot, and the ranks read as one
+   spread beside it: I standing over the full height, II | III and IV | V
+   in two rows, VI a sealed strip under them as on phones. Rows are sized to
+   what is left of the screen, so the strip ends at the fold. */
+@media (min-width: 1024px) and (max-width: 1279px) and (orientation: landscape) {
+  .site-shell.film-edition.mirage-edition .re-dive-section {
+    --rd-band: max(26svh, calc(var(--re-dive-edge-h) * 0.62));
+    --rd-pad: clamp(22px, 3.6vw, 48px);
+    --rd-strip: 64px;
+    padding-top: var(--rd-band);
+  }
+
+  .site-shell.film-edition.mirage-edition .re-dive-section .re-dive-tab {
+    align-self: end;
+  }
+
+  .site-shell.film-edition.mirage-edition .re-dive-section .manager-slot-grid.signal-array {
+    grid-template-columns: minmax(0, 1.3fr) repeat(2, minmax(0, 1fr));
+    grid-template-rows:
+      repeat(
+        2,
+        clamp(
+          150px,
+          calc(
+            (
+                100svh - var(--film-topbar-height, 76px) - var(--rd-band) - 2 * var(--rd-pad) -
+                  var(--rd-strip) - 36px
+              ) / 2
+          ),
+          240px
+        )
+      )
+      var(--rd-strip);
+  }
+
+  .site-shell.film-edition.mirage-edition .re-dive-section .signal-array > .signal {
+    aspect-ratio: auto;
+  }
+
+  .site-shell.film-edition.mirage-edition .re-dive-section .signal-array > .signal.ciel-signal {
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    .re-dive-section
+    .signal-array
+    > .signal.is-vacant:last-child {
+    grid-column: 2 / -1;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    column-gap: 14px;
+    padding-block: 10px;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    .re-dive-section
+    .signal-array
+    > .signal.is-vacant:last-child
+    > :is(span, i, b) {
+    grid-row: 1;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    .re-dive-section
+    .signal-array
+    > .signal.is-vacant:last-child
+    > i {
+    height: 20px;
+    margin: 0;
+  }
+}
+
 /* ---- From 1280px: one row of six, I twice as wide. ---- */
 @media (min-width: 1280px) {
   .site-shell.film-edition.mirage-edition .re-dive-section .manager-slot-grid.signal-array {
