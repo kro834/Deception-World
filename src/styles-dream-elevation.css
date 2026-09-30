@@ -648,6 +648,31 @@ html[data-world-effects="economy"]
     height: 100%;
     min-height: 0;
   }
+
+  /* The three arches share their rows: each arch's portrait, role line,
+     name and link sit on the row's common tracks, so the longest banner
+     (東風谷 慶弥 at 667px) sets every portrait's height and the three
+     seals, banners and captions line up across the row. */
+  @supports (grid-template-rows: subgrid) {
+    /* The three stand in one row, so the grid's row gap would only fall
+       between an arch's own tracks. */
+    .dream-page.dream-page .dream-character-grid {
+      row-gap: 0;
+    }
+
+    .dream-page.dream-page .dream-character-grid > article {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    .dream-page.dream-page .dream-character-grid button.ios26-glass {
+      grid-row: 1 / -1;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+  }
 }
 
 /* ---------- Forced colours ---------- */

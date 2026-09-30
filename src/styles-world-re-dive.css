@@ -563,6 +563,13 @@
     align-items: start;
     column-gap: clamp(28px, 3vw, 40px);
   }
+
+  /* The title grows with the width (3.2vw) but its column holds at 240px,
+     so from about 1200px SIX SIGNALS broke over two lines (four in all).
+     It stops at the size that still keeps SIX SIGNALS on one line. */
+  .site-shell.film-edition.mirage-edition .re-dive-section .threat-copy h3 {
+    font-size: min(3.2vw, 37.5px);
+  }
 }
 
 /* ---- Landscape tablets (1024-1279px wide, wider than tall): one spread. ----

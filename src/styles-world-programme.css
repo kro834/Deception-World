@@ -47,7 +47,10 @@
   gap: clamp(24px, 3vw, 44px) clamp(32px, 6vw, 96px);
   min-height: 100svh;
   height: auto;
-  padding: calc(var(--film-topbar-height, 80px) + 32px) 6vw 56px;
+  /* The fallback is the bar's real 76px: Back/Forward restores the reader's
+     offset before the measured value arrives, and an 80px guess made the
+     hero 4px taller for that moment, so the page settled 4px off. */
+  padding: calc(var(--film-topbar-height, 76px) + 32px) 6vw 56px;
   background: #090b0f;
   border-bottom: 1px solid var(--programme-rule);
 }

@@ -131,7 +131,7 @@
 .site-shell.film-edition .hero::before {
   content: "";
   position: absolute;
-  inset: calc(var(--film-topbar-height, 80px) + 14px) 18px 18px;
+  inset: calc(var(--film-topbar-height, 76px) + 14px) 18px 18px;
   z-index: 0;
   pointer-events: none;
   background: var(--neo-bracket);
