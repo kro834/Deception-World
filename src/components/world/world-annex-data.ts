@@ -263,7 +263,7 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
     role: "仮面ライダーアルゲノム",
     profile: [
       {
-        text: "黒髪に赤き瞳を宿した整った顔立ちの青年、紅城真守。",
+        text: "白髪に赤き瞳を宿した整った顔立ちの青年、紅城真守。",
       },
     ],
     line: "アルゲノム.......世界を奪う義賊だ",
