@@ -59,18 +59,13 @@ test("its own side first; the far rows only when clear; the fallback weighs dist
   assert.match(zeus, /index > 0 && topBar !== null && meetsAny\(candidateRect, \[topBar\]\)/);
 });
 
-test("a step is held for one clear settle before it goes home", () => {
-  assert.match(zeus, /away\.clearSettles < 1\) \{\s*away\.clearSettles \+= 1;\s*return shown;/);
+test("a clear step stays put until meaningful scrolling or a real obstruction", () => {
+  assert.match(zeus, /if \(shownClear && !movedOn\) return shown;/);
   assert.match(
     zeus,
     /Math\.abs\(scroller\.scrollTop - away\.scrollTop\) > viewport\.height \* 0\.6/,
-  ); // A still page gets one more look, so a held step does not stay off a
-  // clear home until the next scroll.
-  assert.match(zeus, /const ZEUS_STEP_RECHECK_MS = 900;/);
-  assert.match(
-    zeus,
-    /if \(stepAway\.current\?\.clearSettles === 1 && placementTimer\.current == null\) \{/,
   );
+  assert.doesNotMatch(zeus, /ZEUS_STEP_RECHECK_MS|clearSettles/);
 });
 
 test("a page-wide flip waits for the third step up; edge docks clamp on the resting size", () => {
