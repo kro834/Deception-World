@@ -33,7 +33,7 @@ test("Liquid Glass rails use concentric shell, lens, and control radii", async (
 test("pointer lighting coalesces work and pauses with the page", async () => {
   const pointer = await read("src/components/world/use-liquid-pointer-light.ts");
   const mode = await read("src/components/world/use-world-mode.ts");
-  assert.match(pointer, /if \(!active && pointerId === null\) return/);
+  assert.match(pointer, /if \(!active && pointerId === null && !resumePointer\) return/);
   assert.match(pointer, /visibilitychange/);
   assert.match(pointer, /requestAnimationFrame\(flush\)/);
   // The economy flag (data-world-effects) is set before the first paint by the

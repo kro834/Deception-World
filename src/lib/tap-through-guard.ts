@@ -13,6 +13,9 @@ export function guardTapThrough() {
     // A script's own .click() (the Zeus return closing the menu) still runs.
     if (!event.isTrusted) return;
     if (performance.now() > until) return;
+    // Enter/Space and assistive activation produce a trusted detail-0 click,
+    // not the touch's compatibility click on the control underneath.
+    if (event.type === "click" && event instanceof MouseEvent && event.detail === 0) return;
     // No focus move, no navigation, no handler below.
     event.preventDefault();
     event.stopPropagation();

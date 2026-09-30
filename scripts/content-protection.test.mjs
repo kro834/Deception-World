@@ -16,6 +16,9 @@ test("the app blocks clipboard actions and content extraction at the root", () =
   assert.match(guard, /key === "c" \|\| key === "x" \|\| key === "v"/);
   assert.match(styles, /body \*[\s\S]*?-webkit-user-select: none !important/);
   assert.match(styles, /\[contenteditable="plaintext-only"\][\s\S]*?user-select: text !important/);
+  assert.match(styles, /input:not\(:disabled\):not\(\[readonly\]\)/);
+  assert.match(styles, /textarea:not\(:disabled\):not\(\[readonly\]\)/);
+  assert.match(styles, /-webkit-touch-callout: default !important/);
 });
 
 test("sandboxed form archives receive the same clipboard protection", () => {
@@ -31,7 +34,13 @@ test("sandboxed form archives receive the same clipboard protection", () => {
 });
 
 test("selection protection never cancels text-origin native pan gestures", () => {
-  for (const file of ["src/components/content-protection.tsx", "public/archive-scroll-stability.js"]) {
-    assert.doesNotMatch(read(file), /addEventListener\(["'](?:selectstart|touchstart|touchmove|pointerdown|pointermove)["']/);
+  for (const file of [
+    "src/components/content-protection.tsx",
+    "public/archive-scroll-stability.js",
+  ]) {
+    assert.doesNotMatch(
+      read(file),
+      /addEventListener\(["'](?:selectstart|touchstart|touchmove|pointerdown|pointermove)["']/,
+    );
   }
 });

@@ -13,8 +13,8 @@
   --font-sans: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
 }
 
-/* Site-wide content protection. Editable controls retain cursor/selection
-   ergonomics, while the capture guard blocks their clipboard operations. */
+/* Site-wide content protection. Editable controls retain normal selection,
+   clipboard editing and text menus for the user's own input. */
 html,
 body,
 body * {
@@ -23,10 +23,18 @@ body * {
   user-select: none !important;
 }
 
-:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]),
-:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]) * {
+body :where(
+  input:not(:disabled):not([readonly]),
+  textarea:not(:disabled):not([readonly]),
+  [contenteditable="true"],
+  [contenteditable="plaintext-only"],
+  [contenteditable=""]
+),
+body :where([contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""])
+  :not([contenteditable="false"], [contenteditable="false"] *) {
   -webkit-user-select: text !important;
   user-select: text !important;
+  -webkit-touch-callout: default !important;
 }
 
 /* ── Form archive route chrome and dive ─────────────────────── */

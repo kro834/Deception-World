@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { preloadRouteWithDeadline } from "../src/lib/route-warmup-deadline.ts";
 
 const source = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 const code = ts.transpileModule(source, {
@@ -58,9 +59,15 @@ function mount(pathname = "/world") {
       return serial;
     },
     clearTimeout: (id) => timers.delete(id),
+    setInterval: (callback) => {
+      timers.set(++serial, callback);
+      return serial;
+    },
+    clearInterval: (id) => timers.delete(id),
   });
   const router = {
     preloadRoute: () => warmup,
+    subscribe: () => () => undefined,
     history: {
       subscribe(callback) {
         subscribers.add(callback);
@@ -108,6 +115,7 @@ function mount(pathname = "/world") {
           },
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
+      if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       return {};
     },
   });
@@ -135,6 +143,30 @@ function mount(pathname = "/world") {
   };
 }
 
+for (const to of ["/characters/ciel", "/managers/zeus", "/form-archive", "/characters/dante"]) {
+  test(`unmount during navigation to ${to} invalidates pending route work`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to });
+    ui.cleanup();
+    assert.equal(
+      ui.root.dataset.routeScrollSettling,
+      undefined,
+      "disposal immediately releases scroll motion",
+    );
+    const gateUpdates = ui.gates.length;
+    ui.releaseWarmup();
+    for (let index = 0; index < 16; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    assert.equal(ui.navigations.length, 0, "an unmounted provider must not navigate");
+    assert.equal(ui.gates.length, gateUpdates, "an unmounted provider must not update its cover");
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.root.dataset.routeCover, undefined);
+  });
+}
+
 for (const action of ["BACK", "FORWARD", "GO"]) {
   test(`${action} during a covered route warmup prevents its later navigation`, async () => {
     const ui = mount();
@@ -142,6 +174,11 @@ for (const action of ["BACK", "FORWARD", "GO"]) {
     assert.equal(ui.root.dataset.loading, "true");
     ui.history(action);
     assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(
+      ui.root.dataset.routeScrollSettling,
+      undefined,
+      "history immediately restores scroll motion",
+    );
     ui.releaseWarmup();
     for (let index = 0; index < 8; index++) await ui.flushTimers();
     await pending;

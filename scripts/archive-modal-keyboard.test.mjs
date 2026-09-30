@@ -17,8 +17,9 @@ test("the generated Realm controller keeps the same modal keyboard guard", () =>
   assert.ok(createRealmArchiveMotion(master).includes(keydownListener));
 });
 
-function keyboardHarness({ lightboxOpen = false, sheetIsOpen = false } = {}) {
+function keyboardHarness({ lightboxOpen = false, sheetIsOpen = false, deferTimers = false } = {}) {
   const calls = [];
+  const timers = [];
   let listener;
   const context = vm.createContext({
     document: {
@@ -29,14 +30,20 @@ function keyboardHarness({ lightboxOpen = false, sheetIsOpen = false } = {}) {
     },
     lightbox: { hasAttribute: () => lightboxOpen },
     sheetOpen: sheetIsOpen,
-    closeSelectorSheet: () => calls.push("close-sheet"),
-    openSelectorSheet: () => calls.push("open-sheet"),
+    closeSelectorSheet: () => {
+      calls.push("close-sheet");
+      context.sheetOpen = false;
+    },
+    openSelectorSheet: () => {
+      calls.push("open-sheet");
+      context.sheetOpen = true;
+    },
     selector: { querySelectorAll: () => [] },
     searchInput: { focus: () => calls.push("focus-search") },
     reducedMotion: { matches: true },
     window: {
       matchMedia: () => ({ matches: true }),
-      setTimeout: (callback) => callback(),
+      setTimeout: (callback) => (deferTimers ? timers.push(callback) : callback()),
     },
     HTMLInputElement: class {},
     HTMLTextAreaElement: class {},
@@ -45,10 +52,12 @@ function keyboardHarness({ lightboxOpen = false, sheetIsOpen = false } = {}) {
   vm.runInContext(keydownListener, context);
   return {
     calls,
-    press(key) {
+    runTimers: () => timers.splice(0).forEach((callback) => callback()),
+    press(key, properties = {}) {
       let prevented = false;
       listener({
         key,
+        ...properties,
         target: {},
         preventDefault: () => {
           prevented = true;
@@ -77,4 +86,22 @@ test("search and selector Escape keep working when no image modal is open", () =
   const sheet = keyboardHarness({ sheetIsOpen: true });
   assert.equal(sheet.press("Escape"), true);
   assert.deepEqual(sheet.calls, ["close-sheet"]);
+});
+
+test("IME confirmation and cancellation stay with the composing input", () => {
+  for (const properties of [{ isComposing: true }, { keyCode: 229 }]) {
+    const harness = keyboardHarness({ sheetIsOpen: true });
+    for (const key of ["/", "Enter", "Escape"]) {
+      assert.equal(harness.press(key, properties), false);
+    }
+    assert.deepEqual(harness.calls, []);
+  }
+});
+
+test("closing keyboard search cancels its pending mobile focus", () => {
+  const harness = keyboardHarness({ deferTimers: true });
+  harness.press("/");
+  harness.press("Escape");
+  harness.runTimers();
+  assert.deepEqual(harness.calls, ["open-sheet", "close-sheet"]);
 });

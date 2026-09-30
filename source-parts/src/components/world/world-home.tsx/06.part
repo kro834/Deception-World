@@ -1,3 +1,8 @@
+          </div>
+        </section>
+      </section>
+
+      <section className="riders-section" id="riders" data-performance-region>
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index" data-film-reveal>
           <span>02</span>

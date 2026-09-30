@@ -145,6 +145,20 @@ try {
       await dialog.waitFor();
       assert.equal((await focusAppearance(dialog)).emphasized, false);
       assert.equal((await focusAppearance(close)).emphasized, false);
+      const image = await dialog.locator(".other-artwork-viewer > img").boundingBox();
+      const imageX = image.x + image.width / 2;
+      const imageY = image.y + Math.min(image.height / 2, 100);
+      await page.mouse.move(imageX, imageY);
+      await page.mouse.down();
+      await page.mouse.move(4, imageY, { steps: 6 });
+      await page.mouse.up();
+      assert.equal(await dialog.count(), 1, "dragging out of artwork must keep the viewer open");
+      await page.mouse.move(4, 100);
+      await page.mouse.down();
+      await page.mouse.move(4, 200, { steps: 6 });
+      await page.mouse.move(4, 100, { steps: 6 });
+      await page.mouse.up();
+      assert.equal(await dialog.count(), 1, "a gutter drag is not a backdrop tap");
       await page.mouse.click(4, 100);
       await dialog.waitFor({ state: "detached" });
     }
@@ -168,9 +182,25 @@ try {
     await page.screenshot({
       path: checkedOutputPath(`${output}/${engine}-${width}-cards.png`, [output]),
     });
+    // Leave the World through history with the native modal still open.
+    // This exercises React portal disposal, rather than only native close().
+    await page.goto(new URL("/characters/terra", base).href);
+    await page.locator(".manager-back").click();
+    await page.waitForURL("**/world#manager-archive-other");
+    await page.getByRole("button", { name: "ハイクの画像を拡大", exact: true }).click();
+    await page.locator("#other-artwork-haiku[open]").waitFor();
+    await page.goBack();
+    await page.waitForURL("**/characters/terra");
+    await page.locator(".related-character-page").waitFor();
+    assert.equal(await page.locator(".other-artwork-dialog").count(), 0);
+    assert.notEqual(
+      await page.evaluate(() => getComputedStyle(document.documentElement).overflowY),
+      "hidden",
+      "history navigation must release the modal scroll lock",
+    );
     assert.deepEqual(errors, []);
     console.log(
-      `${engine} ${width}x${height}: artwork, six slots, close/escape/backdrop, focus and scrolling PASS`,
+      `${engine} ${width}x${height}: artwork, six slots, close/escape/backdrop, drag, focus, scrolling and route disposal PASS`,
     );
     await page.close();
   }

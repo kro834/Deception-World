@@ -480,3 +480,8 @@ const EPISODES: EpisodeRecord[] = [
         label: "仮面ライダーサイファー",
         src: "/rider-cipher.jpeg",
         pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",
+        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],

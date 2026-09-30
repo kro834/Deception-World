@@ -129,7 +129,7 @@ test("a cold deep link to /world lands in one jump under the header", () => {
   const cold = loadGate.slice(loadGate.indexOf("// A deep link opened from outside the site"));
   assert.match(
     cold,
-    /useLayoutEffect\(\(\) => \{\s*if \(!window\.location\.hash\) return;\s*const releaseScrollMotion = holdRouteScrollMotion\(\);/,
+    /useLayoutEffect\(\(\) => \{\s*if \(!window\.location\.hash\) return;\s*const releaseScrollMotion = holdManagedScrollMotion\(\);/,
   );
   assert.match(
     cold,

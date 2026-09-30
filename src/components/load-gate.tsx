@@ -19,6 +19,7 @@ import {
   type OpeningHandoffSource,
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
+import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
 
 type RiderDiveVariant =
   "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
@@ -802,6 +803,22 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const [signal, setSignal] = useState<"idle" | "running" | "done">("idle");
   const signalTimer = useRef(0);
   const arrivalTimer = useRef(0);
+  const [delayedRoute, setDelayedRoute] = useState<{ href: string; focus: boolean } | null>(null);
+  const delayRetryRef = useRef<HTMLAnchorElement>(null);
+  const scrollMotionReleases = useRef(new Set<() => void>());
+  const holdManagedScrollMotion = useCallback(() => {
+    const release = holdRouteScrollMotion();
+    const releaseManaged = () => {
+      release();
+      scrollMotionReleases.current.delete(releaseManaged);
+    };
+    scrollMotionReleases.current.add(releaseManaged);
+    return releaseManaged;
+  }, []);
+
+  useEffect(() => {
+    if (delayedRoute?.focus) delayRetryRef.current?.focus({ preventScroll: true });
+  }, [delayedRoute]);
 
   pathnameRef.current = pathname;
 
@@ -928,9 +945,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const pendingScrollReleases = scrollMotionReleases.current;
     const cancelTransition = () => {
       transitionId.current += 1;
       routeHashSettle += 1;
+      pendingScrollReleases.forEach((release) => release());
       window.clearTimeout(signalTimer.current);
       window.clearTimeout(arrivalTimer.current);
       for (const frame of openingFocusFrames.current) {
@@ -949,6 +968,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       document.documentElement.removeAttribute("data-route-cover");
       setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
       setSignal("idle");
+      setDelayedRoute(null);
     };
     document.addEventListener("deception-world:cancel-route-transition", cancelTransition);
     window.addEventListener("pagehide", cancelTransition);
@@ -960,6 +980,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       }
     });
     return () => {
+      // A pending preload can settle after disposal (or router replacement).
+      // Invalidate it before releasing the cover so it cannot navigate later.
+      transitionId.current += 1;
+      routeHashSettle += 1;
+      pendingScrollReleases.forEach((release) => release());
+      window.clearTimeout(signalTimer.current);
+      window.clearTimeout(arrivalTimer.current);
       stopHistory();
       document.removeEventListener("deception-world:cancel-route-transition", cancelTransition);
       window.removeEventListener("pagehide", cancelTransition);
@@ -988,7 +1015,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // before the router's landing runs, and lets it go.
   useLayoutEffect(() => {
     if (!window.location.hash) return;
-    const releaseScrollMotion = holdRouteScrollMotion();
+    const releaseScrollMotion = holdManagedScrollMotion();
     let hash = "";
     try {
       hash = decodeURIComponent(window.location.hash.slice(1));
@@ -1000,7 +1027,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       return;
     }
     void settleRouteHash(hash).finally(() => window.setTimeout(releaseScrollMotion, 360));
-  }, []);
+    return releaseScrollMotion;
+  }, [holdManagedScrollMotion]);
 
   const go = useCallback(
     async ({
@@ -1070,6 +1098,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (busy.current) return;
+      setDelayedRoute(null);
       const changesDocument = pathname !== to;
       const isArchiveTransition =
         changesDocument && (pathname === "/form-archive" || to === "/form-archive");
@@ -1087,8 +1116,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const riderTransitionVariant = diveVariant ?? cutInVariant;
       const requestId = ++transitionId.current;
       const isCurrent = () => transitionId.current === requestId;
+      const warmCoveredDestination = async () => {
+        const ready = await preloadRouteWithDeadline(() =>
+          router.preloadRoute({ to: to as never }),
+        );
+        if (!isCurrent()) return false;
+        if (!ready)
+          setDelayedRoute({ href: hash ? `${to}#${hash}` : to, focus: Boolean(focusDestination) });
+        return ready;
+      };
       if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
-        const releaseScrollMotion = changesDocument || hash ? holdRouteScrollMotion() : null;
+        const releaseScrollMotion = changesDocument || hash ? holdManagedScrollMotion() : null;
         const assetWarmup = assets.length
           ? preloadAssets(assets, () => undefined).catch(() => undefined)
           : null;
@@ -1123,7 +1161,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const tier = cineTier(reduceMotion);
 
       if (riderTransitionVariant && !isArchiveTransition) {
-        const releaseScrollMotion = holdRouteScrollMotion();
+        const releaseScrollMotion = holdManagedScrollMotion();
         // PREV / NEXT between dossiers flips the file; entry from anywhere
         // else keeps the rider's own dive or cut-in.
         const flip =
@@ -1172,12 +1210,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await nextFrame();
             if (!isCurrent()) return;
           }
-          // Let the requested first-paint images keep warming while the route
-          // module loads, without delaying the cinematic cover on slow links.
-          await Promise.race([
-            router.preloadRoute({ to: to as never }).catch(() => undefined),
-            wait(2400),
-          ]);
+          // Images warm independently of the route chunk. A stalled chunk
+          // releases the cover before navigation, rather than locking the page.
+          if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
@@ -1234,7 +1269,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (assets.length) {
             void preloadAssets(assets, () => undefined).catch(() => undefined);
           }
-          await router.preloadRoute({ to: to as never }).catch(() => undefined);
+          if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
@@ -1292,7 +1327,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
         // Preload only the route module. The archive iframe remains the sole
         // owner of its multi-megabyte document, avoiding duplicate downloads.
-        await router.preloadRoute({ to: to as never }).catch(() => undefined);
+        if (!(await warmCoveredDestination())) return;
         const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
         if (coverTimeLeft > 0) await wait(coverTimeLeft);
         if (!isCurrent()) return;
@@ -1317,7 +1352,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [finishOpeningHandoff, markRouteCover, navigate, pathname, router],
+    [finishOpeningHandoff, holdManagedScrollMotion, markRouteCover, navigate, pathname, router],
   );
 
   const api = useMemo(
@@ -1335,6 +1370,23 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         scene={gate.scene}
       />
       <RouteSignal state={signal} />
+      {delayedRoute && (
+        <aside
+          className="route-load-delay"
+          role="alert"
+          aria-label="ページの読み込みが遅れています"
+        >
+          <p>読み込みが遅れています。元の画面で操作を続けられます。</p>
+          <div>
+            <a ref={delayRetryRef} href={delayedRoute.href}>
+              もう一度開く
+            </a>
+            <button type="button" onClick={() => setDelayedRoute(null)}>
+              閉じる
+            </button>
+          </div>
+        </aside>
+      )}
       <OpeningHandoffLayer
         snapshot={openingSnapshot}
         onCovered={notifyOpeningHandoffCovered}

@@ -115,6 +115,58 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
     ],
     [relatedCard("02", "/character-luna.jpeg"), oldCard("luna", "moon"), 1],
   );
+  // Shuffle previews now warm only their small candidate pool and move only
+  // after decode; reverse those behavior-only edits so this copy pin remains
+  // scoped to changes in the /world text and layout.
+  const previewReadiness = [
+    '    const previewReady = new Set<number>();',
+    '    previewPool.forEach((index) => {',
+    '      const image = index === finalPoster ? finalImage : new Image();',
+    '      if (image !== finalImage) {',
+    '        image.decoding = "async";',
+    '        image.fetchPriority = "low";',
+    '        preparePosterImage(image, POSTERS[index].src);',
+    '      }',
+    '      const decoded = index === finalPoster ? finalReady : image.decode?.();',
+    '      if (!decoded) {',
+    '        const markLoaded = () => {',
+    '          if (image.complete && image.naturalWidth > 0) previewReady.add(index);',
+    '        };',
+    '        markLoaded();',
+    '        image.addEventListener("load", markLoaded, { once: true });',
+    '        return;',
+    '      }',
+    '      void decoded',
+    '        .then(() => {',
+    '          if (shuffleRunId.current !== runId) return;',
+    '          if (image.naturalWidth > 0) previewReady.add(index);',
+    '        })',
+    '        .catch(() => {',
+    '          if (shuffleRunId.current !== runId) return;',
+    '          if (image.complete && image.naturalWidth > 0) previewReady.add(index);',
+    '        });',
+    '    });',
+    '',
+    '',
+  ].join("\n");
+  posterHooks.push(
+    [previewReadiness, "", 1],
+    [
+      "        const previewPoster = previewPosters[index % previewPosters.length];\n" +
+        "        const ready = isFinalStep\n" +
+        "          ? await waitForFinalImage()\n" +
+        "          : previewReady.has(previewPoster);",
+      "        const ready = isFinalStep ? await waitForFinalImage() : true;",
+      1,
+    ],
+    [
+      "        const next = isFinalStep ? finalPoster : previewPoster;\n" +
+        "        if (ready || (isFinalStep && finalImage.complete && finalImage.naturalWidth > 0)) {",
+      "        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];\n" +
+        "        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {",
+      1,
+    ],
+  );
   for (const [edited, original, count] of posterHooks) {
     assert.equal(stripped.split(edited).length - 1, count, edited);
     stripped = stripped.replaceAll(edited, original);

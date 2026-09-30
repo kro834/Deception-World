@@ -1,8 +1,3 @@
-        alt: "仮面ライダーサイファー",
-        width: 1024,
-        height: 1280,
-        to: "/riders/cipher",
-        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
       },
       {
         label: "仮面ライダーレディック",
@@ -481,3 +476,13 @@ export function WorldHome() {
     let firstFrame = 0;
     let secondFrame = 0;
     let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",

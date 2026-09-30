@@ -24,6 +24,15 @@ test("Realm motion controller is regenerated exactly from Saga's current control
   assert.equal(realmMotion.replaceAll("\r\n", "\n"), createRealmArchiveMotion(sagaArchive));
 });
 
+test("Realm form selection preserves the Realm identity in the browser title", () => {
+  const controller = createRealmArchiveMotion(sagaArchive);
+  assert.match(
+    controller,
+    /document\.title = selectedName \+ '｜仮面ライダーレルム フォームアーカイブ'/,
+  );
+  assert.doesNotMatch(controller, /仮面ライダーサーガ フォームアーカイブ/);
+});
+
 test("Windows and Unix source archives generate identical controllers", () => {
   const lf = sagaArchive.replaceAll("\r\n", "\n");
   assert.equal(createRealmArchiveMotion(lf), createRealmArchiveMotion(lf.replaceAll("\n", "\r\n")));
@@ -31,7 +40,7 @@ test("Windows and Unix source archives generate identical controllers", () => {
 
 test("Realm archive loads its normalized motion controller in both deliverables", () => {
   for (const html of [realmStandalone, realmEmbedded]) {
-    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20260823-r41" defer><\/script>/);
+    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20260930-r48" defer><\/script>/);
   }
 });
 

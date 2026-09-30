@@ -167,7 +167,7 @@ test("covered navigation waits for destination readiness and is cancellation-saf
 
   const cancellationEffect = sliceBetween(
     gate,
-    "useEffect(() => {\n    const cancelTransition",
+    "useEffect(() => {\n    const pendingScrollReleases = scrollMotionReleases.current;\n    const cancelTransition",
     "\n  }, [router]);",
     "route-transition cancellation effect",
   );

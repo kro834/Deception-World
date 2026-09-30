@@ -39,7 +39,7 @@ function trackPressesOnly() {
     pointerId = null;
   };
   const onPointerDown = (event: PointerEvent) => {
-    if (!event.isPrimary || !(event.target instanceof Element)) return;
+    if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return;
     const target = event.target.closest(SELECTOR) as LiquidTarget | null;
     if (!target) return;
     release();
@@ -75,14 +75,14 @@ export function useLiquidPointerLight() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const reducedTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)");
-    if (reducedMotion.matches || reducedTransparency.matches || prefersLightweightRendering(navigator)) return;
-    if (document.documentElement.hasAttribute("data-android-renderer")) return trackPressesOnly();
+    if (prefersLightweightRendering(navigator)) return;
 
     let active: LiquidTarget | null = null;
     let pressed: LiquidTarget | null = null;
     let pointerId: number | null = null;
     let frame = 0;
     let nextPoint: { target: LiquidTarget; x: number; y: number } | null = null;
+    let resumePointer = false;
 
     const findTarget = (target: EventTarget | null) =>
       target instanceof Element ? (target.closest(SELECTOR) as LiquidTarget | null) : null;
@@ -90,7 +90,8 @@ export function useLiquidPointerLight() {
     const setActive = (target: LiquidTarget | null, value: boolean) => {
       if (!target) return;
       if (value) {
-        if (target.dataset.liquidPointerActive !== "true") target.dataset.liquidPointerActive = "true";
+        if (target.dataset.liquidPointerActive !== "true")
+          target.dataset.liquidPointerActive = "true";
       } else if (target.dataset.liquidPointerActive) {
         delete target.dataset.liquidPointerActive;
       }
@@ -99,7 +100,8 @@ export function useLiquidPointerLight() {
     const setPressed = (target: LiquidTarget | null, value: boolean) => {
       if (!target) return;
       if (value) {
-        if (target.dataset.liquidPointerPressed !== "true") target.dataset.liquidPointerPressed = "true";
+        if (target.dataset.liquidPointerPressed !== "true")
+          target.dataset.liquidPointerPressed = "true";
       } else if (target.dataset.liquidPointerPressed) {
         delete target.dataset.liquidPointerPressed;
       }
@@ -139,20 +141,24 @@ export function useLiquidPointerLight() {
 
     const onPointerOver = (event: PointerEvent) => {
       const target = findTarget(event.target);
-      if (!target || (event.relatedTarget instanceof Node && target.contains(event.relatedTarget))) return;
+      if (!target || (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)))
+        return;
       activate(target, event.clientX, event.clientY);
     };
     const onPointerMove = (event: PointerEvent) => {
       if (!event.isPrimary) return;
       // `pointerover` already activates an eligible control. Avoid a DOM
       // `closest()` lookup for every mouse movement elsewhere on the page.
-      if (!active && pointerId === null) return;
+      // The cursor may already be over a control when a preference is turned
+      // off; its next move resumes the light without needing a new pointerover.
+      if (!active && pointerId === null && !resumePointer) return;
+      resumePointer = false;
       const target = findTarget(event.target) ?? (pointerId === event.pointerId ? pressed : null);
       if (target) activate(target, event.clientX, event.clientY);
     };
     const onPointerDown = (event: PointerEvent) => {
       const target = findTarget(event.target);
-      if (!target || !event.isPrimary) return;
+      if (!target || !event.isPrimary || event.button !== 0) return;
       pressed = target;
       pointerId = event.pointerId;
       setPressed(target, true);
@@ -164,7 +170,12 @@ export function useLiquidPointerLight() {
     };
     const onPointerOut = (event: PointerEvent) => {
       const target = findTarget(event.target);
-      if (!target || (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) || target === pressed) return;
+      if (
+        !target ||
+        (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) ||
+        target === pressed
+      )
+        return;
       setActive(target, false);
       if (active === target) active = null;
     };
@@ -176,7 +187,8 @@ export function useLiquidPointerLight() {
     };
     const onFocusOut = (event: FocusEvent) => {
       const target = findTarget(event.target);
-      if (!target || (event.relatedTarget instanceof Node && target.contains(event.relatedTarget))) return;
+      if (!target || (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)))
+        return;
       setActive(target, false);
       if (active === target) active = null;
     };
@@ -196,29 +208,50 @@ export function useLiquidPointerLight() {
       if (document.hidden) reset();
     };
 
-    document.addEventListener("pointerover", onPointerOver, { passive: true });
-    document.addEventListener("pointermove", onPointerMove, { passive: true });
-    document.addEventListener("pointerdown", onPointerDown, { passive: true });
-    document.addEventListener("pointerup", onPointerUp, { passive: true });
-    document.addEventListener("pointercancel", onPointerUp, { passive: true });
-    document.addEventListener("pointerout", onPointerOut, { passive: true });
-    document.addEventListener("focusin", onFocusIn);
-    document.addEventListener("focusout", onFocusOut);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("blur", reset);
+    const track = () => {
+      if (document.documentElement.hasAttribute("data-android-renderer")) return trackPressesOnly();
+      resumePointer = true;
+      document.addEventListener("pointerover", onPointerOver, { passive: true });
+      document.addEventListener("pointermove", onPointerMove, { passive: true });
+      document.addEventListener("pointerdown", onPointerDown, { passive: true });
+      document.addEventListener("pointerup", onPointerUp, { passive: true });
+      document.addEventListener("pointercancel", onPointerUp, { passive: true });
+      document.addEventListener("pointerout", onPointerOut, { passive: true });
+      document.addEventListener("focusin", onFocusIn);
+      document.addEventListener("focusout", onFocusOut);
+      document.addEventListener("visibilitychange", onVisibilityChange);
+      window.addEventListener("blur", reset);
 
+      return () => {
+        document.removeEventListener("pointerover", onPointerOver);
+        document.removeEventListener("pointermove", onPointerMove);
+        document.removeEventListener("pointerdown", onPointerDown);
+        document.removeEventListener("pointerup", onPointerUp);
+        document.removeEventListener("pointercancel", onPointerUp);
+        document.removeEventListener("pointerout", onPointerOut);
+        document.removeEventListener("focusin", onFocusIn);
+        document.removeEventListener("focusout", onFocusOut);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        window.removeEventListener("blur", reset);
+        reset();
+      };
+    };
+    let stopTracking: (() => void) | null = null;
+    const syncPreferences = () => {
+      if (reducedMotion.matches || reducedTransparency.matches) {
+        stopTracking?.();
+        stopTracking = null;
+      } else if (!stopTracking) {
+        stopTracking = track();
+      }
+    };
+    syncPreferences();
+    reducedMotion.addEventListener("change", syncPreferences);
+    reducedTransparency.addEventListener("change", syncPreferences);
     return () => {
-      document.removeEventListener("pointerover", onPointerOver);
-      document.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("pointerup", onPointerUp);
-      document.removeEventListener("pointercancel", onPointerUp);
-      document.removeEventListener("pointerout", onPointerOut);
-      document.removeEventListener("focusin", onFocusIn);
-      document.removeEventListener("focusout", onFocusOut);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("blur", reset);
-      reset();
+      reducedMotion.removeEventListener("change", syncPreferences);
+      reducedTransparency.removeEventListener("change", syncPreferences);
+      stopTracking?.();
     };
   }, []);
 }

@@ -16,7 +16,7 @@ const compiled = ts.transpileModule(`${source}\nglobalThis.shuffle = shufflePost
   compilerOptions: { target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function harness() {
+function harness({ reducedMotion = true } = {}) {
   const timers = [];
   const images = [];
   const posters = [];
@@ -25,7 +25,7 @@ function harness() {
   const shuffleRunId = { current: 0 };
   const context = {
     ambientPaused: false,
-    motionReduced: true,
+    motionReduced: reducedMotion,
     poster: 0,
     prevPoster: null,
     POSTERS: [{ src: "first" }, { src: "second" }, { src: "third" }],
@@ -35,7 +35,9 @@ function harness() {
     setShuffling: (value) => busy.push(value),
     setLocked: () => {},
     goPoster: (value) => posters.push(value),
-    preparePosterImage: () => {},
+    preparePosterImage: (image, source) => {
+      image.src = source;
+    },
     window: {
       crypto: { getRandomValues: (values) => values.fill(0) },
       clearTimeout: () => {},
@@ -49,7 +51,15 @@ function harness() {
       }
       decode() {
         return new Promise((resolve, reject) => {
-          this.resolve = resolve;
+          this.load = () => {
+            this.complete = true;
+            this.naturalWidth = 800;
+          };
+          this.resolve = () => {
+            this.complete = true;
+            this.naturalWidth = 800;
+            resolve();
+          };
           this.reject = reject;
         });
       }
@@ -100,4 +110,41 @@ test("cancelled reduced-motion decode cannot overwrite a newer interaction", asy
   await settle();
   assert.deepEqual(state.posters, []);
   assert.deepEqual(state.busy, [true, false]);
+});
+
+test("normal-motion previews skip undecoded posters and use them after decode", async () => {
+  const state = harness({ reducedMotion: false });
+  state.shuffle();
+
+  assert.equal(state.images.length, 3, "the final poster preload is reused when it is also a preview");
+  state.timers[0]();
+  await settle();
+  assert.deepEqual(state.posters, [], "an undecoded preview must not replace the current poster");
+
+  state.images[0].load();
+  await settle();
+  state.timers[0]();
+  await settle();
+  assert.deepEqual(state.posters, [], "loaded pixels are still skipped while decode remains pending");
+
+  state.images.forEach((image) => image.resolve());
+  await settle();
+  state.timers[1]();
+  await settle();
+  assert.equal(state.posters.length, 1, "a decoded preview can be shown on a later beat");
+});
+
+test("late normal-motion preview decode from a cancelled shuffle cannot affect its successor", async () => {
+  const state = harness({ reducedMotion: false });
+  state.shuffle();
+  const cancelledImages = [...state.images];
+  state.shuffleActive.current = false;
+  state.shuffleRunId.current += 1;
+  state.shuffle();
+
+  cancelledImages.forEach((image) => image.resolve());
+  await settle();
+  state.timers[0]();
+  await settle();
+  assert.deepEqual(state.posters, [], "a stale timer/decode must not replace the successor shuffle's poster");
 });

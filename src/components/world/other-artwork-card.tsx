@@ -32,6 +32,12 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const keyboardOpened = useRef(false);
+  const backdropPress = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+    moved: boolean;
+  } | null>(null);
   const dialogId = `other-artwork-${artwork.id}`;
 
   useEffect(() => {
@@ -90,9 +96,23 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
                 setKeyboardFocus(true);
               }
             }}
-            onPointerDownCapture={() => {
+            onPointerDownCapture={(event) => {
               keyboardOpened.current = false;
               setKeyboardFocus(false);
+              backdropPress.current =
+                event.isPrimary && event.button === 0 && event.target === event.currentTarget
+                  ? { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false }
+                  : null;
+            }}
+            onPointerMoveCapture={(event) => {
+              const press = backdropPress.current;
+              if (press?.pointerId !== event.pointerId) return;
+              if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) {
+                press.moved = true;
+              }
+            }}
+            onPointerCancelCapture={() => {
+              backdropPress.current = null;
             }}
             onClose={() => {
               setOpen(false);
@@ -100,7 +120,18 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
               else trigger.current?.blur();
             }}
             onClick={(event) => {
-              if (event.target === event.currentTarget) dialog.current?.close();
+              // A drag starting on the artwork and ending in the gutter also
+              // targets the dialog. Only a stationary gutter press dismisses it.
+              const press = backdropPress.current;
+              backdropPress.current = null;
+              if (
+                event.target === event.currentTarget &&
+                press &&
+                !press.moved &&
+                Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 8
+              ) {
+                dialog.current?.close();
+              }
             }}
           >
             <div className="other-artwork-viewer">

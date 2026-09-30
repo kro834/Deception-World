@@ -12,10 +12,33 @@ body * {
   user-select: none !important;
 }
 
-:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]),
-:where(input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]) * {
+html
+  :where(
+    input:not(:disabled):not([readonly]),
+    textarea:not(:disabled):not([readonly]),
+    [contenteditable="true"],
+    [contenteditable="plaintext-only"],
+    [contenteditable=""]
+  ),
+html
+  :where([contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""])
+  :not([contenteditable="false"], [contenteditable="false"] *) {
   -webkit-user-select: text !important;
   user-select: text !important;
+}
+
+html
+  :where(
+    input:not(:disabled):not([readonly]),
+    textarea:not(:disabled):not([readonly]),
+    [contenteditable="true"],
+    [contenteditable="plaintext-only"],
+    [contenteditable=""]
+  ),
+html
+  :where([contenteditable="true"], [contenteditable="plaintext-only"], [contenteditable=""])
+  :not([contenteditable="false"], [contenteditable="false"] *) {
+  -webkit-touch-callout: default !important;
 }
 
 html,

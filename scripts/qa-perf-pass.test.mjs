@@ -149,7 +149,9 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
   // The deck, the backdrop and the warm-ups all ask through the helpers.
   assert.equal(home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src\)\}/g)?.length, 8);
-  assert.equal(home.match(/preparePosterImage\(/g)?.length, 3);
+  // Four preload call sites: autoplay next, low-priority next, shuffle final,
+  // and at-most-four preview candidates (sharing finalImage if it overlaps).
+  assert.equal(home.match(/preparePosterImage\(/g)?.length, 4);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
 });
 

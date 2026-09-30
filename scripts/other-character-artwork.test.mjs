@@ -71,10 +71,7 @@ test("the Other archive keeps Terra and Luna and fills exactly six slots", () =>
 test("native dialog close paths cannot leave the page scroll lock behind", () => {
   assert.match(component, /dialog\.current\.showModal\(\)/);
   assert.match(component, /onClose=\{\(\) => \{\s*setOpen\(false\)/);
-  assert.match(
-    component,
-    /if \(event\.target === event\.currentTarget\) dialog\.current\?\.close\(\)/,
-  );
+  assert.match(component, /event\.target === event\.currentTarget &&\s*press &&\s*!press\.moved/);
   assert.match(
     component,
     /onClick=\{\(event\) => \{\s*keyboardOpened\.current = event\.detail === 0;\s*dialog\.current\?\.close\(\)/,

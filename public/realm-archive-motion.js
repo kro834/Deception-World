@@ -212,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let animations = [];
   let sheetOpen = false;
   let sheetCloseTimer = 0;
+  let lastSelectorTrigger = null;
   let savedOverflow = '';
   let pointerStart = null;
   let lastLightboxTrigger = null;
@@ -386,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else row.removeAttribute('aria-current');
       });
     });
-    document.title = selectedName + '｜仮面ライダーサーガ フォームアーカイブ';
+    document.title = selectedName + '｜仮面ライダーレルム フォームアーカイブ';
   }
 
   function showOnly(index) {
@@ -621,7 +622,12 @@ document.addEventListener('DOMContentLoaded', () => {
     selector.removeAttribute('role');
     setSheetBackgroundInert(false);
     dock.querySelector('.dock-current')?.setAttribute('aria-expanded', 'false');
-    if (restoreFocus) dock.querySelector('.dock-current')?.focus({ preventScroll: true });
+    if (restoreFocus) {
+      const trigger = lastSelectorTrigger?.isConnected ? lastSelectorTrigger : dock.querySelector('.dock-current');
+      if (trigger === document.body) document.activeElement?.blur?.();
+      else trigger?.focus({ preventScroll: true });
+    }
+    lastSelectorTrigger = null;
   }
 
   function closeSelectorSheet({ restoreFocus = false, immediate = false } = {}) {
@@ -644,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.clearTimeout(sheetCloseTimer);
     sheetCloseTimer = 0;
     root.classList.remove('is-selector-sheet-closing');
+    lastSelectorTrigger = document.activeElement;
     savedOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     sheetOpen = true;
@@ -655,9 +662,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setSheetBackgroundInert(true);
     dock.querySelector('.dock-current')?.setAttribute('aria-expanded', 'true');
     window.requestAnimationFrame(() => {
-      const selected = items[selectedIndex]?.chip;
-      centerChip(items[selectedIndex]);
-      selected?.focus({ preventScroll: true });
+      if (!sheetOpen) return;
+      const available = visibleItems();
+      const selected = available.includes(items[selectedIndex]) ? items[selectedIndex] : available[0];
+      if (selected) centerChip(selected);
+      // A retained search can hide the active form, or all forms. Keep the
+      // initial focus inside the visible selector in both cases.
+      (selected?.chip || searchInput).focus({ preventScroll: true });
     });
   }
 
@@ -860,14 +871,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const searchInput = tools.querySelector('input[type="search"]');
   const clearSearch = tools.querySelector('.search-clear');
+  const normalizeSearchText = value => value.normalize('NFKC').toLocaleLowerCase('ja');
 
   function filterForms() {
-    const query = searchInput.value.trim().toLocaleLowerCase('ja');
+    const query = normalizeSearchText(searchInput.value.trim());
     let matches = 0;
     items.forEach(item => {
       const title = item.article.querySelector('.detail-head h3')?.textContent || '';
       const subtitle = item.article.querySelector('.detail-head p')?.textContent || '';
-      const haystack = (item.chip.textContent + ' ' + title + ' ' + subtitle).toLocaleLowerCase('ja');
+      const haystack = normalizeSearchText(item.chip.textContent + ' ' + title + ' ' + subtitle);
       const hidden = Boolean(query && !haystack.includes(query));
       item.chip.hidden = hidden;
       if (!hidden) matches += 1;
@@ -893,6 +905,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   searchInput.addEventListener('input', filterForms);
   searchInput.addEventListener('keydown', event => {
+    // Enter and Escape confirm/cancel Japanese IME candidates while composing.
+    // Safari can report the final confirmation with keyCode 229 alone.
+    if (event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Escape') {
       searchInput.value = '';
       filterForms();
@@ -921,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', event => {
     // The visible modal owns its keyboard interaction; do not open a sheet
     // behind it or consume the Escape meant to close the enlarged image.
-    if (lightbox.hasAttribute('open')) return;
+    if (lightbox.hasAttribute('open') || event.isComposing || event.keyCode === 229) return;
     const target = event.target;
     const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
     if (sheetOpen && event.key === 'Escape') {
@@ -947,7 +962,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.key === '/' && !typing) {
       event.preventDefault();
       if (window.matchMedia('(max-width: 620px)').matches && !sheetOpen) openSelectorSheet();
-      window.setTimeout(() => searchInput.focus(), reducedMotion.matches ? 0 : 160);
+      window.setTimeout(() => {
+        if (lightbox.hasAttribute('open')) return;
+        if (window.matchMedia('(max-width: 620px)').matches && !sheetOpen) return;
+        searchInput.focus();
+      }, reducedMotion.matches ? 0 : 160);
     }
   });
 
@@ -1086,7 +1105,26 @@ document.addEventListener('DOMContentLoaded', () => {
     finalizeLightboxClose({ restoreFocus: true });
   }
   lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', event => { if (event.target === lightbox) closeLightbox(); });
+  let lightboxBackdropPress = null;
+  lightbox.addEventListener('pointerdown', event => {
+    lightboxBackdropPress = event.isPrimary && event.button === 0 && event.target === lightbox
+      ? { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false }
+      : null;
+  }, true);
+  lightbox.addEventListener('pointermove', event => {
+    const press = lightboxBackdropPress;
+    if (press?.pointerId !== event.pointerId) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) press.moved = true;
+  }, true);
+  lightbox.addEventListener('pointercancel', () => { lightboxBackdropPress = null; }, true);
+  lightbox.addEventListener('click', event => {
+    // A drag from the image into the gutter also dispatches a dialog click.
+    // Dismiss only taps which started outside the image and stayed still.
+    const press = lightboxBackdropPress;
+    lightboxBackdropPress = null;
+    if (event.target === lightbox && press && !press.moved
+      && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 8) closeLightbox();
+  });
   lightbox.addEventListener('cancel', event => { event.preventDefault(); closeLightbox(); });
 
   root.querySelectorAll('.table-responsive').forEach((region, index) => {
@@ -1166,6 +1204,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setArchiveLocation(entry);
     window.clearTimeout(locationIntentTimer);
     locationIntentTimer = window.setTimeout(releaseArchiveLocationIntent, delay);
+  }
+
+  function syncArchiveLocationHash() {
+    const entry = navEntries.find(item => item.link.hash === window.location.hash);
+    if (entry) holdArchiveLocationIntent(entry);
+    else releaseArchiveLocationIntent();
+    schedulePageUpdate();
   }
 
   function resolveArchiveLocationEntry(measured, probe, atDocumentEnd, currentIndex) {
@@ -1262,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
   window.addEventListener('scrollend', releaseArchiveLocationIntent, { passive: true });
-  window.addEventListener('hashchange', schedulePageUpdate, { passive: true });
+  window.addEventListener('hashchange', syncArchiveLocationHash, { passive: true });
   const locationResizeObserver = 'ResizeObserver' in window
     ? new ResizeObserver(schedulePageUpdate)
     : null;
@@ -1328,6 +1373,7 @@ document.addEventListener('DOMContentLoaded', () => {
   root.classList.add('motion-capable', 'v6s-ready');
   showOpeningDefault();
   filterForms();
+  syncArchiveLocationHash();
   updatePageProgress();
   progression.setAttribute('role', 'radiogroup');
   root.dataset.masterReady = 'true';

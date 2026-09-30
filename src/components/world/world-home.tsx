@@ -1473,13 +1473,44 @@ export function WorldHome() {
       return;
     }
 
+    const previewReady = new Set<number>();
+    previewPool.forEach((index) => {
+      const image = index === finalPoster ? finalImage : new Image();
+      if (image !== finalImage) {
+        image.decoding = "async";
+        image.fetchPriority = "low";
+        preparePosterImage(image, POSTERS[index].src);
+      }
+      const decoded = index === finalPoster ? finalReady : image.decode?.();
+      if (!decoded) {
+        const markLoaded = () => {
+          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
+        };
+        markLoaded();
+        image.addEventListener("load", markLoaded, { once: true });
+        return;
+      }
+      void decoded
+        .then(() => {
+          if (shuffleRunId.current !== runId) return;
+          if (image.naturalWidth > 0) previewReady.add(index);
+        })
+        .catch(() => {
+          if (shuffleRunId.current !== runId) return;
+          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
+        });
+    });
+
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;
-        const ready = isFinalStep ? await waitForFinalImage() : true;
+        const previewPoster = previewPosters[index % previewPosters.length];
+        const ready = isFinalStep
+          ? await waitForFinalImage()
+          : previewReady.has(previewPoster);
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];
-        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {
+        const next = isFinalStep ? finalPoster : previewPoster;
+        if (ready || (isFinalStep && finalImage.complete && finalImage.naturalWidth > 0)) {
           goPoster(next);
         }
         if (isFinalStep) {

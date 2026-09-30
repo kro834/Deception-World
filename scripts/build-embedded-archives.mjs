@@ -7,8 +7,8 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
-  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260921-r47">';
-const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260906-r45" defer></script>';
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260930-r48">';
+const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260930-r48" defer></script>';
 // Reports the archive's titles and fixed controls to the page, so the
 // floating Zeus button keeps off them inside this sandboxed frame too.
 const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20260928-z1" defer></script>';

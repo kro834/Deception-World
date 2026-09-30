@@ -1330,9 +1330,9 @@ html[data-route-scroll-settling="true"] {
 
 /* GL pending or drawing: only the canvas is shown (the title is under it). */
 [data-opening-handoff-root]:is(
-    [data-opening-handoff-tier="pending"],
-    [data-opening-handoff-tier="webgl"]
-  ) {
+  [data-opening-handoff-tier="pending"],
+  [data-opening-handoff-tier="webgl"]
+) {
   background: transparent;
 }
 
@@ -1688,4 +1688,50 @@ body:has(.load-gate) .zeus-button:not([data-navigating="true"]) {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+/* Only a stalled route warmup shows this; ordinary cinematic arrivals are unchanged. */
+.route-load-delay {
+  position: fixed;
+  z-index: 2147483200;
+  inset-inline: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: min(440px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 18px;
+  border: 1px solid #a0dce9;
+  border-radius: 12px;
+  background: #101d29;
+  color: #f4f9ff;
+  box-shadow: 0 8px 32px #0009;
+}
+
+.route-load-delay p {
+  margin: 0 0 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.route-load-delay > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.route-load-delay :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid #9fceda;
+  border-radius: 6px;
+  color: #f4f9ff;
+  background: #1d3547;
+  text-decoration: none;
+}
+
+.route-load-delay :is(a, button):focus-visible {
+  outline: 3px solid #f9e5ad;
+  outline-offset: 3px;
 }

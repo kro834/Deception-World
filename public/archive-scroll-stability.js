@@ -3,8 +3,25 @@
 
   if (document.documentElement.dataset.embeddedArchive !== "true") return;
 
-  const blockClipboardAction = (event) => event.preventDefault();
+  const isEditableTarget = (target) => {
+    if (target instanceof HTMLInputElement) {
+      return (
+        !target.matches(":disabled") &&
+        !target.readOnly &&
+        ["text", "search", "email", "url", "tel", "password", "number"].includes(target.type)
+      );
+    }
+    if (target instanceof HTMLTextAreaElement)
+      return !target.matches(":disabled") && !target.readOnly;
+    return target instanceof HTMLElement && target.isContentEditable;
+  };
+  const blockClipboardAction = (event) => {
+    // A user's search text is editable input, not protected archive content.
+    if (event.type !== "dragstart" && isEditableTarget(event.target)) return;
+    event.preventDefault();
+  };
   const blockClipboardShortcut = (event) => {
+    if (isEditableTarget(event.target)) return;
     const key = event.key.toLowerCase();
     const isClipboardShortcut =
       ((event.ctrlKey || event.metaKey) && ["c", "x", "v"].includes(key)) ||

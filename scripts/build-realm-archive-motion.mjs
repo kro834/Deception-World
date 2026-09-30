@@ -35,6 +35,7 @@ function normalizeIdentifiers(source) {
 function normalizeMaster(source) {
   const normalized = normalizeIdentifiers(source)
     .replace("const DEFAULT_FORM_ID = 'multi';", "const DEFAULT_FORM_ID = 'stella';")
+    .replaceAll("仮面ライダーサーガ フォームアーカイブ", "仮面ライダーレルム フォームアーカイブ")
     .replace("17 / 17 FORMS", "09 / 09 FORMS")
     .replace(
       /const accents = \{[\s\S]*?\n {2}\};\n\n {2}const telemetry =/,

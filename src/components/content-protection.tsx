@@ -2,10 +2,27 @@ import { useEffect } from "react";
 
 export function ContentProtection() {
   useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (target instanceof HTMLInputElement) {
+        return (
+          !target.matches(":disabled") &&
+          !target.readOnly &&
+          ["text", "search", "email", "url", "tel", "password", "number"].includes(target.type)
+        );
+      }
+      if (target instanceof HTMLTextAreaElement) {
+        return !target.matches(":disabled") && !target.readOnly;
+      }
+      return target instanceof HTMLElement && target.isContentEditable;
+    };
     const preventClipboardAction = (event: Event) => {
+      // Editing the user's own input must retain normal clipboard and menus.
+      // Artwork/text dragging stays protected even inside an editable field.
+      if (event.type !== "dragstart" && isEditableTarget(event.target)) return;
       event.preventDefault();
     };
     const preventClipboardShortcut = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) return;
       const key = event.key.toLowerCase();
       const isClipboardShortcut =
         ((event.ctrlKey || event.metaKey) && (key === "c" || key === "x" || key === "v")) ||
