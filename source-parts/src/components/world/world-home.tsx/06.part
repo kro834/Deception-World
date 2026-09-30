@@ -1,3 +1,4 @@
+        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index" data-film-reveal>
           <span>02</span>
           <small>EIGHT RIDERS</small>

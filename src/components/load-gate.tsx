@@ -18,7 +18,7 @@ import {
   type OpeningHandoffSnapshot,
   type OpeningHandoffSource,
 } from "@/components/cinematic/opening-handoff";
-import { preloadAssets } from "@/lib/asset-loader";
+import { preloadAssets, warmedSource } from "@/lib/asset-loader";
 
 type RiderDiveVariant =
   "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
@@ -365,7 +365,10 @@ function composeScene({
     controlRect ??
     pressed?.rect ??
     centredRect(160, 120);
-  const file = DETAIL_ROUTE.test(to) && isImageAsset(assets[0]) ? assets[0] : null;
+  // The destination's picture as the warm-up fetched it (a rider's delivery
+  // WebP): a CSS background cannot follow the srcset, and naming the JPEG
+  // fetched the same picture a second time.
+  const file = DETAIL_ROUTE.test(to) && isImageAsset(assets[0]) ? warmedSource(assets[0]) : null;
   const frame =
     frameKind === "screen"
       ? screenFrame()

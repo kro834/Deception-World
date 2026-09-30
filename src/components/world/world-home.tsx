@@ -7,7 +7,7 @@ import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
-import { RIDER_NAV, NameText } from "./dossier-nav";
+import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
@@ -444,7 +444,8 @@ const EPISODES: EpisodeRecord[] = [
         width: 1026,
         height: 1533,
         to: "/characters/terra",
-        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],
+        // The file shows its hero on arrival; the form pickup loads lazily.
+        assets: RELATED_NAV.find((item) => item.id === "01")?.assets ?? ["/character-terra.jpeg"],
       },
       {
         label: "仮面ライダーレルム　ムーンフォーム",
@@ -454,7 +455,7 @@ const EPISODES: EpisodeRecord[] = [
         width: 1024,
         height: 1536,
         to: "/characters/luna",
-        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],
+        assets: RELATED_NAV.find((item) => item.id === "02")?.assets ?? ["/character-luna.jpeg"],
       },
     ],
   },
@@ -2255,11 +2256,13 @@ export function WorldHome() {
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
-                    assets={[
-                      "/character-terra.jpeg",
-                      "/character-terra-thumb.jpeg",
-                      "/rider-realm-earth.jpeg",
-                    ]}
+                    // Only what the file shows on arrival (its hero); the
+                    // form pickup there (710-760 KB) loads lazily.
+                    assets={
+                      RELATED_NAV.find((item) => item.id === "01")?.assets ?? [
+                        "/character-terra.jpeg",
+                      ]
+                    }
                     aria-label="テラ・アレインの個別資料を開く"
                   >
                     <img
@@ -2284,11 +2287,11 @@ export function WorldHome() {
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/luna"
-                    assets={[
-                      "/character-luna.jpeg",
-                      "/character-luna-thumb.jpeg",
-                      "/rider-realm-moon.jpeg",
-                    ]}
+                    assets={
+                      RELATED_NAV.find((item) => item.id === "02")?.assets ?? [
+                        "/character-luna.jpeg",
+                      ]
+                    }
                     aria-label="ルナ・アレインの個別資料を開く"
                   >
                     <img

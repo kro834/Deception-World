@@ -480,3 +480,4 @@
       [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
     }
     const previewPosters = Array.from(
+      { length: 9 },

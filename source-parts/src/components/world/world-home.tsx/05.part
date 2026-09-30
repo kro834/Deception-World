@@ -1,4 +1,3 @@
-                    </svg>
                   )}
                 </span>
                 <b>
@@ -328,11 +327,13 @@
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
-                    assets={[
-                      "/character-terra.jpeg",
-                      "/character-terra-thumb.jpeg",
-                      "/rider-realm-earth.jpeg",
-                    ]}
+                    // Only what the file shows on arrival (its hero); the
+                    // form pickup there (710-760 KB) loads lazily.
+                    assets={
+                      RELATED_NAV.find((item) => item.id === "01")?.assets ?? [
+                        "/character-terra.jpeg",
+                      ]
+                    }
                     aria-label="テラ・アレインの個別資料を開く"
                   >
                     <img
@@ -357,11 +358,11 @@
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/luna"
-                    assets={[
-                      "/character-luna.jpeg",
-                      "/character-luna-thumb.jpeg",
-                      "/rider-realm-moon.jpeg",
-                    ]}
+                    assets={
+                      RELATED_NAV.find((item) => item.id === "02")?.assets ?? [
+                        "/character-luna.jpeg",
+                      ]
+                    }
                     aria-label="ルナ・アレインの個別資料を開く"
                   >
                     <img
@@ -479,4 +480,3 @@
       </section>
 
       <section className="riders-section" id="riders" data-performance-region>
-        <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />

@@ -60,6 +60,23 @@ export const MANAGER_ASSETS = {
 
 const warmed = new Set<string>();
 const inFlight = new Map<string, Promise<boolean>>();
+// The file each image warm-up picked (its Image's currentSrc), and the
+// warm-ups still choosing. A covered entry paints the destination as a CSS
+// background, which cannot follow a srcset: it asks here for the same file.
+const picked = new Map<string, string>();
+const choosing = new Map<string, HTMLImageElement>();
+
+// The file a warm-up of `url` fetches: the one it picked, else (a single
+// candidate with no descriptor, as every rider's delivery WebP) the file
+// every device picks. A width set still choosing falls back to the URL.
+export function warmedSource(url: string) {
+  const known = picked.get(url) || choosing.get(url)?.currentSrc;
+  if (known) return known;
+  const { srcSet, sizes } = { ...dossierImage(url), ...rexonanceImage(url) };
+  const only = srcSet?.trim();
+  if (only && !sizes && !/[\s,]/.test(only)) return only;
+  return url;
+}
 
 function assetReady(url: string) {
   return warmed.has(url);
@@ -87,6 +104,8 @@ async function decodeImageAsset(url: string, signal: AbortSignal) {
       image.onload = null;
       image.onerror = null;
       signal.removeEventListener("abort", abort);
+      if (choosing.get(url) === image) choosing.delete(url);
+      if (loaded && !signal.aborted && image.currentSrc) picked.set(url, image.currentSrc);
       resolve(loaded && !signal.aborted);
     };
     const abort = () => {
@@ -107,6 +126,7 @@ async function decodeImageAsset(url: string, signal: AbortSignal) {
       image.srcset = responsive.srcSet;
     }
     image.src = url;
+    choosing.set(url, image);
     if (typeof image.decode === "function") {
       void image.decode().then(
         () => finish(image.naturalWidth > 0),

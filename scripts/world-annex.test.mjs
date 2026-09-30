@@ -67,6 +67,37 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
     ["\n                {...posterImage(previous.src)}", "", 1],
     ["\n              {...posterImage(current.src)}", "", 1],
   ];
+  // 2026-09-30: the テラ / ルナ cards and EP 02 pickups warm RELATED_NAV's
+  // list (the file's hero only; scripts/rider-cover.test.mjs). Undoing exactly
+  // those edits gives back the pinned file.
+  const relatedCard = (id, first) =>
+    `assets={\n                      RELATED_NAV.find((item) => item.id === "${id}")?.assets ?? [\n                        "${first}",\n                      ]\n                    }`;
+  const oldCard = (name, form) =>
+    `assets={[\n                      "/character-${name}.jpeg",\n                      "/character-${name}-thumb.jpeg",\n                      "/rider-realm-${form}.jpeg",\n                    ]}`;
+  posterHooks.push(
+    [
+      'import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";',
+      'import { RIDER_NAV, NameText } from "./dossier-nav";',
+      1,
+    ],
+    [
+      '        // The file shows its hero on arrival; the form pickup loads lazily.\n        assets: RELATED_NAV.find((item) => item.id === "01")?.assets ?? ["/character-terra.jpeg"],',
+      '        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],',
+      1,
+    ],
+    [
+      '        assets: RELATED_NAV.find((item) => item.id === "02")?.assets ?? ["/character-luna.jpeg"],',
+      '        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],',
+      1,
+    ],
+    [
+      "                    // Only what the file shows on arrival (its hero); the\n                    // form pickup there (710-760 KB) loads lazily.\n                    " +
+        relatedCard("01", "/character-terra.jpeg"),
+      "                    " + oldCard("terra", "earth"),
+      1,
+    ],
+    [relatedCard("02", "/character-luna.jpeg"), oldCard("luna", "moon"), 1],
+  );
   for (const [edited, original, count] of posterHooks) {
     assert.equal(stripped.split(edited).length - 1, count, edited);
     stripped = stripped.replaceAll(edited, original);
