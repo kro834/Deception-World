@@ -105,6 +105,10 @@
   inset: auto -10% 0;
   z-index: -1;
   height: 62%;
+  /* The rise also settles the floor in from its vanishing point (rw-horizon
+     scales about the horizon line), so the stage approaches like a dolly
+     coming to rest, on the same scroll timeline; still one compositor layer. */
+  transform-origin: 50% var(--rw-horizon-at);
   background:
     radial-gradient(circle, rgb(255 190 120 / 0.55) 0 1px, transparent 1.6px) 37px 29px / 173px
       211px,
@@ -427,11 +431,13 @@
   from {
     opacity: 0;
     translate: 0 35%;
+    scale: 1.18 1.08;
   }
 
   to {
     opacity: 1;
     translate: 0 0;
+    scale: 1 1;
   }
 }
 

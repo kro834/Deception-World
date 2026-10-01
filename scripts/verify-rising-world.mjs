@@ -1610,8 +1610,10 @@ try {
   if (sections.has("perf") && profileNames.includes("pixel"))
     await checkPerformance(browser, "pixel");
   if (sections.has("flash")) {
+    // landscape-844 (2026-10-01): the margins erode and the flames stand at
+    // a different pitch on a landscape screen, so it is audited as well.
     for (const name of profileNames.filter((entry) =>
-      ["pixel", "galaxy", "desktop"].includes(entry),
+      ["pixel", "galaxy", "landscape-844", "desktop"].includes(entry),
     )) {
       for (const tier of (process.env.RISING_TIERS || "webgl,css,reduced").split(",")) {
         await auditFlashes(browser, name, tier);

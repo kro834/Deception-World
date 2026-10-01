@@ -39,13 +39,27 @@ float holeLead(float midN) {
   return (0.2 * smoothstep(0.02, 0.2, uBurn) + 0.3 * smoothstep(0.15, 0.55, uBurn)) * site * site;
 }
 
+// The frame erodes from its margins too (kept identical in
+// rising.frag.glsl): a print held over a fire chars first along its
+// edges, the bottom corners curling in, the sides catching up to about a
+// quarter screen height ahead of the front, less towards the top (so the top
+// never catches earlier than the front alone would bring it). Ragged along
+// the margin (the middle octave), and it only grows with uBurn.
+float rimLead(vec2 bq, float midN) {
+  float width = max(uRes.x / uRes.y, 0.7);
+  float margin = fall(0.21, 0.0, min(bq.x, width - bq.x));
+  float ragged = 0.5 + 1.0 * midN;
+  return 0.3 * smoothstep(0.04, 0.42, uBurn) * margin * margin * ragged * (1.0 - 0.74 * bq.y);
+}
+
 // The main pass's burn field without its fine octave: the low octave tears
 // the front into tongues and islands, the middle one frays it and opens the
-// holes ahead of it.
+// holes ahead of it; the margins char ahead of it as well.
 float coarseField(vec2 bq) {
   float midN = nz(bq * 1.3 + vec2(0.61, 0.07)).g;
-  return bq.y * 0.8 + (nz(bq * 0.36 + vec2(0.17, 0.53)).r - 0.5) * 0.5
+  float field = bq.y * 0.8 + (nz(bq * 0.36 + vec2(0.17, 0.53)).r - 0.5) * 0.5
        + (midN - 0.5) * 0.2 - holeLead(midN);
+  return field - rimLead(bq, midN);
 }
 
 void main() {
@@ -127,9 +141,9 @@ void main() {
   // fuller as the burn gathers pace (uBurn only rises; the settle takes them
   // down again through uFlame).
   float roar = smoothstep(0.02, 0.45, uBurn);
-  // About 0.06 to 0.17 screen heights at the catch, 0.11 to 0.37 at the
+  // About 0.07 to 0.19 screen heights at the catch, 0.12 to 0.40 at the
   // roar, a fifth lower on portrait screens.
-  float H = (0.11 + 0.17 * smoothstep(0.25, 0.8, tall)) * (0.6 + 0.4 * uFlame) * (0.85 + 0.3 * pulse)
+  float H = (0.12 + 0.18 * smoothstep(0.25, 0.8, tall)) * (0.6 + 0.4 * uFlame) * (0.85 + 0.3 * pulse)
           * (0.55 + 0.6 * roar)
           * (1.0 - 0.2 * smoothstep(1.0, 1.8, kx)) * (1.0 - 0.55 * downwards)
           * (1.0 - 0.4 * young - 0.65 * tiny);
@@ -149,6 +163,9 @@ void main() {
   float turb = 0.5 + (n1 * 0.6 + n2 * 0.4 - 0.5) * 1.35;
   // The same fetches' other channels: an independent sheet of flame behind.
   float turbB = 0.5 + (swirl.g * 0.6 + eddy.r * 0.4 - 0.5) * 1.35;
+  // The swirl fetch's fine channel: filaments that split the tongues' upper
+  // halves into licks that fray and detach, so the tips are never smooth.
+  turb += (swirl.a - 0.5) * 0.16 * smoothstep(0.25, 1.1, h);
 #else
   float n1 = nz(q + vec2(0.0, -fract(T * 0.5))).r;
   float n2 = n1;
@@ -194,7 +211,7 @@ void main() {
   float densB = (turbB - 0.16 - 0.5 * pow(max(hB, 0.0001), 1.2) - laneB * 0.22 * smoothstep(0.12, 0.9, hB)
                 + 0.1 * fall(0.3, 0.05, hB) * lively * (1.0 - downwards) * (1.0 - island))
               * fuel * fall(1.3, 0.95, hB) - (1.0 - fuel) * 0.3;
-  float flameB = (1.0 - exp(-5.0 * max(densB, 0.0))) * (0.2 + 0.28 * roar);
+  float flameB = (1.0 - exp(-5.0 * max(densB, 0.0))) * (0.26 + 0.36 * roar);
   float tempB = 0.46 + 0.14 * smoothstep(0.0, 0.3, densB) - 0.05 * smoothstep(0.4, 1.2, hB);
   // Front over back: opacity and opacity-weighted temperature.
   float behind = flameB * (1.0 - flame);
@@ -229,7 +246,7 @@ void main() {
   sn += 0.04 * roar;
   // More of the fire smokes, and more thickly, as it builds to its roar.
   float plume = mix(smoothstep(0.3 - 0.12 * roar, 0.65 - 0.1 * roar, source), 0.7, smoothstep(0.25, 0.8, sh));
-  float envelope = smoothstep(0.0, 0.15, sh) * plume * uFlame * (0.65 + 0.55 * roar);
+  float envelope = smoothstep(0.0, 0.15, sh) * plume * uFlame * (0.75 + 0.65 * roar);
   float body = smoothstep(0.5, 0.58, sn);
   float thick = smoothstep(0.58, 0.7, sn);
   smoke = body * (0.45 + 0.55 * thick) * envelope;

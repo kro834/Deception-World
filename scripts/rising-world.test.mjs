@@ -1170,3 +1170,65 @@ test("2026-09-28: the fire eats the print from several places, builds to a roar,
   const renderer = await read("scripts/render-rising-calm-sprites.mjs");
   assert.match(renderer, /\{ path: RISING_CALM_HOLE, shader: HOLE,/);
 });
+
+test("2026-10-01: the frame erodes from its margins, near embers and bloom at octaves 4, the camera pushes in after the cut", async () => {
+  const shader = await read("src/components/world/rising.frag.glsl");
+  const flames = await read("src/components/world/rising-flames.frag.glsl");
+  const fn = (source, name) => {
+    const at = source.indexOf(`float ${name}(`);
+    assert.ok(at > 0, name);
+    return source.slice(at, source.indexOf("\n}\n", at));
+  };
+  // One rim lead, identical in both passes (the flames stand on the main
+  // pass's lip along the margins too), growing only with uBurn (which only
+  // rises), so nothing un-burns; weaker towards the top, so the top of the
+  // print never catches earlier than the front alone brings it (the flash
+  // audit's tightest cells are there).
+  const rim = fn(shader, "rimLead");
+  assert.equal(rim, fn(flames, "rimLead"));
+  assert.ok(rim.includes("uBurn"));
+  assert.doesNotMatch(rim, /uTime|uFlame|uReveal/);
+  assert.match(rim, /\* \(1\.0 - 0\.7\d \* bq\.y\);/);
+  assert.match(shader, /lead = holeLead\(midN\) \+ rimLead\(bq, midN\);/);
+  assert.match(flames, /return field - rimLead\(bq, midN\);/);
+  // The near-field embers and the flame bloom are last resorts on the ladder:
+  // gone with the ash at octaves 3.
+  const gated = (source, needle) => {
+    const at = source.indexOf(needle);
+    assert.ok(at > 0, needle);
+    const stack = [];
+    for (const [token, level] of source.slice(0, at).matchAll(/#if OCTAVES >= (\d)|#endif/g)) {
+      if (token === "#endif") stack.pop();
+      else stack.push(Number(level));
+    }
+    return Math.max(0, ...stack);
+  };
+  assert.equal(gated(shader, "float bokeh = nearEmbers("), 4);
+  assert.equal(gated(shader, "float scatter = ("), 4);
+  // Near embers: in front of everything (char included), wrapping like the
+  // sparks (FP16), each on its own slow beat; the smear is along the rise.
+  const near = fn(shader, "nearEmbers");
+  assert.match(near, /g\.y -= fract\(uTime \* speed \* cells\.y \/ 8\.0\) \* 8\.0;/);
+  assert.match(near, /id\.y = mod\(id\.y, 8\.0\);/);
+  assert.match(near, /r\.y \/= 2\.4 \+ 0\.8 \* h;/);
+  assert.match(shader, /float nearEnv = uFlame \* roar \* smoothstep\(-0\.4, -0\.05, hy\)/);
+  // Camera: the breakthrough's zoom eases out to the whole print by the title
+  // cut, then pushes slowly back in (at most a tenth, one turn) to the end.
+  const s = RISING_TIMING.webgl;
+  const arrive = (T) => risingUniformsAt(T).uArrive;
+  assert.ok(Math.abs(arrive(s.title) - 1) < 1e-6, String(arrive(s.title)));
+  assert.ok(arrive(s.end) >= 0.9 && arrive(s.end) < 1, String(arrive(s.end)));
+  let previous = arrive(s.title);
+  for (let T = s.title; T <= s.end; T += 0.05) {
+    assert.ok(arrive(T) <= previous + 1e-9, `uArrive rose after the cut at ${T}`);
+    previous = arrive(T);
+  }
+  // The flame cap moved with the taller roar (0.4 H, rising-flames.frag.glsl).
+  assert.match(flames, /float H = \(0\.12 \+ 0\.18 \* smoothstep\(0\.25, 0\.8, tall\)\)/);
+  // The gate: the horizon's existing rise also settles the floor in from its
+  // vanishing point (scale about the horizon line), on the same view
+  // timeline: still only the three discovery rises move, still compositor-only.
+  const css = await readCss();
+  assert.match(css, /@keyframes rw-horizon \{\s*from \{[^}]*scale: 1\.\d+ 1\.\d+;[^}]*\}\s*to \{[^}]*scale: 1 1;/);
+  assert.match(css, /\.rw-gate-horizon \{[^}]*transform-origin: 50% var\(--rw-horizon-at\);/);
+});

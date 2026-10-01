@@ -201,9 +201,15 @@ export function risingUniformsAt(T: number): RisingUniforms {
     uZoom: 1 - 0.8 * easeInCubic(diveT),
     // ...until the breakthrough tears open from the core, under the brightest
     // amber: inside the opening the camera is already through, a little
-    // closer than the cover fit, and eases back out to the whole print while
-    // it burns. No frame jumps from one zoom to the other.
-    uArrive: 0.82 + 0.18 * easeOutCubic(clamp01((T - s.breakthrough) / 4.5)),
+    // closer than the cover fit, and eases back out to the whole print by the
+    // title cut. From the cut the camera pushes slowly back in on what is
+    // left of the print (7% by the end, one turn), while the Rexonance art
+    // emerges in screen space behind it: the print falls away from the
+    // reader. No frame jumps from one zoom to the other.
+    uArrive:
+      0.82 +
+      0.18 * easeOutCubic(clamp01((T - s.breakthrough) / (s.title - s.breakthrough))) -
+      0.07 * smooth(s.title, s.end, T),
     uOpen: 1.6 * easeInCubic(clamp01((T - (s.breakthrough - 0.14)) / 0.32)),
     uBlur: pre ? 0.42 * diveT ** 3 : 0.3 * (1 - smooth(s.breakthrough, s.breakthrough + 0.55, T)),
     // One amber swell over 0.5 s, decaying over 0.85 s: never a strobe.

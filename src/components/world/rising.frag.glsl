@@ -80,6 +80,43 @@ float holeLead(float midN) {
   return (0.2 * smoothstep(0.02, 0.2, uBurn) + 0.3 * smoothstep(0.15, 0.55, uBurn)) * site * site;
 }
 
+// The frame erodes from its margins too (kept identical in
+// rising-flames.frag.glsl): a print held over a fire chars first along its
+// edges, the bottom corners curling in, the sides catching up to about a
+// quarter screen height ahead of the front, less towards the top (so the top
+// never catches earlier than the front alone would bring it). Ragged along
+// the margin (the middle octave), and it only grows with uBurn.
+float rimLead(vec2 bq, float midN) {
+  float width = max(uRes.x / uRes.y, 0.7);
+  float margin = fall(0.21, 0.0, min(bq.x, width - bq.x));
+  float ragged = 0.5 + 1.0 * midN;
+  return 0.3 * smoothstep(0.04, 0.42, uBurn) * margin * margin * ragged * (1.0 - 0.74 * bq.y);
+}
+
+// Embers crossing in front of the lens: few, large and out of focus (a soft
+// disc with a brighter core), nearer the camera than the sparks, so they rise
+// faster, drift further on the wind and are smeared along their motion
+// (depth, motion blur). q is aspect-correct; cells and radius as sparkLayer.
+float nearEmbers(vec2 q, vec2 cells, float speed, float seed, float radius) {
+  vec2 g = q * cells;
+  float wy = q.y * 4.0 + seed;
+  g.x += (sin(wy + uTime * 0.9) * 0.5 + sin(wy * 2.1 - uTime * 1.4) * 0.2) * 0.9;
+  g.y -= fract(uTime * speed * cells.y / 8.0) * 8.0;
+  vec2 id = floor(g);
+  id.y = mod(id.y, 8.0);
+  float h = hash12(id + seed);
+  vec2 o = (vec2(hash12(id + seed + 3.1), hash12(id + seed + 7.7)) - 0.5) * 0.6;
+  // In cell widths (FP16-normal squares); the motion smear lengthens it 2.4x along the rise.
+  vec2 r = (fract(g) - 0.5 - o) * vec2(1.0, cells.x / cells.y);
+  r.y /= 2.4 + 0.8 * h;
+  float rad = radius * cells.x * (0.7 + 0.6 * hash12(id + seed + 1.3));
+  float disc = exp(-dot(r, r) / (rad * rad));
+  float core = exp(-dot(r, r) / (0.2 * rad * rad));
+  // One in five cells; each glows on its own slow beat (local, never a strobe).
+  float alive = step(0.74, h) * (0.65 + 0.35 * sin(uTime * (1.6 + 2.0 * h) + h * 30.0));
+  return (disc * 0.55 + core * 0.45) * alive;
+}
+
 // Incandescence for a normalised temperature (0 ~ 800 K, 1 ~ 2400 K): the hue
 // runs deep red -> orange -> yellow, and the radiance climbs steeply with it,
 // so red only ever shows dim and yellow-white only in the hottest cores. HDR:
@@ -225,7 +262,7 @@ void main() {
     // The fine octave as turbulence (|n|): sharp notches, so the edge frays
     // into fibres instead of rounding off like a cloud.
     float fibre = abs(edgeFine - 0.5) * 2.0;
-    lead = holeLead(midN);
+    lead = holeLead(midN) + rimLead(bq, midN);
     float field = uv.y * 0.8 + (lowN - 0.5) * 0.5 + (midN - 0.5) * 0.2 + (fibre - 0.4) * 0.028 + (edgeFine - 0.5) * 0.02
                 - lead;
     float level = mix(-0.27, 1.12, uBurn);
@@ -279,13 +316,23 @@ void main() {
     float flick = 0.8 + 0.34 * fire.r;
 #endif
     // It reaches further and burns brighter as the fire roars.
-    light = uFlame * exp(-hyc / (0.2 + 0.1 * roar)) * flick * (0.7 + 0.45 * roar) * (1.0 - burnt * 0.6);
+    light = uFlame * exp(-hyc / (0.22 + 0.14 * roar)) * flick * (0.76 + 0.56 * roar) * (1.0 - burnt * 0.6);
 
     // Heat haze: shimmer in the hot air over the flame bodies and just above
     // them, and the print wavering through the flames themselves; it climbs
     // higher as the fire roars.
     hazeAmt = uFlame * exp(-((hy - 0.12) * (hy - 0.12)) / 0.02) * step(-0.02, hy);
     hazeAmt = max(hazeAmt, max(flameA * 1.3, uFlame * roar * 0.7 * exp(-((hy - 0.26) * (hy - 0.26)) / 0.03)));
+    // A wider, weaker column of hot air further up, as the fire roars.
+    hazeAmt = max(hazeAmt, uFlame * roar * 0.4 * exp(-((hy - 0.46) * (hy - 0.46)) / 0.06));
+#if OCTAVES >= 4
+    // The fire's light scattering in the air around it: a soft bloom from
+    // the flame texture (four wide taps), so the flames read as a volume
+    // that lights the smoke and the haze, not a cut-out over the print.
+    float scatter = (texture2D(uFire, uv + vec2(0.0, 0.045)).r + texture2D(uFire, uv - vec2(0.0, 0.045)).r
+                   + texture2D(uFire, uv + vec2(0.035, 0.0)).r + texture2D(uFire, uv - vec2(0.035, 0.0)).r) * 0.25;
+    emit += blackbody(0.62) * scatter * uFlame * (0.2 + 0.16 * roar);
+#endif
 
     // Smoke: grey billows, cool blue-grey away from the fire, warm only on
     // the undersides the flames light; the veil stays thin outside the cores.
@@ -467,7 +514,7 @@ void main() {
       // seconds, each patch breathing on its own slow beat (local and
       // gentle: no strobe).
       float crackGlow = gap * (0.2 + 0.8 * cool) * (0.78 + 0.44 * breathe) * lingering * net * plate;
-      emit += blackbody(mix(0.35, 0.6, cool) * hot) * crackGlow * burnt * 1.3;
+      emit += blackbody(mix(0.35, 0.6, cool) * hot) * crackGlow * burnt * 1.7;
       // Ember speckles in the char, each breathing on its own beat as it cools.
       float speck = smoothstep(0.6, 0.78, cf.b) * smoothstep(0.56, 0.8, breathe) * smoothstep(0.5, 0.7, chA.r);
       emit += blackbody(mix(0.4, 0.62, cool) * hot) * speck * exp(-since * 0.7) * burnt * lingering * (1.0 - emerge) * plate;
@@ -490,10 +537,12 @@ void main() {
     float lz = (d + 0.008) / w;
     float lipGlow = exp(-lz * lz) * run;
     float halo = exp(-(d + 0.01) * (d + 0.01) / 0.0004) * run;
-    float bed = exp(min(d, 0.0) / 0.035) * burnt * (0.6 + 0.4 * smoothstep(0.04, 0.3, cells));
+    // The ember bed reaches further back into the fresh char (0.05 field
+    // units), so the char just behind the flames glows instead of going flat.
+    float bed = exp(min(d, 0.0) / 0.05) * burnt * (0.6 + 0.4 * smoothstep(0.04, 0.3, cells));
     emit += (blackbody(0.92 * hot) * lipGlow * 0.9 + blackbody(0.66) * halo * 0.22)
           * smoothstep(0.0, 0.25, uFlame + uBurn * 2.0);
-    emit += blackbody(0.55 * hot) * bed * 0.7;
+    emit += blackbody(0.55 * hot) * bed * 0.85;
 
     // Smoke over the print: defined plumes, veiling at most 0.62 in the cores
     // and about 0.3 at their edges, so the road's reflections survive.
@@ -549,7 +598,7 @@ void main() {
       // Half the cells hold a spark just over the flames, a tenth higher up.
       float keep = 0.08 + 0.42 * exp(-rise / 0.2);
       // Fewer at the catch, more at the roar.
-      keep *= 0.55 + 0.55 * roar;
+      keep *= 0.6 + 0.75 * roar;
       vec2 sp = sparkLayer(p, vec2(22.0, 5.0), 0.62, 1.0, max(px, 0.0017), 0.022, 1.0, keep);
 #if OCTAVES >= 4
       sp += sparkLayer(p + vec2(0.31, 0.0), vec2(15.0, 3.6), 0.48, 5.0, max(px, 0.0021), 0.028, 1.4, keep) * 0.8;
@@ -564,6 +613,16 @@ void main() {
       float sparkT = mix(0.9, 0.74, smoothstep(0.0, 0.5, rise));
       emit += (blackbody(sparkT) * sp.x + blackbody(sparkT - 0.12) * sp.y) * near * 2.8;
     }
+#if OCTAVES >= 4
+    // Near-field embers in front of everything, char and flames alike: they
+    // start low over the fire and drift past the lens, fading out high up.
+    float nearEnv = uFlame * roar * smoothstep(-0.4, -0.05, hy) * fall(1.1, 0.7, hy);
+    if (nearEnv > 0.002) {
+      float bokeh = nearEmbers(p + vec2(0.23, 0.0), vec2(5.0, 2.6), 0.5, 17.0, 0.026);
+      bokeh += nearEmbers(p + vec2(0.71, 0.3), vec2(3.6, 2.0), 0.64, 41.0, 0.036) * 0.85;
+      emit += blackbody(0.74) * bokeh * nearEnv * 1.4;
+    }
+#endif
 #endif
   }
 
