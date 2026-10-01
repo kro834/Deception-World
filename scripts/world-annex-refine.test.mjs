@@ -128,12 +128,21 @@ test("the wall aligns row by row through subgrid, never display: contents", () =
   assert.match(li, /display: grid;/);
   assert.match(li, /grid-row: span 6;/);
   assert.match(li, /grid-template-rows: subgrid;/);
-  assert.match(one(`${closed} > .wa-person`, context), /grid-template-rows: subgrid;/);
-  const body = one(`${closed} > .wa-person > .wa-person-body`, context);
+  // Each part of a closed file keys on itself (same matches and specificity as
+  // the old li:not(:has(...)) chains): a compound written after a :has() widens
+  // Chrome's :has invalidation set, replayed at every DOM swap on /world
+  // (scripts/android-restyle.test.mjs). The exit's row needs no state: an
+  // opened file's own row (grid-row: 2) outranks it.
+  const file = `${S} .wa-roster > li > .wa-person`;
+  assert.match(
+    one(`${file}:not(:has(.wa-profile[open]))`, context),
+    /grid-template-rows: subgrid;/,
+  );
+  const body = one(`${file} > .wa-person-body:not(:has(> .wa-profile[open]))`, context);
   assert.match(body, /grid-row: 2 \/ 6;/);
   assert.match(body, /grid-template-rows: subgrid;/);
-  assert.match(one(`${closed} > .wa-person > .wa-open`, context), /grid-row: 6;/);
-  assert.match(one(`${closed} .wa-person-body > .wa-profile`, context), /grid-row: 4;/);
+  assert.match(one(`${file} > .wa-open`, context), /grid-row: 6;/);
+  assert.match(one(`${file} .wa-person-body > .wa-profile:not([open])`, context), /grid-row: 4;/);
   // The row gap lives in each tile's foot (a subgrid would open it between
   // its own tracks), and the wall keeps its dense packing.
   assert.match(one(`${S} .wa-roster`, context), /row-gap: 0;/);
@@ -218,15 +227,28 @@ test("an opened profile on a phone runs at the file's measure", () => {
   const open = `${S} .wa-person:has(.wa-profile[open])`;
   const phone = ["(max-width: 559px)"];
   assert.match(one(open, phone), /display: block;/);
-  assert.match(one(`${open} > .wa-portrait`, phone), /float: left;/);
-  assert.match(one(`${open} > .wa-portrait`, phone), /width: max\(120px, 34%\);/);
-  assert.match(one(`${open} > .wa-open`, phone), /clear: both;/);
+  // The face, the exit and the profile of an opened file key on themselves
+  // (same matches and specificity as `${open} > …`), so nothing follows a
+  // :has() but a sibling (scripts/android-restyle.test.mjs).
+  const face = `${S} .wa-person > .wa-portrait:has(~ :where(.wa-person-body) > .wa-profile[open])`;
+  assert.match(one(face, phone), /float: left;/);
+  assert.match(one(face, phone), /width: max\(120px, 34%\);/);
+  assert.match(
+    one(`${S} .wa-person-body:has(> .wa-profile[open]) ~ .wa-open`, phone),
+    /clear: both;/,
+  );
   // The profile stops being a size container only here; CLOSE keeps to the
   // widths where the switch has room (the 196px container rule's measure).
-  assert.match(one(`${open} .wa-profile`, phone), /container-type: normal;/);
-  const close = one(`${open} .wa-profile[open] > summary::after`, [
-    "(min-width: 384px) and (max-width: 559px)",
-  ]);
+  assert.match(
+    one(`${S} .wa-person .wa-person-body > .wa-profile[open]`, phone),
+    /container-type: normal;/,
+  );
+  // Keyed to the open profile itself, at the old rule's specificity (no :has(),
+  // so `summary` stays out of Chrome's :has invalidation set).
+  const close = one(
+    `${S} .wa-roster .wa-person > .wa-person-body > .wa-profile[open] > summary::after`,
+    ["(min-width: 384px) and (max-width: 559px)"],
+  );
   assert.match(close, /content: "CLOSE" \/ "";/);
   assert.match(close, /font-size: 12px;/);
   assert.match(css, /\.wa-profile \{\s*container-type: inline-size;/);

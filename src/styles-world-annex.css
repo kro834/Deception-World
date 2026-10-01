@@ -995,28 +995,30 @@ html[data-world-effects="economy"]
   grid-template-columns: minmax(120px, 34%) minmax(0, 1fr);
 }
 
-.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-portrait {
+.site-shell.film-edition.mirage-edition
+  .wa-person
+  > .wa-portrait:has(~ :where(.wa-person-body) > .wa-profile[open]) {
   grid-row: 1 / span 2;
   grid-column: 1;
   align-self: start;
   border-right: 1px solid var(--mr-line);
 }
 
-.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-person-body {
+.site-shell.film-edition.mirage-edition .wa-person > .wa-person-body:has(> .wa-profile[open]) {
   grid-row: 1;
   grid-column: 2;
 }
 
-.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-profile {
+.site-shell.film-edition.mirage-edition .wa-person .wa-person-body > .wa-profile[open] {
   margin-top: 4px;
 }
 
-.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-open {
+.site-shell.film-edition.mirage-edition .wa-person-body:has(> .wa-profile[open]) ~ .wa-open {
   grid-row: 2;
   grid-column: 2;
 }
 
-.site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+.site-shell.film-edition.mirage-edition .wa-person-body:has(> .wa-profile[open]) ~ .wa-open::after {
   inset: 0 auto auto 0;
   width: max(120px, 34%);
 }
@@ -1041,7 +1043,9 @@ html[data-world-effects="economy"]
     grid-template-columns: minmax(200px, 26%) minmax(0, 1fr);
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+  .site-shell.film-edition.mirage-edition
+    .wa-person-body:has(> .wa-profile[open])
+    ~ .wa-open::after {
     width: max(200px, 26%);
   }
 
@@ -1085,7 +1089,19 @@ html[data-world-effects="economy"]
    <article> keep their boxes and roles (no display: contents). An opened
    file leaves the rows: it keeps the face-left full row above. The row gap
    moves into each tile's foot, since a subgrid would otherwise open the
-   gap between its own tracks. */
+   gap between its own tracks.
+   Restyle cost (Android): Chrome keeps ONE invalidation set for every
+   compound written after a :has() and its descendants, and replays it from
+   <body> at each DOM swap under it (poster autoplay, tab switches),
+   restyling every match on the page. So the wall writes nothing after a
+   :has() but a sibling: each part of a file is the :has() subject itself
+   (the file, its body; the face, role and signature look ahead to the
+   profile beside them), the profile keys on its own [open], and the exit
+   follows its body (`~`). The face, name and exit rows of a closed file
+   need no state: an opened file's own rows outrank them, and a grid row
+   means nothing outside a grid. Same matches and specificity as before
+   (:where() keeps a look-ahead's weight); scripts/android-restyle.test.mjs
+   keeps it so. */
 @supports (grid-template-rows: subgrid) {
   @media (min-width: 360px) {
     .site-shell.film-edition.mirage-edition .wa-roster {
@@ -1106,72 +1122,61 @@ html[data-world-effects="economy"]
 
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:not(:has(.wa-profile[open]))
-      > .wa-person {
+      > li
+      > .wa-person:not(:has(.wa-profile[open])) {
       display: grid;
       grid-row: 1 / -1;
       grid-template-rows: subgrid;
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .site-shell.film-edition.mirage-edition
-      .wa-roster
-      > li:not(:has(.wa-profile[open]))
-      > .wa-person
-      > .wa-portrait {
+    .site-shell.film-edition.mirage-edition .wa-roster > li > .wa-person > .wa-portrait {
       grid-row: 1;
     }
 
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:not(:has(.wa-profile[open]))
+      > li
       > .wa-person
-      > .wa-person-body {
+      > .wa-person-body:not(:has(> .wa-profile[open])) {
       display: grid;
       grid-row: 2 / 6;
       grid-template-rows: subgrid;
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .site-shell.film-edition.mirage-edition
-      .wa-roster
-      > li:not(:has(.wa-profile[open]))
-      > .wa-person
-      > .wa-open {
+    .site-shell.film-edition.mirage-edition .wa-roster > li > .wa-person > .wa-open {
       grid-row: 6;
     }
 
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:not(:has(.wa-profile[open]))
+      > li
       .wa-person-body
-      > .wa-role {
+      > .wa-role:not(:has(~ .wa-profile[open])) {
       grid-row: 1;
       align-self: end;
     }
 
-    .site-shell.film-edition.mirage-edition
-      .wa-roster
-      > li:not(:has(.wa-profile[open]))
-      .wa-person-body
-      > h3 {
+    .site-shell.film-edition.mirage-edition .wa-roster > li .wa-person-body > h3 {
       grid-row: 2;
     }
 
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:not(:has(.wa-profile[open]))
+      > li
       .wa-person-body
-      > .wa-quote {
+      > .wa-quote:not(:has(~ .wa-profile[open])) {
       grid-row: 3;
       align-self: start;
     }
 
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:not(:has(.wa-profile[open]))
+      > li
+      > .wa-person
       .wa-person-body
-      > .wa-profile {
+      > .wa-profile:not([open]) {
       grid-row: 4;
     }
   }
@@ -1232,8 +1237,9 @@ html[data-world-effects="economy"]
   @media (min-width: 560px) {
     .site-shell.film-edition.mirage-edition
       .wa-roster
-      > li:last-child:has(> .wa-person.is-none):not(:has(.wa-profile[open]))
-      .wa-portrait.is-vacant {
+      > li:last-child
+      > .wa-person.is-none
+      > .wa-portrait.is-vacant:not(:has(~ :where(.wa-person-body) > .wa-profile[open])) {
       aspect-ratio: auto;
     }
   }
@@ -2136,7 +2142,9 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   }
 
   .site-shell.film-edition.mirage-edition .wa-person .wa-open::after,
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-open::after {
+  .site-shell.film-edition.mirage-edition
+    .wa-person-body:has(> .wa-profile[open])
+    ~ .wa-open::after {
     inset: 0 auto auto 0;
     width: 104px;
   }
@@ -2149,53 +2157,64 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
    stays under the finger), and the words wrap under it; the signature and
    quotes keep their rails beside the face. The profile stops being a size
    container here (it would hold its words beside the face), so the CLOSE
-   word is keyed to the widths where the switch has room for it. */
+   word is keyed to the widths where the switch has room for it. Rules for
+   the file's inner parts key on .wa-profile[open] itself, or look ahead to
+   it from a sibling, at the old specificity, so that no quote or summary
+   joins Chrome's :has() invalidation set (see the wall in rows above). */
 @media (max-width: 559px) {
   .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) {
     display: block;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-portrait {
+  .site-shell.film-edition.mirage-edition
+    .wa-person
+    > .wa-portrait:has(~ :where(.wa-person-body) > .wa-profile[open]) {
     float: left;
     width: max(120px, 34%);
     margin: 0 12px 6px 0;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-person-body {
+  .site-shell.film-edition.mirage-edition .wa-person > .wa-person-body:has(> .wa-profile[open]) {
     display: block;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-quote {
+  .site-shell.film-edition.mirage-edition .wa-person-body > .wa-quote:has(~ .wa-profile[open]),
+  .site-shell.film-edition.mirage-edition .wa-person .wa-profile[open] .wa-quote {
     display: flow-root;
   }
 
   /* A quote in the profile starts under the face, at the full measure. */
   .site-shell.film-edition.mirage-edition
-    .wa-person:has(.wa-profile[open])
-    .wa-profile-body
+    .wa-person
+    .wa-profile[open]
+    > .wa-profile-body
     > .wa-quote {
     clear: left;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) .wa-profile {
+  .site-shell.film-edition.mirage-edition .wa-person .wa-person-body > .wa-profile[open] {
     container-type: normal;
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-open {
+  .site-shell.film-edition.mirage-edition .wa-person-body:has(> .wa-profile[open]) ~ .wa-open {
     clear: both;
   }
 }
 
 @media (max-width: 359px) {
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-profile[open]) > .wa-portrait {
+  .site-shell.film-edition.mirage-edition
+    .wa-person
+    > .wa-portrait:has(~ :where(.wa-person-body) > .wa-profile[open]) {
     width: 104px;
   }
 }
 
 @media (min-width: 384px) and (max-width: 559px) {
   .site-shell.film-edition.mirage-edition
-    .wa-person:has(.wa-profile[open])
-    .wa-profile[open]
+    .wa-roster
+    .wa-person
+    > .wa-person-body
+    > .wa-profile[open]
     > summary::after {
     content: "CLOSE" / "";
     width: auto;
