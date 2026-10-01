@@ -1,0 +1,615 @@
+/* Dream stage: the Taisho programme, lit and moving.
+
+   Linked after styles-dream-arrival.css and before the cinematic skin.
+   Every selector doubles the page class (or starts at html with the page
+   flag), so it outranks the cinematic sheet in either load order. Copy,
+   fonts and the measured geometry (chrome, act index, poster console,
+   dossier columns, story disclosures, the arrival hand-over) are untouched.
+
+   1. The document is the scroller again. The World base gives <body>
+      `overflow: hidden auto`, which makes it a scroll container; every
+      named view timeline on this page (the elevation sheet's story and
+      credits rises) bound to it and sat at its end state, so nothing on
+      Dream ever moved with the scroll. /world clips <body> instead
+      (styles-world-mirage.css); Dream now does the same, outside the
+      loading, menu and dialog states, which keep their own locks.
+   2. Scroll-linked motion runs on named view timelines only, opacity and
+      transform only, under prefers-reduced-motion: no-preference and the
+      economy / menu / loading / dialog gates: the one-sheet's art and
+      vertical title part at different rates as the hero leaves, each
+      act's outlined numeral drifts behind its title, the cast arches,
+      playbill slips, faction plates and case notes settle in, the tanzaku
+      hang on their strings, and 終 is stamped.
+   3. The file (dossier) opens as a 襖: the veil darkens, the sheet rises,
+      the plates wipe in from the top, the copy follows — finite, at rest
+      by 1.1s, nothing brighter than the portrait itself. On desktop the
+      sticky column carries the file number and the roman name as an
+      archive spine under the plates; on phones the plates rail gets an
+      ink band for the CLOSE plate and a position mark on the rail's own
+      inline scroll timeline.
+   4. HUD text only: "I"–"IV", file numbers and roman names, read from
+      data attributes with an empty alternative, so nothing is announced
+      twice. Forced colours drop the ghosts; economy keeps the page still. */
+
+/* ---------- 1. The document scrolls ---------- */
+html[data-dream-chapter="true"]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body {
+  overflow: clip visible;
+}
+
+/* ---------- 2. Stage light ---------- */
+/* The cast act opens under a lantern from above; the annexes keep ink. */
+.dream-page.dream-page .dream-character-section {
+  background:
+    radial-gradient(ellipse 58% 34% at 50% 0, rgb(200 164 92 / 9%), transparent 72%),
+    var(--ts-ink);
+}
+
+/* Each act carries its numeral as an outlined Cinzel ghost behind the
+   title, at the right of the heading rule. Ornament: the kicker already
+   reads ACT I; the alternative text is empty. */
+.dream-page.dream-page .dream-section-heading[data-ts-numeral]::after {
+  content: attr(data-ts-numeral) / "";
+  display: block;
+  position: absolute;
+  top: 60%;
+  right: 0;
+  bottom: auto;
+  left: auto;
+  z-index: -1;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(200 164 92 / 30%);
+  font-family: var(--ts-latin);
+  font-size: clamp(96px, 12vw, 176px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  translate: 0 -58%;
+  pointer-events: none;
+}
+
+/* The playbill act is boxed in its gilt frame: the ghost keeps clear of it. */
+.dream-page.dream-page .dream-dolminence-section .dream-section-heading[data-ts-numeral]::after {
+  right: 12px;
+}
+
+/* Phones: the ghost drops to the count row, clear of a title that spans
+   the column (ドルミネンス). */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-section-heading[data-ts-numeral]::after {
+    top: 86%;
+    font-size: 88px;
+    -webkit-text-stroke-color: rgb(200 164 92 / 22%);
+  }
+}
+
+/* ---------- 3. The file opens as a 襖 ---------- */
+/* Desktop: the sticky plate column carries an archive spine under the
+   plates — the file number outlined, the roman name set down a thread.
+   Only where the column is sticky beside the copy (two columns, a tall
+   frame); the clip on the column opens so the spine can hang below it. */
+@media (min-width: 1181px) and (min-height: 700px) {
+  /* Above 1440px the plate column stretched to the copy's height, so it
+     never stuck and the spine would hang a screen below; it now keeps the
+     plates' height, as it does from 981 to 1440px. */
+  .dream-page.dream-page .dream-dossier-layout {
+    align-items: start;
+  }
+
+  .dream-page.dream-page .dream-dossier-visuals {
+    overflow: visible;
+  }
+
+  .dream-page.dream-page .dream-dossier-visuals[data-ts-order]::before {
+    content: attr(data-ts-order) / "";
+    position: absolute;
+    top: calc(100% + 32px);
+    left: 4px;
+    z-index: 0;
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(200 164 92 / 30%);
+    font-family: var(--ts-latin);
+    font-size: clamp(120px, 11vw, 184px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  .dream-page.dream-page .dream-dossier-visuals[data-ts-roman]::after {
+    content: attr(data-ts-roman) / "";
+    position: absolute;
+    top: calc(100% + 36px);
+    right: 14px;
+    z-index: 0;
+    padding-top: 52px;
+    writing-mode: vertical-rl;
+    color: rgb(179 173 184 / 72%);
+    background: linear-gradient(var(--ts-kin) 0 0) top center / 1px 36px no-repeat;
+    font-family: var(--ts-latin);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+/* Phones: an ink band above the plates rail, so the CLOSE plate sits on
+   ink instead of a face; the rail keeps its outer height and snap. */
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-dossier-visuals {
+    padding-top: 60px;
+    background:
+      linear-gradient(var(--ts-kin) 0 0) 0 59px / 100% 1px no-repeat,
+      var(--ts-ink);
+  }
+
+  .dream-page.dream-page .dream-dossier-layout {
+    timeline-scope: --ts-rail;
+  }
+}
+
+/* The rail mark: a two-segment track at the rail's foot with a gilt thumb
+   that follows the inline scroll. Phones with two plates only; it is a
+   textless ornament, never a control. */
+.dream-page.dream-page .dream-dossier-rail-mark {
+  display: none;
+}
+
+@media (max-width: 640px) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: --ts-rail) {
+    html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-rail-mark {
+      position: relative;
+      z-index: 2;
+      display: block;
+      width: 72px;
+      height: 14px;
+      margin: -30px max(18px, env(safe-area-inset-right)) 16px auto;
+      pointer-events: none;
+    }
+
+    html:not([data-world-effects="economy"])
+      .dream-page.dream-page
+      .dream-dossier-rail-mark::before {
+      content: "";
+      position: absolute;
+      inset: 6px 0;
+      background: linear-gradient(
+        90deg,
+        rgb(243 224 176 / 45%) 0 46%,
+        transparent 46% 54%,
+        rgb(243 224 176 / 45%) 54%
+      );
+    }
+
+    html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-rail-mark::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 50%;
+      height: 4px;
+      background: var(--ts-kin-hi);
+      animation: ts-stage-rail linear both;
+      animation-timeline: --ts-rail;
+    }
+
+    html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-visuals {
+      scroll-timeline: --ts-rail inline;
+    }
+  }
+}
+
+/* ---------- 4. Zeus button: gold on the night theatre ---------- */
+/* Colour only (placement and hold logic untouched): the ice is traded for
+   the programme's gilt and a touch of vermilion. Android's lite tier keeps
+   its blur-free shadow by specificity. */
+html[data-dream-chapter="true"]
+  body
+  .zeus-button:not([data-dragging="true"]):not([data-return-loading="true"]) {
+  border-color: rgb(230 194 142 / 86%);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 60%), rgb(230 194 142 / 16%) 54%, rgb(204 73 59 / 24%)),
+    rgb(13 9 18 / 92%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    0 0 0 3px rgb(13 9 18 / 86%),
+    0 12px 34px rgb(0 0 0 / 50%),
+    0 0 30px rgb(230 194 142 / 20%);
+  outline: 1px solid rgb(200 164 92 / 58%);
+}
+
+html[data-dream-chapter="true"] body .zeus-button-aura {
+  border-color: rgb(243 224 176 / 80%);
+  box-shadow: inset 0 -12px 22px rgb(230 194 142 / 12%);
+}
+
+/* ---------- 5. Motion ---------- */
+/* Finite: the file's opening. The veil, the sheet, the plates and the
+   copy each arrive once; nothing loops. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::backdrop {
+    animation: ts-stage-veil 360ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-layout {
+    animation: ts-stage-sheet 560ms var(--ts-ease) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-visuals
+    figure {
+    animation: ts-stage-plate 640ms var(--ts-ease) 140ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-visuals
+    figure
+    + figure {
+    animation-delay: 260ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-copy
+    > :is(.dream-dossier-title, blockquote, .dream-profile-grid, .dream-dossier-sections) {
+    animation: ts-stage-rise 620ms var(--ts-ease) 220ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-copy
+    > blockquote {
+    animation-delay: 300ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-copy
+    > .dream-profile-grid {
+    animation-delay: 380ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]
+    .dream-dossier-copy
+    > .dream-dossier-sections {
+    animation-delay: 460ms;
+  }
+}
+
+/* Scroll-linked, on named view timelines: each riser names its own, so
+   no clipping ancestor can capture it, and all of it stands down while
+   the menu, the route gate or a file is open. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: --ts-stage) and (animation-range: entry 0% entry 100%) {
+    /* The one-sheet: the art drifts down, the title and the catch rise, as
+       the hero leaves. The art keeps its finite settle beside the drift;
+       the copy block and the logo never move (their stacking would bring
+       back the logo's black matte). */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-hero {
+      view-timeline: --ts-stage block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-hero-art {
+      animation:
+        ts-settle 9s cubic-bezier(0.25, 0.1, 0.25, 1) both,
+        ts-stage-art linear both;
+      animation-timeline: auto, --ts-stage;
+      animation-range: normal, exit 0% exit 100%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-hero
+      :is(.dream-hero-title, .dream-hero-catch) {
+      animation: ts-stage-title linear both;
+      animation-timeline: --ts-stage;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* The act numeral drifts up behind its title while the heading crosses
+       the screen. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-section-heading[data-ts-numeral] {
+      view-timeline: --ts-act block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-section-heading[data-ts-numeral]::after {
+      animation: ts-stage-ghost linear both;
+      animation-timeline: --ts-act;
+      animation-range: entry 0% exit 100%;
+    }
+
+    /* Arches, slips, plates and notes settle in as they enter, each a beat
+       after its neighbour. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      :is(
+        .dream-character-grid > article,
+        .dream-dolminence-grid > article,
+        .dream-faction,
+        .dream-case-notes > li
+      ) {
+      view-timeline: --ts-in block;
+      animation: ts-stage-in linear both;
+      animation-timeline: --ts-in;
+      animation-range: entry 0% entry 48%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      :is(
+        .dream-character-grid > article:nth-child(2),
+        .dream-dolminence-grid > article:nth-child(2),
+        .dream-faction:nth-child(2),
+        .dream-case-notes > li:nth-child(2n)
+      ) {
+      animation-range: entry 12% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      :is(
+        .dream-character-grid > article:nth-child(3),
+        .dream-dolminence-grid > article:nth-child(3),
+        .dream-faction:nth-child(3)
+      ) {
+      animation-range: entry 24% entry 72%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-dolminence-grid
+      > article:nth-child(4) {
+      animation-range: entry 36% entry 84%;
+    }
+
+    /* The tanzaku hang: each strip drops onto its string, swinging a
+       degree either way, three beats across the band. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-quote-band
+      > li {
+      view-timeline: --ts-in block;
+      transform-origin: 50% 0;
+      animation: ts-stage-hang linear both;
+      animation-timeline: --ts-in;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-quote-band
+      > li:nth-child(2n) {
+      animation-name: ts-stage-hang-right;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-quote-band
+      > li:nth-child(3n + 2) {
+      animation-range: entry 10% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-quote-band
+      > li:nth-child(3n) {
+      animation-range: entry 20% entry 80%;
+    }
+
+    /* 終 is stamped rather than risen: it presses down into place on the
+       timeline the elevation sheet already names for it. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-footer-end {
+      animation-name: ts-stamp;
+      animation-timing-function: cubic-bezier(0.2, 0.7, 0.1, 1);
+      animation-range: entry 10% entry 100%;
+    }
+  }
+}
+
+@keyframes ts-stage-veil {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ts-stage-sheet {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes ts-stage-plate {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ts-stage-rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes ts-stage-rail {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 100% 0;
+  }
+}
+
+@keyframes ts-stage-art {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 12%;
+  }
+}
+
+@keyframes ts-stage-title {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -9%;
+  }
+}
+
+@keyframes ts-stage-ghost {
+  from {
+    translate: 0 calc(-58% + 44px);
+  }
+  to {
+    translate: 0 calc(-58% - 44px);
+  }
+}
+
+@keyframes ts-stage-in {
+  from {
+    opacity: 0;
+    translate: 0 32px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes ts-stage-hang {
+  from {
+    opacity: 0;
+    translate: 0 -26px;
+    rotate: -1.4deg;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+  }
+}
+
+@keyframes ts-stage-hang-right {
+  from {
+    opacity: 0;
+    translate: 0 -26px;
+    rotate: 1.4deg;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+  }
+}
+
+@keyframes ts-stamp {
+  from {
+    opacity: 0;
+    scale: 1.3;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ---------- 6. Economy, reduced motion, forced colours ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .dream-page.dream-page .dream-dossier-rail-mark {
+    display: none;
+  }
+}
+
+html[data-world-effects="economy"] .dream-page.dream-page .dream-dossier-rail-mark {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-section-heading[data-ts-numeral]::after,
+  .dream-page.dream-page .dream-dossier-visuals[data-ts-order]::before,
+  .dream-page.dream-page .dream-dossier-visuals[data-ts-roman]::after,
+  .dream-page.dream-page .dream-dossier-rail-mark {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-character-section {
+    background: Canvas;
+  }
+}

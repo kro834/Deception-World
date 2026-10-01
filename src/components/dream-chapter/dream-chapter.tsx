@@ -125,7 +125,11 @@ function DossierContent({ character }: { character: DreamCharacter }) {
       className="dream-dossier-layout"
       style={{ ["--dream-accent" as string]: character.accent }}
     >
-      <div className={`dream-dossier-visuals${character.secondary ? "" : " is-single"}`}>
+      <div
+        className={`dream-dossier-visuals${character.secondary ? "" : " is-single"}`}
+        data-ts-order={character.order}
+        data-ts-roman={character.roman}
+      >
         <figure>
           <img
             src={character.portrait}
@@ -153,6 +157,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
           </figure>
         ) : null}
       </div>
+      {character.secondary ? <i className="dream-dossier-rail-mark" aria-hidden="true" /> : null}
 
       <div className="dream-dossier-copy">
         <header className="dream-dossier-title">
@@ -300,6 +305,8 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
     >
       <div
         className={`dream-dossier-visuals dream-dolminence-visuals${record.secondary ? "" : " is-single"}`}
+        data-ts-order={record.order}
+        data-ts-roman={record.roman}
       >
         <figure>
           <img
@@ -326,6 +333,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
           </figure>
         ) : null}
       </div>
+      {record.secondary ? <i className="dream-dossier-rail-mark" aria-hidden="true" /> : null}
 
       <div className="dream-dossier-copy">
         <header className="dream-dossier-title">
@@ -944,7 +952,7 @@ export function DreamChapter() {
         className="dream-section dream-poster-section"
         aria-labelledby="poster-title"
       >
-        <header className="dream-section-heading" data-film-reveal>
+        <header className="dream-section-heading" data-film-reveal data-ts-numeral="I">
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第一幕
@@ -1124,7 +1132,7 @@ export function DreamChapter() {
         className="dream-section dream-character-section"
         aria-labelledby="character-title"
       >
-        <header className="dream-section-heading" data-film-reveal>
+        <header className="dream-section-heading" data-film-reveal data-ts-numeral="II">
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第二幕
@@ -1231,7 +1239,7 @@ export function DreamChapter() {
         className="dream-section dream-dolminence-section"
         aria-labelledby="dolminence-title"
       >
-        <header className="dream-section-heading" data-film-reveal>
+        <header className="dream-section-heading" data-film-reveal data-ts-numeral="III">
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第三幕
@@ -1394,7 +1402,7 @@ export function DreamChapter() {
       </section>
 
       <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
-        <header className="dream-section-heading" data-film-reveal>
+        <header className="dream-section-heading" data-film-reveal data-ts-numeral="IV">
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第四幕
