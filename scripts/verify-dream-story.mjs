@@ -82,6 +82,11 @@ async function assertStoryContract(page) {
   const intro = section.locator(".dream-story-intro");
   assert.equal(await intro.count(), 1, "one Japanese story introduction is required");
   assert.ok((await intro.innerText()).trim().length > 0, "story introduction must not be empty");
+  assert.equal(
+    (await section.locator(".dream-story-scope").innerText()).trim(),
+    "各章のあらすじには、物語の展開・ネタバレを含みます。",
+    "story notice must identify chapter summaries as containing plot details and spoilers",
+  );
 
   const crossings = section.locator(".dream-story-crossings");
   assert.equal(await crossings.count(), 1, "one crossings block is required");
@@ -117,11 +122,13 @@ async function assertStoryContract(page) {
       `Case ${index} has two story paragraphs`,
     );
   }
-  assert.match(
-    await details.nth(5).innerText(),
-    /記録途中/,
-    "Case 5 remains explicitly in progress",
-  );
+  const finalCase = (await details.nth(5).locator(".dream-story-case-body").textContent()) ?? "";
+  for (const term of ["ヴァルトマン", "告白", "契約", "サードアイ", "認知の歪み", "サヨ"]) {
+    assert.ok(finalCase.includes(term), `Case 5 includes ${term}`);
+  }
+  assert.match(finalCase, /怪作奪還|怪作を迎えに行く/, "Case 5 establishes the rescue preparation");
+  assert.match(finalCase, /まだ|準備|これから/, "Case 5 does not claim the story has concluded");
+  assert.doesNotMatch(finalCase, /元の現実(?:へ|に)帰還を果た|救出を完了|死者全員が帰還/);
   return details;
 }
 

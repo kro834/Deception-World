@@ -8,7 +8,7 @@ import {
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 
-test("six midpoint cases retain their titles and distinct substantive summaries", () => {
+test("six chapter cases retain their titles and distinct substantive summaries", () => {
   assert.deepEqual(
     DREAM_CASES.map(({ no, title }) => `${no}:${title}`),
     ["0:交わる", "1:開く", "2:開ける", "3:明ける", "4:来たる", "5:叛く"],
@@ -19,10 +19,20 @@ test("six midpoint cases retain their titles and distinct substantive summaries"
     for (const paragraph of record.paragraphs) assert.ok(paragraph.length >= 80);
   }
   assert.equal(new Set(DREAM_CASES.flatMap(({ paragraphs }) => paragraphs)).size, 12);
-  assert.match(DREAM_CASES[1].paragraphs.join(""), /最後の扉はまだ開かれていなかった/);
-  assert.match(DREAM_CASES[5].paragraphs.join(""), /怪作も奪われたまま/);
-  assert.match(DREAM_CASES[5].paragraphs.join(""), /記録はこの場面まで/);
-  assert.match(DREAM_CASES[5].paragraphs.join(""), /まだ明かされていない/);
+  assert.match(DREAM_CASES[1].paragraphs.join(""), /最後の心の扉は開きかけたまま残されていた/);
+  assert.match(DREAM_CASES[2].paragraphs.join(""), /霊夢に協力を求める/);
+  assert.match(DREAM_CASES[2].paragraphs.join(""), /マキャベル.{0,12}融和/);
+  const finalCase = DREAM_CASES[5].paragraphs.join("");
+  assert.match(finalCase, /二つの世界|二世界/);
+  assert.match(finalCase, /ヴァルトマン/);
+  assert.match(finalCase, /告白/);
+  assert.match(finalCase, /契約/);
+  assert.match(finalCase, /サードアイ/);
+  assert.match(finalCase, /認知の歪み/);
+  assert.match(finalCase, /サヨ/);
+  assert.match(finalCase, /怪作奪還|怪作を迎えに行く/);
+  assert.match(finalCase, /まだ|準備|これから/);
+  assert.doesNotMatch(finalCase, /元の現実(?:へ|に)帰還を果た|救出を完了|死者全員が帰還/);
 });
 
 test("Touhou crossings explain source-specific roles, not invented alliances", () => {
@@ -34,7 +44,7 @@ test("Touhou crossings explain source-specific roles, not invented alliances", (
     assert.ok(place.role.length > 0);
     assert.ok(place.body.length >= 60);
   }
-  assert.match(DREAM_CASES[2].paragraphs.join(""), /無条件に仲間となるのではなく/);
+  assert.match(DREAM_CASES[2].paragraphs.join(""), /博麗神社で霊夢に協力を求める/);
 });
 
 test("case reader uses native details without adding a modal or scroll lock", () => {
@@ -46,8 +56,7 @@ test("case reader uses native details without adding a modal or scroll lock", ()
   assert.match(cases, /<details className="dream-story-case">/);
   assert.match(cases, /<summary>/);
   assert.match(cases, /aria-describedby="dream-story-scope"/);
-  assert.match(cases, /中盤までの内容を含みます/);
-  assert.match(cases, /記録途中/);
+  assert.match(cases, /各章のあらすじには、物語の展開・ネタバレを含みます。/);
   assert.doesNotMatch(
     cases,
     /onPointer|onTouch|preventDefault|acquireViewportScrollLock|<img|<dialog/,

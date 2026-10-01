@@ -22,7 +22,7 @@ const data = read("src/components/world/world-annex-data.ts");
 const route = read("src/routes/world.tsx");
 const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
-test("world-home.tsx is byte for byte its earlier self plus the annex hooks", () => {
+test("world-home preserves its layout and copy outside explicitly approved edits", () => {
   const hooks = ['import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";\n'];
   let stripped = home;
   for (const hook of hooks) {
@@ -44,7 +44,11 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
       'import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";',
       1,
     ],
-    ["preparePosterImage(image, POSTERS[nextIndex].src);", "image.src = POSTERS[nextIndex].src;", 1],
+    [
+      "preparePosterImage(image, POSTERS[nextIndex].src);",
+      "image.src = POSTERS[nextIndex].src;",
+      1,
+    ],
     [
       "preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);",
       "image.src = POSTERS[(poster + 1) % POSTERS.length].src;",
@@ -119,35 +123,35 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
   // after decode; reverse those behavior-only edits so this copy pin remains
   // scoped to changes in the /world text and layout.
   const previewReadiness = [
-    '    const previewReady = new Set<number>();',
-    '    previewPool.forEach((index) => {',
-    '      const image = index === finalPoster ? finalImage : new Image();',
-    '      if (image !== finalImage) {',
+    "    const previewReady = new Set<number>();",
+    "    previewPool.forEach((index) => {",
+    "      const image = index === finalPoster ? finalImage : new Image();",
+    "      if (image !== finalImage) {",
     '        image.decoding = "async";',
     '        image.fetchPriority = "low";',
-    '        preparePosterImage(image, POSTERS[index].src);',
-    '      }',
-    '      const decoded = index === finalPoster ? finalReady : image.decode?.();',
-    '      if (!decoded) {',
-    '        const markLoaded = () => {',
-    '          if (image.complete && image.naturalWidth > 0) previewReady.add(index);',
-    '        };',
-    '        markLoaded();',
+    "        preparePosterImage(image, POSTERS[index].src);",
+    "      }",
+    "      const decoded = index === finalPoster ? finalReady : image.decode?.();",
+    "      if (!decoded) {",
+    "        const markLoaded = () => {",
+    "          if (image.complete && image.naturalWidth > 0) previewReady.add(index);",
+    "        };",
+    "        markLoaded();",
     '        image.addEventListener("load", markLoaded, { once: true });',
-    '        return;',
-    '      }',
-    '      void decoded',
-    '        .then(() => {',
-    '          if (shuffleRunId.current !== runId) return;',
-    '          if (image.naturalWidth > 0) previewReady.add(index);',
-    '        })',
-    '        .catch(() => {',
-    '          if (shuffleRunId.current !== runId) return;',
-    '          if (image.complete && image.naturalWidth > 0) previewReady.add(index);',
-    '        });',
-    '    });',
-    '',
-    '',
+    "        return;",
+    "      }",
+    "      void decoded",
+    "        .then(() => {",
+    "          if (shuffleRunId.current !== runId) return;",
+    "          if (image.naturalWidth > 0) previewReady.add(index);",
+    "        })",
+    "        .catch(() => {",
+    "          if (shuffleRunId.current !== runId) return;",
+    "          if (image.complete && image.naturalWidth > 0) previewReady.add(index);",
+    "        });",
+    "    });",
+    "",
+    "",
   ].join("\n");
   posterHooks.push(
     [previewReadiness, "", 1],
@@ -170,6 +174,23 @@ test("world-home.tsx is byte for byte its earlier self plus the annex hooks", ()
   for (const [edited, original, count] of posterHooks) {
     assert.equal(stripped.split(edited).length - 1, count, edited);
     stripped = stripped.replaceAll(edited, original);
+  }
+  // 2026-10-01: the owner requested source-grounded prose and scene selection.
+  // Reverse only the two approved story paragraphs; every other string and
+  // the existing layout remain protected by the original fingerprint.
+  const storyEdits = [
+    [
+      "荒廃した碧栄で追跡を逃れる月城悠真の前に、死んだはずのベル・アレインが現れる。再会の一方で、サーガが管理人ローアの管轄から逸脱したことを知ったレックス・ロワは、世界の秩序を保つために「六詠」の介入を決める。",
+      "世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。",
+    ],
+    [
+      "悠真を守るベルと、自らの創作物を守ろうとするローアのもとに、刑事、怪盗、別世界のエージェントが集まる。彼らが管理された運命に抗うなか、六詠第三位のシュザは、人が何を望むかさえ書き換える支配の手を伸ばす。",
+      "シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。",
+    ],
+  ];
+  for (const [edited, original] of storyEdits) {
+    assert.equal(stripped.split(edited).length - 1, 1, edited);
+    stripped = stripped.replace(edited, original);
   }
   // SHA-256 of world-home.tsx before the annex (every existing string on
   // /world). Update only on the owner's request to change that copy.

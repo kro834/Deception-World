@@ -352,8 +352,9 @@ test("World marks the revealed blocks and keeps every word in its JSX", async ()
   assert.equal(copies.length, 3, "story copy ×2 and riders copy");
   assert.equal((source.match(/data-text-reveal="copy"/g) ?? []).length, 3);
   for (const literal of [
-    "世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。",
-    "シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。",
+    // Source-grounded introduction requested by the owner on 2026-10-01.
+    "荒廃した碧栄で追跡を逃れる月城悠真の前に、死んだはずのベル・アレインが現れる。",
+    "六詠第三位のシュザは、人が何を望むかさえ書き換える支配の手を伸ばす。",
     "主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。",
   ]) {
     assert.ok(source.includes(literal), literal);

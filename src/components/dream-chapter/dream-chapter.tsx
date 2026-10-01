@@ -106,7 +106,7 @@ function toKanjiNumber(value: number) {
 
 // Shared by the opening prologue; the story section keeps the spoiler note.
 const DREAM_STORY_INTRO =
-  "人の心に入り込む悪夢を追って、シエル、東風谷慶弥、怪作の道が交わる。幻想郷を巻き込む異変のなかで、三人は霊夢や魔理沙たちと関わり、それぞれの守るべきものと向き合っていく。";
+  "人の心を蝕む悪夢が、シエルを東風谷慶弥と探偵・怪作へ引き合わせる。追手を逃れて辿り着いた幻想郷では、怪作を狙うドルミネンスが人里を襲い、霊夢たちも戦いへ巻き込まれていく。家族を案じる慶弥と、誰にも頼れずにいるシエルは、夢の中で流れた血と、守ろうとした想いの重さを知る。";
 
 function lockDreamViewport() {
   const root = document.documentElement;
@@ -1405,9 +1405,11 @@ export function DreamChapter() {
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-story-intro">
-          <p>六つの章で、夢と現実の境界に起きた異変をたどる。</p>
+          <p>
+            悪夢から慶弥を救ったシエルは、怪作と共に幻想郷へ辿り着く。迫る追手を迎え撃つ六つの章を、出会いから怪作奪還の決意まで辿る。
+          </p>
           <p className="dream-story-scope" id="dream-story-scope">
-            中盤までの内容を含みます。各章を開くとあらすじを読めます。Case 5は記録途中です。
+            各章のあらすじには、物語の展開・ネタバレを含みます。
           </p>
         </div>
         <div className="dream-story-layout">
@@ -1415,7 +1417,7 @@ export function DreamChapter() {
             <p className="dream-story-eyebrow">SAGA × TOUHOU PROJECT</p>
             <h3 id="dream-crossings-title">幻想郷との交差</h3>
             <p className="dream-story-crossings-lead">
-              ただ同じ場所に集うのではなく、それぞれの立場から異変に関わっていく。
+              怪作を狙う追撃は人里を襲い、神社と竹林を戦場に変える。迎え撃つ霊夢たちとの共闘は、シエルと慶弥にも、守られる側になる戸惑いをもたらす。
             </p>
             <dl>
               {DREAM_STORY_CROSSINGS.map((place, index) => (
@@ -1448,9 +1450,6 @@ export function DreamChapter() {
                       <span>{episode.title}</span>
                       <small>{episode.reading}</small>
                     </span>
-                    {episode.no === "5" ? (
-                      <span className="dream-story-case-status">記録途中</span>
-                    ) : null}
                     <span className="dream-story-case-toggle" aria-hidden="true">
                       ＋
                     </span>
