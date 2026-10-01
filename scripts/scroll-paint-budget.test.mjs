@@ -138,7 +138,7 @@ const timelineRules = sheets.flatMap(({ path, rules }) =>
 
 test("the budget sees every scroll-linked animation on the site", () => {
   const names = new Set(timelineRules.flatMap(({ names }) => names));
-  for (const name of ["tr-ink", "tr-caret", "mr-par-back", "mx-lift", "mx-progress"]) {
+  for (const name of ["tr-ink", "mr-par-back", "mx-lift", "mx-progress"]) {
     assert.ok(names.has(name), name);
   }
   assert.ok(names.size >= 30, String(names.size));
@@ -172,7 +172,9 @@ test("scroll-linked keyframes never repaint the page every frame", () => {
   // The typing ink is stepped: one colour change per character, not a fade.
   const ink = timelineRules.find(({ names }) => names.includes("tr-ink"));
   assert.match(ink.body, /tr-ink steps\(1, end\)/);
-  assert.match(ink.body, /tr-caret steps\(1, end\)/);
+  // The cursor rides the same stepped animation since 2026-10-01 (one
+  // animation per character); it is a background-image, never a colour fill.
+  assert.ok(keyframeProperties.get("tr-ink").properties.has("background-image"));
 });
 
 test("no motion gate asks :has(dialog[open]); pages ask html[data-dialog-open]", () => {

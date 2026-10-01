@@ -295,6 +295,7 @@ const timelineState = (page) =>
     return {
       spans: spans.length,
       animations: animations.length,
+      all: spans.reduce((total, span) => total + span.getAnimations().length, 0),
       perSpan: spans.filter(
         (span) =>
           span.getAnimations().filter((animation) => animation.animationName === "tr-ink")
@@ -368,14 +369,17 @@ const spanAudit = (page) =>
       const own = getComputedStyle(span);
       const parent = getComputedStyle(span.parentElement);
       // The typing cursor is this span's own background-image while its
-      // tr-caret range is active (the reader stopped mid-block).
-      const cursor = span
-        .getAnimations()
-        .some(
-          (animation) =>
-            animation.animationName === "tr-caret" &&
-            animation.effect.getComputedTiming().progress !== null,
-        );
+      // tr-ink range is active (the reader stopped mid-block): from the first
+      // offset of the range (progress 0 in the active phase shows it, as
+      // tr-caret did; progress 0 in the before phase, fill backwards, does
+      // not) to just before its end. Scroll-driven timing is in percent.
+      const cursor = span.getAnimations().some((animation) => {
+        if (animation.animationName !== "tr-ink") return false;
+        const { localTime, endTime } = animation.effect.getComputedTiming();
+        const number = (value) => (typeof value === "number" ? value : value?.value);
+        const time = number(localTime);
+        return time != null && time >= 0 && time < number(endTime);
+      });
       for (const property of inherited) {
         // An unset fill follows the character's own (animated) colour.
         if (property === "-webkit-text-fill-color" && own.webkitTextFillColor === own.color)
@@ -687,11 +691,19 @@ async function styleCost(context) {
 
   await walk(page);
   const timelines = await timelineState(page);
+  // The owner's STORY revision (ce3548e) took the typed characters from 230
+  // to 307. The per-frame cost is the animations sampled on every scroll
+  // frame, so the budget is held there: one animation per character (ink and
+  // cursor in one, 2026-10-01), at most the 460 the page was tuned at
+  // (230 x 2). Measured on a Pixel UA at 4x CPU: 307 merged costs less per
+  // frame than 230 split did.
   assert.ok(
-    timelines.spans >= 200 && timelines.spans <= 260,
+    timelines.spans >= 200 && timelines.spans <= 340,
     `phone-412: ${timelines.spans} character spans`,
   );
   assert.equal(timelines.animations, timelines.spans, "phone-412: one animation per character");
+  assert.equal(timelines.all, timelines.spans, "phone-412: a character runs a second animation");
+  assert.ok(timelines.all <= 460, `phone-412: ${timelines.all} reveal animations (budget 460)`);
   assert.equal(timelines.perSpan, 0, "phone-412: a character without exactly one reveal");
   assert.deepEqual(timelines.detached, [], "phone-412: reveal bound to a panel scroller");
   assert.equal(timelines.timeBased, 0, "phone-412: reveal must be scroll-linked and finite");

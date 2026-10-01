@@ -157,9 +157,18 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       .site-shell.film-edition.mirage-edition
       [data-text-reveal]
       .tr-c {
-      animation:
-        tr-ink steps(1, end) both,
-        tr-caret steps(1, end) none;
+      /* One animation per character carries both the ink and the cursor
+         (2026-10-01): the owner's longer STORY copy took the page from 230
+         to 307 typed characters, and two animations each (614) cost more
+         per scroll frame than the 460 the page was tuned at. One stepped
+         animation each (307) costs less than the old 460 did: Pixel UA,
+         4x CPU, story-to-riders scroll, 11 alternating runs, reveal cost
+         above "reveal off" 0.62 ms/frame merged against 0.93 split. */
+      /* Until its turn a character is a clear cell: this base colour, not a
+         backwards fill (see the keyframes), so before its range the
+         animation is simply not in effect. */
+      color: transparent;
+      animation: tr-ink steps(1, end) forwards;
       /* Each character's range, not a zero-length step at its start. The
          production minifier (lightningcss) expands this shorthand, because of
          the longhands below, into longhands with `animation-duration: 0s`:
@@ -207,29 +216,42 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     [data-text-reveal]
     .tr-c {
     animation: none;
+    color: inherit;
   }
 }
 
-/* Typing. Until its turn a character is transparent (its cell keeps its
-   place, so nothing reflows); at its turn it appears at once at its own
-   colour (the implicit `to`), which serves white headings, ice <em>s and grey
-   copy alike. The cursor is the ice block on the next cell: tr-caret fills
-   only while its range is active (fill none), so it moves one cell per
-   character and only while the reader scrolls; nothing blinks or changes on
-   a still page. No text-shadow here: it would re-run overflow layout every
-   frame. */
+/* Typing. Until its turn a character is transparent (the base colour of the
+   rule above; its cell keeps its place, so nothing reflows), and the
+   animation, with no backwards fill, is not in effect. From the first offset
+   of its own range the character's cell holds the ice block cursor (from),
+   which steps(1, end) holds to the end of the range; at the end it appears
+   at once at its own colour, `inherit` (the parent's: white headings, ice
+   <em>s and grey copy alike; no sheet gives .tr-c a colour of its own), with
+   no cursor (to, held by the forwards fill). So the cursor sits on the next
+   cell, moves one cell per character and only while the reader scrolls;
+   nothing blinks or changes on a still page.
+   Why not a backwards fill with a cursor-less 0% stop: the before phase and
+   the first offset of the range are both progress 0, and the states must
+   differ there (no cursor, then cursor). A lead-in stop (0% held to 0.1%)
+   left the block with no cursor at exactly a range boundary, and a wheel
+   scroll rests on whole pixels, which boundaries often are. A per-keyframe
+   steps(1, start) relies on the before flag, which Chromium's sampler does
+   not key on: the state at progress 0 stuck to whichever phase was sampled
+   first, so untyped characters kept a cursor after a scroll back. The base
+   colour carries the before phase instead, and the two-animation version
+   (tr-ink both + tr-caret none, to 2026-10-01) matches this frame for frame.
+   No text-shadow here: it would re-run overflow layout every frame. */
 @keyframes tr-ink {
   from {
     color: transparent;
-  }
-}
-
-@keyframes tr-caret {
-  from,
-  to {
     background-image: linear-gradient(
       color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent),
       color-mix(in oklab, var(--mr-ice, #7ae8ff) 82%, transparent)
     );
+  }
+
+  to {
+    color: inherit;
+    background-image: none;
   }
 }

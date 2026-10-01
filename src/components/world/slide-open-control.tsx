@@ -64,7 +64,9 @@ export function SlideOpenControl({
   // A press that starts on the label or arrows rather than the thumb. The
   // browser's own click then decides whether it was a tap, so page panning
   // (which cancels the pointer and never clicks) keeps its native ownership.
-  const bodyTapStart = useRef<{ x: number; y: number } | null>(null);
+  // `peak` is the furthest that press has wandered: a label press dragged out
+  // and back is an abandoned gesture, like the thumb's, never a tap.
+  const bodyTapStart = useRef<{ x: number; y: number; id: number; peak: number } | null>(null);
 
   const setButtonRef = useCallback(
     (node: HTMLButtonElement | null) => {
@@ -288,7 +290,7 @@ export function SlideOpenControl({
     ) {
       // Only the thumb drags. Elsewhere the pill is an ordinary button: the
       // page keeps panning, and onClick opens it once the press ends in place.
-      bodyTapStart.current = { x: event.clientX, y: event.clientY };
+      bodyTapStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId, peak: 0 };
       return;
     }
 
@@ -331,6 +333,14 @@ export function SlideOpenControl({
   };
 
   const drag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const body = bodyTapStart.current;
+    if (body && body.id === event.pointerId) {
+      body.peak = Math.max(
+        body.peak,
+        Math.abs(event.clientX - body.x),
+        Math.abs(event.clientY - body.y),
+      );
+    }
     if (activePointer.current !== event.pointerId) return;
     latestPointer.current = { x: event.clientX, y: event.clientY };
     peakTravel.current = Math.max(
@@ -467,6 +477,14 @@ export function SlideOpenControl({
       onPointerMove={drag}
       onPointerUp={finishDrag}
       onPointerCancel={cancelDrag}
+      onPointerLeave={(event) => {
+        // A mouse label press that leaves the control has been dragged away.
+        // (Touch and pen are captured to the control and leave only after
+        // their release, so only the mouse is read here.)
+        const body = bodyTapStart.current;
+        if (body && body.id === event.pointerId && event.pointerType === "mouse")
+          body.peak = Number.POSITIVE_INFINITY;
+      }}
       onLostPointerCapture={(event) => {
         // A touch initially captures the thumb. Moving capture to the button
         // emits a bubbling loss from that child, not cancellation of our drag.
@@ -499,7 +517,8 @@ export function SlideOpenControl({
           start &&
           !completingRef.current &&
           Math.abs(event.clientX - start.x) < TAP_TOLERANCE &&
-          Math.abs(event.clientY - start.y) < TAP_TOLERANCE
+          Math.abs(event.clientY - start.y) < TAP_TOLERANCE &&
+          start.peak < TAP_TOLERANCE
         )
           complete("pointer");
       }}

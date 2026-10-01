@@ -239,6 +239,12 @@ html body #site-announcement-dialog .site-announcement-close.ios26-glass {
    page triggers with an identity of their own (the World's clipped plate,
    Dream's velvet, the showcase sites') are not touched. */
 html body .detail-topbar-actions > .side-panel-trigger.ios26-glass {
+  /* Its square corner is written here, in the root chrome sheet, so the
+     first paint is final: the 4px corner came from the World mode rule
+     (html[data-mode="world"], set at hydration on a file), and a cold load
+     of a file showed a round glass trigger for ~90ms before it squared
+     (measured on a production build, 2026-10-02). Same value, earlier. */
+  border-radius: 4px;
   background: rgb(4 8 15 / 92%) !important;
   box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
 }
@@ -331,6 +337,15 @@ html body #site-side-panel .side-panel-links :is(a, button.side-panel-link-butto
     .side-panel-links
     :is(a, button.side-panel-link-button)
     > span {
+    flex-basis: 100%;
+  }
+}
+
+/* SYSTEM, the panel's last group, takes the same rhythm: フォームアーカイブ's
+   SAGA / REALM had dropped under its name while OPENING stayed beside its
+   own, two row heights either side of the Zeus switch. (2026-10-02) */
+@media (max-width: 430px) {
+  html body #site-side-panel > .side-panel-group:last-child .side-panel-links > a > span {
     flex-basis: 100%;
   }
 }

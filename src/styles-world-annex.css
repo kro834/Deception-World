@@ -515,8 +515,12 @@
     border-color: var(--mr-ice);
   }
 
-  .site-shell.film-edition.mirage-edition .wa-person:has(.wa-open:hover) .wa-portrait img {
-    filter: var(--wa-grade,) brightness(1.08) saturate(1.05);
+  /* The face brightens on the portrait plate itself, keyed by its own
+     sibling exit: nothing is written after the :has(), so the img never
+     joins Chrome's :has() invalidation set. The plate's veil multiplies
+     the print, so a brightness on the plate is the print's own lift. */
+  .site-shell.film-edition.mirage-edition .wa-person > .wa-portrait:has(~ .wa-open:hover) {
+    filter: brightness(1.08) saturate(1.05);
   }
 }
 

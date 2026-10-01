@@ -18,8 +18,8 @@ import test from "node:test";
      `.wa-role:not(:has(~ ...))`, `li:has(...)` only restyle themselves), or
      is followed by one sibling combinator to a class (`... ~ .wa-open`):
      sibling sets reach the anchor's own siblings, never <body>'s subtree;
-   - the one exception is the desktop hover face (there since before the
-     refine round; no Android phone matches its media query);
+   - no exception: the desktop hover face keys on the portrait plate
+     (`.wa-portrait:has(~ .wa-open:hover)`), never on its img;
    - the other World sheets write nothing after a :has() at all. */
 
 const read = (path) =>
@@ -159,20 +159,26 @@ test("every :has() argument in the World sheets ends in a class, id or attribute
 });
 
 test("the annex writes nothing after a :has() but one sibling", () => {
-  // Pointing at OPEN DOSSIER brightens the face: desktop pointers only.
-  const HOVER =
-    ".site-shell.film-edition.mirage-edition .wa-person:has(.wa-open:hover) .wa-portrait img";
+  // No exception any more (2026-10-01): the desktop hover face once wrote
+  // `.wa-person:has(.wa-open:hover) .wa-portrait img`, which put every img
+  // into the merged set. It now keys on the portrait plate itself.
   const found = audit("src/styles-world-annex.css");
-  const siblings = found.filter(({ selector }) => selector !== HOVER);
-  assert.equal(found.length - siblings.length, 1, "the hover face");
-  const hover = found.find(({ selector }) => selector === HOVER);
-  assert.deepEqual(hover.context, ["@media (hover: hover) and (pointer: fine)"]);
-  assert.ok(siblings.length > 0, "the opened file's exit follows its body");
-  for (const { selector, after } of siblings) {
+  assert.ok(found.length > 0, "the opened file's exit follows its body");
+  for (const { selector, after } of found) {
     assert.equal(after.length, 1, `more than one compound after :has(): ${selector}`);
     assert.match(after[0].combinator, /^[~+]$/, `descendant or child after :has(): ${selector}`);
     assert.ok(features(after[0].compound).keyed, `bare element after :has(): ${selector}`);
+    assert.doesNotMatch(after[0].compound, /^img\b|\simg\b/, `img after :has(): ${selector}`);
   }
+  const css = read("src/styles-world-annex.css").replace(/\s+/g, " ");
+  assert.doesNotMatch(css, /:has\([^{]*\)[^{,]*\bimg\b[^{]*\{/, "no img after any :has()");
+  const hover = parse(read("src/styles-world-annex.css")).find(
+    ({ selector }) =>
+      selector ===
+      ".site-shell.film-edition.mirage-edition .wa-person > .wa-portrait:has(~ .wa-open:hover)",
+  );
+  assert.ok(hover, "the hover face keys on the portrait plate");
+  assert.deepEqual(hover.context, ["@media (hover: hover) and (pointer: fine)"]);
 });
 
 test("the other World sheets write nothing after a :has()", () => {

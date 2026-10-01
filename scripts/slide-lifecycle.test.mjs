@@ -106,6 +106,19 @@ function mount() {
     press: (x, type) => element.props.onPointerDown(pointer(x, type)),
     move: (x, type) => element.props.onPointerMove(pointer(x, type)),
     up: (x, type) => element.props.onPointerUp(pointer(x, type)),
+    // The label path: the browser's own click ends a body press.
+    at: (x, y, type) => ({ ...pointer(x, type), clientY: y }),
+    pointerDown: (event) => element.props.onPointerDown(event),
+    pointerMove: (event) => element.props.onPointerMove(event),
+    pointerLeave: (event) => element.props.onPointerLeave(event),
+    labelClick: (x, y) =>
+      element.props.onClick({
+        detail: 1,
+        clientX: x,
+        clientY: y,
+        preventDefault() {},
+        stopPropagation() {},
+      }),
     opened: () => opened,
     unmount: () => cleanups.forEach((fn) => fn?.()),
   };
@@ -242,4 +255,40 @@ test("the horizontal tap test names the peak-travel guard", () => {
     /const isThumbTap =\s*deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE && peakTravel\.current < TAP_TOLERANCE;/,
   );
   assert.match(source, /peakTravel\.current = Math\.max\(/);
+});
+
+// The label (not the thumb) is an ordinary button: a press released in place
+// opens, but a press dragged out and back is abandoned, like the thumb's.
+test("a label press dragged out 40px and back never opens (mouse)", () => {
+  const ui = mount();
+  ui.pointerDown(ui.at(150, 25));
+  for (const y of [33, 45, 53, 45, 33, 26]) ui.pointerMove(ui.at(150, y));
+  ui.labelClick(150, 26);
+  ui.flush();
+  assert.equal(ui.opened(), 0);
+  ui.unmount();
+});
+
+test("a label press that leaves the control and comes back never opens (mouse)", () => {
+  const ui = mount();
+  ui.pointerDown(ui.at(150, 25));
+  ui.pointerLeave(ui.at(150, 60));
+  ui.labelClick(150, 25);
+  ui.flush();
+  assert.equal(ui.opened(), 0);
+  ui.unmount();
+});
+
+test("a label tap with natural jitter still opens once (mouse and touch)", () => {
+  for (const type of ["mouse", "touch"]) {
+    const ui = mount();
+    ui.pointerDown(ui.at(150, 25, type));
+    ui.pointerMove(ui.at(154, 28, type));
+    // Touch leaves only after its release: never read as a drag away.
+    if (type === "touch") ui.pointerLeave(ui.at(154, 28, type));
+    ui.labelClick(153, 27);
+    ui.flush();
+    assert.equal(ui.opened(), 1, type);
+    ui.unmount();
+  }
 });

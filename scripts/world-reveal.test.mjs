@@ -224,30 +224,44 @@ test("rail locks clip <body> on /world so the reveal holds still under them", as
 test("only colour and the cursor cell are animated, per inline character, and full-contrast modes opt out", async () => {
   const css = await readCss();
   const { rules, keyframes } = parse(css);
-  assert.deepEqual(Object.keys(keyframes).sort(), ["tr-caret", "tr-ink"]);
-  const properties = (name) => [
-    ...new Set(
-      keyframes[name].flatMap(({ body }) => [...body.matchAll(/([\w-]+)\s*:/g)].map((m) => m[1])),
-    ),
-  ];
-  assert.deepEqual(properties("tr-ink"), ["color"]);
+  // One animation per character carries the ink and the cursor (2026-10-01:
+  // 307 characters at two animations each cost more per scroll frame than
+  // the 460 the page was tuned at; one each costs less).
+  assert.deepEqual(Object.keys(keyframes).sort(), ["tr-ink"]);
+  const properties = (name) =>
+    [
+      ...new Set(
+        keyframes[name].flatMap(({ body }) => [...body.matchAll(/([\w-]+)\s*:/g)].map((m) => m[1])),
+      ),
+    ].sort();
   // background-image, not background-color: Chromium 142+ (Samsung Internet
   // 30, current Chrome) repaints the page under a background-color animation
   // every scroll frame; the stepped image repaints only the cell it enters.
-  assert.deepEqual(properties("tr-caret"), ["background-image"]);
-  // Typing: a character is invisible until its turn, then appears at once at
-  // its own colour (the implicit `to`); the ice cursor holds its cell for one step.
+  assert.deepEqual(properties("tr-ink"), ["background-image", "color"]);
+  // Typing: a character is a clear cell until its turn (the rule's base
+  // colour; no backwards fill, so the animation is not in effect before its
+  // range), a clear cell under the ice cursor from the first offset of its
+  // own range (`from`, held by steps(1, end)), then at once its own colour
+  // (`inherit`, the parent's; no sheet colours .tr-c itself) with no cursor
+  // (`to`, held by the forwards fill). The before phase and the first offset
+  // of the range are both progress 0 and must differ (no cursor, cursor):
+  // a backwards fill with a lead-in stop left no cursor at all on a range
+  // boundary, where a wheel scroll rests; a per-keyframe steps(1, start)
+  // stuck to whichever phase Chromium sampled first (2026-10-02). This is
+  // what the two-animation version (tr-ink both + tr-caret none) showed.
   assert.deepEqual(
     keyframes["tr-ink"].map(({ stop }) => stop),
-    ["from"],
+    ["from", "to"],
   );
-  assert.match(keyframes["tr-ink"][0].body, /color: transparent/);
+  const [caret, lit] = keyframes["tr-ink"].map(({ body }) => flat(body));
   assert.match(
-    flat(keyframes["tr-caret"][0].body),
-    /^background-image: linear-gradient\((color-mix\(in oklab, var\(--mr-ice, #7ae8ff\) 82%, transparent\)), \1\);$/,
+    caret,
+    /^color: transparent; background-image: linear-gradient\((color-mix\(in oklab, var\(--mr-ice, #7ae8ff\) 82%, transparent\)), \1\);$/,
   );
+  assert.equal(lit, "color: inherit; background-image: none;");
   for (const { body } of rules.filter(({ body }) => /animation:\s*tr-ink/.test(body))) {
-    assert.match(body, /tr-ink steps\(1, end\) both,\s*tr-caret steps\(1, end\) none/);
+    assert.match(body, /color: transparent;\s*animation: tr-ink steps\(1, end\) forwards;/);
+    assert.doesNotMatch(body, /tr-caret/);
     assert.match(body, /var\(--tr-d, 0\)/);
   }
   for (const { selector, body } of rules) {
@@ -264,7 +278,9 @@ test("only colour and the cursor cell are animated, per inline character, and fu
     ),
   );
   assert.ok(optOut);
-  assert.equal(flat(optOut.body), "animation: none;");
+  // The base colour is transparent under the animation rule, so the opt-out
+  // restores the inherited colour with the animation.
+  assert.equal(flat(optOut.body), "animation: none; color: inherit;");
   // The same selectors as the animation rules, later, so they outrank them.
   const animatedSelectors = rules
     .filter(({ body }) => /animation:\s*tr-ink/.test(body))
@@ -286,7 +302,7 @@ test("the production CSS keeps each character's range, so the cursor shows", asy
   const typing = rules.filter(({ body }) => /animation:\s*tr-ink/.test(body));
   assert.ok(typing.length > 0);
   for (const { body } of typing) {
-    assert.match(body, /animation:[^;]*tr-caret steps\(1, end\) none;\s*animation-duration: auto;/);
+    assert.match(body, /animation: tr-ink steps\(1, end\) forwards;\s*animation-duration: auto;/);
   }
   const { transform } = await import("lightningcss");
   const { code } = transform({

@@ -697,6 +697,17 @@ main.site-shell.film-edition.mirage-edition
 }
 
 /* ================================================================
+   12. Second pass (2026-10-02)
+   ================================================================ */
+/* STORY's kicker holds one line. Between about 841 and 875px the heading
+   column is 205-212px (the two-column plate's narrowest band, 844x390
+   phones included) and THIS IS NOT A DREAM broke before DREAM under its
+   own rule. The column is wider than the line everywhere else. */
+main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebrow > span {
+  white-space: nowrap;
+}
+
+/* ================================================================
    Forced colours
    ================================================================ */
 @media (forced-colors: active) {

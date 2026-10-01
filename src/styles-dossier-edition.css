@@ -1322,6 +1322,31 @@ main.manager-page:not(.is-sovereign) .dossier-contents-arrow {
     .dossier-contents-arrow {
     translate: 0 2px;
   }
+
+  /* PREV / NEXT lean the way they lead (see the second pass below). */
+  html:not([data-world-effects="economy"])
+    main.manager-page:not(.is-sovereign)
+    .manager-pagination
+    > a
+    > span:last-child {
+    transition: translate 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html:not([data-world-effects="economy"])
+    main.manager-page:not(.is-sovereign)
+    .manager-pagination
+    > a:first-child:hover
+    > span:last-child {
+    translate: -4px 0;
+  }
+
+  html:not([data-world-effects="economy"])
+    main.manager-page:not(.is-sovereign)
+    .manager-pagination
+    > a:last-child:hover
+    > span:last-child {
+    translate: 4px 0;
+  }
 }
 
 /* 夜明護尊's withheld facts (the ▢ runs) read as redaction bars rather than
@@ -1363,6 +1388,64 @@ main.manager-page:not(.is-sovereign) .manager-facts dd.is-redacted {
       var(--dm-prism) 50% 50% / 100% 1px no-repeat;
     opacity: 0.85;
     pointer-events: none;
+  }
+}
+
+/* ================================================================
+   Second pass (2026-10-02)
+   ================================================================ */
+
+/* A partner's long record sets the pair's height. The stretch went to the
+   cast card's art row, so her name and copy floated 350px under her own
+   portrait at 1440 (leddic). Each card keeps its copy under its art; the
+   card's ink simply runs on beside the longer record. */
+@media (min-width: 761px) {
+  main.manager-page:not(.is-sovereign)
+    .rider-archive-identity-records.has-partner
+    > .rider-archive-civilian {
+    grid-template-rows: auto 1fr;
+  }
+}
+
+/* The Rexonance record's small resonance ring sits in the copy's free
+   corner on wide cards. On phones the copy panel is only as tall as its
+   words, and the 58px ring landed beside the quote like an empty bubble:
+   there it closes the rule under the quote as a 30px node instead. */
+@media (max-width: 760px) {
+  main.manager-page:not(.is-sovereign)
+    .is-rexonance-pickup
+    .rexonance-card-ornaments
+    i:nth-child(3) {
+    right: 18px;
+    bottom: 12px;
+    width: 30px;
+  }
+}
+
+/* The record viewers' HUD bar: its top-right bracket ran into the CLOSE
+   plate on every form and nightmare record (the World's two dialogs were
+   cleared in the first pass). CLOSE is that corner's terminal now; the
+   top-left bracket, the ruler and the bar's ink stay. Paint only: the
+   layer list is pickup-cinema's, with the right pair sized to nothing. */
+main.manager-page:not(.is-sovereign)
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)::before,
+main.manager-page:not(.is-sovereign) .rider-nightmare-dialog.rider-nightmare-dialog::before {
+  background-size:
+    var(--pc-arm) 2px,
+    2px var(--pc-arm),
+    0 0,
+    0 0,
+    min(40%, 256px) 5px,
+    auto;
+}
+
+/* PREV / NEXT answer a pointer like the file's other plates: the card's
+   foot lights in the file's accent at once, and its arrow leans 4px the way
+   it leads (fine pointers; the lean only under full motion). The hover had
+   been a 6% tint, hard to see on the ink. */
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page:not(.is-sovereign) .manager-pagination > a:hover {
+    box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--manager-accent, #7ae8ff) 72%, transparent);
   }
 }
 
