@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { REXONANCE_CALLS } from "../src/lib/rexonance-calls.ts";
 
 const updateSource = readFileSync(
   new URL("../public/rexonance-archive-update.js", import.meta.url),
@@ -10,9 +11,9 @@ const updateSource = readFileSync(
 test("レクソナンス三形態の新設定と基礎値をフォームアーカイブへ保持する", () => {
   for (const expected of [
     "332.2t / 480.5t",
-    "Ultra DEUS！",
+    "REXONANCE DEUS！",
     "FAR UP！",
-    "OVER SA-GA！RIDER！",
+    "RIDER！",
     "SA-GA OS 5.5",
     "超自己進化",
     "絶対秩序",
@@ -34,26 +35,30 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     "utf8",
   );
   const calls = [
-    "Ultra DEUS！",
-    "REXONANCE！",
     "FAR UP！",
-    "OVER SA-GA！RIDER！",
-    "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
-    "REXONANCE！",
+    "RIDER！",
+    "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
+    "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
+    "REXONANCE DEUS！",
   ];
   const riderBlock = riderSource.slice(
     riderSource.indexOf('name: "レクソナンスサーガ"'),
     riderSource.indexOf("stats: [", riderSource.indexOf('name: "レクソナンスサーガ"')),
   );
-  let riderPosition = -1;
+  assert.deepEqual(REXONANCE_CALLS, calls);
+  assert.match(riderSource, /import \{ REXONANCE_CALLS \} from "@\/lib\/rexonance-calls"/);
+  assert.match(riderBlock, /calls: \[\.\.\.REXONANCE_CALLS\]/);
   let archivePosition = -1;
   for (const call of calls) {
-    riderPosition = riderBlock.indexOf(call, riderPosition + 1);
     archivePosition = updateSource.indexOf(call, archivePosition + 1);
-    assert.notEqual(riderPosition, -1, `ライダー詳細に ${call} が順番どおり存在する`);
     assert.notEqual(archivePosition, -1, `アーカイブに ${call} が順番どおり存在する`);
   }
-  for (const obsolete of ["EXCONVERT！", "GODSIDE！RIDER！"]) {
+  for (const obsolete of [
+    "EXCONVERT！",
+    "GODSIDE！RIDER！",
+    "Ultra DEUS！",
+    "OVER SA-GA！RIDER！",
+  ]) {
     assert.doesNotMatch(riderBlock, new RegExp(obsolete));
     assert.doesNotMatch(updateSource, new RegExp(obsolete));
   }

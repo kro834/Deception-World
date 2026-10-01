@@ -20,6 +20,8 @@ import {
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
+import { RexonanceCallSequence } from "@/components/rexonance-saga/rexonance-call-sequence";
+import { REXONANCE_ENTRY_TIMINGS } from "@/lib/rexonance-calls";
 
 type RiderDiveVariant =
   "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
@@ -120,7 +122,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   lore: { cover: 360, reveal: 460 },
   vandal: { cover: 360, reveal: 460 },
   dream: { cover: 420, reveal: 500 },
-  rexonance: { cover: 380, reveal: 480 },
+  rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
   "final-stage": { cover: 380, reveal: 480 },
 };
@@ -145,6 +147,42 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 const nextFrame = () =>
   new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+
+// The call hold can be shortened while it is playing. A live reduced
+// motion/economy preference must not leave the static final word waiting for
+// the old cinematic clock. Cancellation also releases this timer immediately.
+function waitForRexonanceCover(duration: number) {
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const simplified = () =>
+    media.matches || document.documentElement.dataset.worldEffects === "economy";
+  let cancel: () => void = () => undefined;
+  if (simplified()) return { promise: Promise.resolve(), cancel };
+  const promise = new Promise<void>((resolve) => {
+    let observer: MutationObserver | null = null;
+    const finish = () => {
+      window.clearTimeout(timer);
+      observer?.disconnect();
+      media.removeEventListener("change", onPreference);
+      document.removeEventListener("deception-world:cancel-route-transition", finish);
+      window.removeEventListener("pagehide", finish);
+      resolve();
+    };
+    const onPreference = () => {
+      if (simplified()) finish();
+    };
+    const timer = window.setTimeout(finish, duration);
+    cancel = finish;
+    observer = new MutationObserver(onPreference);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-world-effects"],
+    });
+    media.addEventListener("change", onPreference);
+    document.addEventListener("deception-world:cancel-route-transition", finish);
+    window.addEventListener("pagehide", finish);
+  });
+  return { promise, cancel };
+}
 
 // Two painted frames under the still shutter after the route commits: the
 // commit's long task lands in a held frame, and the portrait is measured on
@@ -796,6 +834,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   });
   const busy = useRef(false);
   const transitionId = useRef(0);
+  const rexonanceTransition = useRef<number | null>(null);
+  const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);
   const pathnameRef = useRef(pathname);
@@ -948,6 +988,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     const pendingScrollReleases = scrollMotionReleases.current;
     const cancelTransition = () => {
       transitionId.current += 1;
+      rexonanceTransition.current = null;
+      rexonanceCoverCancel.current?.();
+      rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
       pendingScrollReleases.forEach((release) => release());
       window.clearTimeout(signalTimer.current);
@@ -972,6 +1015,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     };
     document.addEventListener("deception-world:cancel-route-transition", cancelTransition);
     window.addEventListener("pagehide", cancelTransition);
+    const cancelHiddenRexonance = () => {
+      // The operation begins before React paints its cover. A DOM query here
+      // misses backgrounding between the click and that first committed frame.
+      if (document.hidden && rexonanceTransition.current !== null) {
+        cancelTransition();
+      }
+    };
+    document.addEventListener("visibilitychange", cancelHiddenRexonance);
     // Back/Forward can arrive while a cover is still warming its route. That
     // earlier request must never commit after the browser has moved elsewhere.
     const stopHistory = router.history.subscribe(({ action }) => {
@@ -983,6 +1034,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       // A pending preload can settle after disposal (or router replacement).
       // Invalidate it before releasing the cover so it cannot navigate later.
       transitionId.current += 1;
+      rexonanceTransition.current = null;
+      rexonanceCoverCancel.current?.();
+      rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
       pendingScrollReleases.forEach((release) => release());
       window.clearTimeout(signalTimer.current);
@@ -990,6 +1044,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       stopHistory();
       document.removeEventListener("deception-world:cancel-route-transition", cancelTransition);
       window.removeEventListener("pagehide", cancelTransition);
+      document.removeEventListener("visibilitychange", cancelHiddenRexonance);
       for (const frame of openingFocusFrames.current) {
         window.cancelAnimationFrame(frame);
       }
@@ -1101,7 +1156,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       setDelayedRoute(null);
       const changesDocument = pathname !== to;
       const isArchiveTransition =
-        changesDocument && (pathname === "/form-archive" || to === "/form-archive");
+        changesDocument &&
+        to !== "/rexonance-saga" &&
+        (pathname === "/form-archive" || to === "/form-archive");
       const isZeusTransition = changesDocument && to === "/managers/zeus";
       const isDreamTransition =
         pathname !== to && (to === "/dream-chapter" || transition === "dream");
@@ -1156,12 +1213,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         return;
       }
       busy.current = true;
-      const startedAt = performance.now();
+      let startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const tier = cineTier(reduceMotion);
 
       if (riderTransitionVariant && !isArchiveTransition) {
         const releaseScrollMotion = holdManagedScrollMotion();
+        if (diveVariant === "rexonance") rexonanceTransition.current = requestId;
         // PREV / NEXT between dossiers flips the file; entry from anywhere
         // else keeps the rider's own dive or cut-in.
         const flip =
@@ -1204,34 +1262,50 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             void preloadAssets(assets, () => undefined).catch(() => undefined);
           }
           // Mobile Safari may coalesce the state update with route/module work.
-          // Give the Dream dive two paints so its first frame is always visible.
-          if (diveVariant === "dream") {
+          // Paint both cinematic entries before loading their route chunk.
+          if (diveVariant === "dream" || diveVariant === "rexonance") {
             await nextFrame();
             await nextFrame();
             if (!isCurrent()) return;
+            // Rexonance's five calls run from the first painted frame, not
+            // from the click (which may have included a long layout task).
+            if (diveVariant === "rexonance") startedAt = performance.now();
           }
           // Images warm independently of the route chunk. A stalled chunk
           // releases the cover before navigation, rather than locking the page.
           if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-          if (coverTimeLeft > 0) await wait(coverTimeLeft);
+          if (coverTimeLeft > 0) {
+            if (diveVariant === "rexonance") {
+              const hold = waitForRexonanceCover(coverTimeLeft);
+              rexonanceCoverCancel.current = hold.cancel;
+              await hold.promise;
+              if (rexonanceCoverCancel.current === hold.cancel) rexonanceCoverCancel.current = null;
+            } else await wait(coverTimeLeft);
+          }
           if (!isCurrent()) return;
           await navigateUnderCover(router, () => navigate({ to: to as never, hash }), to);
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
           if (!isCurrent()) return;
-          const rects = landingRects();
-          const landed = scene && {
-            ...scene,
-            ...rects,
-            hold: scene.kind === "iris" && cutInVariant ? rects.plate : null,
-          };
+          const callOnly = diveVariant === "rexonance";
+          let landed = scene;
+          // The call renderer has no carried portrait or docking layers. Keep
+          // its tier/timing metadata without measuring unused destination art.
+          if (!callOnly) {
+            const rects = landingRects();
+            landed = scene && {
+              ...scene,
+              ...rects,
+              hold: scene.kind === "iris" && cutInVariant ? rects.plate : null,
+            };
+          }
           // The shutter lifts: the destination owns scrolling again, and its
           // own entrance (keyed to data-loading) starts with the hand-over.
           document.documentElement.removeAttribute("data-loading");
           markRouteCover("revealing");
-          if (landed && (landed.hold || !dockGeometry(landed))) await entranceLead();
+          if (!callOnly && landed && (landed.hold || !dockGeometry(landed))) await entranceLead();
           if (!isCurrent()) return;
           setGate({
             active: true,
@@ -1240,12 +1314,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             phase: "revealing",
             scene: landed,
           });
-          await revealRan(timings.reveal, () => {
-            if (landed) handOverDockedFile(landed);
-          });
+          await revealRan(
+            timings.reveal,
+            callOnly
+              ? undefined
+              : () => {
+                  if (landed) handOverDockedFile(landed);
+                },
+          );
         } finally {
           window.setTimeout(releaseScrollMotion, 360);
           if (isCurrent()) {
+            if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
             document.documentElement.removeAttribute("data-loading");
             markRouteCover("settling");
             setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
@@ -1507,9 +1587,10 @@ function RiderRouteDive({
 }) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
+  const rexonance = variant === "rexonance";
   return (
     <div
-      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}`}
+      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}`}
       style={sceneStyle(scene)}
       role="status"
       aria-live="polite"
@@ -1518,17 +1599,23 @@ function RiderRouteDive({
         revealing ? `${meta.label}の個別資料へ到着しました` : `${meta.label}の個別資料へダイブ中`
       }
     >
-      <CineLayers scene={scene} />
-      <span className="archive-dive-space" aria-hidden="true" />
-      <span className="rider-dive-vector-field" aria-hidden="true" />
-      <span className="cine-dive-tunnel" aria-hidden="true">
-        <i />
-        <i />
-      </span>
-      <span className="rider-dive-mark" aria-hidden="true">
-        <i>{meta.no}</i>
-      </span>
-      <span className="cine-dive-flash" aria-hidden="true" />
+      {rexonance ? (
+        <RexonanceCallSequence mode="entry" phase={phase} tier={scene?.tier ?? "reduced"} />
+      ) : (
+        <>
+          <CineLayers scene={scene} />
+          <span className="archive-dive-space" aria-hidden="true" />
+          <span className="rider-dive-vector-field" aria-hidden="true" />
+          <span className="cine-dive-tunnel" aria-hidden="true">
+            <i />
+            <i />
+          </span>
+          <span className="rider-dive-mark" aria-hidden="true">
+            <i>{meta.no}</i>
+          </span>
+          <span className="cine-dive-flash" aria-hidden="true" />
+        </>
+      )}
       <span className="cine-dive-status rider-dive-status">
         <small>
           {variant === "rexonance"

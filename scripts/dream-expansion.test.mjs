@@ -17,7 +17,8 @@ import {
 
 /* Dream Chapter expansion (人物一覧, 組織と勢力, 章の言葉, 用語集, 名台詞, 目次).
    The additions come from the owner's story source and sit after the
-   existing data; the existing copy above them stays byte for byte. */
+   existing data. The owner requested rewritten case/crossing prose on
+   2026-10-01; posters, headline dossiers and combat records remain pinned. */
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const data = read("src/components/dream-chapter/dream-chapter-data.ts");
@@ -28,16 +29,26 @@ const css = read("src/styles-dream-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 const EXPANSION_MARKER =
   "\n// ---------------------------------------------------------------------------\n// Expansion from the owner's story source";
 
-test("existing Dream data is untouched: the expansion is appended after it", () => {
+test("Dream preserves posters, headline dossiers and combat records outside approved prose edits", () => {
   const cut = data.indexOf(EXPANSION_MARKER);
   assert.ok(cut > 0, "expansion marker");
-  const existing = data.slice(0, cut);
-  // SHA-256 of dream-chapter-data.ts before the expansion (posters, cases,
-  // crossings, characters, Dolminence records). Update only on the owner's
-  // request to change that copy.
+  const existing = data
+    .slice(0, cut)
+    .replace(
+      "// あらすじ・人物紹介・用語の説明は原文に基づく要約。\n" +
+        "// line / said / quotes と DREAM_QUOTES / DREAM_CASE_NOTES の台詞は原文の引用。\n",
+      "",
+    );
+  const start = existing.indexOf("export const DREAM_CASES =");
+  const end = existing.indexOf("export type DossierSection =");
+  assert.ok(start > 0 && end > start, "only the case/crossing prose region is exempted");
+  // Hash computed from the same two unedited regions of the pre-rewrite file.
+  // Exact case wording is protected separately in owner-copy.test.mjs.
   assert.equal(
-    createHash("sha256").update(existing).digest("hex"),
-    "ce9b30582b20b838340e45b2fd0ad2f270c2148ce5df834f2c77a6c6bff08da2",
+    createHash("sha256")
+      .update(existing.slice(0, start) + existing.slice(end))
+      .digest("hex"),
+    "d2718d4f847779c62d2fe143ecabfc1f300f7a2df82a9a6564e827bdd6646d49",
   );
   assert.deepEqual(
     DREAM_CASES.map(({ no, title, reading }) => `${no}${title}${reading}`),

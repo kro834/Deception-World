@@ -1,8 +1,3 @@
-            img: "/weapon-axis-raker-mark-vii-launcher.jpeg",
-            pos: "50% 50%",
-            name: "アクシスレイカー・マークⅦ　ランチャーモード",
-            label: "AXIS RAKER / LAUNCHER MODE",
-          },
           {
             img: "/weapon-unite-edge-lancer.jpeg",
             pos: "50% 50%",
@@ -337,3 +332,7 @@
     no: "05",
     name: "LEDDIC",
     ja: "レディック",
+    person: "在原華火",
+    enPerson: "HANAKA ARIHARA",
+    epithet: "規格外の幸運",
+    tone: "#69df74",

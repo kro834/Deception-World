@@ -167,9 +167,21 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.match(gate, /router\.subscribe\("onRendered", \(event\) => \{/);
   assert.doesNotMatch(gate, /announceRouteCommit/);
   const branches = gate.match(
-    /await navigateUnderCover\(router, \(\) => navigate\(\{ to: to as never, hash \}\), to\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const rects = landingRects\(\);\s*const landed = |const landed = [^\n]*landingRects\(\) \};)[\s\S]*?document\.documentElement\.removeAttribute\("data-loading"\);[\s\S]*?phase: "revealing",[\s\S]*?await revealRan\(timings\.reveal/g,
+    /await navigateUnderCover\(router, \(\) => navigate\(\{ to: to as never, hash \}\), to\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = diveVariant === "rexonance";\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?document\.documentElement\.removeAttribute\("data-loading"\);[\s\S]*?phase: "revealing",[\s\S]*?await revealRan\(\s*timings\.reveal/g,
   );
   assert.equal(branches?.length, 2, "rider dives/cut-ins and the sovereign gate");
+  // Only Rexonance's typography has no portrait to dock. Every other rider
+  // keeps the measured geometry and entrance lead, and both branches above
+  // must still pass onRendered, two-frame settling and the reveal clock.
+  assert.match(
+    branches[0],
+    /if \(!callOnly && landed && \(landed\.hold \|\| !dockGeometry\(landed\)\)\) await entranceLead\(\);/,
+  );
+  assert.match(branches[1], /await entranceLead\(\);/);
+  assert.match(
+    gate,
+    /await revealRan\(\s*timings\.reveal,\s*callOnly\s*\? undefined\s*: \(\) => \{\s*if \(landed\) handOverDockedFile\(landed\);/,
+  );
   // The reveal's clock starts on its first painted frame.
   assert.match(
     gate,

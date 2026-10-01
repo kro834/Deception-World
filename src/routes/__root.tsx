@@ -21,6 +21,7 @@ import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 import pressFeedbackCss from "../styles-press-feedback.css?url";
 import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
+import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
@@ -50,7 +51,11 @@ export const Route = createRootRoute({
   head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" },
+      {
+        name: "viewport",
+        content:
+          "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
+      },
       { title: APP_NAME },
       { name: "description", content: "仮面ライダーサーガ Deception World — 映画オープニング" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
@@ -114,6 +119,8 @@ export const Route = createRootRoute({
       // The file shutter: every covered route change closes onto what was
       // pressed and opens from the destination's portrait (load-gate.tsx).
       { rel: "stylesheet", href: transitionCinemaCss },
+      // Entry calls must be available on the departure route as well.
+      { rel: "stylesheet", href: rexonanceCallsCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

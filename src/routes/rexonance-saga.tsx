@@ -11,6 +11,7 @@ import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
 import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
+import rexonancePolishCssUrl from "@/styles-rexonance-polish.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: showcaseElevationCssUrl },
       { rel: "stylesheet", href: showcaseCinemaCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
+      { rel: "stylesheet", href: rexonancePolishCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

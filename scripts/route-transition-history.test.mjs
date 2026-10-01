@@ -3,14 +3,18 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
-import { preloadRouteWithDeadline } from "../src/lib/route-warmup-deadline.ts";
+import {
+  preloadRouteWithDeadline,
+  ROUTE_WARMUP_DEADLINE_MS,
+} from "../src/lib/route-warmup-deadline.ts";
+import { REXONANCE_ENTRY_TIMINGS } from "../src/lib/rexonance-calls.ts";
 
 const source = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 const code = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
 }).outputText;
 
-function mount(pathname = "/world") {
+function mount(pathname = "/world", { preload } = {}) {
   class KeyboardEvent extends Event {
     constructor(type, options = {}) {
       super(type);
@@ -23,9 +27,25 @@ function mount(pathname = "/world") {
     frames = new Map(),
     timers = new Map(),
     subscribers = new Set();
+  const motion = new EventTarget();
+  motion.matches = false;
+  const observers = new Set();
+  class MutationObserver {
+    constructor(callback) {
+      this.callback = callback;
+    }
+    observe() {
+      observers.add(this);
+    }
+    disconnect() {
+      observers.delete(this);
+    }
+  }
   const navigations = [],
     gates = [],
-    alignments = [];
+    alignments = [],
+    fallbacks = [],
+    queries = [];
   let serial = 0;
   let releaseWarmup;
   const warmup = new Promise((resolve) => {
@@ -41,14 +61,18 @@ function mount(pathname = "/world") {
   };
   const doc = new EventTarget();
   Object.assign(doc, {
+    hidden: false,
     documentElement: root,
     getElementById: (hash) => ({ scrollIntoView: () => alignments.push(hash) }),
-    querySelector: () => null,
+    querySelector: (selector) => {
+      queries.push(selector);
+      return null;
+    },
   });
   const win = new EventTarget();
   Object.assign(win, {
     location: { pathname, hash: "" },
-    matchMedia: () => ({ matches: false }),
+    matchMedia: () => motion,
     requestAnimationFrame: (callback) => {
       frames.set(++serial, callback);
       return serial;
@@ -66,7 +90,7 @@ function mount(pathname = "/world") {
     clearInterval: (id) => timers.delete(id),
   });
   const router = {
-    preloadRoute: () => warmup,
+    preloadRoute: (destination) => (preload ? preload(destination) : warmup),
     subscribe: () => () => undefined,
     history: {
       subscribe(callback) {
@@ -84,6 +108,7 @@ function mount(pathname = "/world") {
     CustomEvent,
     KeyboardEvent,
     PointerEvent,
+    MutationObserver,
     performance: { now: () => 1000 },
     require(name) {
       if (name === "react")
@@ -98,6 +123,7 @@ function mount(pathname = "/world") {
             initial,
             (value) => {
               if (value && typeof value === "object" && "active" in value) gates.push(value);
+              if (value && typeof value === "object" && "href" in value) fallbacks.push(value);
             },
           ],
         };
@@ -116,6 +142,7 @@ function mount(pathname = "/world") {
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
+      if (name === "@/lib/rexonance-calls") return { REXONANCE_ENTRY_TIMINGS };
       return {};
     },
   });
@@ -133,7 +160,24 @@ function mount(pathname = "/world") {
     navigations,
     gates,
     alignments,
+    fallbacks,
+    queries,
     releaseWarmup,
+    activeObservers: () => observers.size,
+    pendingTimers: () => timers.size,
+    reduceMotion: () => {
+      motion.matches = true;
+      motion.dispatchEvent(new Event("change"));
+    },
+    economy: () => {
+      root.dataset.worldEffects = "economy";
+      observers.forEach((observer) => observer.callback());
+    },
+    visibility: (hidden) => {
+      doc.hidden = hidden;
+      doc.dispatchEvent(new Event("visibilitychange"));
+    },
+    pagehide: () => win.dispatchEvent(new Event("pagehide")),
     history: (type) => subscribers.forEach((callback) => callback({ action: { type } })),
     key: (key, shiftKey = false) =>
       doc.dispatchEvent(new KeyboardEvent("keydown", { key, shiftKey })),
@@ -184,6 +228,270 @@ for (const action of ["BACK", "FORWARD", "GO"]) {
     await pending;
     assert.equal(ui.navigations.length, 0, "the superseded destination must not replace history");
     assert.equal(ui.gates.at(-1).active, false);
+    ui.cleanup();
+  });
+}
+
+for (const action of ["BACK", "FORWARD", "GO", "pagehide", "unmount"]) {
+  test(`${action} cancels the painted Rexonance call hold and its timer`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to: "/rexonance-saga" });
+    ui.releaseWarmup();
+    await ui.flushFrames();
+    await ui.flushFrames();
+    assert.equal(ui.activeObservers(), 1, "the live-preference hold is registered");
+    if (action === "pagehide") ui.pagehide();
+    else if (action === "unmount") ui.cleanup();
+    else ui.history(action);
+    await pending;
+    await ui.flushTimers();
+    assert.equal(ui.navigations.length, 0, "a cancelled call must never commit later");
+    assert.equal(ui.activeObservers(), 0, "the preference observer is released");
+    assert.equal(ui.pendingTimers(), 0, "the call timer is cleared immediately");
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    if (action !== "unmount") ui.cleanup();
+  });
+}
+
+test("enabling reduced motion during the Rexonance hold ends its cinematic wait", async () => {
+  const ui = mount();
+  const pending = ui.go({ to: "/rexonance-saga" });
+  ui.releaseWarmup();
+  await ui.flushFrames();
+  await ui.flushFrames();
+  assert.equal(ui.activeObservers(), 1);
+  ui.reduceMotion();
+  for (let index = 0; index < 16; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await pending;
+  assert.equal(ui.navigations.length, 1);
+  assert.equal(ui.activeObservers(), 0);
+  assert.equal(ui.gates.at(-1).active, false);
+  assert.equal(ui.root.dataset.loading, undefined);
+  ui.cleanup();
+});
+
+test("hiding Rexonance before its first painted cover cancels the queued navigation", async () => {
+  const ui = mount();
+  const pending = ui.go({ to: "/rexonance-saga" });
+  // A queued React cover does not exist in the document yet. Backgrounding
+  // must cancel the operation itself rather than rely on querying its DOM.
+  try {
+    ui.visibility(true);
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.root.dataset.routeCover, undefined);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    ui.visibility(false);
+    ui.releaseWarmup();
+    for (let index = 0; index < 16; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    assert.equal(ui.navigations.length, 0, "returning to the tab must not revive a cancelled call");
+  } finally {
+    ui.cleanup();
+  }
+});
+
+test("enabling economy rendering during the Rexonance hold ends its cinematic wait", async () => {
+  const ui = mount();
+  const pending = ui.go({ to: "/rexonance-saga" });
+  ui.releaseWarmup();
+  await ui.flushFrames();
+  await ui.flushFrames();
+  assert.equal(ui.activeObservers(), 1);
+  ui.economy();
+  assert.equal(ui.activeObservers(), 0, "the live preference releases the hold immediately");
+  for (let index = 0; index < 16; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await pending;
+  assert.equal(ui.navigations.length, 1);
+  assert.equal(ui.gates.at(-1).active, false);
+  assert.equal(ui.root.dataset.loading, undefined);
+  ui.cleanup();
+});
+
+test("a stalled Rexonance warmup releases its cover and a late response cannot navigate", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const ui = mount();
+  const pending = ui.go({ to: "/rexonance-saga", hash: "stages" });
+  await ui.flushFrames();
+  await ui.flushFrames();
+  t.mock.timers.tick(ROUTE_WARMUP_DEADLINE_MS);
+  await pending;
+  assert.equal(ui.gates.at(-1).active, false);
+  assert.equal(ui.root.dataset.loading, undefined);
+  assert.equal(ui.fallbacks.at(-1).href, "/rexonance-saga#stages");
+  assert.equal(ui.navigations.length, 0);
+  ui.releaseWarmup();
+  for (let index = 0; index < 16; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  assert.equal(ui.navigations.length, 0, "a late warmup must not override the usable source page");
+  assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+
+  const retry = ui.go({ to: "/rexonance-saga", hash: "stages" });
+  for (let index = 0; index < 20; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await retry;
+  assert.equal(ui.navigations.length, 1, "the expired operation must release the navigation guard");
+  assert.equal(ui.gates.at(-1).active, false);
+  ui.cleanup();
+});
+
+for (const failure of ["reject", "throw"]) {
+  test(`a ${failure} during Rexonance warmup hands off to router recovery and releases the cover`, async () => {
+    const ui = mount("/world", {
+      preload: () => {
+        if (failure === "throw") throw new Error("chunk unavailable");
+        return Promise.reject(new Error("chunk unavailable"));
+      },
+    });
+    const pending = ui.go({ to: "/rexonance-saga" });
+    for (let index = 0; index < 20; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    assert.equal(ui.navigations.length, 1);
+    assert.equal(ui.gates.at(-1).active, false);
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.activeObservers(), 0);
+    ui.cleanup();
+  });
+}
+
+test("repeated history cancellation permits the next route without reviving Rexonance", async () => {
+  const ui = mount();
+  const stale = ui.go({ to: "/rexonance-saga" });
+  await ui.flushFrames();
+  await ui.flushFrames();
+  for (const action of ["BACK", "BACK", "FORWARD", "GO", "BACK"]) ui.history(action);
+  const latest = ui.go({ to: "/characters/ciel" });
+  ui.releaseWarmup();
+  for (let index = 0; index < 20; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await Promise.all([stale, latest]);
+  assert.equal(ui.navigations.length, 1);
+  assert.equal(ui.navigations[0].to, "/characters/ciel");
+  assert.equal(ui.root.dataset.loading, undefined);
+  assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+  assert.equal(ui.activeObservers(), 0);
+  ui.cleanup();
+});
+
+for (const phase of ["warmup", "hold", "reveal"]) {
+  for (const cancellation of ["hidden", "pagehide", "BACK"]) {
+    test(`${cancellation} during Rexonance ${phase} cannot erase a newer route's cover`, async () => {
+      const ui = mount();
+      const stale = ui.go({ to: "/rexonance-saga" });
+      await ui.flushFrames();
+      await ui.flushFrames();
+      if (phase !== "warmup") {
+        ui.releaseWarmup();
+        await ui.flushFrames();
+        assert.equal(ui.activeObservers(), 1, "the call hold is active before advancing");
+      }
+      if (phase === "reveal") {
+        for (let index = 0; index < 16 && ui.gates.at(-1).phase !== "revealing"; index++) {
+          await ui.flushTimers();
+          await ui.flushFrames();
+        }
+        assert.equal(ui.gates.at(-1).phase, "revealing");
+      }
+
+      if (cancellation === "hidden") ui.visibility(true);
+      else if (cancellation === "pagehide") ui.pagehide();
+      else ui.history(cancellation);
+      assert.equal(ui.root.dataset.loading, undefined);
+      assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+      assert.equal(ui.activeObservers(), 0);
+      ui.visibility(false);
+      const latest = ui.go({ to: "/characters/ciel" });
+      ui.releaseWarmup();
+      // Let the stale operation reach its finally before the new route's
+      // cover duration expires. It must not clear the newer operation's lock.
+      await ui.flushFrames();
+      assert.equal(ui.root.dataset.loading, "true");
+      assert.equal(ui.gates.at(-1).variant, "ciel");
+      assert.equal(ui.gates.at(-1).active, true);
+      for (let index = 0; index < 20; index++) {
+        await ui.flushFrames();
+        await ui.flushTimers();
+      }
+      await Promise.all([stale, latest]);
+      assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+      assert.equal(
+        ui.navigations.filter(({ to }) => to === "/rexonance-saga").length,
+        phase === "reveal" ? 1 : 0,
+      );
+      assert.equal(ui.gates.at(-1).active, false);
+      assert.equal(ui.root.dataset.loading, undefined);
+      assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+      ui.cleanup();
+    });
+  }
+}
+
+test("a completed Rexonance entry does not leave its visibility policy on another rider", async () => {
+  const ui = mount();
+  const rexonance = ui.go({ to: "/rexonance-saga" });
+  ui.releaseWarmup();
+  for (let index = 0; index < 20; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await rexonance;
+  const ciel = ui.go({ to: "/characters/ciel" });
+  ui.visibility(true);
+  assert.equal(ui.root.dataset.loading, "true", "only an active Rexonance call uses this policy");
+  assert.equal(ui.gates.at(-1).variant, "ciel");
+  ui.visibility(false);
+  for (let index = 0; index < 20; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await ciel;
+  assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+  assert.equal(ui.gates.at(-1).active, false);
+  ui.cleanup();
+});
+
+for (const to of ["/rexonance-saga", "/riders/saga"]) {
+  test(`${to} only measures docking geometry when its renderer uses a carried file`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to });
+    ui.releaseWarmup();
+    for (let index = 0; index < 20; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    const hasDock = to !== "/rexonance-saga";
+    assert.equal(ui.queries.includes("main .manager-portrait-frame"), hasDock);
+    assert.equal(
+      ui.queries.includes("main"),
+      hasDock,
+      "only carried-file arrivals scan page animations",
+    );
+    assert.equal(ui.queries.includes(".load-gate.has-cine > .dwc-carry > i"), hasDock);
+    const cover = ui.gates.find((gate) => gate.active && gate.phase === "covering");
+    const reveal = ui.gates.find((gate) => gate.active && gate.phase === "revealing");
+    assert.equal(reveal.scene.tier, cover.scene.tier);
+    assert.equal(reveal.scene.reveal, cover.scene.reveal);
+    assert.equal(ui.gates.at(-1).active, false);
+    if (!hasDock) assert.equal(reveal.scene, cover.scene, "Rexonance preserves its scene metadata");
     ui.cleanup();
   });
 }

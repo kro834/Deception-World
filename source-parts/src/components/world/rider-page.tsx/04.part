@@ -1,5 +1,3 @@
-        ],
-      },
       {
         no: "02",
         kicker: "MISSION SUPPORT",
@@ -337,3 +335,4 @@ export function RiderPage({ id }: { id: string }) {
             ))}
           </div>
           <dl className="manager-facts">
+            {rider.facts.map((f) => (
