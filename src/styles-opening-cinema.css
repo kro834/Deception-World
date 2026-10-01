@@ -1,0 +1,485 @@
+/* Opening cinema: the title sequence as a theatrical title card. Loaded last
+   on / only, after the elevation sheet. It adds light and camera to the 7.2 s
+   story without moving its clock: the pre-roll strike, the ice logo arriving
+   as a sliver of light on the gold line that opens at the score's impact, a
+   halo and volumetric rays behind the title, two anamorphic streaks (the
+   impact and the prism lock), a slow dolly on the lockup through the burn, a
+   settling frame plane, rails on the end frame, the ENTER THE WORLD plate
+   locking on, and still grain once the title holds.
+
+   Rules: opacity, transform and clip-path only; every boot is finite, runs
+   under both the motion preference and the non-economy renderer, and ends on
+   the value `.is-complete` and the idle stage also set, so SKIP lands on the
+   boot's own frame. The burn, the dive, the handoff timing, the measured
+   rects (lockup, HUD, logo, deck) and every string are untouched: the lockup
+   and the frame plane are at scale(1) on every still state. Forced colours
+   remove the ornament. */
+
+/* The two ornament planes: behind the title (over the depth field) and over
+   it (under the vignette). ------------------------------------------------- */
+.cine-stage {
+  /* The rest light of the halo and the rays: lower on portrait screens,
+     which already carry the projector beam and its pool. */
+  --op-halo-rest: 1;
+  --op-rays-rest: 0.7;
+}
+
+@media (orientation: portrait) {
+  .cine-stage {
+    --op-halo-rest: 0.55;
+    --op-rays-rest: 0.45;
+  }
+}
+
+.cine-cinema {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: layout paint style;
+}
+
+.cine-cinema-back {
+  z-index: 2;
+}
+
+.cine-cinema-front {
+  z-index: 5;
+}
+
+.cine-cinema > i {
+  position: absolute;
+  display: block;
+  opacity: 0;
+  backface-visibility: hidden;
+}
+
+/* The pre-roll strike: the first light, a soft ice pool that opens before
+   the gold line grows and is gone before the logo shows. Peak alpha stays
+   under the flash audit's cell threshold. */
+.cine-strike {
+  top: 50%;
+  left: 50%;
+  width: min(74vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.55);
+  background: radial-gradient(
+    circle,
+    rgb(122 232 255 / 0.16),
+    rgb(122 232 255 / 0.05) 38%,
+    transparent 68%
+  );
+}
+
+/* The halo: a still pool of ice behind the lockup, the depth plane between
+   the atmosphere and the title. It rests on every still state. */
+.cine-halo {
+  top: 50%;
+  left: 50%;
+  width: min(98vw, 1180px);
+  height: min(50vw, 600px);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse,
+    rgb(122 232 255 / 0.11),
+    rgb(74 137 214 / 0.055) 36%,
+    transparent 68%
+  );
+}
+
+/* Volumetric rays: a fan of thin ice and gold rays from above the gate,
+   crowding to the title; masked to a cone and faded before the stage's foot. */
+.cine-rays {
+  inset: -12% -24% 0;
+  transform-origin: 50% 0;
+  background: repeating-conic-gradient(
+    from 168deg at 50% 0,
+    transparent 0deg 1.5deg,
+    rgb(122 232 255 / 0.12) 1.9deg 2.25deg,
+    transparent 2.65deg 4.7deg,
+    rgb(240 207 134 / 0.07) 5deg 5.2deg,
+    transparent 5.45deg 7.4deg
+  );
+  -webkit-mask-image:
+    conic-gradient(from 142deg at 50% 0, transparent 0deg, #000 14deg 62deg, transparent 76deg),
+    linear-gradient(180deg, #000 0, #000 52%, transparent 96%),
+    radial-gradient(ellipse 60% 90% at 50% 0, #000 20%, transparent 100%);
+  -webkit-mask-composite: source-in, source-in;
+  mask-image:
+    conic-gradient(from 142deg at 50% 0, transparent 0deg, #000 14deg 62deg, transparent 76deg),
+    linear-gradient(180deg, #000 0, #000 52%, transparent 96%),
+    radial-gradient(ellipse 60% 90% at 50% 0, #000 20%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* The anamorphic streaks: one lens flare line across the title's centre with
+   a magenta fringe above and a gold fringe below (the chromatic split of a
+   cinema lens). A: ice and white, at the score's impact. B: the prism, as
+   the prism logo locks. Both are gone on every still state. */
+.cine-streak {
+  top: 50%;
+  left: 50%;
+  width: min(124vw, 1560px);
+  height: 2px;
+  transform: translate(-50%, -50%) scaleX(0.15);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 0.55) 22%,
+    rgb(255 255 255 / 0.95) 50%,
+    rgb(122 232 255 / 0.55) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 22px 4px rgb(122 232 255 / 0.42),
+    0 0 90px 14px rgb(122 232 255 / 0.16);
+}
+
+.cine-streak::before,
+.cine-streak::after {
+  content: "";
+  position: absolute;
+  right: 12%;
+  left: 12%;
+  height: 1px;
+  opacity: 0.7;
+}
+
+.cine-streak::before {
+  top: -2px;
+  background: linear-gradient(90deg, transparent, rgb(255 92 200 / 0.75) 50%, transparent);
+}
+
+.cine-streak::after {
+  bottom: -2px;
+  background: linear-gradient(90deg, transparent, rgb(240 207 134 / 0.75) 50%, transparent);
+}
+
+.cine-streak-b {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 0.7) 18%,
+    rgb(164 139 255 / 0.9) 36%,
+    rgb(255 255 255 / 0.95) 50%,
+    rgb(255 92 200 / 0.9) 64%,
+    rgb(240 207 134 / 0.7) 82%,
+    transparent
+  );
+  box-shadow:
+    0 0 16px 3px rgb(164 139 255 / 0.3),
+    0 0 56px 8px rgb(255 92 200 / 0.12);
+}
+
+/* The rails: ruler ticks on the frame's vertical lines at the quarters, the
+   gate's registration marks. They rest with the frame; the top centre is the
+   kicker's rule and the bottom centre the deck's break, so neither carries
+   a mark. */
+.cine-rails {
+  top: calc(var(--cine-bar) + var(--cine-gap-y));
+  right: var(--cine-inset-x);
+  bottom: calc(var(--cine-bar) + var(--cine-gap-y));
+  left: var(--cine-inset-x);
+  background:
+    linear-gradient(var(--op-ice) 0 0) 0 25% / 8px 1px,
+    linear-gradient(var(--op-ice) 0 0) 0 50% / 12px 1px,
+    linear-gradient(var(--op-ice) 0 0) 0 75% / 8px 1px,
+    linear-gradient(var(--op-ice) 0 0) 100% 25% / 8px 1px,
+    linear-gradient(var(--op-ice) 0 0) 100% 50% / 12px 1px,
+    linear-gradient(var(--op-ice) 0 0) 100% 75% / 8px 1px;
+  background-repeat: no-repeat;
+}
+
+/* The lifted stage: on portrait phones and landscape phones the lockup rides
+   above the deck (--op-lift, --cine-lift); the halo and the streaks ride with
+   it, as the flare and the rings do. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-halo,
+  .cine-streak {
+    translate: 0 calc(-1 * var(--op-lift));
+  }
+
+  .cine-halo {
+    width: 120vw;
+    height: 64vw;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .cine-halo,
+  .cine-streak {
+    translate: 0 calc(-1 * var(--cine-lift));
+  }
+
+  .cine-rails {
+    background-size:
+      6px 1px,
+      9px 1px,
+      6px 1px,
+      6px 1px,
+      9px 1px,
+      6px 1px;
+  }
+}
+
+@media (max-width: 700px) {
+  .cine-rails {
+    background-size:
+      6px 1px,
+      9px 1px,
+      6px 1px,
+      6px 1px,
+      9px 1px,
+      6px 1px;
+  }
+}
+
+/* Rest values: the held title and the idle stage ---------------------------- */
+.cine-stage:not(.is-playing) .cine-halo,
+.is-complete .cine-halo {
+  opacity: var(--op-halo-rest);
+}
+
+.cine-stage:not(.is-playing) .cine-rays,
+.is-complete .cine-rays {
+  opacity: var(--op-rays-rest);
+}
+
+.cine-stage:not(.is-playing) .cine-rails,
+.is-complete .cine-rails {
+  opacity: 0.55;
+}
+
+/* The economy renderer never boots the light: it shows the rest light from
+   the first frame, so nothing appears when the title settles. */
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-halo {
+  opacity: var(--op-halo-rest);
+}
+
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-rays {
+  opacity: var(--op-rays-rest);
+}
+
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-rails {
+  opacity: 0.55;
+}
+
+/* The elevation sheet's own still ornament (the frame's brackets, the
+   portrait beam and horizon) likewise holds its rest value through the
+   economy sequence instead of appearing when the title settles. */
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame::before,
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame::after {
+  opacity: 0.75;
+}
+
+@media (orientation: portrait) {
+  html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial::before {
+    opacity: 1;
+  }
+
+  html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial::after {
+    opacity: 0.35;
+  }
+}
+
+/* Still grain once the title holds (the sequence keeps its moving grain). */
+.cine-stage.is-complete .cine-grain {
+  animation-play-state: paused;
+}
+
+/* The boots: finite, gated, ending on the rest values above ------------------
+   Clock (seconds into the sequence): the strike 0-1.1; the arrival 0.34-2.14
+   (a sliver on the line from 0.59, open at 1.46, the score's impact at 1.5);
+   the impact streak 1.3-2.4; the halo 0.9-3.1; the rays 1.2-3.8; the rails
+   1.5-2.1; the dolly through the burn 2.6-5.2-7.2; the prism streak 6.0-7.0;
+   the frame plane settles over the first 3.2 s. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-strike {
+    animation: op-strike 1.1s ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-halo {
+    animation: op-halo-in 2.2s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-rays {
+    animation: op-rays-in 2.6s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-streak-a {
+    animation: op-streak 1.1s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-streak-b {
+    animation: op-streak 1s cubic-bezier(0.16, 1, 0.3, 1) 6s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-rails {
+    animation: op-rails-in 0.6s ease 1.5s both;
+  }
+
+  /* The ice logo's arrival (it outweighs the frosted sheet's fade-up): a
+     sliver of the logo's own light on the gold line, held, then opened to
+     the full wordmark at the impact, pushing in from scale 1.07. */
+  html:not([data-world-effects="economy"]) body .cine-stage.is-playing .cine-logo-wrap {
+    animation: op-logo-arrive 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  }
+
+  /* The camera: the lockup pushes in through the burn and settles as the
+     prism cools; the frame plane settles from a hair wider over the arrival.
+     Both are scale(1) wherever a rect is measured (every still state). */
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-title-lockup {
+    animation: op-dolly var(--seq) linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial {
+    animation: op-frame-settle 3.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* ENTER THE WORLD: its brackets lock on as the deck fades in. */
+  html:not([data-world-effects="economy"]) .cine-stage.is-complete .cine-btn-primary::before {
+    animation: op-plate-lock 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+  }
+
+  /* Wide screens with a mouse: the ice and gold echo layers (hidden by the
+     frosted sheet) return for the arrival only, as the lens's chromatic split
+     converging into the sharp wordmark. */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    html:not([data-world-effects="economy"])
+      body
+      .cine-stage.is-playing:not(.is-economy-opening)
+      .cine-logo-echo {
+      display: block;
+    }
+  }
+}
+
+@keyframes op-strike {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.55);
+  }
+  38% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+@keyframes op-halo-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.78);
+  }
+  to {
+    opacity: var(--op-halo-rest);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes op-rays-in {
+  from {
+    opacity: 0;
+    transform: rotate(-2.5deg) scale(1.08);
+  }
+  to {
+    opacity: var(--op-rays-rest);
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes op-streak {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.12);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(1.5);
+  }
+}
+
+@keyframes op-rails-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+@keyframes op-logo-arrive {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(1.07);
+    clip-path: inset(49.4% 0 49.4% 0);
+  }
+  14% {
+    opacity: 0.85;
+    clip-path: inset(47.6% 0 47.6% 0);
+  }
+  30% {
+    opacity: 1;
+    transform: translate3d(0, 4px, 0) scale(1.05);
+    clip-path: inset(44% 0 44% 0);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.012);
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes op-dolly {
+  0%,
+  36% {
+    transform: scale(1);
+    animation-timing-function: ease-in-out;
+  }
+  72% {
+    transform: scale(1.016);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes op-frame-settle {
+  from {
+    transform: scale(1.018);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes op-plate-lock {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Forced colours: the ornament goes; the title keeps its Canvas field. */
+@media (forced-colors: active) {
+  .cine-cinema {
+    display: none;
+  }
+}

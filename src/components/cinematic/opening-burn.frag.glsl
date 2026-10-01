@@ -16,6 +16,36 @@ uniform sampler2D uFinal; // the prism logo, premultiplied
 
 float lum(vec4 c) { return max(c.r, max(c.g, c.b)); }
 
+// Near-plane embers: a sparse layer of large soft discs (bokeh), slower than
+// the sparks, so the fire has depth. One hash per pixel, as emberLayer.
+float bokehLayer(vec2 q, float t, float scale, float speed, float seed) {
+  vec2 g = q * scale;
+  g.y -= t * speed;
+  g.x += sin(g.y * 0.5 + seed + t * 0.5) * 0.25;
+  vec2 id = floor(g);
+  vec2 f = fract(g) - 0.5;
+  float h = hash12(id + seed);
+  vec2 o = (vec2(hash12(id + seed + 3.1), hash12(id + seed + 7.7)) - 0.5) * 0.5;
+  float r = length(f - o);
+  float disc = fall(0.2, 0.04, r) * 0.55 + fall(0.08, 0.0, r) * 0.45;
+  return disc * step(0.86, h) * (h - 0.86) * 7.0;
+}
+
+// Ash flakes: small tilted flecks that lift off the burnt glyphs and drift,
+// lit on one edge by the fire below them.
+float ashLayer(vec2 q, float t, float seed) {
+  vec2 g = q * 11.0;
+  g.y -= t * 0.24;
+  g.x += sin(g.y * 1.3 + seed + t * 0.9) * 0.3;
+  vec2 id = floor(g);
+  vec2 f = fract(g) - 0.5;
+  float h = hash12(id + seed);
+  vec2 o = (vec2(hash12(id + seed + 1.3), hash12(id + seed + 9.1)) - 0.5) * 0.6;
+  vec2 e = f - o;
+  e.x *= 1.0 + 1.6 * hash12(id + seed + 2.2);
+  return fall(0.1, 0.035, length(e)) * step(0.8, h);
+}
+
 void main() {
   vec2 uv = gl_FragCoord.xy / uRes;
   vec2 luv = (uv - uLogo.xy) / uLogo.zw;   // logo UV, y up
@@ -51,6 +81,12 @@ void main() {
 
   // ---- The ice logo: heated to ember orange ahead of the front, charring at it.
   vec4 first = sampleTop(uFirst, luv + haze);
+  // Just ahead of the front the heated air refracts the ice light: its red
+  // and blue split a little to either side, converging again as it chars.
+  float fringeA = fall(0.09, 0.0, d) * uHeat * (1.0 - uCool) * env;
+  vec2 fx = vec2(0.0055, 0.0) * fringeA;
+  first.r = mix(first.r, sampleTop(uFirst, luv + haze + fx).r, fringeA * 0.8);
+  first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.8);
   float fl = lum(first);
   float scorch = fall(0.13, 0.0, d) * uHeat;
   first.rgb = mix(first.rgb, vec3(1.0, 0.36, 0.08) * fl * 1.3, scorch * 0.85);
@@ -108,7 +144,13 @@ void main() {
 
   float embers = emberLayer(lp, t, 13.0, 0.55, 1.0) + emberLayer(lp, t, 8.0, 0.38, 5.0) * 0.9;
   // Sparks leave the fire zone and drift above it.
-  embers *= fall(1.2, 0.6, length(q)) * clamp(uFlame * 1.4, 0.0, 1.0) * smoothstep(-0.12, 0.08, d) * fall(0.9, 0.3, d);
+  float sparkZone = fall(1.2, 0.6, length(q)) * clamp(uFlame * 1.4, 0.0, 1.0) * smoothstep(-0.12, 0.08, d) * fall(0.9, 0.3, d);
+  embers *= sparkZone;
+  // The near plane: a few large soft embers crossing in front, slower.
+  float bokeh = bokehLayer(lp, t, 4.5, 0.26, 11.0) * sparkZone;
+  // Ash lifts off the glyphs the front has passed and drifts up through the
+  // flames; a cover, lit from below.
+  float flakes = ashLayer(lp, t, 4.0) * clamp(-d / 0.18, 0.0, 1.0) * fall(0.9, 0.25, -d) * uFlame * env;
 
   // Premultiplied: ash and smoke cover; fire is light, added to the glyphs it
   // burns (they show through it), with a little soot in its body.
@@ -117,6 +159,11 @@ void main() {
   outC.rgb = outC.rgb * (1.0 - fireA * 0.4) + fire * fireA;
   outC.a = max(outC.a, fireA * 0.6);
   outC.rgb += vec3(1.0, 0.45, 0.12) * rim * 1.2 + vec3(1.0, 0.42, 0.1) * embers * 1.4 + spill;
+  // Ash covers (soot with an ember-lit edge), then the near embers add their light.
+  float flakeA = clamp(flakes, 0.0, 1.0) * 0.85;
+  vec3 flakeC = vec3(0.1, 0.075, 0.065) + vec3(0.95, 0.3, 0.06) * fall(0.12, 0.0, -d) * 0.5;
+  outC = vec4(flakeC * flakeA, flakeA) + outC * (1.0 - flakeA);
+  outC.rgb += vec3(1.0, 0.5, 0.16) * bokeh * 0.55;
   outC = clamp(outC, 0.0, 1.0);
   // Light needs coverage in a premultiplied canvas (rgb <= alpha).
   outC.a = max(outC.a, max(outC.r, max(outC.g, outC.b)));

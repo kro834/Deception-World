@@ -196,6 +196,26 @@ const CinematicDepthField = memo(function CinematicDepthField() {
   );
 });
 
+// The cinema light (styles-opening-cinema.css): the pre-roll strike, the halo
+// and the god rays behind the title, the two anamorphic streaks over it and
+// the frame rails. Textless ornament; every boot is finite and gated there.
+const CinematicLight = memo(function CinematicLight() {
+  return (
+    <>
+      <div className="cine-cinema cine-cinema-back" aria-hidden="true">
+        <i className="cine-strike" />
+        <i className="cine-halo" />
+        <i className="cine-rays" />
+      </div>
+      <div className="cine-cinema cine-cinema-front" aria-hidden="true">
+        <i className="cine-streak cine-streak-a" />
+        <i className="cine-streak cine-streak-b" />
+        <i className="cine-rails" />
+      </div>
+    </>
+  );
+});
+
 const CinematicEditorialFrame = memo(function CinematicEditorialFrame() {
   return (
     <div className="cine-editorial" aria-hidden="true">
@@ -874,6 +894,7 @@ export function TitleSequence() {
         <CinematicDepthField />
       </div>
       <CinematicEditorialFrame />
+      <CinematicLight />
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings rootRef={hudRef} />

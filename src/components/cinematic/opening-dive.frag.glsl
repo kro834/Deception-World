@@ -70,6 +70,29 @@ void main() {
     col = uWorld > 0.5 ? worldScene(s) : titleScene(s, aspect);
   }
 
+  // ---- The lens: as the camera starts to move, the logo's highlights
+  // stretch into anamorphic ice streaks (gone before the tunnel), and the
+  // zoom's red and blue separate a little along the radius (growing with
+  // speed, gone with the world), so the dive reads as a camera, not a scale.
+  if (uWorld < 0.5 && uDive > 0.001) {
+    float ana = smoothstep(0.02, 0.22, uDive) * (1.0 - smoothstep(0.5, 0.85, uDive));
+    if (ana > 0.001) {
+      // Close taps, so the highlights smear sideways instead of repeating.
+      vec2 dx = vec2(0.016, 0.0);
+      vec3 acc = max(titleScene(s + dx, aspect) - 0.62, 0.0) * 0.5
+               + max(titleScene(s - dx, aspect) - 0.62, 0.0) * 0.5
+               + max(titleScene(s + dx * 2.0, aspect) - 0.62, 0.0) * 0.3
+               + max(titleScene(s - dx * 2.0, aspect) - 0.62, 0.0) * 0.3;
+      col += acc * vec3(0.5, 0.88, 1.0) * ana * 0.6;
+    }
+    float fringe = 0.007 * smoothstep(0.1, 0.9, uDive);
+    if (fringe > 0.0005) {
+      vec2 dir = s - focus;
+      col.r = mix(col.r, titleScene(focus + dir * (1.0 + fringe), aspect).r, 0.4);
+      col.b = mix(col.b, titleScene(focus + dir * (1.0 - fringe), aspect).b, 0.4);
+    }
+  }
+
   // ---- Grade: neutral at frame 0 (it continues the DOM title), Mirage ice after.
   col *= mix(vec3(1.0), vec3(0.82, 0.97, 1.08), uIce);
 
