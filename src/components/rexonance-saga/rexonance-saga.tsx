@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RexonanceCallSequence } from "./rexonance-call-sequence";
+import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -10,7 +12,6 @@ import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
-type RexonanceStage = "standard" | "max" | "ultra";
 type P14Baseline = "p1" | "p2";
 type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
 
@@ -355,6 +356,10 @@ export function RexonanceSaga() {
   const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
+  const [stageCall, setStageCall] = useState<{ id: number; stage: RexonanceStage } | null>(null);
+  const latestStageRef = useRef<RexonanceStage>("standard");
+  const stageCallId = useRef(0);
+  const stageCallTimer = useRef(0);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
@@ -366,26 +371,105 @@ export function RexonanceSaga() {
     });
   };
 
+  const cancelStageCall = useCallback(() => {
+    stageCallId.current += 1;
+    window.clearTimeout(stageCallTimer.current);
+    stageCallTimer.current = 0;
+    setStageCall(null);
+  }, []);
+
+  const selectStage = useCallback(
+    (nextStage: RexonanceStage) => {
+      // initRail emits railselect from a native click before React's onClick.
+      // This synchronous ref also makes rapid swipes last-request-wins.
+      if (latestStageRef.current === nextStage) return;
+      latestStageRef.current = nextStage;
+      setStage(nextStage);
+      cancelStageCall();
+      const connection = (
+        navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        }
+      ).connection;
+      if (
+        document.hidden ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        document.documentElement.dataset.worldEffects === "economy" ||
+        connection?.saveData ||
+        /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+      )
+        return;
+      const id = stageCallId.current;
+      setStageCall({ id, stage: nextStage });
+      stageCallTimer.current = window.setTimeout(() => {
+        if (stageCallId.current === id) {
+          stageCallTimer.current = 0;
+          setStageCall(null);
+        }
+      }, REXONANCE_STAGE_DURATION_MS);
+    },
+    [cancelStageCall],
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const cancelOnPreference = () => {
+      if (media.matches || document.documentElement.dataset.worldEffects === "economy") {
+        cancelStageCall();
+      }
+    };
+    const cancelWhenHidden = () => {
+      if (document.hidden) cancelStageCall();
+    };
+    const observer = new MutationObserver(cancelOnPreference);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-world-effects"],
+    });
+    media.addEventListener("change", cancelOnPreference);
+    document.addEventListener("visibilitychange", cancelWhenHidden);
+    window.addEventListener("pagehide", cancelStageCall);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", cancelOnPreference);
+      document.removeEventListener("visibilitychange", cancelWhenHidden);
+      window.removeEventListener("pagehide", cancelStageCall);
+      stageCallId.current += 1;
+      window.clearTimeout(stageCallTimer.current);
+    };
+  }, [cancelStageCall]);
+
   useEffect(() => {
     const page = pageRef.current;
     const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
     if (!page || !nav) return;
+    let frame = 0;
     const syncNavReserve = () => {
       const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
       if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
         page.style.setProperty("--rxs-local-nav-reserve", reserve);
       }
     };
+    // Rotation can deliver all three resize notifications in one frame.
+    // Read layout once for that frame, keeping the first measurement immediate.
+    const queueNavReserve = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        syncNavReserve();
+      });
+    };
     const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queueNavReserve);
     observer?.observe(nav);
-    window.addEventListener("resize", syncNavReserve, { passive: true });
-    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
+    window.addEventListener("resize", queueNavReserve, { passive: true });
+    window.visualViewport?.addEventListener("resize", queueNavReserve, { passive: true });
     syncNavReserve();
     return () => {
       observer?.disconnect();
-      window.removeEventListener("resize", syncNavReserve);
-      window.visualViewport?.removeEventListener("resize", syncNavReserve);
+      window.removeEventListener("resize", queueNavReserve);
+      window.visualViewport?.removeEventListener("resize", queueNavReserve);
+      if (frame) window.cancelAnimationFrame(frame);
       page.style.removeProperty("--rxs-local-nav-reserve");
     };
   }, []);
@@ -414,7 +498,7 @@ export function RexonanceSaga() {
     const onSelect = (event: Event) => {
       const index = (event as CustomEvent<{ index?: number }>).detail?.index;
       const nextStage = typeof index === "number" ? stages[index] : undefined;
-      if (nextStage) setStage(nextStage);
+      if (nextStage) selectStage(nextStage);
     };
     rail.addEventListener("railselect", onSelect);
     const dispose = initRail(rail);
@@ -424,7 +508,7 @@ export function RexonanceSaga() {
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
-  }, []);
+  }, [selectStage]);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -539,9 +623,18 @@ export function RexonanceSaga() {
     <main
       ref={pageRef}
       id="top"
-      className="rxs-page"
+      className="rxs-page rxs-rexonance-page"
       data-motion-ready={motionReady ? "true" : "false"}
     >
+      {stageCall && (
+        <RexonanceCallSequence
+          key={stageCall.id}
+          mode="stage"
+          phase="covering"
+          tier="full"
+          stage={stageCall.stage}
+        />
+      )}
       <header className="rxs-local-nav">
         <div className="rxs-local-nav-inner">
           <GuardedLink
@@ -949,7 +1042,7 @@ export function RexonanceSaga() {
                 tabIndex={stage === key ? 0 : -1}
                 className={stage === key ? "is-active" : ""}
                 style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
-                onClick={() => setStage(key)}
+                onClick={() => selectStage(key)}
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{STAGES[key].label}</span>

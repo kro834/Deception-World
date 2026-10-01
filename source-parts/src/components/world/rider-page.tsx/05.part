@@ -1,4 +1,3 @@
-            {rider.facts.map((f) => (
               <div key={f.dt}>
                 <dt>{f.dt}</dt>
                 <dd>

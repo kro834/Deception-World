@@ -310,7 +310,9 @@ async function audit(browser, analyser, profileName, name) {
       const covers =
         Boolean(gate) &&
         (!gate.classList.contains("is-revealing") ||
-          [...gate.querySelectorAll(".dwc-shutter > i, .rider-cutin-stage")].some(shown));
+          [...gate.querySelectorAll(".dwc-shutter > i, .rider-cutin-stage, .rx-call-ground")].some(
+            shown,
+          ));
       return {
         path: location.pathname,
         loading: document.documentElement.hasAttribute("data-loading"),
@@ -377,11 +379,11 @@ async function audit(browser, analyser, profileName, name) {
   );
   assert.equal(blank.length, 0, `${profileName} ${name}: flat empty cover frames`);
   assert.ok(
-    doneAt && doneAt <= GONE_BUDGET_MS,
+    doneAt && doneAt <= (scenario.dest === "/rexonance-saga" ? 3000 : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
-    releasedAt && releasedAt <= RELEASE_BUDGET_MS,
+    releasedAt && releasedAt <= (scenario.dest === "/rexonance-saga" ? 3200 : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);

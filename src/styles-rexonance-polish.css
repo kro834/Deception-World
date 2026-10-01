@@ -1,0 +1,139 @@
+/* Rexonance's operating stages share one colour from control to artwork.
+   Scoped to the Rexonance route; shared showcase geometry,
+   type sizes, comparison values and artwork framing remain untouched. */
+.rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="standard"] {
+  --rxs-control-accent: #63e2ff;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="max"] {
+  --rxs-control-accent: #969cff;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="ultra"] {
+  --rxs-control-accent: #ff72da;
+}
+
+/* The shared frosted rail uses an !important surface paint. Match its
+   specificity here so the selected stage can supply the lens edge. */
+html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid-selection-surface {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--rxs-control-accent) 16%, transparent),
+    rgb(255 255 255 / 7%)
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-control-accent) 55%, transparent) !important;
+}
+
+.rxs-page.rxs-rexonance-page
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]
+  small {
+  color: var(--rxs-control-accent);
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]::after {
+  position: absolute;
+  right: 24%;
+  bottom: 4px;
+  left: 24%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rxs-control-accent);
+  opacity: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-rexonance-page
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]::after {
+  opacity: 1;
+}
+
+/* A compact status chip keeps the existing code face and size. */
+.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > small {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent) 42%, transparent);
+  border-radius: 4px 12px 4px 4px;
+  color: var(--rxs-stage-accent);
+  background: color-mix(in srgb, var(--rxs-stage-accent) 8%, #080e17);
+  line-height: 1.5;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-panel figure {
+  --rxs-stage-bracket: color-mix(in srgb, var(--rxs-stage-accent) 76%, #fff);
+  --sc-brackets:
+    linear-gradient(var(--rxs-stage-bracket) 0 0) 0 0 / var(--sc-arm) 2px,
+    linear-gradient(var(--rxs-stage-bracket) 0 0) 0 0 / 2px var(--sc-arm),
+    linear-gradient(var(--rxs-stage-bracket) 0 0) 100% 0 / var(--sc-arm) 2px,
+    linear-gradient(var(--rxs-stage-bracket) 0 0) 100% 0 / 2px var(--sc-arm),
+    linear-gradient(var(--rxs-stage-accent) 0 0) 0 100% / var(--sc-arm) 2px,
+    linear-gradient(var(--rxs-stage-accent) 0 0) 0 100% / 2px var(--sc-arm),
+    linear-gradient(var(--rxs-stage-accent) 0 0) 100% 100% / var(--sc-arm) 2px,
+    linear-gradient(var(--rxs-stage-accent) 0 0) 100% 100% / 2px var(--sc-arm);
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      color-mix(in srgb, var(--rxs-stage-accent) 9%, transparent),
+      transparent 72%
+    ),
+    var(--sc-tile, #080e17);
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-panel figure > span {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent) 24%, transparent);
+}
+
+/* All three titles start at the same height on a two-column stage. This is
+   a minimum, never a fixed box: long copy and larger text remain visible. */
+@media (min-width: 901px) {
+  .rxs-page.rxs-rexonance-page .rxs-stage-panel > div {
+    align-self: start;
+    min-block-size: 40rem;
+    padding-block-start: clamp(48px, 7vw, 100px);
+  }
+}
+
+/* The nav's measured height includes wrapping and device safe-area space. */
+/* World supplies 96px of root scroll padding. This route's targets already
+   carry their own measured nav offset, so adding both leaves a second gap. */
+html[data-mode="world"]:has(.rxs-rexonance-page) {
+  scroll-padding-top: 0;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-section[id] {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve, 62px) + 24px);
+}
+
+/* Native keyboard focus scrolls a control into view too. The side menu keeps
+   its own inner scroller; only this page's hero and sections get the offset. */
+.rxs-page.rxs-rexonance-page
+  :is(.rxs-hero, .rxs-section)
+  :is(a[href], button, input, select, [tabindex="0"]) {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve, 62px) + 12px);
+  scroll-margin-block-end: 16px;
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-rexonance-page
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"][aria-selected="true"] {
+    outline: 1px solid Highlight;
+    outline-offset: -4px;
+  }
+
+  .rxs-page.rxs-rexonance-page
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"][aria-selected="true"]::after {
+    background: Highlight;
+  }
+
+  .rxs-page.rxs-rexonance-page .rxs-stage-panel > div > small {
+    border-color: CanvasText;
+  }
+}

@@ -1,0 +1,469 @@
+/* The published call becomes a series of hard typographic cuts. All moving
+   properties are opacity/transform; the dark ground never flashes white.
+   This sheet is global because the first beat belongs to the departure page. */
+/* This gate has its own ground and release. The legacy dive's root dissolve
+   and radial ground would otherwise fade a second time or remain behind it. */
+html body .load-gate.is-rexonance-dive.is-rexonance-calls {
+  background: transparent !important;
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+html body .load-gate.is-rexonance-dive.is-rexonance-calls > .rider-dive-status {
+  position: absolute;
+  inset: auto;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  animation: none !important;
+  transform: none !important;
+}
+.rx-call-sequence {
+  --rx-call-cyan: #79e8ff;
+  --rx-call-pink: #ff82d5;
+  --rx-call-accent: var(--rx-call-cyan);
+  --rx-call-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  position: absolute;
+  z-index: 40;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  pointer-events: none;
+  color: #effbff;
+  font-family: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
+  text-align: center;
+  font-synthesis: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.rx-call-sequence *,
+.rx-call-sequence *::before,
+.rx-call-sequence *::after {
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.rx-call-sequence[data-mode="stage"] {
+  position: fixed;
+  z-index: 140;
+}
+/* The floating control normally sits above every layer. Hide it only for
+   this short burst, without moving it or adding a persistent UI state. */
+html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+.rx-call-sequence[data-stage="max"] {
+  --rx-call-accent: #acb0ff;
+}
+.rx-call-sequence[data-stage="ultra"] {
+  --rx-call-accent: var(--rx-call-pink);
+}
+.rx-call-ground,
+.rx-call-frame,
+.rx-call-words {
+  position: absolute;
+  inset: 0;
+}
+.rx-call-ground {
+  background:
+    radial-gradient(ellipse at 10% 50%, rgb(50 142 184 / 16%), transparent 48%),
+    radial-gradient(ellipse at 90% 50%, rgb(171 49 123 / 13%), transparent 48%), #02050b;
+}
+.rx-call-frame {
+  inset: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  opacity: 0.6;
+}
+.rx-call-axis {
+  position: absolute;
+  display: block;
+  opacity: 0.38;
+  transform-origin: center;
+}
+.rx-call-axis-horizontal {
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--rx-call-cyan), transparent 30% 70%, var(--rx-call-pink));
+}
+.rx-call-axis-vertical {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(var(--rx-call-cyan), transparent 28% 72%, var(--rx-call-pink));
+}
+.rx-call-brackets {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 24px 1px,
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 1px 24px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 0 / 24px 1px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 0 / 1px 24px,
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 100% / 24px 1px,
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 100% / 1px 24px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 24px 1px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 1px 24px;
+  background-repeat: no-repeat;
+}
+.rx-call-caption {
+  position: absolute;
+  z-index: 1;
+  top: max(42px, calc(env(safe-area-inset-top) + 22px));
+  right: max(36px, calc(env(safe-area-inset-right) + 16px));
+  left: max(36px, calc(env(safe-area-inset-left) + 16px));
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: #b0c9d6;
+  font-family: "Oxanium", "Helvetica Neue", sans-serif;
+  font-size: clamp(9px, 0.78vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+}
+.rx-call-words {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: max(74px, calc(env(safe-area-inset-top) + 48px))
+    max(24px, calc(env(safe-area-inset-right) + 16px))
+    max(74px, calc(env(safe-area-inset-bottom) + 48px))
+    max(24px, calc(env(safe-area-inset-left) + 16px));
+}
+.rx-call-beat {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  width: 100%;
+  opacity: 0;
+  font-size: clamp(24px, 6.5vw, 116px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.045em;
+  text-shadow:
+    -1px 0 rgb(121 232 255 / 55%),
+    1px 0 rgb(255 130 213 / 48%);
+  transform-origin: center;
+}
+.rx-call-beat > span {
+  display: block;
+  white-space: nowrap;
+}
+/* Short opening calls can hit harder than the long repeated phrases.
+   Keep the latter's measured line fit and the page's own typography intact. */
+.rx-call-opening {
+  font-size: clamp(36px, 10.5vw, 156px);
+}
+.rx-call-chant,
+.rx-call-repetition {
+  gap: 0.12em;
+  font-size: clamp(24px, 5.75vw, 100px);
+  line-height: 1.13;
+}
+.rx-call-chant > span:first-child,
+.rx-call-repetition > span:first-child {
+  color: var(--rx-call-cyan);
+}
+.rx-call-chant > span:last-child,
+.rx-call-repetition > span:last-child {
+  color: var(--rx-call-pink);
+}
+.rx-call-final {
+  color: #f2fbff;
+}
+.rx-call-final > span:nth-child(2) {
+  color: var(--rx-call-accent);
+  font-size: 0.8em;
+  letter-spacing: 0.12em;
+}
+.rx-call-meter {
+  position: absolute;
+  bottom: max(40px, calc(env(safe-area-inset-bottom) + 20px));
+  left: 25%;
+  width: 50%;
+  height: 1px;
+  background: rgb(168 202 220 / 13%);
+}
+.rx-call-meter > i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--rx-call-cyan), #c1baff 56%, var(--rx-call-pink));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.rx-call-operating-stage {
+  display: flex;
+  align-items: center;
+  gap: 1.25em;
+  margin-top: 1.4em;
+  color: #b5c5d0;
+  font-family: "Oxanium", "Helvetica Neue", sans-serif;
+  font-size: clamp(10px, 1vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-shadow: none;
+}
+.rx-call-operating-stage b {
+  padding-left: 1em;
+  border-left: 1px solid var(--rx-call-accent);
+  color: var(--rx-call-accent);
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+/* Adjacent beats replace each other on the same frame: no empty fade between
+   calls. Forward fill leaves delayed beats at their base opacity of zero;
+   only the last holds and hands its rest pose into the reveal. */
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-beat {
+  animation: rxCallStrike var(--rx-call-duration) var(--rx-call-ease) var(--rx-call-start) forwards;
+}
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-final {
+  animation-name: rxCallLock;
+}
+/* The first call cuts onto an opaque ground immediately. The departure
+   menu must not bleed through while its own closing transition settles. */
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-frame {
+  animation: rxCallFrameLock 560ms var(--rx-call-ease) both;
+}
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-meter > i {
+  animation: rxCallMeter var(--rx-call-cover) linear both;
+}
+.rx-call-sequence[data-mode="entry"][data-phase="revealing"] .rx-call-beat:not(.rx-call-final) {
+  display: none;
+}
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"] .rx-call-final {
+  animation: rxCallRelease var(--rx-call-reveal) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+  :is(.rx-call-ground, .rx-call-frame, .rx-call-caption, .rx-call-meter) {
+  animation: rxCallGroundOut var(--rx-call-reveal) ease-out both;
+}
+.rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"] .rx-call-frame {
+  animation-name: rxCallFrameOut;
+}
+.rx-call-sequence[data-mode="entry"][data-phase="revealing"] .rx-call-meter > i {
+  transform: scaleX(1);
+}
+.rx-call-sequence[data-mode="stage"][data-tier="full"] {
+  animation: rxCallStageLife var(--rx-call-stage-duration) linear both;
+}
+.rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-ground {
+  opacity: 0.96;
+}
+.rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-final {
+  animation: rxCallLock 240ms var(--rx-call-ease) forwards;
+}
+.rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-operating-stage {
+  animation: rxCallLabelLock 250ms var(--rx-call-ease) 80ms both;
+}
+.rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-meter > i {
+  animation: rxCallMeter var(--rx-call-stage-duration) linear both;
+}
+
+@keyframes rxCallStrike {
+  0% {
+    opacity: 1;
+    transform: scale(1.2) translate3d(0, 9px, 0);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  79%,
+  99.99% {
+    opacity: 1;
+    transform: scale(1.015) translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015) translate3d(0, 0, 0);
+  }
+}
+@keyframes rxCallLock {
+  0% {
+    opacity: 1;
+    transform: scale(1.2) translate3d(0, 9px, 0);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(0.995) translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+@keyframes rxCallRelease {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.16);
+  }
+}
+@keyframes rxCallGroundOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rxCallFrameLock {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+@keyframes rxCallFrameOut {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rxCallMeter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes rxCallLabelLock {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes rxCallStageLife {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .rx-call-caption {
+    justify-content: center;
+    font-size: 9px;
+    letter-spacing: 0.13em;
+  }
+  .rx-call-caption > span:last-child {
+    display: none;
+  }
+  .rx-call-meter {
+    left: 18%;
+    width: 64%;
+  }
+}
+@media (orientation: landscape) and (max-height: 560px) {
+  .rx-call-frame {
+    inset: 12px max(20px, env(safe-area-inset-right)) 12px max(20px, env(safe-area-inset-left));
+  }
+  .rx-call-caption {
+    top: 24px;
+  }
+  .rx-call-meter {
+    bottom: 23px;
+  }
+  .rx-call-words {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .rx-call-beat {
+    font-size: min(6.5vw, 16vh);
+  }
+  .rx-call-opening {
+    font-size: min(10.5vw, 22vh);
+  }
+  .rx-call-chant,
+  .rx-call-repetition {
+    font-size: min(5.75vw, 10vh);
+  }
+  .rx-call-operating-stage {
+    margin-top: 0.8em;
+  }
+}
+
+/* Both the explicit tier and live rendering preference can stop the sequence.
+   The controller shortens the lifecycle; this static composition needs no
+   animation-end event or elapsed visual beat before navigation may proceed. */
+.rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"]),
+html[data-world-effects="economy"] .rx-call-sequence {
+  animation: none !important;
+  opacity: 1;
+}
+.rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"]) *,
+html[data-world-effects="economy"] .rx-call-sequence * {
+  animation: none !important;
+  transform: none !important;
+}
+.rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"]) .rx-call-beat:not(.rx-call-final),
+html[data-world-effects="economy"] .rx-call-sequence .rx-call-beat:not(.rx-call-final) {
+  display: none;
+}
+.rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"]) .rx-call-final,
+html[data-world-effects="economy"] .rx-call-sequence .rx-call-final {
+  opacity: 1;
+  font-size: clamp(22px, 4.8vw, 70px);
+  text-shadow: none;
+}
+.rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"])[data-phase="revealing"],
+html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rx-call-sequence {
+    animation: none !important;
+    opacity: 1;
+  }
+  .rx-call-sequence * {
+    animation: none !important;
+    transform: none !important;
+  }
+  .rx-call-sequence .rx-call-beat:not(.rx-call-final) {
+    display: none;
+  }
+  .rx-call-sequence .rx-call-final {
+    opacity: 1;
+    font-size: clamp(22px, 4.8vw, 70px);
+    text-shadow: none;
+  }
+  .rx-call-sequence[data-phase="revealing"] {
+    opacity: 0;
+  }
+}

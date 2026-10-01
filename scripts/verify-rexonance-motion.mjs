@@ -34,6 +34,39 @@ try {
       );
     assert.equal(await page.locator(".rxs-resonance-field i").count(), 3);
     await page.waitForTimeout(1800);
+    const visibility = await page.evaluate(() => ({
+      hidden: document.hidden,
+      worldVisible: document.documentElement.dataset.worldPageVisible,
+      motionPaused: document.querySelector("main").dataset.motionPaused,
+      targets: [".rxs-hero-copy", ".rxs-hero-copy h1", ".rxs-hero-visual img"].map((selector) => {
+        const element = document.querySelector(selector);
+        const style = getComputedStyle(element);
+        return {
+          selector,
+          opacity: Number(style.opacity),
+          visibility: style.visibility,
+          display: style.display,
+          clipPath: style.clipPath,
+          timelines: element.getAnimations().map((animation) => ({
+            name: animation.animationName,
+            state: animation.playState,
+            timeline: animation.timeline?.constructor.name,
+            progress: animation.effect?.getComputedTiming().progress,
+            endTimeType: typeof animation.effect?.getComputedTiming().endTime,
+          })),
+        };
+      }),
+    }));
+    assert.equal(visibility.hidden, false, "hero visibility must be measured in a foreground page");
+    assert.equal(visibility.worldVisible, "true");
+    assert.equal(visibility.motionPaused, "false");
+    for (const target of visibility.targets) {
+      assert.ok(target.opacity > 0.95, `${target.selector}: completed hero must be opaque`);
+      assert.equal(target.visibility, "visible", target.selector);
+      assert.notEqual(target.display, "none", target.selector);
+      assert.equal(target.clipPath, "none", `${target.selector}: entrance clip must release`);
+    }
+    console.log("Hero visibility", engine, width, JSON.stringify(visibility));
     const delivery = await page.locator(".rxs-hero-visual img").evaluate((img) => ({
       source: img.currentSrc,
       originalRequests: performance

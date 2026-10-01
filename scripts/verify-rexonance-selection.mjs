@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
-const browser = await chromium.launch({ channel: "chrome" });
+const engine = process.env.PW_ENGINE || "chromium";
+const browser = await (engine === "webkit" ? webkit : chromium).launch(
+  engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
+);
 
 const profiles = [
   {
@@ -63,8 +66,8 @@ async function verifySelect(page, ariaLabel) {
     );
   }
 
-  // Model dismissing the native picker without a value change: the page gets
-  // no input, change, or keyboard event, so pointer modality must remain.
+  // Synthetic no-input fixture for dismissing a picker without a value change;
+  // this does not open or dismiss a physical native iOS picker.
   const unchanged = await select.inputValue();
   await select.focus();
   await select.dispatchEvent("pointerdown", { pointerType: "touch", isPrimary: true });
@@ -208,7 +211,7 @@ try {
     await context.close();
   }
   console.log(
-    "NOTE: Chromium emulates touch and an iOS user agent; this does not operate or certify a physical iOS native picker wheel.",
+    `NOTE: ${engine} automates the DOM select with an iOS user agent; hidden/dismissed picker behavior is a synthetic no-input fixture, not a physical iOS picker or OS-version certification.`,
   );
 } finally {
   await browser.close();

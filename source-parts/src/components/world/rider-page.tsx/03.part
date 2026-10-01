@@ -1,7 +1,3 @@
-    person: "在原華火",
-    enPerson: "HANAKA ARIHARA",
-    epithet: "規格外の幸運",
-    tone: "#69df74",
     img: "/rider-profile-leddic.jpeg",
     pos: "50% 10%",
     civilianImg: "/civilian-leddic.jpeg",
@@ -338,3 +334,5 @@
         title: "陽気な顔と、任務の最適解。",
         body: [
           "コードナンバー：セヴン。CODE英国支部のエージェント。陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆る。近接、銃器、潜入、解析、情報回収を一人でこなす。",
+        ],
+      },

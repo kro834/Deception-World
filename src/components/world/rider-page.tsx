@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
+import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
@@ -213,14 +214,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         featuredPickup: true,
         theme: "rexonance",
         quote: "無限出力を、無限の攻撃として完成させる。",
-        calls: [
-          "Ultra DEUS！",
-          "REXONANCE！",
-          "FAR UP！",
-          "OVER SA-GA！RIDER！",
-          "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
-          "REXONANCE！",
-        ],
+        calls: [...REXONANCE_CALLS],
         stats: [
           { dt: "HEIGHT", dd: "244.9cm" },
           { dt: "WEIGHT", dd: "190.8kg" },
