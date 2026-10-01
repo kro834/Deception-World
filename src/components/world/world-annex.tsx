@@ -234,7 +234,11 @@ function CastPortrait({ entry }: { entry: WorldCastEntry }) {
   const portrait = CAST_PORTRAITS[entry.id];
   if (!portrait) return <span className="wa-portrait is-vacant" aria-hidden="true" />;
   return (
-    <span className="wa-portrait" aria-hidden="true" style={cropStyle(portrait)}>
+    <span
+      className={portrait.pale ? "wa-portrait is-pale" : "wa-portrait"}
+      aria-hidden="true"
+      style={cropStyle(portrait)}
+    >
       <img
         src={portrait.src}
         srcSet={portrait.srcSet}

@@ -109,6 +109,48 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       --tr-fade: 4svh;
     }
 
+    /* STORY's two paragraphs are one terminal with one caret: the second
+       starts typing only once the first is whole (its caret gone), and is
+       still whole at 74%. Its span stays under the measured top-to-top
+       distance between the two paragraphs in each width band (phones
+       11.5-17svh, 561-1099px 6.6-11.9svh, wider 8.3-15.7svh). */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .site-shell.film-edition.mirage-edition
+      .story-copy
+      > p[data-text-reveal="copy"]
+      + p[data-text-reveal="copy"] {
+      --tr-from: 12svh;
+      --tr-span: 10svh;
+    }
+
+    @media (min-width: 561px) and (max-width: 1099px) {
+      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+          [data-dialog-open]
+        )
+        .site-shell.film-edition.mirage-edition
+        .story-copy
+        > p[data-text-reveal="copy"]
+        + p[data-text-reveal="copy"] {
+        --tr-from: 16.5svh;
+        --tr-span: 5.5svh;
+      }
+    }
+
+    @media (min-width: 1100px) {
+      html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+          [data-dialog-open]
+        )
+        .site-shell.film-edition.mirage-edition
+        .story-copy
+        > p[data-text-reveal="copy"]
+        + p[data-text-reveal="copy"] {
+        --tr-from: 15svh;
+        --tr-span: 7svh;
+      }
+    }
+
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         [data-dialog-open]
       )

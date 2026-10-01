@@ -866,6 +866,506 @@ main.manager-page:not(.is-sovereign)
   outline-offset: 3px;
 }
 
+/* HOLD + SLIDE had no ring at all: the frosted sheet forces the plate's
+   shadow with !important, which drowned the addon's shadow ring. An
+   outline, which that sheet never sets, draws the file's one warm ring on
+   keyboard focus (the attribute is set only by a keyboard). The special
+   site's link had a white ring from the World sheets. */
+main.manager-page:not(.is-sovereign) .ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 4px;
+}
+
+main.manager-page:not(.is-sovereign) .rider-special-site-link:focus-visible {
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 3px;
+}
+
+/* The header's DW mark (a cyan ring) and レジャス's tap-to-zoom portrait (the
+   accent) join the same family; their offsets stay. */
+main.manager-page:not(.is-sovereign)
+  :is(.manager-topbar .brand, button.manager-portrait-frame):focus-visible {
+  outline: 2px solid var(--dm-focus);
+}
+
+/* ================================================================
+   Brush-up (2026-10-01): one finished dossier
+   ================================================================ */
+/* The spec sheet on phones: Michroma labels such as NATIONALITY (133px)
+   ran into their values in the pinned 96px label column. The sheet takes
+   two tracks, and every row borrows them (subgrid), so each row keeps its
+   ruled box while the label track sizes to the file's longest label. The
+   name row stays a block; under 375px every row stacks, as before. */
+@media (min-width: 375px) and (max-width: 560px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts {
+    grid-template-columns: minmax(96px, max-content) minmax(0, 1fr);
+    column-gap: 14px;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+}
+
+/* White-ground form art: the pickup cards drawn on white were the
+   brightest things in the file. They take the portraits' ID grade, keyed
+   by the art, and every standard card seats its art with an ink vignette
+   (the Rexonance card uses both of its visual's pseudos). Economy
+   rendering keeps the plain image. */
+html:not([data-world-effects="economy"])
+  main.manager-page:not(.is-sovereign)
+  .form-pickup:not(.is-rexonance-pickup)
+  .form-pickup-visual
+  > img:is(
+    [src*="rider-profile-leddic"],
+    [src*="rider-leddic-ishihen"],
+    [src*="rider-leddic-rekka"],
+    [src*="rider-profile-argenome"],
+    [src*="manager-lejas-rider"],
+    [src*="manager-shuza-rider"],
+    [src*="rider-ruler-"],
+    [src*="rider-realm-moon"]
+  ) {
+  filter: saturate(0.92) brightness(0.9) contrast(1.05);
+}
+
+html:not([data-world-effects="economy"])
+  main.manager-page:not(.is-sovereign)
+  .form-pickup:not(.is-rexonance-pickup)
+  .form-pickup-visual::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: radial-gradient(ellipse 78% 72% at 50% 44%, transparent 58%, rgb(4 8 15 / 18%) 100%);
+  pointer-events: none;
+}
+
+/* 変身記録 opens on a still rule, as the dossier's index does: a lit
+   diamond, the prism rule, a ruler of ticks and a gold foot. It sits in
+   the band between the last chapter and the first record, pulled to the
+   chapter rhythm (it was 112-168px of dead ink, and a jump from the reader
+   bar landed on a bare card). Textless and aria-free: generated boxes. */
+main.manager-page:not(.is-sovereign) .manager-dossier:has(+ #form-records) {
+  padding-bottom: clamp(48px, 5vw, 72px);
+}
+
+main.manager-page:not(.is-sovereign) #form-records {
+  position: relative;
+  padding-top: 18px;
+}
+
+main.manager-page:not(.is-sovereign) #form-records::before,
+main.manager-page:not(.is-sovereign) #form-records::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  pointer-events: none;
+}
+
+main.manager-page:not(.is-sovereign) #form-records::before {
+  width: min(1200px, calc(100% - 48px));
+  height: 18px;
+  translate: -50% 0;
+  background:
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 12px no-repeat,
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 38%) 0 1px, transparent 1px 24px) 18px 100% /
+      calc(100% - 64px) 5px no-repeat,
+    linear-gradient(
+        90deg,
+        var(--dm-lock) 0,
+        var(--dm-violet) 7%,
+        var(--dm-magenta) 12%,
+        rgb(122 232 255 / 20%) 12.2%,
+        rgb(122 232 255 / 20%) 100%
+      )
+      0 100% / 100% 1px no-repeat;
+}
+
+/* The lit diamond, on the rule's start. */
+main.manager-page:not(.is-sovereign) #form-records::after {
+  top: 13px;
+  left: max(24px, calc(50% - 600px));
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--dm-lock);
+  background: color-mix(in srgb, var(--dm-lock) 46%, #04080f);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--dm-lock) 40%, transparent);
+  rotate: 45deg;
+}
+
+@media (max-width: 760px) {
+  main.manager-page:not(.is-sovereign) #form-records::before {
+    width: calc(100% - 36px - env(safe-area-inset-left) - env(safe-area-inset-right));
+  }
+
+  main.manager-page:not(.is-sovereign) #form-records::after {
+    left: calc(18px + env(safe-area-inset-left));
+  }
+}
+
+/* HOLD + SLIDE, the last capsule in a file of square plates: a 4px plate
+   with a 2px thumb (the frosted sheet forces 999px with !important on the
+   plate's pseudos and the thumb), locked on with the file's brackets, ice
+   above and gold at the foot, drawn as background layers over the frosted
+   material (the control's pseudos are taken). Box, travel and drag are
+   unchanged. */
+main.manager-page:not(.is-sovereign) .ios-slide-open,
+main.manager-page:not(.is-sovereign) .ios-slide-open::before,
+main.manager-page:not(.is-sovereign) .ios-slide-open::after {
+  border-radius: 4px !important;
+}
+
+main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-fill,
+main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
+  border-radius: 2px !important;
+}
+
+main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
+  border-color: color-mix(in srgb, var(--dm-lock) 58%, #eaf8ff);
+}
+
+main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb > i {
+  border-radius: 1px;
+}
+
+main.manager-page:not(.is-sovereign) .ios-slide-open {
+  border-color: color-mix(in srgb, var(--dm-lock) 46%, transparent);
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 10px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 10px 2px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 2px 10px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 10px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 10px no-repeat,
+    linear-gradient(155deg, #354351, #192331 70%, #202d3b) !important;
+}
+
+main.manager-page:not(.is-sovereign)
+  .ios-slide-open:is([data-holding="true"], [data-completing="true"]) {
+  border-color: color-mix(in srgb, var(--slide-accent) 58%, #fff);
+}
+
+/* Pagination. Tablets: HUD codes read as one token (PREV / RIDER 04 broke
+   after the slash, and the file strip over two lines). */
+@media (min-width: 700px) and (max-width: 1024px) {
+  main.manager-page:not(.is-sovereign) .manager-pagination > a small {
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  main.manager-page:not(.is-sovereign)
+    .manager-introduction
+    .dossier-identity
+    .manager-file-number {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* Two columns, the list on its own row: the deck reads as one through
+   paint, a hairline across the row behind the centred plate with gold
+   foot ticks at the column's edges. The plate keeps its box (spanning it
+   put a control under the Zeus button's corner, which then stepped away
+   at the file's end). */
+@media (min-width: 521px) and (max-width: 760px) {
+  main.manager-page:not(.is-sovereign) .manager-pagination .manager-pagination-index {
+    background:
+      linear-gradient(var(--dm-gold) 0 0) 0 calc(50% + 4px) / 2px 9px no-repeat,
+      linear-gradient(var(--dm-gold) 0 0) 100% calc(50% + 4px) / 2px 9px no-repeat,
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--dm-gold) 60%, transparent),
+          rgb(122 232 255 / 16%) 28%,
+          color-mix(in srgb, var(--dm-lock) 52%, transparent) 50%,
+          rgb(122 232 255 / 16%) 72%,
+          color-mix(in srgb, var(--dm-gold) 60%, transparent)
+        )
+        0 50% / 100% 1px no-repeat;
+  }
+}
+
+/* Stacked phones keep the list's pinned chip (clear of the Zeus corner):
+   the deck reads as one through paint only, a hairline from the chip's
+   end to the column's edge with a gold foot tick. */
+@media (max-width: 520px) {
+  main.manager-page:not(.is-sovereign) .manager-pagination .manager-pagination-index {
+    background:
+      linear-gradient(var(--dm-gold) 0 0) 100% calc(50% + 4px) / 2px 9px no-repeat,
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--dm-lock) 52%, transparent),
+          rgb(122 232 255 / 16%) 72%,
+          color-mix(in srgb, var(--dm-gold) 60%, transparent)
+        )
+        22px 50% / calc(100% - 22px) 1px no-repeat;
+  }
+}
+
+@media (max-width: 359px) {
+  main.manager-page:not(.is-sovereign) .manager-pagination .manager-pagination-index {
+    background-position:
+      100% calc(50% + 4px),
+      0 50%;
+    background-size:
+      2px 9px,
+      100% 1px;
+  }
+}
+
+/* Desktop record doorways: a card taller than the screen showed a head or
+   a pair of legs and a copy panel of empty ink. From 1100px the art stands
+   whole on a lit stage sized to the screen under the header and the reader
+   bar (contain over the record's key light, as the record viewer does),
+   and the copy is centred beside it on a foot rule. The two-column grid and
+   the slide control's box and corner stay. */
+@media (min-width: 1100px) {
+  main.manager-page:not(.is-sovereign) .form-pickup:not(.is-rexonance-pickup) .form-pickup-visual {
+    height: clamp(520px, calc(100svh - var(--detail-header-height, 76px) - 112px), 820px);
+    min-height: 0;
+    background:
+      radial-gradient(
+        ellipse 62% 46% at 50% 16%,
+        color-mix(in srgb, var(--manager-accent, #7ae8ff) 17%, transparent),
+        transparent 72%
+      ),
+      linear-gradient(
+        180deg,
+        transparent 64%,
+        color-mix(in srgb, var(--manager-accent, #7ae8ff) 7%, transparent) 86%,
+        rgb(0 0 0 / 34%)
+      ),
+      #060b14;
+  }
+
+  main.manager-page:not(.is-sovereign)
+    .form-pickup:not(.is-rexonance-pickup)
+    .form-pickup-visual
+    > img {
+    height: 100%;
+    object-fit: contain;
+    object-position: 50% 50% !important;
+  }
+
+  main.manager-page:not(.is-sovereign)
+    .form-pickup:not(.is-rexonance-pickup)
+    .form-pickup-copy::after {
+    content: "";
+    display: block;
+    width: min(420px, 100%);
+    height: 12px;
+    margin-top: 18px;
+    background:
+      linear-gradient(var(--dm-gold) 0 0) 0 100% / 22px 2px no-repeat,
+      linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 12px no-repeat,
+      var(--dm-prism) 0 100% / 100% 1px no-repeat;
+    opacity: 0.9;
+  }
+}
+
+/* The partner's record opens in the file's voice: a Michroma kicker in the
+   accent with the prism rule after it, the heading at chapter weight in
+   chrome ink with its still ghost, and a lock bracket (accent above, gold
+   foot) instead of the green-to-red bar. */
+main.manager-page:not(.is-sovereign) .rider-partner-forms > header {
+  padding-block: 14px 18px;
+  border-left-color: transparent;
+  border-image: none;
+  background:
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 22px no-repeat;
+}
+
+main.manager-page:not(.is-sovereign) .rider-partner-forms > header > p {
+  color: var(--dm-lock);
+  font-family: var(--dm-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+main.manager-page:not(.is-sovereign) .rider-partner-forms > header > p::after {
+  content: "";
+  display: inline-block;
+  width: 44px;
+  height: 1px;
+  margin-left: 12px;
+  vertical-align: middle;
+  background: var(--dm-prism);
+}
+
+main.manager-page:not(.is-sovereign) .rider-partner-forms > header > h2 {
+  color: transparent;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #eefaff 34%,
+    color-mix(in srgb, var(--dm-lock) 55%, #eafbff) 66%,
+    var(--dm-lock) 100%
+  );
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+}
+
+html[data-world-effects="economy"]
+  main.manager-page:not(.is-sovereign)
+  .rider-partner-forms
+  > header
+  > h2 {
+  filter: none;
+}
+
+/* Identity records: the kickers take the file strip's Michroma voice
+   (the nightmare keeps her magenta). On wide screens the copy settles on
+   the card's foot over a prism rule, so each card reads as a file slip; a
+   partner's long record sets the row's height, so that pair keeps its copy
+   under the art. */
+main.manager-page:not(.is-sovereign)
+  :is(.rider-archive-civilian > figcaption > p:first-child, .rider-nightmare-card-copy > p) {
+  font-family: var(--dm-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+
+main.manager-page:not(.is-sovereign) .rider-archive-civilian > figcaption > p:first-child {
+  color: var(--dm-lock);
+}
+
+/* Michroma sets BEFORE TRANSFORMATION / CAST 334-349px wide; the record
+   copy is 230-308px on phones and 296px at 768, where the kicker broke
+   before its slash ("/ CAST" led a line). Below 1024px the kickers keep the
+   file's Oxanium, one line from 360px; narrower, it tracks tighter so the
+   line still holds (the nightmare's long kicker wraps after MACHIAVEL, as
+   it did before). */
+@media (max-width: 1023.98px) {
+  main.manager-page:not(.is-sovereign)
+    :is(.rider-archive-civilian > figcaption > p:first-child, .rider-nightmare-card-copy > p) {
+    font-family: var(--dossier-font-interface);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+  }
+}
+
+@media (max-width: 359.98px) {
+  main.manager-page:not(.is-sovereign)
+    :is(.rider-archive-civilian > figcaption > p:first-child, .rider-nightmare-card-copy > p) {
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (min-width: 1100px) {
+  main.manager-page:not(.is-sovereign)
+    .rider-archive-identity-records:not(.has-partner)
+    :is(.rider-archive-civilian > figcaption, .rider-nightmare-card-copy) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main.manager-page:not(.is-sovereign)
+    .rider-archive-identity-records:not(.has-partner)
+    :is(.rider-archive-civilian > figcaption, .rider-nightmare-card-copy)
+    > p:first-child {
+    margin-top: auto;
+    padding-top: 18px;
+    background: var(--dm-prism) 0 0 / min(100%, 240px) 1px no-repeat;
+  }
+}
+
+/* The file numeral on the portrait: an opaque ink tag with a lock edge,
+   the numeral outlined in the accent as World's numerals are, and a gold
+   foot tick; the misregistered side ghosts stay. It had been a grey box on
+   the light-ground plates. */
+main.manager-page:not(.is-sovereign) .manager-portrait-frame .manager-numeral {
+  border: 1px solid color-mix(in srgb, var(--dm-lock) 62%, transparent);
+  color: transparent;
+  font-family: var(--dm-mono);
+  font-weight: 500;
+  -webkit-text-stroke: 1px var(--dm-lock);
+  text-shadow: none;
+  background:
+    linear-gradient(var(--dm-gold) 0 0) 50% 100% / 18px 2px no-repeat,
+    #04080f;
+}
+
+/* The contents rows scroll down this file: the arrow points into it
+   (↘) rather than the leave-the-site ↗ idiom. The glyph is unchanged. */
+main.manager-page:not(.is-sovereign) .dossier-contents-arrow {
+  display: inline-block;
+  rotate: 90deg;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    main.manager-page:not(.is-sovereign)
+    .dossier-contents
+    > a
+    .dossier-contents-arrow {
+    transition: translate 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html:not([data-world-effects="economy"])
+    main.manager-page:not(.is-sovereign)
+    .dossier-contents
+    > a:hover
+    .dossier-contents-arrow {
+    translate: 0 2px;
+  }
+}
+
+/* 夜明護尊's withheld facts (the ▢ runs) read as redaction bars rather than
+   missing glyphs: an ink strip with fine ice hatching behind the glyphs, the
+   glyphs dimmed, and a gold end tick. The glyphs stay as they are. */
+main.manager-page:not(.is-sovereign) .manager-facts dd.is-redacted {
+  width: fit-content;
+  max-width: 100%;
+  padding: 1px 12px 1px 8px;
+  color: rgb(234 244 255 / 36%);
+  background:
+    linear-gradient(var(--dm-gold) 0 0) 100% 0 / 2px 100% no-repeat,
+    repeating-linear-gradient(135deg, rgb(122 232 255 / 16%) 0 1px, transparent 1px 5px),
+    #02050a;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 10%);
+}
+
+/* A list of one (ダンテ, 01 / 01) ends on the terminal mark 夜明護尊's file
+   uses: gold brackets at the column's ends and the prism boundary, run
+   behind the centred plate. */
+@media (min-width: 761px) {
+  main.manager-page:not(.is-sovereign)
+    .manager-pagination:has(> .manager-pagination-spacer:first-child):has(
+      > .manager-pagination-spacer:last-child
+    )::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 16px;
+    translate: 0 -50%;
+    background:
+      linear-gradient(var(--dm-gold) 0 0) 0 100% / 22px 2px no-repeat,
+      linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 16px no-repeat,
+      linear-gradient(var(--dm-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+      linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 16px no-repeat,
+      var(--dm-prism) 50% 50% / 100% 1px no-repeat;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+}
+
 @media (forced-colors: active) {
   main.manager-page:not(.is-sovereign) .dossier-identity .manager-display-name {
     color: CanvasText;
@@ -899,6 +1399,49 @@ main.manager-page:not(.is-sovereign)
   /* ... and the current section keeps the reader sheet's system highlight. */
   main.manager-page:not(.is-sovereign) .dossier-reader-links a[aria-current] {
     background: Highlight;
+  }
+}
+
+@media (forced-colors: active) {
+  main.manager-page:not(.is-sovereign) .ios-slide-open[data-keyboard-focus="true"]:focus-visible,
+  main.manager-page:not(.is-sovereign) .rider-special-site-link:focus-visible,
+  main.manager-page:not(.is-sovereign)
+    :is(.manager-topbar .brand, button.manager-portrait-frame):focus-visible {
+    outline-color: Highlight;
+  }
+
+  /* Ornament only: the openers, the vignette and the deck's rules. */
+  main.manager-page:not(.is-sovereign) #form-records::before,
+  main.manager-page:not(.is-sovereign) #form-records::after,
+  main.manager-page:not(.is-sovereign)
+    .form-pickup:not(.is-rexonance-pickup)
+    .form-pickup-visual::after,
+  main.manager-page:not(.is-sovereign) .manager-pagination::after,
+  main.manager-page:not(.is-sovereign)
+    .form-pickup:not(.is-rexonance-pickup)
+    .form-pickup-copy::after,
+  main.manager-page:not(.is-sovereign) .rider-partner-forms > header > p::after {
+    display: none;
+  }
+
+  /* Outlined and clipped type becomes plain ink; the redaction bar goes. */
+  main.manager-page:not(.is-sovereign) .manager-portrait-frame .manager-numeral {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+    background: Canvas;
+  }
+
+  main.manager-page:not(.is-sovereign) .rider-partner-forms > header > h2 {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    filter: none;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-facts dd.is-redacted {
+    color: CanvasText;
+    background: none;
+    box-shadow: none;
   }
 }
 
@@ -988,4 +1531,23 @@ main.manager-page:not(.is-sovereign)
   to {
     scale: 1 1;
   }
+}
+
+/* ================================================================
+   The Rexonance card on the page: once, then still
+   ================================================================ */
+/* Its crown line, portrait float and orbit rings looped for as long as
+   the file was open (rexonance-pickup.css, not edited here). On the page
+   they now play once and rest on their end frames, which are their rest
+   poses: the dim crown line, the portrait at scale(1.015), the orbits at
+   360deg (their start) and the weapon scan at opacity 0. Longhands only,
+   so reduced motion and economy (animation: none !important there) stay
+   still. */
+main.manager-page:not(.is-sovereign) .form-pickup.is-rexonance-pickup::after,
+main.manager-page:not(.is-sovereign) .is-rexonance-pickup .form-pickup-visual img,
+main.manager-page:not(.is-sovereign) .rexonance-card-ornaments i,
+main.manager-page:not(.is-sovereign) .rexonance-panel-ambient i,
+main.manager-page:not(.is-sovereign) .rexonance-weapon-grid figure > div::after {
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
 }

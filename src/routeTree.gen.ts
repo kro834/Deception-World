@@ -22,17 +22,20 @@ import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as ApiExportRouteImport } from './routes/api/export'
+import { Route as CharactersIndexRouteImport } from './routes/characters/index'
 import { Route as CharactersCielRouteImport } from './routes/characters/ciel'
 import { Route as CharactersDanteRouteImport } from './routes/characters/dante'
 import { Route as CharactersLunaRouteImport } from './routes/characters/luna'
 import { Route as CharactersTerraRouteImport } from './routes/characters/terra'
 import { Route as CharactersYoakeMamoriRouteImport } from './routes/characters/yoake-mamori'
+import { Route as ManagersIndexRouteImport } from './routes/managers/index'
 import { Route as ManagersLejasRouteImport } from './routes/managers/lejas'
 import { Route as ManagersOpusRouteImport } from './routes/managers/opus'
 import { Route as ManagersReemuRouteImport } from './routes/managers/reemu'
 import { Route as ManagersRexLoiRouteImport } from './routes/managers/rex-loi'
 import { Route as ManagersShuzaRouteImport } from './routes/managers/shuza'
 import { Route as ManagersZeusRouteImport } from './routes/managers/zeus'
+import { Route as RidersIndexRouteImport } from './routes/riders/index'
 import { Route as RidersIdRouteImport } from './routes/riders/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -101,6 +104,11 @@ const ApiExportRoute = ApiExportRouteImport.update({
   path: '/api/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CharactersIndexRoute = CharactersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CharactersRoute,
+} as any)
 const CharactersCielRoute = CharactersCielRouteImport.update({
   id: '/ciel',
   path: '/ciel',
@@ -125,6 +133,11 @@ const CharactersYoakeMamoriRoute = CharactersYoakeMamoriRouteImport.update({
   id: '/yoake-mamori',
   path: '/yoake-mamori',
   getParentRoute: () => CharactersRoute,
+} as any)
+const ManagersIndexRoute = ManagersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ManagersRoute,
 } as any)
 const ManagersLejasRoute = ManagersLejasRouteImport.update({
   id: '/lejas',
@@ -155,6 +168,11 @@ const ManagersZeusRoute = ManagersZeusRouteImport.update({
   id: '/zeus',
   path: '/zeus',
   getParentRoute: () => ManagersRoute,
+} as any)
+const RidersIndexRoute = RidersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RidersRoute,
 } as any)
 const RidersIdRoute = RidersIdRouteImport.update({
   id: '/$id',
@@ -193,20 +211,20 @@ export interface FileRoutesByFullPath {
   '/managers/shuza': typeof ManagersShuzaRoute
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
+  '/characters/': typeof CharactersIndexRoute
+  '/managers/': typeof ManagersIndexRoute
+  '/riders/': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/login': typeof LoginRoute
-  '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
-  '/riders': typeof RidersRouteWithChildren
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
@@ -221,6 +239,9 @@ export interface FileRoutesByTo {
   '/managers/shuza': typeof ManagersShuzaRoute
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
+  '/characters': typeof CharactersIndexRoute
+  '/managers': typeof ManagersIndexRoute
+  '/riders': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -250,6 +271,9 @@ export interface FileRoutesById {
   '/managers/shuza': typeof ManagersShuzaRoute
   '/managers/zeus': typeof ManagersZeusRoute
   '/riders/$id': typeof RidersIdRoute
+  '/characters/': typeof CharactersIndexRoute
+  '/managers/': typeof ManagersIndexRoute
+  '/riders/': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -280,20 +304,20 @@ export interface FileRouteTypes {
     | '/managers/shuza'
     | '/managers/zeus'
     | '/riders/$id'
+    | '/characters/'
+    | '/managers/'
+    | '/riders/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/characters'
     | '/download'
     | '/dream-chapter'
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
     | '/login'
-    | '/managers'
     | '/rexonance-saga'
-    | '/riders'
     | '/world'
     | '/api/export'
     | '/characters/ciel'
@@ -308,6 +332,9 @@ export interface FileRouteTypes {
     | '/managers/shuza'
     | '/managers/zeus'
     | '/riders/$id'
+    | '/characters'
+    | '/managers'
+    | '/riders'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -336,6 +363,9 @@ export interface FileRouteTypes {
     | '/managers/shuza'
     | '/managers/zeus'
     | '/riders/$id'
+    | '/characters/'
+    | '/managers/'
+    | '/riders/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -449,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/characters/': {
+      id: '/characters/'
+      path: '/'
+      fullPath: '/characters/'
+      preLoaderRoute: typeof CharactersIndexRouteImport
+      parentRoute: typeof CharactersRoute
+    }
     '/characters/ciel': {
       id: '/characters/ciel'
       path: '/ciel'
@@ -483,6 +520,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/characters/yoake-mamori'
       preLoaderRoute: typeof CharactersYoakeMamoriRouteImport
       parentRoute: typeof CharactersRoute
+    }
+    '/managers/': {
+      id: '/managers/'
+      path: '/'
+      fullPath: '/managers/'
+      preLoaderRoute: typeof ManagersIndexRouteImport
+      parentRoute: typeof ManagersRoute
     }
     '/managers/lejas': {
       id: '/managers/lejas'
@@ -526,6 +570,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManagersZeusRouteImport
       parentRoute: typeof ManagersRoute
     }
+    '/riders/': {
+      id: '/riders/'
+      path: '/'
+      fullPath: '/riders/'
+      preLoaderRoute: typeof RidersIndexRouteImport
+      parentRoute: typeof RidersRoute
+    }
     '/riders/$id': {
       id: '/riders/$id'
       path: '/$id'
@@ -549,6 +600,7 @@ interface CharactersRouteChildren {
   CharactersLunaRoute: typeof CharactersLunaRoute
   CharactersTerraRoute: typeof CharactersTerraRoute
   CharactersYoakeMamoriRoute: typeof CharactersYoakeMamoriRoute
+  CharactersIndexRoute: typeof CharactersIndexRoute
 }
 
 const CharactersRouteChildren: CharactersRouteChildren = {
@@ -557,6 +609,7 @@ const CharactersRouteChildren: CharactersRouteChildren = {
   CharactersLunaRoute: CharactersLunaRoute,
   CharactersTerraRoute: CharactersTerraRoute,
   CharactersYoakeMamoriRoute: CharactersYoakeMamoriRoute,
+  CharactersIndexRoute: CharactersIndexRoute,
 }
 
 const CharactersRouteWithChildren = CharactersRoute._addFileChildren(
@@ -570,6 +623,7 @@ interface ManagersRouteChildren {
   ManagersRexLoiRoute: typeof ManagersRexLoiRoute
   ManagersShuzaRoute: typeof ManagersShuzaRoute
   ManagersZeusRoute: typeof ManagersZeusRoute
+  ManagersIndexRoute: typeof ManagersIndexRoute
 }
 
 const ManagersRouteChildren: ManagersRouteChildren = {
@@ -579,6 +633,7 @@ const ManagersRouteChildren: ManagersRouteChildren = {
   ManagersRexLoiRoute: ManagersRexLoiRoute,
   ManagersShuzaRoute: ManagersShuzaRoute,
   ManagersZeusRoute: ManagersZeusRoute,
+  ManagersIndexRoute: ManagersIndexRoute,
 }
 
 const ManagersRouteWithChildren = ManagersRoute._addFileChildren(
@@ -587,10 +642,12 @@ const ManagersRouteWithChildren = ManagersRoute._addFileChildren(
 
 interface RidersRouteChildren {
   RidersIdRoute: typeof RidersIdRoute
+  RidersIndexRoute: typeof RidersIndexRoute
 }
 
 const RidersRouteChildren: RidersRouteChildren = {
   RidersIdRoute: RidersIdRoute,
+  RidersIndexRoute: RidersIndexRoute,
 }
 
 const RidersRouteWithChildren =

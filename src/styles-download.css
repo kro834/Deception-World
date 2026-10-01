@@ -278,9 +278,16 @@ html[data-world-effects="economy"] .export-page h1 {
   }
 }
 
+/* The retry link is a 44px control of its own: its text line is centred in
+   the box, and the margins above and below give back the 21px it gained, so
+   the text and the plate stay where they were. */
 .export-page-alt {
   position: relative;
-  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 12px;
+  margin-top: 8px;
   border-radius: 2px;
   font-size: 13px;
   line-height: 1.75;
@@ -291,7 +298,12 @@ html[data-world-effects="economy"] .export-page h1 {
   text-decoration-color: rgb(122 232 255 / 55%);
   text-underline-offset: 4px;
 }
-/* ::before is the addon sheet's 44px hit area; the tick goes on ::after. */
+/* ::before was the addon sheet's stand-in hit area around an 18px line; the
+   box is 44px itself now, so it stays inside it. The tick goes on ::after. */
+.export-page-alt::before {
+  inset: 0;
+}
+
 .export-page-alt::after {
   content: "";
   display: inline-block;
@@ -305,7 +317,7 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page small {
   display: block;
-  margin: 22px 0 clamp(24px, 5vw, 40px);
+  margin: 12px 0 clamp(24px, 5vw, 40px);
   padding-top: 14px;
   /* 17em: the first line holds exactly the clause before the ／ separator
      (197px at 12px) and the second the rest, so nothing breaks mid-word.
@@ -368,11 +380,12 @@ html[data-world-effects="economy"] .export-page h1 {
     margin-top: 20px;
     min-height: 48px;
   }
+  /* The compact rule takes back the retry control's 21px the same way. */
   .export-page-alt {
-    margin-top: 12px;
+    margin-top: 2px;
   }
   .export-page small {
-    margin-top: 12px;
+    margin-top: 2px;
     padding-top: 10px;
     margin-bottom: 18px;
   }

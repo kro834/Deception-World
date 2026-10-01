@@ -52,6 +52,9 @@ export function SlideOpenControl({
   const grabOffset = useRef(0);
   const motionSample = useRef({ offset: 0, at: 0 });
   const travel = useRef(0);
+  // The furthest the thumb press has wandered from where it started. A press
+  // that slid out and came back is an abandoned slide, never a tap.
+  const peakTravel = useRef(0);
   const dragMetrics = useRef<SlideMetrics | null>(null);
   const holdTimer = useRef<number | null>(null);
   const activateTimer = useRef<number | null>(null);
@@ -87,6 +90,7 @@ export function SlideOpenControl({
     pointerIntent.current = "idle";
     pointerStart.current = { x: 0, y: 0 };
     latestPointer.current = { x: 0, y: 0 };
+    peakTravel.current = 0;
     requiresHold.current = false;
     holdActivated.current = false;
     grabOffset.current = 0;
@@ -292,6 +296,7 @@ export function SlideOpenControl({
     pointerIntent.current = "pending";
     pointerStart.current = { x: event.clientX, y: event.clientY };
     latestPointer.current = { x: event.clientX, y: event.clientY };
+    peakTravel.current = 0;
     requiresHold.current = event.pointerType !== "mouse";
     holdActivated.current = false;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
@@ -328,6 +333,11 @@ export function SlideOpenControl({
   const drag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (activePointer.current !== event.pointerId) return;
     latestPointer.current = { x: event.clientX, y: event.clientY };
+    peakTravel.current = Math.max(
+      peakTravel.current,
+      Math.abs(event.clientX - pointerStart.current.x),
+      Math.abs(event.clientY - pointerStart.current.y),
+    );
 
     if (pointerIntent.current === "pending") {
       const deltaX = event.clientX - pointerStart.current.x;
@@ -412,7 +422,9 @@ export function SlideOpenControl({
     const deltaX = Math.abs(event.clientX - pointerStart.current.x);
     const deltaY = Math.abs(event.clientY - pointerStart.current.y);
     // Holding arms a drag; it must not cancel a stationary, deliberate tap.
-    const isThumbTap = deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE;
+    // Sliding out and back is not stationary: that press never opens.
+    const isThumbTap =
+      deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE && peakTravel.current < TAP_TOLERANCE;
     activePointer.current = null;
     try {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {

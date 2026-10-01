@@ -1078,6 +1078,13 @@ main.manager-page.is-sovereign #dossier-profile .manager-facts dd {
   }
 }
 
+/* The narrowest phones: AUTHORITY outran its 142px cell by 7px at 320. */
+@media (max-width: 339px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-facts dt {
+    letter-spacing: 0.04em;
+  }
+}
+
 @media (max-width: 760px) {
   main.manager-page.is-sovereign #dossier-profile .manager-quotes {
     margin: 0;
@@ -1462,6 +1469,15 @@ main.manager-page.is-sovereign
   outline-offset: 3px;
 }
 
+/* HOLD + SLIDE: the frosted sheet forces the plate's shadow with
+   !important, which drowned the addon's shadow ring, so keyboard focus
+   showed nothing. An outline, which that sheet never sets, draws the warm
+   ring (the attribute is set only by a keyboard). */
+main.manager-page.is-sovereign .ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+  outline: 2px solid var(--sv-focus);
+  outline-offset: 4px;
+}
+
 /* ================================================================
    Retired: the old entrance and the loops on a still page
    ================================================================ */
@@ -1547,6 +1563,10 @@ html[data-world-effects="economy"]
 
   main.manager-page.is-sovereign #dossier-profile .manager-facts > div {
     border-top: 1px solid CanvasText;
+  }
+
+  main.manager-page.is-sovereign .ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+    outline-color: Highlight;
   }
 }
 

@@ -69,6 +69,7 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
       path: rect(path),
       buttonBackground: getComputedStyle(node).backgroundColor,
       buttonRadius: parseFloat(getComputedStyle(node).borderTopLeftRadius),
+      buttonBackgroundImage: getComputedStyle(node).backgroundImage,
       labelSmallColor: getComputedStyle(labelSmall).color,
       labelTextColor: getComputedStyle(labelText).color,
       arrowColor: getComputedStyle(arrow).borderTopColor,
@@ -110,9 +111,13 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
     assert.fail(`${label}: no-frost baseline still has the old light rail`);
   }
   if (darkBackground) {
+    // Since the World refine (2026-10-01) HOLD + SLIDE is the files' square
+    // plate (4px, bracketed); otherwise it is the frosted capsule.
+    const squarePlate =
+      metrics.buttonRadius === 4 && /linear-gradient/.test(metrics.buttonBackgroundImage);
     assert.ok(
-      metrics.buttonRadius >= 20,
-      `${label}: rail must remain rounded, got ${metrics.buttonRadius}px`,
+      metrics.buttonRadius >= 20 || squarePlate,
+      `${label}: rail must remain a capsule or the bracketed square plate, got ${metrics.buttonRadius}px`,
     );
   } else {
     assert.ok(darkBackground, `${label}: rail must remain dark, got ${metrics.buttonBackground}`);

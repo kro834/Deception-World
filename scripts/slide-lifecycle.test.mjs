@@ -81,10 +81,10 @@ function mount() {
       fn();
     }
   };
-  const pointer = (clientX) => ({
+  const pointer = (clientX, pointerType = "mouse") => ({
     currentTarget: button,
     isPrimary: true,
-    pointerType: "mouse",
+    pointerType,
     button: 0,
     pointerId: 7,
     clientX,
@@ -102,6 +102,10 @@ function mount() {
     startDrag: () => element.props.onPointerDown(pointer(29)),
     drag: () => element.props.onPointerMove(pointer(149)),
     release: () => element.props.onPointerUp(pointer(149)),
+    // Free pointer paths for the abandoned-slide cases (thumb centre at x 29).
+    press: (x, type) => element.props.onPointerDown(pointer(x, type)),
+    move: (x, type) => element.props.onPointerMove(pointer(x, type)),
+    up: (x, type) => element.props.onPointerUp(pointer(x, type)),
     opened: () => opened,
     unmount: () => cleanups.forEach((fn) => fn?.()),
   };
@@ -176,4 +180,66 @@ test("mobile toolbar height changes do not interrupt a deliberate slider gesture
   ui.flush();
   assert.equal(ui.opened(), 1);
   ui.unmount();
+});
+
+// An abandoned slide (out past the tap tolerance, then back) is "never mind".
+test("a thumb slid out 40px and back to its start never opens (mouse)", () => {
+  const ui = mount();
+  ui.press(29);
+  for (const x of [41, 55, 69]) ui.move(x);
+  assert.equal(ui.button.dataset.dragging, "true");
+  for (const x of [55, 41, 30, 29]) ui.move(x);
+  ui.up(29);
+  ui.flush();
+  assert.equal(ui.opened(), 0);
+  assert.equal(ui.button.dataset.completing, "false");
+  ui.unmount();
+});
+
+test("a held touch slid out 40px and back never opens", () => {
+  const ui = mount();
+  ui.press(29, "touch");
+  assert.equal(ui.button.dataset.holding, "true");
+  ui.flush(); // the hold activates the drag
+  assert.equal(ui.button.dataset.dragging, "true");
+  for (const x of [45, 69, 45, 29]) ui.move(x, "touch");
+  ui.up(29, "touch");
+  ui.flush();
+  assert.equal(ui.opened(), 0);
+  ui.unmount();
+});
+
+test("a stationary press and release on the thumb still opens once", () => {
+  for (const type of ["mouse", "touch"]) {
+    const ui = mount();
+    ui.press(29, type);
+    if (type === "touch") ui.flush(); // held past the activation
+    ui.move(33, type); // natural jitter inside the tap tolerance
+    ui.up(30, type);
+    ui.flush();
+    assert.equal(ui.opened(), 1, type);
+    ui.unmount();
+  }
+});
+
+test("a slide past 40% of the travel still opens once", () => {
+  const ui = mount();
+  ui.press(29);
+  for (const x of [45, 90, 149]) ui.move(x);
+  ui.up(149);
+  ui.flush();
+  assert.equal(ui.opened(), 1);
+  ui.unmount();
+});
+
+test("the horizontal tap test names the peak-travel guard", () => {
+  const source = readFileSync(
+    new URL("../src/components/world/slide-open-control.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    source,
+    /const isThumbTap =\s*deltaX < TAP_TOLERANCE && deltaY < TAP_TOLERANCE && peakTravel\.current < TAP_TOLERANCE;/,
+  );
+  assert.match(source, /peakTravel\.current = Math\.max\(/);
 });

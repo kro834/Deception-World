@@ -413,3 +413,41 @@ test("the reveal is documented with the Mirage edition", async () => {
     assert.ok(section.includes(phrase), phrase);
   }
 });
+
+test("STORY types as one terminal: the second paragraph waits for the first caret", async () => {
+  const { rules } = parse(await readCss());
+  const readVars = (rule) =>
+    Object.fromEntries(
+      [...rule.body.matchAll(/(--tr-(?:from|span|fade)):\s*([\d.]+)svh;/g)].map(
+        ([, name, value]) => [name, Number(value)],
+      ),
+    );
+  const copy = readVars(
+    rules.find(({ selector }) => selector.endsWith('[data-text-reveal="copy"]')),
+  );
+  const second = rules.filter(({ selector }) =>
+    selector.endsWith('.story-copy > p[data-text-reveal="copy"] + p[data-text-reveal="copy"]'),
+  );
+  // Phones, 561-1099px and wider: one rule each, behind the same gate.
+  assert.equal(second.length, 3);
+  for (const rule of second) {
+    assert.ok(rule.selector.startsWith(GATE), rule.selector);
+    assert.ok(rule.context.includes("@media (prefers-reduced-motion: no-preference)"));
+    const vars = { ...copy, ...readVars(rule) };
+    // Still whole with its top at 74%.
+    assert.equal(vars["--tr-from"] + vars["--tr-span"] + vars["--tr-fade"], 26, rule.selector);
+    // It starts once the first paragraph is typed: its span stays under the
+    // shortest measured top-to-top distance of its band (11.5, 6.6 and
+    // 8.3svh), so the first caret is gone before the second appears.
+    const band = rule.context.find((prelude) => prelude.includes("width")) ?? "phones";
+    const floor = band.includes("1099px") ? 6.6 : band.includes("1100px") ? 8.3 : 11.5;
+    assert.ok(vars["--tr-span"] * 1.05 < floor, `${band}: span ${vars["--tr-span"]}svh`);
+    // Variables only: the characters' own rule does the animating.
+    assert.equal(
+      flat(rule.body)
+        .replace(/--tr-(?:from|span): [\d.]+svh;/g, "")
+        .trim(),
+      "",
+    );
+  }
+});

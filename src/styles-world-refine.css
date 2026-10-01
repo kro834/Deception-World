@@ -1,0 +1,996 @@
+/* World refine: /world as one finished edition (one focus family, honest
+   states, composed plates, one archive card grammar, screens that fit).
+   Linked before the Mirage face, which stays last; every selector leads with
+   main.site-shell.film-edition.mirage-edition to outrank Mirage and stay off
+   the dossiers. Paint and layout only; keyframes would be wr-*. Never the
+   annex, RISING / RE DIVE, the side menu or the announcement dialog. */
+
+/* ================================================================
+   1. One focus family: #fff0b5, 2px, on every /world control
+   ================================================================ */
+/* HOLD + SLIDE: its ring was a box-shadow the frosted sheet's !important
+   shadow beat. An outline, on the control's keyboard flag (a tap clears it). */
+main.site-shell.film-edition.mirage-edition
+  .world-column-slide-open.ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+  outline: 2px solid var(--mr-focus);
+  outline-offset: 3px;
+}
+
+main.site-shell.film-edition.mirage-edition .rider-dossier-open.ios-slide-open:focus-visible {
+  outline-color: var(--mr-focus) !important;
+}
+
+/* Colour only: offsets and show/hide logic (the pointer-suppressed grid)
+   stay; accents stay on the lens and the edges. */
+main.site-shell.film-edition.mirage-edition
+  :is(.manager-archive-tabs, .rider-tabs, .world-column-tabs).liquid-swipe-tabs
+  > button[role="tab"]:focus-visible,
+main.site-shell.film-edition.mirage-edition .episode-grid:focus-visible,
+main.site-shell.film-edition.mirage-edition .episode-card-select:focus-visible,
+main.site-shell.film-edition.mirage-edition .episode-pickup-plus:focus-visible,
+main.site-shell.film-edition.mirage-edition footer > a:focus-visible {
+  outline-color: var(--mr-focus);
+}
+
+main.site-shell.film-edition.mirage-edition footer > a:focus-visible {
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+/* The chamfer clip-path clips any outer ring: this one sits inside. */
+main.site-shell.film-edition.mirage-edition .episode-controls button:focus-visible {
+  outline: 2px solid var(--mr-focus);
+  outline-offset: -6px;
+}
+
+/* ================================================================
+   3. The world column plate: one measure, then the story plate
+   ================================================================ */
+/* Two columns around one unbreakable paragraph left column two empty. */
+main.site-shell.film-edition.mirage-edition .world-column-summary-pane {
+  columns: auto;
+}
+
+main.site-shell.film-edition.mirage-edition .world-column-summary-pane p {
+  max-inline-size: 38em;
+}
+
+/* Wide: set as the story plate (number and title left, summary and HOLD +
+   SLIDE right). The stacks keep their cross-fade; rail and slide their boxes. */
+@media (min-width: 1100px) {
+  main.site-shell.film-edition.mirage-edition .world-column-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: clamp(40px, 5vw, 88px);
+    align-items: start;
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-column-number-stack {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-column-heading-stack {
+    grid-column: 1;
+    grid-row: 2 / 4;
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-column-heading-stack h3 {
+    margin-bottom: 0;
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-column-summary-stack {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    padding-left: clamp(20px, 2vw, 28px);
+    border-left: 1px solid var(--mr-line);
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-column-slide-open.ios-slide-open {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: end;
+  }
+}
+
+/* The record's second column gets the first column's rule. */
+main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-dialog-copy > div {
+  column-rule: 1px solid var(--pc-line-strong, rgb(122 232 255 / 34%));
+}
+
+/* ================================================================
+   4. The poster console: mounted prints, honest disabled states
+   ================================================================ */
+/* The six contain posters: flat letterbox bands become a mounted print (ink
+   matte on the 96px grid, brackets sized to the print, a gold hairline, two
+   centre ticks). Painted on the image, keyed by src, so the outgoing copy
+   (same src, no .is-contain) crossfades its own mount: nothing pops. */
+main.site-shell.film-edition.mirage-edition .poster-media {
+  container-type: size;
+}
+
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-07.jpeg"],
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-08.jpeg"] {
+  --print-ar: 1;
+}
+
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-15.jpeg"],
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-19.jpeg"] {
+  --print-ar: 1.5;
+}
+
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-16.jpeg"],
+main.site-shell.film-edition.mirage-edition .poster-image[src$="/poster-card-21.jpeg"] {
+  --print-ar: 1.7778;
+}
+
+main.site-shell.film-edition.mirage-edition
+  .poster-image:is(
+    [src$="/poster-card-07.jpeg"],
+    [src$="/poster-card-08.jpeg"],
+    [src$="/poster-card-15.jpeg"],
+    [src$="/poster-card-16.jpeg"],
+    [src$="/poster-card-19.jpeg"],
+    [src$="/poster-card-21.jpeg"]
+  ) {
+  --pp: clamp(12px, 5cqw, 20px);
+  --pw: min(100cqw - 2 * var(--pp), (100cqh - 2 * var(--pp)) * var(--print-ar));
+  --ph: min(100cqh - 2 * var(--pp), (100cqw - 2 * var(--pp)) / var(--print-ar));
+  --pl: calc((100cqw - var(--pw)) / 2);
+  --pt: calc((100cqh - var(--ph)) / 2);
+  --pr: calc(var(--pl) + var(--pw));
+  --pb: calc(var(--pt) + var(--ph));
+  --g: 8px;
+  --a: 22px;
+  box-sizing: border-box;
+  padding: var(--pp);
+  background:
+    linear-gradient(var(--mr-ice) 0 0) calc(var(--pl) - var(--g) - 2px)
+      calc(var(--pt) - var(--g) - 2px) / var(--a) 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) calc(var(--pl) - var(--g) - 2px)
+      calc(var(--pt) - var(--g) - 2px) / 2px var(--a) no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) calc(var(--pr) + var(--g) + 2px - var(--a))
+      calc(var(--pt) - var(--g) - 2px) / var(--a) 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) calc(var(--pr) + var(--g)) calc(var(--pt) - var(--g) - 2px) /
+      2px var(--a) no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) calc(var(--pl) - var(--g) - 2px)
+      calc(var(--pb) + var(--g)) / var(--a) 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) calc(var(--pl) - var(--g) - 2px)
+      calc(var(--pb) + var(--g) + 2px - var(--a)) / 2px var(--a) no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) calc(var(--pr) + var(--g) + 2px - var(--a))
+      calc(var(--pb) + var(--g)) / var(--a) 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) calc(var(--pr) + var(--g))
+      calc(var(--pb) + var(--g) + 2px - var(--a)) / 2px var(--a) no-repeat,
+    linear-gradient(rgb(240 207 134 / 50%) 0 0) calc(var(--pl) - var(--g) + var(--a) + 4px)
+      calc(var(--pb) + var(--g)) / calc(var(--pw) + 2 * var(--g) - 2 * var(--a) - 8px) 1px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 50% calc(var(--pt) - var(--g) - 16px) / 1px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 50% calc(var(--pb) + var(--g) + 6px) / 1px 10px no-repeat,
+    linear-gradient(90deg, rgb(122 232 255 / 6%) 1px, transparent 1px) calc(50cqw - 0.5px) 0 / 96px
+      100% repeat-x,
+    linear-gradient(rgb(122 232 255 / 6%) 1px, transparent 1px) 0 calc(50cqh - 0.5px) / 100% 96px
+      repeat-y,
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgb(122 232 255 / 5%), transparent 70%),
+    #050a13;
+}
+
+/* Disabled: the episode controls' grammar. SHUFFLING… stays readable.
+   SHUFFLE keeps focus through its run and its ring is an inset shadow (the
+   chamfer clips outlines), so the shadow is dropped only while unfocused. */
+main.site-shell.film-edition.mirage-edition :is(.poster-reset, .poster-lock).ios26-glass:disabled,
+main.site-shell.film-edition.mirage-edition .poster-shuffle.ios26-glass[aria-disabled="true"] {
+  border-color: rgb(122 232 255 / 10%);
+  background: var(--mr-deck) !important;
+  cursor: default;
+}
+
+main.site-shell.film-edition.mirage-edition
+  :is(.poster-reset, .poster-lock).ios26-glass:disabled:not(:focus-visible),
+main.site-shell.film-edition.mirage-edition
+  .poster-shuffle.ios26-glass[aria-disabled="true"]:not(:focus-visible) {
+  box-shadow: none !important;
+}
+
+main.site-shell.film-edition.mirage-edition :is(.poster-reset, .poster-lock).ios26-glass:disabled,
+main.site-shell.film-edition.mirage-edition
+  :is(.poster-reset, .poster-lock).ios26-glass:disabled
+  :is(b, small) {
+  color: rgb(241 247 251 / 32%);
+}
+
+main.site-shell.film-edition.mirage-edition
+  :is(.poster-reset, .poster-lock, .poster-shuffle[aria-disabled="true"]).ios26-glass:is(
+    :disabled,
+    [aria-disabled="true"]
+  )
+  > span:not(.liquid-pointer-glow) {
+  color: rgb(122 232 255 / 32%);
+}
+
+/* ================================================================
+   5. The 六詠 archive in one card grammar
+   ================================================================ */
+/* FRONT's holo-card is the model. #manager-archive keeps RE DIVE's clone
+   out. Phones: REVERSE and RELATED take FRONT's 210px rows (one matrix). */
+@media (max-width: 760px) {
+  main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .manager-archive-panel:is(.is-unmanaged, .is-other) {
+    block-size: auto;
+    min-block-size: 0;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .manager-archive-panel:is(.is-unmanaged, .is-other)
+    .manager-slot-grid {
+    block-size: auto;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(210px, auto);
+    gap: 12px;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .manager-archive-panel:is(.is-unmanaged, .is-other)
+    .manager-slot-grid
+    > * {
+    block-size: auto;
+  }
+}
+
+/* RELATED tab: ink, a 1px ice edge and ice ink; no fill. */
+main.site-shell.film-edition.mirage-edition #manager-archive .other-card-code {
+  color: var(--mr-ice);
+  background: rgb(4 8 15 / 86%);
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 62%);
+  clip-path: none;
+}
+
+/* Captions on FRONT's ink ramp, inside the portrait's lower 40%. */
+main.site-shell.film-edition.mirage-edition #manager-archive .other-card-shade {
+  background:
+    linear-gradient(180deg, rgb(4 8 15 / 4%) 26%, rgb(4 8 15 / 92%) 100%),
+    linear-gradient(90deg, rgb(4 8 15 / 50%), transparent 52%);
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .manager-slot-grid .other-card-copy {
+  bottom: 10px;
+  gap: 2px;
+}
+
+main.site-shell.film-edition.mirage-edition
+  #manager-archive
+  .manager-slot-grid
+  .other-card-copy
+  :is(small, i) {
+  line-height: 1.3;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .manager-slot-grid .other-card-copy b {
+  line-height: 1.2;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .manager-slot-grid .other-card-copy i {
+  color: var(--mr-ice);
+}
+
+/* 夜明護尊's kana reading is one phrase (100px) and its grid track grew to
+   hold it past the card's clip (320px, 844x390: よあけまもりのみ, cut at み).
+   Its copy takes the card's measure and the reading wraps inside it, at
+   the name's seam where the card is narrowest (よあけまもり / のみこと). */
+main.site-shell.film-edition.mirage-edition
+  #manager-archive
+  .other-archive-card[href$="/characters/yoake-mamori"]
+  .other-card-copy {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+main.site-shell.film-edition.mirage-edition
+  #manager-archive
+  .other-archive-card[href$="/characters/yoake-mamori"]
+  .other-card-copy
+  small {
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+@media (max-width: 760px), (max-height: 500px) {
+  main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .other-archive-card[href$="/characters/yoake-mamori"]
+    .other-card-copy
+    small {
+    letter-spacing: 0;
+  }
+}
+
+/* Corner cells: FRONT's 26px plate; each keeps its glyph. */
+main.site-shell.film-edition.mirage-edition #manager-archive .other-archive-card::after {
+  top: 14px;
+  right: 14px;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-archive::after {
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 1px solid rgb(122 232 255 / 62%);
+  background:
+    linear-gradient(
+        45deg,
+        transparent calc(50% - 0.75px),
+        var(--mr-ice-hi) calc(50% - 0.75px) calc(50% + 0.75px),
+        transparent calc(50% + 0.75px)
+      )
+      center / 11px 11px no-repeat,
+    linear-gradient(
+        -45deg,
+        transparent calc(50% - 0.75px),
+        var(--mr-ice-hi) calc(50% - 0.75px) calc(50% + 0.75px),
+        transparent calc(50% + 0.75px)
+      )
+      center / 11px 11px no-repeat,
+    rgb(4 8 15 / 86%);
+  rotate: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    :is(.other-archive-card, .dante-archive):is(:hover, :focus-visible) {
+    border-color: rgb(122 232 255 / 70%);
+  }
+}
+
+/* Signal red stays on the ANOMALOUS RECORD chip alone. */
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-archive {
+  border-color: rgb(122 232 255 / 26%);
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy i {
+  color: var(--mr-ice);
+}
+
+/* The corner plate ends at 40px and the copy is anchored to the card's foot.
+   The chip stands clear of the plate by 6px or more in every band. DANTE
+   sets solid (1.05), the chip at 1.3 and ACCESS // 5px under its name, so
+   the stack is shorter. Where ANOMALOUS RECORD breaks, the chip hugs its
+   longer word, not the full measure. Narrow cards (to 1024px, short
+   landscape) clear the plate below it; wider ones clear it to its left. */
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy {
+  container: wr-dante / inline-size;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy b {
+  line-height: 1.05;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy small {
+  line-height: 1.3;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy i {
+  margin-top: 5px;
+}
+
+/* 162px: the one-line chip's measure (about 160px) and a little slack. */
+@container wr-dante (width < 162px) {
+  main.site-shell.film-edition.mirage-edition #manager-archive .dante-copy small {
+    width: min-content;
+  }
+}
+
+/* One socket grammar (ice hatch); numerals above 4.5:1. */
+main.site-shell.film-edition.mirage-edition
+  #manager-archive
+  .archive-placeholder:is(.is-unmanaged, .is-other) {
+  color: rgb(122 232 255 / 62%);
+}
+
+/* ================================================================
+   6. The episode archive fits the screen
+   ================================================================ */
+/* Wide: the art is capped so heading, controls and the whole record share
+   one screen (cover crop; every card, so the rail stays even). Phones keep
+   their pinned 182px art. A definite width keeps 4:3 from shrinking it. */
+@media (min-width: 761px) {
+  main.site-shell.film-edition.mirage-edition .episode-card .episode-thumbnail {
+    inline-size: 100%;
+    max-block-size: max(240px, min(586px, calc(100svh - var(--film-topbar-height, 76px) - 340px)));
+  }
+}
+
+@media (min-width: 761px) and (max-height: 500px) {
+  main.site-shell.film-edition.mirage-edition .episode-card .episode-thumbnail {
+    max-block-size: 46svh;
+  }
+}
+
+/* 52px squares, as asked (the flex row held them at 44). */
+main.site-shell.film-edition.mirage-edition .episode-controls button {
+  flex-basis: 52px;
+}
+
+/* ================================================================
+   7. Square plates and one hover family
+   ================================================================ */
+/* The + is a square ink plate (ice rim, gold feet, white cross) in its
+   pinned box; the old dress is !important, so this is too, at more weight.
+   The plate stays opaque and imageless under the cross (the pickup contrast
+   verify pins that); the feet and the top sheen ride the free ::after. */
+main.site-shell.film-edition.mirage-edition .episode-pickup-plus.ios26-glass[data-liquid-pointer] {
+  border: 1px solid rgb(122 232 255 / 62%) !important;
+  border-radius: 0 !important;
+  background: rgb(4 8 15) !important;
+  box-shadow:
+    0 0 0 1px rgb(4 8 15 / 80%),
+    inset 0 1px 0 rgb(198 245 255 / 16%) !important;
+}
+
+main.site-shell.film-edition.mirage-edition
+  .episode-pickup-plus.ios26-glass[data-liquid-pointer]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(var(--mr-gold) 0 0) left bottom / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) left bottom / 2px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) right bottom / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) right bottom / 2px 10px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 8%), transparent 60%);
+  pointer-events: none;
+}
+
+/* HOLD + SLIDE joins the + and the files' plate: a 4px plate with a 2px
+   fill and thumb (the frosted sheet forces 999px with !important), locked
+   on with ice brackets above and gold at the foot, drawn as background
+   layers over each control's own surface. Box, travel and drag unchanged. */
+main.site-shell.film-edition.mirage-edition
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open,
+main.site-shell.film-edition.mirage-edition
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open::before,
+main.site-shell.film-edition.mirage-edition
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open::after {
+  border-radius: 4px !important;
+}
+
+main.site-shell.film-edition.mirage-edition
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open
+  :is(.ios-slide-open-fill, .ios-slide-open-thumb) {
+  border-radius: 2px !important;
+}
+
+main.site-shell.film-edition.mirage-edition
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open
+  .ios-slide-open-thumb
+  > i {
+  border-radius: 1px;
+}
+
+main.site-shell.film-edition.mirage-edition .world-column-slide-open.ios-slide-open {
+  background:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 10px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 10px 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 2px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 2px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 2px 10px no-repeat,
+    linear-gradient(155deg, #354351, #192331 70%, #202d3b) !important;
+}
+
+main.site-shell.film-edition.mirage-edition .rider-dossier-open.ios-slide-open {
+  background:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 10px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 10px 2px no-repeat,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 2px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 2px 10px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 2px 10px no-repeat,
+    #122132 !important;
+}
+
+/* The 個別資料 plate's own hover surface (frosted-controls) under the brackets. */
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition .rider-dossier-open.ios-slide-open:hover {
+    background-color: #183049 !important;
+  }
+}
+
+/* One fine-pointer hover (the PROFILE plate's): colour and edge at once;
+   only the + lifts (the tabs sit under their lens). The cross is white at
+   rest and takes ice only here. */
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer]:hover {
+    border-color: var(--mr-ice) !important;
+    background: color-mix(in srgb, var(--mr-ice) 14%, rgb(4 8 15)) !important;
+    transform: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer]:hover
+    :is(.episode-pickup-plus-icon, .episode-pickup-plus-icon .ui-vector-icon) {
+    color: var(--mr-ice-hi) !important;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.manager-archive-tabs, .world-column-tabs, .rider-tabs).liquid-swipe-tabs
+    > button[role="tab"] {
+    transition: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.manager-archive-tabs, .world-column-tabs).liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover {
+    border-color: rgb(122 232 255 / 72%);
+    background: rgb(122 232 255 / 10%);
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    .rider-tabs.liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover {
+    border-color: color-mix(in srgb, var(--tab-tone, var(--mr-ice)) 76%, transparent);
+    background: rgb(122 232 255 / 8%);
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.manager-archive-tabs, .world-column-tabs, .rider-tabs).liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover
+    b {
+    color: #fff;
+  }
+}
+
+/* The lift is motion: gated like Mirage's hover motion. */
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer] {
+    transition: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer] {
+    transition: translate 180ms var(--mr-ease-out);
+  }
+
+  html:not([data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer]:hover {
+    translate: 0 -1px;
+  }
+}
+
+/* ================================================================
+   8. The /world record dialogs: hierarchy and a clean CLOSE
+   ================================================================ */
+/* The subject is the loudest line: 世界観コラム steps down to the annex
+   title size, the column's title takes chrome ink. Paint only. */
+main.site-shell.film-edition.mirage-edition #world-column-pickup #world-column-pickup-title {
+  font-size: clamp(26px, 3vw, 40px);
+}
+
+main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-dialog-copy h3 {
+  color: transparent;
+  background: var(--mr-chrome);
+  background-size: 100% 1lh;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(3px 0 0 rgb(164 139 255 / 34%));
+  font-size: clamp(32px, 4.4vw, 60px);
+  line-height: 1.2;
+}
+
+html[data-world-effects="economy"]
+  main.site-shell.film-edition.mirage-edition
+  #world-column-pickup
+  .world-column-dialog-copy
+  h3 {
+  filter: none;
+}
+
+/* The top brackets leave the HUD bar (the right one ran into CLOSE) for the
+   scroller's own box, held still by background-attachment: scroll. */
+main.site-shell.film-edition.mirage-edition
+  :is(#world-column-pickup, #episode-pickup-dialog)::before {
+  background-size:
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    min(40%, 256px) 5px,
+    auto;
+}
+
+main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-dialog-card,
+main.site-shell.film-edition.mirage-edition #episode-pickup-dialog .episode-pickup-panel {
+  background:
+    linear-gradient(var(--pc-lock) 0 0) left var(--pc-inset) top var(--pc-inset) / var(--pc-arm) 2px
+      no-repeat,
+    linear-gradient(var(--pc-lock) 0 0) left var(--pc-inset) top var(--pc-inset) / 2px var(--pc-arm)
+      no-repeat,
+    linear-gradient(var(--pc-lock) 0 0) right var(--pc-inset) top var(--pc-inset) / var(--pc-arm)
+      2px no-repeat,
+    linear-gradient(var(--pc-lock) 0 0) right var(--pc-inset) top var(--pc-inset) / 2px
+      var(--pc-arm) no-repeat;
+  background-attachment: scroll;
+}
+
+/* ================================================================
+   9. The rider console
+   ================================================================ */
+/* Side by side, the copy starts under its RIDER / NN chip (was 150px below). */
+@media (min-width: 1121px) {
+  main.site-shell.film-edition.mirage-edition .rider-detail {
+    justify-content: flex-start;
+    padding-top: 96px;
+  }
+}
+
+/* Saga's white-ground art takes the dossiers' one-step grade (static). */
+@media (forced-colors: none) {
+  html:not([data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    .rider-visual
+    img[src$="/rider-saga-rexonance-thumbnail-20260827.jpeg"] {
+    filter: saturate(0.92) brightness(0.9) contrast(1.05);
+  }
+}
+
+/* Rider tones are local states: numbers rest in ice (selected keeps its own),
+   at 80% so the 14px numerals hold 4.5:1 on the rail's lightest surface. */
+main.site-shell.film-edition.mirage-edition
+  .rider-tabs.liquid-swipe-tabs
+  > button[role="tab"]:not([aria-selected="true"])
+  small {
+  color: rgb(122 232 255 / 80%);
+}
+
+main.site-shell.film-edition.mirage-edition
+  .rider-tabs.liquid-swipe-tabs
+  > button[role="tab"]:not([aria-selected="true"]):focus-visible
+  small {
+  color: color-mix(in srgb, var(--tab-tone) 58%, #fff);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition
+    .rider-tabs.liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover
+    small {
+    color: color-mix(in srgb, var(--tab-tone) 58%, #fff);
+  }
+}
+
+/* ================================================================
+   10. Short landscape and the footer
+   ================================================================ */
+/* Short landscape: the rider art fits; OPEN DOSSIER (84px untracked) keeps
+   one line in the 87px card measure. */
+@media (max-height: 500px) and (min-width: 700px) {
+  main.site-shell.film-edition.mirage-edition .rider-visual {
+    max-height: 70svh;
+  }
+
+  main.site-shell.film-edition.mirage-edition #manager-archive .signal > small {
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+}
+
+/* The footer stands on the chapter column, on one baseline. */
+@media (min-width: 700px) {
+  main.site-shell.film-edition.mirage-edition > footer {
+    align-items: last baseline;
+    padding-inline: max(8vw, calc((100% - 1280px) / 2));
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  main.site-shell.film-edition.mirage-edition
+    .world-column-slide-open.ios-slide-open[data-keyboard-focus="true"]:focus-visible,
+  main.site-shell.film-edition.mirage-edition
+    :is(.manager-archive-tabs, .rider-tabs, .world-column-tabs).liquid-swipe-tabs
+    > button[role="tab"]:focus-visible,
+  main.site-shell.film-edition.mirage-edition .episode-grid:focus-visible,
+  main.site-shell.film-edition.mirage-edition .episode-card-select:focus-visible,
+  main.site-shell.film-edition.mirage-edition .episode-pickup-plus:focus-visible,
+  main.site-shell.film-edition.mirage-edition .episode-controls button:focus-visible,
+  main.site-shell.film-edition.mirage-edition footer > a:focus-visible {
+    outline-color: Highlight;
+  }
+
+  main.site-shell.film-edition.mirage-edition .rider-dossier-open.ios-slide-open:focus-visible {
+    outline-color: Highlight !important;
+  }
+
+  main.site-shell.film-edition.mirage-edition .poster-image,
+  main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-dialog-card,
+  main.site-shell.film-edition.mirage-edition #episode-pickup-dialog .episode-pickup-panel {
+    background-image: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-dialog-copy h3 {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    filter: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition :is(.poster-reset, .poster-lock).ios26-glass:disabled,
+  main.site-shell.film-edition.mirage-edition
+    :is(.poster-reset, .poster-lock).ios26-glass:disabled
+    :is(b, small, span) {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  main.site-shell.film-edition.mirage-edition #manager-archive .other-card-code {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+
+  /* The poster keys' ring is an inset shadow, which forced colours drop: an
+     inset outline in its place (the chamfer clips an outer one). */
+  main.site-shell.film-edition.mirage-edition .poster-control-cluster > button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  /* The + keeps the system ink (its svg holds its own colour, so the cross
+     went white or ice on a Canvas plate); the feet and sheen are ornament. */
+  main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus
+    :is(.episode-pickup-plus-icon, .ui-vector-icon) {
+    color: ButtonText !important;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    .episode-pickup-plus.ios26-glass[data-liquid-pointer]::after {
+    display: none;
+  }
+
+  /* HOLD + SLIDE: a system plate without the brackets. */
+  main.site-shell.film-edition.mirage-edition
+    :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open {
+    background-image: none !important;
+  }
+}
+
+/* ================================================================
+   W5. The annex locator (world-annex package; appended block)
+   ================================================================ */
+/* The header speaks the chapter numbers, but only 01-03 are links, so
+   across 04-06 (most of the page) it said nothing. A silent chip after
+   RECORDS names the annex chapter under the reading line in the chapter
+   openers' own words, with the current link's ice underline. aria-current
+   is never touched: each chip is generated text with an empty alternative
+   on a free header box (the nav's ::before and ::after, the actions'
+   ::before), anchored after RECORDS. Each is lit by its chapter's view
+   timeline, whose scrollport is narrowed to the header's reading line
+   (22% of the screen, 92-200px, as WorldSectionNav measures it), so
+   exactly one shows from the 04 opener to the end of 06 and none in the
+   hero or 01-03. Opacity only, scroll-linked, behind the full gate and
+   timeline and anchor support; without them the chips do not exist (the
+   header as it was). From 1024px, where a chip clears the menu trigger. */
+@supports (animation-timeline: view()) and (anchor-name: --a) {
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition {
+      timeline-scope: --wr-loc-04, --wr-loc-05, --wr-loc-06, --wr-loc-end;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      #cast-roster {
+      view-timeline: --wr-loc-04 block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      #world-brief {
+      view-timeline: --wr-loc-05 block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      #episode-notes {
+      view-timeline: --wr-loc-06 block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      #quotes {
+      view-timeline: --wr-loc-end block;
+    }
+
+    /* Each chapter's scrollport is the reading line itself. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      :is(#cast-roster, #world-brief, #episode-notes, #quotes) {
+      view-timeline-inset: max(92px, min(200px, 22%)) calc(100% - max(92px, min(200px, 22%)));
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav
+      > a[href="#records"] {
+      anchor-name: --wr-loc-records;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::before,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::after,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar-actions::before {
+      position: absolute;
+      top: anchor(top);
+      bottom: anchor(bottom);
+      left: calc(anchor(right) + 18px);
+      position-anchor: --wr-loc-records;
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      background:
+        linear-gradient(rgb(122 232 255 / 42%) 0 0) 0 50% / 1px 16px no-repeat,
+        linear-gradient(var(--mr-ice) 0 0) 16px 100% / calc(100% - 16px) 2px no-repeat;
+      color: var(--mr-ice-hi);
+      font-family: var(--mr-hud);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::before {
+      content: "04 CAST FILES" / "";
+      animation: wr-loc-on linear;
+      animation-range: cover 0% cover 100%;
+      animation-timeline: --wr-loc-04;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::after {
+      content: "05 WORLD FILES" / "";
+      animation: wr-loc-on linear;
+      animation-range: cover 0% cover 100%;
+      animation-timeline: --wr-loc-05;
+    }
+
+    /* 06 runs over three sections (06.1-06.3): lit from the episode lines
+       on, and put out once 名台詞 has passed the line. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar-actions::before {
+      content: "06 ARCHIVE LOG" / "";
+      animation:
+        wr-loc-on linear forwards,
+        wr-loc-off linear forwards;
+      animation-range:
+        cover 0% cover 100%,
+        cover 100% cover 100%;
+      animation-timeline: --wr-loc-06, --wr-loc-end;
+    }
+  }
+
+  /* Forced colours drop the painted underline: the chip is underlined as
+     the current link is there (styles-world-mirage.css). */
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (forced-colors: active) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::before,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::after,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar-actions::before {
+      text-decoration: underline 2px;
+      text-underline-offset: 6px;
+    }
+  }
+
+  /* 1024-1099: the chip closes up so the longest clears the menu trigger. */
+  @media (min-width: 1024px) and (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::before,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar
+      nav::after,
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      main.site-shell.film-edition.mirage-edition
+      .topbar-actions::before {
+      left: calc(anchor(right) + 12px);
+      padding-left: 12px;
+      background:
+        linear-gradient(rgb(122 232 255 / 42%) 0 0) 0 50% / 1px 16px no-repeat,
+        linear-gradient(var(--mr-ice) 0 0) 12px 100% / calc(100% - 12px) 2px no-repeat;
+      letter-spacing: 0.02em;
+    }
+  }
+}
+
+@keyframes wr-loc-on {
+  from,
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes wr-loc-off {
+  from,
+  to {
+    opacity: 0;
+  }
+}

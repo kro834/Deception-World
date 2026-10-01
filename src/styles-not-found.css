@@ -248,6 +248,26 @@
   outline-offset: 9px;
 }
 
+/* Narrow phones: WORLD ARCHIVEへ戻る holds one line. The Michroma label
+   closes up to the allowed tracking, and under 375px the plate takes the
+   record plate's whole width (its brackets 6px inside the plate's edge),
+   with a tighter side padding. The label stays 13px. */
+@media (max-width: 389px) {
+  .app-not-found.app-not-found > a {
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (max-width: 374px) {
+  .app-not-found.app-not-found > a {
+    grid-column: plate-start / plate-end;
+    justify-self: stretch;
+    gap: 10px;
+    margin-inline: 12px;
+    padding: 0 14px;
+  }
+}
+
 @media (min-width: 560px) {
   /* The header on one line: status left, archive right. */
   .app-not-found.app-not-found > p:first-of-type {

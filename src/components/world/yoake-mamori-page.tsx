@@ -121,7 +121,7 @@ export function YoakeMamoriPage() {
             {facts.map(([label, value]) => (
               <div key={label}>
                 <dt>{label}</dt>
-                <dd>{value}</dd>
+                <dd className={value.includes("▢") ? "is-redacted" : undefined}>{value}</dd>
               </div>
             ))}
           </dl>

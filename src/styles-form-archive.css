@@ -274,7 +274,11 @@ html body .form-archive-page .form-archive-menu-trigger::before {
 
 /* ================================================================
    Loading cover: ink, a reticle that locks on, a 12px gold status and a
-   prism seam, as the route covers are drawn.
+   prism seam, as the route covers are drawn. The cover is opaque: until
+   the archive reports ready the reader sees the cover, not the live page
+   dimmed behind it (its inert controls read as broken); on ready the one
+   opacity fade (styles.css, 0.32s) reveals the page, a single rise in
+   luminance.
    ================================================================ */
 .form-archive-page > .form-archive-frame-status {
   gap: 16px;
@@ -282,7 +286,7 @@ html body .form-archive-page .form-archive-menu-trigger::before {
     linear-gradient(rgb(122 232 255 / 2.6%) 1px, transparent 1px) 50% 50% / 96px 96px,
     linear-gradient(90deg, rgb(122 232 255 / 2.6%) 1px, transparent 1px) 50% 50% / 96px 96px,
     radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--fa-accent) 10%, transparent), transparent 20rem),
-    rgb(4 8 15 / 94%);
+    var(--fa-ink);
   color: var(--fa-gold);
 }
 

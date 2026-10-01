@@ -47,6 +47,19 @@
   --op-plate: color-mix(in srgb, var(--op-ink) 82%, transparent);
   --op-plate-edge: 0 0 0 1px color-mix(in srgb, var(--op-ink) 60%, transparent);
   --op-plate-drop: 0 12px 32px rgb(0 0 0 / 0.5);
+  /* The frame's bracket arm, and the clearance SKIP and the cue keep from it
+     so they never ride a corner mark. */
+  --op-arm: 28px;
+  --op-arm-clear: calc(var(--op-arm) + 6px);
+  /* The control deck, from the rules that size it: two plates (ENTER THE
+     WORLD at its label plus 1.6rem a side, もう一度 likewise) held at least at
+     these widths, and the slot's 12px gap (gap-3). The frame's bottom rule
+     breaks for the deck plus 12px a side (--op-break). */
+  --op-cta-a: 16.8rem;
+  --op-cta-b: 8.25rem;
+  --op-deck-gap: 12px;
+  --op-deck-w: calc(var(--op-cta-a) + var(--op-deck-gap) + var(--op-cta-b));
+  --op-break: calc(var(--op-deck-w) / 2 + 12px);
   /* The first frame is ink with a faint pool of light, never a flat #000. */
   background: var(--op-ink)
     radial-gradient(ellipse at 50% 46%, rgb(74 137 214 / 0.1), transparent 56%);
@@ -56,6 +69,47 @@
   .cine-stage {
     --cine-inset-x: max(14px, calc(env(safe-area-inset-left) + 10px));
     --cine-gap-y: 16px;
+    --op-arm: 20px;
+    /* The plates' 1.1rem padding and the 12px primary label. */
+    --op-cta-a: 14.1rem;
+    --op-cta-b: 7.25rem;
+  }
+}
+
+/* Portrait phones: the primary plate grows (flex 1 1 200px, at most 320px)
+   inside the slot's 16px gutters, so the deck spans the slot. Under 361px the
+   plates stack at min(100%, 280px). */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-stage {
+    --op-deck-w: min(
+      100vw - 2 * max(16px, env(safe-area-inset-left)),
+      320px + var(--op-deck-gap) + var(--op-cta-b)
+    );
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-stage {
+    --op-deck-w: min(100vw - 2 * max(16px, env(safe-area-inset-left)), 280px);
+  }
+}
+
+/* Reduced motion leaves ENTER THE WORLD alone in the slot (styles.css). */
+@media (prefers-reduced-motion: reduce) {
+  .cine-stage {
+    --op-deck-w: var(--op-cta-a);
+  }
+
+  @media (max-width: 700px) and (orientation: portrait) {
+    .cine-stage {
+      --op-deck-w: min(100vw - 2 * max(16px, env(safe-area-inset-left)), 320px);
+    }
+  }
+
+  @media (max-width: 360px) and (orientation: portrait) {
+    .cine-stage {
+      --op-deck-w: min(100vw - 2 * max(16px, env(safe-area-inset-left)), 280px);
+    }
   }
 }
 
@@ -121,7 +175,7 @@
 }
 
 .cine-editorial-caption {
-  color: color-mix(in srgb, var(--op-gold) 66%, transparent);
+  color: color-mix(in srgb, var(--op-gold) 72%, transparent);
 }
 
 .cine-skip {
@@ -215,6 +269,10 @@
   }
 }
 
+/* The left tag leads with a 5px filled ice cell, the menu kickers' mark; the
+   right tag runs out on a 12px ruler tick (a hairline closed by an end tick,
+   as the frame's rule closes on the deck), so neither reads as a typed
+   caret. */
 .cine-sequence-meta span {
   position: relative;
   padding-left: 14px;
@@ -224,23 +282,26 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 2px;
-  width: 7px;
-  height: 7px;
-  border: 1px solid currentColor;
-  border-width: 1px 0 0 1px;
-  transform: translateY(-50%) rotate(45deg);
+  left: 1px;
+  width: 5px;
+  height: 5px;
+  background: var(--op-ice);
+  transform: translateY(-50%);
 }
 
 .cine-sequence-meta span:last-child {
-  padding-right: 14px;
+  padding-right: 20px;
   padding-left: 0;
 }
 
 .cine-sequence-meta span:last-child::before {
-  right: 2px;
+  right: 0;
   left: auto;
-  border-width: 0 1px 1px 0;
+  width: 12px;
+  height: 7px;
+  background:
+    linear-gradient(currentColor 0 0) 0 50% / 100% 1px no-repeat,
+    linear-gradient(currentColor 0 0) 100% 0 / 1px 100% no-repeat;
 }
 
 /* Michroma capitals are wide: under 420 px the two meta labels at 0.08em need
@@ -259,11 +320,11 @@
   }
 }
 
+/* Stacked, the two lines share one cell: it marks the first line only, and
+   the second keeps the indent so both labels start on one edge. */
 @media (max-width: 420px) {
   .cine-sequence-meta span:last-child::before {
-    right: auto;
-    left: 2px;
-    border-width: 1px 0 0 1px;
+    display: none;
   }
 }
 
@@ -295,13 +356,66 @@
   background-repeat: no-repeat;
 }
 
+/* The gold layer also carries the two ticks that end the bottom rule's break
+   for the control deck (see "The deck in a break of the rule"). Where the
+   deck spans the frame, the ticks fall outside the box and are not drawn. */
 .cine-editorial-frame::after {
   background:
     linear-gradient(var(--op-gold) 0 0) left bottom / 28px 2px,
     linear-gradient(var(--op-gold) 0 0) left bottom / 2px 28px,
     linear-gradient(var(--op-gold) 0 0) right bottom / 28px 2px,
-    linear-gradient(var(--op-gold) 0 0) right bottom / 2px 28px;
+    linear-gradient(var(--op-gold) 0 0) right bottom / 2px 28px,
+    linear-gradient(var(--op-gold) 0 0) calc(50% - var(--op-break)) 100% / 1px 9px,
+    linear-gradient(var(--op-gold) 0 0) calc(50% + var(--op-break)) 100% / 1px 9px;
   background-repeat: no-repeat;
+}
+
+/* The deck in a break of the rule ---------------------------------------------
+   ENTER THE WORLD and もう一度 stand on the frame's foot: the bottom rule is cut
+   around them (the deck plus 12px a side, from the tokens above) and the cut
+   is closed by two gold ticks, so no hairline runs behind a plate. The mask
+   is in the rule's own box, so it rides the rule's scaleX draw-in and lands
+   centred as the rule completes, long before the deck appears. */
+/* On portrait phones the deck spans the frame, so the break takes the whole
+   rule, and the deck's own gold-footed plates land on the frame's bottom
+   corners: the frame's gold brackets yield to them once the deck is up
+   (during the sequence they hold, with SKIP and the cue clear of them). */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-stage:not(.is-playing) .cine-editorial-frame::after,
+  .is-complete .cine-editorial-frame::after {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 700px) and (orientation: portrait) {
+  html:not([data-world-effects="economy"]) .cine-stage.is-complete .cine-editorial-frame::after {
+    animation: op-bracket-yield 0.45s ease 0.05s both;
+  }
+}
+
+/* Once, as the deck fades in (the same 0.45s from 0.05s). */
+@keyframes op-bracket-yield {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.cine-editorial-frame > .cine-editorial-frame-bottom {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 calc(50% - var(--op-break)),
+    transparent 0 calc(50% + var(--op-break)),
+    #000 0
+  );
+  mask-image: linear-gradient(
+    90deg,
+    #000 calc(50% - var(--op-break)),
+    transparent 0 calc(50% + var(--op-break)),
+    #000 0
+  );
 }
 
 .cine-stage:not(.is-playing) .cine-editorial-frame::before,
@@ -317,7 +431,7 @@
   }
 
   .cine-editorial-frame::after {
-    background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px;
+    background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px, 1px 9px, 1px 9px;
   }
 }
 
@@ -343,7 +457,7 @@
    markers' lit state is the existing progress-marker keyframe re-keyed so the
    diamond keeps its rotation and takes the warm highlight. */
 .cine-skip {
-  right: var(--cine-inset-x);
+  right: calc(var(--cine-inset-x) + var(--op-arm-clear));
   bottom: calc(var(--cine-bar) + 12px);
   border-color: color-mix(in srgb, var(--op-ice) 36%, transparent);
   border-radius: 4px;
@@ -351,8 +465,10 @@
   box-shadow: var(--op-plate-edge), var(--op-plate-drop);
 }
 
+/* SKIP and the cue stand in from the frame's corners by the bracket arm plus
+   6px, so neither rides a corner mark. */
 .cine-cue {
-  left: var(--cine-inset-x);
+  left: calc(var(--cine-inset-x) + var(--op-arm-clear));
   bottom: calc(var(--cine-bar) + 12px + 14px);
 }
 
@@ -392,9 +508,11 @@
   }
 }
 
-@media (max-width: 360px) {
+/* Below 375px the inset cue and SKIP no longer fit side by side: the cue
+   steps up over SKIP. */
+@media (max-width: 374px) {
   .cine-cue {
-    width: calc(100vw - 2 * var(--cine-inset-x));
+    width: calc(100vw - 2 * var(--cine-inset-x) - 2 * var(--op-arm-clear));
     bottom: calc(var(--cine-bar) + 12px + 64px);
   }
 }
@@ -472,6 +590,19 @@
 
 .cine-btn-secondary::before {
   opacity: 0.7;
+}
+
+/* The plates hold the deck's token widths (their natural widths, so nothing
+   moves), which the rule's break is cut from. Portrait phones size the deck
+   by flex instead (see the tokens). */
+@media (min-width: 701px), (orientation: landscape) {
+  .cine-btn-primary {
+    min-width: var(--op-cta-a);
+  }
+
+  .cine-btn-secondary {
+    min-width: var(--op-cta-b);
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1054,6 +1185,123 @@
   }
 }
 
+/* Portrait: the projection floor ---------------------------------------------
+   Between the title caption and the control deck, the horizon layer goes on
+   down as a still gold projection floor, so the deck stands on a lit stage
+   rather than under a void: a gold horizon hairline 14px under the caption,
+   rays from its centre and depth lines that crowd towards it (flat 2D paint,
+   as the World hero's floor and the RISING gate draw theirs), and a faint
+   pool of light where the deck stands. It is the same pseudo, so it keeps
+   the horizon's rest opacity (0.35) and its finite boot (op-horizon-in);
+   masks keep the logo line to its 1px strip and fade the floor into the
+   horizon, the sides and its foot. --op-floor-at is the caption's foot plus 14px,
+   measured from the stage's middle (the pseudo's top): the lockup is 92vw
+   wide (3:2) and lifted by --op-lift under 701px, the caption sits 7% of
+   its height below it; from 701px the caption sits 2.5% inside the lockup,
+   whose width repeats the rules in styles.css and above. The floor ends at
+   the deck's foot (the slot's bottom offset), behind the plates. */
+@media (orientation: portrait) and (min-width: 361px) {
+  .cine-editorial {
+    --op-floor-at: calc(92vw * 0.38 - var(--op-lift, 0px) + 14px);
+  }
+
+  .cine-editorial::after {
+    bottom: max(10vh, 72px);
+    height: auto;
+    background:
+      var(--op-prism) 0 0 / 100% 1px no-repeat,
+      linear-gradient(
+          90deg,
+          transparent,
+          color-mix(in srgb, var(--op-gold) 90%, transparent) 50%,
+          transparent
+        )
+        0 var(--op-floor-at) / 100% 1px no-repeat,
+      linear-gradient(
+          180deg,
+          transparent calc(7% - 1px),
+          color-mix(in srgb, var(--op-gold) 50%, transparent) calc(7% - 1px) 7%,
+          transparent 7% calc(16% - 1px),
+          color-mix(in srgb, var(--op-gold) 50%, transparent) calc(16% - 1px) 16%,
+          transparent 16% calc(29% - 1px),
+          color-mix(in srgb, var(--op-gold) 52%, transparent) calc(29% - 1px) 29%,
+          transparent 29% calc(47% - 1px),
+          color-mix(in srgb, var(--op-gold) 55%, transparent) calc(47% - 1px) 47%,
+          transparent 47% calc(72% - 1px),
+          color-mix(in srgb, var(--op-gold) 58%, transparent) calc(72% - 1px) 72%,
+          transparent 72%
+        )
+        0 var(--op-floor-at) / 100% calc(100% - var(--op-floor-at)) no-repeat,
+      repeating-conic-gradient(
+          from 90deg at 50% 0,
+          color-mix(in srgb, var(--op-gold) 60%, transparent) 0deg 0.2deg,
+          transparent 0.4deg 7.5deg
+        )
+        0 var(--op-floor-at) / 100% calc(100% - var(--op-floor-at)) no-repeat,
+      radial-gradient(
+          60% 70% at 50% 100%,
+          color-mix(in srgb, var(--op-gold) 20%, transparent),
+          transparent
+        )
+        0 var(--op-floor-at) / 100% calc(100% - var(--op-floor-at)) no-repeat;
+    -webkit-mask-image:
+      linear-gradient(90deg, #000 0 14%, transparent 30% 70%, #000 86%),
+      linear-gradient(#000 0 0),
+      linear-gradient(180deg, transparent, #000 36%, #000 78%, transparent),
+      linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
+    -webkit-mask-size:
+      100% 1px,
+      100% 1px,
+      100% calc(100% - var(--op-floor-at)),
+      100% calc(100% - var(--op-floor-at));
+    -webkit-mask-position:
+      0 0,
+      0 var(--op-floor-at),
+      0 var(--op-floor-at),
+      0 var(--op-floor-at);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-composite: source-over, source-over, source-in;
+    mask-image:
+      linear-gradient(90deg, #000 0 14%, transparent 30% 70%, #000 86%),
+      linear-gradient(#000 0 0),
+      linear-gradient(180deg, transparent, #000 36%, #000 78%, transparent),
+      linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
+    mask-size:
+      100% 1px,
+      100% 1px,
+      100% calc(100% - var(--op-floor-at)),
+      100% calc(100% - var(--op-floor-at));
+    mask-position:
+      0 0,
+      0 var(--op-floor-at),
+      0 var(--op-floor-at),
+      0 var(--op-floor-at);
+    mask-repeat: no-repeat;
+    mask-composite: add, add, intersect;
+  }
+}
+
+@media (orientation: portrait) and (min-width: 701px) {
+  .cine-editorial {
+    --op-lockup-w: min(
+      1120px,
+      92vw,
+      calc(min(78vh, 100dvh - 2 * (max(9vh, 64px) + 60px)) * 1.5)
+    );
+    --op-floor-at: calc(var(--op-lockup-w) * 19 / 60 + 14px);
+  }
+
+  .cine-editorial::after {
+    bottom: max(9vh, 64px);
+  }
+}
+
+@media (orientation: portrait) and (min-width: 701px) and (max-width: 900px) and (min-height: 561px) {
+  .cine-editorial {
+    --op-lockup-w: min(80vw, calc(min(78vh, 100dvh - 2 * (max(9vh, 64px) + 60px)) * 1.5));
+  }
+}
+
 @media (orientation: portrait) and (max-width: 700px) {
   .cine-editorial::before {
     background:
@@ -1128,11 +1376,11 @@
 @keyframes op-tick-in {
   from {
     opacity: 0;
-    transform: translateY(-50%) rotate(45deg) scale(0.4);
+    transform: translateY(-50%) scale(0.4);
   }
   to {
     opacity: 1;
-    transform: translateY(-50%) rotate(45deg) scale(1);
+    transform: translateY(-50%) scale(1);
   }
 }
 
@@ -1156,6 +1404,56 @@
   }
 }
 
+/* The pre-roll: an ice scan and readable intro lines ---------------------------
+   The scan pass keeps its sweep (cinematic-scan, 0.42s + 3.35s, gone at rest)
+   but is ice light, not a grey veil: a 6vh falloff that peaks at 10% ice and
+   leads with a 1px prism edge (it travels down, so the edge is its foot). */
+.cine-scanline {
+  height: 6vh;
+  background:
+    linear-gradient(
+        90deg,
+        rgb(122 232 255 / 0.55),
+        rgb(164 139 255 / 0.5) 34%,
+        rgb(255 92 200 / 0.45) 66%,
+        rgb(240 207 134 / 0.5)
+      )
+      0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, transparent, rgb(122 232 255 / 0.04) 55%, rgb(122 232 255 / 0.1));
+}
+
+/* The kicker and the caption commit to a readable hold (0.88, about 5:1 and
+   up on the ink) instead of hanging at 0.34, then retire on the same beat as
+   before: in at 0.34s and 1.64s, out 0.6s ease from 6.3s, gone at rest.
+   Only the keyframe names change; the durations, delays and fills stay those
+   of styles.css. Opacity and the existing lift only. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial-kicker,
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-editorial-caption {
+    animation-name: op-editorial-in, op-editorial-out;
+  }
+}
+
+@keyframes op-editorial-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 0.88;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes op-editorial-out {
+  from {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* Economy rendering: the held title is still ----------------------------------
    The documented loops (dial spin and precession, grain, idle pulse) stay on
    the normal path; the lightweight renderer pauses them, as Android does. */
@@ -1174,11 +1472,17 @@ html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word 
   filter: none;
 }
 
-/* Forced colours: plain ink, the logo art intact, system buttons ----------------
-   forced-color-adjust is inherited, so the scene opts out once (black behind
-   the logo <img>, which is not adjusted) and every text and control opts back
-   in, so Chrome backplates the labels and draws the buttons in system ink. */
+/* Forced colours: one Canvas field, the logo art intact, system buttons -------
+   forced-color-adjust is inherited, so the scene opts out once and every text
+   and control opts back in, so Chrome draws the labels and the buttons in the
+   system's ink. The scene is Canvas, the same field as the letterbox bars
+   (each ruled off by a CanvasText hairline), so the labels' backplates melt
+   into it instead of boxing the caption; the logo <img> is not adjusted and
+   keeps its art. */
 @media (forced-colors: active) {
+  /* The scene keeps its own black ground in every scheme: the logo is
+     unadjusted light art, and on a light Canvas its white strokes vanish.
+     The caption keeps the forced plates that ground gives it. */
   .cine-stage,
   .cine-camera {
     forced-color-adjust: none;
@@ -1222,6 +1526,14 @@ html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word 
   .cine-letterbox {
     forced-color-adjust: auto;
     background: Canvas;
+  }
+
+  .cine-letterbox.top {
+    border-bottom: 1px solid CanvasText;
+  }
+
+  .cine-letterbox.bottom {
+    border-top: 1px solid CanvasText;
   }
 
   .cine-progress {
