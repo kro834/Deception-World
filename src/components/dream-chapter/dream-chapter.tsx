@@ -19,6 +19,7 @@ import { mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation"
 import { withWordBreaks } from "@/lib/name-breaks";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
+import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_AGENT_ROSTER,
@@ -553,6 +554,8 @@ export function DreamChapter() {
   const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
   const [posterLocked, setPosterLocked] = useState(false);
   const [posterShuffling, setPosterShuffling] = useState(false);
+  const [posterLoading, setPosterLoading] = useState(false);
+  const [posterLoadFailed, setPosterLoadFailed] = useState(false);
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
   const [heroVisible, setHeroVisible] = useState(true);
@@ -573,6 +576,8 @@ export function DreamChapter() {
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
+  const posterSelectionId = useRef(0);
+  const posterLoader = useRef<ReturnType<typeof createReadyPosterLoader> | null>(null);
   const activePoster = DREAM_POSTERS[posterIndex];
   const previousPoster = previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
 
@@ -580,11 +585,19 @@ export function DreamChapter() {
   useEffect(() => mountStableFragmentNavigation(pageRef.current), []);
 
   const cancelShuffle = useCallback(() => {
+    posterSelectionId.current += 1;
+    setPosterLoading(false);
+    setPosterLoadFailed(false);
     shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
     setPosterShuffling(false);
+  }, []);
+
+  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
+    posterLoader.current ??= createReadyPosterLoader(preparePosterImage);
+    return posterLoader.current.load(DREAM_POSTERS[index].src, priority);
   }, []);
 
   useEffect(() => {
@@ -683,7 +696,8 @@ export function DreamChapter() {
     return () => window.clearTimeout(timer);
   }, [previousPosterIndex]);
 
-  const selectPoster = useCallback((next: number) => {
+  const commitPoster = useCallback((next: number) => {
+    setPosterLoadFailed(false);
     setPosterIndex((current) => {
       const wrapped = ((next % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
       if (wrapped !== current) setPreviousPosterIndex(current);
@@ -691,10 +705,24 @@ export function DreamChapter() {
     });
   }, []);
 
+  const selectPoster = useCallback((next: number) => {
+    const wrapped = ((next % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
+    const selection = ++posterSelectionId.current;
+    setPosterLoading(true);
+    setPosterLoadFailed(false);
+    void loadPoster(wrapped).then((ready) => {
+      if (selection !== posterSelectionId.current) return;
+      if (ready) commitPoster(wrapped);
+      setPosterLoadFailed(!ready);
+      setPosterLoading(false);
+    });
+  }, [commitPoster, loadPoster]);
+
   useEffect(() => {
     if (
       posterLocked ||
       posterShuffling ||
+      posterLoading ||
       posterControlsFocused ||
       !posterVisible ||
       !posterMotionEnabled ||
@@ -703,15 +731,30 @@ export function DreamChapter() {
       dolminenceRecord != null
     )
       return;
-    const timer = window.setTimeout(() => {
-      setPosterIndex((current) => {
-        const next = (current + 1) % DREAM_POSTERS.length;
-        setPreviousPosterIndex(current);
-        return next;
+    let cancelled = false;
+    const selection = posterSelectionId.current;
+    let retryDelay = 5200;
+    let timer: number;
+    const advance = () => {
+      const next = (posterIndex + 1) % DREAM_POSTERS.length;
+      void loadPoster(next, "low").then((ready) => {
+        if (cancelled || selection !== posterSelectionId.current) return;
+        if (ready) commitPoster(next);
+        else {
+          // A temporary network failure must not silently stop unlocked autoplay.
+          timer = window.setTimeout(advance, retryDelay);
+          retryDelay = Math.min(retryDelay * 2, 30_000);
+        }
       });
-    }, 5200);
-    return () => window.clearTimeout(timer);
+    };
+    timer = window.setTimeout(advance, 5200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [
+    commitPoster,
+    loadPoster,
     character,
     dolminenceRecord,
     menuOpen,
@@ -719,6 +762,7 @@ export function DreamChapter() {
     posterLocked,
     posterMotionEnabled,
     posterShuffling,
+    posterLoading,
     posterControlsFocused,
     posterVisible,
   ]);
@@ -734,13 +778,11 @@ export function DreamChapter() {
     )
       return;
     const timer = window.setTimeout(() => {
-      const image = new Image();
-      image.decoding = "async";
-      image.fetchPriority = "low";
-      preparePosterImage(image, DREAM_POSTERS[(posterIndex + 1) % DREAM_POSTERS.length].src);
+      void loadPoster((posterIndex + 1) % DREAM_POSTERS.length, "low");
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [
+    loadPoster,
     character,
     dolminenceRecord,
     menuOpen,
@@ -764,6 +806,9 @@ export function DreamChapter() {
 
   useEffect(
     () => () => {
+      posterSelectionId.current += 1;
+      posterLoader.current?.dispose();
+      posterLoader.current = null;
       shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleTimers.current = [];
@@ -814,47 +859,49 @@ export function DreamChapter() {
       (_, index) => previewPool[index % previewPool.length],
     );
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      selectPoster(finalPoster);
-      return;
-    }
-
     cancelShuffle();
     shuffleActive.current = true;
     const runId = shuffleRunId.current;
     setPosterShuffling(true);
-    const finalImage = new Image();
-    finalImage.decoding = "async";
-    finalImage.fetchPriority = "high";
-    preparePosterImage(finalImage, DREAM_POSTERS[finalPoster].src);
-    const finalReady = finalImage.decode?.().catch(() => undefined) ?? Promise.resolve();
+    const finalReady = loadPoster(finalPoster);
+    const finish = (ready: boolean) => {
+      if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+      if (ready) commitPoster(finalPoster);
+      setPosterLoadFailed(!ready);
+      setPosterShuffling(false);
+      shuffleActive.current = false;
+      shuffleTimers.current = [];
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      void finalReady.then(finish);
+      return;
+    }
+
+    const previewReady = new Set<number>();
+    previewPool.forEach((index) => {
+      void loadPoster(index, "low").then((ready) => {
+        if (ready && shuffleRunId.current === runId) previewReady.add(index);
+      });
+    });
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(async () => {
-        if (index === steps.length - 1) {
-          await Promise.race([
-            finalReady,
-            new Promise<void>((resolve) => window.setTimeout(resolve, 240)),
-          ]);
-        }
+        const final = index === steps.length - 1;
+        const ready = final ? await finalReady : false;
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        const next =
-          index === steps.length - 1
-            ? finalPoster
-            : (previews[index % Math.max(previews.length, 1)] ?? finalPoster);
-        selectPoster(next);
-        if (index === steps.length - 1) {
+        if (final) {
+          if (ready) commitPoster(finalPoster);
           const settleTimer = window.setTimeout(() => {
-            if (shuffleRunId.current !== runId) return;
-            setPosterShuffling(false);
-            shuffleActive.current = false;
-            shuffleTimers.current = [];
+            finish(ready);
           }, 300);
           shuffleTimers.current.push(settleTimer);
+        } else {
+          const next = previews[index % previews.length];
+          if (previewReady.has(next)) commitPoster(next);
         }
       }, delay);
       shuffleTimers.current.push(timer);
     });
-  }, [cancelShuffle, posterIndex, previousPosterIndex, selectPoster]);
+  }, [cancelShuffle, commitPoster, loadPoster, posterIndex, previousPosterIndex]);
 
   return (
     <main ref={pageRef} id="top" className="dream-page">
@@ -1023,6 +1070,7 @@ export function DreamChapter() {
             className="dream-poster-current"
             role="tabpanel"
             aria-labelledby={`dream-poster-tab-${posterIndex}`}
+            aria-busy={posterLoading || posterShuffling}
             onAnimationEnd={(event) => {
               if (event.animationName === "dream-poster-enter") setPreviousPosterIndex(null);
             }}
@@ -1045,6 +1093,11 @@ export function DreamChapter() {
               <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
             </figcaption>
+            <p className="dream-poster-load-status" role="status" hidden={!posterLoadFailed && !posterLoading}>
+              {posterLoadFailed
+                ? "画像を読み込めませんでした。もう一度選択してください。"
+                : posterLoading ? "ポスターを読み込み中です。" : ""}
+            </p>
           </figure>
           <div className="dream-poster-thumbnails" role="tablist" aria-label="ポスターを選択">
             {DREAM_POSTERS.map((poster, index) => (

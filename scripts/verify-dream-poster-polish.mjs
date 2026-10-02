@@ -117,6 +117,10 @@ async function checkReducedMotion(page, viewport) {
   const shuffle = page.locator(".dream-poster-shuffle");
   await shuffle.focus();
   await page.keyboard.press("Enter");
+  // Reduced motion skips the shuffle animation, but may wait for image decode.
+  await page.waitForFunction(
+    () => document.querySelector(".dream-poster-shuffle")?.getAttribute("aria-busy") === "false",
+  );
   assert.equal(
     await shuffle.getAttribute("aria-busy"),
     "false",

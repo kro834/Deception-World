@@ -134,11 +134,14 @@ test("Extreme stage rail supports liquid long-press and swipe selection", () => 
 });
 
 test("special-site parallax only updates meaningful visible frames", () => {
-  for (const source of [component, read("src/components/rexonance-saga/rexonance-saga.tsx")]) {
-    assert.match(source, /window\.matchMedia\("\(pointer: coarse\)"\)\.matches/);
-    assert.match(source, /window\.visualViewport\?\.height/);
+  for (const source of [
+    read("src/lib/extreme-motion.js"),
+    read("src/components/rexonance-saga/rexonance-saga.tsx"),
+  ]) {
+    assert.match(source, /matchMedia\("\(pointer: coarse\)"\)/);
+    assert.match(source, /(?:window|environment)\.visualViewport\?\.height/);
     assert.match(source, /Math\.abs\(progress - lastProgress\) < 0\.002/);
-    assert.match(source, /document\.visibilityState === "visible"/);
+    assert.match(source, /document\.(?:visibilityState === "visible"|hidden)/);
     assert.match(source, /visibilitychange/);
   }
 });

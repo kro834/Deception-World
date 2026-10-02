@@ -5,6 +5,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
+import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
 
 type ExtremeStage = "middle" | "ultra";
 type ExtremeBaseline = "diluculum" | "vinculum";
@@ -249,29 +250,8 @@ export function ExtremeSaga() {
     });
   };
 
-  useEffect(() => {
-    const page = pageRef.current;
-    const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
-    if (!page || !nav) return;
-    const syncNavReserve = () => {
-      const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
-      if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
-        page.style.setProperty("--rxs-local-nav-reserve", reserve);
-      }
-    };
-    const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
-    observer?.observe(nav);
-    window.addEventListener("resize", syncNavReserve, { passive: true });
-    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
-    syncNavReserve();
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener("resize", syncNavReserve);
-      window.visualViewport?.removeEventListener("resize", syncNavReserve);
-      page.style.removeProperty("--rxs-local-nav-reserve");
-    };
-  }, []);
+  useEffect(() => mountExtremeNavReserve(pageRef.current), []);
+  useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
 
   const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
     if (!selectPointerInteractionRef.current) return;
@@ -310,7 +290,6 @@ export function ExtremeSaga() {
       connection?.effectiveType === "slow-2g" ||
       connection?.effectiveType === "2g";
     const allowMotion = !media.matches && !constrained;
-    setMotionReady(allowMotion);
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];
     if (!allowMotion || !("IntersectionObserver" in window)) {
@@ -331,40 +310,6 @@ export function ExtremeSaga() {
     reveals.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (!motionReady || window.matchMedia("(pointer: coarse)").matches) return;
-    const page = pageRef.current;
-    if (!page) return;
-    let frame = 0;
-    let lastProgress = -1;
-    const update = () => {
-      frame = 0;
-      const viewportHeight = window.visualViewport?.height || window.innerHeight || 1;
-      const progress = Math.min(1, Math.max(0, window.scrollY / viewportHeight));
-      if (Math.abs(progress - lastProgress) < 0.002) return;
-      lastProgress = progress;
-      page.style.setProperty("--rxs-hero-progress", progress.toFixed(3));
-    };
-    const onScroll = () => {
-      if (!frame && document.visibilityState === "visible") {
-        frame = window.requestAnimationFrame(update);
-      }
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") onScroll();
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.visualViewport?.addEventListener("resize", onScroll, { passive: true });
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.visualViewport?.removeEventListener("resize", onScroll);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [motionReady]);
 
   return (
     <main

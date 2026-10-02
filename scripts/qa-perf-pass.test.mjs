@@ -179,7 +179,9 @@ test("the Dream Chapter's poster console asks for the same WebP copies", async (
   }
   assert.ok(webp < jpeg * 0.6, `${webp} of ${jpeg}`);
   assert.equal(dream.match(/\{\.\.\.posterImage\((?:activePoster|previousPoster)\.src\)\}/g)?.length, 2);
-  assert.equal(dream.match(/preparePosterImage\(/g)?.length, 2);
+  assert.match(dream, /createReadyPosterLoader\(preparePosterImage\)/);
+  assert.match(dream, /posterLoader\.current\.load\(DREAM_POSTERS\[index\]\.src, priority\)/);
+  assert.doesNotMatch(dream, /new Image\(/, "all poster warmups share the delivery-aware loader");
   assert.doesNotMatch(dream, /\.src = DREAM_POSTERS\[/);
 });
 

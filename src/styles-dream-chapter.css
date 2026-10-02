@@ -718,6 +718,22 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   z-index: 1;
 }
 
+.dream-poster-load-status {
+  position: absolute;
+  z-index: 3;
+  inset: 16px 16px auto;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #b78e52;
+  border-radius: 8px;
+  background: #151923;
+  color: #fff5df;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  pointer-events: none;
+}
+
 .dream-poster-stage > .dream-poster-previous > img {
   animation: dream-poster-previous 460ms var(--dream-spring) both;
 }
