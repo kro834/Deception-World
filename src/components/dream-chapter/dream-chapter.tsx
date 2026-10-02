@@ -37,6 +37,27 @@ import {
   type DreamCharacter,
   type DreamDolminence,
 } from "./dream-chapter-data";
+import {
+  AgentAdditions,
+  AgentSupplement,
+  DossierSupplement,
+  DreamArsenal,
+  DreamAtlas,
+  DreamChronicle,
+  DreamRelations,
+  FactionMemberNote,
+  FactionSupplement,
+  GlossaryIndex,
+  GlossarySupplement,
+  RecordSupplement,
+  RosterSupplement,
+  VoicesLeaf,
+} from "./dream-chapter-extra";
+import { DREAM_ARCHIVE_CORNERS, type DreamArchiveCornerId } from "./dream-chapter-extra-data";
+
+/** An archive corner's title: the 目次 link and the corner's heading share it. */
+const archiveCornerTitle = (id: DreamArchiveCornerId) =>
+  DREAM_ARCHIVE_CORNERS.find((corner) => corner.id === id)?.title.text ?? id;
 
 type DreamSectionId = "posters" | "characters" | "dolminence" | "cases";
 
@@ -144,6 +165,11 @@ const DREAM_CONTENTS: readonly {
     links: [
       { href: "#cases", label: "物語" },
       { href: "#case-notes", label: "章の言葉" },
+      // The archive corners close the act (their titles are the corners' own).
+      { href: "#chronicle", label: archiveCornerTitle("chronicle") },
+      { href: "#atlas", label: archiveCornerTitle("atlas") },
+      { href: "#relations", label: archiveCornerTitle("relations") },
+      { href: "#arsenal", label: archiveCornerTitle("arsenal") },
     ],
   },
   {
@@ -281,6 +307,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
               ) : null}
             </section>
           ))}
+          <DossierSupplement id={character.id} after={character.sections.length} />
         </div>
       </div>
     </div>
@@ -454,6 +481,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
               ))}
             </div>
           </section>
+          <DossierSupplement id={record.id} after={2} />
         </div>
       </div>
     </div>
@@ -1309,6 +1337,7 @@ export function DreamChapter() {
                       {paragraph}
                     </p>
                   ))}
+                  <RosterSupplement id={entry.id} />
                 </div>
               </article>
             </li>
@@ -1396,6 +1425,7 @@ export function DreamChapter() {
                   <dd>
                     {row.by ? <QuoteFigure text={row.text} by={row.by} /> : <p>{row.text}</p>}
                     {row.note ? <p className="dream-record-note">{row.note}</p> : null}
+                    <RecordSupplement label={row.label} />
                   </dd>
                 </div>
               ))}
@@ -1422,6 +1452,7 @@ export function DreamChapter() {
                         <p className="dream-agent-note">{agent.note}</p>
                       ) : null}
                       {agent.line ? <p className="dream-agent-line">「{agent.line}」</p> : null}
+                      <AgentSupplement code={agent.code} />
                       {filed ? (
                         <button
                           type="button"
@@ -1443,6 +1474,7 @@ export function DreamChapter() {
                 );
               })}
             </ol>
+            <AgentAdditions />
           </section>
           {DREAM_FACTIONS.map((faction) => (
             <section
@@ -1467,7 +1499,10 @@ export function DreamChapter() {
                   {faction.members.map((member) => (
                     <div key={member.name}>
                       <dt>{member.name}</dt>
-                      <dd>{member.spoken ? `「${member.note}」` : member.note}</dd>
+                      <dd>
+                        {member.spoken ? `「${member.note}」` : member.note}
+                        <FactionMemberNote id={faction.id} name={member.name} />
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -1478,6 +1513,7 @@ export function DreamChapter() {
                   <span>{faction.pact.text}</span>
                 </p>
               ) : null}
+              <FactionSupplement id={faction.id} />
             </section>
           ))}
         </div>
@@ -1587,6 +1623,11 @@ export function DreamChapter() {
         </ol>
       </section>
 
+      <DreamChronicle id="chronicle" />
+      <DreamAtlas id="atlas" />
+      <DreamRelations id="relations" />
+      <DreamArsenal id="arsenal" />
+
       <section id="glossary" className="dream-annex" aria-labelledby="glossary-title">
         <header className="dream-annex-heading">
           <p>KEYWORDS</p>
@@ -1602,10 +1643,12 @@ export function DreamChapter() {
                   <p key={paragraph}>{paragraph}</p>
                 ))}
                 {entry.said ? <QuoteFigure text={entry.said} by={entry.by} /> : null}
+                <GlossarySupplement term={entry.term} />
               </dd>
             </div>
           ))}
         </dl>
+        <GlossaryIndex />
       </section>
 
       <section id="quotes" className="dream-annex dream-quotes" aria-labelledby="quotes-title">
@@ -1621,6 +1664,7 @@ export function DreamChapter() {
             </li>
           ))}
         </ol>
+        <VoicesLeaf />
       </section>
 
       <footer className="dream-footer">

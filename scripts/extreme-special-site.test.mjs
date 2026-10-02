@@ -52,10 +52,13 @@ test("large Extreme headings release iPhone vertical scrolling", () => {
 });
 
 test("Extreme performance copy uses the requested physical-combat framing", () => {
-  assert.match(component, /肉弾戦に、/);
-  assert.match(component, /この実力。/);
+  // 2026-10-02 Track R copy (dreamx/rx-copy/COPY.md E6, E7): the 肉弾戦 framing
+  // stays; the h2 and the intro's second line were rewritten (two sentence spans).
+  assert.match(component, /肉弾戦なら、/);
+  assert.match(component, /話が早い。/);
   assert.match(component, /肉弾戦に最適化したエクスプリーム。/);
-  assert.match(component, /既存の形態と比較してみましょう。/);
+  assert.match(component, /既存の形態と並べた。/);
+  assert.match(component, /負けた欄も、隠さない。/);
   assert.doesNotMatch(component, /数字を揃えて/);
 });
 
@@ -106,8 +109,9 @@ test("Extreme comparison preserves Vinculum values and calculated physical ratio
 test("Extreme P14 stays focused on its own expansion and fixation architecture", () => {
   assert.doesNotMatch(component, /レクソナンス/);
   assert.doesNotMatch(component, /to="\/rexonance-saga"/);
-  assert.match(component, /可能性を、/);
-  assert.match(component, /勝利の条件へ。/);
+  // COPY.md E9: EXPANSION → FIXATION as one sentence pair.
+  assert.match(component, /可能性は増やす。/);
+  assert.match(component, /答えは一つ。/);
   assert.doesNotMatch(component, /同じP14。|到達点は、異なる。/);
   assert.match(component, /P14 \/ EXPANSION/);
   assert.match(component, /P14 \/ FIXATION/);
@@ -129,7 +133,8 @@ test("Extreme stage rail supports liquid long-press and swipe selection", () => 
   assert.match(component, /ultra: \{[\s\S]*?label: "ウルトラ"/);
   assert.match(component, /initRail\(rail\)/);
   assert.match(component, /railselect/);
-  assert.match(component, /タップ、長押し、または左右へのスライドで切り替え/);
+  // COPY.md E16: one hint wording for touch and keyboard, shared with Rexonance.
+  assert.match(component, /タップ・長押し・左右スライド・矢印キーで切り替え/);
   assert.match(styles, /grid-template-columns: repeat\(2, 1fr\)/);
 });
 

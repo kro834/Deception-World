@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
@@ -34,7 +34,7 @@ const STAGES: Record<
     code: "HIGH",
     image: REXONANCE_SITE_ARTWORK.standard,
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
-    title: "無限出力を攻撃に活かす。",
+    title: "無限出力が、平常運転。",
     lede: "超自己進化と絶対秩序をSA-GA OS 5.5で統合。標準運用の時点で、エクスプリーム・ウルトラ以上の実効戦闘性能を高い安定性で維持します。",
     points: ["高安定・高継戦", "REXONANCE DRIVE", "標準カタログ値を公開"],
     accent: "#63e2ff",
@@ -44,7 +44,7 @@ const STAGES: Record<
     code: "MAX",
     image: REXONANCE_SITE_ARTWORK.max,
     alt: "仮面ライダーレクソナンスサーガ・マックスの全身ビジュアル",
-    title: "出力を移し替え、攻撃を強める。",
+    title: "全神飾を、攻撃に回す。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
     points: ["P14完全加速", "SCALER《MAX》", "出力の連続再配分"],
     accent: "#969cff",
@@ -54,7 +54,9 @@ const STAGES: Record<
     code: "ULTRA 60s",
     image: REXONANCE_SITE_ARTWORK.ultra,
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
-    title: "全機構を一つの攻撃機関へ。",
+    // The zero-width marker renders as <wbr /> (renderStageTitle): iPhone
+    // Safari has no auto-phrase, and 一動作へ。 must stay whole at 320px.
+    title: "60秒、全部を\u200B一動作へ。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
@@ -355,6 +357,16 @@ const releaseControlFocus = (control: HTMLElement) => {
   });
 };
 
+// A stage title's zero-width marker becomes a <wbr /> so the visible text is
+// unchanged while WebKit gets its one phrase break.
+const renderStageTitle = (title: string) =>
+  title.split("\u200B").map((part, index) => (
+    <Fragment key={part}>
+      {index > 0 ? <wbr /> : null}
+      {part}
+    </Fragment>
+  ));
+
 // Keep frequent comparison input updates out of the hero, stage art and effects.
 const P14Comparator = memo(function P14Comparator({
   nativeIOSSelection,
@@ -396,7 +408,7 @@ const P14Comparator = memo(function P14Comparator({
         </div>
         {nativeIOSSelection ? (
           <label className="rxs-p14-native-select">
-            <span>iOS標準選択</span>
+            <span>基準にする世代</span>
             <select
               id="rxs-p14-baseline"
               value={p14Baseline}
@@ -447,8 +459,8 @@ const P14Comparator = memo(function P14Comparator({
         )}
         <p id="rxs-p14-baseline-help">
           {nativeIOSSelection
-            ? "iOS標準選択から、100%とする比較基準をP1またはP2へ切り替えられます。"
-            : "スライダーを動かすか両端をタップして、100%とする比較基準をP1またはP2へ切り替えられます。"}
+            ? "100%にする世代を、P1かP2から選べます。"
+            : "100%にする世代を、P1かP2へ。スライダー、両端のタップ、矢印キーで切り替えられます。"}
         </p>
       </div>
 
@@ -495,13 +507,13 @@ const RexonancePerformance = memo(function RexonancePerformance() {
       <header className="rxs-section-heading rxs-reveal">
         <p>PERFORMANCE</p>
         <h2>
-          標準状態で、
+          これで、
           <br />
-          この実力。
+          まだ標準。
         </h2>
         <span>
           公開済みの標準カタログ値で、{activePerformanceBaseline.label}
-          サーガ標準値と比較しています。
+          サーガの標準値と並べています。
         </span>
       </header>
 
@@ -524,7 +536,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
 
       <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
         <label className="rxs-comparison-selector">
-          <span>iOS標準選択</span>
+          <span>比較する相手</span>
           <select
             value={performanceBaseline}
             aria-label="レクソナンスの比較対象"
@@ -599,7 +611,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         >
           <header>
             <small>PROCESSING ARCHITECTURE</small>
-            <h3>単位と系統を揃えて比較</h3>
+            <h3>物差しが違えば、比べない。</h3>
           </header>
           <div>
             <section>
@@ -953,11 +965,16 @@ export function RexonanceSaga() {
           </p>
           <h1 id="rxs-title">
             <span>REXONANCE SAGA</span>
-            共鳴を、
+            混ぜない。
             <br />
-            使いこなす。
+            重ねる。
           </h1>
-          <p className="rxs-hero-lede">三者が独立したまま、力を重ねる。</p>
+          <p className="rxs-hero-lede">
+            <span className="rxs-hero-lede-text">
+              <span>悠真、レックス、ゼウス。</span>
+              <span>誰も消えず、全部が乗る。</span>
+            </span>
+          </p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <RexonanceAperture />
@@ -974,7 +991,7 @@ export function RexonanceSaga() {
           />
         </div>
         <a className="rxs-scroll-cue" href="#performance">
-          <span>性能を見る</span>
+          <span>まず、数字から。</span>
           <i aria-hidden="true" />
         </a>
       </section>
@@ -1005,7 +1022,7 @@ export function RexonanceSaga() {
           <h2 id="rxs-p14-title">
             同じエーテルで、
             <br />
-            より高い性能へ。
+            P1の9倍。
           </h2>
           <span>
             P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
@@ -1026,7 +1043,7 @@ export function RexonanceSaga() {
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / FOURTEENTH GENERATION</small>
-            <h3>高負荷でも出力を保つ。</h3>
+            <h3>全開でも、崩れない。</h3>
             <p>
               入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
             </p>
@@ -1054,9 +1071,11 @@ export function RexonanceSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>THREE OPERATING STAGES</p>
           <h2>
-            状況に合わせて、
+            状況が変われば、
             <br />
-            攻撃機構を組み替える。
+            機構ごと
+            <wbr />
+            組み替える。
           </h2>
         </header>
 
@@ -1091,7 +1110,7 @@ export function RexonanceSaga() {
             ))}
           </div>
           <p id="rxs-stage-hint" className="rxs-stage-hint">
-            タップ・長押し・左右スライドで切り替え
+            タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
 
           <div
@@ -1117,7 +1136,7 @@ export function RexonanceSaga() {
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
-              <h3>{activeStage.title}</h3>
+              <h3>{renderStageTitle(activeStage.title)}</h3>
               <p>{activeStage.lede}</p>
               <ul>
                 {activeStage.points.map((point) => (
@@ -1133,9 +1152,9 @@ export function RexonanceSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>TRINITY RESONANCE</p>
           <h2>
-            三者の意思が、
+            三者三様のまま、
             <br />
-            独立したまま共鳴する。
+            一糸乱れず。
           </h2>
         </header>
 
@@ -1174,7 +1193,11 @@ export function RexonanceSaga() {
       <footer className="rxs-footer">
         <div>
           <p>REXONANCE SAGA / FINAL ARRIVAL</p>
-          <h2>力の使い道は、悠真が決める。</h2>
+          <h2>
+            力は無限。
+            <br />
+            判断は、悠真。
+          </h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>人物・能力の詳細を見る</span>

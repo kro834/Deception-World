@@ -40,7 +40,7 @@ const EXTREME_STAGES: Record<
     code: "MIDDLE",
     image: "/saga-extreme-middle.webp",
     alt: "仮面ライダーエクスプリームサーガの全身ビジュアル",
-    title: "可能性を増殖し、勝利へ束ねる。",
+    title: "殴られるほど、賢くなる。",
     lede: "学習した攻撃と戦況から勝利へ至る経路を増殖し、状況ごとに最適な結果を選び取る標準状態。長期戦ほど選択肢を増やし、相手の優位を狭めます。",
     points: ["LEARNING", "DARK MATTER CHARGING", "HIGH SUPREME"],
     accent: "#5edcff",
@@ -50,7 +50,7 @@ const EXTREME_STAGES: Record<
     code: "ULTRA / 50 SEC",
     image: "/saga-extreme-ultra.jpeg",
     alt: "仮面ライダーエクスプリームサーガ・ウルトラの全身ビジュアル",
-    title: "ただ一つの結果だけを、残す。",
+    title: "50秒で、片をつける。",
     lede: "無数に増殖した可能性を一つの勝利結果へ固定し、攻撃・防御・修復を同じ結論へ収束。50秒間だけ成立する、短期決着の最上位状態です。",
     points: ["結果固定", "絶対攻撃・絶対防御", "50秒間の限界運用"],
     accent: "#ffcf72",
@@ -215,19 +215,19 @@ const CORE_SYSTEMS = [
   {
     number: "01",
     code: "LEARNING",
-    title: "攻撃を、次の解答へ。",
+    title: "同じ手は、二度と食わない。",
     body: "受けた攻撃と戦況を学習し、同じ優位を相手へ許さないための対抗手段を更新。戦闘が続くほど、勝利へ至る経路を増やします。",
   },
   {
     number: "02",
     code: "DARK MATTER CHARGING",
-    title: "出力を、内側から補う。",
+    title: "足りない出力は、内側から。",
     body: "戦況に応じて暗黒物質系の出力を充填し、増殖した戦闘経路を実行可能なエネルギーへ接続。選択肢だけで終わらせず、攻撃へ変換します。",
   },
   {
     number: "03",
     code: "HIGH SUPREME",
-    title: "勝利結果を、固定する。",
+    title: "結論を出したら、動かさない。",
     body: "複数の可能性から決着へ至る結果を選び、攻撃・防御・修復を同じ結論へ収束。ウルトラでは50秒間、その固定を限界まで強化します。",
   },
 ] as const;
@@ -254,14 +254,15 @@ const ExtremePerformance = memo(function ExtremePerformance() {
       <header className="rxs-section-heading rxs-reveal">
         <p>PERFORMANCE COMPARISON</p>
         <h2>
-          肉弾戦に、
+          肉弾戦なら、
           <br />
-          この実力。
+          話が早い。
         </h2>
         <span>
           肉弾戦に最適化したエクスプリーム。
           <br />
-          既存の形態と比較してみましょう。
+          <span>既存の形態と並べた。</span>
+          <span>負けた欄も、隠さない。</span>
         </span>
       </header>
 
@@ -284,7 +285,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
 
       <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
         <label className="rxs-comparison-selector">
-          <span>iOS標準選択</span>
+          <span>比較する相手</span>
           <select
             value={baseline}
             aria-label="エクスプリームの比較対象"
@@ -509,15 +510,21 @@ export function ExtremeSaga() {
           <p>THE SUPREME ARRIVAL OF SA-GA</p>
           <h1 id="exs-title">
             <span>EXTREME SAGA</span>
-            戦うほど、
+            殴り合い、
             <br />
-            勝ち筋が増す。
+            歓迎。
           </h1>
-          <p className="rxs-hero-lede">可能性を解析し、勝利を組み立てる。</p>
+          <p className="rxs-hero-lede">
+            <span className="rxs-hero-lede-text">
+              <span>戦うほど、勝ち筋が増す。</span>
+              <span>長引くほど、こっちのもの。</span>
+            </span>
+          </p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
+          <i className="exs-dial" />
           <img
             src="/saga-extreme-middle.webp"
             alt=""
@@ -528,10 +535,28 @@ export function ExtremeSaga() {
           />
         </div>
         <a className="rxs-scroll-cue" href="#performance">
-          <span>性能を比較する</span>
+          <span>腕っぷしを、数字で。</span>
           <i aria-hidden="true" />
         </a>
       </section>
+
+      <nav className="rxs-chapter-index exs-chapter-index" aria-label="エクスプリームの見どころ">
+        <a href="#p14">
+          <small>P14</small>
+          <span>演算コア</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+        <a href="#stages">
+          <small>2 STAGES</small>
+          <span>二つの形態</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+        <a href="#system">
+          <small>SYSTEM</small>
+          <span>中核システム</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+      </nav>
 
       <ExtremePerformance />
 
@@ -539,9 +564,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>PROCESSING CORE / P14</p>
           <h2 id="exs-p14-title">
-            可能性を、
+            可能性は増やす。
             <br />
-            勝利の条件へ。
+            答えは一つ。
           </h2>
           <span>
             エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
@@ -562,7 +587,7 @@ export function ExtremeSaga() {
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / EXTREME TUNING</small>
-            <h3>結果を選び、固定する。</h3>
+            <h3>選んで、固定。以上。</h3>
             <p>
               KHAOS UltraとKOSMOS
               Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束。変換効率・応答・安定率の個別数値は未公表のため、推測値では補いません。
@@ -587,13 +612,13 @@ export function ExtremeSaga() {
         <div className="exs-p14-comparison rxs-reveal">
           <article>
             <small>P14 / EXPANSION</small>
-            <h3>可能性を増殖する</h3>
+            <h3>勝ち筋は、増やし放題。</h3>
             <p>KHAOS Ultra 20,000YOPSが戦況から成立可能な勝利経路を継続的に生成。</p>
           </article>
           <span aria-hidden="true">→</span>
           <article>
             <small>P14 / FIXATION</small>
-            <h3>結果を一つへ固定する</h3>
+            <h3>その中から、一つだけ残す。</h3>
             <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束。</p>
           </article>
         </div>
@@ -606,9 +631,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>TWO OPERATING STAGES</p>
           <h2>
-            可能性を増やし、
+            ミドルで育てて、
             <br />
-            勝利を固定する。
+            ウルトラで決める。
           </h2>
         </header>
 
@@ -643,7 +668,7 @@ export function ExtremeSaga() {
             ))}
           </div>
           <p id="exs-stage-hint" className="rxs-stage-hint">
-            タップ、長押し、または左右へのスライドで切り替え
+            タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
 
           <div
@@ -682,9 +707,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>EXTREME ARCHITECTURE</p>
           <h2>
-            三つの機構が、
+            勝つための機構が、
             <br />
-            勝利を支える。
+            三つもある。
           </h2>
         </header>
 
@@ -723,10 +748,18 @@ export function ExtremeSaga() {
       <footer className="rxs-footer">
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
-          <h2>可能性を広げ、勝利をつかむ。</h2>
+          <h2>
+            長期戦なら、
+            <br />
+            なおさら歓迎。
+          </h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>人物・能力の詳細を見る</span>
+          <i aria-hidden="true">↗</i>
+        </GuardedLink>
+        <GuardedLink to="/form-archive" assets={[]}>
+          <span>全形態を比較する</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
         <GuardedLink

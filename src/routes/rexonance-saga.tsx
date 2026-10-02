@@ -14,6 +14,7 @@ import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonancePolishCssUrl from "@/styles-rexonance-polish.css?url";
 import rexonanceEditionCssUrl from "@/styles-rexonance-edition.css?url";
 import rexonanceInstrumentCssUrl from "@/styles-rexonance-instrument.css?url";
+import rexonanceFinishCssUrl from "@/styles-rexonance-finish.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -24,13 +25,14 @@ export const Route = createFileRoute("/rexonance-saga")({
       { title: "レクソナンスサーガ｜Deception World" },
       {
         name: "description",
-        content: "レクソナンスサーガの標準性能、P14演算基盤、三段階の形態と共鳴構造を紹介します。",
+        content:
+          "混ぜない。重ねる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14演算基盤、三段階の形態、三者の共鳴構造まで。",
       },
       { property: "og:title", content: "レクソナンスサーガ｜Deception World" },
       {
         property: "og:description",
         content:
-          "レクソナンスサーガの性能、三つの形態、悠真・レックス・ゼウスによる共鳴の仕組みを紹介します。",
+          "悠真、レックス、ゼウス。誰も消えず、全部が乗る。レクソナンスサーガの性能、三つの形態、共鳴の仕組み。",
       },
       { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonancePolishCssUrl },
       { rel: "stylesheet", href: rexonanceEditionCssUrl },
       { rel: "stylesheet", href: rexonanceInstrumentCssUrl },
+      { rel: "stylesheet", href: rexonanceFinishCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

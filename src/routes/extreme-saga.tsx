@@ -11,6 +11,7 @@ import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
 import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
+import extremeEditionCssUrl from "@/styles-extreme-edition.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   component: ExtremeSaga,
@@ -20,12 +21,12 @@ export const Route = createFileRoute("/extreme-saga")({
       {
         name: "description",
         content:
-          "至高、極まれり。エクスプリームサーガの性能、P14、ディルクルムサーガ／ヴィンクルムサーガとの比較を体験する公式特設サイト。",
+          "殴り合い、歓迎。戦うほど勝ち筋が増すエクスプリームサーガ。標準性能、専用P14、ディルクルムサーガ／ヴィンクルムサーガとのカタログ比較を体験する公式特設サイト。",
       },
       { property: "og:title", content: "エクスプリームサーガ｜Deception World" },
       {
         property: "og:description",
-        content: "可能性を増殖し、勝利という結果へ。エクスプリームサーガ公式特設サイト。",
+        content: "殴り合い、歓迎。長引くほど、こっちのもの。エクスプリームサーガ公式特設サイト。",
       },
       { property: "og:image", content: "/saga-extreme-middle.jpeg" },
     ],
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: showcaseElevationCssUrl },
       { rel: "stylesheet", href: showcaseCinemaCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
+      { rel: "stylesheet", href: extremeEditionCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

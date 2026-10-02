@@ -33,9 +33,12 @@ test("Rexonance special site preserves published performance and stage definitio
 });
 
 test("Rexonance hero presents the reviewed resonance copy with the existing type treatment", () => {
-  assert.match(component, /共鳴を、/);
-  assert.match(component, /使いこなす。/);
-  assert.match(component, /三者が独立したまま、力を重ねる。/);
+  // 2026-10-02 Track R copy (dreamx/rx-copy/COPY.md R3, R4): the hero catch
+  // line and lede were rewritten; the lede's two sentences are inline-block spans.
+  assert.match(component, /混ぜない。/);
+  assert.match(component, /重ねる。/);
+  assert.match(component, /悠真、レックス、ゼウス。/);
+  assert.match(component, /誰も消えず、全部が乗る。/);
   assert.doesNotMatch(component, /無限の攻撃へ。/);
   assert.match(styles, /\.rxs-hero-copy::before/);
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
@@ -235,7 +238,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /aria-describedby="rxs-p14-baseline-help"/);
   assert.match(component, /<p id="rxs-p14-baseline-help">/);
   assert.match(component, /event\.currentTarget\.value as P14Baseline/);
-  assert.match(component, /iOS標準選択/);
+  // COPY.md R8, R12: the visible labels name the choice, not the widget.
+  assert.match(component, /比較する相手/);
+  assert.match(component, /基準にする世代/);
   assert.match(component, /aria-pressed=/);
   assert.match(component, /setP14Baseline/);
   assert.match(component, /<b>100%<\/b>/);
@@ -342,7 +347,8 @@ test("Rexonance stage switching uses one animated Liquid Glass selector", () => 
   assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
   assert.match(styles, /data-liquid-held="true"/);
   assert.match(styles, /data-liquid-dragging="true"/);
-  assert.match(component, /タップ・長押し・左右スライドで切り替え/);
+  // COPY.md R19: the hint now names the keyboard path the rail already has.
+  assert.match(component, /タップ・長押し・左右スライド・矢印キーで切り替え/);
   assert.match(liquidStyles, /-webkit-touch-callout: none/);
   assert.match(liquidStyles, /touch-action: pan-y/);
 });

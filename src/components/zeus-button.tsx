@@ -75,12 +75,21 @@ const ZEUS_AVOID_SELECTOR = [
   ".dossier-index-return",
   ".dossier-read-link",
   ".rxs-footer > a",
+  // 2026-10-02: Rexonance's P14 baseline pills and its live readout chip, which
+  // the button covered at 844x390 (dreamx/rx-audit O3).
+  ".rxs-p14-range-labels button",
+  ".rxs-p14-comparator output",
   // Disclosure rows: the whole summary, so its drawn open cue counts too.
   ".wa-profile > summary",
   ".wa-doc > summary",
   ".dream-story-case > summary",
   // Dream's phone PROFILE switch on the cast tiles (a button, same role).
   ".dream-roster-switch",
+  // 2026-10-02 Track D: the Dream archive's fold rows (CASE, CIRCLE, group, speaker and
+  // leaf summaries), only once their list has been revealed: an unrevealed fold is off
+  // screen anyway, and matching it would force the layout of its skipped annex on every
+  // placement pass (55ms at 4x CPU on a Pixel at the page top).
+  '[data-dream-visible="true"] .dream-archive-fold > summary',
   // RE DIVE's 欠番 tags on the sealed III and VI plates: small words the
   // glyph pass skips (only display figures of 24px count), so on phones the
   // button could rest on the VI strip's tag.

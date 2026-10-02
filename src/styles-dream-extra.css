@@ -1,0 +1,1491 @@
+/* Dream archive: the four new corners (出来事, 舞台, 繋がり, 武装), the VOICES
+   leaf in 名台詞 and the supplements bound into the owner's annexes.
+
+   Linked after styles-dream-refinement.css and before the cinematic skin.
+   The corners are .dream-annex siblings with their own class, so the act
+   rules, numerals and the stage sheet's risers never reach them; the annex
+   sheet gives them their width, gutters, scroll margin and content
+   visibility. Taisho grammar as the annexes: --ts tokens, Shippori, Cinzel
+   for the HUD, gilt rules on night ink, vermilion seals and knots that stay
+   still. Folds are native <details> with a 48px summary and a drawn ＋ cell.
+   No text under 12px, fuji focus rings, a forced-colours pass at the end.
+   Motion: the page's one-time reveal, the fold cell's finite turn, and one
+   scroll-linked thread (the chronicle's spine, transform only) under the
+   full gate. */
+
+/* ---------- Shared archive grammar ---------- */
+/* Where the owner's text ends and the archive begins: a hairline above. */
+.dream-page.dream-page .dream-archive-add {
+  padding-top: 10px;
+  border-top: 1px solid var(--ts-hair-soft);
+  color: var(--ts-zoge);
+}
+
+.dream-page.dream-page .dream-archive-eyebrow {
+  margin: 0 0 6px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+
+/* A leaf's label: the HUD word, a count and a rule to the edge. */
+.dream-page.dream-page .dream-archive-leaf-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-archive-leaf-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ts-hair-soft);
+}
+
+/* Speech in a narrative run: the speaker in gilt before the words. */
+.dream-page.dream-page .dream-archive-said {
+  white-space: pre-line;
+}
+
+.dream-page.dream-page .dream-archive-said > b {
+  margin-right: 0.5em;
+  color: var(--ts-kin);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-archive-line {
+  white-space: pre-line;
+}
+
+/* Quoted excerpts keep the annex quote's geometry; narration shows no
+   brackets, so it is not mistaken for speech. */
+.dream-page.dream-page .dream-archive-quote blockquote p + p {
+  margin-top: 6px;
+}
+
+/* The seal: a kanji numeral in a vermilion hanko, as on the roster cards. */
+.dream-page.dream-page .dream-archive-seal {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 4px;
+  border: 1px solid var(--ts-shu);
+  outline: 1px solid rgb(204 73 59 / 45%);
+  outline-offset: 2px;
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+  writing-mode: vertical-rl;
+}
+
+/* ---------- Folds ---------- */
+.dream-page.dream-page .dream-archive-fold {
+  min-width: 0;
+  border: 1px solid var(--ts-hair);
+  background: var(--ts-night);
+}
+
+.dream-page.dream-page .dream-archive-fold > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto 24px;
+  grid-template-areas: "mark title count cell";
+  align-items: center;
+  gap: 2px 14px;
+  min-height: 48px;
+  padding: 8px 12px 8px 14px;
+  list-style: none;
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    var(--ts-velvet);
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary::marker {
+  content: "";
+}
+
+/* Open, the row closes on a 子持ち罫: a thin rule over a thick one. */
+.dream-page.dream-page .dream-archive-fold[open] > summary {
+  box-shadow:
+    inset 0 -1px 0 var(--ts-kin),
+    inset 0 -3px 0 var(--ts-velvet),
+    inset 0 -5px 0 var(--ts-kin);
+}
+
+.dream-page.dream-page .dream-archive-fold-mark {
+  grid-area: mark;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-archive-fold-title {
+  grid-area: title;
+  font-family: var(--ts-display);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-archive-fold-title small {
+  margin-left: 10px;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-archive-fold-count {
+  grid-area: count;
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+}
+
+/* The state cell: a gilt square with a cross drawn in borders (kept by
+   forced colours); open, it turns into the vermilion diamond of the
+   roster's PROFILE switch. */
+.dream-page.dream-page .dream-archive-fold > summary > i {
+  grid-area: cell;
+  position: relative;
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--ts-kin);
+  color: var(--ts-kin-light);
+}
+
+.dream-page.dream-page .dream-archive-fold > summary > i::before,
+.dream-page.dream-page .dream-archive-fold > summary > i::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary > i::before {
+  width: 10px;
+  border-top: 2px solid currentColor;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary > i::after {
+  height: 10px;
+  border-left: 2px solid currentColor;
+}
+
+.dream-page.dream-page .dream-archive-fold[open] > summary > i {
+  border-color: var(--ts-shu-text);
+  background-color: var(--ts-shu-deep);
+  rotate: 45deg;
+  scale: 0.86;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: -3px;
+}
+
+/* Narrow phones: the count takes a second line under the title. */
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-archive-fold > summary {
+    grid-template-columns: auto minmax(0, 1fr) 24px;
+    grid-template-areas:
+      "mark title cell"
+      "count count cell";
+    padding-inline: 10px 10px;
+    column-gap: 10px;
+  }
+
+  .dream-page.dream-page .dream-archive-fold-title {
+    font-size: 16px;
+  }
+
+  .dream-page.dream-page .dream-archive-fold-count {
+    justify-self: start;
+  }
+}
+
+/* ---------- 出来事 (chronicle) ---------- */
+.dream-page.dream-page .dream-chronicle-cases {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-chronicle-cases > li {
+  min-width: 0;
+}
+
+/* The events hang on one gilt spine, the seals sitting on it. */
+.dream-page.dream-page .dream-chronicle-list {
+  position: relative;
+  display: grid;
+  gap: 30px;
+  margin: 0;
+  padding: 24px 18px 28px 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-chronicle-list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 18px;
+  width: 1px;
+  background: var(--ts-kin);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-chronicle-item {
+  position: relative;
+  min-width: 0;
+  padding-left: 58px;
+}
+
+.dream-page.dream-page .dream-chronicle-item > .dream-archive-seal {
+  position: absolute;
+  top: 0;
+  left: 1px;
+}
+
+.dream-page.dream-page .dream-chronicle-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dream-page.dream-page .dream-chronicle-place {
+  color: var(--ts-kin);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-chronicle-meta > span[lang="en"] {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-chronicle-cast {
+  color: var(--ts-zoge);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-chronicle-item h3 {
+  margin: 0 0 10px;
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-wrap: pretty;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-chronicle-body p {
+  margin: 0;
+  color: var(--ts-zoge);
+  font-size: 15px;
+  line-height: 1.85;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-chronicle-body p + p {
+  margin-top: 10px;
+}
+
+.dream-page.dream-page .dream-chronicle-body .dream-archive-quote {
+  margin-top: 4px;
+}
+
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-chronicle-list {
+    gap: 34px;
+    padding: 30px 32px 36px 0;
+  }
+
+  .dream-page.dream-page .dream-chronicle-list::before {
+    left: 24px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item {
+    padding-left: 68px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item > .dream-archive-seal {
+    left: 7px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item h3 {
+    font-size: 20px;
+  }
+}
+
+/* The chronicle reads top-down like a 巻物: one column, centred on wide
+   screens rather than two interleaving columns of cases. */
+@media (min-width: 1181px) {
+  .dream-page.dream-page .dream-chronicle-cases {
+    max-width: 880px;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-chronicle-list {
+    gap: 26px;
+    padding: 20px 14px 24px 0;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item {
+    padding-left: 48px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item > .dream-archive-seal {
+    left: 4px;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 2px;
+    outline-offset: 1px;
+    font-size: 12px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-body p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+}
+
+/* ---------- 舞台 (atlas) ---------- */
+.dream-page.dream-page .dream-atlas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: clamp(14px, 1.8vw, 22px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-atlas-grid > li {
+  display: flex;
+  min-width: 0;
+}
+
+/* A card: kicker and body on the left, the place name standing vertical
+   in a 44px column on the right (as the 目次 title stands), the 青海波
+   band at the foot. */
+.dream-page.dream-page .dream-atlas-grid article {
+  position: relative;
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  grid-template-rows: auto minmax(0, 1fr) 12px;
+  grid-template-areas:
+    "kicker title"
+    "body title"
+    "wave wave";
+  gap: 0 14px;
+  min-width: 0;
+  padding: 22px 20px 0;
+  border: 1px solid var(--ts-hair);
+  outline: 1px solid var(--ts-hair-soft);
+  outline-offset: -6px;
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(25 47 96 / 18%), transparent 46%),
+    var(--ts-night);
+}
+
+.dream-page.dream-page .dream-atlas-kicker {
+  grid-area: kicker;
+  margin: 0 0 12px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+
+.dream-page.dream-page .dream-atlas-grid h3 {
+  grid-area: title;
+  justify-self: end;
+  margin: 0;
+  color: var(--ts-kin-light);
+  background: var(--ts-gilt-vertical, var(--ts-gilt));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ts-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  writing-mode: vertical-rl;
+}
+
+.dream-page.dream-page .dream-atlas-body {
+  grid-area: body;
+  padding-bottom: 22px;
+}
+
+.dream-page.dream-page .dream-atlas-body p {
+  margin: 0;
+  color: var(--ts-zoge);
+  font-size: 15px;
+  line-height: 1.85;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-atlas-body p + p {
+  margin-top: 12px;
+}
+
+/* 青海波 in gradients: two rows of arcs, the second a half step over. */
+.dream-page.dream-page .dream-atlas-wave {
+  grid-area: wave;
+  display: block;
+  height: 12px;
+  margin: 0 -20px;
+  border-top: 1px solid var(--ts-hair-soft);
+  background:
+    radial-gradient(
+        circle at 50% 100%,
+        transparent 7px,
+        var(--ts-hair-soft) 7px 8px,
+        transparent 8px
+      )
+      0 0 / 20px 12px repeat-x,
+    radial-gradient(
+        circle at 50% 100%,
+        transparent 3px,
+        var(--ts-hair-soft) 3px 4px,
+        transparent 4px
+      )
+      0 0 / 20px 12px repeat-x,
+    radial-gradient(
+        circle at 50% 100%,
+        transparent 7px,
+        var(--ts-hair-soft) 7px 8px,
+        transparent 8px
+      )
+      10px 6px / 20px 12px repeat-x;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-atlas-grid article {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) 12px;
+    grid-template-areas:
+      "kicker"
+      "title"
+      "body"
+      "wave";
+    padding: 18px 16px 0;
+  }
+
+  .dream-page.dream-page .dream-atlas-kicker {
+    margin-bottom: 6px;
+  }
+
+  .dream-page.dream-page .dream-atlas-grid h3 {
+    justify-self: start;
+    margin: 0 0 10px;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    writing-mode: horizontal-tb;
+  }
+
+  .dream-page.dream-page .dream-atlas-body {
+    padding-bottom: 18px;
+  }
+
+  .dream-page.dream-page .dream-atlas-body p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .dream-page.dream-page .dream-atlas-wave {
+    margin: 0 -16px;
+  }
+}
+
+/* ---------- 繋がり (relations) ---------- */
+.dream-page.dream-page .dream-relations-circles {
+  display: grid;
+  gap: 12px;
+}
+
+.dream-page.dream-page .dream-relations-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+}
+
+/* 番付: the two names flank the knot, the label on it; the words below. */
+.dream-page.dream-page .dream-relations-tie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas:
+    "a knot b"
+    "quote quote quote";
+  align-items: center;
+  gap: 12px 12px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  border: 1px solid var(--ts-hair-soft);
+  background: rgb(13 9 18 / 60%);
+}
+
+.dream-page.dream-page .dream-relations-name {
+  min-width: 0;
+  color: var(--ts-kinari);
+  font-family: var(--ts-display);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-relations-name:first-child {
+  grid-area: a;
+  text-align: end;
+}
+
+.dream-page.dream-page .dream-relations-knot + .dream-relations-name {
+  grid-area: b;
+}
+
+.dream-page.dream-page .dream-relations-knot {
+  grid-area: knot;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.dream-page.dream-page .dream-relations-knot > i {
+  flex: 1 0 20px;
+  height: 1px;
+  background: var(--ts-kin);
+}
+
+/* The label plate: vermilion, still. */
+.dream-page.dream-page .dream-relations-knot > b {
+  max-width: 16em;
+  padding: 5px 10px;
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+  font-family: var(--ts-display);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-align: center;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-relations-tie > .dream-archive-quote {
+  grid-area: quote;
+  margin-top: 2px;
+}
+
+@media (min-width: 1181px) {
+  .dream-page.dream-page .dream-relations-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px;
+  }
+}
+
+/* Phones: a stack. The knot stands as a vertical thread, the label its tag. */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-relations-list {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .dream-page.dream-page .dream-relations-tie {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "a"
+      "knot"
+      "b"
+      "quote";
+    justify-items: start;
+    gap: 6px;
+    padding: 14px 14px 16px;
+  }
+
+  .dream-page.dream-page .dream-relations-name:first-child {
+    text-align: start;
+  }
+
+  .dream-page.dream-page .dream-relations-knot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-left: 10px;
+  }
+
+  .dream-page.dream-page .dream-relations-knot > i {
+    flex: none;
+    width: 1px;
+    height: 16px;
+    margin-left: 6px;
+  }
+
+  .dream-page.dream-page .dream-relations-knot > b {
+    text-align: start;
+  }
+
+  .dream-page.dream-page .dream-relations-tie > .dream-archive-quote {
+    margin-top: 8px;
+  }
+}
+
+/* ---------- 武装 (arsenal) ---------- */
+.dream-page.dream-page .dream-arsenal-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.dream-page.dream-page .dream-arsenal-list {
+  display: grid;
+  gap: 0 clamp(20px, 3vw, 40px);
+  margin: 0;
+  padding: 6px 18px 18px;
+}
+
+.dream-page.dream-page .dream-arsenal-list > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--ts-hair-soft);
+}
+
+.dream-page.dream-page .dream-arsenal-list > div:first-child {
+  border-top: 0;
+}
+
+.dream-page.dream-page .dream-arsenal-list dt {
+  color: var(--ts-kin-light);
+  background: var(--ts-gilt);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ts-display);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-arsenal-list dt small {
+  margin-left: 10px;
+  color: var(--ts-ginnezu);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-arsenal-list dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-arsenal-list dd p {
+  margin: 0;
+  color: var(--ts-zoge);
+  font-size: 15px;
+  line-height: 1.8;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-arsenal-list dd p + p {
+  margin-top: 8px;
+}
+
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-arsenal-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 8px 24px 22px;
+  }
+
+  .dream-page.dream-page .dream-arsenal-list > div:nth-child(2) {
+    border-top: 0;
+  }
+}
+
+@media (min-width: 1181px) {
+  .dream-page.dream-page .dream-arsenal-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-arsenal-list > div:nth-child(3) {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-arsenal-list {
+    padding: 4px 12px 14px;
+  }
+
+  .dream-page.dream-page .dream-arsenal-list dd p {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+}
+
+/* ---------- VOICES leaf (inside 名台詞) ---------- */
+.dream-page.dream-page .dream-voices {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+/* Open folds do not shift their neighbours' summaries (align start). */
+.dream-page.dream-page .dream-voices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  align-items: start;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-voices-grid > li {
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-voices-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px 18px;
+  list-style: none;
+}
+
+/* ---------- Dossier RECORD section (the dialogs) ---------- */
+.dream-page.dream-page .dream-dossier-sections .dream-archive-record h3 {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+/* ---------- 人物一覧 supplement ---------- */
+.dream-page.dream-page .dream-roster-archive {
+  display: grid;
+  gap: 8px;
+}
+
+/* ---------- Agent roster supplements ---------- */
+.dream-page.dream-page .dream-agent-archive {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.dream-page.dream-page .dream-agent-rider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 0;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-agent-rider small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+/* RIDER and DEVICE each keep their label beside their name. */
+.dream-page.dream-page .dream-agent-rider > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-archive-additions {
+  margin-top: 18px;
+}
+
+/* A leaf fold (ADDITIONAL AGENTS, INDEX): its label is the row's mark. */
+.dream-page.dream-page .dream-archive-fold.is-leaf > summary {
+  grid-template-columns: auto minmax(0, 1fr) 24px;
+  grid-template-areas: "mark count cell";
+}
+
+.dream-page.dream-page .dream-archive-fold.is-leaf .dream-archive-fold-mark {
+  letter-spacing: 0.3em;
+}
+
+.dream-page.dream-page .dream-archive-fold.is-leaf .dream-archive-fold-count {
+  justify-self: start;
+}
+
+.dream-page.dream-page .dream-archive-additions .dream-agent-roster {
+  padding: 12px 14px 14px;
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-archive-fold.is-leaf > summary {
+    grid-template-areas:
+      "mark mark cell"
+      "count count cell";
+  }
+
+  .dream-page.dream-page .dream-archive-additions .dream-agent-roster {
+    padding: 4px 8px 8px;
+  }
+}
+
+/* ---------- Faction supplements ---------- */
+.dream-page.dream-page .dream-faction-archive {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.dream-page.dream-page .dream-faction-archive-text,
+.dream-page.dream-page .dream-faction-member-note {
+  margin: 0;
+  color: var(--ts-zoge);
+  font-size: 14px;
+  line-height: 1.8;
+  word-break: auto-phrase;
+}
+
+.dream-page.dream-page .dream-faction-member-note {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.dream-page.dream-page .dream-faction-archive .dream-faction-members > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ---------- 用語集 supplements and INDEX leaf ---------- */
+.dream-page.dream-page .dream-glossary dd > .dream-archive-add {
+  margin-top: 2px;
+}
+
+.dream-page.dream-page .dream-glossary-index {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+/* On the dictionary's paper the fold is a ruled frame, not a night plate. */
+.dream-page.dream-page #glossary .dream-archive-fold {
+  border-color: var(--ts-hair-soft);
+  background: none;
+}
+
+.dream-page.dream-page #glossary .dream-archive-fold > summary {
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    rgb(110 44 53 / 8%);
+}
+
+.dream-page.dream-page #glossary .dream-archive-fold[open] > summary {
+  box-shadow:
+    inset 0 -1px 0 var(--ts-kin),
+    inset 0 -3px 0 #eee5d4,
+    inset 0 -5px 0 var(--ts-kin);
+}
+
+.dream-page.dream-page .dream-glossary-index .dream-glossary {
+  padding: 4px 16px 14px;
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-glossary-index .dream-glossary {
+    padding: 2px 10px 10px;
+  }
+}
+
+/* ---------- 目次: 第四幕 grows to three full link rows on phones ---------- */
+/* Each row is a grid (act column + two link columns): odd links take the
+   first link column, so six links make three rows, two links one row, and
+   the act label stays with the first row. */
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-contents li > a:nth-of-type(odd) {
+    grid-column: 2;
+  }
+
+  .dream-page.dream-page .dream-contents li > small {
+    grid-row: 1 / span 3;
+    align-self: start;
+    padding-top: 15px;
+  }
+}
+
+/* ---------- Estimates for the skipped annexes ---------- */
+/* Content-box heights as drawn on first paint (CASE 0, 三人 and シエル open;
+   every arsenal fold, ADDITIONAL AGENTS and INDEX closed), measured by
+   scripts/verify-dream-estimates.mjs (WRITE=1) at 1440 (base), 1194, 1024,
+   768, 412, 390, 320, 844x390, 667x375 and 1920; the four corners, #quotes
+   (now with the VOICES leaf) and the three annexes the supplements grew.
+   The annex sheet's own numbers for cast-roster, factions, glossary and
+   quotes are overridden here (this sheet loads later); its format pins stay. */
+
+.dream-page.dream-page #cast-roster {
+  contain-intrinsic-size: auto 2390px;
+}
+
+.dream-page.dream-page #factions {
+  contain-intrinsic-size: auto 3485px;
+}
+
+.dream-page.dream-page #chronicle {
+  contain-intrinsic-size: auto 1965px;
+}
+
+.dream-page.dream-page #atlas {
+  contain-intrinsic-size: auto 2500px;
+}
+
+.dream-page.dream-page #relations {
+  contain-intrinsic-size: auto 1090px;
+}
+
+.dream-page.dream-page #arsenal {
+  contain-intrinsic-size: auto 560px;
+}
+
+.dream-page.dream-page #glossary {
+  contain-intrinsic-size: auto 2180px;
+}
+
+.dream-page.dream-page #quotes {
+  contain-intrinsic-size: auto 1265px;
+}
+
+@media (max-width: 1299px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3300px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 4000px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 1965px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3080px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1115px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 555px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2560px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1725px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3615px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 4160px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 1925px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3465px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1640px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 545px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2915px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1590px;
+  }
+}
+
+@media (max-width: 980px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 4205px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 5535px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2100px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3925px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1650px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 530px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3205px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1945px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2235px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 7180px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2475px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 5260px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2720px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 620px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3995px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 3035px;
+  }
+}
+
+@media (max-width: 400px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2260px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 7455px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2550px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 5565px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2775px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 620px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 4070px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 3035px;
+  }
+}
+
+@media (max-width: 359px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2805px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 9210px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2930px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 6470px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2885px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 690px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 4470px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 3415px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1240px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 5360px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2020px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3925px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1655px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 530px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3160px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1655px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1665px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 5875px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2065px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 4285px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2440px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 525px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3595px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 2255px;
+  }
+}
+
+/* Wide screens (1920): the 1200px measure makes every annex taller than
+   at 1440, so each keeps its own estimate here. */
+@media (min-width: 1600px) {
+  .dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3215px;
+  }
+
+  .dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3845px;
+  }
+
+  .dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 1965px;
+  }
+
+  .dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 2720px;
+  }
+
+  .dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1090px;
+  }
+
+  .dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 560px;
+  }
+
+  .dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2460px;
+  }
+
+  .dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1730px;
+  }
+}
+
+/* ---------- Motion ---------- */
+/* Finite: the fold cell turns into its diamond (transform only). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-archive-fold
+    > summary
+    > i {
+    transition:
+      rotate 240ms var(--ts-ease),
+      scale 240ms var(--ts-ease);
+  }
+}
+
+/* Scroll-linked, one thread: each chronicle list's spine draws down as the
+   list enters, on its own named view timeline (a closed fold's list is not
+   rendered and has none). Transform only; stands down with the stage sheet
+   while the menu, the route gate or a file is open. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: --ts-archive) and (animation-range: entry 0% entry 100%) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-chronicle-list {
+      view-timeline: --ts-archive block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-chronicle-list::before {
+      transform-origin: top;
+      animation: ts-archive-spine linear both;
+      animation-timeline: --ts-archive;
+      animation-range: entry 0% cover 50%;
+    }
+  }
+}
+
+@keyframes ts-archive-spine {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ---------- Pointer response (fine pointers only) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-archive-fold > summary {
+    transition: color 200ms ease;
+  }
+
+  .dream-page.dream-page .dream-archive-fold > summary:hover {
+    color: var(--ts-kin-hi);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-page.dream-page .dream-archive-fold > summary {
+    transition: none;
+  }
+}
+
+html[data-world-effects="economy"] .dream-page.dream-page .dream-archive-fold > summary {
+  transition: none;
+}
+
+/* ---------- Forced colours ---------- */
+/* Gilt text falls back to system text; plates, seals and knots keep an
+   edge; the drawn cell is a button face, Highlight when open. */
+@media (forced-colors: active) {
+  .dream-page.dream-page :is(.dream-atlas-grid h3, .dream-arsenal-list dt) {
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    color: CanvasText;
+  }
+
+  .dream-page.dream-page
+    :is(
+      .dream-archive-fold,
+      .dream-archive-fold > summary,
+      .dream-atlas-grid article,
+      .dream-relations-tie
+    ) {
+    background: Canvas;
+    border-color: CanvasText;
+    outline-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-archive-fold[open] > summary {
+    border-bottom: 1px solid CanvasText;
+  }
+
+  .dream-page.dream-page :is(.dream-archive-seal, .dream-relations-knot > b) {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  .dream-page.dream-page :is(.dream-chronicle-list::before, .dream-relations-knot > i) {
+    background: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-atlas-wave {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-archive-fold > summary > i {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .dream-page.dream-page .dream-archive-fold[open] > summary > i {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .dream-page.dream-page .dream-archive-fold > summary:focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  .dream-page.dream-page
+    :is(
+      .dream-archive-add,
+      .dream-archive-leaf-label::after,
+      .dream-arsenal-list > div,
+      .dream-atlas-wave
+    ) {
+    border-color: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-archive-leaf-label::after {
+    background: CanvasText;
+  }
+}

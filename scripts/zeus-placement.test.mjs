@@ -21,6 +21,8 @@ test("disclosure rows and the new controls are stepped off as whole boxes", () =
     '".dream-story-case > summary"',
     // 2026-09-30: Dream's phone PROFILE switch and RE DIVE's 欠番 tags.
     '".dream-roster-switch"',
+    // 2026-10-02 Track D: the Dream archive's revealed fold rows (dreamx/d-ui).
+    "'[data-dream-visible=\"true\"] .dream-archive-fold > summary'",
     '".re-dive-section .signal.is-vacant > b"',
     '".wa-open"',
     '".wa-contents a"',
@@ -29,6 +31,9 @@ test("disclosure rows and the new controls are stepped off as whole boxes", () =
     '".wa-quote-controls"',
     "'.rider-tabs [role=\"tab\"]'",
     "'.rxs-stage-tabs [role=\"tab\"]'",
+    // 2026-10-02: Rexonance's P14 baseline pills and readout (rx-audit O3).
+    '".rxs-p14-range-labels button"',
+    '".rxs-p14-comparator output"',
     '".dossier-reader-links a"',
     '".hero-actions .primary-action"',
   ]) {

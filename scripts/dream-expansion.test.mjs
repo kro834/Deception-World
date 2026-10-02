@@ -119,6 +119,8 @@ test("each annex renders as its own section, listed in the 目次", () => {
     page.indexOf("\n];", page.indexOf("const DREAM_CONTENTS")),
   );
   const hrefs = [...contents.matchAll(/href: "#([\w-]+)"/g)].map((match) => match[1]);
+  // 2026-10-02 Track D: the four archive corners (出来事, 舞台, 繋がり, 武装) close 第四幕
+  // (scripts/dream-extra-ui.test.mjs pins their rows); the 附録 row is unchanged.
   assert.deepEqual(hrefs, [
     "posters",
     "characters",
@@ -127,6 +129,10 @@ test("each annex renders as its own section, listed in the 目次", () => {
     "factions",
     "cases",
     "case-notes",
+    "chronicle",
+    "atlas",
+    "relations",
+    "arsenal",
     "glossary",
     "quotes",
   ]);
