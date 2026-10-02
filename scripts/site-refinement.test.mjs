@@ -62,3 +62,19 @@ test("opening refinement keeps its one-shot arrival conditional on motion prefer
   assert.match(css, /animation-name:\s*op-title-unseal/);
   assert.doesNotMatch(css, /\binfinite\b|\banimation-duration\s*:|\banimation-delay\s*:/);
 });
+
+test("frequent comparison and section updates stay inside memoised controls", () => {
+  const rex = read("src/components/rexonance-saga/rexonance-saga.tsx");
+  const dream = read("src/components/dream-chapter/dream-chapter.tsx");
+  assert.match(rex, /const P14Comparator = memo\(function P14Comparator/);
+  const rexPage = rex.slice(rex.indexOf("export function RexonanceSaga()"));
+  assert.doesNotMatch(rexPage, /setP14Baseline/);
+  assert.match(rexPage, /<P14Comparator nativeIOSSelection=\{nativeIOSSelection\}/);
+  assert.match(dream, /const DreamSectionNav = memo\(function DreamSectionNav/);
+  const dreamPage = dream.slice(dream.indexOf("export function DreamChapter()"));
+  assert.doesNotMatch(dreamPage, /setActiveSection/);
+  assert.match(dreamPage, /<DreamSectionNav \/>/);
+  assert.match(dream, /landings \?\?= sections\.map/);
+  assert.match(dream, /const invalidateLayout = \(\) => \{\s*landings = null/);
+  assert.match(dream, /removeEventListener\("visibilitychange", invalidateLayout\)/);
+});

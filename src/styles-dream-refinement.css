@@ -85,6 +85,30 @@
   color: #d9cfc1;
 }
 
+/* The whole dossier remains one button. Its existing open label becomes
+   a paper ticket, so the portrait reads as a file that can be opened. */
+.dream-page.dream-page .dream-dolminence-copy em {
+  color: #382638;
+  border-bottom-color: #b58c47;
+  background: #e8dcc5;
+  box-shadow: inset 0 1px rgb(255 255 255 / 35%);
+}
+
+.dream-page.dream-page .dream-dolminence-copy em::after {
+  color: #79353c;
+}
+
+.dream-page.dream-page .dream-dolminence-grid button:focus-visible .dream-dolminence-copy em {
+  background: #f4ecdc;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-dolminence-grid button:hover .dream-dolminence-copy em {
+    background: #f4ecdc;
+    border-bottom-color: #79353c;
+  }
+}
+
 .dream-page.dream-page .dream-faction {
   background:
     linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
@@ -255,6 +279,18 @@
   .dream-page.dream-page .dream-story-case[open] .dream-story-case-number::before {
     color: CanvasText;
     -webkit-text-fill-color: currentColor;
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy em,
+  .dream-page.dream-page .dream-dolminence-grid button:focus-visible .dream-dolminence-copy em {
+    color: ButtonText;
+    border-color: ButtonText;
+    background: ButtonFace;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-dolminence-copy em::after {
+    color: ButtonText;
   }
 }
 

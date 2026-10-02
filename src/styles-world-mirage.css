@@ -1650,7 +1650,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     )
     .anime-work-title
     > span {
-    animation: mr-type 640ms steps(16, jump-end) 80ms both;
+    animation: mr-type 640ms var(--mr-ease-out) 80ms both;
   }
 
   html:not([data-world-effects="economy"]):not([data-mirage-quiet])
@@ -1985,7 +1985,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
         .section-title .eyebrow > span,
         .records-heading .eyebrow > span
       ) {
-      animation: mr-type steps(14, jump-end) both;
+      animation: mr-type var(--mr-ease-out) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -2038,7 +2038,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
-      animation: mr-type steps(14, jump-end) both;
+      animation: mr-type var(--mr-ease-out) both;
       animation-timeline: --mr-archive;
       animation-range: entry 0px entry 60px;
     }
@@ -2113,7 +2113,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .site-shell.film-edition.mirage-edition
       .finale-content
       > span {
-      animation: mr-type steps(21, jump-end) both;
+      animation: mr-type var(--mr-ease-out) both;
       animation-timeline: --mr-finale;
       animation-range: entry 40px entry 220px;
     }
@@ -2124,7 +2124,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .site-shell.film-edition.mirage-edition
       .mr-endmark
       :is(span, b) {
-      animation: mr-type steps(12, jump-end) both;
+      animation: mr-type var(--mr-ease-out) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -2141,8 +2141,8 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 }
 
 /* ================================================================
-   Keyframes (compositor-friendly: opacity, translate, scale, rotate,
-   clip-path, plus the two registered properties)
+   Keyframes (scroll entrances use opacity and transforms, not a changing
+   image/text clipping mask; finite boot effects may still use clip-path)
    ================================================================ */
 @keyframes mr-boot-seal {
   from {
@@ -2194,10 +2194,10 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 
 @keyframes mr-type {
   from {
-    clip-path: inset(0 100% 0 0);
+    opacity: 0.3;
   }
   to {
-    clip-path: inset(-20% -4% -20% 0);
+    opacity: 1;
   }
 }
 
@@ -2424,10 +2424,12 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 
 @keyframes mr-wipe {
   from {
-    clip-path: inset(-25% 100% -35% -6%);
+    opacity: 0.3;
+    translate: -18px 0;
   }
   to {
-    clip-path: inset(-25% -6% -35% -6%);
+    opacity: 1;
+    translate: 0 0;
   }
 }
 
@@ -2455,10 +2457,12 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 
 @keyframes mr-materialize {
   from {
-    clip-path: inset(100% 0 0 0);
+    opacity: 0.35;
+    translate: 0 18px;
   }
   to {
-    clip-path: inset(-10% -10% -10% -10%);
+    opacity: 1;
+    translate: 0 0;
   }
 }
 
@@ -3019,8 +3023,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   html:not([data-world-effects="economy"])[data-android-renderer]
     .site-shell.film-edition.mirage-edition
     .episode-archive {
-    background:
-      var(--mr-brackets), var(--mr-deck);
+    background: var(--mr-brackets), var(--mr-deck);
     background-repeat: no-repeat;
     background-blend-mode: normal;
   }
@@ -3037,7 +3040,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
         .story-heading .eyebrow > span,
         .records-heading .eyebrow > span
       ) {
-      animation: mr-rise-in steps(14, jump-end) both;
+      animation: mr-rise-in var(--mr-ease-out) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -3073,7 +3076,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
       .site-shell.film-edition.mirage-edition
       .threat-copy
       .system-label {
-      animation: mr-fade-in steps(14, jump-end) both;
+      animation: mr-fade-in var(--mr-ease-out) both;
       animation-timeline: --mr-archive;
       animation-range: entry 0px entry 60px;
     }
@@ -3100,7 +3103,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
       .site-shell.film-edition.mirage-edition
       .finale-content
       > span {
-      animation: mr-rise-in steps(21, jump-end) both;
+      animation: mr-rise-in var(--mr-ease-out) both;
       animation-timeline: --mr-finale;
       animation-range: entry 40px entry 220px;
     }
@@ -3111,7 +3114,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
       .site-shell.film-edition.mirage-edition
       .mr-endmark
       :is(span, b) {
-      animation: mr-rise-in steps(12, jump-end) both;
+      animation: mr-rise-in var(--mr-ease-out) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }

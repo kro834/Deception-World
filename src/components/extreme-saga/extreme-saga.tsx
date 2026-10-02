@@ -411,11 +411,11 @@ export function ExtremeSaga() {
           <p>THE SUPREME ARRIVAL OF SA-GA</p>
           <h1 id="exs-title">
             <span>EXTREME SAGA</span>
-            至高、
+            戦うほど、
             <br />
-            極まれり
+            勝ち筋が増す。
           </h1>
-          <p className="rxs-hero-lede">可能性を、勝利という結果へ。</p>
+          <p className="rxs-hero-lede">可能性を解析し、勝利を組み立てる。</p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />
@@ -438,7 +438,11 @@ export function ExtremeSaga() {
       <section id="performance" className="rxs-performance rxs-section">
         <header className="rxs-section-heading rxs-reveal">
           <p>PERFORMANCE COMPARISON</p>
-          <h2>なんて戦闘力。</h2>
+          <h2>
+            肉弾戦に、
+            <br />
+            この実力。
+          </h2>
           <span>
             肉弾戦に最適化したエクスプリーム。
             <br />
@@ -581,7 +585,11 @@ export function ExtremeSaga() {
       <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>PROCESSING CORE / P14</p>
-          <h2 id="exs-p14-title">それすなわち、千里眼。</h2>
+          <h2 id="exs-p14-title">
+            可能性を、
+            <br />
+            勝利の条件へ。
+          </h2>
           <span>
             エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
             UltraとKOSMOS Ultraを統合し、増え続ける可能性を一つの実行可能な結果へ収束させます。
@@ -721,9 +729,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>EXTREME ARCHITECTURE</p>
           <h2>
-            勝利へ至る道を、
+            三つの機構が、
             <br />
-            システムにする。
+            勝利を支える。
           </h2>
         </header>
 

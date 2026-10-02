@@ -32,9 +32,9 @@ test("shared special navigation keeps Rexonance directly below Extreme", () => {
   assert.ok(rexonancePosition > extremePosition);
 });
 
-test("Extreme hero preserves the requested catchphrase and responsive visual treatment", () => {
-  assert.match(component, /至高、/);
-  assert.match(component, /極まれり/);
+test("Extreme hero presents the reviewed combat copy with the existing type treatment", () => {
+  assert.match(component, /戦うほど、/);
+  assert.match(component, /勝ち筋が増す。/);
   assert.match(component, /THE SUPREME ARRIVAL OF SA-GA/);
   assert.match(styles, /\.exs-page \.rxs-hero-visual/);
   assert.match(styles, /orientation: portrait/);
@@ -52,7 +52,8 @@ test("large Extreme headings release iPhone vertical scrolling", () => {
 });
 
 test("Extreme performance copy uses the requested physical-combat framing", () => {
-  assert.match(component, /なんて戦闘力。/);
+  assert.match(component, /肉弾戦に、/);
+  assert.match(component, /この実力。/);
   assert.match(component, /肉弾戦に最適化したエクスプリーム。/);
   assert.match(component, /既存の形態と比較してみましょう。/);
   assert.doesNotMatch(component, /数字を揃えて/);
@@ -105,7 +106,8 @@ test("Extreme comparison preserves Vinculum values and calculated physical ratio
 test("Extreme P14 stays focused on its own expansion and fixation architecture", () => {
   assert.doesNotMatch(component, /レクソナンス/);
   assert.doesNotMatch(component, /to="\/rexonance-saga"/);
-  assert.match(component, /それすなわち、千里眼。/);
+  assert.match(component, /可能性を、/);
+  assert.match(component, /勝利の条件へ。/);
   assert.doesNotMatch(component, /同じP14。|到達点は、異なる。/);
   assert.match(component, /P14 \/ EXPANSION/);
   assert.match(component, /P14 \/ FIXATION/);

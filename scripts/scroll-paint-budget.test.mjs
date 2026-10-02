@@ -9,7 +9,7 @@ import test from "node:test";
    - animating background-color: Chromium 142+ (current Chrome, Samsung
      Internet 30) treats it as compositable and repaints the page under it
      every frame; color is allowed only for the typing ink (tr-ink, stepped);
-     clip-path is main-thread paint, allowed only where it is still listed;
+     changing clip-path masks can also add paint work during scrolling;
    - gating motion on html:not(:has(dialog[open])): every DOM insertion then
      restyles the whole document; html[data-dialog-open] is set instead
      (src/lib/dialog-open-flag.js);
@@ -30,9 +30,6 @@ const cssFiles = [
 
 // Every sheet uses the dialog flag; nothing may use the old :has() gates.
 const PENDING_GATES = new Set();
-// Timeline keyframes that still animate clip-path (main-thread paint).
-// Shrink this list; never grow it.
-const CLIP_PATH_ALLOWED = new Set(["mr-type", "mr-wipe", "mr-materialize"]);
 
 const flat = (text) =>
   text.replace(/\s+/g, " ").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").trim();
@@ -160,14 +157,8 @@ test("scroll-linked keyframes never repaint the page every frame", () => {
       assert.ok(!properties.has("background-color"), `${where} animates background-color`);
       assert.ok(!properties.has("background"), `${where} animates the background shorthand`);
       if (name !== "tr-ink") assert.ok(!properties.has("color"), `${where} animates color`);
-      if (!CLIP_PATH_ALLOWED.has(name)) {
-        assert.ok(!properties.has("clip-path"), `${where} animates clip-path`);
-      }
+      assert.ok(!properties.has("clip-path"), `${where} animates clip-path`);
     }
-  }
-  // The allowlist only names keyframes that still exist and still need it.
-  for (const name of CLIP_PATH_ALLOWED) {
-    assert.ok(keyframeProperties.get(name)?.properties.has("clip-path"), name);
   }
   // The typing ink is stepped: one colour change per character, not a fade.
   const ink = timelineRules.find(({ names }) => names.includes("tr-ink"));

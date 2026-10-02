@@ -219,13 +219,49 @@ main.site-shell.film-edition.mirage-edition .episode-card-copy small {
   color: var(--we-teal);
 }
 
+/* Selection is also visible on the caption, not only on the portrait's
+   existing frame. The inset spine keeps every caption and rail box intact. */
+main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-copy {
+  background: #f1f5f6;
+  box-shadow: inset 4px 0 var(--we-teal);
+}
+
+main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-copy p b {
+  color: var(--we-teal);
+}
+
 /* The appendix opens through a quiet gold directory. Portraits stay the
    dark archive's identity; document titles no longer need chrome ghosts. */
 main.site-shell.film-edition.mirage-edition .wa-contents a {
+  position: relative;
   border-color: rgb(222 194 143 / 32%);
   background:
     linear-gradient(var(--we-gold) 0 0) 0 100% / 28px 2px no-repeat,
     #171d25;
+}
+
+/* A drawn descent cue distinguishes chapter jumps from static catalogue
+   labels. It is outside text flow and adds no new spoken label or motion. */
+main.site-shell.film-edition.mirage-edition .wa-contents a::after {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--we-gold);
+  border-bottom: 1.5px solid var(--we-gold);
+  content: "";
+  rotate: 45deg;
+  translate: 0 -70%;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.site-shell.film-edition.mirage-edition .wa-contents a:hover {
+    color: #f0f5f7;
+    border-color: var(--we-gold);
+    background: #25303a;
+  }
 }
 
 main.site-shell.film-edition.mirage-edition .wa-contents small {
@@ -370,5 +406,20 @@ main.site-shell.film-edition.mirage-edition #quotes .wa-quote blockquote p {
 
   main.site-shell.film-edition.mirage-edition #glossary .wa-glossary > div {
     background: Canvas;
+  }
+
+  main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-copy {
+    background: Canvas;
+    box-shadow: none;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-card-copy p b {
+    color: CanvasText;
+  }
+
+  main.site-shell.film-edition.mirage-edition .wa-contents a::after {
+    border-color: LinkText;
   }
 }

@@ -1,16 +1,21 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
-import { GuardedLink } from "@/components/load-gate";
 import {
-  DREAM_CHAPTER_HERO_ART,
-  DREAM_CHAPTER_LOGO,
-  WORLD_ENTER_ASSETS,
-} from "@/lib/asset-loader";
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
+import { GuardedLink } from "@/components/load-gate";
+import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
+import { mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
@@ -40,6 +45,77 @@ const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string; act: st
   { id: "dolminence", label: "ドルミネンス", act: "第三幕" },
   { id: "cases", label: "物語", act: "第四幕" },
 ];
+
+// Scroll position belongs to the small act index, not the entire programme.
+// Poster changes likewise do not need to render this navigation again.
+const DreamSectionNav = memo(function DreamSectionNav() {
+  const [activeSection, setActiveSection] = useState<DreamSectionId | null>(null);
+
+  useEffect(() => {
+    const sections = DREAM_SECTION_LINKS.map(({ id }) => document.getElementById(id)).filter(
+      (section): section is HTMLElement => section != null,
+    );
+    if (!sections.length) return;
+    let frame = 0;
+    let active: DreamSectionId | null = null;
+    let landings: number[] | null = null;
+    const syncActiveSection = () => {
+      frame = 0;
+      if (document.hidden) return;
+      const marker = Math.max(140, Math.min(320, window.innerHeight * 0.36));
+      // Scroll margins only change with layout. Keep live bounds so image
+      // loading, profile expansion and restored scroll positions stay correct.
+      landings ??= sections.map(
+        (section) => (parseFloat(getComputedStyle(section).scrollMarginTop) || 0) + 8,
+      );
+      let current: DreamSectionId | null = null;
+      sections.forEach((section, index) => {
+        if (section.getBoundingClientRect().top <= Math.max(marker, landings![index])) {
+          current = section.id as DreamSectionId;
+        }
+      });
+      if (current !== active) {
+        active = current;
+        setActiveSection(current);
+      }
+    };
+    const requestSectionSync = () => {
+      if (frame || document.hidden) return;
+      frame = window.requestAnimationFrame(syncActiveSection);
+    };
+    const invalidateLayout = () => {
+      landings = null;
+      requestSectionSync();
+    };
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(invalidateLayout);
+    sections.forEach((section) => resizeObserver?.observe(section));
+    window.addEventListener("scroll", requestSectionSync, { passive: true });
+    window.addEventListener("resize", invalidateLayout, { passive: true });
+    window.visualViewport?.addEventListener("resize", invalidateLayout, { passive: true });
+    document.addEventListener("visibilitychange", invalidateLayout);
+    syncActiveSection();
+    return () => {
+      window.removeEventListener("scroll", requestSectionSync);
+      window.removeEventListener("resize", invalidateLayout);
+      window.visualViewport?.removeEventListener("resize", invalidateLayout);
+      document.removeEventListener("visibilitychange", invalidateLayout);
+      resizeObserver?.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <nav className="dream-chapter-nav" aria-label="DREAM CHAPTER セクション">
+      {DREAM_SECTION_LINKS.map(({ id, label, act }) => (
+        <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
+          <small>{act}</small>
+          <span>{label}</span>
+        </a>
+      ))}
+    </nav>
+  );
+});
 
 // The programme's contents: the four acts keep the act index above; each act
 // gains its annex, and the appendix closes the page.
@@ -473,7 +549,6 @@ function DolminenceDialog({
 export function DreamChapter() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<DreamSectionId | null>(null);
   const [posterIndex, setPosterIndex] = useState(0);
   const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
   const [posterLocked, setPosterLocked] = useState(false);
@@ -502,6 +577,7 @@ export function DreamChapter() {
   const previousPoster = previousPosterIndex == null ? null : DREAM_POSTERS[previousPosterIndex];
 
   useEffect(() => mountFilmMotion(pageRef.current), []);
+  useEffect(() => mountStableFragmentNavigation(pageRef.current), []);
 
   const cancelShuffle = useCallback(() => {
     shuffleRunId.current += 1;
@@ -553,46 +629,6 @@ export function DreamChapter() {
     return () => {
       observer.disconnect();
       delete html.dataset.dreamRevealReady;
-    };
-  }, []);
-
-  useEffect(() => {
-    const sections = DREAM_SECTION_LINKS.map(({ id }) => document.getElementById(id)).filter(
-      (section): section is HTMLElement => section != null,
-    );
-    if (!sections.length) return;
-    let frame = 0;
-    const syncActiveSection = () => {
-      frame = 0;
-      const marker = Math.max(140, Math.min(320, window.innerHeight * 0.36));
-      let current: DreamSectionId | null = null;
-      sections.forEach((section) => {
-        // A nav jump lands the section at its scroll margin, which can sit below
-        // the marker on short landscape screens.
-        const landing = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
-        if (section.getBoundingClientRect().top <= Math.max(marker, landing + 8)) {
-          current = section.id as DreamSectionId;
-        }
-      });
-      setActiveSection(current);
-    };
-    const requestSectionSync = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(syncActiveSection);
-    };
-    const resizeObserver =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(requestSectionSync);
-    sections.forEach((section) => resizeObserver?.observe(section));
-    window.addEventListener("scroll", requestSectionSync, { passive: true });
-    window.addEventListener("resize", requestSectionSync, { passive: true });
-    window.visualViewport?.addEventListener("resize", requestSectionSync, { passive: true });
-    syncActiveSection();
-    return () => {
-      window.removeEventListener("scroll", requestSectionSync);
-      window.removeEventListener("resize", requestSectionSync);
-      window.visualViewport?.removeEventListener("resize", requestSectionSync);
-      resizeObserver?.disconnect();
-      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -845,14 +881,7 @@ export function DreamChapter() {
 
       <SideMenuLayer context="movie" open={menuOpen} onOpenChange={setMenuOpen} />
 
-      <nav className="dream-chapter-nav" aria-label="DREAM CHAPTER セクション">
-        {DREAM_SECTION_LINKS.map(({ id, label, act }) => (
-          <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
-            <small>{act}</small>
-            <span>{label}</span>
-          </a>
-        ))}
-      </nav>
+      <DreamSectionNav />
 
       <section
         ref={heroRef}

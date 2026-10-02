@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
@@ -349,12 +349,148 @@ const CORE_SYSTEMS = [
   },
 ] as const;
 
+const releaseControlFocus = (control: HTMLElement) => {
+  window.requestAnimationFrame(() => {
+    if (document.activeElement === control) control.blur();
+  });
+};
+
+// Keep frequent comparison input updates out of the hero, stage art and effects.
+const P14Comparator = memo(function P14Comparator({
+  nativeIOSSelection,
+}: {
+  nativeIOSSelection: boolean;
+}) {
+  const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
+  const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
+  return (
+    <div className="rxs-p14-comparator rxs-reveal">
+      <header>
+        <div>
+          <small>GENERATION COMPARISON</small>
+          <h3>P14 / {p14Baseline.toUpperCase()}比</h3>
+        </div>
+        <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}比</output>
+      </header>
+
+      <div className="rxs-p14-range-control" data-baseline={p14Baseline}>
+        <div className="rxs-p14-range-labels">
+          <button
+            type="button"
+            className={p14Baseline === "p1" ? "is-active" : undefined}
+            aria-pressed={p14Baseline === "p1"}
+            onClick={() => setP14Baseline("p1")}
+            onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+          >
+            P1比
+          </button>
+          <button
+            type="button"
+            className={p14Baseline === "p2" ? "is-active" : undefined}
+            aria-pressed={p14Baseline === "p2"}
+            onClick={() => setP14Baseline("p2")}
+            onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+          >
+            P2比
+          </button>
+        </div>
+        {nativeIOSSelection ? (
+          <label className="rxs-p14-native-select">
+            <span>iOS標準選択</span>
+            <select
+              id="rxs-p14-baseline"
+              value={p14Baseline}
+              aria-label="P14の比較基準"
+              aria-describedby="rxs-p14-baseline-help"
+              onPointerDown={(event) => {
+                event.currentTarget.dataset.pointerFocus = "true";
+              }}
+              onInput={(event) => {
+                setP14Baseline(event.currentTarget.value as P14Baseline);
+              }}
+              onChange={(event) => {
+                setP14Baseline(event.currentTarget.value as P14Baseline);
+              }}
+            >
+              <option value="p1">P1比</option>
+              <option value="p2">P2比</option>
+            </select>
+          </label>
+        ) : (
+          <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
+            <span className="rxs-p14-ios-track" aria-hidden="true">
+              <i />
+            </span>
+            <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+            <input
+              id="rxs-p14-baseline"
+              type="range"
+              min="1"
+              max="2"
+              step="1"
+              value={p14Baseline === "p1" ? 1 : 2}
+              aria-label="P14の比較対象"
+              aria-describedby="rxs-p14-baseline-help"
+              aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
+              onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+              onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+              onPointerUp={(event) => {
+                syncP14Baseline(event.currentTarget.valueAsNumber);
+                releaseControlFocus(event.currentTarget);
+              }}
+              onTouchEnd={(event) => {
+                syncP14Baseline(event.currentTarget.valueAsNumber);
+                releaseControlFocus(event.currentTarget);
+              }}
+            />
+          </div>
+        )}
+        <p id="rxs-p14-baseline-help">
+          {nativeIOSSelection
+            ? "iOS標準選択から、100%とする比較基準をP1またはP2へ切り替えられます。"
+            : "スライダーを動かすか両端をタップして、100%とする比較基準をP1またはP2へ切り替えられます。"}
+        </p>
+      </div>
+
+      <div
+        key={p14Baseline}
+        className="rxs-p14-metrics"
+        data-baseline={p14Baseline}
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {P14_METRICS.map((metric) => (
+          <article key={metric.label}>
+            <small>{metric.label}</small>
+            <div className="rxs-p14-values">
+              <span>
+                <i>{p14Baseline.toUpperCase()}（基準）</i>
+                <b>100%</b>
+              </span>
+              <span>
+                <i>P14（換算）</i>
+                <strong>{metric.relative[p14Baseline]}</strong>
+              </span>
+            </div>
+            <p key={`${metric.label}-${p14Baseline}`}>
+              <span>{metric.deltaLabel}</span>
+              <b>{metric.delta[p14Baseline]}</b>
+            </p>
+          </article>
+        ))}
+      </div>
+      <p className="rxs-p14-method-note">
+        選択したP1またはP2を100%として、P14を相対換算しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
+      </p>
+    </div>
+  );
+});
+
 export function RexonanceSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
   const [performanceBaseline, setPerformanceBaseline] = useState<PerformanceBaseline>("extreme");
-  const [p14Baseline, setP14Baseline] = useState<P14Baseline>("p1");
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const [stageCall, setStageCall] = useState<{ id: number; stage: RexonanceStage } | null>(null);
@@ -365,12 +501,6 @@ export function RexonanceSaga() {
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
   const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
-  const syncP14Baseline = (value: number) => setP14Baseline(value >= 2 ? "p2" : "p1");
-  const releaseControlFocus = (control: HTMLElement) => {
-    window.requestAnimationFrame(() => {
-      if (document.activeElement === control) control.blur();
-    });
-  };
 
   const cancelStageCall = useCallback(() => {
     stageCallId.current += 1;
@@ -681,11 +811,11 @@ export function RexonanceSaga() {
           </p>
           <h1 id="rxs-title">
             <span>REXONANCE SAGA</span>
-            限りなく、
+            共鳴を、
             <br />
-            限りない
+            使いこなす。
           </h1>
-          <p className="rxs-hero-lede">史上最強のサーガ</p>
+          <p className="rxs-hero-lede">三者が独立したまま、力を重ねる。</p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <RexonanceAperture />
@@ -731,7 +861,7 @@ export function RexonanceSaga() {
           <h2>
             標準状態で、
             <br />
-            従来の強さを超える。
+            この実力。
           </h2>
           <span>
             公開済みの標準カタログ値で、{activePerformanceBaseline.label}
@@ -865,9 +995,9 @@ export function RexonanceSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>PROCESSING CORE / P14</p>
           <h2 id="rxs-p14-title">
-            エーテルを、
+            同じエーテルで、
             <br />
-            効率よく力に変える。
+            より高い性能へ。
           </h2>
           <span>
             P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
@@ -909,125 +1039,7 @@ export function RexonanceSaga() {
           </div>
         </div>
 
-        <div className="rxs-p14-comparator rxs-reveal">
-          <header>
-            <div>
-              <small>GENERATION COMPARISON</small>
-              <h3>P14 / {p14Baseline.toUpperCase()}比</h3>
-            </div>
-            <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}比</output>
-          </header>
-
-          <div className="rxs-p14-range-control" data-baseline={p14Baseline}>
-            <div className="rxs-p14-range-labels">
-              <button
-                type="button"
-                className={p14Baseline === "p1" ? "is-active" : undefined}
-                aria-pressed={p14Baseline === "p1"}
-                onClick={() => setP14Baseline("p1")}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                P1比
-              </button>
-              <button
-                type="button"
-                className={p14Baseline === "p2" ? "is-active" : undefined}
-                aria-pressed={p14Baseline === "p2"}
-                onClick={() => setP14Baseline("p2")}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                P2比
-              </button>
-            </div>
-            {nativeIOSSelection ? (
-              <label className="rxs-p14-native-select">
-                <span>iOS標準選択</span>
-                <select
-                  id="rxs-p14-baseline"
-                  value={p14Baseline}
-                  aria-label="P14の比較基準"
-                  aria-describedby="rxs-p14-baseline-help"
-                  onPointerDown={(event) => {
-                    event.currentTarget.dataset.pointerFocus = "true";
-                  }}
-                  onInput={(event) => {
-                    setP14Baseline(event.currentTarget.value as P14Baseline);
-                  }}
-                  onChange={(event) => {
-                    setP14Baseline(event.currentTarget.value as P14Baseline);
-                  }}
-                >
-                  <option value="p1">P1比</option>
-                  <option value="p2">P2比</option>
-                </select>
-              </label>
-            ) : (
-              <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
-                <span className="rxs-p14-ios-track" aria-hidden="true">
-                  <i />
-                </span>
-                <span className="rxs-p14-ios-thumb" aria-hidden="true" />
-                <input
-                  id="rxs-p14-baseline"
-                  type="range"
-                  min="1"
-                  max="2"
-                  step="1"
-                  value={p14Baseline === "p1" ? 1 : 2}
-                  aria-label="P14の比較対象"
-                  aria-describedby="rxs-p14-baseline-help"
-                  aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
-                  onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                  onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
-                  onPointerUp={(event) => {
-                    syncP14Baseline(event.currentTarget.valueAsNumber);
-                    releaseControlFocus(event.currentTarget);
-                  }}
-                  onTouchEnd={(event) => {
-                    syncP14Baseline(event.currentTarget.valueAsNumber);
-                    releaseControlFocus(event.currentTarget);
-                  }}
-                />
-              </div>
-            )}
-            <p id="rxs-p14-baseline-help">
-              {nativeIOSSelection
-                ? "iOS標準選択から、100%とする比較基準をP1またはP2へ切り替えられます。"
-                : "スライダーを動かすか両端をタップして、100%とする比較基準をP1またはP2へ切り替えられます。"}
-            </p>
-          </div>
-
-          <div
-            key={p14Baseline}
-            className="rxs-p14-metrics"
-            data-baseline={p14Baseline}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {P14_METRICS.map((metric) => (
-              <article key={metric.label}>
-                <small>{metric.label}</small>
-                <div className="rxs-p14-values">
-                  <span>
-                    <i>{p14Baseline.toUpperCase()}（基準）</i>
-                    <b>100%</b>
-                  </span>
-                  <span>
-                    <i>P14（換算）</i>
-                    <strong>{metric.relative[p14Baseline]}</strong>
-                  </span>
-                </div>
-                <p key={`${metric.label}-${p14Baseline}`}>
-                  <span>{metric.deltaLabel}</span>
-                  <b>{metric.delta[p14Baseline]}</b>
-                </p>
-              </article>
-            ))}
-          </div>
-          <p className="rxs-p14-method-note">
-            選択したP1またはP2を100%として、P14を相対換算しています。損失割合、高負荷時の出力低下、応答時間は、値が小さいほど高性能なため削減率・短縮率で表示しています。
-          </p>
-        </div>
+        <P14Comparator nativeIOSSelection={nativeIOSSelection} />
       </section>
 
       <section id="stages" className="rxs-stages rxs-section">

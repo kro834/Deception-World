@@ -46,8 +46,7 @@ await page.addInitScript(() => {
       }
     };
   }
-  // Count commits without changing the app's React tree. Named component
-  // counts are available on the development build; total commits work on both.
+  // Identify the page by its main host child, including minified production builds.
   window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
     supportsFiber: true,
     renderers: new Map(),
@@ -60,7 +59,12 @@ await page.addInitScript(() => {
       audit.commits += 1;
       const visit = (fiber) => {
         if (!fiber) return;
-        if (fiber.type?.name === "RexonanceSaga" && fiber.flags & 1) {
+        if (
+          typeof fiber.type === "function" &&
+          fiber.child?.type === "main" &&
+          fiber.child.memoizedProps?.className?.includes("rxs-rexonance-page") &&
+          fiber.flags & 1
+        ) {
           audit.rexonanceCommits += 1;
         }
         visit(fiber.child);
@@ -201,6 +205,9 @@ try {
     }),
   );
   assert.equal(p14.observerCreates, 0, "P14 inputs must not reinitialize observers or art warmup");
+  if (process.env.PERF_BASELINE !== "1") {
+    assert.equal(p14.rexonanceCommits, 0, "P14 inputs must only render their own comparator");
+  }
 
   const scroll = await measure("scroll-past-hero-60", () =>
     page.evaluate(async () => {

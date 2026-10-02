@@ -148,6 +148,7 @@
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   align-content: center;
@@ -257,9 +258,30 @@
   }
 }
 
+/* The large existing arrows are hidden on phones. A smaller drawn cue
+   sits below the second line without consuming the three columns' width. */
+@media (max-width: 600px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a::after {
+    position: absolute;
+    right: 10px;
+    bottom: 9px;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid var(--rx-edition-gold);
+    border-bottom: 1.5px solid var(--rx-edition-gold);
+    content: "";
+    rotate: -45deg;
+    pointer-events: none;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover {
     background: #10202d;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover i {
+    color: var(--rx-edition-ivory);
   }
 }
 
@@ -292,6 +314,10 @@
   .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-hero, .rxs-local-nav, .rxs-chapter-index) {
     background: Canvas;
     border-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a::after {
+    border-color: LinkText;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero h1 {
