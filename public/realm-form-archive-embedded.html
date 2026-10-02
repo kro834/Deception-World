@@ -9213,6 +9213,8 @@ th {
 </style>
 <style id="realm-v26-saga-ui-parity">
 /* Realm form-selection motion: the same lock animation used by the Saga selector. */
+/* Keep the legacy checked-radio palette standalone-only; embedded archives
+   use the shared selection plate and check in archive-elevation.css. */
 #edition-panel-realm#edition-panel-realm #realm--form-selector .form-chip {
   grid-template-columns:minmax(0,1fr) auto;
 }
@@ -9224,15 +9226,15 @@ th {
   display:block;
 }
 
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-stella:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-stella"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-burst:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-burst"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-blast:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-blast"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-legends:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-legends"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-wrath"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-abyss"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-birth"],
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-nehan"] {
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-stella:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-stella"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-burst:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-burst"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-blast:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-blast"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-legends:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-legends"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-wrath"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-abyss"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-birth"],
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-nehan"] {
   color:#fff!important;
   border-color:var(--active-line)!important;
   background:linear-gradient(105deg,rgb(var(--active-rgb)/19%),rgb(var(--active-2-rgb)/5%))!important;
@@ -9253,15 +9255,15 @@ th {
   transform:scaleY(1);
 }
 
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-stella:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-stella"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-burst:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-burst"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-blast:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-blast"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-legends:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-legends"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-wrath"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-abyss"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-birth"] .chip-mark,
-#edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-nehan"] .chip-mark {
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-stella:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-stella"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-burst:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-burst"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-blast:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-blast"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-legends:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-legends"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-wrath:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-wrath"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-abyss:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-abyss"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-birth:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-birth"] .chip-mark,
+html:not([data-embedded-archive]) #edition-panel-realm#edition-panel-realm #realm--saga-forms-performance-v5#realm--saga-forms-performance-v5 #realm--saga-pick-royal-nehan:checked ~ .archive-workspace #realm--form-selector .form-chip[for="realm--saga-pick-royal-nehan"] .chip-mark {
   border-color:var(--active-2)!important;
   background:var(--active-2)!important;
   box-shadow:0 0 0 .18rem rgb(var(--active-2-rgb)/12%),0 0 10px var(--active-2)!important;
@@ -9551,7 +9553,7 @@ th {
 <script src="/archive-zeus-bridge.js?v=20260928-z1" defer></script>
 </head>
 <body>
-<link rel="stylesheet" href="/archive-elevation.css?v=20260928-elev2">
+<link rel="stylesheet" href="/archive-elevation.css?v=20261003-elev3">
   <input class="edition-choice" type="radio" name="edition-choice" id="edition-choice-saga" value="saga">
   <input class="edition-choice" type="radio" name="edition-choice" id="edition-choice-realm" value="realm" checked>
   <header class="edition-shell">
@@ -9686,7 +9688,7 @@ th {
     updateStatus();
   });
 })()</script>
-<script src="/realm-archive-motion.js?v=20260930-r48" defer></script>
+<script src="/realm-archive-motion.js?v=20261003-r49" defer></script>
 <script src="/realm-archive-update.js?v=20260822-r34" defer></script>
 <script src="/archive-comparison-modern.js?v=20260918-readable" defer></script>
 <script data-archive-ready-signal>

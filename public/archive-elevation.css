@@ -1119,7 +1119,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected {
   border-color: var(--ar-ice) !important;
-  background: rgb(122 232 255 / 10%) !important;
+  background: #142e3b !important;
   box-shadow: inset 3px 0 0 var(--ar-ice) !important;
   color: #fff !important;
 }
@@ -1221,14 +1221,44 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .chip-mark {
+  display: grid !important;
+  place-items: center;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 3px !important;
   border-color: rgb(122 232 255 / 40%) !important;
+  background: transparent !important;
+  color: var(--ar-text-3);
   box-shadow: none !important;
+}
+
+/* The outline is an affordance; the filled check is an actual selection.
+   Neither depends on a glow, hover, or motion to communicate its state. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .chip-mark::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-top: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  rotate: 45deg;
+  translate: -1px 0;
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected .chip-mark {
   border-color: var(--ar-ice) !important;
   background: var(--ar-ice) !important;
+  color: var(--ar-ink);
   box-shadow: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected .chip-mark::after {
+  width: 7px;
+  height: 4px;
+  border: 0;
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  rotate: -45deg;
+  translate: 0 -1px;
 }
 
 /* The selected readout. */
@@ -1344,6 +1374,42 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .search-clear {
   border-color: transparent !important;
   background: transparent !important;
+}
+
+/* There is already one named, 44px clear button. Hide the browser's
+   second cancel glyph, which otherwise appears alongside it in WebKit. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 16px 12px;
+  border: 1px solid rgb(122 232 255 / 24%);
+  border-radius: 4px;
+  background: #0a1523;
+  color: var(--ar-text-2);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty-reset {
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid var(--ar-ice);
+  border-radius: 4px;
+  background: #142e3b;
+  color: var(--ar-text);
+  font: 600 13px/1.4 var(--ar-jp);
+  cursor: pointer;
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-footnote {
@@ -2096,7 +2162,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   border: 1px solid rgb(122 232 255 / 20%) !important;
   border-bottom: 0 !important;
   border-radius: 4px 4px 0 0 !important;
-  background: rgb(4 8 15 / 95%) !important;
+  background: #04080f !important;
   box-shadow: none !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -2120,7 +2186,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current {
   border-color: rgb(122 232 255 / 40%) !important;
-  background: rgb(122 232 255 / 10%) !important;
+  background: #142e3b !important;
   color: #fff !important;
 }
 
@@ -2665,6 +2731,12 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
     border-color: Highlight !important;
     background: Highlight !important;
     color: HighlightText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected .chip-mark {
+    border-color: HighlightText !important;
+    background: HighlightText !important;
+    color: Highlight !important;
   }
 
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .spec-item[data-compare-result="lead"] {

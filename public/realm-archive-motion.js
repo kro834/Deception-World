@@ -126,7 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
   tools.innerHTML = `
     <div class="selector-search">
       <label class="sr-only" for="realm--saga-form-search">フォーム名を検索</label>
-      <input id="realm--saga-form-search" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="フォーム名を検索" aria-describedby="realm--saga-search-summary">
+      <input id="realm--saga-form-search" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="フォーム名を検索" title="フォーム名やコードで検索。スペースで区切ると複数の語で絞り込めます。" aria-describedby="realm--saga-search-summary realm--saga-search-help">
+      <span id="realm--saga-search-help" class="sr-only">フォーム名やコードで検索。スペースで区切ると複数の語で絞り込めます。</span>
       <span class="search-hint" aria-hidden="true">/</span>
       <button class="search-clear" type="button" aria-label="検索を消去" hidden tabindex="-1">×</button>
     </div>
@@ -138,10 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
   searchSummary.setAttribute('aria-live', 'polite');
   searchSummary.innerHTML = '<span>09 / 09 FORMS</span><span>TYPE TO FILTER</span>';
 
-  const noResults = document.createElement('p');
+  const noResults = document.createElement('div');
   noResults.className = 'selector-empty';
   noResults.hidden = true;
-  noResults.textContent = '該当するフォームはありません。';
+  noResults.innerHTML = '<p>該当するフォームはありません。</p><button type="button" class="selector-empty-reset">検索を解除</button>';
   progression.after(noResults);
 
   if (selectorHeading) {
@@ -793,10 +794,10 @@ document.addEventListener('DOMContentLoaded', () => {
     warmNeighbors(defaultIndex);
   }
 
-  function moveSelection(step, options = {}) {
+  function moveSelection(step, options = {}, fromIndex = selectedIndex) {
     const available = visibleItems();
     if (!available.length) return;
-    const current = items[selectedIndex];
+    const current = items[fromIndex];
     let position = available.indexOf(current);
     if (position < 0) position = step > 0 ? -1 : 0;
     const next = available[(position + step + available.length) % available.length];
@@ -821,10 +822,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
         event.preventDefault();
-        moveSelection(1, { focus: true, announce: true });
+        moveSelection(1, { focus: true, announce: true }, item.index);
       } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         event.preventDefault();
-        moveSelection(-1, { focus: true, announce: true });
+        moveSelection(-1, { focus: true, announce: true }, item.index);
       } else if (event.key === 'Home' || event.key === 'End') {
         event.preventDefault();
         const available = visibleItems();
@@ -875,12 +876,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function filterForms() {
     const query = normalizeSearchText(searchInput.value.trim());
+    const terms = query.split(/\s+/).filter(Boolean);
     let matches = 0;
     items.forEach(item => {
       const title = item.article.querySelector('.detail-head h3')?.textContent || '';
       const subtitle = item.article.querySelector('.detail-head p')?.textContent || '';
       const haystack = normalizeSearchText(item.chip.textContent + ' ' + title + ' ' + subtitle);
-      const hidden = Boolean(query && !haystack.includes(query));
+      const hidden = terms.some(term => !haystack.includes(term));
       item.chip.hidden = hidden;
       if (!hidden) matches += 1;
     });
@@ -927,11 +929,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-  clearSearch.addEventListener('click', () => {
+  function resetSearch() {
     searchInput.value = '';
     filterForms();
     searchInput.focus();
-  });
+  }
+  clearSearch.addEventListener('click', resetSearch);
+  noResults.querySelector('.selector-empty-reset').addEventListener('click', resetSearch);
 
   document.addEventListener('keydown', event => {
     // The visible modal owns its keyboard interaction; do not open a sheet
