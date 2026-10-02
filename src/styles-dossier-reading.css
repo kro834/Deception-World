@@ -1,0 +1,111 @@
+/* Character records alternate an ink exhibition with a printed reading
+   surface. Keep the existing columns, sticky headings, copy and type scale;
+   this sheet intentionally does not style portraits, stats or comparisons. */
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
+  --record-ink: #17252f;
+  --record-copy: #334653;
+  --record-accent: color-mix(in srgb, var(--manager-accent, #205b6a) 35%, #163641);
+  color: var(--record-ink);
+  border-color: #aab9bf;
+  background:
+    linear-gradient(var(--record-accent) 0 0) 0 0 / 72px 3px no-repeat,
+    linear-gradient(120deg, #f0f3f2, #e5eae9);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 16%);
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section:target {
+  border-color: var(--record-accent);
+  box-shadow: 0 0 0 2px var(--record-accent);
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section::before {
+  background:
+    linear-gradient(var(--record-accent) 0 0) 0 0 / 22px 2px,
+    linear-gradient(var(--record-accent) 0 0) 0 0 / 2px 22px,
+    linear-gradient(#88714b 0 0) 100% 100% / 22px 2px,
+    linear-gradient(#88714b 0 0) 100% 100% / 2px 22px;
+  background-repeat: no-repeat;
+}
+
+main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .manager-copy-heading
+  > span {
+  color: transparent;
+  -webkit-text-stroke-color: var(--record-accent);
+  text-shadow: none;
+}
+
+main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .manager-copy-heading
+  > span::after {
+  background: linear-gradient(90deg, var(--record-accent), #88714b);
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-heading > p {
+  color: var(--record-accent);
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-heading h2 {
+  color: var(--record-ink);
+  text-shadow: none;
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-body p {
+  color: var(--record-copy);
+}
+
+main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .manager-copy-body
+  :is(strong, b, h3, h4) {
+  color: var(--record-ink);
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a {
+  color: var(--record-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a:focus-visible {
+  outline: 2px solid #17252f;
+  outline-offset: 4px;
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section ::selection {
+  color: #fff;
+  background: #215568;
+}
+
+@media (prefers-contrast: more) {
+  main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
+    --record-copy: #17252f;
+    --record-accent: #143c4b;
+  }
+}
+
+@media (forced-colors: active) {
+  main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
+    --record-copy: CanvasText;
+    --record-ink: CanvasText;
+    --record-accent: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section::before {
+    display: none;
+  }
+
+  main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a {
+    color: LinkText;
+  }
+
+  main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a:focus-visible {
+    outline-color: Highlight;
+  }
+}

@@ -4,6 +4,7 @@ import { OPENING_LOGO_FIRST, OPENING_LOGO_SIZES } from "@/lib/opening-logo";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
+import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/")({
         fetchPriority: "high",
       },
       { rel: "preload", as: "image", href: "/atmosphere-poster.jpg" },
+      { rel: "stylesheet", href: openingRefinementCssUrl },
       // The World's HUD face (the same Michroma subset /world and the
       // dossiers load), the title's elevation sheet, then its cinema light
       // (the arrival, the rays, the streaks), last on this route.

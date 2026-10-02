@@ -12,6 +12,8 @@ import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
 import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonancePolishCssUrl from "@/styles-rexonance-polish.css?url";
+import rexonanceEditionCssUrl from "@/styles-rexonance-edition.css?url";
+import rexonanceInstrumentCssUrl from "@/styles-rexonance-instrument.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -22,13 +24,13 @@ export const Route = createFileRoute("/rexonance-saga")({
       { title: "レクソナンスサーガ｜Deception World" },
       {
         name: "description",
-        content:
-          "無限出力を無限の攻撃へ。レクソナンスサーガの性能比較、三段階の運用形態、トリニティ・レゾナンスを体験する公式特設サイト。",
+        content: "レクソナンスサーガの標準性能、P14演算基盤、三段階の形態と共鳴構造を紹介します。",
       },
       { property: "og:title", content: "レクソナンスサーガ｜Deception World" },
       {
         property: "og:description",
-        content: "サーガシステムの次世代到達点。その性能と共鳴を体験する公式特設サイト。",
+        content:
+          "レクソナンスサーガの性能、三つの形態、悠真・レックス・ゼウスによる共鳴の仕組みを紹介します。",
       },
       { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],
@@ -42,6 +44,8 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: showcaseCinemaCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       { rel: "stylesheet", href: rexonancePolishCssUrl },
+      { rel: "stylesheet", href: rexonanceEditionCssUrl },
+      { rel: "stylesheet", href: rexonanceInstrumentCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

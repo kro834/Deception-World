@@ -346,8 +346,8 @@ test("World marks the revealed blocks and keeps every word in its JSX", async ()
   // WorldHome commit hands it the same element and React skips it.
   const titles = {
     STORY_TITLE: ["救うべき世界は、", "<em>現実</em>にある。"],
-    RIDERS_TITLE: ["八人が、世界へ。"],
-    RECORDS_TITLE: ["到達点は、", "ひとつではない。"],
+    RIDERS_TITLE: ["八人の戦いが交わる。"],
+    RECORDS_TITLE: ["戦いの記録を", "辿る。"],
     FINALE_TITLE: ["サーガは、", "まだ終わらない。"],
   };
   const componentStart = source.indexOf("export function WorldHome()");

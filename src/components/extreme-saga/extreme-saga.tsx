@@ -645,9 +645,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>TWO OPERATING STAGES</p>
           <h2>
-            増やす。
+            可能性を増やし、
             <br />
-            そして、一つへ。
+            勝利を固定する。
           </h2>
         </header>
 
@@ -762,7 +762,7 @@ export function ExtremeSaga() {
       <footer className="rxs-footer">
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
-          <h2>至高は、勝利という結果になる。</h2>
+          <h2>可能性を広げ、勝利をつかむ。</h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>人物・能力の詳細を見る</span>

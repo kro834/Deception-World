@@ -524,9 +524,9 @@ export function FinalStage() {
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / STORY</p>
           <h2>
-            帰るべき場所へ、
+            仲間と共に、
             <br />
-            明日へと続く帰り道を。
+            帰り道を切り拓く。
           </h2>
           <span>{STORY.title}</span>
         </header>
@@ -544,11 +544,11 @@ export function FinalStage() {
         <header className="rxs-section-heading rxs-reveal">
           <p>02 / CHARACTERS</p>
           <h2>
-            帰還した仲間と、
+            悠真の帰還を巡る、
             <br />
-            道を照らす者たち。
+            八人の登場人物。
           </h2>
-          <span>八人の登場人物。各記録はディセプションワールドの人物資料へ接続します。</span>
+          <span>登場人物を切り替えて、役割と詳細を確認できます。</span>
         </header>
         <div className="fst-cast-console rxs-reveal">
           <div

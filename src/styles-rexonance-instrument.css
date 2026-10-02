@@ -1,0 +1,517 @@
+/* Rexonance's core, operating chamber and independent voices form one
+   instrument. Paint stays separate from the measured comparison controls,
+   catalogue values, existing type sizes and the whole-art image framing. */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --ri-ink: #050912;
+  --ri-panel: #101722;
+  --ri-ivory: #f0f6ff;
+  --ri-cyan: #7ae8ff;
+  --ri-amethyst: #b6a3ff;
+  --ri-gold: #e3c185;
+  --ri-rule: rgb(240 246 255 / 15%);
+  --ri-copy: #c1cbd8;
+}
+
+/* P14: the supplied image is the chip, the surrounding dark enclosure is
+   its package. The overview and the comparator remain separate surfaces. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-p14 {
+  background:
+    linear-gradient(90deg, transparent 49.9%, rgb(122 232 255 / 5%) 50%, transparent 50.1%),
+    linear-gradient(180deg, #101a28, #0c121d 62%, var(--ri-ink));
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 36px 2px no-repeat,
+    linear-gradient(var(--ri-rule) 0 0) 0 100% / 100% 1px no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure {
+  border-radius: 2px;
+  background: var(--ri-ink);
+  box-shadow: inset 0 0 0 1px var(--ri-rule);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure::after {
+  inset: 0;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, var(--ri-cyan) 0 2px, transparent 2px 18px) 50% 6px /
+      calc(100% - 48px) 2px,
+    repeating-linear-gradient(90deg, var(--ri-gold) 0 2px, transparent 2px 18px) 50%
+      calc(100% - 6px) / calc(100% - 48px) 2px,
+    linear-gradient(var(--ri-cyan) 0 0) 0 0 / 22px 2px,
+    linear-gradient(var(--ri-cyan) 0 0) 0 0 / 2px 22px,
+    linear-gradient(var(--ri-amethyst) 0 0) 100% 0 / 22px 2px,
+    linear-gradient(var(--ri-amethyst) 0 0) 100% 0 / 2px 22px,
+    linear-gradient(var(--ri-gold) 0 0) 0 100% / 22px 2px,
+    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 22px 2px,
+    linear-gradient(var(--ri-ink) 0 0) 0 0 / 100% 14px,
+    linear-gradient(var(--ri-ink) 0 0) 0 100% / 100% 14px;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(240 246 255 / 25%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy {
+  position: relative;
+  background: linear-gradient(var(--ri-cyan) 0 0) 0 0 / 42px 2px no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > small {
+  color: var(--ri-cyan);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy h3 {
+  color: var(--ri-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > p {
+  color: var(--ri-copy);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div {
+  position: relative;
+  border-top-color: var(--ri-rule);
+  background:
+    linear-gradient(var(--ri-cyan) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 4%), transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:nth-child(2) {
+  background:
+    linear-gradient(var(--ri-amethyst) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 4%), transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:last-child {
+  background:
+    linear-gradient(var(--ri-gold) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 4%), transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dt {
+  color: #a8b6c9;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dd {
+  color: var(--ri-ivory);
+}
+
+/* A selected operating state occupies a single chamber. The artwork keeps
+   its reserved box and object-fit; the coloured chamber is drawn behind it. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(90deg, var(--rxs-stage-accent), var(--ri-gold)) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(240 246 255 / 3%), transparent 64%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure {
+  border-radius: 2px;
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 45%,
+      color-mix(in srgb, var(--rxs-stage-accent) 14%, transparent) 45.2% 45.5%,
+      transparent 45.7%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 61%,
+      rgb(240 246 255 / 8%) 61.2% 61.5%,
+      transparent 61.7%
+    ),
+    linear-gradient(
+      90deg,
+      transparent calc(50% - 0.5px),
+      color-mix(in srgb, var(--rxs-stage-accent) 18%, transparent) 50%,
+      transparent calc(50% + 0.5px)
+    ),
+    linear-gradient(180deg, #101b2a, var(--ri-ink));
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure > span,
+.rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"] .rxs-stage-panel figure > span {
+  inset: 0;
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--rxs-stage-accent) 0 0) 0 0 / 42px 2px,
+    linear-gradient(var(--rxs-stage-accent) 0 0) 0 0 / 2px 42px,
+    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 42px 2px,
+    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 2px 42px,
+    repeating-linear-gradient(180deg, rgb(240 246 255 / 28%) 0 1px, transparent 1px 20px) 12px 50% /
+      6px 42%,
+    linear-gradient(var(--rxs-stage-accent) 0 0) 100% 50% / 3px 44px;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(240 246 255 / 12%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div {
+  position: relative;
+  background:
+    linear-gradient(var(--ri-rule) 0 0) 100% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--rxs-stage-accent) 0 0) 100% 0 / 1px 48px no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > small {
+  border-color: color-mix(in srgb, var(--rxs-stage-accent) 58%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--rxs-stage-accent) 10%, var(--ri-ink));
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel h3 {
+  color: var(--ri-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > p {
+  color: var(--ri-copy);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel ul {
+  border-bottom-color: var(--ri-rule);
+  counter-reset: ri-terminal;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel li {
+  position: relative;
+  border-top-color: var(--ri-rule);
+  color: var(--ri-ivory);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rxs-stage-accent) 5%, transparent),
+    transparent 82%
+  );
+  counter-increment: ri-terminal;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel li::before {
+  color: var(--rxs-stage-accent);
+  content: counter(ri-terminal, decimal-leading-zero) " /";
+  content: counter(ri-terminal, decimal-leading-zero) " /" / "";
+}
+
+/* Trinity: three distinct input plates share a lower bus. Human will is
+   the pale, legible decision surface, rather than a third machine tile. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-system {
+  background: linear-gradient(180deg, #0c121d, var(--ri-ink) 78%), var(--ri-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid::after {
+  position: absolute;
+  z-index: -1;
+  right: 16.666%;
+  bottom: -24px;
+  left: 16.666%;
+  height: 24px;
+  border-right: 1px solid var(--ri-gold);
+  border-bottom: 1px solid var(--ri-gold);
+  border-left: 1px solid var(--ri-gold);
+  background: linear-gradient(var(--ri-gold) 0 0) 50% 0 / 1px 24px no-repeat;
+  opacity: 0.65;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article {
+  --ri-voice: var(--ri-cyan);
+  position: relative;
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--ri-voice) 0 0) 0 0 / 100% 3px no-repeat,
+    linear-gradient(var(--ri-gold) 0 0) 50% 100% / 36px 2px no-repeat,
+    linear-gradient(160deg, #182333, var(--ri-panel) 70%);
+  box-shadow: inset 0 0 0 1px var(--ri-rule);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:nth-child(2) {
+  --ri-voice: var(--ri-amethyst);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article header span {
+  -webkit-text-stroke-color: var(--ri-voice);
+  text-shadow: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article header small {
+  color: var(--ri-voice);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid h3 {
+  color: var(--ri-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid p {
+  color: var(--ri-copy);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+  --ri-voice: #604e32;
+  background:
+    linear-gradient(var(--ri-gold) 0 0) 0 0 / 100% 3px no-repeat,
+    linear-gradient(#604e32 0 0) 50% 100% / 36px 2px no-repeat,
+    linear-gradient(145deg, var(--ri-ivory), #e6e6de);
+  box-shadow: inset 0 0 0 1px rgb(240 246 255 / 38%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:last-child h3 {
+  color: var(--ri-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:last-child p {
+  color: #334052;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs {
+  position: relative;
+  background: linear-gradient(90deg, transparent 18%, rgb(122 232 255 / 4%) 50%, transparent 82%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div {
+  border-top-color: var(--ri-rule);
+  background: linear-gradient(var(--ri-cyan) 0 0) 0 0 / 42px 2px no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div:last-child {
+  background: linear-gradient(var(--ri-amethyst) 0 0) 100% 0 / 42px 2px no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div > small {
+  color: var(--ri-cyan);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div:last-child > small {
+  color: var(--ri-amethyst);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > i {
+  color: var(--ri-gold);
+}
+
+/* The ending is a still resonance field. Three arcs end in a measured gold
+   terminal, while the existing onward plates retain their hit areas. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer {
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 35%,
+      rgb(122 232 255 / 15%) 35.1% 35.25%,
+      transparent 35.4%
+    ),
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 46%,
+      rgb(182 163 255 / 15%) 46.1% 46.25%,
+      transparent 46.4%
+    ),
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 57%,
+      rgb(227 193 133 / 18%) 57.1% 57.25%,
+      transparent 57.4%
+    ),
+    linear-gradient(120deg, #101b29, var(--ri-ink) 58%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer::before {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--ri-cyan),
+    var(--ri-amethyst) 46%,
+    var(--ri-gold) 80%,
+    transparent
+  );
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer::after {
+  width: 72px;
+  height: 18px;
+  background:
+    linear-gradient(var(--ri-gold) 0 0) 0 50% / 72px 1px,
+    linear-gradient(var(--ri-gold) 0 0) 100% 50% / 2px 18px,
+    linear-gradient(var(--ri-cyan) 0 0) 0 50% / 4px 4px;
+  background-repeat: no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > div p {
+  color: var(--ri-gold);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer h2 {
+  color: var(--ri-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return) {
+  border-color: var(--ri-rule);
+  border-radius: 2px;
+  color: var(--ri-ivory);
+  background:
+    linear-gradient(var(--ri-cyan) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--ri-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    var(--ri-panel);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:first-of-type {
+  border-color: rgb(227 193 133 / 48%);
+  color: var(--ri-ink);
+  background:
+    linear-gradient(var(--ri-gold) 0 0) 0 0 / 32px 2px no-repeat,
+    var(--ri-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:first-of-type i {
+  border-color: #8b764f;
+  color: var(--ri-ink);
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid::after {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article {
+    background:
+      linear-gradient(var(--ri-voice) 0 0) 0 0 / 3px 100% no-repeat,
+      linear-gradient(var(--ri-gold) 0 0) 100% 100% / 36px 2px no-repeat,
+      linear-gradient(160deg, #182333, var(--ri-panel) 70%);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+    background:
+      linear-gradient(var(--ri-gold) 0 0) 0 0 / 3px 100% no-repeat,
+      linear-gradient(#604e32 0 0) 100% 100% / 36px 2px no-repeat,
+      linear-gradient(145deg, var(--ri-ivory), #e6e6de);
+  }
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div {
+    background:
+      linear-gradient(var(--ri-rule) 0 0) 100% 0 / 1px 100% no-repeat,
+      linear-gradient(var(--rxs-stage-accent) 0 0) 0 0 / 36px 2px no-repeat;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure > span,
+  .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"] .rxs-stage-panel figure > span {
+    background-size:
+      24px 2px,
+      2px 24px,
+      24px 2px,
+      2px 24px,
+      4px 36%,
+      2px 28px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return):hover {
+    border-color: var(--ri-gold);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:first-of-type:hover {
+    color: var(--ri-ink);
+    background: #fff;
+  }
+}
+
+/* All the new surfaces are static. These modes also remove the decorative
+   field so increased contrast is carried by solid ink and readable plates. */
+@media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer {
+    background: var(--ri-ink);
+  }
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure,
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer {
+  background: var(--ri-ink);
+}
+
+@media (prefers-contrast: more) {
+  .rxs-page.rxs-page.rxs-rexonance-page {
+    --ri-rule: rgb(240 246 255 / 55%);
+    --ri-copy: var(--ri-ivory);
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-p14-overview,
+      .rxs-p14-overview figure,
+      .rxs-p14-copy,
+      .rxs-p14-copy dl div,
+      .rxs-stage-panel,
+      .rxs-stage-panel figure,
+      .rxs-stage-panel > div,
+      .rxs-stage-panel li,
+      .rxs-system-grid article,
+      .rxs-specs,
+      .rxs-specs > div,
+      .rxs-footer,
+      .rxs-footer > a
+    ) {
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+    background: Canvas;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-p14-copy > small,
+      .rxs-p14-copy h3,
+      .rxs-p14-copy > p,
+      .rxs-p14-copy dt,
+      .rxs-p14-copy dd,
+      .rxs-stage-panel h3,
+      .rxs-stage-panel > div > p,
+      .rxs-stage-panel li,
+      .rxs-system-grid h3,
+      .rxs-system-grid p,
+      .rxs-system-grid article header small,
+      .rxs-specs > div > small,
+      .rxs-specs > i,
+      .rxs-footer > div p,
+      .rxs-footer h2,
+      .rxs-footer > a:first-of-type,
+      .rxs-footer > a:first-of-type i
+    ) {
+    color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:last-child :is(h3, p) {
+    color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article header span {
+    -webkit-text-stroke-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-p14-overview figure::after,
+      .rxs-stage-panel figure > span,
+      .rxs-system-grid::after,
+      .rxs-footer::before,
+      .rxs-footer::after
+    ) {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:focus-visible {
+    outline-color: Highlight;
+  }
+}

@@ -1,0 +1,284 @@
+/* Dream Chapter: a theatre programme between velvet acts.
+   Paper belongs to reading; plum-black belongs to portraits and the stage.
+   This paint-only edition preserves the Taisho typography, artwork crop,
+   disclosure geometry and the stage sheet's existing finite motion. */
+
+.dream-page.dream-page .dream-prologue {
+  background:
+    radial-gradient(ellipse 58% 62% at 77% 45%, rgb(185 163 222 / 8%), transparent 72%),
+    linear-gradient(112deg, rgb(25 47 96 / 16%), transparent 58%), var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-prologue-card {
+  background: linear-gradient(118deg, #f4ecdc, #e8ddc8);
+  border-color: #b49151;
+  outline-color: rgb(110 44 53 / 38%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 45%);
+}
+
+.dream-page.dream-page .dream-prologue-card h2 {
+  color: #79353c;
+}
+
+.dream-page.dream-page .dream-prologue-card > p {
+  color: #2d2230;
+  text-shadow: none;
+}
+
+.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
+  color: #655766;
+}
+
+.dream-page.dream-page .dream-prologue-card::before,
+.dream-page.dream-page .dream-prologue-card::after {
+  color: #8b6b32;
+  background: #eee4d1;
+}
+
+/* The contents retains its vertical playbill grammar. A quiet brass rule
+   and solid velvet field distinguish navigation from the synopsis paper. */
+.dream-page.dream-page .dream-contents {
+  background: #1b1321;
+  border-color: rgb(200 164 92 / 55%);
+  outline-color: rgb(200 164 92 / 25%);
+  box-shadow: none;
+}
+
+/* Character dossiers are reading surfaces, not additional stage frames.
+   Keep the vermilion seal and quote line; soften the repeated inner box. */
+.dream-page.dream-page .dream-roster article {
+  background:
+    linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
+    #18111e;
+  border-color: rgb(200 164 92 / 35%);
+  outline-color: transparent;
+}
+
+.dream-page.dream-page .dream-roster-profile {
+  color: #d9cfc1;
+}
+
+.dream-page.dream-page .dream-roster h3 {
+  text-shadow: none;
+}
+
+/* The existing 七宝 pattern made the whole third-act enclosure compete
+   with four character portraits. Keep its framed stage, but let a broad
+   violet wash carry the institutional mood instead of another repeat. */
+.dream-page.dream-page .dream-dolminence-section {
+  background:
+    radial-gradient(ellipse 88% 58% at 8% 0%, rgb(185 163 222 / 10%), transparent 72%),
+    linear-gradient(132deg, #1b1424 0%, #15111e 56%, #100c16 100%);
+  border-color: rgb(200 164 92 / 58%);
+  outline-color: rgb(200 164 92 / 34%);
+}
+
+.dream-page.dream-page .dream-dolminence-grid > article {
+  background:
+    linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
+    #0e0b13;
+  border-color: rgb(200 164 92 / 40%);
+  outline-color: rgb(200 164 92 / 13%);
+}
+
+.dream-page.dream-page .dream-dolminence-intro {
+  color: #d9cfc1;
+}
+
+.dream-page.dream-page .dream-faction {
+  background:
+    linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
+    #211721;
+  border-color: rgb(200 164 92 / 38%);
+  outline-color: transparent;
+}
+
+.dream-page.dream-page .dream-faction.is-dolminence {
+  background:
+    linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
+    #16131e;
+}
+
+.dream-page.dream-page .dream-record-sheet > div {
+  border-color: rgb(200 164 92 / 23%);
+}
+
+.dream-page.dream-page .dream-record-sheet dd > p.dream-record-note {
+  color: #cfc6c3;
+}
+
+/* The fourth act settles into a warmer, quieter field; case cards retain
+   their existing paper interiors and high-contrast disclosure treatment. */
+.dream-page.dream-page .dream-case-section {
+  background:
+    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(110 44 53 / 15%), transparent 78%),
+    linear-gradient(180deg, #120d17 0%, #0d0912 48%, #110b15 100%);
+}
+
+.dream-page.dream-page .dream-story-crossings {
+  background:
+    linear-gradient(#c8a45c 0 0) top / 100% 2px no-repeat,
+    #21161e;
+  border-color: rgb(200 164 92 / 40%);
+  outline-color: transparent;
+}
+
+.dream-page.dream-page .dream-story-case {
+  background: #130e18;
+  border-color: rgb(200 164 92 / 48%);
+  outline-color: rgb(200 164 92 / 22%);
+}
+
+/* Opening a case visibly pulls its paper record out of the dark archive.
+   Only colour changes here; the six summaries and their hit areas stay put. */
+.dream-page.dream-page .dream-story-case[open] {
+  background: #eee4cd;
+  border-color: #b58c47;
+  outline-color: rgb(110 44 53 / 30%);
+}
+
+.dream-page.dream-page .dream-story-case[open] > summary {
+  background: #eee4cd;
+}
+
+.dream-page.dream-page .dream-story-case[open] .dream-story-case-heading > span {
+  color: #291d2c;
+  text-shadow: none;
+}
+
+.dream-page.dream-page
+  .dream-story-case[open]
+  :is(.dream-story-case-number, .dream-story-case-heading > small) {
+  color: #6e5d6b;
+}
+
+.dream-page.dream-page
+  .dream-story-case[open]
+  :is(.dream-story-case-number b, .dream-story-case-toggle),
+.dream-page.dream-page .dream-story-case[open] .dream-story-case-number::before {
+  color: #79353c;
+}
+
+.dream-page.dream-page .dream-story-case-body {
+  background: #eee4cd;
+  box-shadow: none;
+}
+
+/* The dictionary is the programme's last reading sheet. Local ink tokens
+   cover heading rules, quotations and labels without changing their type. */
+.dream-page.dream-page #glossary {
+  --ts-kin: #89662c;
+  --ts-kin-light: #79353c;
+  --ts-kin-deep: #a17b39;
+  --ts-kinari: #302133;
+  --ts-zoge: #4b3b4e;
+  --ts-ginnezu: #6e5d6b;
+  --ts-shu: #a13c35;
+  --ts-shu-text: #893932;
+  --ts-hair-soft: rgb(110 44 53 / 24%);
+  background: #eee5d4;
+  color: #302133;
+  box-shadow:
+    -20px 0 #eee5d4,
+    20px 0 #eee5d4;
+}
+
+.dream-page.dream-page #glossary :is(h2, dt, p) {
+  text-shadow: none;
+}
+
+.dream-page.dream-page #glossary .dream-annex-heading h2 {
+  background: none;
+  color: #79353c;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+}
+
+.dream-page.dream-page .dream-footer {
+  background: linear-gradient(180deg, #181019, #0c0810 72%);
+}
+
+/* On portrait phones the inherited layout places these two vertical
+   labels outside the paper, so they retain their light stage ink. */
+@media (max-width: 760px) and (min-height: 521px) {
+  .dream-page.dream-page .dream-prologue-card h2 {
+    color: var(--ts-kin-light);
+  }
+
+  .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
+    color: var(--ts-ginnezu);
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page
+    :is(
+      .dream-prologue,
+      .dream-prologue-card,
+      .dream-contents,
+      .dream-roster article,
+      .dream-dolminence-section,
+      .dream-dolminence-grid > article,
+      .dream-faction,
+      .dream-faction.is-dolminence,
+      .dream-case-section,
+      .dream-story-crossings,
+      .dream-story-case,
+      .dream-story-case[open],
+      .dream-story-case[open] > summary,
+      .dream-story-case-body,
+      #glossary,
+      .dream-footer
+    ) {
+    background: Canvas;
+    border-color: CanvasText;
+    outline-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-prologue-card::before,
+  .dream-page.dream-page .dream-prologue-card::after {
+    background: Canvas;
+  }
+
+  .dream-page.dream-page
+    :is(
+      .dream-prologue-card,
+      .dream-roster,
+      .dream-record-sheet,
+      .dream-dolminence-intro,
+      .dream-story-case[open],
+      #glossary
+    )
+    :is(h2, h3, p, dt, dd, span, small, b),
+  .dream-page.dream-page .dream-dolminence-intro,
+  .dream-page.dream-page .dream-story-case[open] .dream-story-case-number::before {
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .dream-page.dream-page
+    :is(
+      .dream-roster article,
+      .dream-dolminence-grid > article,
+      .dream-faction,
+      .dream-story-crossings,
+      .dream-story-case
+    ) {
+    border-color: var(--ts-kin-light);
+  }
+}
+
+/* No new motion or translucent layers are introduced in this edition.
+   Reduced/economy modes keep the same reading contrast and static paper. */
+@media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
+  .dream-page.dream-page .dream-prologue-card {
+    background: #eee4d1;
+  }
+}
+
+html[data-world-effects="economy"] .dream-page.dream-page .dream-prologue-card {
+  background: #eee4d1;
+}

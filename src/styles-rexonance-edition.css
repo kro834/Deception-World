@@ -1,0 +1,311 @@
+/* Rexonance's own exhibition: three phases around one figure. The existing
+   type scales, portrait reservation and comparison sheets keep their metrics. */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --rx-edition-ink: #050912;
+  --rx-edition-ivory: #f0f6ff;
+  --rx-edition-violet: #b6a3ff;
+  --rx-edition-gold: #e3c185;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav {
+  background: rgb(5 9 18 / 96%);
+  border-bottom-color: rgb(122 232 255 / 24%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger {
+  border: 1px solid rgb(122 232 255 / 28%);
+  border-radius: 6px;
+  background: #111d2b !important;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero {
+  background:
+    radial-gradient(ellipse at 74% 45%, rgb(62 72 122 / 24%), transparent 53%),
+    radial-gradient(ellipse at 0 100%, rgb(37 104 126 / 12%), transparent 47%),
+    var(--rx-edition-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero::before {
+  display: block;
+  z-index: -1;
+  inset: 20px max(20px, calc((100% - 1280px) / 2));
+  border-inline: 1px solid rgb(159 185 213 / 9%);
+  background:
+    linear-gradient(90deg, #7ae8ff 0 32px, transparent 32px) 0 0 / 100% 1px,
+    linear-gradient(270deg, #e3c185 0 32px, transparent 32px) 0 100% / 100% 1px;
+  background-repeat: no-repeat;
+  mask-image: none;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-copy {
+  text-align: left;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-copy > p:first-child {
+  color: #b8dfec;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero h1 {
+  background-image: linear-gradient(112deg, #fff 8%, #d2f5ff 40%, #c2b5f5 78%, #f1d7b4);
+  filter: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--rx-edition-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede::before {
+  display: block;
+  width: 28px;
+  height: 2px;
+  flex: 0 0 auto;
+  background: var(--rx-edition-gold);
+  content: "";
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual {
+  isolation: isolate;
+  background: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > img {
+  position: relative;
+  z-index: 1;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual::after {
+  z-index: 2;
+  background: linear-gradient(180deg, transparent 68%, var(--rx-edition-ink));
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rxs-orbit-a {
+  background: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture {
+  position: absolute;
+  z-index: 0;
+  top: -4%;
+  left: 50%;
+  width: 138%;
+  height: 105%;
+  max-width: none;
+  overflow: visible;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-grid {
+  stroke: #a8bdce;
+  stroke-width: 0.8;
+  opacity: 0.17;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-phase {
+  stroke: #7ae8ff;
+  stroke-width: 1.5;
+  color: #7ae8ff;
+  opacity: 0.8;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-phase.is-violet {
+  color: var(--rx-edition-violet);
+  stroke: var(--rx-edition-violet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-phase.is-gold {
+  color: var(--rx-edition-gold);
+  stroke: var(--rx-edition-gold);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-blade {
+  fill: currentColor;
+  fill-opacity: 0.05;
+  stroke-opacity: 0.3;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-graduations {
+  stroke: #dae4f0;
+  stroke-width: 1;
+  opacity: 0.45;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  border-block: 1px solid rgb(159 185 213 / 25%);
+  background: var(--rx-edition-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: center;
+  gap: 9px 16px;
+  min-height: 108px;
+  padding: 20px 28px;
+  color: var(--rx-edition-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a + a {
+  border-left: 1px solid rgb(159 185 213 / 20%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index small {
+  color: #7ae8ff;
+  font: 400 12px/1.4 var(--sc-hud);
+  letter-spacing: 0.08em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index span {
+  grid-column: 1;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index i {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--rx-edition-gold);
+  font-size: 22px;
+  font-style: normal;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: -5px;
+}
+
+/* Chapter numbers live beside the title on wide screens, freeing the
+   heading's centre for the Japanese copy. No type scale is overridden. */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading {
+    position: relative;
+    max-width: 1180px;
+    padding-left: 112px;
+    text-align: left;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading::before {
+    position: absolute;
+    top: -3px;
+    left: 0;
+    margin: 0;
+    opacity: 0.64;
+    text-shadow: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span {
+    margin-left: 0;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px), (orientation: portrait) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-copy {
+    align-self: stretch;
+    padding-inline: 8px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture {
+    width: 124%;
+  }
+}
+
+@media (max-width: 600px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
+    width: calc(100% - 40px);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    min-height: 92px;
+    padding: 16px 10px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index small {
+    letter-spacing: 0;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index i {
+    display: none;
+  }
+}
+
+@media (max-width: 340px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
+    width: calc(100% - 24px);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a {
+    padding-inline: 7px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover {
+    background: #10202d;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-aperture {
+    animation: rx-aperture-lock 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes rx-aperture-lock {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture,
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero::before,
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede::before {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-hero, .rxs-local-nav, .rxs-chapter-index) {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero h1 {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index :is(a, small, i) {
+    color: LinkText;
+    border-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:focus-visible {
+    outline-color: Highlight;
+  }
+}

@@ -192,6 +192,29 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     assert.equal(stripped.split(edited).length - 1, 1, edited);
     stripped = stripped.replace(edited, original);
   }
+  // 2026-10-02: the owner requested natural copy instead of abstract slogans.
+  // Permit only the Sol-reviewed heading and introduction edits; the column
+  // bodies, episode stories, facts and all markup retain their existing pin.
+  const copyEdits = [
+    [
+      "const RIDERS_TITLE = <>八人の戦いが交わる。</>;",
+      "const RIDERS_TITLE = <>八人が、世界へ。</>;",
+    ],
+    [
+      "    戦いの記録を\n    <br />\n    辿る。",
+      "    到達点は、\n    <br />\n    ひとつではない。",
+    ],
+    ["救うべき世界は、目の前にある。", "救うべきものは、夢の向こうにはない。"],
+    [
+      "6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。",
+      "6人の最上位管理人と、8人のライダーが同じ世界で交差する。",
+    ],
+    ["異なる立場の八人が、同じ世界で戦う。", "八つの軌跡が同じ世界で交差する。"],
+  ];
+  for (const [edited, original] of copyEdits) {
+    assert.equal(stripped.split(edited).length - 1, 1, edited);
+    stripped = stripped.replace(edited, original);
+  }
   // SHA-256 of world-home.tsx before the annex (every existing string on
   // /world). Update only on the owner's request to change that copy.
   assert.equal(

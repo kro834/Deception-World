@@ -1,0 +1,152 @@
+/* One title, one light path. Preserve the seven-second score, approved logo
+   geometry and control deck; let the background recede as the prism arrives. */
+.cine-stage.cine-stage {
+  --op-halo-rest: 0.72;
+  --op-rays-rest: 0.42;
+  background:
+    radial-gradient(ellipse at 24% 65%, rgb(61 92 113 / 16%), transparent 55%),
+    radial-gradient(ellipse at 82% 28%, rgb(119 77 108 / 10%), transparent 46%), #04080f;
+}
+
+/* Broad reflected light replaces the dense fan. The mask is static; only
+   its parent plane participates in the existing finite arrival. */
+.cine-stage .cine-rays {
+  background:
+    linear-gradient(113deg, transparent 22%, rgb(122 232 255 / 13%) 22.1%, transparent 38%),
+    linear-gradient(113deg, transparent 37%, rgb(182 163 255 / 8%) 37.1%, transparent 54%),
+    linear-gradient(293deg, transparent 22%, rgb(240 207 134 / 10%) 22.1%, transparent 43%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 36%, #000, transparent 72%);
+  mask-image: radial-gradient(ellipse at 50% 36%, #000, transparent 72%);
+}
+
+.cine-stage .cine-halo {
+  background: radial-gradient(
+    ellipse,
+    rgb(122 232 255 / 10%),
+    rgb(182 163 255 / 5%) 42%,
+    transparent 70%
+  );
+}
+
+/* A pair of diagonal registration cuts echoes the silhouette of the actual
+   wordmark without placing more lettering or a second frame over it. */
+.cine-stage .cine-depth-grid {
+  background:
+    linear-gradient(157deg, transparent 39.9%, rgb(122 232 255 / 22%) 40%, transparent 40.12%),
+    linear-gradient(157deg, transparent 59.9%, rgb(240 207 134 / 20%) 60%, transparent 60.12%);
+}
+
+.cine-stage.is-complete .cine-hud {
+  opacity: 0.14;
+}
+
+.cine-stage.is-complete .cine-aperture {
+  opacity: 0.24;
+}
+
+.cine-stage.is-complete :is(.cine-orbit-a, .cine-orbit-b) {
+  opacity: 0.18;
+}
+
+.cine-stage.is-complete .cine-editorial-word {
+  visibility: hidden;
+}
+
+.cine-stage .cine-title-caption {
+  color: #d8e3ed;
+}
+
+/* The only pale plane is the way into the film. Touch targets, type sizes
+   and positioning are unchanged, including the narrow landscape deck. */
+.cine-stage .cine-btn-primary {
+  color: #17202b;
+  border-color: #e3c185;
+  background: #edf2f3;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 32%);
+}
+
+.cine-stage .cine-btn-primary::before {
+  background:
+    linear-gradient(#9a7d46 0 0) left top / 18px 2px,
+    linear-gradient(#9a7d46 0 0) left top / 2px 18px,
+    linear-gradient(#355d6d 0 0) right bottom / 18px 2px,
+    linear-gradient(#355d6d 0 0) right bottom / 2px 18px;
+  background-repeat: no-repeat;
+}
+
+.cine-stage .cine-btn-secondary {
+  background: #0c1823;
+  color: #c9e4ed;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cine-stage .cine-btn-primary:hover {
+    color: #04080f;
+    background: #fff;
+    border-color: #fff0b5;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A diagonal light slit opens along the wordmark's own sweep. It arrives
+     before the unchanged burn starts at 2.6s. No independent clock/layer. */
+  html:not([data-world-effects="economy"]) body .cine-stage.cine-stage.is-playing .cine-logo-wrap {
+    animation-name: op-title-unseal;
+  }
+}
+
+@keyframes op-title-unseal {
+  0% {
+    opacity: 0;
+    transform: translate3d(-8px, 5px, 0) scale(1.04);
+    clip-path: polygon(0 66%, 100% 28%, 100% 28.5%, 0 66.5%);
+  }
+  18% {
+    opacity: 0.85;
+    clip-path: polygon(0 59%, 100% 21%, 100% 36%, 0 74%);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.008);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@media (orientation: portrait) {
+  .cine-stage.cine-stage {
+    --op-halo-rest: 0.5;
+    --op-rays-rest: 0.28;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
+  .cine-stage.cine-stage {
+    background: #04080f;
+  }
+}
+
+@media (forced-colors: active) {
+  .cine-stage.cine-stage {
+    background: Canvas;
+  }
+
+  .cine-stage :is(.cine-btn-primary, .cine-btn-secondary) {
+    background: ButtonFace;
+    color: ButtonText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+
+  .cine-stage .cine-title-caption {
+    color: CanvasText;
+  }
+
+  .cine-stage .cine-btn-primary::before {
+    display: none;
+  }
+}

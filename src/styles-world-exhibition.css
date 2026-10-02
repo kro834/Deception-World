@@ -1,0 +1,374 @@
+/* The World exhibition: the film stays in the dark, its story and glossary
+   open as reading sheets. All layout, type sizes, rail reservations, artwork
+   crops and opening/Zeus/reveal behaviour belong to the existing edition.
+   This sheet supplies static surfaces only, scoped to the World home. */
+main.site-shell.film-edition.mirage-edition {
+  --we-ink: #060b12;
+  --we-panel: #101922;
+  --we-paper: #e8eef0;
+  --we-print: #162632;
+  --we-teal: #205b6a;
+  --we-rule: rgb(188 208 222 / 20%);
+  --we-gold: #dec28f;
+  background:
+    radial-gradient(ellipse 78% 20% at 90% 4%, rgb(78 106 134 / 10%), transparent 75%),
+    var(--we-ink);
+}
+
+/* A calmer exhibition ground leaves the existing finite holography and
+   portraits to carry the light, instead of putting a grid behind all copy. */
+main.site-shell.film-edition.mirage-edition > .ambient .ambient-grid {
+  opacity: 0.05;
+}
+
+main.site-shell.film-edition.mirage-edition .topbar {
+  background: rgb(6 11 18 / 98%);
+  border-bottom-color: var(--we-rule);
+  box-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .hero-backdrop::after {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(6 11 18 / 97%),
+      rgb(6 11 18 / 88%) 34%,
+      rgb(6 11 18 / 40%) 68%,
+      rgb(6 11 18 / 66%)
+    ),
+    linear-gradient(0deg, var(--we-ink), transparent 36%, rgb(6 11 18 / 38%));
+}
+
+main.site-shell.film-edition.mirage-edition
+  :is(.hero, .finale-content)
+  .primary-action.ios26-glass {
+  color: var(--we-print);
+  background:
+    linear-gradient(115deg, #f1f5f5, #d5e7ea) padding-box,
+    linear-gradient(90deg, var(--mr-ice), var(--we-gold)) border-box !important;
+}
+
+main.site-shell.film-edition.mirage-edition .hero-metadata {
+  background: linear-gradient(90deg, rgb(6 11 18 / 58%), transparent);
+}
+
+/* Numerals remain the archive's voice; their face is crisp against the
+   quieter field. There is still one off-register ghost, without a halo. */
+main.site-shell.film-edition.mirage-edition :is(.section-index, .wa-chapter) > span {
+  text-shadow: none;
+}
+
+/* STORY is the programme's inserted reading sheet. The typing keyframes
+   end at color:inherit, so the existing scroll reveal follows this ink. */
+main.site-shell.film-edition.mirage-edition .story-layout {
+  --mr-ice: #205b6a;
+  --mr-gold: #8c713f;
+  --mr-prism: linear-gradient(90deg, #205b6a, #75618b 60%, #8c713f);
+  --film-scan-ink: rgb(32 91 106 / 7%);
+  --film-scan-line: rgb(32 91 106 / 48%);
+  border-color: rgb(232 238 240 / 50%);
+  color: var(--we-print);
+  background:
+    linear-gradient(var(--we-teal) 0 0) 0 0 / 68px 3px no-repeat,
+    linear-gradient(135deg, #f0f4f5, var(--we-paper) 65%),
+    var(--we-paper);
+  box-shadow: inset 0 -1px 0 rgb(6 11 18 / 16%);
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout::before {
+  color: var(--we-paper);
+  background: var(--we-teal);
+  clip-path: none;
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout::after {
+  background:
+    linear-gradient(var(--we-teal) 0 0) 0 0 / 24px 2px,
+    linear-gradient(var(--we-teal) 0 0) 0 0 / 2px 24px,
+    linear-gradient(#8c713f 0 0) 100% 100% / 24px 2px,
+    linear-gradient(#8c713f 0 0) 100% 100% / 2px 24px;
+  background-repeat: no-repeat;
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebrow > span {
+  color: var(--we-teal);
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebrow i {
+  background: linear-gradient(90deg, var(--we-teal), transparent);
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-heading h2 {
+  color: var(--we-print);
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-heading h2 em {
+  color: var(--we-teal);
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-copy > p {
+  color: #344956;
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-copy > .story-lead {
+  color: var(--we-print);
+}
+
+main.site-shell.film-edition.mirage-edition .story-layout .story-copy > .story-lead span {
+  border-color: rgb(32 91 106 / 28%);
+}
+
+/* The observation deck is deliberately a separate dark exhibit. Its front
+   edge carries the index; image tiles keep their portraits and open cues. */
+main.site-shell.film-edition.mirage-edition .threat-panel {
+  border-color: var(--we-rule);
+  background: linear-gradient(90deg, rgb(240 246 255 / 3%), transparent 38%), var(--we-panel);
+  box-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .threat-panel::after {
+  background:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 42px 2px,
+    linear-gradient(var(--we-gold) 0 0) 100% 100% / 42px 2px;
+  background-repeat: no-repeat;
+}
+
+main.site-shell.film-edition.mirage-edition .threat-copy h3 {
+  color: #e9f2f6;
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .threat-copy > p {
+  color: #c0cbd3;
+}
+
+/* The column is a warm-neutral terminal between the cast and the riders,
+   with a gold file edge. All stacked panes and controls keep their boxes. */
+main.site-shell.film-edition.mirage-edition .world-column {
+  border-color: rgb(222 194 143 / 28%);
+  background: #191e25;
+  box-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .world-column::after {
+  background:
+    linear-gradient(var(--we-gold) 0 0) 0 0 / 64px 2px,
+    linear-gradient(var(--we-gold) 0 0) 100% 100% / 22px 2px;
+  background-repeat: no-repeat;
+}
+
+main.site-shell.film-edition.mirage-edition .world-column-index > span,
+main.site-shell.film-edition.mirage-edition .world-column-number {
+  color: var(--we-gold);
+}
+
+main.site-shell.film-edition.mirage-edition .world-column-summary-pane p {
+  color: #c7d0d7;
+}
+
+/* The suit bay gives the figure a clean ink ground, and the dossier copy
+   a readable neutral face. The supplied art and its fade stay untouched. */
+main.site-shell.film-edition.mirage-edition .rider-detail {
+  background-color: var(--we-ink);
+  background-image: linear-gradient(90deg, rgb(240 246 255 / 3%), transparent 62%);
+  box-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .rider-copy-block h3 {
+  color: #f0f5f7;
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .rider-description {
+  color: #c5cfd8;
+}
+
+/* Mounted episode prints carry a light caption strip. The three-card rail,
+   its art dimensions and the independent + hit target do not move. */
+main.site-shell.film-edition.mirage-edition .episode-archive {
+  border-color: var(--we-rule);
+  background: #101720;
+  box-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .episode-archive::after {
+  background:
+    linear-gradient(var(--we-gold) 0 0) 0 0 / 52px 2px,
+    linear-gradient(var(--we-gold) 0 0) 100% 100% / 22px 2px;
+  background-repeat: no-repeat;
+}
+
+main.site-shell.film-edition.mirage-edition .episode-archive-meta p strong {
+  color: var(--we-gold);
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .episode-card-copy {
+  color: var(--we-print);
+  background: var(--we-paper);
+}
+
+main.site-shell.film-edition.mirage-edition .episode-card-copy :is(p span, p b, h4) {
+  color: var(--we-print);
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .episode-card-copy small {
+  color: var(--we-teal);
+}
+
+/* The appendix opens through a quiet gold directory. Portraits stay the
+   dark archive's identity; document titles no longer need chrome ghosts. */
+main.site-shell.film-edition.mirage-edition .wa-contents a {
+  border-color: rgb(222 194 143 / 32%);
+  background:
+    linear-gradient(var(--we-gold) 0 0) 0 100% / 28px 2px no-repeat,
+    #171d25;
+}
+
+main.site-shell.film-edition.mirage-edition .wa-contents small {
+  color: var(--we-gold);
+}
+
+main.site-shell.film-edition.mirage-edition :is(.wa-heading h2, .wa-contents h2) {
+  color: #f0f5f7;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+}
+
+main.site-shell.film-edition.mirage-edition .wa-plate h3 {
+  text-shadow: none;
+}
+
+main.site-shell.film-edition.mirage-edition .wa-brief {
+  border-color: var(--we-rule);
+  background:
+    linear-gradient(var(--we-gold) 0 0) 0 0 / 32px 2px no-repeat,
+    #111a24;
+}
+
+main.site-shell.film-edition.mirage-edition .wa-brief::before {
+  background: linear-gradient(90deg, var(--mr-ice), var(--we-gold));
+  opacity: 0.3;
+}
+
+/* A second reading sheet closes the narrative's terminology. Variables
+   are local to this section, so portraits, reveal and RISING keep their ink. */
+main.site-shell.film-edition.mirage-edition #glossary {
+  --mr-text: #162632;
+  --mr-text-2: #344956;
+  --mr-text-3: #455d6c;
+  --mr-ice: #205b6a;
+  --mr-ice-hi: #205b6a;
+  --mr-violet: #75618b;
+  --mr-gold: #856730;
+  --mr-line: rgb(32 58 73 / 20%);
+  --mr-prism: linear-gradient(90deg, #205b6a, #75618b 60%, #856730);
+  color: var(--mr-text);
+  background: var(--we-paper);
+}
+
+main.site-shell.film-edition.mirage-edition #glossary .wa-heading h2 {
+  color: var(--we-print);
+}
+
+main.site-shell.film-edition.mirage-edition #glossary .wa-glossary > div {
+  background: linear-gradient(90deg, rgb(32 58 73 / 3%), transparent 36%);
+}
+
+main.site-shell.film-edition.mirage-edition #quotes {
+  background: linear-gradient(180deg, #12151b, var(--we-ink));
+}
+
+main.site-shell.film-edition.mirage-edition #quotes .wa-quote-band > li::before {
+  -webkit-text-stroke-color: var(--we-gold);
+}
+
+main.site-shell.film-edition.mirage-edition #quotes .wa-quote blockquote p {
+  color: #eef0ea;
+}
+
+/* The edition introduces no motion, blur, filters or new scroll containers.
+   Calm rendering keeps the same surface hierarchy in solid fills. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  main.site-shell.film-edition.mirage-edition .topbar {
+    background: var(--we-ink);
+  }
+
+  main.site-shell.film-edition.mirage-edition .story-layout {
+    background: var(--we-paper);
+  }
+}
+
+@media (forced-colors: active) {
+  main.site-shell.film-edition.mirage-edition
+    :is(
+      .topbar,
+      .story-layout,
+      .threat-panel,
+      .world-column,
+      .rider-detail,
+      .episode-archive,
+      .episode-card-copy,
+      .wa-brief,
+      .wa-contents a,
+      #glossary,
+      #quotes
+    ) {
+    color: CanvasText;
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.hero, .finale-content)
+    .primary-action.ios26-glass {
+    color: ButtonText;
+    background: ButtonFace !important;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    .story-layout
+    :is(
+      .story-heading .eyebrow > span,
+      .story-heading h2,
+      .story-heading h2 em,
+      .story-copy > p,
+      .story-copy > .story-lead
+    ),
+  main.site-shell.film-edition.mirage-edition
+    :is(
+      .threat-copy h3,
+      .threat-copy > p,
+      .world-column-index > span,
+      .world-column-number,
+      .world-column-summary-pane p,
+      .rider-copy-block h3,
+      .rider-description,
+      .episode-card-copy p span,
+      .episode-card-copy p b,
+      .episode-card-copy h4,
+      .episode-card-copy small,
+      .wa-contents small,
+      .wa-heading h2,
+      .wa-contents h2
+    ),
+  main.site-shell.film-edition.mirage-edition #glossary .wa-heading h2,
+  main.site-shell.film-edition.mirage-edition #quotes .wa-quote blockquote p {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.story-layout::after, .threat-panel::after, .world-column::after, .episode-archive::after) {
+    display: none;
+  }
+
+  main.site-shell.film-edition.mirage-edition #glossary .wa-glossary > div {
+    background: Canvas;
+  }
+}

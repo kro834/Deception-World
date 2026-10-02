@@ -755,12 +755,12 @@ const STORY_TITLE = (
     <em>現実</em>にある。
   </>
 );
-const RIDERS_TITLE = <>八人が、世界へ。</>;
+const RIDERS_TITLE = <>八人の戦いが交わる。</>;
 const RECORDS_TITLE = (
   <>
-    到達点は、
+    戦いの記録を
     <br />
-    ひとつではない。
+    辿る。
   </>
 );
 const FINALE_TITLE = (
@@ -1979,9 +1979,9 @@ export function WorldHome() {
         </div>
         <div className="hero-context">
           <p className="hero-lead">
-            救うべきものは、夢の向こうにはない。
+            救うべき世界は、目の前にある。
             <br />
-            6人の最上位管理人と、8人のライダーが同じ世界で交差する。
+            6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
           </p>
           <div className="hero-metadata" aria-label="作品情報">
             <span>
@@ -2458,7 +2458,7 @@ export function WorldHome() {
           </h2>
           <p data-text-reveal="copy">
             <RevealText copy>
-              主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。八つの軌跡が同じ世界で交差する。
+              主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。異なる立場の八人が、同じ世界で戦う。
             </RevealText>
           </p>
         </div>

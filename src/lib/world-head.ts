@@ -6,6 +6,7 @@ import cinematicEditionCssUrl from "@/styles-cinematic-edition.css?url";
 import dossierEditionCssUrl from "@/styles-dossier-edition.css?url";
 import dossierCinemaCssUrl from "@/styles-dossier-cinema.css?url";
 import pickupCinemaCssUrl from "@/styles-pickup-cinema.css?url";
+import dossierReadingCssUrl from "@/styles-dossier-reading.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -59,6 +60,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   { rel: "stylesheet", href: dossierEditionCssUrl },
   { rel: "stylesheet", href: dossierCinemaCssUrl },
   PICKUP_CINEMA_STYLESHEET_LINK,
+  { rel: "stylesheet", href: dossierReadingCssUrl },
 ];
 
 type WorldHeadInput = {

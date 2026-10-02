@@ -268,12 +268,12 @@ const STORY_TITLE = (
     <em>現実</em>にある。
   </>
 );
-const RIDERS_TITLE = <>八人が、世界へ。</>;
+const RIDERS_TITLE = <>八人の戦いが交わる。</>;
 const RECORDS_TITLE = (
   <>
-    到達点は、
+    戦いの記録を
     <br />
-    ひとつではない。
+    辿る。
   </>
 );
 const FINALE_TITLE = (

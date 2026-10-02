@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
+import { RexonanceAperture } from "./rexonance-aperture";
 import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens } from "@/components/world/liquid-rail";
@@ -33,7 +34,7 @@ const STAGES: Record<
     code: "HIGH",
     image: REXONANCE_SITE_ARTWORK.standard,
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
-    title: "無限出力を、実効攻撃へ。",
+    title: "無限出力を攻撃に活かす。",
     lede: "超自己進化と絶対秩序をSA-GA OS 5.5で統合。標準運用の時点で、エクスプリーム・ウルトラ以上の実効戦闘性能を高い安定性で維持します。",
     points: ["高安定・高継戦", "REXONANCE DRIVE", "標準カタログ値を公開"],
     accent: "#63e2ff",
@@ -43,7 +44,7 @@ const STAGES: Record<
     code: "MAX",
     image: REXONANCE_SITE_ARTWORK.max,
     alt: "仮面ライダーレクソナンスサーガ・マックスの全身ビジュアル",
-    title: "全身を、一撃のために。",
+    title: "出力を移し替え、攻撃を強める。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
     points: ["P14完全加速", "SCALER《MAX》", "出力の連続再配分"],
     accent: "#969cff",
@@ -53,7 +54,7 @@ const STAGES: Record<
     code: "ULTRA 60s",
     image: REXONANCE_SITE_ARTWORK.ultra,
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
-    title: "ただ一つの実在へ、収束する。",
+    title: "全機構を一つの攻撃機関へ。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
@@ -687,6 +688,7 @@ export function RexonanceSaga() {
           <p className="rxs-hero-lede">史上最強のサーガ</p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
+          <RexonanceAperture />
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <img
@@ -705,13 +707,31 @@ export function RexonanceSaga() {
         </a>
       </section>
 
+      <nav className="rxs-chapter-index" aria-label="レクソナンスの見どころ">
+        <a href="#p14">
+          <small>P14</small>
+          <span>演算基盤</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+        <a href="#stages">
+          <small>3 STAGES</small>
+          <span>三つの形態</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+        <a href="#system">
+          <small>TRINITY</small>
+          <span>共鳴構造</span>
+          <i aria-hidden="true">↗</i>
+        </a>
+      </nav>
+
       <section id="performance" className="rxs-performance rxs-section">
         <header className="rxs-section-heading rxs-reveal">
           <p>PERFORMANCE</p>
           <h2>
-            比較にならない。
+            標準状態で、
             <br />
-            それが、標準状態。
+            従来の強さを超える。
           </h2>
           <span>
             公開済みの標準カタログ値で、{activePerformanceBaseline.label}
@@ -847,7 +867,7 @@ export function RexonanceSaga() {
           <h2 id="rxs-p14-title">
             エーテルを、
             <br />
-            ほぼそのまま力へ。
+            効率よく力に変える。
           </h2>
           <span>
             P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
@@ -868,7 +888,7 @@ export function RexonanceSaga() {
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / FOURTEENTH GENERATION</small>
-            <h3>速く、強く、失わない。</h3>
+            <h3>高負荷でも出力を保つ。</h3>
             <p>
               入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
             </p>
@@ -1016,7 +1036,7 @@ export function RexonanceSaga() {
           <h2>
             状況に合わせて、
             <br />
-            攻撃そのものを再設計。
+            攻撃機構を組み替える。
           </h2>
         </header>
 
@@ -1093,9 +1113,9 @@ export function RexonanceSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>TRINITY RESONANCE</p>
           <h2>
-            三者は消えない。
+            三者の意思が、
             <br />
-            独立したまま、響き合う。
+            独立したまま共鳴する。
           </h2>
         </header>
 
@@ -1134,7 +1154,7 @@ export function RexonanceSaga() {
       <footer className="rxs-footer">
         <div>
           <p>REXONANCE SAGA / FINAL ARRIVAL</p>
-          <h2>この力を、誰のために使うのか。</h2>
+          <h2>力の使い道は、悠真が決める。</h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>人物・能力の詳細を見る</span>
