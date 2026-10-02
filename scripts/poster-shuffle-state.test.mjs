@@ -12,7 +12,8 @@ const source = home.slice(
   home.indexOf("  const shufflePoster = () => {"),
   home.indexOf("  const goEpisode ="),
 );
-const compiled = ts.transpileModule(`${source}\nglobalThis.shuffle = shufflePoster;`, {
+const cancel = home.match(/const cancelPosterShuffle = useCallback\([\s\S]*?\n {2}}, \[\]\);/)[0];
+const compiled = ts.transpileModule(`${cancel}\n${source}\nglobalThis.shuffle = shufflePoster;`, {
   compilerOptions: { target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
@@ -25,6 +26,8 @@ function harness({ reducedMotion = true } = {}) {
   const shuffleRunId = { current: 0 };
   const context = {
     ambientPaused: false,
+    heroInViewRef: { current: true },
+    useCallback: (callback) => callback,
     motionReduced: reducedMotion,
     poster: 0,
     prevPoster: null,
@@ -35,34 +38,18 @@ function harness({ reducedMotion = true } = {}) {
     setShuffling: (value) => busy.push(value),
     setLocked: () => {},
     goPoster: (value) => posters.push(value),
-    preparePosterImage: (image, source) => {
-      image.src = source;
+    loadPoster: (index, priority) => {
+      const image = { index, priority, load: () => {} };
+      images.push(image);
+      return new Promise((resolve) => {
+        image.resolve = () => resolve(true);
+        image.timeout = () => resolve(false);
+      });
     },
     window: {
       crypto: { getRandomValues: (values) => values.fill(0) },
       clearTimeout: () => {},
       setTimeout: (callback) => timers.push(callback),
-    },
-    Image: class {
-      complete = false;
-      naturalWidth = 0;
-      constructor() {
-        images.push(this);
-      }
-      decode() {
-        return new Promise((resolve, reject) => {
-          this.load = () => {
-            this.complete = true;
-            this.naturalWidth = 800;
-          };
-          this.resolve = () => {
-            this.complete = true;
-            this.naturalWidth = 800;
-            resolve();
-          };
-          this.reject = reject;
-        });
-      }
     },
   };
   runInNewContext(compiled, context);
@@ -83,13 +70,13 @@ test("reduced-motion shuffle stays busy during decode and completes without prev
   assert.deepEqual(state.busy, [true, false]);
   assert.equal(state.shuffleActive.current, false);
   assert.equal(state.posters.length, 1);
-  assert.equal(state.timers.length, 1, "only the image deadline is scheduled, not preview steps");
+  assert.equal(state.timers.length, 0, "the shared loader owns the deadline; there are no preview steps");
 });
 
 test("a timed-out reduced-motion shuffle clears busy state and cannot replace the poster later", async () => {
   const state = harness();
   state.shuffle();
-  state.timers[0]();
+  state.images[0].timeout();
   await settle();
   assert.deepEqual(state.busy, [true, false]);
   assert.equal(state.shuffleActive.current, false);
@@ -148,3 +135,41 @@ test("late normal-motion preview decode from a cancelled shuffle cannot affect i
   await settle();
   assert.deepEqual(state.posters, [], "a stale timer/decode must not replace the successor shuffle's poster");
 });
+
+test("a cancelled final settle cannot clear the busy state of a newer shuffle", async () => {
+  const state = harness({ reducedMotion: false });
+  state.shuffle();
+  state.images[0].resolve();
+  await settle();
+  await state.timers[9]();
+  const oldSettle = state.timers.at(-1);
+  state.shuffleActive.current = false;
+  state.shuffleRunId.current += 1;
+  state.shuffle();
+  oldSettle();
+  assert.equal(state.shuffleActive.current, true);
+  assert.equal(state.busy.at(-1), true);
+});
+
+test("reset and lock are available to cancel image work while shuffle is busy", () => {
+  const reset = home.slice(home.indexOf('className="poster-reset'), home.indexOf('className={\n                  locked'));
+  assert.match(reset, /disabled=\{poster === 0 && !shuffling\}/);
+  assert.match(reset, /cancelPosterShuffle\(\);\s*goPoster\(0\)/);
+  const lock = home.slice(home.indexOf('"poster-lock ios26-glass is-locked"'), home.indexOf('<output'));
+  assert.doesNotMatch(lock, /disabled=\{shuffling\}/);
+  assert.match(lock, /cancelPosterShuffle\(\);\s*setLocked/);
+});
+
+for (const reducedMotion of [true, false]) {
+  test(`offscreen decode is cancelled before the scroll-settled React state (reduced=${reducedMotion})`, async () => {
+    const state = harness({ reducedMotion });
+    state.shuffle();
+    state.heroInViewRef.current = false;
+    state.images[0].resolve();
+    await settle();
+    if (!reducedMotion) await state.timers[9]();
+    assert.deepEqual(state.posters, []);
+    assert.equal(state.shuffleActive.current, false);
+    assert.equal(state.busy.at(-1), false);
+  });
+}

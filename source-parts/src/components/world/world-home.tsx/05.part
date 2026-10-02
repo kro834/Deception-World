@@ -1,7 +1,3 @@
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
                         height="10"
                         rx="2"
                         fill="none"
@@ -486,3 +482,5 @@
                 onOpen={openPickup}
               />
             </div>
+          </div>
+        </section>

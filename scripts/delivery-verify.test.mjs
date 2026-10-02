@@ -70,7 +70,7 @@ test("the Dream dive warms exactly the files the hero, its preloads and the cons
   assert.match(route, /rel: "preload",\s*as: "image",\s*href: DREAM_CHAPTER_LOGO/);
   assert.doesNotMatch(route, /href: "\/dream-chapter-(?:logo|poster-05)/);
   // The console's poster 05 asks for the hero's own WebP (a cache hit).
-  assert.deepEqual(posterImage("/dream-chapter-poster-05.jpeg"), { srcSet: DREAM_CHAPTER_HERO_ART });
+  assert.deepEqual(posterImage("/dream-chapter-poster-05.jpeg"), { src: DREAM_CHAPTER_HERO_ART, srcSet: DREAM_CHAPTER_HERO_ART });
   // The loader's byte estimates match the files it warms.
   const loader = read("src/lib/asset-loader.ts");
   for (const asset of DREAM_CHAPTER_ENTER_ASSETS) {

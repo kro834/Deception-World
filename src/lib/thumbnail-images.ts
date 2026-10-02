@@ -166,8 +166,8 @@ export function portraitThumbnail(source: string) {
 // 32 supplied JPEGs of 225-800 KB (11.9 MB for the round). The same file
 // fills the full-bleed hero backdrop, so each poster is fetched once, at its
 // own width. It gains a WebP delivery copy of the same pixels (a re-encode by
-// scripts/build-card-variants.mjs, 3-5 times smaller), offered as a 1x srcset
-// so the intrinsic size stays the JPEG's; the JPEG stays the `src`. The first
+// scripts/build-card-variants.mjs, 3-5 times smaller), used for both src and
+// the 1x srcset so warmups and DOM updates select the same resource. The first
 // poster keeps its delivery file, which the opening's handoff and the route
 // preload share, and the two rider key visuals reuse the rider panel's WebPs.
 const POSTER_SOURCES: readonly (readonly [string, number])[] = [
@@ -256,7 +256,9 @@ export const TITLE_LOGO_IMAGES: Record<string, ImageSet> = {
 
 export function posterImage(source: string) {
   const set = POSTER_IMAGES[source];
-  return set ? { srcSet: set.variants[0].path } : {};
+  // Keep src and srcset identical: WebKit can otherwise start the original
+  // JPEG while React changes a keyed poster, invalidating the decoded warmup.
+  return set ? { src: set.variants[0].path, srcSet: set.variants[0].path } : {};
 }
 
 /* The deck warms and decodes the next poster in a detached Image before it
@@ -264,7 +266,7 @@ export function posterImage(source: string) {
 export function preparePosterImage(image: HTMLImageElement, source: string) {
   const set = POSTER_IMAGES[source];
   if (set) image.srcset = set.variants[0].path;
-  image.src = source;
+  image.src = set?.variants[0].path ?? source;
 }
 
 // Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;

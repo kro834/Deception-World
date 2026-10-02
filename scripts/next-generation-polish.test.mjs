@@ -59,9 +59,9 @@ test("world hero work pauses offscreen and primary navigation reports location",
 test("world motion and poster changes stay stable on constrained clients", () => {
   assert.match(worldHome, /prefers-reduced-motion: reduce/);
   assert.match(worldHome, /motionReduced/);
-  assert.match(worldHome, /finalImage\s*\.decode\?\.\(\)/);
-  assert.match(worldHome, /Promise\.race\(\[/);
-  assert.match(worldHome, /finalImage\.naturalWidth > 0/);
+  assert.match(worldHome, /createReadyPosterLoader\(preparePosterImage\)/);
+  assert.match(worldHome, /const finalReady = loadPoster\(finalPoster\)/);
+  assert.match(worldHome, /if \(ready\) goPoster\(finalPoster\)/);
 });
 
 test("manager archive cards use bounded thumbnail assets", async () => {

@@ -486,11 +486,154 @@ const P14Comparator = memo(function P14Comparator({
   );
 });
 
+// Keep performance selection updates inside their own chapter.
+const RexonancePerformance = memo(function RexonancePerformance() {
+  const [performanceBaseline, setPerformanceBaseline] = useState<PerformanceBaseline>("extreme");
+  const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
+  return (
+    <section id="performance" className="rxs-performance rxs-section">
+      <header className="rxs-section-heading rxs-reveal">
+        <p>PERFORMANCE</p>
+        <h2>
+          標準状態で、
+          <br />
+          この実力。
+        </h2>
+        <span>
+          公開済みの標準カタログ値で、{activePerformanceBaseline.label}
+          サーガ標準値と比較しています。
+        </span>
+      </header>
+
+      <div className="rxs-headline-metrics">
+        <article className="rxs-reveal">
+          <small>REACTION / VS VINCULUM</small>
+          <strong>
+            650<span>%+</span>
+          </strong>
+          <p>ヴィンクルムサーガと比較した反応速度</p>
+        </article>
+        <article className="rxs-reveal">
+          <small>MOBILITY / VS EXTREME</small>
+          <strong>
+            900<span>%</span>
+          </strong>
+          <p>エクスプリームサーガと比較した最大機動力</p>
+        </article>
+      </div>
+
+      <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
+        <label className="rxs-comparison-selector">
+          <span>iOS標準選択</span>
+          <select
+            value={performanceBaseline}
+            aria-label="レクソナンスの比較対象"
+            onPointerDown={(event) => {
+              event.currentTarget.dataset.pointerFocus = "true";
+            }}
+            onInput={(event) => {
+              setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
+            }}
+            onChange={(event) => {
+              setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
+            }}
+          >
+            <option value="vertex">ヴァーテックスサーガ</option>
+            <option value="vinculum">ヴィンクルムサーガ</option>
+            <option value="extreme">エクスプリームサーガ</option>
+          </select>
+        </label>
+        <p className="rxs-comparison-formula">
+          比較基準：<b>{activePerformanceBaseline.label}＝100%</b>
+        </p>
+        <div className="rxs-comparison-key" aria-hidden="true">
+          <span>
+            <i className="is-rexonance" />
+            レクソナンス
+          </span>
+          <span>
+            <i className="is-extreme" />
+            {activePerformanceBaseline.label}
+          </span>
+        </div>
+        <div
+          key={performanceBaseline}
+          className="rxs-comparison-metrics"
+          data-baseline={performanceBaseline}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {activePerformanceBaseline.metrics.map((metric) => (
+            <article key={metric.label}>
+              <header>
+                <div>
+                  <small>{metric.label}</small>
+                  <strong>{metric.current}</strong>
+                </div>
+                <span className="rxs-comparison-result">
+                  <i>基準比</i>
+                  <b>{metric.relative}</b>
+                  <em>
+                    {metric.multiplier} / {metric.delta}
+                  </em>
+                </span>
+              </header>
+              <div
+                className="rxs-bars"
+                aria-label={`${metric.label}、${activePerformanceBaseline.label}を100%としたレクソナンスの性能は${metric.relative}、${metric.multiplier}、増加分${metric.delta}`}
+              >
+                <i className="is-rexonance" />
+                <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
+              </div>
+              <p>
+                {activePerformanceBaseline.code} / {metric.previous}
+                {metric.note ? <span> / {metric.note}</span> : null}
+              </p>
+            </article>
+          ))}
+        </div>
+        <section
+          key={`${performanceBaseline}-processing`}
+          className="rxs-processing-comparison"
+          aria-label={`${activePerformanceBaseline.label}とレクソナンスの演算構成比較`}
+        >
+          <header>
+            <small>PROCESSING ARCHITECTURE</small>
+            <h3>単位と系統を揃えて比較</h3>
+          </header>
+          <div>
+            <section>
+              <h4>{activePerformanceBaseline.label}</h4>
+              <ul>
+                {activePerformanceBaseline.processing.baseline.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+            <section>
+              <h4>レクソナンス</h4>
+              <ul>
+                {activePerformanceBaseline.processing.rexonance.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
+          <p>{activePerformanceBaseline.processing.verdict}</p>
+        </section>
+      </div>
+      <p className="rxs-comparison-note rxs-reveal">
+        主表示は選択した形態を100%としたレクソナンスの性能比です。「+」は100%を超えた増加分を示します。走力は100m所要時間の逆数から速度性能を換算し、所要時間の短縮率を補足表示しています。「est.」は推定値を示し、演算はYOPSとTOPSを別指標として比較しています。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
+      </p>
+    </section>
+  );
+});
+
 export function RexonanceSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
-  const [performanceBaseline, setPerformanceBaseline] = useState<PerformanceBaseline>("extreme");
+
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const [stageCall, setStageCall] = useState<{ id: number; stage: RexonanceStage } | null>(null);
@@ -500,7 +643,6 @@ export function RexonanceSaga() {
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
-  const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
 
   const cancelStageCall = useCallback(() => {
     stageCallId.current += 1;
@@ -855,141 +997,7 @@ export function RexonanceSaga() {
         </a>
       </nav>
 
-      <section id="performance" className="rxs-performance rxs-section">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>PERFORMANCE</p>
-          <h2>
-            標準状態で、
-            <br />
-            この実力。
-          </h2>
-          <span>
-            公開済みの標準カタログ値で、{activePerformanceBaseline.label}
-            サーガ標準値と比較しています。
-          </span>
-        </header>
-
-        <div className="rxs-headline-metrics">
-          <article className="rxs-reveal">
-            <small>REACTION / VS VINCULUM</small>
-            <strong>
-              650<span>%+</span>
-            </strong>
-            <p>ヴィンクルムサーガと比較した反応速度</p>
-          </article>
-          <article className="rxs-reveal">
-            <small>MOBILITY / VS EXTREME</small>
-            <strong>
-              900<span>%</span>
-            </strong>
-            <p>エクスプリームサーガと比較した最大機動力</p>
-          </article>
-        </div>
-
-        <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
-          <label className="rxs-comparison-selector">
-            <span>iOS標準選択</span>
-            <select
-              value={performanceBaseline}
-              aria-label="レクソナンスの比較対象"
-              onPointerDown={(event) => {
-                event.currentTarget.dataset.pointerFocus = "true";
-              }}
-              onInput={(event) => {
-                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
-              }}
-              onChange={(event) => {
-                setPerformanceBaseline(event.currentTarget.value as PerformanceBaseline);
-              }}
-            >
-              <option value="vertex">ヴァーテックスサーガ</option>
-              <option value="vinculum">ヴィンクルムサーガ</option>
-              <option value="extreme">エクスプリームサーガ</option>
-            </select>
-          </label>
-          <p className="rxs-comparison-formula">
-            比較基準：<b>{activePerformanceBaseline.label}＝100%</b>
-          </p>
-          <div className="rxs-comparison-key" aria-hidden="true">
-            <span>
-              <i className="is-rexonance" />
-              レクソナンス
-            </span>
-            <span>
-              <i className="is-extreme" />
-              {activePerformanceBaseline.label}
-            </span>
-          </div>
-          <div
-            key={performanceBaseline}
-            className="rxs-comparison-metrics"
-            data-baseline={performanceBaseline}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {activePerformanceBaseline.metrics.map((metric) => (
-              <article key={metric.label}>
-                <header>
-                  <div>
-                    <small>{metric.label}</small>
-                    <strong>{metric.current}</strong>
-                  </div>
-                  <span className="rxs-comparison-result">
-                    <i>基準比</i>
-                    <b>{metric.relative}</b>
-                    <em>
-                      {metric.multiplier} / {metric.delta}
-                    </em>
-                  </span>
-                </header>
-                <div
-                  className="rxs-bars"
-                  aria-label={`${metric.label}、${activePerformanceBaseline.label}を100%としたレクソナンスの性能は${metric.relative}、${metric.multiplier}、増加分${metric.delta}`}
-                >
-                  <i className="is-rexonance" />
-                  <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
-                </div>
-                <p>
-                  {activePerformanceBaseline.code} / {metric.previous}
-                  {metric.note ? <span> / {metric.note}</span> : null}
-                </p>
-              </article>
-            ))}
-          </div>
-          <section
-            key={`${performanceBaseline}-processing`}
-            className="rxs-processing-comparison"
-            aria-label={`${activePerformanceBaseline.label}とレクソナンスの演算構成比較`}
-          >
-            <header>
-              <small>PROCESSING ARCHITECTURE</small>
-              <h3>単位と系統を揃えて比較</h3>
-            </header>
-            <div>
-              <section>
-                <h4>{activePerformanceBaseline.label}</h4>
-                <ul>
-                  {activePerformanceBaseline.processing.baseline.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              </section>
-              <section>
-                <h4>レクソナンス</h4>
-                <ul>
-                  {activePerformanceBaseline.processing.rexonance.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-            <p>{activePerformanceBaseline.processing.verdict}</p>
-          </section>
-        </div>
-        <p className="rxs-comparison-note rxs-reveal">
-          主表示は選択した形態を100%としたレクソナンスの性能比です。「+」は100%を超えた増加分を示します。走力は100m所要時間の逆数から速度性能を換算し、所要時間の短縮率を補足表示しています。「est.」は推定値を示し、演算はYOPSとTOPSを別指標として比較しています。各値は最大出力ではなく標準運用値であり、マックス／ウルトラの定量上限を示すものではありません。
-        </p>
-      </section>
+      <RexonancePerformance />
 
       <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
         <header className="rxs-section-heading rxs-reveal">

@@ -79,7 +79,7 @@ try {
     if (scenario === "selection") assert.equal(result.selected, "dream-poster-tab-13");
     if (scenario === "latest-selection") {
       assert.equal(result.selected, "dream-poster-tab-12");
-      assert.ok(!result.sources.includes("/dream-chapter-poster-14.jpeg"), "superseded selection appeared late");
+      assert.ok(!result.sources.some((source) => /dream-chapter-poster-14(?:-delivery)?\./.test(source)), "superseded selection appeared late");
     }
     if (scenario === "failed-selection" || scenario === "cancel-shuffle") {
       assert.equal(result.selected, "dream-poster-tab-0");

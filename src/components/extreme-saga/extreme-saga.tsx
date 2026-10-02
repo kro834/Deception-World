@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -232,32 +232,185 @@ const CORE_SYSTEMS = [
   },
 ] as const;
 
-export function ExtremeSaga() {
-  useWorldMode();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [stage, setStage] = useState<ExtremeStage>("middle");
+const releaseControlFocus = (control: HTMLElement) => {
+  window.requestAnimationFrame(() => {
+    if (document.activeElement === control) control.blur();
+  });
+};
+
+// Keep performance selection updates inside their own chapter.
+const ExtremePerformance = memo(function ExtremePerformance() {
   const [baseline, setBaseline] = useState<ExtremeBaseline>("diluculum");
-  const [motionReady, setMotionReady] = useState(false);
-  const pageRef = useRef<HTMLElement | null>(null);
-  const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const selectPointerInteractionRef = useRef(false);
-  const activeStage = EXTREME_STAGES[stage];
   const activeComparison = COMPARISONS[baseline];
-
-  const releaseControlFocus = (control: HTMLElement) => {
-    window.requestAnimationFrame(() => {
-      if (document.activeElement === control) control.blur();
-    });
-  };
-
-  useEffect(() => mountExtremeNavReserve(pageRef.current), []);
-  useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
+  const selectPointerInteractionRef = useRef(false);
 
   const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
     if (!selectPointerInteractionRef.current) return;
     selectPointerInteractionRef.current = false;
     releaseControlFocus(control);
   };
+  return (
+    <section id="performance" className="rxs-performance rxs-section">
+      <header className="rxs-section-heading rxs-reveal">
+        <p>PERFORMANCE COMPARISON</p>
+        <h2>
+          肉弾戦に、
+          <br />
+          この実力。
+        </h2>
+        <span>
+          肉弾戦に最適化したエクスプリーム。
+          <br />
+          既存の形態と比較してみましょう。
+        </span>
+      </header>
+
+      <div className="rxs-headline-metrics">
+        <article className="rxs-reveal">
+          <small>PUNCH POWER / EXTREME</small>
+          <strong>
+            205.6<span>t〜</span>
+          </strong>
+          <p>標準状態のパンチ力</p>
+        </article>
+        <article className="rxs-reveal">
+          <small>100M TIME / EXTREME</small>
+          <strong>
+            0.002<span>SEC</span>
+          </strong>
+          <p>標準状態の100m走破時間</p>
+        </article>
+      </div>
+
+      <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
+        <label className="rxs-comparison-selector">
+          <span>iOS標準選択</span>
+          <select
+            value={baseline}
+            aria-label="エクスプリームの比較対象"
+            onPointerDown={() => {
+              selectPointerInteractionRef.current = true;
+            }}
+            onKeyDown={() => {
+              selectPointerInteractionRef.current = false;
+            }}
+            onBlur={() => {
+              selectPointerInteractionRef.current = false;
+            }}
+            onChange={(event) => {
+              const control = event.currentTarget;
+              setBaseline(control.value as ExtremeBaseline);
+              releaseSelectFocusAfterPointerChange(control);
+            }}
+          >
+            <option value="diluculum">ディルクルムサーガ</option>
+            <option value="vinculum">ヴィンクルムサーガ</option>
+          </select>
+        </label>
+        <p className="rxs-comparison-formula">
+          比較基準：<b>{activeComparison.label}＝100%</b>
+        </p>
+        <div className="rxs-comparison-key" aria-hidden="true">
+          <span>
+            <i className="is-rexonance" />
+            エクスプリーム
+          </span>
+          <span>
+            <i className="is-extreme" />
+            {activeComparison.label}
+          </span>
+        </div>
+        <div
+          key={baseline}
+          className="rxs-comparison-metrics"
+          data-baseline={baseline}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {activeComparison.metrics.map((metric) => (
+            <article key={metric.label}>
+              <header>
+                <div>
+                  <small>{metric.label}</small>
+                  <strong>{metric.current}</strong>
+                </div>
+                <span className="rxs-comparison-result">
+                  <i>基準比</i>
+                  <b>{metric.relative}</b>
+                  <em>
+                    {metric.multiplier} / {metric.delta}
+                  </em>
+                </span>
+              </header>
+              <div
+                className="rxs-bars"
+                aria-label={`${metric.label}、${activeComparison.label}を100%としたエクスプリームの性能は${metric.relative}、${metric.multiplier}、差分${metric.delta}`}
+              >
+                <i className="is-rexonance" style={{ width: `${metric.currentBar}%` }} />
+                <i className="is-extreme" style={{ width: `${metric.baselineBar}%` }} />
+              </div>
+              <p>
+                {activeComparison.code} / {metric.previous}
+                {metric.note ? <span> / {metric.note}</span> : null}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <section
+          key={`${baseline}-processing`}
+          className="rxs-processing-comparison"
+          aria-label={`${activeComparison.label}とエクスプリームの構成比較`}
+        >
+          <header>
+            <small>CATALOG / PROCESSING ARCHITECTURE</small>
+            <h3>同じ指標だけを、倍率へ。</h3>
+          </header>
+          <div>
+            <section>
+              <h4>{activeComparison.label}</h4>
+              <ul>
+                {activeComparison.baselineSpecs.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+            <section>
+              <h4>エクスプリーム</h4>
+              <ul>
+                {activeComparison.extremeSpecs.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </section>
+          </div>
+          <p>{activeComparison.verdict}</p>
+          <ul className="exs-unavailable">
+            {activeComparison.unavailable.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+      <p className="rxs-comparison-note rxs-reveal">
+        主表示は選択形態を100%としたエクスプリームの性能比です。走力は100m所要時間の逆数から速度性能を換算しています。「est.」は推定値を示し、YOPSとTOPS、異なる演算系統、公開値不詳の項目は一つの倍率へ合算していません。
+      </p>
+    </section>
+  );
+});
+
+export function ExtremeSaga() {
+  useWorldMode();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [stage, setStage] = useState<ExtremeStage>("middle");
+  const [motionReady, setMotionReady] = useState(false);
+  const pageRef = useRef<HTMLElement | null>(null);
+  const stageTabsRef = useRef<HTMLDivElement | null>(null);
+
+  const activeStage = EXTREME_STAGES[stage];
+
+  useEffect(() => mountExtremeNavReserve(pageRef.current), []);
+  useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
 
   useEffect(() => {
     const rail = stageTabsRef.current;
@@ -380,152 +533,7 @@ export function ExtremeSaga() {
         </a>
       </section>
 
-      <section id="performance" className="rxs-performance rxs-section">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>PERFORMANCE COMPARISON</p>
-          <h2>
-            肉弾戦に、
-            <br />
-            この実力。
-          </h2>
-          <span>
-            肉弾戦に最適化したエクスプリーム。
-            <br />
-            既存の形態と比較してみましょう。
-          </span>
-        </header>
-
-        <div className="rxs-headline-metrics">
-          <article className="rxs-reveal">
-            <small>PUNCH POWER / EXTREME</small>
-            <strong>
-              205.6<span>t〜</span>
-            </strong>
-            <p>標準状態のパンチ力</p>
-          </article>
-          <article className="rxs-reveal">
-            <small>100M TIME / EXTREME</small>
-            <strong>
-              0.002<span>SEC</span>
-            </strong>
-            <p>標準状態の100m走破時間</p>
-          </article>
-        </div>
-
-        <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
-          <label className="rxs-comparison-selector">
-            <span>iOS標準選択</span>
-            <select
-              value={baseline}
-              aria-label="エクスプリームの比較対象"
-              onPointerDown={() => {
-                selectPointerInteractionRef.current = true;
-              }}
-              onKeyDown={() => {
-                selectPointerInteractionRef.current = false;
-              }}
-              onBlur={() => {
-                selectPointerInteractionRef.current = false;
-              }}
-              onChange={(event) => {
-                const control = event.currentTarget;
-                setBaseline(control.value as ExtremeBaseline);
-                releaseSelectFocusAfterPointerChange(control);
-              }}
-            >
-              <option value="diluculum">ディルクルムサーガ</option>
-              <option value="vinculum">ヴィンクルムサーガ</option>
-            </select>
-          </label>
-          <p className="rxs-comparison-formula">
-            比較基準：<b>{activeComparison.label}＝100%</b>
-          </p>
-          <div className="rxs-comparison-key" aria-hidden="true">
-            <span>
-              <i className="is-rexonance" />
-              エクスプリーム
-            </span>
-            <span>
-              <i className="is-extreme" />
-              {activeComparison.label}
-            </span>
-          </div>
-          <div
-            key={baseline}
-            className="rxs-comparison-metrics"
-            data-baseline={baseline}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {activeComparison.metrics.map((metric) => (
-              <article key={metric.label}>
-                <header>
-                  <div>
-                    <small>{metric.label}</small>
-                    <strong>{metric.current}</strong>
-                  </div>
-                  <span className="rxs-comparison-result">
-                    <i>基準比</i>
-                    <b>{metric.relative}</b>
-                    <em>
-                      {metric.multiplier} / {metric.delta}
-                    </em>
-                  </span>
-                </header>
-                <div
-                  className="rxs-bars"
-                  aria-label={`${metric.label}、${activeComparison.label}を100%としたエクスプリームの性能は${metric.relative}、${metric.multiplier}、差分${metric.delta}`}
-                >
-                  <i className="is-rexonance" style={{ width: `${metric.currentBar}%` }} />
-                  <i className="is-extreme" style={{ width: `${metric.baselineBar}%` }} />
-                </div>
-                <p>
-                  {activeComparison.code} / {metric.previous}
-                  {metric.note ? <span> / {metric.note}</span> : null}
-                </p>
-              </article>
-            ))}
-          </div>
-
-          <section
-            key={`${baseline}-processing`}
-            className="rxs-processing-comparison"
-            aria-label={`${activeComparison.label}とエクスプリームの構成比較`}
-          >
-            <header>
-              <small>CATALOG / PROCESSING ARCHITECTURE</small>
-              <h3>同じ指標だけを、倍率へ。</h3>
-            </header>
-            <div>
-              <section>
-                <h4>{activeComparison.label}</h4>
-                <ul>
-                  {activeComparison.baselineSpecs.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              </section>
-              <section>
-                <h4>エクスプリーム</h4>
-                <ul>
-                  {activeComparison.extremeSpecs.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-            <p>{activeComparison.verdict}</p>
-            <ul className="exs-unavailable">
-              {activeComparison.unavailable.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
-        <p className="rxs-comparison-note rxs-reveal">
-          主表示は選択形態を100%としたエクスプリームの性能比です。走力は100m所要時間の逆数から速度性能を換算しています。「est.」は推定値を示し、YOPSとTOPS、異なる演算系統、公開値不詳の項目は一つの倍率へ合算していません。
-        </p>
-      </section>
+      <ExtremePerformance />
 
       <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
         <header className="rxs-section-heading rxs-reveal">

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
+import { worldViewContract } from "./helpers/world-view-contract.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import {
@@ -23,204 +23,12 @@ const route = read("src/routes/world.tsx");
 const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
-  const hooks = ['import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";\n'];
-  let stripped = home;
-  for (const hook of hooks) {
-    assert.ok(stripped.includes(hook), hook);
-    stripped = stripped.replace(hook, "");
-  }
-  for (const name of ["WorldAnnexRiders", "WorldAnnexRecords"]) {
-    assert.equal(home.split(`<${name} />`).length, 2, name);
-    stripped = stripped.replace(`\n      <${name} />\n`, "");
-  }
-  // 2026-09-30: the poster deck asks for right-sized WebPs (posterImage and
-  // preparePosterImage, src/lib/thumbnail-images.ts). Undoing exactly those
-  // edits gives back the pinned file, so no string on /world moved with them.
-  const backCard = (indent) =>
-    `<img\n${indent}  src={current.src}\n${indent}  {...posterImage(current.src)}\n${indent}  alt=""\n${indent}  loading="lazy"\n${indent}  decoding="async"\n${indent}  fetchPriority="low"\n${indent}/>`;
-  const posterHooks = [
-    [
-      'import {\n  episodeThumbnail,\n  managerThumbnail,\n  posterImage,\n  preparePosterImage,\n} from "@/lib/thumbnail-images";',
-      'import { episodeThumbnail, managerThumbnail } from "@/lib/thumbnail-images";',
-      1,
-    ],
-    [
-      "preparePosterImage(image, POSTERS[nextIndex].src);",
-      "image.src = POSTERS[nextIndex].src;",
-      1,
-    ],
-    [
-      "preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);",
-      "image.src = POSTERS[(poster + 1) % POSTERS.length].src;",
-      1,
-    ],
-    [
-      "preparePosterImage(finalImage, POSTERS[finalPoster].src);",
-      "finalImage.src = POSTERS[finalPoster].src;",
-      1,
-    ],
-    [
-      backCard("              "),
-      '<img src={current.src} alt="" loading="lazy" decoding="async" fetchPriority="low" />',
-      3,
-    ],
-    ["\n                {...posterImage(nextPoster.src)}", "", 1],
-    ["\n                    {...posterImage(previous.src)}", "", 1],
-    ["\n                  {...posterImage(current.src)}", "", 1],
-    // The hero backdrop shows the same poster, so it asks for the same file.
-    ["\n                {...posterImage(previous.src)}", "", 1],
-    ["\n              {...posterImage(current.src)}", "", 1],
-    // Busy state covers the reduced-motion decode wait too; reversing these
-    // exact behavioral edits keeps the original-copy fingerprint intact.
-    [
-      "    shuffleActive.current = true;\n    setShuffling(true);\n    setLocked(true);",
-      "    shuffleActive.current = true;\n    setLocked(true);",
-      1,
-    ],
-    [
-      "        shuffleActive.current = false;\n        setShuffling(false);\n      });\n      return;",
-      "        shuffleActive.current = false;\n      });\n      return;",
-      1,
-    ],
-    [
-      "    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach",
-      "    setShuffling(true);\n    [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach",
-      1,
-    ],
-  ];
-  // 2026-09-30: the テラ / ルナ cards and EP 02 pickups warm RELATED_NAV's
-  // list (the file's hero only; scripts/rider-cover.test.mjs). Undoing exactly
-  // those edits gives back the pinned file.
-  const relatedCard = (id, first) =>
-    `assets={\n                      RELATED_NAV.find((item) => item.id === "${id}")?.assets ?? [\n                        "${first}",\n                      ]\n                    }`;
-  const oldCard = (name, form) =>
-    `assets={[\n                      "/character-${name}.jpeg",\n                      "/character-${name}-thumb.jpeg",\n                      "/rider-realm-${form}.jpeg",\n                    ]}`;
-  posterHooks.push(
-    [
-      'import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";',
-      'import { RIDER_NAV, NameText } from "./dossier-nav";',
-      1,
-    ],
-    [
-      '        // The file shows its hero on arrival; the form pickup loads lazily.\n        assets: RELATED_NAV.find((item) => item.id === "01")?.assets ?? ["/character-terra.jpeg"],',
-      '        assets: ["/character-terra.jpeg", "/character-terra-thumb.jpeg", "/rider-realm-earth.jpeg"],',
-      1,
-    ],
-    [
-      '        assets: RELATED_NAV.find((item) => item.id === "02")?.assets ?? ["/character-luna.jpeg"],',
-      '        assets: ["/character-luna.jpeg", "/character-luna-thumb.jpeg", "/rider-realm-moon.jpeg"],',
-      1,
-    ],
-    [
-      "                    // Only what the file shows on arrival (its hero); the\n                    // form pickup there (710-760 KB) loads lazily.\n                    " +
-        relatedCard("01", "/character-terra.jpeg"),
-      "                    " + oldCard("terra", "earth"),
-      1,
-    ],
-    [relatedCard("02", "/character-luna.jpeg"), oldCard("luna", "moon"), 1],
-  );
-  // Shuffle previews now warm only their small candidate pool and move only
-  // after decode; reverse those behavior-only edits so this copy pin remains
-  // scoped to changes in the /world text and layout.
-  const previewReadiness = [
-    "    const previewReady = new Set<number>();",
-    "    previewPool.forEach((index) => {",
-    "      const image = index === finalPoster ? finalImage : new Image();",
-    "      if (image !== finalImage) {",
-    '        image.decoding = "async";',
-    '        image.fetchPriority = "low";',
-    "        preparePosterImage(image, POSTERS[index].src);",
-    "      }",
-    "      const decoded = index === finalPoster ? finalReady : image.decode?.();",
-    "      if (!decoded) {",
-    "        const markLoaded = () => {",
-    "          if (image.complete && image.naturalWidth > 0) previewReady.add(index);",
-    "        };",
-    "        markLoaded();",
-    '        image.addEventListener("load", markLoaded, { once: true });',
-    "        return;",
-    "      }",
-    "      void decoded",
-    "        .then(() => {",
-    "          if (shuffleRunId.current !== runId) return;",
-    "          if (image.naturalWidth > 0) previewReady.add(index);",
-    "        })",
-    "        .catch(() => {",
-    "          if (shuffleRunId.current !== runId) return;",
-    "          if (image.complete && image.naturalWidth > 0) previewReady.add(index);",
-    "        });",
-    "    });",
-    "",
-    "",
-  ].join("\n");
-  posterHooks.push(
-    [previewReadiness, "", 1],
-    [
-      "        const previewPoster = previewPosters[index % previewPosters.length];\n" +
-        "        const ready = isFinalStep\n" +
-        "          ? await waitForFinalImage()\n" +
-        "          : previewReady.has(previewPoster);",
-      "        const ready = isFinalStep ? await waitForFinalImage() : true;",
-      1,
-    ],
-    [
-      "        const next = isFinalStep ? finalPoster : previewPoster;\n" +
-        "        if (ready || (isFinalStep && finalImage.complete && finalImage.naturalWidth > 0)) {",
-      "        const next = isFinalStep ? finalPoster : previewPosters[index % previewPosters.length];\n" +
-        "        if (!isFinalStep || ready || (finalImage.complete && finalImage.naturalWidth > 0)) {",
-      1,
-    ],
-  );
-  for (const [edited, original, count] of posterHooks) {
-    assert.equal(stripped.split(edited).length - 1, count, edited);
-    stripped = stripped.replaceAll(edited, original);
-  }
-  // 2026-10-01: the owner requested source-grounded prose and scene selection.
-  // Reverse only the two approved story paragraphs; every other string and
-  // the existing layout remain protected by the original fingerprint.
-  const storyEdits = [
-    [
-      "荒廃した碧栄で追跡を逃れる月城悠真の前に、死んだはずのベル・アレインが現れる。再会の一方で、サーガが管理人ローアの管轄から逸脱したことを知ったレックス・ロワは、世界の秩序を保つために「六詠」の介入を決める。",
-      "世界、概念、領域、物語、法則。あらゆるものを管轄する管理人。その最上位に位置する六つの存在が、サーガ世界の行く末へ干渉を始める。",
-    ],
-    [
-      "悠真を守るベルと、自らの創作物を守ろうとするローアのもとに、刑事、怪盗、別世界のエージェントが集まる。彼らが管理された運命に抗うなか、六詠第三位のシュザは、人が何を望むかさえ書き換える支配の手を伸ばす。",
-      "シエル、ベル、ローア、レックス、華火、真守、ジェームズ、リュシアン。異なる立場を背負った八人は、ひとつの結末へ向けて交差する。",
-    ],
-  ];
-  for (const [edited, original] of storyEdits) {
-    assert.equal(stripped.split(edited).length - 1, 1, edited);
-    stripped = stripped.replace(edited, original);
-  }
-  // 2026-10-02: the owner requested natural copy instead of abstract slogans.
-  // Permit only the Sol-reviewed heading and introduction edits; the column
-  // bodies, episode stories, facts and all markup retain their existing pin.
-  const copyEdits = [
-    [
-      "const RIDERS_TITLE = <>八人の戦いが交わる。</>;",
-      "const RIDERS_TITLE = <>八人が、世界へ。</>;",
-    ],
-    [
-      "    戦いの記録を\n    <br />\n    辿る。",
-      "    到達点は、\n    <br />\n    ひとつではない。",
-    ],
-    ["救うべき世界は、目の前にある。", "救うべきものは、夢の向こうにはない。"],
-    [
-      "6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。",
-      "6人の最上位管理人と、8人のライダーが同じ世界で交差する。",
-    ],
-    ["異なる立場の八人が、同じ世界で戦う。", "八つの軌跡が同じ世界で交差する。"],
-  ];
-  for (const [edited, original] of copyEdits) {
-    assert.equal(stripped.split(edited).length - 1, 1, edited);
-    stripped = stripped.replace(edited, original);
-  }
-  // SHA-256 of world-home.tsx before the annex (every existing string on
-  // /world). Update only on the owner's request to change that copy.
-  assert.equal(
-    createHash("sha256").update(stripped).digest("hex"),
-    "50bdfab3cbf6fe8e8e9c1d3aed6ba1ecc2a100346c647993f796f1ed10becc98",
-  );
+  // Pinned to the reviewed 702191f view. Loading/event code can now be
+  // consolidated without reconstructing unrelated historical source edits.
+  assert.deepEqual(worldViewContract(home), {
+    records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
+    markup: "0a1db8e1f6476aaae4cb08d1b977a03edacaf71ef264f733e78dcb8dd55e052b",
+  });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
   // annex follows RECORDS as chapters 04-06. Nothing sits between the column
@@ -270,6 +78,14 @@ test("the annex data is complete", () => {
   ]) {
     assert.ok(!data.includes(held), held);
   }
+});
+
+test("the view contract still detects changes to story data, copy and layout", () => {
+  const original = worldViewContract(home);
+  assert.notEqual(worldViewContract(home.replace('title: "脚本制と採録制"', 'title: "変更"')).records, original.records);
+  assert.notEqual(worldViewContract(home.replace("救うべき世界は、目の前にある。", "変更")).markup, original.markup);
+  assert.notEqual(worldViewContract(home.replace('className="riders-section"', 'className="changed"')).markup, original.markup);
+  assert.deepEqual(worldViewContract(home.replace("onClick={shufflePoster}", "onClick={revisedHandler}")), original);
 });
 
 test("each annex is its own section, listed in the contents", () => {

@@ -22,6 +22,7 @@ import { useMirageBoot } from "./use-mirage-boot";
 import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
+import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 
 const POSTERS = [
   {
@@ -930,10 +931,24 @@ export function WorldHome() {
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
+  const posterLoader = useRef<ReturnType<typeof createReadyPosterLoader> | null>(null);
   const episodeProgrammatic = useRef(false);
   const riderTabRef = useRef(riderTab);
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
+
+  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
+    posterLoader.current ??= createReadyPosterLoader(preparePosterImage);
+    return posterLoader.current.load(POSTERS[index].src, priority);
+  }, []);
+
+  const cancelPosterShuffle = useCallback(() => {
+    shuffleRunId.current += 1;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setShuffling(false);
+  }, []);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
@@ -1140,13 +1155,9 @@ export function WorldHome() {
     const t = window.setInterval(async () => {
       if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
       decoding = true;
-      const image = new Image();
-      image.decoding = "async";
-      image.fetchPriority = "low";
-      preparePosterImage(image, POSTERS[nextIndex].src);
       try {
-        await image.decode();
-        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        const ready = await loadPoster(nextIndex, "low");
+        if (cancelled || !ready || document.querySelector("dialog[open]")) return;
         if (!heroInViewRef.current) return;
         startTransition(() => {
           setPrevPoster(poster);
@@ -1162,7 +1173,7 @@ export function WorldHome() {
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [loadPoster, ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
@@ -1178,13 +1189,10 @@ export function WorldHome() {
     )
       return;
     const timer = window.setTimeout(() => {
-      const image = new Image();
-      image.decoding = "async";
-      image.fetchPriority = "low";
-      preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);
+      void loadPoster((poster + 1) % POSTERS.length, "low");
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [loadPoster, ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -1222,13 +1230,9 @@ export function WorldHome() {
   }, [ambientPaused]);
 
   useEffect(() => {
-    if ((!ambientPaused && !motionReduced) || !shuffleActive.current) return;
-    shuffleRunId.current += 1;
-    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
-    shuffleTimers.current = [];
-    shuffleActive.current = false;
-    setShuffling(false);
-  }, [ambientPaused, motionReduced]);
+    const paused = ambientPaused || motionReduced || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    if (paused && shuffleActive.current) cancelPosterShuffle();
+  }, [cancelPosterShuffle, ambientPaused, motionReduced, heroVisible, sideMenuOpen, pickupOpen, episodePickup]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -1380,6 +1384,8 @@ export function WorldHome() {
       shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
+      posterLoader.current?.dispose();
+      posterLoader.current = null;
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
       if (episodePointerFocusTimer.current != null) {
@@ -1448,25 +1454,15 @@ export function WorldHome() {
       { length: 9 },
       (_, index) => previewPool[index % previewPool.length],
     );
-    const finalImage = new Image();
-    finalImage.decoding = "async";
-    finalImage.fetchPriority = "high";
-    preparePosterImage(finalImage, POSTERS[finalPoster].src);
-    const finalReady =
-      finalImage
-        .decode?.()
-        .then(() => true)
-        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
-      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
-    const waitForFinalImage = () =>
-      Promise.race([
-        finalReady,
-        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
-      ]);
+    const finalReady = loadPoster(finalPoster);
     if (motionReduced) {
-      void waitForFinalImage().then((ready) => {
+      void finalReady.then((ready) => {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
+        if (!heroInViewRef.current) {
+          cancelPosterShuffle();
+          return;
+        }
+        if (ready) goPoster(finalPoster);
         shuffleActive.current = false;
         setShuffling(false);
       });
@@ -1475,30 +1471,10 @@ export function WorldHome() {
 
     const previewReady = new Set<number>();
     previewPool.forEach((index) => {
-      const image = index === finalPoster ? finalImage : new Image();
-      if (image !== finalImage) {
-        image.decoding = "async";
-        image.fetchPriority = "low";
-        preparePosterImage(image, POSTERS[index].src);
-      }
-      const decoded = index === finalPoster ? finalReady : image.decode?.();
-      if (!decoded) {
-        const markLoaded = () => {
-          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
-        };
-        markLoaded();
-        image.addEventListener("load", markLoaded, { once: true });
-        return;
-      }
-      void decoded
-        .then(() => {
-          if (shuffleRunId.current !== runId) return;
-          if (image.naturalWidth > 0) previewReady.add(index);
-        })
-        .catch(() => {
-          if (shuffleRunId.current !== runId) return;
-          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
-        });
+      const decoded = index === finalPoster ? finalReady : loadPoster(index, "low");
+      void decoded.then((ready) => {
+        if (ready && shuffleRunId.current === runId) previewReady.add(index);
+      });
     });
 
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
@@ -1506,15 +1482,20 @@ export function WorldHome() {
         const isFinalStep = index === steps.length - 1;
         const previewPoster = previewPosters[index % previewPosters.length];
         const ready = isFinalStep
-          ? await waitForFinalImage()
+          ? await finalReady
           : previewReady.has(previewPoster);
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (!heroInViewRef.current) {
+          cancelPosterShuffle();
+          return;
+        }
         const next = isFinalStep ? finalPoster : previewPoster;
-        if (ready || (isFinalStep && finalImage.complete && finalImage.naturalWidth > 0)) {
+        if (ready) {
           goPoster(next);
         }
         if (isFinalStep) {
           const settleTimer = window.setTimeout(() => {
+            if (!shuffleActive.current || shuffleRunId.current !== runId) return;
             setShuffling(false);
             shuffleActive.current = false;
             shuffleTimers.current = [];
@@ -1783,6 +1764,7 @@ export function WorldHome() {
           >
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img
+                key={nextPoster.src}
                 src={nextPoster.src}
                 {...posterImage(nextPoster.src)}
                 alt=""
@@ -1793,6 +1775,7 @@ export function WorldHome() {
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -1803,6 +1786,7 @@ export function WorldHome() {
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -1813,6 +1797,7 @@ export function WorldHome() {
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -1892,9 +1877,12 @@ export function WorldHome() {
                 type="button"
                 className="poster-reset ios26-glass"
                 data-liquid-pointer="true"
-                disabled={poster === 0 || shuffling}
+                disabled={poster === 0 && !shuffling}
                 aria-label="先頭のポスターへ戻る（RESET）"
-                onClick={() => goPoster(0)}
+                onClick={() => {
+                  cancelPosterShuffle();
+                  goPoster(0);
+                }}
               >
                 <LiquidPointerGlow />
                 <span aria-hidden="true">
@@ -1914,8 +1902,10 @@ export function WorldHome() {
                 aria-label={
                   locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
                 }
-                disabled={shuffling}
-                onClick={() => setLocked((v) => !v)}
+                onClick={() => {
+                  cancelPosterShuffle();
+                  setLocked((v) => !v);
+                }}
               >
                 <LiquidPointerGlow />
                 <span aria-hidden="true">

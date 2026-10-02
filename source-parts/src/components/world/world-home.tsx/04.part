@@ -1,9 +1,10 @@
-        new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 480)),
-      ]);
-    if (motionReduced) {
-      void waitForFinalImage().then((ready) => {
+      void finalReady.then((ready) => {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        if (ready || (finalImage.complete && finalImage.naturalWidth > 0)) goPoster(finalPoster);
+        if (!heroInViewRef.current) {
+          cancelPosterShuffle();
+          return;
+        }
+        if (ready) goPoster(finalPoster);
         shuffleActive.current = false;
         setShuffling(false);
       });
@@ -12,30 +13,10 @@
 
     const previewReady = new Set<number>();
     previewPool.forEach((index) => {
-      const image = index === finalPoster ? finalImage : new Image();
-      if (image !== finalImage) {
-        image.decoding = "async";
-        image.fetchPriority = "low";
-        preparePosterImage(image, POSTERS[index].src);
-      }
-      const decoded = index === finalPoster ? finalReady : image.decode?.();
-      if (!decoded) {
-        const markLoaded = () => {
-          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
-        };
-        markLoaded();
-        image.addEventListener("load", markLoaded, { once: true });
-        return;
-      }
-      void decoded
-        .then(() => {
-          if (shuffleRunId.current !== runId) return;
-          if (image.naturalWidth > 0) previewReady.add(index);
-        })
-        .catch(() => {
-          if (shuffleRunId.current !== runId) return;
-          if (image.complete && image.naturalWidth > 0) previewReady.add(index);
-        });
+      const decoded = index === finalPoster ? finalReady : loadPoster(index, "low");
+      void decoded.then((ready) => {
+        if (ready && shuffleRunId.current === runId) previewReady.add(index);
+      });
     });
 
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
@@ -43,15 +24,20 @@
         const isFinalStep = index === steps.length - 1;
         const previewPoster = previewPosters[index % previewPosters.length];
         const ready = isFinalStep
-          ? await waitForFinalImage()
+          ? await finalReady
           : previewReady.has(previewPoster);
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (!heroInViewRef.current) {
+          cancelPosterShuffle();
+          return;
+        }
         const next = isFinalStep ? finalPoster : previewPoster;
-        if (ready || (isFinalStep && finalImage.complete && finalImage.naturalWidth > 0)) {
+        if (ready) {
           goPoster(next);
         }
         if (isFinalStep) {
           const settleTimer = window.setTimeout(() => {
+            if (!shuffleActive.current || shuffleRunId.current !== runId) return;
             setShuffling(false);
             shuffleActive.current = false;
             shuffleTimers.current = [];
@@ -320,6 +306,7 @@
           >
             <div className="poster-back-card poster-back-card-1" aria-hidden="true">
               <img
+                key={nextPoster.src}
                 src={nextPoster.src}
                 {...posterImage(nextPoster.src)}
                 alt=""
@@ -330,6 +317,7 @@
             </div>
             <div className="poster-back-card poster-back-card-2" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -340,6 +328,7 @@
             </div>
             <div className="poster-back-card poster-back-card-3" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -350,6 +339,7 @@
             </div>
             <div className="poster-back-card poster-back-card-4" aria-hidden="true">
               <img
+                key={current.src}
                 src={current.src}
                 {...posterImage(current.src)}
                 alt=""
@@ -429,9 +419,12 @@
                 type="button"
                 className="poster-reset ios26-glass"
                 data-liquid-pointer="true"
-                disabled={poster === 0 || shuffling}
+                disabled={poster === 0 && !shuffling}
                 aria-label="先頭のポスターへ戻る（RESET）"
-                onClick={() => goPoster(0)}
+                onClick={() => {
+                  cancelPosterShuffle();
+                  goPoster(0);
+                }}
               >
                 <LiquidPointerGlow />
                 <span aria-hidden="true">
@@ -451,8 +444,10 @@
                 aria-label={
                   locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
                 }
-                disabled={shuffling}
-                onClick={() => setLocked((v) => !v)}
+                onClick={() => {
+                  cancelPosterShuffle();
+                  setLocked((v) => !v);
+                }}
               >
                 <LiquidPointerGlow />
                 <span aria-hidden="true">
@@ -485,3 +480,7 @@
                         strokeWidth="1.8"
                         strokeLinecap="round"
                       />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"

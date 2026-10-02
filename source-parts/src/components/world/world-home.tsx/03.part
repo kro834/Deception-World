@@ -1,3 +1,21 @@
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
+      if (cancelled) return;
+      const destination = {
+        path: "/world",
         brand: openingBrandRef.current,
         sigil: openingSigilRef.current,
         hero: openingHeroRef.current,
@@ -165,13 +183,9 @@
     const t = window.setInterval(async () => {
       if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
       decoding = true;
-      const image = new Image();
-      image.decoding = "async";
-      image.fetchPriority = "low";
-      preparePosterImage(image, POSTERS[nextIndex].src);
       try {
-        await image.decode();
-        if (cancelled || image.naturalWidth === 0 || document.querySelector("dialog[open]")) return;
+        const ready = await loadPoster(nextIndex, "low");
+        if (cancelled || !ready || document.querySelector("dialog[open]")) return;
         if (!heroInViewRef.current) return;
         startTransition(() => {
           setPrevPoster(poster);
@@ -187,7 +201,7 @@
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [loadPoster, ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
@@ -203,13 +217,10 @@
     )
       return;
     const timer = window.setTimeout(() => {
-      const image = new Image();
-      image.decoding = "async";
-      image.fetchPriority = "low";
-      preparePosterImage(image, POSTERS[(poster + 1) % POSTERS.length].src);
+      void loadPoster((poster + 1) % POSTERS.length, "low");
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [loadPoster, ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -247,13 +258,9 @@
   }, [ambientPaused]);
 
   useEffect(() => {
-    if ((!ambientPaused && !motionReduced) || !shuffleActive.current) return;
-    shuffleRunId.current += 1;
-    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
-    shuffleTimers.current = [];
-    shuffleActive.current = false;
-    setShuffling(false);
-  }, [ambientPaused, motionReduced]);
+    const paused = ambientPaused || motionReduced || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    if (paused && shuffleActive.current) cancelPosterShuffle();
+  }, [cancelPosterShuffle, ambientPaused, motionReduced, heroVisible, sideMenuOpen, pickupOpen, episodePickup]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -405,6 +412,8 @@
       shuffleRunId.current += 1;
       shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
       shuffleActive.current = false;
+      posterLoader.current?.dispose();
+      posterLoader.current = null;
       if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
       if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
       if (episodePointerFocusTimer.current != null) {
@@ -473,16 +482,5 @@
       { length: 9 },
       (_, index) => previewPool[index % previewPool.length],
     );
-    const finalImage = new Image();
-    finalImage.decoding = "async";
-    finalImage.fetchPriority = "high";
-    preparePosterImage(finalImage, POSTERS[finalPoster].src);
-    const finalReady =
-      finalImage
-        .decode?.()
-        .then(() => true)
-        .catch(() => finalImage.complete && finalImage.naturalWidth > 0) ??
-      Promise.resolve(finalImage.complete && finalImage.naturalWidth > 0);
-    const waitForFinalImage = () =>
-      Promise.race([
-        finalReady,
+    const finalReady = loadPoster(finalPoster);
+    if (motionReduced) {

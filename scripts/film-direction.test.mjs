@@ -164,12 +164,12 @@ test("poster autoplay pauses for overlays, decodes the next image and preserves 
     home,
     /if \(sideMenuOpen \|\| pickupOpen \|\| episodePickup !== null \|\| shuffling\) return/,
   );
-  assert.match(effect, /await image\.decode\(\)/);
-  assert.match(effect, /if \(cancelled \|\| image\.naturalWidth === 0/);
+  assert.match(effect, /await loadPoster\(nextIndex, "low"\)/);
+  assert.match(effect, /if \(cancelled \|\| !ready/);
   assert.match(effect, /document\.querySelector\("dialog\[open\]"\)/);
   assert.match(effect, /cancelled = true/);
   assert.match(effect, /clearInterval\(t\)/);
-  assert.match(home, /POSTERS\[\(poster \+ 1\) % POSTERS\.length\]\.src/);
+  assert.match(home, /loadPoster\(\(poster \+ 1\) % POSTERS\.length, "low"\)/);
   assert.doesNotMatch(home, /RETURNING SIGNAL/);
 });
 

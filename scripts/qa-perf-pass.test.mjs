@@ -8,6 +8,7 @@ import {
   POSTER_IMAGES,
   portraitThumbnail,
   posterImage,
+  preparePosterImage,
 } from "../src/lib/thumbnail-images.ts";
 
 /* The QA, delivery and accessibility pass of 2026-09-30: right-sized cast
@@ -143,16 +144,28 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
       jpeg += original.length;
       webp += delivery.length;
     }
-    // A 1x srcset keeps the JPEG's intrinsic size; the JPEG stays the src.
+    // Both attributes and the warmup use the same resource, including WebKit.
+    assert.equal(posterImage(source).src, set.variants[0].path);
     assert.equal(posterImage(source).srcSet, set.variants[0].path);
+    const warmup = {};
+    preparePosterImage(warmup, source);
+    assert.equal(warmup.src, posterImage(source).src);
+    assert.equal(warmup.srcset, posterImage(source).srcSet);
   }
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
   // The deck, the backdrop and the warm-ups all ask through the helpers.
   assert.equal(home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src\)\}/g)?.length, 8);
-  // Four preload call sites: autoplay next, low-priority next, shuffle final,
-  // and at-most-four preview candidates (sharing finalImage if it overlaps).
-  assert.equal(home.match(/preparePosterImage\(/g)?.length, 4);
+  // Autoplay, warmup and shuffle use the same delivery-aware loader as Dream.
+  assert.match(home, /createReadyPosterLoader\(preparePosterImage\)/);
+  assert.match(home, /posterLoader\.current\.load\(POSTERS\[index\]\.src, priority\)/);
+  assert.doesNotMatch(home, /new Image\(/);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
+  for (let index = 1; index <= 4; index++) {
+    const source = index === 1 ? "nextPoster" : "current";
+    // Mutating a reused lazy back-card image can invalidate the front's
+    // warmed resource during rapid transitions in WebKit.
+    assert.match(home, new RegExp(`className="poster-back-card poster-back-card-${index}"[^>]*>\\s*<img\\s+key=\\{${source}\\.src\\}\\s+src=\\{${source}\\.src\\}`));
+  }
 });
 
 test("the Dream Chapter's poster console asks for the same WebP copies", async () => {
@@ -165,6 +178,7 @@ test("the Dream Chapter's poster console asks for the same WebP copies", async (
     // delivery-verify pass the console asks for the hero's own WebP.
     if (poster.src === "/dream-chapter-poster-05.jpeg") {
       assert.deepEqual(posterImage(poster.src), {
+        src: "/dream-chapter-poster-05-delivery.webp",
         srcSet: "/dream-chapter-poster-05-delivery.webp",
       });
     }

@@ -302,7 +302,7 @@ test("nav reserve measures once initially and once for simultaneous resize sourc
   assert.equal(h.frames.size, 0);
 });
 
-test("Extreme mounts the tested lifecycle helpers without moving comparison state", () => {
+test("Extreme mounts the tested lifecycle helpers without changing the comparison default", () => {
   const source = readFileSync(
     new URL("../src/components/extreme-saga/extreme-saga.tsx", import.meta.url),
     "utf8",
