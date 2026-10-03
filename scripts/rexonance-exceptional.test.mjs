@@ -380,10 +380,12 @@ test("the premiere call keeps its clock, its rows and its first lines", () => {
       context.some((at) => REDUCED.test(at)),
       selector,
     );
+    // rx3: the suit-up's stage-card badge moves too, behind the same gates
+    // (scripts/rexonance-suitup.test.mjs pins its timing and scope).
     for (const part of splitTopLevel(selector)) {
       assert.match(
         part,
-        /^html:not\(\[data-world-effects="economy"\]\) \.rx-call-sequence\[data-mode="entry"\]\[data-tier="full"\]/,
+        /^html:not\(\[data-world-effects="economy"\]\) \.rx-call-sequence(?:\[data-mode="entry"\]\[data-tier="full"\]|\[data-mode="stage"\]\[data-tier="full"\] \.rx-suit-(?:badge|crest))/,
         part,
       );
     }

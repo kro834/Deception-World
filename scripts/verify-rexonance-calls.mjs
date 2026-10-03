@@ -142,6 +142,66 @@ async function waitForVisibleCall(page, selector, expectedLines) {
   );
 }
 
+// rx3 suit-up: whatever HUD text is showing (the system check, the part
+// callouts, LOCK) never covers a call's glyphs, keeps the 12px floor and
+// stays inside the frame; the stage card's badge sits clear of the name.
+async function verifySuitClear(page, selector, profileName, label) {
+  const report = await page.locator(selector).evaluate((beat) => {
+    const root = beat.closest(".rx-call-sequence");
+    const glyphs = [...beat.querySelectorAll(":scope > span")].map((span) => {
+      const range = document.createRange();
+      range.selectNodeContents(span);
+      return range.getBoundingClientRect();
+    });
+    const opacity = (element) => {
+      let value = 1;
+      for (let node = element; node && node !== root.parentElement; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        if (style.display === "none") return 0;
+        value *= Number(style.opacity);
+      }
+      return value;
+    };
+    const hits = (box) =>
+      glyphs.some(
+        (glyph) =>
+          box.left < glyph.right &&
+          box.right > glyph.left &&
+          box.top < glyph.bottom &&
+          box.bottom > glyph.top,
+      );
+    const texts = [
+      ...root.querySelectorAll(".rx-suit-label, .rx-suit-boot p, .rx-suit-boot b"),
+    ].filter((element) => opacity(element) > 0.05);
+    const report = { shown: texts.length, overlaps: [], outside: [], small: [], badge: null };
+    for (const element of texts) {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const box = range.getBoundingClientRect();
+      if (parseFloat(getComputedStyle(element).fontSize) < 12) report.small.push(element.textContent);
+      if (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > innerHeight + 1)
+        report.outside.push(element.textContent);
+      if (hits(box)) report.overlaps.push(element.textContent);
+    }
+    // The badge's place does not depend on its fade: check it whenever shown.
+    const badge = root.querySelector(".rx-suit-badge");
+    if (badge && getComputedStyle(badge).display !== "none") {
+      const box = badge.getBoundingClientRect();
+      report.badge = { clear: !hits(box), top: Math.round(box.top) };
+    }
+    return report;
+  });
+  console.log(`${profileName} suit-clear ${label}`, JSON.stringify(report));
+  assert.deepEqual(report.overlaps, [], `${profileName} ${label}: HUD text over a call`);
+  assert.deepEqual(report.outside, [], `${profileName} ${label}: HUD text outside the frame`);
+  assert.deepEqual(report.small, [], `${profileName} ${label}: HUD text under 12px`);
+  if (report.badge) {
+    assert.ok(report.badge.clear, `${profileName} ${label}: the badge covers the name`);
+    assert.ok(report.badge.top >= 0, `${profileName} ${label}: the badge is inside the frame`);
+  }
+  return report;
+}
+
 // rx2 rest guard: at any tapping cadence one card at most is up, card starts
 // stay at least a card plus its rest apart (950 ms, minus timer jitter), the
 // label follows the latest selection, and nothing is left behind.
@@ -231,6 +291,16 @@ async function verifyProfile(profile) {
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-first.png` });
   }
+  await verifySuitClear(page, entryCall("FAR UP！", 0), profile.name, "FAR UP！");
+  // The system check has booted by RIDER！ (rx3).
+  await page.waitForFunction(
+    (target) => {
+      const beat = document.querySelector(target);
+      return beat && Number(getComputedStyle(beat).opacity) > 0.3;
+    },
+    entryCall("RIDER！", 1),
+  );
+  await verifySuitClear(page, entryCall("RIDER！", 1), profile.name, "RIDER！");
   await waitForVisibleCall(
     page,
     '.rx-call-sequence[data-mode="entry"] .rx-call-chant[data-call="SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！"]',
@@ -239,12 +309,43 @@ async function verifyProfile(profile) {
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-chant.png` });
   }
+  await verifySuitClear(
+    page,
+    '.rx-call-sequence[data-mode="entry"] .rx-call-chant[data-call="SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！"]',
+    profile.name,
+    "SA-GA！DEUS！",
+  );
   await waitForVisibleCall(
     page,
     '.rx-call-sequence[data-mode="entry"] .rx-call-repetition[data-call="REXONANCE！REXONANCE！REXONANCE！REXONANCE！"]',
     4,
   );
+  await verifySuitClear(
+    page,
+    '.rx-call-sequence[data-mode="entry"] .rx-call-repetition[data-call="REXONANCE！REXONANCE！REXONANCE！REXONANCE！"]',
+    profile.name,
+    "REXONANCE！",
+  );
   await waitForVisibleCall(page, entryCall("REXONANCE DEUS！", 4), 2);
+  // Every callout and the LOCK are up just before the hand-over (rx3).
+  await page
+    .waitForFunction(
+      () => {
+        const root = document.querySelector('.rx-call-sequence[data-mode="entry"]');
+        const lock = root?.querySelector(".rx-suit-callout.is-lock .rx-suit-label");
+        return (
+          !root ||
+          root.dataset.phase !== "covering" ||
+          (lock && Number(getComputedStyle(lock).opacity) > 0.9)
+        );
+      },
+      null,
+      { timeout: 1500 },
+    )
+    .catch(() => undefined);
+  if (await page.locator('.rx-call-sequence[data-mode="entry"][data-phase="covering"]').count()) {
+    await verifySuitClear(page, entryCall("REXONANCE DEUS！", 4), profile.name, "REXONANCE DEUS！");
+  }
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-final.png` });
   }
@@ -322,6 +423,12 @@ async function verifyProfile(profile) {
   assert.equal(await stageOverlay.getAttribute("data-stage"), "ultra");
   assert.equal(await page.locator('.rx-call-sequence[data-mode="stage"]').count(), 1);
   assert.match(await stageOverlay.textContent(), /REXONANCE[\s\S]*DEUS！[\s\S]*ULTRA/);
+  await verifySuitClear(
+    page,
+    '.rx-call-sequence[data-mode="stage"] .rx-call-final',
+    profile.name,
+    "stage card",
+  );
   assert.equal(await stageOverlay.evaluate((root) => getComputedStyle(root).pointerEvents), "none");
   assert.equal(
     await page

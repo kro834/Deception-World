@@ -27,3 +27,20 @@ export const REXONANCE_CALL_BEATS = [
   { start: 1300, duration: 680 },
   { start: 1980, duration: 320 },
 ] as const;
+
+// rx3 suit-up HUD. The system check reads only what the page already states,
+// exactly as printed there (rexonance-saga.tsx: the P14 / SA-GA OS 5.5 copy,
+// the processing comparison and the TRINITY specs). ONLINE and LINK are
+// generic HUD words. Decorative: the overlay is aria-hidden.
+export const REXONANCE_SUIT_SYSTEMS = [
+  ["SA-GA OS 5.5", "ONLINE"],
+  ["P14", "LINK"],
+  ["KHAOS DeuX", "50,000YOPS / ∞Core"],
+  ["KOSMOS DeuX", "9,000TOPS / 300Core"],
+  ["Paranormal Realizer Ultra", "ONLINE"],
+  ["Neural Resonancer Ultra", "ONLINE"],
+] as const;
+
+// The schematic's part callouts, in the order their plates lock: one plate
+// group on each quarter-beat of SA-GA！DEUS！.
+export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
