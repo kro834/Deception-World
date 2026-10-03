@@ -17,6 +17,7 @@ import rexonanceInstrumentCssUrl from "@/styles-rexonance-instrument.css?url";
 import rexonanceFinishCssUrl from "@/styles-rexonance-finish.css?url";
 import rexonancePremiereCssUrl from "@/styles-rexonance-premiere.css?url";
 import rexonanceCoutureCssUrl from "@/styles-rexonance-couture.css?url";
+import rexonanceArmourCssUrl from "@/styles-rexonance-armour.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -52,6 +53,9 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceFinishCssUrl },
       { rel: "stylesheet", href: rexonancePremiereCssUrl },
       { rel: "stylesheet", href: rexonanceCoutureCssUrl },
+      // The Armour edition: the page drawn as the suit-up renders its armour
+      // (styles-rexonance-armour.css), paint only, after Couture.
+      { rel: "stylesheet", href: rexonanceArmourCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

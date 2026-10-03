@@ -1,0 +1,607 @@
+/* ================================================================
+   Rexonance — the Armour edition (rx4, 2026-10-04)
+
+   The page drawn the way the suit-up now renders its armour: black
+   plates lit from the top left, a dark bevel under a lit rim, one
+   diagonal sheen across every plate, faceted crystal light in ice and
+   pink, gold for the trims; a lattice ground with light shafts behind
+   the figure, a floor pool under it and a halo behind its core; metal
+   numerals; seams that glow. Paint only: no keyframes, no animation,
+   no timelines, no filter, no blur, nothing fetched. Route-only
+   (linked after the Couture sheet, before the cinematic sheet) and
+   scoped to .rxs-page.rxs-page.rxs-rexonance-page, so Extreme and
+   Final Stage never see it. It leaves every measured geometry (local
+   nav, liquid rail, P14 slider and pills, selects, anchors, the stage
+   copy start) to the earlier sheets: boxes keep their size; only
+   their paint changes. State transitions are colour-only, behind
+   reduced motion and economy.
+   ================================================================ */
+
+/* ---------- Tokens: armour light ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --ra-ink: #02050a;
+  --ra-ice: #79e8ff;
+  --ra-pink: #ff8fd8;
+  --ra-gold: #f2d896;
+  --ra-gold-deep: #c9a15a;
+  --ra-white: #f4fbff;
+  /* The plate: a specular edge, a short tinted falloff, a near-black body. */
+  --ra-plate: linear-gradient(
+    172deg,
+    rgb(244 251 255 / 14%) 0,
+    rgb(122 232 255 / 7%) 3%,
+    #0d1826 11%,
+    #070d16 46%,
+    #03060c 100%
+  );
+  /* One diagonal band of light over every plate. */
+  --ra-sheen: linear-gradient(
+    118deg,
+    transparent 38%,
+    rgb(255 255 255 / 5.5%) 47%,
+    rgb(255 255 255 / 7%) 50%,
+    rgb(255 255 255 / 5.5%) 53%,
+    transparent 62%
+  );
+  /* The bevel: a lit top edge, a dark lower edge, a faint lit left edge. */
+  --ra-bevel:
+    inset 0 1px 0 rgb(255 255 255 / 34%), inset 1px 0 0 rgb(255 255 255 / 9%),
+    inset 0 -1px 0 rgb(0 0 0 / 85%), inset -1px 0 0 rgb(0 0 0 / 55%);
+  --ra-rim-ice: 0 0 0 1px rgb(122 232 255 / 26%);
+  --ra-rim-pink: 0 0 0 1px rgb(255 143 216 / 26%);
+  --ra-rim-gold: 0 0 0 1px rgb(242 216 150 / 34%);
+  --ra-drop: 0 24px 48px -26px rgb(0 0 0 / 90%);
+  /* The lattice: a 28px grid of ice hairlines at 3%, under the grain. */
+  --ra-lattice:
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px);
+  --rc-plate: #070d16;
+  --rc-plate-hi: #0d1826;
+  background:
+    var(--rc-grain) 0 0 / 180px 180px repeat,
+    var(--ra-lattice),
+    var(--ra-ink);
+}
+
+/* ---------- Hero: shafts of light, a halo behind the core, a floor ---------- */
+/* The figure stands at the hero's right (72%). Two shafts of light fall
+   behind it, ice from the left and pink from the right, a halo sits
+   behind its chest core and a floor pool under its feet; the lattice runs
+   under all of it. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero {
+  background:
+    var(--rc-grain) 0 0 / 180px 180px repeat,
+    radial-gradient(ellipse 9% 30% at 72% 36%, rgb(255 248 226 / 16%), transparent 70%),
+    radial-gradient(ellipse 30% 70% at 60% 40%, rgb(122 232 255 / 9%), transparent 70%),
+    radial-gradient(ellipse 30% 70% at 86% 40%, rgb(255 143 216 / 8%), transparent 70%),
+    radial-gradient(ellipse 30% 5% at 72% 94%, rgb(122 232 255 / 20%), transparent 70%),
+    radial-gradient(ellipse 22% 3% at 72% 94%, rgb(255 255 255 / 14%), transparent 70%),
+    linear-gradient(
+        180deg,
+        transparent 93.6%,
+        rgb(122 232 255 / 55%) 93.9%,
+        rgb(255 143 216 / 55%) 94.1%,
+        transparent 94.4%
+      )
+      72% 0 / 36% 100% no-repeat,
+    radial-gradient(ellipse 52% 64% at 72% 44%, rgb(44 70 110 / 34%), transparent 70%),
+    var(--ra-lattice),
+    var(--ra-ink);
+}
+
+/* The wordmark in brushed metal; the headline keeps its ivory. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero h1 span {
+  background: linear-gradient(90deg, #ffffff, #bff4ff 40%, #ffc4ec 70%, #f2d896);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The lede's leading rule becomes a lit gold seam. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede {
+  text-shadow: 0 0 18px rgb(122 232 255 / 18%);
+}
+
+/* ---------- The bar: a glass plate with a lit seam ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav {
+  background:
+    linear-gradient(90deg, var(--ra-ice), var(--ra-pink) 52%, var(--ra-gold)) 0 100% / 100% 1px
+      no-repeat,
+    linear-gradient(180deg, rgb(244 251 255 / 6%), rgb(244 251 255 / 1%) 60%, transparent),
+    var(--ra-ink);
+  box-shadow: 0 1px 14px -2px rgb(122 232 255 / 28%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger {
+  border-color: rgb(122 232 255 / 42%);
+  background:
+    linear-gradient(var(--ra-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate) !important;
+  box-shadow: var(--ra-bevel);
+}
+
+/* ---------- Chapter heads: numerals in metal, seams that glow ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::after {
+  box-shadow: 0 0 10px rgb(122 232 255 / 30%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading h2 {
+  text-shadow: 0 0 24px rgb(122 232 255 / 10%);
+}
+
+/* ---------- Plates ---------- */
+/* Every instrument and card is an armour plate: the plate gradient under
+   the sheen, the bevel inside its edge, a rim in its own light. */
+.rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-headline-metrics article,
+    .rxs-comparison,
+    .rxs-p14 .rxs-p14-comparator,
+    .rxs-p14 .rxs-p14-metrics article,
+    .rxs-processing-comparison > div > section,
+    .rxs-system .rxs-system-grid article,
+    .rxs-footer > a:not(.rxs-footer-return, :first-of-type)
+  ) {
+  background: var(--ra-sheen), var(--ra-plate);
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice), var(--ra-drop);
+}
+
+/* The two headline metrics: ice on the left, pink on the right, chamfered
+   like shoulder plates, their glow blob retired for a lit top seam. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article {
+  /* The showcase set these bare (a hairline, no padding); a plate needs
+     its inset, clear of the chamfers. */
+  padding: clamp(26px, 3.4vw, 44px) clamp(24px, 3.2vw, 40px) clamp(22px, 3vw, 36px);
+  border: 0;
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, var(--ra-ice), rgb(122 232 255 / 0%)) 0 0 / 46% 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% 100%,
+    22px 100%,
+    0 calc(100% - 22px)
+  );
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article:last-child {
+  background:
+    linear-gradient(90deg, var(--ra-pink), rgb(255 143 216 / 0%)) 0 0 / 46% 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  box-shadow: var(--ra-bevel), var(--ra-rim-pink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article::after {
+  opacity: 0.35;
+}
+
+/* The figures are cut metal: white at the top edge, the tone below. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics strong {
+  background: linear-gradient(180deg, #ffffff 12%, #d9f7ff 46%, #79e8ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article:last-child strong {
+  background: linear-gradient(180deg, #ffffff 12%, #ffe1f3 46%, #ff8fd8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics strong span {
+  background: linear-gradient(180deg, #fff7dc, var(--ra-gold) 60%, var(--ra-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The instrument case keeps the finish sheet's gold brackets over the plate. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison {
+  background:
+    linear-gradient(var(--ra-ice) 0 0) 0 0 / 28px 2px,
+    linear-gradient(var(--ra-ice) 0 0) 0 0 / 2px 28px,
+    linear-gradient(var(--ra-pink) 0 0) 100% 0 / 28px 2px,
+    linear-gradient(var(--ra-pink) 0 0) 100% 0 / 2px 28px,
+    linear-gradient(var(--ra-gold) 0 0) 0 100% / 28px 2px,
+    linear-gradient(var(--ra-gold) 0 0) 0 100% / 2px 28px,
+    linear-gradient(var(--ra-gold) 0 0) 100% 100% / 28px 2px,
+    linear-gradient(var(--ra-gold) 0 0) 100% 100% / 2px 28px,
+    linear-gradient(90deg, var(--ra-ice), rgb(255 143 216 / 55%) 46%, transparent) 0 0 / 100% 1px,
+    var(--ra-sheen),
+    var(--ra-plate);
+  background-repeat: no-repeat;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison article strong,
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b {
+  color: var(--ra-white);
+  text-shadow: 0 0 14px rgb(122 232 255 / 22%);
+}
+
+/* The bars: lit tubes. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-bars i.is-rexonance {
+  background: linear-gradient(
+    90deg,
+    #ffffff,
+    var(--ra-ice) 30%,
+    var(--ra-pink) 75%,
+    var(--ra-gold)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%),
+    0 0 10px rgb(122 232 255 / 35%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-bars i.is-extreme {
+  background: linear-gradient(90deg, rgb(244 251 255 / 36%), rgb(244 251 255 / 18%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+}
+
+/* The processing plates: the baseline in ice, Rexonance in pink and gold. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section {
+  border-radius: 4px;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section:last-child {
+  background:
+    linear-gradient(90deg, var(--ra-pink), var(--ra-gold)) 0 0 / 100% 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  box-shadow: var(--ra-bevel), var(--ra-rim-gold);
+}
+
+/* ---------- 02 P14: the core's halo, crystal readouts ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure {
+  box-shadow:
+    var(--ra-rim-ice),
+    0 0 40px -6px rgb(122 232 255 / 30%),
+    var(--ra-drop);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dd {
+  background: linear-gradient(180deg, #ffffff 10%, #d9f7ff 50%, #79e8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:nth-child(2) dd {
+  background: linear-gradient(180deg, #ffffff 10%, #ffe1f3 50%, #ff8fd8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:last-child dd {
+  background: linear-gradient(180deg, #fff7dc 10%, var(--ra-gold) 55%, var(--ra-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14 .rxs-p14-comparator {
+  border-radius: 6px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% 100%,
+    22px 100%,
+    0 calc(100% - 22px)
+  );
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14 .rxs-p14-metrics article {
+  border-radius: 4px;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values strong {
+  color: var(--ra-white);
+  text-shadow: 0 0 14px rgb(255 143 216 / 25%);
+}
+
+/* The P14 slider's track: a lit tube with the gold thumb's seam. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-track {
+  background:
+    linear-gradient(90deg, var(--ra-ice), var(--ra-pink)) 0 0 / 100% 100% no-repeat,
+    var(--ra-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 0 10px rgb(122 232 255 / 25%);
+}
+
+/* ---------- 03 Stages: the figure's frame and the copy's chip ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 38%, transparent),
+    0 0 48px -8px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 40%, transparent),
+    var(--ra-drop);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > small {
+  background:
+    var(--ra-sheen),
+    linear-gradient(
+      172deg,
+      color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 28%, #0d1826),
+      #070d16 60%
+    );
+  box-shadow:
+    var(--ra-bevel),
+    0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 55%, transparent),
+    0 0 12px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 30%, transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel li::before {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice)) 60%, transparent);
+}
+
+/* ---------- 04 System: three plates, three lights ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article {
+  border-radius: 6px;
+  background:
+    linear-gradient(var(--ri-voice, var(--ra-ice)) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--ra-gold) 0 0) 50% 100% / 36px 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 22px) 0,
+    100% 22px,
+    100% 100%,
+    22px 100%,
+    0 calc(100% - 22px)
+  );
+  box-shadow:
+    var(--ra-bevel),
+    0 0 0 1px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 30%, transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:nth-child(2) {
+  --ri-voice: var(--ra-pink);
+}
+
+/* HUMAN WILL, the decision: a gold plate, lit metal rather than paper. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+  background:
+    linear-gradient(90deg, #fff7dc, var(--ra-gold) 40%, var(--ra-gold-deep)) 0 0 / 100% 2px
+      no-repeat,
+    linear-gradient(#604e32 0 0) 50% 100% / 36px 2px no-repeat,
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 22%) 50%, transparent 62%),
+    linear-gradient(172deg, #fff9ea, #f3e7c8 12%, #e8d6a9 48%, #d9bf86 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 85%),
+    inset 0 -1px 0 rgb(96 78 50 / 55%),
+    0 0 0 1px rgb(242 216 150 / 70%),
+    0 0 36px -8px rgb(242 216 150 / 45%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article header span {
+  text-shadow: 0 0 12px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 55%, transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
+  background: linear-gradient(180deg, #ffffff 12%, #d9f7ff 50%, #79e8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div:last-child strong {
+  background: linear-gradient(180deg, #ffffff 12%, #ffe1f3 50%, #ff8fd8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span {
+  background: linear-gradient(180deg, #fff7dc, var(--ra-gold) 60%, var(--ra-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- The chapter index and the footer: plates on the lattice ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
+  background:
+    linear-gradient(180deg, rgb(244 251 255 / 5%), transparent 55%), var(--ra-lattice),
+    rgb(2 5 10 / 70%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer {
+  background:
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 35%,
+      rgb(122 232 255 / 16%) 35.1% 35.25%,
+      transparent 35.4%
+    ),
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 46%,
+      rgb(255 143 216 / 15%) 46.1% 46.25%,
+      transparent 46.4%
+    ),
+    radial-gradient(
+      ellipse at 86% 100%,
+      transparent 57%,
+      rgb(242 216 150 / 18%) 57.1% 57.25%,
+      transparent 57.4%
+    ),
+    radial-gradient(ellipse 60% 80% at 86% 100%, rgb(44 70 110 / 22%), transparent 70%),
+    var(--rc-grain) 0 0 / 180px 180px repeat,
+    var(--ra-lattice),
+    var(--ra-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer::before {
+  box-shadow: 0 0 14px rgb(122 232 255 / 35%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return, :first-of-type) {
+  border-color: transparent;
+  border-radius: 4px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  background:
+    linear-gradient(var(--ra-ice) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--ra-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
+}
+
+/* The primary footer plate is the one ivory, in brushed gold now. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:first-of-type {
+  border-radius: 4px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  background:
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 30%) 50%, transparent 62%),
+    linear-gradient(172deg, #fffaf0, #f3e7c8 14%, #ead8ab 50%, #d9bf86 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 85%),
+    inset 0 -1px 0 rgb(96 78 50 / 55%),
+    0 0 0 1px rgb(242 216 150 / 70%),
+    0 0 30px -8px rgb(242 216 150 / 45%);
+}
+
+/* ---------- States: the light answers the pointer, colour only ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-footer
+    > a:not(.rxs-footer-return, :first-of-type):hover {
+    border-color: transparent;
+    background:
+      linear-gradient(var(--ra-ice) 0 0) 0 0 / 32px 2px no-repeat,
+      linear-gradient(var(--ra-gold) 0 0) 0 100% / 12px 2px no-repeat,
+      linear-gradient(118deg, transparent 34%, rgb(255 255 255 / 10%) 50%, transparent 66%),
+      var(--ra-plate);
+    box-shadow: var(--ra-bevel), var(--ra-rim-gold);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-system
+    .rxs-system-grid
+    article:not(:last-child):hover {
+    box-shadow:
+      var(--ra-bevel),
+      0 0 0 1px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 70%, transparent),
+      0 0 28px -6px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 45%, transparent);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger:hover {
+    border-color: rgb(122 232 255 / 80%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-system .rxs-system-grid article, .rxs-footer > a) {
+    transition: box-shadow 220ms ease;
+  }
+}
+
+/* ---------- More contrast: no sheen, no lattice, solid plates ---------- */
+@media (prefers-contrast: more) {
+  .rxs-page.rxs-page.rxs-rexonance-page {
+    --ra-sheen: none;
+    --ra-lattice: none;
+    --ra-plate: #070d16;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-headline-metrics strong,
+      .rxs-headline-metrics strong span,
+      .rxs-p14-copy dd,
+      .rxs-specs strong,
+      .rxs-specs strong span,
+      .rxs-hero h1 span
+    ) {
+    background: none;
+    color: var(--rc-ivory);
+  }
+}
+
+/* ---------- Forced colours: system surfaces, system text ---------- */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page,
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-hero, .rxs-footer, .rxs-local-nav, .rxs-chapter-index, .rxs-menu-trigger) {
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-headline-metrics article,
+      .rxs-comparison,
+      .rxs-p14 .rxs-p14-comparator,
+      .rxs-p14 .rxs-p14-metrics article,
+      .rxs-processing-comparison > div > section,
+      .rxs-system .rxs-system-grid article,
+      .rxs-footer > a
+    ) {
+    background: Canvas;
+    box-shadow: none;
+    clip-path: none;
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-hero h1 span,
+      .rxs-headline-metrics strong,
+      .rxs-headline-metrics strong span,
+      .rxs-p14-copy dd,
+      .rxs-specs strong,
+      .rxs-specs strong span,
+      .rxs-comparison article strong,
+      .rxs-comparison-result b,
+      .rxs-p14-values strong
+    ) {
+    background: none;
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a,
+  .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-footer
+    > a:not(.rxs-footer-return, :first-of-type):hover {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+}
