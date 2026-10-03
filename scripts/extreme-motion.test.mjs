@@ -317,3 +317,28 @@ test("Extreme mounts the tested lifecycle helpers without changing the compariso
     /const \[baseline, setBaseline\] = useState<ExtremeBaseline>\("diluculum"\)/,
   );
 });
+
+test("where view timelines run, motion stays ready but the scroll write is skipped", () => {
+  const h = setup({ eligible: false });
+  h.environment.CSS = {
+    supports: (property, value) =>
+      (property === "animation-timeline" && value === "view()") ||
+      (property === "animation-range" && value === "entry 0% entry 100%"),
+  };
+  const cleanup = h.mount();
+  // The page still runs its CSS motion; only the per-frame property write stops.
+  assert.deepEqual(h.ready, [true]);
+  assert.equal(h.environment.listeners.has("scroll"), false);
+  h.environment.emit("scroll");
+  h.flush();
+  assert.equal(h.values.has("--rxs-hero-progress"), false);
+  assert.equal(h.writes.length, 0);
+  cleanup();
+  // Without timeline support the fallback keeps following the scroll.
+  const fallback = setup({ eligible: false });
+  fallback.environment.CSS = { supports: () => false };
+  const release = fallback.mount();
+  assert.equal(fallback.environment.listeners.get("scroll").size, 1);
+  assert.equal(fallback.values.get("--rxs-hero-progress"), "0.500");
+  release();
+});

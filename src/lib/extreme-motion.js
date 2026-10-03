@@ -11,6 +11,13 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
   const coarsePointer = environment.matchMedia("(pointer: coarse)");
   const connection = device.connection;
   const nativeEligible = supportsIOS27Enhancements(device);
+  // Where view timelines run, the motion sheet's recede already follows the
+  // scroll on the compositor, so the per-frame property write is skipped as on
+  // Rexonance (rx2 F4); it remains the fallback without timelines.
+  const timelines = Boolean(
+    environment.CSS?.supports?.("animation-timeline", "view()") &&
+      environment.CSS.supports("animation-range", "entry 0% entry 100%"),
+  );
   const previousProgress = page.style.getPropertyValue("--rxs-hero-progress");
   const previousPriority = page.style.getPropertyPriority("--rxs-hero-progress");
   let ready;
@@ -49,7 +56,7 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
       ready = allowed;
       setMotionReady(allowed);
     }
-    const native = nativeEligible && html.dataset.ios27Enhanced === "true";
+    const native = timelines || (nativeEligible && html.dataset.ios27Enhanced === "true");
     if (!allowed || coarsePointer.matches || native || document.hidden) {
       detach();
       if (!document.hidden) {
