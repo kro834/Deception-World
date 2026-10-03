@@ -345,6 +345,15 @@ main.manager-page:not(.is-sovereign)
   }
 }
 
+/* From the desktop step it follows the screen (clamp(11px, 1vw, 13px), the
+   future-interface sheet), which read 11.0-11.9px from 1100 to 1199px wide:
+   iPad landscape (1180, 1194). Same growth, with the 12px floor. */
+@media (min-width: 1100px) {
+  main.manager-page:not(.is-sovereign) .manager-introduction .dossier-identity h1 small {
+    font-size: clamp(12px, 1vw, 13px);
+  }
+}
+
 /* Every label at least 12px, as on the World page. */
 main.manager-page:not(.is-sovereign)
   :is(
@@ -436,6 +445,16 @@ main.manager-page:not(.is-sovereign) .rider-archive-civilian-visual > span {
 main.manager-page:not(.is-sovereign) .manager-pagination > a {
   border-radius: 0;
 }
+
+/* The file ends on its pagination, 1px above <main>'s bottom edge, and
+   <main> clipped both ways (overflow: clip, the World base): the end
+   plates' warm ring (2px at a 3px offset) lost its bottom side. Only the
+   sideways clip is needed (nothing else crosses <main>'s top or bottom, and
+   the page height is unchanged), so the bottom is left open. */
+main.manager-page:not(.is-sovereign) {
+  overflow-y: visible;
+}
+
 
 main.manager-page:not(.is-sovereign) .manager-pagination::before {
   content: "";
@@ -905,6 +924,41 @@ main.manager-page:not(.is-sovereign)
   main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div {
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
+  }
+
+}
+
+/* Under 390px the longest label left the values 173px, so a value's last
+   phrase could miss by a few pixels and drop its closing bracket onto a
+   line of its own (本人に強い自覚はない／）). The labels tighten as Zeus's
+   do under 340px and the value gives up its 4px end pad: 179px. Names too
+   long for the column break at their seams (NameText seams, as
+   仮面ライダー／ヴァンダール), never inside a word. */
+@media (min-width: 375px) and (max-width: 389px) {
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div > dt {
+    letter-spacing: 0.06em;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-hero .manager-facts > div > dd {
+    padding-right: 0;
+  }
+}
+
+/* Lejas's portrait is a button (the close-up cut) that answered a mouse
+   with its cursor only: its tap hint lights in the file's accent, as the
+   list return does. Colour only. */
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page:not(.is-sovereign) button.manager-portrait-frame .lejas-tap-hint {
+    transition:
+      background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  main.manager-page:not(.is-sovereign) button.manager-portrait-frame:hover .lejas-tap-hint {
+    border-color: color-mix(in srgb, var(--manager-accent) 72%, transparent);
+    background-color: color-mix(in srgb, var(--manager-accent) 24%, rgb(6 10 16 / 86%));
+    color: #f4f6fb;
   }
 }
 

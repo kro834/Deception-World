@@ -94,7 +94,7 @@ export function CielPage() {
               <div key={fact.dt}>
                 <dt>{fact.dt}</dt>
                 <dd>
-                  <NameText value={fact.dd} />
+                  <NameText value={fact.dd} seams />
                 </dd>
               </div>
             ))}

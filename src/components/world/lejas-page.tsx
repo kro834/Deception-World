@@ -1,13 +1,56 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
 
+// The close-up is a straight cut between two stacked layers. The layer at
+// rest under opacity 0 is never painted, so it is not decoded: cutting to it
+// showed the plate's empty ground for a frame. Each cut now waits for the
+// layer it lands on to decode (about 12 ms on a phone), and commits anyway if
+// that takes longer, as on a slow first fetch.
+const CUT_DECODE_LIMIT_MS = 200;
+
 export function LejasPage() {
   useWorldMode();
   const [closeUp, setCloseUp] = useState(false);
+  const wideRef = useRef<HTMLImageElement>(null);
+  const faceRef = useRef<HTMLImageElement>(null);
+  const cutRun = useRef(0);
+  const cutTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      cutRun.current += 1;
+      if (cutTimer.current !== null) window.clearTimeout(cutTimer.current);
+    },
+    [],
+  );
+
+  const cut = () => {
+    const next = !closeUp;
+    const layer = next ? faceRef.current : wideRef.current;
+    const run = ++cutRun.current;
+    if (cutTimer.current !== null) window.clearTimeout(cutTimer.current);
+    cutTimer.current = null;
+    let committed = false;
+    const commit = () => {
+      if (committed || cutRun.current !== run) return;
+      committed = true;
+      if (cutTimer.current !== null) window.clearTimeout(cutTimer.current);
+      cutTimer.current = null;
+      setCloseUp(next);
+    };
+    if (!layer || typeof layer.decode !== "function") {
+      commit();
+      return;
+    }
+    // The face layer is lazy: a cut asks for it now if it is still waiting.
+    if (layer.loading === "lazy") layer.loading = "eager";
+    cutTimer.current = window.setTimeout(commit, CUT_DECODE_LIMIT_MS);
+    layer.decode().then(commit, commit);
+  };
 
   return (
     <main
@@ -34,11 +77,12 @@ export function LejasPage() {
           <button
             type="button"
             className={closeUp ? "manager-portrait-frame is-closeup" : "manager-portrait-frame"}
-            onClick={() => setCloseUp((v) => !v)}
+            onClick={cut}
             aria-pressed={closeUp}
             aria-label={closeUp ? "全身ショットに戻す" : "顔アップを表示"}
           >
             <img
+              ref={wideRef}
               className="lejas-wide"
               src="/manager-lejas.jpeg"
               srcSet="/manager-lejas.webp"
@@ -52,6 +96,7 @@ export function LejasPage() {
               fetchPriority="high"
             />
             <img
+              ref={faceRef}
               className="lejas-face"
               src="/manager-lejas-portrait.jpeg"
               srcSet="/manager-lejas-portrait.webp"

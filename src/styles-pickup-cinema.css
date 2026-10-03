@@ -579,6 +579,13 @@ html[data-mode="world"]
   font-size: 13px;
   line-height: 1.65;
   letter-spacing: 0.04em;
+  /* Driver × item names: character breaking split them mid-word on phones
+     (グリードクレ／イドル, ゲームマ／スター). Each name holds whole and the
+     line breaks at its own seams (the spaces round ×, and ／), in even
+     lines; a name wider than the line still wraps (anywhere). */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap-style: balance;
 }
 
 html[data-mode="world"]
@@ -1016,6 +1023,19 @@ html[data-mode="world"]
   overflow-wrap: anywhere;
 }
 
+/* Record prose reads like the dossier's chapters: flush character breaking
+   under the strict kinsoku. Phrase breaking had set a small kana at a line
+   start inside a reading (『えんり／ゅうげんげつとう』, 844x390). */
+html[data-mode="world"]
+  :is(
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+      :is(.form-pickup-overview, .form-pickup-sections),
+    .rider-nightmare-dialog .rider-nightmare-dialog-sections
+  )
+  p {
+  word-break: normal;
+}
+
 /* Records: each ability, arm and finisher is a card with an accent edge;
    the finishers' edge is gold. */
 html[data-mode="world"]
@@ -1180,6 +1200,12 @@ html[data-mode="world"]
   font: 400 12px/1.45 var(--pc-hud);
   letter-spacing: 0.1em;
   overflow-wrap: anywhere;
+  /* A form name wider than its card (草かんむりフォーム in a 113px phone
+     cell) is one phrase to Chrome's phrase breaking, so it fell back to an
+     emergency break and left one character (フォー／ム). Character
+     breaking under the strict kinsoku and balanced lines it inherits splits
+     it evenly between its words (草かんむり／フォーム) in every engine. */
+  word-break: normal;
 }
 
 html[data-mode="world"]

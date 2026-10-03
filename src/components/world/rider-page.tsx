@@ -1353,7 +1353,7 @@ export function RiderPage({ id }: { id: string }) {
               <div key={f.dt}>
                 <dt>{f.dt}</dt>
                 <dd>
-                  <NameText value={f.dd} />
+                  <NameText value={f.dd} seams />
                 </dd>
               </div>
             ))}

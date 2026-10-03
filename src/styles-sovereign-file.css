@@ -1378,6 +1378,14 @@ main.manager-page.is-sovereign > .manager-pagination {
   border-bottom-color: rgb(240 207 134 / 14%);
 }
 
+/* The file ends on this deck, 1px above <main>'s bottom edge, and <main>
+   clipped both ways (overflow: clip, the World base), so the end plates'
+   warm ring lost its bottom side. Only the sideways clip is needed: the
+   bottom is left open (page height unchanged). */
+main.manager-page.is-sovereign {
+  overflow-y: visible;
+}
+
 main.manager-page.is-sovereign > .manager-pagination::before {
   content: "";
   position: absolute;
@@ -1416,6 +1424,20 @@ main.manager-page.is-sovereign > .manager-pagination > a > span:last-child {
 @media (hover: hover) and (pointer: fine) {
   main.manager-page.is-sovereign > .manager-pagination > a:hover {
     background-color: rgb(20 17 12 / 92%);
+  }
+
+  /* The list return answered nothing while PREV / NEXT did (the dossiers'
+     own hover is in the reader sheet, which this file does not load): the
+     same colour step, in gold. */
+  main.manager-page.is-sovereign > .manager-pagination .dossier-index-return {
+    transition:
+      background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  main.manager-page.is-sovereign > .manager-pagination .dossier-index-return:hover {
+    border-color: rgb(240 207 134 / 72%);
+    background-color: #1a160e;
   }
 }
 

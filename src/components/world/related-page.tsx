@@ -273,7 +273,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               <div key={f.dt}>
                 <dt>{f.dt}</dt>
                 <dd>
-                  <NameText value={f.dd} />
+                  <NameText value={f.dd} seams />
                 </dd>
               </div>
             ))}

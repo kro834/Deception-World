@@ -633,7 +633,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               <div key={f.dt}>
                 <dt>{f.dt}</dt>
                 <dd>
-                  <NameText value={f.dd} />
+                  <NameText value={f.dd} seams />
                 </dd>
               </div>
             ))}

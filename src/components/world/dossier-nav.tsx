@@ -1,6 +1,10 @@
 import { Fragment } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { UiVectorIcon } from "./ui-vector-icon";
+
+// name-breaks.ts marks each seam with a zero-width space.
+const NAME_SEAM = "\u200b";
 
 export type DossierLink = {
   id: string;
@@ -157,7 +161,11 @@ export const RELATED_NAV: DossierLink[] = [
   },
 ];
 
-export function NameText({ value }: { value: string }) {
+/** `seams`: a value too wide for its column (the spec sheet's 仮面ライダー
+ * ヴァンダール at 375px) also breaks at name-breaks.ts's seams, drawn as
+ * <wbr>, so it breaks between its words (仮面ライダー／ヴァンダール), never
+ * inside one; the text stays as written. */
+export function NameText({ value, seams = false }: { value: string; seams?: boolean }) {
   const chunks = value.split(/([・／/])/);
   return (
     <>
@@ -172,7 +180,16 @@ export function NameText({ value }: { value: string }) {
         }
         return (
           <span key={`${chunk}-${i}`} className="jp-atom">
-            {chunk}
+            {seams
+              ? withWordBreaks(chunk)
+                  .split(NAME_SEAM)
+                  .map((word, k) => (
+                    <Fragment key={`${word}-${k}`}>
+                      {k > 0 ? <wbr /> : null}
+                      {word}
+                    </Fragment>
+                  ))
+              : chunk}
           </span>
         );
       })}

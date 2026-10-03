@@ -290,6 +290,14 @@ html body .form-archive-page .form-archive-menu-trigger::before {
   color: var(--fa-gold);
 }
 
+/* A SAGA / REALM switch replaces the archive's frame at once, so the cover
+   is there on that same frame: it comes in without the fade (the base sheet
+   runs its 0.32s both ways, which left a flat empty frame and then the half
+   drawn cover over the half drawn archive). Only the reveal on ready fades. */
+.form-archive-page > .form-archive-frame-status:not(.is-loaded) {
+  transition: none;
+}
+
 .form-archive-page .form-archive-frame-status i {
   width: 64px;
   border: 0;
