@@ -1,0 +1,1987 @@
+/* ================================================================
+   Extreme — the Overdrive edition (rx3, 2026-10-03)
+
+   One motion grammar for /extreme-saga, built from a fist fight rather
+   than Rexonance's three-phase lock: things IGNITE (a gold spark runs and
+   a gauge revs), STRIKE (they arrive at once and stop dead, with a hit
+   spark where they land) and go into OVERDRIVE (the needle pegs past its
+   scale; the stretch of a bar beyond the opponent's mark runs white-hot).
+   Headings throw a one-two: the first line from the left, the second from
+   the right. Nothing loops, glows on its own or pulses.
+
+   Route-only (linked after the Extreme edition sheet, before the cinematic
+   sheet) and scoped to .rxs-page.rxs-page.exs-page, so Rexonance and Final
+   Stage never see it. Time-based motion sits behind prefers-reduced-motion:
+   no-preference and html:not([data-world-effects="economy"]) and starts at
+   the load gate's hand-over (html[data-loading] removed), at a reader's
+   change of form ([data-exo-cut]) or when the comparator is reached
+   (.is-visible). Scroll-linked motion rides named view timelines behind the
+   side-menu, loading and dialog flags as well, with animation-duration:
+   auto. Keyframes move opacity, transform, translate, scale, rotate and,
+   only in time-based entrances (filled backwards, so nothing rests
+   clipped), clip-path. Ornaments are textless, aria-hidden <i> elements or
+   pseudo-elements; forced colours drop them.
+   ================================================================ */
+
+/* ---------- Tokens ---------- */
+.rxs-page.rxs-page.exs-page {
+  --exo-gold: #ffd57a;
+  --exo-hot: #fff4d6;
+  --exo-deep: #b58a3a;
+  --exo-ice: #7ae8ff;
+  /* A strike: there at once, then a short settle. */
+  --exo-hit: cubic-bezier(0.1, 0.9, 0.15, 1);
+  /* A wind-up: accelerates into the stop. */
+  --exo-drive: cubic-bezier(0.55, 0, 0.9, 0.45);
+  /* A slash: fast through, soft out. */
+  --exo-slash: cubic-bezier(0.25, 0.75, 0.2, 1);
+  --exo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --exo-shift: 36px;
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.exs-page {
+    --exo-shift: 18px;
+  }
+}
+
+/* ================================================================
+   Foundation
+   ================================================================ */
+/* The metric cards and the two art panels clip instead of becoming scroll
+   containers (overflow: hidden), so the view timelines inside them follow
+   the page: the motion sheet's numerals and artwork settle had bound to
+   boxes that never scroll and sat frozen. */
+.rxs-page.rxs-page.exs-page .rxs-headline-metrics article,
+.rxs-page.rxs-page.exs-page .rxs-p14-overview figure,
+.rxs-page.rxs-page.exs-page .rxs-stage-panel figure {
+  overflow: clip;
+}
+
+/* Blocks with scroll choreography no longer hide behind the time-based
+   reveal (an observer kept them at opacity 0 while their scroll beats played
+   unseen; on a phone the tall comparator left a screen of black). The
+   comparator is a time-based instrument: it stands drawn and plays its rows
+   when it is reached. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    :is(
+      .rxs-section-heading,
+      .rxs-headline-metrics article,
+      .rxs-comparison,
+      .rxs-p14-overview,
+      .exs-p14-comparison,
+      .rxs-stage-switcher,
+      .rxs-system-grid article,
+      .rxs-specs
+    ).rxs-reveal {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
+}
+
+/* The comparator's plates are one time-based system: no scroll lift inside
+   it, and no swap at mount (its rows play when it is reached, below). */
+.rxs-page.rxs-page.exs-page
+  .rxs-comparison
+  :is(.rxs-comparison-selector, .rxs-processing-comparison > div > section),
+.rxs-page.rxs-page.exs-page :is(.rxs-comparison-metrics, .rxs-processing-comparison) {
+  animation: none;
+}
+
+/* ================================================================
+   Static finish
+   ================================================================ */
+/* The headline in gold leaf: a brushed band runs through the letters (the
+   showcase allows gradient ink in the hero headline only). */
+.rxs-page.rxs-page.exs-page .rxs-hero h1 {
+  position: relative;
+  background-image: linear-gradient(
+    100deg,
+    #fff7e3 0%,
+    #ffe2a0 22%,
+    var(--exo-gold) 38%,
+    #c99a45 52%,
+    #ffe7b0 66%,
+    var(--exo-gold) 82%,
+    #fffaf0 100%
+  );
+}
+
+/* The headline's box hugs its lines, so the typewriter strike (and its
+   spark) runs across the letters, not across the empty rest of the column.
+   Left-set heroes keep it at the start; centred ones centre it. */
+@media (min-width: 761px) and (orientation: landscape), (min-width: 1441px) {
+  .rxs-page.rxs-page.exs-page .rxs-hero h1 {
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 760px), (min-width: 761px) and (max-width: 1440px) and (orientation: portrait) {
+  .rxs-page.rxs-page.exs-page .rxs-hero h1 {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+
+/* Side by side from 1441px, the lede keeps its bar at its side, as it does
+   from 761px; it had stood centred over a left-set lede. */
+@media (min-width: 1441px) {
+  .rxs-page.rxs-page.exs-page .rxs-hero-lede {
+    display: flex;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-hero-lede::before {
+    margin: 0;
+  }
+}
+
+/* A landscape phone set the cue over the gauge; it waits under the copy. */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .rxs-page.rxs-page.exs-page .rxs-scroll-cue {
+    left: 5vw;
+    translate: none;
+    text-align: left;
+  }
+}
+
+/* ---------- Hero: the dial becomes a gauge with an overdrive zone ---------- */
+/* The scale runs from 7:30 to 4:30 through twelve; the gap at the foot
+   leaves the floor and the figure's stance clear. */
+.rxs-page.rxs-page.exs-page .exs-dial {
+  -webkit-mask: conic-gradient(from 132deg, transparent 0 96deg, #000 96deg);
+  mask: conic-gradient(from 132deg, transparent 0 96deg, #000 96deg);
+}
+
+/* The zone, the needle and the shock ring share the dial's box. */
+.rxs-page.rxs-page.exs-page .rxs-hero-visual > :is(.exo-zone, .exo-rev, .exo-shock) {
+  position: absolute;
+  z-index: 0;
+  top: 1%;
+  left: 50%;
+  width: 104%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.exs-page .rxs-hero-visual > :is(.exo-zone, .exo-rev, .exo-shock) {
+    width: 100%;
+  }
+}
+
+/* The zone: the last 36° of the scale (96°–132°), its graduations white-hot
+   and a heavier arc on the bezel. Radii in closest-side units of the dial:
+   graduations 62.6–66.6%, bezel 98.6–100%. */
+.rxs-page.rxs-page.exs-page .exo-zone::before,
+.rxs-page.rxs-page.exs-page .exo-zone::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.exs-page .exo-zone::before {
+  background: conic-gradient(from 96deg, var(--exo-hot) 0 36deg, transparent 36deg);
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent 0 98.4%,
+    #000 98.6% 100%,
+    transparent 100%
+  );
+  mask: radial-gradient(circle closest-side, transparent 0 98.4%, #000 98.6% 100%, transparent 100%);
+}
+
+.rxs-page.rxs-page.exs-page .exo-zone::after {
+  inset: 2.5%;
+  background: repeating-conic-gradient(
+    from -0.6deg,
+    var(--exo-hot) 0 1.2deg,
+    transparent 1.2deg 6deg
+  );
+  -webkit-mask:
+    radial-gradient(circle, transparent 0 46.6%, #000 46.8% 49.6%, transparent 49.8%),
+    conic-gradient(from 96deg, #000 0 36deg, transparent 36deg);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle, transparent 0 46.6%, #000 46.8% 49.6%, transparent 49.8%),
+    conic-gradient(from 96deg, #000 0 36deg, transparent 36deg);
+  mask-composite: intersect;
+}
+
+/* The needle rests pegged in the zone at 120°: a tip across the
+   graduations, an index on the bezel and a short trail lighting the scale
+   behind it. */
+.rxs-page.rxs-page.exs-page .exo-rev {
+  rotate: 120deg;
+  background:
+    linear-gradient(var(--exo-hot) 0 0) 50% 14.5% / 3px 6.5% no-repeat,
+    linear-gradient(var(--exo-gold) 0 0) 50% 0 / 3px 2.6% no-repeat;
+}
+
+.rxs-page.rxs-page.exs-page .exo-rev::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  content: "";
+  background: conic-gradient(
+    from -38deg,
+    transparent 0,
+    rgb(255 213 122 / 46%) 37deg,
+    transparent 38deg
+  );
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent 0 61.6%,
+    #000 62% 67.4%,
+    transparent 67.8%
+  );
+  mask: radial-gradient(circle closest-side, transparent 0 61.6%, #000 62% 67.4%, transparent 67.8%);
+  pointer-events: none;
+}
+
+/* The shock ring rests out of sight; the arrival fires it once. */
+.rxs-page.rxs-page.exs-page .exo-shock::before {
+  position: absolute;
+  inset: 16%;
+  border: 2px solid var(--exo-hot);
+  border-radius: 50%;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The title's typewriter strike (styles-showcase-cinema.css) gains a
+   spark: a white-hot head with a short gold trail, riding the struck edge.
+   At rest it is out of sight. */
+.rxs-page.rxs-page.exs-page .rxs-hero h1::after {
+  position: absolute;
+  z-index: 1;
+  top: -0.14em;
+  bottom: -0.14em;
+  left: -100%;
+  width: 100%;
+  content: "";
+  background:
+    linear-gradient(var(--exo-hot) 0 0) 100% 0 / 2px 100% no-repeat,
+    linear-gradient(90deg, transparent, rgb(255 213 122 / 30%)) calc(100% - 2px) 0 / 0.4em 100%
+      no-repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Chapters are rounds ---------- */
+/* Each chapter's outlined numeral (the cinema sheet's) is announced as a
+   round: a 12px HUD label above it, with an empty alt. */
+.rxs-page.rxs-page.exs-page .rxs-section-heading {
+  position: relative;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-section-heading::after {
+  position: absolute;
+  top: -28px;
+  right: 0;
+  left: 0;
+  padding-left: 0.46em;
+  color: color-mix(in srgb, var(--exo-gold) 82%, transparent);
+  font-family: var(--sc-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.46em;
+  text-align: center;
+  white-space: nowrap;
+  content: "ROUND";
+  content: "ROUND" / "";
+  pointer-events: none;
+}
+
+/* The index after the hero carries the same round numbers, outlined. */
+.rxs-page.rxs-page.exs-page .rxs-chapter-index a::before {
+  position: absolute;
+  top: 50%;
+  right: 64px;
+  color: transparent;
+  font-family: var(--sc-mono);
+  font-size: clamp(40px, 4.2vw, 58px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  -webkit-text-stroke: 1px rgb(255 213 122 / 40%);
+  translate: 0 -50%;
+  content: "02";
+  content: "02" / "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-chapter-index a:nth-child(2)::before {
+  content: "03";
+  content: "03" / "";
+}
+
+.rxs-page.rxs-page.exs-page .rxs-chapter-index a:nth-child(3)::before {
+  content: "04";
+  content: "04" / "";
+}
+
+/* Tablets: smaller, clear of the labels. Three narrow phone columns and the
+   stacked rows have no room for them. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .rxs-page.rxs-page.exs-page .rxs-chapter-index a::before {
+    right: 54px;
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 600px) {
+  .rxs-page.rxs-page.exs-page .rxs-chapter-index a::before {
+    display: none;
+  }
+}
+
+/* ---------- Headings throw a one-two ---------- */
+.rxs-page.rxs-page.exs-page .exo-line {
+  display: inline-block;
+}
+
+/* ---------- Performance: a hit and a dash ---------- */
+.rxs-page.rxs-page.exs-page .rxs-headline-metrics article strong {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  isolation: isolate;
+}
+
+/* 205.6t〜: the punch connects; sixteen gold rays burst behind the unit. */
+.rxs-page.rxs-page.exs-page .exo-burst {
+  position: absolute;
+  z-index: -1;
+  top: -4%;
+  right: -0.5em;
+  width: 0.92em;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 4deg,
+    var(--exo-gold) 0 2.6deg,
+    transparent 2.6deg 22.5deg
+  );
+  -webkit-mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
+  mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 0.002 SEC: it has already arrived; its streaks trail off to the right. */
+.rxs-page.rxs-page.exs-page .exo-speed {
+  position: absolute;
+  z-index: -1;
+  top: 22%;
+  right: -0.6em;
+  bottom: 24%;
+  left: 38%;
+  background:
+    linear-gradient(270deg, transparent, var(--exo-gold)) 0 8% / 72% 2px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-ice)) 0 30% / 94% 1px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold)) 0 52% / 58% 2px no-repeat,
+    linear-gradient(270deg, transparent, #fff) 0 74% / 84% 1px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold)) 0 94% / 44% 1px no-repeat;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* ---------- Comparison: the opponent's mark, then the hit ---------- */
+/* Extreme's bar is gold up to where the baseline's bar ends (--exo-base,
+   from the component) and white-hot beyond it: the overdrive is the margin.
+   A 2px ink notch marks the opponent's line. */
+.rxs-page.rxs-page.exs-page .rxs-bars i.is-rexonance {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    var(--exo-deep),
+    var(--exo-gold) calc(var(--exo-base, 100%) - 1px),
+    #000 calc(var(--exo-base, 100%) - 1px) calc(var(--exo-base, 100%) + 1px),
+    var(--exo-hot) calc(var(--exo-base, 100%) + 1px),
+    #fff
+  );
+}
+
+/* The hit spark where Extreme's bar lands. */
+.rxs-page.rxs-page.exs-page .rxs-bars i.is-rexonance::after {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 2px;
+  height: 13px;
+  content: "";
+  background: var(--exo-hot);
+  opacity: 0.75;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-comparison-key .is-rexonance {
+  background: linear-gradient(90deg, var(--exo-gold) 60%, var(--exo-hot) 60%);
+}
+
+/* The result reads as a measured figure. */
+.rxs-page.rxs-page.exs-page .rxs-comparison-result b {
+  font-family: var(--sc-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0;
+  transform-origin: 100% 50%;
+}
+
+/* ---------- P14: the fan, the funnel, the lock ---------- */
+/* The fixation rays converge a little inside the card, where the lock
+   ring can sit whole (the dot was half clipped by the edge). */
+.rxs-page.rxs-page.exs-page .exs-p14-comparison article:first-child::after {
+  transform-origin: 0 50%;
+}
+
+.rxs-page.rxs-page.exs-page .exs-p14-comparison article:last-child::after {
+  background:
+    radial-gradient(
+      circle at calc(100% - 30px) 50%,
+      rgb(122 232 255 / 22%),
+      transparent 18%
+    ),
+    repeating-conic-gradient(
+      from 70deg at calc(100% - 30px) 50%,
+      rgb(122 232 255 / 38%) 0 0.5deg,
+      transparent 0.5deg 9deg
+    );
+  transform-origin: calc(100% - 30px) 50%;
+}
+
+.rxs-page.rxs-page.exs-page .exs-p14-comparison article > .exo-lock {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 30px;
+  width: 26px;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--exo-ice);
+  border-radius: 50%;
+  translate: 50% -50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.exs-page .exs-p14-comparison article > .exo-lock::before {
+  position: absolute;
+  inset: 7.5px;
+  border-radius: 50%;
+  content: "";
+  background: var(--exo-ice);
+}
+
+/* ---------- Stages: the cut ---------- */
+/* After a reader's first change of form, the figure stands on the art it
+   replaces (the other form: there are two), so the new one is cut in over
+   the old with no dark frame between them. Only the site's own two
+   artworks, both loaded by then. The component swaps the art at most once
+   every 1.1 s (STAGE_CUT_GAP_MS), so flicking between the forms never
+   strobes the figure; the tabs and the copy follow at once. */
+.rxs-page.rxs-page.exs-page #exs-stage-panel[data-exo-cut="true"] figure[data-form="ultra"] {
+  background: #1d1d1f url("/saga-extreme-middle.webp") 50% 0 / cover no-repeat;
+}
+
+.rxs-page.rxs-page.exs-page #exs-stage-panel[data-exo-cut="true"] figure[data-form="middle"] {
+  background: #1d1d1f url("/saga-extreme-ultra.jpeg") 50% 0 / cover no-repeat;
+}
+
+/* The stage art holds still on scroll, so the old form behind a cut lines
+   up with it exactly (the motion sheet's settle had sat frozen here, bound
+   to the figure's old overflow: hidden, until this sheet let it run). */
+.rxs-page.rxs-page.exs-page #exs-stage-panel figure img {
+  animation: none;
+}
+
+/* Both titles stand on two lines, so a change of form never moves the
+   figure under them (Ultra's fitted one line from 400 to 590px). */
+.rxs-page.rxs-page.exs-page .exo-title-line {
+  display: block;
+}
+
+/* The slash rides the cut's edge: a "/" from (24%, 0) to (0, 100%) of the
+   figure, moved by the cut's own curve. At rest it is out of sight. */
+.rxs-page.rxs-page.exs-page .rxs-stage-panel figure > .exo-slash {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background:
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 1.5px),
+        var(--exo-hot) calc(50% - 1.5px) calc(50% + 1.5px),
+        transparent calc(50% + 1.5px)
+      )
+      0 0 / 24% 100% no-repeat,
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 6px),
+        rgb(255 213 122 / 24%) 50%,
+        transparent calc(50% + 6px)
+      )
+      0 0 / 24% 100% no-repeat;
+  opacity: 0;
+  translate: 100% 0;
+  pointer-events: none;
+}
+
+/* ---------- System: the joint between the two processors ---------- */
+/* The × read as YOPS times TOPS; the two systems are joined in series
+   (the P14 note), so a gold coupling with a node stands between them. */
+.rxs-page.rxs-page.exs-page .rxs-specs > .exo-joint {
+  position: relative;
+  justify-self: center;
+  width: 56px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--exo-gold), var(--exo-hot) 50%, var(--exo-ice));
+}
+
+.rxs-page.rxs-page.exs-page .rxs-specs > .exo-joint::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--exo-gold);
+  content: "";
+  background: #000;
+  translate: -50% -50%;
+  rotate: 45deg;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.exs-page .rxs-specs > .exo-joint {
+    width: 2px;
+    height: 28px;
+    margin: 10px 0;
+    background: linear-gradient(180deg, var(--exo-gold), var(--exo-hot) 50%, var(--exo-ice));
+  }
+}
+
+/* ---------- Menu button and doors ---------- */
+/* The menu plate gains two gold corner ticks, as the bracketed panels do. */
+.rxs-page.rxs-page.exs-page .rxs-menu-trigger::after {
+  position: absolute;
+  inset: 4px;
+  content: "";
+  background:
+    linear-gradient(var(--exo-gold) 0 0) 0 0 / 8px 1.5px,
+    linear-gradient(var(--exo-gold) 0 0) 0 0 / 1.5px 8px,
+    linear-gradient(var(--exo-gold) 0 0) 100% 100% / 8px 1.5px,
+    linear-gradient(var(--exo-gold) 0 0) 100% 100% / 1.5px 8px;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* The closing line answers the hero's gold 歓迎。: its second beat is set in
+   the site light. The bar's EXTREME label takes the same gold. */
+.rxs-page.rxs-page.exs-page .rxs-footer h2 > .exo-line:last-child {
+  color: var(--exo-gold);
+  -webkit-text-fill-color: var(--exo-gold);
+}
+
+.rxs-page.rxs-page.exs-page .rxs-brand span {
+  color: var(--exo-gold);
+  -webkit-text-fill-color: var(--exo-gold);
+}
+
+/* The doors charge from the left under a hover or focus (a gold wash under
+   the label), and their arrows step out. */
+.rxs-page.rxs-page.exs-page .rxs-footer > a {
+  position: relative;
+  isolation: isolate;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-footer > a::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+  background: linear-gradient(90deg, rgb(255 213 122 / 18%), rgb(255 213 122 / 4%));
+  scale: 0 1;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-footer > a.rxs-footer-return::before {
+  transform-origin: 100% 50%;
+}
+
+.rxs-page.rxs-page.exs-page .rxs-footer > a:is(:hover, :focus-visible)::before {
+  scale: 1 1;
+}
+
+/* ================================================================
+   The arrival (hand-over or first paint)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The spark rides the strike: the same delay, duration and curve. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .rxs-hero
+    h1::after {
+    animation:
+      exo-spark-run 600ms var(--sx-project) calc(var(--sx-delay) + 100ms) backwards,
+      exo-spark-show 600ms linear calc(var(--sx-delay) + 100ms) both;
+  }
+
+  /* The zone locks on with the dial it belongs to. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exo-zone {
+    animation: ex-dial-lock 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* The needle revs from the foot of the scale, pegs past its end at about
+     840 ms and settles in the zone. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exo-rev {
+    animation: exo-rev 1300ms linear calc(var(--sx-delay) + 160ms) both;
+  }
+
+  /* The moment it pegs, the zone ignites and the shock ring fires. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exo-zone::before,
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exo-zone::after {
+    animation: exo-ignite 160ms linear calc(var(--sx-delay) + 820ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exo-shock::before {
+    animation: exo-shock 640ms var(--exo-out) calc(var(--sx-delay) + 820ms) both;
+  }
+
+  /* The lede: its bar ignites, then the two sentences jab in. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .rxs-hero-lede {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .rxs-hero-lede::before {
+    transform-origin: 0 50%;
+    animation: exo-ignite-x 220ms var(--exo-hit) calc(var(--sx-delay) + 220ms) backwards;
+  }
+
+  /* The sentences are drawn from the first frame (they are the hero's
+     largest text, so nothing holds the page's largest paint back); only
+     their position strikes in. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .rxs-hero-lede-text {
+    animation: exo-jab-in 320ms var(--exo-hit) calc(var(--sx-delay) + 300ms) backwards;
+  }
+}
+
+/* Where the copy stacks, the lede's bar stands centred above it. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 760px),
+  (prefers-reduced-motion: no-preference) and (min-width: 761px) and (max-width: 1440px) and
+    (orientation: portrait) {
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .rxs-hero-lede::before {
+    transform-origin: 50% 50%;
+  }
+}
+
+/* ================================================================
+   The cut: a change of form
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The old form stands until the slash crosses it: no fade from dark. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    figure {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    figure
+    img {
+    animation: exo-cut 420ms var(--exo-slash) backwards;
+  }
+
+  /* Ultra is cut in by a white-hot slash; the way back to Middle is a clean
+     cut with no light of its own (the art itself darkens there, so a lit
+     edge would read as a second, opposite flash). */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    figure[data-form="ultra"]
+    > .exo-slash {
+    animation: exo-slash 420ms var(--exo-slash);
+  }
+
+  /* The name lands at once, whatever the art is doing: the code chip
+     strikes, the title jabs in, the lede settles and the points tick in.
+     Keyed to a reader's change (the flag is set before the next paint), so
+     the first paint has no ceremony. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > small {
+    transform-origin: 0 50%;
+    animation: exo-chip 280ms var(--exo-hit) backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > h3 {
+    animation: exo-jab-l 340ms var(--exo-hit) 40ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > p {
+    animation: exo-settle 320ms linear 90ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > ul
+    li {
+    animation: exo-tick 260ms var(--exo-hit) 140ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > ul
+    li:nth-child(2) {
+    animation-delay: 180ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > ul
+    li:nth-child(3) {
+    animation-delay: 220ms;
+  }
+}
+
+/* The copy block itself holds still (its parts move above); on phones it is
+   display: contents and could not move anyway. */
+.rxs-page.rxs-page.exs-page #exs-stage-panel > div {
+  animation: none;
+}
+
+/* Economy rendering is calm here too: a change of form simply stands (the
+   base sheet's fade from dark would otherwise still play). */
+html[data-world-effects="economy"] .rxs-page.rxs-page.exs-page #exs-stage-panel figure {
+  animation: none;
+}
+
+/* ================================================================
+   The comparator: the opponent's mark, then the hit
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article {
+    --exo-row: 0ms;
+    animation: exo-row 260ms var(--exo-hit) var(--exo-row) backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(2) {
+    --exo-row: 70ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(3) {
+    --exo-row: 140ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(4) {
+    --exo-row: 210ms;
+  }
+
+  /* The baseline is drawn to its mark first ... */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-bars
+    i.is-extreme {
+    animation: exo-bar 240ms cubic-bezier(0.3, 0, 0.2, 1) var(--exo-row) backwards;
+  }
+
+  /* ... then Extreme winds up and hits, and the spark lands with it. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-bars
+    i.is-rexonance {
+    animation: exo-bar 340ms var(--exo-drive) calc(var(--exo-row) + 120ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-bars
+    i.is-rexonance::after {
+    animation: exo-spark 420ms var(--exo-out) calc(var(--exo-row) + 460ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-result
+    b {
+    animation: exo-readout 300ms var(--exo-hit) calc(var(--exo-row) + 430ms) backwards;
+  }
+
+  /* The two architectures: the baseline settles, Extreme steps in. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-processing-comparison
+    > div
+    > section {
+    animation: exo-settle 260ms linear backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-processing-comparison
+    > div
+    > section:last-child {
+    animation: exo-row 320ms var(--exo-hit) 90ms backwards;
+  }
+}
+
+/* ================================================================
+   Scroll chapters: rounds, one-twos, hits, the fan and the funnel
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Named timelines (the elevation's --sc-chapter, --sc-tile and --sc-end
+       are reused). */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article {
+      view-timeline: --exo-metric block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-p14-overview {
+      view-timeline: --exo-core block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison {
+      view-timeline: --exo-p14 block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-stage-panel
+      figure {
+      view-timeline: --exo-stage block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-specs {
+      view-timeline: --exo-specs block;
+    }
+
+    /* Every round: the label drops in, the numeral is thrown at the reader
+       and lands. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-section-heading::after {
+      animation-name: exo-drop;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 40%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-section-heading::before {
+      animation-name: exo-numeral;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* The one-two: the headline's first line from the left, the second
+       from the right, a beat later. The line box itself holds still. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      :is(.rxs-section-heading h2, .rxs-footer h2) {
+      animation: none;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-section-heading
+      h2
+      > .exo-line:first-child {
+      animation-name: exo-jab-l;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 5% entry 45%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-section-heading
+      h2
+      > .exo-line:last-child {
+      animation-name: exo-jab-r;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 20% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-footer
+      h2
+      > .exo-line:first-child {
+      animation-name: exo-jab-l;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 5% entry 45%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-footer
+      h2
+      > .exo-line:last-child {
+      animation-name: exo-jab-r;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 20% entry 60%;
+    }
+
+    /* 01: the punch lands at full size and the burst goes off behind it;
+       the hundred metres arrive from the right with their streaks. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article:first-child
+      strong {
+      transform-origin: 0 100%;
+      animation-name: exo-slam;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exo-metric;
+      animation-range: entry 0% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      .exo-burst {
+      animation-name: exo-burst;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exo-metric;
+      animation-range: entry 25% entry 75%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article:nth-child(2)
+      strong {
+      animation-name: exo-dash;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-metric;
+      animation-range: entry 0% entry 50%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      .exo-speed {
+      transform-origin: 0 50%;
+      animation-name: exo-streak;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-metric;
+      animation-range: entry 10% entry 70%;
+    }
+
+    /* 02: the core's brackets clamp shut like a vise; the readout strikes
+       in, figure by figure. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-p14-overview
+      figure::after {
+      animation-name: exo-clamp;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-core;
+      animation-range: entry 10% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      .exo-read {
+      animation-name: exo-jab-l;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-core;
+      animation-range: entry 20% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      .exo-read:nth-child(2) {
+      animation-range: entry 28% entry 63%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      .exo-read:nth-child(3) {
+      animation-range: entry 36% entry 71%;
+    }
+
+    /* The two P14 cards meet in the middle; the expansion's rays fan open
+       from their edge, the fixation's funnel onto one point, and the lock
+       closes on it last. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      article:first-child {
+      animation-name: exo-jab-l;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 0% entry 45%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      article:last-child {
+      animation-name: exo-jab-r;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 10% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      article:first-child::after {
+      animation-name: exo-fan;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 15% entry 75%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      article:last-child::after {
+      animation-name: exo-funnel;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 25% entry 80%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      .exo-lock {
+      animation-name: exo-lock;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 55% entry 95%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .exs-p14-comparison
+      > .exo-arrow {
+      animation-name: exo-punch;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exo-p14;
+      animation-range: entry 30% entry 70%;
+    }
+
+    /* 03: the stage panel's brackets clamp onto the figure. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-stage-panel
+      .exo-frame {
+      animation-name: exo-clamp;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-stage;
+      animation-range: entry 5% entry 40%;
+    }
+
+    /* 04: a three-hit combo. Each plate lands with a hit-stop in reading
+       order, and its outlined number is thrown in after it. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article {
+      animation-name: exo-combo;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 0% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(2) {
+      animation-range: entry 8% entry 63%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(3) {
+      animation-range: entry 16% entry 71%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-system-grid
+      .exo-number {
+      animation-name: exo-numeral;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 20% entry 70%;
+    }
+
+    /* The two processors strike in, and the coupling between them is drawn
+       from its node. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-specs
+      > div
+      strong {
+      transform-origin: 50% 100%;
+      animation-name: exo-slam;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exo-specs;
+      animation-range: entry 0% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-specs
+      > .exo-joint {
+      animation-name: exo-couple;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exo-specs;
+      animation-range: entry 25% entry 65%;
+    }
+
+    /* The doors step into the ring one after another. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-footer
+      > :is(.exo-door, .rxs-footer-return) {
+      animation-name: exo-jab-l;
+      animation-duration: auto;
+      animation-timing-function: var(--exo-hit);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 10% entry 50%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-footer
+      > :is(.exo-door, .rxs-footer-return):nth-of-type(2) {
+      animation-range: entry 18% entry 58%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      .rxs-footer
+      > :is(.exo-door, .rxs-footer-return):nth-of-type(3) {
+      animation-range: entry 26% entry 66%;
+    }
+  }
+}
+
+/* Phones: the arrow between the P14 cards points down, so it punches down. */
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.exs-page .exs-p14-comparison > .exo-arrow {
+    --exo-punch-from: 0 calc(var(--exo-shift) * -1);
+  }
+}
+
+/* Under a scroll lock (the side menu, a dialog, a cover) the page rests
+   drawn: the shared motion sheet's anonymous rules would otherwise take
+   these elements back and replay them. */
+html[data-side-menu-open]
+  .rxs-page.rxs-page.exs-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .exo-line,
+    .rxs-headline-metrics article strong,
+    .exo-burst,
+    .exo-speed,
+    .rxs-p14-copy .exo-read,
+    .exs-p14-comparison article,
+    .exs-p14-comparison > .exo-arrow,
+    .exo-lock,
+    .rxs-system-grid article,
+    .rxs-system-grid .exo-number,
+    .rxs-specs > div strong,
+    .rxs-specs > .exo-joint,
+    .rxs-footer > :is(.exo-door, .rxs-footer-return)
+  ),
+html[data-side-menu-open]
+  .rxs-page.rxs-page.exs-page
+  :is(.rxs-section-heading, .rxs-p14-overview figure, .exs-p14-comparison article)::after,
+html[data-side-menu-open] .rxs-page.rxs-page.exs-page :is(.rxs-section-heading)::before,
+html[data-side-menu-open] .rxs-page.rxs-page.exs-page .rxs-stage-panel .exo-frame {
+  animation: none;
+}
+
+html[data-dialog-open]
+  .rxs-page.rxs-page.exs-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .exo-line,
+    .rxs-headline-metrics article strong,
+    .exo-burst,
+    .exo-speed,
+    .rxs-p14-copy .exo-read,
+    .exs-p14-comparison article,
+    .exs-p14-comparison > .exo-arrow,
+    .exo-lock,
+    .rxs-system-grid article,
+    .rxs-system-grid .exo-number,
+    .rxs-specs > div strong,
+    .rxs-specs > .exo-joint,
+    .rxs-footer > :is(.exo-door, .rxs-footer-return)
+  ),
+html[data-dialog-open]
+  .rxs-page.rxs-page.exs-page
+  :is(.rxs-section-heading, .rxs-p14-overview figure, .exs-p14-comparison article)::after,
+html[data-dialog-open] .rxs-page.rxs-page.exs-page :is(.rxs-section-heading)::before,
+html[data-dialog-open] .rxs-page.rxs-page.exs-page .rxs-stage-panel .exo-frame {
+  animation: none;
+}
+
+html[data-loading]
+  .rxs-page.rxs-page.exs-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .exo-line,
+    .rxs-headline-metrics article strong,
+    .exo-burst,
+    .exo-speed,
+    .rxs-p14-copy .exo-read,
+    .exs-p14-comparison article,
+    .exs-p14-comparison > .exo-arrow,
+    .exo-lock,
+    .rxs-system-grid article,
+    .rxs-system-grid .exo-number,
+    .rxs-specs > div strong,
+    .rxs-specs > .exo-joint,
+    .rxs-footer > :is(.exo-door, .rxs-footer-return)
+  ),
+html[data-loading]
+  .rxs-page.rxs-page.exs-page
+  :is(.rxs-section-heading, .rxs-p14-overview figure, .exs-p14-comparison article)::after,
+html[data-loading] .rxs-page.rxs-page.exs-page :is(.rxs-section-heading)::before,
+html[data-loading] .rxs-page.rxs-page.exs-page .rxs-stage-panel .exo-frame {
+  animation: none;
+}
+
+/* ================================================================
+   Controls: the charge, the step, the press
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.exs-page .rxs-footer > a::before {
+    transition: scale 260ms var(--exo-hit);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    :is(.rxs-footer > a i, .rxs-chapter-index a i, .rxs-chapter-index a::before) {
+    transition: translate 180ms var(--exo-hit);
+  }
+
+  /* Only the press-in is timed; the release keeps each control's own. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    :is(.rxs-footer > a, .rxs-chapter-index a):active {
+    scale: 0.97;
+    transition-duration: 70ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    .rxs-footer
+    > a:not(.rxs-footer-return):is(:hover, :focus-visible)
+    i {
+    translate: 3px -3px;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    .rxs-footer
+    > a.rxs-footer-return:is(:hover, :focus-visible)
+    i {
+    translate: -3px 0;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    .rxs-chapter-index
+    a:is(:hover, :focus-visible)
+    i {
+    translate: 3px -3px;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page
+    .rxs-chapter-index
+    a:is(:hover, :focus-visible)::before {
+    translate: -6px -50%;
+  }
+}
+
+/* The round number lights under the pointer or the keyboard. */
+.rxs-page.rxs-page.exs-page .rxs-chapter-index a:is(:hover, :focus-visible)::before {
+  -webkit-text-stroke-color: var(--exo-gold);
+}
+
+/* ================================================================
+   Keyframes
+   ================================================================ */
+@keyframes exo-spark-run {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: calc(100% + 0.3em) 0;
+  }
+}
+
+@keyframes exo-spark-show {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* From the foot of the scale (-132°) the needle accelerates, pegs past the
+   zone's end (136°), kicks back and settles at 120°. */
+@keyframes exo-rev {
+  0% {
+    opacity: 0;
+    rotate: -132deg;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4);
+  }
+  8% {
+    opacity: 1;
+  }
+  52% {
+    rotate: 136deg;
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
+  }
+  68% {
+    rotate: 112deg;
+    animation-timing-function: ease-in-out;
+  }
+  84% {
+    rotate: 123deg;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    opacity: 1;
+    rotate: 120deg;
+  }
+}
+
+@keyframes exo-ignite {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes exo-shock {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  14% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.45;
+  }
+}
+
+@keyframes exo-ignite-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-jab-l {
+  from {
+    opacity: 0;
+    translate: calc(var(--exo-shift) * -1) 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* A short jab that only moves: for text that must be drawn from the first
+   frame (it stops short of the lede's bar). */
+@keyframes exo-jab-in {
+  from {
+    translate: calc(var(--exo-shift) * -0.35) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes exo-jab-r {
+  from {
+    opacity: 0;
+    translate: var(--exo-shift) 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes exo-drop {
+  from {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Thrown at the reader: from twice its size it lands a touch under and
+   settles. */
+@keyframes exo-numeral {
+  0% {
+    opacity: 0;
+    scale: 2;
+  }
+  55% {
+    opacity: 1;
+    scale: 0.94;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exo-slam {
+  0% {
+    opacity: 0;
+    scale: 1.32;
+  }
+  58% {
+    opacity: 1;
+    scale: 0.97;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exo-burst {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+    rotate: -24deg;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.18;
+  }
+  100% {
+    opacity: 0.5;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes exo-dash {
+  from {
+    opacity: 0;
+    translate: 22% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes exo-streak {
+  0% {
+    opacity: 0;
+    scale: 2.2 1;
+  }
+  45% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.32;
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-clamp {
+  from {
+    opacity: 0;
+    scale: 1.14;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exo-fan {
+  from {
+    scale: 1 0.06;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-funnel {
+  from {
+    opacity: 0.3;
+    scale: 1 2.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-lock {
+  0% {
+    opacity: 0;
+    scale: 3.2;
+  }
+  70% {
+    opacity: 1;
+    scale: 0.86;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* Through the gap between the cards: stretched in its direction of travel,
+   it lands a few pixels past and settles. */
+@keyframes exo-punch {
+  0% {
+    opacity: 0;
+    translate: var(--exo-punch-from, calc(var(--exo-shift) * -1) 0);
+    scale: 1.7 1;
+  }
+  70% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-combo {
+  0% {
+    opacity: 0;
+    scale: 1.07;
+  }
+  55% {
+    opacity: 1;
+    scale: 0.985;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exo-couple {
+  from {
+    opacity: 0;
+    scale: 0.1;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* The cut: a "/" edge crosses the figure from left to right; the polygon
+   keeps four points so the edge stays parallel to itself. */
+@keyframes exo-cut {
+  from {
+    clip-path: polygon(0 0, 0 0, -24% 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 124% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes exo-slash {
+  from {
+    opacity: 1;
+    translate: -24% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 100% 0;
+  }
+}
+
+@keyframes exo-chip {
+  from {
+    opacity: 0.3;
+    scale: 1.25;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exo-settle {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes exo-tick {
+  from {
+    opacity: 0;
+    translate: -10px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Rows re-measure: they never drop below .6, so a swap never blinks. */
+@keyframes exo-row {
+  from {
+    opacity: 0.6;
+    translate: 14px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes exo-bar {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-spark {
+  0% {
+    opacity: 0;
+    scale: 1 0.2;
+  }
+  40% {
+    opacity: 1;
+    scale: 1 1.6;
+  }
+  100% {
+    opacity: 0.75;
+    scale: 1 1;
+  }
+}
+
+@keyframes exo-readout {
+  from {
+    opacity: 0.5;
+    scale: 1.2;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Accessibility modes
+   ================================================================ */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .rxs-page.rxs-page.exs-page :is(.exo-burst, .exo-speed, .exo-shock) {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.exs-page
+    :is(.exo-zone, .exo-rev, .exo-shock, .exo-burst, .exo-speed, .exo-lock, .exo-slash),
+  .rxs-page.rxs-page.exs-page .rxs-hero h1::after,
+  .rxs-page.rxs-page.exs-page .rxs-bars i.is-rexonance::after,
+  .rxs-page.rxs-page.exs-page .rxs-menu-trigger::after,
+  .rxs-page.rxs-page.exs-page .rxs-footer > a::before {
+    display: none;
+  }
+
+  /* The cinema sheet's Extreme ghost outranked its own forced-colours reset
+     and drew coloured edges round the text backplate. */
+  .rxs-page.rxs-page.exs-page .rxs-hero h1 {
+    background-image: none;
+    filter: none;
+  }
+
+  .rxs-page.rxs-page.exs-page .exs-dial {
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  /* The stage figure stands on Canvas, never on the other form's art. */
+  .rxs-page.rxs-page.exs-page #exs-stage-panel[data-exo-cut="true"] figure[data-form] {
+    background: Canvas;
+  }
+
+  /* Data fills keep their meaning: Extreme in the text colour. */
+  .rxs-page.rxs-page.exs-page :is(.rxs-bars i.is-rexonance, .rxs-comparison-key .is-rexonance) {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-chapter-index a::before {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-section-heading::after {
+    color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.exs-page :is(.rxs-footer h2 > .exo-line:last-child, .rxs-brand span) {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-specs > .exo-joint {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-specs > .exo-joint::after {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+}

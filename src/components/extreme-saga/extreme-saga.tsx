@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -9,6 +9,11 @@ import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion
 
 type ExtremeStage = "middle" | "ultra";
 type ExtremeBaseline = "diluculum" | "vinculum";
+
+// The panel's art follows a change of form at most this often. The Ultra art
+// is far brighter than the Middle art, so a reader flicking between the two
+// would otherwise strobe the figure; the tabs and the copy follow at once.
+const STAGE_CUT_GAP_MS = 1100;
 
 type ComparisonMetric = {
   label: string;
@@ -254,9 +259,9 @@ const ExtremePerformance = memo(function ExtremePerformance() {
       <header className="rxs-section-heading rxs-reveal">
         <p>PERFORMANCE COMPARISON</p>
         <h2>
-          肉弾戦なら、
+          <span className="exo-line">肉弾戦なら、</span>
           <br />
-          話が早い。
+          <span className="exo-line">話が早い。</span>
         </h2>
         <span>
           肉弾戦に最適化したエクスプリーム。
@@ -271,6 +276,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           <small>PUNCH POWER / EXTREME</small>
           <strong>
             205.6<span>t〜</span>
+            <i className="exo-burst" aria-hidden="true" />
           </strong>
           <p>標準状態のパンチ力</p>
         </article>
@@ -278,6 +284,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           <small>100M TIME / EXTREME</small>
           <strong>
             0.002<span>SEC</span>
+            <i className="exo-speed" aria-hidden="true" />
           </strong>
           <p>標準状態の100m走破時間</p>
         </article>
@@ -347,7 +354,15 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 className="rxs-bars"
                 aria-label={`${metric.label}、${activeComparison.label}を100%としたエクスプリームの性能は${metric.relative}、${metric.multiplier}、差分${metric.delta}`}
               >
-                <i className="is-rexonance" style={{ width: `${metric.currentBar}%` }} />
+                {/* --exo-base: where the baseline's bar ends inside Extreme's
+                    bar; the stretch beyond it is drawn as the overdrive. */}
+                <i
+                  className="is-rexonance"
+                  style={{
+                    width: `${metric.currentBar}%`,
+                    ["--exo-base" as string]: `${Math.min(100, (metric.baselineBar / metric.currentBar) * 100).toFixed(1)}%`,
+                  }}
+                />
                 <i className="is-extreme" style={{ width: `${metric.baselineBar}%` }} />
               </div>
               <p>
@@ -404,14 +419,39 @@ export function ExtremeSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<ExtremeStage>("middle");
+  // The form whose art the panel shows, and whether a reader has changed it
+  // yet: the cut (styles-extreme-overdrive.css) never plays at first paint.
+  const [shownStage, setShownStage] = useState<ExtremeStage>("middle");
+  const [stageCut, setStageCut] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
+  const lastCutRef = useRef(Number.NEGATIVE_INFINITY);
 
   const activeStage = EXTREME_STAGES[stage];
+  const shownArt = EXTREME_STAGES[shownStage];
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
+
+  // A change of form cuts the art in before the next paint, unless the last
+  // cut was under STAGE_CUT_GAP_MS ago; then it waits, and a reader who has
+  // flicked back to the shown form in the meantime sees no cut at all.
+  useLayoutEffect(() => {
+    if (shownStage === stage) return;
+    const cut = () => {
+      lastCutRef.current = performance.now();
+      setStageCut(true);
+      setShownStage(stage);
+    };
+    const wait = lastCutRef.current + STAGE_CUT_GAP_MS - performance.now();
+    if (wait <= 0) {
+      cut();
+      return;
+    }
+    const timer = window.setTimeout(cut, wait);
+    return () => window.clearTimeout(timer);
+  }, [stage, shownStage]);
 
   useEffect(() => {
     const rail = stageTabsRef.current;
@@ -525,6 +565,9 @@ export function ExtremeSaga() {
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <i className="exs-dial" />
+          <i className="exo-zone" />
+          <i className="exo-rev" />
+          <i className="exo-shock" />
           <img
             src="/saga-extreme-middle.webp"
             alt=""
@@ -564,9 +607,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>PROCESSING CORE / P14</p>
           <h2 id="exs-p14-title">
-            可能性は増やす。
+            <span className="exo-line">可能性は増やす。</span>
             <br />
-            答えは一つ。
+            <span className="exo-line">答えは一つ。</span>
           </h2>
           <span>
             エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
@@ -593,15 +636,15 @@ export function ExtremeSaga() {
               Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束。変換効率・応答・安定率の個別数値は未公表のため、推測値では補いません。
             </p>
             <dl aria-label="エクスプリームのP14構成">
-              <div>
+              <div className="exo-read">
                 <dt>KHAOS Ultra</dt>
                 <dd>20,000YOPS</dd>
               </div>
-              <div>
+              <div className="exo-read">
                 <dt>KOSMOS Ultra</dt>
                 <dd>5,000TOPS</dd>
               </div>
-              <div>
+              <div className="exo-read">
                 <dt>TUNING</dt>
                 <dd>結果固定</dd>
               </div>
@@ -615,11 +658,14 @@ export function ExtremeSaga() {
             <h3>勝ち筋は、増やし放題。</h3>
             <p>KHAOS Ultra 20,000YOPSが戦況から成立可能な勝利経路を継続的に生成。</p>
           </article>
-          <span aria-hidden="true">→</span>
+          <span className="exo-arrow" aria-hidden="true">
+            →
+          </span>
           <article>
             <small>P14 / FIXATION</small>
             <h3>その中から、一つだけ残す。</h3>
             <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束。</p>
+            <i className="exo-lock" aria-hidden="true" />
           </article>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
@@ -631,9 +677,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>TWO OPERATING STAGES</p>
           <h2>
-            ミドルで育てて、
+            <span className="exo-line">ミドルで育てて、</span>
             <br />
-            ウルトラで決める。
+            <span className="exo-line">ウルトラで決める。</span>
           </h2>
         </header>
 
@@ -677,21 +723,32 @@ export function ExtremeSaga() {
             role="tabpanel"
             aria-labelledby={`exs-stage-tab-${stage}`}
             aria-live="polite"
+            data-exo-cut={stageCut ? "true" : undefined}
           >
-            <figure key={stage}>
-              <span aria-hidden="true" />
+            <figure key={shownStage} data-form={shownStage}>
+              <span className="exo-frame" aria-hidden="true" />
               <img
-                src={activeStage.image}
-                alt={activeStage.alt}
-                width={stage === "middle" ? 851 : 796}
-                height={stage === "middle" ? 1280 : 1200}
-                loading={stage === "middle" ? "eager" : "lazy"}
+                src={shownArt.image}
+                alt={shownArt.alt}
+                width={shownStage === "middle" ? 851 : 796}
+                height={shownStage === "middle" ? 1280 : 1200}
+                loading={shownStage === "middle" ? "eager" : "lazy"}
                 decoding="async"
               />
+              <i className="exo-slash" aria-hidden="true" />
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
-              <h3>{activeStage.title}</h3>
+              {/* Two lines at every width, broken after the 、, so a change
+                  of form never moves the figure under the title. */}
+              <h3>
+                <span className="exo-title-line">
+                  {activeStage.title.slice(0, activeStage.title.indexOf("、") + 1)}
+                </span>
+                <span className="exo-title-line">
+                  {activeStage.title.slice(activeStage.title.indexOf("、") + 1)}
+                </span>
+              </h3>
               <p>{activeStage.lede}</p>
               <ul>
                 {activeStage.points.map((point) => (
@@ -707,9 +764,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>EXTREME ARCHITECTURE</p>
           <h2>
-            勝つための機構が、
+            <span className="exo-line">勝つための機構が、</span>
             <br />
-            三つもある。
+            <span className="exo-line">三つもある。</span>
           </h2>
         </header>
 
@@ -717,7 +774,7 @@ export function ExtremeSaga() {
           {CORE_SYSTEMS.map((system) => (
             <article key={system.number} className="rxs-reveal">
               <header>
-                <span>{system.number}</span>
+                <span className="exo-number">{system.number}</span>
                 <small>{system.code}</small>
               </header>
               <h3>{system.title}</h3>
@@ -734,7 +791,7 @@ export function ExtremeSaga() {
             </strong>
             <p>∞ CORE</p>
           </div>
-          <i aria-hidden="true">×</i>
+          <i className="exo-joint" aria-hidden="true" />
           <div>
             <small>KOSMOS Ultra</small>
             <strong>
@@ -749,16 +806,16 @@ export function ExtremeSaga() {
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
           <h2>
-            長期戦なら、
+            <span className="exo-line">長期戦なら、</span>
             <br />
-            なおさら歓迎。
+            <span className="exo-line">なおさら歓迎。</span>
           </h2>
         </div>
-        <GuardedLink to="/riders/saga" assets={[]}>
+        <GuardedLink to="/riders/saga" assets={[]} className="exo-door">
           <span>人物・能力の詳細を見る</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
-        <GuardedLink to="/form-archive" assets={[]}>
+        <GuardedLink to="/form-archive" assets={[]} className="exo-door">
           <span>全形態を比較する</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
