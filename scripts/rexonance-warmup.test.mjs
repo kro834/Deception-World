@@ -147,3 +147,29 @@ test("Data saving avoids speculative downloads and hidden tabs defer warmup", ()
     f.restore();
   }
 });
+
+test("A resolver warms the visible element's own candidates, sizes only when it has them", async () => {
+  const f = fixture();
+  let cleanup;
+  try {
+    cleanup = warmRexonanceStages({}, ["/civilian-bell-20260826.jpeg", "/character-nagi-20260922.webp"], (source) =>
+      source.endsWith(".jpeg") ? { srcSet: source.replace(/\.jpeg$/, "-delivery.webp") } : {
+        srcSet: `${source.replace(/\.webp$/, "")}-delivery-640.webp 640w`,
+        sizes: "(max-width: 767px) 100vw, 64vw",
+      },
+    );
+    f.near();
+    f.flush();
+    assert.equal(f.images[0].srcset, "/civilian-bell-20260826-delivery.webp");
+    assert.equal(f.images[0].sizes, undefined);
+    assert.equal(f.images[0].src, "/civilian-bell-20260826.jpeg");
+    f.images[0].onload();
+    await Promise.resolve();
+    f.flush();
+    assert.equal(f.images[1].sizes, "(max-width: 767px) 100vw, 64vw");
+    assert.match(f.images[1].srcset, /character-nagi-20260922-delivery-640\.webp 640w/);
+  } finally {
+    cleanup?.();
+    f.restore();
+  }
+});

@@ -9,6 +9,7 @@ import finalStageCssUrl from "@/styles-final-stage.css?url";
 import finalStageElevationCssUrl from "@/styles-final-stage-elevation.css?url";
 import finalStageCinemaCssUrl from "@/styles-final-stage-cinema.css?url";
 import finalStageKiroCssUrl from "@/styles-final-stage-kiro.css?url";
+import finalStageLamplightCssUrl from "@/styles-final-stage-lamplight.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -41,6 +42,9 @@ export const Route = createFileRoute("/final-stage")({
       // The 帰路 edition: the way home, drawn over the cinema's arrival.
       { rel: "stylesheet", href: finalStageKiroCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
+      // The Lamplight edition: the station's finish, its states and one
+      // signature, over the motion sheet (styles-final-stage-lamplight.css).
+      { rel: "stylesheet", href: finalStageLamplightCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

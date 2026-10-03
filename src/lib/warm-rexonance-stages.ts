@@ -1,7 +1,16 @@
 import { rexonanceImage } from "./rexonance-images.ts";
 
-/** Warm only nearby alternate forms, one at a time; never gate navigation. */
-export function warmRexonanceStages(target: Element, sources: readonly string[]) {
+type ImageCandidates = { srcSet?: string; sizes?: string };
+
+/** Warm only nearby alternate forms, one at a time; never gate navigation.
+ * `resolve` must give the candidates the visible image element uses, so the
+ * warm-up fetches and decodes the very file it will paint (Final Stage's
+ * portraits pass the dossier delivery as well). */
+export function warmRexonanceStages(
+  target: Element,
+  sources: readonly string[],
+  resolve: (source: string) => ImageCandidates = rexonanceImage,
+) {
   const connection = (
     navigator as Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string };
@@ -30,9 +39,9 @@ export function warmRexonanceStages(target: Element, sources: readonly string[])
     next.decoding = "async";
     next.fetchPriority = "low";
     const source = sources[index++];
-    const responsive = rexonanceImage(source);
+    const responsive = resolve(source);
     if (responsive.srcSet) {
-      next.sizes = responsive.sizes;
+      if (responsive.sizes) next.sizes = responsive.sizes;
       next.srcset = responsive.srcSet;
     }
     let settled = false;

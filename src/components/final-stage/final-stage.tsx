@@ -11,6 +11,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import {
   CAST,
   FAR_FROM_SAGA,
@@ -244,6 +245,9 @@ function RiderPickup({
           if (event.target === dlg.current) close();
         }}
       >
+        {/* The platform doors the record opens through
+            (styles-final-stage-lamplight.css). Ornament only. */}
+        <i className="fsl-gate" aria-hidden="true" />
         <button
           type="button"
           className="form-pickup-close"
@@ -284,13 +288,16 @@ function RiderPickup({
   );
 }
 
+/* A portrait's candidates, exactly as CastVisual spreads them, so a warm-up
+   fetches and decodes the file the keyed figure will paint. */
+const castImage = (source: string) => ({ ...dossierImage(source), ...rexonanceImage(source) });
+
 function CastVisual({ person }: { person: CastEntry }) {
   if (person.image) {
     return (
       <img
         src={person.image}
-        {...dossierImage(person.image)}
-        {...rexonanceImage(person.image)}
+        {...castImage(person.image)}
         alt={`${person.name}のビジュアル`}
         style={{ objectPosition: person.pos }}
         width={person.width}
@@ -374,6 +381,32 @@ export function FinalStage() {
     const rail = formTabsRef.current;
     if (!rail) return;
     return bindRail(rail, RR_FORM_ORDER, setForm);
+  }, []);
+
+  // A swap is opaque from its first frame (styles-final-stage-lamplight.css),
+  // so the next portrait or stage art must already be decoded when a tab is
+  // chosen, or the figure's ground shows for a frame and reads as a flash.
+  // As Rexonance does for its forms: warm the alternates one at a time, at
+  // low priority, once the rail is near (the stages once their record opens).
+  useEffect(() => {
+    const rail = castTabsRef.current;
+    if (!rail) return;
+    return warmRexonanceStages(
+      rail,
+      CAST.slice(1).flatMap((person) => (person.image ? [person.image] : [])),
+      castImage,
+    );
+  }, []);
+
+  useEffect(() => {
+    const rail = stageTabsRef.current;
+    if (!rail) return;
+    return warmRexonanceStages(
+      rail.closest("dialog") ?? rail,
+      FFS_STAGE_ORDER.filter((key) => key !== "middle").map(
+        (key) => FAR_FROM_SAGA.stages[key].image,
+      ),
+    );
   }, []);
 
   useEffect(() => {
@@ -535,6 +568,13 @@ export function FinalStage() {
             <span>FINAL</span>
             <span>STAGE</span>
             <i />
+            {/* The read's route: one station per paragraph, lit as it is
+                passed (styles-final-stage-lamplight.css). Ornament only. */}
+            <div className="fsl-route">
+              {STORY.paragraphs.map((_, index) => (
+                <b key={index} />
+              ))}
+            </div>
           </div>
           <Prose paragraphs={STORY.paragraphs} className="fst-story-copy" />
         </div>
@@ -597,6 +637,10 @@ export function FinalStage() {
                 <span>CHARACTER {activeCast.no}</span>
               </figcaption>
             </figure>
+            {/* The pass's tear line and its punched ends, between the photo
+                and the record (styles-final-stage-lamplight.css). Ornament
+                only, unkeyed, so it stays put while a tab prints the pass. */}
+            <i className="fsl-tear" aria-hidden="true" />
             <div key={`${activeCast.id}-copy`} className="fst-cast-copy">
               <small>{activeCast.kicker}</small>
               <h3>{activeCast.name}</h3>
