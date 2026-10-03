@@ -1057,8 +1057,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   width: calc(var(--rx-suit-h) / 2);
   height: var(--rx-suit-h);
   translate: -50% -50%;
-  -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 45%) 40% 62%, #000 72%);
-  mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 45%) 40% 62%, #000 72%);
+  -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
+  mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
 }
 
 .rx-call-sequence .rx-suit-figure > * {
@@ -1107,8 +1107,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-scan::before {
-  height: 7%;
-  background: radial-gradient(50% 100% at 50% 100%, rgb(121 232 255 / 22%), transparent);
+  height: 9%;
+  background: radial-gradient(50% 100% at 50% 100%, rgb(121 232 255 / 34%), transparent);
 }
 
 .rx-call-sequence .rx-suit-scan::after {
@@ -1159,7 +1159,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    edge, a rim brightest where the light strikes). Ice on the left,
    violet on the right, white at the centre; gold is the trims'. */
 .rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path {
-  stroke-width: 1.25px;
+  stroke-width: 1.4px;
 }
 
 .rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-ice path {
@@ -1177,18 +1177,34 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke: url("#rx-suit-rim-white");
 }
 
+/* The crown and its horns are gold metal, as in the artwork; they form on
+   the last call, so gold still arrives last. */
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-gold path {
+  fill: url("#rx-suit-fill-gold");
+  stroke: url("#rx-suit-rim-gold");
+}
+
 /* Crystals (the diamonds, the stars, the belt cells, the tail's blade) and
    the energy ribbons: translucent ice on the left, pink on the right. */
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path.rx-suit-accent,
-.rx-call-sequence .rx-suit-plate.is-ribbon path {
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path.rx-suit-accent {
   fill: url("#rx-suit-fill-gem-ice");
   stroke: url("#rx-suit-rim-gem-ice");
 }
 
-.rx-call-sequence :is(.rx-suit-plate.is-violet, .rx-suit-plate.is-white) path.rx-suit-accent,
-.rx-call-sequence .rx-suit-plate.is-ribbon.is-violet path {
+.rx-call-sequence :is(.rx-suit-plate.is-violet, .rx-suit-plate.is-white) path.rx-suit-accent {
   fill: url("#rx-suit-fill-gem-violet");
   stroke: url("#rx-suit-rim-gem-violet");
+}
+
+/* The energy ribbons: lit at the root, gone by the foot. */
+.rx-call-sequence .rx-suit-plate.is-ribbon path {
+  fill: url("#rx-suit-fill-ribbon-ice");
+  stroke: url("#rx-suit-rim-ribbon-ice");
+}
+
+.rx-call-sequence .rx-suit-plate.is-ribbon.is-violet path {
+  fill: url("#rx-suit-fill-ribbon-violet");
+  stroke: url("#rx-suit-rim-ribbon-violet");
 }
 
 /* The lock's rim glint: a bright copy of the outline, never a fill. */
@@ -1225,6 +1241,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   fill: #eef8ff;
 }
 
+.rx-call-sequence .is-gold > .rx-suit-cloud path {
+  fill: #ffecbf;
+}
+
 .rx-call-sequence .rx-suit-seed {
   opacity: 0;
 }
@@ -1237,7 +1257,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 /* The faceplate: two halves, folded into the helmet's sides until the
    last call. */
 .rx-call-sequence .rx-suit-face path {
-  fill: rgb(6 14 24 / 94%);
+  fill: url("#rx-suit-fill-white");
   stroke: rgb(121 232 255 / 72%);
 }
 
@@ -1248,7 +1268,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 /* The trims: the owner's accent outlines, in gold. */
 .rx-call-sequence .rx-suit-trim path {
   fill: none;
-  stroke: rgb(227 193 133 / 90%);
+  stroke: url("#rx-suit-rim-gold");
+  stroke-width: 1.6px;
 }
 
 .rx-call-sequence .rx-suit-eyes path {
@@ -1279,6 +1300,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 .rx-call-sequence .rx-suit-glow path {
   fill: none;
   stroke-width: 1.5px;
+}
+
+/* Under each resonance line, a wider, softer copy: the seam's light bleeds. */
+.rx-call-sequence .rx-suit-glow path.rx-suit-soft {
+  stroke-width: 5px;
+  opacity: 0.3;
 }
 
 .rx-call-sequence .rx-suit-glow.is-ice path {
@@ -1318,18 +1345,21 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   left: 50%;
   width: 8%;
   aspect-ratio: 1;
-  background: #f6dc9c;
-  border: 1px solid #e3c185;
+  background: radial-gradient(circle at 42% 38%, #fffbee 0 18%, #f6dc9c 40%, #c9a15a 72%, #7a5a2a);
+  border: 1px solid #ffe9b8;
   border-radius: 50%;
-  box-shadow: 0 0 9px 2px rgb(227 193 133 / 42%);
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 25%),
+    0 0 12px 3px rgb(242 216 150 / 55%);
   translate: -50% -50%;
 }
 
 .rx-call-sequence .rx-suit-jewel {
   top: 39.167%;
   width: 6%;
-  background: radial-gradient(#fbecc4 30%, #d9b46e);
-  box-shadow: 0 0 6px 1px rgb(227 193 133 / 36%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 25%),
+    0 0 8px 2px rgb(242 216 150 / 45%);
 }
 
 /* The target: an ice reticle acquires the visor's place on FAR UP！ and
@@ -1642,8 +1672,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   /* Only the last call reaches the figure here: a lighter torso band. */
   .rx-call-sequence .rx-suit-figure {
-    -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 62%) 40% 62%, #000 72%);
-    mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 62%) 40% 62%, #000 72%);
+    -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
+    mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
   }
 
   /* Every label reads on the right, the legs' too (from the right boot):
@@ -2474,6 +2504,216 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   100% {
     opacity: 1;
+    transform: none;
+  }
+}
+
+/* ================================================================
+   rx4 — the rendering. The same geometry and clock, drawn as armour:
+   opaque plates with a dark bevel under a lit rim and a diagonal sheen,
+   faceted crystals, a gold crown, light halos on the jewels and eyes, a
+   backlight and a floor behind the figure and its cast shadow. Static
+   paint; only opacity and transform move. Scoped to .rx-call-sequence.
+   ================================================================ */
+/* Under every rim, a dark bevel: the plate's edge reads as a thickness. */
+.rx-call-sequence .rx-suit path.rx-suit-bevel {
+  fill: none;
+  stroke: rgb(1 3 8 / 70%);
+  stroke-width: 3.2px;
+}
+
+/* Over every plate, one diagonal band of light. */
+.rx-call-sequence .rx-suit path.rx-suit-sheen {
+  fill: url("#rx-suit-fill-sheen");
+  stroke: none;
+}
+
+/* A crystal's inner facet, near white. */
+.rx-call-sequence .rx-suit-figure .rx-suit-plate path.rx-suit-facet,
+.rx-call-sequence .rx-suit-figure .rx-suit-helm path.rx-suit-facet {
+  fill: rgb(255 255 255 / 78%);
+  stroke: none;
+}
+
+/* The light rig: a backlight in the two tones behind the figure, a faint
+   lattice, and a floor pool under the boots with the figure's reflection
+   colours. It stands in the figure's place, a little wider and taller. */
+.rx-call-sequence .rx-suit-stage {
+  position: absolute;
+  top: 50%;
+  left: var(--rx-suit-cx);
+  width: calc(var(--rx-suit-h) * 0.95);
+  height: calc(var(--rx-suit-h) * 1.12);
+  opacity: 0.85;
+  background:
+    radial-gradient(ellipse 34% 40% at 36% 32%, rgb(121 232 255 / 17%), transparent 70%),
+    radial-gradient(ellipse 34% 40% at 64% 32%, rgb(255 130 213 / 15%), transparent 70%),
+    radial-gradient(ellipse 50% 56% at 50% 44%, rgb(44 70 110 / 34%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(121 232 255 / 3%) 0 1px, transparent 1px 28px);
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
+  translate: -50% -50%;
+}
+
+.rx-call-sequence .rx-suit-stage > .rx-suit-floor {
+  position: absolute;
+  top: 86%;
+  left: 50%;
+  width: 92%;
+  height: 11%;
+  background:
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgb(255 255 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 34% 50%, rgb(121 232 255 / 26%), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 66% 50%, rgb(255 130 213 / 22%), transparent 70%),
+    linear-gradient(rgb(121 232 255 / 0%), rgb(121 232 255 / 55%) 50%, rgb(255 130 213 / 0%)) 50%
+      50% / 70% 1px no-repeat;
+  translate: -50% -50%;
+}
+
+/* The cast shadow: the silhouette, set back and down, under the plates. */
+.rx-call-sequence .rx-suit-figure > .rx-suit-shadow {
+  top: 0;
+  left: 14.2857%;
+  width: 71.4286%;
+  height: 100%;
+  translate: 3% 1.6%;
+}
+
+.rx-call-sequence .rx-suit-shadow path {
+  fill: rgb(0 2 6 / 62%);
+  stroke: none;
+}
+
+/* Light halos on the jewels and the eyes: soft radial light in the part's
+   own colour, small in area. */
+.rx-call-sequence .rx-suit-halo {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+.rx-call-sequence .rx-suit-halo.is-shoulder {
+  background: radial-gradient(circle, rgb(191 244 255 / 42%), rgb(121 232 255 / 14%) 38%, transparent 68%);
+}
+
+.rx-call-sequence .rx-suit-halo.is-shoulder.is-right {
+  background: radial-gradient(circle, rgb(255 212 240 / 42%), rgb(255 130 213 / 14%) 38%, transparent 68%);
+}
+
+.rx-call-sequence .rx-suit-halo.is-eyes {
+  aspect-ratio: 1.6;
+  background: radial-gradient(ellipse, rgb(255 244 214 / 48%), rgb(242 216 150 / 16%) 40%, transparent 70%);
+}
+
+.rx-call-sequence .rx-suit-halo.is-core {
+  background: radial-gradient(circle, rgb(255 248 226 / 46%), rgb(242 216 150 / 18%) 32%, transparent 66%);
+}
+
+.rx-call-sequence .rx-suit-halo.is-jewel {
+  background: radial-gradient(circle, rgb(255 248 226 / 40%), rgb(242 216 150 / 14%) 36%, transparent 68%);
+}
+
+/* The badge, rendered the same way, with a halo behind the eyes. */
+.rx-call-sequence .rx-suit-badge-helmet path {
+  fill: url("#rx-suit-fill-white");
+  stroke: url("#rx-suit-rim-white");
+  stroke-width: 1.3px;
+}
+
+.rx-call-sequence .rx-suit-badge-helmet path.rx-suit-badge-visor {
+  fill: rgb(3 8 16 / 96%);
+  stroke: rgb(222 242 255 / 70%);
+}
+
+.rx-call-sequence .rx-suit-crest path {
+  fill: url("#rx-suit-fill-gold");
+  stroke: url("#rx-suit-rim-gold");
+}
+
+.rx-call-sequence .rx-suit-badge-halo {
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  width: 70%;
+  aspect-ratio: 1.5;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(ellipse, var(--rx-call-accent) 0%, transparent 62%);
+  translate: -50% -50%;
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* FAR UP！ wakes the rig with the HUD. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-stage {
+    animation: rxSuitStage 360ms var(--rx-call-ease) 40ms both;
+  }
+
+  /* The shadow falls once the body stands (the legs' line of the chant). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-shadow {
+    animation: rxSuitTick 300ms linear
+      calc(var(--rx-call-chant-start) + var(--rx-call-chant-duration) * 0.6) both;
+  }
+
+  /* The shoulder jewels light as they form (line two of the chant). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-halo.is-shoulder {
+    animation: rxSuitHalo 420ms var(--rx-call-ease)
+      calc(var(--rx-call-chant-start) + var(--rx-call-chant-duration) / 4 + 60ms) both;
+  }
+
+  /* The eyes, the core and the belt jewel light with their gold. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-halo.is-eyes {
+    animation: rxSuitHalo 60ms linear calc(var(--rx-call-final-start) + 240ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-halo.is-core {
+    animation: rxSuitHalo 70ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 240ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-halo.is-jewel {
+    animation: rxSuitHalo 60ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 255ms) both;
+  }
+
+  /* The badge's eye halo lights with its eyes. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-suit-badge-halo {
+    animation: rxSuitHalo 120ms var(--rx-call-ease) 170ms both;
+  }
+}
+
+@keyframes rxSuitStage {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rxSuitHalo {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
     transform: none;
   }
 }

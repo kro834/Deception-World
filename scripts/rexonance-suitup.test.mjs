@@ -509,3 +509,40 @@ test("the stage badge swaps the crest per form inside the card's first beat", ()
     assert.match(component, new RegExp(`${form}: \\[`));
   }
 });
+
+test("rx4: the plates are rendered armour — bevel, sheen and facets, a gold crown, halos and a rig on the clock", () => {
+  // Every plate draws a dark bevel under its rim, a diagonal sheen over its
+  // body and a near-white facet in each crystal; the badge the same.
+  for (const layer of ["rx-suit-bevel", "rx-suit-sheen", "rx-suit-facet"]) {
+    assert.match(component, new RegExp(`className="${layer}"`));
+  }
+  const bevel = rules.find(({ selector }) => selector === ".rx-call-sequence .rx-suit path.rx-suit-bevel");
+  assert.ok(Number.parseFloat(declaration(bevel.body, "stroke-width")) >= 3);
+  assert.equal(declaration(bevel.body, "fill"), "none");
+  const sheen = rules.find(({ selector }) => selector === ".rx-call-sequence .rx-suit path.rx-suit-sheen");
+  assert.match(declaration(sheen.body, "fill"), /rx-suit-fill-sheen/);
+  // Gradient stops carry an offset, a colour and an opacity; the gold tone
+  // and the ribbons' fading tones exist.
+  for (const tone of ["gold", "ribbon-ice", "ribbon-violet", "sheen", "gem-ice", "gem-violet"]) {
+    assert.match(component, new RegExp(`"?${tone}"?: \\{`));
+  }
+  // The crown and its horns are gold metal (the artwork's), on the last call.
+  const crown = component.match(/const SUIT_HELM[\s\S]*?\n\];/)?.[0];
+  assert.ok(crown);
+  assert.equal((crown.match(/tone: "gold"/g) ?? []).length, 3);
+  assert.equal((crown.match(/tone: "white"/g) ?? []).length, 1, "the shell stays white");
+  // Halos on the shoulder jewels, the eyes, the core and the belt jewel; the
+  // rig and the shadow behind the figure. They animate only on the clock.
+  assert.equal((component.match(/name: "(?:shoulder is-left|shoulder is-right|eyes|core|jewel)"/g) ?? []).length, 5);
+  assert.match(component, /<i className="rx-suit-stage">/);
+  assert.match(component, /<svg className="rx-suit-shadow"/);
+  for (const piece of [".rx-suit-stage", ".rx-suit-shadow", ".rx-suit-halo.is-shoulder", ".rx-suit-halo.is-eyes", ".rx-suit-halo.is-core", ".rx-suit-halo.is-jewel"]) {
+    assert.ok(covering(piece), `${piece} moves on the covering clock`);
+  }
+  // The rig wakes with the HUD; the shadow falls after the legs' line.
+  assert.ok(layerTimes(declaration(covering(".rx-suit-stage").body, "animation"), {}).end < REXONANCE_CALL_BEATS[1].start + 100);
+  const shadow = layerTimes(declaration(covering(".rx-suit-shadow").body, "animation"), {});
+  assert.ok(shadow.delay >= REXONANCE_CALL_BEATS[2].start + REXONANCE_CALL_BEATS[2].duration / 2);
+  // No filter anywhere: light is painted, never computed per frame.
+  assert.doesNotMatch(suitCss, /\bfilter:/);
+});

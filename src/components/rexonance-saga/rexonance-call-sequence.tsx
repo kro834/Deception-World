@@ -127,7 +127,14 @@ const SUIT_SHELL =
 const SUIT_CREST = "113,58 105,49 101,37 101,24 103,12 106,25 109,37 116,50";
 const SUIT_HORN = "102,54 96,46 93,33 99,41 105,49";
 const SUIT_SPIKE = "120,34 123,45 120,57 117,45";
-const SUIT_HEAD = [SUIT_SHELL, SUIT_CREST, mirror(SUIT_CREST), SUIT_HORN, mirror(SUIT_HORN), SUIT_SPIKE];
+const SUIT_HEAD = [
+  SUIT_SHELL,
+  SUIT_CREST,
+  mirror(SUIT_CREST),
+  SUIT_HORN,
+  mirror(SUIT_HORN),
+  SUIT_SPIKE,
+];
 // MAX adds faceted temple fins; ULTRA carries cheek blades and a forehead jewel.
 const SUIT_FIN = "102,68 95,60 92,49 99,57 106,64";
 const SUIT_BLADE = "104,78 96,72 92,62 100,67 108,74";
@@ -179,7 +186,9 @@ const SUIT_SPIRAL = Array.from({ length: 6 }, (_, index) =>
 );
 // Waist: a segmented belt with crystal cells and a round central jewel.
 const SUIT_BELT_CELLS = [80, 87, 94, 101].map((x) => `${x},179 ${x + 6},179 ${x + 6},198 ${x},198`);
-const SUIT_BELT_GEMS = [83, 90, 97, 104].map((x) => `${x},181 ${x + 1.6},188.5 ${x},196 ${x - 1.6},188.5`);
+const SUIT_BELT_GEMS = [83, 90, 97, 104].map(
+  (x) => `${x},181 ${x + 1.6},188.5 ${x},196 ${x - 1.6},188.5`,
+);
 const SUIT_BELT = [circleOutline(120, 188, 12), circleOutline(120, 188, 8)];
 const SUIT_BUCKLE = "87,168 96,169 101,179 93,179";
 // The tasset: a long gold-edged V panel down the front, between the legs.
@@ -229,7 +238,11 @@ const SUIT_TAIL_RINGS = SUIT_TAIL_SPINE.slice(1, -1).map(([x, y], i) => {
   return `${(x - uy * half).toFixed(1)},${(y + ux * half).toFixed(1)} ${(x + ux * 2.5).toFixed(1)},${(y + uy * 2.5).toFixed(1)} ${(x + uy * half).toFixed(1)},${(y - ux * half).toFixed(1)}`;
 });
 const SUIT_TAIL_BLADE = "218,85 231,101 229,123 222,143 214,122 211,101";
-const SUIT_TAIL_BARBS = ["211,85 200,66 206,91", "214,25 233,38 236,54 224,41", "182,23 186,9 192,22"];
+const SUIT_TAIL_BARBS = [
+  "211,85 200,66 206,91",
+  "214,25 233,38 236,54 224,41",
+  "182,23 186,9 192,22",
+];
 // Energy ribbons trailing from the arms and hips to the feet.
 const SUIT_RIBBONS = [
   band(
@@ -313,8 +326,20 @@ const SUIT_PLATES = [
 // then the legs and the ribbons.
 const both = (shapes: readonly string[]) => [...shapes, ...shapes.map(mirror)];
 const SUIT_ZONES = [
-  [SUIT_PEC, mirror(SUIT_PEC), ...both([SUIT_RIB]), SUIT_ABDOMEN, ...SUIT_HOUSING, ...SUIT_BELT, SUIT_TASSET],
-  [...both([...SUIT_PLUMES, SUIT_UPPER_ARM, SUIT_FOREARM, SUIT_FIST]), ...SUIT_TAIL, SUIT_TAIL_BLADE],
+  [
+    SUIT_PEC,
+    mirror(SUIT_PEC),
+    ...both([SUIT_RIB]),
+    SUIT_ABDOMEN,
+    ...SUIT_HOUSING,
+    ...SUIT_BELT,
+    SUIT_TASSET,
+  ],
+  [
+    ...both([...SUIT_PLUMES, SUIT_UPPER_ARM, SUIT_FOREARM, SUIT_FIST]),
+    ...SUIT_TAIL,
+    SUIT_TAIL_BLADE,
+  ],
   [...both([SUIT_THIGH, SUIT_KNEE, SUIT_SHIN, SUIT_BOOT, ...SUIT_RIBBONS])],
 ];
 const SUIT_PHASES = ["ice", "violet", "gold"] as const;
@@ -332,7 +357,7 @@ const outline = (shapes: readonly string[]) => shapes.map((points) => `M${points
 // it (REXONANCE_SUIT_FLOW). Tones: ice on the left, violet on the right,
 // white at the centre; gold is never a plate colour, it lights the trims,
 // the eyes and the jewels last.
-type SuitTone = "ice" | "violet" | "white";
+type SuitTone = "ice" | "violet" | "white" | "gold";
 type SuitFlowKey = keyof typeof REXONANCE_SUIT_FLOW;
 type SuitPiece = {
   name: string;
@@ -367,7 +392,8 @@ const sided = (
   },
 ];
 const pick = (list: readonly string[], indices: number[]) => indices.map((index) => list[index]);
-const ribbonTop = (ribbon: string) => ribbon.split(" ")[0].split(",").map(Number) as unknown as Point;
+const ribbonTop = (ribbon: string) =>
+  ribbon.split(" ")[0].split(",").map(Number) as unknown as Point;
 // Back to front: the tail and the ribbons behind, the plumes behind the
 // arms, the chest in front.
 const SUIT_PIECES: readonly SuitPiece[] = [
@@ -445,7 +471,7 @@ const SUIT_HELM: readonly SuitPiece[] = [
   {
     name: "is-crest is-left",
     shapes: [SUIT_CREST, SUIT_HORN],
-    tone: "white",
+    tone: "gold",
     flow: "crest",
     pivot: SUIT_CREST_PIVOT,
     turn: -14,
@@ -454,7 +480,7 @@ const SUIT_HELM: readonly SuitPiece[] = [
   {
     name: "is-crest is-right",
     shapes: [mirror(SUIT_CREST), mirror(SUIT_HORN)],
-    tone: "white",
+    tone: "gold",
     flow: "crest",
     pivot: mirrorPivot(SUIT_CREST_PIVOT),
     turn: 14,
@@ -463,7 +489,7 @@ const SUIT_HELM: readonly SuitPiece[] = [
   {
     name: "is-spike",
     shapes: [SUIT_SPIKE],
-    tone: "white",
+    tone: "gold",
     flow: "spike",
     pivot: [120, 57],
     grow: [0.5, 0.1],
@@ -506,7 +532,8 @@ const grains = (shapes: readonly string[], seed: number, count: number) => {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!polygons.some((polygon) => inside(polygon, x, y))) continue;
-    path += `M${x.toFixed(1)} ${y.toFixed(1)}h1.6v1.6h-1.6z`;
+    const size = [1.2, 1.7, 2.4][found % 3];
+    path += `M${x.toFixed(1)} ${y.toFixed(1)}h${size}v${size}h-${size}z`;
     found += 1;
   }
   return path;
@@ -542,6 +569,15 @@ const SUIT_PART_LINE = { CHEST: 0, ARMS: 1, LEGS: 2, HEAD: 3 } as const;
 // Gold reaches the trims from the core outward: chest, arms and the tail,
 // legs, and the helmet's crest last (SUIT_PLATES' index 2, 1 and 4, 0, 3).
 const SUIT_TRIM_ZONE = [2, 1, 0, 3, 1];
+// The halos' places and widths (drawing units): the shoulder jewels, the
+// eyes, the core and the belt jewel.
+const SUIT_HALOS = [
+  { name: "shoulder is-left", at: SUIT_JEWEL, size: 64 },
+  { name: "shoulder is-right", at: mirrorPivot(SUIT_JEWEL), size: 64 },
+  { name: "eyes", at: [120, 72] as const, size: 60 },
+  { name: "core", at: SUIT_CORE, size: 96 },
+  { name: "jewel", at: [120, 188] as const, size: 44 },
+] as const;
 // Alignment brackets bite on the joints as the frame locks on RIDER！:
 // the core, the shoulders, the elbows, the knees.
 const SUIT_JOINTS = [
@@ -553,55 +589,176 @@ const SUIT_JOINTS = [
   [75, 301],
   [165, 301],
 ] as const;
-// Plate light: a lit top edge over a darker body (fill), and a rim that is
-// brightest where the light strikes (stroke). Colour stops per tone.
-// Pink-magenta stands in for violet on the right, as in the artwork; the
-// crystals (gems) are lighter, translucent ice and pink.
-const SUIT_LIGHT: Record<string, { fill: string[]; rim: string[] }> = {
+// Plate light (rx4): opaque black armour lit from the top left. Each tone's
+// fill runs from a specular edge through a short tinted falloff into a near-
+// black body; the rim is brightest where the light strikes. A diagonal sheen
+// band lies over every plate, a dark bevel under its rim. Pink-magenta stands
+// in for violet on the right, as in the artwork; the crystals (gems) are
+// bright, faceted ice and pink; gold is the crown's and the trims'. Stops are
+// [offset, colour, opacity].
+type SuitStop = readonly [number, string, string];
+type SuitGradient = { fill: readonly SuitStop[]; rim: readonly SuitStop[]; axis?: string };
+const SUIT_LIGHT: Record<string, SuitGradient> = {
   ice: {
-    fill: ["#79e8ff", "0.24", "#1c5872", "0.34", "#06111d", "0.86"],
-    rim: ["#effdff", "1", "#79e8ff", "0.92", "#3c9fbd", "0.5"],
+    fill: [
+      [0, "#d7f8ff", "0.95"],
+      [0.07, "#79e8ff", "0.55"],
+      [0.2, "#163a52", "0.98"],
+      [0.6, "#0a1522", "1"],
+      [1, "#03060c", "1"],
+    ],
+    rim: [
+      [0, "#ffffff", "1"],
+      [0.3, "#a4f0ff", "0.95"],
+      [1, "#2c7b96", "0.65"],
+    ],
   },
   violet: {
-    fill: ["#ff9ad8", "0.2", "#5a2350", "0.34", "#14081a", "0.86"],
-    rim: ["#fff0fa", "1", "#ff9ad8", "0.92", "#b9558f", "0.5"],
+    fill: [
+      [0, "#ffdcf2", "0.95"],
+      [0.07, "#ff8fd8", "0.55"],
+      [0.2, "#3f163c", "0.98"],
+      [0.6, "#170a1e", "1"],
+      [1, "#06030a", "1"],
+    ],
+    rim: [
+      [0, "#ffffff", "1"],
+      [0.3, "#ffb4e6", "0.95"],
+      [1, "#98407a", "0.65"],
+    ],
   },
   white: {
-    fill: ["#e2f2ff", "0.2", "#2b4a63", "0.32", "#060c17", "0.88"],
-    rim: ["#ffffff", "1", "#d6ecf8", "0.9", "#7d9cb2", "0.5"],
+    fill: [
+      [0, "#ffffff", "0.96"],
+      [0.07, "#dcedff", "0.55"],
+      [0.2, "#22364a", "0.98"],
+      [0.6, "#0c1520", "1"],
+      [1, "#03060c", "1"],
+    ],
+    rim: [
+      [0, "#ffffff", "1"],
+      [0.3, "#e8f4fc", "0.95"],
+      [1, "#6c8ca3", "0.65"],
+    ],
+  },
+  gold: {
+    fill: [
+      [0, "#fff7dc", "0.98"],
+      [0.1, "#f2d896", "0.85"],
+      [0.32, "#8e6c2e", "1"],
+      [0.7, "#3b2a10", "1"],
+      [1, "#160f05", "1"],
+    ],
+    rim: [
+      [0, "#fff9e6", "1"],
+      [0.35, "#f0d49a", "0.95"],
+      [1, "#8a6a30", "0.75"],
+    ],
   },
   "gem-ice": {
-    fill: ["#e9fbff", "0.62", "#79e8ff", "0.42", "#2d6fa0", "0.32"],
-    rim: ["#ffffff", "1", "#bff4ff", "0.9", "#79e8ff", "0.7"],
+    fill: [
+      [0, "#ffffff", "0.98"],
+      [0.32, "#c6f6ff", "0.9"],
+      [0.7, "#3fb3dc", "0.82"],
+      [1, "#14557e", "0.9"],
+    ],
+    rim: [
+      [0, "#ffffff", "1"],
+      [0.5, "#d2f8ff", "0.92"],
+      [1, "#79e8ff", "0.85"],
+    ],
   },
   "gem-violet": {
-    fill: ["#fff0fa", "0.6", "#ff8fd8", "0.4", "#7a2f8f", "0.32"],
-    rim: ["#ffffff", "1", "#ffc4ec", "0.9", "#ff8fd8", "0.7"],
+    fill: [
+      [0, "#ffffff", "0.98"],
+      [0.32, "#ffd6f0", "0.9"],
+      [0.7, "#ef66bd", "0.82"],
+      [1, "#5f2478", "0.9"],
+    ],
+    rim: [
+      [0, "#ffffff", "1"],
+      [0.5, "#ffdcf2", "0.92"],
+      [1, "#ff8fd8", "0.85"],
+    ],
+  },
+  // The energy ribbons: lit at their root, gone by the foot.
+  "ribbon-ice": {
+    axis: "down",
+    fill: [
+      [0, "#d7f8ff", "0.9"],
+      [0.45, "#79e8ff", "0.5"],
+      [1, "#79e8ff", "0"],
+    ],
+    rim: [
+      [0, "#ffffff", "0.95"],
+      [0.5, "#9eefff", "0.6"],
+      [1, "#79e8ff", "0"],
+    ],
+  },
+  "ribbon-violet": {
+    axis: "down",
+    fill: [
+      [0, "#ffdcf2", "0.9"],
+      [0.45, "#ff8fd8", "0.5"],
+      [1, "#ff8fd8", "0"],
+    ],
+    rim: [
+      [0, "#ffffff", "0.95"],
+      [0.5, "#ffb4e6", "0.6"],
+      [1, "#ff8fd8", "0"],
+    ],
+  },
+  // The sheen: one diagonal band of light across every plate.
+  sheen: {
+    axis: "diagonal",
+    fill: [
+      [0, "#ffffff", "0"],
+      [0.4, "#ffffff", "0"],
+      [0.5, "#ffffff", "0.26"],
+      [0.6, "#ffffff", "0"],
+      [1, "#ffffff", "0"],
+    ],
+    rim: [],
   },
 };
+const SUIT_AXES: Record<string, [string, string, string, string]> = {
+  fill: ["0", "0", "0.3", "1"],
+  rim: ["0", "0", "0.2", "1"],
+  down: ["0", "0", "0", "1"],
+  diagonal: ["0", "0", "1", "1"],
+};
 
-const stops = (values: string[]) =>
-  [0, 0.45, 1].map((offset, index) => (
-    <stop
-      key={offset}
-      offset={offset}
-      stopColor={values[index * 2]}
-      stopOpacity={values[index * 2 + 1]}
-    />
+const stops = (values: readonly SuitStop[]) =>
+  values.map(([offset, color, opacity]) => (
+    <stop key={offset} offset={offset} stopColor={color} stopOpacity={opacity} />
   ));
+const gradient = (id: string, kind: "fill" | "rim", light: SuitGradient) => {
+  const [x1, y1, x2, y2] = SUIT_AXES[light.axis ?? kind];
+  return (
+    <linearGradient id={id} x1={x1} y1={y1} x2={x2} y2={y2}>
+      {stops(light[kind])}
+    </linearGradient>
+  );
+};
+
+// A crystal's inner facet: its outline drawn toward its own centre.
+const facet = (points: string, k = 0.46) => {
+  const pts = points.split(" ").map((pair) => pair.split(",").map(Number));
+  const cx = pts.reduce((sum, [x]) => sum + x, 0) / pts.length;
+  const cy = pts.reduce((sum, [, y]) => sum + y, 0) / pts.length;
+  return pts
+    .map(([x, y]) => `${(cx + (x - cx) * k).toFixed(1)},${(cy + (y - cy) * k).toFixed(1)}`)
+    .join(" ");
+};
 
 function SuitLight() {
   return (
     <svg className="rx-suit-defs" width="0" height="0" focusable="false">
       <defs>
-        {Object.keys(SUIT_LIGHT).map((tone) => (
+        {Object.entries(SUIT_LIGHT).map(([tone, light]) => (
           <g key={tone}>
-            <linearGradient id={`rx-suit-fill-${tone}`} x1="0" y1="0" x2="0.3" y2="1">
-              {stops(SUIT_LIGHT[tone].fill)}
-            </linearGradient>
-            <linearGradient id={`rx-suit-rim-${tone}`} x1="0" y1="0" x2="0.2" y2="1">
-              {stops(SUIT_LIGHT[tone].rim)}
-            </linearGradient>
+            {gradient(`rx-suit-fill-${tone}`, "fill", light)}
+            {light.rim.length ? gradient(`rx-suit-rim-${tone}`, "rim", light) : null}
           </g>
         ))}
       </defs>
@@ -615,6 +772,7 @@ function SuitShape({
   accent,
   pivot,
   bare,
+  soft,
   glint,
   cloud,
   style,
@@ -623,6 +781,8 @@ function SuitShape({
   shapes: readonly string[];
   // The SVG is the box itself (nothing to bite or to shut inside it).
   bare?: boolean;
+  // A wider, softer copy under the line (the resonance's bleed).
+  soft?: boolean;
   // A second, bright copy of the outline: the front's seam as it passes.
   glint?: boolean;
   // The piece's nanite grains (one path of dots).
@@ -652,10 +812,21 @@ function SuitShape({
       ? `${percent(pivot[0] - x, width)} ${percent(pivot[1] - y, height)}`
       : undefined,
   };
-  const drawing = (
+  const body = outline(shapes);
+  const drawing = bare ? (
     <>
-      <path d={outline(shapes)} />
+      {soft ? <path className="rx-suit-soft" d={body} /> : null}
+      <path d={body} />
+    </>
+  ) : (
+    <>
+      <path className="rx-suit-bevel" d={body} />
+      <path d={body} />
+      <path className="rx-suit-sheen" d={body} />
       {accent ? <path className="rx-suit-accent" d={outline(accent)} /> : null}
+      {accent ? (
+        <path className="rx-suit-facet" d={outline(accent.map((gem) => facet(gem)))} />
+      ) : null}
     </>
   );
   const view = `${x} ${y} ${width} ${height}`;
@@ -690,8 +861,13 @@ function SuitBadge() {
   const view = "73 4 94 91";
   return (
     <div className="rx-suit-badge">
+      <SuitLight />
+      <i className="rx-suit-badge-halo" />
       <svg className="rx-suit-badge-helmet" viewBox={view}>
-        <path d={outline([SUIT_SHELL, SUIT_FACE, mirror(SUIT_FACE)])} />
+        <path className="rx-suit-bevel" d={outline([SUIT_SHELL])} />
+        <path d={outline([SUIT_SHELL])} />
+        <path className="rx-suit-sheen" d={outline([SUIT_SHELL])} />
+        <path className="rx-suit-badge-visor" d={outline([SUIT_FACE, mirror(SUIT_FACE)])} />
       </svg>
       {/* The form's crest plate swaps in and seats with a rim glint. */}
       {(["standard", "max", "ultra"] as const).map((form) => (
@@ -719,7 +895,16 @@ function Suit() {
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />
       <i className="rx-suit-heading" />
+      {/* The light rig behind the figure: a backlight in the two tones, a
+          floor under the boots and a faint lattice; it wakes with the HUD. */}
+      <i className="rx-suit-stage">
+        <i className="rx-suit-floor" />
+      </i>
       <div className="rx-suit-figure">
+        {/* The figure's cast shadow: its silhouette, set back and down. */}
+        <svg className="rx-suit-shadow" viewBox="0 0 240 480" preserveAspectRatio="none">
+          <path d={`${SUIT_SILHOUETTE}${mirrorPath(SUIT_SILHOUETTE)}`} />
+        </svg>
         {/* FAR UP！ scans the undersuit top to bottom: a frame that slides
             down over a drawing that holds still (two transforms). */}
         <i className="rx-suit-scan">
@@ -788,6 +973,7 @@ function Suit() {
               shapes={shapes.filter((shape) => !SUIT_HEAD.includes(shape))}
               pivot={SUIT_CORE}
               bare
+              soft
               style={{ "--rx-suit-k": index, "--rx-suit-z": zone } as CSSProperties}
             />
           )),
@@ -806,6 +992,19 @@ function Suit() {
             shapes={[SUIT_EYE, mirror(SUIT_EYE)]}
             bare
             style={{ "--rx-suit-k": index } as CSSProperties}
+          />
+        ))}
+        {/* Light halos: the shoulder jewels as they form, the eyes, the core
+            and the belt jewel as they ignite. */}
+        {SUIT_HALOS.map(({ name, at, size }) => (
+          <i
+            key={name}
+            className={`rx-suit-halo is-${name}`}
+            style={{
+              left: percent(at[0], SUIT_W),
+              top: percent(at[1], SUIT_H),
+              width: percent(size, SUIT_W),
+            }}
           />
         ))}
         <i className="rx-suit-core" />
