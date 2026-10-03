@@ -38,7 +38,8 @@ test("Rexonance hero presents the reviewed resonance copy with the existing type
   assert.match(component, /混ぜない。/);
   assert.match(component, /重ねる。/);
   assert.match(component, /悠真、レックス、ゼウス。/);
-  assert.match(component, /誰も消えず、全部が乗る。/);
+  // 2026-10-03 rx2 copy (rx2/COPY2.md C1): the lede's second sentence.
+  assert.match(component, /三つの意思で、一つの力。/);
   assert.doesNotMatch(component, /無限の攻撃へ。/);
   assert.match(styles, /\.rxs-hero-copy::before/);
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);

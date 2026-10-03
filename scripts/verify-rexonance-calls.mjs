@@ -37,6 +37,15 @@ const profiles = [
     hasTouch: true,
     deviceScaleFactor: 2,
   },
+  // rx2: portrait tablets take the portrait chant size and the centre-first
+  // line reveal (the width where a top-down reveal flashed).
+  {
+    name: "tablet-portrait",
+    viewport: { width: 768, height: 1024 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  },
 ];
 
 async function installCallRecorder(page) {
@@ -131,6 +140,63 @@ async function waitForVisibleCall(page, selector, expectedLines) {
   console.log(
     `${page.viewportSize().width}px ${selector}: ${boxes.length} line(s), glyph vertical overlap ${Math.max(0, maxGlyphOverlap).toFixed(1)}px`,
   );
+}
+
+// rx2 rest guard: at any tapping cadence one card at most is up, card starts
+// stay at least a card plus its rest apart (950 ms, minus timer jitter), the
+// label follows the latest selection, and nothing is left behind.
+async function verifyStageCadence(page, profileName) {
+  for (const gap of [400, 700, 1000]) {
+    await page.waitForTimeout(1200);
+    const result = await page.evaluate(async (gap) => {
+      const buttons = document.querySelectorAll(".rxs-stage-tabs button");
+      const stages = ["standard", "max", "ultra"];
+      const starts = [];
+      let maxOverlays = 0;
+      let labels = [];
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof HTMLElement && node.matches('.rx-call-sequence[data-mode="stage"]')) {
+              starts.push(performance.now());
+            }
+          }
+        }
+        maxOverlays = Math.max(
+          maxOverlays,
+          document.querySelectorAll('.rx-call-sequence[data-mode="stage"]').length,
+        );
+      });
+      observer.observe(document.querySelector("main"), { childList: true });
+      const order = [2, 0, 1, 2, 0];
+      for (const index of order) {
+        buttons[index].click();
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        const overlay = document.querySelector('.rx-call-sequence[data-mode="stage"]');
+        labels.push([stages[index], overlay?.dataset.stage ?? null]);
+        await new Promise((resolve) => setTimeout(resolve, gap - 30));
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      observer.disconnect();
+      return {
+        starts: starts.map((time, index) => (index ? Math.round(time - starts[index - 1]) : 0)),
+        maxOverlays,
+        labels,
+        remaining: document.querySelectorAll('.rx-call-sequence[data-mode="stage"]').length,
+      };
+    }, gap);
+    console.log(`${profileName} stage-cadence ${gap}ms`, JSON.stringify(result));
+    assert.ok(result.starts.length >= 1, `${profileName} ${gap}ms: a card still plays`);
+    assert.ok(result.maxOverlays <= 1, `${profileName} ${gap}ms: one card at most`);
+    for (const spacing of result.starts.slice(1)) {
+      assert.ok(spacing >= 900, `${profileName} ${gap}ms: card starts ${result.starts.join(", ")}`);
+    }
+    for (const [selected, shown] of result.labels) {
+      if (shown) assert.equal(shown, selected, `${profileName} ${gap}ms: the card names the latest form`);
+    }
+    assert.equal(result.remaining, 0, `${profileName} ${gap}ms: no card left behind`);
+  }
+  await page.waitForTimeout(500);
 }
 
 async function verifyProfile(profile) {
@@ -373,6 +439,7 @@ async function verifyProfile(profile) {
     delete document.hidden;
     document.dispatchEvent(new Event("visibilitychange"));
   });
+  await verifyStageCadence(page, profile.name);
 
   await tabs.nth(2).evaluate((button) => button.click());
   await page.locator('.rx-call-sequence[data-mode="stage"]').waitFor({ timeout: 1000 });

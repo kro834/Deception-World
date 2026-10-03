@@ -2,6 +2,7 @@ import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react"
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
+import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -44,7 +45,7 @@ const STAGES: Record<
     code: "MAX",
     image: REXONANCE_SITE_ARTWORK.max,
     alt: "仮面ライダーレクソナンスサーガ・マックスの全身ビジュアル",
-    title: "全神飾を、攻撃に回す。",
+    title: "神飾まで、武器になる。",
     lede: "P14を完全加速し、全神飾を攻撃用機構へ連続実装。動作の途中で出力を必要部位へ何度も移し替え、攻撃限界を拡張します。",
     points: ["P14完全加速", "SCALER《MAX》", "出力の連続再配分"],
     accent: "#969cff",
@@ -54,9 +55,10 @@ const STAGES: Record<
     code: "ULTRA 60s",
     image: REXONANCE_SITE_ARTWORK.ultra,
     alt: "仮面ライダーレクソナンスサーガ・ウルトラの全身ビジュアル",
-    // The zero-width marker renders as <wbr /> (renderStageTitle): iPhone
-    // Safari has no auto-phrase, and 一動作へ。 must stay whole at 320px.
-    title: "60秒、全部を\u200B一動作へ。",
+    // Two keep-all phrases that break at their 、 on iPhone Safari, so this
+    // title needs no break marker; renderStageTitle still turns a zero-width
+    // marker into <wbr /> for any future title (rx2/COPY2.md C5).
+    title: "神属権限まで、一動作に。",
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合。60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
@@ -367,6 +369,21 @@ const renderStageTitle = (title: string) =>
     </Fragment>
   ));
 
+// Units that never split across lines: the OS keeps its version (narrow
+// phones split 「SA-GA OS / 5.5」) and 必要部位 stays one noun (844×390 split
+// 「必要部 / 位」). The lede's visible text is unchanged (rx2/COPY2.md L3, L6).
+const STAGE_LEDE_UNITS = /(SA-GA OS 5\.5|必要部位)/;
+const renderStageLede = (lede: string) =>
+  lede.split(STAGE_LEDE_UNITS).map((part, index) =>
+    index % 2 === 1 ? (
+      <span key={`${index}-${part}`} className="rxp-nowrap">
+        {part}
+      </span>
+    ) : (
+      <Fragment key={`${index}-${part}`}>{part}</Fragment>
+    ),
+  );
+
 // Keep frequent comparison input updates out of the hero, stage art and effects.
 const P14Comparator = memo(function P14Comparator({
   nativeIOSSelection,
@@ -511,9 +528,18 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           <br />
           まだ標準。
         </h2>
+        {/* Two sentences of two phrases each, so iPhone Safari never splits a
+            phrase (rx2/COPY2.md C2, L1). 「とも」 names the selected baseline
+            as one partner among several: the cards below have their own. */}
         <span>
-          公開済みの標準カタログ値で、{activePerformanceBaseline.label}
-          サーガの標準値と並べています。
+          <span>
+            <span>{activePerformanceBaseline.label}サーガとも、</span>
+            <span>標準値どうし。</span>
+          </span>
+          <span>
+            <span>マックスとウルトラは、</span>
+            <span>まだ出していません。</span>
+          </span>
         </span>
       </header>
 
@@ -524,6 +550,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
             650<span>%+</span>
           </strong>
           <p>ヴィンクルムサーガと比較した反応速度</p>
+          <i className="rxp-gauge" aria-hidden="true" />
         </article>
         <article className="rxs-reveal">
           <small>MOBILITY / VS EXTREME</small>
@@ -531,6 +558,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
             900<span>%</span>
           </strong>
           <p>エクスプリームサーガと比較した最大機動力</p>
+          <i className="rxp-gauge" aria-hidden="true" />
         </article>
       </div>
 
@@ -649,9 +677,13 @@ export function RexonanceSaga() {
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
   const [stageCall, setStageCall] = useState<{ id: number; stage: RexonanceStage } | null>(null);
+  // How the panel's new form arrives: under a card, or quietly (rx2 rest guard).
+  const [stageEntrance, setStageEntrance] = useState<RexonanceStageEntrance | null>(null);
   const latestStageRef = useRef<RexonanceStage>("standard");
   const stageCallId = useRef(0);
   const stageCallTimer = useRef(0);
+  const stageCallStartedAt = useRef(0);
+  const stageCallExitedAt = useRef(Number.NEGATIVE_INFINITY);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
@@ -669,26 +701,51 @@ export function RexonanceSaga() {
       // This synchronous ref also makes rapid swipes last-request-wins.
       if (latestStageRef.current === nextStage) return;
       latestStageRef.current = nextStage;
-      setStage(nextStage);
-      cancelStageCall();
       const connection = (
         navigator as Navigator & {
           connection?: { saveData?: boolean; effectiveType?: string };
         }
       ).connection;
-      if (
+      const motionAllowed = !(
         document.hidden ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
         document.documentElement.dataset.worldEffects === "economy" ||
         connection?.saveData ||
         /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
-      )
+      );
+      // A running card is retargeted to the latest form and keeps its clock;
+      // a selection just after a card has left changes the form quietly. Card
+      // starts stay ≥950 ms apart, so any tapping cadence keeps ≤1 flash/s.
+      const now = performance.now();
+      const plan = planStageCall({
+        motionAllowed,
+        cardMounted: stageCallTimer.current !== 0,
+        cardElapsedMs: now - stageCallStartedAt.current,
+        sinceNaturalExitMs: now - stageCallExitedAt.current,
+      });
+      setStage(nextStage);
+      setStageEntrance(plan.entrance);
+      if (plan.action === "retarget") {
+        setStageCall((call) => call && { id: call.id, stage: nextStage });
         return;
+      }
+      if (plan.action === "skip") {
+        // A calm interlude (reduced motion, economy, Save-Data, a hidden
+        // tab) ends the streak: the next selection may show its card.
+        if (!motionAllowed) {
+          cancelStageCall();
+          stageCallExitedAt.current = Number.NEGATIVE_INFINITY;
+        }
+        return;
+      }
+      cancelStageCall();
       const id = stageCallId.current;
+      stageCallStartedAt.current = now;
       setStageCall({ id, stage: nextStage });
       stageCallTimer.current = window.setTimeout(() => {
         if (stageCallId.current === id) {
           stageCallTimer.current = 0;
+          stageCallExitedAt.current = performance.now();
           setStageCall(null);
         }
       }, REXONANCE_STAGE_DURATION_MS);
@@ -845,7 +902,16 @@ export function RexonanceSaga() {
   }, []);
 
   useEffect(() => {
-    if (!motionReady || window.matchMedia("(pointer: coarse)").matches) return;
+    // Where view timelines run, the motion sheet's recede already follows the
+    // scroll on the compositor; this per-frame write cost ~5 ms of style work
+    // on desktop (rx2 F4). It remains the fallback without timelines.
+    if (
+      !motionReady ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      (CSS.supports("animation-timeline", "view()") &&
+        CSS.supports("animation-range", "entry 0% entry 100%"))
+    )
+      return;
     const page = pageRef.current;
     if (!page) return;
     let frame = 0;
@@ -972,12 +1038,16 @@ export function RexonanceSaga() {
           <p className="rxs-hero-lede">
             <span className="rxs-hero-lede-text">
               <span>悠真、レックス、ゼウス。</span>
-              <span>誰も消えず、全部が乗る。</span>
+              <span>三つの意思で、一つの力。</span>
             </span>
           </p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <RexonanceAperture />
+          {/* Three rings settle once onto the aperture's circles (rx2 arrival). */}
+          <i className="rxp-ring is-ice" />
+          <i className="rxp-ring is-violet" />
+          <i className="rxp-ring is-gold" />
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <img
@@ -1025,7 +1095,9 @@ export function RexonanceSaga() {
             P1の9倍。
           </h2>
           <span>
-            P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
+            P14は、出力変換・位相制御・能力間調停を一体化した
+            <span className="rxp-nowrap">第14世代</span>
+            演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
           </span>
         </header>
 
@@ -1071,11 +1143,9 @@ export function RexonanceSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>THREE OPERATING STAGES</p>
           <h2>
-            状況が変われば、
+            標準の上に、
             <br />
-            機構ごと
-            <wbr />
-            組み替える。
+            あと二段。
           </h2>
         </header>
 
@@ -1119,7 +1189,11 @@ export function RexonanceSaga() {
             role="tabpanel"
             aria-labelledby={`rxs-stage-tab-${stage}`}
             aria-live="polite"
-            style={{ ["--rxs-stage-accent" as string]: activeStage.accent }}
+            data-entrance={stageEntrance?.kind}
+            style={{
+              ["--rxs-stage-accent" as string]: activeStage.accent,
+              ["--rxp-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
+            }}
           >
             <figure key={stage}>
               <span aria-hidden="true" />
@@ -1137,7 +1211,7 @@ export function RexonanceSaga() {
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
               <h3>{renderStageTitle(activeStage.title)}</h3>
-              <p>{activeStage.lede}</p>
+              <p>{renderStageLede(activeStage.lede)}</p>
               <ul>
                 {activeStage.points.map((point) => (
                   <li key={point}>{point}</li>
@@ -1179,7 +1253,9 @@ export function RexonanceSaga() {
             </strong>
             <p>∞ CORE</p>
           </div>
-          <i aria-hidden="true">×</i>
+          {/* A drawn hairline, not a multiplication sign: the two units stand
+              side by side and are never multiplied (rx2/COPY2.md C8). */}
+          <i aria-hidden="true" />
           <div>
             <small>KOSMOS DeuX</small>
             <strong>

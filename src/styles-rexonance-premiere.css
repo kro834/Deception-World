@@ -1,0 +1,1840 @@
+/* ================================================================
+   Rexonance — the Premiere edition (rx2, 2026-10-03)
+
+   One motion grammar for /rexonance-saga: three phases (ice, violet,
+   gold) arrive from three directions and lock on one frame, and gold —
+   悠真's decision — always locks last. Nothing pulses, glows or loops;
+   things phase in, lock, and values are re-measured.
+
+   Route-only (linked after the finish sheet, before the cinematic sheet)
+   and scoped to .rxs-page.rxs-page.rxs-rexonance-page, so Extreme and
+   Final Stage never see it. Time-based motion sits behind
+   prefers-reduced-motion: no-preference and html:not([data-world-effects=
+   "economy"]); scroll-linked motion also behind the side-menu, loading and
+   dialog flags, on named view timelines, with animation-duration: auto.
+   Keyframes move opacity, transform, translate, scale, rotate and, only in
+   time-based entrances, clip-path. Every clip entrance fills backwards
+   only, so nothing is left clipped at rest. Ornaments are textless and
+   aria-hidden; forced colours hide them.
+   ================================================================ */
+
+/* ---------- Tokens ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --rxp-strike: cubic-bezier(0.2, 0.9, 0.1, 1);
+  --rxp-open: cubic-bezier(0.6, 0, 0.2, 1);
+  --rxp-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rxp-resolve: cubic-bezier(0.45, 0, 0.2, 1);
+  --rxp-ice: #7ae8ff;
+  --rxp-violet: #b6a3ff;
+  --rxp-magenta: #ff72da;
+  --rxp-gold: #e3c185;
+  /* Phones move about half as far as desktop. */
+  --rxp-shift: 28px;
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.rxs-rexonance-page {
+    --rxp-shift: 16px;
+  }
+}
+
+/* ================================================================
+   Foundation: one motion system per block
+   ================================================================ */
+/* Blocks that carry scroll-linked choreography no longer hide behind the
+   time-based reveal: it used to keep them at opacity 0 until an observer
+   fired, by when their scroll beats had already played unseen. The
+   comparison and the P14 comparator keep the reveal; they are time-based
+   instruments with no scroll motion of their own (below). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    :is(
+      .rxs-section-heading,
+      .rxs-headline-metrics article,
+      .rxs-p14-overview,
+      .rxs-stage-switcher,
+      .rxs-system-grid article,
+      .rxs-specs
+    ).rxs-reveal {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
+}
+
+/* The metric cards clip instead of becoming scroll containers, so the
+   numerals' view timelines follow the page. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article {
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* The two comparators are one time-based system: their inner plates no
+   longer run scroll entrances under the hidden reveal. */
+.rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-comparison
+  :is(.rxs-comparison-selector, .rxs-processing-comparison > div > section) {
+  animation: none;
+}
+
+/* The swaps play when a reader changes a baseline (the blocks re-key) or
+   when the comparator first comes into view, never off-screen at mount. */
+.rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-comparison-metrics,
+    .rxs-comparison-metrics > *,
+    .rxs-processing-comparison,
+    .rxs-bars i,
+    .rxs-p14-metrics,
+    .rxs-p14-metrics > *,
+    .rxs-p14-metrics article > p
+  ) {
+  animation: none;
+}
+
+/* The P14 core powers on with the scroll (below), not with the observer. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure {
+  animation: none;
+}
+
+/* A first paint has no stage ceremony: the panel simply stands. */
+.rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel:not([data-entrance]) :is(figure, figure > *),
+.rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel:not([data-entrance]) > div,
+.rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel:not([data-entrance]) > div > * {
+  animation: none;
+}
+
+/* Economy rendering is calm on the page too: everything rests drawn. */
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxs-reveal {
+  opacity: 1;
+  translate: none;
+  transition: none;
+}
+
+html[data-world-effects="economy"]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-comparison-metrics,
+    .rxs-comparison-metrics > *,
+    .rxs-processing-comparison,
+    .rxs-bars i,
+    .rxs-p14-metrics,
+    .rxs-p14-metrics > *,
+    .rxs-p14-metrics article > p,
+    .rxs-p14-overview figure,
+    .rxs-stage-panel figure,
+    .rxs-stage-panel figure > *,
+    .rxs-stage-panel > div,
+    .rxs-stage-panel > div > *
+  ),
+html[data-world-effects="economy"]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-comparison-metrics, .rxs-p14-metrics, .rxs-stage-panel)::before {
+  animation: none;
+}
+
+/* The chosen P14 pill fills white at once; its label no longer fades from
+   ivory through the fill (it vanished for two or three frames). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-p14-range-labels
+    button {
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      scale 160ms ease;
+  }
+}
+
+/* ================================================================
+   The arrival (hand-over or first paint)
+   ================================================================ */
+/* Textless rings that settle onto the aperture's three circles (r 222,
+   294, 318 of the 800-unit plate, centred 43.3% down the visual). */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rxp-ring {
+  position: absolute;
+  z-index: 0;
+  top: 43.3%;
+  left: 50%;
+  height: 58.3%;
+  aspect-ratio: 1;
+  border: 1px solid var(--rxp-ice);
+  border-radius: 50%;
+  opacity: 0;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rxp-ring.is-violet {
+  height: 77.2%;
+  border-color: var(--rxp-violet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rxp-ring.is-gold {
+  height: 83.5%;
+  border-color: var(--rxp-gold);
+}
+
+/* The old field rings crossed the headline and ended invisible; the
+   aperture rings replace them (the DOM keeps its three spans). */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-resonance-field {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* rx2: replaces rx-aperture-lock (styles-rexonance-edition.css), the
+     whole-plate turn. Delete this block and the three phase rules below to
+     restore the owner's plate turn. The plate now only fades in; its three
+     phases ratchet into place one after another, gold last. Groups move;
+     paths never do. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-aperture {
+    animation: rxp-aperture-in 420ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-aperture-phase {
+    transform-box: view-box;
+    transform-origin: 360px 360px;
+    animation: rxp-phase-ice 360ms steps(4, jump-end) backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-aperture-phase.is-violet {
+    animation-name: rxp-phase-violet;
+    animation-delay: 60ms;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-aperture-phase.is-gold {
+    animation-name: rxp-phase-gold;
+    animation-delay: 120ms;
+  }
+
+  /* The headline opens through a slit from its centre line: layered, not
+     typed. Extreme keeps the typewriter strike. Backwards fill only. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero
+    h1 {
+    animation: rxp-slit 360ms var(--rxp-strike) 60ms backwards;
+  }
+
+  /* The lede's two sentences arrive in turn. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-lede {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-lede-text
+    > span {
+    animation: rxp-rise-s 360ms var(--rxp-out) 200ms backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-lede-text
+    > span:nth-child(2) {
+    animation-delay: 260ms;
+  }
+
+  /* The figure resolves inside its aperture, from the plate's centre. It
+     starts open by 9%, so the hero image paints from the first frame. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    img {
+    animation: rxp-iris 900ms var(--rxp-resolve) backwards;
+  }
+
+  /* The floor draws under a figure that is already standing. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual::before {
+    animation-delay: 420ms;
+  }
+
+  /* The printer wipe's leading edge belongs to Extreme. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rxs-orbit-b {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rxp-ring {
+    animation: rxp-ping 1020ms var(--rxp-out) 300ms both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rxp-ring.is-violet {
+    animation-delay: 390ms;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rxp-ring.is-gold {
+    animation-delay: 480ms;
+  }
+
+  /* The cue appears once the figure is nearly whole. */
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-scroll-cue {
+    animation-delay: 900ms;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-scroll-cue
+    i {
+    animation-delay: 960ms;
+  }
+}
+
+/* With timelines, the motion sheet's recede joins the iris on the same
+   image (the recede keeps its place and progress). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-loading])
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      img {
+      animation:
+        rxp-iris 900ms var(--rxp-resolve) backwards,
+        mx-recede linear both;
+      animation-timeline: auto, view(block);
+      animation-range:
+        normal,
+        exit 0% exit 100%;
+    }
+  }
+}
+
+/* ================================================================
+   The stage change: a 650 ms card, then the new form
+   ================================================================ */
+/* The card renders inside the page. Each form has a textless signature;
+   the card leaves through the call's three-blade aperture. */
+.rxs-page.rxs-page.rxs-rexonance-page > .rx-call-sequence .rx-call-signature {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page > .rx-call-sequence .rx-call-signature > i {
+  position: relative;
+  display: block;
+  width: min(78vmin, 600px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page > .rx-call-sequence .rx-call-words {
+  z-index: 1;
+}
+
+/* HIGH: three ice blades close onto the name (faint wedges, a rim). */
+.rxs-page.rxs-page.rxs-rexonance-page
+  > .rx-call-sequence[data-stage="standard"]
+  .rx-call-signature
+  > i {
+  background:
+    radial-gradient(circle, transparent 69.4%, rgb(122 232 255 / 55%) 69.6% 70%, transparent 70.2%),
+    conic-gradient(
+      from -20deg,
+      rgb(122 232 255 / 8%) 0 40deg,
+      transparent 0 120deg,
+      rgb(122 232 255 / 8%) 0 160deg,
+      transparent 0 240deg,
+      rgb(122 232 255 / 8%) 0 280deg,
+      transparent 0
+    );
+  mask: radial-gradient(circle, transparent 18%, #000 18.5% 70.4%, transparent 70.6%);
+}
+
+/* MAX: six violet blades fan out — every 神飾 turned outward. */
+.rxs-page.rxs-page.rxs-rexonance-page > .rx-call-sequence[data-stage="max"] .rx-call-signature > i {
+  background:
+    radial-gradient(circle, transparent 69.4%, rgb(182 163 255 / 55%) 69.6% 70%, transparent 70.2%),
+    repeating-conic-gradient(from -12deg, rgb(182 163 255 / 10%) 0 24deg, transparent 0 60deg);
+  mask: radial-gradient(circle, transparent 26%, #000 26.5% 70.4%, transparent 70.6%);
+}
+
+/* ULTRA: one magenta needle sweeps a sixty-tick dial once. */
+.rxs-page.rxs-page.rxs-rexonance-page
+  > .rx-call-sequence[data-stage="ultra"]
+  .rx-call-signature
+  > i::before,
+.rxs-page.rxs-page.rxs-rexonance-page
+  > .rx-call-sequence[data-stage="ultra"]
+  .rx-call-signature
+  > i::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page
+  > .rx-call-sequence[data-stage="ultra"]
+  .rx-call-signature
+  > i::before {
+  background: repeating-conic-gradient(rgb(255 130 213 / 60%) 0 0.8deg, transparent 0 6deg);
+  mask: radial-gradient(circle, transparent 64%, #000 64.5% 70%, transparent 70.5%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page
+  > .rx-call-sequence[data-stage="ultra"]
+  .rx-call-signature
+  > i::after {
+  background: linear-gradient(var(--rxp-magenta) 0 0) 50% 0 / 2px 50% no-repeat;
+  mask: radial-gradient(circle, transparent 22%, #000 22.5%);
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* The card cuts in and holds instead of fading: it exits through the
+     aperture. Its blades stand opaque from the first frame, so a tap never
+     shows the panel emptied under a card still fading in (rx2 fix-1); only
+     its words, signature and frame fade in, over the frames the whole card
+     used to take. One turn down at the tap, one up as the blades open. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"] {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-call-ground {
+    background: transparent;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-call-ground
+    > i {
+    display: block;
+    animation: rxp-stage-blade 220ms var(--rxp-open) 360ms forwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-call-ground
+    > i:nth-child(2) {
+    animation-delay: 370ms;
+  }
+
+  /* The lit edges show only once the aperture opens, never across the name. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-call-ground
+    > i::before {
+    animation: rxp-edge 220ms linear 360ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-call-ground
+    > i:nth-child(3) {
+    animation-delay: 380ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    :is(.rx-call-words, .rx-call-caption, .rx-call-frame, .rx-call-meter, .rx-call-signature) {
+    animation:
+      rxp-card-in 80ms linear backwards,
+      rxp-stage-quiet 80ms linear 330ms forwards;
+  }
+
+  /* A retarget changes data-stage mid-card: only the signature restarts. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"][data-stage="standard"]
+    .rx-call-signature
+    > i {
+    animation: rxp-sign-high 320ms var(--rxp-strike) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"][data-stage="max"]
+    .rx-call-signature
+    > i {
+    animation: rxp-sign-max 320ms var(--rxp-out) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"][data-stage="ultra"]
+    .rx-call-signature
+    > i {
+    animation: rxp-sign-dial 120ms linear 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rx-call-sequence[data-mode="stage"][data-tier="full"][data-stage="ultra"]
+    .rx-call-signature
+    > i::after {
+    animation: rxp-sign-needle 320ms var(--rxp-resolve) 60ms both;
+  }
+
+  /* The new form under a card rises out of its own floor as the card opens.
+     Clip and opacity only: the copy start and the figure never move. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"]
+    figure {
+    animation: rxp-floor-rise 520ms var(--rxp-strike) calc(var(--rxp-entrance-delay, 0ms) - 80ms)
+      backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance]
+    figure
+    > .rxs-stage-scan {
+    animation-delay: var(--rxp-entrance-delay, 0ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance]
+    figure
+    > span {
+    animation-delay: var(--rxp-entrance-delay, 0ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance]
+    > div {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"]
+    > div
+    > * {
+    animation: rxp-resolve 360ms var(--rxp-strike) calc(var(--rxp-entrance-delay, 0ms) + 40ms)
+      backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"]
+    > div
+    > h3 {
+    animation-name: rxp-slit-flat;
+    animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 90ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"]
+    > div
+    > p {
+    animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 140ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"]
+    > div
+    > ul {
+    animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 190ms);
+  }
+
+  /* A selection without a card (a quick tap after one, or no card at all)
+     changes the form quietly: a short opacity settle, no clip. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="quiet"]
+    figure,
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="quiet"]
+    > div
+    > * {
+    animation: rxp-measure 240ms linear backwards;
+  }
+}
+
+/* ================================================================
+   Instruments that re-measure instead of reloading
+   ================================================================ */
+/* A 2px ice line crosses the readout; values settle behind it. Opacity
+   never drops below .6, so a swap never blinks. */
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-comparison-metrics, .rxs-p14-metrics) {
+  position: relative;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-comparison-metrics, .rxs-p14-metrics)::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(90deg, transparent calc(100% - 2px), var(--rxp-ice) 0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The bars ride a clipped track; a short glint leads the Rexonance bar. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison .rxs-bars {
+  overflow: clip;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    :is(
+      .rxs-comparison.is-visible .rxs-comparison-metrics,
+      .rxs-p14-comparator.is-visible .rxs-p14-metrics
+    )::before {
+    animation: rxp-scan 300ms var(--rxp-strike) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article {
+    animation: rxp-measure-row 240ms linear backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(3) {
+    animation-delay: 140ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(4) {
+    animation-delay: 210ms;
+  }
+
+  /* The baseline bar is drawn to its true length first; then the
+     Rexonance bar fires over the whole track. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-bars
+    i.is-extreme {
+    animation: rxp-bar 360ms var(--rxp-strike) backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-bars
+    i.is-rexonance {
+    animation: rxp-bar 420ms var(--rxp-out) 300ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-processing-comparison {
+    animation: rxp-measure 240ms linear backwards;
+  }
+
+  /* P14 cards settle in reading order (three, two or one columns). */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article {
+    animation: rxp-measure-row 240ms linear backwards;
+  }
+
+  /* The new delta reads at once at its row's .6 floor (never clipped away,
+     so a swap never blinks the reading off); its value settles in from the
+     right as the scan crosses. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article
+    > p
+    > b {
+    animation: rxp-delta-settle 300ms var(--rxp-strike) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(3n + 2) {
+    animation-delay: 70ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(3n) {
+    animation-delay: 140ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 681px) and (max-width: 900px) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(2n) {
+    animation-delay: 70ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 680px) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(n + 2) {
+    animation-delay: 40ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(n + 3) {
+    animation-delay: 80ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(n + 4) {
+    animation-delay: 120ms;
+  }
+}
+
+/* ================================================================
+   Scroll chapters: gauge-lock, power-on, phase sweep, converge
+   ================================================================ */
+/* Static ornaments first: they rest drawn wherever motion is off. */
+
+/* 01: a gauge's reading arc closes each headline numeral on the right,
+   with its index at three o'clock (last child, behind the copy inside the
+   card's own stacking context). */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics .rxp-gauge {
+  --rxp-gauge-ink: var(--rxp-ice);
+  position: absolute;
+  z-index: -1;
+  top: 52px;
+  right: 0;
+  width: clamp(150px, 30%, 210px);
+  aspect-ratio: 1;
+  border: 1px solid var(--rxp-gauge-ink);
+  border-radius: 50%;
+  mask: conic-gradient(from 30deg, #000 0deg 120deg, transparent 120deg);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics .rxp-gauge::after {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 14px;
+  height: 1.5px;
+  margin-top: -0.75px;
+  content: "";
+  background: var(--rxp-gauge-ink);
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article:nth-child(2) .rxp-gauge {
+  --rxp-gauge-ink: var(--rxp-gold);
+}
+
+/* 02: the P14 core's corner brackets, ice above and gold below. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure::before {
+  position: absolute;
+  z-index: 2;
+  inset: 14px;
+  content: "";
+  background:
+    linear-gradient(var(--rxp-ice) 0 0) 0 0 / 28px 2px,
+    linear-gradient(var(--rxp-ice) 0 0) 0 0 / 2px 28px,
+    linear-gradient(var(--rxp-gold) 0 0) 100% 100% / 28px 2px,
+    linear-gradient(var(--rxp-gold) 0 0) 100% 100% / 2px 28px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* 03: a prism hairline across the stage panel's top edge. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel::before {
+  position: absolute;
+  z-index: 1;
+  top: -14px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--rxp-ice),
+    var(--rxp-violet) 50%,
+    var(--rxp-magenta) 84%,
+    transparent
+  );
+  transform-origin: 0 50%;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* 04: HUMAN WILL — the decision plate — carries a gold lock bracket. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:nth-child(3)::after {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 22px;
+  height: 22px;
+  content: "";
+  background:
+    linear-gradient(var(--rxp-gold) 0 0) 100% 100% / 22px 2px,
+    linear-gradient(var(--rxp-gold) 0 0) 100% 100% / 2px 22px;
+  background-repeat: no-repeat;
+  transform-origin: 100% 100%;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Named timelines (the elevation's --sc-chapter, --sc-tile and --sc-end
+       are reused). */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article {
+      view-timeline: --rxp-metric block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview {
+      view-timeline: --rxp-core block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl {
+      view-timeline: --rxp-readout block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-stage-switcher {
+      view-timeline: --rxp-stage block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid {
+      view-timeline: --rxp-grid block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-specs {
+      view-timeline: --rxp-specs block;
+    }
+
+    /* Every chapter: the numeral locks in three ticks (opacity is never
+       stepped; only position is), the line clicks into register from a
+       small lateral offset, and the intro only fades: body text never
+       moves. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-section-heading::before {
+      animation-name: rxp-fade, rxp-lock;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range:
+        entry 0% entry 30%,
+        entry 0% entry 50%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-section-heading
+      h2 {
+      animation-name: rxp-fade, rxp-lock-x;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range:
+        entry 0% entry 35%,
+        entry 10% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-footer
+      h2 {
+      animation-name: rxp-fade, rxp-lock-x;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range:
+        entry 0% entry 35%,
+        entry 10% entry 55%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > span {
+      animation-name: rxp-fade;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 20% entry 70%;
+    }
+
+    /* iOS 27 enters the heading natively: there the line keeps only its
+       stepped lock and the intro its native fade. */
+    html[data-ios27-enhanced="true"]:not([data-world-effects="economy"]):not(
+        [data-side-menu-open]
+      ):not([data-loading]):not([data-dialog-open])
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-section-heading
+      h2 {
+      animation-name: rxp-lock-x;
+      animation-timing-function: steps(3, jump-end);
+      animation-range: entry 10% entry 55%;
+    }
+
+    html[data-ios27-enhanced="true"]:not([data-world-effects="economy"]):not(
+        [data-side-menu-open]
+      ):not([data-loading]):not([data-dialog-open])
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-section-heading
+      > span {
+      animation-name: none;
+    }
+
+    /* 01 PERFORMANCE: the numerals lock like a gauge; the arc sweeps. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      article
+      strong {
+      transform-origin: 0 100%;
+      animation-name: rxp-fade, rxp-gauge;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-metric;
+      animation-range:
+        entry 0% entry 35%,
+        entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-headline-metrics
+      .rxp-gauge {
+      animation-name: rxp-sweep;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-metric;
+      animation-range: entry 0% entry 70%;
+    }
+
+    /* 02 P14: the core powers on; the readout ticks in reading order. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview
+      figure::before {
+      animation-name: rxp-bracket;
+      animation-duration: auto;
+      animation-timing-function: steps(4, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-core;
+      animation-range: entry 10% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div {
+      animation-name: rxp-fade, rxp-tick;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(4, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-readout;
+      animation-range:
+        entry 0% entry 40%,
+        entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div:nth-child(2) {
+      animation-range:
+        entry 10% entry 50%,
+        entry 10% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-copy
+      dl
+      div:nth-child(3) {
+      animation-range:
+        entry 20% entry 60%,
+        entry 20% entry 80%;
+    }
+
+    /* 03 STAGES: the prism hairline lights in three ticks, one per form. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-stage-panel::before {
+      animation-name: rxp-draw;
+      animation-duration: auto;
+      animation-timing-function: steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-stage;
+      animation-range: entry 15% entry 60%;
+    }
+
+    /* 04 TRINITY: three plates converge from three sides, transform only
+       (plates never fade); HUMAN WILL lands last and locks in gold. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article {
+      animation-name: rxp-from-left;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 0% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(2) {
+      animation-name: rxp-from-below;
+      animation-range: entry 10% entry 80%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(3) {
+      animation-name: rxp-from-right;
+      animation-range: entry 20% entry 90%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid
+      article:nth-child(3)::after {
+      animation-name: rxp-lock;
+      animation-duration: auto;
+      animation-timing-function: steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 60% entry 90%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-system-grid::after {
+      transform-origin: 50% 0;
+      animation-name: rxp-bus;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-grid;
+      animation-range: entry 40% entry 100%;
+    }
+
+    /* The two processors slide in from opposite sides; the joint between
+       them draws itself; the figures lock like the headline ones. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-specs
+      > div {
+      animation-name: rxp-from-left;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-specs;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-specs
+      > div:last-child {
+      animation-name: rxp-from-right;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-specs
+      > i {
+      animation-name: rxp-joint;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-specs;
+      animation-range: entry 20% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-specs
+      > div
+      strong {
+      transform-origin: 50% 100%;
+      animation-name: rxp-fade, rxp-gauge;
+      animation-duration: auto;
+      animation-timing-function: linear, steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-specs;
+      animation-range:
+        entry 0% entry 35%,
+        entry 0% entry 60%;
+    }
+
+    /* The end card: the plates step up in reading order; the gold
+       terminal plugs in last. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-footer
+      > a {
+      animation-name: rxp-step-up;
+      animation-duration: auto;
+      animation-timing-function: var(--rxp-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 10% entry 60%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-footer
+      > a:nth-of-type(2) {
+      animation-range: entry 20% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-footer
+      > a:nth-of-type(3) {
+      animation-range: entry 30% entry 80%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-footer::after {
+      animation-name: rxp-plug;
+      animation-duration: auto;
+      animation-timing-function: steps(3, jump-end);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 40% entry 90%;
+    }
+  }
+}
+
+/* Under a scroll lock (the side menu, a dialog, a cover) the page rests
+   drawn: the shared motion sheet's anonymous rules would otherwise take
+   these elements back and replay them. */
+html[data-side-menu-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .rxs-section-heading > span,
+    .rxs-headline-metrics article strong,
+    .rxs-headline-metrics .rxp-gauge,
+    .rxs-p14-copy dl div,
+    .rxs-system-grid article,
+    .rxs-specs > div,
+    .rxs-specs > i,
+    .rxs-specs > div strong,
+    .rxs-footer > a
+  ),
+html[data-side-menu-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading,
+    .rxs-p14-overview figure,
+    .rxs-stage-panel,
+    .rxs-system-grid article:nth-child(3),
+    .rxs-system-grid,
+    .rxs-footer
+  )::before,
+html[data-side-menu-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-system-grid article:nth-child(3), .rxs-system-grid, .rxs-footer)::after {
+  animation: none;
+}
+
+html[data-dialog-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .rxs-section-heading > span,
+    .rxs-headline-metrics article strong,
+    .rxs-headline-metrics .rxp-gauge,
+    .rxs-p14-copy dl div,
+    .rxs-system-grid article,
+    .rxs-specs > div,
+    .rxs-specs > i,
+    .rxs-specs > div strong,
+    .rxs-footer > a
+  ),
+html[data-dialog-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading,
+    .rxs-p14-overview figure,
+    .rxs-stage-panel,
+    .rxs-system-grid article:nth-child(3),
+    .rxs-system-grid,
+    .rxs-footer
+  )::before,
+html[data-dialog-open]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-system-grid article:nth-child(3), .rxs-system-grid, .rxs-footer)::after {
+  animation: none;
+}
+
+html[data-loading]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading h2,
+    .rxs-footer h2,
+    .rxs-section-heading > span,
+    .rxs-headline-metrics article strong,
+    .rxs-headline-metrics .rxp-gauge,
+    .rxs-p14-copy dl div,
+    .rxs-system-grid article,
+    .rxs-specs > div,
+    .rxs-specs > i,
+    .rxs-specs > div strong,
+    .rxs-footer > a
+  ),
+html[data-loading]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-section-heading,
+    .rxs-p14-overview figure,
+    .rxs-stage-panel,
+    .rxs-system-grid article:nth-child(3),
+    .rxs-system-grid,
+    .rxs-footer
+  )::before,
+html[data-loading]
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-system-grid article:nth-child(3), .rxs-system-grid, .rxs-footer)::after {
+  animation: none;
+}
+
+/* ================================================================
+   CTAs and the chapter index
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a::before {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: var(--rxp-ice);
+  scale: 0 1;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:is(:hover, :focus-visible)::before {
+  scale: 1 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-chapter-index
+    a::before {
+    transition: scale 220ms var(--rxp-strike);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-chapter-index a i, .rxs-footer > a i) {
+    transition: translate 160ms var(--rxp-strike);
+  }
+
+  /* The press is quicker and deeper; only the press-in is timed, the
+     release keeps each control's own durations. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-footer > a, .rxs-p14-range-labels button):active {
+    scale: 0.97;
+    transition-duration: 80ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-footer
+    > a:not(.rxs-footer-return):is(:hover, :focus-visible)
+    i {
+    translate: 2px -2px;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-footer
+    > a.rxs-footer-return:is(:hover, :focus-visible)
+    i {
+    translate: -2px 0;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-chapter-index
+    a:is(:hover, :focus-visible)
+    i {
+    translate: 3px -3px;
+  }
+}
+
+/* ================================================================
+   Keyframes
+   ================================================================ */
+@keyframes rxp-aperture-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-phase-ice {
+  from {
+    transform: rotate(-24deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rxp-phase-violet {
+  from {
+    transform: rotate(24deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rxp-phase-gold {
+  from {
+    transform: rotate(-36deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rxp-slit {
+  from {
+    clip-path: inset(46% -0.3em 46% -0.3em);
+    translate: 0 0.04em;
+  }
+  to {
+    clip-path: inset(-0.3em -0.3em -0.3em -0.3em);
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-slit-flat {
+  from {
+    opacity: 0.15;
+    clip-path: inset(46% -0.5em 46% -0.5em);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
+  }
+}
+
+@keyframes rxp-rise-s {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-iris {
+  from {
+    clip-path: circle(9% at 50% 43%);
+    transform: scale(1.03);
+  }
+  to {
+    clip-path: circle(80% at 50% 43%);
+    transform: none;
+  }
+}
+
+@keyframes rxp-ping {
+  0% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+  40% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+/* From nothing to each layer's own opacity (the frame rests at .6). */
+@keyframes rxp-card-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rxp-edge {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-stage-quiet {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rxp-stage-blade {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate3d(0, 80vmax, 0);
+  }
+}
+
+@keyframes rxp-sign-high {
+  0% {
+    opacity: 0;
+    transform: rotate(-60deg) scale(1.35);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rxp-sign-max {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(30deg) scale(1.04);
+  }
+}
+
+@keyframes rxp-sign-dial {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-sign-needle {
+  from {
+    transform: none;
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rxp-floor-rise {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes rxp-resolve {
+  from {
+    opacity: 0.15;
+    clip-path: inset(-0.5em 100% -0.5em -0.5em);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
+  }
+}
+
+@keyframes rxp-delta-settle {
+  from {
+    translate: 0.6em 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-measure {
+  from {
+    opacity: 0.82;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-measure-row {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-scan {
+  0% {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes rxp-bar {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rxp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rxp-lock {
+  from {
+    scale: 1.12;
+    translate: -0.04em 0;
+  }
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-lock-x {
+  from {
+    translate: -0.06em 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-gauge {
+  from {
+    scale: 1.08;
+    translate: 0.04em 0;
+  }
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-sweep {
+  from {
+    rotate: -60deg;
+  }
+  to {
+    rotate: 0deg;
+  }
+}
+
+@keyframes rxp-bracket {
+  from {
+    scale: 1.06;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes rxp-tick {
+  from {
+    translate: calc(var(--rxp-shift) * -0.5) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-draw {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes rxp-from-left {
+  from {
+    translate: calc(var(--rxp-shift) * -1) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-from-right {
+  from {
+    translate: var(--rxp-shift) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-from-below {
+  from {
+    translate: 0 var(--rxp-shift);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-bus {
+  from {
+    scale: 0.2 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes rxp-joint {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes rxp-step-up {
+  from {
+    translate: 0 12px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxp-plug {
+  from {
+    translate: -24px 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxp-ring, .rxp-gauge, .rx-call-signature, .rx-call-ground > i),
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-comparison-metrics,
+      .rxs-p14-metrics,
+      .rxs-p14-overview figure,
+      .rxs-stage-panel,
+      .rxs-chapter-index a
+    )::before,
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:nth-child(3)::after {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel figure,
+  .rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel > div > * {
+    clip-path: none;
+  }
+}

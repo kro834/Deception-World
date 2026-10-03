@@ -126,7 +126,7 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   gap: 18px;
   color: #b0c9d6;
   font-family: "Oxanium", "Helvetica Neue", sans-serif;
-  font-size: clamp(9px, 0.78vw, 12px);
+  font-size: clamp(12px, 0.84vw, 13px);
   font-weight: 500;
   letter-spacing: 0.2em;
 }
@@ -210,7 +210,7 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   margin-top: 1.4em;
   color: #b5c5d0;
   font-family: "Oxanium", "Helvetica Neue", sans-serif;
-  font-size: clamp(10px, 1vw, 14px);
+  font-size: clamp(12px, 1vw, 14px);
   font-weight: 500;
   letter-spacing: 0.18em;
   line-height: 1.2;
@@ -379,8 +379,8 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 @media (max-width: 600px) {
   .rx-call-caption {
     justify-content: center;
-    font-size: 9px;
-    letter-spacing: 0.13em;
+    font-size: 12px;
+    letter-spacing: 0.1em;
   }
   .rx-call-caption > span:last-child {
     display: none;
@@ -465,5 +465,553 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   .rx-call-sequence[data-phase="revealing"] {
     opacity: 0;
+  }
+}
+
+/* ================================================================
+   rx2 — the premiere call. Additions and overrides only: every rule
+   above keeps its pinned values (F5's three caption sizes excepted,
+   raised to the 12px floor in place). Each call now has its own
+   gesture on the same clock; the reveal opens the ground as a
+   three-blade aperture instead of dissolving it over the hero.
+   ================================================================ */
+/* The fallback ！ (Hiragino, Noto CJK, Yu Gothic) takes its proportional
+   form (pwid: about 0.29em, against 0.63em under palt alone), so FAR UP！
+   and DEUS！ set tight; palt stays for a face without pwid. */
+.rx-call-beat {
+  font-feature-settings: "palt", "pwid";
+}
+
+/* Portrait phones: the chants fill the frame instead of a small block. */
+@media (orientation: portrait) and (max-width: 900px) {
+  .rx-call-chant,
+  .rx-call-repetition {
+    font-size: min(7.6vw, 5vh);
+  }
+}
+
+.rx-call-words {
+  z-index: 1;
+}
+
+/* Textless ornaments: three phase arcs behind the words (entry), three
+   dark blades inside the ground. Shown only where the full tier runs. */
+.rx-call-aperture {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.rx-call-aperture > i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: none;
+  width: min(92vmin, 760px);
+  aspect-ratio: 1;
+  border: 1.5px solid transparent;
+  border-top-color: var(--rx-call-cyan);
+  border-radius: 50%;
+  opacity: 0;
+  translate: -50% -50%;
+}
+
+.rx-call-aperture > i:nth-child(2) {
+  border-top-color: #b6a3ff;
+  rotate: 120deg;
+}
+
+.rx-call-aperture > i:nth-child(3) {
+  border-top-color: #e3c185;
+  rotate: 240deg;
+}
+
+/* Three half-planes whose edges pass through the centre at 120° cover
+   the screen; 80vmax of travel clears it. Solid ink, so they cost little. */
+.rx-call-ground > i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: none;
+  width: 150vmax;
+  height: 75vmax;
+  margin-left: -75vmax;
+  background-color: #02050b;
+  transform-origin: 50% 0;
+}
+
+.rx-call-ground > i:nth-child(2) {
+  rotate: 120deg;
+}
+
+.rx-call-ground > i:nth-child(3) {
+  rotate: 240deg;
+}
+
+/* Each blade's leading edge is lit in its phase, brightest at the side of
+   the opening triangle; gold leaves last. */
+.rx-call-ground > i::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1.5px;
+  content: "";
+  background: linear-gradient(90deg, transparent 36%, var(--rx-call-cyan) 46% 54%, transparent 64%);
+  will-change: transform;
+}
+
+.rx-call-ground > i:nth-child(2)::before {
+  background: linear-gradient(90deg, transparent 36%, #b6a3ff 46% 54%, transparent 64%);
+}
+
+.rx-call-ground > i:nth-child(3)::before {
+  background: linear-gradient(90deg, transparent 36%, #e3c185 46% 54%, transparent 64%);
+}
+
+/* REXONANCE DEUS！ is the largest type of the sequence (entry only; the
+   stage card keeps its own name size). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-final {
+    font-size: clamp(24px, 9vw, 150px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (orientation: landscape) and (max-height: 560px) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-final {
+    font-size: min(9vw, 18vh);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* FAR UP！ ignites the frame: the axes draw out from the centre and the
+     brackets lock in three ticks. The axes then dim under the chants. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-axis-horizontal {
+    animation:
+      rxCallAxisIgnite 160ms var(--rx-call-ease) both,
+      rxCallAxisDim 120ms linear var(--rx-call-chant-start) forwards,
+      rxCallAxisUndim 120ms linear var(--rx-call-final-start) forwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-axis-vertical {
+    animation:
+      rxCallAxisIgniteY 160ms var(--rx-call-ease) 40ms both,
+      rxCallAxisDim 120ms linear var(--rx-call-chant-start) forwards,
+      rxCallAxisUndim 120ms linear var(--rx-call-final-start) forwards;
+  }
+
+  /* The frame locks on FAR UP！, ticks as each block's outer pair lands
+     (its last line, a quarter-beat plus 60 ms in) and closes around the
+     name. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-brackets {
+    animation:
+      rxCallBracketsLock 180ms steps(3, jump-end) both,
+      rxCallBracketsTick 60ms steps(2, jump-end)
+        calc(var(--rx-call-chant-start) + var(--rx-call-chant-duration) / 4 + 60ms),
+      rxCallBracketsTickB 60ms steps(2, jump-end)
+        calc(var(--rx-call-response-start) + var(--rx-call-response-duration) / 4 + 60ms),
+      rxCallBracketsClose 60ms linear var(--rx-call-final-start) forwards;
+  }
+
+  /* FAR UP！ rises; RIDER！ cuts in from the side. Same opacity cut as the
+     strike, so the beats still replace each other on one frame. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-opening:first-child {
+    animation-name: rxCallRise;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-opening:nth-child(2) {
+    animation-name: rxCallCut;
+  }
+
+  /* Each four-line block opens from its centre: the middle pair strikes
+     with the beat and never moves, so the middle of the frame stays lit
+     from call to call (a top-down or bottom-up reveal left it dark between
+     beats: 2 flashes/s on portrait tablets). The outer pair follows a
+     quarter-beat later, the call's from the left, top line first. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-chant
+    > span:is(:first-child, :last-child) {
+    opacity: 0;
+    animation: rxCallLineInLeft 110ms var(--rx-call-ease) forwards;
+    animation-delay: calc(var(--rx-call-start) + var(--rx-call-duration) / 4);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-chant
+    > span:last-child {
+    animation-delay: calc(var(--rx-call-start) + var(--rx-call-duration) / 4 + 60ms);
+  }
+
+  /* The answer mirrors it from the right, bottom line first. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-repetition
+    > span:is(:first-child, :last-child) {
+    opacity: 0;
+    animation: rxCallLineInRight 110ms var(--rx-call-ease) forwards;
+    animation-delay: calc(var(--rx-call-start) + var(--rx-call-duration) / 4 + 60ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-repetition
+    > span:last-child {
+    animation-delay: calc(var(--rx-call-start) + var(--rx-call-duration) / 4);
+  }
+
+  /* One phase arc gathers per REXONANCE！ — ice, violet, gold last — and
+     all three lock on the frame REXONANCE DEUS！ lands. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-aperture
+    > i {
+    display: block;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-aperture
+    > i {
+    animation:
+      rxCallPhaseIn 170ms var(--rx-call-ease) forwards,
+      rxCallPhaseLock 60ms steps(3, jump-end) forwards;
+    animation-delay: var(--rx-call-response-start), calc(var(--rx-call-final-start) - 60ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-aperture
+    > i:nth-child(2) {
+    animation-delay:
+      calc(var(--rx-call-response-start) + var(--rx-call-response-duration) / 4),
+      calc(var(--rx-call-final-start) - 60ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-aperture
+    > i:nth-child(3) {
+    animation-delay:
+      calc(var(--rx-call-response-start) + var(--rx-call-response-duration) / 2),
+      calc(var(--rx-call-final-start) - 60ms);
+  }
+
+  /* DEUS！ is there from the beat's first frame and locks up from below. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-final
+    > span:nth-child(2) {
+    animation: rxCallDeusLock 180ms steps(3, jump-end) var(--rx-call-start) forwards;
+  }
+
+  /* The reveal: the name seals shut like a slit (opaque, never a ghost
+     over the hero) while the ground opens around it as three blades; the
+     slit is gone by about 150 ms, before the opening is wide. Transform and
+     opacity only. (A fade left the name translucent over the hero; holding
+     the blades back until it had faded left 3–7 empty frames.) The
+     caption and frame leave in 120 ms and the arcs ride
+     out. The ground holds, then fades on the frame it always did, so the
+     hand-over is measured unchanged. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-final {
+    animation-name: rxCallSeal;
+    animation-timing-function: linear;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    :is(.rx-call-frame, .rx-call-caption, .rx-call-meter) {
+    animation-duration: 120ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-ground {
+    background: transparent;
+    animation: rxCallGroundHold var(--rx-call-reveal) linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-ground
+    > i {
+    display: block;
+    animation: rxCallBladeOpen 360ms cubic-bezier(0.6, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-ground
+    > i:nth-child(2) {
+    animation-delay: 20ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-ground
+    > i:nth-child(3) {
+    animation-delay: 40ms;
+  }
+
+  /* The rims light as the slit goes out, never across the name. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-ground
+    > i::before {
+    animation: rxCallEdgeOn 40ms linear 120ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-aperture
+    > i {
+    animation: rxCallPhaseOut 260ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+}
+
+@keyframes rxCallRise {
+  0% {
+    opacity: 1;
+    transform: scale(1.06) translate3d(0, 0.42em, 0);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  79%,
+  99.99% {
+    opacity: 1;
+    transform: scale(1.015) translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015) translate3d(0, 0, 0);
+  }
+}
+@keyframes rxCallCut {
+  0% {
+    opacity: 1;
+    transform: translate3d(-0.6em, 0, 0) scale(1.08);
+  }
+  18% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  79%,
+  99.99% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.015);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1.015);
+  }
+}
+@keyframes rxCallAxisIgnite {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallAxisIgniteY {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallAxisDim {
+  from {
+    opacity: 0.38;
+  }
+  to {
+    opacity: 0.12;
+  }
+}
+@keyframes rxCallAxisUndim {
+  from {
+    opacity: 0.12;
+  }
+  to {
+    opacity: 0.38;
+  }
+}
+@keyframes rxCallBracketsLock {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallBracketsTick {
+  from {
+    transform: scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallBracketsTickB {
+  from {
+    transform: scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallBracketsClose {
+  from {
+    transform: none;
+  }
+  to {
+    transform: scale(0.992);
+  }
+}
+@keyframes rxCallLineInLeft {
+  from {
+    opacity: 1;
+    transform: translate3d(-0.4em, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rxCallLineInRight {
+  from {
+    opacity: 1;
+    transform: translate3d(0.4em, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rxCallPhaseIn {
+  from {
+    opacity: 0.9;
+    transform: translate3d(0, -4%, 0) scale(1.06);
+  }
+  to {
+    opacity: 0.5;
+    transform: none;
+  }
+}
+@keyframes rxCallPhaseLock {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxCallDeusLock {
+  from {
+    transform: translate3d(0, 0.25em, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+/* Over the 480 ms reveal: the slit closes with gathering speed (opaque,
+   so nothing behind it shows through the name), widening a little, and
+   the last hairline goes out by 32% (about 150 ms). */
+@keyframes rxCallSeal {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.02, 0.78);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.035, 0.45);
+  }
+  26% {
+    opacity: 1;
+    transform: scale(1.045, 0.16);
+  }
+  29% {
+    opacity: 1;
+    transform: scale(1.05, 0.05);
+  }
+  32% {
+    opacity: 0;
+    transform: scale(1.06, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.06, 0);
+  }
+}
+@keyframes rxCallEdgeOn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rxCallGroundHold {
+  0% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rxCallBladeOpen {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate3d(0, 80vmax, 0);
+  }
+}
+@keyframes rxCallPhaseOut {
+  from {
+    opacity: 0.5;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@media (forced-colors: active) {
+  .rx-call-aperture,
+  .rx-call-signature,
+  .rx-call-ground > i {
+    display: none;
   }
 }

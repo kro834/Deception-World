@@ -70,15 +70,37 @@ export function RexonanceCallSequence({
           "--rx-call-cover": `${REXONANCE_ENTRY_TIMINGS.cover}ms`,
           "--rx-call-reveal": `${REXONANCE_ENTRY_TIMINGS.reveal}ms`,
           "--rx-call-stage-duration": `${REXONANCE_STAGE_DURATION_MS}ms`,
+          // The call and its answer, for the ornaments that keep their beat.
+          "--rx-call-chant-start": `${REXONANCE_CALL_BEATS[2].start}ms`,
+          "--rx-call-chant-duration": `${REXONANCE_CALL_BEATS[2].duration}ms`,
+          "--rx-call-response-start": `${REXONANCE_CALL_BEATS[3].start}ms`,
+          "--rx-call-response-duration": `${REXONANCE_CALL_BEATS[3].duration}ms`,
+          "--rx-call-final-start": `${REXONANCE_CALL_BEATS[4].start}ms`,
         } as CSSProperties
       }
     >
-      <div className="rx-call-ground" />
+      {/* Three blades: the dark ground opens as an aperture (textless). */}
+      <div className="rx-call-ground">
+        <i />
+        <i />
+        <i />
+      </div>
       <div className="rx-call-frame">
         <i className="rx-call-axis rx-call-axis-horizontal" />
         <i className="rx-call-axis rx-call-axis-vertical" />
         <i className="rx-call-brackets" />
       </div>
+      {entry ? (
+        <div className="rx-call-aperture">
+          <i />
+          <i />
+          <i />
+        </div>
+      ) : (
+        <div className="rx-call-signature">
+          <i />
+        </div>
+      )}
       <div className="rx-call-caption">
         <span>TRINITY RESONANCE</span>
         <span>{entry ? "P14 / FINAL ARRIVAL" : `P14 / ${REXONANCE_STAGE_LABELS[stage]}`}</span>

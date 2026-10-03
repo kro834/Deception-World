@@ -30,9 +30,28 @@
   display: inline-block;
 }
 
+/* rx2 (COPY2.md C2, L1): the performance intro is two sentences of two
+   phrases; each phrase wraps as one block, so iPhone Safari never splits a
+   form name mid-word and phones read four clean lines. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span > span > span {
+  display: inline-block;
+}
+
+/* rx2 (COPY2.md L2, L3): 「第14世代」 and 「SA-GA OS 5.5」 never split. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxp-nowrap {
+  white-space: nowrap;
+}
+
+/* rx2 (COPY2.md L4): the P14 paragraph was the one body block computing
+   word-break: normal, so Chrome split 「防／御」 and 「こ／のP14」. WebKit
+   drops the value and keeps its own breaking. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > p {
+  word-break: auto-phrase;
+}
+
 /* Chrome breaks these two-beat lines at their 、 through auto-phrase; iPhone
-   Safari has no auto-phrase, so keep-all holds the phrases together and the
-   explicit <wbr> in the two long ones gives the one break they need. */
+   Safari has no auto-phrase, so keep-all holds the phrases together and they
+   break only at their 、 (rx2 removed the last <wbr>-dependent headings). */
 .rxs-page.rxs-page.rxs-rexonance-page
   :is(
     .rxs-section-heading h2,
@@ -278,8 +297,37 @@
   }
 }
 
+/* ---------- Specs: a joint, not a multiplication ---------- */
+/* rx2 (COPY2.md C8): the × between 50,000 YOPS and 9,000 TOPS could read as
+   a product right under 「物差しが違えば、比べない。」. The textless <i> is
+   now a 1px ice-to-gold hairline: upright between the two figures on wide
+   screens, a short stem between the stacked figures on phones. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > i {
+  display: block;
+  justify-self: center;
+  inline-size: 1px;
+  block-size: 56px;
+  margin: 0;
+  background: linear-gradient(180deg, var(--rf-ice), var(--rf-violet) 50%, var(--rf-gold));
+  opacity: 0.8;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > i {
+    block-size: 28px;
+    margin: 6px 0;
+  }
+}
+
 /* ---------- Forced colours ---------- */
 @media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > i {
+    background: none;
+    border-inline-start: 1px solid CanvasText;
+    inline-size: 0;
+    opacity: 1;
+  }
+
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav,
   .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-comparison, .rxs-p14-comparator),
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector,

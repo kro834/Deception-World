@@ -153,11 +153,38 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
     assert.doesNotMatch(source, /iOS標準選択/);
     assert.match(source, /<span>比較する相手<\/span>/);
   }
-  // The Ultra title's zero-width marker renders as <wbr />, never as text.
-  assert.match(rexonance, /title: "60秒、全部を\\u200B一動作へ。"/);
+  // A stage title's zero-width marker renders as <wbr />, never as text. The
+  // rx2 Ultra title (rx2/COPY2.md C5) breaks at its 、 and needs no marker.
+  assert.match(rexonance, /title: "神属権限まで、一動作に。"/);
   assert.match(rexonance, /title\.split\("\\u200B"\)/);
   assert.match(rexonance, /<h3>\{renderStageTitle\(activeStage\.title\)\}<\/h3>/);
-  assert.match(rexonance, /機構ごと\s*<wbr \/>\s*組み替える。/);
+  // rx2/COPY2.md C3: the stages h2 pays off 「これで、まだ標準。」.
+  assert.match(rexonance, /標準の上に、\s*<br \/>\s*あと二段。/);
+  // rx2/COPY2.md C2, L1: the performance intro is two sentences of two
+  // phrase spans, and it still names the selected baseline.
+  assert.match(
+    rexonance,
+    // rx2 fix (COPY2.md C2): 「とも」 keeps the live label true above the
+    // headline cards, which compare with their own partners.
+    /<span>\s*<span>\s*<span>\{activePerformanceBaseline\.label\}サーガとも、<\/span>\s*<span>標準値どうし。<\/span>\s*<\/span>\s*<span>\s*<span>マックスとウルトラは、<\/span>\s*<span>まだ出していません。<\/span>\s*<\/span>\s*<\/span>/,
+  );
+  assert.match(rexonanceCss, /\.rxs-section-heading > span > span > span \{\s*display: inline-block;/);
+  // rx2/COPY2.md L2–L4: units that never split, and the P14 paragraph's phrases.
+  assert.match(rexonance, /<span className="rxp-nowrap">第14世代<\/span>/);
+  // rx2 fix (COPY2.md L6): 必要部位 joins SA-GA OS 5.5 as a nowrap unit.
+  assert.match(rexonance, /const STAGE_LEDE_UNITS = \/\(SA-GA OS 5\\\.5\|必要部位\)\/;/);
+  assert.match(rexonance, /className="rxp-nowrap"/);
+  assert.match(rexonance, /<p>\{renderStageLede\(activeStage\.lede\)\}<\/p>/);
+  assert.match(rexonanceCss, /\.rxp-nowrap \{\s*white-space: nowrap;/);
+  assert.match(rexonanceCss, /\.rxs-p14-copy > p \{\s*word-break: auto-phrase;/);
+  // rx2/COPY2.md C8: the spec joint is a textless hairline, CanvasText in
+  // forced colours; YOPS and TOPS are never shown multiplied.
+  const specs = rexonance.match(/<div className="rxs-specs rxs-reveal">[\s\S]*?<\/section>/)?.[0];
+  assert.ok(specs);
+  assert.match(specs, /<i aria-hidden="true" \/>/);
+  assert.doesNotMatch(specs, /×/);
+  const forced = rexonanceCss.slice(rexonanceCss.indexOf("@media (forced-colors: active)"));
+  assert.match(forced, /\.rxs-specs > i \{\s*background: none;\s*border-inline-start: 1px solid CanvasText;/);
   // Both sheets hold the phrases together where auto-phrase is missing.
   for (const css of [rexonanceCss, extremeCss]) {
     assert.match(css, /\.rxs-stage-hint\s*\) \{\s*word-break: keep-all;\s*overflow-wrap: anywhere;/);
