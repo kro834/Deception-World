@@ -49,11 +49,10 @@ function CallLines({ index }: { index: number }) {
   return <span>{REXONANCE_CALLS[index]}</span>;
 }
 
-// rx3 — the suit-up schematic, in 240 × 480 drawing units. Shapes are drawn
-// for the left side and mirrored. Every group is its own small box (so it
-// moves on the compositor and rasters small), drawn as one path of closed
-// outlines (a few nodes, not one per plate), and its strokes stay 1 px at any
-// size. Textless: only the HUD below carries words.
+// The approved Rexonance portrait, reduced to its characteristic outlines:
+// swept crown, descending V visor, layered shoulder blades, circular jewels
+// and the curled ornament behind the right shoulder. Each assembly group
+// retains its own bounded SVG and the existing transformation-call clock.
 const SUIT_W = 240;
 const SUIT_H = 480;
 const mirror = (points: string) =>
@@ -64,82 +63,148 @@ const mirror = (points: string) =>
       return `${SUIT_W - Number(x)},${y}`;
     })
     .join(" ");
+const circleOutline = (cx: number, cy: number, radius: number) =>
+  Array.from({ length: 16 }, (_, index) => {
+    const angle = (index * Math.PI) / 8;
+    return `${(cx + Math.cos(angle) * radius).toFixed(1)},${(cy + Math.sin(angle) * radius).toFixed(1)}`;
+  }).join(" ");
+const rotateOutline = (points: string, angle: number, cx: number, cy: number) =>
+  points
+    .split(" ")
+    .map((pair) => {
+      const [x, y] = pair.split(",").map(Number);
+      return `${(cx + (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle)).toFixed(1)},${(cy + (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle)).toFixed(1)}`;
+    })
+    .join(" ");
 const SUIT_ARM = [
-  "88,96 68,92 52,102 48,118 56,130 74,128 86,116",
-  "70,93 50,66 56,64 78,94",
-  "54,134 74,133 75,176 57,178",
-  "65,180 73,188 65,196 57,188",
-  "54,200 76,198 77,250 58,254",
-  "54,206 42,228 54,244",
-  "58,257 77,254 79,274 63,278",
+  "88,121 62,100 22,65 33,105 60,128 82,134",
+  "84,126 55,115 8,113 40,130 69,141",
+  "82,134 51,135 15,155 53,148 76,150",
+  "84,143 62,150 27,180 64,162 85,155",
+  "68,145 81,151 78,181 65,198 55,181 56,158",
+  "71,167 63,184 69,198 75,184",
+  "59,193 45,183 45,212 54,235 68,250 73,224 70,204",
+  "50,204 59,215 63,232 56,246 48,225",
+  "48,219 36,205 39,239 53,259 62,251",
+  "52,252 66,248 69,264 52,272 47,263",
+  "52,274 67,266 74,279 70,291 58,299 48,288",
+  "69,142 76,151 69,165 62,152",
+  "83,116 86,122 92,125 86,128 83,134 80,128 74,125 80,122",
+];
+const SUIT_SHOULDER = [circleOutline(83, 125, 13), circleOutline(83, 125, 9)];
+const SUIT_ARM_TRIM = [
+  ...SUIT_SHOULDER,
+  "22,65 38,108 79,131 63,112",
+  "8,113 45,132 74,144 52,129",
+  "15,155 52,146 78,146 61,152",
+  "45,183 50,215 62,242 67,250 59,226",
+  "52,252 66,248 69,264 52,272 47,263",
 ];
 const SUIT_LEG = [
-  "96,216 118,216 117,238 99,244 93,228",
-  "95,247 119,247 117,320 100,322",
-  "108,322 118,331 108,341 98,331",
-  "98,344 119,344 117,428 102,432 95,388",
-  "108,350 111,388 108,422 105,388",
-  "101,436 118,436 123,468 92,471 96,452",
+  "94,239 114,246 115,284 102,322 86,307 83,273",
+  "91,255 105,272 102,307 89,287",
+  "95,266 104,279 95,296 86,280",
+  "90,316 101,338 96,360 81,354 80,338",
+  "90,327 98,342 90,355 83,341",
+  "79,354 97,361 105,415 99,443 82,438 72,395",
+  "80,362 86,397 99,426 91,405 88,373",
+  "81,440 100,444 104,462 94,474 69,472 70,459",
 ];
-const SUIT_PEC = "118,98 100,96 84,104 82,120 92,142 110,152 118,148";
+const SUIT_LEG_TRIM = [
+  "91,255 105,272 102,307 89,287",
+  "90,316 101,338 96,360 81,354 80,338",
+  "79,354 84,388 102,421 99,436 91,416 78,392",
+];
+const SUIT_PEC = "114,110 97,110 88,120 90,143 105,159 115,150";
+// The portrait's asymmetric, crescent-shaped ornament curls above one shoulder.
+const SUIT_MANTLE = [
+  "146,124 150,90 159,61 174,37 194,23 215,19 236,20 216,28 196,39 185,55 181,77 187,93 204,105 212,124 210,148 200,169 203,145 201,127 189,114 171,108 159,129",
+  "159,61 171,56 183,50 196,39 174,44",
+  "150,90 165,84 181,77 174,91 157,105",
+  "171,108 182,99 194,102 204,112 186,109",
+  "200,169 214,139 220,116 213,146",
+];
+const SUIT_HOUSING = [circleOutline(120, 154, 22), circleOutline(120, 154, 13)];
+const SUIT_SPIRAL = Array.from({ length: 6 }, (_, index) =>
+  rotateOutline("120,132 136,135 144,148 130,142 119,140 110,144", (index * Math.PI) / 3, 120, 154),
+);
+const SUIT_BELT = [circleOutline(120, 230, 12), circleOutline(120, 230, 8)];
 const SUIT_CHEST = [
+  ...SUIT_MANTLE,
   SUIT_PEC,
   mirror(SUIT_PEC),
-  "102,156 138,156 136,168 104,168",
-  "104,171 136,171 134,183 106,183",
-  "106,186 134,186 132,197 108,197",
-  "96,201 144,201 146,214 94,214",
-  "120,198 128,202.5 128,211.5 120,216 112,211.5 112,202.5",
+  ...SUIT_SPIRAL,
+  "90,143 99,164 112,178 108,165 99,155",
+  mirror("90,143 99,164 112,178 108,165 99,155"),
+  "108,177 120,194 132,177 131,207 120,223 109,207",
+  "102,211 120,220 138,211 143,237 130,249 120,241 110,249 97,237",
+  "102,242 114,251 120,273 126,251 138,242 130,272 120,296 110,272",
+  "96,219 107,220 106,235 94,237",
+  mirror("96,219 107,220 106,235 94,237"),
 ];
-// The P14 core's housing, drawn in gold on the chest plate.
-const SUIT_HOUSING = "120,115 129.5,120.5 129.5,131.5 120,137 110.5,131.5 110.5,120.5";
-const SUIT_SHELL =
-  "120,22 136,27 146,38 149,56 145,72 134,82 120,85 106,82 95,72 91,56 94,38 104,27";
-const SUIT_CREST = "117,33 112,31 86,6 91,4";
-const SUIT_SPIKE = "120,6 124,23 120,35 116,23";
+const SUIT_SHELL = "120,47 135,54 142,67 141,84 132,100 120,112 108,100 99,84 98,67 105,54";
+const SUIT_CREST = "116,76 105,65 96,45 90,22 91,2 98,33 107,52 120,66";
+const SUIT_SPIKE = "120,30 125,54 120,73 115,54";
 const SUIT_HEAD = [SUIT_SHELL, SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE];
-// The stage card's badge swaps the crest per form: HIGH keeps the V, MAX
-// fans six fins (every ornament turned outward), ULTRA draws its blades
-// into one spire.
-const SUIT_FIN_A = "114,30 98,8 102,6 117,27";
-const SUIT_FIN_B = "110,33 84,17 87,13 113,29";
-const SUIT_FIN_C = "106,37 78,32 79,27 108,33";
-const SUIT_BLADE = "112,31 108,28 112,-4 116,-2";
+// All three supplied portraits retain the long crown and V visor. MAX
+// adds faceted temple fins; ULTRA carries the pointed forehead jewel.
+const SUIT_FIN = "103,83 94,67 91,49 101,63 111,76";
+const SUIT_BLADE = "105,96 93,82 88,61 102,77 114,89";
 const SUIT_CRESTS = {
   standard: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE],
-  max: [
-    SUIT_FIN_A,
-    SUIT_FIN_B,
-    SUIT_FIN_C,
-    ...[SUIT_FIN_A, SUIT_FIN_B, SUIT_FIN_C].map(mirror),
-    SUIT_SPIKE,
+  max: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE, SUIT_FIN, mirror(SUIT_FIN)],
+  ultra: [
+    SUIT_CREST,
+    mirror(SUIT_CREST),
+    SUIT_BLADE,
+    mirror(SUIT_BLADE),
+    "120,42 126,58 120,73 114,58",
   ],
-  ultra: [SUIT_BLADE, mirror(SUIT_BLADE), "120,-16 125,16 120,36 115,16"],
 } as const;
-const SUIT_FACE = "120,36 106,39 97,50 98,66 108,77 120,80";
-const SUIT_EYE = "117,50 105,45 97,48 98,55 108,59 117,55";
+const SUIT_FACE = "120,77 107,67 99,66 102,86 110,102 120,112";
+const SUIT_EYE = "120,82 105,70 101,68 104,80 116,91 120,106 120,94 118,87";
 const SUIT_SILHOUETTE =
-  "M120 86 110 86 92 95 62 100 50 112 48 134 52 200 52 256 56 282 80 282 80 200 84 150 94 196 92 216 92 330 94 436 90 474 120 474 120 252";
+  "M120 113 108 106 87 110 61 108 38 120 56 153 50 179 44 198 46 252 46 287 58 302 74 291 81 265 76 202 87 162 102 196 93 239 82 274 80 338 73 395 80 439 68 460 68 476 97 476 106 458 103 430 103 359 119 283 120 262";
 const mirrorPath = (path: string) =>
   path.replace(/(\d+(?:\.\d+)?) (\d+(?:\.\d+)?)/g, (_, x, y) => `${SUIT_W - Number(x)} ${y}`);
 
 const SUIT_PLATES = [
-  { name: "is-legs is-left", shapes: SUIT_LEG, index: 0 },
-  { name: "is-legs is-right", shapes: SUIT_LEG.map(mirror), index: 0 },
-  { name: "is-arms is-left", shapes: SUIT_ARM, index: 1 },
-  { name: "is-arms is-right", shapes: SUIT_ARM.map(mirror), index: 1 },
-  { name: "is-chest", shapes: SUIT_CHEST, accent: [SUIT_HOUSING], index: 2 },
-  { name: "is-head", shapes: SUIT_HEAD, index: 3 },
+  { name: "is-legs is-left", shapes: SUIT_LEG, accent: SUIT_LEG_TRIM, index: 0 },
+  {
+    name: "is-legs is-right",
+    shapes: SUIT_LEG.map(mirror),
+    accent: SUIT_LEG_TRIM.map(mirror),
+    index: 0,
+  },
+  { name: "is-arms is-left", shapes: SUIT_ARM, accent: SUIT_ARM_TRIM, index: 1 },
+  {
+    name: "is-arms is-right",
+    shapes: SUIT_ARM.map(mirror),
+    accent: SUIT_ARM_TRIM.map(mirror),
+    index: 1,
+  },
+  {
+    name: "is-chest",
+    shapes: SUIT_CHEST,
+    accent: [...SUIT_HOUSING, ...SUIT_SPIRAL, ...SUIT_BELT],
+    index: 2,
+  },
+  {
+    name: "is-head",
+    shapes: SUIT_HEAD,
+    accent: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE],
+    index: 3,
+  },
 ] as const;
 
 // Resonance runs outward from the core: chest, then arms and helmet, then legs.
 const SUIT_ZONES = [
-  [...SUIT_CHEST, SUIT_HOUSING],
+  [...SUIT_CHEST, ...SUIT_HOUSING, ...SUIT_BELT],
   [...SUIT_ARM, ...SUIT_ARM.map(mirror), ...SUIT_HEAD],
   [...SUIT_LEG, ...SUIT_LEG.map(mirror)],
 ];
 const SUIT_PHASES = ["ice", "violet", "gold"] as const;
-const SUIT_CORE = [120, 126] as const;
+const SUIT_CORE = [120, 154] as const;
 
 const percent = (value: number, total: number) => `${((value / total) * 100).toFixed(3)}%`;
 // Closed outlines as one path: "M" starts each outline, its other points are
@@ -208,7 +273,7 @@ function SuitShape({
 
 // The stage card's accent: the helmet, its crest plate swapped for the form.
 function SuitBadge() {
-  const view = "60 -16 120 104";
+  const view = "60 0 120 116";
   return (
     <div className="rx-suit-badge">
       <svg className="rx-suit-badge-helmet" viewBox={view}>
@@ -237,7 +302,7 @@ function Suit() {
         <svg className="rx-suit-blueprint" viewBox="0 0 240 480" preserveAspectRatio="none">
           <path
             className="rx-suit-guides"
-            d="M120 0V480M0 54H240M0 112H240M0 126H240M0 207H240M0 331H240M0 474H240"
+            d="M120 0V480M0 78H240M0 125H240M0 154H240M0 230H240M0 341H240M0 474H240"
           />
           <path d={`${SUIT_SILHOUETTE}${mirrorPath(SUIT_SILHOUETTE)}`} />
         </svg>

@@ -1031,14 +1031,14 @@ export function RexonanceSaga() {
           </p>
           <h1 id="rxs-title">
             <span>REXONANCE SAGA</span>
-            混ぜない。
+            究極が
             <br />
-            重ねる。
+            始まる。
           </h1>
           <p className="rxs-hero-lede">
             <span className="rxs-hero-lede-text">
-              <span>悠真、レックス、ゼウス。</span>
-              <span>三つの意思で、一つの力。</span>
+              <span>覚醒する、</span>
+              <span>全てが最高峰で。</span>
             </span>
           </p>
         </div>

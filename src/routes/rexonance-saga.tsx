@@ -28,13 +28,12 @@ export const Route = createFileRoute("/rexonance-saga")({
       {
         name: "description",
         content:
-          "混ぜない。重ねる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14演算基盤、三つの形態、三者の共鳴構造まで。",
+          "究極が始まる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14演算基盤、三つの形態、三者の共鳴構造まで。",
       },
       { property: "og:title", content: "レクソナンスサーガ｜Deception World" },
       {
         property: "og:description",
-        content:
-          "悠真、レックス、ゼウス。三つの意思で、一つの力。レクソナンスサーガの性能、P14、三つの形態、共鳴構造。",
+        content: "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14、三つの形態、共鳴構造。",
       },
       { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],

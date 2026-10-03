@@ -1115,7 +1115,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke: rgb(222 242 255 / 64%);
 }
 
-.rx-call-sequence .rx-suit-plate .rx-suit-accent {
+.rx-call-sequence .rx-suit-plate path.rx-suit-accent {
   fill: none;
   stroke: rgb(227 193 133 / 88%);
 }
@@ -1197,7 +1197,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-ring {
-  top: 26.25%;
+  top: 32.083%;
   left: 50%;
   width: 44%;
   aspect-ratio: 1;
@@ -1216,21 +1216,22 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-core {
-  top: 26.25%;
+  top: 32.083%;
   left: 50%;
-  width: 3.2%;
+  width: 8%;
   aspect-ratio: 1;
   background: #f6dc9c;
+  border: 1px solid #e3c185;
+  border-radius: 50%;
   box-shadow: 0 0 9px 2px rgb(227 193 133 / 42%);
   translate: -50% -50%;
-  rotate: 45deg;
 }
 
 /* The target: an ice reticle acquires the visor's place on FAR UP！ and
    holds around the helmet; on REXONANCE DEUS！ it hands over to four gold
    brackets that lock on. */
 .rx-call-sequence .rx-suit-lock {
-  top: 11.25%;
+  top: 16.25%;
   left: 50%;
   display: none;
   width: 34%;
@@ -1365,17 +1366,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 .rx-call-sequence .rx-suit-callout.is-head {
   --rx-suit-x: 0.056;
-  --rx-suit-y: 0.1125;
+  --rx-suit-y: 0.1625;
 }
 
 .rx-call-sequence .rx-suit-callout.is-arms {
-  --rx-suit-x: 0.121;
-  --rx-suit-y: 0.1667;
+  --rx-suit-x: 0.12;
+  --rx-suit-y: 0.26;
 }
 
 .rx-call-sequence .rx-suit-callout.is-chest {
-  --rx-suit-x: 0.042;
-  --rx-suit-y: 0.225;
+  --rx-suit-x: 0.05;
+  --rx-suit-y: 0.305;
 }
 
 .rx-call-sequence .rx-suit-callout.is-legs {
@@ -1953,7 +1954,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   left: 50%;
   display: none;
   width: min(15vmin, 132px);
-  aspect-ratio: 120 / 104;
+  aspect-ratio: 120 / 116;
   translate: -50% 0;
 }
 

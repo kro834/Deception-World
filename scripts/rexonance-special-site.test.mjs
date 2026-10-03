@@ -33,13 +33,10 @@ test("Rexonance special site preserves published performance and stage definitio
 });
 
 test("Rexonance hero presents the reviewed resonance copy with the existing type treatment", () => {
-  // 2026-10-02 Track R copy (dreamx/rx-copy/COPY.md R3, R4): the hero catch
-  // line and lede were rewritten; the lede's two sentences are inline-block spans.
-  assert.match(component, /混ぜない。/);
-  assert.match(component, /重ねる。/);
-  assert.match(component, /悠真、レックス、ゼウス。/);
-  // 2026-10-03 rx2 copy (rx2/COPY2.md C1): the lede's second sentence.
-  assert.match(component, /三つの意思で、一つの力。/);
+  assert.match(component, /究極が\s*<br \/>\s*始まる。/);
+  assert.match(component, /<span>覚醒する、<\/span>\s*<span>全てが最高峰で。<\/span>/);
+  assert.match(route, /究極が始まる。/);
+  assert.match(route, /覚醒する、全てが最高峰で。/);
   assert.doesNotMatch(component, /無限の攻撃へ。/);
   assert.match(styles, /\.rxs-hero-copy::before/);
   assert.match(styles, /text-shadow:\s*0 3px 22px #000/);
