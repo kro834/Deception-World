@@ -117,8 +117,12 @@ test("the sequence is SSR-stable, decorative, finite, and compositor-only", () =
   for (const [, name, body] of keyframes) {
     const properties = [...body.matchAll(/(?:^|[;{}])\s*([a-z-]+)\s*:/g)].map((match) => match[1]);
     assert.ok(properties.length > 0, `${name} should define keyframes`);
+    // suitup2: a keyframe may carry its own easing (a timing function for
+    // the next segment, not an animated property).
     assert.ok(
-      properties.every((property) => property === "opacity" || property === "transform"),
+      properties.every((property) =>
+        ["opacity", "transform", "animation-timing-function"].includes(property),
+      ),
       `${name} should animate only opacity/transform, found ${properties.join(", ")}`,
     );
   }

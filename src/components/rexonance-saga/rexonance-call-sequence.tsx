@@ -211,21 +211,182 @@ const percent = (value: number, total: number) => `${((value / total) * 100).toF
 // implicit line-tos, "Z" closes it.
 const outline = (shapes: readonly string[]) => shapes.map((points) => `M${points}Z`).join("");
 
+// suitup2: the fitting. The owner's plate groups above stay exactly as drawn;
+// for the assembly each group is carried by a few pieces cut along its own
+// outlines (the same point lists, nothing redrawn): two leg sections, the
+// arm and its four shoulder blades, the chest, the spiral housing that
+// closes like an iris, the mantle crescent, and the helmet's shell, crest
+// halves and spike. Tones: ice on the left, violet on the right, white at
+// the centre; gold is never a plate colour, it lights the trims last.
+type SuitTone = "ice" | "violet" | "white";
+type SuitPiece = {
+  name: string;
+  shapes: readonly string[];
+  tone: SuitTone;
+  // The SA-GA！DEUS！ line it locks on, and its place in that line's run.
+  line: number;
+  order: number;
+  pivot?: readonly [number, number];
+  fold?: string;
+};
+const mirrorPivot = ([x, y]: readonly [number, number]) => [SUIT_W - x, y] as const;
+const SUIT_SHOULDER_PIVOT = [83, 125] as const;
+// The shoulder blades open as a fan: each starts folded onto the lowest
+// one and the lowest opens first (blade 0 is the top blade).
+const SUIT_BLADE_FOLD = [-89, -54, -20, -6];
+const SUIT_CHEST_BODY = [
+  ...SUIT_CHEST.filter((shape) => !SUIT_MANTLE.includes(shape) && !SUIT_SPIRAL.includes(shape)),
+  ...SUIT_BELT,
+];
+const SUIT_CREST_PIVOT = [117, 72] as const;
+const sided = (
+  name: string,
+  shapes: readonly string[],
+  piece: Omit<SuitPiece, "name" | "shapes" | "tone">,
+): SuitPiece[] => [
+  { ...piece, name: `${name} is-left`, shapes, tone: "ice" },
+  {
+    ...piece,
+    name: `${name} is-right`,
+    shapes: shapes.map(mirror),
+    tone: "violet",
+    pivot: piece.pivot ? mirrorPivot(piece.pivot) : undefined,
+    fold: piece.fold ? `${-Number.parseFloat(piece.fold)}deg` : undefined,
+  },
+];
+// Back to front: the mantle curls behind the shoulder, the blades behind
+// the arms, the chest in front of both.
+const SUIT_PIECES: readonly SuitPiece[] = [
+  {
+    name: "is-mantle is-key",
+    shapes: SUIT_MANTLE,
+    tone: "violet",
+    line: 3,
+    order: 0,
+    pivot: [152, 126],
+  },
+  ...sided("is-legs is-upper is-key", SUIT_LEG.slice(0, 5), { line: 0, order: 0 }),
+  ...sided("is-legs is-lower", SUIT_LEG.slice(5), { line: 0, order: 1 }),
+  ...[3, 2, 1, 0].flatMap((blade, index) =>
+    sided("is-arms is-blade", [SUIT_ARM[blade]], {
+      line: 1,
+      order: index + 1,
+      pivot: SUIT_SHOULDER_PIVOT,
+      fold: `${SUIT_BLADE_FOLD[blade]}deg`,
+    }),
+  ),
+  ...sided("is-arms is-limb is-key", SUIT_ARM.slice(4), { line: 1, order: 0 }),
+  { name: "is-chest is-key", shapes: SUIT_CHEST_BODY, tone: "white", line: 2, order: 0 },
+  {
+    name: "is-iris",
+    shapes: [...SUIT_HOUSING, ...SUIT_SPIRAL],
+    tone: "white",
+    line: 2,
+    order: 3,
+    pivot: SUIT_CORE,
+  },
+];
+// The helmet waits above, open, through REXONANCE！ and shuts last.
+const SUIT_HELM: readonly SuitPiece[] = [
+  { name: "is-shell", shapes: [SUIT_SHELL], tone: "white", line: 4, order: 0 },
+  {
+    name: "is-crest is-left",
+    shapes: [SUIT_CREST],
+    tone: "white",
+    line: 4,
+    order: 0,
+    pivot: SUIT_CREST_PIVOT,
+    fold: "-22deg",
+  },
+  {
+    name: "is-crest is-right",
+    shapes: [mirror(SUIT_CREST)],
+    tone: "white",
+    line: 4,
+    order: 0,
+    pivot: mirrorPivot(SUIT_CREST_PIVOT),
+    fold: "22deg",
+  },
+  { name: "is-spike", shapes: [SUIT_SPIKE], tone: "white", line: 4, order: 0 },
+];
+// Gold reaches the trims from the core outward: chest, arms, legs, and the
+// helmet's crest last (zones in the order of SUIT_PLATES' index 2, 1, 0, 3).
+const SUIT_TRIM_ZONE = [2, 1, 0, 3];
+// Alignment brackets bite on the joints as the frame locks on RIDER！:
+// the core, the shoulders, the elbows, the knees.
+const SUIT_JOINTS = [
+  SUIT_CORE,
+  [83, 125],
+  [157, 125],
+  [60, 196],
+  [180, 196],
+  [90, 338],
+  [150, 338],
+] as const;
+// Plate light: a lit top edge over a darker body (fill), and a rim that is
+// brightest where the light strikes (stroke). Colour stops per tone.
+const SUIT_LIGHT: Record<SuitTone, { fill: string[]; rim: string[] }> = {
+  ice: {
+    fill: ["#79e8ff", "0.24", "#1c5872", "0.34", "#06111d", "0.86"],
+    rim: ["#effdff", "1", "#79e8ff", "0.92", "#3c9fbd", "0.5"],
+  },
+  violet: {
+    fill: ["#b6a3ff", "0.22", "#3a2f78", "0.34", "#0a0a1f", "0.86"],
+    rim: ["#f5f1ff", "1", "#b6a3ff", "0.92", "#6c5bbd", "0.5"],
+  },
+  white: {
+    fill: ["#e2f2ff", "0.2", "#2b4a63", "0.32", "#060c17", "0.88"],
+    rim: ["#ffffff", "1", "#d6ecf8", "0.9", "#7d9cb2", "0.5"],
+  },
+};
+
+const stops = (values: string[]) =>
+  [0, 0.45, 1].map((offset, index) => (
+    <stop
+      key={offset}
+      offset={offset}
+      stopColor={values[index * 2]}
+      stopOpacity={values[index * 2 + 1]}
+    />
+  ));
+
+function SuitLight() {
+  return (
+    <svg className="rx-suit-defs" width="0" height="0" focusable="false">
+      <defs>
+        {(Object.keys(SUIT_LIGHT) as SuitTone[]).map((tone) => (
+          <g key={tone}>
+            <linearGradient id={`rx-suit-fill-${tone}`} x1="0" y1="0" x2="0.3" y2="1">
+              {stops(SUIT_LIGHT[tone].fill)}
+            </linearGradient>
+            <linearGradient id={`rx-suit-rim-${tone}`} x1="0" y1="0" x2="0.2" y2="1">
+              {stops(SUIT_LIGHT[tone].rim)}
+            </linearGradient>
+          </g>
+        ))}
+      </defs>
+    </svg>
+  );
+}
+
 function SuitShape({
   className,
   shapes,
   accent,
   pivot,
   bare,
+  glint,
   style,
 }: {
   className: string;
   shapes: readonly string[];
   // The SVG is the box itself (nothing to bite or to shut inside it).
   bare?: boolean;
+  // A second, bright copy of the outline for the lock's rim glint.
+  glint?: boolean;
   // Outlines drawn in the accent stroke (the gold core housing).
   accent?: readonly string[];
-  // A drawing point to scale from (the core, for the resonance).
+  // A drawing point to scale or turn from (the core, a shoulder, a root).
   pivot?: readonly [number, number];
   style?: CSSProperties;
 }) {
@@ -267,9 +428,21 @@ function SuitShape({
       <svg viewBox={view} preserveAspectRatio="none">
         {drawing}
       </svg>
+      {glint ? (
+        <svg className="rx-suit-glint" viewBox={view} preserveAspectRatio="none">
+          <path d={outline(shapes)} />
+        </svg>
+      ) : null}
     </i>
   );
 }
+
+const pieceStyle = (piece: SuitPiece) =>
+  ({
+    "--rx-suit-i": piece.line,
+    "--rx-suit-j": piece.order,
+    ...(piece.fold ? { "--rx-suit-r": piece.fold } : null),
+  }) as CSSProperties;
 
 // The stage card's accent: the helmet, its crest plate swapped for the form.
 function SuitBadge() {
@@ -279,10 +452,16 @@ function SuitBadge() {
       <svg className="rx-suit-badge-helmet" viewBox={view}>
         <path d={outline([SUIT_SHELL, SUIT_FACE, mirror(SUIT_FACE)])} />
       </svg>
+      {/* The form's crest plate swaps in and seats with a rim glint. */}
       {(["standard", "max", "ultra"] as const).map((form) => (
-        <svg key={form} className={`rx-suit-crest is-${form}`} viewBox={view}>
-          <path d={outline(SUIT_CRESTS[form])} />
-        </svg>
+        <div key={form} className={`rx-suit-crest is-${form}`}>
+          <svg viewBox={view}>
+            <path d={outline(SUIT_CRESTS[form])} />
+          </svg>
+          <svg className="rx-suit-crest-glint" viewBox={view}>
+            <path d={outline(SUIT_CRESTS[form])} />
+          </svg>
+        </div>
       ))}
       <svg className="rx-suit-badge-eyes" viewBox={view}>
         <path d={outline([SUIT_EYE, mirror(SUIT_EYE)])} />
@@ -294,25 +473,66 @@ function SuitBadge() {
 function Suit() {
   return (
     <div className="rx-suit">
+      <SuitLight />
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />
       <i className="rx-suit-heading" />
       <div className="rx-suit-figure">
-        <svg className="rx-suit-blueprint" viewBox="0 0 240 480" preserveAspectRatio="none">
-          <path
-            className="rx-suit-guides"
-            d="M120 0V480M0 78H240M0 125H240M0 154H240M0 230H240M0 341H240M0 474H240"
+        {/* FAR UP！ scans the undersuit top to bottom: a frame that slides
+            down over a drawing that holds still (two transforms). */}
+        <i className="rx-suit-scan">
+          <svg className="rx-suit-blueprint" viewBox="0 0 240 480" preserveAspectRatio="none">
+            <path
+              className="rx-suit-guides"
+              d="M120 0V480M0 78H240M0 125H240M0 154H240M0 230H240M0 341H240M0 474H240"
+            />
+            <path d={`${SUIT_SILHOUETTE}${mirrorPath(SUIT_SILHOUETTE)}`} />
+          </svg>
+        </i>
+        {SUIT_JOINTS.map(([x, y], index) => (
+          <i
+            key={`${x}-${y}`}
+            className="rx-suit-joint"
+            style={
+              {
+                left: percent(x, SUIT_W),
+                top: percent(y, SUIT_H),
+                "--rx-suit-j": index,
+              } as CSSProperties
+            }
           />
-          <path d={`${SUIT_SILHOUETTE}${mirrorPath(SUIT_SILHOUETTE)}`} />
-        </svg>
+        ))}
+        {SUIT_PIECES.map((piece) => (
+          <SuitShape
+            key={`${piece.name}-${piece.order}`}
+            className={`rx-suit-plate ${piece.name} is-${piece.tone}`}
+            shapes={piece.shapes}
+            pivot={piece.pivot}
+            // The rim glint marks each group's key plate and the iris.
+            glint={/is-key|is-iris/.test(piece.name)}
+            style={pieceStyle(piece)}
+          />
+        ))}
+        {SUIT_HELM.map((piece) => (
+          <SuitShape
+            key={piece.name}
+            className={`rx-suit-helm ${piece.name} is-${piece.tone}`}
+            shapes={piece.shapes}
+            pivot={piece.pivot}
+            glint
+            style={pieceStyle(piece)}
+          />
+        ))}
+        <SuitShape className="rx-suit-face is-left" shapes={[SUIT_FACE]} />
+        <SuitShape className="rx-suit-face is-right" shapes={[mirror(SUIT_FACE)]} />
         {SUIT_PLATES.map((plate) => (
           <SuitShape
             key={plate.name}
-            className={`rx-suit-plate ${plate.name}`}
-            shapes={plate.shapes}
-            accent={"accent" in plate ? plate.accent : undefined}
-            style={{ "--rx-suit-i": plate.index } as CSSProperties}
+            className={`rx-suit-trim ${plate.name}`}
+            shapes={plate.accent}
+            bare
+            style={{ "--rx-suit-z": SUIT_TRIM_ZONE[plate.index] } as CSSProperties}
           />
         ))}
         {SUIT_PHASES.map((phase, index) =>
@@ -334,8 +554,6 @@ function Suit() {
             style={{ "--rx-suit-k": index } as CSSProperties}
           />
         ))}
-        <SuitShape className="rx-suit-face is-left" shapes={[SUIT_FACE]} />
-        <SuitShape className="rx-suit-face is-right" shapes={[mirror(SUIT_FACE)]} />
         {SUIT_PHASES.map((phase, index) => (
           <SuitShape
             key={phase}
@@ -346,6 +564,7 @@ function Suit() {
           />
         ))}
         <i className="rx-suit-core" />
+        <i className="rx-suit-jewel" />
         <i className="rx-suit-lock" />
       </div>
       <div className="rx-suit-callouts">

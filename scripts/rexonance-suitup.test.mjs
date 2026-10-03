@@ -9,7 +9,12 @@ import {
 } from "../src/lib/rexonance-calls.ts";
 import { REXONANCE_STAGE_CARD_LEAVE_MS } from "../src/lib/rexonance-stage-call.ts";
 
-/* 2026-10-03 rx3: the suit-up. The henshin call sequence gains an armour
+/* 2026-10-04 suitup2: the fitting. Plates are cut into pieces along the
+   owner's outlines (scripts pin the clock per line and per piece), the
+   helmet waits open through REXONANCE！ and shuts on REXONANCE DEUS！, gold
+   reaches the trims last, and wide landscape frames stand the figure
+   beside the calls.
+   2026-10-03 rx3: the suit-up. The henshin call sequence gains an armour
    assembly on its own clock: a HUD boots on FAR UP！, a blueprint traces on
    RIDER！, one plate group locks on each quarter-beat of SA-GA！DEUS！,
    resonance runs through the armour with the aperture's arcs on
@@ -180,14 +185,15 @@ const derived = Object.fromEntries(
 function ms(expression, element) {
   let value = expression;
   for (let pass = 0; pass < 4; pass += 1) {
-    value = value.replace(/var\((--[\w-]+)\)/g, (_, name) => {
+    value = value.replace(/var\((--[\w-]+)(?:,\s*([^()]+))?\)/g, (_, name, fallback) => {
       if (name in element) return String(element[name]);
       if (name in derived) return derived[name];
       if (name in CLOCK) return String(CLOCK[name]);
+      if (fallback !== undefined) return fallback;
       throw new Error(`unknown ${name} in ${expression}`);
     });
   }
-  const arithmetic = value.replace(/calc\(/g, "(").replace(/(\d)ms\b/g, "$1");
+  const arithmetic = value.replace(/calc\(/g, "(").replace(/(\d)(?:ms|deg|px)\b/g, "$1");
   assert.match(arithmetic, /^[\d\s.+\-*/()]+$/, expression);
   return Function(`return (${arithmetic});`)();
 }
@@ -202,6 +208,15 @@ const layerTimes = (layer, element) => {
   const delay = times[1] ? ms(times[1], element) : 0;
   return { name: tokens[0], duration, delay, end: duration + delay };
 };
+// Every flight time a piece declares.
+const FLIGHTS = [
+  ...new Set(
+    rules
+      .map(({ body }) => declaration(body, "--rx-suit-fly"))
+      .filter(Boolean)
+      .map((value) => Number.parseFloat(value)),
+  ),
+].sort((a, b) => a - b);
 const covering = (fragment) =>
   rules.find(
     ({ selector, body }) =>
@@ -213,21 +228,52 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   const chant = REXONANCE_CALL_BEATS[2];
   const response = REXONANCE_CALL_BEATS[3];
   const final = REXONANCE_CALL_BEATS[4].start;
-  // One plate group per quarter-beat of SA-GA！DEUS！, arriving on it: the
-  // keyframe's arrival (80 %) lands on the beat, the bite starts there.
+  // One plate group per line of SA-GA！DEUS！ (suitup2: legs, arms, chest,
+  // mantle), its pieces 26 ms apart: each piece's seat (80 %) lands on its
+  // lock, whatever its flight time; the bite starts there and the rim glint
+  // peaks there.
   const plate = covering(".rx-suit-plate");
-  assert.match(keyframes.get("rxSuitPlate"), /80% \{\s*transform:/);
-  for (const index of [0, 1, 2, 3]) {
-    const lock = chant.start + (index * chant.duration) / 4;
-    const { duration, delay } = layerTimes(declaration(plate.body, "animation"), {
-      "--rx-suit-i": index,
-    });
-    assert.equal(delay + 0.8 * duration, lock, `plate group ${index}`);
-    const bite = layerTimes(declaration(covering(".rx-suit-plate::before").body, "animation"), {
-      "--rx-suit-i": index,
-    });
-    assert.equal(bite.delay, lock);
+  assert.match(keyframes.get("rxSuitPlate"), /80% \{[^}]*transform:/);
+  for (const [part, line] of [
+    ["is-legs is-upper is-key", 0],
+    ["is-arms is-limb is-key", 1],
+    ["is-chest is-key", 2],
+    ["is-mantle is-key", 3],
+  ]) {
+    assert.match(component, new RegExp(`"${part}[^]*?line: ${line}, order: 0|name: "${part}",[^}]*?line: ${line},\\s*order: 0`));
   }
+  for (const index of [0, 1, 2, 3]) {
+    for (const order of [0, 1, 2, 3, 4]) {
+      const lock = chant.start + (index * chant.duration) / 4 + order * 26;
+      for (const fly of FLIGHTS) {
+        const element = { "--rx-suit-i": index, "--rx-suit-j": order, "--rx-suit-fly": fly };
+        const { duration, delay } = layerTimes(declaration(plate.body, "animation"), element);
+        assert.equal(delay + 0.8 * duration, lock, `plate ${index}/${order}/${fly}`);
+        const streak = layerTimes(
+          declaration(covering(".rx-suit-plate:is(.is-legs, .is-limb)::after").body, "animation"),
+          element,
+        );
+        assert.deepEqual([streak.delay, streak.duration], [delay, duration], "the streak flies with it");
+        const bite = layerTimes(
+          declaration(covering(".rx-suit-plate.is-key::before").body, "animation"),
+          element,
+        );
+        assert.equal(bite.delay, lock);
+      }
+    }
+  }
+  assert.deepEqual(FLIGHTS, [160, 220, 260, 300]);
+  // FAR UP！: the scan's window and its drawing share one clock, so the
+  // drawing holds still while the window slides down over it.
+  const scan = declaration(covering(".rx-suit-scan").body, "animation");
+  const hold = splitTopLevel(declaration(covering(".rx-suit-scan > svg").body, "animation"))[0];
+  assert.equal(scan.replace(/^\S+/, ""), hold.replace(/^\S+/, ""));
+  assert.ok(layerTimes(scan, {}).end <= REXONANCE_CALL_BEATS[1].start, "scanned on FAR UP！");
+  // REXONANCE！'s fourth line: the gold has reached the legs' trims.
+  const trim = layerTimes(declaration(covering(".rx-suit-trim").body, "animation"), {
+    "--rx-suit-z": 2,
+  });
+  assert.equal(trim.delay, response.start + (3 * response.duration) / 4);
   // Resonance: one phase per REXONANCE！ quarter-beat, with the arcs.
   for (const phase of [0, 1, 2]) {
     const at = response.start + (phase * response.duration) / 4;
@@ -241,11 +287,22 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     });
     assert.equal(glow.delay, at);
   }
-  // REXONANCE DEUS！: the faceplate shuts on the beat, then the eyes ignite
-  // ice, violet, gold; the core ignites with gold; all before the cover ends.
+  // REXONANCE DEUS！: the helmet, waiting open since the first REXONANCE！,
+  // drops on the beat (90 %) and is seated 80 ms later; the faceplate shuts
+  // behind it, then the eyes ignite ice, violet, gold; the core ignites
+  // with gold; all before the cover ends.
+  const helm = layerTimes(
+    declaration(covering(":is(.rx-suit-helm, .rx-suit-face)").body, "animation"),
+    {},
+  );
+  assert.match(keyframes.get("rxSuitHelm"), /10% \{[^}]*opacity: 0\.5;[^]*90% \{[^}]*opacity: 0\.5;/);
+  assert.equal(helm.delay + 0.1 * helm.duration, response.start + 40);
+  assert.equal(helm.delay + 0.9 * helm.duration, final);
+  assert.equal(helm.end, final + 80);
   const shut = declaration(covering(".rx-suit-face > svg").body, "animation");
   assert.match(shut, /^rxSuitFaceShut /);
-  assert.equal(layerTimes(shut, {}).delay, final);
+  assert.equal(layerTimes(shut, {}).delay, final + 50);
+  assert.ok(layerTimes(shut, {}).end <= final + 140);
   const eyes = [0, 1, 2].map((phase) =>
     layerTimes(declaration(covering(".rx-suit-eyes").body, "animation"), {
       "--rx-suit-k": phase,
@@ -255,18 +312,16 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   assert.ok(eyes[1].delay < eyes[2].delay, "gold locks last");
   const core = layerTimes(declaration(covering(".rx-suit-core").body, "animation"), {});
   assert.ok(core.delay >= eyes[1].end && core.end <= cover, "the core ignites with gold");
-  // The reticle acquires on FAR UP！, dims as the helmet locks inside it and
-  // hands over to the gold lock on the last call (its keyframes on the clock).
+  // The reticle acquires on FAR UP！, dims as the helmet arrives above it on
+  // the first REXONANCE！ (suitup2; it locked on the chant's fourth line
+  // before) and hands over to the gold lock on the last call.
   const reticle = layerTimes(declaration(covering(".rx-suit-lock::before").body, "animation"), {});
   const at = (offset) => reticle.delay + (offset / 100) * reticle.duration;
   const stops = [
     ...keyframes.get("rxSuitReticle").matchAll(/([\d.]+)% \{\s*opacity: ([\d.]+);/g),
   ].map(([, offset, opacity]) => [Math.round(at(Number(offset)) * 2) / 2, Number(opacity)]);
   assert.ok(reticle.delay < REXONANCE_CALL_BEATS[1].start, "acquired on FAR UP！");
-  assert.deepEqual(
-    stops.filter(([, opacity]) => opacity === 0.8).at(-1)[0],
-    chant.start + (3 * chant.duration) / 4,
-  );
+  assert.deepEqual(stops.filter(([, opacity]) => opacity === 0.8).at(-1)[0], response.start);
   assert.deepEqual(stops.filter(([, opacity]) => opacity === 0.32).at(-1)[0], final);
   assert.equal(
     layerTimes(declaration(covering(".rx-suit-lock::after").body, "animation"), {}).delay,
@@ -281,13 +336,20 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     for (const layer of splitTopLevel(declaration(body, "animation"))) {
       for (let i = 0; i <= indices; i += 1) {
         for (const k of [0, 1, 2]) {
-          const { end } = layerTimes(layer, {
-            "--rx-suit-i": i,
-            "--rx-suit-k": k,
-            "--rx-suit-z": 2,
-          });
-          assert.ok(end <= cover, `${selector}: ${layer} ends at ${end}`);
-          checked += 1;
+          // Pieces run 0-4 in a line, joints 0-6; trims reach zone 3.
+          for (const j of [0, 4, 6]) {
+            for (const fly of FLIGHTS) {
+              const { end } = layerTimes(layer, {
+                "--rx-suit-i": i,
+                "--rx-suit-j": j,
+                "--rx-suit-k": k,
+                "--rx-suit-z": 3,
+                "--rx-suit-fly": fly,
+              });
+              assert.ok(end <= cover, `${selector}: ${layer} ends at ${end}`);
+              checked += 1;
+            }
+          }
         }
       }
     }
@@ -322,7 +384,9 @@ test("motion is gated by reduced motion, forced colours and economy, finite and 
   for (const [name, body] of suitFrames) {
     const properties = [...body.matchAll(/(?:^|[;{}])\s*([a-z-]+)\s*:/g)].map((m) => m[1]);
     assert.ok(properties.length > 0, name);
-    for (const property of properties) assert.ok(["opacity", "transform"].includes(property), name);
+    // A keyframe may also carry its own easing (not an animated property).
+    for (const property of properties)
+      assert.ok(["opacity", "transform", "animation-timing-function"].includes(property), name);
   }
   // HUD pieces are hidden unless the full tier runs; calm, economy and
   // reduced never see a boot, a callout, a lock or a badge.
@@ -333,6 +397,7 @@ test("motion is gated by reduced motion, forced colours and economy, finite and 
     "rx-suit-lock",
     "rx-suit-boot",
     "rx-suit-badge",
+    "rx-suit-joint",
   ]) {
     const base = rules.find(
       ({ selector, context }) => selector === `.rx-call-sequence .${piece}` && context.length === 0,

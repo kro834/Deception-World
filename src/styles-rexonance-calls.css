@@ -1029,6 +1029,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   /* The figure's height; its 1:2 box is centred below the caption row.
      Callout anchors sit in its outer bands, clear of the calls. */
   --rx-suit-h: min(86vh, 150vw, 960px, 100vh - 128px);
+  /* The figure's centre: the frame's, or beside the calls (below). */
+  --rx-suit-cx: 50%;
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -1051,7 +1053,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 .rx-call-sequence .rx-suit-figure {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: var(--rx-suit-cx);
   width: calc(var(--rx-suit-h) / 2);
   height: var(--rx-suit-h);
   translate: -50% -50%;
@@ -1069,13 +1071,14 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   overflow: visible;
 }
 
-.rx-call-sequence .rx-suit-figure > i > svg {
-  width: 100%;
-  height: 100%;
+.rx-call-sequence .rx-suit .rx-suit-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
-.rx-call-sequence .rx-suit-blueprint {
-  inset: 0;
+.rx-call-sequence .rx-suit-figure > i > svg {
   width: 100%;
   height: 100%;
 }
@@ -1086,10 +1089,44 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   vector-effect: non-scaling-stroke;
 }
 
-/* The undersuit, dashed, on its construction lines. */
+/* The undersuit, dashed, on its construction lines, inside the scan's
+   window; the sweep is the window's lower edge. */
+.rx-call-sequence .rx-suit-scan {
+  inset: 0 -20%;
+  overflow: hidden;
+}
+
+.rx-call-sequence .rx-suit-scan::before,
+.rx-call-sequence .rx-suit-scan::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  opacity: 0;
+}
+
+.rx-call-sequence .rx-suit-scan::before {
+  height: 7%;
+  background: radial-gradient(50% 100% at 50% 100%, rgb(121 232 255 / 22%), transparent);
+}
+
+.rx-call-sequence .rx-suit-scan::after {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9f6ff 22% 78%, transparent);
+}
+
+.rx-call-sequence .rx-suit-scan > .rx-suit-blueprint {
+  position: absolute;
+  top: 0;
+  left: 14.2857%;
+  width: 71.4286%;
+  height: 100%;
+}
+
 .rx-call-sequence .rx-suit-blueprint path {
   fill: none;
-  stroke: rgb(121 232 255 / 30%);
+  stroke: rgb(121 232 255 / 46%);
   stroke-dasharray: 2 4;
 }
 
@@ -1098,30 +1135,63 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke-dasharray: none;
 }
 
-/* Plates: ice on the left, violet on the right, white at the centre;
-   the core housing is gold. */
-.rx-call-sequence .rx-suit-plate path {
-  fill: rgb(121 232 255 / 5%);
-  stroke: rgb(121 232 255 / 62%);
+/* Alignment brackets on the joints (full tier only). */
+.rx-call-sequence .rx-suit-joint {
+  display: none;
+  width: calc(var(--rx-suit-h) * 0.05);
+  aspect-ratio: 1;
+  opacity: 0;
+  background:
+    linear-gradient(currentColor 0 0) 0 0 / 30% 1px,
+    linear-gradient(currentColor 0 0) 0 0 / 1px 30%,
+    linear-gradient(currentColor 0 0) 100% 0 / 30% 1px,
+    linear-gradient(currentColor 0 0) 100% 0 / 1px 30%,
+    linear-gradient(currentColor 0 0) 0 100% / 30% 1px,
+    linear-gradient(currentColor 0 0) 0 100% / 1px 30%,
+    linear-gradient(currentColor 0 0) 100% 100% / 30% 1px,
+    linear-gradient(currentColor 0 0) 100% 100% / 1px 30%;
+  background-repeat: no-repeat;
+  color: #bff4ff;
+  translate: -50% -50%;
 }
 
-.rx-call-sequence .rx-suit-plate.is-right path {
-  fill: rgb(182 163 255 / 5%);
-  stroke: rgb(192 175 255 / 62%);
+/* Plates: solid panels lit from above (a darker body under a lit top
+   edge, a rim brightest where the light strikes). Ice on the left,
+   violet on the right, white at the centre; gold is the trims'. */
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path {
+  stroke-width: 1.25px;
 }
 
-.rx-call-sequence .rx-suit-plate:is(.is-chest, .is-head) path {
-  fill: rgb(239 251 255 / 4%);
-  stroke: rgb(222 242 255 / 64%);
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-ice path {
+  fill: url("#rx-suit-fill-ice");
+  stroke: url("#rx-suit-rim-ice");
 }
 
-.rx-call-sequence .rx-suit-plate path.rx-suit-accent {
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-violet path {
+  fill: url("#rx-suit-fill-violet");
+  stroke: url("#rx-suit-rim-violet");
+}
+
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-white path {
+  fill: url("#rx-suit-fill-white");
+  stroke: url("#rx-suit-rim-white");
+}
+
+/* The lock's rim glint: a bright copy of the outline, never a fill. */
+.rx-call-sequence .rx-suit-figure > i > .rx-suit-glint {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) > svg.rx-suit-glint path {
   fill: none;
-  stroke: rgb(227 193 133 / 88%);
+  stroke: #fbfeff;
+  stroke-width: 1.5px;
 }
 
-/* A bracket bite: four corners that clamp the plate as it locks. */
-.rx-call-sequence .rx-suit-plate::before {
+/* A bracket bite: four corners that clamp the key plate as it locks. */
+.rx-call-sequence .rx-suit-plate.is-key::before {
   position: absolute;
   inset: -4px;
   content: "";
@@ -1139,8 +1209,38 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   color: #bff4ff;
 }
 
-.rx-call-sequence .rx-suit-plate.is-right::before {
+.rx-call-sequence .rx-suit-plate.is-violet::before {
   color: #d6ccff;
+}
+
+.rx-call-sequence .rx-suit-plate.is-white::before {
+  color: #eef8ff;
+}
+
+/* Motion streaks: three speed lines trailing back along the flight,
+   under the plate (full tier only; resting at 0). */
+.rx-call-sequence .rx-suit-plate:is(.is-legs, .is-limb)::after {
+  --rx-suit-streak: rgb(121 232 255 / 60%);
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--rx-suit-h) * 0.24);
+  height: 44%;
+  content: "";
+  opacity: 0;
+  background:
+    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 12% / 100% 1px,
+    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 50% / 72% 1px,
+    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 88% / 100% 1px;
+  background-repeat: no-repeat;
+  transform-origin: 0 50%;
+  translate: 0 -50%;
+  rotate: var(--rx-suit-a, 0deg);
+}
+
+.rx-call-sequence .rx-suit-plate.is-violet::after {
+  --rx-suit-streak: rgb(192 175 255 / 60%);
 }
 
 /* The faceplate: two halves, folded into the helmet's sides until the
@@ -1152,6 +1252,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 .rx-call-sequence .rx-suit-face.is-right path {
   stroke: rgb(192 175 255 / 72%);
+}
+
+/* The trims: the owner's accent outlines, in gold. */
+.rx-call-sequence .rx-suit-trim path {
+  fill: none;
+  stroke: rgb(227 193 133 / 90%);
 }
 
 .rx-call-sequence .rx-suit-eyes path {
@@ -1181,7 +1287,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 .rx-call-sequence .rx-suit-glow path {
   fill: none;
-  stroke-width: 1.25px;
+  stroke-width: 1.5px;
 }
 
 .rx-call-sequence .rx-suit-glow.is-ice path {
@@ -1215,7 +1321,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   border-color: #e3c185;
 }
 
-.rx-call-sequence .rx-suit-core {
+/* The core (spiral housing) and the belt jewel bloom gold last. */
+.rx-call-sequence :is(.rx-suit-core, .rx-suit-jewel) {
   top: 32.083%;
   left: 50%;
   width: 8%;
@@ -1225,6 +1332,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   border-radius: 50%;
   box-shadow: 0 0 9px 2px rgb(227 193 133 / 42%);
   translate: -50% -50%;
+}
+
+.rx-call-sequence .rx-suit-jewel {
+  top: 47.917%;
+  width: 5%;
+  background: radial-gradient(#fbecc4 30%, #d9b46e);
+  box-shadow: 0 0 6px 1px rgb(227 193 133 / 36%);
 }
 
 /* The target: an ice reticle acquires the visor's place on FAR UP！ and
@@ -1348,7 +1462,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   position: absolute;
   top: calc(50% + (var(--rx-suit-y) - 0.5) * var(--rx-suit-h));
   right: max(36px, calc(env(safe-area-inset-right) + 16px));
-  left: calc(50% + var(--rx-suit-x) * var(--rx-suit-h));
+  left: calc(var(--rx-suit-cx) + var(--rx-suit-x) * var(--rx-suit-h));
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
@@ -1382,7 +1496,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 .rx-call-sequence .rx-suit-callout.is-legs {
   --rx-suit-x: -0.05;
   --rx-suit-y: 0.942;
-  right: calc(50% - var(--rx-suit-x) * var(--rx-suit-h));
+  right: calc(100% - var(--rx-suit-cx) - var(--rx-suit-x) * var(--rx-suit-h));
   left: max(36px, calc(env(safe-area-inset-left) + 16px));
   flex-direction: row;
 }
@@ -1390,7 +1504,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 .rx-call-sequence .rx-suit-callout.is-lock {
   top: calc(50% - 0.46 * var(--rx-suit-h));
   right: auto;
-  left: calc(50% + 0.1 * var(--rx-suit-h));
+  left: calc(var(--rx-suit-cx) + 0.1 * var(--rx-suit-h));
   color: #f2d896;
 }
 
@@ -1518,10 +1632,85 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+/* Wide landscape frames: the figure stands beside the calls, in the room
+   the chant leaves on the right (the chant measures about 9.2 em at its
+   own size), so the fitting reads whole and the words stay clear. */
+@media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+  .rx-call-sequence .rx-suit {
+    --rx-suit-chant: clamp(24px, 5.75vw, 100px);
+    --rx-suit-edge: 36px;
+    --rx-suit-h: min(
+      86vh,
+      960px,
+      100vh - 128px,
+      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+    );
+    --rx-suit-cx: calc(100% - var(--rx-suit-edge) - var(--rx-suit-h) / 4);
+  }
+
+  /* Only the last call reaches the figure here: a lighter torso band. */
+  .rx-call-sequence .rx-suit-figure {
+    -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 62%) 40% 62%, #000 72%);
+    mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 62%) 40% 62%, #000 72%);
+  }
+
+  /* Every label reads on the right, the legs' too (from the right boot):
+     nothing stands between the figure and the calls. */
+  .rx-call-sequence .rx-suit-callout.is-legs {
+    --rx-suit-x: 0.05;
+    right: max(36px, calc(env(safe-area-inset-right) + 16px));
+    left: calc(var(--rx-suit-cx) + var(--rx-suit-x) * var(--rx-suit-h));
+    flex-direction: row-reverse;
+  }
+
+  .rx-call-sequence .rx-suit-callout.is-legs > i {
+    background: linear-gradient(270deg, rgb(121 232 255 / 16%), rgb(121 232 255 / 55%));
+    transform-origin: 0 50%;
+  }
+
+  .rx-call-sequence .rx-suit-callout.is-legs > i::after {
+    right: auto;
+    left: -2px;
+  }
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
+  .rx-call-sequence .rx-suit {
+    --rx-suit-chant: min(5.75vw, 10vh);
+    --rx-suit-edge: 24px;
+    --rx-suit-h: min(
+      100vh - 88px,
+      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+    );
+  }
+}
+
+@supports (height: 1svh) {
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+    .rx-call-sequence .rx-suit {
+      --rx-suit-h: min(
+        86svh,
+        960px,
+        100svh - 128px,
+        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+      );
+    }
+  }
+
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
+    .rx-call-sequence .rx-suit {
+      --rx-suit-h: min(
+        100svh - 88px,
+        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+      );
+    }
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
-    :is(.rx-suit-rim, .rx-suit-callouts, .rx-suit-lock) {
+    :is(.rx-suit-rim, .rx-suit-callouts, .rx-suit-lock, .rx-suit-joint) {
     display: block;
   }
 
@@ -1573,33 +1762,81 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitTick 60ms steps(2, jump-end) calc(120ms + var(--rx-suit-i) * 32ms) both;
   }
 
-  /* RIDER！: the blueprint traces in. */
+  /* FAR UP！ also scans the body: a single sweep runs top to bottom and
+     leaves the undersuit drawn behind it (the window slides down while
+     its drawing holds still: two transforms, no clip). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-blueprint {
-    animation: rxSuitTrace 240ms steps(4, jump-end) var(--rx-call-rider-start) both;
+    .rx-suit-scan {
+    animation: rxSuitScanWindow 250ms cubic-bezier(0.45, 0, 0.55, 1) 70ms both;
   }
 
-  /* SA-GA！DEUS！: one plate group locks on each quarter-beat — legs,
-     arms, chest, helmet — arriving off-axis and biting shut on it. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-scan
+    > svg {
+    animation:
+      rxSuitScanHold 250ms cubic-bezier(0.45, 0, 0.55, 1) 70ms both,
+      rxSuitUndersuit 60ms steps(2, jump-end) var(--rx-call-rider-start) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-scan::before,
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-scan::after {
+    animation: rxSuitSweep 330ms linear 70ms both;
+  }
+
+  /* RIDER！: the undersuit locks (above) and alignment brackets bite on
+     the joints, core first, then shoulders, elbows, knees. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-joint {
+    animation: rxSuitJoint 900ms linear calc(var(--rx-call-rider-start) + var(--rx-suit-j) * 24ms)
+      both;
+  }
+
+  /* SA-GA！DEUS！: one plate group locks on each line — legs, arms (the
+     shoulder blades fanning in one by one), chest (its spiral housing
+     closing like an iris), the mantle crescent. Each piece flies in
+     off-axis, slides, pauses, seats a hair past its place on the lock
+     (80 %) and settles; the bite and a rim glint mark the lock. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
-    :is(.rx-suit-plate, .rx-suit-face, .rx-suit-callout) {
+    :is(.rx-suit-plate, .rx-suit-callout) {
     --rx-suit-lock: calc(
-      var(--rx-call-chant-start) + var(--rx-suit-i) * var(--rx-call-chant-duration) / 4
+      var(--rx-call-chant-start) + var(--rx-suit-i) * var(--rx-call-chant-duration) / 4 +
+        var(--rx-suit-j, 0) * 26ms
     );
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-plate {
-    animation: rxSuitPlate 120ms cubic-bezier(0.3, 0, 0.1, 1) calc(var(--rx-suit-lock) - 96ms) both;
+    animation: rxSuitPlate var(--rx-suit-fly) linear
+      calc(var(--rx-suit-lock) - var(--rx-suit-fly) * 0.8) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate::before {
+    .rx-suit-plate:is(.is-legs, .is-limb)::after {
+    animation: rxSuitStreak var(--rx-suit-fly) linear
+      calc(var(--rx-suit-lock) - var(--rx-suit-fly) * 0.8) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate.is-key::before {
     animation: rxSuitBite 260ms cubic-bezier(0.2, 0.9, 0.1, 1) var(--rx-suit-lock) forwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate
+    > .rx-suit-glint {
+    animation: rxSuitGlint 240ms linear calc(var(--rx-suit-lock) - 20ms) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1615,25 +1852,40 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitTick 60ms steps(2, jump-end) calc(var(--rx-suit-lock) + 50ms) both;
   }
 
-  /* The faceplate arrives folded with the helmet and shuts on
-     REXONANCE DEUS！: each half's box arrives and its plate shuts, one
-     transform animation per box, so both stay on the compositor. */
+  /* The helmet waits above, open, from the first REXONANCE！ (10 %) and on
+     REXONANCE DEUS！ (90 %) slams down and shuts: shell and spike drop,
+     the crest halves fold in, the faceplate halves close behind them. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-face {
-    animation: rxSuitFaceArrive 120ms cubic-bezier(0.3, 0, 0.1, 1) calc(var(--rx-suit-lock) - 96ms)
-      both;
+    :is(.rx-suit-helm, .rx-suit-face) {
+    animation: rxSuitHelm calc(var(--rx-call-final-start) - var(--rx-call-response-start) + 120ms)
+      linear calc(var(--rx-call-response-start) - 40ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-helm
+    > .rx-suit-glint {
+    animation: rxSuitGlint 240ms linear calc(var(--rx-call-final-start) + 50ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-face
     > svg {
-    animation: rxSuitFaceShut 100ms cubic-bezier(0.6, 0, 0.15, 1) var(--rx-call-final-start) both;
+    animation: rxSuitFaceShut 90ms cubic-bezier(0.6, 0, 0.15, 1)
+      calc(var(--rx-call-final-start) + 50ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-callout.is-head {
+    --rx-suit-lock: calc(var(--rx-call-final-start) + 80ms);
   }
 
   /* REXONANCE！: resonance runs from the core through the armour, one
-     phase per line with the aperture's arcs — ice, violet, gold. */
+     phase per line with the aperture's arcs — ice, violet, gold — and the
+     gold stays in the trims, core to arms to legs, the last on line four. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
     :is(.rx-suit-glow, .rx-suit-ring) {
@@ -1646,7 +1898,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-glow {
     animation: rxSuitGlow 300ms cubic-bezier(0.2, 0.7, 0.2, 1)
-      calc(var(--rx-suit-at) + var(--rx-suit-z) * 40ms) both;
+      calc(var(--rx-suit-at) + var(--rx-suit-z) * 70ms) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1655,18 +1907,35 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitRing 360ms cubic-bezier(0.1, 0.6, 0.3, 1) var(--rx-suit-at) forwards;
   }
 
-  /* The reticle acquires on FAR UP！, dims once the helmet locks inside
-     it, and on REXONANCE DEUS！ hands over to the gold lock. Its keyframes
-     sit on the call clock: the helmet's lock at 1137.5 ms (53.34 %) and
-     the last call at 1980 ms (95.05 %). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-trim {
+    animation: rxSuitTick 240ms cubic-bezier(0.2, 0.7, 0.2, 1)
+      calc(
+        var(--rx-call-response-start) + var(--rx-call-response-duration) / 2 + var(--rx-suit-z) *
+          85ms
+      )
+      both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-trim.is-head {
+    animation: rxSuitTick 80ms linear calc(var(--rx-call-final-start) + 190ms) both;
+  }
+
+  /* The reticle acquires on FAR UP！, dims as the helmet arrives above it
+     on the first REXONANCE！, and on REXONANCE DEUS！ hands over to the gold
+     lock. Its keyframes sit on the call clock: 1300 ms (61.386 %) and the
+     last call at 1980 ms (95.05 %). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-lock::before {
     animation: rxSuitReticle 2020ms linear 60ms both;
   }
 
-  /* REXONANCE DEUS！: the lock settles on the visor, the faceplate shuts,
-     and the eyes and the core ignite — ice, violet, gold last. */
+  /* REXONANCE DEUS！: the lock settles on the visor, the helmet shuts,
+     and the eyes, the core and the belt jewel ignite — gold last. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-lock::after {
@@ -1683,13 +1952,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-eyes {
     animation: rxSuitIgnite 50ms linear
-      calc(var(--rx-call-final-start) + 110ms + var(--rx-suit-k) * 60ms) both;
+      calc(var(--rx-call-final-start) + 140ms + var(--rx-suit-k) * 50ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-core {
-    animation: rxSuitCore 80ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 220ms) both;
+    animation: rxSuitCore 70ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 240ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-jewel {
+    animation: rxSuitCore 60ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 255ms) both;
   }
 
   /* The hand-over: the suit leaves with the caption and the frame. */
@@ -1697,6 +1972,16 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
     .rx-suit {
     animation: rxCallGroundOut 120ms ease-out both;
+  }
+}
+
+/* Short landscapes: the last call runs nearly edge to edge at the height of
+   the arms' and chest's labels, so those two step aside as it strikes. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (orientation: landscape) and (max-height: 560px) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-callout:is(.is-arms, .is-chest) {
+    animation: rxSuitBootOut 60ms linear calc(var(--rx-call-final-start) - 40ms) both;
   }
 }
 
@@ -1708,45 +1993,86 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-.rx-call-sequence .rx-suit-plate.is-legs {
-  --rx-suit-dx: calc(var(--rx-suit-h) * -0.07);
-  --rx-suit-dy: calc(var(--rx-suit-h) * 0.06);
-  --rx-suit-r: -9deg;
+/* Flight paths, as fractions of the figure's height (--rx-suit-a points
+   the streak back along the path). Back pieces arrive from further away
+   (smaller), front ones from nearer the camera (larger). */
+.rx-call-sequence .rx-suit-plate {
+  --rx-suit-fly: 260ms;
+  --rx-suit-dx: 0px;
+  --rx-suit-dy: 0px;
+  --rx-suit-r: 0deg;
+  --rx-suit-s: 1;
 }
 
-.rx-call-sequence .rx-suit-plate.is-legs.is-right {
-  --rx-suit-dx: calc(var(--rx-suit-h) * 0.07);
-  --rx-suit-r: 9deg;
+.rx-call-sequence .rx-suit-plate.is-legs.is-upper {
+  --rx-suit-dx: calc(var(--rx-suit-h) * -0.16);
+  --rx-suit-dy: calc(var(--rx-suit-h) * 0.2);
+  --rx-suit-r: -12deg;
+  --rx-suit-a: 129deg;
 }
 
-.rx-call-sequence .rx-suit-plate.is-arms {
-  --rx-suit-dx: calc(var(--rx-suit-h) * -0.1);
-  --rx-suit-dy: calc(var(--rx-suit-h) * -0.02);
-  --rx-suit-r: -14deg;
+.rx-call-sequence .rx-suit-plate.is-legs.is-upper.is-right {
+  --rx-suit-dx: calc(var(--rx-suit-h) * 0.16);
+  --rx-suit-r: 12deg;
+  --rx-suit-a: 51deg;
 }
 
-.rx-call-sequence .rx-suit-plate.is-arms.is-right {
-  --rx-suit-dx: calc(var(--rx-suit-h) * 0.1);
-  --rx-suit-r: 14deg;
+.rx-call-sequence .rx-suit-plate.is-legs.is-lower {
+  --rx-suit-dx: calc(var(--rx-suit-h) * -0.12);
+  --rx-suit-dy: calc(var(--rx-suit-h) * 0.27);
+  --rx-suit-r: -6deg;
+  --rx-suit-a: 114deg;
+}
+
+.rx-call-sequence .rx-suit-plate.is-legs.is-lower.is-right {
+  --rx-suit-dx: calc(var(--rx-suit-h) * 0.12);
+  --rx-suit-r: 6deg;
+  --rx-suit-a: 66deg;
+}
+
+.rx-call-sequence .rx-suit-plate.is-limb {
+  --rx-suit-dx: calc(var(--rx-suit-h) * -0.22);
+  --rx-suit-dy: calc(var(--rx-suit-h) * -0.05);
+  --rx-suit-r: -26deg;
+  --rx-suit-s: 0.9;
+  --rx-suit-a: 193deg;
+}
+
+.rx-call-sequence .rx-suit-plate.is-limb.is-right {
+  --rx-suit-dx: calc(var(--rx-suit-h) * 0.22);
+  --rx-suit-r: 26deg;
+  --rx-suit-a: -13deg;
+}
+
+/* The blades turn out of the fold about the shoulder (their fold angle
+   is set per blade on the element). */
+.rx-call-sequence .rx-suit-plate.is-blade {
+  --rx-suit-fly: 160ms;
+  --rx-suit-s: 0.78;
 }
 
 .rx-call-sequence .rx-suit-plate.is-chest {
-  --rx-suit-dx: 0px;
-  --rx-suit-dy: calc(var(--rx-suit-h) * 0.03);
-  --rx-suit-r: 0deg;
-  --rx-suit-s: 1.2;
+  --rx-suit-dy: calc(var(--rx-suit-h) * 0.05);
+  --rx-suit-s: 1.4;
 }
 
-.rx-call-sequence .rx-suit-plate.is-head {
-  --rx-suit-dx: 0px;
-  --rx-suit-dy: calc(var(--rx-suit-h) * -0.07);
+.rx-call-sequence .rx-suit-plate.is-iris {
+  --rx-suit-fly: 220ms;
+  --rx-suit-r: -150deg;
+  --rx-suit-s: 1.9;
+}
+
+.rx-call-sequence .rx-suit-plate.is-mantle {
+  --rx-suit-fly: 300ms;
+  --rx-suit-r: 75deg;
+  --rx-suit-s: 0.4;
+}
+
+.rx-call-sequence :is(.rx-suit-helm, .rx-suit-face) {
   --rx-suit-r: 0deg;
-  --rx-suit-s: 1.08;
 }
 
 .rx-call-sequence .rx-suit-face {
-  --rx-suit-i: 3;
-  --rx-suit-dy: calc(var(--rx-suit-h) * -0.07);
   --rx-suit-open: translate3d(-12%, 0, 0) scaleX(0.3);
 }
 
@@ -1796,32 +2122,110 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     opacity: 0;
   }
 }
-@keyframes rxSuitTrace {
+@keyframes rxSuitScanWindow {
   from {
-    opacity: 0;
-    transform: scaleY(0.96);
+    transform: translate3d(0, -100%, 0);
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
-@keyframes rxSuitPlate {
-  0% {
-    opacity: 0;
-    transform: translate3d(var(--rx-suit-dx), var(--rx-suit-dy), 0) rotate(var(--rx-suit-r))
-      scale(var(--rx-suit-s, 1));
+@keyframes rxSuitScanHold {
+  from {
+    transform: translate3d(0, 100%, 0);
   }
-  30% {
+  to {
+    transform: none;
+  }
+}
+@keyframes rxSuitSweep {
+  0% {
     opacity: 1;
   }
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rxSuitUndersuit {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes rxSuitJoint {
+  0% {
+    opacity: 0;
+    transform: scale(2);
+  }
+  6% {
+    opacity: 1;
+  }
+  12% {
+    transform: scale(0.9);
+  }
+  16% {
+    transform: none;
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+/* Slide (to 58 %), a mechanical pause (to 70 %), the seat a hair past its
+   place on the lock (80 %), the settle. */
+@keyframes rxSuitPlate {
+  0% {
+    animation-timing-function: cubic-bezier(0.12, 0.55, 0.2, 1);
+    opacity: 0;
+    transform: translate3d(var(--rx-suit-dx), var(--rx-suit-dy), 0) rotate(var(--rx-suit-r))
+      scale(var(--rx-suit-s));
+  }
+  12% {
+    opacity: 1;
+  }
+  58% {
+    animation-timing-function: linear;
+    transform: translate3d(calc(var(--rx-suit-dx) * 0.07), calc(var(--rx-suit-dy) * 0.07), 0)
+      rotate(calc(var(--rx-suit-r) * 0.08)) scale(calc(1 + (var(--rx-suit-s) - 1) * 0.07));
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.6, 0, 1, 0.6);
+    transform: translate3d(calc(var(--rx-suit-dx) * 0.055), calc(var(--rx-suit-dy) * 0.055), 0)
+      rotate(calc(var(--rx-suit-r) * 0.065)) scale(calc(1 + (var(--rx-suit-s) - 1) * 0.055));
+  }
   80% {
-    transform: translate3d(calc(var(--rx-suit-dx) * -0.03), calc(var(--rx-suit-dy) * -0.03), 0)
-      rotate(calc(var(--rx-suit-r) * -0.05));
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
+    transform: translate3d(calc(var(--rx-suit-dx) * -0.02), calc(var(--rx-suit-dy) * -0.02), 0)
+      rotate(calc(var(--rx-suit-r) * -0.025)) scale(calc(1 - (var(--rx-suit-s) - 1) * 0.015));
   }
   100% {
     opacity: 1;
     transform: none;
+  }
+}
+@keyframes rxSuitStreak {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
   }
 }
 @keyframes rxSuitBite {
@@ -1838,6 +2242,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
+@keyframes rxSuitGlint {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 @keyframes rxSuitLead {
   from {
     transform: scaleX(0);
@@ -1846,12 +2261,34 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-@keyframes rxSuitFaceArrive {
-  from {
+/* 1260 ms in from above (10 %: 1340 ms) to wait open, then from the last
+   call (90 %: 1980 ms) down a hair past its seat (97 %) and settled at
+   2060 ms. */
+@keyframes rxSuitHelm {
+  0% {
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
     opacity: 0;
-    transform: translate3d(0, var(--rx-suit-dy), 0);
+    transform: translate3d(0, calc(var(--rx-suit-h) * -0.11), 0) rotate(var(--rx-suit-r))
+      scale(1.08);
   }
-  to {
+  10% {
+    opacity: 0.5;
+    transform: translate3d(0, calc(var(--rx-suit-h) * -0.05), 0) rotate(var(--rx-suit-r))
+      scale(1.04);
+  }
+  90% {
+    animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5);
+    opacity: 0.5;
+    transform: translate3d(0, calc(var(--rx-suit-h) * -0.05), 0) rotate(var(--rx-suit-r))
+      scale(1.04);
+  }
+  97% {
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
+    opacity: 1;
+    transform: translate3d(0, calc(var(--rx-suit-h) * 0.006), 0)
+      rotate(calc(var(--rx-suit-r) * -0.06));
+  }
+  100% {
     opacity: 1;
     transform: none;
   }
@@ -1870,7 +2307,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: scale(0.97);
   }
   18% {
-    opacity: 0.6;
+    opacity: 0.9;
   }
   100% {
     opacity: 0;
@@ -1898,10 +2335,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   10% {
     transform: scale(1.06) rotate(0deg);
   }
-  53.34% {
+  61.386% {
     opacity: 0.8;
   }
-  57% {
+  64.356% {
     opacity: 0.32;
   }
   95.05% {
@@ -1979,12 +2416,34 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-badge > .rx-suit-crest {
+  position: absolute;
+  inset: 0;
   display: none;
+}
+
+.rx-call-sequence .rx-suit-crest > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .rx-call-sequence .rx-suit-crest path {
   fill: rgb(6 14 24 / 70%);
   stroke: var(--rx-call-accent);
+}
+
+/* The swap's rim glint: a bright copy of the crest's outline. */
+.rx-call-sequence .rx-suit-crest > .rx-suit-crest-glint {
+  opacity: 0;
+}
+
+.rx-call-sequence .rx-suit-crest > .rx-suit-crest-glint path {
+  fill: none;
+  stroke: #fbfeff;
+  stroke-width: 1.5px;
 }
 
 .rx-call-sequence[data-stage="standard"] .rx-suit-badge > .rx-suit-crest.is-standard,
@@ -2035,7 +2494,14 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="stage"][data-tier="full"]
     .rx-suit-crest {
-    animation: rxSuitCrest 120ms cubic-bezier(0.3, 0, 0.1, 1) 40ms both;
+    animation: rxSuitCrest 150ms linear 30ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="stage"][data-tier="full"]
+    .rx-suit-crest
+    > .rx-suit-crest-glint {
+    animation: rxSuitGlint 160ms linear 140ms both;
   }
 
   html:not([data-world-effects="economy"])
@@ -2082,13 +2548,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+/* The plate swap: in fast (to 70 %), a hair past its seat, settled. */
 @keyframes rxSuitCrest {
   0% {
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.2, 1);
     opacity: 0;
     transform: var(--rx-suit-from);
   }
   35% {
     opacity: 1;
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+    transform: translate3d(0, 1.5%, 0) scale(0.985);
   }
   100% {
     opacity: 1;
