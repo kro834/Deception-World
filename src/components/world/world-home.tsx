@@ -23,6 +23,7 @@ import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { warmWorldSwaps } from "./world-swap-warmups";
 
 const POSTERS = [
   {
@@ -952,6 +953,17 @@ export function WorldHome() {
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
+  // A first rider or archive-tab choice paints its picture at once
+  // (world-swap-warmups.ts). The return layout effect has set the shown rider.
+  useEffect(
+    () =>
+      warmWorldSwaps(
+        shellRef.current ?? document,
+        RIDERS.map((rider) => rider.img),
+        riderTabRef.current,
+      ),
+    [],
+  );
 
   useLayoutEffect(() => {
     const returnId = readRiderReturn();

@@ -23,6 +23,7 @@ import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { warmWorldSwaps } from "./world-swap-warmups";
 
 const POSTERS = [
   {
@@ -484,3 +485,4 @@ const EPISODES: EpisodeRecord[] = [
         alt: "仮面ライダーサイファー",
         width: 1024,
         height: 1280,
+        to: "/riders/cipher",

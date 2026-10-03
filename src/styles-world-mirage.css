@@ -188,9 +188,11 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   outline-offset: -5px;
 }
 
-/* 561-760px: the brand text ran into STORY; the sigil carries the brand. */
+/* 561-760px: the brand text ran into STORY; the sigil carries the brand.
+   The sigil is a <span> too: `.brand > span` hid it as well and left the
+   brand link an empty, focusable box, so only the wordmark goes. */
 @media (min-width: 561px) and (max-width: 760px) {
-  .site-shell.film-edition.mirage-edition .brand > span {
+  .site-shell.film-edition.mirage-edition .brand > span:not(.brand-sigil) {
     display: none;
   }
 }

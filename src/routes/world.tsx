@@ -18,6 +18,7 @@ import worldReDiveCssUrl from "@/styles-world-re-dive.css?url";
 import worldAnnexCssUrl from "@/styles-world-annex.css?url";
 import worldRefineCssUrl from "@/styles-world-refine.css?url";
 import worldExhibitionCssUrl from "@/styles-world-exhibition.css?url";
+import worldPhasesCssUrl from "@/styles-world-phases.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -47,6 +48,9 @@ export const Route = createFileRoute("/world")({
         PICKUP_CINEMA_STYLESHEET_LINK,
         { rel: "stylesheet", href: worldRefineCssUrl },
         { rel: "stylesheet", href: worldExhibitionCssUrl },
+        // Each chapter its own colour and air (hero, story, riders, records,
+        // annex, finale), ahead of the HUD face and the last sheet.
+        { rel: "stylesheet", href: worldPhasesCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],

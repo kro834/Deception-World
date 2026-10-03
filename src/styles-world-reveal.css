@@ -81,6 +81,15 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow-wrap: anywhere;
 }
 
+/* A typed heading writes itself as the reader scrolls. film-motion's
+   one-shot scan still swept it as it entered, while its cells were empty:
+   a grey block crossing nothing (over the finale's い。 mid-sweep), a second
+   entrance. The scan stands down on typed blocks, as Mirage stands it down
+   in the hero. */
+.site-shell.film-edition.mirage-edition [data-text-reveal] > .film-text-scan {
+  display: none;
+}
+
 @supports not (word-break: auto-phrase) {
   .site-shell [data-text-reveal] {
     text-wrap-style: auto;

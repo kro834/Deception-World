@@ -1,0 +1,634 @@
+/* World phases (2026-10-03) — each chapter its own colour and air.
+
+   The owner asked for the Deception design to change greatly in colour and
+   atmosphere from phase to phase. The World keeps one grammar (the ice and
+   prism HUD, outlined numerals, brackets, chrome-ink titles) and recolours
+   it per chapter, in reading order:
+   - the hero and the opening hand-over stay the projection bay: ice on
+     midnight ink (the opening's dive lands on this frame);
+   - 01 STORY is an ice dusk: indigo deepening to a mauve horizon, frost
+     light from above, fine frost scanlines, periwinkle HUD, the record on
+     lilac paper in indigo ink;
+   - inside it, the 六詠 archive is bruised violet and crimson, cross-hatched
+     like a quarantine plate, the threat;
+   - 02 RIDERS is steel and prism: brushed gunmetal under a cold sheen,
+     steel HUD, the full prism kept for what is lit;
+   - 03 RECORDS is a sepia archive: lamplit amber over index-card rules,
+     cream prints;
+   - 04-06, the annex, is a verdigris vault: patina green, copper warmth, a
+     microfiche dot ground, celadon paper for the glossary;
+   - the finale burns: ember light under the key art and an ember iris, then
+     the end record and footer fall to deep ink before RISING's own fire.
+
+   How: each chapter's section restates the Mirage, Neo and exhibition
+   tokens (as the exhibition sheet already does for the story plate and
+   the glossary), so every rule written against them follows the phase;
+   the few hard-coded ice strokes are restated here. Grounds and textures
+   are static backgrounds on the sections: they scroll with the content and
+   never repaint on a scroll frame, nothing here moves, and a phase meets the
+   next on a hard edge. All grounds stay dark (the lightest field is the
+   existing paper), so neighbouring phases keep the brisk-scroll flash
+   reading; fire is amber, never a saturated red field. Forced colours keep
+   the system palette (every visual rule sits under forced-colors: none);
+   reduced transparency and more contrast drop the textures.
+
+   This sheet loads after the exhibition sheet and before the Michroma face
+   and Mirage, which stays last; its ID-scoped selectors outrank both. */
+
+/* ================================================================
+   1. Phase tokens
+   ================================================================ */
+main.site-shell.film-edition.mirage-edition #story {
+  --mr-ice: #a9c4ff;
+  --mr-ice-hi: #e0e9ff;
+  --mr-ice-deep: #7290ec;
+  --mr-violet: #c9abff;
+  --mr-magenta: #f2a0d6;
+  --mr-deck: #121b3a;
+  --mr-deck-raised: #182246;
+  --we-panel: #121b3a;
+  --we-rule: rgb(169 196 255 / 24%);
+  --we-gold: #e7c98f;
+  --we-paper: #e8eaf7;
+  --we-print: #1b2350;
+  --we-teal: #3d4cab;
+}
+
+main.site-shell.film-edition.mirage-edition #manager-archive {
+  --mr-ice: #c8a3ff;
+  --mr-ice-hi: #f0e3ff;
+  --mr-ice-deep: #9466f2;
+  --mr-violet: #ff7fa4;
+  --mr-magenta: #ff6a8c;
+  --mr-deck: #180b22;
+  --mr-deck-raised: #22102e;
+  --we-panel: #180b22;
+  --we-rule: rgb(200 163 255 / 26%);
+}
+
+main.site-shell.film-edition.mirage-edition #riders {
+  --mr-ice: #cfd8e3;
+  --mr-ice-hi: #f5f8fc;
+  --mr-ice-deep: #95a3b4;
+  --mr-deck: #151a21;
+  --mr-deck-raised: #1c222b;
+  --we-ink: #11151b;
+  --we-panel: #151a21;
+  --we-rule: rgb(207 216 227 / 22%);
+}
+
+main.site-shell.film-edition.mirage-edition #records {
+  --mr-ice: #efb96f;
+  --mr-ice-hi: #ffe3b8;
+  --mr-ice-deep: #bf884b;
+  --mr-violet: #e0a07a;
+  --mr-magenta: #e98c5e;
+  --mr-deck: #1e150c;
+  --mr-deck-raised: #291d12;
+  --we-panel: #1e150c;
+  --we-paper: #f4e8d0;
+  --we-print: #2b1c0d;
+  /* The prints' small ink: dark enough to hold 4.5:1 on the dimmed cards. */
+  --we-teal: #5e3610;
+  --we-rule: rgb(239 185 111 / 24%);
+}
+
+main.site-shell.film-edition.mirage-edition :is(.wa-contents, .world-annex) {
+  --mr-ice: #6ddfba;
+  --mr-ice-hi: #c6f6e5;
+  --mr-ice-deep: #33ab8a;
+  --mr-violet: #a6dccb;
+  --mr-magenta: #e3a674;
+  --mr-gold: #e6c38c;
+  --mr-deck: #0d1d18;
+  --mr-deck-raised: #122620;
+  --we-panel: #0d1d18;
+  --we-rule: rgb(109 223 186 / 24%);
+  --we-gold: #e3a674;
+}
+
+/* The glossary stays the annex's reading sheet, on celadon paper. */
+main.site-shell.film-edition.mirage-edition #glossary {
+  --mr-text: #10302a;
+  --mr-text-2: #28473f;
+  --mr-text-3: #39594f;
+  --mr-ice: #1c6b56;
+  --mr-ice-hi: #1c6b56;
+  --mr-ice-deep: #1c6b56;
+  --mr-violet: #5d7d4a;
+  --mr-magenta: #865a22;
+  --mr-gold: #865a22;
+  --we-paper: #e3eee7;
+}
+
+main.site-shell.film-edition.mirage-edition :is(.finale-section, .mr-ticker.is-close, footer) {
+  --mr-ice: #ffab66;
+  --mr-ice-hi: #ffdcb8;
+  --mr-ice-deep: #e47b39;
+  --mr-violet: #ffc27a;
+  --mr-magenta: #ff9a5c;
+  --mr-gold: #ffd28c;
+  --mr-ink: #0c0604;
+  --mr-void: #050304;
+  --mr-deck: #180c07;
+  --mr-deck-raised: #221109;
+  --we-gold: #ffd28c;
+}
+
+/* Tokens built from other tokens resolve where they are declared (on the
+   shell, in ice), so each phase restates them from its own palette. */
+main.site-shell.film-edition.mirage-edition
+  :is(
+    #story,
+    #manager-archive,
+    #riders,
+    #records,
+    .wa-contents,
+    .world-annex,
+    .finale-section,
+    .mr-ticker.is-close,
+    footer
+  ) {
+  --mr-line: color-mix(in srgb, var(--mr-ice) 22%, transparent);
+  --mr-line-strong: color-mix(in srgb, var(--mr-ice) 54%, transparent);
+  --mr-prism: linear-gradient(
+    90deg,
+    var(--mr-ice) 0%,
+    var(--mr-violet) 34%,
+    var(--mr-magenta) 66%,
+    var(--mr-gold) 100%
+  );
+  --mr-chrome: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    var(--mr-ice-hi) 34%,
+    var(--mr-ice) 70%,
+    var(--mr-ice-deep) 100%
+  );
+  --mr-brackets:
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 26px 2px,
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 26px,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 26px 2px,
+    linear-gradient(var(--mr-ice) 0 0) 100% 0 / 2px 26px,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 26px 2px,
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 2px 26px,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 26px 2px,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 2px 26px;
+  --neo-cyan: var(--mr-ice);
+  --neo-cyan-deep: var(--mr-ice-deep);
+  --neo-gold: var(--mr-gold);
+  --neo-line: var(--mr-line);
+  --neo-line-strong: var(--mr-line-strong);
+  --neo-glow: color-mix(in srgb, var(--mr-ice) 16%, transparent);
+  --neo-panel: color-mix(in srgb, var(--mr-deck) 96%, transparent);
+  --neo-panel-raised: color-mix(in srgb, var(--mr-deck-raised) 97%, transparent);
+  --film-scan-ink: color-mix(in srgb, var(--mr-ice) 16%, transparent);
+  --film-scan-line: color-mix(in srgb, var(--mr-ice-hi) 80%, transparent);
+}
+
+/* The glossary's sheet keeps its own lines and rule (it is paper). */
+main.site-shell.film-edition.mirage-edition #glossary {
+  --mr-line: rgb(16 48 42 / 20%);
+  --mr-line-strong: rgb(16 48 42 / 42%);
+  --mr-prism: linear-gradient(90deg, #1c6b56, #5d7d4a 60%, #865a22);
+}
+
+/* The topbar takes the current chapter's accent through the links' own
+   aria-current (WorldSectionNav), and the annex chips theirs; the bar
+   itself stays the projection bay's. */
+main.site-shell.film-edition.mirage-edition .topbar nav a[href="#story"] {
+  --mr-ice: #a9c4ff;
+  --neo-cyan: #a9c4ff;
+}
+
+main.site-shell.film-edition.mirage-edition .topbar nav a[href="#riders"] {
+  --mr-ice: #cfd8e3;
+  --neo-cyan: #cfd8e3;
+}
+
+main.site-shell.film-edition.mirage-edition .topbar nav a[href="#records"] {
+  --mr-ice: #efb96f;
+  --neo-cyan: #efb96f;
+}
+
+main.site-shell.film-edition.mirage-edition .topbar nav::before,
+main.site-shell.film-edition.mirage-edition .topbar nav::after,
+main.site-shell.film-edition.mirage-edition .topbar-actions::before {
+  --mr-ice: #6ddfba;
+  --mr-ice-hi: #c6f6e5;
+}
+
+@media (forced-colors: none) {
+  main.site-shell.film-edition.mirage-edition
+    .topbar
+    nav
+    a:is([href="#story"], [href="#riders"], [href="#records"])[aria-current="location"] {
+    text-shadow: 0 0 16px color-mix(in srgb, var(--mr-ice) 45%, transparent);
+  }
+
+  /* ================================================================
+     2. Grounds: static, painted with the content, hard-edged
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition #story {
+    background:
+      radial-gradient(ellipse 58% 20% at 84% 3%, rgb(176 200 255 / 20%), transparent 72%),
+      radial-gradient(ellipse 90% 26% at 26% 100%, rgb(214 150 236 / 22%), transparent 72%),
+      repeating-linear-gradient(0deg, rgb(200 216 255 / 3.5%) 0 1px, transparent 1px 5px),
+      linear-gradient(180deg, #0a1126 0%, #101a3c 30%, #182046 62%, #241a46 100%);
+  }
+
+  main.site-shell.film-edition.mirage-edition #riders {
+    background:
+      radial-gradient(ellipse 44% 28% at 90% 16%, rgb(164 139 255 / 15%), transparent 70%),
+      radial-gradient(ellipse 40% 26% at 6% 84%, rgb(255 92 200 / 10%), transparent 70%),
+      radial-gradient(ellipse 30% 22% at 52% 50%, rgb(122 232 255 / 6%), transparent 70%),
+      linear-gradient(172deg, transparent 6%, rgb(228 236 248 / 8%) 10%, transparent 15%),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg, #0e1116 0%, #191d24 42%, #13171c 100%);
+  }
+
+  main.site-shell.film-edition.mirage-edition #records {
+    background:
+      radial-gradient(ellipse 62% 30% at 14% 5%, rgb(255 184 96 / 22%), transparent 70%),
+      radial-gradient(ellipse 50% 36% at 92% 78%, rgb(233 140 94 / 10%), transparent 70%),
+      repeating-linear-gradient(0deg, rgb(239 185 111 / 6.5%) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, #140d07 0%, #20160c 46%, #170f08 100%);
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.wa-contents, .world-annex:not(#glossary, #quotes)) {
+    background:
+      radial-gradient(ellipse 52% 30% at 88% 8%, rgb(109 223 186 / 13%), transparent 72%),
+      radial-gradient(ellipse 50% 30% at 8% 92%, rgb(227 166 116 / 7%), transparent 72%),
+      radial-gradient(rgb(109 223 186 / 11%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
+      linear-gradient(180deg, #08150f, #0b1a15 50%, #08130f);
+  }
+
+  main.site-shell.film-edition.mirage-edition #glossary {
+    background:
+      radial-gradient(rgb(28 107 86 / 8%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
+      var(--we-paper);
+  }
+
+  main.site-shell.film-edition.mirage-edition #quotes {
+    background:
+      radial-gradient(rgb(109 223 186 / 9%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
+      linear-gradient(180deg, #0c1a15, #050b09);
+  }
+
+  main.site-shell.film-edition.mirage-edition .finale-section {
+    background:
+      radial-gradient(ellipse 80% 44% at 50% 100%, rgb(255 150 60 / 26%), transparent 72%),
+      radial-gradient(ellipse 50% 24% at 50% 0%, rgb(255 190 110 / 8%), transparent 70%),
+      #0c0604;
+  }
+
+  main.site-shell.film-edition.mirage-edition :is(.mr-ticker.is-close, footer) {
+    background:
+      linear-gradient(
+        90deg,
+        rgb(255 171 102 / 7%),
+        transparent 34%,
+        transparent 66%,
+        rgb(255 210 140 / 6%)
+      ),
+      #040305;
+  }
+
+  /* ================================================================
+     3. Chapter marks: the rule, the curtain and the numeral's light
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition :is(#story, #riders, #records)::before,
+  main.site-shell.film-edition.mirage-edition .world-annex.is-chapter::before {
+    background: linear-gradient(
+      90deg,
+      var(--mr-ice) 0,
+      var(--mr-violet) 7%,
+      var(--mr-magenta) 12%,
+      var(--mr-line) 12.2%,
+      var(--mr-line) 100%
+    );
+  }
+
+  main.site-shell.film-edition.mirage-edition :is(#story, #riders, #records)::after {
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--mr-ice) 9%, transparent) 42%,
+      color-mix(in srgb, var(--mr-violet) 7%, transparent) 52%,
+      transparent
+    );
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(#story, #riders, #records)
+    .section-index
+    > span {
+    text-shadow: 0 0 36px color-mix(in srgb, var(--mr-ice) 30%, transparent);
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(#story, #riders, #records)
+    .section-index
+    > span::after,
+  main.site-shell.film-edition.mirage-edition .wa-chapter > span::after {
+    color: color-mix(in srgb, var(--mr-magenta) 46%, transparent);
+  }
+
+  main.site-shell.film-edition.mirage-edition .wa-chapter {
+    background-image: repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--mr-ice) 52%, transparent) 0 1px,
+      transparent 1px 24px
+    );
+  }
+
+  /* ================================================================
+     4. 01 STORY: the record on lilac paper, the column at dusk
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition #story .story-layout {
+    --mr-ice: #3d4cab;
+    --mr-gold: #8a6a2c;
+    --mr-prism: linear-gradient(90deg, #3d4cab, #7d58c2 60%, #8a6a2c);
+    --film-scan-ink: rgb(61 76 171 / 7%);
+    --film-scan-line: rgb(61 76 171 / 48%);
+    border-color: rgb(232 234 247 / 50%);
+    background:
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 68px 3px no-repeat,
+      radial-gradient(ellipse 60% 70% at 100% 100%, rgb(201 171 255 / 22%), transparent 70%),
+      linear-gradient(135deg, #f3f3fc, var(--we-paper) 62%),
+      var(--we-paper);
+  }
+
+  main.site-shell.film-edition.mirage-edition #story .story-layout::after {
+    background:
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 24px 2px,
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 2px 24px,
+      linear-gradient(#8a6a2c 0 0) 100% 100% / 24px 2px,
+      linear-gradient(#8a6a2c 0 0) 100% 100% / 2px 24px;
+    background-repeat: no-repeat;
+  }
+
+  main.site-shell.film-edition.mirage-edition #story .story-layout .story-copy > p {
+    color: #2f3a66;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    #story
+    .story-layout
+    .story-copy
+    > .story-lead
+    span {
+    border-color: rgb(61 76 171 / 28%);
+  }
+
+  /* The chosen column's number reads on the rail's lit lens in frost white. */
+  main.site-shell.film-edition.mirage-edition
+    #story
+    .world-column-tabs
+    [role="tab"][aria-selected="true"]
+    small {
+    color: #eef2ff;
+  }
+
+  main.site-shell.film-edition.mirage-edition #story .story-heading::after {
+    background:
+      linear-gradient(var(--mr-gold) 0 0) 0 0 / 7px 1px,
+      linear-gradient(rgb(61 76 171 / 60%) 0 0) 0 33% / 5px 1px,
+      linear-gradient(rgb(61 76 171 / 30%) 0 0) 0 66% / 5px 1px,
+      linear-gradient(180deg, var(--mr-ice), rgb(61 76 171 / 0%)) 0 0 / 1px 100%;
+    background-repeat: no-repeat;
+  }
+
+  /* ================================================================
+     5. 02 RIDERS: the console in steel, the file chip in the prism
+     ================================================================ */
+  /* At rest the rider numbers are steel (8.5:1 on the rail); the chosen one
+     keeps its near-white on the lens. */
+  main.site-shell.film-edition.mirage-edition
+    #riders
+    .rider-tabs
+    [role="tab"]:not([aria-selected="true"])
+    small {
+    color: #b3bfcc;
+  }
+
+  main.site-shell.film-edition.mirage-edition #riders .rider-number {
+    color: #0b0e12;
+    background: linear-gradient(90deg, #cfd8e3, #a48bff 45%, #ff5cc8 75%, #f0cf86);
+  }
+
+  main.site-shell.film-edition.mirage-edition #riders .rider-visual::before {
+    background:
+      linear-gradient(90deg, var(--mr-deck) 0%, rgb(21 26 33 / 55%) 16%, transparent 34%),
+      linear-gradient(0deg, rgb(21 26 33 / 80%), transparent 30%),
+      radial-gradient(ellipse 90% 80% at 60% 42%, transparent 58%, rgb(21 26 33 / 55%) 100%);
+  }
+
+  /* ================================================================
+     6. 03 RECORDS: cream prints in a lamplit bay
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition #records .episode-card.is-active .episode-card-copy {
+    background: #fbf1df;
+  }
+
+  main.site-shell.film-edition.mirage-edition #records .episode-card.is-active .episode-card-surface {
+    border-color: color-mix(in srgb, var(--mr-ice) 50%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 22%, transparent),
+      0 0 0 1px var(--mr-deck),
+      0 18px 50px rgb(0 0 0 / 45%);
+  }
+
+  /* ================================================================
+     7. The annex: verdigris plates, copper ghosts
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition .wa-contents a {
+    border-color: color-mix(in srgb, var(--mr-ice) 32%, transparent);
+    background:
+      linear-gradient(var(--we-gold) 0 0) 0 100% / 28px 2px no-repeat,
+      #10221c;
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-annex .wa-brief {
+    background-color: #0f201b;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    .world-annex
+    :is(.wa-profile > summary, .wa-doc > summary) {
+    background-color: color-mix(in srgb, var(--mr-ice) 7%, transparent);
+  }
+
+  main.site-shell.film-edition.mirage-edition .world-annex .wa-open {
+    background-color: color-mix(in srgb, var(--mr-ice) 6%, transparent);
+  }
+
+  /* ================================================================
+     8. The finale: ember under the art, an ember iris
+     ================================================================ */
+  main.site-shell.film-edition.mirage-edition .finale-sticky::after {
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgb(255 150 60 / 22%), transparent 70%),
+      radial-gradient(ellipse 60% 55% at 50% 50%, rgb(14 6 3 / 38%), rgb(12 6 4 / 90%) 100%),
+      linear-gradient(180deg, var(--mr-ink), transparent 9%, transparent 78%, var(--mr-ink));
+  }
+
+  main.site-shell.film-edition.mirage-edition .finale-sticky::before {
+    background:
+      conic-gradient(
+        from 30deg,
+        transparent 0 6%,
+        rgb(255 171 102 / 82%) 6% 7%,
+        transparent 7% 24%,
+        rgb(255 210 140 / 78%) 24% 24.6%,
+        transparent 24.6% 48%,
+        rgb(255 170 92 / 58%) 48% 56%,
+        transparent 56% 72%,
+        rgb(255 194 122 / 60%) 72% 76%,
+        transparent 76%
+      ),
+      repeating-conic-gradient(rgb(255 171 102 / 45%) 0 0.4deg, transparent 0.4deg 5deg);
+  }
+
+  main.site-shell.film-edition.mirage-edition .finale-content h2 {
+    text-shadow: 0 0 42px rgb(255 160 80 / 24%);
+  }
+
+  main.site-shell.film-edition.mirage-edition .mr-endmark b {
+    text-shadow:
+      -2px 0 rgb(255 170 92 / 50%),
+      2px 0 rgb(255 210 140 / 50%);
+  }
+
+  /* ================================================================
+     9. Plates outside the Android lite tier, which paints each plate's
+        brackets into its own background (styles-world-mirage.css): there
+        the phase tokens recolour that background instead.
+     ================================================================ */
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive {
+    background:
+      radial-gradient(ellipse 70% 60% at 0% 0%, rgb(148 102 242 / 22%), transparent 62%),
+      radial-gradient(ellipse 60% 60% at 100% 100%, rgb(255 106 140 / 14%), transparent 62%),
+      repeating-linear-gradient(135deg, rgb(255 127 164 / 4.5%) 0 1px, transparent 1px 12px),
+      var(--mr-deck);
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #story
+    .world-column {
+    border-color: rgb(201 171 255 / 26%);
+    background:
+      radial-gradient(ellipse 60% 80% at 100% 0%, rgb(169 196 255 / 10%), transparent 70%),
+      linear-gradient(135deg, rgb(201 171 255 / 7%), transparent 40%),
+      var(--mr-deck);
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #riders
+    .rider-console {
+    background:
+      linear-gradient(172deg, rgb(228 236 248 / 6%), transparent 30%),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 2.5%) 0 1px, transparent 1px 4px),
+      #12161c;
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #records
+    .episode-archive {
+    background:
+      radial-gradient(ellipse 50% 40% at 0% 0%, rgb(255 184 96 / 10%), transparent 70%),
+      repeating-linear-gradient(0deg, rgb(239 185 111 / 4%) 0 1px, transparent 1px 34px),
+      var(--mr-deck);
+  }
+
+  /* The story record is paper on every tier. The Android lite tier had
+     repainted it as the dark deck while its ink stayed the paper's, so the
+     heading and copy read about 1.2:1 on Pixel and Galaxy phones; there
+     the paper carries the tier's four corner brackets (indigo over brass). */
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    main.site-shell.film-edition.mirage-edition
+    #story
+    .story-layout {
+    background:
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 24px 2px no-repeat,
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 2px 24px no-repeat,
+      linear-gradient(var(--we-teal) 0 0) 100% 0 / 24px 2px no-repeat,
+      linear-gradient(var(--we-teal) 0 0) 100% 0 / 2px 24px no-repeat,
+      linear-gradient(#8a6a2c 0 0) 0 100% / 24px 2px no-repeat,
+      linear-gradient(#8a6a2c 0 0) 0 100% / 2px 24px no-repeat,
+      linear-gradient(#8a6a2c 0 0) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(#8a6a2c 0 0) 100% 100% / 2px 24px no-repeat,
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 68px 3px no-repeat,
+      radial-gradient(ellipse 60% 70% at 100% 100%, rgb(201 171 255 / 22%), transparent 70%),
+      linear-gradient(135deg, #f3f3fc, var(--we-paper) 62%),
+      var(--we-paper);
+    background-origin: border-box;
+  }
+}
+
+/* ================================================================
+   10. Calm modes: flat phase grounds, no texture
+   ================================================================ */
+@media (forced-colors: none) and (prefers-reduced-transparency: reduce),
+  (forced-colors: none) and (prefers-contrast: more) {
+  main.site-shell.film-edition.mirage-edition #story {
+    background: #101a3c;
+  }
+
+  main.site-shell.film-edition.mirage-edition #riders {
+    background: #161a20;
+  }
+
+  main.site-shell.film-edition.mirage-edition #records {
+    background: #1a120a;
+  }
+
+  main.site-shell.film-edition.mirage-edition
+    :is(.wa-contents, .world-annex:not(#glossary, #quotes)) {
+    background: #0b1a15;
+  }
+
+  main.site-shell.film-edition.mirage-edition #glossary {
+    background: var(--we-paper);
+  }
+
+  main.site-shell.film-edition.mirage-edition #quotes {
+    background: #08120f;
+  }
+
+  main.site-shell.film-edition.mirage-edition #story .story-layout {
+    background:
+      linear-gradient(var(--we-teal) 0 0) 0 0 / 68px 3px no-repeat,
+      var(--we-paper);
+  }
+
+  main.site-shell.film-edition.mirage-edition .finale-section {
+    background: #0c0604;
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive {
+    background: var(--mr-deck);
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #riders
+    .rider-console {
+    background: #12161c;
+  }
+
+  :where(html:not([data-android-renderer]), html[data-world-effects="economy"])
+    main.site-shell.film-edition.mirage-edition
+    #records
+    .episode-archive {
+    background: var(--mr-deck);
+  }
+}

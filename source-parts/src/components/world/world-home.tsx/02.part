@@ -1,4 +1,3 @@
-        to: "/riders/cipher",
         assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
       },
       {
@@ -466,6 +465,17 @@ export function WorldHome() {
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
+  // A first rider or archive-tab choice paints its picture at once
+  // (world-swap-warmups.ts). The return layout effect has set the shown rider.
+  useEffect(
+    () =>
+      warmWorldSwaps(
+        shellRef.current ?? document,
+        RIDERS.map((rider) => rider.img),
+        riderTabRef.current,
+      ),
+    [],
+  );
 
   useLayoutEffect(() => {
     const returnId = readRiderReturn();
@@ -475,12 +485,3 @@ export function WorldHome() {
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
   }, []);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-other") return;
-    setManagerTab(2);
-    syncRail(managerRail.current, 2);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;

@@ -1,3 +1,9 @@
+    const previewPosters = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
+    const finalReady = loadPoster(finalPoster);
+    if (motionReduced) {
       void finalReady.then((ready) => {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (!heroInViewRef.current) {
@@ -480,7 +486,3 @@
                         strokeWidth="1.8"
                         strokeLinecap="round"
                       />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"

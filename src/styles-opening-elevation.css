@@ -1090,6 +1090,21 @@
   }
 }
 
+/* 361-389px portrait (iPhone SE and mini, 360-384px Androids): the plates
+   stay side by side, but ENTER THE WORLD's 188px label outgrew its plate
+   and broke in two (ENTER THE / WORLD). The plates close their padding and
+   the label takes the phones' tighter HUD tracking, on one line. */
+@media (min-width: 361px) and (max-width: 389px) and (orientation: portrait) {
+  .cine-btn {
+    padding-inline: 0.8rem;
+  }
+
+  .cine-btn-primary {
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+}
+
 /* Portrait tablet: the dial grows with the picture. */
 @media (min-width: 701px) and (max-width: 1023px) and (orientation: portrait) {
   .cine-hud {

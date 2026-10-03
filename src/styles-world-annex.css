@@ -1544,6 +1544,16 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   line-height: 1.6;
 }
 
+/* An office title with no ・ is one long compound that phrase breaking reads
+   as a single phrase, so on a phone it could only break at the edge, leaving
+   書 alone on a line. It takes ordinary Japanese breaking, balanced
+   (REALMS最高危険度 / 事象審査会提出文書). A title with ・ keeps phrase
+   breaking, which breaks after its ・. */
+.site-shell.film-edition.mirage-edition .wa-doc:not([aria-label*="・"]) .wa-doc-office {
+  word-break: normal;
+  text-wrap: balance;
+}
+
 .site-shell.film-edition.mirage-edition .wa-doc-subject,
 .site-shell.film-edition.mirage-edition .wa-doc-verdict {
   display: grid;
@@ -1650,9 +1660,13 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   line-height: 1.8;
 }
 
+/* The name column holds the longest name on one line: レルムズフランス本部 is
+   about 11rem at 17px, and at 160px it broke as 本 / 部 from 900 to 1099px.
+   A length, not max-content: each row is its own grid, and the names and
+   descriptions stay aligned from row to row. */
 @media (min-width: 900px) {
   .site-shell.film-edition.mirage-edition .wa-locations li {
-    grid-template-columns: 56px minmax(160px, 0.28fr) minmax(0, 1fr);
+    grid-template-columns: 56px minmax(11.5rem, 0.28fr) minmax(0, 1fr);
     align-items: baseline;
   }
 
@@ -1783,6 +1797,13 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   .site-shell.film-edition.mirage-edition .wa-episodes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* The episode lines are short dialogue, set like the wall's signatures:
+   balanced, so a phrase's tail keeps off a line of its own. Unbalanced, the
+   longest broke う / ちが in the plate from 768 to 1440px. */
+.site-shell.film-edition.mirage-edition .wa-episodes .wa-quote blockquote p {
+  text-wrap: balance;
 }
 
 /* ---------------------------------------------------------------- 06.2 用語集 */
