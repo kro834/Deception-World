@@ -1,0 +1,1057 @@
+/* Dream Kinema edition — the programme of a Taisho picture house, finished.
+
+   Linked after styles-dream-extra.css and before the cinematic skin; every
+   selector doubles the page class (or starts at html with the page's gates),
+   so it outranks the cinematic sheet in either load order. Copy, fonts, the
+   measured geometry (chrome, act index, poster console, dossier columns,
+   story disclosures, the arrival hand-over) and every text node are
+   untouched: new visible text is only English HUD numerals generated with
+   an empty alternative.
+
+   1. The world guide. The four archive corners (出来事, 舞台, 繋がり, 武装)
+      stand on one indigo-lacquer band and carry the index 01–04 on their
+      kicker; the chronicle reads as a timeline (place and cast left of the
+      spine on wide screens), the atlas sets its fifteen places as a
+      numbered masonry of location boards, the arsenal's entries are
+      numbered and no longer stretch apart, the ties are knotted plates.
+   2. Materials: lacquer sheen on the plates, gold leaf numerals, vermilion
+      seals kept small, a 簀の目 laid texture on the paper.
+   3. States for every control: hover answers a fine pointer only, the
+      ornaments that step in ease (scale, opacity, translate) only behind
+      the motion gates, and presses settle a pixel.
+   4. Motion grammar 開帳 (the unveiling): things are hung from a rod,
+      pressed like a seal, or parted from the centre. Finite (on toggle or
+      on open) or scroll-linked on named view timelines, transform and
+      opacity only, under prefers-reduced-motion: no-preference and the
+      economy / menu / loading / dialog gates. Nothing loops.
+   5. Forced colours, reduced motion and economy rest drawn. */
+
+/* ---------- 0. Tokens ---------- */
+.dream-page.dream-page {
+  --kn-num: "Oxanium", "Cinzel", "Times New Roman", serif;
+  --kn-ai: #0e1121;
+  --kn-ai-plate: #131629;
+  --kn-sheen: linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 42%);
+}
+
+/* ---------- 1. Acts: a running head ---------- */
+/* The count follows the kicker on its line (ACT II — CAST | 03 FILES), so
+   the act's outlined numeral, which drifts at the right of the heading,
+   no longer runs through the count's letters. Phones keep the count under
+   the title, where the numeral already stands clear. */
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-section-heading {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
+    justify-self: start;
+  }
+}
+
+/* ---------- 1b. The world guide band ---------- */
+/* The four corners share one ground: indigo lacquer laid edge to edge
+   (the border image's outset paints past the 1200px measure without a
+   wider box; it is ink overflow, so nothing scrolls sideways). A gilt
+   hairline opens the band on the chronicle and closes it under the
+   arsenal. */
+.dream-page.dream-page :is(#chronicle, #atlas, #relations, #arsenal) {
+  border-image: linear-gradient(var(--kn-ai) 0 0) fill 0 / / 0 100vw;
+}
+
+.dream-page.dream-page #chronicle {
+  padding-top: clamp(56px, 7vw, 96px);
+  border-image: linear-gradient(180deg, var(--ts-hair) 0 1px, var(--kn-ai) 1px) fill 0 / / 0 100vw;
+}
+
+.dream-page.dream-page #arsenal {
+  border-image: linear-gradient(0deg, var(--ts-hair) 0 1px, var(--kn-ai) 1px) fill 0 / / 0 100vw;
+}
+
+/* The band opens on the act's curtain rule: a short 子持ち罫 with a
+   diamond, inside the section's own box. */
+.dream-page.dream-page #chronicle::before {
+  content: "";
+  position: absolute;
+  top: clamp(18px, 2.4vw, 32px);
+  left: 50%;
+  width: min(220px, 40%);
+  height: 5px;
+  translate: -50% 0;
+  background: var(--ts-komochi);
+  pointer-events: none;
+}
+
+.dream-page.dream-page #chronicle::after {
+  content: "";
+  position: absolute;
+  top: calc(clamp(18px, 2.4vw, 32px) - 1px);
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  translate: -50% 0;
+  rotate: 45deg;
+  border: 1px solid var(--ts-kin);
+  background: var(--kn-ai);
+  pointer-events: none;
+}
+
+/* The index: 01–04 before each corner's kicker, a vermilion-edged chip in
+   Oxanium. HUD numerals with an empty alternative (the kicker and title
+   already name the corner). */
+.dream-page.dream-page
+  :is(#chronicle, #atlas, #relations, #arsenal)
+  .dream-annex-heading
+  > p::before {
+  display: inline-block;
+  margin-right: 14px;
+  padding: 1px 7px 0;
+  border: 1px solid rgb(204 73 59 / 72%);
+  color: var(--ts-shu-text);
+  font-family: var(--kn-num);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  vertical-align: 1px;
+}
+
+.dream-page.dream-page #chronicle .dream-annex-heading > p::before {
+  content: "01" / "";
+}
+
+.dream-page.dream-page #atlas .dream-annex-heading > p::before {
+  content: "02" / "";
+}
+
+.dream-page.dream-page #relations .dream-annex-heading > p::before {
+  content: "03" / "";
+}
+
+.dream-page.dream-page #arsenal .dream-annex-heading > p::before {
+  content: "04" / "";
+}
+
+/* Under 360px the chip and CHRONICLE share a 150px kicker cell: a little
+   less tracking keeps the index and the word on one line. */
+@media (max-width: 359px) {
+  .dream-page.dream-page :is(#chronicle, #atlas, #relations, #arsenal) .dream-annex-heading > p {
+    letter-spacing: 0.22em;
+  }
+
+  .dream-page.dream-page
+    :is(#chronicle, #atlas, #relations, #arsenal)
+    .dream-annex-heading
+    > p::before {
+    margin-right: 10px;
+  }
+}
+
+/* Counts read as instrument figures. */
+.dream-page.dream-page .dream-annex-heading > span {
+  font-family: var(--kn-num);
+  letter-spacing: 0.2em;
+}
+
+/* ---------- 2. Folds: plates on the band ---------- */
+.dream-page.dream-page .dream-archive-fold {
+  border-color: rgb(200 164 92 / 38%);
+}
+
+.dream-page.dream-page :is(#chronicle, #atlas, #relations, #arsenal) .dream-archive-fold {
+  background: var(--kn-ai-plate);
+}
+
+.dream-page.dream-page .dream-archive-fold > summary {
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    var(--kn-sheen),
+    var(--ts-velvet);
+}
+
+.dream-page.dream-page .dream-archive-fold-count {
+  font-family: var(--kn-num);
+  letter-spacing: 0.18em;
+}
+
+/* Open, the summary keeps its 子持ち罫 close and the plate warms a step. */
+.dream-page.dream-page .dream-archive-fold[open] > summary {
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    var(--kn-sheen),
+    #2a1830;
+}
+
+.dream-page.dream-page .dream-archive-fold > summary:active {
+  translate: 0 1px;
+}
+
+/* ---------- 3. 出来事: a timeline ---------- */
+.dream-page.dream-page .dream-chronicle-item h3 {
+  text-wrap: pretty;
+}
+
+.dream-page.dream-page .dream-chronicle-place {
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+/* Wide screens: place and cast stand left of the spine, the seal sits on
+   it, and the event reads to the right at a book measure. From 981px (at
+   1024 the old spine-left list ran 860px lines). */
+@media (min-width: 981px) {
+  .dream-page.dream-page .dream-chronicle-cases {
+    max-width: 1000px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-list {
+    --kn-meta: 200px;
+    gap: 40px;
+    padding: 36px 44px 44px 0;
+  }
+
+  .dream-page.dream-page .dream-chronicle-list::before {
+    left: calc(var(--kn-meta) + 24px);
+  }
+
+  .dream-page.dream-page .dream-chronicle-item {
+    display: grid;
+    grid-template-columns: var(--kn-meta) 48px minmax(0, 1fr);
+    grid-template-areas:
+      "meta seal title"
+      "meta seal body";
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: start;
+    padding-left: 0;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item > .dream-archive-seal {
+    position: relative;
+    top: 2px;
+    left: auto;
+    grid-area: seal;
+    justify-self: center;
+  }
+
+  .dream-page.dream-page .dream-chronicle-meta {
+    grid-area: meta;
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    margin: 4px 0 0;
+    padding-right: 4px;
+    text-align: end;
+  }
+
+  .dream-page.dream-page .dream-chronicle-place {
+    font-size: 15px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-item h3 {
+    grid-area: title;
+    font-size: 22px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-body {
+    grid-area: body;
+    max-width: 38em;
+  }
+}
+
+/* ---------- 4. 舞台: numbered location boards in a masonry ---------- */
+.dream-page.dream-page .dream-atlas-grid {
+  counter-reset: kn-place;
+}
+
+.dream-page.dream-page .dream-atlas-grid > li {
+  counter-increment: kn-place;
+}
+
+.dream-page.dream-page .dream-atlas-kicker::before {
+  content: counter(kn-place, decimal-leading-zero) / "";
+  display: inline-block;
+  margin-right: 12px;
+  padding-right: 12px;
+  border-right: 1px solid var(--ts-hair);
+  color: var(--ts-kin-hi);
+  font-family: var(--kn-num);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-atlas-grid article {
+  border-color: rgb(200 164 92 / 42%);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(25 47 96 / 26%), transparent 52%),
+    var(--kn-ai-plate);
+}
+
+.dream-page.dream-page .dream-atlas-grid h3 {
+  font-size: clamp(22px, 1.9vw, 27px);
+  letter-spacing: 0.26em;
+}
+
+/* Cards keep their own height: three (two on tablets) balanced columns
+   instead of rows stretched to the longest place. The DOM order runs down
+   each column, and the numerals say so. */
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-atlas-grid {
+    display: block;
+    columns: 2;
+    column-gap: clamp(16px, 2vw, 24px);
+  }
+
+  .dream-page.dream-page .dream-atlas-grid > li {
+    display: flow-root;
+    margin-bottom: clamp(16px, 2vw, 24px);
+    break-inside: avoid;
+  }
+}
+
+@media (min-width: 1101px) {
+  .dream-page.dream-page .dream-atlas-grid {
+    columns: 3;
+  }
+}
+
+/* ---------- 5. 繋がり: knotted plates ---------- */
+.dream-page.dream-page .dream-relations-tie {
+  border-color: rgb(200 164 92 / 24%);
+  background:
+    linear-gradient(var(--ts-hair) 0 0) top / 100% 1px no-repeat,
+    var(--kn-sheen),
+    rgb(10 12 24 / 72%);
+}
+
+.dream-page.dream-page .dream-relations-name {
+  font-size: 19px;
+}
+
+.dream-page.dream-page .dream-relations-knot > b {
+  padding: 6px 12px;
+  box-shadow: inset 0 0 0 1px rgb(243 224 176 / 34%);
+  font-size: 13px;
+}
+
+/* ---------- 6. 武装: numbered entries that hold together ---------- */
+/* In two and three columns a short entry's row stretched to its tallest
+   neighbour, and the stretch fell between the name and its words. The
+   entries now keep their own height in balanced columns (the numerals
+   give the order), each opening on its own hairline. */
+.dream-page.dream-page .dream-arsenal-list {
+  counter-reset: kn-arms;
+}
+
+.dream-page.dream-page .dream-arsenal-list > div {
+  align-content: start;
+  counter-increment: kn-arms;
+}
+
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-arsenal-list {
+    display: block;
+    columns: 2;
+    column-gap: clamp(24px, 3vw, 44px);
+    padding-top: 10px;
+  }
+
+  .dream-page.dream-page .dream-arsenal-list > div,
+  .dream-page.dream-page .dream-arsenal-list > div:first-child,
+  .dream-page.dream-page .dream-arsenal-list > div:nth-child(2),
+  .dream-page.dream-page .dream-arsenal-list > div:nth-child(3) {
+    padding: 16px 0 18px;
+    border-top: 1px solid var(--ts-hair-soft);
+    break-inside: avoid;
+  }
+}
+
+@media (min-width: 1181px) {
+  .dream-page.dream-page .dream-arsenal-list {
+    columns: 3;
+  }
+}
+
+/* The group marks share one column, so the titles start on one line. On
+   phones the mark stands over the title instead: beside it, KEIYA KOCHIYA
+   left 90px at 320, and 東風谷慶弥 broke before its last character. */
+@media (min-width: 641px) {
+  .dream-page.dream-page .dream-arsenal .dream-archive-fold > summary {
+    grid-template-columns: 11.5em minmax(0, 1fr) auto 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-arsenal .dream-archive-fold > summary {
+    grid-template-columns: minmax(0, 1fr) 24px;
+    grid-template-areas:
+      "mark cell"
+      "title cell"
+      "count cell";
+    row-gap: 3px;
+  }
+}
+
+.dream-page.dream-page .dream-arsenal-list dt::before {
+  content: counter(kn-arms, decimal-leading-zero) / "";
+  display: inline-block;
+  min-width: 2.2em;
+  margin-right: 8px;
+  color: var(--ts-shu-text);
+  -webkit-text-fill-color: var(--ts-shu-text);
+  font-family: var(--kn-num);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  vertical-align: 2px;
+}
+
+.dream-page.dream-page .dream-arsenal-list dt small {
+  display: inline-block;
+  padding: 0 8px;
+  border: 1px solid var(--ts-hair-soft);
+  line-height: 1.7;
+  vertical-align: 2px;
+}
+
+/* ---------- 6b. Washi: the paper keeps its 簀の目 ---------- */
+/* The 口上, the open CASE records and the dictionary are paper: a laid
+   texture of fine horizontal 簀の目 lines with a chain line every 54px, at
+   two to four per cent ink, under the existing paper. Flat paper returns
+   under reduced motion, reduced transparency and economy, as the
+   refinement sheet asks (the reduced-transparency restatement is its own
+   block: Safari does not know the feature, and an unknown feature inside
+   the texture's query would have kept the texture from every iPhone). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-prologue-card {
+    background:
+      repeating-linear-gradient(0deg, rgb(110 72 40 / 3%) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 4%) 53px 54px),
+      linear-gradient(118deg, #f4ecdc, #e8ddc8);
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-story-case-body {
+    background:
+      repeating-linear-gradient(0deg, rgb(110 72 40 / 2.5%) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px),
+      #eee4cd;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page #glossary {
+    background:
+      repeating-linear-gradient(0deg, rgb(110 72 40 / 2.5%) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px),
+      #eee5d4;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-prologue-card {
+    background: #eee4d1;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-story-case-body {
+    background: #eee4cd;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page #glossary {
+    background: #eee5d4;
+  }
+}
+
+/* ---------- 7. States ---------- */
+/* The act index: a gilt underline that grows from the centre under a
+   fine pointer; the current act keeps its vermilion bar. */
+.dream-page.dream-page .dream-chapter-nav a {
+  position: relative;
+}
+
+.dream-page.dream-page .dream-chapter-nav a::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  bottom: 3px;
+  left: 14px;
+  height: 2px;
+  background: var(--ts-kin);
+  scale: 0 1;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-chapter-nav a:active {
+  background-color: rgb(110 44 53 / 30%);
+}
+
+/* 目次: the card clips its own paint. Its title hangs on a scroll-linked
+   transform, and without a clip around it the compositor assumed that
+   motion could overlap everything after the card, promoting the next
+   twelve thousand pixels of acts into one layer; nothing in the card
+   draws outside it (the outline sits 7px inside, the link rings 2px). */
+.dream-page.dream-page .dream-contents {
+  overflow: clip;
+}
+
+/* 目次: a vermilion diamond steps in at the row's end (where the columns
+   leave it room; the phone rows keep every pixel for their labels). */
+@media (min-width: 761px) {
+  .dream-page.dream-page .dream-contents a {
+    position: relative;
+    padding-right: 22px;
+  }
+
+  .dream-page.dream-page .dream-contents a::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--ts-shu-text);
+    opacity: 0;
+    translate: -4px -50%;
+    rotate: 45deg;
+    pointer-events: none;
+  }
+
+  .dream-page.dream-page .dream-contents a:focus-visible::after {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+}
+
+.dream-page.dream-page .dream-contents a:active {
+  background-color: rgb(110 44 53 / 36%);
+}
+
+/* The poster console: a press settles a pixel; the locked plate's glyph
+   becomes a vermilion seal. */
+.dream-page.dream-page :is(.dream-poster-controls button, .dream-poster-thumbnails button):active {
+  translate: 0 1px;
+}
+
+.dream-page.dream-page .dream-poster-controls .dream-poster-lock[aria-pressed="true"] b {
+  border-color: var(--ts-shu-text);
+  color: var(--ts-kinari);
+  background: var(--ts-shu-deep);
+}
+
+/* The file's CLOSE plate: gilt corner ticks like the console's plates, on
+   their own layer (the Taisho sheet sets the glass plate's background
+   shorthand with !important, which a background-image cannot pass). */
+.dream-page.dream-page .dream-dossier-dialog .dream-dossier-close::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 10px 1px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 1px 10px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 10px 1px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 1px 10px no-repeat;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-dossier-close:active {
+  translate: 0 1px;
+}
+
+/* PROFILE, the agent file button, the hero and footer plates: presses
+   settle a pixel too. */
+.dream-page.dream-page
+  :is(.dream-roster-switch, .dream-agent-open, .dream-hero-actions a, .dream-footer > a):active {
+  translate: 0 1px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-chapter-nav a:hover:not([aria-current="location"])::after {
+    scale: 1 1;
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a:hover {
+    color: var(--ts-kin-hi);
+  }
+
+  .dream-page.dream-page .dream-contents a:hover::after {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+
+  .dream-page.dream-page .dream-poster-thumbnails button.ios26-glass:hover {
+    border-color: var(--ts-kin);
+  }
+
+  .dream-page.dream-page .dream-dossier-dialog .dream-dossier-close.ios26-glass:hover {
+    border-color: var(--ts-kin-light);
+  }
+
+  .dream-page.dream-page .dream-archive-fold > summary:hover > i {
+    border-color: var(--ts-kin-hi);
+  }
+
+  .dream-page.dream-page .dream-archive-fold:not([open]) > summary:hover {
+    background:
+      linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+      linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+      linear-gradient(90deg, rgb(200 164 92 / 10%), transparent 40%),
+      var(--kn-sheen),
+      #2c1832;
+  }
+}
+
+/* The state changes ease only where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-chapter-nav a::after {
+    transition: scale 260ms var(--ts-ease);
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-contents a::after {
+    transition:
+      opacity 200ms ease,
+      translate 260ms var(--ts-ease);
+  }
+}
+
+/* ---------- 8. Motion: 開帳 ---------- */
+/* Finite. A fold unrolls once each time it opens (its words drop the last
+   few pixels from under the summary); the effect is released at the end. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-archive-fold[open]
+    > :not(summary) {
+    animation: kn-unroll 460ms var(--ts-ease) backwards;
+  }
+}
+
+/* Finite. The file opens as a 襖 in earnest: two lacquered panels, framed
+   in gilt with a pull at the seam, stand closed over the file for a beat
+   and part to the sides as the stage sheet's veil, sheet, plates and copy
+   arrive beneath them. The panels are as dark as the dialog's own ground
+   (which is drawn at once on open), so the reveal adds no new turn of
+   light; they never take a pointer, sit under the CLOSE plate, and rest
+   off screen until the file closes. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::before,
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    width: 50.5%;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 7px, var(--ts-kin) 7px 8px, transparent 8.5px)
+        var(--kn-pull, right 22px) center / 24px 24px no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) 50% 18px / calc(100% - 36px) 1px no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) 50% calc(100% - 18px) / calc(100% - 36px) 1px no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) 18px 50% / 1px calc(100% - 36px) no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) calc(100% - 18px) 50% / 1px calc(100% - 36px) no-repeat,
+      repeating-linear-gradient(0deg, rgb(255 255 255 / 1.6%) 0 1px, transparent 1px 9px),
+      linear-gradient(180deg, #160e1b, #0d0912 70%);
+    pointer-events: none;
+    animation: kn-fusuma-left 620ms cubic-bezier(0.65, 0, 0.2, 1) 130ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::before {
+    left: 0;
+    border-right: 2px solid var(--ts-kin);
+  }
+
+  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::after {
+    --kn-pull: left 22px;
+    right: 0;
+    border-left: 2px solid var(--ts-kin);
+    animation-name: kn-fusuma-right;
+  }
+}
+
+/* Scroll-linked, on named view timelines, under the full gate. Three
+   verbs: hang (a banner or bookmark drops from its rod), press (a seal or
+   a numeral is stamped), tie (threads draw into a knot). The stage and
+   elevation sheets already name the act headings (--ts-act), the cast and
+   playbill slips (--ts-in) and the CASE slips (--ts-rise) under the same
+   gate; their children reuse those timelines. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: --kn-leaf) and (animation-range: entry 0% entry 100%) {
+    /* Each act's 幟 hangs from its rod as the heading rises. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-section-heading[data-ts-numeral]
+      > .dream-act-mark {
+      transform-origin: 50% 0;
+      animation: kn-hang linear both;
+      animation-timeline: --ts-act;
+      animation-range: entry 10% cover 40%;
+    }
+
+    /* Each annex hangs its 栞 the same way. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-annex-heading {
+      view-timeline: --kn-leaf block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-annex-heading::before {
+      transform-origin: 50% 0;
+      animation: kn-hang linear both;
+      animation-timeline: --kn-leaf;
+      animation-range: entry 0% cover 45%;
+    }
+
+    /* 目次: its title hangs as the card arrives. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-contents {
+      view-timeline: --kn-contents block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-contents
+      h2 {
+      transform-origin: 50% 0;
+      animation: kn-hang linear both;
+      animation-timeline: --kn-contents;
+      animation-range: entry 10% entry 90%;
+    }
+
+    /* 第一幕: the key visual's gilt corners lock onto the art. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-poster-stage {
+      view-timeline: --kn-billboard block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-poster-current::before {
+      animation: kn-lock linear both;
+      animation-timeline: --kn-billboard;
+      animation-range: entry 15% cover 40%;
+    }
+
+    /* 第二幕: the 幟 unfurl down their poles beside the arches. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-character-grid
+      > article
+      .dream-character-copy
+      b {
+      transform-origin: 50% 0;
+      animation: kn-unfurl linear both;
+      animation-timeline: --ts-in;
+      animation-range: entry 10% entry 75%;
+    }
+
+    /* 第三幕: each file's number is pressed like a seal. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-dolminence-grid
+      > article
+      .dream-dolminence-number {
+      animation: kn-press linear both;
+      animation-timeline: --ts-in;
+      animation-range: entry 30% entry 85%;
+    }
+
+    /* 第四幕: each CASE numeral is pressed as its slip rises. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-story-cases
+      > li
+      .dream-story-case-number
+      b {
+      animation: kn-press linear both;
+      animation-timeline: --ts-rise;
+      animation-range: entry 40% entry 100%;
+    }
+
+    /* 出来事: the seals are stamped down the spine as each event reaches
+       the reading line. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-chronicle-item
+      > .dream-archive-seal {
+      view-timeline: --kn-seal block;
+      view-timeline-inset: 0 18%;
+      animation: kn-stamp linear both;
+      animation-timeline: --kn-seal;
+      animation-range: cover 0% cover 16%;
+    }
+
+    /* 舞台: the place name is brushed down its column. (The 青海波 at the
+       foot stays drawn: fifteen more composited layers for a 12px band.) */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-atlas-grid
+      article {
+      view-timeline: --kn-board block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-atlas-grid
+      h3 {
+      animation: kn-brush linear both;
+      animation-timeline: --kn-board;
+      animation-range: entry 5% entry 55%;
+    }
+
+    /* 繋がり: the two threads draw from the names into the knot. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-relations-tie {
+      view-timeline: --kn-tie block;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-relations-knot
+      > i {
+      transform-origin: 0 0;
+      animation: kn-tie linear both;
+      animation-timeline: --kn-tie;
+      animation-range: entry 15% entry 70%;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-relations-knot
+      > i
+      + b
+      + i {
+      transform-origin: 100% 100%;
+    }
+
+    /* 武装: the closed group drawers pull out of the cabinet as they reach
+       the screen, over their first 120px. An open drawer stays put: it
+       would be promoted whole, two thousand pixels of entries. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-arsenal-groups
+      > .dream-archive-fold:not([open]) {
+      view-timeline: --kn-drawer block;
+      animation: kn-drawer linear both;
+      animation-timeline: --kn-drawer;
+      animation-range: entry 0% entry 120px;
+    }
+  }
+}
+
+@keyframes kn-fusuma-left {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -101% 0;
+  }
+}
+
+@keyframes kn-fusuma-right {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 101% 0;
+  }
+}
+
+@keyframes kn-unroll {
+  from {
+    opacity: 0;
+    translate: 0 -12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes kn-hang {
+  from {
+    opacity: 0;
+    scale: 1 0.18;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@keyframes kn-unfurl {
+  from {
+    opacity: 0.25;
+    scale: 1 0.12;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@keyframes kn-lock {
+  from {
+    opacity: 0;
+    scale: 1.06;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes kn-press {
+  from {
+    opacity: 0;
+    scale: 1.45;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes kn-stamp {
+  from {
+    opacity: 0;
+    scale: 1.6;
+    rotate: -9deg;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes kn-brush {
+  from {
+    opacity: 0;
+    translate: 0 -16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes kn-drawer {
+  from {
+    opacity: 0;
+    translate: -28px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes kn-tie {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+/* ---------- 9. Forced colours ---------- */
+/* The band, the curtain rule and the panels go; the generated numerals
+   and chips read in system text; the act index underline, the 目次
+   diamond and the chronicle spine are drawn in CanvasText. (Pseudo-
+   elements cannot sit inside :is(), so each is named on its own.) */
+@media (forced-colors: active) {
+  .dream-page.dream-page :is(#chronicle, #atlas, #relations, #arsenal) {
+    border-image: none;
+  }
+
+  .dream-page.dream-page #chronicle::before,
+  .dream-page.dream-page #chronicle::after,
+  .dream-page.dream-page .dream-dossier-dialog::before,
+  .dream-page.dream-page .dream-dossier-dialog::after,
+  .dream-page.dream-page .dream-dossier-dialog .dream-dossier-close::before {
+    display: none;
+  }
+
+  .dream-page.dream-page
+    :is(#chronicle, #atlas, #relations, #arsenal)
+    .dream-annex-heading
+    > p::before,
+  .dream-page.dream-page .dream-atlas-kicker::before,
+  .dream-page.dream-page .dream-arsenal-list dt::before {
+    border-color: CanvasText;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-chapter-nav a::after,
+  .dream-page.dream-page .dream-chronicle-list::before {
+    background: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-contents a::after {
+    border-color: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-relations-knot > b {
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-arsenal-list dt small {
+    border-color: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-poster-controls .dream-poster-lock[aria-pressed="true"] b {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  /* The paper's texture outranks the refinement sheet's Canvas; restate it. */
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    :is(.dream-prologue-card, .dream-story-case-body, #glossary) {
+    background: Canvas;
+  }
+}

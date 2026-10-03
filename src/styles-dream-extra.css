@@ -1004,7 +1004,9 @@
    768, 412, 390, 320, 844x390, 667x375 and 1920; the four corners, #quotes
    (now with the VOICES leaf) and the three annexes the supplements grew.
    The annex sheet's own numbers for cast-roster, factions, glossary and
-   quotes are overridden here (this sheet loads later); its format pins stay. */
+   quotes are overridden here (this sheet loads later); its format pins stay.
+   Re-measured 2026-10-03 for the Kinema edition (styles-dream-kinema.css: the
+   atlas masonry, the chronicle timeline from 981px, the arsenal columns). */
 
 .dream-page.dream-page #cast-roster {
   contain-intrinsic-size: auto 2390px;
@@ -1015,19 +1017,19 @@
 }
 
 .dream-page.dream-page #chronicle {
-  contain-intrinsic-size: auto 1965px;
+  contain-intrinsic-size: auto 2015px;
 }
 
 .dream-page.dream-page #atlas {
-  contain-intrinsic-size: auto 2500px;
+  contain-intrinsic-size: auto 2190px;
 }
 
 .dream-page.dream-page #relations {
-  contain-intrinsic-size: auto 1090px;
+  contain-intrinsic-size: auto 1110px;
 }
 
 .dream-page.dream-page #arsenal {
-  contain-intrinsic-size: auto 560px;
+  contain-intrinsic-size: auto 565px;
 }
 
 .dream-page.dream-page #glossary {
@@ -1048,19 +1050,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 1965px;
+    contain-intrinsic-size: auto 2010px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3080px;
+    contain-intrinsic-size: auto 2685px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1115px;
+    contain-intrinsic-size: auto 1130px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 555px;
+    contain-intrinsic-size: auto 560px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1082,19 +1084,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 1925px;
+    contain-intrinsic-size: auto 2000px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3465px;
+    contain-intrinsic-size: auto 2855px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1640px;
+    contain-intrinsic-size: auto 1670px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 545px;
+    contain-intrinsic-size: auto 550px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1116,15 +1118,15 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2100px;
+    contain-intrinsic-size: auto 2105px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3925px;
+    contain-intrinsic-size: auto 3670px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1650px;
+    contain-intrinsic-size: auto 1680px;
   }
 
   .dream-page.dream-page #arsenal {
@@ -1150,19 +1152,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2475px;
+    contain-intrinsic-size: auto 2505px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 5260px;
+    contain-intrinsic-size: auto 5315px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2720px;
+    contain-intrinsic-size: auto 2770px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 620px;
+    contain-intrinsic-size: auto 755px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1184,19 +1186,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2550px;
+    contain-intrinsic-size: auto 2555px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 5565px;
+    contain-intrinsic-size: auto 5615px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2775px;
+    contain-intrinsic-size: auto 2830px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 620px;
+    contain-intrinsic-size: auto 755px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1218,19 +1220,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2930px;
+    contain-intrinsic-size: auto 2955px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 6470px;
+    contain-intrinsic-size: auto 6575px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2885px;
+    contain-intrinsic-size: auto 2940px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 690px;
+    contain-intrinsic-size: auto 775px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1252,19 +1254,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2020px;
+    contain-intrinsic-size: auto 2025px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3925px;
+    contain-intrinsic-size: auto 3210px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1655px;
+    contain-intrinsic-size: auto 1680px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 530px;
+    contain-intrinsic-size: auto 535px;
   }
 
   .dream-page.dream-page #glossary {
@@ -1286,15 +1288,15 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2065px;
+    contain-intrinsic-size: auto 2070px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 4285px;
+    contain-intrinsic-size: auto 4300px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2440px;
+    contain-intrinsic-size: auto 2490px;
   }
 
   .dream-page.dream-page #arsenal {
@@ -1322,19 +1324,19 @@
   }
 
   .dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 1965px;
+    contain-intrinsic-size: auto 2015px;
   }
 
   .dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 2720px;
+    contain-intrinsic-size: auto 2410px;
   }
 
   .dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1090px;
+    contain-intrinsic-size: auto 1110px;
   }
 
   .dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 560px;
+    contain-intrinsic-size: auto 565px;
   }
 
   .dream-page.dream-page #glossary {
