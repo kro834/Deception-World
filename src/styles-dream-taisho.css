@@ -1018,7 +1018,10 @@
       var(--ts-kin) calc(100% - 5px) calc(100% - 4px),
       transparent 0
     ),
-    var(--ts-shu-deep);
+    /* A dark vermilion (the owner's call, 2026-10-03): the protagonist's
+       banner still leads in shu, but a brisk scroll past it no longer reads
+       as a red flash beside the white arch. */
+    var(--ts-shu-banner, #7a2620);
 }
 
 /* Under each arch the billing opens on a 子持ち罫, and the link leads with

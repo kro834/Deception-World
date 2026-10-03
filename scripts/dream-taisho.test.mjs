@@ -136,3 +136,11 @@ test("the page reads as a four-act film programme", async () => {
   assert.match(source, /<dl className="dream-credits" aria-label="登場記録">/);
   assert.doesNotMatch(source, /\u3000/);
 });
+
+test("the protagonist's banner is a dark vermilion, so a brisk scroll reads no red flash", async () => {
+  const css = await readCss();
+  const rule = css.match(/article:first-child \.dream-character-copy b \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(rule);
+  assert.match(rule, /var\(--ts-shu-banner, #7a2620\);/);
+  assert.doesNotMatch(rule, /--ts-shu-deep/);
+});
