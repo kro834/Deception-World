@@ -150,7 +150,7 @@ test("each chapter has its own accent, none of them the hero's ice, and every ac
   const phases = {
     story: { tokens: tokens("#story"), ground: "#0a1126" },
     archive: { tokens: tokens("#manager-archive"), ground: "#180b22" },
-    riders: { tokens: tokens("#riders"), ground: "#191d24" },
+    riders: { tokens: tokens("#riders"), ground: "#343b45" },
     records: { tokens: tokens("#records"), ground: "#20160c" },
     annex: { tokens: tokens(":is(.wa-contents, .world-annex)"), ground: "#0b1a15" },
     finale: { tokens: tokens(":is(.finale-section, .mr-ticker.is-close, footer)"), ground: "#0c0604" },

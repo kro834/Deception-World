@@ -69,12 +69,12 @@ main.site-shell.film-edition.mirage-edition #manager-archive {
 main.site-shell.film-edition.mirage-edition #riders {
   --mr-ice: #cfd8e3;
   --mr-ice-hi: #f5f8fc;
-  --mr-ice-deep: #95a3b4;
-  --mr-deck: #151a21;
-  --mr-deck-raised: #1c222b;
+  --mr-ice-deep: #aab6c6;
+  --mr-deck: #1d2229;
+  --mr-deck-raised: #262c35;
   --we-ink: #11151b;
-  --we-panel: #151a21;
-  --we-rule: rgb(207 216 227 / 22%);
+  --we-panel: #1d2229;
+  --we-rule: rgb(220 228 238 / 26%);
 }
 
 main.site-shell.film-edition.mirage-edition #records {
@@ -237,14 +237,27 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
       linear-gradient(180deg, #0a1126 0%, #101a3c 30%, #182046 62%, #241a46 100%);
   }
 
+  /* The riders' hangar is the one lit metal phase (the owner asked for the
+     phases to differ greatly): graphite brightening to brushed gunmetal at
+     its middle, two raking sheens, a plate seam every 120px and the prism
+     thrown as violet and magenta stage light. Still a dark field (the
+     brightest stop is #343b45), so the brisk-scroll reading holds. */
   main.site-shell.film-edition.mirage-edition #riders {
     background:
-      radial-gradient(ellipse 44% 28% at 90% 16%, rgb(164 139 255 / 15%), transparent 70%),
-      radial-gradient(ellipse 40% 26% at 6% 84%, rgb(255 92 200 / 10%), transparent 70%),
-      radial-gradient(ellipse 30% 22% at 52% 50%, rgb(122 232 255 / 6%), transparent 70%),
-      linear-gradient(172deg, transparent 6%, rgb(228 236 248 / 8%) 10%, transparent 15%),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px),
-      linear-gradient(180deg, #0e1116 0%, #191d24 42%, #13171c 100%);
+      radial-gradient(ellipse 50% 30% at 92% 12%, rgb(164 139 255 / 24%), transparent 70%),
+      radial-gradient(ellipse 46% 30% at 4% 88%, rgb(255 92 200 / 16%), transparent 70%),
+      linear-gradient(
+        168deg,
+        transparent 4%,
+        rgb(236 242 250 / 13%) 9%,
+        transparent 13%,
+        transparent 54%,
+        rgb(236 242 250 / 7%) 58%,
+        transparent 61%
+      ),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 4.5%) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(0deg, rgb(0 0 0 / 14%) 0 1px, transparent 1px 120px),
+      linear-gradient(180deg, #1b1f25 0%, #2c323b 38%, #343b45 58%, #20252c 100%);
   }
 
   main.site-shell.film-edition.mirage-edition #records {
@@ -420,9 +433,9 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
 
   main.site-shell.film-edition.mirage-edition #riders .rider-visual::before {
     background:
-      linear-gradient(90deg, var(--mr-deck) 0%, rgb(21 26 33 / 55%) 16%, transparent 34%),
-      linear-gradient(0deg, rgb(21 26 33 / 80%), transparent 30%),
-      radial-gradient(ellipse 90% 80% at 60% 42%, transparent 58%, rgb(21 26 33 / 55%) 100%);
+      linear-gradient(90deg, var(--mr-deck) 0%, rgb(29 34 41 / 55%) 16%, transparent 34%),
+      linear-gradient(0deg, rgb(29 34 41 / 80%), transparent 30%),
+      radial-gradient(ellipse 90% 80% at 60% 42%, transparent 58%, rgb(29 34 41 / 55%) 100%);
   }
 
   /* ================================================================
@@ -582,7 +595,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
   }
 
   main.site-shell.film-edition.mirage-edition #riders {
-    background: #161a20;
+    background: #2a3038;
   }
 
   main.site-shell.film-edition.mirage-edition #records {
