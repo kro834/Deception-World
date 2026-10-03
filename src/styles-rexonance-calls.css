@@ -1177,6 +1177,20 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke: url("#rx-suit-rim-white");
 }
 
+/* Crystals (the diamonds, the stars, the belt cells, the tail's blade) and
+   the energy ribbons: translucent ice on the left, pink on the right. */
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path.rx-suit-accent,
+.rx-call-sequence .rx-suit-plate.is-ribbon path {
+  fill: url("#rx-suit-fill-gem-ice");
+  stroke: url("#rx-suit-rim-gem-ice");
+}
+
+.rx-call-sequence :is(.rx-suit-plate.is-violet, .rx-suit-plate.is-white) path.rx-suit-accent,
+.rx-call-sequence .rx-suit-plate.is-ribbon.is-violet path {
+  fill: url("#rx-suit-fill-gem-violet");
+  stroke: url("#rx-suit-rim-gem-violet");
+}
+
 /* The lock's rim glint: a bright copy of the outline, never a fill. */
 .rx-call-sequence .rx-suit-figure > i > .rx-suit-glint {
   position: absolute;
@@ -1190,57 +1204,34 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke-width: 1.5px;
 }
 
-/* A bracket bite: four corners that clamp the key plate as it locks. */
-.rx-call-sequence .rx-suit-plate.is-key::before {
+
+/* Nanite grains: each piece's cloud (resting unseen), and the seed. */
+.rx-call-sequence .rx-suit-figure > i > .rx-suit-cloud {
   position: absolute;
-  inset: -4px;
-  content: "";
+  inset: 0;
   opacity: 0;
-  background:
-    linear-gradient(currentColor 0 0) 0 0 / 7px 1px,
-    linear-gradient(currentColor 0 0) 0 0 / 1px 7px,
-    linear-gradient(currentColor 0 0) 100% 0 / 7px 1px,
-    linear-gradient(currentColor 0 0) 100% 0 / 1px 7px,
-    linear-gradient(currentColor 0 0) 0 100% / 7px 1px,
-    linear-gradient(currentColor 0 0) 0 100% / 1px 7px,
-    linear-gradient(currentColor 0 0) 100% 100% / 7px 1px,
-    linear-gradient(currentColor 0 0) 100% 100% / 1px 7px;
-  background-repeat: no-repeat;
-  color: #bff4ff;
 }
 
-.rx-call-sequence .rx-suit-plate.is-violet::before {
-  color: #d6ccff;
+.rx-call-sequence .rx-suit-cloud path {
+  fill: #bff4ff;
+  stroke: none;
 }
 
-.rx-call-sequence .rx-suit-plate.is-white::before {
-  color: #eef8ff;
+.rx-call-sequence .is-violet > .rx-suit-cloud path {
+  fill: #ffc4ec;
 }
 
-/* Motion streaks: three speed lines trailing back along the flight,
-   under the plate (full tier only; resting at 0). */
-.rx-call-sequence .rx-suit-plate:is(.is-legs, .is-limb)::after {
-  --rx-suit-streak: rgb(121 232 255 / 60%);
-  position: absolute;
-  z-index: -1;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--rx-suit-h) * 0.24);
-  height: 44%;
-  content: "";
+.rx-call-sequence .is-white > .rx-suit-cloud path {
+  fill: #eef8ff;
+}
+
+.rx-call-sequence .rx-suit-seed {
   opacity: 0;
-  background:
-    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 12% / 100% 1px,
-    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 50% / 72% 1px,
-    linear-gradient(90deg, var(--rx-suit-streak), transparent) 0 88% / 100% 1px;
-  background-repeat: no-repeat;
-  transform-origin: 0 50%;
-  translate: 0 -50%;
-  rotate: var(--rx-suit-a, 0deg);
 }
 
-.rx-call-sequence .rx-suit-plate.is-violet::after {
-  --rx-suit-streak: rgb(192 175 255 / 60%);
+.rx-call-sequence .rx-suit-seed path {
+  fill: #dff9ff;
+  stroke: none;
 }
 
 /* The faceplate: two halves, folded into the helmet's sides until the
@@ -1251,7 +1242,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-face.is-right path {
-  stroke: rgb(192 175 255 / 72%);
+  stroke: rgb(255 154 216 / 72%);
 }
 
 /* The trims: the owner's accent outlines, in gold. */
@@ -1269,7 +1260,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-eyes.is-violet path {
-  fill: #b6a3ff;
+  fill: #ff8fd8;
 }
 
 .rx-call-sequence .rx-suit-eyes.is-gold path {
@@ -1295,7 +1286,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-glow.is-violet path {
-  stroke: #c4b4ff;
+  stroke: #ffa6df;
 }
 
 .rx-call-sequence .rx-suit-glow.is-gold path {
@@ -1303,7 +1294,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-ring {
-  top: 32.083%;
+  top: 26.667%;
   left: 50%;
   width: 44%;
   aspect-ratio: 1;
@@ -1314,7 +1305,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-ring.is-violet {
-  border-color: #b6a3ff;
+  border-color: #ff8fd8;
 }
 
 .rx-call-sequence .rx-suit-ring.is-gold {
@@ -1323,7 +1314,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 /* The core (spiral housing) and the belt jewel bloom gold last. */
 .rx-call-sequence :is(.rx-suit-core, .rx-suit-jewel) {
-  top: 32.083%;
+  top: 26.667%;
   left: 50%;
   width: 8%;
   aspect-ratio: 1;
@@ -1335,8 +1326,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-jewel {
-  top: 47.917%;
-  width: 5%;
+  top: 39.167%;
+  width: 6%;
   background: radial-gradient(#fbecc4 30%, #d9b46e);
   box-shadow: 0 0 6px 1px rgb(227 193 133 / 36%);
 }
@@ -1345,10 +1336,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    holds around the helmet; on REXONANCE DEUS！ it hands over to four gold
    brackets that lock on. */
 .rx-call-sequence .rx-suit-lock {
-  top: 16.25%;
+  top: 12.5%;
   left: 50%;
   display: none;
-  width: 34%;
+  width: 30%;
   aspect-ratio: 1.6;
   translate: -50% -50%;
 }
@@ -1479,32 +1470,33 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-callout.is-head {
-  --rx-suit-x: 0.056;
-  --rx-suit-y: 0.1625;
+  --rx-suit-x: 0.05;
+  --rx-suit-y: 0.13;
 }
 
 .rx-call-sequence .rx-suit-callout.is-arms {
-  --rx-suit-x: 0.12;
-  --rx-suit-y: 0.26;
+  --rx-suit-x: 0.092;
+  --rx-suit-y: 0.231;
 }
 
 .rx-call-sequence .rx-suit-callout.is-chest {
-  --rx-suit-x: 0.05;
-  --rx-suit-y: 0.305;
+  --rx-suit-x: 0.04;
+  --rx-suit-y: 0.267;
 }
 
 .rx-call-sequence .rx-suit-callout.is-legs {
-  --rx-suit-x: -0.05;
-  --rx-suit-y: 0.942;
+  --rx-suit-x: -0.11;
+  --rx-suit-y: 0.92;
   right: calc(100% - var(--rx-suit-cx) - var(--rx-suit-x) * var(--rx-suit-h));
   left: max(36px, calc(env(safe-area-inset-left) + 16px));
   flex-direction: row;
 }
 
 .rx-call-sequence .rx-suit-callout.is-lock {
-  top: calc(50% - 0.46 * var(--rx-suit-h));
-  right: auto;
-  left: calc(var(--rx-suit-cx) + 0.1 * var(--rx-suit-h));
+  top: calc(50% - 0.475 * var(--rx-suit-h));
+  /* Left of the crown: the tail arches over the right. */
+  right: calc(100% - var(--rx-suit-cx) + 0.06 * var(--rx-suit-h));
+  left: auto;
   color: #f2d896;
 }
 
@@ -1657,7 +1649,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   /* Every label reads on the right, the legs' too (from the right boot):
      nothing stands between the figure and the calls. */
   .rx-call-sequence .rx-suit-callout.is-legs {
-    --rx-suit-x: 0.05;
+    --rx-suit-x: 0.11;
     right: max(36px, calc(env(safe-area-inset-right) + 16px));
     left: calc(var(--rx-suit-cx) + var(--rx-suit-x) * var(--rx-suit-h));
     flex-direction: row-reverse;
@@ -1798,45 +1790,53 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
       both;
   }
 
-  /* SA-GA！DEUS！: one plate group locks on each line — legs, arms (the
-     shoulder blades fanning in one by one), chest (its spiral housing
-     closing like an iris), the mantle crescent. Each piece flies in
-     off-axis, slides, pauses, seats a hair past its place on the lock
-     (80 %) and settles; the bite and a rim glint mark the lock. */
+  /* RIDER！ seeds the core: a knot of grains gathers there. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-seed {
+    animation: rxSuitSeed 420ms linear calc(var(--rx-call-rider-start) + 40ms) both;
+  }
+
+  /* SA-GA！DEUS！: the nanite front spreads from the core, one region per
+     line — chest, shoulders and arms to the hands, waist and legs to the
+     feet, the mantle — and the helmet rises up the neck on REXONANCE
+     DEUS！. Each piece's grains gather from 60 ms before the front reaches
+     it (--rx-suit-t) while the piece flows out from the core's side, the
+     plate solidifies behind the front, a bright seam runs its outline, and
+     the grains settle out. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
-    :is(.rx-suit-plate, .rx-suit-callout) {
+    .rx-suit-callout {
     --rx-suit-lock: calc(
-      var(--rx-call-chant-start) + var(--rx-suit-i) * var(--rx-call-chant-duration) / 4 +
-        var(--rx-suit-j, 0) * 26ms
+      var(--rx-call-chant-start) + var(--rx-suit-i) * var(--rx-call-chant-duration) / 4
     );
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate {
-    animation: rxSuitPlate var(--rx-suit-fly) linear
-      calc(var(--rx-suit-lock) - var(--rx-suit-fly) * 0.8) both;
+    :is(.rx-suit-plate, .rx-suit-helm) {
+    animation: rxSuitFlow 280ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-t) - 60ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate:is(.is-legs, .is-limb)::after {
-    animation: rxSuitStreak var(--rx-suit-fly) linear
-      calc(var(--rx-suit-lock) - var(--rx-suit-fly) * 0.8) both;
+    :is(.rx-suit-plate, .rx-suit-helm)
+    > svg:first-child {
+    animation: rxSuitSolid 220ms linear var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate.is-key::before {
-    animation: rxSuitBite 260ms cubic-bezier(0.2, 0.9, 0.1, 1) var(--rx-suit-lock) forwards;
+    :is(.rx-suit-plate, .rx-suit-helm)
+    > .rx-suit-cloud {
+    animation: rxSuitCloud 300ms linear calc(var(--rx-suit-t) - 60ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate
+    :is(.rx-suit-plate, .rx-suit-helm)
     > .rx-suit-glint {
-    animation: rxSuitGlint 240ms linear calc(var(--rx-suit-lock) - 20ms) both;
+    animation: rxSuitGlint 180ms linear calc(var(--rx-suit-t) + 60ms) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1852,21 +1852,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitTick 60ms steps(2, jump-end) calc(var(--rx-suit-lock) + 50ms) both;
   }
 
-  /* The helmet waits above, open, from the first REXONANCE！ (10 %) and on
-     REXONANCE DEUS！ (90 %) slams down and shuts: shell and spike drop,
-     the crest halves fold in, the faceplate halves close behind them. */
+  /* The faceplate halves form with the shell, open, and close over it. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    :is(.rx-suit-helm, .rx-suit-face) {
-    animation: rxSuitHelm calc(var(--rx-call-final-start) - var(--rx-call-response-start) + 120ms)
-      linear calc(var(--rx-call-response-start) - 40ms) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-helm
-    > .rx-suit-glint {
-    animation: rxSuitGlint 240ms linear calc(var(--rx-call-final-start) + 50ms) both;
+    .rx-suit-face {
+    animation:
+      rxSuitFlow 280ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-t) - 60ms) both,
+      rxSuitSolid 220ms linear var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1993,83 +1985,22 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-/* Flight paths, as fractions of the figure's height (--rx-suit-a points
-   the streak back along the path). Back pieces arrive from further away
-   (smaller), front ones from nearer the camera (larger). */
-.rx-call-sequence .rx-suit-plate {
-  --rx-suit-fly: 260ms;
-  --rx-suit-dx: 0px;
-  --rx-suit-dy: 0px;
+/* The flow: each piece starts a little nearer the core (--rx-suit-fx/fy,
+   set per piece as fractions of the figure's height), slightly gathered,
+   and grows pieces (blades, mantle, iris, helmet) from their pivot. */
+.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm, .rx-suit-face) {
+  --rx-suit-fx: 0;
+  --rx-suit-fy: 0;
   --rx-suit-r: 0deg;
-  --rx-suit-s: 1;
+  --rx-suit-sx: 0.94;
+  --rx-suit-sy: 0.94;
 }
 
-.rx-call-sequence .rx-suit-plate.is-legs.is-upper {
-  --rx-suit-dx: calc(var(--rx-suit-h) * -0.16);
-  --rx-suit-dy: calc(var(--rx-suit-h) * 0.2);
-  --rx-suit-r: -12deg;
-  --rx-suit-a: 129deg;
-}
-
-.rx-call-sequence .rx-suit-plate.is-legs.is-upper.is-right {
-  --rx-suit-dx: calc(var(--rx-suit-h) * 0.16);
-  --rx-suit-r: 12deg;
-  --rx-suit-a: 51deg;
-}
-
-.rx-call-sequence .rx-suit-plate.is-legs.is-lower {
-  --rx-suit-dx: calc(var(--rx-suit-h) * -0.12);
-  --rx-suit-dy: calc(var(--rx-suit-h) * 0.27);
-  --rx-suit-r: -6deg;
-  --rx-suit-a: 114deg;
-}
-
-.rx-call-sequence .rx-suit-plate.is-legs.is-lower.is-right {
-  --rx-suit-dx: calc(var(--rx-suit-h) * 0.12);
-  --rx-suit-r: 6deg;
-  --rx-suit-a: 66deg;
-}
-
-.rx-call-sequence .rx-suit-plate.is-limb {
-  --rx-suit-dx: calc(var(--rx-suit-h) * -0.22);
-  --rx-suit-dy: calc(var(--rx-suit-h) * -0.05);
-  --rx-suit-r: -26deg;
-  --rx-suit-s: 0.9;
-  --rx-suit-a: 193deg;
-}
-
-.rx-call-sequence .rx-suit-plate.is-limb.is-right {
-  --rx-suit-dx: calc(var(--rx-suit-h) * 0.22);
-  --rx-suit-r: 26deg;
-  --rx-suit-a: -13deg;
-}
-
-/* The blades turn out of the fold about the shoulder (their fold angle
-   is set per blade on the element). */
-.rx-call-sequence .rx-suit-plate.is-blade {
-  --rx-suit-fly: 160ms;
-  --rx-suit-s: 0.78;
-}
-
-.rx-call-sequence .rx-suit-plate.is-chest {
-  --rx-suit-dy: calc(var(--rx-suit-h) * 0.05);
-  --rx-suit-s: 1.4;
-}
-
-.rx-call-sequence .rx-suit-plate.is-iris {
-  --rx-suit-fly: 220ms;
-  --rx-suit-r: -150deg;
-  --rx-suit-s: 1.9;
-}
-
-.rx-call-sequence .rx-suit-plate.is-mantle {
-  --rx-suit-fly: 300ms;
-  --rx-suit-r: 75deg;
-  --rx-suit-s: 0.4;
-}
-
-.rx-call-sequence :is(.rx-suit-helm, .rx-suit-face) {
-  --rx-suit-r: 0deg;
+.rx-call-sequence .rx-suit-face {
+  --rx-suit-t: calc(var(--rx-call-final-start) + 20ms);
+  --rx-suit-sx: 0.8;
+  --rx-suit-sy: 0.2;
+  transform-origin: 50% 100%;
 }
 
 .rx-call-sequence .rx-suit-face {
@@ -2179,53 +2110,64 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-/* Slide (to 58 %), a mechanical pause (to 70 %), the seat a hair past its
-   place on the lock (80 %), the settle. */
-@keyframes rxSuitPlate {
+@keyframes rxSuitSeed {
   0% {
-    animation-timing-function: cubic-bezier(0.12, 0.55, 0.2, 1);
     opacity: 0;
-    transform: translate3d(var(--rx-suit-dx), var(--rx-suit-dy), 0) rotate(var(--rx-suit-r))
-      scale(var(--rx-suit-s));
+    transform: scale(2.4) rotate(-40deg);
   }
-  12% {
+  30% {
     opacity: 1;
-  }
-  58% {
-    animation-timing-function: linear;
-    transform: translate3d(calc(var(--rx-suit-dx) * 0.07), calc(var(--rx-suit-dy) * 0.07), 0)
-      rotate(calc(var(--rx-suit-r) * 0.08)) scale(calc(1 + (var(--rx-suit-s) - 1) * 0.07));
   }
   70% {
-    animation-timing-function: cubic-bezier(0.6, 0, 1, 0.6);
-    transform: translate3d(calc(var(--rx-suit-dx) * 0.055), calc(var(--rx-suit-dy) * 0.055), 0)
-      rotate(calc(var(--rx-suit-r) * 0.065)) scale(calc(1 + (var(--rx-suit-s) - 1) * 0.055));
-  }
-  80% {
-    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
-    transform: translate3d(calc(var(--rx-suit-dx) * -0.02), calc(var(--rx-suit-dy) * -0.02), 0)
-      rotate(calc(var(--rx-suit-r) * -0.025)) scale(calc(1 - (var(--rx-suit-s) - 1) * 0.015));
+    opacity: 1;
+    transform: scale(0.8);
   }
   100% {
-    opacity: 1;
+    opacity: 0.6;
     transform: none;
   }
 }
-@keyframes rxSuitStreak {
+/* The piece flows out from the core's side and from its pivot. */
+@keyframes rxSuitFlow {
+  from {
+    transform: translate3d(
+        calc(var(--rx-suit-fx) * var(--rx-suit-h) * -0.22),
+        calc(var(--rx-suit-fy) * var(--rx-suit-h) * -0.22),
+        0
+      )
+      rotate(var(--rx-suit-r)) scale(var(--rx-suit-sx), var(--rx-suit-sy));
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxSuitSolid {
+  from {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Grains gather out of a wider cloud onto the plate, then settle out. */
+@keyframes rxSuitCloud {
   0% {
     opacity: 0;
+    transform: scale(1.8) rotate(12deg);
   }
-  8% {
-    opacity: 0.85;
+  25% {
+    opacity: 1;
   }
-  50% {
-    opacity: 0.5;
-  }
-  60% {
-    opacity: 0;
+  55% {
+    opacity: 0.8;
+    transform: none;
   }
   100% {
     opacity: 0;
+    transform: none;
   }
 }
 @keyframes rxSuitBite {
@@ -2258,38 +2200,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: scaleX(0);
   }
   to {
-    transform: none;
-  }
-}
-/* 1260 ms in from above (10 %: 1340 ms) to wait open, then from the last
-   call (90 %: 1980 ms) down a hair past its seat (97 %) and settled at
-   2060 ms. */
-@keyframes rxSuitHelm {
-  0% {
-    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
-    opacity: 0;
-    transform: translate3d(0, calc(var(--rx-suit-h) * -0.11), 0) rotate(var(--rx-suit-r))
-      scale(1.08);
-  }
-  10% {
-    opacity: 0.5;
-    transform: translate3d(0, calc(var(--rx-suit-h) * -0.05), 0) rotate(var(--rx-suit-r))
-      scale(1.04);
-  }
-  90% {
-    animation-timing-function: cubic-bezier(0.7, 0, 1, 0.5);
-    opacity: 0.5;
-    transform: translate3d(0, calc(var(--rx-suit-h) * -0.05), 0) rotate(var(--rx-suit-r))
-      scale(1.04);
-  }
-  97% {
-    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
-    opacity: 1;
-    transform: translate3d(0, calc(var(--rx-suit-h) * 0.006), 0)
-      rotate(calc(var(--rx-suit-r) * -0.06));
-  }
-  100% {
-    opacity: 1;
     transform: none;
   }
 }

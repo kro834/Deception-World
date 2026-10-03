@@ -44,3 +44,44 @@ export const REXONANCE_SUIT_SYSTEMS = [
 // The schematic's part callouts, in the order their plates lock: one plate
 // group on each quarter-beat of SA-GA！DEUS！.
 export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
+
+// suitup3: the armour forms like nanotech, spreading from the P14 core.
+// When the nanite front reaches each region (ms on the overlay's clock):
+// RIDER！ seeds the core; each SA-GA！DEUS！ line carries the front one
+// region further — chest, shoulders and arms to the hands, waist and legs
+// to the feet, then the tail streams out over the shoulder to its blade
+// with the ribbons — and on REXONANCE DEUS！ the helmet rises up the neck
+// and closes.
+const SUIT_CHANT = REXONANCE_CALL_BEATS[2].start;
+const SUIT_LINE = REXONANCE_CALL_BEATS[2].duration / 4;
+const SUIT_FINAL = REXONANCE_CALL_BEATS[4].start;
+export const REXONANCE_SUIT_FLOW = {
+  seed: REXONANCE_CALL_BEATS[1].start + 40,
+  iris: SUIT_CHANT,
+  chest: SUIT_CHANT + 40,
+  ribs: SUIT_CHANT + 80,
+  shoulder: SUIT_CHANT + SUIT_LINE,
+  blades: SUIT_CHANT + SUIT_LINE + 30,
+  upperArm: SUIT_CHANT + SUIT_LINE + 40,
+  forearm: SUIT_CHANT + SUIT_LINE + 90,
+  hand: SUIT_CHANT + SUIT_LINE + 135,
+  abdomen: SUIT_CHANT + 2 * SUIT_LINE,
+  pelvis: SUIT_CHANT + 2 * SUIT_LINE + 30,
+  thigh: SUIT_CHANT + 2 * SUIT_LINE + 60,
+  knee: SUIT_CHANT + 2 * SUIT_LINE + 90,
+  shin: SUIT_CHANT + 2 * SUIT_LINE + 120,
+  boot: SUIT_CHANT + 2 * SUIT_LINE + 150,
+  tail0: SUIT_CHANT + 3 * SUIT_LINE,
+  ribbons: SUIT_CHANT + 3 * SUIT_LINE + 15,
+  tail1: SUIT_CHANT + 3 * SUIT_LINE + 30,
+  tail2: SUIT_CHANT + 3 * SUIT_LINE + 60,
+  tail3: SUIT_CHANT + 3 * SUIT_LINE + 90,
+  blade: SUIT_CHANT + 3 * SUIT_LINE + 120,
+  neck: SUIT_FINAL,
+  crest: SUIT_FINAL + 40,
+  spike: SUIT_FINAL + 70,
+} as const;
+// A region condenses over this long after the front reaches it; its cloud
+// gathers from 60 ms before and settles out over 300 ms.
+export const REXONANCE_SUIT_FORM_MS = 220;
+export const REXONANCE_SUIT_CLOUD_MS = 300;
