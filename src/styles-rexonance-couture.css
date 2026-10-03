@@ -1,0 +1,845 @@
+/* ================================================================
+   Rexonance — the Couture edition (rx3, 2026-10-03)
+
+   The page as a fashion-meets-tech film microsite: one lacquered ink
+   ground with a fine grain instead of black, navy and #1d1d1f bands; one
+   colour story (ice, violet, gold — magenta stays ULTRA's own light);
+   editorial chapter heads on a fixed spine; thin, watch-dial numerals;
+   ink-glass instruments with hairlines instead of rounded grey tiles; and
+   one set of quiet states for every control.
+
+   Route-only (linked after the Premiere sheet, before the cinematic
+   sheet) and scoped to .rxs-page.rxs-page.rxs-rexonance-page, so Extreme
+   and Final Stage never see it. Paint, type and composition only: it adds
+   no keyframes and no animation, and it leaves the geometry the verify
+   scripts measure (local nav, liquid rail, P14 slider and pills, selects,
+   anchors, the desktop stage copy start) to the earlier sheets. Hover and
+   press transitions sit behind reduced motion and economy rendering.
+   ================================================================ */
+
+/* ---------- Tokens: one ground, one light per phase ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --rc-ink: #04080f;
+  --rc-ink-deep: #02050a;
+  --rc-plate: #08101a;
+  --rc-plate-hi: #0d1724;
+  --rc-ice: #7ae8ff;
+  --rc-violet: #b6a3ff;
+  --rc-gold: #e3c185;
+  --rc-ivory: #f0f6ff;
+  --rc-hair: rgb(240 246 255 / 11%);
+  --rc-hair-strong: rgb(240 246 255 / 20%);
+  --rc-body: rgb(240 246 255 / 76%);
+  --rc-quiet: rgb(240 246 255 / 58%);
+  --rc-prism: linear-gradient(90deg, #7ae8ff, #b6a3ff 52%, #e3c185);
+  --rc-prism-reverse: linear-gradient(270deg, #7ae8ff, #b6a3ff 52%, #e3c185);
+  --rc-prism-down: linear-gradient(180deg, #7ae8ff, #b6a3ff 52%, #e3c185);
+  /* Ink glass: a faint top light over the plate, never a blur. */
+  --rc-glass: linear-gradient(
+    180deg,
+    rgb(240 246 255 / 5%),
+    rgb(240 246 255 / 1.5%) 42%,
+    rgb(240 246 255 / 2.5%)
+  );
+  /* A 180px tile of fractal noise, white at 0-9% alpha: film grain, drawn
+     once and repeated with the page (no blend mode, no fixed layer). */
+  --rc-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .94 0 0 0 0 .97 0 0 0 0 1 .075 0 0 0 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* The showcase's Apple neutrals follow the lacquer. */
+  --sc-ink: var(--rc-ink);
+  --sc-tile: var(--rc-plate);
+  --sc-text: var(--rc-ivory);
+  --sc-secondary: var(--rc-quiet);
+  --sc-gold: var(--rc-gold);
+  --sc-prism: var(--rc-prism);
+  --sc-prism-reverse: var(--rc-prism-reverse);
+  --sc-prism-down: var(--rc-prism-down);
+  --rxs-white: var(--rc-ivory);
+  --rxs-muted: var(--rc-quiet);
+  background: var(--rc-grain) 0 0 / 180px 180px repeat, var(--rc-ink);
+}
+
+/* No page-scoped ::selection: an ancestor-scoped highlight rule made Blink
+   resolve a highlight style for every element on each subtree recalc (the
+   dive's page recalcs grew from ~650 to ~1100 elements). The site-wide
+   cyan selection already fits the ice story. */
+
+/* ---------- One ground: chapters are tones, not bands ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section {
+  background: transparent;
+}
+
+/* P14 opens a cool chamber; the old centre spine ran through its copy. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-p14 {
+  background: linear-gradient(180deg, rgb(122 232 255 / 3.5%), transparent 640px);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-system {
+  background: linear-gradient(180deg, rgb(182 163 255 / 3%), transparent 560px);
+}
+
+/* ---------- Hero: the same lights on the lacquer ---------- */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero {
+  background:
+    var(--rc-grain) 0 0 / 180px 180px repeat,
+    radial-gradient(ellipse 52% 64% at 72% 44%, rgb(80 96 160 / 22%), transparent 70%),
+    radial-gradient(ellipse 46% 56% at 0 100%, rgb(37 104 126 / 12%), transparent 70%),
+    var(--rc-ink);
+}
+
+/* The wordmark reads as a logotype: the widest tracking on the page. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero h1 span {
+  letter-spacing: 0.36em;
+}
+
+/* The figure's floor fade ended in a solid ink box that read as a
+   rectangle against the hero's lights; the image's own mask feathers it. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual::after {
+  background: none;
+}
+
+/* ================================================================
+   Chapter heads: a running head on a fixed spine
+   ================================================================ */
+/* The kicker becomes a running head: the label, then one hairline to the
+   column's edge (ice and violet at the label, a gold terminal at the end).
+   The leading arm is retired; the trailing arm keeps the elevation's
+   scroll draw, so the rule now draws across the whole column. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+  justify-content: flex-start;
+  gap: 18px;
+  letter-spacing: 0.24em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::before {
+  display: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::after {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 32px;
+  background: linear-gradient(
+    90deg,
+    var(--rc-ice),
+    var(--rc-violet) 72px,
+    var(--rc-hair-strong) 200px,
+    var(--rc-hair-strong) calc(100% - 12px),
+    var(--rc-gold) calc(100% - 12px)
+  );
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading h2 {
+  letter-spacing: -0.012em;
+  line-height: 1.12;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span {
+  color: var(--rc-body);
+  line-height: 1.75;
+  word-break: auto-phrase;
+}
+
+/* Wide screens: the head is a two-column spread. The numeral keeps the
+   spine (the edition's 112px column), the running head spans the page,
+   the headline holds the left and the intro answers it at the right, set
+   on the headline's last line. */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.62fr);
+    column-gap: clamp(40px, 4.5vw, 80px);
+    align-items: end;
+    max-width: 1180px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+    grid-column: 1 / -1;
+    margin-bottom: 30px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading h2 {
+    grid-column: 1;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span {
+    grid-column: 2;
+    max-width: 420px;
+    margin: 0 0 0.35em;
+    font-size: 17px;
+  }
+}
+
+/* Phones and tablets: the numeral and the running head share one row on
+   the page's left edge; headline and intro follow, left-aligned with the
+   instruments below them (centred heads sat over left-set cards). */
+@media (max-width: 1099px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: center;
+    text-align: left;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading::before {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-size: clamp(40px, 6vw, 56px);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading h2 {
+    grid-column: 1 / -1;
+    margin-top: 26px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span {
+    grid-column: 1 / -1;
+    max-width: 640px;
+    margin: 22px 0 0;
+  }
+}
+
+/* Tablets: the headline grows with the column it now owns. */
+@media (min-width: 681px) and (max-width: 1099px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section .rxs-section-heading h2 {
+    font-size: clamp(42px, 6vw, 60px);
+  }
+}
+
+/* On phones the label sits over its rule, so a long label wraps without
+   squeezing the rule into a dash. */
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    letter-spacing: 0.1em;
+    text-wrap: balance;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::after {
+    flex: none;
+    min-width: 0;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section .rxs-section-heading h2 {
+    font-size: clamp(32px, 9.6vw, 42px);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > span {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 359px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p {
+    letter-spacing: 0.06em;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::after {
+    display: block;
+  }
+}
+
+/* ================================================================
+   Numerals: a watch dial, not a scoreboard
+   ================================================================ */
+/* Display figures thin out (SF Pro's light cuts on Apple devices; where
+   the face has no light weight the nearest loaded one is used), tighten,
+   and keep tabular figures so swapped values never shift their column. */
+.rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-headline-metrics strong,
+    .rxs-specs strong,
+    .rxs-comparison article strong,
+    .rxs-comparison-result b,
+    .rxs-p14-copy dd,
+    .rxs-p14-values b,
+    .rxs-p14-values strong
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "palt" 1;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-headline-metrics strong, .rxs-specs strong) {
+  font-weight: 200;
+  letter-spacing: -0.035em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-comparison article strong,
+    .rxs-comparison-result b,
+    .rxs-p14-copy dd,
+    .rxs-p14-values b,
+    .rxs-p14-values strong
+  ) {
+  font-weight: 300;
+  letter-spacing: -0.015em;
+}
+
+/* Units stay in the light, a step heavier than the figure they qualify. */
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-headline-metrics, .rxs-specs) strong span {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* ================================================================
+   01 Performance
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics p {
+  color: var(--rc-body);
+  font-size: 16px;
+}
+
+/* The comparison: an ink-glass instrument case. The brackets and the top
+   prism edge stay (finish sheet); the plate becomes lacquer under glass. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison {
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 28px 2px,
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 2px 28px,
+    linear-gradient(var(--rc-violet) 0 0) 100% 0 / 28px 2px,
+    linear-gradient(var(--rc-violet) 0 0) 100% 0 / 2px 28px,
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 28px 2px,
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 2px 28px,
+    linear-gradient(var(--rc-gold) 0 0) 100% 100% / 28px 2px,
+    linear-gradient(var(--rc-gold) 0 0) 100% 100% / 2px 28px,
+    linear-gradient(90deg, var(--rc-ice), color-mix(in srgb, var(--rc-violet) 55%, transparent) 46%, transparent)
+      0 0 / 100% 1px,
+    var(--rc-glass),
+    linear-gradient(180deg, var(--rc-plate-hi), var(--rc-plate) 38%, var(--rc-ink));
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector {
+  background:
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 36px 2px no-repeat,
+    linear-gradient(var(--rc-hair) 0 0) 0 100% / 100% 1px no-repeat,
+    transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-formula {
+  color: var(--rc-quiet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-formula b {
+  color: var(--rc-ivory);
+  font-weight: 600;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-key {
+  color: var(--rc-quiet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article {
+  border-top-color: var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics small {
+  color: var(--rc-quiet);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison article strong {
+  color: var(--rc-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result i {
+  color: var(--rc-quiet);
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result em,
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison article > p {
+  color: var(--rc-quiet);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The baseline reads in a cool grey that keeps 3:1 on the plate. */
+.rxs-page.rxs-page.rxs-rexonance-page {
+  --sc-baseline: #6f7783;
+}
+
+/* Processing: a two-column spec sheet in the case, not two black pills. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison {
+  border-top-color: var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section {
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--sc-baseline) 0 0) 0 0 / 44px 2px no-repeat,
+    var(--rc-glass),
+    var(--rc-ink);
+  box-shadow: inset 0 0 0 1px var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section:last-child {
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 6%), transparent 70%),
+    var(--rc-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rc-ice) 22%, transparent);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison h4 {
+  border-bottom-color: var(--rc-hair);
+  letter-spacing: 0.02em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison li {
+  color: var(--rc-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > p {
+  color: var(--rc-body);
+}
+
+/* Notes are footnotes: set on the column's left edge, under a short rule. */
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-comparison-note, .rxs-p14-method-note) {
+  margin-inline: 0 auto;
+  color: var(--rc-quiet);
+  line-height: 1.85;
+  word-break: auto-phrase;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-comparison-note, .rxs-p14-method-note)::before {
+  width: 40px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, var(--rc-ice), var(--rc-violet));
+}
+
+/* ================================================================
+   02 P14
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure {
+  background: var(--rc-ink-deep);
+}
+
+/* The copy's ice accent sat on the label's cap height. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy {
+  padding-top: 22px;
+}
+
+@media (min-width: 681px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > small {
+    letter-spacing: 0.2em;
+  }
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > p {
+  color: var(--rc-body);
+  line-height: 1.85;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div {
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 3.5%), transparent 80%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:nth-child(2) {
+  background:
+    linear-gradient(var(--rc-violet) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 3.5%), transparent 80%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dl div:last-child {
+  background:
+    linear-gradient(var(--rc-gold) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(180deg, rgb(240 246 255 / 3.5%), transparent 80%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy dt {
+  color: var(--rc-quiet);
+}
+
+/* The comparator shares the comparison's case. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14 .rxs-p14-comparator {
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 28px 2px,
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 2px 28px,
+    linear-gradient(var(--rc-violet) 0 0) 100% 0 / 28px 2px,
+    linear-gradient(var(--rc-violet) 0 0) 100% 0 / 2px 28px,
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 28px 2px,
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 2px 28px,
+    linear-gradient(var(--rc-gold) 0 0) 100% 100% / 28px 2px,
+    linear-gradient(var(--rc-gold) 0 0) 100% 100% / 2px 28px,
+    linear-gradient(90deg, var(--rc-ice), color-mix(in srgb, var(--rc-violet) 55%, transparent) 46%, transparent)
+      0 0 / 100% 1px,
+    var(--rc-glass),
+    linear-gradient(180deg, var(--rc-plate-hi), var(--rc-plate) 38%, var(--rc-ink));
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control {
+  border-color: var(--rc-hair);
+  background: rgb(2 5 10 / 55%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control > p {
+  color: var(--rc-quiet);
+}
+
+/* Paint only: the slider's boxes, thumb travel and hit areas stay. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-track {
+  background: rgb(240 246 255 / 14%);
+}
+
+/* Nine readings as ink-glass plates on 2px corners (the rounded grey
+   tiles were the one Apple surface left in the instrument). */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14 .rxs-p14-metrics article {
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 28px 2px no-repeat,
+    var(--rc-glass),
+    var(--rc-ink);
+  box-shadow: inset 0 0 0 1px var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics small {
+  color: var(--rc-ivory);
+  font-weight: 500;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values i {
+  color: var(--rc-quiet);
+  font-style: normal;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values b {
+  color: var(--rc-quiet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values strong {
+  color: var(--rc-ivory);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics article > p {
+  border-top-color: var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics article > p span {
+  color: var(--rc-quiet);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics article > p b {
+  color: var(--rc-ice);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The headline figures share the heading's spine on wide screens instead
+   of a centred 980px block (three left edges became one). */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics {
+    max-width: none;
+    margin-inline: 112px 0;
+  }
+}
+
+/* ================================================================
+   03 Stages
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-hint {
+  color: var(--rc-quiet);
+  letter-spacing: 0.04em;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel h3 {
+  letter-spacing: -0.012em;
+  line-height: 1.12;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > p {
+  color: var(--rc-body);
+  line-height: 1.85;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel ul,
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel li {
+  border-color: var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel li::before {
+  font-family: var(--sc-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================
+   04 System
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article {
+  background:
+    linear-gradient(var(--ri-voice) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--rc-gold) 0 0) 50% 100% / 36px 2px no-repeat,
+    var(--rc-glass),
+    var(--rc-plate);
+  box-shadow: inset 0 0 0 1px var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid p {
+  color: var(--rc-body);
+  line-height: 1.85;
+}
+
+/* HUMAN WILL, the decision, is the one pale plate: champagne, not paper. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+  background:
+    linear-gradient(var(--rc-gold) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(#604e32 0 0) 50% 100% / 36px 2px no-repeat,
+    linear-gradient(150deg, #f7f4ec, #ebe4d4 62%, #e1d6bf);
+  box-shadow: inset 0 0 0 1px rgb(227 193 133 / 55%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:last-child p {
+  color: #3a4250;
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article {
+    background:
+      linear-gradient(var(--ri-voice) 0 0) 0 0 / 2px 100% no-repeat,
+      linear-gradient(var(--rc-gold) 0 0) 100% 100% / 36px 2px no-repeat,
+      var(--rc-glass),
+      var(--rc-plate);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:last-child {
+    background:
+      linear-gradient(var(--rc-gold) 0 0) 0 0 / 2px 100% no-repeat,
+      linear-gradient(#604e32 0 0) 100% 100% / 36px 2px no-repeat,
+      linear-gradient(150deg, #f7f4ec, #ebe4d4 62%, #e1d6bf);
+  }
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs {
+  background: linear-gradient(90deg, transparent 12%, rgb(122 232 255 / 3%) 50%, transparent 88%);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div {
+  border-top-color: var(--rc-hair);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-specs p {
+  color: var(--rc-quiet);
+  letter-spacing: 0.12em;
+}
+
+/* ================================================================
+   The end card
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer {
+  background:
+    radial-gradient(ellipse at 86% 100%, transparent 35%, rgb(122 232 255 / 13%) 35.1% 35.25%, transparent 35.4%),
+    radial-gradient(ellipse at 86% 100%, transparent 46%, rgb(182 163 255 / 13%) 46.1% 46.25%, transparent 46.4%),
+    radial-gradient(ellipse at 86% 100%, transparent 57%, rgb(227 193 133 / 16%) 57.1% 57.25%, transparent 57.4%),
+    radial-gradient(ellipse 60% 80% at 86% 100%, rgb(80 96 160 / 10%), transparent 70%),
+    var(--rc-grain) 0 0 / 180px 180px repeat,
+    var(--rc-ink-deep);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer::before {
+  height: 1px;
+  background: var(--rc-prism);
+}
+
+@media (min-width: 681px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > div p {
+    letter-spacing: 0.24em;
+  }
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer h2 {
+  letter-spacing: -0.012em;
+  line-height: 1.12;
+}
+
+/* The secondary plate is ink glass; the primary stays the one ivory. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return, :first-of-type) {
+  border-color: var(--rc-hair-strong);
+  background:
+    linear-gradient(var(--rc-ice) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    var(--rc-glass),
+    var(--rc-plate);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a.rxs-footer-return {
+  border-color: var(--rc-hair);
+  border-radius: 2px;
+  color: var(--rc-quiet);
+}
+
+/* ================================================================
+   Bar, menu button and the chapter index
+   ================================================================ */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav {
+  background: var(--rc-prism) 0 100% / 100% 1px no-repeat, var(--rc-ink);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav nav a {
+  color: rgb(240 246 255 / 78%);
+}
+
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav nav a {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* The edition's !important answers the showcase's forced trigger paint;
+   this keeps its box and only changes the plate. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger {
+  border-color: color-mix(in srgb, var(--rc-ice) 30%, transparent);
+  border-radius: 2px;
+  background:
+    linear-gradient(var(--rc-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    var(--rc-glass),
+    var(--rc-plate) !important;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
+  border-block-color: var(--rc-hair);
+  background: var(--rc-glass);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a + a {
+  border-left-color: var(--rc-hair);
+}
+
+@media (min-width: 601px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index small {
+    letter-spacing: 0.16em;
+  }
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index span {
+  color: var(--rc-body);
+  letter-spacing: 0.04em;
+}
+
+/* ================================================================
+   States: one quiet vocabulary
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger:hover {
+    border-color: color-mix(in srgb, var(--rc-ice) 70%, transparent);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover {
+    background: rgb(122 232 255 / 5%);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover span {
+    color: var(--rc-ivory);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return, :first-of-type):hover {
+    border-color: var(--rc-gold);
+    background:
+      linear-gradient(var(--rc-ice) 0 0) 0 0 / 32px 2px no-repeat,
+      linear-gradient(var(--rc-gold) 0 0) 0 100% / 12px 2px no-repeat,
+      linear-gradient(180deg, rgb(240 246 255 / 9%), rgb(240 246 255 / 3%)),
+      var(--rc-plate);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a.rxs-footer-return:hover {
+    color: var(--rc-ivory);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-menu-trigger, .rxs-chapter-index span) {
+    transition:
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+}
+
+/* ---------- More contrast: firmer hairlines, full-strength copy ---------- */
+@media (prefers-contrast: more) {
+  .rxs-page.rxs-page.rxs-rexonance-page {
+    --rc-hair: rgb(240 246 255 / 42%);
+    --rc-hair-strong: rgb(240 246 255 / 60%);
+    --rc-body: var(--rc-ivory);
+    --rc-quiet: rgb(240 246 255 / 84%);
+    --rc-grain: none;
+  }
+}
+
+/* ---------- Forced colours ---------- */
+/* The UA drops every gradient and the grain; these rules restate the
+   system surfaces this sheet's later selectors would otherwise shadow, and
+   give the instruments a CanvasText frame in place of their inset edges. */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page,
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-local-nav, .rxs-chapter-index) {
+    background: Canvas;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-comparison,
+      .rxs-p14 .rxs-p14-comparator,
+      .rxs-processing-comparison > div > section,
+      .rxs-p14 .rxs-p14-metrics article,
+      .rxs-system .rxs-system-grid article,
+      .rxs-system .rxs-system-grid article:last-child
+    ) {
+    background: Canvas;
+    box-shadow: none;
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-comparison-selector, .rxs-p14-range-control, .rxs-p14-copy dl div, .rxs-specs) {
+    background: Canvas;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-section-heading > p::after {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger {
+    border-color: ButtonText;
+    background: ButtonFace !important;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return),
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return, :first-of-type):hover {
+    border-color: ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  /* The chosen P14 pill: the UA's Canvas backplate hid its HighlightText
+     label (a blank bar in both schemes); it paints its own system pair, as
+     the stage tabs do. */
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button.is-active {
+    color: HighlightText;
+    background: Highlight;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+}

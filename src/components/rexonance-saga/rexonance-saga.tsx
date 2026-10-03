@@ -1095,7 +1095,8 @@ export function RexonanceSaga() {
             P1の9倍。
           </h2>
           <span>
-            P14は、出力変換・位相制御・能力間調停を一体化した
+            P14は、出力変換・位相制御・能力間調停を
+            <span className="rxp-nowrap">一体化した</span>
             <span className="rxp-nowrap">第14世代</span>
             演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
           </span>

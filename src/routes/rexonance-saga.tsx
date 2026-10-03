@@ -16,6 +16,7 @@ import rexonanceEditionCssUrl from "@/styles-rexonance-edition.css?url";
 import rexonanceInstrumentCssUrl from "@/styles-rexonance-instrument.css?url";
 import rexonanceFinishCssUrl from "@/styles-rexonance-finish.css?url";
 import rexonancePremiereCssUrl from "@/styles-rexonance-premiere.css?url";
+import rexonanceCoutureCssUrl from "@/styles-rexonance-couture.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -51,6 +52,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceInstrumentCssUrl },
       { rel: "stylesheet", href: rexonanceFinishCssUrl },
       { rel: "stylesheet", href: rexonancePremiereCssUrl },
+      { rel: "stylesheet", href: rexonanceCoutureCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
