@@ -50,61 +50,75 @@ function CallLines({ index }: { index: number }) {
   return <span>{REXONANCE_CALLS[index]}</span>;
 }
 
-// The approved full-body Rexonance artwork (suitup3, 2026-10-04), reduced
-// to its outlines in a 240 x 480 drawing: a tall crown of upswept horns over
-// a pointed V visor; fan shoulders of layered plumes round gold-rimmed
-// jewels; the spiral round the chest core; a segmented belt with a round
-// jewel; the long V tasset between the legs; diamond crystals in gold
-// almond frames on the thighs, knees and feet; gold-banded forearms and
-// gauntlet fists; the segmented scorpion tail over the right shoulder with
-// its hooked crystal blade; and energy ribbons trailing to the feet.
+// The approved full-body Rexonance artwork, sculpted (suitup5, 2026-10-05)
+// in a 240 x 480 drawing: a tall crown of splayed, upswept horns over a
+// sharp V visor; fans of ten curved feather-blades sweeping up and out
+// round big gold-rimmed star jewels; a broad chest tapering to a narrow
+// waist round the spiral core and its curved vanes; a segmented crystal
+// belt with a round jewel; the long gold V tasset between the side hip
+// blades; long legs with almond gold frames and diamond crystals on the
+// thighs and knees, curved spiked shin guards and pointed boots with gold
+// cuffs; curved gauntlets with gold bracers and clenched fists; the
+// segmented scorpion tail arching over the right shoulder to a hooked
+// crystal blade; and S-shaped energy ribbons sweeping to the floor.
+// Outlines are point lists; curve() rounds them where the artwork curves.
 const SUIT_W = 240;
 const SUIT_H = 480;
 type Point = readonly [number, number];
+const fmt = ([x, y]: Point) => `${x.toFixed(1)},${y.toFixed(1)}`;
 const mirror = (points: string) =>
   points
     .split(" ")
     .map((pair) => {
       const [x, y] = pair.split(",");
-      return `${SUIT_W - Number(x)},${y}`;
+      return `${(SUIT_W - Number(x)).toFixed(1)},${y}`;
     })
     .join(" ");
 const circleOutline = (cx: number, cy: number, radius: number) =>
   Array.from({ length: 16 }, (_, index) => {
     const angle = (index * Math.PI) / 8;
-    return `${(cx + Math.cos(angle) * radius).toFixed(1)},${(cy + Math.sin(angle) * radius).toFixed(1)}`;
+    return fmt([cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius]);
   }).join(" ");
-const rotateOutline = (points: string, angle: number, cx: number, cy: number) =>
-  points
-    .split(" ")
-    .map((pair) => {
-      const [x, y] = pair.split(",").map(Number);
-      return `${(cx + (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle)).toFixed(1)},${(cy + (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle)).toFixed(1)}`;
-    })
-    .join(" ");
-// A smooth spine through key points (Catmull-Rom, `steps` per span).
+const catmull = (p0: Point, p1: Point, p2: Point, p3: Point, t: number): Point => {
+  const at = (k: 0 | 1) =>
+    0.5 *
+    (2 * p1[k] +
+      (-p0[k] + p2[k]) * t +
+      (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t +
+      (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t);
+  return [at(0), at(1)];
+};
+// A smooth open spine through key points (`steps` per span).
 const smooth = (points: readonly Point[], steps: number) => {
   const out: Point[] = [];
   for (let i = 0; i < points.length - 1; i += 1) {
     const p0 = points[Math.max(0, i - 1)];
-    const p1 = points[i];
-    const p2 = points[i + 1];
     const p3 = points[Math.min(points.length - 1, i + 2)];
     for (let step = 0; step < steps; step += 1) {
-      const t = step / steps;
-      const at = (k: 0 | 1) =>
-        0.5 *
-        (2 * p1[k] +
-          (-p0[k] + p2[k]) * t +
-          (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t +
-          (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t);
-      out.push([at(0), at(1)]);
+      out.push(catmull(p0, points[i], points[i + 1], p3, step / steps));
     }
   }
   out.push(points[points.length - 1]);
   return out;
 };
-// A tapering band along a spine (the tail's sections, the ribbons).
+// A closed outline through key points, rounded between them; a point
+// written "x,y*" stays a sharp corner (tips, chins, plate edges).
+const curve = (spec: string, steps = 2) => {
+  const nodes = spec.split(" ").map((token) => ({
+    p: token.replace("*", "").split(",").map(Number) as unknown as Point,
+    sharp: token.endsWith("*"),
+  }));
+  const n = nodes.length;
+  const out: Point[] = [];
+  nodes.forEach((a, i) => {
+    const b = nodes[(i + 1) % n];
+    const p0 = a.sharp ? a.p : nodes[(i - 1 + n) % n].p;
+    const p3 = b.sharp ? b.p : nodes[(i + 2) % n].p;
+    for (let step = 0; step < steps; step += 1) out.push(catmull(p0, a.p, b.p, p3, step / steps));
+  });
+  return out.map(fmt).join(" ");
+};
+// A tapering band along a spine (the tail's sections, the ribbons, blades).
 const band = (spine: readonly Point[], w0: number, w1: number) => {
   const left: string[] = [];
   const right: string[] = [];
@@ -115,18 +129,42 @@ const band = (spine: readonly Point[], w0: number, w1: number) => {
     const half = (w0 + ((w1 - w0) * i) / (spine.length - 1)) / 2;
     const ox = (-(ny - py) / length) * half;
     const oy = ((nx - px) / length) * half;
-    left.push(`${(x + ox).toFixed(1)},${(y + oy).toFixed(1)}`);
-    right.unshift(`${(x - ox).toFixed(1)},${(y - oy).toFixed(1)}`);
+    left.push(fmt([x + ox, y + oy]));
+    right.unshift(fmt([x - ox, y - oy]));
   });
   return [...left, ...right].join(" ");
 };
+// A curved feather-blade from a root to its tip, bowed by `bend`: widest
+// a little past its root, drawn to a point.
+const blade = (root: Point, tip: Point, width: number, bend: number) => {
+  const length = Math.hypot(tip[0] - root[0], tip[1] - root[1]);
+  const nx = -(tip[1] - root[1]) / length;
+  const ny = (tip[0] - root[0]) / length;
+  const control: Point = [(root[0] + tip[0]) / 2 + nx * bend, (root[1] + tip[1]) / 2 + ny * bend];
+  const left: string[] = [];
+  const right: string[] = [];
+  for (let i = 0; i <= 8; i += 1) {
+    const t = i / 8;
+    const at = (k: 0 | 1) =>
+      (1 - t) * (1 - t) * root[k] + 2 * (1 - t) * t * control[k] + t * t * tip[k];
+    const dx = 2 * (1 - t) * (control[0] - root[0]) + 2 * t * (tip[0] - control[0]);
+    const dy = 2 * (1 - t) * (control[1] - root[1]) + 2 * t * (tip[1] - control[1]);
+    const d = Math.hypot(dx, dy) || 1;
+    const half = (width / 2) * Math.sin(Math.PI * (0.15 + 0.85 * t)) ** 0.8;
+    // The leading edge bows out more than the trailing one (a feather).
+    left.push(fmt([at(0) - (dy / d) * half * 1.25, at(1) + (dx / d) * half * 1.25]));
+    right.unshift(fmt([at(0) + (dy / d) * half * 0.75, at(1) - (dx / d) * half * 0.75]));
+  }
+  return [...left.slice(0, -1), ...right].join(" ");
+};
 
-// Helmet: a tall crown of upswept horns over a pointed V visor.
-const SUIT_SHELL =
-  "120,37 131,41 139,50 142,62 139,73 132,81 120,89 108,81 101,73 98,62 101,50 109,41";
-const SUIT_CREST = "113,58 105,49 101,37 101,24 103,12 106,25 109,37 116,50";
-const SUIT_HORN = "102,54 96,46 93,33 99,41 105,49";
-const SUIT_SPIKE = "120,34 123,45 120,57 117,45";
+// Helmet: a tall crown of splayed, upswept horns over a sharp V visor.
+const SUIT_SHELL = curve(
+  "120,37 131,40 138,47 141,58 139,70 133,80 120,91* 107,80 101,70 99,58 102,47 109,40",
+);
+const SUIT_CREST = curve("103,12* 100,25 100,37 103,49 109,59 115,67* 112,55 108,42 105,27");
+const SUIT_HORN = curve("92,36* 95,49 101,59 106,66* 102,57 97,47");
+const SUIT_SPIKE = curve("120,31* 123,44 122,58 120,67* 118,58 117,44");
 const SUIT_HEAD = [
   SUIT_SHELL,
   SUIT_CREST,
@@ -136,11 +174,11 @@ const SUIT_HEAD = [
   SUIT_SPIKE,
 ];
 // MAX adds faceted temple fins; ULTRA carries cheek blades and a forehead jewel.
-const SUIT_FIN = "102,68 95,60 92,49 99,57 106,64";
-const SUIT_BLADE = "104,78 96,72 92,62 100,67 108,74";
+const SUIT_FIN = curve("90,52* 95,62 103,70* 98,63");
+const SUIT_BLADE = curve("92,64* 98,72 106,79* 100,70");
 const SUIT_CRESTS = {
   standard: [SUIT_CREST, mirror(SUIT_CREST), SUIT_HORN, mirror(SUIT_HORN), SUIT_SPIKE],
-  max: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE, SUIT_FIN, mirror(SUIT_FIN)],
+  max: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE, SUIT_FIN, mirror(SUIT_FIN), SUIT_HORN, mirror(SUIT_HORN)],
   ultra: [
     SUIT_CREST,
     mirror(SUIT_CREST),
@@ -149,80 +187,114 @@ const SUIT_CRESTS = {
     "120,40 124,49 120,58 116,49",
   ],
 } as const;
-const SUIT_FACE = "120,60 110,57 101,59 104,70 111,80 120,89";
-const SUIT_EYE = "103,59 109,59 120,73 120,83";
+const SUIT_FACE = curve("120,61 112,59 103,59* 105,68 110,77 116,85 120,91*");
+const SUIT_EYE = "103,61 109,63 116,72 120,79 120,86 115,79 108,70";
 
-// Shoulders: a fan of plumes round a gold-rimmed jewel with a star.
+// Shoulders: ten curved feather-blades swept up and out round a big
+// gold-rimmed jewel with a four-point star.
+const SUIT_JEWEL = [74, 112] as const;
+const plume = (tip: Point, width: number, bend: number) => {
+  const length = Math.hypot(tip[0] - SUIT_JEWEL[0], tip[1] - SUIT_JEWEL[1]);
+  const root: Point = [
+    SUIT_JEWEL[0] + ((tip[0] - SUIT_JEWEL[0]) / length) * 11,
+    SUIT_JEWEL[1] + ((tip[1] - SUIT_JEWEL[1]) / length) * 11,
+  ];
+  return blade(root, tip, width, bend);
+};
 const SUIT_PLUMES = [
-  "71,99 63,79 59,57 68,76 77,96",
-  "67,102 51,84 38,65 55,79 71,98",
-  "64,107 41,98 22,95 43,91 67,103",
-  "62,113 39,112 19,116 40,106 63,109",
-  "63,119 44,129 25,141 41,124 62,115",
-  "67,124 54,138 39,151 49,132 65,121",
-  "83,99 87,87 93,76 91,90 87,101",
+  plume([44, 152], 9, -9),
+  plume([28, 141], 10, -13),
+  plume([15, 126], 12, -15),
+  plume([11, 107], 12, -15),
+  plume([15, 88], 12, -15),
+  plume([25, 69], 12, -15),
+  plume([39, 55], 11, -14),
+  plume([57, 45], 10, -12),
+  plume([77, 50], 8, -8),
+  plume([94, 66], 6, -5),
 ];
-const SUIT_SHOULDER = [circleOutline(76, 111, 15), circleOutline(76, 111, 11)];
-const SUIT_STAR = "76,103 78,109 84,111 78,113 76,119 74,113 68,111 74,109";
-const SUIT_PENDANT = "76,128 78.5,139 76,152 73.5,139";
-// Arms: gold-banded forearms with a crystal, black gauntlet fists.
-const SUIT_UPPER_ARM = "57,136 71,138 66,152 63,167 49,167 51,150";
-const SUIT_FOREARM = "48,167 64,167 62,190 59,220 35,220 33,197 39,178";
+const SUIT_SHOULDER = [circleOutline(74, 112, 14), circleOutline(74, 112, 10.5)];
+const SUIT_STAR = "74,101 76,110 85,112 76,114 74,123 72,114 63,112 72,110";
+const SUIT_PENDANT = "74,138 77,149 74,161 71,149";
+// Arms: a muscular upper arm, curved gauntlet plates with gold bracers, a
+// crystal on the gauntlet, a gold cuff and a clenched fist.
+const SUIT_UPPER_ARM = curve("60,127 70,131 70,146 65,162* 50,168* 47,154 51,138");
+const SUIT_FOREARM = curve("50,165* 63,169 62,188 57,207 53,221* 34,222* 31,206 32,188 39,173");
 const SUIT_BANDS = [
-  "39,176 63,170 63,174 39,181",
-  "35,195 62,188 62,192 35,199",
-  "34,209 60,203 60,207 34,213",
+  curve("37,177* 57,168 61,171* 40,183*"),
+  curve("33,193* 59,184 61,188* 34,199*"),
+  curve("32,208* 56,199 57,203* 33,213*"),
 ];
-const SUIT_ARM_GEM = "33,184 40,179 42,199 37,216 31,205";
-const SUIT_CUFF = "33,220 60,220 61,228 32,228";
-const SUIT_FIST = "34,228 59,228 61,240 56,252 40,252 33,242";
-// Chest: pectoral plates round the spiral housing of the core.
-const SUIT_PEC = "120,104 106,100 92,112 88,132 96,148 108,157 120,152";
-const SUIT_RIB = "91,140 99,156 104,171 97,171 90,156";
-const SUIT_ABDOMEN = "107,157 120,152 133,157 137,171 120,177 103,171";
-const SUIT_HOUSING = [circleOutline(120, 128, 22), circleOutline(120, 128, 9)];
-const SUIT_SPIRAL = Array.from({ length: 6 }, (_, index) =>
-  rotateOutline("120,106 136,109 144,122 130,116 119,114 110,118", (index * Math.PI) / 3, 120, 128),
+const SUIT_ARM_GEM = curve("32,186* 38,182 40,200 36,216* 31,205");
+const SUIT_CUFF = curve("33,219* 55,218 57,228* 32,228*");
+const SUIT_FIST = curve("34,228* 57,228* 61,238 59,249 49,256 39,253 33,243");
+// Chest: broad pectoral plates tapering to a narrow waist round the
+// spiral core and its curved vanes.
+const SUIT_PEC = curve("120,99* 108,97 96,103 89,115 88,131 93,146 102,157 112,163 120,164*");
+const SUIT_RIB = curve("90,138* 95,152 101,165 106,175* 99,172 91,160");
+const SUIT_ABDOMEN = curve("106,164 120,160* 134,164 137,176* 120,180 103,176*");
+const SUIT_HOUSING = [circleOutline(120, 128, 20), circleOutline(120, 128, 9)];
+const SUIT_SPIRAL = Array.from({ length: 8 }, (_, i) => {
+  const a0 = (i * Math.PI) / 4;
+  const spine = Array.from({ length: 7 }, (_, k): Point => {
+    const t = k / 6;
+    const r = 10 + 17 * t;
+    const a = a0 + t * 1.25;
+    return [120 + Math.cos(a) * r, 128 + Math.sin(a) * r];
+  });
+  return band(spine, 2, 5.5);
+});
+// Waist: a segmented belt of crystal cells with a round central jewel.
+const SUIT_BELT_CELLS = [80, 87, 94, 101].map((x) =>
+  curve(`${x},180* ${x + 6},180* ${x + 6},198* ${x},198*`, 1),
 );
-// Waist: a segmented belt with crystal cells and a round central jewel.
-const SUIT_BELT_CELLS = [80, 87, 94, 101].map((x) => `${x},179 ${x + 6},179 ${x + 6},198 ${x},198`);
 const SUIT_BELT_GEMS = [83, 90, 97, 104].map(
-  (x) => `${x},181 ${x + 1.6},188.5 ${x},196 ${x - 1.6},188.5`,
+  (x) => `${x},182 ${x + 1.7},189 ${x},196 ${x - 1.7},189`,
 );
-const SUIT_BELT = [circleOutline(120, 188, 12), circleOutline(120, 188, 8)];
-const SUIT_BUCKLE = "87,168 96,169 101,179 93,179";
-// The tasset: a long gold-edged V panel down the front, between the legs.
-const SUIT_TASSET = "104,200 136,200 130,262 121,349 110,262";
-const SUIT_TASSET_V = "110,200 120,244 130,200 127,200 120,232 113,200";
-const SUIT_HIP_PENDANT = "49,300 51.5,318 49,337 46.5,318";
-// Legs: diamond crystals on the thighs and knees in gold almond frames.
-const SUIT_THIGH = "72,202 104,202 104,232 100,262 94,280 70,282 66,250 68,222";
-const SUIT_THIGH_FRAME = "90,224 103,250 90,278 77,250";
-const SUIT_THIGH_GEM = "90,230 98,250 90,272 82,250";
-const SUIT_KNEE = "76,278 91,300 75,339 60,300";
-const SUIT_KNEE_GEM = "76,286 83,301 76,316 69,301";
-const SUIT_SHIN = "62,326 84,326 82,358 81,381 62,381 60,354";
-const SUIT_BOOT_CUFF = "58,380 83,380 85,392 71,401 56,392";
-const SUIT_BOOT = "56,392 85,392 82,420 80,446 36,446 34,438 50,426 52,406";
-const SUIT_FOOT_GEM = "57,403 63,415 57,428 51,415";
-// The tail: a segmented scorpion tail over the right shoulder, in four
-// sections, ending in a hooked crystal blade; gold rings between segments.
+const SUIT_BELT = [circleOutline(120, 190, 12), circleOutline(120, 190, 8.5)];
+const SUIT_BUCKLE = curve("90,170* 98,171 103,180* 94,180*");
+// The tasset: a long gold V between the legs, and the side hip blades.
+const SUIT_TASSET = curve("103,199* 137,199* 134,236 128,270 120,304* 112,270 106,236");
+const SUIT_TASSET_V = "109,201 120,262 131,201 127,201 120,248 113,201";
+const SUIT_TASSET_PENDANT = "120,316 124,332 120,350 116,332";
+const SUIT_HIP_BLADE = curve("80,199* 70,214 62,242 56,272 51,301* 60,270 70,240 85,207*");
+const SUIT_HIP_PENDANT = "47,318 50,331 47,345 44,331";
+// Legs: long and tapered; almond gold frames with diamond crystals on the
+// thighs and knees; curved spiked shin guards; pointed armoured boots with
+// gold cuffs and a diamond.
+const SUIT_THIGH = curve("80,200* 104,202 104,224 101,248 95,272 87,291* 73,292* 66,272 64,248 67,222");
+const SUIT_THIGH_FRAME = curve("92,223* 101,235 104,251 99,266 91,279* 81,265 78,250 82,236");
+const SUIT_THIGH_GEM = "92,232 99,251 91,270 84,251";
+const SUIT_KNEE = curve("75,275* 85,284 90,299 86,314 74,334* 63,316 60,299 65,284");
+const SUIT_KNEE_GEM = "75,289 82,303 75,318 68,303";
+const SUIT_SHIN = curve("64,326* 82,326* 85,346 82,366 79,385* 61,385* 58,364 59,343");
+const SUIT_SHIN_SPIKES = [
+  curve("57,384* 53,368 52,351* 57,365 61,381*"),
+  curve("81,386* 87,371 92,356* 89,373 85,388*"),
+];
+const SUIT_BOOT_CUFF = curve("49,402* 52,394 65,381* 82,391 88,402* 66,394");
+const SUIT_BOOT = curve("52,399* 84,400* 82,416 79,432 76,446* 38,446* 35,440* 42,431 50,419");
+const SUIT_TOE = curve("35,440* 42,432 55,429 70,433 76,446* 38,446*");
+const SUIT_FOOT_GEM = "57,406 62,417 56,428 51,417";
+// The tail: a segmented scorpion tail arching over the right shoulder in
+// four sections to a hooked crystal blade; gold rings between segments
+// and gold barbs along its crest.
 const SUIT_TAIL_SPINE: readonly Point[] = [
-  [153, 86],
-  [156, 63],
-  [161, 44],
-  [170, 31],
-  [183, 23],
-  [197, 21],
-  [211, 25],
-  [222, 35],
-  [228, 50],
-  [228, 65],
-  [223, 78],
-  [217, 88],
+  [150, 90],
+  [153, 67],
+  [160, 47],
+  [171, 33],
+  [185, 25],
+  [200, 22],
+  [214, 27],
+  [225, 38],
+  [230, 52],
+  [229, 66],
+  [224, 79],
+  [216, 89],
 ];
 const SUIT_TAIL_LINE = smooth(SUIT_TAIL_SPINE, 3);
-const tailWidth = (i: number) => 15 - (7 * i) / (SUIT_TAIL_LINE.length - 1);
+const tailWidth = (i: number) => 22 - (11 * i) / (SUIT_TAIL_LINE.length - 1);
 const SUIT_TAIL = [0, 1, 2, 3].map((section) => {
   const from = Math.round((section * (SUIT_TAIL_LINE.length - 1)) / 4);
   const to = Math.round(((section + 1) * (SUIT_TAIL_LINE.length - 1)) / 4);
@@ -234,70 +306,72 @@ const SUIT_TAIL_RINGS = SUIT_TAIL_SPINE.slice(1, -1).map(([x, y], i) => {
   const length = Math.hypot(nx - px, ny - py);
   const ux = (nx - px) / length;
   const uy = (ny - py) / length;
-  const half = (15 - i * 0.6) / 2;
-  return `${(x - uy * half).toFixed(1)},${(y + ux * half).toFixed(1)} ${(x + ux * 2.5).toFixed(1)},${(y + uy * 2.5).toFixed(1)} ${(x + uy * half).toFixed(1)},${(y - ux * half).toFixed(1)}`;
+  const half = (22 - i * 1.05) / 2;
+  return `${fmt([x - uy * half, y + ux * half])} ${fmt([x + ux * 3, y + uy * 3])} ${fmt([x + uy * half, y - ux * half])}`;
 });
-const SUIT_TAIL_BLADE = "218,85 231,101 229,123 222,143 214,122 211,101";
+const SUIT_TAIL_BLADE = curve("202,78* 207,92 213,107 220,123 228,143* 230,121 228,104 222,90 212,82");
 const SUIT_TAIL_BARBS = [
-  "211,85 200,66 206,91",
-  "214,25 233,38 236,54 224,41",
-  "182,23 186,9 192,22",
+  curve("165,37* 158,24* 171,32*", 1),
+  curve("181,27* 186,11* 192,24*", 1),
+  curve("212,26* 226,16* 223,32*", 1),
+  curve("205,96* 199,80 201,67* 208,84*"),
+  curve("222,98* 232,86 237,76* 230,97*"),
 ];
-// Energy ribbons trailing from the arms and hips to the feet.
+// Energy ribbons: S-shaped sweeps from the arms and the hips to the floor.
 const SUIT_RIBBONS = [
   band(
     smooth(
       [
-        [46, 150],
-        [32, 168],
-        [20, 196],
-        [13, 228],
-        [15, 262],
-        [24, 300],
-      ],
-      3,
-    ),
-    5,
-    0.6,
-  ),
-  band(
-    smooth(
-      [
-        [66, 205],
-        [50, 240],
-        [37, 280],
-        [29, 320],
-        [32, 356],
-        [40, 382],
+        [52, 134],
+        [33, 152],
+        [20, 180],
+        [17, 212],
+        [24, 244],
+        [22, 272],
       ],
       3,
     ),
     6,
-    0.6,
+    0.5,
   ),
   band(
     smooth(
       [
-        [78, 228],
-        [72, 270],
-        [62, 318],
-        [56, 350],
-        [56, 372],
+        [62, 252],
+        [46, 282],
+        [31, 312],
+        [24, 342],
+        [29, 368],
+        [42, 390],
       ],
       3,
     ),
-    4,
-    0.6,
+    9,
+    0.5,
+  ),
+  band(
+    smooth(
+      [
+        [68, 300],
+        [58, 326],
+        [50, 350],
+        [52, 372],
+        [60, 386],
+      ],
+      3,
+    ),
+    5,
+    0.5,
   ),
 ];
 const SUIT_SILHOUETTE =
-  "M120 89 108 93 95 99 83 108 66 112 58 140 50 166 33 196 33 242 40 252 56 252 61 228 62 196 70 168 86 156 98 170 92 200 72 202 66 250 61 300 60 356 62 381 56 392 34 438 36 446 80 446 82 392 84 326 94 280 104 232 120 222";
+  "M120 91 104 96 90 104 76 98 60 104 50 128 46 152 36 172 31 192 31 210 34 222 33 243 39 253 49 256 59 249 61 238 57 222 62 190 68 168 86 150 92 162 100 172 103 178 80 198 67 222 64 248 66 272 62 296 59 318 58 344 58 364 61 385 50 400 42 431 35 440 38 446 76 446 79 432 84 400 85 346 92 300 101 248 104 224 110 200 120 200";
 const mirrorPath = (path: string) =>
   path.replace(/(\d+(?:\.\d+)?) (\d+(?:\.\d+)?)/g, (_, x, y) => `${SUIT_W - Number(x)} ${y}`);
 
 // The gold trims, per plate group (index: legs 0, arms 1, chest 2, head 3,
 // tail 4); gold reaches them last.
-const SUIT_LEG_TRIM = [SUIT_THIGH_FRAME, SUIT_KNEE, SUIT_BOOT_CUFF, SUIT_HIP_PENDANT];
+const SUIT_LEG_TRIM = [SUIT_THIGH_FRAME, SUIT_KNEE, SUIT_BOOT_CUFF, SUIT_TOE, SUIT_HIP_BLADE, SUIT_HIP_PENDANT];
 const SUIT_ARM_TRIM = [...SUIT_SHOULDER, SUIT_PENDANT, ...SUIT_BANDS, SUIT_CUFF];
 const SUIT_PLATES = [
   { name: "is-legs is-left", accent: SUIT_LEG_TRIM, index: 0 },
@@ -315,11 +389,12 @@ const SUIT_PLATES = [
       SUIT_BUCKLE,
       mirror(SUIT_BUCKLE),
       SUIT_TASSET,
+      SUIT_TASSET_PENDANT,
     ],
     index: 2,
   },
   { name: "is-head", accent: SUIT_HEAD.slice(1), index: 3 },
-  { name: "is-tail", accent: [...SUIT_TAIL_RINGS, SUIT_TAIL_BLADE], index: 4 },
+  { name: "is-tail", accent: [...SUIT_TAIL_RINGS, ...SUIT_TAIL_BARBS.slice(0, 3)], index: 4 },
 ] as const;
 
 // Resonance runs outward from the core: chest, then arms and the tail,
@@ -340,7 +415,7 @@ const SUIT_ZONES = [
     ...SUIT_TAIL,
     SUIT_TAIL_BLADE,
   ],
-  [...both([SUIT_THIGH, SUIT_KNEE, SUIT_SHIN, SUIT_BOOT, ...SUIT_RIBBONS])],
+  [...both([SUIT_THIGH, SUIT_KNEE, SUIT_SHIN, SUIT_BOOT, SUIT_HIP_BLADE, ...SUIT_RIBBONS])],
 ];
 const SUIT_PHASES = ["ice", "violet", "gold"] as const;
 const SUIT_CORE = [120, 128] as const;
@@ -372,9 +447,8 @@ type SuitPiece = {
   grow?: readonly [number, number];
 };
 const mirrorPivot = ([x, y]: readonly [number, number]) => [SUIT_W - x, y] as const;
-const SUIT_JEWEL = [76, 111] as const;
-const SUIT_CREST_PIVOT = [113, 56] as const;
-const SUIT_NECK = [120, 89] as const;
+const SUIT_CREST_PIVOT = [113, 64] as const;
+const SUIT_NECK = [120, 91] as const;
 const sided = (
   name: string,
   shapes: readonly string[],
@@ -407,25 +481,27 @@ const SUIT_PIECES: readonly SuitPiece[] = [
   })),
   {
     name: "is-tail",
-    shapes: SUIT_TAIL_BARBS,
+    shapes: SUIT_TAIL_BARBS.slice(3),
     gems: [SUIT_TAIL_BLADE],
     tone: "violet",
     flow: "blade",
-    pivot: [218, 85],
+    pivot: [212, 82],
     turn: -30,
     grow: [0.3, 0.3],
   },
   ...SUIT_RIBBONS.flatMap((ribbon) =>
     sided("is-ribbon", [ribbon], { flow: "ribbons", pivot: ribbonTop(ribbon), grow: [1, 0.15] }),
   ),
+  ...sided("is-legs", [SUIT_HIP_BLADE], { gems: [SUIT_HIP_PENDANT], flow: "pelvis" }),
   ...sided("is-legs", [SUIT_THIGH], { gems: [SUIT_THIGH_GEM], flow: "thigh" }),
   ...sided("is-legs", [SUIT_KNEE], { gems: [SUIT_KNEE_GEM], flow: "knee" }),
-  ...sided("is-legs", [SUIT_SHIN], { flow: "shin" }),
-  ...sided("is-legs", [SUIT_BOOT_CUFF, SUIT_BOOT], { gems: [SUIT_FOOT_GEM], flow: "boot" }),
+  ...sided("is-legs", [SUIT_SHIN, ...SUIT_SHIN_SPIKES], { flow: "shin" }),
+  ...sided("is-legs", [SUIT_BOOT, SUIT_BOOT_CUFF, SUIT_TOE], { gems: [SUIT_FOOT_GEM], flow: "boot" }),
+  // The ten feather-blades in three layers, back to front.
   ...[
-    [0, 1, 6],
-    [2, 3],
-    [4, 5],
+    [0, 1, 2],
+    [3, 4, 5, 6],
+    [7, 8, 9],
   ].flatMap((plumes, layer) =>
     sided("is-arms is-plume", pick(SUIT_PLUMES, plumes), {
       flow: "blades",
@@ -444,7 +520,7 @@ const SUIT_PIECES: readonly SuitPiece[] = [
   {
     name: "is-chest",
     shapes: [...SUIT_BELT_CELLS, ...SUIT_BELT_CELLS.map(mirror), ...SUIT_BELT, SUIT_TASSET],
-    gems: [...SUIT_BELT_GEMS, ...SUIT_BELT_GEMS.map(mirror), SUIT_TASSET_V],
+    gems: [...SUIT_BELT_GEMS, ...SUIT_BELT_GEMS.map(mirror), SUIT_TASSET_V, SUIT_TASSET_PENDANT],
     tone: "white",
     flow: "pelvis",
   },
@@ -491,7 +567,7 @@ const SUIT_HELM: readonly SuitPiece[] = [
     shapes: [SUIT_SPIKE],
     tone: "gold",
     flow: "spike",
-    pivot: [120, 57],
+    pivot: [120, 67],
     grow: [0.5, 0.1],
   },
 ];
@@ -522,10 +598,13 @@ const grains = (shapes: readonly string[], seed: number, count: number) => {
     state = (state * 1664525 + 1013904223) % 4294967296;
     return state / 4294967296;
   };
-  // Parsed once per piece: each try only tests numbers.
-  const polygons: Polygon[] = shapes.map((points) =>
-    points.split(" ").map((pair) => pair.split(",").map(Number)),
-  );
+  // Parsed once per piece: each try only tests numbers. A rounded outline
+  // is tested on every other point, which is close enough for a scatter of
+  // grains and half the work.
+  const polygons: Polygon[] = shapes.map((points) => {
+    const all = points.split(" ").map((pair) => pair.split(",").map(Number));
+    return all.length > 12 ? all.filter((_, index) => index % 2 === 0) : all;
+  });
   const [x0, y0, x1, y1] = bounds(shapes);
   let path = "";
   for (let found = 0, tries = 0; found < count && tries < count * 40; tries += 1) {
@@ -576,18 +655,18 @@ const SUIT_HALOS = [
   { name: "shoulder is-right", at: mirrorPivot(SUIT_JEWEL), size: 64 },
   { name: "eyes", at: [120, 72] as const, size: 60 },
   { name: "core", at: SUIT_CORE, size: 96 },
-  { name: "jewel", at: [120, 188] as const, size: 44 },
+  { name: "jewel", at: [120, 190] as const, size: 44 },
 ] as const;
 // Alignment brackets bite on the joints as the frame locks on RIDER！:
 // the core, the shoulders, the elbows, the knees.
 const SUIT_JOINTS = [
   SUIT_CORE,
-  [76, 111],
-  [164, 111],
-  [48, 167],
-  [192, 167],
-  [75, 301],
-  [165, 301],
+  [74, 112],
+  [166, 112],
+  [50, 166],
+  [190, 166],
+  [75, 303],
+  [165, 303],
 ] as const;
 // Plate light (rx4): opaque black armour lit from the top left. Each tone's
 // fill runs from a specular edge through a short tinted falloff into a near-
@@ -706,6 +785,33 @@ const SUIT_LIGHT: Record<string, SuitGradient> = {
       [0, "#ffffff", "0.95"],
       [0.5, "#ffb4e6", "0.6"],
       [1, "#ff8fd8", "0"],
+    ],
+  },
+  // The shoulder fans' feather-blades: crystal, lit at the root's edge.
+  "plume-ice": {
+    fill: [
+      [0, "#e9fbff", "0.92"],
+      [0.22, "#79e8ff", "0.72"],
+      [0.6, "#1d5f92", "0.88"],
+      [1, "#08142a", "0.96"],
+    ],
+    rim: [
+      [0, "#fff7dc", "1"],
+      [0.4, "#f0d49a", "0.95"],
+      [1, "#8a6a30", "0.8"],
+    ],
+  },
+  "plume-violet": {
+    fill: [
+      [0, "#ffe3f5", "0.92"],
+      [0.22, "#ff8fd8", "0.72"],
+      [0.6, "#7c2a6c", "0.88"],
+      [1, "#1a0a22", "0.96"],
+    ],
+    rim: [
+      [0, "#fff7dc", "1"],
+      [0.4, "#f0d49a", "0.95"],
+      [1, "#8a6a30", "0.8"],
     ],
   },
   // The sheen: one diagonal band of light across every plate.

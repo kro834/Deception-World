@@ -1207,6 +1207,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   stroke: url("#rx-suit-rim-ribbon-violet");
 }
 
+/* The shoulder fans' feather-blades: crystal bodies with gold edges. */
+.rx-call-sequence .rx-suit-plate.is-plume path:not([class]) {
+  fill: url("#rx-suit-fill-plume-ice");
+  stroke: url("#rx-suit-rim-plume-ice");
+}
+
+.rx-call-sequence .rx-suit-plate.is-plume.is-violet path:not([class]) {
+  fill: url("#rx-suit-fill-plume-violet");
+  stroke: url("#rx-suit-rim-plume-violet");
+}
+
 /* The lock's rim glint: a bright copy of the outline, never a fill. */
 .rx-call-sequence .rx-suit-figure > i > .rx-suit-glint {
   position: absolute;
@@ -1355,7 +1366,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-jewel {
-  top: 39.167%;
+  top: 39.583%;
   width: 6%;
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 25%),
