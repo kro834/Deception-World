@@ -22,10 +22,19 @@ function CallLines({ index }: { index: number }) {
   if (index === 2) {
     return (
       <>
-        <span>SA-GA！DEUS！</span>
-        <span>SA-GA！DEUS！</span>
-        <span>SA-GA！DEUS！</span>
-        <span>SA-GA！DEUS！</span>
+        {/* Each line is a call and its answer: SA-GA！, then DEUS！ answers. */}
+        <span>
+          SA-GA！<span className="rx-call-answer">DEUS！</span>
+        </span>
+        <span>
+          SA-GA！<span className="rx-call-answer">DEUS！</span>
+        </span>
+        <span>
+          SA-GA！<span className="rx-call-answer">DEUS！</span>
+        </span>
+        <span>
+          SA-GA！<span className="rx-call-answer">DEUS！</span>
+        </span>
       </>
     );
   }
@@ -178,7 +187,15 @@ const SUIT_FIN = curve("90,52* 95,62 103,70* 98,63");
 const SUIT_BLADE = curve("92,64* 98,72 106,79* 100,70");
 const SUIT_CRESTS = {
   standard: [SUIT_CREST, mirror(SUIT_CREST), SUIT_HORN, mirror(SUIT_HORN), SUIT_SPIKE],
-  max: [SUIT_CREST, mirror(SUIT_CREST), SUIT_SPIKE, SUIT_FIN, mirror(SUIT_FIN), SUIT_HORN, mirror(SUIT_HORN)],
+  max: [
+    SUIT_CREST,
+    mirror(SUIT_CREST),
+    SUIT_SPIKE,
+    SUIT_FIN,
+    mirror(SUIT_FIN),
+    SUIT_HORN,
+    mirror(SUIT_HORN),
+  ],
   ultra: [
     SUIT_CREST,
     mirror(SUIT_CREST),
@@ -262,7 +279,9 @@ const SUIT_HIP_PENDANT = "47,318 50,331 47,345 44,331";
 // Legs: long and tapered; almond gold frames with diamond crystals on the
 // thighs and knees; curved spiked shin guards; pointed armoured boots with
 // gold cuffs and a diamond.
-const SUIT_THIGH = curve("80,200* 104,202 104,224 101,248 95,272 87,291* 73,292* 66,272 64,248 67,222");
+const SUIT_THIGH = curve(
+  "80,200* 104,202 104,224 101,248 95,272 87,291* 73,292* 66,272 64,248 67,222",
+);
 const SUIT_THIGH_FRAME = curve("92,223* 101,235 104,251 99,266 91,279* 81,265 78,250 82,236");
 const SUIT_THIGH_GEM = "92,232 99,251 91,270 84,251";
 const SUIT_KNEE = curve("75,275* 85,284 90,299 86,314 74,334* 63,316 60,299 65,284");
@@ -309,7 +328,9 @@ const SUIT_TAIL_RINGS = SUIT_TAIL_SPINE.slice(1, -1).map(([x, y], i) => {
   const half = (22 - i * 1.05) / 2;
   return `${fmt([x - uy * half, y + ux * half])} ${fmt([x + ux * 3, y + uy * 3])} ${fmt([x + uy * half, y - ux * half])}`;
 });
-const SUIT_TAIL_BLADE = curve("202,78* 207,92 213,107 220,123 228,143* 230,121 228,104 222,90 212,82");
+const SUIT_TAIL_BLADE = curve(
+  "202,78* 207,92 213,107 220,123 228,143* 230,121 228,104 222,90 212,82",
+);
 const SUIT_TAIL_BARBS = [
   curve("165,37* 158,24* 171,32*", 1),
   curve("181,27* 186,11* 192,24*", 1),
@@ -371,7 +392,14 @@ const mirrorPath = (path: string) =>
 
 // The gold trims, per plate group (index: legs 0, arms 1, chest 2, head 3,
 // tail 4); gold reaches them last.
-const SUIT_LEG_TRIM = [SUIT_THIGH_FRAME, SUIT_KNEE, SUIT_BOOT_CUFF, SUIT_TOE, SUIT_HIP_BLADE, SUIT_HIP_PENDANT];
+const SUIT_LEG_TRIM = [
+  SUIT_THIGH_FRAME,
+  SUIT_KNEE,
+  SUIT_BOOT_CUFF,
+  SUIT_TOE,
+  SUIT_HIP_BLADE,
+  SUIT_HIP_PENDANT,
+];
 const SUIT_ARM_TRIM = [...SUIT_SHOULDER, SUIT_PENDANT, ...SUIT_BANDS, SUIT_CUFF];
 const SUIT_PLATES = [
   { name: "is-legs is-left", accent: SUIT_LEG_TRIM, index: 0 },
@@ -496,7 +524,10 @@ const SUIT_PIECES: readonly SuitPiece[] = [
   ...sided("is-legs", [SUIT_THIGH], { gems: [SUIT_THIGH_GEM], flow: "thigh" }),
   ...sided("is-legs", [SUIT_KNEE], { gems: [SUIT_KNEE_GEM], flow: "knee" }),
   ...sided("is-legs", [SUIT_SHIN, ...SUIT_SHIN_SPIKES], { flow: "shin" }),
-  ...sided("is-legs", [SUIT_BOOT, SUIT_BOOT_CUFF, SUIT_TOE], { gems: [SUIT_FOOT_GEM], flow: "boot" }),
+  ...sided("is-legs", [SUIT_BOOT, SUIT_BOOT_CUFF, SUIT_TOE], {
+    gems: [SUIT_FOOT_GEM],
+    flow: "boot",
+  }),
   // The ten feather-blades in three layers, back to front.
   ...[
     [0, 1, 2],

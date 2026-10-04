@@ -129,7 +129,8 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
     "OPERATING STAGE",
     "REXONANCE",
     "REXONANCE！",
-    "SA-GA！DEUS！",
+    // The chant's call; its answer, DEUS！, is listed above (2026-10-05).
+    "SA-GA！",
     "SYSTEM CHECK",
     "TRINITY RESONANCE",
   ]);

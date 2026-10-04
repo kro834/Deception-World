@@ -179,6 +179,22 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 .rx-call-repetition > span:last-child {
   color: var(--rx-call-pink);
 }
+/* The chant's answer: DEUS！ in gold after each SA-GA！. */
+.rx-call-chant .rx-call-answer {
+  color: #f2d896;
+}
+.rx-call-chant > span:nth-child(1) .rx-call-answer {
+  --rx-call-answer-n: 0;
+}
+.rx-call-chant > span:nth-child(2) .rx-call-answer {
+  --rx-call-answer-n: 1;
+}
+.rx-call-chant > span:nth-child(3) .rx-call-answer {
+  --rx-call-answer-n: 2;
+}
+.rx-call-chant > span:nth-child(4) .rx-call-answer {
+  --rx-call-answer-n: 3;
+}
 .rx-call-final {
   color: #f2fbff;
 }
@@ -658,6 +674,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation-delay: calc(var(--rx-call-start) + var(--rx-call-duration) / 4 + 60ms);
   }
 
+  /* SA-GA！DEUS！ is a call and its answer, four times: each line's DEUS！
+     answers its SA-GA！ in gold, top line to bottom on an even pulse
+     (230 ms into the chant, then every 120 ms), after every SA-GA！ is up.
+     A small box that only arrives (opacity rises, never falls). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-chant
+    .rx-call-answer {
+    display: inline-block;
+    animation: rxCallAnswer 120ms var(--rx-call-ease) both;
+    animation-delay: calc(var(--rx-call-start) + 230ms + var(--rx-call-answer-n) * 120ms);
+  }
+
   /* The answer mirrors it from the right, bottom line first. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
@@ -886,6 +915,16 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   to {
     transform: scale(0.992);
+  }
+}
+@keyframes rxCallAnswer {
+  from {
+    opacity: 0;
+    transform: translate3d(0.35em, 0, 0) scale(1.18);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes rxCallLineInLeft {

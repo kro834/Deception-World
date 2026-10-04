@@ -94,8 +94,9 @@ async function waitForVisibleCall(page, selector, expectedLines) {
     const beat = document.querySelector(target);
     return beat && Number(getComputedStyle(beat).opacity) > 0.3;
   }, selector);
+  // Lines only: a chant line nests its answer, DEUS！ (2026-10-05).
   const boxes = await page.locator(selector).evaluate((beat) =>
-    [...beat.querySelectorAll("span")].map((span) => {
+    [...beat.querySelectorAll(":scope > span")].map((span) => {
       const range = document.createRange();
       range.selectNodeContents(span);
       const box = range.getBoundingClientRect();
@@ -178,8 +179,14 @@ async function verifySuitClear(page, selector, profileName, label) {
       const range = document.createRange();
       range.selectNodeContents(element);
       const box = range.getBoundingClientRect();
-      if (parseFloat(getComputedStyle(element).fontSize) < 12) report.small.push(element.textContent);
-      if (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > innerHeight + 1)
+      if (parseFloat(getComputedStyle(element).fontSize) < 12)
+        report.small.push(element.textContent);
+      if (
+        box.left < -1 ||
+        box.right > innerWidth + 1 ||
+        box.top < -1 ||
+        box.bottom > innerHeight + 1
+      )
         report.outside.push(element.textContent);
       if (hits(box)) report.overlaps.push(element.textContent);
     }
@@ -217,7 +224,10 @@ async function verifyStageCadence(page, profileName) {
       const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           for (const node of mutation.addedNodes) {
-            if (node instanceof HTMLElement && node.matches('.rx-call-sequence[data-mode="stage"]')) {
+            if (
+              node instanceof HTMLElement &&
+              node.matches('.rx-call-sequence[data-mode="stage"]')
+            ) {
               starts.push(performance.now());
             }
           }
@@ -252,7 +262,8 @@ async function verifyStageCadence(page, profileName) {
       assert.ok(spacing >= 900, `${profileName} ${gap}ms: card starts ${result.starts.join(", ")}`);
     }
     for (const [selected, shown] of result.labels) {
-      if (shown) assert.equal(shown, selected, `${profileName} ${gap}ms: the card names the latest form`);
+      if (shown)
+        assert.equal(shown, selected, `${profileName} ${gap}ms: the card names the latest form`);
     }
     assert.equal(result.remaining, 0, `${profileName} ${gap}ms: no card left behind`);
   }
@@ -371,12 +382,14 @@ async function verifyProfile(profile) {
   );
   console.log(
     `${profile.name} entry-timeline`,
-    JSON.stringify(await page.evaluate(() => ({
-      phases: window.__rexonanceEntryPhases,
-      start: window.__rexonanceEntryStartedAt,
-      finished: window.__rexonanceEntryFinishedAt,
-      routeCover: document.documentElement.getAttribute("data-route-cover"),
-    }))),
+    JSON.stringify(
+      await page.evaluate(() => ({
+        phases: window.__rexonanceEntryPhases,
+        start: window.__rexonanceEntryStartedAt,
+        finished: window.__rexonanceEntryFinishedAt,
+        routeCover: document.documentElement.getAttribute("data-route-cover"),
+      })),
+    ),
   );
   assert.ok(
     entryDuration < 3200,
@@ -459,9 +472,14 @@ async function verifyProfile(profile) {
   const detachDiagnostic = await page.evaluate(() => ({
     routeCover: document.documentElement.getAttribute("data-route-cover"),
     overlayCount: document.querySelectorAll('.rx-call-sequence[data-mode="stage"]').length,
-    stageHasMatches: document.querySelectorAll("html body:has(.rx-call-sequence[data-mode='stage'])").length,
+    stageHasMatches: document.querySelectorAll(
+      "html body:has(.rx-call-sequence[data-mode='stage'])",
+    ).length,
     zeusVisibility: getComputedStyle(document.querySelector(".zeus-button")).visibility,
-    rootAttributes: Array.from(document.documentElement.attributes, ({ name, value }) => [name, value]),
+    rootAttributes: Array.from(document.documentElement.attributes, ({ name, value }) => [
+      name,
+      value,
+    ]),
   }));
   await page.waitForFunction(
     () => getComputedStyle(document.querySelector(".zeus-button")).visibility === "visible",
@@ -471,10 +489,15 @@ async function verifyProfile(profile) {
   const zeusRelease = await page.evaluate(() => ({
     routeCover: document.documentElement.getAttribute("data-route-cover"),
     overlayCount: document.querySelectorAll('.rx-call-sequence[data-mode="stage"]').length,
-    stageHasMatches: document.querySelectorAll("html body:has(.rx-call-sequence[data-mode='stage'])").length,
+    stageHasMatches: document.querySelectorAll(
+      "html body:has(.rx-call-sequence[data-mode='stage'])",
+    ).length,
     visibility: getComputedStyle(document.querySelector(".zeus-button")).visibility,
   }));
-  console.log(`${profile.name} stage-zeus-release`, JSON.stringify({ detachDiagnostic, zeusRelease }));
+  console.log(
+    `${profile.name} stage-zeus-release`,
+    JSON.stringify({ detachDiagnostic, zeusRelease }),
+  );
   assert.equal(
     zeusRelease.visibility,
     "visible",

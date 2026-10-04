@@ -37,7 +37,16 @@ test("entry calls stay identical to the published five-call sequence and order",
   assert.ok(!component.includes("speechSynthesis"));
   assert.match(component, /REXONANCE_CALLS\.map\(\(call, index\)/);
   assert.match(component, /data-call=\{call\}/);
-  assert.equal((component.match(/<span>SA-GA！DEUS！<\/span>/g) ?? []).length, 4);
+  // 2026-10-05 (owner): each chant line is SA-GA！ with DEUS！ as its
+  // answer; the line's text is still SA-GA！DEUS！, four times.
+  assert.equal(
+    (
+      component.match(
+        /<span>\s*SA-GA！<span className="rx-call-answer">DEUS！<\/span>\s*<\/span>/g,
+      ) ?? []
+    ).length,
+    4,
+  );
   assert.equal((component.match(/<span>REXONANCE！<\/span>/g) ?? []).length, 4);
   assert.match(
     component,
