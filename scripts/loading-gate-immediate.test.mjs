@@ -31,12 +31,16 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash, search: changesDocument \? undefined : true \}\);[\s\S]*?return;/,
   );
   const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");
   const directBranch = goBlock.slice(directIndex, directEnd);
-  assert.match(directBranch, /await navigate\(\{ to: to as never, hash \}\)/);
+  assert.match(
+    directBranch,
+    /await navigate\(\{ to: to as never, hash, search: changesDocument \? undefined : true \}\)/,
+    "same-document section jumps preserve search while new documents clear it",
+  );
   assert.match(directBranch, /preloadAssets\(assets, \(\) => undefined\)/);
   assert.match(gate, /const preloadDestination = useCallback/);
   assert.match(gate, /onTouchStart=\{preloadDestination\}/);

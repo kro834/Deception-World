@@ -1198,7 +1198,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await nextFrame();
           }
           if (!isCurrent()) return;
-          await navigate({ to: to as never, hash });
+          // A section jump stays in the current document, including its
+          // selected archive. Only a new document starts with fresh search.
+          await navigate({ to: to as never, hash, search: changesDocument ? undefined : true });
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           if (hash) await settleRouteHash(hash);

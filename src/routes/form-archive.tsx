@@ -7,7 +7,12 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import formArchiveCssUrl from "@/styles-form-archive.css?url";
 
+type ArchiveKind = "saga" | "realm";
+
 export const Route = createFileRoute("/form-archive")({
+  validateSearch: (search: Record<string, unknown>): { archive?: ArchiveKind } => ({
+    archive: search.archive === "realm" ? "realm" : undefined,
+  }),
   component: FormArchive,
   head: () => ({
     meta: [
@@ -23,7 +28,6 @@ export const Route = createFileRoute("/form-archive")({
   }),
 });
 
-type ArchiveKind = "saga" | "realm";
 const ARCHIVE_READY_FAILSAFE_MS = 900;
 
 type ArchiveTransition = {
@@ -38,7 +42,9 @@ type ArchiveReadyFallback = ArchiveTransition & {
 
 function FormArchive() {
   useWorldMode();
-  const [archive, setArchive] = useState<ArchiveKind>("saga");
+  const { archive: requestedArchive = "saga" } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [archive, setArchive] = useState<ArchiveKind>(requestedArchive);
   const [transitionGeneration, setTransitionGeneration] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -46,7 +52,10 @@ function FormArchive() {
   const switcherRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const transitionGenerationRef = useRef(0);
-  const activeTransitionRef = useRef<ArchiveTransition>({ archive: "saga", generation: 0 });
+  const activeTransitionRef = useRef<ArchiveTransition>({
+    archive: requestedArchive,
+    generation: 0,
+  });
   const loadedFrameTransitionRef = useRef<ArchiveTransition | null>(null);
   const readyFallbackRef = useRef<ArchiveReadyFallback | null>(null);
   const restoreSwitcherFocusRef = useRef<ArchiveTransition | null>(null);
@@ -152,13 +161,31 @@ function FormArchive() {
       setLoaded(false);
       setTransitionGeneration(generation);
       setArchive(next);
+      // Keep this history entry tied to the document being read. Replacing
+      // it preserves Back's meaning while reloads and shared URLs retain Realm.
+      if (next !== requestedArchive) {
+        void navigate({
+          search: (previous) => ({ ...previous, archive: next === "realm" ? next : undefined }),
+          hash: true,
+          replace: true,
+          resetScroll: false,
+        });
+      }
     },
-    [loaded],
+    [loaded, navigate, requestedArchive],
   );
 
   useEffect(() => {
     selectArchiveRef.current = selectArchive;
   }, [selectArchive]);
+
+  // A same-page history traversal may request another archive while a frame
+  // is loading. Let that frame settle before replacing it, just as for taps.
+  useEffect(() => {
+    if (loaded && requestedArchive !== activeTransitionRef.current.archive) {
+      selectArchiveRef.current(requestedArchive);
+    }
+  }, [loaded, requestedArchive]);
 
   useEffect(() => {
     if (!loaded) return;

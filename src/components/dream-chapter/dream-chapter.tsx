@@ -7,6 +7,7 @@ import {
   useState,
   type MouseEvent,
 } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
@@ -325,6 +326,7 @@ function CharacterDialog({
   trigger: HTMLButtonElement | null;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -348,18 +350,29 @@ function CharacterDialog({
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       dialog.focus({ preventScroll: true });
     }
+    let historyDismissed = false;
+    const stopHistory = router.history.subscribe(({ action }) => {
+      if (action.type !== "BACK" && action.type !== "FORWARD" && action.type !== "GO") return;
+      historyDismissed = true;
+      stopSettling();
+      if (dialog.open) dialog.close();
+      // Release the frozen departure offset before history restores its destination.
+      unlockViewport();
+      onClose();
+    });
     return () => {
+      stopHistory();
       stopSettling();
       if (dialog.open) dialog.close();
       unlockViewport();
-      if (openedByKeyboard) {
+      if (openedByKeyboard && !historyDismissed) {
         window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
       } else {
         trigger?.blur();
         window.requestAnimationFrame(() => trigger?.blur());
       }
     };
-  }, [character, openedByKeyboard, trigger]);
+  }, [character, onClose, openedByKeyboard, router, trigger]);
 
   if (!character) return null;
 
@@ -499,6 +512,7 @@ function DolminenceDialog({
   trigger: HTMLButtonElement | null;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -522,18 +536,28 @@ function DolminenceDialog({
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       dialog.focus({ preventScroll: true });
     }
-    return () => {
+    let historyDismissed = false;
+    const stopHistory = router.history.subscribe(({ action }) => {
+      if (action.type !== "BACK" && action.type !== "FORWARD" && action.type !== "GO") return;
+      historyDismissed = true;
       stopSettling();
       if (dialog.open) dialog.close();
       unlockViewport();
-      if (openedByKeyboard) {
+      onClose();
+    });
+    return () => {
+      stopHistory();
+      stopSettling();
+      if (dialog.open) dialog.close();
+      unlockViewport();
+      if (openedByKeyboard && !historyDismissed) {
         window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
       } else {
         trigger?.blur();
         window.requestAnimationFrame(() => trigger?.blur());
       }
     };
-  }, [openedByKeyboard, record, trigger]);
+  }, [onClose, openedByKeyboard, record, router, trigger]);
 
   if (!record) return null;
 
@@ -592,6 +616,8 @@ export function DreamChapter() {
   const [dolminenceRecord, setDolminenceRecord] = useState<DreamDolminence | null>(null);
   const [characterOpenedByKeyboard, setCharacterOpenedByKeyboard] = useState(false);
   const [dolminenceOpenedByKeyboard, setDolminenceOpenedByKeyboard] = useState(false);
+  const closeCharacter = useCallback(() => setCharacter(null), []);
+  const closeDolminenceRecord = useCallback(() => setDolminenceRecord(null), []);
   // 人物一覧 on phones: each profile sits behind its PROFILE switch
   // (styles-dream-annex.css shows every profile on tablets and desktops and
   // hides the switch there, so the server markup is right at every width).
@@ -1715,13 +1741,13 @@ export function DreamChapter() {
         character={character}
         openedByKeyboard={characterOpenedByKeyboard}
         trigger={characterTriggerRef.current}
-        onClose={() => setCharacter(null)}
+        onClose={closeCharacter}
       />
       <DolminenceDialog
         record={dolminenceRecord}
         openedByKeyboard={dolminenceOpenedByKeyboard}
         trigger={dolminenceTriggerRef.current}
-        onClose={() => setDolminenceRecord(null)}
+        onClose={closeDolminenceRecord}
       />
     </main>
   );

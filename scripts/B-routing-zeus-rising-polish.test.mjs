@@ -59,7 +59,7 @@ test("a keyboard activation focuses the destination in every navigation branch",
   );
   assert.match(
     loadGate,
-    /await navigate\(\{ to: to as never, hash \}\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
+    /await navigate\(\{ to: to as never, hash, search: changesDocument \? undefined : true \}\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
   );
   assert.match(loadGate, /target\.focus\(\{ preventScroll: true \}\);/);
   assert.match(transitions, /\[data-route-focus="true"\]:focus \{\s*outline: none;\s*\}/);

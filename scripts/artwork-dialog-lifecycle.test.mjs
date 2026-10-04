@@ -23,6 +23,9 @@ function mountDialog() {
         };
       }
       if (name === "react-dom") return { createPortal: (element) => element };
+      if (name === "@tanstack/react-router") {
+        return { useRouter: () => ({ history: { subscribe: () => () => {} } }) };
+      }
       if (name === "react/jsx-runtime") {
         return {
           jsx: (type, props) => ({ type, props }),

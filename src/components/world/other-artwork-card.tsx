@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "@tanstack/react-router";
 import { UiVectorIcon } from "./ui-vector-icon";
 
 // Only names and artwork have been supplied; do not invent profile information.
@@ -27,6 +28,7 @@ export const OTHER_ARTWORK = [
 ] as const;
 
 export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[number] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [keyboardFocus, setKeyboardFocus] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -47,6 +49,18 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
     // Start on the labelled dialog; Tab still reaches its close control normally.
     dialog.current.focus({ preventScroll: true });
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    // Hash history keeps the World mounted. Dismiss its old image before the
+    // restored section appears, without returning focus to the departed card.
+    return router.history.subscribe(({ action }) => {
+      if (action.type !== "BACK" && action.type !== "FORWARD" && action.type !== "GO") return;
+      keyboardOpened.current = false;
+      backdropPress.current = null;
+      dialog.current?.close();
+    });
+  }, [open, router]);
 
   return (
     <>
