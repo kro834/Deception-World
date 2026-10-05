@@ -8,6 +8,13 @@ const compiled = ts.transpileModule(
   readFileSync(new URL("../src/components/world/manager-stub.tsx", import.meta.url), "utf8"),
   { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } },
 ).outputText;
+const compiledHistory = ts.transpileModule(
+  readFileSync(
+    new URL("../src/components/world/use-dialog-history-dismiss.ts", import.meta.url),
+    "utf8",
+  ),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+).outputText;
 
 function mount() {
   const effects = [],
@@ -45,11 +52,17 @@ function mount() {
     },
   };
   const exports = {};
-  runInNewContext(compiled, {
+  const scope = {
     exports,
     window: win,
     document: doc,
+    HTMLElement: class HTMLElement {},
     require(name) {
+      if (name === "./use-dialog-history-dismiss") {
+        const historyExports = {};
+        runInNewContext(compiledHistory, { ...scope, exports: historyExports });
+        return historyExports;
+      }
       if (name === "react")
         return {
           useRef: (current) => ({ current }),
@@ -72,7 +85,8 @@ function mount() {
         };
       return {};
     },
-  });
+  };
+  runInNewContext(compiled, scope);
   const tree = exports.FormPickup({
     rider: { theme: "rexonance", name: "レクソナンスサーガ", img: "/rider.webp", calls: [] },
   });

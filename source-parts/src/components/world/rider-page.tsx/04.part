@@ -50,7 +50,7 @@
     civilian: {
       name: "ジェームズ・スミス",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。CODE Number Seven。",
+      body: "CODE英国支部から派遣されたエージェント。コードナンバーはセヴン。",
     },
   },
   {
@@ -88,12 +88,12 @@
         no: "01",
         kicker: "SCARS / PROFILE",
         title: "スカーズに所属する、謎の男。",
-        body: ["スカーズに所属している謎の男。役職は特務情報官。"],
+        body: ["正体不明の組織『スカーズ』で特務情報官を務める、謎の男。"],
       },
       {
         no: "02",
         kicker: "PROFESSIONAL / CONTROLLED PERCEPTION",
-        title: "信用ではなく、相手の認識を制御する。",
+        title: "相手にどう見られているかを、正確に把握する。",
         body: [
           "徹底したプロフェッショナル。目的、必要情報、成功条件、撤退条件を常に切り分け、感情的な好悪を任務判断へ混ぜることを嫌う。愛想を振り撒かず、信用を獲得すること自体にも興味を示さない。潜入で重要なのは好かれることではなく、《相手が自分をどういう人物だと思っているかを把握し、その認識から逸脱しないこと》だと考えているからだ。",
           "そのため必要とあれば敵を助け、味方を攻撃し、故意に任務を失敗し、時には本当に仲間へ損害を与える判断すら行う。",
@@ -119,7 +119,7 @@
       {
         no: "05",
         kicker: "CIPHER / INFORMATIONAL UNCERTAINTY",
-        title: "情報的不確定性を、戦闘の力へ。",
+        title: "偽装と経路追跡で、敵の判断を狂わせる。",
         body: [
           "サイファーシステムは潜入、偽装、情報収集、対組織工作を主目的として開発された。認証信号の偽装、能力や命令の経路追跡、位置情報などへの偽信号の混入によって、《情報的不確定性》を利用して戦う。",
           "潜入継続が不可能となった場合、あるいは対象の確実な排除が必要な場合にはブラックサイトへ移行。偽装へ割り当てていた演算資源とEMPの大部分を身体駆動、武装、敵解析へ転用する。",
@@ -212,7 +212,7 @@
     civilian: {
       name: "リュシアン・ヴァレール",
       kicker: "BEFORE TRANSFORMATION / SCARS",
-      body: "変身前ビジュアル // CONFIRMED。SCARSに所属する謎の男。役職は特務情報官。",
+      body: "SCARSの特務情報官。潜入と偽装、情報収集を専門とする。",
       cv: "内山昂輝",
     },
   },
@@ -260,6 +260,7 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  useDialogHistoryDismiss(nightmareRef, closeNightmare);
   const partnerForms = rider.partner?.forms ?? [];
   const pickupForms =
     rider.id === "saga"

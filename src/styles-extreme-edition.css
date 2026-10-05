@@ -75,6 +75,18 @@
   overflow-wrap: anywhere;
 }
 
+/* The narrow P14 cards need Japanese line-break opportunities before the
+   emergency wrap; keep-all can strand a closing punctuation mark by itself. */
+.rxs-page.rxs-page.exs-page .exs-p14-comparison h3 {
+  word-break: normal;
+  line-break: strict;
+}
+
+/* Keep 勝ち筋 whole without shrinking the display face on a narrow phone. */
+.rxs-page.rxs-page.exs-page .exs-p14-comparison h3 > span {
+  display: inline-block;
+}
+
 /* ---------- Anchors and focus clear the fixed bar (Rexonance parity) ---------- */
 /* World supplies 96px of root scroll padding; these targets carry the
    measured nav offset themselves, so the root padding is zeroed here too. */

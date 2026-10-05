@@ -12,6 +12,7 @@ import { dossierImage } from "@/lib/dossier-images";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
+import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import {
   CAST,
   FAR_FROM_SAGA,
@@ -190,6 +191,10 @@ function RiderPickup({
     resetScroll();
   };
   useEffect(() => () => cancelScrollReset.current?.(), []);
+  useDialogHistoryDismiss(dlg, () => {
+    pointerOpened.current = true;
+    close();
+  });
   return (
     <section
       id={id}
@@ -588,7 +593,7 @@ export function FinalStage() {
             <br />
             八人の登場人物。
           </h2>
-          <span>登場人物を切り替えて、役割と詳細を確認できます。</span>
+          <span>悠真と仲間たちが、案内係ナギとともにアーカイヴの異変に立ち向かう。</span>
         </header>
         <div className="fst-cast-console rxs-reveal">
           <div

@@ -101,6 +101,17 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section ::select
     display: none;
   }
 
+  /* The paper's more specific numeral rule otherwise retains the display
+     stroke over the system's filled glyph, making this number heavier
+     than the dossier's other forced-colour labels. */
+  main.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .manager-copy-heading
+    > span {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
   main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a {
     color: LinkText;
   }

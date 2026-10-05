@@ -116,7 +116,7 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   assert.match(component, /P14 \/ EXPANSION/);
   assert.match(component, /P14 \/ FIXATION/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表/);
-  assert.match(component, /推測値では補いません/);
+  assert.match(component, /変換効率・応答・安定率の個別数値は未公表です/);
   assert.match(component, /20,000YOPS/);
   assert.match(component, /5,000TOPS/);
   assert.match(component, /src="\/extreme-p14-core.jpg"/);

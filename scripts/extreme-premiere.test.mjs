@@ -426,7 +426,7 @@ test("the copy keeps the 2026-10-02 voice and the meta speaks it (COPY3-extreme 
     "腕っぷしを、数字で。",
     "肉弾戦に最適化したエクスプリーム。",
     "<span>負けた欄も、隠さない。</span>",
-    "<h3>選んで、固定。以上。</h3>",
+    "<h3>選んだ結果を、勝利に固定する。</h3>",
     'title: "殴られるほど、賢くなる。"',
     'title: "50秒で、片をつける。"',
   ]) {

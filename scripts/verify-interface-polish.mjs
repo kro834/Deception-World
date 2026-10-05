@@ -154,6 +154,40 @@ async function verifySpecs(page, route, width) {
     labels.every((label) => label.font >= 12 && label.inside && !label.clipped),
     JSON.stringify(labels),
   );
+  if (route === "/extreme-saga") {
+    const headings = await page.locator(".exs-p14-comparison h3").evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const lines = new Map();
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const text = walker.currentNode;
+          for (let index = 0; index < text.textContent.length; index++) {
+            const range = document.createRange();
+            range.setStart(text, index);
+            range.setEnd(text, index + 1);
+            const y = Math.round(range.getBoundingClientRect().top);
+            lines.set(y, (lines.get(y) ?? "") + text.textContent[index]);
+          }
+        }
+        return { text: node.textContent, lines: [...lines.values()] };
+      }),
+    );
+    assert.equal(headings.length, 2);
+    for (const heading of headings) {
+      assert.ok(
+        heading.lines.every((line) => !/^[、。，．！？]/u.test(line.trim())),
+        JSON.stringify(heading),
+      );
+    }
+    const phrases = await page.locator(".exs-p14-comparison h3 > span").evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        display: getComputedStyle(node).display,
+        fits: node.getBoundingClientRect().width <= node.parentElement.clientWidth + 1,
+      })),
+    );
+    assert.equal(phrases.length, 3);
+    assert.ok(phrases.every((phrase) => phrase.display === "inline-block" && phrase.fits));
+  }
   if (process.env.CAPTURE_DIR) {
     await page.screenshot({
       path: `${process.env.CAPTURE_DIR}/${route.slice(1)}-specs-${width}-after.png`,

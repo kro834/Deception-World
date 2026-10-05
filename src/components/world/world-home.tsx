@@ -24,6 +24,7 @@ import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
+import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 
 const POSTERS = [
   {
@@ -1640,6 +1641,19 @@ export function WorldHome() {
       reducedMotion ? 0 : 360,
     );
   };
+
+  useDialogHistoryDismiss(episodePickupDialogRef, () => {
+    episodePickupOpenedByKeyboard.current = false;
+    closeEpisodePickup();
+  });
+  useDialogHistoryDismiss(pickupDialogRef, () => {
+    cancelColumnPickupScrollReset.current?.();
+    cancelColumnPickupScrollReset.current = null;
+    if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
+    pickupCloseTimer.current = null;
+    pickupDialogRef.current?.close();
+    setPickupOpen(false);
+  });
 
   return (
     <main

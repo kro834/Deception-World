@@ -5,6 +5,7 @@ import { dossierImage } from "@/lib/dossier-images";
 import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { useWorldMode } from "./use-world-mode";
+import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader } from "./dossier-reader";
@@ -103,7 +104,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     pos: "50% 10%",
     civilianImg: "/civilian-yuma-20260826.jpeg",
     civilianPos: "50% 12%",
-    title: "最も弱い地点から、結末へ踏み込む第一のライダー。",
+    title: "滅ぼすはずだった世界を取り戻す、夢見る者。",
     quotes: ["俺たちが夢を叶えるんだ。", "世界を変える", "俺達の世界を返せ…！"],
     facts: [
       { dt: "NAME", dd: "月城 悠真（つきしろ ゆうま）" },
@@ -117,10 +118,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "01",
         kicker: "DESTINY / LIBERATION",
-        title: "人類を滅ぼす運命から、世界を取り戻す戦いへ。",
+        title: "仲間と夢を叶え、奪われた世界を取り戻す。",
         body: [
-          "元は何の変哲もない十九歳の青年。『サーガの世界』で物語の主人公シエルに選ばれてしまった。管理人から人類殲滅を強要され、仮面ライダーサーガとして世界を滅ぼす運命を背負ううち、精神は退廃していった。",
-          "しかし怪作の夢へ潜ったことで呪縛から解放され、新たな力を獲得。仲間と夢を叶え、奪われた世界を取り戻すため、味方陣営のダークホースとして戦う。",
+          "元は何の変哲もない十九歳の青年だったが、『サーガの世界』で物語の主人公シエルに選ばれてしまう。管理人から人類殲滅を強要され、仮面ライダーサーガとして世界を滅ぼす運命を背負ううち、精神は退廃していった。",
+          "怪作の夢へ潜ったことで呪縛から解放され、新たな力を手にした。今は仲間と夢を叶え、奪われた世界を取り戻すため、味方陣営のダークホースとして戦っている。",
         ],
       },
       {
@@ -128,7 +129,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         kicker: "BATTLE / DISTANCE",
         title: "生身を避け、能力と射程で戦場を制する。",
         body: [
-          "生身の身体能力は低く、変身前の交戦を徹底して避ける。本領は能力を多用する遠距離戦。万物を拒絶する半汎用式ライダーシステムが、サーガの核になる。",
+          "生身の身体能力は低く、変身前の交戦を徹底して避ける。変身後は万物を拒絶する半汎用式ライダーシステムを駆使し、能力を多用した遠距離戦で本領を発揮する。",
         ],
       },
       {
@@ -228,8 +229,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "EMP", dd: "無制限" },
         ],
         overview: [
-          "月城悠真がエクスサーガドライバーへデュアルエクスコアとレクソナンスコアを装填して変身する、サーガシステムの最終到達形態。秩序と破壊を司るレックス・ロワ、最高位神格を持つ五代目ゼウス、そして神から切り離されながら一人の人間として生きた悠真。三者を融合して個を消すのではなく、それぞれを独立したまま超共鳴させ、戦闘出力だけを月城悠真へ集約することで成立する。",
-          "エクスプリームサーガが開いた無制限出力の設計思想を継承し、REXONANCE DRIVE、REXONANCE DEUS、KHAOS DeuX、KOSMOS DeuXを統合。生成した力を踏み込み、加速、姿勢維持、装甲突破、位相貫通、権限干渉、存在構造への伝達まで連続的に再配分する。作用域であるエフェクティブ・エリアを極小化し、装甲内部のトランスミッション・エリアを最短化することで、反射や散逸を抑え、同じ出力をより鋭く、確実に対象へ到達させる。",
+          "月城悠真がエクスサーガドライバーへデュアルエクスコアとレクソナンスコアを装填して変身する、サーガシステムの最終到達形態。その力を担うのは、秩序と破壊を司るレックス・ロワ、最高位神格を持つ五代目ゼウス、そして神から切り離されながら一人の人間として生きた悠真の三者。それぞれが独立したまま超共鳴し、個を失わずに戦闘出力だけを月城悠真へ集約することで成立する。",
+          "エクスプリームサーガが開いた無制限出力の設計思想を継承し、REXONANCE DRIVE、REXONANCE DEUS、KHAOS DeuX、KOSMOS DeuXを統合する。生成した力を踏み込み、加速、姿勢維持、装甲突破、位相貫通、権限干渉、存在構造への伝達まで連続的に再配分する。作用域であるエフェクティブ・エリアを極小化し、装甲内部のトランスミッション・エリアを最短化することで、反射や散逸を抑え、同じ出力をより鋭く、確実に対象へ到達させる。",
           "攻撃の周波数、位相、権限署名は戦闘中にも更新され、一般的な無効化処理の成立条件から外れる構成へ逐次遷移する。さらに超高位管理権限は反管理権限さえ外部権限要求として捕捉し、レックスの主権で作用範囲を整理し、ゼウスの第一性で悠真の処理を先行させる。最大出力だけでなく、実際に届く実効攻撃性能においてエクスプリーム・ウルトラを上回る、無限出力を無限の攻撃へ完成させた形態である。",
           "ゼウス由来の超自己進化は、現在の装甲、演算、出力、攻撃形式を次世代状態へ更新し続ける。レックス由来の絶対秩序は、その進化結果へ境界と役割を与え、破綻のない一つの戦闘体系へ即座に固定する。進化によって秩序を失わず、秩序によって進化を止めない循環こそがレクソナンスの核であり、スリムな外形に反して、全身は一つの巨大な攻撃機関として機能する。",
         ],
@@ -248,7 +249,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           },
           {
             name: "REXONANCE DRIVE",
-            body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。",
+            body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択する。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。",
           },
           {
             name: "REXONANCE DEUS",
@@ -348,7 +349,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "月城 悠真",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。シエル／月城悠真。夢見る者。",
+      body: "『サーガの世界』でシエルに選ばれた青年。仲間と夢を叶えるために戦う。",
       cv: "坂田将吾",
     },
     nightmare: {
@@ -385,7 +386,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         {
           no: "03",
           kicker: "NIGHTMARE / REJECTION",
-          title: "現象ではなく、届いたという結果を拒絶する。",
+          title: "『それ、いらない』で攻撃の到達を拒む。",
           body: [
             "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
           ],
@@ -420,7 +421,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     pos: "50% 8%",
     civilianImg: "/civilian-bell-20260826.jpeg",
     civilianPos: "50% 10%",
-    title: "失われた信号が、名前を持って帰還する。",
+    title: "REALMSが誇る完全適合者、ベル・アレイン。",
     quotes: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
     facts: [
       { dt: "NAME", dd: "ベル・アレイン" },
@@ -443,9 +444,9 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "02",
         kicker: "PERSONALITY / DECISION",
-        title: "誰かが前を向くため、決断の後にも笑う。",
+        title: "軽口を絶やさず、共存できるかを見極める。",
         body: [
-          "明るく親しみやすく、冗談や軽口で場を動かす。意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。基準は外見や出自ではなく共存可能性である。",
+          "明るく親しみやすく、冗談や軽口で場を動かす一方、意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。外見や出自に惑わされず、共存できるかどうかで判断する。",
         ],
       },
       {
@@ -523,7 +524,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "ベル・アレイン",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。REALMS元日本支部リーダー。",
+      body: "REALMS元日本支部リーダー。レルムズドライバー唯一の完全適合者。",
     },
     special: {
       kicker: "FINAL STAGE / STORY SITE",
@@ -553,7 +554,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     pos: "50% 10%",
     civilianImg: "/civilian-lore.jpeg",
     civilianPos: "50% 8%",
-    title: "管理人の側から、世界へ踏み込む第三のライダー。",
+    title: "自ら弄んだ世界で、かつての敵と共闘する管理人。",
     quotes: [
       "命の終わり際に向けられる最後の眼差しが好きだった",
       "私を生かすためだけに削られた人生が、静かに幕を下ろす瞬間が好きだった",
@@ -636,7 +637,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "ローア",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。サーガ世界の管理人。",
+      body: "サーガ世界を創造した管理人。弱体化した今は、かつての敵と共闘している。",
       cv: "小林千晃",
     },
   },
@@ -653,7 +654,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     pos: "50% 8%",
     civilianImg: "/civilian-vandal.jpeg",
     civilianPos: "50% 10%",
-    title: "六詠第二位が、肉弾戦へ権限を変換する。",
+    title: "秩序の神が振るう、破壊者の拳。",
     quotes: REX_LOI.quotes,
     facts: REX_LOI.facts,
     sections: REX_LOI.sections,
@@ -661,7 +662,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "レックス・ロワ",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。六詠の管理人。",
+      body: "秩序と破壊を司る六詠第二位の管理人。仮面ライダーヴァンダールに変身する。",
       cv: "斎賀みつき",
     },
   },
@@ -692,7 +693,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "01",
         kicker: "INVESTIGATION / LUCK",
-        title: "本人が気付かぬまま、核心へ立つ。",
+        title: "何気ない一言で、事件の核心を突く。",
         body: [
           "現場叩き上げで捜査一課へ進んだ警部補。無口で冷静に見えるが、実際は口下手で深く考えていないことが多い。何気なく口にした言葉が事件の核心を突き、遭遇した人物がたまたま犯人だったという規格外の強運を持つ。",
         ],
@@ -700,7 +701,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "02",
         kicker: "ADAPTER / FILE",
-        title: "運が先行し、拳がそれを確定する。",
+        title: "負け知らずの体術と、設計通りに使わない能力。",
         body: [
           "柔道、空手、剣道、捕縛術で性別を問わず一度も敗れたことがない。腕時計型の変身装置『レディックウォッチ』を用い、与えられた能力を設計通りに扱わず、悪知恵と幸運で転用する。",
         ],
@@ -780,7 +781,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "在原華火",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。捜査一課・警部補。",
+      body: "捜査一課の警部補。口下手な言動と規格外の幸運で、事件の核心に辿り着く。",
       cv: "悠木碧",
     },
     partner: {
@@ -913,7 +914,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         kicker: "PROFILE",
         title: "病を頂戴する、高速の義賊。",
         body: [
-          "紅城真守は、幻想郷で活躍し、幻想郷を救った紅魔館の執事である。ゲーマドライバーへライダーガシャットを装填することで仮面ライダーアルゲノムへ変身する。",
+          "紅魔館の執事として仕え、幻想郷を救った紅城真守。ゲーマドライバーへライダーガシャットを装填することで、仮面ライダーアルゲノムへ変身する。",
         ],
       },
       {
@@ -971,7 +972,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "紅城真守",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。紅魔館の執事。",
+      body: "幻想郷を救った紅魔館の執事。仮面ライダーアルゲノムとして戦う。",
       cv: "石川界人",
     },
   },
@@ -1007,9 +1008,9 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "01",
         kicker: "AGENT PROFILE",
-        title: "陽気な顔と、任務の最適解。",
+        title: "軽口を飛ばしながら、任務を遂行する。",
         body: [
-          "コードナンバー：セヴン。CODE英国支部のエージェント。陽気な軽口の奥で最適解を選び、改良型ゼッツシステムを駆る。近接、銃器、潜入、解析、情報回収を一人でこなす。",
+          "コードナンバー・セヴンを名乗るCODE英国支部のエージェント。陽気な軽口を飛ばしながらも任務に最適な手段を選び、改良型ゼッツシステムを駆る。近接戦闘と銃器の扱いから潜入、解析、情報回収まで、一人でこなす。",
         ],
       },
       {
@@ -1064,7 +1065,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "ジェームズ・スミス",
       kicker: "BEFORE TRANSFORMATION / CAST",
-      body: "変身前ビジュアル // CONFIRMED。CODE Number Seven。",
+      body: "CODE英国支部から派遣されたエージェント。コードナンバーはセヴン。",
     },
   },
   {
@@ -1102,12 +1103,12 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         no: "01",
         kicker: "SCARS / PROFILE",
         title: "スカーズに所属する、謎の男。",
-        body: ["スカーズに所属している謎の男。役職は特務情報官。"],
+        body: ["正体不明の組織『スカーズ』で特務情報官を務める、謎の男。"],
       },
       {
         no: "02",
         kicker: "PROFESSIONAL / CONTROLLED PERCEPTION",
-        title: "信用ではなく、相手の認識を制御する。",
+        title: "相手にどう見られているかを、正確に把握する。",
         body: [
           "徹底したプロフェッショナル。目的、必要情報、成功条件、撤退条件を常に切り分け、感情的な好悪を任務判断へ混ぜることを嫌う。愛想を振り撒かず、信用を獲得すること自体にも興味を示さない。潜入で重要なのは好かれることではなく、《相手が自分をどういう人物だと思っているかを把握し、その認識から逸脱しないこと》だと考えているからだ。",
           "そのため必要とあれば敵を助け、味方を攻撃し、故意に任務を失敗し、時には本当に仲間へ損害を与える判断すら行う。",
@@ -1133,7 +1134,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "05",
         kicker: "CIPHER / INFORMATIONAL UNCERTAINTY",
-        title: "情報的不確定性を、戦闘の力へ。",
+        title: "偽装と経路追跡で、敵の判断を狂わせる。",
         body: [
           "サイファーシステムは潜入、偽装、情報収集、対組織工作を主目的として開発された。認証信号の偽装、能力や命令の経路追跡、位置情報などへの偽信号の混入によって、《情報的不確定性》を利用して戦う。",
           "潜入継続が不可能となった場合、あるいは対象の確実な排除が必要な場合にはブラックサイトへ移行。偽装へ割り当てていた演算資源とEMPの大部分を身体駆動、武装、敵解析へ転用する。",
@@ -1226,7 +1227,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     civilian: {
       name: "リュシアン・ヴァレール",
       kicker: "BEFORE TRANSFORMATION / SCARS",
-      body: "変身前ビジュアル // CONFIRMED。SCARSに所属する謎の男。役職は特務情報官。",
+      body: "SCARSの特務情報官。潜入と偽装、情報収集を専門とする。",
       cv: "内山昂輝",
     },
   },
@@ -1274,6 +1275,7 @@ export function RiderPage({ id }: { id: string }) {
     nightmareRef.current?.close();
   };
   const primaryForm = rider.forms[0];
+  useDialogHistoryDismiss(nightmareRef, closeNightmare);
   const partnerForms = rider.partner?.forms ?? [];
   const pickupForms =
     rider.id === "saga"

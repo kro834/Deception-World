@@ -46,7 +46,7 @@ const EXTREME_STAGES: Record<
     image: "/saga-extreme-middle.webp",
     alt: "仮面ライダーエクスプリームサーガの全身ビジュアル",
     title: "殴られるほど、賢くなる。",
-    lede: "学習した攻撃と戦況から勝利へ至る経路を増殖し、状況ごとに最適な結果を選び取る標準状態。長期戦ほど選択肢を増やし、相手の優位を狭めます。",
+    lede: "標準状態では、学習した攻撃と戦況から勝利へ至る経路を増殖させ、状況ごとに最適な結果を選び取ります。戦いが長引くほど選択肢が増え、相手の優位を狭めていきます。",
     points: ["LEARNING", "DARK MATTER CHARGING", "HIGH SUPREME"],
     accent: "#5edcff",
   },
@@ -56,7 +56,7 @@ const EXTREME_STAGES: Record<
     image: "/saga-extreme-ultra.jpeg",
     alt: "仮面ライダーエクスプリームサーガ・ウルトラの全身ビジュアル",
     title: "50秒で、片をつける。",
-    lede: "無数に増殖した可能性を一つの勝利結果へ固定し、攻撃・防御・修復を同じ結論へ収束。50秒間だけ成立する、短期決着の最上位状態です。",
+    lede: "無数に増殖した可能性を一つの勝利結果へ固定し、攻撃・防御・修復を同じ結論へ収束させます。50秒間だけ成立する、短期決着の最上位状態です。",
     points: ["結果固定", "絶対攻撃・絶対防御", "50秒間の限界運用"],
     accent: "#ffcf72",
   },
@@ -221,19 +221,19 @@ const CORE_SYSTEMS = [
     number: "01",
     code: "LEARNING",
     title: "同じ手は、二度と食わない。",
-    body: "受けた攻撃と戦況を学習し、同じ優位を相手へ許さないための対抗手段を更新。戦闘が続くほど、勝利へ至る経路を増やします。",
+    body: "受けた攻撃と戦況を学習し、相手が同じ手で優位に立てないよう対抗手段を更新します。戦闘が続くほど、勝利へ至る経路が増えていきます。",
   },
   {
     number: "02",
     code: "DARK MATTER CHARGING",
     title: "足りない出力は、内側から。",
-    body: "戦況に応じて暗黒物質系の出力を充填し、増殖した戦闘経路を実行可能なエネルギーへ接続。選択肢だけで終わらせず、攻撃へ変換します。",
+    body: "戦況に応じて暗黒物質系の出力を充填し、増殖した戦闘経路を実行するためのエネルギーを供給します。生み出した選択肢を、実際の攻撃へ繋げます。",
   },
   {
     number: "03",
     code: "HIGH SUPREME",
     title: "結論を出したら、動かさない。",
-    body: "複数の可能性から決着へ至る結果を選び、攻撃・防御・修復を同じ結論へ収束。ウルトラでは50秒間、その固定を限界まで強化します。",
+    body: "複数の可能性から決着へ至る結果を選び、攻撃・防御・修復を同じ結論へ収束させます。ウルトラでは50秒間、その固定を限界まで強化します。",
   },
 ] as const;
 
@@ -630,10 +630,10 @@ export function ExtremeSaga() {
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / EXTREME TUNING</small>
-            <h3>選んで、固定。以上。</h3>
+            <h3>選んだ結果を、勝利に固定する。</h3>
             <p>
               KHAOS UltraとKOSMOS
-              Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束。変換効率・応答・安定率の個別数値は未公表のため、推測値では補いません。
+              Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束させます。変換効率・応答・安定率の個別数値は未公表です。
             </p>
             <dl aria-label="エクスプリームのP14構成">
               <div className="exo-read">
@@ -655,8 +655,12 @@ export function ExtremeSaga() {
         <div className="exs-p14-comparison rxs-reveal">
           <article>
             <small>P14 / EXPANSION</small>
-            <h3>勝ち筋は、増やし放題。</h3>
-            <p>KHAOS Ultra 20,000YOPSが戦況から成立可能な勝利経路を継続的に生成。</p>
+            <h3>
+              <span>戦況から、</span>
+              <span>勝ち筋を</span>
+              <span>生み出す。</span>
+            </h3>
+            <p>KHAOS Ultra 20,000YOPSが、戦況から成立可能な勝利経路を継続的に生成します。</p>
           </article>
           <span className="exo-arrow" aria-hidden="true">
             →
@@ -664,7 +668,7 @@ export function ExtremeSaga() {
           <article>
             <small>P14 / FIXATION</small>
             <h3>その中から、一つだけ残す。</h3>
-            <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束。</p>
+            <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束させます。</p>
             <i className="exo-lock" aria-hidden="true" />
           </article>
         </div>

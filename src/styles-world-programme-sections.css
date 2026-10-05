@@ -30,6 +30,15 @@
   color: var(--programme-muted);
 }
 
+/* The rider and record introductions already leave room before their
+   consoles. Keep the chapter rule nearer its title on wider screens so
+   the two pauses do not push the first visual below the opening view. */
+@media (min-width: 761px) {
+  .site-shell.film-edition :is(.riders-section, .records-section) > .section-index {
+    margin-bottom: clamp(44px, 5vw, 64px);
+  }
+}
+
 .site-shell.film-edition .section-index::after {
   background: none;
 }

@@ -11,6 +11,7 @@ import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
+import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -151,6 +152,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     resetScroll();
   };
   const stats = rider.stats ?? [];
+  useDialogHistoryDismiss(dlg, () => {
+    pointerOpened.current = true;
+    close();
+  });
   const abilities = rider.abilities ?? [];
   const arsenal = rider.arsenal ?? [];
   const finishers = rider.finishers ?? [];
@@ -401,7 +406,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               ) : null}
             </div>
           </div>
-          {weaponGallery.length ? (
-            <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
-              <header>
-                <div>

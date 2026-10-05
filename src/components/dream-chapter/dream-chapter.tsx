@@ -1387,7 +1387,7 @@ export function DreamChapter() {
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <p className="dream-dolminence-intro" data-dream-reveal>
-          夢と現実の境界で作戦を遂行する機密組織「ドルミネンス」。擬装システムと既存の変身装置を用いる、四つの記録を開示する。
+          夢と現実の境界で作戦を遂行する機密組織「ドルミネンス」。ロードナイト、ロードケイオス、ドレッド、ルパンの四人について、変身者と装備、その性能を紹介する。
         </p>
         <div className="dream-dolminence-grid" data-dream-reveal>
           {DREAM_DOLMINENCE.map((record) => (

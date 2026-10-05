@@ -27,6 +27,7 @@ import { CALM_EMBERS, CALM_FLAME_SEATS, CALM_HOLES, CALM_SMOKE } from "./rising-
 import type { RisingRun, RisingStats } from "./rising-sequence";
 import type { ReDiveRun } from "./re-dive-sequence";
 import { RE_DIVE_SECTION_ID, ReDiveSection } from "./re-dive-section";
+import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 
 // The image the fire consumes is chosen per device at the press
 // (rising-art.ts). The art that emerges from the ash is the standard
@@ -317,6 +318,7 @@ export function RisingWorld() {
   const runRef = useRef<RisingRun | null>(null);
   const releaseLockRef = useRef<(() => void) | null>(null);
   const openRef = useRef(false);
+  const historyDismissedRef = useRef(false);
   const originRef = useRef({ x: 0, y: 0 });
   const refocusControlRef = useRef(false);
   const generationRef = useRef(0);
@@ -519,6 +521,7 @@ export function RisingWorld() {
       }
       // Locked in the same task as showModal(), released in the same task as close().
       openRef.current = true;
+      historyDismissedRef.current = false;
       releaseLockRef.current?.();
       releaseLockRef.current = acquireViewportScrollLock({ freezeBody: true });
       // Pointer: focus the dialog surface (no ring flash). Keyboard: CLOSE.
@@ -567,6 +570,13 @@ export function RisingWorld() {
     setEnded(false);
     setLive("");
     setReDive("idle");
+    if (historyDismissedRef.current) {
+      // Browser history owns the next scroll/focus target, not RE DIVE's
+      // landing section or the departed gate. Release before it restores.
+      releaseLockRef.current?.();
+      releaseLockRef.current = null;
+      return;
+    }
     if (reDiving) {
       // RE DIVE (landed, or closed on the way): the page stays at the section.
       releaseLockRef.current?.();
@@ -595,6 +605,11 @@ export function RisingWorld() {
     if (dialog?.open) dialog.close();
     finishClose();
   }, [finishClose]);
+
+  useDialogHistoryDismiss(dialogRef, () => {
+    historyDismissedRef.current = true;
+    closeDialog();
+  });
 
   // Landed: under the still frame, move the page to the section (the lock
   // gives the gate's position back first), then fade the dialog out over it.

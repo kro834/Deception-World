@@ -1,4 +1,3 @@
-        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
       },
       {
         label: "仮面ライダーレディック",
@@ -485,3 +484,7 @@ export function WorldHome() {
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
   }, []);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
