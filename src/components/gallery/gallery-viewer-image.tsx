@@ -30,6 +30,17 @@ export function GalleryViewerImage({
   }, [source]);
 
   useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({
+      top: zoomed ? viewport.clientHeight / 2 : 0,
+      left: zoomed ? viewport.clientWidth / 2 : 0,
+      behavior: "instant",
+    });
+    if (zoomed) viewport.focus({ preventScroll: true });
+  }, [zoomed]);
+
+  useEffect(() => {
     if (
       status !== "ready" ||
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
@@ -62,8 +73,6 @@ export function GalleryViewerImage({
           aria-pressed={zoomed}
           onClick={() => {
             setZoomed((current) => !current);
-            if (viewportRef.current)
-              viewportRef.current.scrollTo({ top: 0, left: 0, behavior: "instant" });
           }}
         >
           {zoomed ? "全体を表示" : "2倍で鑑賞"}

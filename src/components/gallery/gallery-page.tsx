@@ -387,7 +387,7 @@ export function GalleryPage() {
       // whose native Tab preference skips buttons.
       const controls = Array.from(
         dialog.querySelectorAll<HTMLElement>(
-          'button:not(:disabled), input:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+          'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), summary, a[href], [tabindex]:not([tabindex="-1"])',
         ),
       ).filter(
         (node) =>

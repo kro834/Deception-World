@@ -8,7 +8,7 @@ export function getRouter() {
     defaultErrorComponent: AppErrorComponent,
     defaultNotFoundComponent: NotFoundComponent,
     // A gallery modal owns restoration until its history traversal settles.
-    // Never record a frozen body (scrollY = 0) as the reader's return offset.
+    // Never restore the frozen body's offset (scrollY = 0) over the reader's position.
     scrollRestoration: ({ location }) =>
       location.pathname !== "/gallery" ||
       typeof document === "undefined" ||
