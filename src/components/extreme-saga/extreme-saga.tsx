@@ -674,7 +674,7 @@ export function ExtremeSaga() {
           </article>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          P14は二つの演算系統を直列の役割として接続します。演算器の公開値だけで変換効率を逆算せず、未公表の数値は未公表のまま扱っています。
+          P14は二つの演算系統を直列の役割として接続します。
         </p>
       </section>
 
