@@ -16,6 +16,12 @@ only for a verified domain already assigned to the authenticated project. Later
 releases retain an attested previous deployment and can roll back on failed public
 verification, before any destructive migration begins.
 
+Promotion and rollback use the official project-scoped REST endpoints with the
+existing team token. The deployment ID, immutable URL, project and commit are
+attested before either switch, and the canonical domain is polled until it points
+at that exact deployment. This avoids the CLI's personal-account lookup without
+adding permissions or disabling deployment protection.
+
 Ordinary publication does **not** delete data. The separate retirement cleanup is
 disabled unless the production environment variable `APPLY_DESTRUCTIVE_MIGRATIONS`
 is explicitly set to `1`; it also requires an existing previous deployment. Do not

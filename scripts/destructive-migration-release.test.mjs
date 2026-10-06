@@ -48,6 +48,14 @@ test("destructive migrations require an exact explicit opt-in", () => {
   assert.equal(shouldApplyMigration("0004_retire_archive_ai.sql", true), true);
 });
 
+test("publication stays on the canonical URL and switches only API-attested deployments", () => {
+  assert.match(workflow, /PUBLIC_BASE_URL: https:\/\/deception-world\.vercel\.app/);
+  assert.match(workflow, /node scripts\/switch-vercel-production\.mjs promote "\$\{\{ steps\.candidate_attestation\.outputs\.id \}\}"/);
+  assert.match(workflow, /node scripts\/switch-vercel-production\.mjs rollback "\$\{\{ steps\.previous\.outputs\.id \}\}"/);
+  assert.doesNotMatch(workflow, /vercel (?:promote|rollback)/);
+  assert.match(workflow, /--expected-sha "\$GITHUB_SHA"/);
+});
+
 test("main deploy verifies the AI-free release before starting destructive cleanup", () => {
   const candidate = workflow.indexOf("Create staged Production candidate");
   const promote = workflow.indexOf("Promote verified candidate");
