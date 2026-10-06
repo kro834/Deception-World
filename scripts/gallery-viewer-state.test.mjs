@@ -3,11 +3,24 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import {
   galleryAdjacentId,
+  galleryLayoutTop,
   gallerySwipeStep,
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
 } from "../src/components/gallery/gallery-viewer-state.ts";
+
+test("return anchor uses document layout rather than entrance animation or frozen body offsets", () => {
+  const body = { offsetTop: 0, offsetParent: null };
+  const page = { offsetTop: 78, offsetParent: body };
+  const card = { offsetTop: 9600, offsetParent: page };
+  const link = { offsetTop: 2, offsetParent: card, ownerDocument: { body } };
+  assert.equal(galleryLayoutTop(link), 9680);
+  body.offsetTop = -9500;
+  assert.equal(galleryLayoutTop(link), 9680);
+  card.offsetTop += 420;
+  assert.equal(galleryLayoutTop(link), 10100);
+});
 
 test("viewer keeps a filtered/reversed sequence without mutating discovery or changing categories", () => {
   const all = ["a", "b", "c"].map((id) => ({ id }));

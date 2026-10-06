@@ -5,6 +5,19 @@ export type GalleryViewerRecord = {
   position: GalleryReadingPosition;
 };
 
+/** Document layout, excluding the frozen body's offset and entrance transforms. */
+export function galleryLayoutTop(element: HTMLElement): number {
+  const body = element.ownerDocument.body;
+  let top = 0;
+  for (
+    let node: HTMLElement | null = element;
+    node && node !== body;
+    node = node.offsetParent as HTMLElement | null
+  )
+    top += node.offsetTop;
+  return top;
+}
+
 /** History is input, including older deployments and a restored browser session. */
 export function readGalleryViewerRecord(value: unknown): GalleryViewerRecord | null {
   if (!value || typeof value !== "object") return null;

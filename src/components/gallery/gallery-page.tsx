@@ -37,6 +37,7 @@ import { GalleryCurtain } from "./gallery-curtain";
 import { GalleryViewerImage } from "./gallery-viewer-image";
 import {
   galleryAdjacentId,
+  galleryLayoutTop,
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
@@ -438,7 +439,7 @@ export function GalleryPage() {
         // Hero aspect changes and favorite filtering can move the originating card.
         const shiftedTop =
           opener?.isConnected && originalTop !== null
-            ? readingAt.top + opener.getBoundingClientRect().top - originalTop
+            ? readingAt.top + galleryLayoutTop(opener) - originalTop
             : readingAt.top;
         release();
         delete document.body.dataset.galleryViewerLock;
@@ -490,6 +491,9 @@ export function GalleryPage() {
         setSelectedId(null);
         return;
       }
+      // A restored community artwork may arrive after hydration. Retrying must
+      // not reset an already open viewer or its in-progress title editor.
+      if (viewerActiveRef.current && viewerIdRef.current === record.id) return;
       const sequence = record.ids
         .map((id) => allArtworksRef.current.find((work) => work.id === id))
         .filter((work): work is GalleryCollectionArtwork => Boolean(work));
@@ -500,7 +504,7 @@ export function GalleryPage() {
         `[data-gallery-artwork="${record.id}"] .gallery-work-open`,
       );
       window.scrollTo({ ...record.position, behavior: "instant" });
-      openerTopRef.current = openerRef.current?.getBoundingClientRect().top ?? null;
+      openerTopRef.current = openerRef.current ? galleryLayoutTop(openerRef.current) : null;
       viewerWorksRef.current = sequence;
       viewerIdRef.current = record.id;
       viewerEntryRef.current = true;
@@ -515,7 +519,7 @@ export function GalleryPage() {
     return router.history.subscribe(({ action }) => {
       if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") restore();
     });
-  }, [router]);
+  }, [router, communityLoaded]);
 
   useEffect(
     () => () => {
@@ -531,7 +535,7 @@ export function GalleryPage() {
     finishReturnRef.current?.();
     readingAtRef.current = { top: window.scrollY, left: window.scrollX };
     openerRef.current = event.currentTarget;
-    openerTopRef.current = event.currentTarget.getBoundingClientRect().top;
+    openerTopRef.current = galleryLayoutTop(event.currentTarget);
     restoreFocusRef.current = event.detail === 0;
     viewerWorksRef.current = galleryViewerSequence(allArtworks, works, work);
     viewerIdRef.current = work.id;

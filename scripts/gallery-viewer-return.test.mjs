@@ -19,7 +19,7 @@ test("the viewer freezes the page and puts the reader back where they were", () 
     page.indexOf("const release = acquireViewportScrollLock") < page.indexOf("dialog.showModal()"),
   );
   assert.match(page, /settleGalleryViewerReturn\(/);
-  assert.match(page, /opener\.getBoundingClientRect\(\).top - originalTop/);
+  assert.match(page, /galleryLayoutTop\(opener\) - originalTop/);
   assert.doesNotMatch(page, /requestAnimationFrame/);
   const router = read("src/router.tsx");
   assert.match(router, /!document.body.hasAttribute\("data-gallery-viewer-lock"\)/);
