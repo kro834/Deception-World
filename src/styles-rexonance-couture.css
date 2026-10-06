@@ -671,6 +671,15 @@
   line-height: 1.12;
 }
 
+/* rx5 A17: from 1300px the closing title's 4.4vw outgrew its 454px column,
+   and 「決めるのは悠真。」 left its 。 alone on a third line. The title holds
+   at 54px there, so each of its two lines stays whole. */
+@media (min-width: 1025px) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer h2 {
+    font-size: clamp(45px, 4.4vw, 54px);
+  }
+}
+
 /* The secondary plate is ink glass; the primary stays the one ivory. */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:not(.rxs-footer-return, :first-of-type) {
   border-color: var(--rc-hair-strong);

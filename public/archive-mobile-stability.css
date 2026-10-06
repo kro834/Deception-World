@@ -366,6 +366,23 @@ html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-perfo
   outline-offset: -3px;
 }
 
+/* rx5 A12: on a phone the page's floating Zeus button rests over the end of
+   the hero's FORMS / TIERS / STATUS row on the first screen (UPDATED was cut
+   under it at 390x844). The button keeps its place; from 380px the row keeps
+   a 52px lane clear at its right and the figures take their own widths
+   (narrower phones would wrap STATUS, and their row starts below the first
+   screen, clear of the button). */
+@media (min-width: 380px) and (max-width: 620px) {
+  html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics {
+    box-sizing: border-box;
+    padding-right: 52px;
+  }
+
+  html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics div {
+    flex: 1 1 auto;
+  }
+}
+
 /* Under 390px the four section links outgrew their pill: 2形態比較 was cut to
    2形態比 at 360px (a Galaxy) and 375px, with nothing to say the nav scrolls.
    A slightly tighter header and link spacing lets all four fit from 360px,

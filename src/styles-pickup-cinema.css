@@ -2889,3 +2889,22 @@ html[data-world-effects="economy"] body #world-column-pickup #world-column-picku
     outline-color: Highlight !important;
   }
 }
+
+/* rx5 A12: on a landscape phone the floating Zeus button (bottom right, its
+   placement untouched) sat on the right column of a record's figures (HOST in
+   the nightmare pickup) as the sheet scrolled. The figures keep a 64px lane
+   clear on their right there; the cards still share the remaining width. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .form-pickup-dialog:not(.fst-pickup-dialog) .form-pickup-stats,
+  .rider-nightmare-dialog .rider-nightmare-dialog-record > dl {
+    box-sizing: border-box;
+    padding-right: 64px;
+  }
+}
+
+/* rx5 A22: the world column's active tab is a pale liquid pill, and its ice
+   numeral (01-04) faded into it (about 2:1). On the lit pill the numeral
+   takes the label's near-white; the other tabs keep ice on ink. */
+html body #world-column-pickup .world-column-dialog-tabs button.is-active small {
+  color: #e8f2f8;
+}

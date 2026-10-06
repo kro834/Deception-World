@@ -99,6 +99,12 @@ main.manager-page:not(.is-sovereign) .manager-topbar .brand small {
   font-size: 12px;
 }
 
+/* rx5 A02: the file line sat at 3.9:1 (#657084) on the deck; it takes the
+   lifted slate the sovereign file's gold line already clears (about 7:1). */
+main.manager-page:not(.is-sovereign) .manager-topbar .brand small {
+  color: #93a3bb;
+}
+
 /* ================================================================
    Panels: square, on the deck, locked on with brackets
    ================================================================ */

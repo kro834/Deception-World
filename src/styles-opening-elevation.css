@@ -979,6 +979,42 @@
   }
 }
 
+/* rx5 A01: where the frame is short for its width, the title caption under the
+   logo reached down onto the motto (iPad landscape 900-1140 wide; 320x568 and
+   360x640 phones). The motto steps below the caption, into the gap above the
+   cue strip; on the short phones the caption keeps its one-line offset (it
+   only wraps under 300 px). Position only: timing and opacity untouched. */
+@media (min-width: 701px) and (max-width: 1140px) and (orientation: landscape) {
+  .cine-editorial-caption {
+    margin-bottom: 30px;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1000px) and (orientation: landscape) {
+  .cine-editorial-caption {
+    letter-spacing: 0.14em;
+  }
+}
+
+/* Under 864 px the motto's line reaches the skip plate's column: it rises to
+   sit between the caption and the plate. */
+@media (min-width: 701px) and (max-width: 863px) and (orientation: landscape) {
+  .cine-editorial-caption {
+    margin-bottom: 44px;
+  }
+}
+
+@media (min-width: 300px) and (max-width: 360px) and (max-height: 700px) and (orientation: portrait) {
+  .cine-title-caption {
+    bottom: -7%;
+  }
+
+  .cine-editorial-caption {
+    margin-bottom: 86px;
+    line-height: 1.4;
+  }
+}
+
 /* The film gate: a prism hairline and thirds ticks on each bar ------------------
    Both pseudo layers stay inside the bar box (the bars keep their #000, their
    z-index and their bar-in transform; the ornament rides with them). */
