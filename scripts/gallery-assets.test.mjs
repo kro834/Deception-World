@@ -9,11 +9,11 @@ const manifest = JSON.parse(
 );
 
 test("the gallery preserves every supplied work and its unique ordered catalogue number", () => {
-  assert.equal(GALLERY_ARTWORKS.length, 69);
+  assert.equal(GALLERY_ARTWORKS.length, 79);
   assert.equal(manifest.items.length, GALLERY_ARTWORKS.length);
   assert.deepEqual(
     GALLERY_ARTWORKS.map((work) => work.id),
-    Array.from({ length: 69 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
+    Array.from({ length: 79 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
   );
   for (const work of GALLERY_ARTWORKS) {
     assert.ok(work.title.trim().length > 0 && work.alt.trim().length > 0);
@@ -26,7 +26,7 @@ test("the gallery preserves every supplied work and its unique ordered catalogue
 
 test("the four new exhibits follow the existing 65 without renumbering them", () => {
   assert.deepEqual(
-    GALLERY_ARTWORKS.slice(65).map(({ id, title, category }) => ({ id, title, category })),
+    GALLERY_ARTWORKS.slice(65, 69).map(({ id, title, category }) => ({ id, title, category })),
     [
       { id: "g66", title: "倉庫の組み合い", category: "scenes" },
       { id: "g67", title: "星空の三人", category: "portraits" },
@@ -34,6 +34,26 @@ test("the four new exhibits follow the existing 65 without renumbering them", ()
       { id: "g69", title: "倉庫の紅と桃", category: "portraits" },
     ],
   );
+});
+
+test("four additional exhibits append as 070–073 while preserving existing IDs", () => {
+  assert.deepEqual(GALLERY_ARTWORKS.slice(69, 73).map(({ id, category }) => ({ id, category })), [
+    { id: "g70", category: "places" },
+    { id: "g71", category: "portraits" },
+    { id: "g72", category: "scenes" },
+    { id: "g73", category: "scenes" },
+  ]);
+});
+
+test("six additional exhibits append as 074–079 without changing earlier catalogue IDs", () => {
+  assert.deepEqual(GALLERY_ARTWORKS.slice(73).map(({ id, category }) => ({ id, category })), [
+    { id: "g74", category: "portraits" },
+    { id: "g75", category: "portraits" },
+    { id: "g76", category: "portraits" },
+    { id: "g77", category: "portraits" },
+    { id: "g78", category: "scenes" },
+    { id: "g79", category: "scenes" },
+  ]);
 });
 
 test("delivery derivatives have recorded bytes, hashes and uncropped non-upscaled dimensions", () => {

@@ -10,7 +10,9 @@ Dece team and its `deception-world` project. Never commit their values.
 
 The workflow checks lint, tests, types and build, stages a candidate without moving
 the public domain, verifies its exact main SHA and delivered image hashes, then
-promotes it and verifies the public address. Vercel's native Git auto-publisher is
+checks shared-gallery readiness for releases that declare `sharedGallery: true`,
+then promotes it and verifies the public address. Gallery checks only read the
+public configuration and feed; they never create accounts or test posts. Vercel's native Git auto-publisher is
 disabled to prevent it racing the checked promotion. Initial publication is allowed
 only for a verified domain already assigned to the authenticated project. Later
 releases retain an attested previous deployment and can roll back on failed public

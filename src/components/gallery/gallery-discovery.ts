@@ -1,4 +1,8 @@
-import type { GalleryArtwork } from "./gallery-data";
+import {
+  galleryNumberFor,
+  isCommunityGalleryId,
+  type GalleryCollectionArtwork,
+} from "./gallery-community-client.ts";
 
 export const GALLERY_FAVORITES_KEY = "deception-world.gallery-favorites.v1";
 
@@ -10,13 +14,13 @@ export function normalizeGalleryQuery(value: string): string {
 }
 
 export function matchesGalleryQuery(
-  artwork: GalleryArtwork,
+  artwork: GalleryCollectionArtwork,
   query: string,
   personalTitle?: string,
 ): boolean {
   const normalized = normalizeGalleryQuery(query);
   if (!normalized) return true;
-  const number = artwork.id.slice(1).padStart(3, "0");
+  const number = galleryNumberFor(artwork);
   const searchable = normalizeGalleryQuery(
     [artwork.id, number, personalTitle, artwork.alt].filter(Boolean).join(" "),
   );
@@ -24,7 +28,7 @@ export function matchesGalleryQuery(
 }
 
 export function filterGalleryArtworks(
-  artworks: readonly GalleryArtwork[],
+  artworks: readonly GalleryCollectionArtwork[],
   options: {
     category: string;
     query: string;
@@ -32,7 +36,7 @@ export function filterGalleryArtworks(
     favorites: GalleryFavorites;
     titles: Readonly<Record<string, string>>;
   },
-): GalleryArtwork[] {
+): GalleryCollectionArtwork[] {
   const favoriteIds = new Set(options.favorites);
   return artworks.filter(
     (artwork) =>
@@ -45,6 +49,7 @@ export function filterGalleryArtworks(
 export function readGalleryFavorites(
   storage: Pick<Storage, "getItem">,
   artworkIds: readonly string[],
+  preserveCommunityIds = false,
 ): GalleryFavorites {
   const raw = storage.getItem(GALLERY_FAVORITES_KEY);
   if (!raw) return [];
@@ -56,7 +61,15 @@ export function readGalleryFavorites(
   }
   if (!Array.isArray(parsed)) return [];
   const knownIds = new Set(artworkIds);
-  return [...new Set(parsed.filter((id): id is string => typeof id === "string" && knownIds.has(id)))];
+  return [
+    ...new Set(
+      parsed.filter(
+        (id): id is string =>
+          typeof id === "string" &&
+          (knownIds.has(id) || (preserveCommunityIds && isCommunityGalleryId(id))),
+      ),
+    ),
+  ];
 }
 
 export function toggleGalleryFavorite(
@@ -65,7 +78,9 @@ export function toggleGalleryFavorite(
   artworkIds: readonly string[],
 ): GalleryFavorites {
   if (!artworkIds.includes(id)) throw new Error("Invalid artwork identifier");
-  const favorites = new Set(readGalleryFavorites(storage, artworkIds));
+  // A shared post can load after favorites. Keep its valid identifier when
+  // writing, while the target must belong to this tab's loaded collection.
+  const favorites = new Set(readGalleryFavorites(storage, artworkIds, true));
   if (favorites.has(id)) favorites.delete(id);
   else favorites.add(id);
   const next = [...favorites];

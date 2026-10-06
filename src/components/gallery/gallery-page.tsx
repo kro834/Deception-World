@@ -1,10 +1,31 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
-import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, type GalleryArtwork } from "./gallery-data";
+import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
+import {
+  communityPostToArtwork,
+  createGalleryAuthClient,
+  deleteCommunityGalleryImage,
+  ensureGalleryWriteSession,
+  GalleryRequestError,
+  galleryNumberFor as numberFor,
+  isCommunityGalleryId,
+  postCommunityGalleryImage,
+  prepareCommunityUpload,
+  readCommunityGallery,
+  readCommunityGalleryConfig,
+  restoreCommunityGalleryImage,
+  subscribeGallerySession,
+  updateCommunityGalleryTitle,
+  type CommunityGalleryPost,
+  type CommunityGalleryTitle,
+  type CommunityGalleryTitles,
+  type GalleryCollectionArtwork,
+} from "./gallery-community-client";
 import {
   filterGalleryArtworks,
   GALLERY_FAVORITES_KEY,
@@ -17,28 +38,49 @@ import {
   GALLERY_TITLE_LIMIT,
   GALLERY_TITLES_KEY,
   readGalleryTitles,
-  saveGalleryTitle,
   type GalleryTitles,
 } from "./gallery-titles";
 
 const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
-const numberFor = (artwork: GalleryArtwork) => artwork.id.slice(1).padStart(3, "0");
 
 export function GalleryPage() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"]>("all");
+  const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
+    "all",
+  );
   const [query, setQuery] = useState("");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<GalleryFavorites>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
-  const [titles, setTitles] = useState<GalleryTitles>({});
+  const [sharedTitles, setSharedTitles] = useState<CommunityGalleryTitles>({});
+  const [legacyTitles, setLegacyTitles] = useState<GalleryTitles>({});
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [arriving, setArriving] = useState(true);
+  const [communityPosts, setCommunityPosts] = useState<CommunityGalleryPost[]>([]);
+  const [deletedPosts, setDeletedPosts] = useState<CommunityGalleryPost[]>([]);
+  const [communityReady, setCommunityReady] = useState(false);
+  const [communityConfigChecked, setCommunityConfigChecked] = useState(false);
+  const [communityLoaded, setCommunityLoaded] = useState(false);
+  const [communityBusy, setCommunityBusy] = useState(false);
+  const [communityMessage, setCommunityMessage] = useState("");
+  const [communityError, setCommunityError] = useState("");
+  const [communityLoadError, setCommunityLoadError] = useState("");
+  const [session, setSession] = useState<Session | null>(null);
+  const [pendingImages, setPendingImages] = useState<File[]>([]);
+  const [editingVersion, setEditingVersion] = useState(0);
+  const [titleConflict, setTitleConflict] = useState<CommunityGalleryTitle | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const communityInputRef = useRef<HTMLInputElement>(null);
+  const communityReloadRef = useRef<(() => Promise<void>) | null>(null);
+  const communityBusyRef = useRef(false);
+  const authClientRef = useRef<SupabaseClient | null>(null);
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
+  const confirmDeleteRef = useRef<HTMLButtonElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const restoreEditFocusRef = useRef(false);
@@ -46,31 +88,55 @@ export function GalleryPage() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
-  const viewerWorksRef = useRef<GalleryArtwork[]>([]);
-  const works = filterGalleryArtworks(GALLERY_ARTWORKS, {
+  const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
+  const communityWorks = useMemo(
+    () => communityPosts.map(communityPostToArtwork),
+    [communityPosts],
+  );
+  const allArtworks = useMemo(() => [...GALLERY_ARTWORKS, ...communityWorks], [communityWorks]);
+  const titles = useMemo(
+    () => Object.fromEntries(Object.entries(sharedTitles).map(([id, entry]) => [id, entry.title])),
+    [sharedTitles],
+  );
+  const allArtworkIds = useMemo(() => allArtworks.map((work) => work.id), [allArtworks]);
+  const works = filterGalleryArtworks(allArtworks, {
     category,
     query,
     favoritesOnly,
     favorites,
     titles,
   });
-  const selected = GALLERY_ARTWORKS.find((work) => work.id === selectedId) ?? null;
-  const viewerWorks = viewerWorksRef.current.length ? viewerWorksRef.current : works;
+  const selected =
+    GALLERY_ARTWORKS.find((work) => work.id === selectedId) ??
+    communityWorks.find((work) => work.id === selectedId) ??
+    null;
+  const navigationSnapshot = viewerWorksRef.current
+    .map((work) => allArtworks.find((current) => current.id === work.id))
+    .filter((work): work is GalleryCollectionArtwork => Boolean(work));
+  const viewerWorks = navigationSnapshot.length ? navigationSnapshot : works;
   const selectedIndex = viewerWorks.findIndex((work) => work.id === selectedId);
   const viewerOpen = selected !== null;
   const featured = GALLERY_ARTWORKS[2];
+  const selectedPost = communityPosts.find((post) => post.id === selectedId);
+  const canDeleteSelected = Boolean(session && selectedPost?.canDelete);
 
   useEffect(() => {
     const load = () => {
       try {
-        setTitles(readGalleryTitles(window.localStorage));
+        setLegacyTitles(readGalleryTitles(window.localStorage));
       } catch {
         setSaveError("このブラウザーでは保存領域を利用できません。");
       }
     };
     const loadFavorites = () => {
       try {
-        setFavorites(readGalleryFavorites(window.localStorage, GALLERY_ARTWORKS.map((work) => work.id)));
+        setFavorites(
+          readGalleryFavorites(
+            window.localStorage,
+            GALLERY_ARTWORKS.map((work) => work.id),
+            true,
+          ),
+        );
       } catch {
         setSaveError("このブラウザーでは保存領域を利用できません。");
       }
@@ -92,6 +158,96 @@ export function GalleryPage() {
   }, []);
 
   useEffect(() => {
+    let disposed = false;
+    let unsubscribe: (() => void) | undefined;
+    const connect = async () => {
+      try {
+        const config = await readCommunityGalleryConfig();
+        if (disposed) return;
+        if (!config.ready) {
+          setCommunityError(
+            "共有ギャラリーの接続準備が完了していないため、投稿とタイトル編集は現在利用できません。",
+          );
+          return;
+        }
+        const client = await createGalleryAuthClient(config);
+        if (disposed) {
+          void client.auth.stopAutoRefresh();
+          return;
+        }
+        authClientRef.current = client;
+        void client.auth.startAutoRefresh();
+        const subscription = subscribeGallerySession(client, setSession);
+        unsubscribe = subscription.unsubscribe;
+        await subscription.loaded;
+        if (disposed) return;
+        setCommunityReady(true);
+      } catch {
+        if (!disposed)
+          setCommunityError(
+            "共有ギャラリーの接続に失敗しました。ページを再読み込みしてお試しください。",
+          );
+      } finally {
+        if (!disposed) setCommunityConfigChecked(true);
+      }
+    };
+    void connect();
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+      void authClientRef.current?.auth.stopAutoRefresh();
+      authClientRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    let disposed = false;
+    let generation = 0;
+    const refresh = async () => {
+      const current = ++generation;
+      try {
+        const collection = await readCommunityGallery(session?.access_token);
+        if (disposed || current !== generation) return;
+        setCommunityPosts(collection.posts);
+        setDeletedPosts(collection.deletedPosts ?? []);
+        setSharedTitles(collection.titles);
+        setCommunityLoaded(true);
+        setCommunityLoadError("");
+      } catch (error) {
+        if (!disposed && current === generation)
+          setCommunityLoadError(
+            error instanceof Error ? error.message : "共有作品を読み込めませんでした。",
+          );
+      }
+    };
+    communityReloadRef.current = refresh;
+    const onFocus = () => {
+      if (!communityBusyRef.current) void refresh();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible" && !communityBusyRef.current) void refresh();
+    };
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && !communityBusyRef.current) void refresh();
+    }, 30_000);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    void refresh();
+    return () => {
+      disposed = true;
+      generation++;
+      communityReloadRef.current = null;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    if (confirmDelete) confirmDeleteRef.current?.focus({ preventScroll: true });
+  }, [confirmDelete]);
+
+  useEffect(() => {
     if (editing) titleInputRef.current?.focus({ preventScroll: true });
     else if (restoreEditFocusRef.current) {
       editButtonRef.current?.focus({ preventScroll: true });
@@ -103,6 +259,8 @@ export function GalleryPage() {
     setEditing(false);
     setSaveMessage("");
     setSaveError("");
+    setConfirmDelete(false);
+    setTitleConflict(null);
   };
   const cancelEditor = () => {
     restoreEditFocusRef.current = true;
@@ -127,7 +285,7 @@ export function GalleryPage() {
     );
     grid.querySelectorAll("[data-gallery-artwork]").forEach((work) => observer.observe(work));
     return () => observer.disconnect();
-  }, [category]);
+  }, [category, communityWorks]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -185,7 +343,7 @@ export function GalleryPage() {
     setSelectedId(null);
   });
 
-  const openWork = (event: MouseEvent<HTMLAnchorElement>, work: GalleryArtwork) => {
+  const openWork = (event: MouseEvent<HTMLAnchorElement>, work: GalleryCollectionArtwork) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return;
     event.preventDefault();
@@ -193,7 +351,7 @@ export function GalleryPage() {
     restoreFocusRef.current = event.detail === 0;
     const navigationWorks = works.some((item) => item.id === work.id)
       ? works
-      : GALLERY_ARTWORKS.filter((item) => category === "all" || item.category === work.category);
+      : allArtworks.filter((item) => category === "all" || item.category === work.category);
     viewerWorksRef.current = navigationWorks.some((item) => item.id === work.id)
       ? navigationWorks
       : [...navigationWorks, work];
@@ -218,18 +376,167 @@ export function GalleryPage() {
   };
   const changeFavorite = (id: string) => {
     try {
-      setFavorites(
-        toggleGalleryFavorite(window.localStorage, id, GALLERY_ARTWORKS.map((work) => work.id)),
-      );
+      setFavorites(toggleGalleryFavorite(window.localStorage, id, allArtworkIds));
       setSaveError("");
     } catch {
-      setSaveError("お気に入りを保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。");
+      setSaveError(
+        "お気に入りを保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。",
+      );
     }
   };
   const resetDiscovery = () => {
     setQuery("");
     setCategory("all");
     setFavoritesOnly(false);
+  };
+
+  const accessToken = async () => {
+    const client = authClientRef.current;
+    if (!client) throw new Error("投稿設定の準備中です。しばらくしてからお試しください。");
+    const activeSession = await ensureGalleryWriteSession(client);
+    return activeSession.access_token;
+  };
+  const addCommunityImages = async (files: File[]) => {
+    if (!files.length || communityBusyRef.current) return;
+    if (files.length > 5) {
+      setCommunityError("一度に選べる画像は5枚までです。");
+      return;
+    }
+    communityBusyRef.current = true;
+    setCommunityBusy(true);
+    setCommunityMessage("");
+    setCommunityError("");
+    let added = 0;
+    const failures: string[] = [];
+    try {
+      for (const file of files) {
+        if (!communityReloadRef.current) break;
+        setCommunityMessage(
+          `${added + failures.length + 1} / ${files.length}点目の画像を確認して公開しています…`,
+        );
+        try {
+          const token = await accessToken();
+          const prepared = await prepareCommunityUpload(file);
+          if (!communityReloadRef.current) break;
+          await postCommunityGalleryImage(prepared, token);
+          added++;
+        } catch (error) {
+          failures.push(
+            `${file.name}：${error instanceof Error ? error.message : "投稿できませんでした。"}`,
+          );
+        }
+      }
+      if (added) {
+        await communityReloadRef.current?.();
+        setCategory("community");
+        setQuery("");
+        setFavoritesOnly(false);
+      }
+      if (communityReloadRef.current) {
+        setPendingImages([]);
+        setCommunityMessage(added ? `${added}点を公開しました。すべての訪問者が見られます。` : "");
+        setCommunityError(
+          failures.slice(0, 3).join("\n") +
+            (failures.length > 3 ? `\nほか${failures.length - 3}点を追加できませんでした。` : ""),
+        );
+      }
+    } finally {
+      communityBusyRef.current = false;
+      if (communityReloadRef.current) setCommunityBusy(false);
+    }
+  };
+  const cancelDelete = () => {
+    setConfirmDelete(false);
+    deleteButtonRef.current?.focus({ preventScroll: true });
+  };
+  const removeCommunityImage = async () => {
+    if (!selected || !canDeleteSelected || communityBusyRef.current) return;
+    const work = selected;
+    communityBusyRef.current = true;
+    setCommunityBusy(true);
+    setSaveError("");
+    try {
+      await deleteCommunityGalleryImage(work.id, await accessToken());
+      closeViewer();
+      await communityReloadRef.current?.();
+      if (communityReloadRef.current)
+        setCommunityMessage(
+          `${numberFor(work)}を非公開にしました。「非公開にした投稿」から復元できます。`,
+        );
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "投稿を非公開にできませんでした。");
+    } finally {
+      communityBusyRef.current = false;
+      if (communityReloadRef.current) setCommunityBusy(false);
+    }
+  };
+  const restoreCommunityImage = async (post: CommunityGalleryPost) => {
+    if (communityBusyRef.current) return;
+    communityBusyRef.current = true;
+    setCommunityBusy(true);
+    setCommunityError("");
+    try {
+      await restoreCommunityGalleryImage(post.id, await accessToken());
+      await communityReloadRef.current?.();
+      setCommunityMessage(`${numberFor(communityPostToArtwork(post))}を公開展示に戻しました。`);
+    } catch (error) {
+      setCommunityError(error instanceof Error ? error.message : "投稿を復元できませんでした。");
+    } finally {
+      communityBusyRef.current = false;
+      setCommunityBusy(false);
+    }
+  };
+  const beginTitleEdit = async (initial = selected ? (titles[selected.id] ?? "") : "") => {
+    if (!selected || !communityReady || !communityLoaded || communityBusyRef.current) return;
+    communityBusyRef.current = true;
+    setCommunityBusy(true);
+    setSaveError("");
+    try {
+      await accessToken();
+      if (!communityReloadRef.current) return;
+      setDraft(initial);
+      setEditingVersion(sharedTitles[selected.id]?.version ?? 0);
+      setTitleConflict(null);
+      setSaveMessage("");
+      setEditing(true);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "投稿設定の準備中です。");
+    } finally {
+      communityBusyRef.current = false;
+      setCommunityBusy(false);
+    }
+  };
+  const publishTitle = async () => {
+    if (!selected || communityBusyRef.current || titleConflict) return;
+    const work = selected;
+    communityBusyRef.current = true;
+    setCommunityBusy(true);
+    setSaveError("");
+    try {
+      const entry = await updateCommunityGalleryTitle(
+        work.id,
+        draft,
+        editingVersion,
+        await accessToken(),
+      );
+      setSharedTitles((current) => ({ ...current, [work.id]: entry }));
+      setSaveMessage("タイトルを公開しました。すべての訪問者に表示されます。");
+      restoreEditFocusRef.current = true;
+      setEditing(false);
+      await communityReloadRef.current?.();
+    } catch (error) {
+      if (error instanceof GalleryRequestError && error.status === 409 && error.current) {
+        setTitleConflict(error.current);
+        setSharedTitles((current) => ({ ...current, [work.id]: error.current! }));
+        setSaveError(
+          "編集中に別の利用者がタイトルを変更しました。最新のタイトルを確認してから再編集してください。下書きは残しています。",
+        );
+      } else
+        setSaveError(error instanceof Error ? error.message : "タイトルを公開できませんでした。");
+    } finally {
+      communityBusyRef.current = false;
+      setCommunityBusy(false);
+    }
   };
 
   return (
@@ -306,9 +613,143 @@ export function GalleryPage() {
               <h2 id="gallery-collection-title">作品を巡る</h2>
             </div>
             <p className="gallery-count" aria-live="polite">
-              {works.length} / {GALLERY_ARTWORKS.length}点を表示
+              {works.length} / {allArtworks.length}点を表示
             </p>
           </div>
+          <section
+            id="gallery-account"
+            className="gallery-account"
+            aria-labelledby="gallery-account-title"
+          >
+            <h3 id="gallery-account-title">みんなの展示室</h3>
+            <p>
+              だれでも画像を投稿し、すべての作品のタイトルを編集できます。登録やログインは不要です。
+            </p>
+            {!communityReady && (
+              <p>
+                {communityConfigChecked
+                  ? "投稿設定の準備中です。しばらくしてからお試しください。"
+                  : "投稿設定を確認しています。"}
+              </p>
+            )}
+          </section>
+          <div className="gallery-personal-controls" aria-busy={communityBusy}>
+            <div>
+              <p id="gallery-community-privacy">
+                追加した画像は公開ギャラリーに保存され、すべての訪問者に表示されます。公開してよい画像を選んでください。お気に入りだけはこのブラウザーに保存されます。
+              </p>
+              <p>
+                追加した画像はこのブラウザーから非公開・復元できます。ブラウザーのデータを消すと管理できなくなります。
+              </p>
+              <p id="gallery-community-limits">
+                JPEG・PNG・WebPの静止画像、元の画像は1枚10MB・4,000万画素まで。一度に5枚選べます。投稿時に長辺2,400px以下へ縮小します。
+              </p>
+              <p>
+                このブラウザーで50枚・合計100MBまで、投稿は1日10回までです。非公開にした投稿も復元用に保存され、枚数と容量に含まれます。
+              </p>
+            </div>
+            <button
+              type="button"
+              className="gallery-personal-add"
+              disabled={!communityReady || communityBusy}
+              aria-describedby="gallery-community-privacy gallery-community-limits"
+              onClick={() => communityInputRef.current?.click()}
+            >
+              {communityBusy ? "処理しています…" : "自分の画像を追加"}
+            </button>
+            <input
+              ref={communityInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              hidden
+              aria-label="追加する自分の画像を選択"
+              onChange={(event) => {
+                const files = Array.from(event.currentTarget.files ?? []);
+                event.currentTarget.value = "";
+                if (!files.length) return;
+                if (files.length > 5) {
+                  setCommunityError("一度に選べる画像は5枚までです。");
+                  return;
+                }
+                setPendingImages(files);
+                setCommunityError("");
+                setCommunityMessage("");
+              }}
+            />
+            {pendingImages.length > 0 && (
+              <div className="gallery-pending-images">
+                <p>
+                  {pendingImages.length}
+                  点を選択しました。「投稿する」を押すと、すべての訪問者に公開されます。
+                </p>
+                <ul>
+                  {pendingImages.map((file, index) => (
+                    <li key={`${file.name}-${index}`}>
+                      {file.name}（{(file.size / (1024 * 1024)).toFixed(1)}MB）
+                    </li>
+                  ))}
+                </ul>
+                <div className="gallery-viewer-actions">
+                  <button
+                    type="button"
+                    className="gallery-personal-add"
+                    disabled={communityBusy || !communityReady}
+                    onClick={() => {
+                      void addCommunityImages(pendingImages);
+                    }}
+                  >
+                    投稿する
+                  </button>
+                  <button
+                    type="button"
+                    className="gallery-viewer-close"
+                    disabled={communityBusy}
+                    onClick={() => setPendingImages([])}
+                  >
+                    選択を取り消す
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {!communityLoaded && !communityLoadError && (
+            <p className="gallery-save-message" role="status">
+              共有作品を読み込んでいます。
+            </p>
+          )}
+          {communityMessage && (
+            <p className="gallery-personal-message" role="status">
+              {communityMessage}
+            </p>
+          )}
+          {(communityError || communityLoadError) && (
+            <p className="gallery-personal-message is-error" role="alert">
+              {[communityError, communityLoadError].filter(Boolean).join("\n")}
+            </p>
+          )}
+          {session && deletedPosts.length > 0 && (
+            <details className="gallery-deleted-posts">
+              <summary>非公開にした投稿（{deletedPosts.length}点）</summary>
+              <ul>
+                {deletedPosts.map((post) => (
+                  <li key={post.id}>
+                    <span>{numberFor(communityPostToArtwork(post))}</span>
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      disabled={communityBusy}
+                      onClick={() => {
+                        void restoreCommunityImage(post);
+                      }}
+                    >
+                      公開展示に戻す
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
           <div className="gallery-discovery-controls">
             <label className="gallery-search">
               <span>作品を検索</span>
@@ -316,8 +757,8 @@ export function GalleryPage() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="番号・代替テキスト・個人タイトル"
-                aria-label="作品を番号、画像の説明、個人タイトルで検索"
+                placeholder="番号・画像の説明・公開タイトル"
+                aria-label="作品を番号、画像の説明、公開タイトルで検索"
               />
             </label>
             <button
@@ -326,7 +767,8 @@ export function GalleryPage() {
               aria-pressed={favoritesOnly}
               onClick={() => setFavoritesOnly((current) => !current)}
             >
-              お気に入りのみ <span>{favorites.length}</span>
+              お気に入りのみ{" "}
+              <span>{allArtworkIds.filter((id) => favorites.includes(id)).length}</span>
             </button>
           </div>
           <nav className="gallery-filters" aria-label="展示の分類">
@@ -340,11 +782,18 @@ export function GalleryPage() {
                 {item.label}
                 <span>
                   {item.id === "all"
-                    ? GALLERY_ARTWORKS.length
-                    : GALLERY_ARTWORKS.filter((work) => work.category === item.id).length}
+                    ? allArtworks.length
+                    : allArtworks.filter((work) => work.category === item.id).length}
                 </span>
               </button>
             ))}
+            <button
+              type="button"
+              aria-pressed={category === "community"}
+              onClick={() => setCategory("community")}
+            >
+              みんなの投稿<span>{communityWorks.length}</span>
+            </button>
           </nav>
           <div className="gallery-grid" ref={gridRef}>
             {works.map((work) => (
@@ -401,10 +850,16 @@ export function GalleryPage() {
           {works.length === 0 && (
             <div className="gallery-empty" role="status">
               <p>条件に合う作品はありません。</p>
-              <button type="button" onClick={resetDiscovery}>絞り込みを解除</button>
+              <button type="button" onClick={resetDiscovery}>
+                絞り込みを解除
+              </button>
             </div>
           )}
-          {saveError && <p className="gallery-save-message is-error" role="alert">{saveError}</p>}
+          {saveError && (
+            <p className="gallery-save-message is-error" role="alert">
+              {saveError}
+            </p>
+          )}
         </section>
       </main>
       <footer className="gallery-footer">
@@ -424,6 +879,15 @@ export function GalleryPage() {
         aria-labelledby="gallery-viewer-title"
         onClose={() => setSelectedId(null)}
         onCancel={(event) => {
+          if (communityBusy) {
+            event.preventDefault();
+            return;
+          }
+          if (confirmDelete) {
+            event.preventDefault();
+            cancelDelete();
+            return;
+          }
           if (editing) {
             event.preventDefault();
             cancelEditor();
@@ -432,7 +896,7 @@ export function GalleryPage() {
           restoreFocusRef.current = true;
         }}
         onKeyDown={(event) => {
-          if (editing || event.target instanceof HTMLInputElement) return;
+          if (editing || confirmDelete || event.target instanceof HTMLInputElement) return;
           if (event.key === "Escape") restoreFocusRef.current = true;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
             event.preventDefault();
@@ -451,53 +915,98 @@ export function GalleryPage() {
                     <span className="gallery-personal-title">{titles[selected.id]}</span>
                   )}
                 </h2>
-                <p className="gallery-storage-note">タイトルはこのブラウザーだけに保存されます。</p>
+                <p className="gallery-storage-note">
+                  タイトルはすべての訪問者に共有され、だれでも編集できます。
+                </p>
+                {isCommunityGalleryId(selected.id) && (
+                  <p className="gallery-storage-note">みんなの投稿・公開展示</p>
+                )}
               </div>
               <div className="gallery-viewer-actions">
                 <button
                   type="button"
                   className="gallery-viewer-close"
                   ref={editButtonRef}
-                  disabled={editing}
+                  disabled={
+                    !communityReady || !communityLoaded || editing || confirmDelete || communityBusy
+                  }
                   onClick={() => {
-                    setDraft(titles[selected.id] ?? "");
-                    setSaveMessage("");
-                    setSaveError("");
-                    setEditing(true);
+                    void beginTitleEdit();
                   }}
                 >
-                  編集
+                  タイトルを編集
                 </button>
                 <button
                   type="button"
                   className="gallery-viewer-close"
                   aria-pressed={favorites.includes(selected.id)}
-                  disabled={editing}
+                  disabled={editing || confirmDelete}
                   onClick={() => changeFavorite(selected.id)}
                 >
                   {favorites.includes(selected.id) ? "♥ お気に入り" : "♡ お気に入り"}
                 </button>
-                <button type="button" className="gallery-viewer-close" onClick={closeViewer}>
+                {canDeleteSelected && (
+                  <button
+                    type="button"
+                    className="gallery-viewer-close"
+                    ref={deleteButtonRef}
+                    disabled={editing || communityBusy || confirmDelete}
+                    onClick={() => {
+                      setSaveError("");
+                      setConfirmDelete(true);
+                    }}
+                  >
+                    非公開にする
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="gallery-viewer-close"
+                  disabled={communityBusy}
+                  onClick={closeViewer}
+                >
                   閉じる <span aria-hidden="true">×</span>
                 </button>
               </div>
+              {confirmDelete && (
+                <div
+                  className="gallery-delete-confirm"
+                  role="group"
+                  aria-labelledby="gallery-delete-question"
+                >
+                  <p id="gallery-delete-question">
+                    {numberFor(selected)}を公開展示から外しますか？
+                    投稿は削除されず、「非公開にした投稿」から公開展示に戻せます。
+                  </p>
+                  <div className="gallery-viewer-actions">
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      disabled={communityBusy}
+                      onClick={cancelDelete}
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      ref={confirmDeleteRef}
+                      disabled={communityBusy}
+                      onClick={() => {
+                        void removeCommunityImage();
+                      }}
+                    >
+                      {communityBusy ? "処理しています…" : "非公開にする"}
+                    </button>
+                  </div>
+                </div>
+              )}
               {editing && (
                 <form
                   className="gallery-title-editor"
                   onSubmit={(event) => {
                     event.preventDefault();
-                    try {
-                      const nextTitles = saveGalleryTitle(window.localStorage, selected.id, draft);
-                      setTitles(nextTitles);
-                      setSaveError("");
-                      setSaveMessage("このブラウザーに保存しました。");
-                      restoreEditFocusRef.current = true;
-                      setEditing(false);
-                    } catch {
-                      setSaveError(
-                        "保存できませんでした。ブラウザーの保存設定や空き容量を確認して、もう一度お試しください。",
-                      );
-                    }
+                    void publishTitle();
                   }}
                 >
                   <label htmlFor="gallery-title-input">タイトル</label>
@@ -505,24 +1014,71 @@ export function GalleryPage() {
                     id="gallery-title-input"
                     ref={titleInputRef}
                     value={draft}
+                    disabled={communityBusy}
                     maxLength={GALLERY_TITLE_LIMIT}
                     onChange={(event) => setDraft(event.target.value)}
                     placeholder="空欄で保存すると番号だけに戻ります"
                     aria-describedby="gallery-title-help"
                   />
                   <p id="gallery-title-help">
-                    100文字まで。ほかの端末やブラウザーとは共有されません。
+                    100文字まで。公開するとすべての訪問者に表示されます。
                   </p>
+                  {titleConflict && (
+                    <div className="gallery-title-conflict" role="status">
+                      <p>最新の公開タイトル：{titleConflict.title || "（番号のみ）"}</p>
+                      <button
+                        type="button"
+                        className="gallery-viewer-close"
+                        onClick={() => {
+                          setDraft(titleConflict.title);
+                          setEditingVersion(titleConflict.version);
+                          setTitleConflict(null);
+                          setSaveError("");
+                          titleInputRef.current?.focus();
+                        }}
+                      >
+                        最新のタイトルから再編集
+                      </button>
+                    </div>
+                  )}
                   <div className="gallery-viewer-actions">
-                    <button type="submit" className="gallery-viewer-close">
-                      保存
+                    <button
+                      type="submit"
+                      className="gallery-viewer-close"
+                      disabled={communityBusy || Boolean(titleConflict)}
+                    >
+                      {communityBusy ? "公開しています…" : "タイトルを公開"}
                     </button>
-                    <button type="button" className="gallery-viewer-close" onClick={cancelEditor}>
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      disabled={communityBusy}
+                      onClick={cancelEditor}
+                    >
                       キャンセル
                     </button>
                   </div>
                 </form>
               )}
+              {!editing &&
+                legacyTitles[selected.id] &&
+                legacyTitles[selected.id] !== titles[selected.id] && (
+                  <div className="gallery-legacy-title">
+                    <p>以前の個人タイトル：{legacyTitles[selected.id]}</p>
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      disabled={
+                        !communityReady || !communityLoaded || communityBusy || confirmDelete
+                      }
+                      onClick={() => {
+                        void beginTitleEdit(legacyTitles[selected.id]);
+                      }}
+                    >
+                      以前の個人タイトルを公開
+                    </button>
+                  </div>
+                )}
               {saveMessage && (
                 <p className="gallery-save-message" role="status">
                   {saveMessage}
@@ -555,13 +1111,17 @@ export function GalleryPage() {
               )}
             </div>
             <footer className="gallery-viewer-footer">
-              <button type="button" disabled={editing} onClick={() => moveWork(-1)}>
+              <button
+                type="button"
+                disabled={editing || confirmDelete}
+                onClick={() => moveWork(-1)}
+              >
                 ← 前の作品
               </button>
               <p aria-live="polite">
                 {selectedIndex + 1} / {viewerWorks.length}
               </p>
-              <button type="button" disabled={editing} onClick={() => moveWork(1)}>
+              <button type="button" disabled={editing || confirmDelete} onClick={() => moveWork(1)}>
                 次の作品 →
               </button>
             </footer>

@@ -30,6 +30,21 @@
 }
 
 /* ---------------------------------------------------------------- frame */
+/* Search results land on individual records below the fixed topbar. */
+.site-shell.film-edition.mirage-edition
+  :is([id^="wa-location-"], [id^="wa-episode-"], [id^="wa-term-"]) {
+  scroll-margin-top: calc(var(--film-topbar-height, calc(76px + env(safe-area-inset-top))) + 14px);
+}
+
+@media (max-width: 760px), (max-width: 920px) and (max-height: 560px) and (orientation: landscape) {
+  .site-shell.film-edition.mirage-edition
+    :is([id^="wa-location-"], [id^="wa-episode-"], [id^="wa-term-"]) {
+    scroll-margin-top: calc(
+      var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 14px
+    );
+  }
+}
+
 /* Sub-sections break at clamp(40px, 5vw, 72px) each side; a chapter opens
    at the core chapters' own clamp(64px, 9vw, 129.6px). A jump from the
    contents lands the opener (or kicker) just under the topbar. */

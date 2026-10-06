@@ -41,6 +41,11 @@ import { Route as ManagersZeusRouteImport } from './routes/managers/zeus'
 import { Route as RidersIndexRouteImport } from './routes/riders/index'
 import { Route as RidersIdRouteImport } from './routes/riders/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiGalleryIndexRouteImport } from './routes/api/gallery/index'
+import { Route as ApiGalleryIdRouteImport } from './routes/api/gallery/$id'
+import { Route as ApiGalleryConfigRouteImport } from './routes/api/gallery/config'
+import { Route as ApiGalleryTitleRouteImport } from './routes/api/gallery/title'
+import { Route as ApiGalleryIdRestoreRouteImport } from './routes/api/gallery/$id.restore'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -202,6 +207,31 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGalleryIndexRoute = ApiGalleryIndexRouteImport.update({
+  id: '/api/gallery/',
+  path: '/api/gallery/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGalleryIdRoute = ApiGalleryIdRouteImport.update({
+  id: '/api/gallery/$id',
+  path: '/api/gallery/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGalleryConfigRoute = ApiGalleryConfigRouteImport.update({
+  id: '/api/gallery/config',
+  path: '/api/gallery/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGalleryTitleRoute = ApiGalleryTitleRouteImport.update({
+  id: '/api/gallery/title',
+  path: '/api/gallery/title',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGalleryIdRestoreRoute = ApiGalleryIdRestoreRouteImport.update({
+  id: '/restore',
+  path: '/restore',
+  getParentRoute: () => ApiGalleryIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -236,6 +266,11 @@ export interface FileRoutesByFullPath {
   '/managers/': typeof ManagersIndexRoute
   '/riders/': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
+  '/api/gallery/config': typeof ApiGalleryConfigRoute
+  '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery/': typeof ApiGalleryIndexRoute
+  '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -267,6 +302,11 @@ export interface FileRoutesByTo {
   '/managers': typeof ManagersIndexRoute
   '/riders': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
+  '/api/gallery/config': typeof ApiGalleryConfigRoute
+  '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery': typeof ApiGalleryIndexRoute
+  '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -302,6 +342,11 @@ export interface FileRoutesById {
   '/managers/': typeof ManagersIndexRoute
   '/riders/': typeof RidersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
+  '/api/gallery/config': typeof ApiGalleryConfigRoute
+  '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery/': typeof ApiGalleryIndexRoute
+  '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -338,6 +383,11 @@ export interface FileRouteTypes {
     | '/managers/'
     | '/riders/'
     | '/api/auth/$'
+    | '/api/gallery/$id'
+    | '/api/gallery/config'
+    | '/api/gallery/title'
+    | '/api/gallery/'
+    | '/api/gallery/$id/restore'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -369,6 +419,11 @@ export interface FileRouteTypes {
     | '/managers'
     | '/riders'
     | '/api/auth/$'
+    | '/api/gallery/$id'
+    | '/api/gallery/config'
+    | '/api/gallery/title'
+    | '/api/gallery'
+    | '/api/gallery/$id/restore'
   id:
     | '__root__'
     | '/'
@@ -403,6 +458,11 @@ export interface FileRouteTypes {
     | '/managers/'
     | '/riders/'
     | '/api/auth/$'
+    | '/api/gallery/$id'
+    | '/api/gallery/config'
+    | '/api/gallery/title'
+    | '/api/gallery/'
+    | '/api/gallery/$id/restore'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -423,6 +483,10 @@ export interface RootRouteChildren {
   WorldRoute: typeof WorldRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiGalleryIdRoute: typeof ApiGalleryIdRouteWithChildren
+  ApiGalleryConfigRoute: typeof ApiGalleryConfigRoute
+  ApiGalleryTitleRoute: typeof ApiGalleryTitleRoute
+  ApiGalleryIndexRoute: typeof ApiGalleryIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -651,6 +715,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/gallery/': {
+      id: '/api/gallery/'
+      path: '/api/gallery'
+      fullPath: '/api/gallery/'
+      preLoaderRoute: typeof ApiGalleryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gallery/$id': {
+      id: '/api/gallery/$id'
+      path: '/api/gallery/$id'
+      fullPath: '/api/gallery/$id'
+      preLoaderRoute: typeof ApiGalleryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gallery/config': {
+      id: '/api/gallery/config'
+      path: '/api/gallery/config'
+      fullPath: '/api/gallery/config'
+      preLoaderRoute: typeof ApiGalleryConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gallery/title': {
+      id: '/api/gallery/title'
+      path: '/api/gallery/title'
+      fullPath: '/api/gallery/title'
+      preLoaderRoute: typeof ApiGalleryTitleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/gallery/$id/restore': {
+      id: '/api/gallery/$id/restore'
+      path: '/restore'
+      fullPath: '/api/gallery/$id/restore'
+      preLoaderRoute: typeof ApiGalleryIdRestoreRouteImport
+      parentRoute: typeof ApiGalleryIdRoute
+    }
   }
 }
 
@@ -713,6 +812,18 @@ const RidersRouteChildren: RidersRouteChildren = {
 const RidersRouteWithChildren =
   RidersRoute._addFileChildren(RidersRouteChildren)
 
+interface ApiGalleryIdRouteChildren {
+  ApiGalleryIdRestoreRoute: typeof ApiGalleryIdRestoreRoute
+}
+
+const ApiGalleryIdRouteChildren: ApiGalleryIdRouteChildren = {
+  ApiGalleryIdRestoreRoute: ApiGalleryIdRestoreRoute,
+}
+
+const ApiGalleryIdRouteWithChildren = ApiGalleryIdRoute._addFileChildren(
+  ApiGalleryIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersRoute: CharactersRouteWithChildren,
@@ -731,6 +842,10 @@ const rootRouteChildren: RootRouteChildren = {
   WorldRoute: WorldRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiGalleryIdRoute: ApiGalleryIdRouteWithChildren,
+  ApiGalleryConfigRoute: ApiGalleryConfigRoute,
+  ApiGalleryTitleRoute: ApiGalleryTitleRoute,
+  ApiGalleryIndexRoute: ApiGalleryIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

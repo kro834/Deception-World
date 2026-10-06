@@ -208,7 +208,7 @@ export function SearchPage({
           }}
         />
         <p className="search-scope-note">
-          公開資料の見出し・紹介文・用語を検索しています。ギャラリーで付けた個人のタイトルは検索対象に含まれません。
+          公開資料の見出し・紹介文・用語を検索しています。ギャラリーの公開タイトルは、展示室内の検索から探せます。
         </p>
       </main>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />

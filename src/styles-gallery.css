@@ -34,7 +34,7 @@
   text-decoration: none;
 }
 
-.gallery-page button {
+.gallery-page :where(button) {
   color: inherit;
   font: inherit;
 }
@@ -315,6 +315,131 @@
   margin-top: 28px;
 }
 
+.gallery-personal-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 24px;
+  padding-block: 20px;
+  border-block: 1px solid var(--gallery-rule);
+}
+
+.gallery-account {
+  display: grid;
+  gap: 12px;
+  margin-top: 26px;
+  padding: 20px;
+  border: 1px solid var(--gallery-rule);
+  background: rgb(197 166 108 / 0.035);
+}
+
+.gallery-account h3 {
+  margin: 0;
+  color: var(--gallery-ivory);
+  font-family: var(--gallery-serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.gallery-account p {
+  margin: 0;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.gallery-pending-images {
+  flex-basis: 100%;
+  display: grid;
+  gap: 12px;
+}
+
+.gallery-pending-images ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.5em;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.gallery-deleted-posts {
+  margin-top: 18px;
+  color: var(--gallery-muted);
+  font-size: 12px;
+}
+
+.gallery-deleted-posts summary {
+  min-height: 44px;
+  padding-block: 12px;
+  cursor: pointer;
+}
+
+.gallery-deleted-posts ul {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-deleted-posts li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gallery-personal-controls > div {
+  flex: 1 1 340px;
+}
+
+.gallery-personal-controls p,
+.gallery-personal-message,
+.gallery-delete-confirm p {
+  margin: 0;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.gallery-personal-controls p + p {
+  margin-top: 6px;
+}
+
+.gallery-personal-message {
+  margin-top: 14px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.gallery-personal-message.is-error {
+  color: #ffb5a4;
+}
+
+.gallery-personal-add {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid rgb(197 166 108 / 0.7);
+  border-radius: 0;
+  background: rgb(197 166 108 / 0.1);
+  color: #f1dfba;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.gallery-personal-add:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .gallery-search {
   display: grid;
   width: min(100%, 520px);
@@ -536,6 +661,7 @@
 
 .gallery-favorite-toggle {
   margin-top: 10px;
+  white-space: nowrap;
 }
 
 .gallery-empty {
@@ -686,6 +812,31 @@
   gap: 8px;
   padding-top: 10px;
 }
+
+.gallery-delete-confirm {
+  flex-basis: 100%;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgb(255 181 164 / 0.35);
+  background: rgb(255 181 164 / 0.035);
+}
+
+.gallery-legacy-title,
+.gallery-title-conflict {
+  flex-basis: 100%;
+  display: grid;
+  gap: 10px;
+  padding-block: 12px;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.gallery-legacy-title p,
+.gallery-title-conflict p {
+  margin: 0;
+}
 .gallery-title-editor label {
   color: #e7d7b9;
   font-size: 13px;
@@ -755,6 +906,7 @@ html[data-route-cover] .gallery-arrival {
   cursor: pointer;
   font-size: 12px;
   letter-spacing: 0.04em;
+  white-space: nowrap;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
@@ -1024,7 +1176,24 @@ html[data-route-cover] .gallery-arrival {
   }
 
   .gallery-work figcaption {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
     padding-top: 13px;
+  }
+
+  .gallery-favorite-toggle {
+    justify-self: start;
+    margin-top: 0;
+    padding-inline: 10px;
+  }
+
+  .gallery-viewer-header {
+    gap: 12px;
+  }
+
+  .gallery-viewer-header > div:first-child,
+  .gallery-viewer-header > .gallery-viewer-actions {
+    flex-basis: 100%;
   }
 
   .gallery-work-hint {

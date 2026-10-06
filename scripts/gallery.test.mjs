@@ -22,20 +22,36 @@ const curtain = readFileSync(
 const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/styles-route-transitions.css", import.meta.url), "utf8");
 
-test("exhibits start numbered without automatic titles and the viewer offers local editing", () => {
+test("exhibits start numbered and visitor edits publish versioned shared titles without a login form", () => {
   assert.doesNotMatch(component, /(?:featured|work|selected)\.title/);
   assert.match(component, /className="gallery-work-number">\{numberFor\(work\)\}/);
-  assert.match(component, /saveGalleryTitle\(window\.localStorage, selected\.id, draft\)/);
+  assert.match(
+    component,
+    /updateCommunityGalleryTitle\([\s\S]*?work\.id,[\s\S]*?draft,[\s\S]*?editingVersion/,
+  );
+  assert.doesNotMatch(component, /saveGalleryTitle\(/);
+  assert.match(component, /error\.status === 409/);
+  assert.match(component, /以前の個人タイトルを公開/);
+  assert.doesNotMatch(
+    component,
+    /type="(?:email|password)"|signInWithPassword|signUp\(|ログイン中|ログアウト/,
+  );
+  assert.match(component, /ensureGalleryWriteSession\(client\)/);
+  assert.match(component, /投稿する/);
+  assert.match(component, /setPendingImages\(files\)/);
   assert.match(component, /onSubmit=/);
   assert.match(component, /window\.addEventListener\("storage", onStorage\)/);
   assert.match(component, /window\.removeEventListener\("storage", onStorage\)/);
   assert.match(component, /input:not\(:disabled\)/);
-  assert.match(component, /if \(editing \|\| event\.target instanceof HTMLInputElement\) return/);
+  assert.match(
+    component,
+    /if \(editing \|\| confirmDelete \|\| event\.target instanceof HTMLInputElement\) return/,
+  );
   assert.match(component, /role="alert"/);
 });
 
 test("gallery discovery combines search, categories, and local favorites without default titles", () => {
-  assert.match(component, /filterGalleryArtworks\(GALLERY_ARTWORKS/);
+  assert.match(component, /filterGalleryArtworks\(allArtworks/);
   assert.match(component, /type="search"/);
   assert.match(component, /value=\{query\}/);
   assert.match(component, /aria-pressed=\{favoritesOnly\}/);
@@ -44,7 +60,7 @@ test("gallery discovery combines search, categories, and local favorites without
   assert.match(component, /条件に合う作品はありません。/);
   assert.match(component, /絞り込みを解除/);
   assert.match(component, /GALLERY_FAVORITES_KEY/);
-  assert.match(component, /setFavorites\(readGalleryFavorites/);
+  assert.match(component, /setFavorites\(\s*readGalleryFavorites/);
   assert.match(component, /aria-label=.*work\.alt/);
   assert.match(discovery, /normalize\("NFKC"\)/);
   assert.match(discovery, /personalTitle, artwork\.alt/);
@@ -95,7 +111,10 @@ test("opening filtered artwork keeps it selected in the collection and navigatio
     component,
     /if \(category !== "all" && category !== work\.category\) setCategory\("all"\)/,
   );
-  assert.match(component, /viewerWorks\[\(selectedIndex \+ step \+ viewerWorks\.length\) % viewerWorks\.length\]/);
+  assert.match(
+    component,
+    /viewerWorks\[\(selectedIndex \+ step \+ viewerWorks\.length\) % viewerWorks\.length\]/,
+  );
   assert.match(component, /selectedIndex \+ 1\} \/ \{viewerWorks\.length\}/);
   assert.match(component, /event\.key === "ArrowLeft" \|\| event\.key === "ArrowRight"/);
 });

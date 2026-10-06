@@ -7,12 +7,25 @@ const runFile = promisify(execFile);
 
 // The CLI supplies authenticated protection access without disabling protection.
 export async function vercelCurlFetch(url) {
-  const { stdout } = await runFile("vercel", [
-    "curl", String(url), "--", "--silent", "--show-error", "--location",
-    "--max-time", "30", "--write-out", "\\n%{http_code}",
-  ], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
+  const { stdout } = await runFile(
+    "vercel",
+    [
+      "curl",
+      String(url),
+      "--",
+      "--silent",
+      "--show-error",
+      "--location",
+      "--max-time",
+      "30",
+      "--write-out",
+      "\\n%{http_code}",
+    ],
+    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+  );
   const status = Number(stdout.subarray(-3).toString());
-  if (!Number.isInteger(status) || status < 100) throw new Error("Vercel curl returned no HTTP status");
+  if (!Number.isInteger(status) || status < 100)
+    throw new Error("Vercel curl returned no HTTP status");
   return new Response(stdout.subarray(0, -4), { status });
 }
 
@@ -73,6 +86,163 @@ async function request(fetchImpl, url, bypassToken, timeoutMs) {
   }
 }
 
+function publicGalleryOrigin(value) {
+  if (typeof value !== "string") throw new Error("Shared gallery URL is missing");
+  const url = new URL(value);
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("Shared gallery URL must be a safe HTTPS origin");
+  }
+  return url.origin;
+}
+
+function safeGalleryPublicKey(value) {
+  if (typeof value !== "string") return false;
+  if (/^sb_publishable_[A-Za-z0-9_-]+$/u.test(value)) return true;
+  if (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/u.test(value)) return false;
+  try {
+    return (
+      JSON.parse(Buffer.from(value.split(".")[1], "base64url").toString("utf8")).role === "anon"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function object(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function validPublicGalleryCollection(collection, storageOrigin) {
+  const validPostId = (id) =>
+    typeof id === "string" &&
+    /^u-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(id);
+  const validArtworkId = (id) => /^g(?:0[1-9]|[1-6][0-9]|7[0-9])$/u.test(id) || validPostId(id);
+  if (
+    !object(collection) ||
+    !Array.isArray(collection.posts) ||
+    collection.posts.length > 1000 ||
+    !object(collection.titles) ||
+    Object.keys(collection.titles).length > 1079
+  )
+    return false;
+  if (
+    collection.deletedPosts !== undefined &&
+    (!Array.isArray(collection.deletedPosts) || collection.deletedPosts.length !== 0)
+  )
+    return false;
+  const ids = new Set();
+  const sequences = new Set();
+  const postKeys = new Set([
+    "id",
+    "sequence",
+    "width",
+    "height",
+    "url",
+    "createdAt",
+    "deletedAt",
+    "canDelete",
+  ]);
+  for (const post of collection.posts) {
+    if (
+      !object(post) ||
+      Object.keys(post).some((key) => !postKeys.has(key)) ||
+      !validPostId(post.id) ||
+      ids.has(post.id) ||
+      !Number.isSafeInteger(post.sequence) ||
+      post.sequence <= 0 ||
+      sequences.has(post.sequence) ||
+      !Number.isSafeInteger(post.width) ||
+      post.width < 1 ||
+      post.width > 2400 ||
+      !Number.isSafeInteger(post.height) ||
+      post.height < 1 ||
+      post.height > 2400 ||
+      typeof post.createdAt !== "string" ||
+      !Number.isFinite(Date.parse(post.createdAt)) ||
+      post.canDelete !== false ||
+      (post.deletedAt !== undefined && post.deletedAt !== null)
+    )
+      return false;
+    try {
+      const image = new URL(post.url);
+      if (
+        image.origin !== storageOrigin ||
+        image.protocol !== "https:" ||
+        image.username ||
+        image.password ||
+        image.pathname !== `/storage/v1/object/sign/gallery-images/${post.id}.webp` ||
+        !image.searchParams.get("token")
+      )
+        return false;
+    } catch {
+      return false;
+    }
+    ids.add(post.id);
+    sequences.add(post.sequence);
+  }
+  for (const [id, title] of Object.entries(collection.titles)) {
+    if (
+      !validArtworkId(id) ||
+      (validPostId(id) && !ids.has(id)) ||
+      !object(title) ||
+      Object.keys(title).some((key) => key !== "title" && key !== "version") ||
+      typeof title.title !== "string" ||
+      title.title.length > 120 ||
+      Array.from(title.title).some(
+        (character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127,
+      ) ||
+      !Number.isSafeInteger(title.version) ||
+      title.version < 0
+    )
+      return false;
+  }
+  return true;
+}
+
+async function verifySharedGallery(fetchImpl, origin, bypassToken, timeoutMs) {
+  const results = [];
+  let storageOrigin;
+  for (const path of ["/api/gallery/config", "/api/gallery"]) {
+    let status = null;
+    try {
+      const response = await request(fetchImpl, new URL(path, origin), bypassToken, timeoutMs);
+      status = response.status;
+      const body = await response.json();
+      if (!response.ok) throw new Error("Shared gallery endpoint is unavailable");
+      if (path === "/api/gallery/config") {
+        if (
+          !object(body) ||
+          Object.keys(body).some((key) => !["ready", "url", "publishableKey"].includes(key)) ||
+          body.ready !== true ||
+          !safeGalleryPublicKey(body.publishableKey)
+        )
+          throw new Error("Shared gallery config is unready or contains unsafe credentials");
+        storageOrigin = publicGalleryOrigin(body.url);
+      } else if (!storageOrigin || !validPublicGalleryCollection(body, storageOrigin)) {
+        throw new Error("Shared gallery public data is invalid or exposes private post metadata");
+      }
+      results.push({ path, ok: true, status, kind: "gallery" });
+    } catch {
+      // Never echo an untrusted config response or a potentially leaked key.
+      results.push({
+        path,
+        ok: false,
+        status,
+        kind: "gallery",
+        error: "Shared gallery readiness verification failed",
+      });
+    }
+  }
+  return results;
+}
+
 export async function verifyPublicDeployment({
   baseUrl,
   bypassToken,
@@ -83,25 +253,59 @@ export async function verifyPublicDeployment({
   if (!baseUrl) throw new Error("base URL is required");
   const origin = normalizedOrigin(baseUrl);
   const results = [];
+  let sharedGallery = false;
 
   if (expectedSha) {
     try {
-      const response = await request(fetchImpl, new URL('/release-identity.json', origin), bypassToken, timeoutMs);
+      const response = await request(
+        fetchImpl,
+        new URL("/release-identity.json", origin),
+        bypassToken,
+        timeoutMs,
+      );
       const identity = await response.json();
       if (!response.ok || identity.sha !== expectedSha || !Array.isArray(identity.assets)) {
-        throw new Error('Public release does not match the expected main commit');
+        throw new Error("Public release does not match the expected main commit");
       }
-      results.push({ path: '/release-identity.json', ok: true, status: response.status, kind: 'identity' });
+      sharedGallery = identity.sharedGallery === true;
+      results.push({
+        path: "/release-identity.json",
+        ok: true,
+        status: response.status,
+        kind: "identity",
+      });
       for (const asset of identity.assets) {
-        if (!/^\/(gallery\/|saga-extreme-)/u.test(asset.path) || asset.path.includes('..')) throw new Error('Invalid release asset path');
-        const delivered = await request(fetchImpl, new URL(asset.path, origin), bypassToken, timeoutMs);
-        const digest = createHash('sha256').update(Buffer.from(await delivered.arrayBuffer())).digest('hex');
-        results.push({ path: asset.path, ok: delivered.ok && digest === asset.sha256, status: delivered.status, kind: 'asset' });
+        if (!/^\/(gallery\/|saga-extreme-)/u.test(asset.path) || asset.path.includes(".."))
+          throw new Error("Invalid release asset path");
+        const delivered = await request(
+          fetchImpl,
+          new URL(asset.path, origin),
+          bypassToken,
+          timeoutMs,
+        );
+        const digest = createHash("sha256")
+          .update(Buffer.from(await delivered.arrayBuffer()))
+          .digest("hex");
+        results.push({
+          path: asset.path,
+          ok: delivered.ok && digest === asset.sha256,
+          status: delivered.status,
+          kind: "asset",
+        });
       }
     } catch (error) {
-      results.push({ path: '/release-identity.json', ok: false, status: null, kind: 'identity', error: String(error) });
+      results.push({
+        path: "/release-identity.json",
+        ok: false,
+        status: null,
+        kind: "identity",
+        error: String(error),
+      });
     }
   }
+
+  if (sharedGallery)
+    results.push(...(await verifySharedGallery(fetchImpl, origin, bypassToken, timeoutMs)));
 
   for (const path of PUBLIC_SMOKE_ROUTES) {
     try {
