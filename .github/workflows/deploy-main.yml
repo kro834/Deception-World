@@ -19,7 +19,6 @@ jobs:
     environment: production
     env:
       PUBLIC_BASE_URL: https://deception-world.vercel.app
-      VERCEL_SCOPE: dece6
       VERCEL_CLI_VERSION: 59.10.0
     steps:
       - name: Check out exact main commit
@@ -196,7 +195,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "attempted=true" >> "$GITHUB_OUTPUT"
-          vercel promote "${{ steps.candidate.outputs.url }}" --scope "$VERCEL_SCOPE" --yes --timeout "5 m" --token "$VERCEL_TOKEN"
+          node scripts/switch-vercel-production.mjs promote "${{ steps.candidate_attestation.outputs.id }}" "${{ steps.candidate.outputs.url }}" "$GITHUB_SHA"
 
       - name: Verify Production before destructive cleanup
         id: production_probe
@@ -342,8 +341,7 @@ jobs:
           NODE
           )"
           if [ -n "$rollback_target" ]; then
-            vercel rollback "$rollback_target" --scope "$VERCEL_SCOPE" --timeout "5 m" --token "$VERCEL_TOKEN"
-            vercel rollback status --scope "$VERCEL_SCOPE" --timeout "5 m" --token "$VERCEL_TOKEN"
+            node scripts/switch-vercel-production.mjs rollback "${{ steps.previous.outputs.id }}" "$rollback_target" "${{ steps.previous.outputs.sha }}"
             node --input-type=module - "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
             import { assertVercelProductionSnapshot } from "./scripts/vercel-production-deployment.mjs";
             const [expectedUrl, expectedSha] = process.argv.slice(2);

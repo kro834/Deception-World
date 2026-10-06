@@ -178,6 +178,28 @@ export async function assertVercelBootstrapCandidate({ candidateUrl, candidateSh
   return identity;
 }
 
+/** Use the same project-scoped promotion/rollback API as the official CLI. */
+export async function switchVercelProduction({
+  action = 'promote', deploymentId, deploymentUrl, deploymentSha,
+  token, teamId, projectId, fetchImpl = fetch,
+}) {
+  if (!['promote', 'rollback'].includes(action)) throw new Error('Invalid Production switch action');
+  const identity = await assertVercelBootstrapCandidate({
+    candidateUrl: deploymentUrl, candidateSha: deploymentSha,
+    token, teamId, projectId, fetchImpl,
+  });
+  if (identity.id !== deploymentId) throw new Error('Production switch deployment ID mismatch');
+  const endpoint = vercelEndpoint(
+    `/${action === 'promote' ? 'v10' : 'v9'}/projects/${encodeURIComponent(projectId)}/${action}/${encodeURIComponent(deploymentId)}`,
+    teamId,
+  );
+  const response = await fetchImpl(endpoint, {
+    method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: '{}',
+  });
+  if (!response.ok) throw new Error(`Vercel ${action} failed with HTTP ${response.status}`);
+  return identity;
+}
+
 /**
  * Attest that a staged candidate carries the exact rollback metadata captured
  * from Production. Promotion must not proceed when Vercel omitted or changed

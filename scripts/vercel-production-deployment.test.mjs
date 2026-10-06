@@ -6,6 +6,7 @@ import {
   assertVercelProductionSnapshot,
   resolveVercelRollbackTarget,
   resolveVercelProductionDeployment,
+  switchVercelProduction,
   VERCEL_PREVIOUS_PRODUCTION_SHA_META,
   VERCEL_PREVIOUS_PRODUCTION_URL_META,
 } from "./vercel-production-deployment.mjs";
@@ -13,6 +14,38 @@ import {
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const PREVIOUS_SHA = "fedcba9876543210fedcba9876543210fedcba98";
 const PROJECT_ID = "prj_archive";
+
+test("production switching uses the team-scoped API only after exact deployment attestation", async () => {
+  for (const action of ["promote", "rollback"]) {
+    const seen = [];
+    await switchVercelProduction({ action, deploymentId: "dpl_candidate", deploymentUrl: "https://candidate.vercel.app", deploymentSha: SHA,
+      token: "secret", teamId: "team_example", projectId: PROJECT_ID, fetchImpl: async (input, init) => {
+        seen.push({ url: new URL(input), init });
+        return init.method === "POST" ? new Response(null, { status: 202 }) : Response.json({ id: "dpl_candidate", projectId: PROJECT_ID, url: "candidate.vercel.app", meta: { githubCommitSha: SHA } });
+      } });
+    assert.equal(seen.length, 2);
+    assert.equal(seen[1].url.pathname, `/${action === "promote" ? "v10" : "v9"}/projects/${PROJECT_ID}/${action}/dpl_candidate`);
+    assert.equal(seen[1].init.body, "{}");
+    assert.ok(seen.every(({ url, init }) => url.searchParams.get("teamId") === "team_example" && init.headers.authorization === "Bearer secret"));
+  }
+});
+
+test("production switching rejects wrong IDs and denied requests without broadening scope", async () => {
+  const options = { deploymentId: "dpl_candidate", deploymentUrl: "https://candidate.vercel.app", deploymentSha: SHA,
+    token: "secret", teamId: "team_example", projectId: PROJECT_ID };
+  let writes = 0;
+  const record = { id: "dpl_candidate", projectId: PROJECT_ID, url: "candidate.vercel.app", meta: { githubCommitSha: SHA } };
+  const fetchImpl = async (_input, init) => {
+    if (init.method === "POST") { writes++; return new Response(null, { status: 403 }); }
+    return Response.json(record);
+  };
+  await assert.rejects(switchVercelProduction({ ...options, action: "delete", fetchImpl }), /Invalid Production switch action/);
+  await assert.rejects(switchVercelProduction({ ...options, deploymentId: "dpl_other", fetchImpl }), /ID/);
+  await assert.rejects(switchVercelProduction({ ...options, projectId: "prj_other", fetchImpl }), /does not belong/);
+  assert.equal(writes, 0);
+  await assert.rejects(switchVercelProduction({ ...options, fetchImpl }), /HTTP 403/);
+  assert.equal(writes, 1);
+});
 
 test("first publication requires an authenticated, verified project domain", async () => {
   const options = { baseUrl: "https://new.vercel.app", projectId: PROJECT_ID, teamId: "team_example", token: "secret", allowUnpublished: true };
