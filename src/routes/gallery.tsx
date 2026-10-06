@@ -14,6 +14,7 @@ export const Route = createFileRoute("/gallery")({
     });
     return {
       ...head,
+      meta: [...(head.meta ?? []), { name: "theme-color", content: "#171614" }],
       links: [
         ...(head.links ?? []),
         // A direct visit opens on the curtain: its stickers load with the page.

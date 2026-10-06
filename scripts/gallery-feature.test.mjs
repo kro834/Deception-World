@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import {
   GALLERY_FEATURE_KEY,
   readGalleryFeature,
@@ -69,4 +70,25 @@ test("storage failures propagate so the UI cannot report an unsaved choice as sa
       ["g01"],
     ),
   );
+});
+
+test("featured framing follows the selected artwork ratio and copy uses its available width", () => {
+  const page = readFileSync(
+    new URL("../src/components/gallery/gallery-page.tsx", import.meta.url),
+    "utf8",
+  );
+  const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
+  assert.match(page, /"--gallery-feature-ratio" as string\]: featured.width \/ featured.height/);
+  assert.match(page, /data-feature-shape=\{featured.width < featured.height/);
+  assert.match(css, /aspect-ratio: var\(--gallery-feature-ratio\)/);
+  assert.match(css, /container-type: inline-size/);
+  assert.match(css, /font-size: clamp\(32px, 13cqi,/);
+  assert.doesNotMatch(css, /aspect-ratio: 1\.(12|08)/);
+});
+
+test("the fixed header reserves and covers the status-bar safe area", () => {
+  const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
+  assert.match(css, /padding-top: calc\(var\(--gallery-bar\) \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(css, /\.gallery-topbar::before \{[\s\S]*?background: #171614;/);
+  assert.match(css, /padding: calc\(12px \+ env\(safe-area-inset-top, 0px\)\)/);
 });

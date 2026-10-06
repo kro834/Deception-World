@@ -672,18 +672,24 @@ export function GalleryPage() {
         </div>
       </header>
       <main id="gallery-main">
-        <section className="gallery-intro" aria-labelledby="gallery-title">
+        <section
+          className="gallery-intro"
+          data-feature-shape={featured.width < featured.height ? "portrait" : "landscape"}
+          style={{ ["--gallery-feature-ratio" as string]: featured.width / featured.height }}
+          aria-labelledby="gallery-title"
+        >
           <div className="gallery-intro-copy">
             <p className="gallery-eyebrow">DECEPTION WORLD / GALLERY</p>
             <h1 id="gallery-title">
-              光と影の、
-              <br />
+              <span className="gallery-title-opening">光と影の、</span>
               <span>展示室。</span>
             </h1>
             <p className="gallery-intro-description">
-              戦いの一瞬から、静かな横顔まで。
-              <br />
-              ディセプションワールドの景色を、一点ずつ巡るギャラリー。
+              <span>戦いの一瞬から、静かな横顔まで。</span>
+              <span>
+                <span className="gallery-copy-phrase">ディセプションワールドの景色を、</span>
+                <span className="gallery-copy-phrase">一点ずつ巡るギャラリー。</span>
+              </span>
             </p>
             <a className="gallery-enter" href="#gallery-collection">
               展示室へ<span aria-hidden="true">↓</span>
