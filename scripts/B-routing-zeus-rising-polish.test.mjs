@@ -16,7 +16,10 @@ const reDive = read("src/styles-world-re-dive.css");
 const specialSites = read("src/styles-rexonance-saga.css");
 
 test("Back and Forward into the world keep the reading position; fresh entries start at the top", () => {
-  assert.match(router, /scrollRestoration: true,[\s\S]*?scrollRestorationBehavior: "instant"/);
+  assert.match(
+    router,
+    /scrollRestoration: \(\{ location \}\) =>[\s\S]*?location.pathname !== "\/gallery" \|\|[\s\S]*?scrollRestorationBehavior: "instant"/,
+  );
   assert.match(
     loadGate,
     /router\.history\.subscribe\(\(\{ action, location \}\) => \{\s*const pop = action\.type === "BACK" \|\| action\.type === "FORWARD" \|\| action\.type === "GO";\s*const repeated = pop && location\.href === previousHref;\s*previousHref = location\.href;/,

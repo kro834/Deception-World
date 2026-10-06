@@ -13,23 +13,24 @@ const css = read("src/styles-gallery.css");
 test("the viewer freezes the page and puts the reader back where they were", () => {
   assert.match(page, /acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(page, /readingAtRef.current = \{ top: window\.scrollY, left: window\.scrollX \}/);
-  assert.match(page, /router\.subscribe\("onRendered", settle\)/);
+  assert.match(page, /subscribeRendered: \(done\) => router\.subscribe\("onRendered", done\)/);
   assert.match(page, /router\.history\.location\.pathname !== "\/gallery"/);
   assert.ok(
     page.indexOf("const release = acquireViewportScrollLock") < page.indexOf("dialog.showModal()"),
   );
-  assert.ok(
-    page.indexOf('router.subscribe("onRendered", settle)') < page.indexOf("router.history.back();"),
-  );
-  assert.match(page, /viewerGenerationRef.current !== generation/);
+  assert.match(page, /settleGalleryViewerReturn\(/);
+  assert.match(page, /opener\.getBoundingClientRect\(\).top - originalTop/);
+  assert.doesNotMatch(page, /requestAnimationFrame/);
+  const router = read("src/router.tsx");
+  assert.match(router, /!document.body.hasAttribute\("data-gallery-viewer-lock"\)/);
 });
 
 test("one history entry per open viewer: Back closes it, a page close removes it", () => {
   assert.match(
     page,
-    /router\.history\.push\(here\.href, \{ \.\.\.here\.state, galleryViewer: true \}\)/,
+    /router\.history\.push\(here\.href, \{[\s\S]*?galleryViewer: \{[\s\S]*?position: readingAt/,
   );
-  assert.match(page, /galleryViewer\)\s*router\.history\.back\(\)/);
+  assert.match(page, /ownEntry &&[\s\S]*?router\.history\.back\(\)/);
   assert.equal(
     (page.match(/router\.history\.push\(/g) ?? []).length,
     1,

@@ -10,6 +10,10 @@ const discovery = readFileSync(
   new URL("../src/components/gallery/gallery-discovery.ts", import.meta.url),
   "utf8",
 );
+const viewerImage = readFileSync(
+  new URL("../src/components/gallery/gallery-viewer-image.tsx", import.meta.url),
+  "utf8",
+);
 const route = readFileSync(new URL("../src/routes/gallery.tsx", import.meta.url), "utf8");
 const chrome = readFileSync(
   new URL("../src/components/world/world-chrome.tsx", import.meta.url),
@@ -45,7 +49,7 @@ test("exhibits start numbered and visitor edits publish versioned shared titles 
   assert.match(component, /input:not\(:disabled\)/);
   assert.match(
     component,
-    /if \(editing \|\| confirmDelete \|\| event\.target instanceof HTMLInputElement\) return/,
+    /editing \|\|[\s\S]*?confirmDelete \|\|[\s\S]*?communityBusy \|\|[\s\S]*?event\.target instanceof HTMLInputElement/,
   );
   assert.match(component, /role="alert"/);
 });
@@ -66,7 +70,7 @@ test("gallery discovery combines search, categories, and local favorites without
   assert.match(discovery, /personalTitle, artwork\.alt/);
   assert.match(discovery, /knownIds\.has\(id\)/);
   assert.match(discovery, /deception-world\.gallery-favorites\.v1/);
-  assert.match(component, /viewerWorksRef\.current = navigationWorks/);
+  assert.match(component, /viewerWorksRef\.current = galleryViewerSequence/);
   assert.match(component, /GALLERY_ARTWORKS\.find\(\(work\) => work\.id === selectedId\)/);
 });
 
@@ -103,18 +107,12 @@ test("gallery artwork links keep a direct full-image destination and preserve mo
     /event\.button !== 0 \|\| event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/,
   );
   assert.match(component, /event\.preventDefault\(\)/);
-  assert.match(component, /target="_blank" rel="noreferrer"/);
+  assert.match(viewerImage, /target="_blank" rel="noreferrer"/);
 });
 
-test("opening filtered artwork keeps it selected in the collection and navigation wraps", () => {
-  assert.match(
-    component,
-    /if \(category !== "all" && category !== work\.category\) setCategory\("all"\)/,
-  );
-  assert.match(
-    component,
-    /viewerWorks\[\(selectedIndex \+ step \+ viewerWorks\.length\) % viewerWorks\.length\]/,
-  );
+test("opening filtered artwork keeps discovery untouched and navigation follows the session", () => {
+  assert.doesNotMatch(component, /category !== work\.category/);
+  assert.match(component, /galleryAdjacentId\(/);
   assert.match(component, /selectedIndex \+ 1\} \/ \{viewerWorks\.length\}/);
   assert.match(component, /event\.key === "ArrowLeft" \|\| event\.key === "ArrowRight"/);
 });
@@ -127,7 +125,7 @@ test("native viewer owns and releases the shared viewport lock and dismisses on 
   assert.match(component, /const release = acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(component, /if \(dialog\.open\) dialog\.close\(\)/);
   assert.match(component, /release\(\)/);
-  assert.match(component, /useDialogHistoryDismiss\(dialogRef,[\s\S]*?setSelectedId\(null\)/);
+  assert.match(component, /router.history.subscribe\([\s\S]*?action.type === "BACK"/);
 });
 
 test("viewer exposes dialog names, keyboard dismissal, live position, and image recovery", () => {
@@ -136,8 +134,10 @@ test("viewer exposes dialog names, keyboard dismissal, live position, and image 
   assert.match(component, /aria-labelledby="gallery-viewer-title"/);
   assert.match(component, /onCancel=\{/);
   assert.match(component, /aria-live="polite"/);
-  assert.match(component, /onError=\{\(\) => setFailedId\(selected\.id\)\}/);
-  assert.match(component, /selected\.medium/);
+  assert.match(viewerImage, /onError=\{\(\) => setStatus\("error"\)\}/);
+  assert.match(viewerImage, /work\.medium/);
+  assert.match(viewerImage, /再読み込み/);
+  assert.match(viewerImage, /2倍で鑑賞/);
   assert.match(component, /dialog\.addEventListener\("keydown", cycleFocus\)/);
   assert.match(component, /dialog\.removeEventListener\("keydown", cycleFocus\)/);
   assert.match(component, /event\.shiftKey \? -1 : 1/);

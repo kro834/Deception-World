@@ -4,6 +4,19 @@ body:has(.gallery-page) {
   background-color: #171614;
 }
 
+/* Outside the clipped/isolation-scoped gallery. Safari's status-bar and
+   rubber-band area must never sample the artwork through a filtered layer. */
+.gallery-statusbar-cover {
+  position: fixed;
+  z-index: 41;
+  top: -96px;
+  right: 0;
+  left: 0;
+  height: calc(96px + max(16px, env(safe-area-inset-top, 0px)));
+  background: #171614;
+  pointer-events: none;
+}
+
 .gallery-page {
   --gallery-ink: #171614;
   --gallery-ink-soft: #24221e;
@@ -72,8 +85,8 @@ body:has(.gallery-page) {
   padding: calc(12px + env(safe-area-inset-top, 0px)) max(32px, calc((100vw - 1320px) / 2)) 12px;
   border-bottom: 1px solid rgb(222 205 171 / 0.13);
   background: #171614;
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* Extend the opaque band into iOS's status-bar/overscroll area too. */
@@ -476,6 +489,26 @@ body:has(.gallery-page) {
   justify-content: space-between;
   gap: 16px;
   margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.gallery-order {
+  display: grid;
+  gap: 8px;
+  color: var(--gallery-muted);
+  font-size: 12px;
+}
+
+.gallery-order select,
+.gallery-reset-filter {
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 1px solid var(--gallery-rule);
+  border-radius: 0;
+  background: #24221e;
+  color: var(--gallery-ivory);
+  font: inherit;
+  cursor: pointer;
 }
 
 .gallery-personal-controls {
@@ -930,7 +963,7 @@ body:has(.gallery-page) {
 .gallery-viewer-shell {
   display: grid;
   height: 100%;
-  min-height: 360px;
+  min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
   padding: clamp(16px, 3vw, 30px);
 }
@@ -948,6 +981,38 @@ body:has(.gallery-page) {
   min-height: 66px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--gallery-rule);
+  max-height: 45dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gallery-close-primary {
+  align-self: start;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #171614;
+}
+
+.gallery-viewer-tools {
+  flex-basis: 100%;
+  color: var(--gallery-muted);
+  font-size: 12px;
+}
+
+.gallery-viewer-tools summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.gallery-viewer-tools summary span {
+  margin-left: 14px;
+  font-size: 11px;
+}
+
+.gallery-viewer-tools .gallery-viewer-actions {
+  margin-top: 12px;
 }
 
 .gallery-viewer-header > div:first-child {
@@ -1093,7 +1158,92 @@ html[data-route-cover] .gallery-arrival {
   display: grid;
   min-height: 0;
   place-items: center;
-  padding: clamp(14px, 3vw, 32px) 0;
+  padding: 12px 0;
+  overflow: hidden;
+}
+
+.gallery-viewer-image {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.gallery-image-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--gallery-muted);
+  font-size: 11px;
+}
+
+.gallery-image-toolbar span {
+  min-width: 0;
+  line-height: 1.6;
+}
+
+.gallery-image-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+
+.gallery-image-canvas {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-image-canvas img {
+  grid-area: 1 / 1;
+}
+
+.gallery-image-full:not([data-ready="true"]) {
+  opacity: 0;
+}
+
+.gallery-image-preview {
+  opacity: 0.55;
+}
+
+.gallery-image-status,
+.gallery-image-viewport > .gallery-image-error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 20px;
+  color: #eee9dc;
+  text-shadow: 0 1px 8px #000;
+  pointer-events: none;
+}
+
+.gallery-image-viewport > .gallery-image-error {
+  pointer-events: auto;
+}
+
+.gallery-image-error p {
+  margin: 0;
+}
+
+.gallery-viewer-image[data-zoomed="true"] .gallery-image-viewport {
+  overflow: auto;
+  touch-action: pan-x pan-y pinch-zoom;
+  overscroll-behavior: contain;
+}
+
+.gallery-viewer-image[data-zoomed="true"] .gallery-image-canvas {
+  width: 200%;
+  height: 200%;
 }
 
 .gallery-viewer-stage img {
@@ -1359,9 +1509,12 @@ html[data-route-cover] .gallery-arrival {
     gap: 12px;
   }
 
-  .gallery-viewer-header > div:first-child,
-  .gallery-viewer-header > .gallery-viewer-actions {
-    flex-basis: 100%;
+  .gallery-viewer-header > div:first-child {
+    flex: 1;
+  }
+
+  .gallery-viewer-tools summary span {
+    display: none;
   }
 
   .gallery-work-hint {
@@ -1412,12 +1565,10 @@ html[data-route-cover] .gallery-arrival {
 
 @media (max-height: 560px) and (min-width: 701px) {
   .gallery-viewer-shell {
-    grid-template-rows: auto minmax(120px, 1fr) auto;
+    padding: 12px;
   }
-
-  .gallery-viewer-stage img {
-    max-height: 56vh;
-    max-height: 56dvh;
+  .gallery-viewer-header {
+    max-height: 30dvh;
   }
 }
 

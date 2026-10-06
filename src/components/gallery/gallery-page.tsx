@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
-import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
 import {
@@ -34,6 +34,13 @@ import {
   type GalleryFavorites,
 } from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
+import { GalleryViewerImage } from "./gallery-viewer-image";
+import {
+  galleryAdjacentId,
+  galleryViewerSequence,
+  readGalleryViewerRecord,
+  settleGalleryViewerReturn,
+} from "./gallery-viewer-state";
 import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
 import {
   GALLERY_TITLE_LIMIT,
@@ -50,19 +57,24 @@ export function GalleryPage() {
   // The history entry the open viewer adds, so Back closes it in place.
   const viewerEntryRef = useRef(false);
   const readingAtRef = useRef({ top: 0, left: 0 });
-  const viewerGenerationRef = useRef(0);
+  const openerTopRef = useRef<number | null>(null);
+  const finishReturnRef = useRef<(() => void) | null>(null);
+  const viewerActiveRef = useRef(false);
+  const viewerIdRef = useRef<string | null>(null);
+  const backdropPointerRef = useRef(false);
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
     "all",
   );
   const [query, setQuery] = useState("");
+  const [order, setOrder] = useState<"number" | "newest">("number");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<GalleryFavorites>([]);
   const [featuredId, setFeaturedId] = useState<string | null>(null);
   const [featureMessage, setFeatureMessage] = useState("");
   const [featureError, setFeatureError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [failedId, setFailedId] = useState<string | null>(null);
   const [sharedTitles, setSharedTitles] = useState<CommunityGalleryTitles>({});
   const [legacyTitles, setLegacyTitles] = useState<GalleryTitles>({});
   const [editing, setEditing] = useState(false);
@@ -101,6 +113,7 @@ export function GalleryPage() {
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
+  const allArtworksRef = useRef<GalleryCollectionArtwork[]>([]);
   const communityWorks = useMemo(
     () => communityPosts.map(communityPostToArtwork),
     [communityPosts],
@@ -111,13 +124,16 @@ export function GalleryPage() {
     [sharedTitles],
   );
   const allArtworkIds = useMemo(() => allArtworks.map((work) => work.id), [allArtworks]);
-  const works = filterGalleryArtworks(allArtworks, {
-    category,
-    query,
-    favoritesOnly,
-    favorites,
-    titles,
-  });
+  const works = useMemo(() => {
+    const filtered = filterGalleryArtworks(allArtworks, {
+      category,
+      query,
+      favoritesOnly,
+      favorites,
+      titles,
+    });
+    return order === "newest" ? filtered.reverse() : filtered;
+  }, [allArtworks, category, query, favoritesOnly, favorites, titles, order]);
   const selected =
     GALLERY_ARTWORKS.find((work) => work.id === selectedId) ??
     communityWorks.find((work) => work.id === selectedId) ??
@@ -128,11 +144,26 @@ export function GalleryPage() {
   const viewerWorks = navigationSnapshot.length ? navigationSnapshot : works;
   const selectedIndex = viewerWorks.findIndex((work) => work.id === selectedId);
   const viewerOpen = selected !== null;
+  const neighbors = useMemo(() => {
+    if (viewerWorksRef.current.length < 2 || !selectedId) return [];
+    const ids = viewerWorksRef.current.map((work) => work.id);
+    const adjacent = new Set([
+      galleryAdjacentId(ids, selectedId, -1),
+      galleryAdjacentId(ids, selectedId, 1),
+    ]);
+    return allArtworks.filter((work) => adjacent.has(work.id));
+    // The sequence is a session snapshot; only its IDs and the selected work matter.
+  }, [selectedId, allArtworks]);
   const featured = allArtworks.find((work) => work.id === featuredId) ?? GALLERY_ARTWORKS[2];
   const selectedPost = communityPosts.find((post) => post.id === selectedId);
   const canDeleteSelected = Boolean(session && selectedPost?.canDelete);
 
   useEffect(() => {
+    allArtworksRef.current = allArtworks;
+  }, [allArtworks]);
+
+  useEffect(() => {
+    setMounted(true);
     const load = () => {
       try {
         setLegacyTitles(readGalleryTitles(window.localStorage));
@@ -250,13 +281,23 @@ export function GalleryPage() {
     };
     communityReloadRef.current = refresh;
     const onFocus = () => {
-      if (!communityBusyRef.current) void refresh();
+      if (!communityBusyRef.current && !viewerActiveRef.current) void refresh();
     };
     const onVisibility = () => {
-      if (document.visibilityState === "visible" && !communityBusyRef.current) void refresh();
+      if (
+        document.visibilityState === "visible" &&
+        !communityBusyRef.current &&
+        !viewerActiveRef.current
+      )
+        void refresh();
     };
     const timer = window.setInterval(() => {
-      if (document.visibilityState === "visible" && !communityBusyRef.current) void refresh();
+      if (
+        document.visibilityState === "visible" &&
+        !communityBusyRef.current &&
+        !viewerActiveRef.current
+      )
+        void refresh();
     }, 30_000);
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
@@ -311,21 +352,28 @@ export function GalleryPage() {
       },
       { threshold: 0.08 },
     );
-    grid.querySelectorAll("[data-gallery-artwork]").forEach((work) => observer.observe(work));
+    grid
+      .querySelectorAll("[data-gallery-artwork]:not([data-gallery-enter])")
+      .forEach((work) => observer.observe(work));
     return () => observer.disconnect();
-  }, [category, communityWorks]);
+  }, [works]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!viewerOpen || !dialog) return;
     // Capture before native modal focus can scroll Safari's page.
     const readingAt = readingAtRef.current;
-    const generation = viewerGenerationRef.current;
+    finishReturnRef.current?.();
+    finishReturnRef.current = null;
+    viewerActiveRef.current = true;
+    document.body.dataset.galleryViewerLock = "true";
     const release = acquireViewportScrollLock({ freezeBody: true });
     try {
       if (!dialog.open) dialog.showModal();
     } catch {
       release();
+      delete document.body.dataset.galleryViewerLock;
+      viewerActiveRef.current = false;
       setSelectedId(null);
       return;
     }
@@ -367,73 +415,126 @@ export function GalleryPage() {
     // the top). Moving between works adds none.
     if (!viewerEntryRef.current) {
       const here = router.history.location;
-      router.history.push(here.href, { ...here.state, galleryViewer: true });
+      router.history.push(here.href, {
+        ...here.state,
+        galleryViewer: {
+          id: viewerIdRef.current,
+          ids: viewerWorksRef.current.map((work) => work.id),
+          position: readingAt,
+        },
+      });
       viewerEntryRef.current = true;
     }
     return () => {
       dialog.removeEventListener("keydown", cycleFocus);
       if (dialog.open) dialog.close();
-      release();
-      // Closed in the page (button, Escape, backdrop): take the entry back
-      // off, so the history is as it was. A Back gesture already removed it.
-      if (viewerEntryRef.current) {
-        viewerEntryRef.current = false;
-        // Leaving the entry, the router restores the offset it filed while
-        // the body was frozen (0). Once the gallery has rendered again, put
-        // the reader back where they were; never on another page.
-        let settled = false;
-        const settle = () => {
-          if (settled) return;
-          settled = true;
-          stopRendered();
-          window.clearTimeout(fallback);
-          window.requestAnimationFrame(() =>
-            window.requestAnimationFrame(() => {
-              if (
-                router.history.location.pathname !== "/gallery" ||
-                viewerGenerationRef.current !== generation ||
-                dialog.open
-              )
-                return;
-              if (Math.abs(window.scrollY - readingAt.top) > 2)
-                window.scrollTo({ ...readingAt, behavior: "instant" });
-            }),
-          );
-        };
-        const stopRendered = router.subscribe("onRendered", settle);
-        const fallback = window.setTimeout(settle, 600);
-        // Observe the render before requesting history navigation.
-        if ((router.history.location.state as { galleryViewer?: boolean }).galleryViewer)
-          router.history.back();
-      }
-      if (restoreFocusRef.current) openerRef.current?.focus({ preventScroll: true });
-      else if (document.activeElement === openerRef.current) openerRef.current?.blur();
+      const ownEntry = viewerEntryRef.current;
+      viewerEntryRef.current = false;
+      const opener = openerRef.current;
+      const restoreFocus = restoreFocusRef.current;
+      const originalTop = openerTopRef.current;
       restoreFocusRef.current = false;
+      const finish = () => {
+        // Hero aspect changes and favorite filtering can move the originating card.
+        const shiftedTop =
+          opener?.isConnected && originalTop !== null
+            ? readingAt.top + opener.getBoundingClientRect().top - originalTop
+            : readingAt.top;
+        release();
+        delete document.body.dataset.galleryViewerLock;
+        viewerActiveRef.current = false;
+        finishReturnRef.current = null;
+        if (router.history.location.pathname !== "/gallery") return;
+        if (Math.abs(window.scrollY - shiftedTop) > 2)
+          window.scrollTo({
+            top: Math.max(0, shiftedTop),
+            left: readingAt.left,
+            behavior: "instant",
+          });
+        if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true });
+        else if (document.activeElement === opener) opener?.blur();
+      };
+      if (router.history.location.pathname !== "/gallery") {
+        finish();
+        return;
+      }
+      finishReturnRef.current = settleGalleryViewerReturn({
+        subscribeRendered: (done) => router.subscribe("onRendered", done),
+        schedule: (done) => {
+          const timer = window.setTimeout(done, 800);
+          return () => window.clearTimeout(timer);
+        },
+        leaveEntry: () => {
+          if (
+            ownEntry &&
+            readGalleryViewerRecord(
+              (router.history.location.state as { galleryViewer?: unknown }).galleryViewer,
+            )
+          )
+            router.history.back();
+        },
+        finish,
+      });
     };
+    // Changing artworks must not release/reacquire the session's page lock.
   }, [viewerOpen, router]);
 
-  useDialogHistoryDismiss(dialogRef, () => {
-    restoreFocusRef.current = false;
-    dialogRef.current?.close();
-    setSelectedId(null);
-  });
+  useEffect(() => {
+    const restore = () => {
+      const here = router.history.location;
+      const record = readGalleryViewerRecord(
+        (here.state as { galleryViewer?: unknown }).galleryViewer,
+      );
+      restoreFocusRef.current = false;
+      if (here.pathname !== "/gallery" || !record) {
+        setSelectedId(null);
+        return;
+      }
+      const sequence = record.ids
+        .map((id) => allArtworksRef.current.find((work) => work.id === id))
+        .filter((work): work is GalleryCollectionArtwork => Boolean(work));
+      if (!sequence.some((work) => work.id === record.id)) return;
+      finishReturnRef.current?.();
+      readingAtRef.current = record.position;
+      openerRef.current = document.querySelector<HTMLElement>(
+        `[data-gallery-artwork="${record.id}"] .gallery-work-open`,
+      );
+      window.scrollTo({ ...record.position, behavior: "instant" });
+      openerTopRef.current = openerRef.current?.getBoundingClientRect().top ?? null;
+      viewerWorksRef.current = sequence;
+      viewerIdRef.current = record.id;
+      viewerEntryRef.current = true;
+      setEditing(false);
+      setSaveMessage("");
+      setSaveError("");
+      setConfirmDelete(false);
+      setTitleConflict(null);
+      setSelectedId(record.id);
+    };
+    restore();
+    return router.history.subscribe(({ action }) => {
+      if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") restore();
+    });
+  }, [router]);
+
+  useEffect(
+    () => () => {
+      finishReturnRef.current?.();
+    },
+    [],
+  );
 
   const openWork = (event: MouseEvent<HTMLAnchorElement>, work: GalleryCollectionArtwork) => {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return;
     event.preventDefault();
+    finishReturnRef.current?.();
     readingAtRef.current = { top: window.scrollY, left: window.scrollX };
-    viewerGenerationRef.current++;
     openerRef.current = event.currentTarget;
+    openerTopRef.current = event.currentTarget.getBoundingClientRect().top;
     restoreFocusRef.current = event.detail === 0;
-    const navigationWorks = works.some((item) => item.id === work.id)
-      ? works
-      : allArtworks.filter((item) => category === "all" || item.category === work.category);
-    viewerWorksRef.current = navigationWorks.some((item) => item.id === work.id)
-      ? navigationWorks
-      : [...navigationWorks, work];
-    if (category !== "all" && category !== work.category) setCategory("all");
-    setFailedId(null);
+    viewerWorksRef.current = galleryViewerSequence(allArtworks, works, work);
+    viewerIdRef.current = work.id;
     resetEditor();
     setSelectedId(work.id);
   };
@@ -464,11 +565,25 @@ export function GalleryPage() {
     viewerWorksRef.current = [];
   };
   const moveWork = (step: number) => {
-    const next = viewerWorks[(selectedIndex + step + viewerWorks.length) % viewerWorks.length];
+    if (editing || confirmDelete || communityBusy) return;
+    const next = galleryAdjacentId(
+      viewerWorks.map((work) => work.id),
+      selectedId ?? "",
+      step,
+    );
     if (next) {
       resetEditor();
-      setFailedId(null);
-      setSelectedId(next.id);
+      viewerIdRef.current = next;
+      setSelectedId(next);
+      const here = router.history.location;
+      const record = readGalleryViewerRecord(
+        (here.state as { galleryViewer?: unknown }).galleryViewer,
+      );
+      if (record)
+        router.history.replace(here.href, {
+          ...here.state,
+          galleryViewer: { ...record, id: next },
+        });
     }
   };
   const changeFavorite = (id: string) => {
@@ -654,6 +769,8 @@ export function GalleryPage() {
 
   return (
     <div id="gallery-top" className="world gallery-page" data-gallery-page="true">
+      {mounted &&
+        createPortal(<div className="gallery-statusbar-cover" aria-hidden="true" />, document.body)}
       {arriving && (
         <div className="gallery-arrival">
           <GalleryCurtain phase="revealing" />
@@ -920,6 +1037,21 @@ export function GalleryPage() {
               お気に入りのみ{" "}
               <span>{allArtworkIds.filter((id) => favorites.includes(id)).length}</span>
             </button>
+            <label className="gallery-order">
+              <span>並び順</span>
+              <select
+                value={order}
+                onChange={(event) => setOrder(event.target.value as "number" | "newest")}
+              >
+                <option value="number">番号順</option>
+                <option value="newest">新しい作品から</option>
+              </select>
+            </label>
+            {(query || category !== "all" || favoritesOnly) && (
+              <button type="button" className="gallery-reset-filter" onClick={resetDiscovery}>
+                絞り込みを解除
+              </button>
+            )}
           </div>
           <nav className="gallery-filters" aria-label="展示の分類">
             {GALLERY_CATEGORIES.map((item) => (
@@ -1027,8 +1159,11 @@ export function GalleryPage() {
         ref={dialogRef}
         tabIndex={-1}
         aria-labelledby="gallery-viewer-title"
-        onClose={() => setSelectedId(null)}
+        onClose={(event) => {
+          if (!event.currentTarget.open) setSelectedId(null);
+        }}
         onCancel={(event) => {
+          event.preventDefault();
           if (communityBusy) {
             event.preventDefault();
             return;
@@ -1044,15 +1179,46 @@ export function GalleryPage() {
             return;
           }
           restoreFocusRef.current = true;
+          closeViewer();
         }}
         onKeyDown={(event) => {
-          if (editing || confirmDelete || event.target instanceof HTMLInputElement) return;
+          if (editing || confirmDelete || communityBusy || event.target instanceof HTMLInputElement)
+            return;
           if (event.key === "Escape") restoreFocusRef.current = true;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
             event.preventDefault();
+            if (event.repeat) return;
             restoreFocusRef.current = true;
             moveWork(event.key === "ArrowLeft" ? -1 : 1);
           }
+        }}
+        onPointerDown={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          backdropPointerRef.current =
+            event.target === event.currentTarget &&
+            (event.clientX < rect.left ||
+              event.clientX > rect.right ||
+              event.clientY < rect.top ||
+              event.clientY > rect.bottom);
+        }}
+        onPointerUp={(event) => {
+          const outside = backdropPointerRef.current;
+          backdropPointerRef.current = false;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const endedOutside =
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom;
+          if (
+            outside &&
+            endedOutside &&
+            event.target === event.currentTarget &&
+            !editing &&
+            !confirmDelete &&
+            !communityBusy
+          )
+            closeViewer();
         }}
       >
         {selected && (
@@ -1065,68 +1231,77 @@ export function GalleryPage() {
                     <span className="gallery-personal-title">{titles[selected.id]}</span>
                   )}
                 </h2>
-                <p className="gallery-storage-note">
-                  タイトルはすべての訪問者に共有され、だれでも編集できます。
-                </p>
                 {isCommunityGalleryId(selected.id) && (
                   <p className="gallery-storage-note">みんなの投稿・公開展示</p>
                 )}
               </div>
-              <div className="gallery-viewer-actions">
-                <button
-                  type="button"
-                  className="gallery-viewer-close"
-                  aria-pressed={featuredId === selected.id}
-                  disabled={editing || confirmDelete}
-                  onClick={() => changeFeature(selected.id)}
-                >
-                  {featuredId === selected.id ? "トップに設定済み" : "トップに飾る"}
-                </button>
-                <button
-                  type="button"
-                  className="gallery-viewer-close"
-                  ref={editButtonRef}
-                  disabled={
-                    !communityReady || !communityLoaded || editing || confirmDelete || communityBusy
-                  }
-                  onClick={() => {
-                    void beginTitleEdit();
-                  }}
-                >
-                  タイトルを編集
-                </button>
-                <button
-                  type="button"
-                  className="gallery-viewer-close"
-                  aria-pressed={favorites.includes(selected.id)}
-                  disabled={editing || confirmDelete}
-                  onClick={() => changeFavorite(selected.id)}
-                >
-                  {favorites.includes(selected.id) ? "♥ お気に入り" : "♡ お気に入り"}
-                </button>
-                {canDeleteSelected && (
+              <button
+                type="button"
+                className="gallery-viewer-close gallery-close-primary"
+                disabled={communityBusy}
+                onClick={closeViewer}
+              >
+                閉じる <span aria-hidden="true">×</span>
+              </button>
+              <details className="gallery-viewer-tools">
+                <summary>
+                  作品の設定<span>トップ作品・お気に入り・タイトル</span>
+                </summary>
+                <p className="gallery-storage-note">
+                  トップ作品とお気に入りは自分用に保存。タイトルはすべての訪問者に共有され、だれでも編集できます。
+                </p>
+                <div className="gallery-viewer-actions">
                   <button
                     type="button"
                     className="gallery-viewer-close"
-                    ref={deleteButtonRef}
-                    disabled={editing || communityBusy || confirmDelete}
+                    aria-pressed={featuredId === selected.id}
+                    disabled={editing || confirmDelete}
+                    onClick={() => changeFeature(selected.id)}
+                  >
+                    {featuredId === selected.id ? "トップに設定済み" : "トップに飾る"}
+                  </button>
+                  <button
+                    type="button"
+                    className="gallery-viewer-close"
+                    ref={editButtonRef}
+                    disabled={
+                      !communityReady ||
+                      !communityLoaded ||
+                      editing ||
+                      confirmDelete ||
+                      communityBusy
+                    }
                     onClick={() => {
-                      setSaveError("");
-                      setConfirmDelete(true);
+                      void beginTitleEdit();
                     }}
                   >
-                    非公開にする
+                    タイトルを編集
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="gallery-viewer-close"
-                  disabled={communityBusy}
-                  onClick={closeViewer}
-                >
-                  閉じる <span aria-hidden="true">×</span>
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    className="gallery-viewer-close"
+                    aria-pressed={favorites.includes(selected.id)}
+                    disabled={editing || confirmDelete}
+                    onClick={() => changeFavorite(selected.id)}
+                  >
+                    {favorites.includes(selected.id) ? "♥ お気に入り" : "♡ お気に入り"}
+                  </button>
+                  {canDeleteSelected && (
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      ref={deleteButtonRef}
+                      disabled={editing || communityBusy || confirmDelete}
+                      onClick={() => {
+                        setSaveError("");
+                        setConfirmDelete(true);
+                      }}
+                    >
+                      非公開にする
+                    </button>
+                  )}
+                </div>
+              </details>
               {featureMessage && (
                 <p className="gallery-storage-note" role="status">
                   {featureMessage}
@@ -1260,29 +1435,20 @@ export function GalleryPage() {
               )}
             </header>
             <div className="gallery-viewer-stage">
-              {failedId !== selected.id ? (
-                <img
-                  key={selected.id}
-                  src={selected.full}
-                  alt={selected.alt}
-                  width={selected.width}
-                  height={selected.height}
-                  decoding="async"
-                  onError={() => setFailedId(selected.id)}
-                />
-              ) : (
-                <p className="gallery-image-error">
-                  画像を読み込めませんでした。
-                  <a href={selected.medium} target="_blank" rel="noreferrer">
-                    画像を別のタブで開く
-                  </a>
-                </p>
-              )}
+              <GalleryViewerImage
+                key={selected.id}
+                work={selected}
+                neighbors={neighbors}
+                navigationDisabled={
+                  editing || confirmDelete || communityBusy || viewerWorks.length < 2
+                }
+                onMove={moveWork}
+              />
             </div>
             <footer className="gallery-viewer-footer">
               <button
                 type="button"
-                disabled={editing || confirmDelete}
+                disabled={editing || confirmDelete || communityBusy || viewerWorks.length < 2}
                 onClick={() => moveWork(-1)}
               >
                 ← 前の作品
@@ -1290,7 +1456,11 @@ export function GalleryPage() {
               <p aria-live="polite">
                 {selectedIndex + 1} / {viewerWorks.length}
               </p>
-              <button type="button" disabled={editing || confirmDelete} onClick={() => moveWork(1)}>
+              <button
+                type="button"
+                disabled={editing || confirmDelete || communityBusy || viewerWorks.length < 2}
+                onClick={() => moveWork(1)}
+              >
                 次の作品 →
               </button>
             </footer>
