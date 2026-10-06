@@ -4,11 +4,19 @@ import { readFileSync } from "node:fs";
 import {
   galleryAdjacentId,
   galleryLayoutTop,
+  galleryRevealDelta,
   gallerySwipeStep,
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
 } from "../src/components/gallery/gallery-viewer-state.ts";
+
+test("keyboard focus reveals only a clipped control within its settings viewport", () => {
+  const viewport = { top: 43, bottom: 367 };
+  assert.equal(galleryRevealDelta({ top: 366, bottom: 410 }, viewport), 43);
+  assert.equal(galleryRevealDelta({ top: 10, bottom: 54 }, viewport), -33);
+  assert.equal(galleryRevealDelta({ top: 200, bottom: 244 }, viewport), 0);
+});
 
 test("return anchor uses document layout rather than entrance animation or frozen body offsets", () => {
   const body = { offsetTop: 0, offsetParent: null };

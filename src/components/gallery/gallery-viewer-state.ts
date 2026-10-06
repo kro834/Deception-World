@@ -18,6 +18,14 @@ export function galleryLayoutTop(element: HTMLElement): number {
   return top;
 }
 
+export function galleryRevealDelta(
+  control: { top: number; bottom: number },
+  viewport: { top: number; bottom: number },
+): number {
+  if (control.top < viewport.top) return control.top - viewport.top;
+  return Math.max(0, control.bottom - viewport.bottom);
+}
+
 /** History is input, including older deployments and a restored browser session. */
 export function readGalleryViewerRecord(value: unknown): GalleryViewerRecord | null {
   if (!value || typeof value !== "object") return null;

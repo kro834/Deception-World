@@ -38,6 +38,7 @@ import { GalleryViewerImage } from "./gallery-viewer-image";
 import {
   galleryAdjacentId,
   galleryLayoutTop,
+  galleryRevealDelta,
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
@@ -51,6 +52,13 @@ import {
 } from "./gallery-titles";
 
 const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
+
+function revealGalleryControl(control: HTMLElement | null) {
+  const header = control?.closest<HTMLElement>(".gallery-viewer-header");
+  if (!header || !control) return;
+  const top = galleryRevealDelta(control.getBoundingClientRect(), header.getBoundingClientRect());
+  if (top) header.scrollBy({ top, behavior: "instant" });
+}
 
 export function GalleryPage() {
   useWorldMode();
@@ -314,13 +322,19 @@ export function GalleryPage() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (confirmDelete) confirmDeleteRef.current?.focus({ preventScroll: true });
+    if (confirmDelete) {
+      confirmDeleteRef.current?.focus({ preventScroll: true });
+      revealGalleryControl(confirmDeleteRef.current);
+    }
   }, [confirmDelete]);
 
   useEffect(() => {
-    if (editing) titleInputRef.current?.focus({ preventScroll: true });
-    else if (restoreEditFocusRef.current) {
+    if (editing) {
+      titleInputRef.current?.focus({ preventScroll: true });
+      revealGalleryControl(titleInputRef.current);
+    } else if (restoreEditFocusRef.current) {
       editButtonRef.current?.focus({ preventScroll: true });
+      revealGalleryControl(editButtonRef.current);
       restoreEditFocusRef.current = false;
     }
   }, [editing]);
@@ -406,6 +420,7 @@ export function GalleryPage() {
           : (activeIndex + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
       event.preventDefault();
       controls[nextIndex].focus({ preventScroll: true });
+      revealGalleryControl(controls[nextIndex]);
     };
     dialog.addEventListener("keydown", cycleFocus);
     // Freeze the page where the reader left it and put it back exactly on
@@ -1410,6 +1425,7 @@ export function GalleryPage() {
                           setTitleConflict(null);
                           setSaveError("");
                           titleInputRef.current?.focus({ preventScroll: true });
+                          revealGalleryControl(titleInputRef.current);
                         }}
                       >
                         最新のタイトルから再編集
