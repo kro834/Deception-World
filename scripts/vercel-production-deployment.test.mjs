@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   assertVercelCandidateRollbackMetadata,
+  assertVercelBootstrapCandidate,
   assertVercelProductionSnapshot,
   resolveVercelRollbackTarget,
   resolveVercelProductionDeployment,
@@ -12,6 +13,28 @@ import {
 const SHA = "0123456789abcdef0123456789abcdef01234567";
 const PREVIOUS_SHA = "fedcba9876543210fedcba9876543210fedcba98";
 const PROJECT_ID = "prj_archive";
+
+test("first publication requires an authenticated, verified project domain", async () => {
+  const options = { baseUrl: "https://new.vercel.app", projectId: PROJECT_ID, teamId: "team_example", token: "secret", allowUnpublished: true };
+  assert.equal(await resolveVercelProductionDeployment({ ...options, fetchImpl: async input =>
+    new URL(input).pathname.startsWith('/v4/aliases/') ? new Response('', { status: 404 }) : Response.json({ name: 'new.vercel.app', verified: true }) }), null);
+  for (const status of [401, 403, 500]) {
+    await assert.rejects(resolveVercelProductionDeployment({ ...options, fetchImpl: async () => new Response('', { status }) }), /alias lookup failed/);
+  }
+  await assert.rejects(resolveVercelProductionDeployment({ ...options, fetchImpl: async input =>
+    new URL(input).pathname.startsWith('/v4/aliases/') ? new Response('', { status: 404 }) : Response.json({ name: 'other.vercel.app', verified: true }) }), /not verified/);
+  await assert.rejects(resolveVercelProductionDeployment({ ...options, fetchImpl: async () => new Response('', { status: 404 }) }), /domain lookup failed/);
+});
+
+test("bootstrap candidate must attest the exact project, immutable URL and main SHA", async () => {
+  const options = { candidateUrl: "https://candidate.vercel.app", candidateSha: SHA, projectId: PROJECT_ID };
+  const record = { id: 'dpl_candidate', projectId: PROJECT_ID, url: 'candidate.vercel.app', meta: { githubCommitSha: SHA } };
+  assert.equal((await assertVercelBootstrapCandidate({ ...options, fetchImpl: async () => Response.json(record) })).sha, SHA);
+  await assert.rejects(assertVercelBootstrapCandidate({ ...options, candidateSha: PREVIOUS_SHA, fetchImpl: async () => Response.json(record) }), /expected main commit/);
+  await assert.rejects(assertVercelBootstrapCandidate({ ...options, projectId: 'prj_other', fetchImpl: async () => Response.json(record) }), /does not belong/);
+  await assert.rejects(assertVercelProductionSnapshot({ ...options, baseUrl: 'https://new.vercel.app', expectedUrl: '', expectedSha: '', allowUnpublished: true, fetchImpl: async input =>
+    new URL(input).pathname.startsWith('/v4/aliases/') ? Response.json({ deploymentId: 'dpl_candidate' }) : Response.json(record) }), /appeared during bootstrap/);
+});
 
 test("Production lookup resolves a public alias before inspecting the immutable deployment", async () => {
   const seen = [];

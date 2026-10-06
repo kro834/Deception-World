@@ -19,12 +19,12 @@ const packageJson = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
 
-test("the credential-free Git fallback publishes verified main builds only", () => {
-  assert.deepEqual(vercelConfig.git?.deploymentEnabled, {
-    "*": false,
-    main: true,
-  });
-  assert.equal(vercelConfig.github?.autoAlias, true);
+test("the verified workflow is the only Production publisher", () => {
+  assert.equal(vercelConfig.git?.deploymentEnabled, false);
+  assert.equal(vercelConfig.github?.autoAlias, false);
+  assert.match(workflow, /branches: \[main\]/);
+  assert.match(workflow, /vars\.APPLY_DESTRUCTIVE_MIGRATIONS == '1'/);
+  assert.doesNotMatch(readFileSync(new URL('../.vercelignore', import.meta.url), 'utf8'), /source-parts/);
   assert.equal(vercelConfig.buildCommand, "npm run release:build");
   assert.match(packageJson.scripts?.["release:build"] ?? "", /npm run lint/);
   assert.match(packageJson.scripts?.["release:build"] ?? "", /npm test/);

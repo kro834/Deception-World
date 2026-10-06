@@ -122,6 +122,7 @@ export async function resolveVercelProductionDeployment({
   token,
   teamId,
   projectId,
+  allowUnpublished = false,
   fetchImpl = fetch,
 }) {
   requiredProjectId(projectId);
@@ -131,8 +132,21 @@ export async function resolveVercelProductionDeployment({
     `/v4/aliases/${encodeURIComponent(production.hostname)}`,
     teamId,
   );
+  const aliasResponse = await fetchImpl(aliasEndpoint, { headers });
+  if (allowUnpublished && aliasResponse.status === 404) {
+    // Only bootstrap a domain actually assigned to this authenticated project.
+    // Authentication failures and domains belonging to another project fail closed.
+    const domain = await readJson(await fetchImpl(vercelEndpoint(
+      `/v9/projects/${encodeURIComponent(projectId)}/domains/${encodeURIComponent(production.hostname)}`,
+      teamId,
+    ), { headers }), "Vercel project domain lookup");
+    if (domain.name !== production.hostname || domain.verified !== true) {
+      throw new Error("Unpublished Production domain is not verified for this project");
+    }
+    return null;
+  }
   const alias = await readJson(
-    await fetchImpl(aliasEndpoint, { headers }),
+    aliasResponse,
     "Vercel Production alias lookup",
   );
   const deploymentId = aliasDeploymentId(alias);
@@ -146,6 +160,20 @@ export async function resolveVercelProductionDeployment({
   });
   if (identity.url === production.origin) {
     throw new Error("Vercel alias lookup did not resolve an immutable deployment URL");
+  }
+  return identity;
+}
+
+/** Attest the first candidate without inventing a rollback target. */
+export async function assertVercelBootstrapCandidate({ candidateUrl, candidateSha, ...options }) {
+  const url = immutableOrigin(candidateUrl, "Candidate deployment");
+  const { identity } = await resolveVercelDeploymentRecord({
+    ...options,
+    fetchImpl: options.fetchImpl ?? fetch,
+    identifier: new URL(url).hostname,
+  });
+  if (identity.url !== url || identity.sha !== candidateSha) {
+    throw new Error("Bootstrap candidate does not match the expected main commit");
   }
   return identity;
 }
@@ -309,6 +337,11 @@ export async function assertVercelProductionSnapshot({
   expectedSha,
   ...resolveOptions
 }) {
+  if (!expectedUrl && !expectedSha && resolveOptions.allowUnpublished) {
+    const current = await resolveVercelProductionDeployment(resolveOptions);
+    if (current !== null) throw new Error("Production appeared during bootstrap; refusing promotion");
+    return null;
+  }
   const expectedUrlValue = String(expectedUrl).trim();
   const normalizedExpectedUrl = new URL(expectedUrlValue).origin;
   if (normalizedExpectedUrl !== expectedUrlValue) {

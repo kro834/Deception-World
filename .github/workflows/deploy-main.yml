@@ -1,6 +1,7 @@
 name: Deploy verified main to Production
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -17,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL || 'https://sand-zenith-meadow-dune.grok.me' }}
+      PUBLIC_BASE_URL: https://deception-world.vercel.app
       VERCEL_CLI_VERSION: 59.10.0
     steps:
       - name: Check out exact main commit
@@ -85,14 +86,16 @@ jobs:
             token: process.env.VERCEL_TOKEN,
             teamId: process.env.VERCEL_ORG_ID,
             projectId: process.env.VERCEL_PROJECT_ID,
+            allowUnpublished: true,
           });
           appendFileSync(
             output,
-            `id=${deployment.id}\nurl=${deployment.url}\nsha=${deployment.sha}\n`,
+            `id=${deployment?.id ?? ''}\nurl=${deployment?.url ?? ''}\nsha=${deployment?.sha ?? ''}\n`,
           );
           NODE
 
       - name: Verify previous Production belongs to main
+        if: steps.previous.outputs.id != ''
         shell: bash
         run: |
           set -euo pipefail
@@ -113,7 +116,8 @@ jobs:
             --meta "githubCommitSha=$GITHUB_SHA" \
             --meta "archivePreviousProductionUrl=${{ steps.previous.outputs.url }}" \
             --meta "archivePreviousProductionSha=${{ steps.previous.outputs.sha }}" \
-            --build-env "APPLY_DESTRUCTIVE_MIGRATIONS=0")"
+            --build-env "APPLY_DESTRUCTIVE_MIGRATIONS=0" \
+            --build-env "PUBLIC_RELEASE_SHA=$GITHUB_SHA")"
           node -e 'const value = new URL(process.argv[1]); if (value.protocol !== "https:") process.exit(1)' "$candidate_url"
           echo "url=$candidate_url" >> "$GITHUB_OUTPUT"
 
@@ -128,9 +132,10 @@ jobs:
           set -euo pipefail
           node --input-type=module - "$GITHUB_OUTPUT" "${{ steps.candidate.outputs.url }}" "$GITHUB_SHA" "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
           import { appendFileSync } from "node:fs";
-          import { assertVercelCandidateRollbackMetadata } from "./scripts/vercel-production-deployment.mjs";
+          import { assertVercelCandidateRollbackMetadata, assertVercelBootstrapCandidate } from "./scripts/vercel-production-deployment.mjs";
           const [output, candidateUrl, candidateSha, previousUrl, previousSha] = process.argv.slice(2);
-          const candidate = await assertVercelCandidateRollbackMetadata({
+          const attest = previousUrl ? assertVercelCandidateRollbackMetadata : assertVercelBootstrapCandidate;
+          const candidate = await attest({
             candidateUrl,
             candidateSha,
             previousUrl,
@@ -144,9 +149,10 @@ jobs:
 
       - name: Smoke-test candidate and retired routes
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROTECTION_BYPASS: ${{ secrets.VERCEL_PROTECTION_BYPASS }}
         run: |
-          args=(--base-url "${{ steps.candidate.outputs.url }}")
+          args=(--base-url "${{ steps.candidate.outputs.url }}" --vercel-curl --expected-sha "$GITHUB_SHA")
           if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
             args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
           fi
@@ -166,6 +172,7 @@ jobs:
           await assertVercelProductionSnapshot({
             expectedUrl,
             expectedSha,
+            allowUnpublished: true,
             baseUrl: process.env.PUBLIC_BASE_URL,
             token: process.env.VERCEL_TOKEN,
             teamId: process.env.VERCEL_ORG_ID,
@@ -210,7 +217,7 @@ jobs:
             projectId: process.env.VERCEL_PROJECT_ID,
           });
           NODE
-          args=(--base-url "$PUBLIC_BASE_URL")
+          args=(--base-url "$PUBLIC_BASE_URL" --expected-sha "$GITHUB_SHA")
           if [ -n "$VERCEL_PROTECTION_BYPASS" ]; then
             args+=(--vercel-bypass-token "$VERCEL_PROTECTION_BYPASS")
           fi
@@ -218,7 +225,7 @@ jobs:
 
       - name: Apply destructive cleanup from the verified main SHA
         id: destructive_cleanup
-        if: steps.production_probe.outcome == 'success'
+        if: steps.production_probe.outcome == 'success' && steps.previous.outputs.id != '' && vars.APPLY_DESTRUCTIVE_MIGRATIONS == '1'
         continue-on-error: true
         shell: bash
         env:
@@ -281,7 +288,7 @@ jobs:
           npm run verify:public -- "${args[@]}"
 
       - name: Roll back only before destructive cleanup starts
-        if: always() && steps.promote.outputs.attempted == 'true' && steps.destructive_cleanup.outputs.started != 'true' && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success')
+        if: always() && steps.previous.outputs.id != '' && steps.promote.outputs.attempted == 'true' && steps.destructive_cleanup.outputs.started != 'true' && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success')
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -347,5 +354,5 @@ jobs:
           fi
 
       - name: Fail release after unsuccessful promotion
-        if: always() && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success' || steps.destructive_cleanup.outcome != 'success' || steps.post_cleanup_probe.outcome != 'success')
+        if: always() && (steps.promote.outcome != 'success' || steps.production_probe.outcome != 'success' || (steps.destructive_cleanup.outcome != 'skipped' && steps.destructive_cleanup.outcome != 'success') || (steps.post_cleanup_probe.outcome != 'skipped' && steps.post_cleanup_probe.outcome != 'success'))
         run: exit 1

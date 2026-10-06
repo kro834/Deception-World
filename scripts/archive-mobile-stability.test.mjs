@@ -128,6 +128,6 @@ test("embedded archives use one root scroller and recover stale locks throughout
 
 test("production builds regenerate embedded archives and expose the public release probe", () => {
   assert.equal(packageJson.scripts["archive:embed"], "node scripts/build-embedded-archives.mjs");
-  assert.equal(packageJson.scripts.prebuild, "npm run archive:embed");
+  assert.equal(packageJson.scripts.prebuild, "npm run archive:embed && node scripts/build-release-identity.mjs");
   assert.equal(packageJson.scripts["verify:public"], "node scripts/verify-public-deployment.mjs");
 });

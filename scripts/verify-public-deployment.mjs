@@ -1,4 +1,20 @@
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const runFile = promisify(execFile);
+
+// The CLI supplies authenticated protection access without disabling protection.
+export async function vercelCurlFetch(url) {
+  const { stdout } = await runFile("vercel", [
+    "curl", String(url), "--", "--silent", "--show-error", "--location",
+    "--max-time", "30", "--write-out", "\\n%{http_code}",
+  ], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
+  const status = Number(stdout.subarray(-3).toString());
+  if (!Number.isInteger(status) || status < 100) throw new Error("Vercel curl returned no HTTP status");
+  return new Response(stdout.subarray(0, -4), { status });
+}
 
 export const PUBLIC_SMOKE_ROUTES = [
   "/",
@@ -60,10 +76,30 @@ export async function verifyPublicDeployment({
   bypassToken,
   fetchImpl = globalThis.fetch,
   timeoutMs = 30_000,
+  expectedSha,
 } = {}) {
   if (!baseUrl) throw new Error("base URL is required");
   const origin = normalizedOrigin(baseUrl);
   const results = [];
+
+  if (expectedSha) {
+    try {
+      const response = await request(fetchImpl, new URL('/release-identity.json', origin), bypassToken, timeoutMs);
+      const identity = await response.json();
+      if (!response.ok || identity.sha !== expectedSha || !Array.isArray(identity.assets)) {
+        throw new Error('Public release does not match the expected main commit');
+      }
+      results.push({ path: '/release-identity.json', ok: true, status: response.status, kind: 'identity' });
+      for (const asset of identity.assets) {
+        if (!/^\/(gallery\/|saga-extreme-)/u.test(asset.path) || asset.path.includes('..')) throw new Error('Invalid release asset path');
+        const delivered = await request(fetchImpl, new URL(asset.path, origin), bypassToken, timeoutMs);
+        const digest = createHash('sha256').update(Buffer.from(await delivered.arrayBuffer())).digest('hex');
+        results.push({ path: asset.path, ok: delivered.ok && digest === asset.sha256, status: delivered.status, kind: 'asset' });
+      }
+    } catch (error) {
+      results.push({ path: '/release-identity.json', ok: false, status: null, kind: 'identity', error: String(error) });
+    }
+  }
 
   for (const path of PUBLIC_SMOKE_ROUTES) {
     try {
@@ -101,6 +137,8 @@ async function main() {
   const report = await verifyPublicDeployment({
     baseUrl: valueAfter("--base-url") ?? process.env.PUBLIC_BASE_URL,
     bypassToken: valueAfter("--vercel-bypass-token") ?? process.env.VERCEL_PROTECTION_BYPASS,
+    expectedSha: valueAfter("--expected-sha"),
+    fetchImpl: args.includes("--vercel-curl") ? vercelCurlFetch : globalThis.fetch,
   });
   console.log(`Public deployment smoke test: ${report.origin}`);
   for (const result of report.results) {

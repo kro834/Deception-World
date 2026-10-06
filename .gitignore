@@ -13,3 +13,4 @@ attachments
 .DS_Store
 /tmp
 *.log
+public/release-identity.json
