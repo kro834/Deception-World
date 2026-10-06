@@ -6,6 +6,7 @@
 // styles-dream-extra.css. The owner's own text stays where it is; every Japanese string here
 // comes from the data file (the source's wording), the rest are English HUD labels.
 import { DREAM_CASES } from "./dream-chapter-data";
+import { DreamStoryBacklinks } from "./dream-story-navigation";
 import {
   DREAM_AGENT_ADDITIONS,
   DREAM_AGENT_SUPPLEMENT,
@@ -222,13 +223,18 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
           const events = DREAM_CHRONICLE.filter((event) => event.case === episode.no);
           return (
             <li key={episode.no}>
-              <details className="dream-archive-fold" open={index === 0}>
+              <details
+                className="dream-archive-fold"
+                id={`dream-chronicle-case-${episode.no}`}
+                open={index === 0}
+              >
                 <FoldSummary
                   mark={`CASE ${episode.no}`}
                   title={episode.title}
                   reading={episode.reading}
                   count={`${pad2(events.length)} EVENTS`}
                 />
+                <DreamStoryBacklinks no={episode.no} from="chronicle" />
                 <ol className="dream-chronicle-list">
                   {events.map((event) => (
                     <li key={event.no} className="dream-chronicle-item">

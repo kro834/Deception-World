@@ -55,6 +55,11 @@ import {
   VoicesLeaf,
 } from "./dream-chapter-extra";
 import { DREAM_ARCHIVE_CORNERS, type DreamArchiveCornerId } from "./dream-chapter-extra-data";
+import {
+  DreamStoryBacklinks,
+  DreamStoryIndex,
+  DreamStoryNavigation,
+} from "./dream-story-navigation";
 
 /** An archive corner's title: the 目次 link and the corner's heading share it. */
 const archiveCornerTitle = (id: DreamArchiveCornerId) =>
@@ -759,18 +764,21 @@ export function DreamChapter() {
     });
   }, []);
 
-  const selectPoster = useCallback((next: number) => {
-    const wrapped = ((next % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
-    const selection = ++posterSelectionId.current;
-    setPosterLoading(true);
-    setPosterLoadFailed(false);
-    void loadPoster(wrapped).then((ready) => {
-      if (selection !== posterSelectionId.current) return;
-      if (ready) commitPoster(wrapped);
-      setPosterLoadFailed(!ready);
-      setPosterLoading(false);
-    });
-  }, [commitPoster, loadPoster]);
+  const selectPoster = useCallback(
+    (next: number) => {
+      const wrapped = ((next % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
+      const selection = ++posterSelectionId.current;
+      setPosterLoading(true);
+      setPosterLoadFailed(false);
+      void loadPoster(wrapped).then((ready) => {
+        if (selection !== posterSelectionId.current) return;
+        if (ready) commitPoster(wrapped);
+        setPosterLoadFailed(!ready);
+        setPosterLoading(false);
+      });
+    },
+    [commitPoster, loadPoster],
+  );
 
   useEffect(() => {
     if (
@@ -1147,10 +1155,16 @@ export function DreamChapter() {
               <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
             </figcaption>
-            <p className="dream-poster-load-status" role="status" hidden={!posterLoadFailed && !posterLoading}>
+            <p
+              className="dream-poster-load-status"
+              role="status"
+              hidden={!posterLoadFailed && !posterLoading}
+            >
               {posterLoadFailed
                 ? "画像を読み込めませんでした。もう一度選択してください。"
-                : posterLoading ? "ポスターを読み込み中です。" : ""}
+                : posterLoading
+                  ? "ポスターを読み込み中です。"
+                  : ""}
             </p>
           </figure>
           <div className="dream-poster-thumbnails" role="tablist" aria-label="ポスターを選択">
@@ -1545,7 +1559,11 @@ export function DreamChapter() {
         </div>
       </section>
 
-      <section id="cases" className="dream-section dream-case-section" aria-labelledby="case-title">
+      <section
+        id="cases"
+        className="dream-section dream-case-section dream-reader"
+        aria-labelledby="case-title"
+      >
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="IV">
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
@@ -1564,6 +1582,7 @@ export function DreamChapter() {
             各章のあらすじには、物語の展開・ネタバレを含みます。
           </p>
         </div>
+        <DreamStoryIndex />
         <div className="dream-story-layout">
           <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
             <p className="dream-story-eyebrow">SAGA × TOUHOU PROJECT</p>
@@ -1593,7 +1612,11 @@ export function DreamChapter() {
           >
             {DREAM_CASES.map((episode) => (
               <li key={episode.no}>
-                <details className="dream-story-case">
+                <details
+                  className="dream-story-case"
+                  id={`dream-case-${episode.no}`}
+                  data-case-no={episode.no}
+                >
                   <summary>
                     <span className="dream-story-case-number">
                       CASE <b>{episode.no}</b>
@@ -1605,12 +1628,14 @@ export function DreamChapter() {
                     <span className="dream-story-case-toggle" aria-hidden="true">
                       ＋
                     </span>
+                    <span className="dream-reader-preview">{episode.lead}</span>
                   </summary>
                   <div className="dream-story-case-body">
                     <h3>{episode.lead}</h3>
                     {episode.paragraphs.map((paragraph) => (
                       <p key={paragraph}>{paragraph}</p>
                     ))}
+                    <DreamStoryNavigation no={episode.no} />
                   </div>
                 </details>
               </li>
@@ -1629,7 +1654,7 @@ export function DreamChapter() {
           {DREAM_CASE_NOTES.map((note) => {
             const episode = DREAM_CASES.find((item) => item.no === note.no);
             return (
-              <li key={note.no}>
+              <li key={note.no} id={`dream-case-note-${note.no}`} tabIndex={-1}>
                 <p className="dream-case-note-head">
                   <span>
                     CASE <b>{note.no}</b>
@@ -1643,6 +1668,7 @@ export function DreamChapter() {
                   </p>
                 ) : null}
                 <QuoteFigure text={note.line} by={note.by} />
+                <DreamStoryBacklinks no={note.no} from="note" />
               </li>
             );
           })}

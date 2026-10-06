@@ -50,10 +50,13 @@ test("Touhou crossings explain source-specific roles, not invented alliances", (
 test("case reader uses native details without adding a modal or scroll lock", () => {
   const page = read("src/components/dream-chapter/dream-chapter.tsx");
   const cases = page.slice(
-    page.indexOf('<section id="cases"'),
+    page.indexOf('id="cases"'),
     page.indexOf('<footer className="dream-footer">'),
   );
-  assert.match(cases, /<details className="dream-story-case">/);
+  assert.match(
+    cases,
+    /<details\s+className="dream-story-case"\s+id=\{`dream-case-\$\{episode.no\}`\}/,
+  );
   assert.match(cases, /<summary>/);
   assert.match(cases, /aria-describedby="dream-story-scope"/);
   assert.match(cases, /各章のあらすじには、物語の展開・ネタバレを含みます。/);
@@ -61,6 +64,9 @@ test("case reader uses native details without adding a modal or scroll lock", ()
     cases,
     /onPointer|onTouch|preventDefault|acquireViewportScrollLock|<img|<dialog/,
   );
+  assert.match(cases, /<DreamStoryIndex \/>/);
+  assert.match(cases, /<DreamStoryNavigation no=\{episode.no\} \/>/);
+  assert.match(cases, /id=\{`dream-case-note-\$\{note.no\}`\}/);
   const css = read("src/styles-dream-story.css");
   assert.match(css, /touch-action: pan-y pinch-zoom/);
   assert.match(css, /prefers-reduced-motion: reduce/);

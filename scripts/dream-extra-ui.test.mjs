@@ -181,7 +181,10 @@ test("motion is finite or on one named view timeline, under the full gate, trans
 });
 
 test("folds are native details with a 48px summary, a drawn cell, the fuji ring and forced colours", () => {
-  assert.match(extra, /<details className="dream-archive-fold" open=\{index === 0\}>/);
+  assert.match(
+    extra,
+    /<details\s+className="dream-archive-fold"\s+id=\{`dream-chronicle-case-\$\{episode.no\}`\}\s+open=\{index === 0\}\s*>/,
+  );
   assert.match(extra, /<details key=\{group\.group\} className="dream-archive-fold">/);
   // ADDITIONAL AGENTS and INDEX are closed leaf folds (twelve rows / fifteen entries would
   // make the phone ledger and the dictionary a third longer again).
