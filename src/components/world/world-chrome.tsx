@@ -7,6 +7,7 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
+import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { DisplayName } from "@/components/name-text";
 import {
@@ -1082,7 +1083,7 @@ export function SideMenuLayer({
           <div className="side-panel-links">
             <GuardedLink
               to="/gallery"
-              assets={[]}
+              assets={GALLERY_CURTAIN_STICKERS}
               beforeNavigate={close}
               aria-current={pathname === "/gallery" ? "page" : undefined}
             >
