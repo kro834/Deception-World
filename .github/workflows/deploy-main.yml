@@ -112,10 +112,14 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -euo pipefail
+          rollback_meta=()
+          if [ -n "${{ steps.previous.outputs.url }}" ]; then
+            rollback_meta+=(--meta "archivePreviousProductionUrl=${{ steps.previous.outputs.url }}")
+            rollback_meta+=(--meta "archivePreviousProductionSha=${{ steps.previous.outputs.sha }}")
+          fi
           candidate_url="$(vercel deploy --prod --skip-domain --yes --token "$VERCEL_TOKEN" \
             --meta "githubCommitSha=$GITHUB_SHA" \
-            --meta "archivePreviousProductionUrl=${{ steps.previous.outputs.url }}" \
-            --meta "archivePreviousProductionSha=${{ steps.previous.outputs.sha }}" \
+            "${rollback_meta[@]}" \
             --build-env "APPLY_DESTRUCTIVE_MIGRATIONS=0" \
             --build-env "PUBLIC_RELEASE_SHA=$GITHUB_SHA")"
           node -e 'const value = new URL(process.argv[1]); if (value.protocol !== "https:") process.exit(1)' "$candidate_url"
