@@ -20,6 +20,11 @@ test("the viewer freezes the page and puts the reader back where they were", () 
   );
   assert.match(page, /settleGalleryViewerReturn\(/);
   assert.match(page, /galleryLayoutTop\(opener\) - originalTop/);
+  assert.match(
+    page,
+    /galleryViewer: \{ \.\.\.record, position: \{ \.\.\.record.position, top \} \}/,
+  );
+  assert.match(page, /\[viewerOpen, router, featuredId, works, titles\]/);
   assert.doesNotMatch(page, /requestAnimationFrame/);
   const router = read("src/router.tsx");
   assert.match(router, /!document.body.hasAttribute\("data-gallery-viewer-lock"\)/);

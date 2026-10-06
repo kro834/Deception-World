@@ -481,6 +481,33 @@ export function GalleryPage() {
   }, [viewerOpen, router]);
 
   useEffect(() => {
+    if (!viewerOpen) return;
+    const synchronizePosition = () => {
+      const here = router.history.location;
+      const record = readGalleryViewerRecord(
+        (here.state as { galleryViewer?: unknown }).galleryViewer,
+      );
+      if (!viewerActiveRef.current || !viewerEntryRef.current || !record) return;
+      const opener = openerRef.current;
+      const originalTop = openerTopRef.current;
+      const top =
+        opener?.isConnected && originalTop !== null
+          ? Math.max(0, readingAtRef.current.top + galleryLayoutTop(opener) - originalTop)
+          : readingAtRef.current.top;
+      // Keep Forward's saved position aligned with the same layout correction
+      // used on close, including late shared titles and a different hero ratio.
+      if (Math.abs(record.position.top - top) > 2)
+        router.history.replace(here.href, {
+          ...here.state,
+          galleryViewer: { ...record, position: { ...record.position, top } },
+        });
+    };
+    synchronizePosition();
+    window.addEventListener("resize", synchronizePosition);
+    return () => window.removeEventListener("resize", synchronizePosition);
+  }, [viewerOpen, router, featuredId, works, titles]);
+
+  useEffect(() => {
     const restore = () => {
       const here = router.history.location;
       const record = readGalleryViewerRecord(
