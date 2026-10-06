@@ -195,7 +195,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "attempted=true" >> "$GITHUB_OUTPUT"
-          vercel promote "${{ steps.candidate.outputs.url }}" --yes --timeout "5 m" --token "$VERCEL_TOKEN"
+          node scripts/switch-vercel-production.mjs promote "${{ steps.candidate_attestation.outputs.id }}" "${{ steps.candidate.outputs.url }}" "$GITHUB_SHA"
 
       - name: Verify Production before destructive cleanup
         id: production_probe
@@ -341,8 +341,7 @@ jobs:
           NODE
           )"
           if [ -n "$rollback_target" ]; then
-            vercel rollback "$rollback_target" --timeout "5 m" --token "$VERCEL_TOKEN"
-            vercel rollback status --timeout "5 m" --token "$VERCEL_TOKEN"
+            node scripts/switch-vercel-production.mjs rollback "${{ steps.previous.outputs.id }}" "$rollback_target" "${{ steps.previous.outputs.sha }}"
             node --input-type=module - "${{ steps.previous.outputs.url }}" "${{ steps.previous.outputs.sha }}" <<'NODE'
             import { assertVercelProductionSnapshot } from "./scripts/vercel-production-deployment.mjs";
             const [expectedUrl, expectedSha] = process.argv.slice(2);
