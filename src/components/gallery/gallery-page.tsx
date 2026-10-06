@@ -14,7 +14,7 @@ import {
   type GalleryTitles,
 } from "./gallery-titles";
 
-const imageSizes = "(max-width: 640px) 90vw, (max-width: 1000px) 44vw, 30vw";
+const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
 const numberFor = (artwork: GalleryArtwork) => artwork.id.slice(1).padStart(3, "0");
 
 export function GalleryPage() {
@@ -282,6 +282,7 @@ export function GalleryPage() {
             {works.map((work) => (
               <figure
                 className={`gallery-work${work.width > work.height ? " gallery-work-wide" : ""}`}
+                style={{ ["--gallery-ar" as string]: (work.width / work.height).toFixed(3) }}
                 data-gallery-artwork={work.id}
                 key={work.id}
               >
@@ -299,7 +300,7 @@ export function GalleryPage() {
                       srcSet={work.srcSet}
                       sizes={
                         work.width > work.height
-                          ? "(max-width: 640px) 90vw, (max-width: 1000px) 90vw, 62vw"
+                          ? "(max-width: 640px) 92vw, (max-width: 1000px) 60vw, 44vw"
                           : imageSizes
                       }
                       alt={work.alt}
