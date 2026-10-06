@@ -49,6 +49,8 @@ export function GalleryPage() {
   const router = useRouter();
   // The history entry the open viewer adds, so Back closes it in place.
   const viewerEntryRef = useRef(false);
+  const readingAtRef = useRef({ top: 0, left: 0 });
+  const viewerGenerationRef = useRef(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
     "all",
@@ -316,9 +318,14 @@ export function GalleryPage() {
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!viewerOpen || !dialog) return;
+    // Capture before native modal focus can scroll Safari's page.
+    const readingAt = readingAtRef.current;
+    const generation = viewerGenerationRef.current;
+    const release = acquireViewportScrollLock({ freezeBody: true });
     try {
       if (!dialog.open) dialog.showModal();
     } catch {
+      release();
       setSelectedId(null);
       return;
     }
@@ -355,8 +362,6 @@ export function GalleryPage() {
     // Freeze the page where the reader left it and put it back exactly on
     // close: an unfrozen page could come back at the top (iOS Safari), and
     // the router's reset for the entry below lands on the frozen body.
-    const readingAt = { top: window.scrollY, left: window.scrollX };
-    const release = acquireViewportScrollLock({ freezeBody: true });
     // One history entry per open viewer: a Back gesture closes the artwork
     // and stays in the gallery instead of leaving it (and returning later at
     // the top). Moving between works adds none.
@@ -373,8 +378,6 @@ export function GalleryPage() {
       // off, so the history is as it was. A Back gesture already removed it.
       if (viewerEntryRef.current) {
         viewerEntryRef.current = false;
-        if ((router.history.location.state as { galleryViewer?: boolean }).galleryViewer)
-          router.history.back();
         // Leaving the entry, the router restores the offset it filed while
         // the body was frozen (0). Once the gallery has rendered again, put
         // the reader back where they were; never on another page.
@@ -384,14 +387,24 @@ export function GalleryPage() {
           settled = true;
           stopRendered();
           window.clearTimeout(fallback);
-          window.requestAnimationFrame(() => {
-            if (router.history.location.pathname !== "/gallery") return;
-            if (Math.abs(window.scrollY - readingAt.top) > 2)
-              window.scrollTo({ ...readingAt, behavior: "instant" });
-          });
+          window.requestAnimationFrame(() =>
+            window.requestAnimationFrame(() => {
+              if (
+                router.history.location.pathname !== "/gallery" ||
+                viewerGenerationRef.current !== generation ||
+                dialog.open
+              )
+                return;
+              if (Math.abs(window.scrollY - readingAt.top) > 2)
+                window.scrollTo({ ...readingAt, behavior: "instant" });
+            }),
+          );
         };
         const stopRendered = router.subscribe("onRendered", settle);
         const fallback = window.setTimeout(settle, 600);
+        // Observe the render before requesting history navigation.
+        if ((router.history.location.state as { galleryViewer?: boolean }).galleryViewer)
+          router.history.back();
       }
       if (restoreFocusRef.current) openerRef.current?.focus({ preventScroll: true });
       else if (document.activeElement === openerRef.current) openerRef.current?.blur();
@@ -409,6 +422,8 @@ export function GalleryPage() {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return;
     event.preventDefault();
+    readingAtRef.current = { top: window.scrollY, left: window.scrollX };
+    viewerGenerationRef.current++;
     openerRef.current = event.currentTarget;
     restoreFocusRef.current = event.detail === 0;
     const navigationWorks = works.some((item) => item.id === work.id)

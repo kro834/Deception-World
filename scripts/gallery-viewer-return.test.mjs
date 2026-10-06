@@ -12,9 +12,16 @@ const css = read("src/styles-gallery.css");
 
 test("the viewer freezes the page and puts the reader back where they were", () => {
   assert.match(page, /acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
-  assert.match(page, /const readingAt = \{ top: window\.scrollY, left: window\.scrollX \}/);
+  assert.match(page, /readingAtRef.current = \{ top: window\.scrollY, left: window\.scrollX \}/);
   assert.match(page, /router\.subscribe\("onRendered", settle\)/);
-  assert.match(page, /if \(router\.history\.location\.pathname !== "\/gallery"\) return;/);
+  assert.match(page, /router\.history\.location\.pathname !== "\/gallery"/);
+  assert.ok(
+    page.indexOf("const release = acquireViewportScrollLock") < page.indexOf("dialog.showModal()"),
+  );
+  assert.ok(
+    page.indexOf('router.subscribe("onRendered", settle)') < page.indexOf("router.history.back();"),
+  );
+  assert.match(page, /viewerGenerationRef.current !== generation/);
 });
 
 test("one history entry per open viewer: Back closes it, a page close removes it", () => {
