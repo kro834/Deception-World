@@ -149,7 +149,7 @@ export function GalleryViewerImage({
             >
               再読み込み
             </button>
-            <a href={work.full} target="_blank" rel="noreferrer">
+            <a href={work.medium} target="_blank" rel="noreferrer">
               画像を別のタブで開く
             </a>
           </div>

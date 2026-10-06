@@ -61,11 +61,12 @@ try {
     await dialog.waitFor();
     await page.waitForFunction(
       () =>
-        document.querySelector(".gallery-viewer[open] .gallery-viewer-stage img")?.naturalWidth > 0,
+        document.querySelector('.gallery-viewer[open] .gallery-image-full[data-ready="true"]')
+          ?.naturalWidth > 0,
     );
     assert.equal(
       await dialog
-        .locator(".gallery-viewer-stage img")
+        .locator(".gallery-image-full")
         .evaluate((node) => getComputedStyle(node).objectFit),
       "contain",
     );
@@ -139,6 +140,10 @@ try {
         !document.querySelector(".gallery-viewer[open]") &&
         document.documentElement.style.overflow !== "hidden",
     );
+    await page.goForward();
+    await page.locator(".gallery-viewer[open]").waitFor();
+    await page.getByRole("button", { name: "閉じる", exact: true }).click();
+    await page.waitForFunction(() => !document.body.hasAttribute("data-gallery-viewer-lock"));
     assert.deepEqual(errors, [], "browser errors");
     console.log(
       `${engine} ${viewport.width}×${viewport.height}: collection, filters, viewer, focus, scroll, menu, BACK passed`,
@@ -180,7 +185,7 @@ try {
   assert.equal(await failure.locator("a").getAttribute("href"), GALLERY_ARTWORKS[0].medium);
   await recoveryPage.getByRole("button", { name: "次の作品 →" }).click();
   await recoveryPage.waitForFunction(
-    () => document.querySelector(".gallery-viewer-stage img")?.naturalWidth > 0,
+    () => document.querySelector('.gallery-image-full[data-ready="true"]')?.naturalWidth > 0,
   );
   await recoveryPage.getByRole("button", { name: "閉じる" }).click();
   await recoveryPage.locator(".gallery-viewer[open]").waitFor({ state: "hidden" });
@@ -196,7 +201,7 @@ try {
       await addedPage.locator(`[data-gallery-artwork="${work.id}"] .gallery-work-open`).click();
       const dialog = addedPage.locator(".gallery-viewer[open]");
       await dialog.waitFor();
-      const art = dialog.locator(".gallery-viewer-stage img");
+      const art = dialog.locator(".gallery-image-full");
       await art.evaluate((node) => node.decode());
       assert.equal(await art.getAttribute("src"), work.full);
       assert.equal(await dialog.locator("h2").innerText(), work.title);
