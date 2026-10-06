@@ -47,3 +47,23 @@ test("the menu's gallery link warms the stickers before the curtain closes", () 
   assert.match(curtain, /export const GALLERY_CURTAIN_STICKERS/);
   assert.match(chrome, /to="\/gallery"\s+assets=\{GALLERY_CURTAIN_STICKERS\}/);
 });
+
+test("every page warms the stickers on idle; the curtain paints them decoded; /gallery preloads them", () => {
+  const root = read("src/routes/__root.tsx");
+  const warm = read("src/lib/gallery-sticker-warmup.ts");
+  const route = read("src/routes/gallery.tsx");
+  assert.match(root, /scheduleGalleryStickerWarmup\(GALLERY_CURTAIN_STICKERS\)/);
+  assert.match(root, /<GalleryStickerWarmup \/>/);
+  // After load, on idle, low priority, decoded and held; never under Save-Data or 2G.
+  assert.match(warm, /requestIdleCallback/);
+  assert.match(warm, /addEventListener\("load"/);
+  assert.match(warm, /fetchPriority = "low"/);
+  assert.match(warm, /held\.push\(image\)/);
+  assert.match(warm, /image\.decode\(\)/);
+  assert.match(warm, /saveData/);
+  assert.match(curtain, /decoding="sync"/);
+  assert.match(
+    route,
+    /GALLERY_CURTAIN_STICKERS\.map\(\(href\) => \(\{\s*rel: "preload",\s*as: "image"/,
+  );
+});

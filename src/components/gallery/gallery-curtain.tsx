@@ -56,7 +56,12 @@ export function GalleryCurtain({
                   key={sticker.src}
                   src={stickerSrc(sticker.src)}
                   alt=""
-                  decoding="async"
+                  // Warmed and decoded ahead (gallery-sticker-warmup.ts): paint
+                  // the decoded sticker in the curtain's first frame, never
+                  // an empty spot that fills in a moment later.
+                  decoding="sync"
+                  loading="eager"
+                  fetchPriority="high"
                   draggable={false}
                   style={
                     {
