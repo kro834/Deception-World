@@ -364,6 +364,39 @@
   letter-spacing: 0.18em;
 }
 
+.gallery-feature-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  color: #c7bda9;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.gallery-feature-settings a,
+.gallery-feature-settings button {
+  padding: 8px 12px;
+  border: 1px solid #8c7956;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--gallery-brass);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gallery-feature-settings :is(a, button):focus-visible {
+  outline: 2px solid var(--gallery-brass);
+  outline-offset: 4px;
+}
+
+.gallery-feature-settings p {
+  width: 100%;
+  margin: 0;
+}
+
 .gallery-collection {
   padding-block: 12px clamp(100px, 12vw, 168px);
   scroll-margin-top: 92px;

@@ -34,6 +34,7 @@ import {
   type GalleryFavorites,
 } from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
+import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
 import {
   GALLERY_TITLE_LIMIT,
   GALLERY_TITLES_KEY,
@@ -55,6 +56,9 @@ export function GalleryPage() {
   const [query, setQuery] = useState("");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [favorites, setFavorites] = useState<GalleryFavorites>([]);
+  const [featuredId, setFeaturedId] = useState<string | null>(null);
+  const [featureMessage, setFeatureMessage] = useState("");
+  const [featureError, setFeatureError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
   const [sharedTitles, setSharedTitles] = useState<CommunityGalleryTitles>({});
@@ -122,7 +126,7 @@ export function GalleryPage() {
   const viewerWorks = navigationSnapshot.length ? navigationSnapshot : works;
   const selectedIndex = viewerWorks.findIndex((work) => work.id === selectedId);
   const viewerOpen = selected !== null;
-  const featured = GALLERY_ARTWORKS[2];
+  const featured = allArtworks.find((work) => work.id === featuredId) ?? GALLERY_ARTWORKS[2];
   const selectedPost = communityPosts.find((post) => post.id === selectedId);
   const canDeleteSelected = Boolean(session && selectedPost?.canDelete);
 
@@ -149,10 +153,24 @@ export function GalleryPage() {
     };
     load();
     loadFavorites();
+    const loadFeature = () => {
+      try {
+        setFeaturedId(
+          readGalleryFeature(
+            window.localStorage,
+            GALLERY_ARTWORKS.map((work) => work.id),
+          ),
+        );
+      } catch {
+        setFeatureError("このブラウザーではトップ作品の保存領域を利用できません。");
+      }
+    };
+    loadFeature();
     if (document.documentElement.dataset.routeCover) setArriving(false);
     const onStorage = (event: StorageEvent) => {
       if (event.key === GALLERY_TITLES_KEY || event.key === null) load();
       if (event.key === GALLERY_FAVORITES_KEY || event.key === null) loadFavorites();
+      if (event.key === GALLERY_FEATURE_KEY || event.key === null) loadFeature();
     };
     window.addEventListener("storage", onStorage);
     // A direct visit opens the cloth too; a managed route entry already owns its curtain.
@@ -453,6 +471,22 @@ export function GalleryPage() {
     setCategory("all");
     setFavoritesOnly(false);
   };
+  const changeFeature = (id: string | null) => {
+    try {
+      saveGalleryFeature(window.localStorage, id, allArtworkIds);
+      setFeaturedId(id);
+      setFeatureError("");
+      setFeatureMessage(
+        id
+          ? "トップ作品を保存しました。自分の表示だけに反映されます。"
+          : "トップ作品を初期設定に戻しました。",
+      );
+    } catch {
+      setFeatureError(
+        "トップ作品を保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。",
+      );
+    }
+  };
 
   const accessToken = async () => {
     const client = authClientRef.current;
@@ -682,6 +716,19 @@ export function GalleryPage() {
               <span>{numberFor(featured)}</span>
               {titles[featured.id] && <span>{titles[featured.id]}</span>}
             </figcaption>
+            <div className="gallery-feature-settings">
+              <a href="#gallery-collection">トップ作品を選ぶ</a>
+              {featuredId && (
+                <button type="button" onClick={() => changeFeature(null)}>
+                  初期設定に戻す
+                </button>
+              )}
+              <p>
+                作品を拡大して「トップに飾る」を選択。自分の表示だけに反映され、このブラウザーに保存されます。
+              </p>
+              {featureMessage && <p role="status">{featureMessage}</p>}
+              {featureError && <p role="alert">{featureError}</p>}
+            </div>
           </figure>
         </section>
         <section
@@ -718,7 +765,7 @@ export function GalleryPage() {
           <div className="gallery-personal-controls" aria-busy={communityBusy}>
             <div>
               <p id="gallery-community-privacy">
-                追加した画像は公開ギャラリーに保存され、すべての訪問者に表示されます。公開してよい画像を選んでください。お気に入りだけはこのブラウザーに保存されます。
+                追加した画像は公開ギャラリーに保存され、すべての訪問者に表示されます。公開してよい画像を選んでください。お気に入りとトップ作品の選択は、自分用の設定としてこのブラウザーに保存されます。
               </p>
               <p>
                 追加した画像はこのブラウザーから非公開・復元できます。ブラウザーのデータを消すと管理できなくなります。
@@ -1008,6 +1055,15 @@ export function GalleryPage() {
                 <button
                   type="button"
                   className="gallery-viewer-close"
+                  aria-pressed={featuredId === selected.id}
+                  disabled={editing || confirmDelete}
+                  onClick={() => changeFeature(selected.id)}
+                >
+                  {featuredId === selected.id ? "トップに設定済み" : "トップに飾る"}
+                </button>
+                <button
+                  type="button"
+                  className="gallery-viewer-close"
                   ref={editButtonRef}
                   disabled={
                     !communityReady || !communityLoaded || editing || confirmDelete || communityBusy
@@ -1050,6 +1106,16 @@ export function GalleryPage() {
                   閉じる <span aria-hidden="true">×</span>
                 </button>
               </div>
+              {featureMessage && (
+                <p className="gallery-storage-note" role="status">
+                  {featureMessage}
+                </p>
+              )}
+              {featureError && (
+                <p className="gallery-storage-note" role="alert">
+                  {featureError}
+                </p>
+              )}
               {confirmDelete && (
                 <div
                   className="gallery-delete-confirm"
