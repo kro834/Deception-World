@@ -1210,6 +1210,82 @@ export const GALLERY_ASSETS = [
       },
     ],
   },
+  {
+    id: "g66",
+    width: 1145,
+    height: 1374,
+    variants: [
+      {
+        path: "/gallery/g66-480.webp",
+        width: 480,
+      },
+      {
+        path: "/gallery/g66-900.webp",
+        width: 900,
+      },
+      {
+        path: "/gallery/g66-1145.webp",
+        width: 1145,
+      },
+    ],
+  },
+  {
+    id: "g67",
+    width: 1672,
+    height: 941,
+    variants: [
+      {
+        path: "/gallery/g67-480.webp",
+        width: 480,
+      },
+      {
+        path: "/gallery/g67-900.webp",
+        width: 900,
+      },
+      {
+        path: "/gallery/g67-1672.webp",
+        width: 1672,
+      },
+    ],
+  },
+  {
+    id: "g68",
+    width: 1792,
+    height: 1008,
+    variants: [
+      {
+        path: "/gallery/g68-480.webp",
+        width: 480,
+      },
+      {
+        path: "/gallery/g68-900.webp",
+        width: 900,
+      },
+      {
+        path: "/gallery/g68-1792.webp",
+        width: 1792,
+      },
+    ],
+  },
+  {
+    id: "g69",
+    width: 1536,
+    height: 1024,
+    variants: [
+      {
+        path: "/gallery/g69-480.webp",
+        width: 480,
+      },
+      {
+        path: "/gallery/g69-900.webp",
+        width: 900,
+      },
+      {
+        path: "/gallery/g69-1536.webp",
+        width: 1536,
+      },
+    ],
+  },
 ] as const;
 
 export type GalleryAsset = (typeof GALLERY_ASSETS)[number];

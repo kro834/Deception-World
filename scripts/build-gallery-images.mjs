@@ -19,7 +19,9 @@ function hash(buffer) {
 
 async function readInputs(manifestPath) {
   if (!manifestPath) {
-    throw new Error("Pass --manifest <path> to a JSON array or an ES module exporting galleryInputs.");
+    throw new Error(
+      "Pass --manifest <path> to a JSON array or an ES module exporting galleryInputs.",
+    );
   }
 
   if (manifestPath.endsWith(".json")) {
@@ -34,16 +36,34 @@ async function readInputs(manifestPath) {
 const manifestFlagIndex = process.argv.indexOf("--manifest");
 const manifestPath = manifestFlagIndex >= 0 ? process.argv[manifestFlagIndex + 1] : undefined;
 const inputs = await readInputs(manifestPath);
-if (!Array.isArray(inputs) || inputs.length === 0 || inputs.some((input) => typeof input !== "string")) {
+if (
+  !Array.isArray(inputs) ||
+  inputs.length === 0 ||
+  inputs.some((input) => typeof input !== "string")
+) {
   throw new Error("The input manifest must provide a non-empty array of exact image file paths.");
 }
 await mkdir(outputRoot, { recursive: true });
 
-const entries = [];
+// An addition uses the published catalogue rather than requiring the original
+// private attachments again. Existing IDs, metadata and delivery bytes stay put.
+const append = process.argv.includes("--append");
+const previous = append ? JSON.parse(await readFile(manifestOutput, "utf8")) : null;
+if (
+  previous &&
+  (previous.version !== 1 ||
+    previous.format !== "image/webp" ||
+    !Array.isArray(previous.items) ||
+    previous.items.some((entry, index) => entry.id !== `g${String(index + 1).padStart(2, "0")}`))
+) {
+  throw new Error("Cannot append to an invalid or out-of-order gallery catalogue.");
+}
+const entries = [...(previous?.items ?? [])];
+const existingCount = entries.length;
 let totalBytes = 0;
 
 for (const [index, inputPath] of inputs.entries()) {
-  const id = `g${String(index + 1).padStart(2, "0")}`;
+  const id = `g${String(existingCount + index + 1).padStart(2, "0")}`;
   const original = await readFile(inputPath);
   const originalHash = hash(original);
   const sourceMetadata = await sharp(original).metadata();
@@ -51,7 +71,9 @@ for (const [index, inputPath] of inputs.entries()) {
   const sourceWidth = swapsDimensions ? sourceMetadata.height : sourceMetadata.width;
   const sourceHeight = swapsDimensions ? sourceMetadata.width : sourceMetadata.height;
   if (!sourceWidth || !sourceHeight) {
-    throw new Error(`Unable to read image dimensions for manifest item ${index + 1} (${basename(inputPath)}).`);
+    throw new Error(
+      `Unable to read image dimensions for manifest item ${index + 1} (${basename(inputPath)}).`,
+    );
   }
 
   const actualWidths = [...new Set(requestedWidths.map((width) => Math.min(width, sourceWidth)))];
@@ -106,4 +128,6 @@ const assetModule = [
 await writeFile(assetModuleOutput, assetModule);
 
 const variantCount = entries.reduce((sum, entry) => sum + entry.variants.length, 0);
-console.log(`Built ${entries.length} gallery originals into ${variantCount} WebP variants (${totalBytes.toLocaleString()} bytes total).`);
+console.log(
+  `Built ${inputs.length} ${append ? "additional" : "gallery"} originals; catalogue now has ${entries.length} works and ${variantCount} variants (${totalBytes.toLocaleString()} new bytes).`,
+);

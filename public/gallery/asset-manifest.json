@@ -1854,6 +1854,122 @@
           "sha256": "27d8a82fccc4375aadf95d2e4ac1c6465852bb0435143dc09ac628df2b8f3b7d"
         }
       ]
+    },
+    {
+      "id": "g66",
+      "sourceSha256": "886c7c198e334aef8973fb94d1afd69f6200dee1ab6a8973f5dcac057abc9be9",
+      "sourceWidth": 1145,
+      "sourceHeight": 1374,
+      "variants": [
+        {
+          "path": "/gallery/g66-480.webp",
+          "width": 480,
+          "height": 576,
+          "bytes": 102892,
+          "sha256": "809b558c6acfa2a8041e7810e36d6b652629435e24050cf7b4265b979e53b941"
+        },
+        {
+          "path": "/gallery/g66-900.webp",
+          "width": 900,
+          "height": 1080,
+          "bytes": 277142,
+          "sha256": "0b97993c305ad48dc2aa84bdee75ceaed7d61872ac34c94dcffb93d0f9c8d430"
+        },
+        {
+          "path": "/gallery/g66-1145.webp",
+          "width": 1145,
+          "height": 1374,
+          "bytes": 391222,
+          "sha256": "63bdc694916d1f182e9b60291042c9023f4f9f65eac8a1a79d15148bf78762e4"
+        }
+      ]
+    },
+    {
+      "id": "g67",
+      "sourceSha256": "ee57f0007437c6856d71ec728769bbc96fd49ae8d0dc4f51ce0f777c00176668",
+      "sourceWidth": 1672,
+      "sourceHeight": 941,
+      "variants": [
+        {
+          "path": "/gallery/g67-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 54566,
+          "sha256": "fcbfa7cf6d9dcb637716301bf9c8980a6de0ad802cb92ba4137b0b2dc2354412"
+        },
+        {
+          "path": "/gallery/g67-900.webp",
+          "width": 900,
+          "height": 507,
+          "bytes": 159938,
+          "sha256": "cf6c8243762a6847b31840e69e11afeaa111e18121dc831cf580996754bd3902"
+        },
+        {
+          "path": "/gallery/g67-1672.webp",
+          "width": 1672,
+          "height": 941,
+          "bytes": 407728,
+          "sha256": "f765d13dfa542b0024f798eda2cabd5d511dfe9c2014da3106ef0e105482a289"
+        }
+      ]
+    },
+    {
+      "id": "g68",
+      "sourceSha256": "4f8a4206d3eef3bc8613983bce382ebc429a3dc9adab4428de2cff76def10a9f",
+      "sourceWidth": 1792,
+      "sourceHeight": 1008,
+      "variants": [
+        {
+          "path": "/gallery/g68-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 27274,
+          "sha256": "04e3b9631a162ebad417d469860e1ba2138d2a1a7d7c0157b1b388c1a04e4e8d"
+        },
+        {
+          "path": "/gallery/g68-900.webp",
+          "width": 900,
+          "height": 506,
+          "bytes": 81996,
+          "sha256": "9332ea62763e2541219e32b457d7199dcb845522c91d2d1433232b079226b681"
+        },
+        {
+          "path": "/gallery/g68-1792.webp",
+          "width": 1792,
+          "height": 1008,
+          "bytes": 253090,
+          "sha256": "9bf17062c8ef362a156d0bd8fb97f60c420abdf83feecae5ee2dc1a46ede528f"
+        }
+      ]
+    },
+    {
+      "id": "g69",
+      "sourceSha256": "bdc67667bef5056534ee7d6d9cfeff649c4f9503389c30f31f5b61d575da27f9",
+      "sourceWidth": 1536,
+      "sourceHeight": 1024,
+      "variants": [
+        {
+          "path": "/gallery/g69-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 60452,
+          "sha256": "afe24e0627710812e5ba45a7525c580d35d8e6948c435df3d1ff18ff8b8e56ee"
+        },
+        {
+          "path": "/gallery/g69-900.webp",
+          "width": 900,
+          "height": 600,
+          "bytes": 169216,
+          "sha256": "74e9c1bf3ed054714ebb58c518f6ffa44baa296e8eed9a2b1b366870798156a6"
+        },
+        {
+          "path": "/gallery/g69-1536.webp",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 357778,
+          "sha256": "1a82f2acced7a45f2328ed0336cd6794a0194c62183a700163858475ed122a7c"
+        }
+      ]
     }
   ]
 }

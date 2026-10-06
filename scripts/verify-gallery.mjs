@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { mkdir } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readFile } from "node:fs/promises";
 import { chromium, webkit, request } from "playwright";
 import { GALLERY_ARTWORKS } from "../src/components/gallery/gallery-data.ts";
 
@@ -98,6 +99,9 @@ try {
     await page.screenshot({ path: `${output}/gallery-${viewport.width}-viewer.png` });
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });
+    // Native close removes [open] before React's effect releases the shared
+    // scroll lock. Wait for that cleanup rather than sampling between them.
+    await page.waitForFunction(() => document.documentElement.style.overflow !== "hidden");
     assert.ok(
       await opener.evaluate((node) => document.activeElement === node),
       "opener focus not restored",
@@ -182,6 +186,37 @@ try {
   await recoveryPage.locator(".gallery-viewer[open]").waitFor({ state: "hidden" });
   await recovery.close();
 
+  // Check the newly appended exhibition at both viewing sizes, including
+  // the final work's wrap back to the start of the collection.
+  for (const width of [390, 1440]) {
+    const added = await browser.newContext({ viewport: { width, height: 900 } });
+    const addedPage = await added.newPage();
+    await addedPage.goto(base + "/gallery", { waitUntil: "networkidle" });
+    for (const work of GALLERY_ARTWORKS.slice(-4)) {
+      await addedPage.locator(`[data-gallery-artwork="${work.id}"] .gallery-work-open`).click();
+      const dialog = addedPage.locator(".gallery-viewer[open]");
+      await dialog.waitFor();
+      const art = dialog.locator(".gallery-viewer-stage img");
+      await art.evaluate((node) => node.decode());
+      assert.equal(await art.getAttribute("src"), work.full);
+      assert.equal(await dialog.locator("h2").innerText(), work.title);
+      assert.deepEqual(await art.evaluate((node) => [node.naturalWidth, node.naturalHeight]), [
+        work.width,
+        work.height,
+      ]);
+      assert.equal(await art.evaluate((node) => getComputedStyle(node).objectFit), "contain");
+      await addedPage.screenshot({ path: `${output}/gallery-${width}-${work.id}.png` });
+      if (work === GALLERY_ARTWORKS.at(-1)) {
+        await addedPage.keyboard.press("ArrowRight");
+        assert.equal(await dialog.locator("h2").innerText(), GALLERY_ARTWORKS[0].title);
+      }
+      await addedPage.getByRole("button", { name: "閉じる" }).click();
+      await dialog.waitFor({ state: "hidden" });
+      await addedPage.waitForFunction(() => document.documentElement.style.overflow !== "hidden");
+    }
+    await added.close();
+  }
+
   if (engine === "chromium") {
     const touch = await browser.newContext({
       viewport: { width: 390, height: 844 },
@@ -216,6 +251,18 @@ try {
       for (const path of new Set([work.thumb, work.medium, work.full])) {
         const response = await delivery.head(base + path);
         assert.equal(response.status(), 200, `asset delivery: ${path}`);
+      }
+    }
+    const manifest = JSON.parse(
+      await readFile(new URL("../public/gallery/asset-manifest.json", import.meta.url), "utf8"),
+    );
+    for (const work of manifest.items.slice(-4)) {
+      for (const asset of work.variants) {
+        const response = await delivery.get(base + asset.path);
+        assert.equal(response.status(), 200);
+        const bytes = await response.body();
+        assert.equal(bytes.length, asset.bytes);
+        assert.equal(createHash("sha256").update(bytes).digest("hex"), asset.sha256);
       }
     }
   } finally {

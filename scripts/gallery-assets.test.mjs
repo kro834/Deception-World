@@ -9,11 +9,11 @@ const manifest = JSON.parse(
 );
 
 test("the gallery preserves every supplied work and its unique ordered catalogue number", () => {
-  assert.equal(GALLERY_ARTWORKS.length, 65);
+  assert.equal(GALLERY_ARTWORKS.length, 69);
   assert.equal(manifest.items.length, GALLERY_ARTWORKS.length);
   assert.deepEqual(
     GALLERY_ARTWORKS.map((work) => work.id),
-    Array.from({ length: 65 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
+    Array.from({ length: 69 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
   );
   for (const work of GALLERY_ARTWORKS) {
     assert.ok(work.title.trim().length > 0 && work.alt.trim().length > 0);
@@ -22,6 +22,18 @@ test("the gallery preserves every supplied work and its unique ordered catalogue
     for (const path of [work.thumb, work.medium, work.full])
       assert.match(path, /^\/gallery\/g\d+-\d+\.webp$/);
   }
+});
+
+test("the four new exhibits follow the existing 65 without renumbering them", () => {
+  assert.deepEqual(
+    GALLERY_ARTWORKS.slice(65).map(({ id, title, category }) => ({ id, title, category })),
+    [
+      { id: "g66", title: "倉庫の組み合い", category: "scenes" },
+      { id: "g67", title: "星空の三人", category: "portraits" },
+      { id: "g68", title: "交差する星剣", category: "scenes" },
+      { id: "g69", title: "倉庫の紅と桃", category: "portraits" },
+    ],
+  );
 });
 
 test("delivery derivatives have recorded bytes, hashes and uncropped non-upscaled dimensions", () => {
