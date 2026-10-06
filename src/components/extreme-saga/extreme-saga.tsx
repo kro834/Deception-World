@@ -220,19 +220,19 @@ const CORE_SYSTEMS = [
   {
     number: "01",
     code: "LEARNING",
-    title: "同じ手は、二度と食わない。",
+    title: "受けた攻撃が、対抗策に。",
     body: "受けた攻撃と戦況を学習し、相手が同じ手で優位に立てないよう対抗手段を更新します。戦闘が続くほど、勝利へ至る経路が増えていきます。",
   },
   {
     number: "02",
     code: "DARK MATTER CHARGING",
-    title: "足りない出力は、内側から。",
+    title: "暗黒物質を、戦う出力へ。",
     body: "戦況に応じて暗黒物質系の出力を充填し、増殖した戦闘経路を実行するためのエネルギーを供給します。生み出した選択肢を、実際の攻撃へ繋げます。",
   },
   {
     number: "03",
     code: "HIGH SUPREME",
-    title: "結論を出したら、動かさない。",
+    title: "決着を固定する。",
     body: "複数の可能性から決着へ至る結果を選び、攻撃・防御・修復を同じ結論へ収束させます。ウルトラでは50秒間、その固定を限界まで強化します。",
   },
 ] as const;
@@ -667,7 +667,7 @@ export function ExtremeSaga() {
           </span>
           <article>
             <small>P14 / FIXATION</small>
-            <h3>その中から、一つだけ残す。</h3>
+            <h3>勝ち筋を、実行できる形へ。</h3>
             <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束させます。</p>
             <i className="exo-lock" aria-hidden="true" />
           </article>
@@ -768,9 +768,9 @@ export function ExtremeSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>EXTREME ARCHITECTURE</p>
           <h2>
-            <span className="exo-line">勝つための機構が、</span>
+            <span className="exo-line">学習、充填、</span>
             <br />
-            <span className="exo-line">三つもある。</span>
+            <span className="exo-line">結果固定。</span>
           </h2>
         </header>
 

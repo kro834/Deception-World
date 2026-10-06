@@ -43,6 +43,14 @@
   display: inline-block;
 }
 
+/* Keep the centred chapter title, but give the long core description a
+   stable reading edge when it occupies many lines on a phone. */
+@media (max-width: 600px) {
+  .rxs-page.rxs-page.exs-page #p14 > .rxs-section-heading > span {
+    text-align: left;
+  }
+}
+
 /* The column hero centres its copy: the bar stands above the lede, centred,
    instead of at the far left of a centred text block. */
 @media (max-width: 760px),
@@ -197,7 +205,9 @@ html[data-mode="world"]:has(.exs-page) {
 
 /* The dial locks on once after the hand-over; it never loops. */
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]):not([data-loading]) .rxs-page.rxs-page.exs-page .exs-dial {
+  html:not([data-world-effects="economy"]):not([data-loading])
+    .rxs-page.rxs-page.exs-page
+    .exs-dial {
     animation: ex-dial-lock 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }

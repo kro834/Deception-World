@@ -117,7 +117,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "DESTINY / LIBERATION",
+        kicker: "来歴",
         title: "仲間と夢を叶え、奪われた世界を取り戻す。",
         body: [
           "元は何の変哲もない十九歳の青年だったが、『サーガの世界』で物語の主人公シエルに選ばれてしまう。管理人から人類殲滅を強要され、仮面ライダーサーガとして世界を滅ぼす運命を背負ううち、精神は退廃していった。",
@@ -126,15 +126,15 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "BATTLE / DISTANCE",
-        title: "生身を避け、能力と射程で戦場を制する。",
+        kicker: "戦い方",
+        title: "変身後の能力を活かした遠距離戦。",
         body: [
           "生身の身体能力は低く、変身前の交戦を徹底して避ける。変身後は万物を拒絶する半汎用式ライダーシステムを駆使し、能力を多用した遠距離戦で本領を発揮する。",
         ],
       },
       {
         no: "03",
-        kicker: "POWER / SAGA SYSTEM",
+        kicker: "サーガシステム",
         // A zero-width space lets the title break between 半汎用式 and
         // ライダーシステム: phrase breaking otherwise keeps the compound whole,
         // and a phone column of 360-390px then splits it as システ／ム。
@@ -183,13 +183,13 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           },
           {
             name: "ユナイトエッジ",
-            body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。",
+            body: "分離した二刀で一点を貫き、攻撃の結果を固定する。最大8888次元の結果を保持し、悪夢だけを剥離する。",
           },
         ],
         finishers: [
           {
             name: "ハイグリーム・エッジ",
-            body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。",
+            body: "四段階チャージで放つ強斬撃。初撃を避けられても、相手が回避した先に合わせて二撃目を固定する。",
           },
           {
             name: "エクスプリームビッグバン",
@@ -309,7 +309,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           },
           {
             name: "デウスシフト・レクソナンスパーク",
-            body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。",
+            body: "LOWからULTRAまで出力を段階的に上昇させ、エフェクティブ・エリアを足先一点へ圧縮する最終必殺技。肉体、装甲、位相、再生、管理権限を解析し、最も効率よく破壊できる深度へ全攻撃力を通す。",
           },
         ],
         weaponGallery: [

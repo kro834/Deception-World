@@ -188,18 +188,18 @@ export function LejasPage() {
           sections={[
             {
               no: "01",
-              kicker: "AUTHORITY / BOARD",
-              title: "対立する目的が生まれた瞬間、世界は盤面になる。",
+              kicker: "盤面と勝敗の管轄",
+              title: "世界を、勝負の盤面へ。",
             },
             {
               no: "02",
-              kicker: "PERSONALITY / TRUE DECEPTION",
+              kicker: "人物と情報の提示",
               title: "正しい情報だけで、相手自身に間違わせる。",
             },
             {
               no: "03",
-              kicker: "BATTLE / USED OPTIONS",
-              title: "最善手を選び続けた先に、敗北だけを残す。",
+              kicker: "戦い方",
+              title: "逃走も必殺技も、使い切らせる。",
             },
           ]}
         />
@@ -207,22 +207,22 @@ export function LejasPage() {
           <article className="manager-copy-section" id="character-section-01">
             <div className="manager-copy-heading">
               <span>01</span>
-              <p>AUTHORITY / BOARD</p>
-              <h2>対立する目的が生まれた瞬間、世界は盤面になる。</h2>
+              <p>盤面と勝敗の管轄</p>
+              <h2>世界を、勝負の盤面へ。</h2>
             </div>
             <div className="manager-copy-body">
               <p>
                 『盤面』『役割』『選択肢』『勝敗条件』を管轄する六詠第四位の管理人。一位とレックスには明確な隔たりがあるが、残る四名の中では戦闘能力、管理権限、策略の全てにおいて最強であり、同時に最も悪趣味とされる。
               </p>
               <p>
-                他者の意志や感情を直接操らず、命令もせず、存在しない事実も示さない。真実の一部だけを適切な順序で見せ、選択可能な行動を配置し、相手自身に望ましい一手を選ばせる。
+                意志や感情の直接操作、命令、虚偽の提示を使わず、真実の一部だけを適切な順序で見せる。選択可能な行動を配置し、相手自身に望ましい一手を選ばせる。
               </p>
             </div>
           </article>
           <article className="manager-copy-section" id="character-section-02">
             <div className="manager-copy-heading">
               <span>02</span>
-              <p>PERSONALITY / TRUE DECEPTION</p>
+              <p>人物と情報の提示</p>
               <h2>正しい情報だけで、相手自身に間違わせる。</h2>
             </div>
             <div className="manager-copy-body">
@@ -234,8 +234,8 @@ export function LejasPage() {
           <article className="manager-copy-section" id="character-section-03">
             <div className="manager-copy-heading">
               <span>03</span>
-              <p>BATTLE / USED OPTIONS</p>
-              <h2>最善手を選び続けた先に、敗北だけを残す。</h2>
+              <p>戦い方</p>
+              <h2>逃走も必殺技も、使い切らせる。</h2>
             </div>
             <div className="manager-copy-body">
               <p>
@@ -299,11 +299,11 @@ export function LejasPage() {
             arsenal: [
               {
                 name: "ノー・リーガムーブ",
-                body: "大剣。対象の合法手を斬り、直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。",
+                body: "対象の合法手を斬る大剣。直前に選んだ回避、防御、反撃、能力発動を一時的に再使用不能とする。",
               },
               {
                 name: "チェックメイト・バスティオン",
-                body: "盾。受けた攻撃を一手として記録し、同系統を自動減衰する。",
+                body: "受けた攻撃を一手として記録し、同系統の攻撃を自動減衰する盾。",
               },
             ],
             finishers: [

@@ -222,15 +222,52 @@
   background: linear-gradient(180deg, #181019, #0c0810 72%);
 }
 
-/* On portrait phones the inherited layout places these two vertical
-   labels outside the paper, so they retain their light stage ink. */
-@media (max-width: 760px) and (min-height: 521px) {
+/* Six intertitles read as two complete rows on the wide programme. */
+@media (min-width: 1100px) {
+  .dream-page.dream-page .dream-case-notes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Equipment names may wrap; their small editorial labels stay whole. */
+.dream-page.dream-page .dream-agent-rider > span > small {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* The synopsis keeps its vertical columns on portrait phones. Place its
+   title and signature above and below them so neither leaves the paper. */
+@media (max-width: 480px) and (min-height: 521px) {
+  .dream-page.dream-page .dream-prologue-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding-inline: 12px;
+  }
+
   .dream-page.dream-page .dream-prologue-card h2 {
-    color: var(--ts-kin-light);
+    writing-mode: horizontal-tb;
+    color: #79353c;
+    text-align: center;
+    padding-inline-start: 0.6em;
+  }
+
+  .dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
+    flex: none;
   }
 
   .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-    color: var(--ts-ginnezu);
+    writing-mode: horizontal-tb;
+    flex-direction: column;
+    align-self: center;
+    gap: 8px;
+    width: 100%;
+    height: auto;
+    padding: 16px 8px 0;
+    border-top: 1px solid rgb(110 44 53 / 24%);
+    color: #655766;
+    text-align: center;
+    text-wrap: balance;
   }
 }
 

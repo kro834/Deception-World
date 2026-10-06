@@ -65,7 +65,7 @@ test("Reemu dossier replaces the obsolete observation authority without weakenin
     "固定管轄なし",
     "状況、責任、因果、運命",
     "言い訳を現実にする男",
-    "出力は並の管理人を大きく上回る",
+    "並の管理人を大きく上回る出力",
     "ディルクルムサーガを圧倒",
   ]) {
     assert.ok(reemu.includes(value), `Reemu dossier should include ${value}`);

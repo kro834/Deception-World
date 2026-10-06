@@ -88,7 +88,10 @@ const FULL_GATE =
   /^html:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\) \.rxs-page\.rxs-page\.exs-page\[data-motion-ready="true"\]/;
 
 test("the sheet loads on /extreme-saga only, after the edition and before the cinematic sheet", () => {
-  assert.match(route, /import extremeOverdriveCssUrl from "@\/styles-extreme-overdrive\.css\?url";/);
+  assert.match(
+    route,
+    /import extremeOverdriveCssUrl from "@\/styles-extreme-overdrive\.css\?url";/,
+  );
   const links = route.slice(route.search(/links:\s*\[/));
   const edition = links.indexOf("href: extremeEditionCssUrl");
   const overdrive = links.indexOf("href: extremeOverdriveCssUrl");
@@ -156,12 +159,17 @@ test("keyframes are its own, move only opacity, transforms and clip-path, and tu
   const used = new Set(
     rules.flatMap(({ body }) =>
       [...declarations(body, "animation"), ...declarations(body, "animation-name")].flatMap(
-        (value) => [...value.matchAll(/(?<![-\w])((?:exo|ex|mx)-[\w-]+)/g)].map((match) => match[1]),
+        (value) =>
+          [...value.matchAll(/(?<![-\w])((?:exo|ex|mx)-[\w-]+)/g)].map((match) => match[1]),
       ),
     ),
   );
   for (const name of used) {
-    if (name.startsWith("exo-")) assert.ok(keyframes.some((frame) => frame.name === name), name);
+    if (name.startsWith("exo-"))
+      assert.ok(
+        keyframes.some((frame) => frame.name === name),
+        name,
+      );
     else assert.equal(name, "ex-dial-lock", name);
   }
 });
@@ -285,7 +293,10 @@ test("12px floor, no !important, no images but the site's own two forms, a force
   const backdrops = rules.filter(({ body }) => /url\(/.test(body));
   assert.equal(backdrops.length, 2);
   for (const { selector, body } of backdrops) {
-    const [, form] = selector.match(/#exs-stage-panel\[data-exo-cut="true"\] figure\[data-form="(ultra|middle)"\]$/) ?? [];
+    const [, form] =
+      selector.match(
+        /#exs-stage-panel\[data-exo-cut="true"\] figure\[data-form="(ultra|middle)"\]$/,
+      ) ?? [];
     assert.ok(form, selector);
     assert.match(body, form === "ultra" ? /saga-extreme-middle/ : /saga-extreme-ultra/, selector);
   }
@@ -304,15 +315,24 @@ test("12px floor, no !important, no images but the site's own two forms, a force
   );
   assert.match(forced, /\.rxs-hero h1::after/);
   // The stage art holds still on scroll, so the old form lines up behind a cut.
-  assert.match(css, /\.rxs-page\.rxs-page\.exs-page #exs-stage-panel figure img \{\s*animation: none;/);
+  assert.match(
+    css,
+    /\.rxs-page\.rxs-page\.exs-page #exs-stage-panel figure img \{\s*animation: none;/,
+  );
   assert.match(forced, /\.rxs-hero h1 \{\s*background-image: none;\s*filter: none;/);
   // Economy: a change of form simply stands.
   assert.match(
     css,
     /html\[data-world-effects="economy"\] \.rxs-page\.rxs-page\.exs-page #exs-stage-panel figure \{\s*animation: none;/,
   );
-  assert.match(forced, /\.rxs-bars i\.is-rexonance, \.rxs-comparison-key \.is-rexonance\) \{\s*background: CanvasText;/);
-  assert.match(forced, /#exs-stage-panel\[data-exo-cut="true"\] figure\[data-form\] \{\s*background: Canvas;/);
+  assert.match(
+    forced,
+    /\.rxs-bars i\.is-rexonance, \.rxs-comparison-key \.is-rexonance\) \{\s*background: CanvasText;/,
+  );
+  assert.match(
+    forced,
+    /#exs-stage-panel\[data-exo-cut="true"\] figure\[data-form\] \{\s*background: Canvas;/,
+  );
   // Transitions run only with motion allowed and outside economy rendering.
   for (const { selector, body, context } of rules) {
     if (!declarations(body, "transition").some((value) => value !== "none")) continue;
@@ -351,7 +371,9 @@ test("the blocks with scroll choreography and the comparator skip the hidden rev
 });
 
 test("the component adds only textless, hidden ornaments, line wrappers and the cut flag", () => {
-  const visual = component.match(/<div className="rxs-hero-visual" aria-hidden="true">[\s\S]*?<\/div>/)?.[0];
+  const visual = component.match(
+    /<div className="rxs-hero-visual" aria-hidden="true">[\s\S]*?<\/div>/,
+  )?.[0];
   assert.ok(visual);
   for (const ornament of ["exs-dial", "exo-zone", "exo-rev", "exo-shock"]) {
     assert.ok(visual.includes(`<i className="${ornament}" />`), ornament);
@@ -370,7 +392,7 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
     ["肉弾戦なら、", "話が早い。"],
     ["可能性は増やす。", "答えは一つ。"],
     ["ミドルで育てて、", "ウルトラで決める。"],
-    ["勝つための機構が、", "三つもある。"],
+    ["学習、充填、", "結果固定。"],
     ["長期戦なら、", "なおさら歓迎。"],
   ]) {
     assert.match(
@@ -381,7 +403,9 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
     );
   }
   // The coupling between the processors carries no glyph (COPY3-extreme E2).
-  const specs = component.match(/<div className="rxs-specs rxs-reveal">[\s\S]*?<\/div>\s*<\/section>/)?.[0];
+  const specs = component.match(
+    /<div className="rxs-specs rxs-reveal">[\s\S]*?<\/div>\s*<\/section>/,
+  )?.[0];
   assert.ok(specs);
   assert.match(specs, /<i className="exo-joint" aria-hidden="true" \/>/);
   assert.doesNotMatch(specs, /×/);
@@ -391,7 +415,10 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
   // selection at once, the selection handlers are the original ones.
   assert.match(component, /const STAGE_CUT_GAP_MS = 1100;/);
   assert.match(component, /const \[stageCut, setStageCut\] = useState\(false\);/);
-  assert.match(component, /const \[shownStage, setShownStage\] = useState<ExtremeStage>\("middle"\);/);
+  assert.match(
+    component,
+    /const \[shownStage, setShownStage\] = useState<ExtremeStage>\("middle"\);/,
+  );
   assert.match(
     component,
     /useLayoutEffect\(\(\) => \{\s*if \(shownStage === stage\) return;\s*const cut = \(\) => \{\s*lastCutRef\.current = performance\.now\(\);\s*setStageCut\(true\);\s*setShownStage\(stage\);\s*\};\s*const wait = lastCutRef\.current \+ STAGE_CUT_GAP_MS - performance\.now\(\);\s*if \(wait <= 0\) \{\s*cut\(\);\s*return;\s*\}\s*const timer = window\.setTimeout\(cut, wait\);\s*return \(\) => window\.clearTimeout\(timer\);\s*\}, \[stage, shownStage\]\);/,
@@ -436,6 +463,9 @@ test("the copy keeps the 2026-10-02 voice and the meta speaks it (COPY3-extreme 
     route,
     /"殴り合い、歓迎。戦うほど勝ち筋が増すエクスプリームサーガの公式特設サイト。標準性能と専用P14、ディルクルムサーガ／ヴィンクルムサーガとのカタログ比較を、負けた欄まで隠さず並べています。"/,
   );
-  assert.match(route, /content: "殴り合い、歓迎。長引くほど、こっちのもの。エクスプリームサーガ公式特設サイト。"/);
+  assert.match(
+    route,
+    /content: "殴り合い、歓迎。長引くほど、こっちのもの。エクスプリームサーガ公式特設サイト。"/,
+  );
   assert.doesNotMatch(route, /至高、極まれり/);
 });

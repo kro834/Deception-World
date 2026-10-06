@@ -82,10 +82,22 @@ test("the annex data is complete", () => {
 
 test("the view contract still detects changes to story data, copy and layout", () => {
   const original = worldViewContract(home);
-  assert.notEqual(worldViewContract(home.replace('title: "脚本制と採録制"', 'title: "変更"')).records, original.records);
-  assert.notEqual(worldViewContract(home.replace("救うべき世界は、目の前にある。", "変更")).markup, original.markup);
-  assert.notEqual(worldViewContract(home.replace('className="riders-section"', 'className="changed"')).markup, original.markup);
-  assert.deepEqual(worldViewContract(home.replace("onClick={shufflePoster}", "onClick={revisedHandler}")), original);
+  assert.notEqual(
+    worldViewContract(home.replace('title: "脚本制と採録制"', 'title: "変更"')).records,
+    original.records,
+  );
+  assert.notEqual(
+    worldViewContract(home.replace("救うべき世界は、目の前にある。", "変更")).markup,
+    original.markup,
+  );
+  assert.notEqual(
+    worldViewContract(home.replace('className="riders-section"', 'className="changed"')).markup,
+    original.markup,
+  );
+  assert.deepEqual(
+    worldViewContract(home.replace("onClick={shufflePoster}", "onClick={revisedHandler}")),
+    original,
+  );
 });
 
 test("each annex is its own section, listed in the contents", () => {
@@ -209,16 +221,12 @@ test("the PROFILE switch reads as a control and stays under the finger", () => {
   assert.match(annex, /if \(!summary \|\| before === undefined\) return;/);
   assert.match(annex, /window\.scrollBy\(\{ top: shift, behavior: "instant" \}\)/);
   assert.match(annex, /getComputedStyle\(summary\)\.scrollMarginTop/);
-  // The plate: a boxed, filled switch with a 44px hit area and a gold state
-  // cell; open lights the plate and fills the cell. CLOSE is generated with
-  // an empty alt so the accessible name stays "<name> PROFILE".
+  // The disclosure retains a 44px hit area and a reversed open chevron.
+  // CLOSE is generated with an empty alt so the accessible name stays
+  // "<name> PROFILE"; its quiet reading row is distinct from the file exit.
   assert.match(
     css,
-    /\.wa-profile > summary,\s*\.site-shell\.film-edition\.mirage-edition \.wa-doc > summary \{[^}]*min-height: 44px;[^}]*border: 1px solid var\(--mr-line-strong\);[^}]*background: rgb\(122 232 255 \/ 6%\);/,
-  );
-  assert.match(
-    css,
-    /\.wa-profile\[open\] > summary::after,\s*\.site-shell\.film-edition\.mirage-edition \.wa-doc\[open\] > summary > i \{\s*border-color: var\(--mr-gold\);\s*background: var\(--mr-gold\);/,
+    /\.wa-profile > summary,\s*\.site-shell\.film-edition\.mirage-edition \.wa-doc > summary \{[^}]*min-height: 44px;/,
   );
   assert.match(css, /\.wa-profile\[open\] > summary::before,[^{]*\{[^}]*rotate: -135deg;/);
   assert.match(

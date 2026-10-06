@@ -124,7 +124,7 @@ export function CielPage() {
           </div>
           <figcaption>
             <p>{SAGA.civilian.kicker}</p>
-            <small>変身前ビジュアル // CONFIRMED</small>
+            <small>変身前の姿</small>
             <h2>{SAGA.civilian.name}</h2>
             <p>{SAGA.civilian.body}</p>
             {SAGA.civilian.cv ? <p>CV {SAGA.civilian.cv}</p> : null}

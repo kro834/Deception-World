@@ -528,17 +528,16 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           <br />
           まだ標準。
         </h2>
-        {/* Two sentences of two phrases each, so iPhone Safari never splits a
-            phrase (rx2/COPY2.md C2, L1). 「とも」 names the selected baseline
-            as one partner among several: the cards below have their own. */}
+        {/* Keep each phrase intact on narrow screens; the selected baseline
+            applies to the standard-value comparison below. */}
         <span>
           <span>
-            <span>{activePerformanceBaseline.label}サーガとも、</span>
-            <span>標準値どうし。</span>
+            <span>{activePerformanceBaseline.label}サーガと、</span>
+            <span>標準値で比較。</span>
           </span>
           <span>
-            <span>マックスとウルトラは、</span>
-            <span>まだ出していません。</span>
+            <span>マックスとウルトラの数値は、</span>
+            <span>未公表です。</span>
           </span>
         </span>
       </header>
@@ -639,7 +638,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         >
           <header>
             <small>PROCESSING ARCHITECTURE</small>
-            <h3>物差しが違えば、比べない。</h3>
+            <h3>演算は、系統ごとに。</h3>
           </header>
           <div>
             <section>
@@ -1116,7 +1115,7 @@ export function RexonanceSaga() {
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / FOURTEENTH GENERATION</small>
-            <h3>全開でも、崩れない。</h3>
+            <h3>最大出力を支える、安定性。</h3>
             <p>
               入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
             </p>

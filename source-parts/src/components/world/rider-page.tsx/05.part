@@ -35,7 +35,7 @@
           </div>
           <figcaption>
             <p>{rider.civilian.kicker}</p>
-            <small>変身前ビジュアル // CONFIRMED</small>
+            <small>変身前の姿</small>
             <h2>{rider.civilian.name}</h2>
             <p>{rider.civilian.body}</p>
             {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}

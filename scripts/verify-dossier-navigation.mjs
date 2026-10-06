@@ -81,7 +81,7 @@ try {
     await page.waitForURL("**#dossier-index");
     const contents = page.locator(".dossier-contents a");
     assert.equal(await contents.count(), 3);
-    assert.ok((await contents.first().textContent()).includes("世界は盤面になる"));
+    assert.ok((await contents.first().textContent()).includes("世界を、勝負の盤面へ。"));
     for (const anchor of await page.locator(".dossier-reader-links a").all()) {
       assert.ok((await anchor.boundingBox()).height >= 48);
     }

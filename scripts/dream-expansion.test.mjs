@@ -42,13 +42,14 @@ test("Dream preserves posters, headline dossiers and combat records outside appr
   const start = existing.indexOf("export const DREAM_CASES =");
   const end = existing.indexOf("export type DossierSection =");
   assert.ok(start > 0 && end > start, "only the case/crossing prose region is exempted");
-  // Hash computed from the same two unedited regions of the pre-rewrite file.
-  // Exact case wording is protected separately in owner-copy.test.mjs.
+  // These regions retain the posters, names, quotes and combat records.
+  // The reviewed Lupin summaries describe inherited specifications without
+  // the former editorial instructions; exact cases have their own guard.
   assert.equal(
     createHash("sha256")
       .update(existing.slice(0, start) + existing.slice(end))
       .digest("hex"),
-    "d2718d4f847779c62d2fe143ecabfc1f300f7a2df82a9a6564e827bdd6646d49",
+    "757d90092e2d40428c81b4cdefc919af0e39a7208b892a30fdea5a2124f08957",
   );
   assert.deepEqual(
     DREAM_CASES.map(({ no, title, reading }) => `${no}${title}${reading}`),

@@ -117,7 +117,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "DESTINY / LIBERATION",
+        kicker: "来歴",
         title: "仲間と夢を叶え、奪われた世界を取り戻す。",
         body: [
           "元は何の変哲もない十九歳の青年だったが、『サーガの世界』で物語の主人公シエルに選ばれてしまう。管理人から人類殲滅を強要され、仮面ライダーサーガとして世界を滅ぼす運命を背負ううち、精神は退廃していった。",
@@ -126,15 +126,15 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "BATTLE / DISTANCE",
-        title: "生身を避け、能力と射程で戦場を制する。",
+        kicker: "戦い方",
+        title: "変身後の能力を活かした遠距離戦。",
         body: [
           "生身の身体能力は低く、変身前の交戦を徹底して避ける。変身後は万物を拒絶する半汎用式ライダーシステムを駆使し、能力を多用した遠距離戦で本領を発揮する。",
         ],
       },
       {
         no: "03",
-        kicker: "POWER / SAGA SYSTEM",
+        kicker: "サーガシステム",
         // A zero-width space lets the title break between 半汎用式 and
         // ライダーシステム: phrase breaking otherwise keeps the compound whole,
         // and a phone column of 360-390px then splits it as システ／ム。
@@ -183,13 +183,13 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           },
           {
             name: "ユナイトエッジ",
-            body: "分離した二刀を一点貫通と結果固定へ特化。最大8888次元の結果を保持し、悪夢だけを剥離する。",
+            body: "分離した二刀で一点を貫き、攻撃の結果を固定する。最大8888次元の結果を保持し、悪夢だけを剥離する。",
           },
         ],
         finishers: [
           {
             name: "ハイグリーム・エッジ",
-            body: "四段階チャージで放つ強斬撃。初撃を避けられても回避後へ最適化した二撃目を固定する。",
+            body: "四段階チャージで放つ強斬撃。初撃を避けられても、相手が回避した先に合わせて二撃目を固定する。",
           },
           {
             name: "エクスプリームビッグバン",
@@ -309,7 +309,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           },
           {
             name: "デウスシフト・レクソナンスパーク",
-            body: "LOWからULTRAまで出力を段階上昇させ、エフェクティブ・エリアを足先一点へ圧縮。肉体、装甲、位相、再生、管理権限を解析し、最も破壊効率の高い深度へ全攻撃力を通す最終必殺技。",
+            body: "LOWからULTRAまで出力を段階的に上昇させ、エフェクティブ・エリアを足先一点へ圧縮する最終必殺技。肉体、装甲、位相、再生、管理権限を解析し、最も効率よく破壊できる深度へ全攻撃力を通す。",
           },
         ],
         weaponGallery: [
@@ -348,7 +348,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "月城 悠真",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "『サーガの世界』でシエルに選ばれた青年。仲間と夢を叶えるために戦う。",
       cv: "坂田将吾",
     },
@@ -369,7 +369,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       sections: [
         {
           no: "01",
-          kicker: "ORIGIN / ANOTHER CIEL",
+          kicker: "誕生の経緯",
           title: "シエルの魂から生まれた、もう一人のシエル。",
           body: [
             "『仮面ライダーサーガ ドリームチャプター』Case 1では声のみで現れ、Case 2で姿と正体を明かした特別なナイトメア。通常のナイトメアが夢主の深層心理へ侵入して悪夢を生むのに対し、彼女はシエルの魂に引き寄せられて誕生した。",
@@ -377,15 +377,15 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         },
         {
           no: "02",
-          kicker: "APPEARANCE / PERSONA",
-          title: "慈愛と嘲笑を、同じ穏やかさで語る脚本家。",
+          kicker: "外見",
+          title: "薔薇とレースを纏う、女性型のナイトメア。",
           body: [
             "青い巨大な衣装を纏う女性型の大柄なナイトメア。ドレス、喪服、花嫁衣装、舞台衣装のいずれにも見える装いには、白銀のレース、赤と青の薔薇が刻まれる。フードの内側に人の顔はなく、花弁のように開閉する赤黒い発光体の中心へ白い瞳が一つだけ浮かぶ。",
           ],
         },
         {
           no: "03",
-          kicker: "NIGHTMARE / REJECTION",
+          kicker: "拒絶の力",
           title: "『それ、いらない』で攻撃の到達を拒む。",
           body: [
             "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
@@ -394,7 +394,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       ],
     },
     special: {
-      kicker: "FINAL STAGE / STORY SITE",
+      kicker: "ファイナルステージ",
       name: "ファーフロムサーガ",
       en: "FAR FROM SAGA",
       sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
@@ -434,8 +434,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "REALMS / COMMANDER",
-        title: "一人で作戦本部として機能する帰還者。",
+        kicker: "REALMSでの役割",
+        title: "前線で戦いながら、部隊の戦況を管理する。",
         body: [
           "ベル・アレインは、検体災害と高危険度異常存在へ対抗するREALMSの元日本支部リーダー。創設者ソル・アレインと英国人の母の息子で、レルムズドライバー唯一の完全適合者である。",
           "自ら前線へ出ながら戦況、人員、被害予測、敵の進路を同時管理する。出生や来歴の全貌は組織内でも不明。",
@@ -443,7 +443,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "PERSONALITY / DECISION",
+        kicker: "人物と判断基準",
         title: "軽口を絶やさず、共存できるかを見極める。",
         body: [
           "明るく親しみやすく、冗談や軽口で場を動かす一方、意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。外見や出自に惑わされず、共存できるかどうかで判断する。",
@@ -451,7 +451,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "03",
-        kicker: "BODY / COMBAT",
+        kicker: "外見と戦闘",
         title: "生身でも、この世界で最強とされる。",
         body: [
           "黒く染めた髪、淡い蒼の瞳、長い耳を持ち、白いコートを好む。反射神経、空間認識、情報処理に秀で、初手の必殺技と欺瞞を織り交ぜる。",
@@ -523,11 +523,11 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "ベル・アレイン",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "REALMS元日本支部リーダー。レルムズドライバー唯一の完全適合者。",
     },
     special: {
-      kicker: "FINAL STAGE / STORY SITE",
+      kicker: "ファイナルステージ",
       name: "レルムロイヤル",
       en: "REALM ROYAL",
       sub: "ROYAL / WRATH / ABYSS / BIRTH / NEHAN",
@@ -571,7 +571,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "POSITION / PRESENT",
+        kicker: "現在の立場",
         title: "世界を弄んだ管理人は、かつての敵と並び立つ。",
         body: [
           "サーガ世界の管理人であり、かつてシエルを殺害した経験を持つ。現在は諸事情によって弱体化し、過去に敵対した者たちとの共闘へ臨んでいる。",
@@ -579,8 +579,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "PERSONALITY / COWARDICE",
-        title: "善意も悪意も、自分で踏みにじる。",
+        kicker: "人物と過去",
+        title: "憂さ晴らしに創造した世界を、バッドエンドへ導いた。",
         body: [
           "自己肯定感は低いが、プライドは高い。口論で大敗した際の憂さ晴らしとしてサーガ世界を創造し、そこで偶然行った人助けを感謝されて舞い上がった結果、『仮面ライダーサーガ』の結末をバッドエンドへ導いた。",
         ],
@@ -636,7 +636,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "ローア",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "サーガ世界を創造した管理人。弱体化した今は、かつての敵と共闘している。",
       cv: "小林千晃",
     },
@@ -661,7 +661,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     forms: REX_LOI.rider ? [REX_LOI.rider] : [],
     civilian: {
       name: "レックス・ロワ",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "秩序と破壊を司る六詠第二位の管理人。仮面ライダーヴァンダールに変身する。",
       cv: "斎賀みつき",
     },
@@ -692,7 +692,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "INVESTIGATION / LUCK",
+        kicker: "捜査と幸運",
         title: "何気ない一言で、事件の核心を突く。",
         body: [
           "現場叩き上げで捜査一課へ進んだ警部補。無口で冷静に見えるが、実際は口下手で深く考えていないことが多い。何気なく口にした言葉が事件の核心を突き、遭遇した人物がたまたま犯人だったという規格外の強運を持つ。",
@@ -700,7 +700,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "ADAPTER / FILE",
+        kicker: "体術と変身装置",
         title: "負け知らずの体術と、設計通りに使わない能力。",
         body: [
           "柔道、空手、剣道、捕縛術で性別を問わず一度も敗れたことがない。腕時計型の変身装置『レディックウォッチ』を用い、与えられた能力を設計通りに扱わず、悪知恵と幸運で転用する。",
@@ -780,7 +780,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "在原華火",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "捜査一課の警部補。口下手な言動と規格外の幸運で、事件の核心に辿り着く。",
       cv: "悠木碧",
     },
@@ -789,7 +789,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       enName: "CHIGIRI NAIKAMI",
       image: "/civilian-naikami-chigiri.jpeg",
       pos: "50% 16%",
-      kicker: "SKILLED DUO / POLICE INSPECTOR",
+      kicker: "警部 / 華火の相棒",
       tag: "#敏腕コンビ",
       call: "レディック！！！ LETS GO！！！！！！！",
       body: [
@@ -911,18 +911,18 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "PROFILE",
-        title: "病を頂戴する、高速の義賊。",
+        kicker: "来歴",
+        title: "幻想郷を救った、紅魔館の執事。",
         body: [
           "紅魔館の執事として仕え、幻想郷を救った紅城真守。ゲーマドライバーへライダーガシャットを装填することで、仮面ライダーアルゲノムへ変身する。",
         ],
       },
       {
         no: "02",
-        kicker: "BATTLE STYLE",
+        kicker: "戦い方",
         title: "高速機動と無音の接近。",
         body: [
-          "ファントムローブは布が風に揺れる音まで消し、ブーツも足音を発生させない。索敵、無音接近、駆除プログラムを一つの流れへ組み込む。",
+          "ファントムローブは布が風に揺れる音まで消し、ブーツも足音を発生させない。敵を探して音を立てずに接近し、攻撃とともに駆除プログラムを流し込む。",
         ],
       },
     ],
@@ -971,7 +971,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "紅城真守",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "幻想郷を救った紅魔館の執事。仮面ライダーアルゲノムとして戦う。",
       cv: "石川界人",
     },
@@ -1007,7 +1007,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "AGENT PROFILE",
+        kicker: "CODEでの任務",
         title: "軽口を飛ばしながら、任務を遂行する。",
         body: [
           "コードナンバー・セヴンを名乗るCODE英国支部のエージェント。陽気な軽口を飛ばしながらも任務に最適な手段を選び、改良型ゼッツシステムを駆る。近接戦闘と銃器の扱いから潜入、解析、情報回収まで、一人でこなす。",
@@ -1015,10 +1015,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
-        kicker: "MISSION SUPPORT",
+        kicker: "支援装備",
         title: "戦闘・潜入・解析を支えるCODE装備。",
         body: [
-          "ゼッツフォン、ゼッツカメラ、ゼッツセンサー、ゼッツライセンス。任務の道具は身分ごと世界の境界をまたぐ。",
+          "ゼッツフォン、ゼッツカメラ、ゼッツセンサー、ゼッツライセンスを任務に用いる。エージェントとしての身分と装備を伴い、世界の境界を越えて活動する。",
         ],
       },
     ],
@@ -1064,7 +1064,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "ジェームズ・スミス",
-      kicker: "BEFORE TRANSFORMATION / CAST",
+      kicker: "変身者",
       body: "CODE英国支部から派遣されたエージェント。コードナンバーはセヴン。",
     },
   },
@@ -1101,13 +1101,13 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     sections: [
       {
         no: "01",
-        kicker: "SCARS / PROFILE",
+        kicker: "SCARSでの立場",
         title: "スカーズに所属する、謎の男。",
         body: ["正体不明の組織『スカーズ』で特務情報官を務める、謎の男。"],
       },
       {
         no: "02",
-        kicker: "PROFESSIONAL / CONTROLLED PERCEPTION",
+        kicker: "潜入時の判断",
         title: "相手にどう見られているかを、正確に把握する。",
         body: [
           "徹底したプロフェッショナル。目的、必要情報、成功条件、撤退条件を常に切り分け、感情的な好悪を任務判断へ混ぜることを嫌う。愛想を振り撒かず、信用を獲得すること自体にも興味を示さない。潜入で重要なのは好かれることではなく、《相手が自分をどういう人物だと思っているかを把握し、その認識から逸脱しないこと》だと考えているからだ。",
@@ -1116,16 +1116,16 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "03",
-        kicker: "ETHICS / NECESSARY LOSS",
-        title: "犠牲を必要という一語で閉じる者を、決して許さない。",
+        kicker: "犠牲への考え方",
+        title: "準備不足の犠牲を、必要な犠牲と呼ばない。",
         body: [
           "無関係な人間を使い捨てることを極端に嫌う。任務上どうしても避けられなかった犠牲と、自分たちの無能や準備不足が生んだ犠牲を同じ言葉で処理する者へは、露骨な嫌悪を向ける。「必要な犠牲だった、で報告書を閉じる奴は大体ただの馬鹿だ」という言葉には、損失を数字へ変換して責任から逃げる態度への拒絶が表れている。",
         ],
       },
       {
         no: "04",
-        kicker: "RELATIONS / HOSTILE MASK",
-        title: "悪態の奥で、必要な情報だけは一度も取りこぼさない。",
+        kicker: "ベルと悠真との関係",
+        title: "ベルとは情報を共有し、悠真には敵意を演じる。",
         body: [
           "口調は冷静だが、育ちの良いフランス人らしい言葉遣いからは少し遠く、親しい相手ほど口が悪くなる。特にベルとは旧知のため容赦がない。ベル側も彼の態度には慣れており、互いに悪態を吐きながら必要な情報だけは正確に交換する。",
           "悠真に対しては潜入任務の都合上、長期間明確な敵意を演じる。それは演技ではあるが、彼自身も悠真の危うい自己犠牲性には苛立ちを覚えており、本気で批判する。皮肉なことに、後に彼自身が悠真を庇って死亡する。",
@@ -1133,7 +1133,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "05",
-        kicker: "CIPHER / INFORMATIONAL UNCERTAINTY",
+        kicker: "サイファーシステム",
         title: "偽装と経路追跡で、敵の判断を狂わせる。",
         body: [
           "サイファーシステムは潜入、偽装、情報収集、対組織工作を主目的として開発された。認証信号の偽装、能力や命令の経路追跡、位置情報などへの偽信号の混入によって、《情報的不確定性》を利用して戦う。",
@@ -1226,7 +1226,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     civilian: {
       name: "リュシアン・ヴァレール",
-      kicker: "BEFORE TRANSFORMATION / SCARS",
+      kicker: "変身者",
       body: "SCARSの特務情報官。潜入と偽装、情報収集を専門とする。",
       cv: "内山昂輝",
     },
@@ -1389,7 +1389,7 @@ export function RiderPage({ id }: { id: string }) {
           </div>
           <figcaption>
             <p>{rider.civilian.kicker}</p>
-            <small>変身前ビジュアル // CONFIRMED</small>
+            <small>変身前の姿</small>
             <h2>{rider.civilian.name}</h2>
             <p>{rider.civilian.body}</p>
             {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}

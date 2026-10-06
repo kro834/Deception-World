@@ -803,12 +803,10 @@ html[data-world-effects="economy"]
   text-wrap: balance;
 }
 
-/* PROFILE: a native disclosure, closed by default (find-in-page opens it).
-   The summary is a switch plate inside the file: an ice-lit box with a gold
-   state cell at its end, a chevron pointing down while shut and up while
-   open. Open, the plate lights and the cell fills gold. No gold brackets on
-   the plate, so OPEN DOSSIER stays the file's exit. REALMS documents share
-   the plate and the cell. Every state change is instant (a still annex). */
+/* PROFILE is the in-place reading disclosure; OPEN DOSSIER leaves the
+   card. A quiet ruled row distinguishes the former from the gold-edged
+   exit below it. REALMS document disclosures retain their boxed treatment.
+   Native expanded state and instant feedback remain unchanged. */
 .site-shell.film-edition.mirage-edition .wa-profile {
   margin-top: auto;
   padding: 10px 0 12px;
@@ -832,6 +830,9 @@ html[data-world-effects="economy"]
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary {
+  border-inline: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--mr-ice);
   font-family: var(--mr-hud);
   font-size: 12px;
@@ -860,6 +861,8 @@ html[data-world-effects="economy"]
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary::after {
   content: "" / "";
+  border-color: transparent;
+  background: transparent;
 }
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary::before,
@@ -879,6 +882,7 @@ html[data-world-effects="economy"]
 
 .site-shell.film-edition.mirage-edition .wa-profile > summary::before {
   right: 17px;
+  border-color: var(--mr-ice);
 }
 
 .site-shell.film-edition.mirage-edition .wa-doc > summary > i::before {
@@ -905,6 +909,20 @@ html[data-world-effects="economy"]
   translate: 0 -25%;
 }
 
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary {
+  background: rgb(122 232 255 / 6%);
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::after {
+  border-color: transparent;
+  background: transparent;
+  color: var(--mr-ice-hi);
+}
+
+.site-shell.film-edition.mirage-edition .wa-profile[open] > summary::before {
+  border-color: var(--mr-ice-hi);
+}
+
 /* Open, and where the plate has room, the cell reads CLOSE beside its
    chevron (silent: the native expanded state is what gets announced). */
 .site-shell.film-edition.mirage-edition .wa-profile {
@@ -916,7 +934,7 @@ html[data-world-effects="economy"]
     content: "CLOSE" / "";
     width: auto;
     padding: 0 26px 0 8px;
-    color: var(--mr-ink);
+    color: var(--mr-ice-hi);
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0.04em;
@@ -943,7 +961,6 @@ html[data-world-effects="economy"]
     color: var(--mr-ice-hi);
   }
 
-  .site-shell.film-edition.mirage-edition .wa-profile > summary:hover::after,
   .site-shell.film-edition.mirage-edition .wa-doc > summary:hover > i {
     border-color: var(--mr-gold);
   }
@@ -1249,7 +1266,7 @@ html[data-world-effects="economy"]
   }
 }
 
-/* OPEN DOSSIER exits through the site's cell: the PROFILE cell's 28px
+/* OPEN DOSSIER exits through the site's cell: the document's 28px
    gold-edged box at the plate's end (its right edge on the switch's), with
    a border-drawn chevron pointing out of the file. Both are the label's
    own pseudos (textless); the link's ::after stays the face's hit box.
@@ -2244,7 +2261,6 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
     content: "CLOSE" / "";
     width: auto;
     padding: 0 26px 0 8px;
-    color: var(--mr-ink);
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0.04em;

@@ -46,7 +46,9 @@ test("the sheets load last on their own routes, before the cinematic sheet, and 
   const rx = rexonanceRoute.slice(rexonanceRoute.search(/links:\s*\[/));
   const instrument = rx.indexOf("href: rexonanceInstrumentCssUrl");
   const finish = rx.indexOf("href: rexonanceFinishCssUrl");
-  assert.ok(instrument > 0 && instrument < finish && finish < rx.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  assert.ok(
+    instrument > 0 && instrument < finish && finish < rx.indexOf("CINEMATIC_STYLESHEET_LINK"),
+  );
   const ex = extremeRoute.slice(extremeRoute.search(/links:\s*\[/));
   const motion = ex.indexOf("href: motionEditionCssUrl");
   const edition = ex.indexOf("href: extremeEditionCssUrl");
@@ -84,7 +86,10 @@ test("every rule is scoped to its own page, so Final Stage never sees it", () =>
 
 test("static paint: no loops, no gestures, no images, the 12px floor, forced colours", () => {
   for (const css of [rexonanceCss, extremeCss]) {
-    assert.doesNotMatch(css, /\binfinite\b|touch-action\s*:|overscroll-behavior\s*:|scroll-snap-|url\(/);
+    assert.doesNotMatch(
+      css,
+      /\binfinite\b|touch-action\s*:|overscroll-behavior\s*:|scroll-snap-|url\(/,
+    );
     assert.doesNotMatch(css, /font-size:\s*(?:[0-9]|1[01])(?:\.\d+)?px\b/);
     assert.match(css, /@media \(forced-colors: active\)/);
     // The measured slider and lens are never restyled here.
@@ -98,12 +103,16 @@ test("static paint: no loops, no gestures, no images, the 12px floor, forced col
   assert.equal(frames.length, 1);
   assert.equal(frames[0][1], "ex-dial-lock");
   const properties = new Set([...frames[0][2].matchAll(/([\w-]+)\s*:/g)].map((m) => m[1]));
-  for (const property of properties) assert.ok(["opacity", "transform"].includes(property), property);
+  for (const property of properties)
+    assert.ok(["opacity", "transform"].includes(property), property);
   assert.match(
     extremeCss,
-    /@media \(prefers-reduced-motion: no-preference\) \{\s*html:not\(\[data-world-effects="economy"\]\):not\(\[data-loading\]\) \.rxs-page\.rxs-page\.exs-page \.exs-dial \{\s*animation: ex-dial-lock/,
+    /@media \(prefers-reduced-motion: no-preference\) \{\s*html:not\(\[data-world-effects="economy"\]\):not\(\[data-loading\]\)\s+\.rxs-page\.rxs-page\.exs-page\s+\.exs-dial \{\s*animation: ex-dial-lock/,
   );
-  assert.match(extremeCss, /@media \(prefers-reduced-motion: reduce\) \{\s*\.rxs-page\.rxs-page\.exs-page \.exs-dial \{\s*animation: none/);
+  assert.match(
+    extremeCss,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\.rxs-page\.rxs-page\.exs-page \.exs-dial \{\s*animation: none/,
+  );
   // !important only answers the showcase's forced menu-trigger paint.
   for (const css of [rexonanceCss, extremeCss]) {
     for (const block of css.match(/[^{}]+\{[^}]*!important[^}]*\}/g) ?? []) {
@@ -124,14 +133,25 @@ test("the stage copy reorder is phone-only and leaves the desktop grid alone", (
 });
 
 test("Extreme gains Rexonance's anchor and focus offsets, an opaque bar and a chapter index", () => {
-  assert.match(extremeCss, /html\[data-mode="world"\]:has\(\.exs-page\) \{\s*scroll-padding-top: 0;/);
+  assert.match(
+    extremeCss,
+    /html\[data-mode="world"\]:has\(\.exs-page\) \{\s*scroll-padding-top: 0;/,
+  );
   assert.match(
     extremeCss,
     /\.rxs-page\.rxs-page\.exs-page \.rxs-section\[id\] \{\s*scroll-margin-block-start: calc\(var\(--rxs-local-nav-reserve, 62px\) \+ 24px\);/,
   );
-  assert.match(extremeCss, /:is\(a\[href\], button, input, select, \[tabindex="0"\]\) \{\s*scroll-margin-block-start: calc\(var\(--rxs-local-nav-reserve, 62px\) \+ 12px\);/);
-  assert.match(extremeCss, /\.rxs-page\.rxs-page\.exs-page \.rxs-local-nav \{[^}]*backdrop-filter: none;/);
-  const index = extreme.match(/<nav className="rxs-chapter-index exs-chapter-index"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+  assert.match(
+    extremeCss,
+    /:is\(a\[href\], button, input, select, \[tabindex="0"\]\) \{\s*scroll-margin-block-start: calc\(var\(--rxs-local-nav-reserve, 62px\) \+ 12px\);/,
+  );
+  assert.match(
+    extremeCss,
+    /\.rxs-page\.rxs-page\.exs-page \.rxs-local-nav \{[^}]*backdrop-filter: none;/,
+  );
+  const index = extreme.match(
+    /<nav className="rxs-chapter-index exs-chapter-index"[^>]*>[\s\S]*?<\/nav>/,
+  )?.[0];
   assert.ok(index);
   assert.match(index, /aria-label="エクスプリームの見どころ"/);
   for (const target of ["p14", "stages", "system"]) {
@@ -160,15 +180,16 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   assert.match(rexonance, /<h3>\{renderStageTitle\(activeStage\.title\)\}<\/h3>/);
   // rx2/COPY2.md C3: the stages h2 pays off 「これで、まだ標準。」.
   assert.match(rexonance, /標準の上に、\s*<br \/>\s*あと二段。/);
-  // rx2/COPY2.md C2, L1: the performance intro is two sentences of two
-  // phrase spans, and it still names the selected baseline.
+  // The performance intro preserves phrase spans and its live baseline;
+  // the standard-value comparison and unpublished stages stay explicit.
   assert.match(
     rexonance,
-    // rx2 fix (COPY2.md C2): 「とも」 keeps the live label true above the
-    // headline cards, which compare with their own partners.
-    /<span>\s*<span>\s*<span>\{activePerformanceBaseline\.label\}サーガとも、<\/span>\s*<span>標準値どうし。<\/span>\s*<\/span>\s*<span>\s*<span>マックスとウルトラは、<\/span>\s*<span>まだ出していません。<\/span>\s*<\/span>\s*<\/span>/,
+    /<span>\s*<span>\s*<span>\{activePerformanceBaseline\.label\}サーガと、<\/span>\s*<span>標準値で比較。<\/span>\s*<\/span>\s*<span>\s*<span>マックスとウルトラの数値は、<\/span>\s*<span>未公表です。<\/span>\s*<\/span>\s*<\/span>/,
   );
-  assert.match(rexonanceCss, /\.rxs-section-heading > span > span > span \{\s*display: inline-block;/);
+  assert.match(
+    rexonanceCss,
+    /\.rxs-section-heading > span > span > span \{\s*display: inline-block;/,
+  );
   // rx2/COPY2.md L2–L4: units that never split, and the P14 paragraph's phrases.
   assert.match(rexonance, /<span className="rxp-nowrap">第14世代<\/span>/);
   // rx2 fix (COPY2.md L6): 必要部位 joins SA-GA OS 5.5 as a nowrap unit.
@@ -184,10 +205,16 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   assert.match(specs, /<i aria-hidden="true" \/>/);
   assert.doesNotMatch(specs, /×/);
   const forced = rexonanceCss.slice(rexonanceCss.indexOf("@media (forced-colors: active)"));
-  assert.match(forced, /\.rxs-specs > i \{\s*background: none;\s*border-inline-start: 1px solid CanvasText;/);
+  assert.match(
+    forced,
+    /\.rxs-specs > i \{\s*background: none;\s*border-inline-start: 1px solid CanvasText;/,
+  );
   // Both sheets hold the phrases together where auto-phrase is missing.
   for (const css of [rexonanceCss, extremeCss]) {
-    assert.match(css, /\.rxs-stage-hint\s*\) \{\s*word-break: keep-all;\s*overflow-wrap: anywhere;/);
+    assert.match(
+      css,
+      /\.rxs-stage-hint\s*\) \{\s*word-break: keep-all;\s*overflow-wrap: anywhere;/,
+    );
     assert.match(css, /\.rxs-hero-lede-text > span,[\s\S]*?\{\s*display: inline-block;/);
   }
 });
