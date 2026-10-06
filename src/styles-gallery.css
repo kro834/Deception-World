@@ -44,10 +44,21 @@
   outline-offset: 4px;
 }
 
+/* The bar stays on screen (2026-10-08). It was sticky, but the site-wide
+   body overflow-x makes <body> the scroll container, so it never stuck and
+   the refresh control scrolled away; fixed, with the page padded by its
+   height, it reads the same at rest. */
+.gallery-page {
+  --gallery-bar: 78px;
+  padding-top: calc(var(--gallery-bar) + max(0px, env(safe-area-inset-top) - 12px));
+}
+
 .gallery-topbar {
-  position: sticky;
+  position: fixed;
   z-index: 40;
   top: 0;
+  right: 0;
+  left: 0;
   display: flex;
   min-height: 78px;
   align-items: center;
@@ -95,6 +106,83 @@
   font-size: 12px;
   letter-spacing: 0.08em;
   transition: color 180ms ease;
+}
+
+.gallery-refresh {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid rgb(224 210 184 / 0.32);
+  background: transparent;
+  color: #e4d7be;
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.gallery-refresh > span {
+  color: var(--gallery-brass);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.gallery-refresh:hover {
+  border-color: #c5a66c;
+  color: #f3d899;
+}
+
+.gallery-refresh[data-busy="true"] {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.gallery-refresh-status {
+  min-width: 0;
+  color: #b8ad99;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .gallery-refresh[data-busy="true"] > span {
+    animation: gallery-refresh-turn 700ms linear infinite;
+  }
+}
+
+@media (max-width: 700px) {
+  .gallery-refresh {
+    padding: 0 12px;
+  }
+
+  .gallery-refresh-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@keyframes gallery-refresh-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (forced-colors: active) {
+  .gallery-refresh {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
 }
 
 .gallery-topbar-actions > a:hover,
@@ -1059,6 +1147,12 @@ html[data-route-cover] .gallery-arrival {
   .gallery-grid {
     --gallery-row: clamp(180px, 28vw, 260px);
     column-gap: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .gallery-page {
+    --gallery-bar: 68px;
   }
 }
 

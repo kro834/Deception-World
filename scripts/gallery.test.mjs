@@ -122,7 +122,9 @@ test("opening filtered artwork keeps it selected in the collection and navigatio
 test("native viewer owns and releases the shared viewport lock and dismisses on browser history", () => {
   assert.match(component, /dialog\.showModal\(\)/);
   assert.match(component, /dialog\.focus\(\{ preventScroll: true \}\)/);
-  assert.match(component, /const release = acquireViewportScrollLock\(\)/);
+  // 2026-10-08: the viewer freezes the body (the owner's report: closing an
+  // artwork could land at the top), so the page is put back exactly on close.
+  assert.match(component, /const release = acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(component, /if \(dialog\.open\) dialog\.close\(\)/);
   assert.match(component, /release\(\)/);
   assert.match(component, /useDialogHistoryDismiss\(dialogRef,[\s\S]*?setSelectedId\(null\)/);

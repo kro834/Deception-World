@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
@@ -45,6 +45,9 @@ const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
 
 export function GalleryPage() {
   useWorldMode();
+  const router = useRouter();
+  // The history entry the open viewer adds, so Back closes it in place.
+  const viewerEntryRef = useRef(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
     "all",
@@ -76,7 +79,10 @@ export function GalleryPage() {
   const [titleConflict, setTitleConflict] = useState<CommunityGalleryTitle | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const communityInputRef = useRef<HTMLInputElement>(null);
-  const communityReloadRef = useRef<(() => Promise<void>) | null>(null);
+  const communityReloadRef = useRef<(() => Promise<boolean>) | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshedAt, setRefreshedAt] = useState("");
+  const [justRefreshed, setJustRefreshed] = useState(false);
   const communityBusyRef = useRef(false);
   const authClientRef = useRef<SupabaseClient | null>(null);
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
@@ -207,17 +213,19 @@ export function GalleryPage() {
       const current = ++generation;
       try {
         const collection = await readCommunityGallery(session?.access_token);
-        if (disposed || current !== generation) return;
+        if (disposed || current !== generation) return false;
         setCommunityPosts(collection.posts);
         setDeletedPosts(collection.deletedPosts ?? []);
         setSharedTitles(collection.titles);
         setCommunityLoaded(true);
         setCommunityLoadError("");
+        return true;
       } catch (error) {
         if (!disposed && current === generation)
           setCommunityLoadError(
             error instanceof Error ? error.message : "共有作品を読み込めませんでした。",
           );
+        return false;
       }
     };
     communityReloadRef.current = refresh;
@@ -326,16 +334,52 @@ export function GalleryPage() {
       controls[nextIndex].focus({ preventScroll: true });
     };
     dialog.addEventListener("keydown", cycleFocus);
-    const release = acquireViewportScrollLock();
+    // Freeze the page where the reader left it and put it back exactly on
+    // close: an unfrozen page could come back at the top (iOS Safari), and
+    // the router's reset for the entry below lands on the frozen body.
+    const readingAt = { top: window.scrollY, left: window.scrollX };
+    const release = acquireViewportScrollLock({ freezeBody: true });
+    // One history entry per open viewer: a Back gesture closes the artwork
+    // and stays in the gallery instead of leaving it (and returning later at
+    // the top). Moving between works adds none.
+    if (!viewerEntryRef.current) {
+      const here = router.history.location;
+      router.history.push(here.href, { ...here.state, galleryViewer: true });
+      viewerEntryRef.current = true;
+    }
     return () => {
       dialog.removeEventListener("keydown", cycleFocus);
       if (dialog.open) dialog.close();
       release();
+      // Closed in the page (button, Escape, backdrop): take the entry back
+      // off, so the history is as it was. A Back gesture already removed it.
+      if (viewerEntryRef.current) {
+        viewerEntryRef.current = false;
+        if ((router.history.location.state as { galleryViewer?: boolean }).galleryViewer)
+          router.history.back();
+        // Leaving the entry, the router restores the offset it filed while
+        // the body was frozen (0). Once the gallery has rendered again, put
+        // the reader back where they were; never on another page.
+        let settled = false;
+        const settle = () => {
+          if (settled) return;
+          settled = true;
+          stopRendered();
+          window.clearTimeout(fallback);
+          window.requestAnimationFrame(() => {
+            if (router.history.location.pathname !== "/gallery") return;
+            if (Math.abs(window.scrollY - readingAt.top) > 2)
+              window.scrollTo({ ...readingAt, behavior: "instant" });
+          });
+        };
+        const stopRendered = router.subscribe("onRendered", settle);
+        const fallback = window.setTimeout(settle, 600);
+      }
       if (restoreFocusRef.current) openerRef.current?.focus({ preventScroll: true });
       else if (document.activeElement === openerRef.current) openerRef.current?.blur();
       restoreFocusRef.current = false;
     };
-  }, [viewerOpen]);
+  }, [viewerOpen, router]);
 
   useDialogHistoryDismiss(dialogRef, () => {
     restoreFocusRef.current = false;
@@ -359,6 +403,26 @@ export function GalleryPage() {
     setFailedId(null);
     resetEditor();
     setSelectedId(work.id);
+  };
+  const refreshNow = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      try {
+        setLegacyTitles(readGalleryTitles(window.localStorage));
+      } catch {
+        // The shared titles below do not need this browser's storage.
+      }
+      const ok = (await communityReloadRef.current?.()) ?? false;
+      const time = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+      setRefreshedAt(ok ? `${time} 更新` : "更新できませんでした");
+      if (ok) {
+        setJustRefreshed(true);
+        window.setTimeout(() => setJustRefreshed(false), 2400);
+      }
+    } finally {
+      setRefreshing(false);
+    }
   };
   const closeViewer = () => {
     resetEditor();
@@ -551,6 +615,24 @@ export function GalleryPage() {
           DECEPTION WORLD<span>VISUAL COLLECTION</span>
         </Link>
         <div className="gallery-topbar-actions">
+          {/* Pull everyone's latest titles and posts now, rather than at the
+              next 30-second refresh. */}
+          <button
+            type="button"
+            className="gallery-refresh"
+            onClick={refreshNow}
+            // Busy, not disabled: a disabled control drops its focus to the
+            // body, which sent a pointer press back to the top of the page.
+            aria-disabled={refreshing}
+            data-busy={refreshing ? "true" : undefined}
+            aria-describedby="gallery-refresh-status"
+          >
+            <span aria-hidden="true">↻</span>
+            {refreshing ? "更新中" : justRefreshed ? "更新済み" : "更新"}
+          </button>
+          <span id="gallery-refresh-status" className="gallery-refresh-status" aria-live="polite">
+            {refreshedAt}
+          </span>
           <a href="#gallery-collection">作品を見る</a>
           <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
         </div>
