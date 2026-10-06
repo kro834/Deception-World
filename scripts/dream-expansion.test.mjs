@@ -49,7 +49,9 @@ test("Dream preserves posters, headline dossiers and combat records outside appr
     createHash("sha256")
       .update(existing.slice(0, start) + existing.slice(end))
       .digest("hex"),
-    "757d90092e2d40428c81b4cdefc919af0e39a7208b892a30fdea5a2124f08957",
+    // rx5 (2026-10-06, the owner's request to fix AI-sounding detail copy):
+    // Dread's closing line reads 「…以外の詳細は未記録。」 like Lupin's (b70e000).
+    "f452c2f3213e6a279fbd1ba8864c3d1f352d1d92c0fec94404626db004a53254",
   );
   assert.deepEqual(
     DREAM_CASES.map(({ no, title, reading }) => `${no}${title}${reading}`),
