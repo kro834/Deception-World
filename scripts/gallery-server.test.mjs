@@ -31,10 +31,25 @@ const migration = await readFile(
   new URL("../supabase/migrations/202610060001_shared_gallery.sql", import.meta.url),
   "utf8",
 );
+const catalogueMigration = await readFile(
+  new URL("../supabase/migrations/202610060002_gallery_catalogue_113.sql", import.meta.url),
+  "utf8",
+);
 
 test("gallery server validates static IDs, public UUIDs, titles and concurrency versions", () => {
-  for (const id of ["g01", "g79", postA]) assert.equal(validGalleryArtworkId(id), true);
-  for (const id of ["g00", "g80", "g1", "p-12345678-1234-4123-8123-123456789abc", "__proto__"])
+  for (let number = 1; number <= 113; number++)
+    assert.equal(validGalleryArtworkId(`g${String(number).padStart(2, "0")}`), true);
+  assert.equal(validGalleryArtworkId(postA), true);
+  for (const id of [
+    "g00",
+    "g114",
+    "g001",
+    "g0113",
+    "g1",
+    "g999",
+    "p-12345678-1234-4123-8123-123456789abc",
+    "__proto__",
+  ])
     assert.equal(validGalleryArtworkId(id), false);
   assert.deepEqual(
     validateGalleryTitle({ artworkId: "g01", title: "  星の光  ", expectedVersion: 0 }),
@@ -235,7 +250,7 @@ async function withMockSupabase(fetchHandler, callback) {
   }
 }
 
-test("public GET retains all 1079 titles beyond the default Supabase response cap without disclosing owner IDs", async () => {
+test("public GET retains all 1113 titles beyond the default Supabase response cap without disclosing owner IDs", async () => {
   const posts = Array.from({ length: 1000 }, (_, index) => ({
     id: `u-00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
     sequence: index + 1,
@@ -248,7 +263,7 @@ test("public GET retains all 1079 titles beyond the default Supabase response ca
   }));
   const titles = [
     ...posts.map((post) => ({ artwork_id: post.id, title: `投稿${post.sequence}`, version: 1 })),
-    ...Array.from({ length: 79 }, (_, index) => ({
+    ...Array.from({ length: 113 }, (_, index) => ({
       artwork_id: `g${String(index + 1).padStart(2, "0")}`,
       title: `既存${index + 1}`,
       version: 3,
@@ -293,8 +308,9 @@ test("public GET retains all 1079 titles beyond the default Supabase response ca
       );
       assert.equal(response.status, 200);
       const body = await response.json();
-      assert.equal(Object.keys(body.titles).length, 1079);
+      assert.equal(Object.keys(body.titles).length, 1113);
       assert.deepEqual(body.titles.g79, { title: "既存79", version: 3 });
+      assert.deepEqual(body.titles.g113, { title: "既存113", version: 3 });
       assert.deepEqual(body.titles[posts[999].id], { title: "投稿1000", version: 1 });
       assert.equal(titleRequests, 3);
       assert.equal(body.posts.length, 1000);
@@ -474,7 +490,11 @@ test("a remotely verified anonymous visitor can upload, edit, remove and restore
           new Request("https://gallery.example/api/gallery/title", {
             method: "PATCH",
             headers: { ...headers, "content-type": "application/json" },
-            body: JSON.stringify({ artworkId: "g79", title: "来訪者の作品名", expectedVersion: 0 }),
+            body: JSON.stringify({
+              artworkId: "g113",
+              title: "来訪者の作品名",
+              expectedVersion: 0,
+            }),
           }),
         ),
       );
@@ -554,7 +574,7 @@ test("image sanitization bounds dimensions, rotates pixels and removes original 
   );
 });
 
-async function database() {
+async function database(expandCatalogue = true) {
   const db = new PGlite();
   await db.exec(`
     create role anon; create role authenticated; create role service_role;
@@ -566,6 +586,7 @@ async function database() {
     insert into auth.users(id, is_anonymous) values('${userA}', false), ('${userB}', false), ('${anonymous}', true);
   `);
   await db.exec(migration);
+  if (expandCatalogue) await db.exec(catalogueMigration);
   return db;
 }
 async function call(db, name, values) {
@@ -578,6 +599,114 @@ async function post(db, user = userA, id = postA, bytes = 123) {
   assert.equal(reserved.post.id, id);
   return call(db, "gallery_complete_upload", [user, id, false]);
 }
+
+test("catalogue expansion changes only the static ID predicate of the existing title RPC", () => {
+  const titleFunction = /create or replace function public\.gallery_set_title[\s\S]*?end \$\$;/;
+  assert.equal(
+    catalogueMigration.match(titleFunction)?.[0],
+    migration
+      .match(titleFunction)?.[0]
+      .replace("^g(0[1-9]|[1-6][0-9]|7[0-9])$", "^g(0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$"),
+  );
+});
+
+test("existing installations expand to all 34 new IDs without changing stored data or RPC privileges", async () => {
+  const db = await database(false);
+  try {
+    await post(db);
+    await call(db, "gallery_set_title", [anonymous, "g79", "保存済みの作品名", 0]);
+    assert.deepEqual(await call(db, "gallery_set_title", [anonymous, "g80", "追加前", 0]), {
+      error: "not_found",
+    });
+    const snapshot = async () => ({
+      posts: (await db.query("select * from public.gallery_posts order by id")).rows,
+      titles: (await db.query("select * from public.gallery_titles order by artwork_id")).rows,
+      history: (await db.query("select * from public.gallery_title_history order by id")).rows,
+      rates: (await db.query("select * from public.gallery_rate_limits order by user_id, action"))
+        .rows,
+      globalRates: (await db.query("select * from public.gallery_global_limits order by action"))
+        .rows,
+      rpc: (
+        await db.query(
+          "select proacl, prosecdef, proconfig from pg_proc where oid = 'public.gallery_set_title(uuid,text,text,integer)'::regprocedure",
+        )
+      ).rows,
+    });
+    const before = await snapshot();
+    const constraintBefore = await db.query(
+      "select pg_get_constraintdef(oid) as definition from pg_constraint where conrelid = 'public.gallery_titles'::regclass and conname = 'gallery_titles_artwork_id_check'",
+    );
+    assert.equal(constraintBefore.rows.length, 1);
+    assert.match(constraintBefore.rows[0].definition, /\[1-6\]\[0-9\]/);
+    await db.exec(catalogueMigration);
+    assert.deepEqual(await snapshot(), before);
+    // Reapplying the additive migration also preserves data and grants.
+    await db.exec(catalogueMigration);
+    assert.deepEqual(await snapshot(), before);
+    const constraintAfter = await db.query(
+      "select pg_get_constraintdef(oid) as definition from pg_constraint where conrelid = 'public.gallery_titles'::regclass and conname = 'gallery_titles_artwork_id_check'",
+    );
+    assert.equal(constraintAfter.rows.length, 1);
+    assert.match(constraintAfter.rows[0].definition, /11\[0-3\]/);
+    for (let number = 80; number <= 113; number++)
+      assert.deepEqual(
+        await call(db, "gallery_set_title", [
+          number % 2 ? userA : userB,
+          `g${number}`,
+          `作品${number}`,
+          0,
+        ]),
+        { title: `作品${number}`, version: 1 },
+      );
+    for (const id of ["g00", "g001", "g1", "g0113", "g114", "g999"])
+      assert.deepEqual(await call(db, "gallery_set_title", [anonymous, id, "対象外", 0]), {
+        error: "not_found",
+      });
+    await assert.rejects(db.query("insert into public.gallery_titles(artwork_id) values ('g114')"));
+    assert.deepEqual(await call(db, "gallery_set_title", [anonymous, "g113", "", 1]), {
+      title: "",
+      version: 2,
+    });
+    assert.deepEqual(await call(db, "gallery_set_title", [anonymous, "g79", "従来の再編集", 1]), {
+      title: "従来の再編集",
+      version: 2,
+    });
+  } finally {
+    await db.close();
+  }
+});
+
+test("catalogue expansion rejects a same-named unexpected constraint before changing data or schema", async () => {
+  const db = await database(false);
+  try {
+    await post(db);
+    await call(db, "gallery_set_title", [anonymous, "g79", "保存済みの作品名", 0]);
+    await db.exec(`alter table public.gallery_titles drop constraint gallery_titles_artwork_id_check;
+      alter table public.gallery_titles add constraint gallery_titles_artwork_id_check
+      check (artwork_id ~ '^g[0-9]{2,3}$' or artwork_id ~ '^u-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');`);
+    const snapshot = async () => ({
+      posts: (await db.query("select * from public.gallery_posts order by id")).rows,
+      titles: (await db.query("select * from public.gallery_titles order by artwork_id")).rows,
+      history: (await db.query("select * from public.gallery_title_history order by id")).rows,
+      constraint: (
+        await db.query(
+          "select pg_get_constraintdef(oid) as definition from pg_constraint where conrelid = 'public.gallery_titles'::regclass and conname = 'gallery_titles_artwork_id_check'",
+        )
+      ).rows,
+      rpc: (
+        await db.query(
+          "select pg_get_functiondef(oid) as definition, proacl from pg_proc where oid = 'public.gallery_set_title(uuid,text,text,integer)'::regprocedure",
+        )
+      ).rows,
+    });
+    const before = await snapshot();
+    await assert.rejects(db.exec(catalogueMigration), /Unexpected gallery artwork ID constraint/);
+    await db.exec("rollback;");
+    assert.deepEqual(await snapshot(), before);
+  } finally {
+    await db.close();
+  }
+});
 
 test("Supabase migration denies direct anonymous/authenticated mutations and RPC calls", async () => {
   const db = await database();
@@ -656,7 +785,7 @@ test("every verified visitor can edit every static and posted title with audited
         ["第一の名前", "次の名前", 2, userB],
       ],
     );
-    assert.deepEqual(await call(db, "gallery_set_title", [userB, "g80", "bad", 0]), {
+    assert.deepEqual(await call(db, "gallery_set_title", [userB, "g114", "bad", 0]), {
       error: "not_found",
     });
   } finally {
@@ -675,7 +804,7 @@ test("verified anonymous database sessions own posts and can edit all titles", a
       [id],
     );
     assert.deepEqual(stored.rows, [{ owner_id: anonymous, object_path: `${id}.webp` }]);
-    assert.deepEqual(await call(db, "gallery_set_title", [anonymous, "g79", "来訪者の名前", 0]), {
+    assert.deepEqual(await call(db, "gallery_set_title", [anonymous, "g113", "来訪者の名前", 0]), {
       title: "来訪者の名前",
       version: 1,
     });
@@ -762,15 +891,15 @@ test("competing title writes produce one winning version and one conflict", asyn
   const db = await database();
   try {
     const results = await Promise.all([
-      call(db, "gallery_set_title", [userA, "g79", "名前A", 0]),
-      call(db, "gallery_set_title", [userB, "g79", "名前B", 0]),
+      call(db, "gallery_set_title", [userA, "g113", "名前A", 0]),
+      call(db, "gallery_set_title", [userB, "g113", "名前B", 0]),
     ]);
     const accepted = results.find((result) => !result.error);
     const rejected = results.find((result) => result.error);
     assert.equal(accepted.version, 1);
     assert.deepEqual(rejected, { error: "conflict", current: accepted });
     const history = await db.query(
-      "select title, version from public.gallery_title_history where artwork_id = 'g79'",
+      "select title, version from public.gallery_title_history where artwork_id = 'g113'",
     );
     assert.deepEqual(history.rows, [accepted]);
   } finally {

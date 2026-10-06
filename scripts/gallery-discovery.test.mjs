@@ -53,11 +53,11 @@ test("combines category, search, personal title, and favorites filters", () => {
 
 test("favorite storage validates known IDs, deduplicates, and toggles without losing other tabs", () => {
   const ids = GALLERY_ARTWORKS.map((work) => work.id);
-  const storage = memoryStorage(JSON.stringify(["g01", "g01", "g99", "bad", 4]));
+  const storage = memoryStorage(JSON.stringify(["g01", "g01", "g114", "bad", 4]));
   assert.deepEqual(readGalleryFavorites(storage, ids), ["g01"]);
   assert.deepEqual(toggleGalleryFavorite(storage, "g02", ids), ["g01", "g02"]);
   assert.deepEqual(toggleGalleryFavorite(storage, "g01", ids), ["g02"]);
-  assert.throws(() => toggleGalleryFavorite(storage, "g99", ids));
+  assert.throws(() => toggleGalleryFavorite(storage, "g114", ids));
   storage.setItem(GALLERY_FAVORITES_KEY, "not-json");
   assert.deepEqual(readGalleryFavorites(storage, ids), []);
 });

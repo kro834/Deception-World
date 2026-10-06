@@ -114,6 +114,10 @@ const galleryCollection = () => ({
   ],
   titles: {
     g79: { title: "共有の作品名", version: 1 },
+    g80: { title: "追加の作品名", version: 1 },
+    g99: { title: "二桁の最後", version: 1 },
+    g100: { title: "三桁の初め", version: 1 },
+    g113: { title: "追加の最後", version: 1 },
     [POST_ID]: { title: "来訪者の作品", version: 2 },
   },
 });
@@ -165,7 +169,21 @@ test("new release identity requires shared gallery readiness and preserves artwo
       throw new Error("Expected exact supplied release SHA");
     },
     readFileSync: (path, encoding) =>
-      encoding === "utf8" ? JSON.stringify({ items: Array(79).fill({}) }) : Buffer.from(path),
+      encoding === "utf8"
+        ? JSON.stringify({
+            items: Array.from({ length: 113 }, (_, index) => {
+              const id = `g${String(index + 1).padStart(2, "0")}`;
+              const width = index === 78 ? 1672 : 1800;
+              return {
+                id,
+                variants: [
+                  { path: `/gallery/${id}-480.webp`, width: 480 },
+                  { path: `/gallery/${id}-${width}.webp`, width },
+                ],
+              };
+            }),
+          })
+        : Buffer.from(path),
     writeFileSync: (path, value) => {
       assert.equal(path, "public/release-identity.json");
       written = JSON.parse(value);
@@ -174,8 +192,9 @@ test("new release identity requires shared gallery readiness and preserves artwo
   });
   assert.equal(written.sharedGallery, true);
   assert.equal(written.sha, SHA);
-  assert.equal(written.artworks, 79);
+  assert.equal(written.artworks, 113);
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g79-1672.webp"));
+  assert.ok(written.assets.some((asset) => asset.path === "/gallery/g113-1800.webp"));
 });
 
 test("an attested shared-gallery release checks config and public data using only unauthenticated GETs", async () => {
@@ -251,7 +270,10 @@ test("shared-gallery gate rejects malformed, unavailable or private public data"
   const post = valid.posts[0];
   for (const collection of [
     { posts: [], titles: [] },
-    { posts: [post], titles: { g80: { title: "invalid", version: 0 } } },
+    ...["g00", "g001", "g0113", "g114", "g999"].map((id) => ({
+      posts: [post],
+      titles: { [id]: { title: "invalid", version: 0 } },
+    })),
     { posts: [post], titles: { g79: { title: "stale", version: -1 } } },
     { posts: [{ ...post, ownerId: "private-session-id" }], titles: valid.titles },
     { posts: [{ ...post, canDelete: true }], titles: valid.titles },
@@ -273,4 +295,36 @@ test("shared-gallery gate rejects malformed, unavailable or private public data"
     { networkErrorPath: "/api/gallery" },
   ])
     assert.equal((await sharedGalleryReport(failure)).report.ok, false);
+});
+
+test("shared-gallery gate accepts all 113 static titles together with the 1000-post quota", async () => {
+  const template = galleryCollection().posts[0];
+  const posts = Array.from({ length: 1000 }, (_, index) => {
+    const id = `u-00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+    return {
+      ...template,
+      id,
+      sequence: index + 1,
+      url: `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${id}.webp?token=public-image-token`,
+    };
+  });
+  const titles = Object.fromEntries(
+    [
+      ...Array.from({ length: 113 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
+      ...posts.map((post) => post.id),
+    ].map((id) => [id, { title: "共有の作品名", version: 1 }]),
+  );
+  assert.equal(Object.keys(titles).length, 1113);
+  assert.equal((await sharedGalleryReport({ collection: { posts, titles } })).report.ok, true);
+  assert.equal(
+    (
+      await sharedGalleryReport({
+        collection: {
+          posts,
+          titles: { ...titles, g114: { title: "対象外", version: 0 } },
+        },
+      })
+    ).report.ok,
+    false,
+  );
 });

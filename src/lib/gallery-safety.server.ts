@@ -20,7 +20,7 @@ export function validGalleryPostId(id: string): boolean {
 }
 
 export function validGalleryArtworkId(id: string): boolean {
-  return /^g(?:0[1-9]|[1-6][0-9]|7[0-9])$/.test(id) || validGalleryPostId(id);
+  return /^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(id) || validGalleryPostId(id);
 }
 
 export function validateGalleryTitle(value: unknown): {

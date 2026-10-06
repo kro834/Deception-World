@@ -16,7 +16,7 @@ export function readGalleryTitles(storage: Pick<Storage, "getItem">): GalleryTit
   return Object.fromEntries(
     Object.entries(parsed).filter(
       ([id, title]) =>
-        /^g\d{2}$/.test(id) &&
+        /^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(id) &&
         typeof title === "string" &&
         title.trim().length > 0 &&
         title.length <= GALLERY_TITLE_LIMIT,
@@ -26,7 +26,8 @@ export function readGalleryTitles(storage: Pick<Storage, "getItem">): GalleryTit
 
 /** Read again before writing so another tab's edits to other pictures survive. */
 export function saveGalleryTitle(storage: TitleStorage, id: string, draft: string): GalleryTitles {
-  if (!/^g\d{2}$/.test(id)) throw new Error("Invalid artwork identifier");
+  if (!/^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(id))
+    throw new Error("Invalid artwork identifier");
   const title = draft.trim();
   if (title.length > GALLERY_TITLE_LIMIT) throw new Error("Title too long");
   const titles = readGalleryTitles(storage);

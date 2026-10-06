@@ -9,11 +9,11 @@ const manifest = JSON.parse(
 );
 
 test("the gallery preserves every supplied work and its unique ordered catalogue number", () => {
-  assert.equal(GALLERY_ARTWORKS.length, 79);
+  assert.equal(GALLERY_ARTWORKS.length, 113);
   assert.equal(manifest.items.length, GALLERY_ARTWORKS.length);
   assert.deepEqual(
     GALLERY_ARTWORKS.map((work) => work.id),
-    Array.from({ length: 79 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
+    Array.from({ length: 113 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`),
   );
   for (const work of GALLERY_ARTWORKS) {
     assert.ok(work.title.trim().length > 0 && work.alt.trim().length > 0);
@@ -37,23 +37,44 @@ test("the four new exhibits follow the existing 65 without renumbering them", ()
 });
 
 test("four additional exhibits append as 070–073 while preserving existing IDs", () => {
-  assert.deepEqual(GALLERY_ARTWORKS.slice(69, 73).map(({ id, category }) => ({ id, category })), [
-    { id: "g70", category: "places" },
-    { id: "g71", category: "portraits" },
-    { id: "g72", category: "scenes" },
-    { id: "g73", category: "scenes" },
-  ]);
+  assert.deepEqual(
+    GALLERY_ARTWORKS.slice(69, 73).map(({ id, category }) => ({ id, category })),
+    [
+      { id: "g70", category: "places" },
+      { id: "g71", category: "portraits" },
+      { id: "g72", category: "scenes" },
+      { id: "g73", category: "scenes" },
+    ],
+  );
 });
 
 test("six additional exhibits append as 074–079 without changing earlier catalogue IDs", () => {
-  assert.deepEqual(GALLERY_ARTWORKS.slice(73).map(({ id, category }) => ({ id, category })), [
-    { id: "g74", category: "portraits" },
-    { id: "g75", category: "portraits" },
-    { id: "g76", category: "portraits" },
-    { id: "g77", category: "portraits" },
-    { id: "g78", category: "scenes" },
-    { id: "g79", category: "scenes" },
-  ]);
+  assert.deepEqual(
+    GALLERY_ARTWORKS.slice(73, 79).map(({ id, category }) => ({ id, category })),
+    [
+      { id: "g74", category: "portraits" },
+      { id: "g75", category: "portraits" },
+      { id: "g76", category: "portraits" },
+      { id: "g77", category: "portraits" },
+      { id: "g78", category: "scenes" },
+      { id: "g79", category: "scenes" },
+    ],
+  );
+});
+
+test("the 34 supplied additions append as 080–113 and include the new design collection", () => {
+  assert.deepEqual(
+    GALLERY_ARTWORKS.slice(79).map(({ id }) => id),
+    Array.from({ length: 34 }, (_, index) => `g${index + 80}`),
+  );
+  assert.equal(GALLERY_ARTWORKS[79].category, "designs");
+  assert.match(GALLERY_ARTWORKS[84].alt, /バイク/);
+  assert.match(GALLERY_ARTWORKS[95].alt, /紫の刃/);
+  assert.match(GALLERY_ARTWORKS[99].alt, /室内/);
+  assert.match(GALLERY_ARTWORKS[112].alt, /三人/);
+  assert.ok(
+    GALLERY_CATEGORIES.some(({ id, label }) => id === "designs" && label === "ポスター・デザイン"),
+  );
 });
 
 test("delivery derivatives have recorded bytes, hashes and uncropped non-upscaled dimensions", () => {

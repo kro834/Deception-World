@@ -6,9 +6,18 @@ remain separate. Static gallery images remain available before this service is
 configured; shared writes fail closed.
 
 Provision a Supabase project and apply
-`migrations/202610060001_shared_gallery.sql` to that project's database with an
-administrator connection or its SQL editor. Set these server environment values
-in Vercel:
+`migrations/202610060001_shared_gallery.sql` followed by
+`migrations/202610060002_gallery_catalogue_113.sql` to that project's database
+with an administrator connection or its SQL editor. Existing installations only
+need the second migration before deploying the 113-image catalogue. It replaces
+the `gallery_titles_artwork_id_check` constraint and title RPC's static-ID
+validation atomically without modifying existing titles, posts, history, quotas
+or privileges; `g01` through `g113` retain their original IDs. Inspect the live
+constraint name and definition before applying this migration. Its precondition
+accepts only the validated original or already-expanded static/community ID
+domain; an absent, unvalidated or unexpected same-named check fails the
+transaction before changing the constraint or title RPC.
+Set these server environment values in Vercel:
 
 - `SUPABASE_URL`: the HTTPS project URL.
 - `SUPABASE_PUBLISHABLE_KEY` or `SUPABASE_ANON_KEY`: the browser publishable/anon key.

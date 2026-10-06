@@ -34,6 +34,24 @@ test("saved titles survive another read, can be re-edited, and empty titles rest
   saveGalleryTitle(local, "g01", "  ");
   assert.deepEqual(readGalleryTitles(local), {});
 });
+test("new artwork IDs retain titles across the two-to-three digit boundary and reject unknown IDs", () => {
+  const local = storage();
+  for (let number = 80; number <= 113; number++) {
+    const id = `g${number}`;
+    saveGalleryTitle(local, id, `作品${number}`);
+    assert.equal(readGalleryTitles(local)[id], `作品${number}`);
+  }
+  for (const id of ["g00", "g001", "g1", "g0113", "g114", "g999"])
+    assert.throws(() => saveGalleryTitle(local, id, "unknown"));
+  assert.deepEqual(
+    readGalleryTitles(
+      storage(JSON.stringify({ g113: "最後の作品", g114: "unknown", g001: "bad", g00: "bad" })),
+    ),
+    { g113: "最後の作品" },
+  );
+  saveGalleryTitle(local, "g113", "");
+  assert.equal(readGalleryTitles(local).g113, undefined);
+});
 test("saving reads fresh storage and preserves another tab's changes to other pictures", () => {
   const local = storage();
   saveGalleryTitle(local, "g01", "一番");

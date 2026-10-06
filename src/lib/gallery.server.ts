@@ -259,7 +259,7 @@ async function galleryPosts(client: SupabaseClient, rows: PostRow[], userId: str
 type TitleRow = { artwork_id: string; title: string; version: number };
 async function galleryTitles(client: SupabaseClient): Promise<TitleRow[]> {
   const rows: TitleRow[] = [];
-  const maximum = 1079; // Every static image plus the gallery's 1000 post quota.
+  const maximum = 1113; // Every static image plus the gallery's 1000 post quota.
   let after: string | undefined;
   while (rows.length < maximum) {
     // Supabase normally caps one response at 1000 rows. Keyset pages also avoid

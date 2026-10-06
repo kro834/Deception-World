@@ -298,6 +298,11 @@ test("public numbers are unchanged and shared upload numbering survives filterin
   assert.equal(isCommunityGalleryId(id), true);
   assert.equal(isCommunityGalleryId("u-001"), false);
   assert.equal(galleryNumberFor({ id: "g79" }), "079");
+  assert.equal(galleryNumberFor({ id: "g80" }), "080");
+  assert.equal(galleryNumberFor({ id: "g99" }), "099");
+  assert.equal(galleryNumberFor({ id: "g100" }), "100");
+  assert.equal(galleryNumberFor({ id: "g112" }), "112");
+  assert.equal(galleryNumberFor({ id: "g113" }), "113");
   const artwork = communityPostToArtwork(post);
   assert.equal(galleryNumberFor(artwork), "U001");
   assert.equal(artwork.full, post.url);
@@ -350,6 +355,30 @@ test("response validation rejects unsafe image URLs and malformed records and do
     assert.throws(() =>
       normalizeCommunityGalleryCollection({ posts: [{ ...post, ...change }], titles: {} }),
     );
+});
+
+test("shared titles accept every catalogue ID through 113 and discard unknown or padded aliases", async (t) => {
+  const known = Array.from({ length: 113 }, (_, index) => `g${String(index + 1).padStart(2, "0")}`);
+  const unknown = ["g00", "g001", "g1", "g0113", "g114", "g999"];
+  const entry = { title: "共有の作品名", version: 1 };
+  const titles = Object.fromEntries([...known, ...unknown].map((id) => [id, entry]));
+  assert.deepEqual(
+    normalizeCommunityGalleryCollection({ posts: [], titles }).titles,
+    Object.fromEntries(known.map((id) => [id, entry])),
+  );
+  const fetchMock = t.mock.method(globalThis, "fetch", async (_input, init) => {
+    assert.equal(init.method, "PATCH");
+    assert.equal(init.headers.get("Authorization"), "Bearer anonymous-session");
+    assert.equal(JSON.parse(init.body).artworkId, "g113");
+    return Response.json(entry);
+  });
+  assert.deepEqual(
+    await updateCommunityGalleryTitle("g113", entry.title, 0, "anonymous-session"),
+    entry,
+  );
+  for (const id of unknown)
+    await assert.rejects(updateCommunityGalleryTitle(id, entry.title, 0, "anonymous-session"));
+  assert.equal(fetchMock.mock.callCount(), 1);
 });
 
 test("later auth events win over an earlier session read and unmount unsubscribes", async () => {

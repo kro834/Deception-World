@@ -286,7 +286,8 @@ export function normalizeCommunityGalleryCollection(value: unknown): CommunityGa
   const titles = Object.fromEntries(
     Object.entries(collection.titles).filter(
       ([id, title]) =>
-        (/^g\d{2}$/.test(id) || isCommunityGalleryId(id)) && isCommunityGalleryTitle(title),
+        (/^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(id) || isCommunityGalleryId(id)) &&
+        isCommunityGalleryTitle(title),
     ),
   );
   return {
@@ -431,7 +432,8 @@ export async function updateCommunityGalleryTitle(
   token: string,
 ): Promise<CommunityGalleryTitle> {
   if (
-    (!/^g\d{2}$/.test(artworkId) && !isCommunityGalleryId(artworkId)) ||
+    (!/^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(artworkId) &&
+      !isCommunityGalleryId(artworkId)) ||
     title.trim().length > 100 ||
     !Number.isSafeInteger(expectedVersion) ||
     expectedVersion < 0

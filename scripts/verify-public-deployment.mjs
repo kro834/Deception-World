@@ -123,13 +123,14 @@ function validPublicGalleryCollection(collection, storageOrigin) {
   const validPostId = (id) =>
     typeof id === "string" &&
     /^u-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(id);
-  const validArtworkId = (id) => /^g(?:0[1-9]|[1-6][0-9]|7[0-9])$/u.test(id) || validPostId(id);
+  const validArtworkId = (id) =>
+    /^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/u.test(id) || validPostId(id);
   if (
     !object(collection) ||
     !Array.isArray(collection.posts) ||
     collection.posts.length > 1000 ||
     !object(collection.titles) ||
-    Object.keys(collection.titles).length > 1079
+    Object.keys(collection.titles).length > 1113
   )
     return false;
   if (
