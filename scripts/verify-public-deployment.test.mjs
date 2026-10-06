@@ -24,6 +24,11 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
+test("publication covers the new shared search and personal library routes", () => {
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/search"));
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/library"));
+});
+
 test("public smoke routes pass while all retired AI routes remain 404", async () => {
   const seen = [];
   const report = await verifyPublicDeployment({

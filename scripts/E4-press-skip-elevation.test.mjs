@@ -225,7 +225,7 @@ test("gesture owners, non-controls and secondary buttons are left alone", () => 
 test("the root mounts the watcher and links its sheet after the pickup sheet", () => {
   assert.match(root, /import \{ watchPresses \} from "@\/lib\/press-feedback\.js";/);
   assert.match(root, /useEffect\(\(\) => watchPresses\(\), \[\]\);/);
-  assert.match(root, /<AppGuards \/>\s*<DialogOpenFlag \/>\s*<PressFeedback \/>\s*<Outlet \/>/);
+  assert.match(root, /<AppGuards \/>\s*<DialogOpenFlag \/>\s*<PressFeedback \/>\s*<LibrarySession \/>\s*<Outlet \/>/);
   assert.match(
     root,
     /\{ rel: "stylesheet", href: pickupVisibilityCss \},\s*\{ rel: "stylesheet", href: pressFeedbackCss \},/,

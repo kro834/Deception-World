@@ -336,7 +336,15 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     ),
   ].map((match) => `${match[1]}=${match[2]}`);
   const count = (value) => attrs.filter((attr) => attr === value).length;
-  assert.equal(attrs.length, 67);
+  // Search deep links add visible targets while preserving every original
+  // reading and accessibility attribute in the refined annex contract.
+  const searchAnchors = [
+    'id={`wa-location-${place.name}`}',
+    'id={`wa-episode-${episode.no}`}',
+    'id={`wa-term-${entry.term}`}',
+  ];
+  for (const anchor of searchAnchors) assert.equal(count(anchor), 1, anchor);
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 67);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
   assert.equal(count('lang="en"'), 5);

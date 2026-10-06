@@ -462,7 +462,7 @@ function WorldFiles() {
           <h3 id="wa-locations-title">舞台</h3>
           <ol>
             {WORLD_LOCATIONS.map((place, index) => (
-              <li key={place.name}>
+              <li key={place.name} id={`wa-location-${place.name}`}>
                 <span className="wa-index" aria-hidden="true">
                   {pad(index + 1)}
                 </span>
@@ -645,7 +645,7 @@ function ArchiveLog() {
             {WORLD_EPISODE_NOTES.map((episode) => {
               const art = EPISODE_ART[episode.no];
               return (
-                <li key={episode.no} className={`wa-plate wa-episode is-ep-${episode.no}`}>
+                <li key={episode.no} id={`wa-episode-${episode.no}`} className={`wa-plate wa-episode is-ep-${episode.no}`}>
                   {art ? (
                     <span
                       className="wa-episode-art"
@@ -698,7 +698,7 @@ function ArchiveLog() {
           />
           <dl className="wa-glossary">
             {WORLD_GLOSSARY.map((entry) => (
-              <div key={entry.term}>
+              <div key={entry.term} id={`wa-term-${entry.term}`}>
                 <dt>{entry.term}</dt>
                 <dd>
                   {entry.body.map((paragraph) => (

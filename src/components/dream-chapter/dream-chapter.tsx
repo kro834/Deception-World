@@ -7,7 +7,7 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import { useRouter } from "@tanstack/react-router";
+import { useRouter, useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
@@ -606,6 +606,7 @@ function DolminenceDialog({
 
 export function DreamChapter() {
   useWorldMode();
+  const dossierHash = useRouterState({ select: (state) => state.location.hash });
   const [menuOpen, setMenuOpen] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
   const [previousPosterIndex, setPreviousPosterIndex] = useState<number | null>(null);
@@ -642,6 +643,34 @@ export function DreamChapter() {
 
   useEffect(() => mountFilmMotion(pageRef.current), []);
   useEffect(() => mountStableFragmentNavigation(pageRef.current), []);
+
+  // Search links identify the existing record card. The same dialog and its
+  // history dismissal/focus cleanup handle direct arrivals and revisits.
+  useLayoutEffect(() => {
+    let id: string;
+    try {
+      id = decodeURIComponent(dossierHash.replace(/^#/, ""));
+    } catch {
+      return;
+    }
+    const targetCharacter = DREAM_CHARACTERS.find((item) => id === `dream-character-${item.id}`);
+    const targetRecord = DREAM_DOLMINENCE.find((item) => id === `dream-dolminence-${item.id}`);
+    if (!targetCharacter && !targetRecord) return;
+    const trigger = document.getElementById(id);
+    if (!(trigger instanceof HTMLButtonElement) || !pageRef.current?.contains(trigger)) return;
+    setMenuOpen(false);
+    if (targetCharacter) {
+      characterTriggerRef.current = trigger;
+      setCharacterOpenedByKeyboard(true);
+      setDolminenceRecord(null);
+      setCharacter(targetCharacter);
+    } else if (targetRecord) {
+      dolminenceTriggerRef.current = trigger;
+      setDolminenceOpenedByKeyboard(true);
+      setCharacter(null);
+      setDolminenceRecord(targetRecord);
+    }
+  }, [dossierHash]);
 
   const cancelShuffle = useCallback(() => {
     posterSelectionId.current += 1;
@@ -1296,6 +1325,7 @@ export function DreamChapter() {
           {DREAM_CHARACTERS.map((item) => (
             <article key={item.id} style={{ ["--dream-accent" as string]: item.accent }}>
               <button
+                id={`dream-character-${item.id}`}
                 type="button"
                 className="ios26-glass"
                 data-liquid-pointer="true"
@@ -1407,6 +1437,7 @@ export function DreamChapter() {
           {DREAM_DOLMINENCE.map((record) => (
             <article key={record.id} style={{ ["--dream-accent" as string]: record.accent }}>
               <button
+                id={`dream-dolminence-${record.id}`}
                 type="button"
                 className="ios26-glass"
                 data-liquid-pointer="true"

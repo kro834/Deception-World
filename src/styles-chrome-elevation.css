@@ -1515,3 +1515,35 @@ html[data-world-effects="economy"]
     background: none;
   }
 }
+.side-panel-links > .library-current-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.side-panel-links .library-current-control button {
+  min-height: 44px;
+  padding: 11px 15px;
+  border: 1px solid rgb(173 209 230 / 0.3);
+  border-radius: 7px;
+  background: rgb(173 209 230 / 0.06);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.side-panel-links .library-current-control button[aria-pressed="true"] {
+  border-color: rgb(213 185 130 / 0.6);
+  background: rgb(213 185 130 / 0.1);
+}
+.side-panel-links .library-current-control button:focus-visible {
+  outline: 2px solid #d5b982;
+  outline-offset: 3px;
+}
+.side-panel-links .library-current-control > span {
+  max-width: 100%;
+  color: #e9c3b0;
+  font-size: 12px;
+  line-height: 1.7;
+}

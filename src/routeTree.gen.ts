@@ -17,10 +17,12 @@ import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersIndexRouteImport } from './routes/characters/index'
@@ -80,6 +82,11 @@ const GalleryRoute = GalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -98,6 +105,11 @@ const RexonanceSagaRoute = RexonanceSagaRouteImport.update({
 const RidersRoute = RidersRouteImport.update({
   id: '/riders',
   path: '/riders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorldRoute = WorldRouteImport.update({
@@ -200,10 +212,12 @@ export interface FileRoutesByFullPath {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
+  '/search': typeof SearchRoute
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
@@ -231,8 +245,10 @@ export interface FileRoutesByTo {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
+  '/search': typeof SearchRoute
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
@@ -262,10 +278,12 @@ export interface FileRoutesById {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
+  '/search': typeof SearchRoute
   '/world': typeof WorldRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
@@ -296,10 +314,12 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/library'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
+    | '/search'
     | '/world'
     | '/api/export'
     | '/characters/ciel'
@@ -327,8 +347,10 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/library'
     | '/login'
     | '/rexonance-saga'
+    | '/search'
     | '/world'
     | '/api/export'
     | '/characters/ciel'
@@ -357,10 +379,12 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/library'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
     | '/riders'
+    | '/search'
     | '/world'
     | '/api/export'
     | '/characters/ciel'
@@ -390,10 +414,12 @@ export interface RootRouteChildren {
   FinalStageRoute: typeof FinalStageRoute
   FormArchiveRoute: typeof FormArchiveRoute
   GalleryRoute: typeof GalleryRoute
+  LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
+  SearchRoute: typeof SearchRoute
   WorldRoute: typeof WorldRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -457,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -483,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/riders'
       fullPath: '/riders'
       preLoaderRoute: typeof RidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/world': {
@@ -682,10 +722,12 @@ const rootRouteChildren: RootRouteChildren = {
   FinalStageRoute: FinalStageRoute,
   FormArchiveRoute: FormArchiveRoute,
   GalleryRoute: GalleryRoute,
+  LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
+  SearchRoute: SearchRoute,
   WorldRoute: WorldRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

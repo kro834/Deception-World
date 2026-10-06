@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
+import { LibraryVisitTracker } from "@/components/library/library-controls";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
@@ -46,6 +47,11 @@ function DialogOpenFlag() {
 function PressFeedback() {
   useEffect(() => watchPresses(), []);
   return null;
+}
+
+function LibrarySession() {
+  const location = useRouterState({ select: (state) => state.location });
+  return <LibraryVisitTracker pathname={location.pathname} hash={location.hash} />;
 }
 
 export const Route = createRootRoute({
@@ -154,6 +160,7 @@ export const Route = createRootRoute({
               <AppGuards />
               <DialogOpenFlag />
               <PressFeedback />
+              <LibrarySession />
               <Outlet />
             </ZeusButtonProvider>
           </LoadGateProvider>

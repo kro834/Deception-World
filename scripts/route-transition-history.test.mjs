@@ -14,7 +14,51 @@ const code = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
 }).outputText;
 
-function mount(pathname = "/world", { preload } = {}) {
+test("a missing Rexonance renderer continues under the normal cover", async () => {
+  const ui = mount("/world", {
+    prepareCalls: () => ({ promise: Promise.resolve(null), cancel() {} }),
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+  ui.releaseWarmup();
+  for (let index = 0; index < 20; index++) {
+    await ui.flushFrames();
+    await ui.flushTimers();
+  }
+  await pending;
+  assert.equal(ui.navigations.length, 1);
+  assert.ok(ui.gates.some((gate) => gate.active && gate.rexonanceCall === null));
+  assert.equal(ui.activeObservers(), 0);
+  assert.equal(ui.root.dataset.loading, undefined);
+  ui.cleanup();
+});
+
+for (const action of ["BACK", "hidden", "unmount"]) {
+  test(`${action} cancels pending cinematic preparation before any cover paints`, async () => {
+    let release;
+    const ui = mount("/world", {
+      prepareCalls: () => ({
+        promise: new Promise((resolve) => {
+          release = resolve;
+        }),
+        cancel: () => release(null),
+      }),
+    });
+    const pending = ui.go({ to: "/rexonance-saga" });
+    assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+    if (action === "BACK") ui.history("BACK");
+    else if (action === "hidden") ui.visibility(true);
+    else ui.cleanup();
+    await pending;
+    release(() => null);
+    assert.equal(ui.navigations.length, 0);
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    if (action !== "unmount") ui.cleanup();
+  });
+}
+
+function mount(pathname = "/world", { preload, prepareCalls } = {}) {
   class KeyboardEvent extends Event {
     constructor(type, options = {}) {
       super(type);
@@ -143,12 +187,19 @@ function mount(pathname = "/world", { preload } = {}) {
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls") return { REXONANCE_ENTRY_TIMINGS };
+      if (name === "@/lib/rexonance-transition-loader")
+        return {
+          prepareRexonanceTransition:
+            prepareCalls ?? (() => ({ promise: Promise.resolve(() => null), cancel() {} })),
+        };
       return {};
     },
   });
   const tree = exports.LoadGateProvider({ children: null });
   const cleanups = effects.map((callback) => callback()).filter(Boolean);
   const flush = async (queue) => {
+    // Dedicated cinematic modules now prepare before requesting their first paint.
+    for (let index = 0; index < 8; index++) await Promise.resolve();
     const pending = [...queue.values()];
     queue.clear();
     pending.forEach((callback) => callback());

@@ -5,6 +5,13 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, type GalleryArtwork } from "./gallery-data";
+import {
+  filterGalleryArtworks,
+  GALLERY_FAVORITES_KEY,
+  readGalleryFavorites,
+  toggleGalleryFavorite,
+  type GalleryFavorites,
+} from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
 import {
   GALLERY_TITLE_LIMIT,
@@ -21,6 +28,9 @@ export function GalleryPage() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"]>("all");
+  const [query, setQuery] = useState("");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [favorites, setFavorites] = useState<GalleryFavorites>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
   const [titles, setTitles] = useState<GalleryTitles>({});
@@ -36,9 +46,17 @@ export function GalleryPage() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
-  const works = GALLERY_ARTWORKS.filter((work) => category === "all" || work.category === category);
-  const selected = works.find((work) => work.id === selectedId) ?? null;
-  const selectedIndex = works.findIndex((work) => work.id === selectedId);
+  const viewerWorksRef = useRef<GalleryArtwork[]>([]);
+  const works = filterGalleryArtworks(GALLERY_ARTWORKS, {
+    category,
+    query,
+    favoritesOnly,
+    favorites,
+    titles,
+  });
+  const selected = GALLERY_ARTWORKS.find((work) => work.id === selectedId) ?? null;
+  const viewerWorks = viewerWorksRef.current.length ? viewerWorksRef.current : works;
+  const selectedIndex = viewerWorks.findIndex((work) => work.id === selectedId);
   const viewerOpen = selected !== null;
   const featured = GALLERY_ARTWORKS[2];
 
@@ -50,10 +68,19 @@ export function GalleryPage() {
         setSaveError("このブラウザーでは保存領域を利用できません。");
       }
     };
+    const loadFavorites = () => {
+      try {
+        setFavorites(readGalleryFavorites(window.localStorage, GALLERY_ARTWORKS.map((work) => work.id)));
+      } catch {
+        setSaveError("このブラウザーでは保存領域を利用できません。");
+      }
+    };
     load();
+    loadFavorites();
     if (document.documentElement.dataset.routeCover) setArriving(false);
     const onStorage = (event: StorageEvent) => {
       if (event.key === GALLERY_TITLES_KEY || event.key === null) load();
+      if (event.key === GALLERY_FAVORITES_KEY || event.key === null) loadFavorites();
     };
     window.addEventListener("storage", onStorage);
     // A direct visit opens the cloth too; a managed route entry already owns its curtain.
@@ -164,6 +191,12 @@ export function GalleryPage() {
     event.preventDefault();
     openerRef.current = event.currentTarget;
     restoreFocusRef.current = event.detail === 0;
+    const navigationWorks = works.some((item) => item.id === work.id)
+      ? works
+      : GALLERY_ARTWORKS.filter((item) => category === "all" || item.category === work.category);
+    viewerWorksRef.current = navigationWorks.some((item) => item.id === work.id)
+      ? navigationWorks
+      : [...navigationWorks, work];
     if (category !== "all" && category !== work.category) setCategory("all");
     setFailedId(null);
     resetEditor();
@@ -173,14 +206,30 @@ export function GalleryPage() {
     resetEditor();
     dialogRef.current?.close();
     setSelectedId(null);
+    viewerWorksRef.current = [];
   };
   const moveWork = (step: number) => {
-    const next = works[(selectedIndex + step + works.length) % works.length];
+    const next = viewerWorks[(selectedIndex + step + viewerWorks.length) % viewerWorks.length];
     if (next) {
       resetEditor();
       setFailedId(null);
       setSelectedId(next.id);
     }
+  };
+  const changeFavorite = (id: string) => {
+    try {
+      setFavorites(
+        toggleGalleryFavorite(window.localStorage, id, GALLERY_ARTWORKS.map((work) => work.id)),
+      );
+      setSaveError("");
+    } catch {
+      setSaveError("お気に入りを保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。");
+    }
+  };
+  const resetDiscovery = () => {
+    setQuery("");
+    setCategory("all");
+    setFavoritesOnly(false);
   };
 
   return (
@@ -257,9 +306,28 @@ export function GalleryPage() {
               <h2 id="gallery-collection-title">作品を巡る</h2>
             </div>
             <p className="gallery-count" aria-live="polite">
-              {category === "all" ? "全" : "展示中 "}
-              {works.length}点
+              {works.length} / {GALLERY_ARTWORKS.length}点を表示
             </p>
+          </div>
+          <div className="gallery-discovery-controls">
+            <label className="gallery-search">
+              <span>作品を検索</span>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="番号・代替テキスト・個人タイトル"
+                aria-label="作品を番号、画像の説明、個人タイトルで検索"
+              />
+            </label>
+            <button
+              type="button"
+              className="gallery-favorites-filter"
+              aria-pressed={favoritesOnly}
+              onClick={() => setFavoritesOnly((current) => !current)}
+            >
+              お気に入りのみ <span>{favorites.length}</span>
+            </button>
           </div>
           <nav className="gallery-filters" aria-label="展示の分類">
             {GALLERY_CATEGORIES.map((item) => (
@@ -289,7 +357,7 @@ export function GalleryPage() {
                   className="gallery-work-open"
                   href={work.full}
                   onClick={(event) => openWork(event, work)}
-                  aria-label={`${numberFor(work)}を拡大して鑑賞`}
+                  aria-label={`${numberFor(work)}、${work.alt}。拡大して鑑賞`}
                   aria-haspopup="dialog"
                   aria-controls="gallery-viewer"
                 >
@@ -316,10 +384,26 @@ export function GalleryPage() {
                 <figcaption>
                   <span className="gallery-work-number">{numberFor(work)}</span>
                   {titles[work.id] && <h3>{titles[work.id]}</h3>}
+                  <button
+                    type="button"
+                    className="gallery-favorite-toggle"
+                    aria-pressed={favorites.includes(work.id)}
+                    aria-label={`${numberFor(work)}を${favorites.includes(work.id) ? "お気に入りから解除" : "お気に入りに追加"}`}
+                    onClick={() => changeFavorite(work.id)}
+                  >
+                    {favorites.includes(work.id) ? "♥ お気に入り" : "♡ お気に入り"}
+                  </button>
                 </figcaption>
               </figure>
             ))}
           </div>
+          {works.length === 0 && (
+            <div className="gallery-empty" role="status">
+              <p>条件に合う作品はありません。</p>
+              <button type="button" onClick={resetDiscovery}>絞り込みを解除</button>
+            </div>
+          )}
+          {saveError && <p className="gallery-save-message is-error" role="alert">{saveError}</p>}
         </section>
       </main>
       <footer className="gallery-footer">
@@ -382,6 +466,15 @@ export function GalleryPage() {
                   }}
                 >
                   編集
+                </button>
+                <button
+                  type="button"
+                  className="gallery-viewer-close"
+                  aria-pressed={favorites.includes(selected.id)}
+                  disabled={editing}
+                  onClick={() => changeFavorite(selected.id)}
+                >
+                  {favorites.includes(selected.id) ? "♥ お気に入り" : "♡ お気に入り"}
                 </button>
                 <button type="button" className="gallery-viewer-close" onClick={closeViewer}>
                   閉じる <span aria-hidden="true">×</span>
@@ -465,7 +558,7 @@ export function GalleryPage() {
                 ← 前の作品
               </button>
               <p aria-live="polite">
-                {selectedIndex + 1} / {works.length}
+                {selectedIndex + 1} / {viewerWorks.length}
               </p>
               <button type="button" disabled={editing} onClick={() => moveWork(1)}>
                 次の作品 →

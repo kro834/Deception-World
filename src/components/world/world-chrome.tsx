@@ -23,6 +23,7 @@ import { RIDER_NAV } from "./dossier-nav";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
+import { LibraryCurrentButton } from "@/components/library/library-controls";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -247,6 +248,7 @@ export function SideMenuLayer({
   const router = useRouter();
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const locationHash = useRouterState({ select: (state) => state.location.hash });
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
   // session; read when the menu opens.
   const [reDiveReached, setReDiveReached] = useState(false);
@@ -772,6 +774,30 @@ export function SideMenuLayer({
           </button>
         </div>
         <div className="side-panel-group">
+          <p>FIND A RECORD</p>
+          <div className="side-panel-links">
+            <GuardedLink
+              to="/search"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/search" ? "page" : undefined}
+            >
+              <span>資料を探す</span>
+              <i>SEARCH</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/library"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/library" ? "page" : undefined}
+            >
+              <span>資料室・しおり</span>
+              <i>LIBRARY</i>
+            </GuardedLink>
+            <LibraryCurrentButton pathname={pathname} hash={locationHash} />
+          </div>
+        </div>
+        <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
             {isSpecialSite ? (
@@ -824,7 +850,12 @@ export function SideMenuLayer({
                   <span>ギャラリートップ</span>
                   <i>GALLERY</i>
                 </GuardedLink>
-                <GuardedLink to="/gallery" hash="gallery-collection" assets={[]} beforeNavigate={close}>
+                <GuardedLink
+                  to="/gallery"
+                  hash="gallery-collection"
+                  assets={[]}
+                  beforeNavigate={close}
+                >
                   <span>作品一覧</span>
                   <i>COLLECTION</i>
                 </GuardedLink>
@@ -929,7 +960,9 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={context === "extreme" ? "page" : undefined}
             >
-              <span><DisplayName value="エクスプリームサーガ" /></span>
+              <span>
+                <DisplayName value="エクスプリームサーガ" />
+              </span>
               <i>SUPREME SITE</i>
             </GuardedLink>
             <GuardedLink
@@ -939,7 +972,9 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={context === "rexonance" ? "page" : undefined}
             >
-              <span><DisplayName value="レクソナンスサーガ" /></span>
+              <span>
+                <DisplayName value="レクソナンスサーガ" />
+              </span>
               <i>PERFORMANCE SITE</i>
             </GuardedLink>
           </div>

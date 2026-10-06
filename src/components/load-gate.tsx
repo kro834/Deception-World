@@ -20,7 +20,10 @@ import {
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
-import { RexonanceCallSequence } from "@/components/rexonance-saga/rexonance-call-sequence";
+import {
+  prepareRexonanceTransition,
+  type RexonanceTransitionRenderer,
+} from "@/lib/rexonance-transition-loader";
 import { REXONANCE_ENTRY_TIMINGS } from "@/lib/rexonance-calls";
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 
@@ -35,6 +38,7 @@ type GateState = {
   variant: "archive" | "zeus" | "gallery" | RiderTransitionVariant;
   phase: "covering" | "revealing";
   scene?: CineScene | null;
+  rexonanceCall?: RexonanceTransitionRenderer | null;
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -1270,6 +1274,16 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       if (riderTransitionVariant && !isArchiveTransition) {
         const releaseScrollMotion = holdManagedScrollMotion();
         if (diveVariant === "rexonance") rexonanceTransition.current = requestId;
+        let rexonanceCall: RexonanceTransitionRenderer | null = null;
+        if (diveVariant === "rexonance") {
+          const preparation = prepareRexonanceTransition();
+          rexonanceCoverCancel.current = preparation.cancel;
+          rexonanceCall = await preparation.promise;
+          if (rexonanceCoverCancel.current === preparation.cancel)
+            rexonanceCoverCancel.current = null;
+          if (!isCurrent()) return;
+          startedAt = performance.now();
+        }
         // PREV / NEXT between dossiers flips the file; entry from anywhere
         // else keeps the rider's own dive or cut-in.
         const flip =
@@ -1283,7 +1297,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             : flip
               ? FILE_FLIP_TIMINGS
               : diveVariant
-                ? RIDER_DIVE_TIMINGS[diveVariant]
+                ? diveVariant === "rexonance" && !rexonanceCall
+                  ? CALM_TIMINGS
+                  : RIDER_DIVE_TIMINGS[diveVariant]
                 : cutInVariant
                   ? RIDER_CUT_IN_TIMINGS[cutInVariant]
                   : CALM_TIMINGS;
@@ -1306,6 +1322,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           variant: riderTransitionVariant,
           phase: "covering",
           scene,
+          rexonanceCall,
         });
         try {
           if (assets.length) {
@@ -1326,7 +1343,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) {
-            if (diveVariant === "rexonance") {
+            if (diveVariant === "rexonance" && rexonanceCall) {
               const hold = waitForRexonanceCover(coverTimeLeft);
               rexonanceCoverCancel.current = hold.cancel;
               await hold.promise;
@@ -1339,7 +1356,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
           if (!isCurrent()) return;
-          const callOnly = diveVariant === "rexonance";
+          const callOnly = Boolean(rexonanceCall);
           let landed = scene;
           // The call renderer has no carried portrait or docking layers. Keep
           // its tier/timing metadata without measuring unused destination art.
@@ -1363,6 +1380,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             variant: riderTransitionVariant,
             phase: "revealing",
             scene: landed,
+            rexonanceCall,
           });
           await revealRan(
             timings.reveal,
@@ -1498,6 +1516,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         variant={gate.variant}
         phase={gate.phase}
         scene={gate.scene}
+        rexonanceCall={gate.rexonanceCall}
       />
       <RouteSignal state={signal} />
       {delayedRoute && (
@@ -1531,11 +1550,13 @@ function LoadOverlay({
   variant,
   phase,
   scene,
+  rexonanceCall,
 }: {
   active: boolean;
   variant: GateState["variant"];
   phase: GateState["phase"];
   scene?: CineScene | null;
+  rexonanceCall?: RexonanceTransitionRenderer | null;
 }) {
   if (!active) return null;
   if (variant === "gallery") return <GalleryCurtain phase={phase} />;
@@ -1549,7 +1570,9 @@ function LoadOverlay({
     variant === "extreme" ||
     variant === "final-stage";
   if (isRiderDive) {
-    return <RiderRouteDive variant={variant} phase={phase} scene={scene} />;
+    return (
+      <RiderRouteDive variant={variant} phase={phase} scene={scene} rexonanceCall={rexonanceCall} />
+    );
   }
   const isRiderCutIn =
     variant === "leddic" ||
@@ -1631,14 +1654,16 @@ function RiderRouteDive({
   variant,
   phase,
   scene,
+  rexonanceCall: RexonanceCallSequence,
 }: {
   variant: RiderDiveVariant;
   phase: GateState["phase"];
   scene?: CineScene | null;
+  rexonanceCall?: RexonanceTransitionRenderer | null;
 }) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
-  const rexonance = variant === "rexonance";
+  const rexonance = variant === "rexonance" && Boolean(RexonanceCallSequence);
   return (
     <div
       className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}`}
@@ -1650,7 +1675,7 @@ function RiderRouteDive({
         revealing ? `${meta.label}の個別資料へ到着しました` : `${meta.label}の個別資料へダイブ中`
       }
     >
-      {rexonance ? (
+      {rexonance && RexonanceCallSequence ? (
         <RexonanceCallSequence mode="entry" phase={phase} tier={scene?.tier ?? "reduced"} />
       ) : (
         <>

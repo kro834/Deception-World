@@ -6,6 +6,10 @@ const component = readFileSync(
   new URL("../src/components/gallery/gallery-page.tsx", import.meta.url),
   "utf8",
 );
+const discovery = readFileSync(
+  new URL("../src/components/gallery/gallery-discovery.ts", import.meta.url),
+  "utf8",
+);
 const route = readFileSync(new URL("../src/routes/gallery.tsx", import.meta.url), "utf8");
 const chrome = readFileSync(
   new URL("../src/components/world/world-chrome.tsx", import.meta.url),
@@ -28,6 +32,26 @@ test("exhibits start numbered without automatic titles and the viewer offers loc
   assert.match(component, /input:not\(:disabled\)/);
   assert.match(component, /if \(editing \|\| event\.target instanceof HTMLInputElement\) return/);
   assert.match(component, /role="alert"/);
+});
+
+test("gallery discovery combines search, categories, and local favorites without default titles", () => {
+  assert.match(component, /filterGalleryArtworks\(GALLERY_ARTWORKS/);
+  assert.match(component, /type="search"/);
+  assert.match(component, /value=\{query\}/);
+  assert.match(component, /aria-pressed=\{favoritesOnly\}/);
+  assert.match(component, /gallery-favorite-toggle/);
+  assert.match(component, /aria-pressed=\{favorites\.includes\(selected\.id\)\}/);
+  assert.match(component, /条件に合う作品はありません。/);
+  assert.match(component, /絞り込みを解除/);
+  assert.match(component, /GALLERY_FAVORITES_KEY/);
+  assert.match(component, /setFavorites\(readGalleryFavorites/);
+  assert.match(component, /aria-label=.*work\.alt/);
+  assert.match(discovery, /normalize\("NFKC"\)/);
+  assert.match(discovery, /personalTitle, artwork\.alt/);
+  assert.match(discovery, /knownIds\.has\(id\)/);
+  assert.match(discovery, /deception-world\.gallery-favorites\.v1/);
+  assert.match(component, /viewerWorksRef\.current = navigationWorks/);
+  assert.match(component, /GALLERY_ARTWORKS\.find\(\(work\) => work\.id === selectedId\)/);
 });
 
 test("gallery entry uses closing and opening cloth panels with a reduced-motion alternative", () => {
@@ -71,8 +95,8 @@ test("opening filtered artwork keeps it selected in the collection and navigatio
     component,
     /if \(category !== "all" && category !== work\.category\) setCategory\("all"\)/,
   );
-  assert.match(component, /works\[\(selectedIndex \+ step \+ works\.length\) % works\.length\]/);
-  assert.match(component, /selectedIndex \+ 1\} \/ \{works\.length\}/);
+  assert.match(component, /viewerWorks\[\(selectedIndex \+ step \+ viewerWorks\.length\) % viewerWorks\.length\]/);
+  assert.match(component, /selectedIndex \+ 1\} \/ \{viewerWorks\.length\}/);
   assert.match(component, /event\.key === "ArrowLeft" \|\| event\.key === "ArrowRight"/);
 });
 
