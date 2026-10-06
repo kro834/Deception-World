@@ -1275,8 +1275,9 @@ html[data-route-cover] .gallery-arrival {
 
 .gallery-viewer-footer {
   min-height: 58px;
-  padding-top: 14px;
+  padding: 14px 0 0;
   border-top: 1px solid var(--gallery-rule);
+  background: transparent;
 }
 
 .gallery-viewer-footer p {
@@ -1568,7 +1569,20 @@ html[data-route-cover] .gallery-arrival {
     padding: 12px;
   }
   .gallery-viewer-header {
+    min-height: 44px;
     max-height: 30dvh;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  .gallery-viewer-tools:not([open]) {
+    flex-basis: auto;
+    order: 1;
+  }
+  .gallery-close-primary {
+    order: 2;
+  }
+  .gallery-viewer-tools[open] {
+    order: 3;
   }
 }
 

@@ -145,3 +145,13 @@ test("status-bar cover lives outside the clipped gallery and neither solid heade
   assert.match(header, /background: #171614;/);
   assert.match(header, /backdrop-filter: none;/);
 });
+
+test("short viewers reclaim the site's generic footer padding and keep collapsed tools on one row", () => {
+  const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
+  const footer = [...css.matchAll(/\.gallery-viewer-footer \{([\s\S]*?)\n\}/g)]
+    .map((match) => match[1])
+    .find((rule) => rule.includes("min-height: 58px"));
+  assert.match(footer, /padding: 14px 0 0;/);
+  assert.match(footer, /background: transparent;/);
+  assert.match(css, /\.gallery-viewer-tools:not\(\[open\]\) \{\s*flex-basis: auto;/);
+});
