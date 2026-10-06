@@ -2319,6 +2319,8 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-inner {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   background: #04080f !important;
   box-shadow: none !important;
 }
@@ -2331,12 +2333,18 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong {
+  min-width: 0;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
   color: var(--ar-text) !important;
   font-size: 14px !important;
   letter-spacing: 0.04em !important;
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close {
+  flex: 0 0 44px;
   width: 44px !important;
   height: 44px !important;
   min-width: 44px !important;

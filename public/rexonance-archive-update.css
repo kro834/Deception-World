@@ -157,6 +157,16 @@
   line-height: 1.78;
 }
 
+/* Keep long finisher calls inside the main dossier's narrow reading card. */
+#saga-forms-performance-v5 .form-detail .rexonance-finisher-grid article {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+#saga-forms-performance-v5 .form-detail .rexonance-finisher-grid p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 #saga-forms-performance-v5 .rexonance-order {
   padding: 0.9rem 1rem;
   border-left: 2px solid var(--saga-gold);

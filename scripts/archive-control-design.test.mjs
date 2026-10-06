@@ -46,7 +46,16 @@ test("both embedded archives request the revised design stylesheet", () => {
       `public/${archive}-form-archive-embedded.html`,
     ]) {
       const source = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
-      assert.match(source, /archive-elevation\.css\?v=20261003-elev3/);
+      assert.match(source, /archive-elevation\.css\?v=20261006-elev4/);
     }
   }
+});
+
+test("expanded art keeps the complete form name and its close button inside narrow screens", () => {
+  assert.match(rule(".lightbox-inner"), /grid-template-columns: minmax\(0, 1fr\)/);
+  assert.match(rule(".image-lightbox .lightbox-bar strong"), /min-width: 0/);
+  assert.match(rule(".image-lightbox .lightbox-bar strong"), /white-space: normal/);
+  assert.match(rule(".image-lightbox .lightbox-bar strong"), /word-break: keep-all/);
+  assert.match(rule(".image-lightbox .lightbox-bar strong"), /overflow-wrap: anywhere/);
+  assert.match(rule(".lightbox-close"), /flex: 0 0 44px/);
 });
