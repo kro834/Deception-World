@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "process": {
+    "orientation": "auto",
+    "crop": false,
+    "resize": false,
+    "composite": false,
+    "metadata": "stripped",
+    "jpeg": { "quality": 88, "mozjpeg": true },
+    "webp": { "quality": 84, "effort": 6 }
+  },
+  "sources": [
+    {
+      "id": "middle",
+      "width": 1023,
+      "height": 1538,
+      "bytes": 3865519,
+      "sha256": "15afb095f14a4109bd26adf290751977bc4b4a9122b8ce90250f81a9aecf077f",
+      "outputs": [
+        {
+          "path": "/saga-extreme-middle-20261006.jpeg",
+          "width": 1023,
+          "height": 1538,
+          "bytes": 440191,
+          "sha256": "dbe10827705a8a545d7d95315619fced5caab61210624e36ec58943a36800ef6"
+        },
+        {
+          "path": "/saga-extreme-middle-20261006.webp",
+          "width": 1023,
+          "height": 1538,
+          "bytes": 332708,
+          "sha256": "834a0fcfef3255aed98128973f717aac3b2ff1c8a3dbf5a85d961bacbf66f186"
+        }
+      ]
+    },
+    {
+      "id": "ultra",
+      "width": 1022,
+      "height": 1538,
+      "bytes": 3862709,
+      "sha256": "ebbcd400308fef1709ce5f8dc51c8aa7557052ca3367eb702237c6c45fbd9785",
+      "outputs": [
+        {
+          "path": "/saga-extreme-ultra-20261006.jpeg",
+          "width": 1022,
+          "height": 1538,
+          "bytes": 426004,
+          "sha256": "34ba8867883d94dd747fa3928d2a9ef2e744478972fe284b921df75cfdbf978e"
+        }
+      ]
+    }
+  ]
+}

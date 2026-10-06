@@ -490,11 +490,11 @@
    every 1.1 s (STAGE_CUT_GAP_MS), so flicking between the forms never
    strobes the figure; the tabs and the copy follow at once. */
 .rxs-page.rxs-page.exs-page #exs-stage-panel[data-exo-cut="true"] figure[data-form="ultra"] {
-  background: #1d1d1f url("/saga-extreme-middle.webp") 50% 0 / cover no-repeat;
+  background: #1d1d1f url("/saga-extreme-middle-20261006.webp") 50% 0 / cover no-repeat;
 }
 
 .rxs-page.rxs-page.exs-page #exs-stage-panel[data-exo-cut="true"] figure[data-form="middle"] {
-  background: #1d1d1f url("/saga-extreme-ultra.jpeg") 50% 0 / cover no-repeat;
+  background: #1d1d1f url("/saga-extreme-ultra-20261006.jpeg") 50% 0 / cover no-repeat;
 }
 
 /* The stage art holds still on scroll, so the old form behind a cut lines

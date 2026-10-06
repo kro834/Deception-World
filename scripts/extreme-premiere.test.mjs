@@ -287,7 +287,10 @@ test("12px floor, no !important, no images but the site's own two forms, a force
   assert.doesNotMatch(css, /font-size:\s*(?:[0-9]|1[01])(?:\.\d+)?px\b/);
   assert.doesNotMatch(css, /!important/);
   const urls = [...css.matchAll(/url\(([^)]*)\)/g)].map((match) => match[1]);
-  assert.deepEqual(urls.sort(), ['"/saga-extreme-middle.webp"', '"/saga-extreme-ultra.jpeg"']);
+  assert.deepEqual(urls.sort(), [
+    '"/saga-extreme-middle-20261006.webp"',
+    '"/saga-extreme-ultra-20261006.jpeg"',
+  ]);
   // The other form stands behind the cut only after a reader's change, and
   // always the form being replaced.
   const backdrops = rules.filter(({ body }) => /url\(/.test(body));
@@ -298,7 +301,13 @@ test("12px floor, no !important, no images but the site's own two forms, a force
         /#exs-stage-panel\[data-exo-cut="true"\] figure\[data-form="(ultra|middle)"\]$/,
       ) ?? [];
     assert.ok(form, selector);
-    assert.match(body, form === "ultra" ? /saga-extreme-middle/ : /saga-extreme-ultra/, selector);
+    assert.match(
+      body,
+      form === "ultra"
+        ? /saga-extreme-middle-20261006\.webp/
+        : /saga-extreme-ultra-20261006\.jpeg/,
+      selector,
+    );
   }
   // Generated text: the round label and numbers, each with an empty alt.
   for (const [, value] of css.matchAll(/content:\s*([^;]+);/g)) {

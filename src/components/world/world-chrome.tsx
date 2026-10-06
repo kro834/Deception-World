@@ -211,7 +211,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "final-stage";
+  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "final-stage" | "gallery";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -818,6 +818,21 @@ export function SideMenuLayer({
                   </GuardedLink>
                 ))}
               </>
+            ) : context === "gallery" ? (
+              <>
+                <GuardedLink to="/gallery" hash="gallery-top" assets={[]} beforeNavigate={close}>
+                  <span>ギャラリートップ</span>
+                  <i>GALLERY</i>
+                </GuardedLink>
+                <GuardedLink to="/gallery" hash="gallery-collection" assets={[]} beforeNavigate={close}>
+                  <span>作品一覧</span>
+                  <i>COLLECTION</i>
+                </GuardedLink>
+                <GuardedLink to="/world" assets={[]} beforeNavigate={close}>
+                  <span>ワールドへ戻る</span>
+                  <i>WORLD</i>
+                </GuardedLink>
+              </>
             ) : context === "archive" ? (
               <>
                 {[
@@ -1030,6 +1045,15 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>INFORMATION</p>
           <div className="side-panel-links">
+            <GuardedLink
+              to="/gallery"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/gallery" ? "page" : undefined}
+            >
+              <span>ギャラリー</span>
+              <i>VISUAL COLLECTION</i>
+            </GuardedLink>
             <button
               ref={announcementTriggerRef}
               className="side-panel-link-button side-panel-announcement-trigger"

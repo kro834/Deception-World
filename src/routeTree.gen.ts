@@ -16,6 +16,7 @@ import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
@@ -72,6 +73,11 @@ const FinalStageRoute = FinalStageRouteImport.update({
 const FormArchiveRoute = FormArchiveRouteImport.update({
   id: '/form-archive',
   path: '/form-archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
+  '/gallery': typeof GalleryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
+  '/gallery': typeof GalleryRoute
   '/login': typeof LoginRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/world': typeof WorldRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
+  '/gallery': typeof GalleryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
   '/rexonance-saga': typeof RexonanceSagaRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
+    | '/gallery'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
+    | '/gallery'
     | '/login'
     | '/rexonance-saga'
     | '/world'
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
+    | '/gallery'
     | '/login'
     | '/managers'
     | '/rexonance-saga'
@@ -377,6 +389,7 @@ export interface RootRouteChildren {
   ExtremeSagaRoute: typeof ExtremeSagaRoute
   FinalStageRoute: typeof FinalStageRoute
   FormArchiveRoute: typeof FormArchiveRoute
+  GalleryRoute: typeof GalleryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
   RexonanceSagaRoute: typeof RexonanceSagaRoute
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/form-archive'
       fullPath: '/form-archive'
       preLoaderRoute: typeof FormArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -661,6 +681,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExtremeSagaRoute: ExtremeSagaRoute,
   FinalStageRoute: FinalStageRoute,
   FormArchiveRoute: FormArchiveRoute,
+  GalleryRoute: GalleryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
   RexonanceSagaRoute: RexonanceSagaRoute,

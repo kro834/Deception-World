@@ -29,7 +29,7 @@ export const Route = createFileRoute("/extreme-saga")({
         property: "og:description",
         content: "殴り合い、歓迎。長引くほど、こっちのもの。エクスプリームサーガ公式特設サイト。",
       },
-      { property: "og:image", content: "/saga-extreme-middle.jpeg" },
+      { property: "og:image", content: "/saga-extreme-middle-20261006.jpeg" },
     ],
     links: [
       ...WORLD_STYLESHEET_LINKS,
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/extreme-saga")({
       {
         rel: "preload",
         as: "image",
-        href: "/saga-extreme-middle.webp",
+        href: "/saga-extreme-middle-20261006.webp",
         fetchPriority: "high",
         type: "image/webp",
       },

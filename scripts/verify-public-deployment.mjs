@@ -10,6 +10,8 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/riders/saga",
   "/dream-chapter",
   "/rexonance-saga",
+  "/extreme-saga",
+  "/gallery",
   "/final-stage",
 ];
 

@@ -35,6 +35,8 @@ const EXTREME_STAGES: Record<
     code: string;
     image: string;
     alt: string;
+    width: number;
+    height: number;
     title: string;
     lede: string;
     points: readonly string[];
@@ -44,8 +46,10 @@ const EXTREME_STAGES: Record<
   middle: {
     label: "ミドル",
     code: "MIDDLE",
-    image: "/saga-extreme-middle.webp",
+    image: "/saga-extreme-middle-20261006.webp",
     alt: "仮面ライダーエクスプリームサーガの全身ビジュアル",
+    width: 1023,
+    height: 1538,
     title: "殴られるほど、賢くなる。",
     lede: "標準状態では、学習した攻撃と戦況から勝利へ至る経路を増殖させ、状況ごとに最適な結果を選び取ります。戦いが長引くほど選択肢が増え、相手の優位を狭めていきます。",
     points: ["LEARNING", "DARK MATTER CHARGING", "HIGH SUPREME"],
@@ -54,8 +58,10 @@ const EXTREME_STAGES: Record<
   ultra: {
     label: "ウルトラ",
     code: "ULTRA / 50 SEC",
-    image: "/saga-extreme-ultra.jpeg",
+    image: "/saga-extreme-ultra-20261006.jpeg",
     alt: "仮面ライダーエクスプリームサーガ・ウルトラの全身ビジュアル",
+    width: 1022,
+    height: 1538,
     title: "50秒で、片をつける。",
     lede: "無数に増殖した可能性を一つの勝利結果へ固定し、攻撃・防御・修復を同じ結論へ収束させます。50秒間だけ成立する、短期決着の最上位状態です。",
     points: ["結果固定", "絶対攻撃・絶対防御", "50秒間の限界運用"],
@@ -570,10 +576,10 @@ export function ExtremeSaga() {
           <i className="exo-rev" />
           <i className="exo-shock" />
           <img
-            src="/saga-extreme-middle.webp"
+            src="/saga-extreme-middle-20261006.webp"
             alt=""
-            width="851"
-            height="1280"
+            width="1023"
+            height="1538"
             decoding="async"
             fetchPriority="high"
           />
@@ -735,8 +741,8 @@ export function ExtremeSaga() {
               <img
                 src={shownArt.image}
                 alt={shownArt.alt}
-                width={shownStage === "middle" ? 851 : 796}
-                height={shownStage === "middle" ? 1280 : 1200}
+                width={shownArt.width}
+                height={shownArt.height}
                 loading={shownStage === "middle" ? "eager" : "lazy"}
                 decoding="async"
               />

@@ -123,8 +123,47 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   const p14Asset = new URL("../public/extreme-p14-core.jpg", import.meta.url);
   assert.equal(existsSync(p14Asset), true);
   assert.ok(statSync(p14Asset).size < 400_000, "Extreme P14 artwork should stay below 400 KB");
-  const ultraAsset = new URL("../public/saga-extreme-ultra.jpeg", import.meta.url);
+  const ultraAsset = new URL("../public/saga-extreme-ultra-20261006.jpeg", import.meta.url);
   assert.ok(statSync(ultraAsset).size < 450_000, "Extreme Ultra artwork should stay below 450 KB");
+});
+
+test("Extreme stage profiles use the full-size versioned reference artwork", () => {
+  const artworkFiles = [
+    "public/saga-extreme-middle-20261006.jpeg",
+    "public/saga-extreme-middle-20261006.webp",
+    "public/saga-extreme-ultra-20261006.jpeg",
+  ];
+  for (const path of artworkFiles) {
+    assert.equal(existsSync(new URL(`../${path}`, import.meta.url)), true);
+  }
+
+  const runtime = [
+    component,
+    route,
+    loader,
+    styles,
+    read("src/components/world/rider-page.tsx"),
+    read("scripts/fetch-public-assets.mjs"),
+  ].join("\n");
+  assert.doesNotMatch(
+    runtime,
+    /saga-extreme-middle[.]jpe?g|saga-extreme-middle[.]webp|saga-extreme-ultra[.]jpeg/,
+  );
+  assert.match(route, /og:image", content: "\/saga-extreme-middle-20261006\.jpeg"/);
+  assert.match(route, /href: "\/saga-extreme-middle-20261006\.webp"/);
+  assert.match(component, /width: 1023,\s*height: 1538/);
+  assert.match(component, /width: 1022,\s*height: 1538/);
+  assert.match(component, /width=\{shownArt\.width\}/);
+  assert.match(component, /height=\{shownArt\.height\}/);
+
+  const provenance = JSON.parse(read("public/extreme-image-provenance.json"));
+  assert.deepEqual(
+    provenance.sources.map(({ id, width, height }) => ({ id, width, height })),
+    [
+      { id: "middle", width: 1023, height: 1538 },
+      { id: "ultra", width: 1022, height: 1538 },
+    ],
+  );
 });
 
 test("Extreme stage rail supports liquid long-press and swipe selection", () => {

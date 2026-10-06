@@ -146,7 +146,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     ],
     forms: [
       {
-        img: "/saga-extreme-middle.jpeg",
+        img: "/saga-extreme-middle-20261006.jpeg",
         pos: "50% 8%",
         system: "エクスサーガドライバー × デュアルエクスコア",
         name: "エクスプリームサーガ",
@@ -198,7 +198,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         ],
       },
       {
-        img: "/saga-extreme-ultra.jpeg",
+        img: "/saga-extreme-ultra-20261006.jpeg",
         pos: "50% 8%",
         system: "エクスサーガドライバー × デュアルエクスコア",
         name: "エクスプリームサーガ・ウルトラ",

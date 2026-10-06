@@ -28,7 +28,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/dream-chapter-poster-05-delivery.webp": 138154,
   "/rider-rexonance-saga-pickup-20260922.webp": 391098,
   [REXONANCE_SITE_ARTWORK.standard]: 440678,
-  "/saga-extreme-middle.webp": 238554,
+  "/saga-extreme-middle-20261006.webp": 332708,
   "/final-stage-logo.webp": 106600,
 };
 
@@ -45,7 +45,7 @@ export const DREAM_CHAPTER_ENTER_ASSETS = [DREAM_CHAPTER_LOGO, DREAM_CHAPTER_HER
 
 export const REXONANCE_SAGA_ENTER_ASSETS = [REXONANCE_SITE_ARTWORK.standard] as const;
 
-export const EXTREME_SAGA_ENTER_ASSETS = ["/saga-extreme-middle.webp"] as const;
+export const EXTREME_SAGA_ENTER_ASSETS = ["/saga-extreme-middle-20261006.webp"] as const;
 
 export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 

@@ -135,9 +135,9 @@ const files = [
   "rider-saga.jpeg",
   "rider-terra.jpeg",
   "rider-vandaal.jpeg",
-  "saga-extreme-middle.jpeg",
-  "saga-extreme-middle.webp",
-  "saga-extreme-ultra.jpeg",
+  "saga-extreme-middle-20261006.jpeg",
+  "saga-extreme-middle-20261006.webp",
+  "saga-extreme-ultra-20261006.jpeg",
 ];
 
 async function main() {
