@@ -5,11 +5,17 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, type GalleryArtwork } from "./gallery-data";
+import { GalleryCurtain } from "./gallery-curtain";
+import {
+  GALLERY_TITLE_LIMIT,
+  GALLERY_TITLES_KEY,
+  readGalleryTitles,
+  saveGalleryTitle,
+  type GalleryTitles,
+} from "./gallery-titles";
 
 const imageSizes = "(max-width: 640px) 90vw, (max-width: 1000px) 44vw, 30vw";
 const numberFor = (artwork: GalleryArtwork) => artwork.id.slice(1).padStart(3, "0");
-const categoryFor = (artwork: GalleryArtwork) =>
-  GALLERY_CATEGORIES.find((category) => category.id === artwork.category)?.label;
 
 export function GalleryPage() {
   useWorldMode();
@@ -17,6 +23,15 @@ export function GalleryPage() {
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"]>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failedId, setFailedId] = useState<string | null>(null);
+  const [titles, setTitles] = useState<GalleryTitles>({});
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [arriving, setArriving] = useState(true);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreEditFocusRef = useRef(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -26,6 +41,46 @@ export function GalleryPage() {
   const selectedIndex = works.findIndex((work) => work.id === selectedId);
   const viewerOpen = selected !== null;
   const featured = GALLERY_ARTWORKS[2];
+
+  useEffect(() => {
+    const load = () => {
+      try {
+        setTitles(readGalleryTitles(window.localStorage));
+      } catch {
+        setSaveError("このブラウザーでは保存領域を利用できません。");
+      }
+    };
+    load();
+    if (document.documentElement.dataset.routeCover) setArriving(false);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === GALLERY_TITLES_KEY || event.key === null) load();
+    };
+    window.addEventListener("storage", onStorage);
+    // A direct visit opens the cloth too; a managed route entry already owns its curtain.
+    const timer = window.setTimeout(() => setArriving(false), 1400);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (editing) titleInputRef.current?.focus({ preventScroll: true });
+    else if (restoreEditFocusRef.current) {
+      editButtonRef.current?.focus({ preventScroll: true });
+      restoreEditFocusRef.current = false;
+    }
+  }, [editing]);
+
+  const resetEditor = () => {
+    setEditing(false);
+    setSaveMessage("");
+    setSaveError("");
+  };
+  const cancelEditor = () => {
+    restoreEditFocusRef.current = true;
+    resetEditor();
+  };
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -66,7 +121,7 @@ export function GalleryPage() {
       // whose native Tab preference skips buttons.
       const controls = Array.from(
         dialog.querySelectorAll<HTMLElement>(
-          'button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+          'button:not(:disabled), input:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
         ),
       ).filter(
         (node) =>
@@ -111,15 +166,18 @@ export function GalleryPage() {
     restoreFocusRef.current = event.detail === 0;
     if (category !== "all" && category !== work.category) setCategory("all");
     setFailedId(null);
+    resetEditor();
     setSelectedId(work.id);
   };
   const closeViewer = () => {
+    resetEditor();
     dialogRef.current?.close();
     setSelectedId(null);
   };
   const moveWork = (step: number) => {
     const next = works[(selectedIndex + step + works.length) % works.length];
     if (next) {
+      resetEditor();
       setFailedId(null);
       setSelectedId(next.id);
     }
@@ -127,6 +185,11 @@ export function GalleryPage() {
 
   return (
     <div id="gallery-top" className="world gallery-page" data-gallery-page="true">
+      {arriving && (
+        <div className="gallery-arrival">
+          <GalleryCurtain phase="revealing" />
+        </div>
+      )}
       <header className="gallery-topbar">
         <Link className="gallery-brand" to="/world">
           DECEPTION WORLD<span>VISUAL COLLECTION</span>
@@ -164,7 +227,7 @@ export function GalleryPage() {
               onClick={(event) => openWork(event, featured)}
               aria-haspopup="dialog"
               aria-controls="gallery-viewer"
-              aria-label={`${featured.title}を拡大して鑑賞`}
+              aria-label={`${numberFor(featured)}を拡大して鑑賞`}
             >
               <img
                 src={featured.medium}
@@ -178,8 +241,8 @@ export function GalleryPage() {
               />
             </a>
             <figcaption>
-              <span>FEATURED / {numberFor(featured)}</span>
-              <span>{featured.title}</span>
+              <span>{numberFor(featured)}</span>
+              {titles[featured.id] && <span>{titles[featured.id]}</span>}
             </figcaption>
           </figure>
         </section>
@@ -226,7 +289,7 @@ export function GalleryPage() {
                   className="gallery-work-open"
                   href={work.full}
                   onClick={(event) => openWork(event, work)}
-                  aria-label={`${numberFor(work)} ${work.title}を拡大して鑑賞`}
+                  aria-label={`${numberFor(work)}を拡大して鑑賞`}
                   aria-haspopup="dialog"
                   aria-controls="gallery-viewer"
                 >
@@ -252,10 +315,7 @@ export function GalleryPage() {
                 </a>
                 <figcaption>
                   <span className="gallery-work-number">{numberFor(work)}</span>
-                  <div>
-                    <h3>{work.title}</h3>
-                    <p>{categoryFor(work)}</p>
-                  </div>
+                  {titles[work.id] && <h3>{titles[work.id]}</h3>}
                 </figcaption>
               </figure>
             ))}
@@ -278,10 +338,16 @@ export function GalleryPage() {
         tabIndex={-1}
         aria-labelledby="gallery-viewer-title"
         onClose={() => setSelectedId(null)}
-        onCancel={() => {
+        onCancel={(event) => {
+          if (editing) {
+            event.preventDefault();
+            cancelEditor();
+            return;
+          }
           restoreFocusRef.current = true;
         }}
         onKeyDown={(event) => {
+          if (editing || event.target instanceof HTMLInputElement) return;
           if (event.key === "Escape") restoreFocusRef.current = true;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
             event.preventDefault();
@@ -294,12 +360,85 @@ export function GalleryPage() {
           <div className="gallery-viewer-shell">
             <header className="gallery-viewer-header">
               <div>
-                <p className="gallery-eyebrow">COLLECTION / {numberFor(selected)}</p>
-                <h2 id="gallery-viewer-title">{selected.title}</h2>
+                <h2 id="gallery-viewer-title">
+                  {numberFor(selected)}
+                  {titles[selected.id] && (
+                    <span className="gallery-personal-title">{titles[selected.id]}</span>
+                  )}
+                </h2>
+                <p className="gallery-storage-note">タイトルはこのブラウザーだけに保存されます。</p>
               </div>
-              <button type="button" className="gallery-viewer-close" onClick={closeViewer}>
-                閉じる <span aria-hidden="true">×</span>
-              </button>
+              <div className="gallery-viewer-actions">
+                <button
+                  type="button"
+                  className="gallery-viewer-close"
+                  ref={editButtonRef}
+                  disabled={editing}
+                  onClick={() => {
+                    setDraft(titles[selected.id] ?? "");
+                    setSaveMessage("");
+                    setSaveError("");
+                    setEditing(true);
+                  }}
+                >
+                  編集
+                </button>
+                <button type="button" className="gallery-viewer-close" onClick={closeViewer}>
+                  閉じる <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              {editing && (
+                <form
+                  className="gallery-title-editor"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    try {
+                      const nextTitles = saveGalleryTitle(window.localStorage, selected.id, draft);
+                      setTitles(nextTitles);
+                      setSaveError("");
+                      setSaveMessage("このブラウザーに保存しました。");
+                      restoreEditFocusRef.current = true;
+                      setEditing(false);
+                    } catch {
+                      setSaveError(
+                        "保存できませんでした。ブラウザーの保存設定や空き容量を確認して、もう一度お試しください。",
+                      );
+                    }
+                  }}
+                >
+                  <label htmlFor="gallery-title-input">タイトル</label>
+                  <input
+                    id="gallery-title-input"
+                    ref={titleInputRef}
+                    value={draft}
+                    maxLength={GALLERY_TITLE_LIMIT}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="空欄で保存すると番号だけに戻ります"
+                    aria-describedby="gallery-title-help"
+                  />
+                  <p id="gallery-title-help">
+                    100文字まで。ほかの端末やブラウザーとは共有されません。
+                  </p>
+                  <div className="gallery-viewer-actions">
+                    <button type="submit" className="gallery-viewer-close">
+                      保存
+                    </button>
+                    <button type="button" className="gallery-viewer-close" onClick={cancelEditor}>
+                      キャンセル
+                    </button>
+                  </div>
+                </form>
+              )}
+              {saveMessage && (
+                <p className="gallery-save-message" role="status">
+                  {saveMessage}
+                </p>
+              )}
+              {saveError && (
+                <p className="gallery-save-message is-error" role="alert">
+                  {saveError}
+                </p>
+              )}
             </header>
             <div className="gallery-viewer-stage">
               {failedId !== selected.id ? (
@@ -322,13 +461,13 @@ export function GalleryPage() {
               )}
             </div>
             <footer className="gallery-viewer-footer">
-              <button type="button" onClick={() => moveWork(-1)}>
+              <button type="button" disabled={editing} onClick={() => moveWork(-1)}>
                 ← 前の作品
               </button>
               <p aria-live="polite">
                 {selectedIndex + 1} / {works.length}
               </p>
-              <button type="button" onClick={() => moveWork(1)}>
+              <button type="button" disabled={editing} onClick={() => moveWork(1)}>
                 次の作品 →
               </button>
             </footer>

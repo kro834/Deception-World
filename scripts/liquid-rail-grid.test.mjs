@@ -385,12 +385,12 @@ test("a sideways swipe before the hold selects nothing", () => {
   }
 });
 
-test("a long press on the rider grid takes the finger and drags across tabs", () => {
+test("a 220ms long press on the rider grid takes the finger and drags across tabs", () => {
   const ui = riderGrid();
   try {
     ui.pointer("pointerdown", 25, 25);
     ui.pointer("pointermove", 29, 28); // a resting finger drifts a little
-    ui.advance(349);
+    ui.advance(219);
     assert.equal(ui.root.dataset.railLock, undefined);
     ui.advance(1);
     assert.equal(ui.root.dataset.railLock, "true", "the hold locks the page");

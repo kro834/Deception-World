@@ -102,7 +102,7 @@ test("covered navigation waits for destination readiness and is cancellation-saf
   const goBlock = sliceBetween(gate, "const go = useCallback", "\n\n  const api = useMemo", "go");
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
+    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!isGalleryTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
   );
   assert.notEqual(coveredIndex, -1, "go must have a transitionCovered branch");
   assert.notEqual(directIndex, -1, "go must retain the ordinary direct-navigation branch");

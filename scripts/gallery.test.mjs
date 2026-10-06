@@ -11,6 +11,34 @@ const chrome = readFileSync(
   new URL("../src/components/world/world-chrome.tsx", import.meta.url),
   "utf8",
 );
+const curtain = readFileSync(
+  new URL("../src/components/gallery/gallery-curtain.tsx", import.meta.url),
+  "utf8",
+);
+const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+const css = readFileSync(new URL("../src/styles-route-transitions.css", import.meta.url), "utf8");
+
+test("exhibits start numbered without automatic titles and the viewer offers local editing", () => {
+  assert.doesNotMatch(component, /(?:featured|work|selected)\.title/);
+  assert.match(component, /className="gallery-work-number">\{numberFor\(work\)\}/);
+  assert.match(component, /saveGalleryTitle\(window\.localStorage, selected\.id, draft\)/);
+  assert.match(component, /onSubmit=/);
+  assert.match(component, /window\.addEventListener\("storage", onStorage\)/);
+  assert.match(component, /window\.removeEventListener\("storage", onStorage\)/);
+  assert.match(component, /input:not\(:disabled\)/);
+  assert.match(component, /if \(editing \|\| event\.target instanceof HTMLInputElement\) return/);
+  assert.match(component, /role="alert"/);
+});
+
+test("gallery entry uses closing and opening cloth panels with a reduced-motion alternative", () => {
+  assert.match(gate, /const isGalleryTransition = changesDocument && to === "\/gallery"/);
+  assert.match(gate, /if \(variant === "gallery"\) return <GalleryCurtain phase=\{phase\} \/>/);
+  assert.match(gate, /cover: 720, reveal: 1120/);
+  assert.match(curtain, /\["left", "right"\]/);
+  assert.match(css, /gallery-curtain-close 720ms/);
+  assert.match(css, /gallery-curtain-open 1120ms/);
+  assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?gallery-curtain-fade-out 240ms/);
+});
 
 test("gallery route loads the World mode and its route-scoped stylesheet", () => {
   assert.match(route, /createFileRoute\("\/gallery"\)/);

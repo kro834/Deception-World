@@ -554,9 +554,79 @@
 }
 
 .gallery-viewer-header {
+  flex-wrap: wrap;
   min-height: 66px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--gallery-rule);
+}
+
+.gallery-viewer-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.gallery-viewer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.gallery-personal-title {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.gallery-storage-note {
+  margin: 6px 0 0;
+  color: #aba08b;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.gallery-title-editor {
+  flex-basis: 100%;
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+}
+.gallery-title-editor label {
+  color: #e7d7b9;
+  font-size: 13px;
+}
+.gallery-title-editor input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #89724f;
+  border-radius: 0;
+  background: #0d0d0c;
+  color: #f0e7d7;
+  font: inherit;
+}
+.gallery-title-editor input:focus-visible {
+  outline: 2px solid #e8c383;
+  outline-offset: 2px;
+}
+.gallery-title-editor p,
+.gallery-save-message {
+  margin: 0;
+  color: #cbbb9a;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.gallery-save-message {
+  flex-basis: 100%;
+}
+.gallery-save-message.is-error {
+  color: #ffb5a4;
+}
+.gallery-viewer button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.gallery-arrival {
+  pointer-events: none;
+}
+html[data-route-cover] .gallery-arrival {
+  display: none;
 }
 
 .gallery-viewer-header h2 {
@@ -644,6 +714,7 @@
 }
 
 .gallery-viewer-footer p {
+  display: block;
   margin: 0;
   color: #c6b99f;
   font-family: var(--gallery-serif);

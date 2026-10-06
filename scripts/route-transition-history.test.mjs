@@ -187,7 +187,13 @@ function mount(pathname = "/world", { preload } = {}) {
   };
 }
 
-for (const to of ["/characters/ciel", "/managers/zeus", "/form-archive", "/characters/dante"]) {
+for (const to of [
+  "/gallery",
+  "/characters/ciel",
+  "/managers/zeus",
+  "/form-archive",
+  "/characters/dante",
+]) {
   test(`unmount during navigation to ${to} invalidates pending route work`, async () => {
     const ui = mount();
     const pending = ui.go({ to });
@@ -209,6 +215,76 @@ for (const to of ["/characters/ciel", "/managers/zeus", "/form-archive", "/chara
     assert.equal(ui.root.dataset.loading, undefined);
     assert.equal(ui.root.dataset.routeCover, undefined);
   });
+}
+
+for (const mode of ["full", "economy", "reduced"]) {
+  test(`gallery ${mode} curtain commits under cover and releases all route locks`, async () => {
+    const ui = mount();
+    if (mode === "economy") ui.economy();
+    if (mode === "reduced") ui.reduceMotion();
+    const pending = ui.go({ to: "/gallery" });
+    assert.equal(ui.gates.at(-1).variant, "gallery");
+    assert.equal(ui.gates.at(-1).phase, "covering");
+    assert.equal(ui.navigations.length, 0);
+    ui.releaseWarmup();
+    for (let index = 0; index < 20; index++) {
+      await ui.flushFrames();
+      await ui.flushTimers();
+    }
+    await pending;
+    assert.deepEqual(
+      ui.navigations.map(({ to }) => to),
+      ["/gallery"],
+    );
+    assert.ok(ui.gates.some((gate) => gate.variant === "gallery" && gate.phase === "revealing"));
+    assert.equal(ui.gates.at(-1).active, false);
+    assert.equal(ui.root.dataset.loading, undefined);
+    assert.equal(ui.root.dataset.routeCover, undefined);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    ui.cleanup();
+  });
+}
+
+for (const phase of ["warmup", "hold", "reveal"]) {
+  for (const action of ["BACK", "pagehide"]) {
+    test(`${action} during gallery ${phase} cannot revive its curtain over a newer route`, async () => {
+      const ui = mount();
+      const stale = ui.go({ to: "/gallery" });
+      await ui.flushFrames();
+      await ui.flushFrames();
+      if (phase !== "warmup") {
+        ui.releaseWarmup();
+        await ui.flushFrames();
+      }
+      if (phase === "reveal") {
+        for (let index = 0; index < 16 && ui.gates.at(-1).phase !== "revealing"; index++) {
+          await ui.flushTimers();
+          await ui.flushFrames();
+        }
+        assert.equal(ui.gates.at(-1).phase, "revealing");
+      }
+      if (action === "BACK") ui.history(action);
+      else ui.pagehide();
+      const latest = ui.go({ to: "/characters/ciel" });
+      ui.releaseWarmup();
+      await ui.flushFrames();
+      assert.equal(ui.gates.at(-1).variant, "ciel");
+      assert.equal(ui.root.dataset.loading, "true");
+      for (let index = 0; index < 24; index++) {
+        await ui.flushFrames();
+        await ui.flushTimers();
+      }
+      await Promise.all([stale, latest]);
+      assert.equal(
+        ui.navigations.filter(({ to }) => to === "/gallery").length,
+        phase === "reveal" ? 1 : 0,
+      );
+      assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+      assert.equal(ui.root.dataset.loading, undefined);
+      assert.equal(ui.gates.at(-1).active, false);
+      ui.cleanup();
+    });
+  }
 }
 
 for (const action of ["BACK", "FORWARD", "GO"]) {

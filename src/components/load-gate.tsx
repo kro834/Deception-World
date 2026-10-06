@@ -22,6 +22,7 @@ import { preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
 import { RexonanceCallSequence } from "@/components/rexonance-saga/rexonance-call-sequence";
 import { REXONANCE_ENTRY_TIMINGS } from "@/lib/rexonance-calls";
+import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 
 type RiderDiveVariant =
   "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
@@ -31,7 +32,7 @@ type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "archive" | "zeus" | RiderTransitionVariant;
+  variant: "archive" | "zeus" | "gallery" | RiderTransitionVariant;
   phase: "covering" | "revealing";
   scene?: CineScene | null;
 };
@@ -1155,6 +1156,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       if (busy.current) return;
       setDelayedRoute(null);
       const changesDocument = pathname !== to;
+      const isGalleryTransition = changesDocument && to === "/gallery";
       const isArchiveTransition =
         changesDocument &&
         to !== "/rexonance-saga" &&
@@ -1182,7 +1184,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           setDelayedRoute({ href: hash ? `${to}#${hash}` : to, focus: Boolean(focusDestination) });
         return ready;
       };
-      if (!isArchiveTransition && !isZeusTransition && !riderTransitionVariant) {
+      if (
+        !isArchiveTransition &&
+        !isZeusTransition &&
+        !isGalleryTransition &&
+        !riderTransitionVariant
+      ) {
         const releaseScrollMotion = changesDocument || hash ? holdManagedScrollMotion() : null;
         const assetWarmup = assets.length
           ? preloadAssets(assets, () => undefined).catch(() => undefined)
@@ -1218,6 +1225,47 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       let startedAt = performance.now();
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const tier = cineTier(reduceMotion);
+
+      if (isGalleryTransition) {
+        const releaseScrollMotion = holdManagedScrollMotion();
+        const timings =
+          tier === "full" ? { cover: 720, reveal: 1120 } : { cover: 100, reveal: 240 };
+        document.documentElement.dataset.loading = "true";
+        markRouteCover("covering");
+        setGate({ active: true, percent: 100, variant: "gallery", phase: "covering", scene: null });
+        try {
+          await nextFrame();
+          await nextFrame();
+          if (!isCurrent() || !(await warmCoveredDestination())) return;
+          const remaining = timings.cover - (performance.now() - startedAt);
+          if (remaining > 0) await wait(remaining);
+          if (!isCurrent()) return;
+          await navigateUnderCover(router, () => navigate({ to: to as never, hash }), to);
+          if (!isCurrent()) return;
+          if (focusDestination) focusRouteDestination(hash);
+          await settleUnderCover();
+          if (!isCurrent()) return;
+          document.documentElement.removeAttribute("data-loading");
+          markRouteCover("revealing");
+          setGate({
+            active: true,
+            percent: 100,
+            variant: "gallery",
+            phase: "revealing",
+            scene: null,
+          });
+          await revealRan(timings.reveal);
+        } finally {
+          window.setTimeout(releaseScrollMotion, 360);
+          if (isCurrent()) {
+            document.documentElement.removeAttribute("data-loading");
+            markRouteCover("settling");
+            setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
+            busy.current = false;
+          }
+        }
+        return;
+      }
 
       if (riderTransitionVariant && !isArchiveTransition) {
         const releaseScrollMotion = holdManagedScrollMotion();
@@ -1490,6 +1538,7 @@ function LoadOverlay({
   scene?: CineScene | null;
 }) {
   if (!active) return null;
+  if (variant === "gallery") return <GalleryCurtain phase={phase} />;
   const isRiderDive =
     variant === "saga" ||
     variant === "realm" ||

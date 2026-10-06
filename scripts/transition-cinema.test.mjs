@@ -214,7 +214,7 @@ test("the shutter closes onto the pressed card and lands on the portrait frame",
 test("routes without a cover answer with the prism signal, never a scroll lock", () => {
   const direct = gate.slice(
     gate.search(
-      /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{/,
+      /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{/,
     ),
     gate.indexOf("busy.current = true;", gate.indexOf("const go = useCallback")),
   );

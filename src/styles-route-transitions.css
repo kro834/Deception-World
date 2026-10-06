@@ -1,5 +1,199 @@
 /* Route chrome lives outside the generated styles bundle so postinstall's
    source assembly cannot drop navigation spacing or transition primitives. */
+.load-gate.gallery-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: block;
+  overflow: hidden;
+  background: transparent;
+  isolation: isolate;
+}
+.gallery-curtain-rail {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  height: 14px;
+  background: linear-gradient(#110d0b, #b29054 35%, #4b3925 60%, #070605);
+  box-shadow: 0 8px 28px #000a;
+}
+.gallery-curtain-panel {
+  position: absolute;
+  top: -3%;
+  bottom: -4%;
+  width: 52%;
+  will-change: transform;
+  filter: drop-shadow(0 10px 16px #0009);
+}
+.gallery-curtain-panel.is-left {
+  left: 0;
+  --curtain-away: -104%;
+  --curtain-sway: -1.6deg;
+}
+.gallery-curtain-panel.is-right {
+  right: 0;
+  --curtain-away: 104%;
+  --curtain-sway: 1.6deg;
+}
+.gallery-curtain-cloth {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  transform-origin: 50% 0;
+  background: #331015;
+  box-shadow:
+    inset 0 -80px 100px #100608a8,
+    inset 0 40px 50px #000b;
+}
+.gallery-curtain-cloth > i {
+  flex: 1;
+  height: 100%;
+  opacity: 0.96;
+  background:
+    repeating-linear-gradient(91deg, #ffffff03 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 45% 28%, #b15f5730, transparent 65%),
+    linear-gradient(
+      90deg,
+      #16080b 0%,
+      #44121c 19%,
+      #773141 40%,
+      #491825 66%,
+      #1c090e 85%,
+      #3a101a 100%
+    );
+  box-shadow: inset 3px 0 5px #0008;
+}
+.gallery-curtain-cloth > i:nth-child(3n) {
+  filter: brightness(0.88);
+}
+.gallery-curtain-cloth > i:nth-child(3n + 1) {
+  filter: brightness(1.08);
+}
+.gallery-curtain-hem {
+  position: absolute;
+  inset: auto 0 6%;
+  height: 10px;
+  background: linear-gradient(#41291b, #cca66b 30%, #715136 65%, #160a0b);
+  box-shadow: 0 8px 16px #0008;
+  transform: rotate(var(--curtain-sway));
+}
+.gallery-curtain.is-covering .gallery-curtain-panel {
+  animation: gallery-curtain-close 720ms cubic-bezier(0.22, 0.7, 0.18, 1) both;
+}
+.gallery-curtain.is-revealing .gallery-curtain-panel {
+  animation: gallery-curtain-open 1120ms cubic-bezier(0.45, 0, 0.15, 1) both;
+}
+.gallery-curtain.is-covering .gallery-curtain-cloth {
+  animation: gallery-cloth-settle 720ms ease-out both;
+}
+.gallery-curtain.is-revealing .gallery-curtain-cloth {
+  animation: gallery-cloth-draw 1120ms ease-in-out both;
+}
+.gallery-curtain.is-revealing .gallery-curtain-rail {
+  animation: gallery-rail-release 1120ms linear both;
+}
+@keyframes gallery-curtain-close {
+  from {
+    transform: translateX(var(--curtain-away));
+  }
+  83% {
+    transform: translateX(0);
+  }
+  92% {
+    transform: translateX(calc(var(--curtain-away) * 0.013));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes gallery-curtain-open {
+  from {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--curtain-away));
+  }
+}
+@keyframes gallery-cloth-settle {
+  from {
+    transform: skewX(var(--curtain-sway)) scaleX(0.92);
+  }
+  75% {
+    transform: skewX(calc(var(--curtain-sway) * -1));
+  }
+  to {
+    transform: skewX(0);
+  }
+}
+@keyframes gallery-cloth-draw {
+  from {
+    transform: skewX(0);
+  }
+  30% {
+    transform: skewX(var(--curtain-sway));
+  }
+  65% {
+    transform: skewX(calc(var(--curtain-sway) * -1.3));
+  }
+  to {
+    transform: skewX(0) scaleX(0.92);
+  }
+}
+@keyframes gallery-rail-release {
+  0%,
+  65% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+html[data-world-effects="economy"] .gallery-curtain,
+.gallery-curtain.is-calm {
+  animation: gallery-curtain-fade-in 100ms both;
+}
+html[data-world-effects="economy"] .gallery-curtain.is-revealing,
+.gallery-curtain.is-calm.is-revealing {
+  animation: gallery-curtain-fade-out 240ms both;
+}
+html[data-world-effects="economy"] .gallery-curtain *,
+.gallery-curtain.is-calm * {
+  animation: none !important;
+  transform: none;
+}
+@keyframes gallery-curtain-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gallery-curtain-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-curtain {
+    animation: gallery-curtain-fade-in 100ms both;
+  }
+  .gallery-curtain.is-revealing {
+    animation: gallery-curtain-fade-out 240ms both;
+  }
+  .gallery-curtain * {
+    animation: none !important;
+    transform: none;
+  }
+}
+
 html[data-route-scroll-settling="true"] {
   scroll-behavior: auto !important;
 }

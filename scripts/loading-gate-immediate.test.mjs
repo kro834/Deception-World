@@ -17,7 +17,7 @@ test("covered opening navigation is selected before immediate routes while rider
   const goBlock = gate.slice(goStart, goEnd);
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
   const directIndex = goBlock.search(
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{/,
   );
   assert.notEqual(coveredIndex, -1, "go must handle a shared transition before routing");
   assert.notEqual(directIndex, -1, "go must retain the immediate-route branch");
@@ -31,7 +31,7 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash, search: changesDocument \? undefined : true \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to: to as never, hash, search: changesDocument \? undefined : true \}\);[\s\S]*?return;/,
   );
   const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");

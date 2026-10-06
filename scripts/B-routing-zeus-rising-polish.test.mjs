@@ -52,10 +52,10 @@ test("a keyboard activation focuses the destination in every navigation branch",
     loadGate,
     /void go\(\{ to, hash, assets, transition, focusDestination: e\.detail === 0 \}\)/,
   );
-  // Plain, rider dive / cut-in, Zeus and archive branches.
+  // Plain, gallery, rider dive / cut-in, Zeus and archive branches.
   assert.equal(
     (loadGate.match(/if \(focusDestination\) focusRouteDestination\(hash\);/g) ?? []).length,
-    4,
+    5,
   );
   assert.match(
     loadGate,

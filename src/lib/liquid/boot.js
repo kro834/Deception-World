@@ -462,7 +462,7 @@ function initRail(root) {
   // tabs selects as before. A quick tap still selects the tapped tab. Mouse
   // and pen keep the immediate press-and-drag.
   const holdToDrag = root.classList.contains('rider-tabs');
-  const TOUCH_HOLD_MS = 350;
+  const TOUCH_HOLD_MS = 220;
   const TOUCH_SLOP = 11;
   let releasePageLock = null;
   const lockPage = () => {
