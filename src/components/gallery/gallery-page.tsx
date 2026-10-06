@@ -1116,7 +1116,7 @@ export function GalleryPage() {
                           setEditingVersion(titleConflict.version);
                           setTitleConflict(null);
                           setSaveError("");
-                          titleInputRef.current?.focus();
+                          titleInputRef.current?.focus({ preventScroll: true });
                         }}
                       >
                         最新のタイトルから再編集
