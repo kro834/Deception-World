@@ -243,6 +243,15 @@
       animation-range: entry 0% entry 100%;
     }
 
+    /* These panels' view-timeline transforms must not pull a native chapter
+       jump back while WebKit chooses its first scroll anchor. Keep anchoring
+       elsewhere, including the still prose and disclosure sections. */
+    html:not([data-world-effects="economy"])
+      .site-shell.film-edition.motion-on
+      :is(.world-column, .rider-console) {
+      overflow-anchor: none;
+    }
+
     html:not([data-world-effects="economy"])
       .site-shell.film-edition.motion-on
       .manager-slot-grid

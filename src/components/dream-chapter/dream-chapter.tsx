@@ -17,7 +17,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
@@ -1433,7 +1433,7 @@ export function DreamChapter() {
                 <span className="dream-dolminence-number">{record.order}</span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
-                  <b>{withWordBreaks(record.name)}</b>
+                  <b><DisplayName value={record.name} /></b>
                   <i>{record.roman}</i>
                   <em>機密記録を開く</em>
                 </span>

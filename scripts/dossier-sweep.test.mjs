@@ -51,8 +51,8 @@ test("the file's end plates keep their whole focus ring (main clips sideways onl
 
 test("spec-sheet values break at name seams and keep their closing bracket", () => {
   assert.match(nav, /export function NameText\(\{ value, seams = false \}/);
-  assert.match(nav, /withWordBreaks\(chunk\)\s*\.split\(NAME_SEAM\)/);
-  assert.match(nav, /\{k > 0 \? <wbr \/> : null\}/);
+  assert.match(nav, /<DisplayName value=\{chunk\} \/>/);
+  assert.match(read("src/components/name-text.tsx"), /\{index > 0 \? <wbr \/> : null\}/);
   // The default path renders exactly as before.
   assert.match(nav, /: chunk\}/);
   for (const [file, value] of [

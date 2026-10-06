@@ -117,3 +117,12 @@ test("World timelines follow the page, not a clipping panel", async () => {
     assert.match(css, new RegExp(`view-timeline: ${name} block`), name);
   }
 });
+
+test("only the animated World column and rider console opt out of scroll anchoring", async () => {
+  const css = await readCss();
+  assert.match(
+    css,
+    /html:not\(\[data-world-effects="economy"\]\)\s*\.site-shell\.film-edition\.motion-on\s*:is\(\.world-column, \.rider-console\)\s*\{\s*overflow-anchor:\s*none;\s*\}/,
+  );
+  assert.doesNotMatch(css, /(?:^|[}\s])(?:html|body|\.site-shell)\s*\{[^}]*overflow-anchor:/);
+});

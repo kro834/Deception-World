@@ -17,6 +17,7 @@ import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
 import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
+import nameWordsCss from "../styles-name-words.css?url";
 import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 import pressFeedbackCss from "../styles-press-feedback.css?url";
 import chromeElevationCss from "../styles-chrome-elevation.css?url";
@@ -111,6 +112,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: routeTransitionsCss },
       { rel: "stylesheet", href: frostedControlsCss },
       { rel: "stylesheet", href: futureInterfaceCss },
+      { rel: "stylesheet", href: nameWordsCss },
       { rel: "stylesheet", href: pickupVisibilityCss },
       { rel: "stylesheet", href: pressFeedbackCss },
       // The shared chrome (menu, announcements, covers, Zeus button, skip

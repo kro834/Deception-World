@@ -4,6 +4,7 @@ import { RexonanceAperture } from "./rexonance-aperture";
 import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
 import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
+import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
@@ -995,7 +996,7 @@ export function RexonanceSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>REXONANCE</span>
-            <b>レクソナンスサーガ</b>
+            <b><DisplayName value="レクソナンスサーガ" /></b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>

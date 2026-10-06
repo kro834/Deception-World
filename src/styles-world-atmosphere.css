@@ -95,6 +95,15 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .site-shell.film-edition.mirage-edition[data-world-phase] .topbar,
+  .site-shell.film-edition.mirage-edition[data-world-phase]
+    .topbar
+    :is(.brand-sigil, .side-panel-trigger) {
+    transition: none !important;
+  }
+}
+
 /* Older chrome sheets have their own colour transitions. Economy disables
    those as well, rather than merely omitting the new crossfade. */
 html[data-world-effects="economy"]

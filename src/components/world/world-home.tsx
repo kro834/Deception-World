@@ -2529,7 +2529,7 @@ export function WorldHome() {
               <h3 aria-label={`仮面ライダー${rider.ja}`}>
                 <span className="rider-name-line">仮面ライダー</span>
                 <br />
-                <span className="rider-name-line">{rider.ja}</span>
+                <span className="rider-name-line"><NameText value={rider.ja} seams /></span>
               </h3>
               <p className="rider-description">{rider.desc}</p>
               <div className="rider-line">

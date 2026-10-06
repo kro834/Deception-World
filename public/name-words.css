@@ -1,0 +1,23 @@
+/* Shared name markup: no prose, font sizes, card sizing or row changes. */
+html body .name-word {
+  /* Existing sheets style prefix spans inside headings. Word spans must
+     inherit the original name's typography, never the prefix's small type. */
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline !important;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+html body .name-word--protected {
+  display: inline-block !important;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}

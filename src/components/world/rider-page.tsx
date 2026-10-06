@@ -3,7 +3,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "./use-world-mode";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
@@ -1552,7 +1552,7 @@ export function RiderPage({ id }: { id: string }) {
               <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b>{withWordBreaks(rider.special.name)}</b>
+                <b><DisplayName value={rider.special.name} /></b>
               </h2>
               {rider.special.sub ? <em>{rider.special.sub}</em> : null}
               <q>{rider.special.quote}</q>

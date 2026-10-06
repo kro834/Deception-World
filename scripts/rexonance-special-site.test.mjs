@@ -14,7 +14,7 @@ const loader = read("src/lib/asset-loader.ts");
 
 test("Rexonance special site is reachable from every shared side menu", () => {
   assert.match(route, /createFileRoute\("\/rexonance-saga"\)/);
-  assert.match(menu, /<span>レクソナンスサーガ<\/span>/);
+  assert.match(menu, /<span>\s*<DisplayName value="レクソナンスサーガ" \/>\s*<\/span>/);
   assert.match(menu, /REXONANCE_SAGA_ENTER_ASSETS/);
   assert.match(menu, /context\?: "world" \| "archive" \| "movie" \| "rexonance"/);
   assert.match(component, /<SideMenuLayer context="rexonance"/);

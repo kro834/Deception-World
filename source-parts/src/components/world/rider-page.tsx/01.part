@@ -3,7 +3,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "./use-world-mode";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";

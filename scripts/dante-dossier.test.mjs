@@ -33,7 +33,7 @@ test("Dante preserves unknown facts, affiliation, quotes, and two distinct mode 
   assert.ok(DANTE_FORMS.every((f) => f.nameParts.join("") === f.name));
   assert.match(
     read("src/components/world/manager-stub.tsx"),
-    /const formName = rider.nameParts[\s\S]*?: rider.name;/,
+    /const formName = rider.nameParts[\s\S]*?<DisplayName value=\{part\} \/>[\s\S]*?: <DisplayName value=\{record\.name\} \/>;/,
   );
   assert.equal(DANTE_FORMS[1].arsenal[0].name, "リドルエッジ");
 });

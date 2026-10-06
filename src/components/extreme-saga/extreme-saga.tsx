@@ -1,5 +1,6 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
@@ -522,7 +523,7 @@ export function ExtremeSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>EXTREME</span>
-            <b>エクスプリームサーガ</b>
+            <b><DisplayName value="エクスプリームサーガ" /></b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
             <a href="#performance">比較</a>

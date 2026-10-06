@@ -9,7 +9,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 
@@ -53,9 +53,8 @@ type Profile = {
 
 export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const router = useRouter();
-  // The name as shown breaks only between its words (name-breaks.ts); labels
-  // and alt text keep the record's own spelling.
-  const rider = { ...record, name: withWordBreaks(record.name) };
+  // Name markup marks word boundaries; labels and alt retain exact spelling.
+  const rider = record;
   const dlg = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const pointerOpened = useRef(false);
@@ -70,10 +69,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const formName = rider.nameParts
     ? rider.nameParts.map((part) => (
         <span className="form-name-part" key={part}>
-          {part}
+          <DisplayName value={part} />
         </span>
       ))
-    : rider.name;
+    : <DisplayName value={record.name} />;
   const isRexonance = rider.theme === "rexonance";
   const resetScroll = () => {
     const dialog = dlg.current;
@@ -245,7 +244,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             <span>{riderPrefix}</span>
             <b>{formName}</b>
           </h2>
-          {rider.sub ? <em>{rider.sub}</em> : null}
+          {rider.sub ? <em><DisplayName value={rider.sub} /></em> : null}
           <q>{rider.quote ?? rider.system}</q>
         </div>
       </article>
@@ -294,7 +293,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               <span>{riderPrefix}</span>
               <b>{formName}</b>
             </h2>
-            {rider.sub ? <em>{rider.sub}</em> : null}
+            {rider.sub ? <em><DisplayName value={rider.sub} /></em> : null}
             <div className="rider-call">
               {rider.calls.map((c, index) => (
                 <b key={`${c}-${index}`}>{c}</b>
@@ -314,7 +313,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               />
               <figcaption>
                 <span>FORM VISUAL</span>
-                <b>{rider.name}</b>
+                <b><DisplayName value={record.name} /></b>
               </figcaption>
             </figure>
             <div>
@@ -350,7 +349,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {abilities.map((a) => (
                       <div key={a.name}>
-                        <h3>{a.name}</h3>
+                        <h3><DisplayName value={a.name} /></h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -364,7 +363,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {arsenal.map((a) => (
                       <div key={a.name}>
-                        <h3>{a.name}</h3>
+                        <h3><DisplayName value={a.name} /></h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -378,7 +377,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {finishers.map((a) => (
                       <div key={a.name}>
-                        <h3>{a.name}</h3>
+                        <h3><DisplayName value={a.name} /></h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -398,7 +397,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                       />
                       <figcaption>
                         <span>{f.sub ?? "FORM"}</span>
-                        <b>{f.name}</b>
+                        <b><DisplayName value={f.name} /></b>
                       </figcaption>
                     </figure>
                   ))}
@@ -406,3 +405,4 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               ) : null}
             </div>
           </div>
+          {weaponGallery.length ? (

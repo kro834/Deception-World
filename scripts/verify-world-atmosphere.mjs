@@ -41,10 +41,16 @@ const clearRoute = () =>
   document.querySelector(".world-atmosphere") &&
   !document.documentElement.hasAttribute("data-loading") &&
   !document.documentElement.hasAttribute("data-route-scroll-settling");
-const moveTo = (selector, overshoot = 14) => {
-  const target = selector === "top" ? null : document.querySelector(selector.startsWith(".") ? selector : `#${selector}`);
-  const line = Math.max(92, Math.min(200, innerHeight * 0.22));
-  scrollTo({ top: target ? target.getBoundingClientRect().top + scrollY - line + overshoot : 0, behavior: "instant" });
+const moveTo = (selector) => {
+  const target =
+    selector === "top"
+      ? null
+      : document.querySelector(selector.startsWith(".") ? selector : `#${selector}`);
+  // Use the browser's section landing, including scroll-margin and skipped
+  // content layout. A raw pre-layout rect + scrollTo can be moved back by
+  // WebKit's scroll anchoring before the section reaches the reading line.
+  if (target) target.scrollIntoView({ block: "start", behavior: "instant" });
+  else scrollTo({ top: 0, behavior: "instant" });
 };
 const readChrome = () => {
   const shell = document.querySelector(".site-shell.film-edition.mirage-edition");
@@ -65,10 +71,70 @@ const readChrome = () => {
     overflow: document.documentElement.scrollWidth - innerWidth,
   };
 };
+const readPhaseState = ({ selector, expected }) => {
+  const target =
+    selector === "top"
+      ? document.documentElement
+      : document.querySelector(selector.startsWith(".") ? selector : `#${selector}`);
+  const rect = target?.getBoundingClientRect();
+  return {
+    expected,
+    currentPhase:
+      document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase ?? null,
+    selector,
+    targetRect: rect
+      ? {
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          width: rect.width,
+          height: rect.height,
+        }
+      : null,
+    window: { scrollY, innerWidth, innerHeight },
+  };
+};
+const waitForPhase = async (page, { profile, selector, expected, timeout = 8_000 }) => {
+  try {
+    await page.waitForFunction(
+      (phase) =>
+        document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase ===
+        phase,
+      expected,
+      { timeout },
+    );
+  } catch (error) {
+    const state = await page.evaluate(readPhaseState, { selector, expected });
+    throw new Error(`${profile} phase wait failed: ${JSON.stringify(state)}; ${error.message}`, {
+      cause: error,
+    });
+  }
+};
+const landAt = async (page, selector) => {
+  await page.evaluate(moveTo, selector);
+  await page.waitForTimeout(150);
+  const arrived = await page.evaluate((name) => {
+    if (name === "top") return scrollY < 1;
+    const target = document.querySelector(name.startsWith(".") ? name : `#${name}`);
+    const line = Math.max(
+      92,
+      Math.min(200, innerHeight * 0.22),
+      (Number.parseFloat(getComputedStyle(target).scrollMarginTop) || 0) + 8,
+    );
+    const rect = target.getBoundingClientRect();
+    return rect.top <= line && rect.bottom > line;
+  }, selector);
+  // Only the synthetic instant-scroll warm-up may need one new measurement
+  // after skipped-content layout. Never force a phase or an observer update.
+  if (!arrived) await page.evaluate(moveTo, selector);
+};
 
 try {
   for (const profile of profiles) {
-    const page = await browser.newPage({ viewport: { width: profile.width, height: profile.height } });
+    const page = await browser.newPage({
+      viewport: { width: profile.width, height: profile.height },
+    });
     const pageErrors = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
     // Keep the normal-motion run on the full rendering tier on low-core CI hosts.
@@ -90,26 +156,38 @@ try {
 
     const observations = [];
     for (const [selector, expected] of phases) {
-      await page.evaluate(moveTo, selector);
-      await page.waitForFunction(
-        (phase) => document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase === phase,
-        expected,
-        { timeout: 8_000 },
-      );
+      await landAt(page, selector);
+      await waitForPhase(page, { profile: profile.name, selector, expected });
       await page.waitForTimeout(100);
       const intermediate = await page.evaluate(readChrome);
       await page.waitForTimeout(760);
       const settled = await page.evaluate(readChrome);
       assert.equal(intermediate.phase, expected, `${profile.name} ${selector}: active phase`);
       assert.equal(settled.phase, expected, `${profile.name} ${selector}: settled phase`);
-      assert.equal(settled.accent, palette[expected].accent, `${profile.name} ${selector}: accent token`);
+      assert.equal(
+        settled.accent,
+        palette[expected].accent,
+        `${profile.name} ${selector}: accent token`,
+      );
       assert.equal(settled.base, palette[expected].base, `${profile.name} ${selector}: base token`);
-      assert.equal(settled.light, palette[expected].accent, `${profile.name} ${selector}: light layer`);
+      assert.equal(
+        settled.light,
+        palette[expected].accent,
+        `${profile.name} ${selector}: light layer`,
+      );
       assert.equal(settled.overflow, 0, `${profile.name} ${selector}: horizontal overflow`);
       const previous = observations.at(-1)?.settled.phase ?? "projection";
       if (previous !== expected) {
-        assert.notEqual(intermediate.border, settled.border, `${profile.name} ${selector}: border fades`);
-        assert.notEqual(intermediate.background, settled.background, `${profile.name} ${selector}: background fades`);
+        assert.notEqual(
+          intermediate.border,
+          settled.border,
+          `${profile.name} ${selector}: border fades`,
+        );
+        assert.notEqual(
+          intermediate.background,
+          settled.background,
+          `${profile.name} ${selector}: background fades`,
+        );
       }
       observations.push({ selector, intermediate, settled });
     }
@@ -119,17 +197,16 @@ try {
       const story = document.getElementById("story");
       scrollTo({ top: story.getBoundingClientRect().top + scrollY + 120, behavior: "instant" });
     });
-    await page.waitForFunction(
-      () => document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase === "story",
-      undefined,
-      { timeout: 8_000 },
-    );
+    await waitForPhase(page, { profile: profile.name, selector: "story", expected: "story" });
 
     // During an active fade, repeated scroll changes retain only the final target.
     await page.evaluate(() => {
       const move = (id) => {
         const target = document.getElementById(id);
-        scrollTo({ top: target.getBoundingClientRect().top + scrollY - 160 + 14, behavior: "instant" });
+        scrollTo({
+          top: target.getBoundingClientRect().top + scrollY - 160 + 14,
+          behavior: "instant",
+        });
       };
       move("riders");
       setTimeout(() => move("records"), 70);
@@ -147,7 +224,15 @@ try {
     );
     assert.equal(menuVisibility, "hidden", `${profile.name}: atmosphere behind the menu`);
     assert.deepEqual(pageErrors, [], `${profile.name}: page errors`);
-    results.push({ profile: profile.name, tier, observations, returnedPhase: "story", queued, menuVisibility, pageErrors });
+    results.push({
+      profile: profile.name,
+      tier,
+      observations,
+      returnedPhase: "story",
+      queued,
+      menuVisibility,
+      pageErrors,
+    });
     await page.close();
   }
 
@@ -160,11 +245,13 @@ try {
     await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
     await page.waitForFunction(clearRoute, undefined, { timeout: 30_000 });
     await page.waitForTimeout(1_800);
-    await page.evaluate(moveTo, "riders");
-    await page.waitForFunction(
-      () => document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase === "riders",
-    );
+    await landAt(page, "riders");
+    await waitForPhase(page, { profile: "reduced-motion", selector: "riders", expected: "riders" });
     const first = await page.evaluate(readChrome);
+    assert.ok(
+      first.transitionDuration.split(",").every((duration) => Number.parseFloat(duration) <= 0.001),
+      "reduced motion chrome does not animate its colors",
+    );
     await page.waitForTimeout(120);
     const settled = await page.evaluate(readChrome);
     assert.deepEqual(
@@ -178,7 +265,10 @@ try {
         duration: getComputedStyle(layer).transitionDuration,
       })),
     );
-    assert.deepEqual(staticLayer.map(({ opacity }) => opacity), [1, 0]);
+    assert.deepEqual(
+      staticLayer.map(({ opacity }) => opacity),
+      [1, 0],
+    );
     assert.ok(staticLayer.every(({ duration }) => Number.parseFloat(duration) <= 0.001));
     results.push({ reducedMotion: { first, settled, staticLayer } });
     await page.close();
@@ -187,17 +277,27 @@ try {
   // Economy rendering hides the glow and disables all topbar transitions.
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    // Production chooses this tier before first paint; test that real path
+    // rather than changing document geometry and scrolling in the same task.
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, "hardwareConcurrency", {
+        get: () => 2,
+        configurable: true,
+      });
+      Object.defineProperty(Navigator.prototype, "deviceMemory", {
+        get: () => 2,
+        configurable: true,
+      });
+    });
     await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
     await page.waitForFunction(clearRoute, undefined, { timeout: 30_000 });
     await page.waitForTimeout(1_800);
-    await page.evaluate(() => {
-      document.documentElement.dataset.worldEffects = "economy";
-      const target = document.getElementById("records");
-      scrollTo({ top: target.getBoundingClientRect().top + scrollY - 160 + 14, behavior: "instant" });
-    });
-    await page.waitForFunction(
-      () => document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase === "records",
+    assert.equal(
+      await page.evaluate(() => document.documentElement.dataset.worldEffects),
+      "economy",
     );
+    await landAt(page, "records");
+    await waitForPhase(page, { profile: "economy", selector: "records", expected: "records" });
     const first = await page.evaluate(readChrome);
     await page.waitForTimeout(120);
     const settled = await page.evaluate(readChrome);
@@ -218,32 +318,55 @@ try {
   // Forced colors preserve a system border while dropping decorative light.
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.emulateMedia({ forcedColors: "active" });
-    await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(clearRoute, undefined, { timeout: 30_000 });
-    await page.waitForTimeout(1_800);
-    await page.evaluate(moveTo, "riders");
-    await page.waitForFunction(
-      () => document.querySelector(".site-shell.film-edition.mirage-edition")?.dataset.worldPhase === "riders",
-    );
-    const forced = await page.evaluate(() => {
-      const probe = document.createElement("div");
-      probe.style.borderBottom = "1px solid CanvasText";
-      document.body.append(probe);
-      const systemText = getComputedStyle(probe).borderBottomColor;
-      probe.remove();
-      return {
-        media: matchMedia("(forced-colors: active)").matches,
-        border: getComputedStyle(document.querySelector(".topbar")).borderBottomColor,
-        systemText,
-        overlay: getComputedStyle(document.querySelector(".world-atmosphere")).display,
-      };
-    });
-    assert.equal(forced.media, true);
-    assert.equal(forced.border, forced.systemText, "forced-colors keeps the CanvasText system border");
-    assert.equal(forced.overlay, "none");
-    results.push({ forcedColors: forced });
-    await page.close();
+    let forcedColorsSupported = false;
+    try {
+      await page.emulateMedia({ forcedColors: "active" });
+      forcedColorsSupported = await page.evaluate(
+        () => matchMedia("(forced-colors: active)").matches,
+      );
+    } catch (error) {
+      results.push({ forcedColors: { supported: false, skipped: true, reason: error.message } });
+    }
+    if (!forcedColorsSupported) {
+      if (!results.some((entry) => entry.forcedColors?.skipped)) {
+        results.push({
+          forcedColors: { supported: false, skipped: true, reason: "media query did not activate" },
+        });
+      }
+      await page.close();
+    } else {
+      await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
+      await page.waitForFunction(clearRoute, undefined, { timeout: 30_000 });
+      await page.waitForTimeout(1_800);
+      await page.evaluate(moveTo, "riders");
+      await waitForPhase(page, {
+        profile: "forced-colors",
+        selector: "riders",
+        expected: "riders",
+      });
+      const forced = await page.evaluate(() => {
+        const probe = document.createElement("div");
+        probe.style.borderBottom = "1px solid CanvasText";
+        document.body.append(probe);
+        const systemText = getComputedStyle(probe).borderBottomColor;
+        probe.remove();
+        return {
+          media: matchMedia("(forced-colors: active)").matches,
+          border: getComputedStyle(document.querySelector(".topbar")).borderBottomColor,
+          systemText,
+          overlay: getComputedStyle(document.querySelector(".world-atmosphere")).display,
+        };
+      });
+      assert.equal(forced.media, true);
+      assert.equal(
+        forced.border,
+        forced.systemText,
+        "forced-colors keeps the CanvasText system border",
+      );
+      assert.equal(forced.overlay, "none");
+      results.push({ forcedColors: forced });
+      await page.close();
+    }
   }
 
   const report = { ok: true, engine, base, results };
@@ -254,7 +377,11 @@ try {
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
   console.error(
-    JSON.stringify({ ok: false, engine, message: error.message, stack: error.stack, results }, null, 2),
+    JSON.stringify(
+      { ok: false, engine, message: error.message, stack: error.stack, results },
+      null,
+      2,
+    ),
   );
   process.exitCode = 1;
 } finally {

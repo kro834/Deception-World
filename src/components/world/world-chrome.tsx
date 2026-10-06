@@ -8,6 +8,7 @@ import {
   type PointerEvent,
 } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
+import { DisplayName } from "@/components/name-text";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -913,7 +914,7 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={context === "extreme" ? "page" : undefined}
             >
-              <span>エクスプリームサーガ</span>
+              <span><DisplayName value="エクスプリームサーガ" /></span>
               <i>SUPREME SITE</i>
             </GuardedLink>
             <GuardedLink
@@ -923,7 +924,7 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={context === "rexonance" ? "page" : undefined}
             >
-              <span>レクソナンスサーガ</span>
+              <span><DisplayName value="レクソナンスサーガ" /></span>
               <i>PERFORMANCE SITE</i>
             </GuardedLink>
           </div>

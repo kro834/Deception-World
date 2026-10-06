@@ -9,7 +9,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
@@ -229,9 +229,9 @@ function RiderPickup({
           <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
-            <b>{withWordBreaks(name)}</b>
+            <b><DisplayName value={name} /></b>
           </h3>
-          <em>{withWordBreaks(sub)}</em>
+          <em><DisplayName value={sub} /></em>
           <q>{quote}</q>
         </div>
       </article>
@@ -274,9 +274,9 @@ function RiderPickup({
             <small>{eyebrow}</small>
             <h2>
               <span>仮面ライダー</span>
-              <b>{withWordBreaks(name)}</b>
+              <b><DisplayName value={name} /></b>
             </h2>
-            <em>{withWordBreaks(sub)}</em>
+            <em><DisplayName value={sub} /></em>
           </div>
           <div className="fst-pickup-record">{children}</div>
           {/* The record's own way out at its end (styles-pickup-stability.css),

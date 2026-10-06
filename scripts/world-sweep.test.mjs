@@ -77,8 +77,8 @@ test("361-389px portrait: ENTER THE WORLD keeps one line beside もう一度", (
 });
 
 test("the annex breaks between words: rider-name roles, location names, episode lines", () => {
-  assert.match(annex, /import \{ withWordBreaks \} from "@\/lib\/name-breaks";/);
-  assert.match(annex, /<p className="wa-role">\{withWordBreaks\(entry\.role\)\}<\/p>/);
+  assert.match(annex, /import \{ DisplayName \} from "@\/components\/name-text";/);
+  assert.match(annex, /<p className="wa-role">\s*<DisplayName value=\{entry\.role\} \/>\s*<\/p>/);
   assert.match(
     annexCss,
     /@media \(min-width: 900px\) \{\s*\.site-shell\.film-edition\.mirage-edition \.wa-locations li \{\s*grid-template-columns: 56px minmax\(11\.5rem, 0\.28fr\) minmax\(0, 1fr\);/,

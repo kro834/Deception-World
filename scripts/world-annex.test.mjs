@@ -24,10 +24,11 @@ const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
   // Reviewed 2026-10-06: the requested rider hold guide and decorative
-  // WorldAtmosphere are the only new markup. Story records remain pinned.
+  // WorldAtmosphere, plus the requested shared name-break markup. Story
+  // records and displayed spelling remain pinned.
   assert.deepEqual(worldViewContract(home), {
     records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
-    markup: "3a516136ed6895f34a936c2a1ba2fcf78152a91b439bc4dd4907df7b2bf5e88f",
+    markup: "f1d8efd0e8c0d3946d6422da32b7bc5cb6632149faa5e25c486b9b0410d19f1f",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

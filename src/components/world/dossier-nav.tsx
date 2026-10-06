@@ -1,10 +1,7 @@
 import { Fragment } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { UiVectorIcon } from "./ui-vector-icon";
-
-// name-breaks.ts marks each seam with a zero-width space.
-const NAME_SEAM = "\u200b";
 
 export type DossierLink = {
   id: string;
@@ -180,16 +177,7 @@ export function NameText({ value, seams = false }: { value: string; seams?: bool
         }
         return (
           <span key={`${chunk}-${i}`} className="jp-atom">
-            {seams
-              ? withWordBreaks(chunk)
-                  .split(NAME_SEAM)
-                  .map((word, k) => (
-                    <Fragment key={`${word}-${k}`}>
-                      {k > 0 ? <wbr /> : null}
-                      {word}
-                    </Fragment>
-                  ))
-              : chunk}
+            {seams ? <DisplayName value={chunk} /> : chunk}
           </span>
         );
       })}

@@ -2,7 +2,7 @@ import type { CSSProperties, MouseEvent, ReactNode, SyntheticEvent } from "react
 import { useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thumbnail-images";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { UiVectorIcon } from "./ui-vector-icon";
 import {
@@ -321,7 +321,7 @@ function CastFiles() {
                 <div className="wa-person-body">
                   {/* A rider name breaks after 仮面ライダー, never inside it
                       (アルゲノ / ム), and keeps its dash company. */}
-                  <p className="wa-role">{withWordBreaks(entry.role)}</p>
+                  <p className="wa-role"><DisplayName value={entry.role} /></p>
                   <h3 id={`wa-person-${entry.id}`}>
                     <NameText value={entry.name} />
                   </h3>

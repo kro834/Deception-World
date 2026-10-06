@@ -1,6 +1,6 @@
 import { GuardedLink } from "@/components/load-gate";
 import { dossierImage } from "@/lib/dossier-images";
-import { withWordBreaks } from "@/lib/name-breaks";
+import { DisplayName } from "@/components/name-text";
 import { CIEL_PORTRAIT, cielPortrait } from "@/lib/thumbnail-images";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, NameText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
@@ -215,7 +215,7 @@ export function CielPage() {
               <small>{SAGA.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b>{withWordBreaks(SAGA.special.name)}</b>
+                <b><DisplayName value={SAGA.special.name} /></b>
               </h2>
               {SAGA.special.sub ? <em>{SAGA.special.sub}</em> : null}
               <q>{SAGA.special.quote}</q>

@@ -165,24 +165,24 @@ test("display names break between their words, never inside one", () => {
 
   // The stored names are unchanged; each title shows the seams.
   const stub = read("src/components/world/manager-stub.tsx");
-  assert.match(stub, /const rider = \{ \.\.\.record, name: withWordBreaks\(record\.name\) \};/);
+  assert.match(stub, /<DisplayName value=\{record\.name\} \/>/);
   for (const label of ["の記録`", "のフォームビジュアル`", "をピックアップ`"]) {
     assert.ok(stub.includes(`\${record.name}${label}`), label);
   }
   assert.match(
     read("src/components/world/rider-page.tsx"),
-    /<b>\{withWordBreaks\(rider\.special\.name\)\}<\/b>/,
+    /<b>\s*<DisplayName value=\{rider\.special\.name\} \/>\s*<\/b>/,
   );
   assert.match(
     read("src/components/world/ciel-page.tsx"),
-    /<b>\{withWordBreaks\(SAGA\.special\.name\)\}<\/b>/,
+    /<b>\s*<DisplayName value=\{SAGA\.special\.name\} \/>\s*<\/b>/,
   );
   const finalStage = read("src/components/final-stage/final-stage.tsx");
-  assert.equal(finalStage.split("<b>{withWordBreaks(name)}</b>").length - 1, 2);
-  assert.equal(finalStage.split("<em>{withWordBreaks(sub)}</em>").length - 1, 2);
+  assert.equal([...finalStage.matchAll(/<b>\s*<DisplayName value=\{name\} \/>\s*<\/b>/g)].length, 2);
+  assert.equal([...finalStage.matchAll(/<em>\s*<DisplayName value=\{sub\} \/>\s*<\/em>/g)].length, 2);
   assert.match(
     read("src/components/dream-chapter/dream-chapter.tsx"),
-    /<b>\{withWordBreaks\(record\.name\)\}<\/b>/,
+    /<b>\s*<DisplayName value=\{record\.name\} \/>\s*<\/b>/,
   );
 
   // Their styles keep katakana whole, so the seams are the only breaks.

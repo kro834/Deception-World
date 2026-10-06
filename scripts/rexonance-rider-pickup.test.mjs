@@ -121,8 +121,9 @@ test("Rexonance pickup title keeps the requested two-line Japanese break and rem
   for (const source of [pickup, reconstructedPickup]) {
     assert.match(
       source,
-      /isRexonance \? \([\s\S]*?<span>\{riderPrefix\}<\/span>[\s\S]*?<b>\{rider\.name\}<\/b>/,
+      /isRexonance \? \([\s\S]*?<span>\{riderPrefix\}<\/span>[\s\S]*?<b>\{formName\}<\/b>/,
     );
+    assert.match(source, /<DisplayName value=\{record\.name\} \/>/);
   }
   assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 span,[\s\S]*?display: block/);
   assert.match(styles, /\.is-rexonance-dialog \.form-pickup-heading h2 b \{[\s\S]*?white-space: normal[\s\S]*?overflow-wrap: anywhere/);

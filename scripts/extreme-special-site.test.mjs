@@ -13,7 +13,7 @@ const loader = read("src/lib/asset-loader.ts");
 
 test("Extreme special site has a route, menu entry, warmup asset, and dedicated transition", () => {
   assert.match(route, /createFileRoute\("\/extreme-saga"\)/);
-  assert.match(menu, /<span>エクスプリームサーガ<\/span>/);
+  assert.match(menu, /<span>\s*<DisplayName value="エクスプリームサーガ" \/>\s*<\/span>/);
   assert.match(menu, /EXTREME_SAGA_ENTER_ASSETS/);
   assert.match(component, /<SideMenuLayer context="extreme"/);
   assert.match(loader, /export const EXTREME_SAGA_ENTER_ASSETS/);
@@ -26,8 +26,8 @@ test("shared special navigation keeps Rexonance directly below Extreme", () => {
     menu.indexOf("<p>SPECIAL</p>"),
     menu.indexOf("<p>STORIES</p>"),
   );
-  const extremePosition = specialNavigation.indexOf("<span>エクスプリームサーガ</span>");
-  const rexonancePosition = specialNavigation.indexOf("<span>レクソナンスサーガ</span>");
+  const extremePosition = specialNavigation.indexOf('<DisplayName value="エクスプリームサーガ" />');
+  const rexonancePosition = specialNavigation.indexOf('<DisplayName value="レクソナンスサーガ" />');
   assert.ok(extremePosition >= 0);
   assert.ok(rexonancePosition > extremePosition);
 });
