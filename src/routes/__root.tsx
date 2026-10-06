@@ -1,5 +1,13 @@
 import { useEffect } from "react";
-import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
+import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
+import { scheduleGalleryStickerWarmup } from "@/lib/gallery-sticker-warmup";
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 import { LibraryVisitTracker } from "@/components/library/library-controls";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
@@ -46,6 +54,13 @@ function DialogOpenFlag() {
    (src/lib/press-feedback.js, src/styles-press-feedback.css). */
 function PressFeedback() {
   useEffect(() => watchPresses(), []);
+  return null;
+}
+
+/* The gallery curtain's stickers, fetched and decoded on idle so they are on
+   the cloth from the curtain's first frame (src/lib/gallery-sticker-warmup.ts). */
+function GalleryStickerWarmup() {
+  useEffect(() => scheduleGalleryStickerWarmup(GALLERY_CURTAIN_STICKERS), []);
   return null;
 }
 
@@ -162,6 +177,7 @@ export const Route = createRootRoute({
               <PressFeedback />
               <LibrarySession />
               <Outlet />
+              <GalleryStickerWarmup />
             </ZeusButtonProvider>
           </LoadGateProvider>
         </AuthProvider>

@@ -70,6 +70,27 @@
 .gallery-curtain-cloth > i:nth-child(3n + 1) {
   filter: brightness(1.08);
 }
+.gallery-curtain-stickers {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+/* The cast's stickers ride the cloth: placed by translate and tilted by
+   rotate (not transform), so the calm tier's transform reset keeps them. */
+.gallery-curtain-stickers > img {
+  position: absolute;
+  top: var(--sticker-y);
+  left: var(--sticker-x);
+  width: auto;
+  height: calc(min(21vh, 27vw, 210px) * var(--sticker-h, 1));
+  max-width: none;
+  translate: -50% -50%;
+  rotate: var(--sticker-r, 0deg);
+  filter: drop-shadow(0 3px 2px #0007) drop-shadow(0 10px 14px #0006);
+  user-select: none;
+  -webkit-user-drag: none;
+}
 .gallery-curtain-hem {
   position: absolute;
   inset: auto 0 6%;
@@ -164,6 +185,11 @@ html[data-world-effects="economy"] .gallery-curtain *,
 .gallery-curtain.is-calm * {
   animation: none !important;
   transform: none;
+}
+@media (forced-colors: active) {
+  .gallery-curtain-stickers {
+    display: none;
+  }
 }
 @keyframes gallery-curtain-fade-in {
   from {
