@@ -358,6 +358,8 @@
      no holes and the numbered order 001-069 stays the reading order. The
      last row keeps its natural size (the spacer below absorbs the rest). */
   --gallery-row: clamp(190px, 22vw, 320px);
+  /* The mat round every work: the same on all four sides. */
+  --gallery-mat: clamp(11px, 1.65vw, 22px);
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -373,7 +375,11 @@
 .gallery-work {
   min-width: 0;
   margin: 0;
-  flex: var(--gallery-ar, 1) 1 calc(var(--gallery-ar, 1) * var(--gallery-row));
+  /* The image, not the frame, takes the row height: the basis adds the mat
+     and the frame's 1px edge, and the free space is shared by aspect ratio,
+     so every image in a row ends at the same height. */
+  flex: var(--gallery-ar, 1) 1
+    calc(var(--gallery-ar, 1) * var(--gallery-row) + 2 * var(--gallery-mat) + 2px);
 }
 
 .gallery-work-wide {
@@ -391,10 +397,9 @@
   position: relative;
   display: grid;
   min-height: 0;
-  /* The frame takes the work's own proportion, plus its mat. */
-  aspect-ratio: var(--gallery-ar, 0.95);
+  /* The image sets the frame's height, so the mat is even on every side. */
   place-items: center;
-  padding: clamp(11px, 1.65vw, 22px);
+  padding: var(--gallery-mat);
   overflow: hidden;
   border: 1px solid rgb(212 191 153 / 0.33);
   background:
@@ -418,7 +423,8 @@
 .gallery-work-frame img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: var(--gallery-ar, auto);
   object-fit: contain;
   object-position: center;
   transition:
@@ -906,13 +912,14 @@ html[data-route-cover] .gallery-arrival {
 
   /* Phones: two portraits share a row, a landscape work takes its own. */
   .gallery-grid {
-    --gallery-row: 200px;
+    /* Two portraits share a row from 320px up. */
+    --gallery-row: clamp(150px, 46vw, 200px);
     column-gap: 12px;
     row-gap: 30px;
   }
 
-  .gallery-work-frame {
-    padding: 8px;
+  .gallery-grid {
+    --gallery-mat: 8px;
   }
 
   .gallery-work figcaption {
