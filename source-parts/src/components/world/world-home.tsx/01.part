@@ -25,6 +25,7 @@ import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
+import { WorldAtmosphere } from "./world-atmosphere";
 
 const POSTERS = [
   {
@@ -488,3 +489,4 @@ const EPISODES: EpisodeRecord[] = [
         height: 1280,
         to: "/riders/cipher",
         assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
+      },

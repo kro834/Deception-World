@@ -1,3 +1,10 @@
+    setInitialRiderTab(returnIndex);
+    setRiderTab(returnIndex);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
     syncRail(managerRail.current, 2);
   }, [locationHash]);
 
@@ -484,8 +491,3 @@
       [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
     }
     const previewPosters = Array.from(
-      { length: 9 },
-      (_, index) => previewPool[index % previewPool.length],
-    );
-    const finalReady = loadPoster(finalPoster);
-    if (motionReduced) {

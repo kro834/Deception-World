@@ -65,6 +65,62 @@ html body .rider-tabs > button[role="tab"] {
   max-height: 74px;
   box-sizing: border-box;
 }
+/* Instructions and feedback share a reserved slot below the eight fixed
+   cells. A candidate changes only text and paint, never the grid's size. */
+.rider-selector {
+  min-width: 0;
+  align-self: start;
+}
+.rider-selection-guide {
+  min-height: 104px;
+  margin: 0 var(--rider-liquid-safe-inline, 18px) 18px;
+  padding: 12px 14px;
+  border: 1px solid #a2d5ee26;
+  border-radius: 12px;
+  background: #14212c;
+  color: #d1dce6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.rider-selection-guide p {
+  margin: 0;
+}
+.rider-selection-guide [data-rider-selection-status] {
+  margin-top: 6px;
+  min-height: 2lh;
+  color: #99adc0;
+}
+.rider-selector:has([data-liquid-held="true"]) .rider-selection-guide {
+  border-color: #b9eaff;
+  background: #1c3547;
+}
+.rider-selector:has([data-liquid-held="true"]) [data-rider-selection-status] {
+  color: #fff;
+  font-weight: 600;
+}
+html body .rider-tabs > button[data-liquid-arming="true"] {
+  outline: 1px solid #b9eaff;
+  outline-offset: -4px;
+}
+html body .rider-tabs[data-liquid-held="true"] > button[data-liquid-contact="true"] {
+  border-color: #d2f2ff;
+  box-shadow: inset 0 0 0 1px #d2f2ff;
+}
+html body .rider-tabs[data-liquid-held="true"] > .liquid-selection-lens {
+  transition: none !important;
+}
+html body .rider-tabs[data-liquid-held="true"] > button[role="tab"] {
+  transition: none;
+}
+html body .rider-tabs[data-liquid-held="true"] > button[role="tab"] > * {
+  transition: scale 120ms ease-out;
+}
+@media (forced-colors: active) {
+  .rider-selector:has([data-liquid-held="true"]) .rider-selection-guide,
+  html body .rider-tabs[data-liquid-held="true"] > button[data-liquid-contact="true"] {
+    border-color: Highlight;
+  }
+}
 /* Tablets: eight riders fill two rows of four instead of 3 + 3 + 2 with an
    empty cell. Only the grid changes; the long-press gesture is untouched. */
 @media (min-width: 561px) and (max-width: 840px) {
@@ -140,6 +196,9 @@ html body .liquid-swipe-tabs[data-liquid-dragging="true"] > .liquid-selection-le
   transition: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
+  html body .rider-tabs[data-liquid-held="true"] > button[role="tab"] > * {
+    transition: none !important;
+  }
   html body .liquid-swipe-tabs > .liquid-selection-lens {
     transition: none !important;
   }

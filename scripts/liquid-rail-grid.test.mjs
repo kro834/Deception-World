@@ -227,7 +227,7 @@ function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
     return prevented;
   };
 
-  return { advance, dispose, flushFrames, lens, pointer, root, tabs, touchmove, win };
+  return { advance, dispose, flushFrames, lens, pointer, root, tabs, touchmove, win, doc };
 }
 
 const cell = (left, top) => ({ left, top, width: 50, height: 50 });
@@ -459,3 +459,95 @@ test("other rails keep owning a touch from contact", () => {
     ui.dispose();
   }
 });
+
+test("a held rider lens follows the first small move without recentering an edge press", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 47, 45);
+    ui.advance(350);
+    ui.pointer("pointermove", 50, 48);
+    ui.flushFrames();
+    assert.equal(ui.root.dataset.liquidDragging, "true");
+    assert.match(ui.lens.style.transform, /translate3d\(3\.00px,3\.00px,0\)/);
+    ui.pointer("pointermove", 95, 95);
+    ui.flushFrames();
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true", "preview does not commit");
+    assert.equal(ui.tabs[3].getAttribute("data-liquid-contact"), "true");
+    ui.pointer("pointerup", 95, 95);
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a scrolling touch cannot select a rider through its subsequent compatibility click", () => {
+  const ui = riderGrid();
+  try {
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    ui.pointer("pointermove", 75, 70, ui.tabs[1]);
+    ui.pointer("pointerup", 75, 70, ui.tabs[1]);
+    ui.tabs[1].dispatch("click", { detail: 1 });
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.liquidArmed, undefined);
+    assert.equal(ui.tabs[1].getAttribute("data-liquid-arming"), null);
+    ui.tabs[1].dispatch("click", { detail: 0 });
+    assert.equal(
+      ui.tabs[1].getAttribute("aria-selected"),
+      "true",
+      "assistive activation remains available",
+    );
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("rider preview commits once on release, and an old move cannot enter the next touch", () => {
+  const ui = riderGrid();
+  let commits = 0;
+  ui.root.addEventListener("railselect", () => commits++);
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    ui.advance(350);
+    ui.pointer("pointermove", 75, 75);
+    ui.pointer("pointerup", 75, 75);
+    ui.tabs[0].dispatch("click", { detail: 1 });
+    assert.equal(commits, 1);
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    ui.pointer("pointerdown", 25, 25);
+    assert.doesNotThrow(ui.flushFrames);
+    assert.equal(ui.root.dataset.railLock, undefined, "the new finger is still pending");
+    ui.pointer("pointerup", 25, 25);
+    assert.equal(commits, 2);
+  } finally {
+    ui.dispose();
+  }
+});
+
+for (const [name, interrupt] of Object.entries({
+  Escape: (ui) => ui.win.dispatch("keydown", { key: "Escape" }),
+  "another touch": (ui) => ui.win.dispatch("pointerdown", { pointerType: "touch", pointerId: 9 }),
+  "lost capture": (ui) => ui.root.dispatch("lostpointercapture", { pointerId: 7 }),
+  blur: (ui) => ui.win.dispatch("blur"),
+  hidden: (ui) => {
+    ui.doc.hidden = true;
+    ui.doc.dispatch("visibilitychange");
+  },
+  disposal: (ui) => ui.dispose(),
+})) {
+  test(`a rider hold cancelled by ${name} leaves no selection or scroll lock`, () => {
+    const ui = riderGrid();
+    try {
+      ui.pointer("pointerdown", 75, 75, ui.tabs[3]);
+      ui.advance(350);
+      assert.equal(ui.root.dataset.railLock, "true");
+      interrupt(ui);
+      assert.equal(ui.root.dataset.railLock, undefined);
+      assert.equal(ui.root.dataset.liquidHeld, "false");
+      assert.equal(ui.touchmove(), false);
+      ui.tabs[3].dispatch("click", { detail: 1 });
+      assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    } finally {
+      ui.dispose();
+    }
+  });
+}

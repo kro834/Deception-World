@@ -1,3 +1,5 @@
+                expanded={pickupOpen}
+                label="ピックアップ"
                 onOpen={openPickup}
               />
             </div>

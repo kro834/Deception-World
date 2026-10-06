@@ -1,4 +1,14 @@
-  window.addEventListener('pagehide', cancel);
+  const cancelOtherTouch = (event) => {
+    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+  };
+  const cancelWithEscape = (event) => {
+    if (holdToDrag && gesture && event.key === 'Escape') {
+      event.preventDefault();
+      cancel();
+    }
+  };
+  window.addEventListener('pointerdown', cancelOtherTouch, true);
+  window.addEventListener('keydown', cancelWithEscape);
   // Rotation invalidates captured coordinates. Toolbar height changes do not:
   // cancelling on every visualViewport resize would interrupt normal iOS drags.
   window.addEventListener('orientationchange', cancel);
@@ -76,6 +86,8 @@
     window.removeEventListener('pointercancel', cancel, true);
     window.removeEventListener('blur', cancel);
     window.removeEventListener('pagehide', cancel);
+    window.removeEventListener('pointerdown', cancelOtherTouch, true);
+    window.removeEventListener('keydown', cancelWithEscape);
     window.removeEventListener('orientationchange', cancel);
     window.removeEventListener('resize', handleViewportResize);
     document.removeEventListener('visibilitychange', handleVisibilityChange);

@@ -1,13 +1,3 @@
-    const pt = Math.min(this.canvas.height, Math.ceil(this.canvas.height - top * ratio));
-    if (pr - pl <= 0 || pt - pb <= 0) return;
-    gl.enable(gl.SCISSOR_TEST); gl.scissor(pl, pb, pr - pl, pt - pb);
-  }
-  draw(time) {
-    this.frame = null;
-    const root = this.activeRoot, gl = this.gl, g0 = this.geometry;
-    if (!root || !gl || !g0) return;
-    const elapsed = this.lastTime === 0 ? 16 : Math.min(48, time - this.lastTime);
-    this.lastTime = time;
 
     // Droplet lag: chase the requested geometry instead of snapping to it.
     let settling = false;
@@ -104,6 +94,8 @@ function initRail(root) {
   const glow = root.querySelector('.liquid-contact-glow');
   const reflection = root.querySelector('.liquid-contact-reflection');
   const lensReflection = root.querySelector('.liquid-lens-reflection');
+  const riderStatus = root.parentElement?.querySelector('[data-rider-selection-status]');
+  const statusRest = riderStatus?.textContent;
   const tabs = () => [...root.querySelectorAll(':scope > button[role="tab"]')];
   let gesture = null, holdTimer = null, moveFrame = null, pending = null;
   let lensGeometry = null;
@@ -163,6 +155,10 @@ function initRail(root) {
       if (k === i) t.setAttribute('data-liquid-contact', 'true');
       else t.removeAttribute('data-liquid-contact');
     });
+    if (riderStatus) {
+      const name = i === null ? null : tabs()[i]?.getAttribute('data-rider-name');
+      riderStatus.textContent = name ? `${name}を選択中。指を離して決定。` : statusRest;
+    }
   };
   const contact = (cx, cy) => {
     if (!gesture) return;
@@ -193,8 +189,8 @@ function initRail(root) {
   // The rider grid covers most of a phone's width in the middle of the page,
   // so on touch it is a page-scroll surface first (touch-action: pan-y,
   // styles-frosted-controls.css). A swipe that starts on it scrolls the page
-  // natively: nothing is measured, locked or drawn until a long press
-  // engages. Only then does the finger own the rail, and dragging across the
+  // natively: a light outline acknowledges contact, but nothing is measured
+  // or locked until a long press engages. Only then does the finger own the rail, and dragging across the
   // tabs selects as before. A quick tap still selects the tapped tab. Mouse
   // and pen keep the immediate press-and-drag.
   const holdToDrag = root.classList.contains('rider-tabs');
@@ -209,15 +205,19 @@ function initRail(root) {
     releasePageLock?.();
     releasePageLock = null;
   };
-  // An armed touch has written nothing yet, so letting it go writes nothing:
-  // it usually ends because the browser took the finger for a page scroll.
-  const disarm = () => {
+  // An armed touch owns only its contact outline. Release it when the
+  // browser takes the finger for a page scroll, without ever locking the page.
+  const disarm = (suppressClick = false) => {
+    if (suppressClick) swallowClick = true;
     clearTimeout(holdTimer);
+    delete root.dataset.liquidArmed;
+    tabs().forEach(t => t.removeAttribute('data-liquid-arming'));
     gesture = null;
     pending = null;
   };
   const cancel = () => {
-    if (gesture?.hold === 'armed') { disarm(); return; }
+    if (gesture) swallowClick = true;
+    if (gesture?.hold === 'armed') { disarm(true); return; }
     const pointerId = gesture?.pointerId;
     const wasActive = Boolean(gesture);
     gesture = null;
@@ -246,8 +246,8 @@ function initRail(root) {
 
     if (lockScroll) {
       const startGeo = gesture.geos[gesture.start];
-      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
-      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
+      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx - (gesture.grabX || 0);
+      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1) - (gesture.grabY || 0);
       const geos = gesture.geos;
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
@@ -256,3 +256,16 @@ function initRail(root) {
       const tab = tabs()[preview];
       if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
       const lw = g.width, lh = g.height;
+      const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;
+      const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
+      const geo = {
+        x: clamp(px - lw / 2, insetX, Math.max(insetX, root.clientWidth - lw - insetX)),
+        y: clamp(py - lh / 2, insetY, Math.max(insetY, root.clientHeight - lh - insetY)),
+        width: lw,
+        height: lh,
+      };
+      lensGeometry = geo;
+      if (lens) {
+        const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
+        if (lens.style.width !== width) lens.style.width = width;
+        if (lens.style.height !== height) lens.style.height = height;

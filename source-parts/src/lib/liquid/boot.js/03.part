@@ -1,16 +1,3 @@
-      const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;
-      const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
-      const geo = {
-        x: clamp(px - lw / 2, insetX, Math.max(insetX, root.clientWidth - lw - insetX)),
-        y: clamp(py - lh / 2, insetY, Math.max(insetY, root.clientHeight - lh - insetY)),
-        width: lw,
-        height: lh,
-      };
-      lensGeometry = geo;
-      if (lens) {
-        const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
-        if (lens.style.width !== width) lens.style.width = width;
-        if (lens.style.height !== height) lens.style.height = height;
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
@@ -52,12 +39,15 @@
   // Rider grid, touch: note the contact and wait for the hold.
   const arm = (e) => {
     const target = e.target.closest('button[role="tab"]');
+    if (!target || !root.contains(target)) return;
     gesture = {
       axis: 'pending', hold: 'armed', start: target ? tabs().indexOf(target) : -1, raw: 0, held: false,
       pointerId: e.pointerId, pointerType: e.pointerType,
       startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
       vx: 0, vy: 0, geos: null, rect: null, sx: 1, sy: 1,
     };
+    root.dataset.liquidArmed = 'true';
+    target.setAttribute('data-liquid-arming', 'true');
     clearTimeout(holdTimer);
     holdTimer = setTimeout(engage, TOUCH_HOLD_MS);
   };
@@ -78,11 +68,21 @@
     const start = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, rect, geos);
     const target = tabs()[start];
     if (!target || !geos[start]) { disarm(); return; }
+    const sx = rect.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = rect.height / Math.max(root.offsetHeight, 1) || 1;
+    const first = geos[0];
+    const oneRow = geos.every(box => Math.abs(box.y - first.y) < 2);
+    const oneColumn = geos.every(box => Math.abs(box.x - first.x) < 2);
     Object.assign(g, {
-      hold: 'engaged', held: true, start, raw: start, geos, rect,
-      sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
-      sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
+      hold: 'engaged', held: true, axis: 'free', start, raw: start, geos, rect, sx, sy,
+      linearAxis: oneRow ? 'horizontal' : oneColumn ? 'vertical' : null,
+      // Pick up the lens at the point the finger held, rather than snapping
+      // its centre under an off-centre press on the first move.
+      grabX: (g.lastX - rect.left) / sx - geos[start].x - geos[start].width / 2,
+      grabY: (g.lastY - rect.top) / sy - geos[start].y - geos[start].height / 2,
     });
+    delete root.dataset.liquidArmed;
+    target.removeAttribute('data-liquid-arming');
     settle(start, geos);
     root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'true';
     lockPage();
@@ -150,9 +150,15 @@
       // Moving before the hold is a swipe, not a selection: a vertical one is
       // a page scroll (the browser cancels the pointer), a sideways one simply
       // lets the grid go.
-      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm();
+      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm(true);
       else { gesture.lastX = e.clientX; gesture.lastY = e.clientY; gesture.lastT = e.timeStamp; }
       return;
+    }
+    // Holding is the deliberate gesture threshold. Once it has engaged,
+    // even a small move follows the finger; there is no second dead zone.
+    if (gesture.hold === 'engaged' && root.dataset.liquidDragging !== 'true') {
+      root.dataset.liquidDragging = 'true';
+      if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
     }
     if (gesture.axis === 'pending') {
       const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
@@ -190,10 +196,15 @@
   const finish = (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
     const g = gesture;
+    // A release may arrive before the coalesced move frame. It must not
+    // process that old move against the next touch's unmeasured gesture.
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    pending = null;
     if (g.hold === 'armed') {
       // A quick tap selects the tab under the finger; a lift away from the
       // contact point ended a swipe.
-      disarm();
+      disarm(true);
       if (Math.hypot(e.clientX - g.startX, e.clientY - g.startY) >= TOUCH_SLOP) return;
       const i = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, root.getBoundingClientRect(), measure());
       select(i); settle(i);
@@ -216,19 +227,19 @@
     }
     if (g.axis === 'free') {
       const startGeo = g.geos[g.start];
-      const px = g.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (e.clientX - g.rect.left) / g.sx;
-      const py = g.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (e.clientY - g.rect.top) / (g.sy || 1);
-      const idx = nearestTab(px, py, measure());
+      const px = g.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (e.clientX - g.rect.left) / g.sx - (g.grabX || 0);
+      const py = g.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (e.clientY - g.rect.top) / (g.sy || 1) - (g.grabY || 0);
+      const idx = nearestTab(px, py, g.geos);
       swallowClick = true;
       gesture = null; reset(); unlockPage(); select(idx);
-      requestAnimationFrame(() => settle(idx));
+      requestAnimationFrame(() => { if (!disposed && !gesture) settle(active); });
       return;
     }
     let idx = Math.round(g.raw);
     if (Math.abs(g.vx) > 0.42) idx = g.vx > 0 ? Math.max(idx, g.start + 1) : Math.min(idx, g.start - 1);
     idx = clamp(idx, 0, tabs().length - 1);
     gesture = null; reset(); unlockPage(); select(idx);
-    requestAnimationFrame(() => settle(idx));
+    requestAnimationFrame(() => { if (!disposed && !gesture) settle(active); });
   };
   on(root, 'pointerup', finish);
   on(root, 'pointercancel', () => cancel());
@@ -256,3 +267,4 @@
   window.addEventListener('pointerup', finish, true);
   window.addEventListener('pointercancel', cancel, true);
   window.addEventListener('blur', cancel);
+  window.addEventListener('pagehide', cancel);

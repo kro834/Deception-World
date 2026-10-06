@@ -23,11 +23,11 @@ const route = read("src/routes/world.tsx");
 const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
-  // Pinned to the reviewed 702191f view. Loading/event code can now be
-  // consolidated without reconstructing unrelated historical source edits.
+  // Reviewed 2026-10-06: the requested rider hold guide and decorative
+  // WorldAtmosphere are the only new markup. Story records remain pinned.
   assert.deepEqual(worldViewContract(home), {
     records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
-    markup: "0a1db8e1f6476aaae4cb08d1b977a03edacaf71ef264f733e78dcb8dd55e052b",
+    markup: "3a516136ed6895f34a936c2a1ba2fcf78152a91b439bc4dd4907df7b2bf5e88f",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

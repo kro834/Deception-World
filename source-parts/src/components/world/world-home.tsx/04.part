@@ -1,3 +1,8 @@
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
+    const finalReady = loadPoster(finalPoster);
+    if (motionReduced) {
       void finalReady.then((ready) => {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (!heroInViewRef.current) {
@@ -190,6 +195,7 @@
       className="site-shell motion-on film-edition mirage-edition"
       data-motion-enabled="true"
     >
+      <WorldAtmosphere />
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />
@@ -484,7 +490,3 @@
                         strokeWidth="1.8"
                       />
                     </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 7.5-2"

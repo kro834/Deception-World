@@ -25,6 +25,7 @@ import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
+import { WorldAtmosphere } from "./world-atmosphere";
 
 const POSTERS = [
   {
@@ -715,34 +716,44 @@ const PickupRail = memo(
 const RiderRail = memo(
   forwardRef<HTMLDivElement, { initialIndex: number }>(function RiderRail({ initialIndex }, ref) {
     return (
-      <div
-        ref={ref}
-        className="rider-tabs liquid-swipe-tabs"
-        role="tablist"
-        aria-label="八人のメインライダー"
-        aria-orientation="vertical"
-      >
-        <LiquidLens />
-        {RIDERS.map((r, i) => (
-          <button
-            key={r.id}
-            type="button"
-            role="tab"
-            id={`rider-tab-${r.id}`}
-            aria-controls="rider-active-panel"
-            className={i === initialIndex ? "is-active" : ""}
-            aria-selected={i === initialIndex}
-            tabIndex={i === initialIndex ? 0 : -1}
-            style={{
-              ["--tab-tone" as string]: r.tone,
-              ["--liquid-accent" as string]: r.tone,
-            }}
-          >
-            <small>{r.no}</small>
-            <span>{r.name}</span>
-            <i />
-          </button>
-        ))}
+      <div className="rider-selector">
+        <div
+          ref={ref}
+          className="rider-tabs liquid-swipe-tabs"
+          role="tablist"
+          aria-label="八人のメインライダー"
+          aria-orientation="vertical"
+          aria-describedby="rider-selection-help"
+        >
+          <LiquidLens />
+          {RIDERS.map((r, i) => (
+            <button
+              key={r.id}
+              type="button"
+              role="tab"
+              id={`rider-tab-${r.id}`}
+              aria-controls="rider-active-panel"
+              className={i === initialIndex ? "is-active" : ""}
+              aria-selected={i === initialIndex}
+              data-rider-name={r.ja}
+              tabIndex={i === initialIndex ? 0 : -1}
+              style={{
+                ["--tab-tone" as string]: r.tone,
+                ["--liquid-accent" as string]: r.tone,
+              }}
+            >
+              <small>{r.no}</small>
+              <span>{r.name}</span>
+              <i />
+            </button>
+          ))}
+        </div>
+        <div className="rider-selection-guide" id="rider-selection-help">
+          <p>タップで切り替え。長押しして、指を滑らせて選択。</p>
+          <p data-rider-selection-status aria-live="polite" aria-atomic="true">
+            指を離すとライダーが切り替わります。
+          </p>
+        </div>
       </div>
     );
   }),
@@ -1661,6 +1672,7 @@ export function WorldHome() {
       className="site-shell motion-on film-edition mirage-edition"
       data-motion-enabled="true"
     >
+      <WorldAtmosphere />
       <SideMenuLayer open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
       <div className="ambient" aria-hidden="true">
         <div className="ambient-grid" />

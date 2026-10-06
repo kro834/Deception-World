@@ -256,3 +256,13 @@ class GlassRenderer {
     const pl = Math.max(0, Math.floor(left * ratio));
     const pb = Math.max(0, Math.floor(this.canvas.height - (top + h) * ratio));
     const pr = Math.min(this.canvas.width, Math.ceil((left + w) * ratio));
+    const pt = Math.min(this.canvas.height, Math.ceil(this.canvas.height - top * ratio));
+    if (pr - pl <= 0 || pt - pb <= 0) return;
+    gl.enable(gl.SCISSOR_TEST); gl.scissor(pl, pb, pr - pl, pt - pb);
+  }
+  draw(time) {
+    this.frame = null;
+    const root = this.activeRoot, gl = this.gl, g0 = this.geometry;
+    if (!root || !gl || !g0) return;
+    const elapsed = this.lastTime === 0 ? 16 : Math.min(48, time - this.lastTime);
+    this.lastTime = time;

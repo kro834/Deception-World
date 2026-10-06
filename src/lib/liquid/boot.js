@@ -362,6 +362,8 @@ function initRail(root) {
   const glow = root.querySelector('.liquid-contact-glow');
   const reflection = root.querySelector('.liquid-contact-reflection');
   const lensReflection = root.querySelector('.liquid-lens-reflection');
+  const riderStatus = root.parentElement?.querySelector('[data-rider-selection-status]');
+  const statusRest = riderStatus?.textContent;
   const tabs = () => [...root.querySelectorAll(':scope > button[role="tab"]')];
   let gesture = null, holdTimer = null, moveFrame = null, pending = null;
   let lensGeometry = null;
@@ -421,6 +423,10 @@ function initRail(root) {
       if (k === i) t.setAttribute('data-liquid-contact', 'true');
       else t.removeAttribute('data-liquid-contact');
     });
+    if (riderStatus) {
+      const name = i === null ? null : tabs()[i]?.getAttribute('data-rider-name');
+      riderStatus.textContent = name ? `${name}を選択中。指を離して決定。` : statusRest;
+    }
   };
   const contact = (cx, cy) => {
     if (!gesture) return;
@@ -451,8 +457,8 @@ function initRail(root) {
   // The rider grid covers most of a phone's width in the middle of the page,
   // so on touch it is a page-scroll surface first (touch-action: pan-y,
   // styles-frosted-controls.css). A swipe that starts on it scrolls the page
-  // natively: nothing is measured, locked or drawn until a long press
-  // engages. Only then does the finger own the rail, and dragging across the
+  // natively: a light outline acknowledges contact, but nothing is measured
+  // or locked until a long press engages. Only then does the finger own the rail, and dragging across the
   // tabs selects as before. A quick tap still selects the tapped tab. Mouse
   // and pen keep the immediate press-and-drag.
   const holdToDrag = root.classList.contains('rider-tabs');
@@ -467,15 +473,19 @@ function initRail(root) {
     releasePageLock?.();
     releasePageLock = null;
   };
-  // An armed touch has written nothing yet, so letting it go writes nothing:
-  // it usually ends because the browser took the finger for a page scroll.
-  const disarm = () => {
+  // An armed touch owns only its contact outline. Release it when the
+  // browser takes the finger for a page scroll, without ever locking the page.
+  const disarm = (suppressClick = false) => {
+    if (suppressClick) swallowClick = true;
     clearTimeout(holdTimer);
+    delete root.dataset.liquidArmed;
+    tabs().forEach(t => t.removeAttribute('data-liquid-arming'));
     gesture = null;
     pending = null;
   };
   const cancel = () => {
-    if (gesture?.hold === 'armed') { disarm(); return; }
+    if (gesture) swallowClick = true;
+    if (gesture?.hold === 'armed') { disarm(true); return; }
     const pointerId = gesture?.pointerId;
     const wasActive = Boolean(gesture);
     gesture = null;
@@ -504,8 +514,8 @@ function initRail(root) {
 
     if (lockScroll) {
       const startGeo = gesture.geos[gesture.start];
-      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx;
-      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1);
+      const px = gesture.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (m.x - gesture.rect.left) / gesture.sx - (gesture.grabX || 0);
+      const py = gesture.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (m.y - gesture.rect.top) / (gesture.sy || 1) - (gesture.grabY || 0);
       const geos = gesture.geos;
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
@@ -568,12 +578,15 @@ function initRail(root) {
   // Rider grid, touch: note the contact and wait for the hold.
   const arm = (e) => {
     const target = e.target.closest('button[role="tab"]');
+    if (!target || !root.contains(target)) return;
     gesture = {
       axis: 'pending', hold: 'armed', start: target ? tabs().indexOf(target) : -1, raw: 0, held: false,
       pointerId: e.pointerId, pointerType: e.pointerType,
       startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
       vx: 0, vy: 0, geos: null, rect: null, sx: 1, sy: 1,
     };
+    root.dataset.liquidArmed = 'true';
+    target.setAttribute('data-liquid-arming', 'true');
     clearTimeout(holdTimer);
     holdTimer = setTimeout(engage, TOUCH_HOLD_MS);
   };
@@ -594,11 +607,21 @@ function initRail(root) {
     const start = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, rect, geos);
     const target = tabs()[start];
     if (!target || !geos[start]) { disarm(); return; }
+    const sx = rect.width / Math.max(root.offsetWidth, 1) || 1;
+    const sy = rect.height / Math.max(root.offsetHeight, 1) || 1;
+    const first = geos[0];
+    const oneRow = geos.every(box => Math.abs(box.y - first.y) < 2);
+    const oneColumn = geos.every(box => Math.abs(box.x - first.x) < 2);
     Object.assign(g, {
-      hold: 'engaged', held: true, start, raw: start, geos, rect,
-      sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
-      sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
+      hold: 'engaged', held: true, axis: 'free', start, raw: start, geos, rect, sx, sy,
+      linearAxis: oneRow ? 'horizontal' : oneColumn ? 'vertical' : null,
+      // Pick up the lens at the point the finger held, rather than snapping
+      // its centre under an off-centre press on the first move.
+      grabX: (g.lastX - rect.left) / sx - geos[start].x - geos[start].width / 2,
+      grabY: (g.lastY - rect.top) / sy - geos[start].y - geos[start].height / 2,
     });
+    delete root.dataset.liquidArmed;
+    target.removeAttribute('data-liquid-arming');
     settle(start, geos);
     root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'true';
     lockPage();
@@ -666,9 +689,15 @@ function initRail(root) {
       // Moving before the hold is a swipe, not a selection: a vertical one is
       // a page scroll (the browser cancels the pointer), a sideways one simply
       // lets the grid go.
-      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm();
+      if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= TOUCH_SLOP) disarm(true);
       else { gesture.lastX = e.clientX; gesture.lastY = e.clientY; gesture.lastT = e.timeStamp; }
       return;
+    }
+    // Holding is the deliberate gesture threshold. Once it has engaged,
+    // even a small move follows the finger; there is no second dead zone.
+    if (gesture.hold === 'engaged' && root.dataset.liquidDragging !== 'true') {
+      root.dataset.liquidDragging = 'true';
+      if (getRenderer().isActive(root)) getRenderer().setPhase('dragging');
     }
     if (gesture.axis === 'pending') {
       const dx = e.clientX - gesture.startX, dy = e.clientY - gesture.startY;
@@ -706,10 +735,15 @@ function initRail(root) {
   const finish = (e) => {
     if (!gesture || gesture.pointerId !== e.pointerId) return;
     const g = gesture;
+    // A release may arrive before the coalesced move frame. It must not
+    // process that old move against the next touch's unmeasured gesture.
+    if (moveFrame !== null) cancelAnimationFrame(moveFrame);
+    moveFrame = null;
+    pending = null;
     if (g.hold === 'armed') {
       // A quick tap selects the tab under the finger; a lift away from the
       // contact point ended a swipe.
-      disarm();
+      disarm(true);
       if (Math.hypot(e.clientX - g.startX, e.clientY - g.startY) >= TOUCH_SLOP) return;
       const i = g.start >= 0 ? g.start : tabAt(g.startX, g.startY, root.getBoundingClientRect(), measure());
       select(i); settle(i);
@@ -732,19 +766,19 @@ function initRail(root) {
     }
     if (g.axis === 'free') {
       const startGeo = g.geos[g.start];
-      const px = g.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (e.clientX - g.rect.left) / g.sx;
-      const py = g.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (e.clientY - g.rect.top) / (g.sy || 1);
-      const idx = nearestTab(px, py, measure());
+      const px = g.linearAxis === 'vertical' ? startGeo.x + startGeo.width / 2 : (e.clientX - g.rect.left) / g.sx - (g.grabX || 0);
+      const py = g.linearAxis === 'horizontal' ? startGeo.y + startGeo.height / 2 : (e.clientY - g.rect.top) / (g.sy || 1) - (g.grabY || 0);
+      const idx = nearestTab(px, py, g.geos);
       swallowClick = true;
       gesture = null; reset(); unlockPage(); select(idx);
-      requestAnimationFrame(() => settle(idx));
+      requestAnimationFrame(() => { if (!disposed && !gesture) settle(active); });
       return;
     }
     let idx = Math.round(g.raw);
     if (Math.abs(g.vx) > 0.42) idx = g.vx > 0 ? Math.max(idx, g.start + 1) : Math.min(idx, g.start - 1);
     idx = clamp(idx, 0, tabs().length - 1);
     gesture = null; reset(); unlockPage(); select(idx);
-    requestAnimationFrame(() => settle(idx));
+    requestAnimationFrame(() => { if (!disposed && !gesture) settle(active); });
   };
   on(root, 'pointerup', finish);
   on(root, 'pointercancel', () => cancel());
@@ -773,6 +807,17 @@ function initRail(root) {
   window.addEventListener('pointercancel', cancel, true);
   window.addEventListener('blur', cancel);
   window.addEventListener('pagehide', cancel);
+  const cancelOtherTouch = (event) => {
+    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+  };
+  const cancelWithEscape = (event) => {
+    if (holdToDrag && gesture && event.key === 'Escape') {
+      event.preventDefault();
+      cancel();
+    }
+  };
+  window.addEventListener('pointerdown', cancelOtherTouch, true);
+  window.addEventListener('keydown', cancelWithEscape);
   // Rotation invalidates captured coordinates. Toolbar height changes do not:
   // cancelling on every visualViewport resize would interrupt normal iOS drags.
   window.addEventListener('orientationchange', cancel);
@@ -850,6 +895,8 @@ function initRail(root) {
     window.removeEventListener('pointercancel', cancel, true);
     window.removeEventListener('blur', cancel);
     window.removeEventListener('pagehide', cancel);
+    window.removeEventListener('pointerdown', cancelOtherTouch, true);
+    window.removeEventListener('keydown', cancelWithEscape);
     window.removeEventListener('orientationchange', cancel);
     window.removeEventListener('resize', handleViewportResize);
     document.removeEventListener('visibilitychange', handleVisibilityChange);
