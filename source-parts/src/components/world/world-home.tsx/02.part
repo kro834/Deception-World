@@ -1,4 +1,3 @@
-      {
         label: "仮面ライダーレディック",
         src: "/rider-leddic-ishihen.jpeg",
         pos: "50% 12%",
@@ -490,3 +489,5 @@ export function WorldHome() {
     const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
     if (returnIndex < 0) return;
     riderTabRef.current = returnIndex;
+    setInitialRiderTab(returnIndex);
+    setRiderTab(returnIndex);

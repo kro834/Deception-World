@@ -490,3 +490,4 @@ const EPISODES: EpisodeRecord[] = [
         to: "/riders/cipher",
         assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
       },
+      {

@@ -118,8 +118,8 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
       --tr-fade: 4svh;
     }
 
-    /* STORY's two paragraphs are one terminal with one caret: the second
-       starts typing only once the first is whole (its caret gone), and is
+    /* STORY's paragraphs are one terminal with one caret: each subsequent
+       paragraph starts once its predecessor is whole (its caret gone), and is
        still whole at 74%. Its span stays under the measured top-to-top
        distance between the two paragraphs in each width band (phones
        11.5-17svh, 561-1099px 6.6-11.9svh, wider 8.3-15.7svh). */

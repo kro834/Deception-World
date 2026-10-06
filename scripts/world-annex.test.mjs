@@ -11,7 +11,7 @@ import {
   WORLD_QUOTES,
 } from "../src/components/world/world-annex-data.ts";
 
-/* World annex (資料目次, 世界と組織, 人物一覧, エピソードの言葉, 用語集,
+/* World annex (資料目次, 世界と組織, 人物一覧, エピソードの記録, 用語集,
    名台詞). The additions come from the owner's story source; the existing
    /world page is unchanged apart from the three places that render them. */
 
@@ -24,11 +24,12 @@ const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
   // Reviewed 2026-10-06: the requested rider hold guide and decorative
-  // WorldAtmosphere, plus the requested shared name-break markup. Story
-  // records and displayed spelling remain pinned.
+  // WorldAtmosphere and shared name-break markup, plus the source-led
+  // synopsis expansion requested on 2026-10-06. Fixed columns, records,
+  // artwork and displayed spelling remain pinned.
   assert.deepEqual(worldViewContract(home), {
     records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
-    markup: "f1d8efd0e8c0d3946d6422da32b7bc5cb6632149faa5e25c486b9b0410d19f1f",
+    markup: "a7c10042924fc85c748b1d9c4e16a52f8cc4090b2663d49090c7d4136a705ceb",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -49,7 +50,7 @@ test("the annex data is complete", () => {
     WORLD_BRIEF.map(({ id }) => id),
     ["rikuei", "kanri", "realms", "code"],
   );
-  assert.equal(WORLD_LOCATIONS.length, 5);
+  assert.equal(WORLD_LOCATIONS.length, 6);
   assert.equal(WORLD_CAST_ROSTER.length, 14);
   assert.equal(new Set(WORLD_CAST_ROSTER.map(({ id }) => id)).size, 14);
   for (const entry of WORLD_CAST_ROSTER) {
@@ -60,10 +61,14 @@ test("the annex data is complete", () => {
     WORLD_EPISODE_NOTES.map(({ no, title }) => `${no} ${title}`),
     ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD"],
   );
-  for (const episode of WORLD_EPISODE_NOTES) assert.equal(episode.lines.length, 3);
-  assert.equal(WORLD_GLOSSARY.length, 13);
+  assert.deepEqual(
+    WORLD_EPISODE_NOTES.map(({ lines }) => lines.length),
+    [3, 3, 5],
+  );
+  assert.ok(WORLD_EPISODE_NOTES.every(({ synopsis }) => synopsis.length === 3));
+  assert.equal(WORLD_GLOSSARY.length, 15);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
-  assert.equal(WORLD_QUOTES.length, 10);
+  assert.equal(WORLD_QUOTES.length, 13);
   // In-story text only: no chat handles, no ideographic indent spaces.
   assert.doesNotMatch(data, /@|\u3000/);
   // Conflicting or undecided facts stay out until the owner settles them.

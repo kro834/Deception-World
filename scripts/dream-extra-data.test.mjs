@@ -13,7 +13,7 @@ const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf
 const dataSource = read("src/components/dream-chapter/dream-chapter-extra-data.ts");
 
 const LINES = /^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/;
-const MAX_LINE = 57714;
+const MAX_LINE = 58013;
 const HUD = /^[A-Z0-9][A-Z0-9 ·\-–—:'.&/]*$/;
 
 const isPassage = (value) =>
@@ -66,15 +66,15 @@ test("archive corners keep their ids, 目次 rows and English HUD kickers", () =
   for (const label of Object.values(extra.DREAM_ARCHIVE_LABELS)) assert.match(label, HUD);
 });
 
-test("chronicle: forty events in case order, seven/seven/eight/eight/six/four", () => {
+test("chronicle: forty-four events retain case order and add four pre-rescue scenes", () => {
   const events = extra.DREAM_CHRONICLE;
   assert.deepEqual(
     events.map(({ no }) => no),
-    Array.from({ length: 40 }, (_, i) => i + 1),
+    Array.from({ length: 44 }, (_, i) => i + 1),
   );
   const cases = owner.DREAM_CASES.map(({ no }) => no);
   const perCase = cases.map((no) => events.filter((event) => event.case === no).length);
-  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 4]);
+  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 8]);
   for (let i = 1; i < events.length; i += 1) {
     assert.ok(cases.indexOf(events[i].case) >= cases.indexOf(events[i - 1].case), `event ${i + 1}`);
   }
@@ -82,6 +82,29 @@ test("chronicle: forty events in case order, seven/seven/eight/eight/six/four", 
     assert.ok(event.title.text && event.place && event.cast.length > 0, `event ${event.no}`);
     assert.equal(new Set(event.cast).size, event.cast.length, `event ${event.no} cast repeats`);
   }
+});
+
+test("new chronicle passages preserve complete source utterances and physical anchors", () => {
+  const [finger, sayo, promise, blanket] = extra.DREAM_CHRONICLE.slice(40);
+  assert.equal(finger.lines, "57713");
+  assert.equal(finger.text, "拭われて綺麗になった花火屋の指先が、誰の目にも留まらないほど、かすかに、ぴくりと小さく動いた。");
+  assert.equal(sayo.lines, "57854,57870,57880");
+  assert.deepEqual(sayo.segments, [
+    { by: "サヨ", text: "「だから……彼を取り戻すまでは、私は死ぬわけにはいかないのよ」" },
+    { by: "橙", text: "「私も、藍様を取り戻したい」" },
+    { by: "橙", text: "「その人がどんな人なのか……私にも、ちゃんと見せてよ」" },
+  ]);
+  assert.equal(promise.lines, "57966,57972");
+  assert.deepEqual(promise.segments, [
+    { by: "八坂神奈子", text: "「それなら約束だ。全員で必ず生きて帰ろう。……そして、帰ったらまた一杯やるぞ」" },
+    { by: "洩矢諏訪子", text: "「神様とのゆびきりげんまん、破ったら許さないからね？」" },
+  ]);
+  assert.equal(blanket.lines, "58003,58009,58012");
+  assert.deepEqual(blanket.segments, [
+    { by: "鈴仙・優曇華院・イナバ", text: "「いいえ。永琳様が、風邪を引かないようにって掛けてくれたのよ」" },
+    { by: "魂魄妖夢", text: "「そうですか……」" },
+    { text: "静かに答えた妖夢は、その優しさにギュッと毛布を握り締めた。" },
+  ]);
 });
 
 test("atlas, relations, arsenal and voices keep their planned counts", () => {

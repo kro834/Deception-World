@@ -7,7 +7,7 @@ import {
   DREAM_CASES,
 } from "../src/components/dream-chapter/dream-chapter-data.ts";
 
-// Selected against the owner's 2026-10-01 story attachments. Keep exact
+// Selected against the owner's 2026-10-06 story attachments. Keep exact
 // dialogue and attribution separate from the site's rewritten summaries.
 // Only the selected lines are retained here, not the private LINE exports.
 test("World episode lines follow reunion, intervention and resistance in source order", () => {
@@ -31,9 +31,29 @@ test("World episode lines follow reunion, intervention and resistance in source 
           text: "───もっとも、あんたらは私を愛し.......何を“好き”やと思うかさえも、うちが決めさせてもらうけど",
           by: "シュザ",
         },
+        { text: "頼む。お前の力が必要なんだ", by: "月城悠真" },
+        { text: "生きていて良かった", by: "月城悠真" },
       ],
     ],
   );
+});
+
+test("World records expand the three supplied episodes without inventing a resolved ending", () => {
+  for (const episode of WORLD_EPISODE_NOTES) {
+    assert.equal(episode.synopsis.length, 3, episode.no);
+    assert.ok(
+      episode.synopsis.every((text) => text.length >= 80),
+      episode.no,
+    );
+  }
+  const legends = WORLD_EPISODE_NOTES[1].synopsis.join("");
+  assert.match(legends, /テラ.*命を落とす/);
+  assert.match(legends, /不適正.*変身不可/);
+  const latest = WORLD_EPISODE_NOTES[2].synopsis.join("");
+  for (const fact of ["4.2秒", "マキャベルゴアナイトメア", "フェイブル", "シュザがまだ"]) {
+    assert.ok(latest.includes(fact), fact);
+  }
+  assert.doesNotMatch(latest, /シュザを倒した|シュザを討ち取|すべての戦いが終わ/);
 });
 
 test("Dream's closing scene quotes Ciel preparing to bring Kaisaku home, not a completed rescue", () => {
@@ -45,6 +65,7 @@ test("Dream's closing scene quotes Ciel preparing to bring Kaisaku home, not a c
   assert.doesNotMatch(bell.profile.join(""), /本人が復活|本人の復活/);
   const dawn = DREAM_CASES.find(({ no }) => no === "3").paragraphs.join("");
   assert.match(dawn, /味方まで巻き込み/);
-  assert.match(dawn, /自分が壊した世界と仲間/);
+  assert.match(dawn, /自分が壊した境内と仲間の身体を修復/);
+  assert.match(dawn, /失われた命を引き戻す/);
   assert.match(dawn, /反動/);
 });

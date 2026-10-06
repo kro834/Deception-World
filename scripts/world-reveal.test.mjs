@@ -365,16 +365,25 @@ test("World marks the revealed blocks and keeps every word in its JSX", async ()
   const headings = source.match(/data-text-reveal="heading"/g) ?? [];
   assert.equal(headings.length, 4, "story, riders, records and finale headings");
   const copies = source.match(/<p data-text-reveal="copy">\s*<RevealText copy>/g) ?? [];
-  assert.equal(copies.length, 3, "story copy ×2 and riders copy");
-  assert.equal((source.match(/data-text-reveal="copy"/g) ?? []).length, 3);
+  assert.equal(copies.length, 4, "source-grounded story copy ×3 and riders copy");
+  assert.equal((source.match(/data-text-reveal="copy"/g) ?? []).length, 4);
   for (const literal of [
-    // Source-grounded introduction requested by the owner on 2026-10-01.
-    "荒廃した碧栄で追跡を逃れる月城悠真の前に、死んだはずのベル・アレインが現れる。",
-    "六詠第三位のシュザは、人が何を望むかさえ書き換える支配の手を伸ばす。",
+    // Source-grounded introduction expanded from the owner's 2026-10-06 attachment.
+    "荒廃した碧栄で追われる月城悠真の前に、死んだはずのベル・アレインが現れるが、悠真はその手を取れず逃走を続ける。",
+    "しかし、共闘してもフリートを攻略できない。",
+    "次に一行を狙ったのは六詠第三位のシュザだった。",
+    "天守閣で追い詰められた彼らに残された逃げ道は、悠真自身の夢へと続いていた。",
     "主人公、帰還者、二人の管理人、刑事、怪盗、英国支部のエージェント、潜入情報官。",
   ]) {
     assert.ok(source.includes(literal), literal);
   }
+  const storyCopy = source.slice(
+    source.indexOf('<div className="story-copy">'),
+    source.indexOf('<div className="threat-panel"'),
+  );
+  const introLength = [...storyCopy.matchAll(/<RevealText copy>\s*([\s\S]*?)<\/RevealText>/g)]
+    .reduce((length, [, paragraph]) => length + [...paragraph.trim()].length, 0);
+  assert.ok(introLength >= 300 && introLength <= 320, `compact introduction: ${introLength}`);
   // Left whole: the blocks a rail changes, the sequel lead (its spans are
   // blocks), the hero, the h1 and the episode titles.
   assert.match(source, /<p className="rider-description">\{rider\.desc\}<\/p>/);

@@ -406,3 +406,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </div>
           </div>
           {weaponGallery.length ? (
+            <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
+              <header>
+                <div>
+                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>

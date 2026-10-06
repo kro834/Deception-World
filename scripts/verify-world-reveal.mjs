@@ -13,6 +13,7 @@ const BLOCKS = [
   ".story-heading h2",
   ".story-copy > p[data-text-reveal]",
   ".story-copy > p[data-text-reveal] + p[data-text-reveal]",
+  ".story-copy > p[data-text-reveal] + p[data-text-reveal] + p[data-text-reveal]",
   ".section-title h2",
   ".section-title > p[data-text-reveal]",
   ".records-heading h2",
@@ -697,8 +698,10 @@ async function styleCost(context) {
   // cursor in one, 2026-10-01), at most the 460 the page was tuned at
   // (230 x 2). Measured on a Pixel UA at 4x CPU: 307 merged costs less per
   // frame than 230 split did.
+  // 2026-10-06: the expanded story's brief introduction is capped to keep
+  // the same 460-animation budget; full episode synopses are static prose.
   assert.ok(
-    timelines.spans >= 200 && timelines.spans <= 340,
+    timelines.spans >= 200 && timelines.spans <= 460,
     `phone-412: ${timelines.spans} character spans`,
   );
   assert.equal(timelines.animations, timelines.spans, "phone-412: one animation per character");
@@ -780,7 +783,7 @@ async function styleCost(context) {
     "phone-412: heading characters hidden from assistive tech",
   );
   assert.ok(
-    a11y.copies.length === 3 &&
+    a11y.copies.length === 4 &&
       a11y.copies.every((copy) => copy.same && !copy.spokenHasSpans && copy.tiny),
     `phone-412: copy text alternatives ${JSON.stringify(a11y.copies)}`,
   );

@@ -39,7 +39,7 @@ test("Rex Loi Vandal transformation preserves calls, numerical specs, and abilit
   assert.match(profile, /system: "ヴァンダールドライバー × スペシャルコア"/);
   assert.match(
     profile,
-    /calls: \["RIDE IN!", "SPECIAL!", "ROLLOUT!", "NONE SHALL TRANSCEND IT!", "VANDAL!"\]/,
+    /calls: \["RIDE IN！", "SPECIAL！", "ROLLOUT！", "Astra Barn！", "VANDAL！"\]/,
   );
   for (const value of ["203.6cm", "113.2kg", "262.9t", "372.2t", "5000m", "0.01sec"]) {
     assert.ok(profile.includes(`dd: "${value}"`), value);
@@ -51,6 +51,46 @@ test("Rex Loi Vandal transformation preserves calls, numerical specs, and abilit
   assert.match(profile, /name: "デアブーツ"/);
   assert.match(profile, /name: "デッドエンド"/);
   assert.match(profile, /『DEAD END！』/);
+  assert.match(profile, /他の六詠の4人からも最大級の脅威/);
+  assert.match(profile, /ヴァンダールドライバーの仮想リベレーターを操作して発動/);
+  assert.doesNotMatch(profile, /NONE SHALL TRANSCEND IT|他の五人|右側面を殴り付け/);
+});
+
+test("Rex Loi retains all six exact quotes and its original portrait and form images", () => {
+  const profile = manager.slice(manager.indexOf("export const REX_LOI"), manager.indexOf("export const SHUZA"));
+  const quotes = profile.match(/quotes: \[([\s\S]*?)\]/)[1];
+  assert.deepEqual([...quotes.matchAll(/"([^"]+)"/g)].map((match) => match[1]), [
+    "世界は、今日も選択を許されて居ます",
+    "生者には生を。死者には静寂を",
+    "力有る者には責任を",
+    "私の力が、私の欲によって振るわれぬ様に",
+    "今日も又、道を閉ざす物だけを壊しましょう",
+    "我々と皆様の、秩序の為に",
+  ]);
+  assert.match(profile, /image: "\/manager-rex-loi\.jpeg"/);
+  assert.match(profile, /imageWebp: "\/manager-rex-loi\.webp"/);
+  assert.match(profile, /img: "\/rider-vandal-20260826\.jpeg"/);
+});
+
+test("Distribution is a standalone sixth section with source mechanisms and limits", () => {
+  const profile = manager.slice(manager.indexOf("export const REX_LOI"), manager.indexOf("export const SHUZA"));
+  const sections = profile.slice(profile.indexOf("sections: ["), profile.indexOf("  rider: {"));
+  assert.deepEqual([...sections.matchAll(/no: "(\d+)"/g)].map((match) => match[1]), ["01", "02", "03", "04", "05", "06"]);
+  const distribution = sections.slice(sections.indexOf('no: "06"'));
+  assert.match(distribution, /kicker: "神性による能力"/);
+  assert.match(distribution, /title: "分配"/);
+  const paragraphs = [...distribution.matchAll(/^ {8}"([^"]+)",$/gm)].map((match) => match[1]);
+  assert.equal(paragraphs.length, 6);
+  for (const paragraph of paragraphs) assert.ok(paragraph.length >= 100);
+  for (const mechanism of [
+    "生身で行使", "管理権限が届く範囲", "追跡", "体内にある空気", "内部を循環する力",
+    "複数の対象", "一点へ集中", "後の反撃", "力の総量は増えず", "元の攻撃が持つ力の範囲",
+    "防護や神体の性質を無条件に無視できるわけではなく", "突破に足る神性と管理権限",
+    "反管理権限", "最高位の管理主権", "優勢である間", "巻き添えを抑える",
+    "呼吸を必要としない", "その対象だけを安全に処理できるとは限らない",
+    "戦闘能力だけを奪って命を残す", "レックス自身の判断",
+  ]) assert.ok(distribution.includes(mechanism), mechanism);
+  assert.doesNotMatch(distribution, /無条件に貫通|無限に(?:増幅|蓄積)|必ず(?:突破|分離)|あらゆる防御を無視/);
 });
 
 test("Vandal reuses REX_LOI data and the requested CV records remain intact", () => {

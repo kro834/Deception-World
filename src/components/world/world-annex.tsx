@@ -29,7 +29,7 @@ import {
 const ANNEX_CONTENTS: readonly { href: string; code: string; label: string }[] = [
   { href: "#cast-roster", code: "04", label: "人物一覧" },
   { href: "#world-brief", code: "05", label: "世界と組織" },
-  { href: "#episode-notes", code: "06.1", label: "エピソードの言葉" },
+  { href: "#episode-notes", code: "06.1", label: "エピソードの記録" },
   { href: "#glossary", code: "06.2", label: "用語集" },
   { href: "#quotes", code: "06.3", label: "名台詞" },
 ];
@@ -321,7 +321,9 @@ function CastFiles() {
                 <div className="wa-person-body">
                   {/* A rider name breaks after 仮面ライダー, never inside it
                       (アルゲノ / ム), and keeps its dash company. */}
-                  <p className="wa-role"><DisplayName value={entry.role} /></p>
+                  <p className="wa-role">
+                    <DisplayName value={entry.role} />
+                  </p>
                   <h3 id={`wa-person-${entry.id}`}>
                     <NameText value={entry.name} />
                   </h3>
@@ -620,7 +622,7 @@ function QuoteRail({ children }: { children: ReactNode }) {
   );
 }
 
-/** 06 ARCHIVE LOG: lines per episode, the glossary and the quotes log. */
+/** 06 ARCHIVE LOG: episode synopses and source dialogue, then the glossary. */
 function ArchiveLog() {
   return (
     <>
@@ -634,10 +636,11 @@ function ArchiveLog() {
           <AnnexHeading
             id="episode-notes-title"
             no="06.1"
-            code="EPISODE LINES"
-            title="エピソードの言葉"
+            code="EPISODE RECORDS"
+            title="エピソードの記録"
             count={`EP.${WORLD_EPISODE_NOTES[0].no}–${WORLD_EPISODE_NOTES[WORLD_EPISODE_NOTES.length - 1].no}`}
           />
+          <p className="wa-prose">EP.01〜03の展開を含みます。</p>
           <ol className="wa-episodes">
             {WORLD_EPISODE_NOTES.map((episode) => {
               const art = EPISODE_ART[episode.no];
@@ -669,6 +672,13 @@ function ArchiveLog() {
                       <i lang="en">STAGE</i> {episode.stage}
                     </small>
                   </p>
+                  <div className="wa-episode-synopsis">
+                    {episode.synopsis.map((paragraph) => (
+                      <p key={paragraph} className="wa-prose">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                   <Lines lines={episode.lines} />
                 </li>
               );

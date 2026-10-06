@@ -15,10 +15,11 @@ test("six chapter cases retain their titles and distinct substantive summaries",
   );
   for (const record of DREAM_CASES) {
     assert.ok(record.lead.length > 10);
-    assert.equal(record.paragraphs.length, 2);
+    assert.ok(record.paragraphs.length >= 3);
     for (const paragraph of record.paragraphs) assert.ok(paragraph.length >= 80);
   }
-  assert.equal(new Set(DREAM_CASES.flatMap(({ paragraphs }) => paragraphs)).size, 12);
+  const paragraphs = DREAM_CASES.flatMap(({ paragraphs }) => paragraphs);
+  assert.equal(new Set(paragraphs).size, paragraphs.length);
   assert.match(DREAM_CASES[1].paragraphs.join(""), /最後の心の扉は開きかけたまま残されていた/);
   assert.match(DREAM_CASES[2].paragraphs.join(""), /霊夢に協力を求める/);
   assert.match(DREAM_CASES[2].paragraphs.join(""), /マキャベル.{0,12}融和/);
@@ -33,6 +34,17 @@ test("six chapter cases retain their titles and distinct substantive summaries",
   assert.match(finalCase, /怪作奪還|怪作を迎えに行く/);
   assert.match(finalCase, /まだ|準備|これから/);
   assert.doesNotMatch(finalCase, /元の現実(?:へ|に)帰還を果た|救出を完了|死者全員が帰還/);
+});
+
+test("the latest revolt scenes remain preparations, not a completed rescue or revival", () => {
+  const finalCase = DREAM_CASES[5].paragraphs.join("");
+  for (const scene of ["橙", "藍", "小指", "神奈子", "諏訪子", "朝食", "妖夢", "毛布", "狗瓦", "こいし", "指先"]) {
+    assert.ok(finalCase.includes(scene), scene);
+  }
+  assert.match(finalCase, /怪作を迎えに行く出発を前に/);
+  assert.match(finalCase, /意識の戻らない狗瓦/);
+  assert.match(finalCase, /指先が、誰にも気づかれないほどかすかに動いた/);
+  assert.doesNotMatch(finalCase, /花火屋(?:が|は).{0,12}(?:復活|蘇生|生き返)|狗瓦(?:が|は).{0,12}(?:目覚め|意識を取り戻)|奪還(?:に成功|を果た|を完了)/);
 });
 
 test("Touhou crossings explain source-specific roles, not invented alliances", () => {

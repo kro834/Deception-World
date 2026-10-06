@@ -99,6 +99,10 @@ try {
     await page.locator('.dream-reader-index a[href="#dream-case-3"]').press("Enter");
     await page.waitForFunction(() => document.getElementById("dream-case-3")?.open);
     await landed(page, "dream-case-3");
+    // The keyboard link completes its scheduled focus before the next link is pressed.
+    await page.waitForFunction(
+      () => document.activeElement === document.querySelector("#dream-case-3 > summary"),
+    );
     assert.equal(await page.locator("#dream-case-3 .dream-reader-preview").isVisible(), false);
     await page.locator("#dream-case-3 .dream-reader-return").press("Enter");
     await page.waitForFunction(() => document.activeElement?.id === "dream-chapter-index");

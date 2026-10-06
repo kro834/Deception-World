@@ -1,6 +1,9 @@
-// World annex (世界と組織, 人物一覧, エピソードの言葉, 用語集, 名台詞).
+// World annex (世界と組織, 人物一覧, エピソードの記録, 用語集, 名台詞).
 // Quotes preserve the owner's story source wording; profiles and definitions
-// summarize facts supported by the story texts supplied on 2026-10-01.
+// summarize facts supported by the story texts supplied on 2026-10-01 and
+// the continuation supplied on 2026-10-06. The latter is reviewed in
+// docs/world-content-source-review-20261006.md; the private export stays out
+// of this repository. Episode 03 remains in progress.
 // Existing quotation provenance is kept in dw-src/provenance.json. Names keep the
 // source's spelling; readings are left out (the source gives conflicting ones).
 
@@ -127,6 +130,10 @@ export const WORLD_LOCATIONS: readonly { name: string; text: string }[] = [
     name: "天守閣",
     text: "シュザが支配する和の異界にそびえる巨大な城。最上階の水面には、彼女に奪われた世界や生命の痕跡が沈み、欲望を書き換えられた者たちが従う。",
   },
+  {
+    name: "悠真の夢",
+    text: "天守閣から逃れた一行がたどり着いた、赤い海の広がる悠真の深層心理。マキャベルゴアナイトメアが悠真を迎え、彼の頼みを受けてジェームズと真守の傷を消す。仲間の生存を確かめた悠真の前に、フェイブルが黒い扉から現れる。",
+  },
 ];
 
 export type WorldCastEntry = {
@@ -220,7 +227,7 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
         text: "無神千桐と行動する捜査一課の警部補。口下手ながら、レディックとして戦闘と負傷者の治療に加わる。周囲が六詠の力に追い詰められるなかでも、彼女の行動と幸運が仲間を支える。",
       },
     ],
-    line: "しろいひと、うるさいからしずかにして",
+    line: "わかった。しろいひと、うるさいからしずかにして",
     to: "/riders/leddic",
   },
   {
@@ -311,6 +318,7 @@ export type WorldEpisodeNote = {
   no: string;
   title: string;
   stage: string;
+  synopsis: readonly string[];
   lines: readonly WorldAnnexLine[];
 };
 export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
@@ -318,6 +326,11 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
     no: "01",
     title: "HIDE-AND-SEEK",
     stage: "碧栄",
+    synopsis: [
+      "荒廃した碧栄で追跡部隊を斬り伏せ、逃走を続ける月城悠真。その背後に、たった一台のバイクが迫る。乗っていたのは、悠真が自ら殺したはずのベル・アレインだった。瓦礫も水没した地下道も越えて追いついたベルは手を差し出すが、悠真はその手を取れず、高架から身を投げて再び逃げ出してしまう。",
+      "サーガの脚本が消失し、ローアの管轄から外れたことを知ったレックス・ロワは、六詠による介入を決める。悠真の前に現れたリームーはフリートへ変身し、ディルクルムの拒絶さえ退けた。変身を解かれた悠真へ刃が迫る寸前、ベルが割って入る。悠真を守る位置を譲らないレルムに、他者が自分の創作物を傷つけることを許さないローアも加勢する。",
+      "戦場には、刑事の無神千桐と在原華火、怪盗の紅城真守、サーガ討伐の任務を帯びたジェームズ・スミスも駆けつける。負傷者の治療を続ける華火のために、千桐たちはフリートへ食い下がった。初対面のライダーたちが三方から同時に仕掛けても、リームーは攻撃を受け流し、翌日の再訪を告げて姿を消す。全員が生き残ったものの、誰も彼を攻略できないまま、次の襲撃が約束されてしまった。",
+    ],
     lines: [
       {
         text: "世界を変える",
@@ -337,6 +350,11 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
     no: "02",
     title: "LEGENDS",
     stage: "レルムズフランス本部",
+    synopsis: [
+      "ローアが荒地に作り出したコンビニで、一行はようやく食事と治療の時間を得る。サーガが街を滅ぼしたという任務の前提を問い直すジェームズに、ローアはアザトの事件について語った。明日にはリームーが戻ってくる。ベルは悠真からターミナルコアとクリスタルコアを預かり、フリートに対抗する道具を取りにREALMSフランス本部へ向かう。",
+      "本部では、ルナのムーンフォームと兄テラのアースフォームが行く手を阻んだ。仲間たちにルナの足止めを託し、先へ急ぐベルだったが、兄は彼の癖を知り尽くしている。その攻防の裏では、未完成のレジェンズルーレットへ戦闘記録が送られていた。テラたちが求めていたのは、ローアの管理から外れたベルを支える新たな足場だった。そこへ、時差を口実に早々とフリートが再襲来する。",
+      "ローアとテラが身を挺して時間を稼ぎ、ベルは床を這ってルーレットへたどり着く。ついにレルムレジェンズへの変身を果たすが、ブーストを使うフリートの猛攻は止まらない。弟をかばったテラが命を落とすと、ベルは兄の死を嘲るリームーへ怒りをぶつけ、レジェンズエッジを振るった。敵の姿が消えたあとも兄は戻らず、残されたドライバーには不適正と変身不可の表示が浮かぶ。",
+    ],
     lines: [
       {
         text: "お帰りなさい、ベル",
@@ -355,7 +373,12 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
   {
     no: "03",
     title: "DECEPTION WORLD",
-    stage: "天守閣",
+    stage: "天守閣〜悠真の夢",
+    synopsis: [
+      "兄を救えず、レジェンズへの変身も封じられたベルを迎え、一行はコンビニで次の戦いに備える。倒されたはずのリームーが神聖なる間へ戻る一方、六詠第三位のシュザはサーガたちを自分のものにしようと動き出していた。悠真が夢の中で新しいコアの設計を進める間に、シュザは夜番のジェームズの前へ現れ、眠っていた真守を天守閣へ連れ去る。目覚めた仲間たちの周囲にも、見知らぬ城下町が広がっていた。",
+      "真守を捜す一行の前に、シュザに従う夜明護尊が立ちはだかる。悠真はヴィンクルムサーガへ変身して応戦するが、神の力を振るう相手を前に苦戦する。天守閣では、シュザがルーラーへ変身し、抗うアルゲノムを圧倒していた。ジェームズと千桐も加勢するものの、ルーラーの攻撃が仲間たちを追い詰める。サイファーの氷槍が降り注ぐなか、華火は瀕死の真守を抱えて脱出を図る。",
+      "出口を塞ぐ夜明護尊へ、ジェームズと悠真が攻撃を重ねる。ローアが管理権限への干渉で作った猶予は、わずか4.2秒。悠真はその隙に夢へ通じる扉を開き、仲間たちを自分の深層心理へ逃がした。赤い海で待っていたマキャベルゴアナイトメアは、悠真の頼みを受け、ジェームズと真守の傷を消す。生きていた仲間の姿に安堵する悠真だったが、現実ではシュザがまだ彼らを狙っている。そこへ黒い扉からフェイブルが現れ、悠真を扉の奥へ連れていく。",
+    ],
     lines: [
       {
         text: "レックスはんには悪いけど、あの子らはうちが貰うわ",
@@ -368,6 +391,14 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
       {
         text: "───もっとも、あんたらは私を愛し.......何を“好き”やと思うかさえも、うちが決めさせてもらうけど",
         by: "シュザ",
+      },
+      {
+        text: "頼む。お前の力が必要なんだ",
+        by: "月城悠真",
+      },
+      {
+        text: "生きていて良かった",
+        by: "月城悠真",
       },
     ],
   },
@@ -421,7 +452,7 @@ export const WORLD_GLOSSARY: readonly WorldGlossaryEntry[] = [
     ],
     said: [
       {
-        text: "やはり管理外の存在からの攻撃は、管理人に対しては弱点の様です。",
+        text: "やはり管理外の存在からの攻撃は、管理人に対しては弱点の様です。\u3000弱点を見つけられて良かったですね、君達",
         by: "リームー",
       },
     ],
@@ -492,6 +523,20 @@ export const WORLD_GLOSSARY: readonly WorldGlossaryEntry[] = [
     ],
     said: [],
   },
+  {
+    term: "マキャベルゴアナイトメア",
+    body: [
+      "悠真の深層心理で一行を迎えた拒絶の悪夢。青い衣と薔薇の光をまとい、身構えたジェームズの変身を解除する。その後は悠真の願いを聞き入れ、ジェームズの裂傷と、ルーラーに倒された真守の重傷を消し去った。",
+    ],
+    said: [],
+  },
+  {
+    term: "夢への扉",
+    body: [
+      "天守閣で追い詰められた悠真が、クリスタルコアの力で開いた深層心理への入口。ローアがシュザの管理権限へ干渉して作った4.2秒の間に、一行は扉を通って現実の戦場から逃れた。逃げ込んだ先では、悠真の内にいる悪夢が仲間の治療を担う。",
+    ],
+    said: [],
+  },
 ];
 
 export const WORLD_QUOTES: readonly WorldAnnexLine[] = [
@@ -534,5 +579,17 @@ export const WORLD_QUOTES: readonly WorldAnnexLine[] = [
   {
     text: "覚悟しときや、ローア───",
     by: "シュザ",
+  },
+  {
+    text: "お前の気持ちが分かったよ、悠真",
+    by: "ベル・アレイン",
+  },
+  {
+    text: "そこまでしても……お前達を死なせるわけにはいかなかった",
+    by: "月城悠真",
+  },
+  {
+    text: "少し来てくれるか、サーガ",
+    by: "フェイブル",
   },
 ];

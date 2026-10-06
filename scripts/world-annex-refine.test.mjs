@@ -311,7 +311,7 @@ test("the sheet stays still paint at the 12px floor", () => {
   }
 });
 
-test("world-annex.tsx keeps every word, name and aria attribute", () => {
+test("world-annex.tsx keeps its labels and accessibility with the approved episode expansion", () => {
   const texts = [...annex.matchAll(/>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
     .map((match) => match[1].replace(/\s+/g, " ").trim())
     .filter((text) => text && !/^[=&|;)(,.:?]/.test(text) && !/=>/.test(text));
@@ -324,6 +324,7 @@ test("world-annex.tsx keeps every word, name and aria attribute", () => {
     "LOCATIONS",
     "舞台",
     "スワイプ・左右キーで切替",
+    "EP.01〜03の展開を含みます。",
     "EPISODE",
     "STAGE",
     "ARCHIVE INDEX",
@@ -353,7 +354,7 @@ test("world-annex.tsx keeps every word, name and aria attribute", () => {
     'aria-label="表示中の名台詞"',
     'aria-label="前の名台詞へ"',
     'aria-label="次の名台詞へ"',
-    'title="エピソードの言葉"',
+    'title="エピソードの記録"',
     'title="用語集"',
     'title="名台詞"',
     'aria-labelledby="wa-contents-title"',
@@ -367,13 +368,13 @@ test("world-annex.tsx keeps every word, name and aria attribute", () => {
     '<ChapterOpener no="06" label="ARCHIVE LOG" />',
     'code="CHARACTERS"',
     'code="WORLD BRIEF"',
-    'code="EPISODE LINES"',
+    'code="EPISODE RECORDS"',
     'code="KEYWORDS"',
     'code="QUOTES"',
     "count={`${pad(WORLD_CAST_ROSTER.length)} PERSONS`}",
     '{ href: "#cast-roster", code: "04", label: "人物一覧" }',
     '{ href: "#world-brief", code: "05", label: "世界と組織" }',
-    '{ href: "#episode-notes", code: "06.1", label: "エピソードの言葉" }',
+    '{ href: "#episode-notes", code: "06.1", label: "エピソードの記録" }',
     '{ href: "#glossary", code: "06.2", label: "用語集" }',
     '{ href: "#quotes", code: "06.3", label: "名台詞" }',
   ]) {

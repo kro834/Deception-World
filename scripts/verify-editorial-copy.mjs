@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -8,11 +8,15 @@ import {
   WORLD_GLOSSARY,
 } from "../src/components/world/world-annex-data.ts";
 import { DREAM_CASES } from "../src/components/dream-chapter/dream-chapter-data.ts";
+import { DREAM_CHRONICLE } from "../src/components/dream-chapter/dream-chapter-extra-data.ts";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
-const output = process.env.AUDIT_OUT || "/tmp/editorial-copy-audit";
+const engine = process.env.PW_ENGINE === "webkit" ? "webkit" : "chromium";
+const output = process.env.AUDIT_OUT || `/tmp/editorial-copy-audit-${engine}`;
 await mkdir(output, { recursive: true });
-const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
+const browser = await (engine === "webkit" ? webkit : chromium).launch(
+  engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
+);
 
 async function assertReadable(page, selector) {
   const failures = await page.locator(selector).evaluateAll((nodes) =>
@@ -39,7 +43,7 @@ async function shot(page, selector, path) {
 }
 
 try {
-  for (const width of [375, 390, 1024, 1194]) {
+  for (const width of [320, 390, 768, 1194, 1440]) {
     const context = await browser.newContext({
       viewport: { width, height: 844 },
       hasTouch: true,
@@ -73,7 +77,12 @@ try {
       assert.deepEqual(await article.locator(":scope > .wa-prose").allTextContents(), entry.body);
     }
     for (const [index, episode] of WORLD_EPISODE_NOTES.entries()) {
-      const text = await page.locator(".wa-episodes > li").nth(index).textContent();
+      const record = page.locator(".wa-episodes > li").nth(index);
+      assert.deepEqual(
+        await record.locator(".wa-episode-synopsis > p").allTextContents(),
+        episode.synopsis,
+      );
+      const text = await record.textContent();
       for (const { text: line, by } of episode.lines) {
         assert.ok(text.includes(line) && text.includes(by));
       }
@@ -91,6 +100,7 @@ try {
     await shot(page, "#world-brief", `${output}/world-${width}-brief.png`);
     await assertReadable(page, "#world-brief .wa-prose");
     await shot(page, "#episode-notes", `${output}/world-${width}-episodes.png`);
+    await assertReadable(page, "#episode-notes .wa-prose");
     await assertReadable(page, "#episode-notes blockquote p");
     await shot(page, "#glossary", `${output}/world-${width}-glossary.png`);
     await assertReadable(page, "#glossary .wa-prose");
@@ -115,6 +125,29 @@ try {
       if (episode.no === "5") await shot(page, record, `${output}/dream-${width}-case5.png`);
       await page.keyboard.press("Space");
     }
+    const chronicle = page.locator("#dream-chronicle-case-5");
+    await chronicle.locator("summary").scrollIntoViewIfNeeded();
+    await chronicle.locator("summary").press("Enter");
+    assert.equal(await chronicle.getAttribute("open"), "");
+    const events = DREAM_CHRONICLE.filter(({ case: no }) => no === "5");
+    assert.equal(await chronicle.locator(".dream-chronicle-item").count(), events.length);
+    for (const [index, event] of events.entries()) {
+      if (event.no <= 40) continue;
+      const entry = chronicle.locator(".dream-chronicle-item").nth(index);
+      assert.equal(await entry.locator("h3").textContent(), event.title.text);
+      const text = await entry.locator(".dream-chronicle-body").textContent();
+      for (const passage of event.segments ?? [{ text: event.text }]) {
+        assert.ok(text.includes(passage.text), `event ${event.no}: source passage is displayed`);
+      }
+      await entry.scrollIntoViewIfNeeded();
+      await assertReadable(
+        page,
+        `#dream-chronicle-case-5 .dream-chronicle-item:nth-child(${index + 1}) p`,
+      );
+    }
+    await shot(page, chronicle, `${output}/dream-${width}-latest-events.png`);
+    await chronicle.locator("summary").press("Space");
+    assert.equal(await chronicle.getAttribute("open"), null);
     assert.deepEqual(errors, []);
     await context.close();
     console.log(
