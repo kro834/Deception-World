@@ -1,1 +1,1 @@
-archives
+# Build inputs must remain available for archive regeneration and release gates.
