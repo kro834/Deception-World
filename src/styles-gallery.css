@@ -76,7 +76,7 @@
 .gallery-footer p span {
   color: var(--gallery-muted);
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.23em;
 }
@@ -128,7 +128,7 @@
 .gallery-eyebrow {
   margin: 0;
   color: var(--gallery-brass);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.27em;
   line-height: 1.6;
@@ -192,7 +192,7 @@
   gap: 12px;
   margin: 52px 0 0;
   color: #928b80;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.22em;
 }
 
@@ -272,7 +272,7 @@
   flex: none;
   color: var(--gallery-brass);
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
 }
 
@@ -406,7 +406,7 @@
 
 .gallery-filters button span {
   color: #9c907c;
-  font-size: 10px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -421,20 +421,37 @@
 }
 
 .gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-  column-gap: clamp(20px, 3vw, 42px);
-  row-gap: clamp(44px, 6vw, 78px);
+  /* Justified rows (2026-10-07): each work's width follows its own aspect
+     ratio (--gallery-ar, set per work), so every row fills the measure with
+     no holes and the numbered order 001-069 stays the reading order. The
+     last row keeps its natural size (the spacer below absorbs the rest). */
+  --gallery-row: clamp(190px, 22vw, 320px);
+  /* The mat round every work: the same on all four sides. */
+  --gallery-mat: clamp(11px, 1.65vw, 22px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: clamp(16px, 2vw, 30px);
+  row-gap: clamp(34px, 4.4vw, 60px);
+}
+
+.gallery-grid::after {
+  flex: 999 1 0;
+  content: "";
 }
 
 .gallery-work {
   min-width: 0;
   margin: 0;
+  /* The image, not the frame, takes the row height: the basis adds the mat
+     and the frame's 1px edge, and the free space is shared by aspect ratio,
+     so every image in a row ends at the same height. */
+  flex: var(--gallery-ar, 1) 1
+    calc(var(--gallery-ar, 1) * var(--gallery-row) + 2 * var(--gallery-mat) + 2px);
 }
 
 .gallery-work-wide {
-  grid-column: span 2;
+  grid-column: auto;
 }
 
 .gallery-work-open {
@@ -447,10 +464,10 @@
 .gallery-work-frame {
   position: relative;
   display: grid;
-  min-height: 210px;
-  aspect-ratio: 0.95;
+  min-height: 0;
+  /* The image sets the frame's height, so the mat is even on every side. */
   place-items: center;
-  padding: clamp(11px, 1.65vw, 22px);
+  padding: var(--gallery-mat);
   overflow: hidden;
   border: 1px solid rgb(212 191 153 / 0.33);
   background:
@@ -471,14 +488,11 @@
   pointer-events: none;
 }
 
-.gallery-work-wide .gallery-work-frame {
-  aspect-ratio: 1.95;
-}
-
 .gallery-work-frame img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: var(--gallery-ar, auto);
   object-fit: contain;
   object-position: center;
   transition:
@@ -498,7 +512,7 @@
   border: 1px solid rgb(229 210 174 / 0.36);
   background: rgb(15 14 12 / 0.88);
   color: #e7d7b9;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.07em;
   opacity: 0;
   transform: translateY(4px);
@@ -543,7 +557,7 @@
   padding-top: 4px;
   color: var(--gallery-brass);
   font-family: var(--gallery-serif);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
 }
@@ -562,7 +576,7 @@
 .gallery-work figcaption p {
   margin: 5px 0 0;
   color: #968e80;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
 }
 
@@ -593,7 +607,7 @@
   align-items: center;
   gap: 9px;
   color: #c9b890;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   transition: color 180ms ease;
 }
@@ -663,7 +677,7 @@
 .gallery-storage-note {
   margin: 6px 0 0;
   color: #aba08b;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 .gallery-title-editor {
@@ -891,12 +905,8 @@ html[data-route-cover] .gallery-arrival {
   }
 
   .gallery-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 26px;
-  }
-
-  .gallery-work-wide {
-    grid-column: span 2;
+    --gallery-row: clamp(180px, 28vw, 260px);
+    column-gap: 20px;
   }
 }
 
@@ -913,7 +923,7 @@ html[data-route-cover] .gallery-arrival {
   }
 
   .gallery-brand span {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0.16em;
   }
 
@@ -922,7 +932,7 @@ html[data-route-cover] .gallery-arrival {
   }
 
   .gallery-topbar-actions > a {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.02em;
   }
 
@@ -998,26 +1008,19 @@ html[data-route-cover] .gallery-arrival {
     min-height: 44px;
     gap: 6px;
     padding-inline: 11px;
-    font-size: 11px;
+    font-size: 12px;
+  }
+
+  /* Phones: two portraits share a row, a landscape work takes its own. */
+  .gallery-grid {
+    /* Two portraits share a row from 320px up. */
+    --gallery-row: clamp(150px, 46vw, 200px);
+    column-gap: 12px;
+    row-gap: 30px;
   }
 
   .gallery-grid {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 37px;
-  }
-
-  .gallery-work-wide {
-    grid-column: auto;
-  }
-
-  .gallery-work-frame {
-    min-height: 200px;
-    aspect-ratio: 0.8;
-    padding: 14px;
-  }
-
-  .gallery-work-wide .gallery-work-frame {
-    aspect-ratio: 1.45;
+    --gallery-mat: 8px;
   }
 
   .gallery-work figcaption {
@@ -1051,7 +1054,7 @@ html[data-route-cover] .gallery-arrival {
   }
 
   .gallery-count {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .gallery-viewer {
@@ -1066,7 +1069,7 @@ html[data-route-cover] .gallery-arrival {
 
   .gallery-viewer-footer button {
     padding-inline: 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
