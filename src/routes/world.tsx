@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { WorldHome } from "@/components/world/world-home";
+import { validateInquirySearch } from "@/lib/inquiry-guides";
 import {
   createWorldHead,
   PICKUP_CINEMA_STYLESHEET_LINK,
@@ -28,6 +29,7 @@ const MIRAGE_FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Michroma&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%2F-.%3A%2B%23%25%26%C2%B7%7C%3C%3E%20";
 
 export const Route = createFileRoute("/world")({
+  validateSearch: validateInquirySearch,
   component: WorldHome,
   head: () => {
     const head = createWorldHead({

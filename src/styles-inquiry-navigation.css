@@ -1,0 +1,133 @@
+/* Kept on the left: the movable Zeus control starts on the right. */
+.inquiry-navigation {
+  --inquiry-accent: #ecc991;
+  position: fixed;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 70;
+  color: #f4eee2;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: left;
+}
+.inquiry-navigation[data-tone="blue"] {
+  --inquiry-accent: #a0dcea;
+}
+.inquiry-navigation > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1px solid var(--inquiry-accent);
+  border-radius: 4px;
+  background: #101a23;
+  box-shadow: 0 6px 25px #0008;
+  color: var(--inquiry-accent);
+  cursor: pointer;
+  list-style: none;
+}
+.inquiry-navigation > summary::-webkit-details-marker {
+  display: none;
+}
+.inquiry-navigation small {
+  font-variant-numeric: tabular-nums;
+}
+.inquiry-navigation-panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  width: min(350px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  box-sizing: border-box;
+  max-height: min(540px, calc(100svh - 180px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  border: 1px solid #87949a;
+  border-top: 3px solid var(--inquiry-accent);
+  border-radius: 4px;
+  background: #101a23;
+  box-shadow: 0 8px 32px #000a;
+}
+.inquiry-navigation-panel h2 {
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 8px 0;
+  text-wrap: pretty;
+}
+.inquiry-navigation-panel p {
+  margin: 8px 0 14px;
+}
+.inquiry-navigation-panel .inquiry-navigation-label {
+  color: var(--inquiry-accent);
+  font-size: 12px;
+  margin: 0;
+}
+.inquiry-navigation-panel nav {
+  display: grid;
+  gap: 8px;
+}
+.inquiry-navigation-panel a {
+  display: grid;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #87949a60;
+  border-radius: 3px;
+  color: #f4eee2;
+  text-decoration: none;
+}
+.inquiry-navigation-panel a span {
+  color: var(--inquiry-accent);
+  font-size: 12px;
+}
+.inquiry-navigation-panel a strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.inquiry-navigation-panel a:hover {
+  background: #ffffff0c;
+}
+.inquiry-navigation-panel .inquiry-navigation-return {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.inquiry-navigation-panel .inquiry-navigation-note {
+  color: #b2c0ca;
+  font-size: 12px;
+}
+.inquiry-navigation-panel button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #87949a;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.inquiry-navigation :focus-visible {
+  outline: 2px solid var(--inquiry-accent);
+  outline-offset: 3px;
+}
+html[data-loading="true"] .inquiry-navigation,
+html[data-dialog-open] .inquiry-navigation,
+body:has(.side-panel[data-open="true"]) .inquiry-navigation {
+  visibility: hidden;
+}
+@media (forced-colors: active) {
+  .inquiry-navigation {
+    --inquiry-accent: LinkText;
+  }
+  .inquiry-navigation > summary,
+  .inquiry-navigation-panel {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+  }
+  .inquiry-navigation-panel a {
+    color: LinkText;
+  }
+}
