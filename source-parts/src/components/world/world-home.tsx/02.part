@@ -492,4 +492,3 @@ export function WorldHome() {
     riderTabRef.current = returnIndex;
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
-  }, []);

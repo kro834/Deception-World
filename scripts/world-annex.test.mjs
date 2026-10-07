@@ -27,15 +27,7 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // WorldAtmosphere and shared name-break markup, plus the source-led
   // synopsis expansion requested on 2026-10-06. Fixed columns, records,
   // artwork and displayed spelling remain pinned.
-  // Reviewed 2026-10-07: the owner requested a Blender-rendered entrance.
-  // Remove only that exact decorative node and hero marker to keep the old
-  // content/layout fingerprint rather than blessing unrelated markup edits.
-  const beforeArchitecture = home
-    .replace(/\s*data-architectural-hero="world"/, "")
-    .replace(/\s*<ArchitecturalBackdrop variant="world" \/>/, "");
-  assert.match(home, /data-architectural-hero="world"/);
-  assert.match(home, /<ArchitecturalBackdrop variant="world" \/>/);
-  assert.deepEqual(worldViewContract(beforeArchitecture), {
+  assert.deepEqual(worldViewContract(home), {
     records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
     markup: "a7c10042924fc85c748b1d9c4e16a52f8cc4090b2663d49090c7d4136a705ceb",
   });

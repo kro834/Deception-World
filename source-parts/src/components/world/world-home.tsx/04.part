@@ -1,3 +1,6 @@
+    const finalReady = loadPoster(finalPoster);
+    if (motionReduced) {
+      void finalReady.then((ready) => {
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (!heroInViewRef.current) {
           cancelPosterShuffle();
@@ -220,14 +223,7 @@
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
-      <section
-        ref={openingHeroRef}
-        className="hero"
-        id="top"
-        data-performance-region
-        data-architectural-hero="world"
-      >
-        <ArchitecturalBackdrop variant="world" />
+      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
         <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span
@@ -493,3 +489,6 @@
                         stroke="currentColor"
                         strokeWidth="1.8"
                       />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="14" height="14">

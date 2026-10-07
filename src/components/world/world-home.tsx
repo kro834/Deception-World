@@ -27,7 +27,6 @@ import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
-import { ArchitecturalBackdrop } from "@/components/cinematic/architectural-backdrop";
 
 const POSTERS = [
   {
@@ -1706,14 +1705,7 @@ export function WorldHome() {
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
-      <section
-        ref={openingHeroRef}
-        className="hero"
-        id="top"
-        data-performance-region
-        data-architectural-hero="world"
-      >
-        <ArchitecturalBackdrop variant="world" />
+      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
         <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
           {previous ? (
             <span

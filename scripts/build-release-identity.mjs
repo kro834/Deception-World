@@ -20,11 +20,6 @@ const paths = [
   "/exhibition-studio/studio-light.hdr",
   "/exhibition-studio/plaster-normal.png",
   "/exhibition-studio/plaster-roughness.png",
-  "/architectural-heroes/manifest.json",
-  "/architectural-heroes/world-1280.webp",
-  "/architectural-heroes/world-2560.webp",
-  "/architectural-heroes/dream-1280.webp",
-  "/architectural-heroes/dream-2560.webp",
 ];
 const assets = paths.map((path) => ({
   path,

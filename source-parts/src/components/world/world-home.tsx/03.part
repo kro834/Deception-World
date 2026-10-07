@@ -1,3 +1,4 @@
+  }, []);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -491,6 +492,3 @@
       { length: 9 },
       (_, index) => previewPool[index % previewPool.length],
     );
-    const finalReady = loadPoster(finalPoster);
-    if (motionReduced) {
-      void finalReady.then((ready) => {

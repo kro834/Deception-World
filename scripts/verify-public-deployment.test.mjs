@@ -64,11 +64,6 @@ test("public verification hashes Blender frame and exhibition assets and rejects
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
-    "/architectural-heroes/manifest.json",
-    "/architectural-heroes/world-1280.webp",
-    "/architectural-heroes/world-2560.webp",
-    "/architectural-heroes/dream-1280.webp",
-    "/architectural-heroes/dream-2560.webp",
   ];
   const bytes = new Map(
     paths.map((path) => [path, readFileSync(new URL(`../public${path}`, import.meta.url))]),
@@ -112,18 +107,12 @@ test("public verification hashes Blender frame and exhibition assets and rejects
     "/exhibition-studio/unknown.hdr",
     "/exhibition-studio/studio-light.hdr/extra",
     "/exhibition-studio/../secret.png",
-    "/architectural-heroes/unknown.webp",
-    "/architectural-heroes/world-2560.webp/extra",
-    "/architectural-heroes/../secret.webp",
   ]) {
     const invalid = await run({ unknown });
     assert.equal(invalid.report.ok, false, unknown);
     assert.equal(
       invalid.seen.some(
-        (path) =>
-          path.startsWith("/ultra-materials/") ||
-          path.startsWith("/exhibition-studio/") ||
-          path.startsWith("/architectural-heroes/"),
+        (path) => path.startsWith("/ultra-materials/") || path.startsWith("/exhibition-studio/"),
       ),
       false,
     );
@@ -298,11 +287,6 @@ test("new release identity requires shared gallery readiness and preserves artwo
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
-    "/architectural-heroes/manifest.json",
-    "/architectural-heroes/world-1280.webp",
-    "/architectural-heroes/world-2560.webp",
-    "/architectural-heroes/dream-1280.webp",
-    "/architectural-heroes/dream-2560.webp",
   ]) {
     const asset = written.assets.find((item) => item.path === path);
     assert.ok(asset, `${path} must be attested before production promotion`);

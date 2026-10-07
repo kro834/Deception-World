@@ -78,7 +78,7 @@ const scoped = (part) =>
   part.startsWith(`html[data-world-effects="economy"] ${ROOT}`) ||
   part.startsWith(`${GATE} ${ROOT}`);
 
-test("the refine sheet stays after pickup cinema and before Mirage and the final architectural skin", () => {
+test("the refine sheet sits after the pickup cinema sheet and before the Mirage face, which stays last", () => {
   assert.match(route, /import worldRefineCssUrl from "@\/styles-world-refine\.css\?url";/);
   const links = route.slice(route.search(/stylesheetLinks:\s*\[/));
   const order = [
@@ -86,7 +86,6 @@ test("the refine sheet stays after pickup cinema and before Mirage and the final
     "href: worldRefineCssUrl",
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
-    "href: architecturalHeroesCssUrl",
   ].map((needle) => links.indexOf(needle));
   assert.ok(
     order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])),
@@ -94,7 +93,7 @@ test("the refine sheet stays after pickup cinema and before Mirage and the final
   );
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: architecturalHeroesCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
   );
   // Never shared: the dossiers, Dream and the special sites do not get it.
   assert.doesNotMatch(read("src/lib/world-head.ts"), /refine/i);

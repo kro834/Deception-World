@@ -21,7 +21,6 @@ import worldRefineCssUrl from "@/styles-world-refine.css?url";
 import worldExhibitionCssUrl from "@/styles-world-exhibition.css?url";
 import worldPhasesCssUrl from "@/styles-world-phases.css?url";
 import worldAtmosphereCssUrl from "@/styles-world-atmosphere.css?url";
-import architecturalHeroesCssUrl from "@/styles-architectural-heroes.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -58,7 +57,6 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldAtmosphereCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
-        { rel: "stylesheet", href: architecturalHeroesCssUrl },
       ],
     });
     return {

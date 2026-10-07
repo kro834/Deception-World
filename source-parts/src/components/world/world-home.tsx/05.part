@@ -1,6 +1,3 @@
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
                       <path
                         d="M8 10V8a4 4 0 0 1 7.5-2"
                         fill="none"
@@ -493,3 +490,5 @@
               </div>
               <SlideOpenControl
                 ariaControls="world-column-pickup"
+                ariaLabel="世界観コラムのピックアップを開く"
+                buttonRef={pickupBtnRef}
