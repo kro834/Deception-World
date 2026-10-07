@@ -224,6 +224,21 @@ async function sharedGalleryReport({
   return { report, seen };
 }
 
+test("shared gallery release gate accepts each lossless upload format with the exact signed object path", async () => {
+  for (const format of ["jpeg", "png", "webp"]) {
+    const collection = galleryCollection();
+    collection.posts[0].url =
+      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${format}?token=public-image-token`;
+    assert.equal((await sharedGalleryReport({ collection })).report.ok, true, format);
+  }
+  for (const suffix of ["jpg", "gif", "svg", "png/extra", "png%2fextra"]) {
+    const collection = galleryCollection();
+    collection.posts[0].url =
+      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${suffix}?token=public-image-token`;
+    assert.equal((await sharedGalleryReport({ collection })).report.ok, false, suffix);
+  }
+});
+
 test("new release identity requires shared gallery readiness and preserves artwork identity", () => {
   const source = readFileSync(
     new URL("./build-release-identity.mjs", import.meta.url),

@@ -184,7 +184,10 @@ function validPublicGalleryCollection(collection, storageOrigin) {
         image.protocol !== "https:" ||
         image.username ||
         image.password ||
-        image.pathname !== `/storage/v1/object/sign/gallery-images/${post.id}.webp` ||
+        !["jpeg", "png", "webp"].some(
+          (format) =>
+            image.pathname === `/storage/v1/object/sign/gallery-images/${post.id}.${format}`,
+        ) ||
         !image.searchParams.get("token")
       )
         return false;
