@@ -20,17 +20,27 @@ body:has(.gallery-page) {
   background-color: #171614;
 }
 
-/* Outside the clipped/isolation-scoped gallery. Safari's status-bar and
-   rubber-band area must never sample the artwork through a filtered layer. */
+/* Server-rendered outside the gallery paint clip so Safari can sample an
+   opaque fixed viewport edge before hydration and the first scroll. */
 .gallery-statusbar-cover {
   position: fixed;
   z-index: 41;
-  top: -96px;
+  top: 0;
   right: 0;
   left: 0;
-  height: calc(96px + max(16px, env(safe-area-inset-top, 0px)));
+  height: max(16px, env(safe-area-inset-top, 0px));
   background: #171614;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   pointer-events: none;
+}
+
+/* Extend paint, not the fixed box geometry, into rubber-band overscroll. */
+.gallery-statusbar-cover::before {
+  position: absolute;
+  inset: -96px 0 100%;
+  background: #171614;
+  content: "";
 }
 
 .gallery-page {

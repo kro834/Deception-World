@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { createPortal } from "react-dom";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -86,7 +85,6 @@ export function GalleryPage() {
   const [linkNotice, setLinkNotice] = useState<"waiting" | "error" | "missing" | "invalid" | null>(
     null,
   );
-  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
     "all",
@@ -187,7 +185,6 @@ export function GalleryPage() {
   }, [allArtworks]);
 
   useEffect(() => {
-    setMounted(true);
     const load = () => {
       try {
         setLegacyTitles(readGalleryTitles(window.localStorage));
@@ -890,10 +887,8 @@ export function GalleryPage() {
     }
   };
 
-  return (
+  const exhibition = (
     <div id="gallery-top" className="world gallery-page" data-gallery-page="true">
-      {mounted &&
-        createPortal(<div className="gallery-statusbar-cover" aria-hidden="true" />, document.body)}
       {arriving && (
         <div className="gallery-arrival">
           <GalleryCurtain phase="revealing" />
@@ -1637,5 +1632,12 @@ export function GalleryPage() {
         )}
       </dialog>
     </div>
+  );
+  return (
+    <>
+      {/* Keep the opaque viewport edge in the initial HTML, outside the gallery paint clip. */}
+      <div className="gallery-statusbar-cover" aria-hidden="true" />
+      {exhibition}
+    </>
   );
 }

@@ -144,11 +144,17 @@ test("status-bar cover lives outside the clipped gallery and neither solid heade
     new URL("../src/components/gallery/gallery-page.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(page, /createPortal\([\s\S]*?gallery-statusbar-cover[\s\S]*?document.body/);
+  assert.match(
+    page,
+    /<>[\s\S]*?<div className="gallery-statusbar-cover" aria-hidden="true" \/>\s*\{exhibition\}\s*<\/>/,
+  );
+  assert.doesNotMatch(page, /createPortal/);
   assert.match(
     css,
-    /\.gallery-statusbar-cover \{[\s\S]*?position: fixed;[\s\S]*?top: -96px;[\s\S]*?background: #171614;/,
+    /\.gallery-statusbar-cover \{[\s\S]*?position: fixed;[\s\S]*?top: 0;[\s\S]*?background: #171614;/,
   );
+  assert.match(css, /height: max\(16px, env\(safe-area-inset-top, 0px\)\);/);
+  assert.match(css, /\.gallery-statusbar-cover::before \{[\s\S]*?inset: -96px 0 100%;/);
   const header = css.match(/\.gallery-topbar \{[\s\S]*?\n\}/)[0];
   assert.match(header, /background: #171614;/);
   assert.match(header, /backdrop-filter: none;/);
