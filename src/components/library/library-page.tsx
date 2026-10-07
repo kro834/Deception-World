@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "@/components/world/use-world-mode";
@@ -48,7 +49,13 @@ function EntryCard({
     </article>
   );
 }
-export function LibraryPage() {
+export function LibraryPage({
+  guide,
+  onGuideChange,
+}: {
+  guide?: string;
+  onGuideChange: (id: string) => void;
+}) {
   useWorldMode();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -92,6 +99,7 @@ export function LibraryPage() {
               本文から検索 <span aria-hidden="true">↗</span>
             </GuardedLink>
           </section>
+          <LibraryInquiry guide={guide} onGuideChange={onGuideChange} />
           <section className="library-browser" aria-labelledby="library-browser-title">
             <div className="library-browser-heading">
               <h2 id="library-browser-title">資料を探す</h2>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { validateInquirySearch } from "@/lib/inquiry-guides";
 import { ExtremeSaga } from "@/components/extreme-saga/extreme-saga";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
@@ -15,6 +16,7 @@ import extremeEditionCssUrl from "@/styles-extreme-edition.css?url";
 import extremeOverdriveCssUrl from "@/styles-extreme-overdrive.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
+  validateSearch: validateInquirySearch,
   component: ExtremeSaga,
   head: () => ({
     meta: [

@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { validateInquirySearch } from "@/lib/inquiry-guides";
 import { ManagerStub, REX_LOI } from "@/components/world/manager-stub";
 import { DOSSIER_STYLESHEET_LINKS, createWorldHead } from "@/lib/world-head";
 
 export const Route = createFileRoute("/managers/rex-loi")({
+  validateSearch: validateInquirySearch,
   component: () => <ManagerStub profile={REX_LOI} />,
   head: () =>
     createWorldHead({

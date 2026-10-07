@@ -9,6 +9,8 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { LibraryVisitTracker } from "@/components/library/library-controls";
+import { InquiryNavigation } from "@/components/library/inquiry-navigation";
+import inquiryNavigationCss from "@/styles-inquiry-navigation.css?url";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
@@ -151,6 +153,7 @@ export const Route = createRootRoute({
       // Entry calls must be available on the departure route as well.
       { rel: "stylesheet", href: rexonanceCallsCss },
       { rel: "stylesheet", href: viewportChromeCss },
+      { rel: "stylesheet", href: inquiryNavigationCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -191,6 +194,7 @@ function RootDocument() {
               <PressFeedback />
               <LibrarySession />
               <Outlet />
+              <InquiryNavigation />
               <GalleryStickerWarmup />
             </ZeusButtonProvider>
           </LoadGateProvider>

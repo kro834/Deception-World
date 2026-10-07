@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { validateInquirySearch } from "@/lib/inquiry-guides";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
@@ -10,8 +11,9 @@ import formArchiveCssUrl from "@/styles-form-archive.css?url";
 type ArchiveKind = "saga" | "realm";
 
 export const Route = createFileRoute("/form-archive")({
-  validateSearch: (search: Record<string, unknown>): { archive?: ArchiveKind } => ({
-    archive: search.archive === "realm" ? "realm" : undefined,
+  validateSearch: (search: Record<string, unknown>) => ({
+    ...validateInquirySearch(search),
+    archive: search.archive === "realm" ? ("realm" as const) : undefined,
   }),
   component: FormArchive,
   head: () => ({
