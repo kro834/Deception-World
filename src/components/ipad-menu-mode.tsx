@@ -17,7 +17,7 @@ export function IpadMenuMode() {
   return null;
 }
 
-/** Optional escape hatch: only an identified iPad sees this setting. */
+/** iPad defaults to compact navigation; an explicit personal OFF is retained. */
 export function IpadMenuToggle() {
   const descriptionId = useId();
   const mode = useSyncExternalStore(
@@ -40,7 +40,7 @@ export function IpadMenuToggle() {
         <i aria-hidden="true">{enabled ? "ON" : "OFF"}</i>
       </button>
       <p id={descriptionId} className="ipad-menu-description">
-        上部が透ける場合、スクロール中は小さなメニューボタンで操作します。このiPadに保存されます。
+        iPadでは自動でオンになります。上部のバーが画面外に出ると、小さなメニューボタンに変わります。設定はこのiPadに保存されます。
       </p>
     </div>
   );

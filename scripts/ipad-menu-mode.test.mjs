@@ -11,47 +11,100 @@ import {
   watchIpadMenuMode,
 } from "../src/lib/ipad-menu-mode.js";
 
-test("compact menu is opt-in and storage denial retains only the in-memory choice", () => {
-  for (const value of [null, "0", "true", "invalid"]) {
-    assert.equal(readIpadMenuPreference({ getItem: () => value }), false);
+test("iPad defaults ON for missing/invalid preferences and retains an explicit OFF", () => {
+  for (const value of [null, "1", "true", "invalid"]) {
+    assert.equal(readIpadMenuPreference({ getItem: () => value }), true);
   }
-  assert.equal(readIpadMenuPreference({ getItem: () => "1" }), true);
+  assert.equal(readIpadMenuPreference({ getItem: () => "0" }), false);
   const denied = {
     getItem: () => {
       throw new Error("Denied");
     },
   };
-  assert.equal(readIpadMenuPreference(denied), false);
-  assert.equal(readIpadMenuPreference(denied, true), true);
+  assert.equal(readIpadMenuPreference(denied), true);
+  assert.equal(readIpadMenuPreference(denied, false), false);
   assert.equal(getIpadMenuServerSnapshot(), "unavailable");
 });
 
-test("hysteresis keeps the button stable near the threshold and while a modal is locked", () => {
-  assert.equal(getIpadMenuScrolled(false, 80), false);
-  assert.equal(getIpadMenuScrolled(false, 81), true);
-  assert.equal(getIpadMenuScrolled(true, 17), true);
-  assert.equal(getIpadMenuScrolled(true, 16), false);
-  assert.equal(getIpadMenuScrolled(true, 0, true), true);
-  assert.equal(getIpadMenuScrolled(false, 300, true), false);
-  assert.equal(getIpadMenuScrolled(true, Number.NaN), true);
+test("the trigger changes exactly when measured chrome completely exits, except while locked", () => {
+  for (const height of [76, 78, 139, 191]) {
+    assert.equal(getIpadMenuScrolled(false, height - 0.1, height), false);
+    assert.equal(getIpadMenuScrolled(false, height, height), true);
+    assert.equal(getIpadMenuScrolled(true, height - 0.1, height), false);
+  }
+  assert.equal(getIpadMenuScrolled(false, 0, 0), false);
+  assert.equal(getIpadMenuScrolled(false, -10, 76), false);
+  assert.equal(getIpadMenuScrolled(true, 0, 76, true), true);
+  assert.equal(getIpadMenuScrolled(false, 300, 76, true), false);
+  assert.equal(getIpadMenuScrolled(true, Number.NaN, 76), true);
+  assert.equal(getIpadMenuScrolled(false, 300, Number.NaN), false);
 });
 
-function fixture({ ipad = true, preference = "1", denied = false } = {}) {
-  const attrs = new Map(ipad ? [["data-ipad-viewport", "contained"]] : []);
+function fixture({ ipad = true, preference = "1", denied = false, route = "world" } = {}) {
+  const attrs = new Map([
+    ...(ipad ? [["data-ipad-viewport", "contained"]] : []),
+    ["data-viewport-chrome", route],
+  ]);
   const listeners = new Map();
   const frames = new Map();
   const observations = [];
+  const variables = new Map();
+  const sizeTargets = new Set();
   let sequence = 0;
   let disconnected = false;
+  let treeDisconnected = false;
+  let sizeDisconnected = false;
+  let measurements = 0;
+  let writes = 0;
   let notifyStyle;
+  let notifyTree;
+  let notifyResize;
+  const sizes = { header: 76, nav: 63 };
+  const header = {
+    isConnected: true,
+    get offsetHeight() {
+      measurements++;
+      return sizes.header;
+    },
+  };
+  const nav = {
+    isConnected: true,
+    get offsetHeight() {
+      measurements++;
+      return sizes.nav;
+    },
+  };
+  const elements = new Map([
+    [".topbar", header],
+    [".gallery-topbar", header],
+    [".dream-site-header", header],
+    [".dream-chapter-nav", nav],
+  ]);
   const root = {
-    style: { overflow: "" },
+    style: {
+      overflow: "",
+      getPropertyValue: (name) => variables.get(name) ?? "",
+      setProperty: (name, value) => {
+        writes++;
+        variables.set(name, value);
+      },
+      removeProperty: (name) => variables.delete(name),
+    },
     getAttribute: (key) => attrs.get(key) ?? null,
     setAttribute: (key, value) => attrs.set(key, value),
     removeAttribute: (key) => attrs.delete(key),
   };
-  const doc = { documentElement: root, body: { style: { position: "", top: "" } } };
-  const storage = { getItem: () => preference };
+  const doc = {
+    documentElement: root,
+    body: { style: { position: "", top: "" } },
+    querySelector: (selector) => elements.get(selector) ?? null,
+  };
+  const storage = {
+    getItem: () => preference,
+    setItem: (_, value) => {
+      preference = value;
+    },
+  };
   const win = {
     scrollY: 100,
     get localStorage() {
@@ -68,13 +121,30 @@ function fixture({ ipad = true, preference = "1", denied = false } = {}) {
     cancelAnimationFrame: (id) => frames.delete(id),
     MutationObserver: class {
       constructor(callback) {
-        notifyStyle = callback;
+        this.callback = callback;
       }
       observe(target, options) {
         observations.push({ target, options });
+        this.tree = Boolean(options.childList);
+        if (this.tree) notifyTree = this.callback;
+        else notifyStyle = this.callback;
       }
       disconnect() {
-        disconnected = true;
+        if (this.tree) treeDisconnected = true;
+        else disconnected = true;
+      }
+    },
+    ResizeObserver: class {
+      constructor(callback) {
+        notifyResize = callback;
+      }
+      observe(target) {
+        sizeTargets.add(target);
+        sizeDisconnected = false;
+      }
+      disconnect() {
+        sizeTargets.clear();
+        sizeDisconnected = true;
       }
     },
   };
@@ -90,11 +160,30 @@ function fixture({ ipad = true, preference = "1", denied = false } = {}) {
     listeners,
     frames,
     observations,
+    variables,
+    elements,
+    sizes,
+    sizeTargets,
     flush,
-    notifyStyle: () => notifyStyle(),
+    notifyStyle: () => notifyStyle([{ target: root, attributeName: "style" }]),
+    notifyRoot: (attributeName) => notifyStyle([{ target: root, attributeName }]),
+    notifyTree: () => notifyTree([{ target: doc.body, type: "childList" }]),
+    notifyResize: () => notifyResize(),
     emit: (type, payload = {}) => win.dispatchEvent({ type, ...payload }),
     get disconnected() {
       return disconnected;
+    },
+    get treeDisconnected() {
+      return treeDisconnected;
+    },
+    get sizeDisconnected() {
+      return sizeDisconnected;
+    },
+    get measurements() {
+      return measurements;
+    },
+    get writes() {
+      return writes;
     },
   };
 }
@@ -105,6 +194,7 @@ test("controller preserves compact state through lock/unlock, batches scrolling 
   f.flush();
   assert.equal(f.attrs.get("data-ipad-menu"), "compact");
   assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.variables.get("--ipad-header-scroll"), "76px");
   assert.deepEqual(f.listeners.get("scroll").options, { passive: true });
   f.doc.body.style.position = "fixed";
   f.win.scrollY = 0;
@@ -114,6 +204,7 @@ test("controller preserves compact state through lock/unlock, batches scrolling 
   assert.equal(f.frames.size, 1);
   f.flush();
   assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.variables.get("--ipad-header-scroll"), "76px");
   f.doc.body.style.position = "";
   f.doc.documentElement.style.overflow = "hidden";
   f.notifyStyle();
@@ -129,14 +220,154 @@ test("controller preserves compact state through lock/unlock, batches scrolling 
   f.flush();
   assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
   assert.deepEqual(
-    f.observations.map(({ options }) => options.attributeFilter),
-    [["style", "data-ipad-viewport"], ["style"]],
+    f.observations
+      .filter(({ options }) => options.attributes)
+      .map(({ options }) => options.attributeFilter),
+    [["style", "data-ipad-viewport", "data-viewport-chrome"], ["style"]],
   );
   f.emit("scroll");
   dispose();
   assert.equal(f.frames.size, 0);
   assert.equal(f.listeners.size, 0);
   assert.equal(f.disconnected, true);
+  assert.equal(f.treeDisconnected, true);
+  assert.equal(f.sizeDisconnected, true);
+});
+
+test("scroll position follows the full header and Dream nav without per-scroll measurement", () => {
+  const f = fixture({ route: "dream" });
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-height"), "76px");
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "139px");
+  assert.equal(f.variables.get("--ipad-header-scroll"), "100px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.sizeTargets.size, 2);
+  const initialMeasurements = f.measurements;
+  for (const scrollY of [125, 138.9, 139, 300, 138, 0, -20]) {
+    f.win.scrollY = scrollY;
+    f.emit("scroll");
+    f.flush();
+    assert.equal(f.attrs.get("data-ipad-menu-scrolled"), String(scrollY >= 139));
+    assert.equal(
+      f.variables.get("--ipad-header-scroll"),
+      `${Math.max(0, Math.min(139, scrollY))}px`,
+    );
+  }
+  assert.equal(f.measurements, initialMeasurements);
+  const initialWrites = f.writes;
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.writes, initialWrites, "the same clamped offset does not rewrite style");
+  f.notifyStyle(); // Our own CSS variables must not schedule another RAF.
+  assert.equal(f.frames.size, 0);
+  dispose();
+});
+
+test("route and responsive geometry changes update the threshold and observer targets", () => {
+  const f = fixture();
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  f.attrs.set("data-viewport-chrome", "dream");
+  f.notifyRoot("data-viewport-chrome");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.sizeTargets.size, 2);
+  f.sizes.header = 90;
+  f.sizes.nav = 100;
+  f.win.scrollY = 160;
+  f.notifyResize();
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "190px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  f.sizes.nav = 40;
+  f.emit("resize");
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "130px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  f.attrs.set("data-viewport-chrome", "gallery");
+  f.emit("dw-ipad-menu-change");
+  f.flush();
+  assert.equal(f.sizeTargets.size, 1);
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "90px");
+  dispose();
+});
+
+test("fast reverse scroll uses the latest offset, and a missing header never invents a threshold", () => {
+  const f = fixture();
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  for (const scrollY of [120, 500, 80, 75]) {
+    f.win.scrollY = scrollY;
+    f.emit("scroll");
+  }
+  assert.equal(f.frames.size, 1);
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.variables.get("--ipad-header-scroll"), "75px");
+  f.elements.delete(".topbar");
+  f.win.scrollY = 500;
+  f.emit("dw-ipad-menu-change");
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "0px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  dispose();
+});
+
+test("a lazy route measures late-mounted chrome without another route or resize event", () => {
+  const f = fixture({ route: "gallery" });
+  const dreamHeader = f.elements.get(".dream-site-header");
+  const dreamNav = f.elements.get(".dream-chapter-nav");
+  f.elements.delete(".dream-site-header");
+  f.elements.delete(".dream-chapter-nav");
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.attrs.set("data-viewport-chrome", "dream");
+  f.notifyRoot("data-viewport-chrome");
+  f.win.scrollY = 40;
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-height"), "0px");
+  assert.equal(f.sizeTargets.size, 0);
+  f.elements.set(".dream-site-header", dreamHeader);
+  f.notifyTree();
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-height"), "76px");
+  assert.equal(f.variables.get("--ipad-header-scroll"), "40px");
+  assert.equal(f.sizeTargets.size, 1);
+  f.elements.set(".dream-chapter-nav", dreamNav);
+  f.notifyTree();
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-exit-distance"), "139px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.sizeTargets.size, 2);
+  const measurements = f.measurements;
+  f.notifyTree(); // Unrelated gallery/modal/text content must not schedule geometry.
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.measurements, measurements);
+  assert.deepEqual(f.observations.find(({ options }) => options.childList).options, {
+    childList: true,
+    subtree: true,
+  });
+  dispose();
+  assert.equal(f.treeDisconnected, true);
+});
+
+test("replacing a mounted header on the same route reconnects geometry observation", () => {
+  const f = fixture();
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  const oldHeader = f.elements.get(".topbar");
+  oldHeader.isConnected = false;
+  const replacement = { offsetHeight: 120, isConnected: true };
+  f.elements.set(".topbar", replacement);
+  f.notifyTree();
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-height"), "120px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.sizeTargets.has(oldHeader), false);
+  assert.equal(f.sizeTargets.has(replacement), true);
+  dispose();
 });
 
 test("storage changes sync without affecting unrelated preferences or non-iPad browsers", () => {
@@ -150,13 +381,26 @@ test("storage changes sync without affecting unrelated preferences or non-iPad b
   f.emit("storage", { key: IPAD_MENU_STORAGE_KEY, newValue: "1" });
   assert.equal(f.attrs.get("data-ipad-menu"), "compact");
   f.emit("storage", { key: null, newValue: null });
-  assert.equal(f.attrs.has("data-ipad-menu"), false);
+  assert.equal(f.attrs.get("data-ipad-menu"), "compact");
+  f.emit("storage", { key: IPAD_MENU_STORAGE_KEY, newValue: "0", storageArea: {} });
+  assert.equal(f.attrs.get("data-ipad-menu"), "compact");
   dispose();
-  for (const options of [{ ipad: false }, { denied: true }, { preference: null }]) {
+  for (const options of [{ ipad: false }, { preference: "0" }]) {
     const other = fixture(options);
     const cleanup = watchIpadMenuMode(other.win, other.doc);
     other.flush();
     assert.equal(other.attrs.has("data-ipad-menu"), false);
+    const measurements = other.measurements;
+    other.emit("scroll");
+    assert.equal(other.frames.size, 0);
+    assert.equal(other.measurements, measurements);
+    cleanup();
+  }
+  for (const options of [{ denied: true }, { preference: null }, { preference: "invalid" }]) {
+    const other = fixture(options);
+    const cleanup = watchIpadMenuMode(other.win, other.doc);
+    other.flush();
+    assert.equal(other.attrs.get("data-ipad-menu"), "compact");
     cleanup();
   }
 });
@@ -169,6 +413,7 @@ test("a denied write preserves both on and off choices through route refreshes",
   globalThis.document = f.doc;
   const dispose = watchIpadMenuMode(f.win, f.doc);
   try {
+    assert.equal(getIpadMenuSnapshot(), "on");
     setIpadMenuMode(true);
     f.flush();
     assert.equal(getIpadMenuSnapshot(), "on");
@@ -182,6 +427,8 @@ test("a denied write preserves both on and off choices through route refreshes",
     f.flush();
     assert.equal(getIpadMenuSnapshot(), "off");
     assert.equal(f.attrs.has("data-ipad-menu-scrolled"), false);
+    assert.equal(f.variables.size, 0);
+    assert.equal(f.attrs.get("data-ipad-menu-preference"), "off");
   } finally {
     dispose();
     if (oldWindow === undefined) delete globalThis.window;
@@ -189,6 +436,42 @@ test("a denied write preserves both on and off choices through route refreshes",
     if (oldDocument === undefined) delete globalThis.document;
     else globalThis.document = oldDocument;
   }
+});
+
+test("an in-memory OFF survives controller remounts when storage is denied", () => {
+  const f = fixture({ denied: true });
+  f.attrs.set("data-ipad-menu-preference", "off");
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu"), false);
+  dispose();
+  const remount = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu"), false);
+  remount();
+});
+
+test("late device detection initializes the default and window resize remains a fallback", () => {
+  const f = fixture({ ipad: false, preference: null });
+  f.win.ResizeObserver = undefined;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.attrs.set("data-ipad-viewport", "contained");
+  f.notifyRoot("data-ipad-viewport");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu"), "compact");
+  assert.equal(f.variables.get("--ipad-header-height"), "76px");
+  f.sizes.header = 120;
+  f.emit("resize");
+  f.flush();
+  assert.equal(f.variables.get("--ipad-header-height"), "120px");
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  f.attrs.delete("data-ipad-viewport");
+  f.notifyRoot("data-ipad-viewport");
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu"), false);
+  assert.equal(f.variables.size, 0);
+  dispose();
 });
 
 test("root has one controller and sidebar toggle is accessible and hydration-safe", () => {
@@ -202,6 +485,7 @@ test("root has one controller and sidebar toggle is accessible and hydration-saf
   assert.match(component, /className="side-panel-link-button ipad-menu-toggle"/);
   assert.match(component, /iPad省スペースメニュー/);
   assert.match(component, /このiPadに保存されます。/);
+  assert.match(component, /iPadでは自動でオンになります。/);
   assert.match(component, /refreshIpadMenuMode\(\), \[pathname\]/);
   assert.doesNotMatch(
     source("src/lib/ipad-menu-mode.js"),

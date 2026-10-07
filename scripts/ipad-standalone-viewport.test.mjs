@@ -4,7 +4,7 @@ import test from "node:test";
 import vm from "node:vm";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "../src/lib/ipad-standalone-viewport.js";
 
-function run(userAgent, maxTouchPoints, standalone, displayMode = false) {
+function run(userAgent, maxTouchPoints, standalone, displayMode = false, preference = null) {
   let content =
     "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content";
   const attributes = {};
@@ -12,6 +12,10 @@ function run(userAgent, maxTouchPoints, standalone, displayMode = false) {
   vm.runInNewContext(IPAD_STANDALONE_VIEWPORT_SCRIPT, {
     window: {
       navigator: { userAgent, maxTouchPoints, standalone },
+      get localStorage() {
+        if (preference === "denied") throw new Error("Storage denied");
+        return { getItem: () => preference };
+      },
       matchMedia: () => ({ matches: displayMode }),
       MutationObserver: class {
         constructor(callback) {
@@ -52,6 +56,7 @@ test("installed iPad reserves the status area, including desktop-mode UA", () =>
     assert.match(result.content, /interactive-widget=resizes-content/);
     assert.equal(result.attributes["data-ipad-standalone-viewport"], "contained");
     assert.equal(result.attributes["data-ipad-viewport"], "contained");
+    assert.equal(result.attributes["data-ipad-menu"], "compact");
     assert.match(result.navigate(), /viewport-fit=contain/);
   }
   assert.match(run("Macintosh", 5, undefined, true).content, /viewport-fit=contain/);
@@ -79,8 +84,21 @@ test("iPhone, Mac and Android retain the existing viewport", () => {
     ["Macintosh", 0, true],
     ["Android", 5, true],
   ]) {
-    assert.match(run(...profile).content, /viewport-fit=cover/);
+    const result = run(...profile);
+    assert.match(result.content, /viewport-fit=cover/);
+    assert.equal(result.attributes["data-ipad-menu"], undefined);
   }
+});
+
+test("the prepaint compact default preserves explicit OFF and tolerates denied storage", () => {
+  for (const value of [null, "1", "invalid", "denied"]) {
+    const result = run("Macintosh", 5, true, false, value);
+    assert.equal(result.attributes["data-ipad-menu"], "compact");
+    assert.equal(result.attributes["data-ipad-menu-preference"], "on");
+  }
+  const disabled = run("iPad", 5, true, false, "0");
+  assert.equal(disabled.attributes["data-ipad-menu"], undefined);
+  assert.equal(disabled.attributes["data-ipad-menu-preference"], "off");
 });
 
 test("the correction runs in the shared head before route hydration", () => {

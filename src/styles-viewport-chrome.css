@@ -63,10 +63,10 @@ html:root[data-viewport-chrome] :is(.gallery-topbar, .topbar, .dream-site-header
   backdrop-filter: none !important;
 }
 
-/* Opt-in recovery for installed iPad chrome that still samples page content.
-   Keep the SAME menu opener and header layout boxes: World measures its full
-   height for anchors, and gallery/viewer restoration uses window.scrollY.
-   Visibility hides header links from keyboard/AT without collapsing layout.
+/* iPad's compact mode keeps the SAME opener and full header layout boxes.
+   The native document scrolls the chrome out using `top`, never a transformed
+   ancestor that would trap the fixed launcher. The measured header + Dream
+   index must be fully outside the viewport before the launcher takes over.
    No nested scroller, duplicate menu, or relocated focus target is created. */
 .ipad-menu-toggle {
   display: none !important;
@@ -93,22 +93,65 @@ html:root[data-ipad-viewport="contained"] .ipad-menu-toggle {
   outline-offset: -1px;
 }
 
-html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+/* The old paint guard is not part of compact chrome. Remove its positive
+   in-viewport strip AND negative overflow: neither may remain above a page
+   whose entire header has scrolled away. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .viewport-chrome-cover,
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .viewport-chrome-cover::before {
+  display: none !important;
+  content: none !important;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
   :is(.gallery-topbar, .topbar, .dream-site-header) {
-  visibility: hidden;
-  pointer-events: none;
+  top: calc(0px - var(--ipad-header-scroll, 0px)) !important;
+  /* Returning toward the top restores an opaque surface immediately; a
+     transparent-to-solid background tween would briefly recreate the bug. */
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  will-change: auto !important;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .dream-chapter-nav {
+  top: calc(var(--ipad-header-height, 84px) - var(--ipad-header-scroll, 0px)) !important;
+  transition: none !important;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header) {
+  visibility: hidden !important;
+  pointer-events: none !important;
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
 }
 
-html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
   .dream-chapter-nav {
-  visibility: hidden;
-  pointer-events: none;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
-html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+/* Progress rules and inset glints extend a pixel below their header. They
+   must disappear too, including during route skins' scroll animations. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header, .dream-chapter-nav)::before,
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header, .dream-chapter-nav)::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
   :is(.gallery-topbar, .topbar, .dream-site-header)
   .side-panel-trigger {
   position: fixed;
@@ -118,8 +161,8 @@ html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewpor
   width: 60px;
   height: 60px;
   min-width: 60px;
-  visibility: visible;
-  pointer-events: auto;
+  visibility: visible !important;
+  pointer-events: auto !important;
   border: 1px solid #c9b587 !important;
   border-radius: 50% !important;
   clip-path: none !important;
@@ -130,10 +173,99 @@ html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewpor
   backdrop-filter: none !important;
 }
 
-html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
   .side-panel-trigger:focus-visible {
   outline: 2px solid #f7eedc;
   outline-offset: 4px;
+}
+
+/* A collapsing ribbon resolves into a circular rim while the menu glyph
+   unfolds. Only these decorative children move: the opaque 60px hit target
+   and its collision box are already in their final place on the first frame. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  .side-panel-trigger-ring {
+  position: absolute;
+  inset: 4px;
+  display: block;
+  padding: 0;
+  border: 1px solid #f7eedc;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 10px #c9b58766;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask: none;
+  mask: none;
+  transition: none;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  .side-panel-trigger::before,
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  .side-panel-trigger-ring::before {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+    .side-panel-trigger-ring {
+    animation: ipad-menu-ribbon-fold 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+    .side-panel-trigger-glyph {
+    animation: ipad-menu-glyph-unfold 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes ipad-menu-ribbon-fold {
+  0% {
+    border-radius: 4px;
+    opacity: 0.9;
+    transform: translateY(-16px) rotate(-16deg) scale(1.5, 0.16);
+  }
+  44% {
+    border-radius: 24%;
+    opacity: 1;
+    transform: translateY(0) rotate(26deg) scale(0.72, 1.15);
+  }
+  72% {
+    border-radius: 50%;
+    opacity: 0.8;
+    transform: rotate(0deg) scale(1.08);
+  }
+  100% {
+    border-radius: 50%;
+    opacity: 0;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes ipad-menu-glyph-unfold {
+  0% {
+    opacity: 0.2;
+    transform: rotate(75deg) scale(0.35, 0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+    :is(.side-panel-trigger, .side-panel-trigger-ring, .side-panel-trigger-glyph),
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+    .side-panel-trigger-glyph i {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @media (forced-colors: active) {

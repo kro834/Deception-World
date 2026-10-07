@@ -25,5 +25,11 @@ export const IPAD_STANDALONE_VIEWPORT_SCRIPT = `(function () {
     });
   }
   document.documentElement.setAttribute("data-ipad-viewport", "contained");
+  // Match the hydrated controller's personal default before the first paint.
+  // Do not write storage merely for opening the page or replace an explicit OFF.
+  var compact = true;
+  try { compact = window.localStorage.getItem("dw-ipad-compact-menu-v1") !== "0"; } catch (_) {}
+  document.documentElement.setAttribute("data-ipad-menu-preference", compact ? "on" : "off");
+  if (compact) document.documentElement.setAttribute("data-ipad-menu", "compact");
   if (installed) document.documentElement.setAttribute("data-ipad-standalone-viewport", "contained");
 })();`;
