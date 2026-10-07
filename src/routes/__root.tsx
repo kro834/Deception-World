@@ -33,6 +33,7 @@ import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
+import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
@@ -103,7 +104,7 @@ export const Route = createRootRoute({
     ],
     // Runs while the HTML is parsed: the device attributes on <html> (Android,
     // One UI, iOS 18, economy, native progress) are there at the first paint.
-    scripts: [{ children: DEVICE_PROFILE_SCRIPT }],
+    scripts: [{ children: IPAD_STANDALONE_VIEWPORT_SCRIPT }, { children: DEVICE_PROFILE_SCRIPT }],
     links: [
       // The Zeus button's image, for every route that shows the button. The
       // opening (/) never renders it, so there the preload went unused (a

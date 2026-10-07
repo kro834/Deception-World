@@ -210,7 +210,7 @@ test("both pre-paint scripts stay ES5 and fail open", () => {
 test("the root installs the profile; the World hook no longer writes device attributes", () => {
   const root = read("src/routes/__root.tsx");
   assert.match(root, /import \{ DEVICE_PROFILE_SCRIPT \} from "@\/lib\/device-profile-gate";/);
-  assert.match(root, /scripts: \[\{ children: DEVICE_PROFILE_SCRIPT \}\]/);
+  assert.match(root, /scripts: \[[\s\S]*?\{ children: DEVICE_PROFILE_SCRIPT \}/);
   const mode = read("src/components/world/use-world-mode.ts");
   assert.doesNotMatch(
     mode,
