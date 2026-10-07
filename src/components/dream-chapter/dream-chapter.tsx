@@ -21,6 +21,7 @@ import { DisplayName } from "@/components/name-text";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
   DREAM_AGENT_ROSTER,
@@ -606,6 +607,7 @@ function DolminenceDialog({
 
 export function DreamChapter() {
   useWorldMode();
+  const artworkReady = useUltraArtworkReady();
   const dossierHash = useRouterState({ select: (state) => state.location.hash });
   const [menuOpen, setMenuOpen] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
@@ -1159,6 +1161,7 @@ export function DreamChapter() {
           <figure
             id="dream-poster-panel"
             className="dream-poster-current"
+            data-ultra-artwork-ready={artworkReady ? "true" : undefined}
             role="tabpanel"
             aria-labelledby={`dream-poster-tab-${posterIndex}`}
             aria-busy={posterLoading || posterShuffling}

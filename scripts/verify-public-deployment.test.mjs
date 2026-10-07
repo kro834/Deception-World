@@ -195,6 +195,21 @@ test("new release identity requires shared gallery readiness and preserves artwo
   assert.equal(written.artworks, 113);
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g79-1672.webp"));
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g113-1800.webp"));
+  for (const path of [
+    "/ultra-materials/manifest.json",
+    "/ultra-materials/brushed-alloy-normal.png",
+    "/ultra-materials/brushed-alloy-roughness.png",
+    "/ultra-materials/frame-rim.png",
+  ]) {
+    const asset = written.assets.find((item) => item.path === path);
+    assert.ok(asset, `${path} must be attested before production promotion`);
+    assert.equal(
+      asset.sha256,
+      createHash("sha256")
+        .update(Buffer.from(`public${path}`))
+        .digest("hex"),
+    );
+  }
 });
 
 test("an attested shared-gallery release checks config and public data using only unauthenticated GETs", async () => {

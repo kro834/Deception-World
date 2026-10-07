@@ -18,19 +18,32 @@ const compiled = ts.transpileModule(source, {
 const jsx = (type, props, key) => ({ type, props, key });
 const jsxRuntime = { jsx, jsxs: jsx };
 
-function createDeferred() {
+function deferred() {
   let resolve;
-  let reject;
-  const promise = new Promise((ok, fail) => {
+  const promise = new Promise((ok) => {
     resolve = ok;
-    reject = fail;
   });
-  return { promise, resolve, reject };
+  return { promise, resolve };
 }
 
 async function flushPromises() {
-  for (let index = 0; index < 6; index++) await Promise.resolve();
+  for (let index = 0; index < 8; index++) await Promise.resolve();
 }
+
+function artwork(revision = 1) {
+  return {
+    revision,
+    source: `/artwork-${revision}.webp`,
+    host: { isConnected: true },
+    image: { isConnected: true, complete: true, naturalWidth: 1200 },
+  };
+}
+
+const visibleGeometry = {
+  geometry: { left: -12, top: -12, width: 424, height: 324 },
+  visible: true,
+  rect: { left: 100, top: 60, width: 400, height: 300 },
+};
 
 function mount({ blockedInitially = false, deferImport = false } = {}) {
   const root = {
@@ -42,61 +55,13 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
       return this.dataset[key] ?? null;
     },
   };
-  const stage = { dataset: {}, style: { getPropertyValue: () => "" } };
-  let canvas = { nodeName: "CANVAS", identity: 0 };
-  let canvasKey;
-  let nextCanvasIdentity = 1;
-  let blocked = blockedInitially;
-  let visibilityCallback;
-  let visibilityStops = 0;
-  let observerInstance;
+  const document = {
+    documentElement: root,
+    querySelector: () => null,
+  };
   const windowListeners = new Map();
   const mediaQueries = [];
-  const rendererCalls = {
-    allocations: [],
-    instances: [],
-    dispose: 0,
-    pause: 0,
-    start: 0,
-    resize: 0,
-  };
-  const statuses = [];
-  const pendingImport = deferImport ? createDeferred() : null;
-  let rendererModuleLoads = 0;
-  let diagnostics = { lost: false, ready: false };
-
-  let rendererOptions;
-  const rendererModule = {
-    createUltraRenderer(target, options) {
-      rendererCalls.allocations.push({ target, quality: options.quality, options });
-      rendererOptions = options;
-      const instance = {
-        disposeCount: 0,
-        getDiagnostics: () => ({ ...diagnostics }),
-        pause() {
-          rendererCalls.pause++;
-        },
-        start() {
-          rendererCalls.start++;
-        },
-        resize() {
-          rendererCalls.resize++;
-        },
-        dispose() {
-          instance.disposeCount++;
-          rendererCalls.dispose++;
-        },
-        setPointer() {},
-        setTheme() {},
-      };
-      rendererCalls.instances.push(instance);
-      return instance;
-    },
-  };
-  const mediaListenerSets = [];
   const browser = {
-    innerWidth: 1280,
-    innerHeight: 800,
     matchMedia(query) {
       const listeners = new Set();
       const entry = {
@@ -107,7 +72,6 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
         listeners,
       };
       mediaQueries.push(entry);
-      mediaListenerSets.push(listeners);
       return entry;
     },
     addEventListener(name, listener) {
@@ -119,28 +83,90 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
       windowListeners.get(name)?.delete(listener);
     },
   };
-  const document = {
-    documentElement: root,
-    querySelector: () => null,
+  const calls = {
+    allocations: [],
+    dispose: 0,
+    geometryStops: 0,
+    material: [],
+    pause: 0,
+    pointers: [],
+    resize: 0,
+    start: 0,
+    targetStops: 0,
+    visibilityStops: 0,
   };
+  const pendingImport = deferImport ? deferred() : null;
+  let moduleLoads = 0;
+  let targetCallback;
+  let geometryCallback;
+  let visibilityCallback;
+  let blocked = blockedInitially;
+  let nextCanvasId = 1;
+  let outerTree;
+  let portal;
+  let stage;
+  let canvas;
+  let lastProps;
+  let currentScope;
+  let cursor = 0;
+  const outerScope = { state: [], refs: [], effects: [], pending: new Set() };
+  let frameScope = null;
+  let frameKey = null;
 
-  const refs = [];
-  const effects = [];
-  const pendingEffects = new Set();
-  let hookCursor = 0;
+  const rendererModule = {
+    createUltraRenderer(targetCanvas, options) {
+      const instance = {
+        diagnostics: { ready: false, lost: false },
+        disposeCount: 0,
+        getDiagnostics() {
+          return { ...this.diagnostics };
+        },
+        pause() {
+          calls.pause++;
+        },
+        start() {
+          calls.start++;
+        },
+        resize() {
+          calls.resize++;
+        },
+        dispose() {
+          this.disposeCount++;
+          calls.dispose++;
+        },
+        setPointer(x, y) {
+          calls.pointers.push([x, y]);
+        },
+        setTheme() {},
+      };
+      calls.allocations.push({ canvas: targetCanvas, options, instance });
+      return instance;
+    },
+  };
   const react = {
     memo: (component) => component,
+    useState(initial) {
+      const index = cursor++;
+      if (!(index in currentScope.state)) currentScope.state[index] = initial;
+      const scope = currentScope;
+      return [
+        scope.state[index],
+        (value) => {
+          scope.state[index] = typeof value === "function" ? value(scope.state[index]) : value;
+        },
+      ];
+    },
     useRef(initial) {
-      const index = hookCursor++;
-      if (!refs[index]) refs[index] = { current: initial };
-      return refs[index];
+      const index = cursor++;
+      if (!currentScope.refs[index]) currentScope.refs[index] = { current: initial };
+      return currentScope.refs[index];
     },
     useEffect(callback, deps) {
-      const index = hookCursor++;
-      const current = effects[index];
+      const index = cursor++;
+      const current = currentScope.effects[index];
       if (!current || deps.some((dependency, offset) => dependency !== current.deps[offset])) {
-        effects[index] = { callback, cleanup: current?.cleanup, deps };
-        pendingEffects.add(index);
+        currentScope.effects[index] = { callback, cleanup: current?.cleanup, deps };
+        currentScope.pending.add(index);
       }
     },
   };
@@ -149,19 +175,34 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
     window: browser,
     exports: {},
     MutationObserver: class {
-      constructor(callback) {
-        observerInstance = { callback, disconnected: false, observed: [] };
-      }
-      observe(target, options) {
-        observerInstance.observed.push({ target, options });
-      }
-      disconnect() {
-        observerInstance.disconnected = true;
-      }
+      observe() {}
+      disconnect() {}
     },
     require(name) {
       if (name === "react/jsx-runtime") return jsxRuntime;
       if (name === "react") return react;
+      if (name === "react-dom") {
+        return { createPortal: (children, container) => ({ children, container }) };
+      }
+      if (name === "@/lib/ultra-artwork-target.js") {
+        return {
+          ULTRA_FRAME_GUTTER: 12,
+          watchUltraArtworkTarget(callback) {
+            targetCallback = callback;
+            return () => {
+              calls.targetStops++;
+              targetCallback = undefined;
+            };
+          },
+          watchUltraArtworkGeometry(_target, callback) {
+            geometryCallback = callback;
+            return () => {
+              calls.geometryStops++;
+              geometryCallback = undefined;
+            };
+          },
+        };
+      }
       if (name === "@/lib/ultra-mode-visibility.js") {
         return {
           isUltraSceneBlocked: () => blocked,
@@ -169,14 +210,14 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
             visibilityCallback = callback;
             callback(blocked);
             return () => {
-              visibilityStops++;
+              calls.visibilityStops++;
               visibilityCallback = undefined;
             };
           },
         };
       }
       if (name === "@/lib/ultra-renderer.js") {
-        rendererModuleLoads++;
+        moduleLoads++;
         return pendingImport?.promise ?? rendererModule;
       }
       throw new Error(`Unexpected dependency: ${name}`);
@@ -185,269 +226,283 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
   vm.runInContext(compiled, context);
   const component = context.exports.UltraEffects;
 
-  function render(props) {
-    hookCursor = 0;
-    const tree = component(props);
-    if (tree) {
-      tree.props.ref.current = stage;
-      const canvasNode = tree.props.children[0];
-      if (canvasNode.key !== canvasKey) {
-        canvasKey = canvasNode.key;
-        canvas = { nodeName: "CANVAS", identity: nextCanvasIdentity++ };
-      }
-      canvasNode.props.ref.current = canvas;
-    }
-    for (const index of [...pendingEffects].sort((a, b) => a - b)) {
-      pendingEffects.delete(index);
-      const effect = effects[index];
+  function flushEffects(scope) {
+    for (const index of [...scope.pending].sort((a, b) => a - b)) {
+      scope.pending.delete(index);
+      const effect = scope.effects[index];
       effect.cleanup?.();
       effect.cleanup = effect.callback();
     }
-    return tree;
+  }
+  function cleanupScope(scope) {
+    if (!scope) return;
+    for (const effect of scope.effects) effect?.cleanup?.();
+    scope.effects = [];
+    scope.pending.clear();
+  }
+  function render(props = lastProps) {
+    lastProps = props;
+    currentScope = outerScope;
+    cursor = 0;
+    outerTree = component(props);
+    flushEffects(outerScope);
+    if (!outerTree) {
+      cleanupScope(frameScope);
+      frameScope = null;
+      frameKey = null;
+      portal = stage = canvas = null;
+      return null;
+    }
+    if (frameKey !== outerTree.key) {
+      cleanupScope(frameScope);
+      frameScope = { state: [], refs: [], effects: [], pending: new Set() };
+      frameKey = outerTree.key;
+      stage = { dataset: {}, style: {} };
+      canvas = { nodeName: "CANVAS", identity: nextCanvasId++ };
+    }
+    currentScope = frameScope;
+    cursor = 0;
+    portal = outerTree.type(outerTree.props);
+    const span = portal.children;
+    span.props.ref.current = stage;
+    span.props.children[0].props.ref.current = canvas;
+    flushEffects(frameScope);
+    return portal;
   }
 
   return {
+    calls,
+    mediaQueries,
+    pendingImport,
+    rendererModule,
+    root,
+    render,
+    setTarget(target) {
+      targetCallback?.(target);
+    },
+    geometry(value) {
+      geometryCallback?.(value);
+    },
+    visibility(value) {
+      blocked = value;
+      visibilityCallback?.(value);
+    },
+    fireWindow(name, event) {
+      for (const listener of windowListeners.get(name) ?? []) listener(event);
+    },
+    fireStatus(status) {
+      calls.allocations.at(-1)?.options.onStatus(status);
+    },
+    fireMaterial(status) {
+      calls.allocations.at(-1)?.options.onMaterialState(status);
+      calls.material.push(status);
+    },
+    get portal() {
+      return portal;
+    },
+    get stage() {
+      return stage;
+    },
     get canvas() {
       return canvas;
     },
-    context,
-    mediaQueries,
-    observer: () => observerInstance,
-    rendererCalls,
-    rendererModuleLoads: () => rendererModuleLoads,
-    root,
-    stage,
-    statuses,
-    visibility(blockedState) {
-      blocked = blockedState;
-      visibilityCallback?.(blockedState);
-    },
-    fireStatus(status) {
-      rendererOptions?.onStatus(status);
-    },
-    setDiagnostics(next) {
-      diagnostics = { ...diagnostics, ...next };
-    },
-    render,
-    cleanup() {
-      for (const effect of effects) effect?.cleanup?.();
+    get moduleLoads() {
+      return moduleLoads;
     },
     get listenerCounts() {
       return {
-        media: mediaListenerSets.reduce((total, listeners) => total + listeners.size, 0),
-        window: [...windowListeners.values()].reduce(
-          (total, listeners) => total + listeners.size,
-          0,
-        ),
-        visibilityStops,
+        window: [...windowListeners.values()].reduce((total, set) => total + set.size, 0),
+        media: mediaQueries.reduce((total, entry) => total + entry.listeners.size, 0),
       };
     },
-    get pendingImport() {
-      return pendingImport;
+    cleanup() {
+      cleanupScope(frameScope);
+      frameScope = null;
+      cleanupScope(outerScope);
     },
-    rendererModule,
   };
 }
 
-test("initially blocked scene does not import or allocate a WebGL renderer", () => {
-  const f = mount({ blockedInitially: true });
-  const tree = f.render({
-    enabled: true,
-    motionAllowed: true,
-    onStatus: (status) => f.statuses.push(status),
-  });
-  assert.equal(tree.props.className, "ultra-effects");
-  assert.equal(f.rendererModuleLoads(), 0);
-  assert.equal(f.rendererCalls.allocations.length, 0);
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
-  assert.deepEqual(f.statuses, ["paused"]);
+test("no target or an unloaded, hidden target cannot import or allocate WebGL", async () => {
+  const f = mount();
+  const props = { enabled: true, motionAllowed: true };
+  assert.equal(f.render(props), null);
+  assert.equal(f.moduleLoads, 0);
+  const target = artwork();
+  target.image.complete = false;
+  f.setTarget(target);
+  const portal = f.render();
+  assert.equal(portal.container, target.host);
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  assert.equal(f.stage.style.visibility, "hidden");
+  assert.equal(f.moduleLoads, 0);
+  target.image.complete = true;
+  f.geometry({ ...visibleGeometry, visible: false });
+  assert.equal(f.moduleLoads, 0);
   f.cleanup();
 });
 
-test("a blocker set while the lazy renderer import is pending prevents context allocation", async () => {
-  const f = mount({ deferImport: true });
-  f.render({ enabled: true, motionAllowed: true });
+test("one loaded visible artwork receives a local 12px portal and starts GPU after import", async () => {
+  const f = mount();
+  const props = { enabled: true, motionAllowed: true, quality: "cinema" };
+  f.render(props);
+  const target = artwork();
+  f.setTarget(target);
+  const portal = f.render();
+  assert.equal(portal.container, target.host);
+  assert.equal(portal.children.props.className, "ultra-effects");
+  assert.equal(portal.children.props["aria-hidden"], "true");
+  assert.equal(portal.children.props["data-ultra-quality"], "cinema");
+  f.geometry(visibleGeometry);
+  assert.deepEqual(
+    [f.stage.style.left, f.stage.style.top, f.stage.style.width, f.stage.style.height],
+    ["-12px", "-12px", "424px", "324px"],
+  );
   await flushPromises();
-  assert.equal(f.rendererModuleLoads(), 1);
-  f.visibility(true);
-  f.pendingImport.resolve(f.rendererModule);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 0);
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
+  assert.equal(f.calls.allocations.length, 1);
+  assert.equal(f.calls.allocations[0].canvas, f.canvas);
+  assert.equal(f.calls.allocations[0].options.quality, "cinema");
+  assert.equal(f.calls.allocations[0].options.frameWidthPx, 12);
+  assert.equal(f.calls.start, 1);
   f.cleanup();
 });
 
-test("resolving the lazy import after unmount never allocates a renderer", async () => {
-  const f = mount({ deferImport: true });
-  f.render({ enabled: true, motionAllowed: true });
-  await flushPromises();
-  assert.equal(f.rendererModuleLoads(), 1);
-  f.cleanup();
-  f.pendingImport.resolve(f.rendererModule);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 0);
-  assert.equal(f.listenerCounts.window, 0);
-  assert.equal(f.listenerCounts.media, 0);
-});
-
-test("temporary UI blocking pauses and resumes the existing renderer without disposing it", async () => {
+test("local geometry updates resize and pointer input uses the image rect", async () => {
   const f = mount();
   f.render({ enabled: true, motionAllowed: true });
+  f.setTarget(artwork());
+  f.render();
+  f.geometry(visibleGeometry);
   await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
-  assert.equal(f.rendererCalls.start, 1);
-  f.setDiagnostics({ ready: true });
+  f.fireWindow("pointermove", { clientX: 300, clientY: 210, pointerType: "mouse" });
+  assert.deepEqual(f.calls.pointers.at(-1), [0, 0]);
+  const before = f.calls.resize;
+  f.geometry({
+    geometry: { left: -12, top: -12, width: 524, height: 324 },
+    visible: true,
+    rect: { left: 100, top: 60, width: 500, height: 300 },
+  });
+  assert.equal(f.calls.resize, before + 1);
+  assert.equal(f.stage.style.width, "524px");
+  f.fireWindow("pointermove", { clientX: 600, clientY: 360, pointerType: "touch" });
+  assert.equal(f.calls.pointers.length, 1);
+  f.cleanup();
+});
+
+test("temporary menu and offscreen gates pause and resume the same renderer", async () => {
+  const f = mount();
+  f.render({ enabled: true, motionAllowed: true });
+  f.setTarget(artwork());
+  f.render();
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  const instance = f.calls.allocations[0].instance;
+  instance.diagnostics.ready = true;
   f.fireStatus("ready");
   assert.equal(f.stage.dataset.ultraRenderer, "gpu");
-
   f.visibility(true);
-  assert.equal(f.rendererCalls.pause, 1);
-  assert.equal(f.rendererCalls.dispose, 0);
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
+  assert.equal(f.stage.style.visibility, "hidden");
+  assert.equal(f.calls.pause, 1);
   f.visibility(false);
-  assert.equal(f.rendererCalls.start, 2);
-  assert.equal(f.rendererCalls.dispose, 0);
-  assert.equal(f.stage.dataset.ultraRenderer, "gpu");
+  assert.equal(f.calls.allocations.length, 1);
+  assert.equal(f.calls.dispose, 0);
+  f.geometry({ ...visibleGeometry, visible: false });
+  assert.equal(f.calls.pause, 2);
+  f.geometry(visibleGeometry);
+  assert.equal(f.calls.allocations.length, 1);
+  assert.equal(f.calls.start, 3);
   f.cleanup();
-  assert.equal(f.rendererCalls.dispose, 1);
+  assert.equal(f.calls.dispose, 1);
 });
 
-test("GPU paint stays hidden until first draw is ready", async () => {
+test("GPU ready and baked material are independent stage signals", async () => {
   const f = mount();
   f.render({ enabled: true, motionAllowed: true });
+  f.setTarget(artwork());
+  f.render();
+  f.geometry(visibleGeometry);
   await flushPromises();
   assert.equal(f.stage.dataset.ultraRenderer, "starting");
+  f.fireMaterial("pending");
+  assert.equal(f.stage.dataset.ultraMaterial, "pending");
   assert.notEqual(f.stage.dataset.ultraRenderer, "gpu");
   f.fireStatus("ready");
   assert.equal(f.stage.dataset.ultraRenderer, "gpu");
-  f.cleanup();
-});
-
-test("lost renderer remains paused on resume until restoration and its first redraw", async () => {
-  const f = mount();
-  f.render({ enabled: true, motionAllowed: true });
-  await flushPromises();
-  f.setDiagnostics({ ready: true });
-  f.fireStatus("ready");
-  f.setDiagnostics({ lost: true });
-  f.fireStatus("context-lost");
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
-
-  f.visibility(true);
-  f.visibility(false);
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
-  assert.equal(f.rendererCalls.dispose, 0);
-  f.setDiagnostics({ lost: false, ready: false });
-  f.visibility(true);
-  f.visibility(false);
-  assert.equal(f.stage.dataset.ultraRenderer, "starting");
-  f.fireStatus("ready");
+  f.fireMaterial("fallback");
+  assert.equal(f.stage.dataset.ultraMaterial, "fallback");
   assert.equal(f.stage.dataset.ultraRenderer, "gpu");
   f.cleanup();
 });
 
-test("OFF cleanup disposes the renderer and releases all registered listeners", async () => {
+test("revision and quality changes each dispose the prior renderer and use a fresh canvas", async () => {
+  const f = mount();
+  const props = { enabled: true, motionAllowed: true, quality: "high" };
+  f.render(props);
+  f.setTarget(artwork(1));
+  f.render();
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  const firstCanvas = f.canvas;
+  assert.equal(f.calls.allocations.length, 1);
+  f.setTarget(artwork(2));
+  f.render();
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  assert.equal(f.calls.dispose, 1);
+  assert.equal(f.calls.allocations.length, 2);
+  assert.notEqual(f.canvas, firstCanvas);
+  const secondCanvas = f.canvas;
+  f.render({ ...props, quality: "cinema" });
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  assert.equal(f.calls.dispose, 2);
+  assert.equal(f.calls.allocations.length, 3);
+  assert.notEqual(f.canvas, secondCanvas);
+  assert.equal(f.calls.allocations.at(-1).options.quality, "cinema");
+  f.cleanup();
+  assert.equal(f.calls.dispose, 3);
+});
+
+test("late renderer import after target replacement allocates only the latest target", async () => {
+  const f = mount({ deferImport: true });
+  f.render({ enabled: true, motionAllowed: true });
+  f.setTarget(artwork(1));
+  f.render();
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  assert.equal(f.moduleLoads, 1);
+  f.setTarget(artwork(2));
+  f.render();
+  f.geometry(visibleGeometry);
+  await flushPromises();
+  assert.equal(f.moduleLoads, 2);
+  assert.equal(f.calls.allocations.length, 0);
+  f.pendingImport.resolve(f.rendererModule);
+  await flushPromises();
+  assert.equal(f.calls.allocations.length, 1);
+  assert.equal(f.calls.allocations[0].canvas, f.canvas);
+  f.cleanup();
+});
+
+test("OFF disposes the renderer and releases target, geometry, visibility and window listeners", async () => {
   const f = mount();
   const props = { enabled: true, motionAllowed: true };
   f.render(props);
+  f.setTarget(artwork());
+  f.render();
+  f.geometry(visibleGeometry);
   await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
+  assert.equal(f.calls.allocations.length, 1);
   assert.ok(f.listenerCounts.window > 0);
   assert.ok(f.listenerCounts.media > 0);
-  const nextTree = f.render({ ...props, enabled: false });
-  assert.equal(nextTree, null);
-  assert.equal(f.rendererCalls.dispose, 1);
-  assert.equal(f.observer().disconnected, true);
+  assert.equal(f.render({ ...props, enabled: false }), null);
+  assert.equal(f.calls.dispose, 1);
+  assert.equal(f.calls.targetStops, 1);
+  assert.equal(f.calls.geometryStops, 1);
+  assert.equal(f.calls.visibilityStops, 1);
   assert.equal(f.listenerCounts.window, 0);
   assert.equal(f.listenerCounts.media, 0);
-  assert.equal(f.listenerCounts.visibilityStops, 1);
   assert.equal("ultraRenderer" in f.root.dataset, false);
-});
-
-test("renderer quality defaults to high and an explicit cinema choice reaches the renderer", async () => {
-  const high = mount();
-  const highTree = high.render({ enabled: true, motionAllowed: true });
-  assert.equal(highTree.props["data-ultra-quality"], "high");
-  assert.equal(highTree.props.children[0].key, "high");
-  await flushPromises();
-  assert.equal(high.rendererCalls.allocations.length, 1);
-  assert.equal(high.rendererCalls.allocations[0].quality, "high");
-  high.cleanup();
-
-  const cinema = mount();
-  const cinemaTree = cinema.render({ enabled: true, motionAllowed: true, quality: "cinema" });
-  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
-  assert.equal(cinemaTree.props.children[0].key, "cinema");
-  await flushPromises();
-  assert.equal(cinema.rendererCalls.allocations.length, 1);
-  assert.equal(cinema.rendererCalls.allocations[0].quality, "cinema");
-  cinema.cleanup();
-});
-
-test("changing quality disposes the old renderer once and allocates the new quality once", async () => {
-  const f = mount();
-  const base = { enabled: true, motionAllowed: true };
-  const highTree = f.render(base);
-  assert.equal(highTree.props.children[0].key, "high");
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
-  assert.equal(f.rendererCalls.allocations[0].quality, "high");
-  const oldCanvas = f.rendererCalls.allocations[0].target;
-
-  const cinemaTree = f.render({ ...base, quality: "cinema" });
-  assert.equal(cinemaTree.props.children[0].key, "cinema");
-  assert.equal(f.rendererCalls.instances[0].disposeCount, 1);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 2);
-  assert.equal(f.rendererCalls.allocations[1].quality, "cinema");
-  assert.notEqual(f.rendererCalls.allocations[1].target, oldCanvas);
-  assert.equal(f.rendererCalls.dispose, 1);
-
   f.cleanup();
-  assert.deepEqual(
-    f.rendererCalls.instances.map((instance) => instance.disposeCount),
-    [1, 1],
-  );
-});
-
-test("a quality change during lazy import allocates only the latest cinema renderer", async () => {
-  const f = mount({ deferImport: true });
-  const base = { enabled: true, motionAllowed: true };
-  const highTree = f.render(base);
-  assert.equal(highTree.props["data-ultra-quality"], "high");
-  await flushPromises();
-  assert.equal(f.rendererModuleLoads(), 1);
-
-  const cinemaTree = f.render({ ...base, quality: "cinema" });
-  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
-  await flushPromises();
-  assert.equal(f.rendererModuleLoads(), 2);
-  assert.equal(f.rendererCalls.allocations.length, 0);
-
-  f.pendingImport.resolve(f.rendererModule);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
-  assert.equal(f.rendererCalls.allocations[0].quality, "cinema");
-  f.cleanup();
-});
-
-test("changing quality while a menu blocker is active does not allocate a renderer", async () => {
-  const f = mount();
-  const base = { enabled: true, motionAllowed: true };
-  f.render(base);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
-  assert.equal(f.rendererCalls.allocations[0].quality, "high");
-
-  f.visibility(true);
-  assert.equal(f.stage.dataset.ultraRenderer, "paused");
-  const cinemaTree = f.render({ ...base, quality: "cinema" });
-  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
-  assert.equal(f.rendererCalls.instances[0].disposeCount, 1);
-  await flushPromises();
-  assert.equal(f.rendererCalls.allocations.length, 1);
-  assert.equal(f.rendererCalls.dispose, 1);
-
-  f.cleanup();
-  assert.equal(f.rendererCalls.dispose, 1);
 });

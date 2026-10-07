@@ -1,39 +1,26 @@
-/* Decorative overlay only. Screen blending makes an opaque GPU canvas's
-   black pixels neutral while keeping its emitted light visible. */
+/* The portal measures the artwork and places this layer in a 12px outer gutter.
+   Premultiplied alpha keeps the image aperture completely unpainted. */
 .ultra-effects {
   display: none;
 }
 
 html[data-ultra-mode="on"] .ultra-effects {
-  display: block;
-  position: fixed;
-  z-index: 4;
+  --ultra-frame-width: 12px;
+  --ultra-edge-intensity: 0.6;
+  position: absolute;
+  z-index: 2;
   inset: 0;
+  display: block;
   overflow: hidden;
+  border-radius: inherit;
   pointer-events: none;
-  --ultra-light-strength: 0.38;
-  --ultra-cinema-light-strength: 0.44;
-  opacity: var(--ultra-light-strength);
-  mix-blend-mode: screen;
+  opacity: 1;
+  mix-blend-mode: normal;
   contain: paint;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent);
 }
 
 html[data-ultra-mode="on"] .ultra-effects[data-ultra-quality="cinema"] {
-  opacity: var(--ultra-cinema-light-strength);
-}
-
-/* Optical detail is strongest on the cinematic landing page. Exhibition and
-   reading surfaces retain the same scene, with quieter light over original art
-   and Japanese body text. This never filters or transforms the page itself. */
-html[data-ultra-mode="on"][data-viewport-chrome="gallery"] .ultra-effects {
-  --ultra-light-strength: 0.28;
-  --ultra-cinema-light-strength: 0.34;
-}
-
-html[data-ultra-mode="on"][data-viewport-chrome="dream"] .ultra-effects {
-  --ultra-light-strength: 0.3;
-  --ultra-cinema-light-strength: 0.36;
+  --ultra-edge-intensity: 0.85;
 }
 
 .ultra-effects-canvas,
@@ -50,54 +37,20 @@ html[data-ultra-mode="on"][data-viewport-chrome="dream"] .ultra-effects {
   opacity: 0;
 }
 
+/* A quiet metal-and-glass edge when WebGL is unavailable or paused. The
+   center has no painted pixels, so the image keeps its exact color and crop. */
 .ultra-effects-fallback {
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 36% 48% at 14% 58%, rgb(43 199 251 / 25%), transparent 73%),
-    radial-gradient(ellipse 44% 40% at 78% 29%, rgb(174 99 255 / 21%), transparent 74%),
-    radial-gradient(ellipse 39% 35% at 84% 82%, rgb(232 178 81 / 14%), transparent 78%),
-    linear-gradient(115deg, rgb(7 30 48 / 11%), transparent 42%, rgb(27 11 48 / 13%));
-}
-
-.ultra-effects-fallback::before,
-.ultra-effects-fallback::after {
-  position: absolute;
-  inset: -24%;
-  content: "";
-  pointer-events: none;
-}
-
-.ultra-effects-fallback::before {
-  background: conic-gradient(
-    from 186deg at 48% 52%,
-    transparent 0deg 19deg,
-    rgb(104 220 255 / 13%) 28deg,
-    transparent 48deg 114deg,
-    rgb(190 126 255 / 11%) 126deg,
-    transparent 145deg 265deg,
-    rgb(246 200 115 / 10%) 279deg,
-    transparent 300deg 360deg
-  );
-  mask-image: radial-gradient(
-    ellipse 44% 50% at center,
-    transparent 36%,
-    #000 58%,
-    transparent 78%
-  );
-}
-
-.ultra-effects-fallback::after {
-  opacity: 0.4;
-  background-image:
-    radial-gradient(circle, rgb(231 251 255 / 83%) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgb(212 179 255 / 70%) 0 1px, transparent 1.5px);
-  background-position:
-    0 0,
-    38px 69px;
-  background-size:
-    117px 113px,
-    173px 167px;
-  mask-image: radial-gradient(ellipse 54% 48% at 50% 50%, #000, transparent 94%);
+  box-sizing: border-box;
+  border: calc(var(--ultra-frame-width) - 2px) solid transparent;
+  border-image-source: url("/ultra-materials/frame-rim.png");
+  border-image-slice: 64;
+  border-image-width: 1;
+  border-image-repeat: stretch;
+  opacity: var(--ultra-edge-intensity);
+  /* Only the Blender rails paint. Padding-box gradients or inset shadows
+     would paint inside the transparent aperture and cover artwork edges. */
+  background: none;
+  box-shadow: none;
 }
 
 html[data-ultra-mode="on"][data-ultra-motion="on"]
@@ -109,26 +62,24 @@ html[data-ultra-mode="on"][data-ultra-motion="on"]
 html[data-ultra-mode="on"][data-ultra-motion="on"]
   .ultra-effects[data-ultra-renderer="gpu"]
   .ultra-effects-fallback {
-  opacity: 0;
+  display: none;
 }
 
-/* The canvas is hidden during a draw pause; the still CSS field remains. */
-html[data-ultra-mode="on"][data-ultra-motion="on"][data-ultra-paused="true"]
-  .ultra-effects[data-ultra-renderer="gpu"]
-  .ultra-effects-canvas {
-  opacity: 0;
+html[data-ultra-mode="on"][data-ultra-paused="true"] .ultra-effects .ultra-effects-canvas {
+  display: none;
 }
 
-html[data-ultra-mode="on"][data-ultra-motion="on"][data-ultra-paused="true"]
+html[data-ultra-mode="on"][data-ultra-paused="true"]
   .ultra-effects[data-ultra-renderer="gpu"]
   .ultra-effects-fallback {
-  opacity: 1;
+  display: block;
 }
 
-/* The fallback is a still image in every state. The GPU renderer alone owns
-   motion, so an unsupported browser, error, or paused tab has no CSS loop. */
-
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+/* Any requested accessibility reduction removes the new surface treatment. */
+@media (prefers-reduced-motion: reduce),
+  (prefers-reduced-transparency: reduce),
+  (prefers-contrast: more),
+  (forced-colors: active) {
   html[data-ultra-mode="on"] .ultra-effects {
     display: none;
   }

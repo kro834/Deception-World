@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import ts from "typescript";
 
 // Pin content and rendered structure independently of timer/loading logic.
-// The two poster cancellation controls are the only disabled states excluded;
-// their behavior is exercised by poster-shuffle-state and browser tests.
+// Poster cancellation disabled states and the nonvisual, post-hydration Ultra
+// readiness marker are excluded; dedicated tests cover their behavior.
 export function worldViewContract(source) {
   const file = ts.createSourceFile("world-home.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const printer = ts.createPrinter({ removeComments: true });
@@ -25,6 +25,11 @@ export function worldViewContract(source) {
         // React identity and event handlers are not rendered attributes.
         if (name === "key" || /^on[A-Z]/.test(name)) return undefined;
         const attributes = node.parent.properties;
+        const posterFrame = attributes.some((attribute) =>
+          ts.isJsxAttribute(attribute) && attribute.name.getText(file) === "className" &&
+          attribute.initializer?.getText(file) === '"poster-frame"',
+        );
+        if (name === "data-ultra-artwork-ready" && posterFrame) return undefined;
         const posterControl = attributes.some((attribute) =>
           ts.isJsxAttribute(attribute) && attribute.name.getText(file) === "className" &&
           attribute.initializer && /\bposter-(reset|lock)\b/.test(attribute.initializer.getText(file)),

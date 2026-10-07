@@ -27,63 +27,82 @@ test("Ultra material sheet parses and addresses real components", () => {
   }
 });
 
-test("materials and motion are Ultra-only and obey accessibility gates", () => {
+test("materials are Ultra-only, motion-safe, and preserve original artwork", () => {
   assert.match(css, /html\[data-ultra-mode="on"\]/);
-  assert.match(css, /\[data-ultra-motion="on"\]/);
-  assert.match(css, /@media \(forced-colors: none\)/);
-  assert.match(css, /prefers-reduced-motion: no-preference/);
-  assert.match(css, /prefers-reduced-transparency: no-preference/);
-  assert.match(css, /prefers-contrast: no-preference/);
-  assert.match(css, /prefers-reduced-transparency: reduce/);
-  assert.match(css, /prefers-contrast: more/);
-  assert.match(css, /@media \(forced-colors: active\)/);
-  for (const attribute of [
-    "data-ultra-paused",
-    "data-loading",
-    "data-dialog-open",
-    "data-side-menu-open",
-  ]) {
-    assert.match(css, new RegExp(`:not\\(\\s*\\[${attribute}`));
-  }
-  assert.doesNotMatch(css, /\.gallery-(?:feature-open|work-frame) img\s*\{/);
-  assert.doesNotMatch(
+  assert.match(
     css,
-    /(?:^|\n)\s*html\[data-ultra-mode="on"\]\s+(?:body|\.gallery-viewer-stage|\.gallery-image-viewport)\b/,
+    /@media\s*\(not\s*\(forced-colors:\s*active\)\)\s+and\s*\(not\s*\(prefers-reduced-motion:\s*reduce\)\)\s+and\s*\(not\s*\(prefers-reduced-transparency:\s*reduce\)\)\s+and\s*\(not\s*\(prefers-contrast:\s*more\)\)/,
   );
+  assert.doesNotMatch(css, /\.gallery-(?:feature-open|work-frame) img\s*\{/);
+  assert.doesNotMatch(css, /\bimg\s*\{[^}]*\b(?:filter|transform)\s*:/s);
+  assert.doesNotMatch(css, /\b(?:filter|transform)\s*:/);
+  assert.doesNotMatch(css, /@keyframes\b|\banimation\s*:/);
 });
 
-test("reduced-transparency and forced-colors fallbacks reach the full manager portrait selector", () => {
-  const fallback = css.slice(css.indexOf("@media (prefers-reduced-transparency: reduce)"));
-  assert.match(
-    fallback,
-    /main\.manager-page:not\(\.is-sovereign\)\s*\.manager-hero\s*\.manager-portrait-frame/,
-  );
-  assert.match(
-    fallback,
-    /@media \(forced-colors: active\)[\s\S]*?\.manager-hero\s*\.manager-portrait-frame/,
-  );
-  assert.match(fallback, /\.poster-frame::after\s*\{[^}]*opacity:\s*0;\s*animation:\s*none/s);
-  assert.doesNotMatch(css, /\.poster-frame\s*\{[^}]*animation:/s);
+test("reduced motion, transparency, contrast, and forced colors disable material treatment", () => {
+  assert.match(css, /not\s*\(forced-colors:\s*active\)/);
+  assert.match(css, /not\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(css, /not\s*\(prefers-reduced-transparency:\s*reduce\)/);
+  assert.match(css, /not\s*\(prefers-contrast:\s*more\)/);
+  assert.match(css, /\.manager-portrait-frame\s*\{/);
+  assert.match(css, /\.poster-frame::after\s*\{/);
 });
 
-test("scene light adapts to quality and protects exhibition and reading surfaces", () => {
+test("local mount materials stay inside artwork bounds and protect artwork pixels", () => {
   const effects = read("src/styles-ultra-effects.css");
   assert.doesNotThrow(() =>
     transform({ filename: "styles-ultra-effects.css", code: Buffer.from(effects) }),
   );
+  const stageRule =
+    effects.match(/html\[data-ultra-mode="on"\]\s+\.ultra-effects\s*\{([^}]*)\}/s)?.[1] ?? "";
+  assert.match(stageRule, /position:\s*absolute/);
+  assert.match(stageRule, /inset:\s*0/);
+  assert.match(stageRule, /opacity:\s*1/);
+  assert.match(stageRule, /mix-blend-mode:\s*normal/);
+  assert.match(stageRule, /border-radius:\s*inherit/);
+  assert.match(stageRule, /pointer-events:\s*none/);
+  assert.match(stageRule, /--ultra-edge-intensity:\s*0\.6/);
   assert.match(
     effects,
-    /\.ultra-effects\[data-ultra-quality="cinema"\]\s*\{\s*opacity:\s*var\(--ultra-cinema-light-strength\)/,
+    /html\[data-ultra-mode="on"\]\s+\.ultra-effects\[data-ultra-quality="cinema"\]\s*\{[^}]*--ultra-edge-intensity:\s*0\.85/s,
   );
-  for (const chrome of ["gallery", "dream"]) {
-    assert.match(
-      effects,
-      new RegExp(
-        `html\\[data-ultra-mode="on"\\]\\[data-viewport-chrome="${chrome}"\\]\\s*\\.ultra-effects\\s*\\{[^}]*--ultra-light-strength:[^}]*--ultra-cinema-light-strength:`,
-        "s",
-      ),
-    );
+
+  // The renderer is a local portal layer on an artwork mount, never a page veil.
+  assert.doesNotMatch(effects, /position:\s*fixed/);
+  assert.doesNotMatch(effects, /mix-blend-mode:\s*screen/);
+  assert.doesNotMatch(effects, /mask-image\s*:/);
+  assert.doesNotMatch(effects, /(?:^|\n)\s*@keyframes\b|\banimation\s*:/);
+  assert.doesNotMatch(effects, /radial-gradient\s*\(|conic-gradient\s*\(/);
+  assert.doesNotMatch(effects, /\b(?:filter|transform)\s*:/);
+
+  for (const preference of [
+    "prefers-reduced-motion: reduce",
+    "prefers-reduced-transparency: reduce",
+    "prefers-contrast: more",
+    "forced-colors: active",
+  ]) {
+    assert.ok(effects.includes(preference), `missing accessibility gate ${preference}`);
   }
-  assert.doesNotMatch(effects, /(?:body|main|img)\s*\{[^}]*(?:filter|transform):/s);
-  assert.match(effects, /mix-blend-mode:\s*screen/);
+  assert.match(
+    effects,
+    /html\[data-ultra-mode="on"\][^{]*\.ultra-effects\s*\{[^}]*display:\s*none/s,
+  );
+  assert.match(
+    effects,
+    /data-ultra-motion="on"[\s\S]*?data-ultra-renderer="gpu"[\s\S]*?\.ultra-effects-canvas\s*\{[^}]*opacity:\s*1/s,
+  );
+  assert.match(
+    effects,
+    /data-ultra-paused="true"[\s\S]*?\.ultra-effects-canvas\s*\{[^}]*display:\s*none/s,
+  );
+
+  // The static fallback may draw the mount's fine rails, never a free-floating field.
+  const fallback =
+    effects.match(/\/\* A quiet[\s\S]*?\.ultra-effects-fallback\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(fallback, /border:\s*calc\(var\(--ultra-frame-width\) - 2px\) solid transparent/);
+  assert.match(fallback, /border-image-source:\s*url\("\/ultra-materials\/frame-rim\.png"\)/);
+  assert.match(fallback, /border-image-slice:\s*64\s*;/);
+  assert.match(fallback, /background:\s*none/);
+  assert.match(fallback, /box-shadow:\s*none/);
+  assert.doesNotMatch(fallback, /\bfill\b|(?:radial|conic|linear)-gradient\s*\(/);
 });

@@ -402,6 +402,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
 
 export function WorldHome() {
   useWorldMode();
+  const artworkReady = useUltraArtworkReady();
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);

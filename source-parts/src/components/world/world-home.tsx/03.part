@@ -491,3 +491,4 @@
     const previewPosters = Array.from(
       { length: 9 },
       (_, index) => previewPool[index % previewPool.length],
+    );

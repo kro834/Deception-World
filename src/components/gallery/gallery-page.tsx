@@ -5,6 +5,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
+import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
 import {
   communityPostToArtwork,
@@ -74,6 +75,7 @@ function revealGalleryControl(control: HTMLElement | null) {
 
 export function GalleryPage() {
   useWorldMode();
+  const artworkReady = useUltraArtworkReady();
   const router = useRouter();
   const display = useGalleryDisplayPreferences();
   // The history entry the open viewer adds, so Back closes it in place.
@@ -1057,6 +1059,7 @@ export function GalleryPage() {
           <figure className="gallery-feature">
             <a
               className="gallery-feature-open"
+              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
               href={featured.full}
               onClick={(event) => openWork(event, featured)}
               aria-haspopup="dialog"

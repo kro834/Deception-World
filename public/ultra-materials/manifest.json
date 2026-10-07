@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-ultra-materials.py",
+  "generatorSha256": "173ca046a9fd094eda2d49694e6644cf47c60463e34a4ec965967e2631bad1e6",
+  "blenderVersion": "5.2.0 LTS",
+  "engine": "CYCLES",
+  "device": "CPU",
+  "seed": 271828,
+  "samples": 64,
+  "resolution": 1024,
+  "purpose": "Repeatable surface detail for metal artwork mounts; no artwork baked",
+  "material": {
+    "baseColorLinear": [
+      0.018,
+      0.026,
+      0.037
+    ],
+    "metallic": 1.0,
+    "anisotropy": 0.62,
+    "roughnessRange": [
+      0.311,
+      0.459
+    ],
+    "normalConvention": "Tangent OpenGL +X +Y +Z",
+    "uvBrushDirection": "U; rotate UV for vertical frame rails"
+  },
+  "maps": {
+    "normal": {
+      "file": "brushed-alloy-normal.png",
+      "sha256": "88bc4dbcfda2058c45ca6fededb0f809b4be42514a1a3cfd79f7fd2cf2b294a3",
+      "colorSpace": "linear",
+      "repeat": true
+    },
+    "roughness": {
+      "file": "brushed-alloy-roughness.png",
+      "sha256": "86cb3b0cf5b79c0cc723570d436964d488a1dbb474fe0519b15f22bff61e3b8d",
+      "colorSpace": "linear",
+      "channel": "R",
+      "repeat": true
+    }
+  },
+  "frame": {
+    "file": "frame-rim.png",
+    "sha256": "e15371c12acdcef889aaf9714985590848450262899d25b73a3d92390f6671fb",
+    "colorSpace": "sRGB",
+    "transparent": true,
+    "borderImageSlice": 64,
+    "borderImageFill": false,
+    "outerSizeMeters": 2,
+    "apertureSizeMeters": 1.786,
+    "railWidthMeters": 0.107,
+    "depthMeters": 0.036,
+    "bevelMeters": 0.003,
+    "miterDegrees": 45,
+    "alphaChecks": {
+      "centerAlphaMax": 0.0,
+      "railAlphaMin": 1.0,
+      "centerCheckedInsetPx": 68
+    }
+  },
+  "provenance": {
+    "blend": "ultra-brushed-alloy.blend",
+    "blendSha256": "b1eb21cb2ca6fc8b1333a1e74c10e9da35aa67800dbe77a47fcd5957f85c06a5",
+    "preview": "brushed-alloy-studio-preview.png"
+  }
+}

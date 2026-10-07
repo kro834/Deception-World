@@ -104,6 +104,15 @@ test("the view contract still detects changes to story data, copy and layout", (
     worldViewContract(home.replace("onClick={shufflePoster}", "onClick={revisedHandler}")),
     original,
   );
+  // This readiness marker changes GPU timing, not artwork or rendered layout.
+  assert.deepEqual(
+    worldViewContract(home.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, "")),
+    original,
+  );
+  assert.notEqual(
+    worldViewContract(home.replace('className="riders-section"', 'className="riders-section" data-ultra-artwork-ready="true"')).markup,
+    original.markup,
+  );
 });
 
 test("each annex is its own section, listed in the contents", () => {

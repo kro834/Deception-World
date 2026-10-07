@@ -12,6 +12,10 @@ const paths = [
   ...gallery.items.map((item) => [...item.variants].sort((a, b) => b.width - a.width)[0].path),
   "/saga-extreme-middle-20261006.webp",
   "/saga-extreme-ultra-20261006.jpeg",
+  "/ultra-materials/manifest.json",
+  "/ultra-materials/brushed-alloy-normal.png",
+  "/ultra-materials/brushed-alloy-roughness.png",
+  "/ultra-materials/frame-rim.png",
 ];
 const assets = paths.map((path) => ({
   path,

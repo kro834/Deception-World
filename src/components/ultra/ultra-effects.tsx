@@ -1,5 +1,12 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { isUltraSceneBlocked, watchUltraSceneVisibility } from "@/lib/ultra-mode-visibility.js";
+import {
+  ULTRA_FRAME_GUTTER,
+  watchUltraArtworkTarget,
+  watchUltraArtworkGeometry,
+  type UltraArtworkTarget,
+} from "@/lib/ultra-artwork-target.js";
 import type { UltraRenderer } from "@/lib/ultra-renderer.js";
 
 export type UltraEffectsStatus = "starting" | "webgl2" | "fallback" | "paused" | "error";
@@ -17,15 +24,39 @@ const ACCESSIBILITY_QUERIES = [
   "(forced-colors: active)",
 ];
 
-/** Optional decorative scene. The renderer owns its sole RAF loop; React never
- * updates per frame. UI locks retain the context, while OFF releases it. */
+/** React only tracks artwork identity. The portal shares its host's transforms;
+ * layout/visibility observers and the renderer do not update React per frame. */
 export const UltraEffects = memo(function UltraEffects({
   enabled,
   motionAllowed,
   quality = "high",
   onStatus,
 }: UltraEffectsProps) {
-  const stageRef = useRef<HTMLDivElement>(null);
+  const [target, setTarget] = useState<UltraArtworkTarget | null>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    return watchUltraArtworkTarget(setTarget);
+  }, [enabled]);
+  return enabled && target ? (
+    <ArtworkFrame
+      key={`${target.revision}-${quality}-${motionAllowed}`}
+      target={target}
+      enabled={enabled}
+      motionAllowed={motionAllowed}
+      quality={quality}
+      onStatus={onStatus}
+    />
+  ) : null;
+});
+
+function ArtworkFrame({
+  target,
+  enabled,
+  motionAllowed,
+  quality,
+  onStatus,
+}: UltraEffectsProps & { target: UltraArtworkTarget }) {
+  const stageRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const callbackRef = useRef(onStatus);
   useEffect(() => {
@@ -42,8 +73,8 @@ export const UltraEffects = memo(function UltraEffects({
     let failed = false;
     let renderer: UltraRenderer | null = null;
     let reported: UltraEffectsStatus | undefined;
-    let viewportWidth = Math.max(window.innerWidth, 1);
-    let viewportHeight = Math.max(window.innerHeight, 1);
+    let visible = false;
+    let pointerRect: DOMRect | null = null;
     let media: MediaQueryList[] = [];
     let mediaAvailable = true;
     try {
@@ -53,6 +84,11 @@ export const UltraEffects = memo(function UltraEffects({
     }
     const allowed = () =>
       !disposed &&
+      visible &&
+      target.host.isConnected &&
+      target.image.isConnected &&
+      target.image.complete &&
+      target.image.naturalWidth > 0 &&
       motionAllowed &&
       mediaAvailable &&
       !media.some((query) => query.matches) &&
@@ -90,6 +126,7 @@ export const UltraEffects = memo(function UltraEffects({
     };
     const sync = () => {
       if (disposed) return;
+      stage.style.visibility = allowed() ? "visible" : "hidden";
       if (!allowed()) {
         renderer?.pause();
         report("paused");
@@ -118,6 +155,10 @@ export const UltraEffects = memo(function UltraEffects({
           const candidate = createUltraRenderer(canvas, {
             quality,
             maxFps: 60,
+            frameWidthPx: ULTRA_FRAME_GUTTER,
+            onMaterialState(state) {
+              if (!disposed) stage.dataset.ultraMaterial = state;
+            },
             onStatus(status) {
               if (disposed) return;
               if (status === "ready") {
@@ -148,23 +189,35 @@ export const UltraEffects = memo(function UltraEffects({
           if (!disposed) fail();
         });
     };
-    const resize = () => {
-      viewportWidth = Math.max(window.innerWidth, 1);
-      viewportHeight = Math.max(window.innerHeight, 1);
-      if (allowed()) renderer?.resize();
-    };
     const pointer = (event: PointerEvent) => {
-      if (!allowed() || !renderer || event.pointerType === "touch") return;
+      if (!allowed() || !renderer || !pointerRect || event.pointerType === "touch") return;
       renderer.setPointer(
-        (event.clientX / viewportWidth) * 2 - 1,
-        1 - (event.clientY / viewportHeight) * 2,
+        ((event.clientX - pointerRect.left) / Math.max(pointerRect.width, 1)) * 2 - 1,
+        1 - ((event.clientY - pointerRect.top) / Math.max(pointerRect.height, 1)) * 2,
       );
     };
     const center = () => renderer?.setPointer(0, 0);
-    window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", pointer, { passive: true });
     window.addEventListener("blur", center);
     for (const query of media) query.addEventListener("change", sync);
+    let previousSize = "";
+    const stopGeometry = watchUltraArtworkGeometry(
+      target,
+      ({ geometry, visible: inView, rect }) => {
+        visible = inView;
+        pointerRect = rect;
+        if (geometry) {
+          stage.style.left = `${geometry.left}px`;
+          stage.style.top = `${geometry.top}px`;
+          stage.style.width = `${geometry.width}px`;
+          stage.style.height = `${geometry.height}px`;
+          const size = `${geometry.width}:${geometry.height}`;
+          if (size !== previousSize && allowed()) renderer?.resize();
+          previousSize = size;
+        }
+        sync();
+      },
+    );
     const stopVisibility = watchUltraSceneVisibility(sync);
     const themeObserver = new MutationObserver(tint);
     themeObserver.observe(root, { attributes: true, attributeFilter: ["data-viewport-chrome"] });
@@ -174,22 +227,29 @@ export const UltraEffects = memo(function UltraEffects({
 
     return () => {
       disposed = true;
+      stopGeometry();
       stopVisibility();
       themeObserver.disconnect();
       for (const query of media) query.removeEventListener("change", sync);
-      window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", pointer);
       window.removeEventListener("blur", center);
       renderer?.dispose();
       renderer = null;
       if (root.dataset.ultraRenderer === reported) delete root.dataset.ultraRenderer;
     };
-  }, [enabled, motionAllowed, quality]);
+  }, [target, enabled, motionAllowed, quality]);
 
-  return enabled ? (
-    <div ref={stageRef} className="ultra-effects" data-ultra-quality={quality} aria-hidden="true">
-      <canvas key={quality} ref={canvasRef} className="ultra-effects-canvas" />
-      <div className="ultra-effects-fallback" />
-    </div>
-  ) : null;
-});
+  return createPortal(
+    <span
+      ref={stageRef}
+      className="ultra-effects"
+      data-ultra-quality={quality}
+      aria-hidden="true"
+      style={{ visibility: "hidden" }}
+    >
+      <canvas ref={canvasRef} className="ultra-effects-canvas" />
+      <span className="ultra-effects-fallback" />
+    </span>,
+    target.host,
+  );
+}

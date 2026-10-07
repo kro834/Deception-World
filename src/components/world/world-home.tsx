@@ -23,6 +23,7 @@ import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
@@ -895,6 +896,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
 
 export function WorldHome() {
   useWorldMode();
+  const artworkReady = useUltraArtworkReady();
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
@@ -1844,7 +1846,10 @@ export function WorldHome() {
                 fetchPriority="low"
               />
             </div>
-            <div className="poster-frame">
+            <div
+              className="poster-frame"
+              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
+            >
               <span className="poster-holo-ring" aria-hidden="true" />
               <div className="poster-media">
                 {previous ? (

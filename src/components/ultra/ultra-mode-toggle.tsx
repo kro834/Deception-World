@@ -75,7 +75,7 @@ export function UltraModeToggle() {
         <i aria-hidden="true">{snapshot.enabled ? "ON" : "OFF"}</i>
       </button>
       <p id={descriptionId} className="ultra-mode-description">
-        光・反射・粒子・質感の描写を高めます。端末の発熱や消費電力が増える場合があります。設定はこのブラウザーに保存します。いつでもOFFに戻せます。
+        作品画像の周囲に金属・ガラスの額縁表現を加えます。端末の発熱や消費電力が増える場合があります。設定はこのブラウザーに保存します。いつでもOFFに戻せます。
       </p>
       {snapshot.enabled && (
         <fieldset className="ultra-quality-options" aria-describedby={qualityDescriptionId}>
@@ -94,7 +94,7 @@ export function UltraModeToggle() {
             />
             <span>
               <b>高精細</b>
-              <small>結晶内の光と多層反射を高精細に描写します。</small>
+              <small>額縁の金属面と縁の光を高精細に描写します。</small>
             </span>
           </label>
           <label className="ultra-quality-option">
@@ -111,7 +111,7 @@ export function UltraModeToggle() {
             />
             <span>
               <b>シネマ</b>
-              <small>光の重なりと輪郭をさらに精密に描写します。処理負荷が高くなります。</small>
+              <small>額縁の反射と輪郭を、より高い描写密度で表示します。処理負荷が高くなります。</small>
             </span>
           </label>
           <p id={qualityDescriptionId} className="ultra-quality-description">
@@ -120,14 +120,14 @@ export function UltraModeToggle() {
         </fieldset>
       )}
       <details className="ultra-mode-rendering-details">
-        <summary>描画方式について</summary>
+        <summary>素材と表示について</summary>
         <p>
-          対応環境ではWebGL2で結晶・反射床・光・粒子を描画します。MetalFXやハードウェア・レイ・トレーシングではなく、Web用のレイマーチングです。非対応環境では静的な素材表現へ切り替わります。
+          Blenderで生成した透明な額縁素材を使い、作品画像そのものは加工しません。対応環境では額縁の金属・ガラス縁の質感を描写します。非対応環境では静的な額縁素材で表示し、動き・透明度・コントラスト・配色の設定が優先される場合は追加の演出を抑えます。
         </p>
       </details>
       {snapshot.ready && !snapshot.motionAllowed && (
         <p id={motionId} className="ultra-mode-preference">
-          動き・透明度の軽減やコントラスト・配色の設定を優先し、静的な素材表現で表示します。
+          動き・透明度の軽減やコントラスト・配色の設定を優先し、追加の演出を抑えています。
         </p>
       )}
       <p className="ultra-mode-feedback" role="status" aria-live="polite">
