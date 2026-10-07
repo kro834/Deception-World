@@ -1083,6 +1083,19 @@ html body .fst-page .fst-cast-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   object-position: 50% 12%;
 }
 
+/* One original portrait per selected Royal form; preserve its complete frame. */
+.fst-page .fst-gallery.fst-royal-selected-visual {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 640px;
+  margin-inline: auto;
+}
+.fst-page .fst-gallery.fst-royal-selected-visual img {
+  aspect-ratio: auto;
+  height: auto;
+  object-fit: contain;
+  transform: none;
+}
+
 .fst-gallery figcaption {
   position: absolute;
   bottom: 12px;

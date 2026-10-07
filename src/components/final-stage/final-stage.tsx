@@ -229,9 +229,13 @@ function RiderPickup({
           <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
-            <b><DisplayName value={name} /></b>
+            <b>
+              <DisplayName value={name} />
+            </b>
           </h3>
-          <em><DisplayName value={sub} /></em>
+          <em>
+            <DisplayName value={sub} />
+          </em>
           <q>{quote}</q>
         </div>
       </article>
@@ -274,9 +278,13 @@ function RiderPickup({
             <small>{eyebrow}</small>
             <h2>
               <span>仮面ライダー</span>
-              <b><DisplayName value={name} /></b>
+              <b>
+                <DisplayName value={name} />
+              </b>
             </h2>
-            <em><DisplayName value={sub} /></em>
+            <em>
+              <DisplayName value={sub} />
+            </em>
           </div>
           <div className="fst-pickup-record">{children}</div>
           {/* The record's own way out at its end (styles-pickup-stability.css),
@@ -335,6 +343,7 @@ export function FinalStage() {
   const activeCast = CAST[castIndex];
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeForm = REALM_ROYAL.forms[form];
+  const activeVisual = REALM_ROYAL.visuals[RR_FORM_ORDER.indexOf(form)];
 
   useEffect(() => {
     const page = pageRef.current;
@@ -804,9 +813,9 @@ export function FinalStage() {
         <RiderPickup
           id="realm-royal"
           accent="#ff6f8d"
-          image={REALM_ROYAL.visuals[0].image}
-          imageWidth={REALM_ROYAL.visuals[0].width}
-          imageHeight={REALM_ROYAL.visuals[0].height}
+          image={activeVisual.image}
+          imageWidth={activeVisual.width}
+          imageHeight={activeVisual.height}
           imagePos="50% 10%"
           eyebrow={`RIDER RECORD 02 / ${REALM_ROYAL.en}`}
           name={REALM_ROYAL.name}
@@ -868,22 +877,23 @@ export function FinalStage() {
           </div>
 
           <SubHeading kicker="VISUAL" title="ビジュアル" />
-          <div className="fst-gallery" role="list" aria-label="レルムロイヤル ビジュアル">
-            {REALM_ROYAL.visuals.map((visual, index) => (
-              <figure key={visual.image} role="listitem">
-                <img
-                  src={visual.image}
-                  {...rexonanceImage(visual.image, true)}
-                  alt={visual.alt}
-                  width={visual.width}
-                  height={visual.height}
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority={index === 0 ? "auto" : "low"}
-                />
-                <figcaption>{visual.label}</figcaption>
-              </figure>
-            ))}
+          <div
+            className="fst-gallery fst-royal-selected-visual"
+            role="list"
+            aria-label="レルムロイヤル ビジュアル"
+          >
+            <figure key={activeVisual.image} role="listitem">
+              <img
+                src={activeVisual.image}
+                alt={activeVisual.alt}
+                width={activeVisual.width}
+                height={activeVisual.height}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="auto"
+              />
+              <figcaption>{activeVisual.label}</figcaption>
+            </figure>
           </div>
 
           <SubHeading kicker="OVERVIEW" title="概要" />

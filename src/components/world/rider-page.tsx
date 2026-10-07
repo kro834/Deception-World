@@ -530,7 +530,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       kicker: "ファイナルステージ",
       name: "レルムロイヤル",
       en: "REALM ROYAL",
-      sub: "ROYAL / WRATH / ABYSS / BIRTH / NEHAN",
+      sub: "ROYAL / WRATH / ABYSS / BIRTH / ULTRA",
       quote:
         "戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。",
       img: "/rider-realm-royal.webp",
