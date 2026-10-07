@@ -21,6 +21,7 @@ import {
   sanitizeGalleryImage,
   setGalleryDeleted,
 } from "../src/lib/gallery.server.ts";
+import { completeGalleryUpload, initGalleryUpload } from "../src/lib/gallery-upload.server.ts";
 
 const userA = "12345678-1234-4123-8123-123456789abc";
 const userB = "22345678-1234-4123-8123-123456789abc";
@@ -33,6 +34,10 @@ const migration = await readFile(
 );
 const catalogueMigration = await readFile(
   new URL("../supabase/migrations/202610060002_gallery_catalogue_113.sql", import.meta.url),
+  "utf8",
+);
+const losslessMigration = await readFile(
+  new URL("../supabase/migrations/202610070001_gallery_lossless_uploads.sql", import.meta.url),
   "utf8",
 );
 
@@ -385,6 +390,8 @@ test("mutation routes reject remotely invalid and expired tokens and never trust
             });
           for (const handler of [
             () => postGallery(request("POST")),
+            () => initGalleryUpload(request("POST", "/upload")),
+            () => completeGalleryUpload(request("POST", "/upload/complete")),
             () => patchGalleryTitle(request("PATCH", "/title")),
             () => setGalleryDeleted(request("DELETE", `/${postA}`), postA, true),
             () => setGalleryDeleted(request("POST", `/${postA}/restore`), postA, false),
@@ -399,7 +406,7 @@ test("mutation routes reject remotely invalid and expired tokens and never trust
           },
         });
         assert.equal((await galleryRoute(() => patchGalleryTitle(cookieOnly))).status, 401);
-        assert.equal(verifications, 8);
+        assert.equal(verifications, 12);
       },
     );
   } finally {
@@ -529,29 +536,461 @@ test("a remotely verified anonymous visitor can upload, edit, remove and restore
   );
 });
 
-test("image sanitization bounds dimensions, rotates pixels and removes original metadata", async () => {
+test("signed staging upload initializes with metadata only and finalizes the exact lossless image", async () => {
   const { default: sharp } = await import("sharp");
-  const source = await sharp({
-    create: { width: 3000, height: 500, channels: 3, background: "#55aaff" },
+  const image = await sharp({
+    create: { width: 32, height: 24, channels: 4, background: { r: 71, g: 143, b: 202, alpha: 0.4 } },
   })
     .png()
     .toBuffer();
+  let uploadId;
+  let postRow;
+  let signedPath;
+  let finalBytes;
+  let finishedUpload = false;
+  let stageDownloads = 0;
+  let prepareCalls = 0;
+  const cleanupRemovals = [];
+  const rpcCalls = [];
+  await withMockSupabase(
+    async (input, init) => {
+      const url = new URL(String(input));
+      if (url.pathname === "/auth/v1/user")
+        return Response.json({
+          id: anonymous,
+          is_anonymous: true,
+          aud: "authenticated",
+          role: "authenticated",
+          app_metadata: {},
+          user_metadata: {},
+          created_at: "2026-10-06T00:00:00.000Z",
+        });
+      if (url.pathname.startsWith("/rest/v1/rpc/")) {
+        const name = url.pathname.split("/").at(-1);
+        const body = JSON.parse(init.body);
+        rpcCalls.push([name, body]);
+        if (name === "gallery_upload_cleanup_claim")
+          return Response.json({ uploads: [{ id: `u-${userB}`, stage_path: `u-${userB}/source` }] });
+        if (name === "gallery_upload_init") {
+          uploadId = body.p_id;
+          return Response.json({ upload: { id: uploadId, stage_path: `${uploadId}/source`, content_type: body.p_type } });
+        }
+        if (name === "gallery_upload_claim" && finishedUpload)
+          return Response.json({ post: { ...postRow, state: "ready" }, ready: true });
+        if (name === "gallery_upload_claim")
+          return Response.json({ upload: { id: uploadId, stage_path: `${uploadId}/source`, content_type: "image/png" } });
+        if (name === "gallery_upload_prepare") {
+          prepareCalls++;
+          assert.equal(body.p_id, uploadId);
+          assert.equal(body.p_format, "png");
+          postRow = {
+            id: uploadId,
+            sequence: 1,
+            owner_id: anonymous,
+            object_path: `${uploadId}.png`,
+            width: body.p_width,
+            height: body.p_height,
+            created_at: "2026-10-06T00:00:00.000Z",
+            deleted_at: null,
+          };
+          return Response.json({ post: { ...postRow, bytes: body.p_bytes } });
+        }
+        if (name === "gallery_upload_finish") {
+          finishedUpload = true;
+          return Response.json({ post: { ...postRow, state: "ready" } });
+        }
+        throw new Error(`Unexpected RPC ${name}`);
+      }
+      if (url.pathname.startsWith("/storage/v1/object/upload/sign/")) {
+        signedPath = decodeURIComponent(url.pathname.split("/storage/v1/object/upload/sign/")[1]);
+        return Response.json({ url: `/object/upload/sign/${signedPath}?token=stage-token` });
+      }
+      if (url.pathname === "/storage/v1/object/gallery-upload-staging" && init.method === "DELETE") {
+        cleanupRemovals.push(JSON.parse(init.body));
+        return Response.json({ message: "temporary storage failure" }, { status: 503 });
+      }
+      if (url.pathname === `/storage/v1/object/gallery-upload-staging/${uploadId}/source`) {
+        stageDownloads++;
+        return new Response(image, { headers: { "content-type": "image/png" } });
+      }
+      if (url.pathname === `/storage/v1/object/gallery-images/${uploadId}.png`) {
+        finalBytes = Buffer.from(await new Response(init.body).arrayBuffer());
+        return Response.json({ Key: `${uploadId}.png` });
+      }
+      if (url.pathname === "/storage/v1/object/sign/gallery-images") {
+        const body = JSON.parse(init.body);
+        return Response.json(body.paths.map((path) => ({
+          path,
+          signedURL: `/object/sign/gallery-images/${path}?token=final-test`,
+          error: null,
+        })));
+      }
+      throw new Error(`Unexpected upload mock request ${url.pathname}`);
+    },
+    async () => {
+      const headers = {
+        origin: "https://gallery.example",
+        authorization: "Bearer anonymous-verified-token-123456789",
+        "content-type": "application/json",
+      };
+      const initialized = await galleryRoute(() => initGalleryUpload(new Request("https://gallery.example/api/gallery/upload", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ size: image.byteLength, type: "image/png" }),
+      })));
+      assert.equal(initialized.status, 201, await initialized.clone().text());
+      const body = await initialized.json();
+      assert.equal(body.path, `${body.uploadId}/source`);
+      assert.equal(body.token, "stage-token");
+      assert.doesNotMatch(JSON.stringify(body), /sb_secret|service_role/);
+      assert.equal(signedPath, `gallery-upload-staging/${body.uploadId}/source`);
+      assert.deepEqual(rpcCalls.map(([name]) => name), ["gallery_upload_cleanup_claim", "gallery_upload_init"]);
+      assert.deepEqual(cleanupRemovals, [{ prefixes: [`u-${userB}/source`] }]);
+      assert.equal(rpcCalls.some(([name]) => name === "gallery_upload_cleanup_finish"), false);
+
+      const completed = await galleryRoute(() => completeGalleryUpload(new Request("https://gallery.example/api/gallery/upload/complete", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ uploadId: body.uploadId }),
+      })));
+      assert.equal(completed.status, 201, await completed.clone().text());
+      const result = await completed.json();
+      assert.equal(result.post.url, `https://gallery-test.supabase.co/storage/v1/object/sign/gallery-images/${body.uploadId}.png?token=final-test`);
+      assert.equal(result.post.width, 32);
+      assert.equal(result.post.height, 24);
+      assert.equal(postRow.object_path, `${body.uploadId}.png`);
+      assert.deepEqual(await sharp(finalBytes).raw().toBuffer(), await sharp(image).raw().toBuffer());
+      assert.deepEqual(rpcCalls.map(([name]) => name), [
+        "gallery_upload_cleanup_claim",
+        "gallery_upload_init",
+        "gallery_upload_claim",
+        "gallery_upload_prepare",
+        "gallery_upload_finish",
+      ]);
+      assert.deepEqual(
+        Object.keys(rpcCalls[1][1]).sort(),
+        ["p_id", "p_type", "p_user"].sort(),
+        "the server-minted staging request carries metadata, never browser-supplied image bytes",
+      );
+      const callsBeforeReadyRetry = rpcCalls.length;
+      const retry = await galleryRoute(() => completeGalleryUpload(new Request("https://gallery.example/api/gallery/upload/complete", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ uploadId: body.uploadId }),
+      })));
+      assert.equal(retry.status, 200);
+      assert.equal((await retry.json()).post.width, 32);
+      assert.equal(stageDownloads, 1);
+      assert.equal(prepareCalls, 1);
+      assert.equal(rpcCalls.length, callsBeforeReadyRetry + 1);
+    },
+  );
+});
+
+test("a mismatched occupied final path rejects without deleting either object", async () => {
+  const { default: sharp } = await import("sharp");
+  const id = `u-${userA}`;
+  const source = await sharp({
+    create: { width: 8, height: 6, channels: 4, background: { r: 120, g: 40, b: 190, alpha: 0.7 } },
+  }).png().toBuffer();
+  const differentFinal = await sharp({
+    create: { width: 8, height: 6, channels: 4, background: { r: 10, g: 20, b: 30, alpha: 0.7 } },
+  }).png().toBuffer();
+  const actions = [];
+  const storage = [];
+  await withMockSupabase(
+    async (input, init) => {
+      const url = new URL(String(input));
+      if (url.pathname === "/auth/v1/user")
+        return Response.json({
+          id: anonymous,
+          is_anonymous: true,
+          aud: "authenticated",
+          role: "authenticated",
+          app_metadata: {},
+          user_metadata: {},
+          created_at: "2026-10-06T00:00:00.000Z",
+        });
+      if (url.pathname.startsWith("/rest/v1/rpc/")) {
+        const name = url.pathname.split("/").at(-1);
+        actions.push(name);
+        if (name === "gallery_upload_claim")
+          return Response.json({ upload: { id, stage_path: `${id}/source`, content_type: "image/png" } });
+        if (name === "gallery_upload_prepare")
+          return Response.json({ post: { id, object_path: `${id}.png`, width: 8, height: 6, bytes: JSON.parse(init.body).p_bytes } });
+        if (name === "gallery_upload_release") return Response.json({ ok: true });
+        throw new Error(`Unexpected RPC ${name}`);
+      }
+      if (url.pathname === `/storage/v1/object/gallery-upload-staging/${id}/source`)
+        return new Response(source, { headers: { "content-type": "image/png" } });
+      if (url.pathname === `/storage/v1/object/gallery-images/${id}.png`) {
+        storage.push(init.method);
+        if (init.method === "POST") return Response.json({ message: "object already exists" }, { status: 409 });
+        return new Response(differentFinal, { headers: { "content-type": "image/png" } });
+      }
+      if (url.pathname === `/storage/v1/object/gallery-images` || url.pathname.endsWith("/remove")) {
+        storage.push(`unexpected:${init.method}`);
+        throw new Error("Final objects must never be deleted during conflict recovery");
+      }
+      throw new Error(`Unexpected conflict mock request ${url.pathname}`);
+    },
+    async () => {
+      const response = await galleryRoute(() => completeGalleryUpload(new Request(
+        "https://gallery.example/api/gallery/upload/complete",
+        {
+          method: "POST",
+          headers: {
+            origin: "https://gallery.example",
+            authorization: "Bearer anonymous-verified-token-123456789",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ uploadId: id }),
+        },
+      )));
+      assert.equal(response.status, 503);
+      assert.deepEqual(await response.json(), { error: "画像の保存に失敗しました。時間をおいてお試しください。" });
+      assert.deepEqual(storage, ["POST", "GET"]);
+      assert.deepEqual(actions, ["gallery_upload_claim", "gallery_upload_prepare", "gallery_upload_release"]);
+      assert.equal(actions.includes("gallery_upload_finish"), false);
+    },
+  );
+});
+
+test("sanitization keeps original dimensions and PNG RGBA pixels exactly", async () => {
+  const { default: sharp } = await import("sharp");
+  const width = 37;
+  const height = 29;
+  const pixels = Buffer.alloc(width * height * 4);
+  for (let index = 0; index < pixels.length; index += 4) {
+    const pixel = index / 4;
+    pixels[index] = (pixel * 19) % 256;
+    pixels[index + 1] = (pixel * 41) % 256;
+    pixels[index + 2] = (pixel * 73) % 256;
+    pixels[index + 3] = pixel % 5 === 0 ? 0 : (pixel * 29) % 256;
+  }
+  const source = await sharp(pixels, { raw: { width, height, channels: 4 } }).png().toBuffer();
   const result = await sanitizeGalleryImage(source, "image/png");
-  assert.equal(result.width, 2400);
-  assert.equal(result.height, 400);
-  assert.ok(result.bytes.byteLength <= 3 * 1024 * 1024);
+  assert.equal(result.width, width);
+  assert.equal(result.height, height);
+  assert.equal(result.format, "png");
+  assert.equal(result.contentType, "image/png");
+  assert.ok(result.bytes.byteLength <= 19 * 1024 * 1024);
+  const decoded = await sharp(result.bytes).raw().toBuffer();
+  assert.deepEqual(decoded, pixels);
+});
+
+function jpegWithGpsExif(jpeg) {
+  const tiff = Buffer.alloc(56);
+  tiff.write("II", 0, "ascii");
+  tiff.writeUInt16LE(42, 2);
+  tiff.writeUInt32LE(8, 4);
+  tiff.writeUInt16LE(2, 8);
+  tiff.writeUInt16LE(0x0112, 10);
+  tiff.writeUInt16LE(3, 12);
+  tiff.writeUInt32LE(1, 14);
+  tiff.writeUInt16LE(6, 18);
+  tiff.writeUInt16LE(0x8825, 22);
+  tiff.writeUInt16LE(4, 24);
+  tiff.writeUInt32LE(1, 26);
+  tiff.writeUInt32LE(38, 30);
+  tiff.writeUInt32LE(0, 34);
+  tiff.writeUInt16LE(1, 38);
+  tiff.writeUInt16LE(1, 40);
+  tiff.writeUInt16LE(2, 42);
+  tiff.writeUInt32LE(2, 44);
+  tiff.write("N\0", 48, "ascii");
+  tiff.writeUInt32LE(0, 52);
+  const exif = Buffer.concat([Buffer.from("Exif\0\0", "binary"), tiff]);
+  const segment = Buffer.alloc(4);
+  segment[0] = 0xff;
+  segment[1] = 0xe1;
+  segment.writeUInt16BE(exif.length + 2, 2);
+  return Buffer.concat([jpeg.subarray(0, 2), segment, exif, jpeg.subarray(2)]);
+}
+
+const pngCrcTable = Uint32Array.from({ length: 256 }, (_, value) => {
+  let crc = value;
+  for (let bit = 0; bit < 8; bit++) crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+  return crc >>> 0;
+});
+
+function pngChunk(type, data) {
+  const typeBytes = Buffer.from(type, "ascii");
+  const chunk = Buffer.alloc(data.length + 12);
+  chunk.writeUInt32BE(data.length, 0);
+  typeBytes.copy(chunk, 4);
+  data.copy(chunk, 8);
+  let crc = 0xffffffff;
+  for (const byte of chunk.subarray(4, 8 + data.length))
+    crc = pngCrcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  chunk.writeUInt32BE((crc ^ 0xffffffff) >>> 0, 8 + data.length);
+  return chunk;
+}
+
+function pngWithLargeTextChunk(source, targetBytes) {
+  const end = source.subarray(source.length - 12);
+  const textBytes = targetBytes - source.length - 12;
+  assert.ok(textBytes >= 2);
+  const text = Buffer.alloc(textBytes);
+  text.write("x\0", 0, "binary");
+  const textChunk = pngChunk("tEXt", text);
+  assert.equal(source.length + textChunk.length, targetBytes);
+  return Buffer.concat([source.subarray(0, source.length - 12), textChunk, end]);
+}
+
+function exifIfd0Tags(exif) {
+  if (!exif || exif.length < 14) return [];
+  const tiff = exif.subarray(6);
+  const littleEndian = tiff.toString("ascii", 0, 2) === "II";
+  const view = new DataView(tiff.buffer, tiff.byteOffset, tiff.byteLength);
+  const read16 = (offset) => view.getUint16(offset, littleEndian);
+  const read32 = (offset) => view.getUint32(offset, littleEndian);
+  const ifdOffset = read32(4);
+  const count = read16(ifdOffset);
+  return Array.from({ length: count }, (_, index) => read16(ifdOffset + 2 + index * 12));
+}
+
+test("sanitization preserves 16-bit PNG samples and alpha without resizing", async () => {
+  const { default: sharp } = await import("sharp");
+  const width = 23;
+  const height = 17;
+  const samples = new Uint16Array(width * height * 4);
+  for (let index = 0; index < samples.length; index++) samples[index] = (index * 7919) % 65536;
+  for (let pixel = 0; pixel < width * height; pixel++) samples[pixel * 4 + 3] = pixel % 4 ? 65535 : 0;
+  const { deflateSync, inflateSync } = await import("node:zlib");
+  const rows = Buffer.alloc(height * (1 + width * 8));
+  for (let y = 0; y < height; y++) {
+    const rowStart = y * (1 + width * 8);
+    rows[rowStart] = 0;
+    for (let x = 0; x < width * 4; x++) rows.writeUInt16BE(samples[y * width * 4 + x], rowStart + 1 + x * 2);
+  }
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 16;
+  ihdr[9] = 6;
+  const source = Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", deflateSync(rows)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+  const sourceMetadata = await sharp(source).metadata();
+  assert.equal(sourceMetadata.depth, "ushort");
+  assert.equal(sourceMetadata.hasAlpha, true);
+
+  const result = await sanitizeGalleryImage(source, "image/png");
+  assert.equal(result.width, width);
+  assert.equal(result.height, height);
+  assert.equal(result.format, "png");
+  const metadata = await sharp(result.bytes).metadata();
+  assert.equal(metadata.depth, "ushort");
+  assert.equal(metadata.hasAlpha, true);
+  const idatData = (buffer) => {
+    const chunks = [];
+    for (let offset = 8; offset + 12 <= buffer.length; ) {
+      const length = buffer.readUInt32BE(offset);
+      const name = buffer.toString("ascii", offset + 4, offset + 8);
+      if (name === "IDAT") chunks.push(buffer.subarray(offset + 8, offset + 8 + length));
+      offset += length + 12;
+    }
+    return inflateSync(Buffer.concat(chunks));
+  };
+  assert.deepEqual(idatData(result.bytes), idatData(source));
+});
+
+test("PNG ICC profiles survive lossless metadata cleanup", async () => {
+  const { default: sharp } = await import("sharp");
+  const source = await sharp({
+    create: { width: 11, height: 9, channels: 4, background: { r: 40, g: 90, b: 150, alpha: 0.6 } },
+  })
+    .withIccProfile("p3")
+    .png()
+    .toBuffer();
+  const sourceProfile = (await sharp(source).metadata()).icc;
+  assert.ok(sourceProfile);
+  const result = await sanitizeGalleryImage(source, "image/png");
+  const resultProfile = (await sharp(result.bytes).metadata()).icc;
+  assert.deepEqual(resultProfile, sourceProfile);
+});
+
+test("JPEG EXIF orientation is retained while visible dimensions account for it", async () => {
+  const { default: sharp } = await import("sharp");
+  const width = 80;
+  const height = 40;
+  const source = await sharp({
+    create: { width, height, channels: 3, background: "#cc4477" },
+  })
+    .withMetadata({ orientation: 6 })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+  const result = await sanitizeGalleryImage(source, "image/jpeg");
+  assert.equal(result.width, height);
+  assert.equal(result.height, width);
+  assert.equal(result.format, "jpeg");
+  assert.equal(result.contentType, "image/jpeg");
+  const metadata = await sharp(result.bytes).metadata();
+  assert.equal(metadata.format, "jpeg");
+  assert.equal(metadata.orientation, 6);
+  assert.deepEqual(metadata.autoOrient, { width: height, height: width });
+  assert.ok(metadata.exif);
+  assert.ok(result.bytes.byteLength <= 19 * 1024 * 1024);
+});
+
+test("JPEG GPS metadata is removed without changing its raster or required orientation", async () => {
+  const { default: sharp } = await import("sharp");
   const jpeg = await sharp({
     create: { width: 80, height: 40, channels: 3, background: "#cc4477" },
   })
-    .withMetadata({ orientation: 6 })
-    .jpeg()
+    .jpeg({ quality: 90 })
     .toBuffer();
-  const rotated = await sanitizeGalleryImage(jpeg, "image/jpeg");
-  assert.equal(rotated.width, 40);
-  assert.equal(rotated.height, 80);
-  const metadata = await sharp(rotated.bytes).metadata();
-  assert.equal(metadata.format, "webp");
-  for (const key of ["exif", "xmp", "icc", "orientation"]) assert.equal(metadata[key], undefined);
+  const source = jpegWithGpsExif(jpeg);
+  const sourceMetadata = await sharp(source).metadata();
+  assert.equal(sourceMetadata.orientation, 6);
+  assert.ok(exifIfd0Tags(sourceMetadata.exif).includes(0x8825));
+  const result = await sanitizeGalleryImage(source, "image/jpeg");
+  const resultMetadata = await sharp(result.bytes).metadata();
+  assert.equal(resultMetadata.orientation, 6);
+  assert.ok(!exifIfd0Tags(resultMetadata.exif).includes(0x8825));
+  assert.deepEqual(
+    await sharp(result.bytes).rotate().raw().toBuffer(),
+    await sharp(source).rotate().raw().toBuffer(),
+  );
+});
+
+test("JPEG and WebP sanitization does not recompress the encoded picture", async () => {
+  const { default: sharp } = await import("sharp");
+  const sourcePixels = Buffer.alloc(31 * 19 * 3);
+  for (let index = 0; index < sourcePixels.length; index++) sourcePixels[index] = (index * 43) % 256;
+  for (const [format, type] of [["jpeg", "image/jpeg"], ["webp", "image/webp"]]) {
+    const source = await sharp(sourcePixels, {
+      raw: { width: 31, height: 19, channels: 3 },
+    })[format]({ quality: 82 })
+      .toBuffer();
+    const result = await sanitizeGalleryImage(source, type);
+    assert.equal(result.format, format);
+    assert.equal(result.contentType, type);
+    assert.equal(result.width, 31);
+    assert.equal(result.height, 19);
+    assert.deepEqual(
+      await sharp(result.bytes).raw().toBuffer(),
+      await sharp(source).raw().toBuffer(),
+      `${format} raster must remain bit-for-bit identical after lossless sanitization`,
+    );
+  }
+});
+
+test("exact 19 MiB sources are accepted and one-byte-over inputs are rejected", async () => {
+  const { default: sharp } = await import("sharp");
+  const source = await sharp({
+    create: { width: 4, height: 4, channels: 4, background: { r: 80, g: 120, b: 160, alpha: 0.5 } },
+  })
+    .png()
+    .toBuffer();
+  const exact = pngWithLargeTextChunk(source, 19 * 1024 * 1024);
+  const result = await sanitizeGalleryImage(exact, "image/png");
+  assert.equal(result.width, 4);
+  assert.equal(result.height, 4);
   await assert.rejects(
     () => sanitizeGalleryImage(new Uint8Array([255, 216, 255]), "image/jpeg"),
     (error) => error.status === 400,
@@ -561,7 +1000,7 @@ test("image sanitization bounds dimensions, rotates pixels and removes original 
     (error) => error.status === 400,
   );
   await assert.rejects(
-    () => sanitizeGalleryImage(new Uint8Array(10 * 1024 * 1024 + 1), "image/png"),
+    () => sanitizeGalleryImage(new Uint8Array(19 * 1024 * 1024 + 1), "image/png"),
     (error) => error.status === 413,
   );
   // Oversized IHDR dimensions are rejected before the decoder allocates pixels.
@@ -587,6 +1026,7 @@ async function database(expandCatalogue = true) {
   `);
   await db.exec(migration);
   if (expandCatalogue) await db.exec(catalogueMigration);
+  await db.exec(losslessMigration);
   return db;
 }
 async function call(db, name, values) {
@@ -712,9 +1152,9 @@ test("Supabase migration denies direct anonymous/authenticated mutations and RPC
   const db = await database();
   try {
     const result = await db.query(
-      `select relname, relrowsecurity from pg_class where relname in ('gallery_posts','gallery_titles','gallery_title_history','gallery_rate_limits','gallery_global_limits')`,
+      `select relname, relrowsecurity from pg_class where relname in ('gallery_posts','gallery_titles','gallery_title_history','gallery_rate_limits','gallery_global_limits','gallery_uploads')`,
     );
-    assert.equal(result.rows.length, 5);
+    assert.equal(result.rows.length, 6);
     assert.ok(result.rows.every((row) => row.relrowsecurity));
     for (const role of ["anon", "authenticated"]) {
       const privileges = await db.query(
@@ -724,11 +1164,16 @@ test("Supabase migration denies direct anonymous/authenticated mutations and RPC
       assert.deepEqual(privileges.rows[0], { inserts: false, updates: false, rpc: false });
     }
     const bucket = await db.query(
-      "select public, file_size_limit, allowed_mime_types from storage.buckets",
+      "select id, public, file_size_limit, allowed_mime_types from storage.buckets order by id",
     );
-    assert.equal(bucket.rows[0].public, false);
-    assert.equal(Number(bucket.rows[0].file_size_limit), 3 * 1024 * 1024);
-    assert.deepEqual(bucket.rows[0].allowed_mime_types, ["image/webp"]);
+    assert.deepEqual(
+      bucket.rows.map((row) => [row.id, row.public, Number(row.file_size_limit), row.allowed_mime_types]),
+      [
+        ["gallery-images", false, 19 * 1024 * 1024, ["image/jpeg", "image/png", "image/webp"]],
+        ["gallery-upload-staging", false, 19 * 1024 * 1024, ["image/jpeg", "image/png", "image/webp"]],
+      ],
+    );
+    assert.equal(await call(db, "gallery_upload_protocol_ready", []), true);
     const storagePolicy = await db.query(
       "select permissive, roles, cmd from pg_policies where schemaname = 'storage' and policyname = 'gallery_server_only'",
     );
@@ -744,6 +1189,76 @@ test("Supabase migration denies direct anonymous/authenticated mutations and RPC
     const readableObjects = await db.query("select bucket_id from storage.objects");
     assert.deepEqual(readableObjects.rows, [{ bucket_id: "unrelated-bucket" }]);
     await db.exec("reset role");
+  } finally {
+    await db.close();
+  }
+});
+
+test("lossless upload migration keeps legacy reserve RPC and adds an idempotent format-bound lifecycle", async () => {
+  const db = await database();
+  try {
+    const uploadId = `u-${userA}`;
+    const lease = "42345678-1234-4123-8123-123456789abc";
+    const digest = "a".repeat(64);
+    const initialized = await call(db, "gallery_upload_init", [userA, uploadId, "image/png"]);
+    assert.equal(initialized.upload.id, uploadId);
+    assert.equal(initialized.upload.stage_path, `${uploadId}/source`);
+    assert.equal(initialized.upload.reserved_bytes, 19 * 1024 * 1024);
+    const claimed = await call(db, "gallery_upload_claim", [userA, uploadId, lease]);
+    assert.equal(claimed.upload.id, uploadId);
+    assert.equal(claimed.upload.state, "processing");
+    assert.equal(claimed.upload.lease_id, lease);
+    assert.deepEqual(
+      await call(db, "gallery_upload_claim", [userA, uploadId, "52345678-1234-4123-8123-123456789abc"]),
+      { error: "busy" },
+    );
+    const prepared = await call(db, "gallery_upload_prepare", [
+      userA,
+      uploadId,
+      lease,
+      640,
+      480,
+      2_000_000,
+      "png",
+      digest,
+    ]);
+    assert.equal(prepared.post.id, uploadId);
+    assert.equal(prepared.post.object_path, `${uploadId}.png`);
+    assert.equal(prepared.post.width, 640);
+    assert.equal(prepared.post.height, 480);
+    assert.equal(prepared.post.bytes, 2_000_000);
+    assert.deepEqual(await call(db, "gallery_upload_prepare", [
+      userA,
+      uploadId,
+      lease,
+      640,
+      480,
+      2_000_000,
+      "png",
+      digest,
+    ]), prepared);
+    const finished = await call(db, "gallery_upload_finish", [userA, uploadId, lease]);
+    assert.equal(finished.post.state, "ready");
+    assert.deepEqual(await call(db, "gallery_upload_finish", [userA, uploadId, lease]), {
+      post: finished.post,
+      ready: true,
+    });
+    assert.deepEqual(await call(db, "gallery_upload_claim", [userA, uploadId, lease]), {
+      post: finished.post,
+      ready: true,
+    });
+
+    const legacy = await call(db, "gallery_reserve_upload", [userB, postB, 200, 300, 1000]);
+    assert.equal(legacy.post.object_path, `${postB}.webp`);
+    const formatted = await call(db, "gallery_reserve_upload", [
+      userB,
+      `u-32345678-1234-4123-8123-123456789abc`,
+      200,
+      300,
+      1000,
+      "jpeg",
+    ]);
+    assert.equal(formatted.post.object_path, `u-32345678-1234-4123-8123-123456789abc.jpeg`);
   } finally {
     await db.close();
   }

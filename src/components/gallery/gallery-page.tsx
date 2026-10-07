@@ -10,12 +10,14 @@ import { ExhibitionStudio } from "@/components/ultra/exhibition-studio";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
 import {
   communityPostToArtwork,
+  COMMUNITY_GALLERY_TITLE_LIMIT,
   createGalleryAuthClient,
   deleteCommunityGalleryImage,
   ensureGalleryWriteSession,
   GalleryRequestError,
   galleryNumberFor as numberFor,
   isCommunityGalleryId,
+  mergeCommunityGalleryTitles,
   postCommunityGalleryImage,
   prepareCommunityUpload,
   readCommunityGallery,
@@ -58,12 +60,7 @@ import {
   type GalleryViewerMode,
 } from "./gallery-viewer-state";
 import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
-import {
-  GALLERY_TITLE_LIMIT,
-  GALLERY_TITLES_KEY,
-  readGalleryTitles,
-  type GalleryTitles,
-} from "./gallery-titles";
+import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
 
 const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
 
@@ -310,7 +307,7 @@ export function GalleryPage() {
         if (disposed || current !== generation) return false;
         setCommunityPosts(collection.posts);
         setDeletedPosts(collection.deletedPosts ?? []);
-        setSharedTitles(collection.titles);
+        setSharedTitles((current) => mergeCommunityGalleryTitles(current, collection.titles));
         setCommunityLoaded(true);
         setCommunityLoadError("");
         return true;
@@ -846,7 +843,7 @@ export function GalleryPage() {
           const token = await accessToken();
           const prepared = await prepareCommunityUpload(file);
           if (!communityReloadRef.current) break;
-          await postCommunityGalleryImage(prepared, token);
+          await postCommunityGalleryImage(prepared, token, authClientRef.current ?? undefined);
           added++;
         } catch (error) {
           failures.push(
@@ -947,17 +944,25 @@ export function GalleryPage() {
         editingVersion,
         await accessToken(),
       );
-      setSharedTitles((current) => ({ ...current, [work.id]: entry }));
+      setSharedTitles((current) => mergeCommunityGalleryTitles(current, { [work.id]: entry }));
       setSaveMessage("タイトルを公開しました。すべての訪問者に表示されます。");
       restoreEditFocusRef.current = true;
       setEditing(false);
-      await communityReloadRef.current?.();
     } catch (error) {
       if (error instanceof GalleryRequestError && error.status === 409 && error.current) {
         setTitleConflict(error.current);
-        setSharedTitles((current) => ({ ...current, [work.id]: error.current! }));
+        setSharedTitles((current) =>
+          mergeCommunityGalleryTitles(current, { [work.id]: error.current! }),
+        );
         setSaveError(
           "編集中に別の利用者がタイトルを変更しました。最新のタイトルを確認してから再編集してください。下書きは残しています。",
+        );
+      } else if (error instanceof GalleryRequestError && error.status === 429) {
+        const wait = error.retryAfterSeconds;
+        setSaveError(
+          wait
+            ? `短時間にタイトル更新が続きました。${wait}秒ほど待ってから再度お試しください。下書きは残しています。`
+            : "短時間にタイトル更新が続きました。少し待ってから再度お試しください。下書きは残しています。",
         );
       } else
         setSaveError(error instanceof Error ? error.message : "タイトルを公開できませんでした。");
@@ -965,6 +970,16 @@ export function GalleryPage() {
       communityBusyRef.current = false;
       setCommunityBusy(false);
     }
+  };
+
+  const resolveTitleConflict = (useLatestTitle: boolean) => {
+    if (!titleConflict) return;
+    if (useLatestTitle) setDraft(titleConflict.title);
+    setEditingVersion(titleConflict.version);
+    setTitleConflict(null);
+    setSaveError("");
+    titleInputRef.current?.focus({ preventScroll: true });
+    revealGalleryControl(titleInputRef.current);
   };
 
   const exhibition = (
@@ -1153,7 +1168,7 @@ export function GalleryPage() {
                 追加した画像はこのブラウザーから非公開・復元できます。ブラウザーのデータを消すと管理できなくなります。
               </p>
               <p id="gallery-community-limits">
-                JPEG・PNG・WebPの静止画像、元の画像は1枚10MB・4,000万画素まで。一度に5枚選べます。投稿時に長辺2,400px以下へ縮小します。
+                JPEG・PNG・WebPの静止画像、元の画像は1枚19MB（19MiB）・4,000万画素まで。一度に5枚選べます。解像度・色・透過を保つ可逆圧縮で投稿し、縮小や画質を下げる再圧縮は行いません。圧縮で小さくならない場合も、同じ画質のまま保存します。画像の向き情報だけを残し、その他のEXIF・GPS・XMPの撮影情報は除去します。ICC色プロファイルは保持しますが、プロファイル内の説明情報は残る場合があります。HDR補助画像付きJPEGには対応していません。
               </p>
               <p>
                 このブラウザーで50枚・合計100MBまで、投稿は1日10回までです。非公開にした投稿も復元用に保存され、枚数と容量に含まれます。
@@ -1638,30 +1653,33 @@ export function GalleryPage() {
                     ref={titleInputRef}
                     value={draft}
                     disabled={communityBusy}
-                    maxLength={GALLERY_TITLE_LIMIT}
+                    maxLength={COMMUNITY_GALLERY_TITLE_LIMIT}
                     onChange={(event) => setDraft(event.target.value)}
                     placeholder="空欄で保存すると番号だけに戻ります"
                     aria-describedby="gallery-title-help"
                   />
                   <p id="gallery-title-help">
-                    100文字まで。公開するとすべての訪問者に表示されます。
+                    120文字まで。公開するとすべての訪問者に表示されます。
                   </p>
                   {titleConflict && (
                     <div className="gallery-title-conflict" role="status">
                       <p>最新の公開タイトル：{titleConflict.title || "（番号のみ）"}</p>
+                      <p>
+                        入力中の下書きは保持されています。最新の版を使って保存を再試行できます。
+                      </p>
                       <button
                         type="button"
                         className="gallery-viewer-close"
-                        onClick={() => {
-                          setDraft(titleConflict.title);
-                          setEditingVersion(titleConflict.version);
-                          setTitleConflict(null);
-                          setSaveError("");
-                          titleInputRef.current?.focus({ preventScroll: true });
-                          revealGalleryControl(titleInputRef.current);
-                        }}
+                        onClick={() => resolveTitleConflict(false)}
                       >
-                        最新のタイトルから再編集
+                        下書きを最新versionで再試行
+                      </button>
+                      <button
+                        type="button"
+                        className="gallery-viewer-close"
+                        onClick={() => resolveTitleConflict(true)}
+                      >
+                        最新タイトルを使う
                       </button>
                     </div>
                   )}

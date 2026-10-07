@@ -47,7 +47,9 @@ import { Route as ApiGalleryIndexRouteImport } from './routes/api/gallery/index'
 import { Route as ApiGalleryIdRouteImport } from './routes/api/gallery/$id'
 import { Route as ApiGalleryConfigRouteImport } from './routes/api/gallery/config'
 import { Route as ApiGalleryTitleRouteImport } from './routes/api/gallery/title'
+import { Route as ApiGalleryUploadRouteImport } from './routes/api/gallery/upload'
 import { Route as ApiGalleryIdRestoreRouteImport } from './routes/api/gallery/$id.restore'
+import { Route as ApiGalleryUploadCompleteRouteImport } from './routes/api/gallery/upload.complete'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -239,11 +241,22 @@ const ApiGalleryTitleRoute = ApiGalleryTitleRouteImport.update({
   path: '/api/gallery/title',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGalleryUploadRoute = ApiGalleryUploadRouteImport.update({
+  id: '/api/gallery/upload',
+  path: '/api/gallery/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGalleryIdRestoreRoute = ApiGalleryIdRestoreRouteImport.update({
   id: '/restore',
   path: '/restore',
   getParentRoute: () => ApiGalleryIdRoute,
 } as any)
+const ApiGalleryUploadCompleteRoute =
+  ApiGalleryUploadCompleteRouteImport.update({
+    id: '/complete',
+    path: '/complete',
+    getParentRoute: () => ApiGalleryUploadRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -283,8 +296,10 @@ export interface FileRoutesByFullPath {
   '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
   '/api/gallery/config': typeof ApiGalleryConfigRoute
   '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery/upload': typeof ApiGalleryUploadRouteWithChildren
   '/api/gallery/': typeof ApiGalleryIndexRoute
   '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
+  '/api/gallery/upload/complete': typeof ApiGalleryUploadCompleteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -321,8 +336,10 @@ export interface FileRoutesByTo {
   '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
   '/api/gallery/config': typeof ApiGalleryConfigRoute
   '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery/upload': typeof ApiGalleryUploadRouteWithChildren
   '/api/gallery': typeof ApiGalleryIndexRoute
   '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
+  '/api/gallery/upload/complete': typeof ApiGalleryUploadCompleteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -363,8 +380,10 @@ export interface FileRoutesById {
   '/api/gallery/$id': typeof ApiGalleryIdRouteWithChildren
   '/api/gallery/config': typeof ApiGalleryConfigRoute
   '/api/gallery/title': typeof ApiGalleryTitleRoute
+  '/api/gallery/upload': typeof ApiGalleryUploadRouteWithChildren
   '/api/gallery/': typeof ApiGalleryIndexRoute
   '/api/gallery/$id/restore': typeof ApiGalleryIdRestoreRoute
+  '/api/gallery/upload/complete': typeof ApiGalleryUploadCompleteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -406,8 +425,10 @@ export interface FileRouteTypes {
     | '/api/gallery/$id'
     | '/api/gallery/config'
     | '/api/gallery/title'
+    | '/api/gallery/upload'
     | '/api/gallery/'
     | '/api/gallery/$id/restore'
+    | '/api/gallery/upload/complete'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -444,8 +465,10 @@ export interface FileRouteTypes {
     | '/api/gallery/$id'
     | '/api/gallery/config'
     | '/api/gallery/title'
+    | '/api/gallery/upload'
     | '/api/gallery'
     | '/api/gallery/$id/restore'
+    | '/api/gallery/upload/complete'
   id:
     | '__root__'
     | '/'
@@ -485,8 +508,10 @@ export interface FileRouteTypes {
     | '/api/gallery/$id'
     | '/api/gallery/config'
     | '/api/gallery/title'
+    | '/api/gallery/upload'
     | '/api/gallery/'
     | '/api/gallery/$id/restore'
+    | '/api/gallery/upload/complete'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -512,6 +537,7 @@ export interface RootRouteChildren {
   ApiGalleryIdRoute: typeof ApiGalleryIdRouteWithChildren
   ApiGalleryConfigRoute: typeof ApiGalleryConfigRoute
   ApiGalleryTitleRoute: typeof ApiGalleryTitleRoute
+  ApiGalleryUploadRoute: typeof ApiGalleryUploadRouteWithChildren
   ApiGalleryIndexRoute: typeof ApiGalleryIndexRoute
 }
 
@@ -783,12 +809,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGalleryTitleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/gallery/upload': {
+      id: '/api/gallery/upload'
+      path: '/api/gallery/upload'
+      fullPath: '/api/gallery/upload'
+      preLoaderRoute: typeof ApiGalleryUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/gallery/$id/restore': {
       id: '/api/gallery/$id/restore'
       path: '/restore'
       fullPath: '/api/gallery/$id/restore'
       preLoaderRoute: typeof ApiGalleryIdRestoreRouteImport
       parentRoute: typeof ApiGalleryIdRoute
+    }
+    '/api/gallery/upload/complete': {
+      id: '/api/gallery/upload/complete'
+      path: '/complete'
+      fullPath: '/api/gallery/upload/complete'
+      preLoaderRoute: typeof ApiGalleryUploadCompleteRouteImport
+      parentRoute: typeof ApiGalleryUploadRoute
     }
   }
 }
@@ -864,6 +904,17 @@ const ApiGalleryIdRouteWithChildren = ApiGalleryIdRoute._addFileChildren(
   ApiGalleryIdRouteChildren,
 )
 
+interface ApiGalleryUploadRouteChildren {
+  ApiGalleryUploadCompleteRoute: typeof ApiGalleryUploadCompleteRoute
+}
+
+const ApiGalleryUploadRouteChildren: ApiGalleryUploadRouteChildren = {
+  ApiGalleryUploadCompleteRoute: ApiGalleryUploadCompleteRoute,
+}
+
+const ApiGalleryUploadRouteWithChildren =
+  ApiGalleryUploadRoute._addFileChildren(ApiGalleryUploadRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersRoute: CharactersRouteWithChildren,
@@ -887,6 +938,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiGalleryIdRoute: ApiGalleryIdRouteWithChildren,
   ApiGalleryConfigRoute: ApiGalleryConfigRoute,
   ApiGalleryTitleRoute: ApiGalleryTitleRoute,
+  ApiGalleryUploadRoute: ApiGalleryUploadRouteWithChildren,
   ApiGalleryIndexRoute: ApiGalleryIndexRoute,
 }
 export const routeTree = rootRouteImport

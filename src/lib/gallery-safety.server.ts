@@ -1,9 +1,9 @@
 /** Gallery input rules are enforced again on the server, independently of the browser. */
-export const GALLERY_MAX_INPUT_BYTES = 10 * 1024 * 1024;
-export const GALLERY_MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+export const GALLERY_MAX_INPUT_BYTES = 19 * 1024 * 1024;
+export const GALLERY_MAX_IMAGE_BYTES = GALLERY_MAX_INPUT_BYTES;
 export const GALLERY_MAX_PIXELS = 40_000_000;
-export const GALLERY_MAX_EDGE = 2400;
-export const GALLERY_MAX_REQUEST_BYTES = GALLERY_MAX_INPUT_BYTES + 64 * 1024;
+// Legacy multipart is kept for old clients, but never exceeds the Function body cap.
+export const GALLERY_MAX_REQUEST_BYTES = 4 * 1024 * 1024;
 
 export class GalleryError extends Error {
   status: number;
