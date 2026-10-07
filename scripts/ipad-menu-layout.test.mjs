@@ -62,7 +62,13 @@ test("fully exited chrome loses all edge paint without collapsing containers or 
     header,
     /(?:^|;)\s*(?:display|overflow(?:-[xy])?|transform|contain|touch-action)\s*:/,
   );
-  assert.doesNotMatch(css, /(?:^|[;{])\s*(?:overflow(?:-[xy])?|touch-action)\s*:/);
+  const pageScrollRules = rules.filter(
+    ({ selector }) =>
+      /\b(?:html:root|body)\b/.test(selector) && !selector.includes(".side-panel-trigger"),
+  );
+  for (const rule of pageScrollRules) {
+    assert.doesNotMatch(rule.body, /\b(?:overflow(?:-[xy])?|touch-action)\s*:/);
+  }
   const dreamIndex = bodyFor(`${compactScope} .dream-chapter-nav`);
   assert.match(dreamIndex, /visibility:\s*hidden\s*!important;/);
   assert.match(dreamIndex, /pointer-events:\s*none\s*!important;/);
@@ -109,19 +115,64 @@ test("the same launcher becomes a reachable opaque target below the shared menu 
   );
 });
 
-test("only decorative children morph, leaving the launcher collision box stable from frame one", () => {
+test("the fixed 60px launcher stays still while its decorative copy converges and expands", () => {
   const launcher = bodyFor(`${compactScope} ${headers} .side-panel-trigger`);
   assert.doesNotMatch(
     launcher,
     /(?:^|;)\s*(?:animation(?:-[\w-]+)?|transition(?:-[\w-]+)?|transform|translate|scale|rotate|filter|perspective|will-change)\s*:/,
   );
-  const motion = css.match(/@media \(prefers-reduced-motion: no-preference\) \{([\s\S]*?)\n\}/)?.[1];
+  assert.match(launcher, /width:\s*60px;/);
+  assert.match(launcher, /height:\s*60px;/);
+  assert.match(launcher, /background:\s*var\(--viewport-chrome-color\)\s*!important;/);
+
+  const motion = css.match(
+    /@media \(prefers-reduced-motion: no-preference\) \{([\s\S]*?)\n\}/,
+  )?.[1];
   assert.ok(motion);
-  assert.match(motion, /\.side-panel-trigger-ring\s*\{\s*animation: ipad-menu-ribbon-fold 520ms/);
-  assert.match(motion, /\.side-panel-trigger-glyph\s*\{\s*animation: ipad-menu-glyph-unfold 420ms/);
+  assert.match(
+    motion,
+    /\.side-panel-trigger-convergence\s*\{\s*animation: ipad-menu-converge 720ms/,
+  );
+  assert.match(motion, /\.side-panel-trigger-convergence\s*\{\s*animation: ipad-menu-expand 720ms/);
+  assert.match(
+    motion,
+    /\.side-panel-trigger-convergence\s+i\s*\{\s*animation: ipad-menu-strip-fold 610ms/,
+  );
+  assert.match(
+    motion,
+    /\.side-panel-trigger-convergence\s+i\s*\{\s*animation: ipad-menu-strip-open 610ms/,
+  );
+  assert.match(motion, /\.side-panel-trigger-ring\s*\{\s*animation: ipad-menu-ring-arrive 720ms/);
+  assert.match(motion, /\.side-panel-trigger-ring\s*\{\s*animation: ipad-menu-ring-depart 720ms/);
+  assert.match(
+    motion,
+    /\.side-panel-trigger-glyph\s*\{\s*animation: ipad-menu-glyph-arrive 660ms 60ms/,
+  );
+  assert.match(motion, /animation-delay:\s*38ms/);
+  assert.match(motion, /animation-delay:\s*76ms/);
+  assert.match(
+    motion,
+    /data-ipad-menu="compact"\]:not\(\s*\[data-ipad-menu-scrolled="true"\]\s*\)\[data-ipad-menu-motion="expand"\]/,
+  );
   assert.doesNotMatch(motion, /infinite|\.side-panel-trigger\s*\{/);
-  assert.match(css, /@keyframes ipad-menu-ribbon-fold\s*\{[\s\S]*?border-radius: 4px;[\s\S]*?border-radius: 50%;/);
-  assert.match(css, /@keyframes ipad-menu-glyph-unfold\s*\{[\s\S]*?transform: rotate\(75deg\) scale\(0.35, 0.8\);/);
+  assert.match(
+    css,
+    /@keyframes ipad-menu-converge\s*\{[\s\S]*?translate\(var\(--ipad-menu-origin-x, 0px\), var\(--ipad-menu-origin-y, 0px\)\)[\s\S]*?translate\(0, 0\)/,
+  );
+  assert.match(
+    css,
+    /@keyframes ipad-menu-expand\s*\{[\s\S]*?calc\(-1 \* var\(--ipad-menu-origin-x, 0px\)\)[\s\S]*?calc\(-1 \* var\(--ipad-menu-origin-y, 0px\)\)[\s\S]*?translate\(0, 0\)/,
+  );
+
+  const trigger = source("src/components/world/world-chrome.tsx").match(
+    /<span className="side-panel-trigger-convergence" aria-hidden="true">([\s\S]*?)<\/span>/,
+  );
+  assert.ok(trigger, "the traveling copy is decorative and separate from the button hitbox");
+  assert.equal((trigger[1].match(/<i\s*\/>/g) ?? []).length, 3);
+  assert.match(css, /data-ipad-menu-motion="converge"/);
+  assert.match(css, /data-ipad-menu-motion="expand"/);
+  assert.match(css, /--ipad-menu-origin-x/);
+  assert.match(css, /--ipad-menu-origin-y/);
   const sharedHeader = rules.find(
     (rule) =>
       rule.selector === `html:root[data-viewport-chrome] ${headers}` &&
@@ -133,12 +184,15 @@ test("only decorative children morph, leaving the launcher collision box stable 
 });
 
 test("reduced motion disables the fold, glyph arrival and their inherited transitions", () => {
-  const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/)?.[1];
+  const reduced = css.match(
+    /@media \(prefers-reduced-motion: reduce\), \(forced-colors: active\) \{([\s\S]*?)\n\}/,
+  )?.[1];
   assert.ok(reduced);
-  assert.match(reduced, /:is\(\.side-panel-trigger, \.side-panel-trigger-ring, \.side-panel-trigger-glyph\)/);
-  assert.match(reduced, /\.side-panel-trigger-glyph i/);
+  assert.match(reduced, /\.side-panel-trigger-convergence/);
+  assert.match(reduced, /\.side-panel-trigger-glyph/);
   assert.match(reduced, /animation:\s*none\s*!important;/);
   assert.match(reduced, /transition:\s*none\s*!important;/);
+  assert.match(reduced, /display:\s*none\s*!important;/);
 });
 
 test("each affected route keeps its one existing menu opener and controlled menu layer", () => {

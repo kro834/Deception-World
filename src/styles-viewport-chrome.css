@@ -173,16 +173,46 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-me
   backdrop-filter: none !important;
 }
 
+/* The header button resumes its native shape after expand. During the
+   decorative return flight, a route's chamfer must not clip the streak. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="expand"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header)
+  .side-panel-trigger {
+  clip-path: none !important;
+  overflow: visible !important;
+}
+
 html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
   .side-panel-trigger:focus-visible {
   outline: 2px solid #f7eedc;
   outline-offset: 4px;
 }
 
-/* A collapsing ribbon resolves into a circular rim while the menu glyph
-   unfolds. Only these decorative children move: the opaque 60px hit target
-   and its collision box are already in their final place on the first frame. */
-html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+/* Hover and press feedback may shade the control, but its hit box must not
+   scale or become a containing block during the header-to-launcher switch. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header)
+  .side-panel-trigger,
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header)
+  .side-panel-trigger:is(:hover, :active, [data-press]) {
+  --dw-press-scale: 1;
+  transform: none !important;
+  scale: none !important;
+  rotate: none !important;
+  translate: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+  perspective: none !important;
+  will-change: auto !important;
+}
+
+/* The actual trigger stays at its new position immediately. A decorative
+   copy travels between the measured header origin and the settled button. */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]:is(
+    [data-ipad-menu-scrolled="true"],
+    [data-ipad-menu-motion="expand"]
+  )
   .side-panel-trigger-ring {
   position: absolute;
   inset: 4px;
@@ -191,66 +221,269 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-me
   border: 1px solid #f7eedc;
   border-radius: 50%;
   background: transparent;
-  box-shadow: 0 0 10px #c9b58766;
-  opacity: 0;
+  box-shadow:
+    inset 0 0 0 1px #f7eedc30,
+    0 0 12px #c9b58766;
+  opacity: 0.74;
   pointer-events: none;
   -webkit-mask: none;
   mask: none;
   transition: none;
 }
 
-html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]:is(
+    [data-ipad-menu-scrolled="true"],
+    [data-ipad-menu-motion="expand"]
+  )
   .side-panel-trigger::before,
-html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]:is(
+    [data-ipad-menu-scrolled="true"],
+    [data-ipad-menu-motion="expand"]
+  )
   .side-panel-trigger-ring::before {
   display: none !important;
   content: none !important;
   animation: none !important;
 }
 
+.side-panel-trigger-convergence {
+  display: none;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]:is(
+    [data-ipad-menu-motion="converge"],
+    [data-ipad-menu-motion="expand"]
+  )
+  .side-panel-trigger-convergence {
+  position: absolute;
+  z-index: 2;
+  inset: 4px;
+  display: block;
+  overflow: visible;
+  border: 1px solid #f7eedc;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    inset 0 0 0 1px #f7eedc33,
+    0 0 18px #c9b58799;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .side-panel-trigger-convergence
+  i {
+  position: absolute;
+  top: 50%;
+  left: 14%;
+  display: block;
+  width: 72%;
+  height: 2px;
+  border-radius: 999px;
+  background: #f7eedc;
+  box-shadow: 0 0 10px #f7eedc77;
+  pointer-events: none;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .side-panel-trigger-convergence
+  i:nth-child(1) {
+  --ipad-fold-y: -10px;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .side-panel-trigger-convergence
+  i:nth-child(2) {
+  --ipad-fold-y: 0px;
+}
+
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+  .side-panel-trigger-convergence
+  i:nth-child(3) {
+  --ipad-fold-y: 10px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
-    .side-panel-trigger-ring {
-    animation: ipad-menu-ribbon-fold 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-ipad-menu-motion="converge"][data-viewport-chrome]
+    .side-panel-trigger-convergence {
+    animation: ipad-menu-converge 720ms cubic-bezier(0.38, 0.04, 0.2, 1) both;
   }
 
-  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"]:not(
+      [data-ipad-menu-scrolled="true"]
+    )[data-ipad-menu-motion="expand"][data-viewport-chrome]
+    .side-panel-trigger-convergence {
+    animation: ipad-menu-expand 720ms cubic-bezier(0.38, 0.04, 0.2, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="converge"][data-viewport-chrome]
+    .side-panel-trigger-convergence
+    i {
+    animation: ipad-menu-strip-fold 610ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="expand"][data-viewport-chrome]
+    .side-panel-trigger-convergence
+    i {
+    animation: ipad-menu-strip-open 610ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion][data-viewport-chrome]
+    .side-panel-trigger-convergence
+    i:nth-child(2) {
+    animation-delay: 38ms;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion][data-viewport-chrome]
+    .side-panel-trigger-convergence
+    i:nth-child(3) {
+    animation-delay: 76ms;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-ipad-menu-motion="converge"][data-viewport-chrome]
+    .side-panel-trigger-ring {
+    animation: ipad-menu-ring-arrive 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="expand"][data-viewport-chrome]
+    .side-panel-trigger-ring {
+    animation: ipad-menu-ring-depart 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-ipad-menu-motion="converge"][data-viewport-chrome]
     .side-panel-trigger-glyph {
-    animation: ipad-menu-glyph-unfold 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: ipad-menu-glyph-arrive 660ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="expand"][data-viewport-chrome]
+    .side-panel-trigger-glyph {
+    animation: ipad-menu-glyph-arrive 660ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
-@keyframes ipad-menu-ribbon-fold {
+@keyframes ipad-menu-converge {
   0% {
-    border-radius: 4px;
-    opacity: 0.9;
-    transform: translateY(-16px) rotate(-16deg) scale(1.5, 0.16);
+    border-radius: 8px;
+    opacity: 0.98;
+    transform: translate(var(--ipad-menu-origin-x, 0px), var(--ipad-menu-origin-y, 0px))
+      rotate(-12deg) scale(3.4, 0.16);
   }
-  44% {
-    border-radius: 24%;
+  62% {
+    border-radius: 38%;
     opacity: 1;
-    transform: translateY(0) rotate(26deg) scale(0.72, 1.15);
+    transform: translate(0, 0) rotate(16deg) scale(0.78, 1.18);
   }
-  72% {
+  82% {
     border-radius: 50%;
-    opacity: 0.8;
-    transform: rotate(0deg) scale(1.08);
+    opacity: 0.92;
+    transform: translate(0, 0) rotate(-5deg) scale(1.12, 0.94);
   }
   100% {
     border-radius: 50%;
     opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes ipad-menu-expand {
+  0% {
+    border-radius: 50%;
+    opacity: 0.88;
+    transform: translate(
+        calc(-1 * var(--ipad-menu-origin-x, 0px)),
+        calc(-1 * var(--ipad-menu-origin-y, 0px))
+      )
+      rotate(0deg) scale(1);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(
+        calc(-1 * var(--ipad-menu-origin-x, 0px)),
+        calc(-1 * var(--ipad-menu-origin-y, 0px))
+      )
+      rotate(7deg) scale(1.1, 0.92);
+  }
+  76% {
+    border-radius: 28%;
+    opacity: 1;
+    transform: translate(0, 0) rotate(-12deg) scale(2.1, 0.28);
+  }
+  100% {
+    border-radius: 8px;
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg) scale(3.4, 0.16);
+  }
+}
+
+@keyframes ipad-menu-strip-fold {
+  0% {
+    opacity: 0.8;
+    transform: translateY(var(--ipad-fold-y)) scaleX(2.5);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(var(--ipad-fold-y)) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) scaleX(0.2);
+  }
+}
+
+@keyframes ipad-menu-strip-open {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scaleX(0.2);
+  }
+  42% {
+    opacity: 1;
+    transform: translateY(var(--ipad-fold-y)) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--ipad-fold-y)) scaleX(2.5);
+  }
+}
+
+@keyframes ipad-menu-ring-arrive {
+  0% {
+    opacity: 0;
+    transform: rotate(-38deg) scale(0.4);
+  }
+  72% {
+    opacity: 1;
+    transform: rotate(10deg) scale(1.13);
+  }
+  100% {
+    opacity: 0.74;
     transform: rotate(0deg) scale(1);
   }
 }
 
-@keyframes ipad-menu-glyph-unfold {
+@keyframes ipad-menu-ring-depart {
   0% {
-    opacity: 0.2;
-    transform: rotate(75deg) scale(0.35, 0.8);
+    opacity: 0.74;
+    transform: rotate(0deg) scale(1);
   }
-  60% {
+  35% {
     opacity: 1;
-    transform: rotate(-6deg) scale(1.12);
+    transform: rotate(-8deg) scale(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(30deg) scale(0.45);
+  }
+}
+
+@keyframes ipad-menu-glyph-arrive {
+  0% {
+    opacity: 0.18;
+    transform: rotate(35deg) scale(0.4);
+  }
+  64% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1.1);
   }
   100% {
     opacity: 1;
@@ -258,13 +491,26 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-me
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
   html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
-    :is(.side-panel-trigger, .side-panel-trigger-ring, .side-panel-trigger-glyph),
+    :is(
+      .side-panel-trigger,
+      .side-panel-trigger-ring,
+      .side-panel-trigger-glyph,
+      .side-panel-trigger-convergence
+    ),
   html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
-    .side-panel-trigger-glyph i {
+    :is(.side-panel-trigger-glyph, .side-panel-trigger-convergence)
+    i {
     animation: none !important;
     transition: none !important;
+  }
+
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewport-chrome]
+    .side-panel-trigger-convergence,
+  html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-motion="expand"][data-viewport-chrome]
+    .side-panel-trigger-ring {
+    display: none !important;
   }
 }
 

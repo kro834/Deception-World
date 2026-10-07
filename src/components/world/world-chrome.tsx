@@ -148,6 +148,11 @@ export function SideMenuTrigger({
       }
     >
       <LiquidPointerGlow />
+      <span className="side-panel-trigger-convergence" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
       <span className="side-panel-trigger-ring" aria-hidden="true" />
       <span className="side-panel-trigger-glyph" aria-hidden="true">
         <i />

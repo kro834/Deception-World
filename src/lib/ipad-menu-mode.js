@@ -1,5 +1,6 @@
 export const IPAD_MENU_STORAGE_KEY = "dw-ipad-compact-menu-v1";
 const CHANGE_EVENT = "dw-ipad-menu-change";
+export const IPAD_MENU_MOTION_SETTLE_MS = 900;
 const HEADER_SELECTORS = {
   gallery: ".gallery-topbar",
   world: ".topbar",
@@ -14,6 +15,39 @@ const HEADER_SELECTORS = {
 export function getIpadMenuScrolled(previous, scrollY, exitDistance, locked = false) {
   if (locked || !Number.isFinite(scrollY)) return previous;
   return Number.isFinite(exitDistance) && exitDistance > 0 && scrollY >= exitDistance;
+}
+
+/** A header-to-floating vector in CSS pixels, read only at a real scroll
+ * boundary. Invalid/detached geometry must not launch a viewport-sized streak.
+ * @param {{left:number,top:number,width:number,height:number}|null} headerRect
+ * @param {{left:number,top:number,width:number,height:number}|null} floatingRect
+ * @param {{width:number,height:number}} viewport
+ */
+export function getIpadMenuMotionGeometry(headerRect, floatingRect, viewport) {
+  if (!headerRect || !floatingRect || !viewport) return null;
+  const rects = [headerRect, floatingRect];
+  if (
+    rects.some(
+      (rect) =>
+        ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) ||
+        rect.width <= 0 ||
+        rect.height <= 0,
+    )
+  )
+    return null;
+  if (
+    ![viewport.width, viewport.height].every(Number.isFinite) ||
+    viewport.width <= 0 ||
+    viewport.height <= 0
+  )
+    return null;
+  const x = headerRect.left + headerRect.width / 2 - floatingRect.left - floatingRect.width / 2;
+  const y = headerRect.top + headerRect.height / 2 - floatingRect.top - floatingRect.height / 2;
+  const round = (value) => Math.round(value * 100) / 100;
+  return {
+    x: round(Math.max(-viewport.width, Math.min(viewport.width, x))),
+    y: round(Math.max(-viewport.height - 120, Math.min(viewport.height + 120, y))),
+  };
 }
 
 /** @param {{ getItem: (key: string) => string | null }} storage @param {boolean} fallback */
@@ -58,6 +92,7 @@ export function setIpadMenuMode(enabled) {
   else {
     root.removeAttribute("data-ipad-menu");
     root.removeAttribute("data-ipad-menu-scrolled");
+    root.removeAttribute("data-ipad-menu-motion");
   }
   try {
     window.localStorage.setItem(IPAD_MENU_STORAGE_KEY, enabled ? "1" : "0");
@@ -84,6 +119,14 @@ export function watchIpadMenuMode(win = window, doc = document) {
   let exitDistance = 0;
   let header = null;
   let nav = null;
+  let scrollRequested = false;
+  let reconcileRequested = true;
+  let motionTimer = 0;
+  let motionGeneration = 0;
+  const reducedMotion =
+    typeof win.matchMedia === "function"
+      ? win.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
   let lastOverflow = root.style.overflow;
   let lastBodyPosition = doc.body.style.position;
   const isIpad = () => root.getAttribute("data-ipad-viewport") === "contained";
@@ -106,6 +149,26 @@ export function watchIpadMenuMode(win = window, doc = document) {
   const setPixels = (name, value) => {
     const next = `${value}px`;
     if (root.style.getPropertyValue(name) !== next) root.style.setProperty(name, next);
+  };
+  const clearMotion = () => {
+    motionGeneration++;
+    if (motionTimer) win.clearTimeout(motionTimer);
+    motionTimer = 0;
+    root.removeAttribute("data-ipad-menu-motion");
+    root.style.removeProperty("--ipad-menu-origin-x");
+    root.style.removeProperty("--ipad-menu-origin-y");
+  };
+  const startMotion = (direction, geometry) => {
+    clearMotion();
+    if (!geometry || reducedMotion?.matches || doc.hidden || typeof win.setTimeout !== "function")
+      return;
+    setPixels("--ipad-menu-origin-x", geometry.x);
+    setPixels("--ipad-menu-origin-y", geometry.y);
+    root.setAttribute("data-ipad-menu-motion", direction);
+    const generation = motionGeneration;
+    motionTimer = win.setTimeout(() => {
+      if (!disposed && generation === motionGeneration) clearMotion();
+    }, IPAD_MENU_MOTION_SETTLE_MS);
   };
   const clearGeometry = () => {
     root.style.removeProperty("--ipad-header-scroll");
@@ -134,32 +197,59 @@ export function watchIpadMenuMode(win = window, doc = document) {
     if (frame) win.cancelAnimationFrame(frame);
     frame = 0;
     if (disposed) return;
+    const scrollBoundary = scrollRequested && !measureDirty && !reconcileRequested;
+    scrollRequested = false;
+    reconcileRequested = false;
     if (!isIpad() || !isEnabled()) {
       if (!isIpad()) root.removeAttribute("data-ipad-menu");
       scrolled = false;
       root.removeAttribute("data-ipad-menu-scrolled");
       clearGeometry();
+      clearMotion();
       measureDirty = true;
       return;
     }
     const locked = doc.body.style.position === "fixed" || root.style.overflow === "hidden";
     // Fixed-body modals report scrollY=0. Freeze the departing header as well as
     // the trigger state until their normal document position is restored.
-    if (locked) return;
+    if (locked) {
+      clearMotion();
+      return;
+    }
     if (measureDirty) measure();
     if (Number.isFinite(win.scrollY)) {
       setPixels("--ipad-header-scroll", Math.min(exitDistance, Math.max(0, win.scrollY)));
     }
-    scrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
+    const nextScrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
+    const animate =
+      scrollBoundary && nextScrolled !== scrolled && !reducedMotion?.matches && !doc.hidden;
+    const trigger = animate ? header?.querySelector?.(".side-panel-trigger") : null;
+    const oldRect = trigger?.getBoundingClientRect?.();
+    scrolled = nextScrolled;
     const value = scrolled ? "true" : "false";
     if (root.getAttribute("data-ipad-menu-scrolled") !== value) {
       root.setAttribute("data-ipad-menu-scrolled", value);
+    }
+    if (animate) {
+      // Publish the settled hit box first: Zeus collision handling and touch
+      // focus use the real launcher, never the travelling decorative ribbons.
+      const newRect = trigger?.getBoundingClientRect?.();
+      startMotion(
+        scrolled ? "converge" : "expand",
+        getIpadMenuMotionGeometry(scrolled ? oldRect : newRect, scrolled ? newRect : oldRect, {
+          width: win.innerWidth,
+          height: win.innerHeight,
+        }),
+      );
     }
   };
   const schedule = () => {
     if (!disposed && !frame) frame = win.requestAnimationFrame(update);
   };
   const scheduleMeasure = () => {
+    scrollRequested = false;
+    reconcileRequested = true;
+    clearMotion();
     measureDirty = true;
     schedule();
   };
@@ -167,7 +257,10 @@ export function watchIpadMenuMode(win = window, doc = document) {
     typeof win.ResizeObserver === "function" ? new win.ResizeObserver(scheduleMeasure) : null;
   const onScroll = () => {
     // Other devices and an explicit personal OFF choice need no scroll work.
-    if (isIpad() && isEnabled()) schedule();
+    if (isIpad() && isEnabled()) {
+      scrollRequested = true;
+      schedule();
+    }
   };
   const storageChanged = (event) => {
     if (event.key !== null && event.key !== IPAD_MENU_STORAGE_KEY) return;
@@ -177,6 +270,9 @@ export function watchIpadMenuMode(win = window, doc = document) {
       return;
     }
     applyPreference(event.newValue !== "0");
+    scrollRequested = false;
+    reconcileRequested = true;
+    clearMotion();
     measureDirty = true;
     update();
     signal();
@@ -204,7 +300,12 @@ export function watchIpadMenuMode(win = window, doc = document) {
       lastBodyPosition = doc.body.style.position;
       changed = true;
     }
-    if (changed) schedule();
+    if (changed) {
+      scrollRequested = false;
+      reconcileRequested = true;
+      clearMotion();
+      schedule();
+    }
   });
   observer.observe(root, {
     attributes: true,
@@ -228,9 +329,17 @@ export function watchIpadMenuMode(win = window, doc = document) {
     }
   });
   treeObserver.observe(doc.body, { childList: true, subtree: true });
+  const cancelMotion = () => {
+    scrollRequested = false;
+    reconcileRequested = true;
+    clearMotion();
+  };
+  doc.addEventListener?.("visibilitychange", cancelMotion);
+  reducedMotion?.addEventListener?.("change", cancelMotion);
   signal();
   return () => {
     disposed = true;
+    clearMotion();
     if (frame) win.cancelAnimationFrame(frame);
     observer.disconnect();
     treeObserver.disconnect();
@@ -239,5 +348,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
     win.removeEventListener(CHANGE_EVENT, scheduleMeasure);
     win.removeEventListener("storage", storageChanged);
     win.removeEventListener("resize", scheduleMeasure);
+    doc.removeEventListener?.("visibilitychange", cancelMotion);
+    reducedMotion?.removeEventListener?.("change", cancelMotion);
   };
 }

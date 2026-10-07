@@ -40,13 +40,28 @@ test("the trigger changes exactly when measured chrome completely exits, except 
   assert.equal(getIpadMenuScrolled(false, 300, Number.NaN), false);
 });
 
-function fixture({ ipad = true, preference = "1", denied = false, route = "world" } = {}) {
+function fixture({
+  ipad = true,
+  preference = "1",
+  denied = false,
+  route = "world",
+  motion = false,
+} = {}) {
   const attrs = new Map([
     ...(ipad ? [["data-ipad-viewport", "contained"]] : []),
     ["data-viewport-chrome", route],
   ]);
   const listeners = new Map();
   const frames = new Map();
+  const timers = new Map();
+  const timerHistory = [];
+  const documentListeners = new Map();
+  const mediaListeners = new Map();
+  const reduced = {
+    matches: false,
+    addEventListener: (type, listener) => mediaListeners.set(type, listener),
+    removeEventListener: (type) => mediaListeners.delete(type),
+  };
   const observations = [];
   const variables = new Map();
   const sizeTargets = new Set();
@@ -56,12 +71,22 @@ function fixture({ ipad = true, preference = "1", denied = false, route = "world
   let sizeDisconnected = false;
   let measurements = 0;
   let writes = 0;
+  let geometryReads = 0;
   let notifyStyle;
   let notifyTree;
   let notifyResize;
   const sizes = { header: 76, nav: 63 };
+  const trigger = {
+    getBoundingClientRect: () => {
+      geometryReads++;
+      return attrs.get("data-ipad-menu-scrolled") === "true"
+        ? { left: 940, top: 596, width: 60, height: 60 }
+        : { left: 950, top: 16 - Math.min(76, win.scrollY), width: 44, height: 44 };
+    },
+  };
   const header = {
     isConnected: true,
+    querySelector: () => (motion ? trigger : null),
     get offsetHeight() {
       measurements++;
       return sizes.header;
@@ -96,6 +121,9 @@ function fixture({ ipad = true, preference = "1", denied = false, route = "world
   };
   const doc = {
     documentElement: root,
+    hidden: false,
+    addEventListener: (type, listener) => documentListeners.set(type, listener),
+    removeEventListener: (type) => documentListeners.delete(type),
     body: { style: { position: "", top: "" } },
     querySelector: (selector) => elements.get(selector) ?? null,
   };
@@ -107,6 +135,21 @@ function fixture({ ipad = true, preference = "1", denied = false, route = "world
   };
   const win = {
     scrollY: 100,
+    innerWidth: 1024,
+    innerHeight: 768,
+    ...(motion
+      ? {
+          matchMedia: () => reduced,
+          setTimeout: (callback, duration) => {
+            assert.equal(duration, 900);
+            const id = ++sequence;
+            timers.set(id, callback);
+            timerHistory.push(callback);
+            return id;
+          },
+          clearTimeout: (id) => timers.delete(id),
+        }
+      : {}),
     get localStorage() {
       if (denied) throw new Error("Denied");
       return storage;
@@ -161,6 +204,18 @@ function fixture({ ipad = true, preference = "1", denied = false, route = "world
     frames,
     observations,
     variables,
+    timers,
+    timerHistory,
+    reduced,
+    documentListeners,
+    mediaListeners,
+    expireMotion: () => {
+      const pending = [...timers.values()];
+      timers.clear();
+      for (const callback of pending) callback();
+    },
+    visibilityChanged: () => documentListeners.get("visibilitychange")?.(),
+    reducedChanged: () => mediaListeners.get("change")?.(),
     elements,
     sizes,
     sizeTargets,
@@ -185,8 +240,125 @@ function fixture({ ipad = true, preference = "1", denied = false, route = "world
     get writes() {
       return writes;
     },
+    get geometryReads() {
+      return geometryReads;
+    },
   };
 }
+
+test("only actual scroll boundaries launch a measured one-shot convergence or expansion", () => {
+  const f = fixture({ motion: true });
+  f.win.scrollY = 0;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false, "initial restoration never flies");
+  const scroll = (y) => {
+    f.win.scrollY = y;
+    f.emit("scroll");
+    f.flush();
+  };
+  scroll(76);
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "converge");
+  assert.equal(f.variables.get("--ipad-menu-origin-x"), "2px");
+  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-664px");
+  assert.equal(f.geometryReads, 2, "two settled rectangles at the boundary only");
+  const oldCompletion = f.timerHistory[0];
+  scroll(400);
+  assert.equal(f.geometryReads, 2);
+  scroll(0);
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "expand");
+  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-588px");
+  assert.equal(f.timers.size, 1, "reversal cancels the old completion");
+  oldCompletion();
+  assert.equal(
+    f.attrs.get("data-ipad-menu-motion"),
+    "expand",
+    "stale callback cannot erase the new motion",
+  );
+  f.expireMotion();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.variables.has("--ipad-menu-origin-y"), false);
+  dispose();
+  assert.equal(f.documentListeners.size, 0);
+  assert.equal(f.mediaListeners.size, 0);
+});
+
+test("resize, routes, locks and device preference reconciliation cannot replay scroll motion", () => {
+  const f = fixture({ motion: true });
+  f.win.scrollY = 0;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.win.scrollY = 200;
+  f.emit("resize");
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  f.win.scrollY = 0;
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "expand");
+  f.doc.body.style.position = "fixed";
+  f.notifyStyle();
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  f.doc.body.style.position = "";
+  f.win.scrollY = 200;
+  f.notifyStyle();
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(
+    f.attrs.has("data-ipad-menu-motion"),
+    false,
+    "unlock scroll is restoration, not a gesture",
+  );
+  f.attrs.set("data-viewport-chrome", "dream");
+  f.win.scrollY = 0;
+  f.notifyRoot("data-viewport-chrome");
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.geometryReads, 2);
+  dispose();
+  assert.equal(f.timers.size, 0);
+});
+
+test("hidden and reduced-motion transitions cancel decorative work without changing native scrolling", () => {
+  const f = fixture({ motion: true });
+  f.win.scrollY = 0;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  const scroll = (y) => {
+    f.win.scrollY = y;
+    f.emit("scroll");
+    f.flush();
+  };
+  scroll(200);
+  f.reduced.matches = true;
+  f.reducedChanged();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.timers.size, 0);
+  scroll(0);
+  scroll(200);
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  f.reduced.matches = false;
+  f.reducedChanged();
+  scroll(0);
+  scroll(200);
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "converge");
+  f.doc.hidden = true;
+  f.visibilityChanged();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.timers.size, 0);
+  scroll(0);
+  assert.equal(f.win.scrollY, 0);
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "false");
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  dispose();
+});
 
 test("controller preserves compact state through lock/unlock, batches scrolling and cleans up", () => {
   const f = fixture();
