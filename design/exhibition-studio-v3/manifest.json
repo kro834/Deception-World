@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-exhibition-studio.py",
+  "generatorSha256": "01bd2d347daeb402b989049424284f14525632b229681ca7e04e215f14b57a81",
+  "blenderVersion": "5.2.0 LTS",
+  "engine": "CYCLES",
+  "samples": 64,
+  "denoising": true,
+  "seed": 271828,
+  "resolution": [
+    1200,
+    900
+  ],
+  "units": "meters",
+  "colorManagement": {
+    "viewTransform": "AgX",
+    "exposure": 0.35
+  },
+  "glass": {
+    "ior": 1.46,
+    "thinFilmIor": 1.208,
+    "thinFilmThicknessNm": 114,
+    "note": "Single quarter-wave AR coating; not a manufacturer-specific spectral model"
+  },
+  "sourceArtwork": {
+    "path": "public/gallery/g19-1672.webp",
+    "sha256Before": "aad46b22de60f37099f6749072054c1acc1a9bedbb032eb1422a300b015fd377",
+    "sha256After": "aad46b22de60f37099f6749072054c1acc1a9bedbb032eb1422a300b015fd377",
+    "packedOriginalBytes": true,
+    "editedOrResaved": false
+  },
+  "dimensions": {
+    "room": {
+      "width": 4.8,
+      "height": 3.0,
+      "floorDepth": 4.8,
+      "skirtingHeight": 0.07
+    },
+    "artwork": {
+      "width": 1.65,
+      "height": 0.9286184210526315,
+      "centerHeight": 1.53
+    },
+    "mount": {
+      "outerWidth": 1.8299999999999998,
+      "outerHeight": 1.1086184210526315,
+      "railFaceWidth": 0.025,
+      "railDepth": 0.046,
+      "railBevel": 0.0012,
+      "cottonMatWidth": 0.065,
+      "glassThickness": 0.002,
+      "wallGap": 0.032
+    },
+    "sourceDimensions": [
+      1672,
+      941
+    ]
+  },
+  "objects": 40,
+  "outputs": {
+    "front": {
+      "file": "exhibition-front.png",
+      "sha256": "ec1117ca32c840d1fece7690087782d1d3c3348e6d7d04072224c225f02c52b7",
+      "location": [
+        0,
+        -3.85,
+        1.4
+      ],
+      "target": [
+        0,
+        -0.04,
+        1.13
+      ]
+    },
+    "oblique": {
+      "file": "exhibition-oblique.png",
+      "sha256": "11ad03ef0f601294c4f92a9ca64df7bf2a1517a777cf21aa3729e56ce0cc5397",
+      "location": [
+        1.72,
+        -3.2,
+        1.68
+      ],
+      "target": [
+        0,
+        -0.03,
+        1.42
+      ]
+    }
+  },
+  "blend": {
+    "file": "exhibition-studio.blend",
+    "sha256": "bbe31aaca2e4b4b83dca542f9c2eaaf32a700d88c0e69fbf948a5d47a3904f58"
+  },
+  "runtimeAssets": null,
+  "purpose": "Physical exhibition lighting/material QA; not a retouched replacement of the source artwork"
+}

@@ -16,6 +16,10 @@ const paths = [
   "/ultra-materials/brushed-alloy-normal.png",
   "/ultra-materials/brushed-alloy-roughness.png",
   "/ultra-materials/frame-rim.png",
+  "/exhibition-studio/manifest.json",
+  "/exhibition-studio/studio-light.hdr",
+  "/exhibition-studio/plaster-normal.png",
+  "/exhibition-studio/plaster-roughness.png",
 ];
 const assets = paths.map((path) => ({
   path,

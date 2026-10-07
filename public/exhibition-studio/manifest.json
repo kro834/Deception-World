@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-exhibition-studio.py",
+  "generatorSha256": "01bd2d347daeb402b989049424284f14525632b229681ca7e04e215f14b57a81",
+  "blenderVersion": "5.2.0 LTS",
+  "engine": "CYCLES",
+  "sourceArtworkUnchanged": true,
+  "probe": {
+    "file": "studio-light.hdr",
+    "sha256": "f17283c6be6ac4af7ffea08759a63d8bbb89e364e2f48053d6b537f72df1a614",
+    "resolution": [
+      2048,
+      1024
+    ],
+    "samples": 32,
+    "positionMeters": [
+      0,
+      -0.35,
+      1.53
+    ],
+    "rotationEulerRadians": [
+      1.5707963267948966,
+      0,
+      0
+    ],
+    "projection": "equirectangular",
+    "maximumLinearRadiance": 6.90625,
+    "excludedObjects": [
+      "Backing_panel",
+      "Wall_spacer_-0.55",
+      "Wall_spacer_0.55",
+      "Original_artwork_on_archival_print",
+      "Cotton_mat_65mm_Top",
+      "Cotton_mat_65mm_Right",
+      "Cotton_mat_65mm_Bottom",
+      "Cotton_mat_65mm_Left",
+      "Mitered_frame_25mm_face_46mm_deep_Top",
+      "Mitered_frame_25mm_face_46mm_deep_Right",
+      "Mitered_frame_25mm_face_46mm_deep_Bottom",
+      "Mitered_frame_25mm_face_46mm_deep_Left",
+      "Machined_inner_reveal_Top",
+      "Machined_inner_reveal_Right",
+      "Machined_inner_reveal_Bottom",
+      "Machined_inner_reveal_Left",
+      "Museum_glazing_2mm",
+      "Small_physical_caption_card",
+      "Caption_lettering"
+    ],
+    "artworkBakedIntoEnvironment": false
+  },
+  "maps": {
+    "plaster-normal.png": {
+      "sha256": "988d60c18dbda26ab726e704eabce8f8c74572593054c5bbe9245040d2ae06bd",
+      "colorSpace": "linear",
+      "resolution": [
+        512,
+        512
+      ],
+      "sampleWidthMeters": 0.25
+    },
+    "plaster-roughness.png": {
+      "sha256": "fd9853d18f6017c0f6a6e392ef8744115c6f74a480755f3f858ea3e4702aaccd",
+      "colorSpace": "linear",
+      "resolution": [
+        512,
+        512
+      ],
+      "sampleWidthMeters": 0.25
+    }
+  }
+}

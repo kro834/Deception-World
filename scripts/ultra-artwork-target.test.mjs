@@ -284,6 +284,24 @@ test("discovery follows gallery, Dream, World priority and ignores unchanged ide
   assert.equal(f.doc.listenerCount(), 0);
 });
 
+test("physical exhibition ownership relinquishes and restores the old artwork renderer on marker changes", () => {
+  const f = fixture();
+  f.hosts.set(".gallery-feature-open", f.host);
+  const seen = [];
+  const stop = f.watchUltraArtworkTarget((value) => seen.push(value), f.doc);
+  assert.equal(seen.at(-1).host, f.host);
+  assert.ok(f.observers.mutation[0].observed[0].options.attributeFilter.includes("data-exhibition-active"));
+  let studioActive = true;
+  f.host.closest = (selector) => selector === '[data-exhibition-active="true"]' && studioActive ? {} : null;
+  f.observers.mutation[0].emit();
+  assert.equal(seen.at(-1), null, "physical room must not compete with the earlier GPU rim");
+  studioActive = false;
+  f.observers.mutation[0].emit();
+  assert.equal(seen.at(-1).host, f.host);
+  assert.equal(seen.at(-1).revision, 2);
+  stop();
+});
+
 test("DOM replacement, srcset and responsive currentSrc each receive a new renderer key", () => {
   const f = fixture();
   f.hosts.set(".dream-poster-current", f.host);

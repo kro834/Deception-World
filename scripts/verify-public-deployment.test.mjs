@@ -54,12 +54,16 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
-test("public verification hashes all four Blender assets and rejects changed bytes or unknown paths", async () => {
+test("public verification hashes Blender frame and exhibition assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
     "/ultra-materials/manifest.json",
     "/ultra-materials/brushed-alloy-normal.png",
     "/ultra-materials/brushed-alloy-roughness.png",
     "/ultra-materials/frame-rim.png",
+    "/exhibition-studio/manifest.json",
+    "/exhibition-studio/studio-light.hdr",
+    "/exhibition-studio/plaster-normal.png",
+    "/exhibition-studio/plaster-roughness.png",
   ];
   const bytes = new Map(
     paths.map((path) => [path, readFileSync(new URL(`../public${path}`, import.meta.url))]),
@@ -100,11 +104,16 @@ test("public verification hashes all four Blender assets and rejects changed byt
     "/ultra-materials/unknown.png",
     "/ultra-materials/frame-rim.png/extra",
     "/ultra-materials/../secret.png",
+    "/exhibition-studio/unknown.hdr",
+    "/exhibition-studio/studio-light.hdr/extra",
+    "/exhibition-studio/../secret.png",
   ]) {
     const invalid = await run({ unknown });
     assert.equal(invalid.report.ok, false, unknown);
     assert.equal(
-      invalid.seen.some((path) => path.startsWith("/ultra-materials/")),
+      invalid.seen.some(
+        (path) => path.startsWith("/ultra-materials/") || path.startsWith("/exhibition-studio/"),
+      ),
       false,
     );
   }
@@ -113,6 +122,7 @@ test("public verification hashes all four Blender assets and rejects changed byt
 test("publication covers the new shared search and personal library routes", () => {
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/search"));
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/library"));
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/exhibition"));
 });
 
 test("public smoke routes pass while all retired AI routes remain 404", async () => {
@@ -256,6 +266,10 @@ test("new release identity requires shared gallery readiness and preserves artwo
     "/ultra-materials/brushed-alloy-normal.png",
     "/ultra-materials/brushed-alloy-roughness.png",
     "/ultra-materials/frame-rim.png",
+    "/exhibition-studio/manifest.json",
+    "/exhibition-studio/studio-light.hdr",
+    "/exhibition-studio/plaster-normal.png",
+    "/exhibition-studio/plaster-roughness.png",
   ]) {
     const asset = written.assets.find((item) => item.path === path);
     assert.ok(asset, `${path} must be attested before production promotion`);

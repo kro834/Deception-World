@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-exhibition-studio.py",
+  "generatorSha256": "01bd2d347daeb402b989049424284f14525632b229681ca7e04e215f14b57a81",
+  "blenderVersion": "5.2.0 LTS",
+  "engine": "CYCLES",
+  "samples": 64,
+  "denoising": true,
+  "seed": 271828,
+  "resolution": [
+    1200,
+    900
+  ],
+  "units": "meters",
+  "colorManagement": {
+    "viewTransform": "AgX",
+    "exposure": 0.35
+  },
+  "glass": {
+    "ior": 1.46,
+    "thinFilmIor": 1.208,
+    "thinFilmThicknessNm": 114,
+    "note": "Single quarter-wave AR coating; not a manufacturer-specific spectral model"
+  },
+  "sourceArtwork": {
+    "path": "public/gallery/g19-1672.webp",
+    "sha256Before": "aad46b22de60f37099f6749072054c1acc1a9bedbb032eb1422a300b015fd377",
+    "sha256After": "aad46b22de60f37099f6749072054c1acc1a9bedbb032eb1422a300b015fd377",
+    "packedOriginalBytes": true,
+    "editedOrResaved": false
+  },
+  "dimensions": {
+    "room": {
+      "width": 4.8,
+      "height": 3.0,
+      "floorDepth": 4.8,
+      "skirtingHeight": 0.07
+    },
+    "artwork": {
+      "width": 1.65,
+      "height": 0.9286184210526315,
+      "centerHeight": 1.53
+    },
+    "mount": {
+      "outerWidth": 1.8299999999999998,
+      "outerHeight": 1.1086184210526315,
+      "railFaceWidth": 0.025,
+      "railDepth": 0.046,
+      "railBevel": 0.0012,
+      "cottonMatWidth": 0.065,
+      "glassThickness": 0.002,
+      "wallGap": 0.032
+    },
+    "sourceDimensions": [
+      1672,
+      941
+    ]
+  },
+  "objects": 42,
+  "outputs": {},
+  "blend": {
+    "file": "exhibition-studio.blend",
+    "sha256": "6894ece66644c7864b8dd8d8e8e77a7b275e32b4e8bff55d595069b8216119b7"
+  },
+  "runtimeAssets": {
+    "probe": {
+      "file": "studio-light.hdr",
+      "sha256": "f17283c6be6ac4af7ffea08759a63d8bbb89e364e2f48053d6b537f72df1a614",
+      "resolution": [
+        2048,
+        1024
+      ],
+      "samples": 32,
+      "positionMeters": [
+        0,
+        -0.35,
+        1.53
+      ],
+      "rotationEulerRadians": [
+        1.5707963267948966,
+        0,
+        0
+      ],
+      "projection": "equirectangular",
+      "maximumLinearRadiance": 6.90625,
+      "excludedObjects": [
+        "Backing_panel",
+        "Wall_spacer_-0.55",
+        "Wall_spacer_0.55",
+        "Original_artwork_on_archival_print",
+        "Cotton_mat_65mm_Top",
+        "Cotton_mat_65mm_Right",
+        "Cotton_mat_65mm_Bottom",
+        "Cotton_mat_65mm_Left",
+        "Mitered_frame_25mm_face_46mm_deep_Top",
+        "Mitered_frame_25mm_face_46mm_deep_Right",
+        "Mitered_frame_25mm_face_46mm_deep_Bottom",
+        "Mitered_frame_25mm_face_46mm_deep_Left",
+        "Machined_inner_reveal_Top",
+        "Machined_inner_reveal_Right",
+        "Machined_inner_reveal_Bottom",
+        "Machined_inner_reveal_Left",
+        "Museum_glazing_2mm",
+        "Small_physical_caption_card",
+        "Caption_lettering"
+      ],
+      "artworkBakedIntoEnvironment": false
+    },
+    "maps": {
+      "plaster-normal.png": {
+        "sha256": "988d60c18dbda26ab726e704eabce8f8c74572593054c5bbe9245040d2ae06bd",
+        "colorSpace": "linear",
+        "resolution": [
+          512,
+          512
+        ],
+        "sampleWidthMeters": 0.25
+      },
+      "plaster-roughness.png": {
+        "sha256": "fd9853d18f6017c0f6a6e392ef8744115c6f74a480755f3f858ea3e4702aaccd",
+        "colorSpace": "linear",
+        "resolution": [
+          512,
+          512
+        ],
+        "sampleWidthMeters": 0.25
+      }
+    }
+  },
+  "purpose": "Physical exhibition lighting/material QA; not a retouched replacement of the source artwork"
+}

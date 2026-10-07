@@ -75,7 +75,7 @@ export function UltraModeToggle() {
         <i aria-hidden="true">{snapshot.enabled ? "ON" : "OFF"}</i>
       </button>
       <p id={descriptionId} className="ultra-mode-description">
-        作品画像の周囲に金属・ガラスの額縁表現を加えます。端末の発熱や消費電力が増える場合があります。設定はこのブラウザーに保存します。いつでもOFFに戻せます。
+        ギャラリーのトップ作品を、立体の額縁・ガラス・照明を備えた展示空間で鑑賞できます。ほかの対応作品には額縁表現を加えます。端末の発熱や消費電力が増える場合があります。設定はこのブラウザーに保存し、いつでもOFFに戻せます。
       </p>
       {snapshot.enabled && (
         <fieldset className="ultra-quality-options" aria-describedby={qualityDescriptionId}>
@@ -94,7 +94,7 @@ export function UltraModeToggle() {
             />
             <span>
               <b>高精細</b>
-              <small>額縁の金属面と縁の光を高精細に描写します。</small>
+              <small>金属・ガラス・壁の質感と照明を高精細に描写します。</small>
             </span>
           </label>
           <label className="ultra-quality-option">
@@ -111,7 +111,7 @@ export function UltraModeToggle() {
             />
             <span>
               <b>シネマ</b>
-              <small>額縁の反射と輪郭を、より高い描写密度で表示します。処理負荷が高くなります。</small>
+              <small>額縁の反射と輪郭、壁に落ちる影を、より高い描写密度で表示します。処理負荷が高くなります。</small>
             </span>
           </label>
           <p id={qualityDescriptionId} className="ultra-quality-description">
@@ -122,7 +122,7 @@ export function UltraModeToggle() {
       <details className="ultra-mode-rendering-details">
         <summary>素材と表示について</summary>
         <p>
-          Blenderで生成した透明な額縁素材を使い、作品画像そのものは加工しません。対応環境では額縁の金属・ガラス縁の質感を描写します。非対応環境では静的な額縁素材で表示し、動き・透明度・コントラスト・配色の設定が優先される場合は追加の演出を抑えます。
+          作品画像そのものは加工しません。原画の構図と画像データを保ち、展示空間にはBlenderで制作した室内の光と漆喰の材質データを使います。ブラウザーで立体の額縁、低反射ガラス、壁と石床を描画し、正面・斜め・展示室全景を選べます。原画表示にも戻せます。3Dを利用できない場合は原画を表示し、動き・透明度・コントラスト・配色の設定が優先される場合は追加の演出を抑えます。
         </p>
       </details>
       {snapshot.ready && !snapshot.motionAllowed && (

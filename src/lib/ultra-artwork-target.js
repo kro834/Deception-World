@@ -22,6 +22,9 @@ export function watchUltraArtworkTarget(notify, doc = document) {
       const host = doc.querySelector(hostSelector);
       const image = host?.querySelector(imageSelector);
       if (!host || !image || !image.isConnected) continue;
+      // A physical studio owns this image while enabled, avoiding a second GPU
+      // context painting the previous narrow rim behind its room renderer.
+      if (host.closest('[data-exhibition-active="true"]')) continue;
       const source = artworkSource(image);
       if (previous?.host === host && previous.image === image && previous.source === source) return;
       next = { host, image, source, revision: ++revision };
@@ -36,7 +39,7 @@ export function watchUltraArtworkTarget(notify, doc = document) {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ["src", "srcset", "data-ultra-artwork-ready"],
+    attributeFilter: ["src", "srcset", "data-ultra-artwork-ready", "data-exhibition-active"],
   });
   // currentSrc may change without a src/srcset mutation at a responsive breakpoint.
   doc.addEventListener("load", refresh, true);

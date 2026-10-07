@@ -574,13 +574,14 @@ test("root and shared menu wire the prepaint gate, styles, runtime and toggle", 
   assert.match(menu, /<UltraModeToggle\s*\/>/);
 });
 
-test("menu describes local frame materials without promising native ray tracing or changing the artwork", () => {
+test("menu describes physical exhibition materials without promising native ray tracing or changing the artwork", () => {
   const f = mountToggle({ stored: "true" });
   const stop = f.store.watchUltraMode();
   const copy = text(f.render());
   assert.match(copy, /Blender/);
   assert.match(copy, /作品画像そのものは加工しません/);
-  assert.match(copy, /非対応環境では静的な額縁素材/);
+  assert.match(copy, /3Dを利用できない場合は原画を表示/);
+  assert.match(copy, /展示空間/);
   assert.match(copy, /追加の演出を抑え/);
   assert.doesNotMatch(copy, /反射床|結晶内|レイマーチング|MetalFX|レイトレーシング/);
   stop();

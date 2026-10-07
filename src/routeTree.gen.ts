@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CharactersRouteImport } from './routes/characters'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
+import { Route as ExhibitionRouteImport } from './routes/exhibition'
 import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
@@ -66,6 +67,11 @@ const DownloadRoute = DownloadRouteImport.update({
 const DreamChapterRoute = DreamChapterRouteImport.update({
   id: '/dream-chapter',
   path: '/dream-chapter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExhibitionRoute = ExhibitionRouteImport.update({
+  id: '/exhibition',
+  path: '/exhibition',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExtremeSagaRoute = ExtremeSagaRouteImport.update({
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
+  '/exhibition': typeof ExhibitionRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
+  '/exhibition': typeof ExhibitionRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/characters': typeof CharactersRouteWithChildren
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
+  '/exhibition': typeof ExhibitionRoute
   '/extreme-saga': typeof ExtremeSagaRoute
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/download'
     | '/dream-chapter'
+    | '/exhibition'
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/'
     | '/download'
     | '/dream-chapter'
+    | '/exhibition'
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/characters'
     | '/download'
     | '/dream-chapter'
+    | '/exhibition'
     | '/extreme-saga'
     | '/final-stage'
     | '/form-archive'
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   CharactersRoute: typeof CharactersRouteWithChildren
   DownloadRoute: typeof DownloadRoute
   DreamChapterRoute: typeof DreamChapterRoute
+  ExhibitionRoute: typeof ExhibitionRoute
   ExtremeSagaRoute: typeof ExtremeSagaRoute
   FinalStageRoute: typeof FinalStageRoute
   FormArchiveRoute: typeof FormArchiveRoute
@@ -530,6 +543,13 @@ declare module '@tanstack/react-router' {
       path: '/dream-chapter'
       fullPath: '/dream-chapter'
       preLoaderRoute: typeof DreamChapterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exhibition': {
+      id: '/exhibition'
+      path: '/exhibition'
+      fullPath: '/exhibition'
+      preLoaderRoute: typeof ExhibitionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/extreme-saga': {
@@ -849,6 +869,7 @@ const rootRouteChildren: RootRouteChildren = {
   CharactersRoute: CharactersRouteWithChildren,
   DownloadRoute: DownloadRoute,
   DreamChapterRoute: DreamChapterRoute,
+  ExhibitionRoute: ExhibitionRoute,
   ExtremeSagaRoute: ExtremeSagaRoute,
   FinalStageRoute: FinalStageRoute,
   FormArchiveRoute: FormArchiveRoute,

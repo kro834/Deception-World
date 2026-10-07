@@ -6,6 +6,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
+import { ExhibitionStudio } from "@/components/ultra/exhibition-studio";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
 import {
   communityPostToArtwork,
@@ -1057,26 +1058,42 @@ export function GalleryPage() {
             </p>
           </div>
           <figure className="gallery-feature">
-            <a
-              className="gallery-feature-open"
-              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
-              href={featured.full}
-              onClick={(event) => openWork(event, featured)}
-              aria-haspopup="dialog"
-              aria-controls="gallery-viewer"
-              aria-label={`${numberFor(featured)}を拡大して鑑賞`}
+            <ExhibitionStudio
+              artworkUrl={featured.full}
+              artworkWidth={featured.width}
+              artworkHeight={featured.height}
+              artworkReady={artworkReady}
             >
-              <img
-                src={featured.medium}
-                srcSet={featured.srcSet}
-                sizes="(max-width: 760px) 90vw, 56vw"
-                alt={featured.alt}
-                width={featured.width}
-                height={featured.height}
-                fetchPriority="high"
-                decoding="async"
-              />
-            </a>
+              <a
+                className="gallery-feature-open"
+                data-ultra-artwork-ready={artworkReady ? "true" : undefined}
+                href={featured.full}
+                onClick={(event) => openWork(event, featured)}
+                aria-haspopup="dialog"
+                aria-controls="gallery-viewer"
+                aria-label={`${numberFor(featured)}を拡大して鑑賞`}
+              >
+                <img
+                  src={featured.medium}
+                  srcSet={featured.srcSet}
+                  sizes="(max-width: 760px) 90vw, 56vw"
+                  alt={featured.alt}
+                  width={featured.width}
+                  height={featured.height}
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </a>
+            </ExhibitionStudio>
+            {!isCommunityGalleryId(featured.id) && (
+              <Link
+                className="exhibition-room-entry"
+                to="/exhibition"
+                search={{ work: featured.id }}
+              >
+                展示室を大きく開く <span aria-hidden="true">↗</span>
+              </Link>
+            )}
             <figcaption>
               <span>{numberFor(featured)}</span>
               {titles[featured.id] && <span>{titles[featured.id]}</span>}
