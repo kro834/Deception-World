@@ -400,8 +400,23 @@ test("renderer uses the unchanged decoded source with full UVs, real wall contac
   assert.ok(scene.getObjectByName("ceiling-lighting-track"));
   const all = [];
   scene.traverse((object) => all.push(object));
-  assert.ok(all.some((object) => object.isDirectionalLight && object.castShadow));
+  assert.ok(all.some((object) => object.isSpotLight && object.castShadow));
   assert.ok(all.some((object) => object.isRectAreaLight));
+  const daylight = scene.getObjectByName("window-daylight-shadow");
+  const shadowRay = new three.Raycaster(
+    daylight.position,
+    daylight.target.position.clone().sub(daylight.position).normalize(),
+  );
+  const firstContact = shadowRay.intersectObjects(
+    all.filter((object) => object.isMesh && object.castShadow),
+    false,
+  )[0];
+  assert.ok(
+    firstContact &&
+      firstContact.object.name !== "plaster-ceiling" &&
+      firstContact.object.name !== "plaster-side-wall",
+    "the enclosed room must not block the exhibit's main window light",
+  );
   assert.equal(all.filter((object) => object.name === "hidden-wall-spacer").length, 4);
   assert.equal(f.calls.fetch[0].url, "/unchanged-original.webp");
   assert.equal(

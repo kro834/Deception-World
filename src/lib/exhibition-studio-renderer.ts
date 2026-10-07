@@ -524,17 +524,16 @@ export async function createExhibitionStudio(
     windowLight.position.set(-2.3, 2.4, 2.0);
     windowLight.lookAt(0, 1.3, 0);
     scene.add(windowLight);
-    const daylight = new DirectionalLight(0xf4f5ff, 2.2);
-    daylight.position.set(-3.0, 5, 4);
-    daylight.target.position.set(0, 1.1, 0);
+    const daylight = new SpotLight(0xf4f5ff, 35, 8, 1.15, 0.75, 2);
+    daylight.name = "window-daylight-shadow";
+    // This finite shadow-casting fill sits inside the window. An infinite
+    // directional source would let the enclosing walls occlude the whole room.
+    daylight.position.copy(windowLight.position);
+    daylight.target.position.set(0, 1.3, 0);
     daylight.castShadow = true;
     daylight.shadow.mapSize.setScalar(options.quality === "cinema" ? 4096 : 2048);
-    daylight.shadow.camera.left = -3;
-    daylight.shadow.camera.right = 3;
-    daylight.shadow.camera.top = 3;
-    daylight.shadow.camera.bottom = -3;
     daylight.shadow.camera.near = 0.1;
-    daylight.shadow.camera.far = 16;
+    daylight.shadow.camera.far = 8;
     daylight.shadow.bias = -0.00008;
     daylight.shadow.normalBias = 0.001;
     daylight.shadow.radius = 3;
