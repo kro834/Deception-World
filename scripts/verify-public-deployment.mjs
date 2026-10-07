@@ -277,7 +277,12 @@ export async function verifyPublicDeployment({
         kind: "identity",
       });
       for (const asset of identity.assets) {
-        if (!/^\/(gallery\/|saga-extreme-)/u.test(asset.path) || asset.path.includes(".."))
+        if (
+          !/^\/(?:gallery\/|saga-extreme-|ultra-materials\/(?:brushed-alloy-(?:normal|roughness)\.png|frame-rim\.png|manifest\.json)$)/u.test(
+            asset.path,
+          ) ||
+          asset.path.includes("..")
+        )
           throw new Error("Invalid release asset path");
         const delivered = await request(
           fetchImpl,

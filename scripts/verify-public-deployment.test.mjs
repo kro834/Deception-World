@@ -54,6 +54,62 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
+test("public verification hashes all four Blender assets and rejects changed bytes or unknown paths", async () => {
+  const paths = [
+    "/ultra-materials/manifest.json",
+    "/ultra-materials/brushed-alloy-normal.png",
+    "/ultra-materials/brushed-alloy-roughness.png",
+    "/ultra-materials/frame-rim.png",
+  ];
+  const bytes = new Map(
+    paths.map((path) => [path, readFileSync(new URL(`../public${path}`, import.meta.url))]),
+  );
+  const assets = paths.map((path) => ({
+    path,
+    sha256: createHash("sha256").update(bytes.get(path)).digest("hex"),
+  }));
+  const run = async ({ changed, unknown } = {}) => {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: "a".repeat(40),
+      fetchImpl: async (input) => {
+        const path = new URL(input).pathname;
+        seen.push(path);
+        if (path === "/release-identity.json")
+          return Response.json({
+            sha: "a".repeat(40),
+            assets: unknown ? [{ path: unknown, sha256: "0".repeat(64) }] : assets,
+          });
+        if (bytes.has(path))
+          return new Response(changed === path ? Buffer.from("changed") : bytes.get(path));
+        if (RETIRED_AI_ROUTES.includes(path)) return new Response("Not Found", { status: 404 });
+        return new Response("Deception World");
+      },
+    });
+    return { report, seen };
+  };
+  const valid = await run();
+  assert.equal(valid.report.ok, true);
+  assert.deepEqual(
+    valid.report.results.filter(({ kind }) => kind === "asset").map(({ path }) => path),
+    paths,
+  );
+  for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
+  for (const unknown of [
+    "/ultra-materials/unknown.png",
+    "/ultra-materials/frame-rim.png/extra",
+    "/ultra-materials/../secret.png",
+  ]) {
+    const invalid = await run({ unknown });
+    assert.equal(invalid.report.ok, false, unknown);
+    assert.equal(
+      invalid.seen.some((path) => path.startsWith("/ultra-materials/")),
+      false,
+    );
+  }
+});
+
 test("publication covers the new shared search and personal library routes", () => {
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/search"));
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/library"));
