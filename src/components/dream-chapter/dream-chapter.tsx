@@ -23,6 +23,7 @@ import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
+import { ArchitecturalBackdrop } from "@/components/cinematic/architectural-backdrop";
 import {
   DREAM_AGENT_ROSTER,
   DREAM_CASE_NOTES,
@@ -1026,9 +1027,11 @@ export function DreamChapter() {
       <section
         ref={heroRef}
         className="dream-hero"
+        data-architectural-hero="dream"
         aria-labelledby="dream-title"
         data-dream-hero-active={heroVisible ? "true" : "false"}
       >
+        <ArchitecturalBackdrop variant="dream" />
         <div className="dream-hero-field" aria-hidden="true">
           <img
             className="dream-hero-art"

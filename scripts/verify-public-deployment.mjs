@@ -279,7 +279,7 @@ export async function verifyPublicDeployment({
       });
       for (const asset of identity.assets) {
         if (
-          !/^\/(?:gallery\/|saga-extreme-|ultra-materials\/(?:brushed-alloy-(?:normal|roughness)\.png|frame-rim\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$)/u.test(
+          !/^\/(?:gallery\/|saga-extreme-|ultra-materials\/(?:brushed-alloy-(?:normal|roughness)\.png|frame-rim\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$|architectural-heroes\/(?:(?:world|dream)-(?:1280|2560)\.webp|manifest\.json)$)/u.test(
             asset.path,
           ) ||
           asset.path.includes("..")

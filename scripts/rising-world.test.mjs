@@ -66,7 +66,7 @@ const ALLOWED_WORDS = new Set([
   "RE DIVE…?",
 ]);
 
-test("the rising sheet is linked before the Mirage face, so Mirage stays last", async () => {
+test("the rising sheet keeps its order before Mirage and the final architectural hero skin", async () => {
   const route = await read("src/routes/world.tsx");
   assert.match(route, /import worldRisingCssUrl from "@\/styles-world-rising\.css\?url";/);
   const links = route.slice(route.search(/stylesheetLinks:\s*\[/));
@@ -75,6 +75,7 @@ test("the rising sheet is linked before the Mirage face, so Mirage stays last", 
     "href: worldRisingCssUrl",
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
+    "href: architecturalHeroesCssUrl",
   ].map((needle) => links.indexOf(needle));
   assert.ok(
     order.every((index) => index > 0),
@@ -86,7 +87,7 @@ test("the rising sheet is linked before the Mirage face, so Mirage stays last", 
   );
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: architecturalHeroesCssUrl }') + 2,
   );
 });
 

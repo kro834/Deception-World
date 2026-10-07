@@ -5,6 +5,7 @@ import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
+import architecturalHeroesCssUrl from "../styles-architectural-heroes.css?url";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
       { rel: "stylesheet", href: openingElevationCssUrl },
       { rel: "stylesheet", href: openingCinemaCssUrl },
+      { rel: "stylesheet", href: architecturalHeroesCssUrl },
     ],
   }),
 });

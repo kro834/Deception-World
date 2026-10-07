@@ -23,6 +23,7 @@ import { useLoadGate } from "@/components/load-gate";
 import { Particles } from "./particles";
 import { OPENING_BURN } from "./opening-timing";
 import type { BurnRun, BurnStats } from "./opening-burn";
+import { ArchitecturalBackdrop } from "./architectural-backdrop";
 
 // OPENING_SEQUENCE_SECONDS in opening-timing.ts: the ice logo arrives, burns
 // from 2.6 s, and the prism logo has cooled and taken over by about 6.1 s.
@@ -865,6 +866,7 @@ export function TitleSequence() {
     <main
       ref={stageRef}
       className={stageClass}
+      data-architectural-hero="opening"
       onPointerDown={
         phase === "playing"
           ? (e) => {
@@ -879,6 +881,7 @@ export function TitleSequence() {
       aria-busy={isWorldTransitioning}
     >
       <div className="cine-camera" aria-hidden="true">
+        <ArchitecturalBackdrop variant="opening" />
         <video
           key={`atm-${replayKey}`}
           ref={videoRef}

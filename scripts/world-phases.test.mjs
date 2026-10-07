@@ -96,7 +96,7 @@ const contrast = (a, b) => {
 };
 const blend = (top, under, alpha) => top.map((v, i) => v * alpha + under[i] * (1 - alpha));
 
-test("the phases sheet loads on /world only, after the exhibition sheet and before the HUD face and Mirage, which stays last", () => {
+test("the phases sheet stays World-only, after exhibition and before HUD, Mirage and architecture", () => {
   assert.match(route, /import worldPhasesCssUrl from "@\/styles-world-phases\.css\?url";/);
   const links = route.slice(route.search(/stylesheetLinks:\s*\[/));
   const order = [
@@ -104,11 +104,12 @@ test("the phases sheet loads on /world only, after the exhibition sheet and befo
     "href: worldPhasesCssUrl",
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
+    "href: architecturalHeroesCssUrl",
   ].map((needle) => links.indexOf(needle));
   assert.ok(order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])), String(order));
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: architecturalHeroesCssUrl }') + 2,
   );
   assert.doesNotMatch(head, /mirage|phases/i);
   assert.doesNotMatch(root, /styles-world-phases/);

@@ -1,3 +1,5 @@
+                ariaLabel="世界観コラムのピックアップを開く"
+                buttonRef={pickupBtnRef}
                 className="world-column-slide-open"
                 expanded={pickupOpen}
                 label="ピックアップ"

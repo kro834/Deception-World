@@ -56,15 +56,16 @@ function rules(css) {
 const COMPOSITOR =
   /^(opacity|transform|translate|scale|rotate|clip-path|visibility|animation-timing-function)$/;
 
-test("the cinema sheet is the last sheet on /, after the elevation sheet", async () => {
+test("the cinema sheet follows elevation and precedes the architectural entrance skin", async () => {
   const route = await read("src/routes/index.tsx");
   assert.match(route, /import openingCinemaCssUrl from "\.\.\/styles-opening-cinema\.css\?url";/);
   const links = route.slice(route.indexOf("links: ["), route.indexOf("],"));
   const order = [...links.matchAll(/href: (\w+)/g)].map((m) => m[1]);
-  assert.deepEqual(order.slice(-3), [
+  assert.deepEqual(order.slice(-4), [
     "DOSSIER_HUD_FONTS_URL",
     "openingElevationCssUrl",
     "openingCinemaCssUrl",
+    "architecturalHeroesCssUrl",
   ]);
 });
 

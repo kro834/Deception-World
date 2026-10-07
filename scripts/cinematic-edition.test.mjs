@@ -13,6 +13,16 @@ test("cinematic skin follows each feature's own stylesheet", async () => {
   for (const route of ["dream-chapter", "rexonance-saga", "extreme-saga", "final-stage"]) {
     const source = await read(`src/routes/${route}.tsx`);
     const links = source.slice(source.search(/(?:stylesheetLinks|links):\s*\[/));
+    if (route === "dream-chapter") {
+      // The new hero-only architecture intentionally follows the cinematic
+      // skin. All existing feature sheets must still precede that skin.
+      const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
+      const architecture = links.indexOf('rel: "stylesheet", href: architecturalHeroesCssUrl');
+      assert.ok(cinematic > 0 && architecture > cinematic, route);
+      assert.ok(cinematic > links.slice(0, architecture).lastIndexOf('rel: "stylesheet"'), route);
+      assert.equal(links.lastIndexOf('rel: "stylesheet"'), architecture, route);
+      continue;
+    }
     assert.ok(
       links.indexOf("CINEMATIC_STYLESHEET_LINK") > links.lastIndexOf('rel: "stylesheet"'),
       route,

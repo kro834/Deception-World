@@ -37,7 +37,7 @@ const mediaRule = (query, selector) => {
   return rule(block, selector);
 };
 
-test("the Mirage overrides outrank Mirage from the earlier sheet, which stays last", () => {
+test("the Mirage overrides keep their order before the final architectural hero skin", () => {
   const route = read("src/routes/world.tsx");
   const links = route.slice(
     route.indexOf("stylesheetLinks: ["),
@@ -45,7 +45,7 @@ test("the Mirage overrides outrank Mirage from the earlier sheet, which stays la
   );
   const order = [...links.matchAll(/href: (\w+)/g)].map((match) => match[1]);
   assert.ok(order.indexOf("worldProgrammeSectionsCssUrl") < order.indexOf("worldMirageCssUrl"));
-  assert.equal(order.at(-1), "worldMirageCssUrl");
+  assert.deepEqual(order.slice(-2), ["worldMirageCssUrl", "architecturalHeroesCssUrl"]);
   // Every rule that restyles a Mirage surface carries the leading `main`.
   assert.doesNotMatch(css, /(^|\n)\s*\.site-shell\.film-edition\.mirage-edition/);
 });

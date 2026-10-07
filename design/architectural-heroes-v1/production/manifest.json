@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "generator": "scripts/build-architectural-heroes.py",
+  "sourceSha256": "36dfc3e29cd2d0f5022ffc3a4497c05b7c0baed8d01c24e5f26b6158c5495561",
+  "blender": "5.2.0 LTS",
+  "engine": "Cycles",
+  "seed": 7102026,
+  "viewTransform": "AgX",
+  "artworkPolicy": "No user artwork, text or outside image is embedded. Original work must remain a separate unmodified UI image.",
+  "materialPolicy": "Original physically scaled geometry with procedural materials only; no third-party assets.",
+  "outputs": {
+    "world": {
+      "blend": "world-atrium.blend",
+      "blendSha256": "34a0d4f51a2340c1c136ea2f3aa6ea160a8bb20d2b232c71fcc91e842506c266",
+      "image": "world-atrium.png",
+      "imageSha256": "24674ee69c27788c0f61742da1d10f4f3db2d5218daba193d676c5aba38dc330",
+      "resolution": [
+        2560,
+        1600
+      ],
+      "samples": 192,
+      "device": "GPU",
+      "overlayZone": {
+        "x": [
+          0.14,
+          0.86
+        ],
+        "y": [
+          0.15,
+          0.78
+        ]
+      }
+    },
+    "dream": {
+      "blend": "dream-atrium.blend",
+      "blendSha256": "962201b1666e1f6af3d694924f914d42a422dd8fc8cba5736e504ca28a1f88ef",
+      "image": "dream-atrium.png",
+      "imageSha256": "de1a1938c4cf444fef4bf8274f680e4457bafa13b263ec15f749f584ae0fb095",
+      "resolution": [
+        2560,
+        1600
+      ],
+      "samples": 192,
+      "device": "GPU",
+      "overlayZone": {
+        "x": [
+          0.14,
+          0.86
+        ],
+        "y": [
+          0.15,
+          0.78
+        ]
+      }
+    }
+  }
+}

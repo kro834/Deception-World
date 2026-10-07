@@ -65,7 +65,7 @@ const inScope = (part) => {
   return /^\.site-shell\.film-edition\.(?:motion-on\.)?mirage-edition(?![\w-])/.test(rest);
 };
 
-test("Mirage layer and its HUD face load last on /world only", async () => {
+test("Mirage and its HUD face keep their World-only order before the architectural skin", async () => {
   const route = await read("src/routes/world.tsx");
   assert.match(route, /import worldMirageCssUrl from "@\/styles-world-mirage\.css\?url";/);
   assert.match(route, /family=Michroma&display=swap&text=/);
@@ -75,6 +75,7 @@ test("Mirage layer and its HUD face load last on /world only", async () => {
     "href: otherArtworkCssUrl",
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
+    "href: architecturalHeroesCssUrl",
   ].map((needle) => links.indexOf(needle));
   assert.ok(
     order.every((index) => index > 0),
@@ -86,7 +87,7 @@ test("Mirage layer and its HUD face load last on /world only", async () => {
   );
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: architecturalHeroesCssUrl }') + 2,
   );
   for (const path of [
     "src/lib/world-head.ts",
