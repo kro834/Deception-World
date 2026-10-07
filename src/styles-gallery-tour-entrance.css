@@ -1,0 +1,523 @@
+.gallery-tour-entrance {
+  --gallery-tour-course-accent: var(--gallery-brass);
+  min-width: 0;
+}
+
+.gallery-tour-introduction {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+  padding-block: clamp(24px, 5vw, 64px) clamp(52px, 8vw, 104px);
+}
+
+.gallery-tour-introduction-copy {
+  min-width: 0;
+}
+
+.gallery-tour-eyebrow {
+  margin: 0 0 22px;
+  color: var(--gallery-brass);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1.7;
+}
+
+.gallery-tour-introduction h1 {
+  margin: 0 0 30px;
+  color: var(--gallery-ivory);
+  font-family: var(--gallery-serif);
+  font-size: clamp(34px, 4.2vw, 64px);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  line-height: 1.55;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.gallery-tour-introduction h1:focus {
+  outline: none;
+}
+
+.gallery-tour-introduction-lead,
+.gallery-tour-introduction-note {
+  max-width: 35em;
+  margin: 0;
+  line-height: 2.1;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.gallery-tour-introduction-lead {
+  font-size: clamp(15px, 1.2vw, 18px);
+}
+
+.gallery-tour-introduction-note {
+  margin-top: 20px;
+  color: var(--gallery-muted);
+  font-size: 13px;
+}
+
+.gallery-tour-introduction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+  margin-top: 30px;
+}
+
+.gallery-tour-entrance .gallery-tour-action {
+  display: inline-flex;
+  min-height: 46px;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--gallery-ivory);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.gallery-tour-entrance .gallery-tour-action-primary {
+  border-color: var(--gallery-rule);
+  background: rgb(222 203 170 / 0.07);
+}
+
+.gallery-tour-entrance .gallery-tour-action-primary:hover {
+  border-color: var(--gallery-tour-course-accent);
+  background: rgb(222 203 170 / 0.13);
+}
+
+.gallery-tour-entrance .gallery-tour-action-text {
+  padding-inline: 0;
+  color: var(--gallery-muted);
+}
+
+.gallery-tour-entrance .gallery-tour-action-text:hover {
+  color: var(--gallery-ivory);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.gallery-tour-introduction-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 26px 0 0;
+  color: var(--gallery-muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.gallery-tour-introduction-facts > span + span {
+  padding-left: 18px;
+  border-left: 1px solid var(--gallery-rule);
+}
+
+.gallery-tour-opening-artwork {
+  min-width: 0;
+  margin: 0;
+}
+
+.gallery-tour-opening-frame {
+  display: grid;
+  min-height: 260px;
+  padding: clamp(12px, 2vw, 24px);
+  border: 1px solid var(--gallery-rule);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgb(213 180 112 / 0.12), transparent 80%), #100f0e;
+  box-shadow: 0 22px 60px rgb(0 0 0 / 0.24);
+  place-items: center;
+}
+
+.gallery-tour-opening-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.gallery-tour-opening-artwork figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  margin-top: 14px;
+  color: var(--gallery-muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.gallery-tour-opening-artwork figcaption > span:first-child {
+  color: var(--gallery-brass);
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+
+.gallery-tour-catalogue {
+  padding-block: 42px 20px;
+  border-top: 1px solid var(--gallery-rule);
+  scroll-margin-top: calc(var(--gallery-bar) + env(safe-area-inset-top, 0px) + 24px);
+}
+
+.gallery-tour-catalogue-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px 50px;
+  margin-bottom: 34px;
+}
+
+.gallery-tour-catalogue-heading .gallery-tour-eyebrow {
+  margin-bottom: 12px;
+}
+
+.gallery-tour-catalogue-heading h2 {
+  margin: 0;
+  font-family: var(--gallery-serif);
+  font-size: clamp(24px, 2.8vw, 38px);
+  font-weight: 400;
+  line-height: 1.65;
+  text-wrap: balance;
+}
+
+.gallery-tour-catalogue-heading > p {
+  max-width: 30em;
+  margin: 0;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+.gallery-tour-entrance-message {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-left: 2px solid var(--gallery-brass);
+  background: rgb(222 203 170 / 0.05);
+  color: var(--gallery-muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.gallery-tour-course-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.gallery-tour-course {
+  display: flex;
+  min-width: 0;
+  grid-column: span 2;
+  flex-direction: column;
+  border: 1px solid var(--gallery-rule);
+  background: rgb(255 248 228 / 0.018);
+}
+
+.gallery-tour-course:nth-child(-n + 2) {
+  grid-column: span 3;
+}
+
+.gallery-tour-course-visual {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: clamp(230px, 24vw, 340px);
+  padding: 54px 24px 16px;
+  border-bottom: 1px solid var(--gallery-rule);
+  background: #100f0e;
+  place-items: center;
+}
+
+.gallery-tour-course-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.gallery-tour-course-number {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--gallery-rule);
+  background: #171614;
+  color: var(--gallery-tour-course-accent);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  place-items: center;
+}
+
+.gallery-tour-course-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: clamp(18px, 2.2vw, 30px);
+}
+
+.gallery-tour-course-kicker {
+  margin: 0 0 12px;
+  color: var(--gallery-tour-course-accent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.8;
+}
+
+.gallery-tour-course h3 {
+  margin: 0 0 14px;
+  color: var(--gallery-ivory);
+  font-family: var(--gallery-serif);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 400;
+  line-height: 1.65;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.gallery-tour-course-description {
+  margin: 0;
+  color: var(--gallery-muted);
+  font-size: 13px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+.gallery-tour-course-previews {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.gallery-tour-course-preview {
+  display: grid;
+  min-width: 0;
+  height: clamp(74px, 8vw, 108px);
+  padding: 4px;
+  background: #100f0e;
+  place-items: center;
+}
+
+.gallery-tour-course-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.gallery-tour-course-observation {
+  margin-top: 22px;
+  padding-left: 14px;
+  border-left: 1px solid var(--gallery-tour-course-accent);
+}
+
+.gallery-tour-course-observation > span {
+  color: var(--gallery-tour-course-accent);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.gallery-tour-course-observation p {
+  margin: 7px 0 0;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 1.9;
+  text-wrap: pretty;
+}
+
+.gallery-tour-course-bottom {
+  margin-top: auto;
+  padding-top: 26px;
+}
+
+.gallery-tour-course-position {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  color: var(--gallery-muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.gallery-tour-course-position > span:first-child {
+  color: var(--gallery-ivory);
+}
+
+.gallery-tour-course-progress {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: rgb(238 233 220 / 0.12);
+  accent-color: var(--gallery-tour-course-accent);
+}
+
+.gallery-tour-course-progress::-webkit-progress-bar {
+  background: rgb(238 233 220 / 0.12);
+}
+
+.gallery-tour-course-progress::-webkit-progress-value {
+  background: var(--gallery-tour-course-accent);
+}
+
+.gallery-tour-course-progress::-moz-progress-bar {
+  background: var(--gallery-tour-course-accent);
+}
+
+.gallery-tour-course-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-top: 18px;
+}
+
+.gallery-tour-course-actions .gallery-tour-action-primary {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.gallery-tour-entrance .gallery-tour-reset {
+  min-height: 44px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--gallery-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.8;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.gallery-tour-entrance .gallery-tour-reset:hover {
+  color: var(--gallery-ivory);
+}
+
+@media (max-width: 980px) {
+  .gallery-tour-course-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .gallery-tour-course,
+  .gallery-tour-course:nth-child(-n + 2) {
+    grid-column: auto;
+  }
+
+  .gallery-tour-catalogue-heading {
+    align-items: start;
+  }
+
+  .gallery-tour-catalogue-heading > p {
+    max-width: 24em;
+  }
+}
+
+@media (max-width: 800px) {
+  .gallery-tour-introduction {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+  }
+
+  .gallery-tour-introduction-copy {
+    max-width: 38em;
+  }
+
+  .gallery-tour-introduction h1 {
+    font-size: clamp(34px, 6.5vw, 52px);
+  }
+
+  .gallery-tour-opening-frame {
+    min-height: 0;
+  }
+
+  .gallery-tour-opening-frame img {
+    max-height: 460px;
+  }
+
+  .gallery-tour-catalogue-heading {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .gallery-tour-catalogue-heading > p {
+    max-width: 38em;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery-tour-course-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .gallery-tour-course-visual {
+    height: clamp(240px, 75vw, 340px);
+  }
+
+  .gallery-tour-course-preview {
+    height: 92px;
+  }
+
+  .gallery-tour-eyebrow {
+    margin-bottom: 16px;
+  }
+
+  .gallery-tour-introduction h1 {
+    margin-bottom: 22px;
+  }
+
+  .gallery-tour-introduction-facts {
+    display: block;
+  }
+
+  .gallery-tour-introduction-facts > span {
+    display: block;
+  }
+
+  .gallery-tour-introduction-facts > span + span {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-tour-entrance .gallery-tour-action {
+    transition: none;
+  }
+}

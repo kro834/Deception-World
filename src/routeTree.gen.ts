@@ -17,6 +17,7 @@ import { Route as ExtremeSagaRouteImport } from './routes/extreme-saga'
 import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as GalleryToursRouteImport } from './routes/gallery-tours'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
@@ -85,6 +86,11 @@ const FormArchiveRoute = FormArchiveRouteImport.update({
 const GalleryRoute = GalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryToursRoute = GalleryToursRouteImport.update({
+  id: '/gallery-tours',
+  path: '/gallery-tours',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryRoute = LibraryRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/gallery-tours': typeof GalleryToursRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/gallery-tours': typeof GalleryToursRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/final-stage': typeof FinalStageRoute
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
+  '/gallery-tours': typeof GalleryToursRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/gallery-tours'
     | '/library'
     | '/login'
     | '/managers'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/gallery-tours'
     | '/library'
     | '/login'
     | '/rexonance-saga'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/final-stage'
     | '/form-archive'
     | '/gallery'
+    | '/gallery-tours'
     | '/library'
     | '/login'
     | '/managers'
@@ -474,6 +486,7 @@ export interface RootRouteChildren {
   FinalStageRoute: typeof FinalStageRoute
   FormArchiveRoute: typeof FormArchiveRoute
   GalleryRoute: typeof GalleryRoute
+  GalleryToursRoute: typeof GalleryToursRoute
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/gallery'
       fullPath: '/gallery'
       preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery-tours': {
+      id: '/gallery-tours'
+      path: '/gallery-tours'
+      fullPath: '/gallery-tours'
+      preLoaderRoute: typeof GalleryToursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library': {
@@ -833,6 +853,7 @@ const rootRouteChildren: RootRouteChildren = {
   FinalStageRoute: FinalStageRoute,
   FormArchiveRoute: FormArchiveRoute,
   GalleryRoute: GalleryRoute,
+  GalleryToursRoute: GalleryToursRoute,
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,

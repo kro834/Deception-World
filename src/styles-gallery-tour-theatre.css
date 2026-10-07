@@ -1,0 +1,399 @@
+.gallery-tour-theatre {
+  --gallery-tour-accent: #c8a76b;
+  --gallery-tour-text: #eee9dc;
+  --gallery-tour-muted: #b8b0a1;
+  color: var(--gallery-tour-text);
+  min-width: 0;
+}
+
+.gallery-tour-theatre *,
+.gallery-tour-theatre *::before,
+.gallery-tour-theatre *::after {
+  box-sizing: border-box;
+}
+
+.gallery-tour-theatre-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.gallery-tour-theatre-kicker,
+.gallery-tour-stop-label {
+  margin: 0 0 12px;
+  color: var(--gallery-tour-accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.19em;
+  line-height: 1.7;
+}
+
+.gallery-tour-theatre-heading h1,
+.gallery-tour-stop-caption h2 {
+  margin: 0;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-weight: 500;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.gallery-tour-theatre-heading h1 {
+  color: var(--gallery-tour-text);
+  font-size: clamp(27px, 3.7vw, 46px);
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+}
+
+.gallery-tour-theatre-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 300px);
+  gap: clamp(26px, 3.4vw, 52px);
+  align-items: start;
+}
+
+.gallery-tour-screen-column,
+.gallery-tour-reading-column {
+  min-width: 0;
+}
+
+.gallery-tour-stage {
+  position: relative;
+  min-width: 0;
+  background: #090a0c;
+  border: 1px solid rgb(218 197 157 / 0.25);
+  padding: clamp(10px, 1.4vw, 18px);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.24);
+  outline-offset: 5px;
+}
+
+.gallery-tour-artwork {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: clamp(280px, 62dvh, 720px);
+}
+
+.gallery-tour-full-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  object-fit: contain;
+  opacity: 0;
+}
+
+.gallery-tour-full-image[data-ready="true"] {
+  opacity: 1;
+}
+
+.gallery-tour-image-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  margin: 0;
+  color: var(--gallery-tour-muted);
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.9;
+}
+
+.gallery-tour-image-message p {
+  margin: 0;
+}
+
+.gallery-tour-image-message a {
+  color: var(--gallery-tour-text);
+  text-underline-offset: 4px;
+}
+
+.gallery-tour-transport {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.gallery-tour-theatre .gallery-tour-theatre-button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid rgb(218 197 157 / 0.3);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--gallery-tour-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled) {
+  border-color: var(--gallery-tour-accent);
+  background: rgb(218 197 157 / 0.06);
+}
+
+.gallery-tour-theatre .gallery-tour-theatre-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.gallery-tour-theatre :where(button, a, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--gallery-tour-accent);
+  outline-offset: 4px;
+}
+
+.gallery-tour-exit {
+  flex: 0 0 auto;
+}
+
+.gallery-tour-transport > button:first-child {
+  justify-self: start;
+}
+
+.gallery-tour-transport > button:last-child {
+  justify-self: end;
+}
+
+.gallery-tour-position {
+  margin: 0;
+  white-space: nowrap;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gallery-tour-position-total {
+  color: var(--gallery-tour-muted);
+  font-size: 14px;
+}
+
+.gallery-tour-filmstrip {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 6px 5px 13px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gallery-tour-accent) #171614;
+}
+
+.gallery-tour-theatre .gallery-tour-thumbnail {
+  position: relative;
+  flex: 0 0 92px;
+  width: 92px;
+  height: 78px;
+  padding: 5px 5px 20px;
+  border: 1px solid rgb(218 197 157 / 0.2);
+  border-radius: 1px;
+  background: #0d0d0f;
+  color: var(--gallery-tour-muted);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.gallery-tour-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.gallery-tour-thumbnail span {
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  right: 0;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+}
+
+.gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"] {
+  border-color: var(--gallery-tour-accent);
+  color: var(--gallery-tour-accent);
+  box-shadow: inset 0 0 0 1px var(--gallery-tour-accent);
+}
+
+.gallery-tour-stop-caption {
+  padding: 8px 0 28px;
+  border-bottom: 1px solid rgb(218 197 157 / 0.2);
+}
+
+.gallery-tour-stop-caption h2 {
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.75;
+}
+
+.gallery-tour-stop-note {
+  margin: 18px 0 0;
+  color: var(--gallery-tour-muted);
+  font-size: 14px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+.gallery-tour-playback {
+  margin-top: 26px;
+}
+
+.gallery-tour-playback-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--gallery-tour-muted);
+  font-size: 12px;
+}
+
+.gallery-tour-playback-label select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgb(218 197 157 / 0.3);
+  border-radius: 2px;
+  background: #171614;
+  color: var(--gallery-tour-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.gallery-tour-theatre .gallery-tour-play-button {
+  width: 100%;
+  border-color: var(--gallery-tour-accent);
+  text-align: center;
+}
+
+.gallery-tour-time-track {
+  height: 2px;
+  margin-top: 8px;
+  background: rgb(218 197 157 / 0.13);
+  overflow: hidden;
+}
+
+.gallery-tour-time-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--gallery-tour-accent);
+  transform-origin: left;
+  animation: gallery-tour-time var(--gallery-tour-interval, 12s) linear both;
+}
+
+@keyframes gallery-tour-time {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.gallery-tour-playback-help,
+.gallery-tour-playback-notice {
+  margin: 13px 0 0;
+  color: var(--gallery-tour-muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.gallery-tour-playback-notice:empty {
+  display: none;
+}
+
+.gallery-tour-playback-notice {
+  color: var(--gallery-tour-accent);
+}
+
+.gallery-tour-ending {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(218 197 157 / 0.2);
+}
+
+.gallery-tour-ending p {
+  margin: 0 0 10px;
+  color: var(--gallery-tour-accent);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.gallery-tour-theatre-actions {
+  margin-top: 24px;
+}
+
+@media (max-width: 760px) {
+  .gallery-tour-theatre-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .gallery-tour-theatre-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .gallery-tour-artwork {
+    height: clamp(220px, 52dvh, 540px);
+  }
+
+  .gallery-tour-transport {
+    gap: 8px;
+    margin: 14px 0;
+  }
+
+  .gallery-tour-theatre .gallery-tour-transport button {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .gallery-tour-stop-caption {
+    padding-top: 0;
+  }
+
+  .gallery-tour-playback {
+    max-width: 420px;
+  }
+}
+
+@media (max-height: 500px) and (min-width: 761px) {
+  .gallery-tour-theatre-heading {
+    margin-bottom: 18px;
+  }
+
+  .gallery-tour-theatre-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 30%);
+    gap: 24px;
+  }
+
+  .gallery-tour-artwork {
+    height: 58dvh;
+    min-height: 190px;
+  }
+
+  .gallery-tour-stop-caption h2 {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-tour-time-fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+}

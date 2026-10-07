@@ -972,6 +972,12 @@ export function GalleryPage() {
             <a className="gallery-enter" href="#gallery-collection">
               展示室へ<span aria-hidden="true">↓</span>
             </a>
+            <p className="gallery-tour-invitation">
+              <Link to="/gallery-tours">
+                テーマから作品を巡る <span aria-hidden="true">↗</span>
+              </Link>
+              <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
+            </p>
             <p className="gallery-edition">
               COLLECTION <b>{GALLERY_ARTWORKS.length}</b> WORKS
             </p>
