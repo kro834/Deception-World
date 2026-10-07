@@ -15,34 +15,6 @@
   font-size: 12px;
 }
 
-html:has(.gallery-page),
-body:has(.gallery-page) {
-  background-color: #171614;
-}
-
-/* Server-rendered outside the gallery paint clip so Safari can sample an
-   opaque fixed viewport edge before hydration and the first scroll. */
-.gallery-statusbar-cover {
-  position: fixed;
-  z-index: 41;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: max(16px, env(safe-area-inset-top, 0px));
-  background: #171614;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  pointer-events: none;
-}
-
-/* Extend paint, not the fixed box geometry, into rubber-band overscroll. */
-.gallery-statusbar-cover::before {
-  position: absolute;
-  inset: -96px 0 100%;
-  background: #171614;
-  content: "";
-}
-
 .gallery-page {
   --gallery-ink: #171614;
   --gallery-ink-soft: #24221e;
@@ -113,15 +85,6 @@ body:has(.gallery-page) {
   background: #171614;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-}
-
-/* Extend the opaque band into iOS's status-bar/overscroll area too. */
-.gallery-topbar::before {
-  position: absolute;
-  inset: calc(-1 * max(32px, env(safe-area-inset-top, 0px))) 0 100%;
-  background: #171614;
-  content: "";
-  pointer-events: none;
 }
 
 .gallery-brand {

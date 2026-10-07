@@ -88,7 +88,15 @@ test("featured framing follows the selected artwork ratio and copy uses its avai
 
 test("the fixed header reserves and covers the status-bar safe area", () => {
   const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
+  const chromeCss = readFileSync(
+    new URL("../src/styles-viewport-chrome.css", import.meta.url),
+    "utf8",
+  );
   assert.match(css, /padding-top: calc\(var\(--gallery-bar\) \+ env\(safe-area-inset-top, 0px\)\)/);
-  assert.match(css, /\.gallery-topbar::before \{[\s\S]*?background: #171614;/);
+  assert.match(
+    chromeCss,
+    /\[data-viewport-chrome="gallery"\]\s*\{\s*--viewport-chrome-color: #171614;/,
+  );
+  assert.match(chromeCss, /\.viewport-chrome-cover::before \{[\s\S]*?background: inherit;/);
   assert.match(css, /padding: calc\(12px \+ env\(safe-area-inset-top, 0px\)\)/);
 });

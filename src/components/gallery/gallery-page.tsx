@@ -1635,11 +1635,5 @@ export function GalleryPage() {
       </dialog>
     </div>
   );
-  return (
-    <>
-      {/* Keep the opaque viewport edge in the initial HTML, outside the gallery paint clip. */}
-      <div className="gallery-statusbar-cover" aria-hidden="true" />
-      {exhibition}
-    </>
-  );
+  return exhibition;
 }

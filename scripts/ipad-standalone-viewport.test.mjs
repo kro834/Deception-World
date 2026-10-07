@@ -37,8 +37,8 @@ function run(userAgent, maxTouchPoints, standalone, displayMode = false) {
   return {
     content,
     attributes,
-    navigate: () => {
-      content = "width=device-width, viewport-fit=cover";
+    navigate: (next = "width=device-width, viewport-fit=cover") => {
+      content = next;
       onHeadChange?.();
       return content;
     },
@@ -51,15 +51,31 @@ test("installed iPad reserves the status area, including desktop-mode UA", () =>
     assert.match(result.content, /viewport-fit=contain/);
     assert.match(result.content, /interactive-widget=resizes-content/);
     assert.equal(result.attributes["data-ipad-standalone-viewport"], "contained");
+    assert.equal(result.attributes["data-ipad-viewport"], "contained");
     assert.match(result.navigate(), /viewport-fit=contain/);
   }
   assert.match(run("Macintosh", 5, undefined, true).content, /viewport-fit=contain/);
 });
 
-test("iPhone, ordinary iPad tabs, Mac and Android retain the existing viewport", () => {
+test("ordinary iPad tabs reserve the same native area, including desktop-mode UA", () => {
+  for (const ua of ["iPad OS 26", "Macintosh Intel Mac OS X"]) {
+    const result = run(ua, 5, false);
+    assert.match(result.content, /viewport-fit=contain/);
+    assert.equal(result.attributes["data-ipad-viewport"], "contained");
+    assert.equal(result.attributes["data-ipad-standalone-viewport"], undefined);
+    assert.match(result.navigate(), /viewport-fit=contain/);
+    assert.match(result.navigate("width=device-width"), /viewport-fit=contain/);
+    assert.match(result.navigate("width=device-width, viewport-fit=auto"), /viewport-fit=contain/);
+    assert.equal(
+      result.navigate("width=device-width, viewport-fit=contain"),
+      "width=device-width, viewport-fit=contain",
+    );
+  }
+});
+
+test("iPhone, Mac and Android retain the existing viewport", () => {
   for (const profile of [
     ["iPhone", 5, true],
-    ["iPad", 5, false],
     ["Macintosh", 0, true],
     ["Android", 5, true],
   ]) {

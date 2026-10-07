@@ -1,17 +1,19 @@
-/** Reserve the native status area in installed iPad apps before first paint.
- * iPhone and ordinary browser tabs retain their existing edge-to-edge layout. */
+/** Reserve the native status area on iPad before first paint, in Safari tabs
+ * as well as installed apps. iPhone/Android retain their edge-to-edge layout. */
 export const IPAD_STANDALONE_VIEWPORT_SCRIPT = `(function () {
   var n = window.navigator;
   var ipad = /iPad/.test(n.userAgent || "") ||
     (/Macintosh/.test(n.userAgent || "") && n.maxTouchPoints > 1);
   var installed = n.standalone === true ||
     Boolean(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
-  if (!ipad || !installed) return;
+  if (!ipad) return;
   function reserveStatusArea() {
     var viewport = document.querySelector('meta[name="viewport"]');
     if (!viewport) return;
     var content = viewport.getAttribute("content") || "";
-    var contained = content.replace(/viewport-fit\\s*=\\s*cover/i, "viewport-fit=contain");
+    var contained = /viewport-fit\\s*=/i.test(content)
+      ? content.replace(/viewport-fit\\s*=\\s*[^,;\\s]+/i, "viewport-fit=contain")
+      : content + ", viewport-fit=contain";
     if (contained !== content) viewport.setAttribute("content", contained);
   }
   reserveStatusArea();
@@ -22,5 +24,6 @@ export const IPAD_STANDALONE_VIEWPORT_SCRIPT = `(function () {
       subtree: true, childList: true, attributes: true, attributeFilter: ["content"]
     });
   }
-  document.documentElement.setAttribute("data-ipad-standalone-viewport", "contained");
+  document.documentElement.setAttribute("data-ipad-viewport", "contained");
+  if (installed) document.documentElement.setAttribute("data-ipad-standalone-viewport", "contained");
 })();`;

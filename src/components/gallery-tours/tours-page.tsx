@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
@@ -84,7 +83,6 @@ export function GalleryToursPage({
   onExit: () => void;
 }) {
   useWorldMode();
-  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [progress, setProgress] = useState<TourProgress>({});
   const [storageMessage, setStorageMessage] = useState("");
@@ -102,7 +100,6 @@ export function GalleryToursPage({
   );
 
   useEffect(() => {
-    setMounted(true);
     const read = () => {
       try {
         setProgress(readTourProgress(window.localStorage));
@@ -152,8 +149,6 @@ export function GalleryToursPage({
 
   return (
     <div className="world gallery-page gallery-tours-page" data-gallery-tours="true">
-      {mounted &&
-        createPortal(<div className="gallery-statusbar-cover" aria-hidden="true" />, document.body)}
       <header className="gallery-topbar">
         <Link className="gallery-brand" to="/gallery">
           DECEPTION WORLD<span>GUIDED EXHIBITIONS</span>

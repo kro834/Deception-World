@@ -138,23 +138,18 @@ test("fallback and reopening/unmount cancel old restoration before a new session
   }
 });
 
-test("status-bar cover lives outside the clipped gallery and neither solid header layer uses blur", () => {
+test("gallery uses the shared server-rendered viewport cover outside its paint clip", () => {
   const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
+  const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
   const page = readFileSync(
     new URL("../src/components/gallery/gallery-page.tsx", import.meta.url),
     "utf8",
   );
   assert.match(
-    page,
-    /<>[\s\S]*?<div className="gallery-statusbar-cover" aria-hidden="true" \/>\s*\{exhibition\}\s*<\/>/,
+    root,
+    /<body[^>]*>\s*<SkipLink \/>\s*<ContentProtection \/>\s*\{chrome && <div className="viewport-chrome-cover" aria-hidden="true" \/>\}/,
   );
-  assert.doesNotMatch(page, /createPortal/);
-  assert.match(
-    css,
-    /\.gallery-statusbar-cover \{[\s\S]*?position: fixed;[\s\S]*?top: 0;[\s\S]*?background: #171614;/,
-  );
-  assert.match(css, /height: max\(16px, env\(safe-area-inset-top, 0px\)\);/);
-  assert.match(css, /\.gallery-statusbar-cover::before \{[\s\S]*?inset: -96px 0 100%;/);
+  assert.doesNotMatch(page, /createPortal|gallery-statusbar-cover/);
   const header = css.match(/\.gallery-topbar \{[\s\S]*?\n\}/)[0];
   assert.match(header, /background: #171614;/);
   assert.match(header, /backdrop-filter: none;/);

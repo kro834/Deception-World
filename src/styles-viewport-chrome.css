@@ -1,0 +1,64 @@
+/* One canvas/viewport-edge contract for the three exhibition entrances.
+   This is in the root head, not a delayed route effect or a clipped page.
+   Colours match viewport-chrome.js (also used by theme-color). */
+html:root[data-viewport-chrome="gallery"] {
+  --viewport-chrome-color: #171614;
+}
+html:root[data-viewport-chrome="world"] {
+  --viewport-chrome-color: #03060c;
+}
+html:root[data-viewport-chrome="dream"] {
+  --viewport-chrome-color: #130c17;
+}
+
+html:root[data-viewport-chrome],
+html:root[data-viewport-chrome] body {
+  /* Keep the native inset/overscroll canvas solid as well as the header.
+     Route and device sheets must not reintroduce an alpha ground. */
+  background: var(--viewport-chrome-color) !important;
+}
+
+html:root[data-ipad-viewport="contained"][data-viewport-chrome],
+html:root[data-ipad-viewport="contained"][data-viewport-chrome] body {
+  /* Only suppress rubber-band paint at the document boundary on iPad.
+     Keep the native document scroller, gestures and restoration intact. */
+  overscroll-behavior-y: none;
+}
+
+.viewport-chrome-cover {
+  position: fixed;
+  z-index: 59; /* Above all three headers; below the menu, dialogs and curtain. */
+  top: 0;
+  right: 0;
+  left: 0;
+  height: max(1px, env(safe-area-inset-top, 0px));
+  background: var(--viewport-chrome-color);
+  pointer-events: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.viewport-chrome-cover::before {
+  position: absolute;
+  inset: -96px 0 100%;
+  background: inherit;
+  content: "";
+}
+
+/* Preserve World's chapter colours, but put an opaque base below any
+   decorative gradient. No composited glass on the viewport edge, including
+   data-page-scrolled and the device/economy fallbacks. */
+html:root[data-viewport-chrome] :is(.gallery-topbar, .topbar, .dream-site-header) {
+  background-color: var(--world-atmosphere-base, var(--viewport-chrome-color)) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+@media (forced-colors: active) {
+  html:root[data-viewport-chrome] {
+    --viewport-chrome-color: Canvas;
+  }
+  html:root[data-viewport-chrome] :is(.gallery-topbar, .topbar, .dream-site-header) {
+    background-color: Canvas !important;
+  }
+}

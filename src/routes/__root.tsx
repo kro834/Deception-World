@@ -32,8 +32,10 @@ import pressFeedbackCss from "../styles-press-feedback.css?url";
 import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
+import viewportChromeCss from "../styles-viewport-chrome.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
+import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
@@ -82,7 +84,10 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       { name: "description", content: "仮面ライダーサーガ Deception World — 映画オープニング" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
-      { name: "theme-color", content: "#000000" },
+      {
+        name: "theme-color",
+        content: getViewportChromeColor(matches.at(-1)?.routeId ?? ""),
+      },
       { name: "color-scheme", content: "dark" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
@@ -145,6 +150,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: transitionCinemaCss },
       // Entry calls must be available on the departure route as well.
       { rel: "stylesheet", href: rexonanceCallsCss },
+      { rel: "stylesheet", href: viewportChromeCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -160,14 +166,21 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
     ],
   }),
-  component: () => (
-    <html lang="ja" suppressHydrationWarning>
+  component: RootDocument,
+});
+
+function RootDocument() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const chrome = getViewportChrome(pathname);
+  return (
+    <html lang="ja" data-viewport-chrome={chrome} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="antialiased">
         <SkipLink />
         <ContentProtection />
+        {chrome && <div className="viewport-chrome-cover" aria-hidden="true" />}
         <LegacyDataRetirement />
         <PreviewHostBridge />
         <AuthProvider>
@@ -185,5 +198,5 @@ export const Route = createRootRoute({
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}
