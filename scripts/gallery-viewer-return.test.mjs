@@ -24,7 +24,10 @@ test("the viewer freezes the page and puts the reader back where they were", () 
     page,
     /galleryViewer: \{ \.\.\.record, position: \{ \.\.\.record.position, top \} \}/,
   );
-  assert.match(page, /\[viewerOpen, router, featuredId, works, titles\]/);
+  assert.match(
+    page,
+    /viewerOpen,\s*router,\s*featuredId,\s*works,\s*titles,\s*display.preferences.density,\s*display.status,\s*display.error,/,
+  );
   assert.doesNotMatch(page, /requestAnimationFrame/);
   const router = read("src/router.tsx");
   assert.match(router, /!document.body.hasAttribute\("data-gallery-viewer-lock"\)/);
@@ -33,7 +36,7 @@ test("the viewer freezes the page and puts the reader back where they were", () 
 test("one history entry per open viewer: Back closes it, a page close removes it", () => {
   assert.match(
     page,
-    /router\.history\.push\(here\.href, \{[\s\S]*?galleryViewer: \{[\s\S]*?position: readingAt/,
+    /router\.history\.push\(galleryArtworkHref\(here\.href, viewerId\), \{[\s\S]*?galleryViewer: \{[\s\S]*?position: readingAt/,
   );
   assert.match(page, /ownEntry &&[\s\S]*?router\.history\.back\(\)/);
   assert.equal(

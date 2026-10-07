@@ -1,0 +1,230 @@
+/* Personal display controls; artwork pixels and gallery order are never altered. */
+.gallery-display-settings {
+  margin-block: 24px;
+  border-block: 1px solid var(--gallery-rule);
+  color: var(--gallery-ivory);
+}
+
+.gallery-viewer-tools .gallery-background-control {
+  margin-top: 20px;
+}
+
+.gallery-display-settings > summary {
+  min-height: 48px;
+  padding-block: 14px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gallery-display-settings > summary > span {
+  margin-left: 16px;
+  color: var(--gallery-muted);
+  font-size: 12px;
+}
+
+.gallery-display-body {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 24px;
+}
+
+.gallery-display-description,
+.gallery-display-feedback {
+  margin: 0;
+  color: var(--gallery-muted);
+  font-size: 12px;
+  line-height: 1.8;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+.gallery-display-feedback {
+  margin-top: 10px;
+}
+
+.gallery-display-feedback.is-error {
+  color: #ffb5a4;
+}
+
+.gallery-display-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gallery-display-field > legend {
+  margin-bottom: 10px;
+  padding: 0;
+  color: var(--gallery-ivory);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.gallery-display-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gallery-display-choice {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgb(224 210 184 / 0.32);
+  color: #e7dcc7;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.gallery-display-choice:has(input:checked) {
+  border-color: #c8a76b;
+  background: rgb(197 166 108 / 0.14);
+  color: #f1dfba;
+}
+
+.gallery-display-choice:has(input:focus-visible),
+.gallery-display-settings > summary:focus-visible,
+.gallery-display-reset:focus-visible {
+  outline: 2px solid #f0d18d;
+  outline-offset: 3px;
+}
+
+.gallery-display-choice input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 0;
+  accent-color: #c8a76b;
+}
+
+.gallery-display-swatch {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  border-radius: 50%;
+}
+
+.gallery-display-swatch[data-background="ink"] {
+  background: #101112;
+}
+
+.gallery-display-swatch[data-background="warm"] {
+  background: #b8aa93;
+}
+
+.gallery-display-swatch[data-background="light"] {
+  background: #f1eee7;
+}
+
+.gallery-display-reset {
+  justify-self: start;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid rgb(224 210 184 / 0.32);
+  background: transparent;
+  color: #e7dcc7;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.gallery-grid[data-gallery-density="compact"] {
+  --gallery-row: clamp(145px, 16vw, 210px);
+  --gallery-mat: clamp(8px, 1vw, 14px);
+  column-gap: clamp(12px, 1.5vw, 20px);
+  row-gap: 28px;
+}
+
+.gallery-grid[data-gallery-density="spacious"] {
+  --gallery-row: clamp(260px, 33vw, 450px);
+  --gallery-mat: clamp(14px, 2vw, 28px);
+  column-gap: clamp(24px, 3vw, 40px);
+  row-gap: clamp(42px, 5vw, 64px);
+}
+
+/* Only the image's surrounding mat changes; all dialog controls stay dark. */
+.gallery-viewer[data-gallery-background="ink"] .gallery-image-viewport {
+  --gallery-viewport-focus: #f0d18d;
+  background: #101112;
+}
+
+.gallery-viewer[data-gallery-background="warm"] .gallery-image-viewport {
+  --gallery-viewport-focus: #493310;
+  background: #b8aa93;
+}
+
+.gallery-viewer[data-gallery-background="light"] .gallery-image-viewport {
+  --gallery-viewport-focus: #674716;
+  background: #f1eee7;
+}
+
+.gallery-viewer[data-gallery-background] .gallery-image-viewport:focus-visible {
+  outline: 3px solid var(--gallery-viewport-focus, #f0d18d);
+  outline-offset: -3px;
+}
+
+.gallery-viewer[data-gallery-background] .gallery-image-status {
+  inset: auto 12px 12px;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid #756344;
+  background: #171614;
+  color: #f8f2e5;
+  text-shadow: none;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.gallery-viewer[data-gallery-background] .gallery-image-viewport > .gallery-image-error {
+  inset: 12px;
+  align-content: start;
+  padding: 16px;
+  background: rgb(23 22 20 / 0.96);
+  color: #f8f2e5;
+  text-shadow: none;
+  overflow-y: auto;
+}
+
+@media (max-width: 1020px) and (min-width: 701px) {
+  .gallery-grid[data-gallery-density="compact"] {
+    --gallery-row: clamp(150px, 20vw, 210px);
+  }
+
+  .gallery-grid[data-gallery-density="spacious"] {
+    --gallery-row: clamp(250px, 40vw, 370px);
+  }
+}
+
+@media (max-width: 700px) {
+  .gallery-grid[data-gallery-density="compact"] {
+    --gallery-row: clamp(130px, 38vw, 170px);
+    --gallery-mat: 6px;
+    column-gap: 10px;
+    row-gap: 24px;
+  }
+
+  /* A third narrow portrait would squeeze the caption and favorite control. */
+  .gallery-grid[data-gallery-density="compact"] .gallery-work {
+    min-width: calc((100% - 10px) / 2);
+  }
+
+  .gallery-grid[data-gallery-density="spacious"] {
+    --gallery-mat: 12px;
+    row-gap: 36px;
+  }
+
+  .gallery-grid[data-gallery-density="spacious"] .gallery-work {
+    flex-basis: 100%;
+  }
+
+  .gallery-display-choice {
+    flex: 1 1 92px;
+  }
+}

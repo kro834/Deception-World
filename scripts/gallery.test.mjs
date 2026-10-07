@@ -10,6 +10,10 @@ const discovery = readFileSync(
   new URL("../src/components/gallery/gallery-discovery.ts", import.meta.url),
   "utf8",
 );
+const searchControls = readFileSync(
+  new URL("../src/components/gallery/gallery-search-controls.tsx", import.meta.url),
+  "utf8",
+);
 const viewerImage = readFileSync(
   new URL("../src/components/gallery/gallery-viewer-image.tsx", import.meta.url),
   "utf8",
@@ -56,8 +60,8 @@ test("exhibits start numbered and visitor edits publish versioned shared titles 
 
 test("gallery discovery combines search, categories, and local favorites without default titles", () => {
   assert.match(component, /filterGalleryArtworks\(allArtworks/);
-  assert.match(component, /type="search"/);
-  assert.match(component, /value=\{query\}/);
+  assert.match(searchControls, /type="search"/);
+  assert.match(searchControls, /value=\{query\}/);
   assert.match(component, /aria-pressed=\{favoritesOnly\}/);
   assert.match(component, /gallery-favorite-toggle/);
   assert.match(component, /aria-pressed=\{favorites\.includes\(selected\.id\)\}/);
@@ -67,7 +71,7 @@ test("gallery discovery combines search, categories, and local favorites without
   assert.match(component, /setFavorites\(\s*readGalleryFavorites/);
   assert.match(component, /aria-label=.*work\.alt/);
   assert.match(discovery, /normalize\("NFKC"\)/);
-  assert.match(discovery, /personalTitle, artwork\.alt/);
+  assert.match(discovery, /publicTitle, artwork\.alt/);
   assert.match(discovery, /knownIds\.has\(id\)/);
   assert.match(discovery, /deception-world\.gallery-favorites\.v1/);
   assert.match(component, /viewerWorksRef\.current = galleryViewerSequence/);
@@ -125,7 +129,8 @@ test("native viewer owns and releases the shared viewport lock and dismisses on 
   assert.match(component, /const release = acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(component, /if \(dialog\.open\) dialog\.close\(\)/);
   assert.match(component, /release\(\)/);
-  assert.match(component, /router.history.subscribe\([\s\S]*?action.type === "BACK"/);
+  assert.match(component, /router.history.subscribe\(restore\)/);
+  assert.match(component, /plan.kind === "none"[\s\S]*?setSelectedId\(null\)/);
 });
 
 test("viewer exposes dialog names, keyboard dismissal, live position, and image recovery", () => {

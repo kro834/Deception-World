@@ -35,6 +35,16 @@ import {
 } from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
 import { GalleryViewerImage } from "./gallery-viewer-image";
+import { GalleryShareControl } from "./gallery-share-control";
+import { GallerySearchControls } from "./gallery-search-controls";
+import { GalleryBackgroundControl, GalleryDisplaySettings } from "./gallery-display-settings";
+import { useGalleryDisplayPreferences } from "./use-gallery-display-preferences";
+import {
+  galleryArtworkHref,
+  galleryWithoutArtwork,
+  planGalleryArtworkEntry,
+  readGalleryArtworkLink,
+} from "./gallery-artwork-link";
 import {
   galleryAdjacentId,
   galleryLayoutTop,
@@ -63,6 +73,7 @@ function revealGalleryControl(control: HTMLElement | null) {
 export function GalleryPage() {
   useWorldMode();
   const router = useRouter();
+  const display = useGalleryDisplayPreferences();
   // The history entry the open viewer adds, so Back closes it in place.
   const viewerEntryRef = useRef(false);
   const readingAtRef = useRef({ top: 0, left: 0 });
@@ -70,7 +81,11 @@ export function GalleryPage() {
   const finishReturnRef = useRef<(() => void) | null>(null);
   const viewerActiveRef = useRef(false);
   const viewerIdRef = useRef<string | null>(null);
+  const preparingLinkRef = useRef(false);
   const backdropPointerRef = useRef(false);
+  const [linkNotice, setLinkNotice] = useState<"waiting" | "error" | "missing" | "invalid" | null>(
+    null,
+  );
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<(typeof GALLERY_CATEGORIES)[number]["id"] | "community">(
@@ -429,9 +444,10 @@ export function GalleryPage() {
     // One history entry per open viewer: a Back gesture closes the artwork
     // and stays in the gallery instead of leaving it (and returning later at
     // the top). Moving between works adds none.
-    if (!viewerEntryRef.current) {
+    const viewerId = viewerIdRef.current;
+    if (!viewerEntryRef.current && viewerId) {
       const here = router.history.location;
-      router.history.push(here.href, {
+      router.history.push(galleryArtworkHref(here.href, viewerId), {
         ...here.state,
         galleryViewer: {
           id: viewerIdRef.current,
@@ -520,36 +536,85 @@ export function GalleryPage() {
     synchronizePosition();
     window.addEventListener("resize", synchronizePosition);
     return () => window.removeEventListener("resize", synchronizePosition);
-  }, [viewerOpen, router, featuredId, works, titles]);
+  }, [
+    viewerOpen,
+    router,
+    featuredId,
+    works,
+    titles,
+    display.preferences.density,
+    display.status,
+    display.error,
+  ]);
 
   useEffect(() => {
     const restore = () => {
+      if (preparingLinkRef.current || arriving) return;
       const here = router.history.location;
-      const record = readGalleryViewerRecord(
-        (here.state as { galleryViewer?: unknown }).galleryViewer,
-      );
-      restoreFocusRef.current = false;
-      if (here.pathname !== "/gallery" || !record) {
+      const plan = planGalleryArtworkEntry({
+        href: here.href,
+        viewerState: (here.state as { galleryViewer?: unknown }).galleryViewer,
+        availableIds: allArtworksRef.current.map((work) => work.id),
+        communityLoaded,
+        communityFailed: Boolean(communityLoadError),
+      });
+      if (plan.kind === "none") {
+        restoreFocusRef.current = false;
         setSelectedId(null);
         return;
       }
+      if (plan.kind === "waiting") {
+        setLinkNotice(plan.failed ? "error" : "waiting");
+        return;
+      }
+      if (plan.kind === "invalid" || plan.kind === "missing") {
+        setLinkNotice(plan.kind);
+        preparingLinkRef.current = true;
+        try {
+          router.history.replace(plan.cleanHref, { ...here.state, galleryViewer: undefined });
+          // Browser history batches mutations; commit the base before the next push.
+          router.history.flush();
+        } finally {
+          preparingLinkRef.current = false;
+        }
+        setSelectedId(null);
+        return;
+      }
+      const { record } = plan;
       // A restored community artwork may arrive after hydration. Retrying must
       // not reset an already open viewer or its in-progress title editor.
       if (viewerActiveRef.current && viewerIdRef.current === record.id) return;
+      restoreFocusRef.current = false;
       const sequence = record.ids
         .map((id) => allArtworksRef.current.find((work) => work.id === id))
         .filter((work): work is GalleryCollectionArtwork => Boolean(work));
       if (!sequence.some((work) => work.id === record.id)) return;
       finishReturnRef.current?.();
+      if (plan.cleanHref !== null) {
+        // First arrival has no gallery underneath it. Replace that entry first;
+        // the normal viewer effect then adds its one, Back-closeable entry.
+        preparingLinkRef.current = true;
+        try {
+          router.history.replace(plan.cleanHref, { ...here.state, galleryViewer: undefined });
+          // Browser history batches mutations; commit the base before the next push.
+          router.history.flush();
+        } finally {
+          preparingLinkRef.current = false;
+        }
+      }
       readingAtRef.current = record.position;
-      openerRef.current = document.querySelector<HTMLElement>(
-        `[data-gallery-artwork="${record.id}"] .gallery-work-open`,
-      );
+      openerRef.current =
+        plan.cleanHref !== null
+          ? null
+          : document.querySelector<HTMLElement>(
+              `[data-gallery-artwork="${CSS.escape(record.id)}"] .gallery-work-open`,
+            );
       window.scrollTo({ ...record.position, behavior: "instant" });
       openerTopRef.current = openerRef.current ? galleryLayoutTop(openerRef.current) : null;
       viewerWorksRef.current = sequence;
       viewerIdRef.current = record.id;
-      viewerEntryRef.current = true;
+      viewerEntryRef.current = plan.cleanHref === null;
+      setLinkNotice(null);
       setEditing(false);
       setSaveMessage("");
       setSaveError("");
@@ -558,10 +623,8 @@ export function GalleryPage() {
       setSelectedId(record.id);
     };
     restore();
-    return router.history.subscribe(({ action }) => {
-      if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") restore();
-    });
-  }, [router, communityLoaded]);
+    return router.history.subscribe(restore);
+  }, [router, communityLoaded, communityLoadError, arriving]);
 
   useEffect(
     () => () => {
@@ -575,6 +638,20 @@ export function GalleryPage() {
       return;
     event.preventDefault();
     finishReturnRef.current?.();
+    const here = router.history.location;
+    if (readGalleryArtworkLink(here.href).kind !== "none") {
+      preparingLinkRef.current = true;
+      try {
+        router.history.replace(galleryWithoutArtwork(here.href), {
+          ...here.state,
+          galleryViewer: undefined,
+        });
+        router.history.flush();
+      } finally {
+        preparingLinkRef.current = false;
+      }
+    }
+    setLinkNotice(null);
     readingAtRef.current = { top: window.scrollY, left: window.scrollX };
     openerRef.current = event.currentTarget;
     openerTopRef.current = galleryLayoutTop(event.currentTarget);
@@ -626,7 +703,7 @@ export function GalleryPage() {
         (here.state as { galleryViewer?: unknown }).galleryViewer,
       );
       if (record)
-        router.history.replace(here.href, {
+        router.history.replace(galleryArtworkHref(here.href, next), {
           ...here.state,
           galleryViewer: { ...record, id: next },
         });
@@ -850,6 +927,29 @@ export function GalleryPage() {
         </div>
       </header>
       <main id="gallery-main">
+        {linkNotice && (
+          <div className="gallery-link-notice">
+            <p role="status">
+              {linkNotice === "waiting"
+                ? "リンク先の投稿作品を読み込んでいます。"
+                : linkNotice === "error"
+                  ? "リンク先の投稿作品を読み込めませんでした。更新して、もう一度確認できます。"
+                  : linkNotice === "missing"
+                    ? "リンク先の作品は公開されていないか、見つかりません。ほかの作品は引き続き鑑賞できます。"
+                    : "この作品リンクは読み取れませんでした。ギャラリーから作品を選んでください。"}
+            </p>
+            {linkNotice === "error" && (
+              <button
+                type="button"
+                className="gallery-viewer-close"
+                aria-disabled={refreshing}
+                onClick={refreshNow}
+              >
+                {refreshing ? "更新中…" : "もう一度読み込む"}
+              </button>
+            )}
+          </div>
+        )}
         <section
           className="gallery-intro"
           data-feature-shape={featured.width < featured.height ? "portrait" : "landscape"}
@@ -1064,16 +1164,7 @@ export function GalleryPage() {
             </details>
           )}
           <div className="gallery-discovery-controls">
-            <label className="gallery-search">
-              <span>作品を検索</span>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="番号・画像の説明・公開タイトル"
-                aria-label="作品を番号、画像の説明、公開タイトルで検索"
-              />
-            </label>
+            <GallerySearchControls query={query} onQueryChange={setQuery} />
             <button
               type="button"
               className="gallery-favorites-filter"
@@ -1123,7 +1214,18 @@ export function GalleryPage() {
               みんなの投稿<span>{communityWorks.length}</span>
             </button>
           </nav>
-          <div className="gallery-grid" ref={gridRef}>
+          <GalleryDisplaySettings
+            value={display.preferences}
+            onChange={display.update}
+            onReset={display.reset}
+            status={display.status}
+            error={display.error}
+          />
+          <div
+            className="gallery-grid"
+            data-gallery-density={display.preferences.density}
+            ref={gridRef}
+          >
             {works.map((work) => (
               <figure
                 className={`gallery-work${work.width > work.height ? " gallery-work-wide" : ""}`}
@@ -1144,9 +1246,11 @@ export function GalleryPage() {
                       src={work.thumb}
                       srcSet={work.srcSet}
                       sizes={
-                        work.width > work.height
-                          ? "(max-width: 640px) 92vw, (max-width: 1000px) 60vw, 44vw"
-                          : imageSizes
+                        display.preferences.density === "spacious"
+                          ? "(max-width: 700px) 92vw, (max-width: 1020px) 75vw, 60vw"
+                          : work.width > work.height
+                            ? "(max-width: 640px) 92vw, (max-width: 1000px) 60vw, 44vw"
+                            : imageSizes
                       }
                       alt={work.alt}
                       width={work.width}
@@ -1202,6 +1306,7 @@ export function GalleryPage() {
       <dialog
         id="gallery-viewer"
         className="gallery-viewer"
+        data-gallery-background={display.preferences.background}
         ref={dialogRef}
         tabIndex={-1}
         aria-labelledby="gallery-viewer-title"
@@ -1291,7 +1396,7 @@ export function GalleryPage() {
               </button>
               <details className="gallery-viewer-tools">
                 <summary>
-                  作品の設定<span>トップ作品・お気に入り・タイトル</span>
+                  作品の設定<span>トップ作品・背景・タイトル・共有リンク</span>
                 </summary>
                 <p className="gallery-storage-note">
                   トップ作品とお気に入りは自分用に保存。タイトルはすべての訪問者に共有され、だれでも編集できます。
@@ -1347,6 +1452,17 @@ export function GalleryPage() {
                     </button>
                   )}
                 </div>
+                <GalleryShareControl
+                  key={selected.id}
+                  id={selected.id}
+                  disabled={editing || confirmDelete || communityBusy}
+                />
+                <GalleryBackgroundControl
+                  value={display.preferences.background}
+                  onChange={(background) => display.update({ background })}
+                  status={display.status}
+                  error={display.error}
+                />
               </details>
               {featureMessage && (
                 <p className="gallery-storage-note" role="status">

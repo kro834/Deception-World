@@ -1,0 +1,42 @@
+.gallery-link-notice {
+  margin: 24px auto;
+  max-width: 1680px;
+  padding: 18px 24px;
+  border: 1px solid rgb(194 168 111 / 38%);
+  color: #e6dec9;
+  background: #24221d;
+}
+
+.gallery-link-notice p {
+  margin: 0 0 12px;
+  line-height: 1.7;
+}
+
+.gallery-share-control {
+  margin-top: 12px;
+}
+
+.gallery-share-url {
+  display: grid;
+  gap: 8px;
+  max-width: 100%;
+  color: #e6dec9;
+  font-size: 0.875rem;
+}
+
+.gallery-share-url input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid rgb(194 168 111 / 55%);
+  color: #f3eddd;
+  background: #171614;
+  font: inherit;
+}
+
+.gallery-share-url input:focus-visible {
+  outline: 2px solid #c2a86f;
+  outline-offset: 3px;
+}

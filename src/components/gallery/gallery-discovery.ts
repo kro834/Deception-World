@@ -13,18 +13,69 @@ export function normalizeGalleryQuery(value: string): string {
   return value.normalize("NFKC").toLocaleLowerCase("ja-JP").trim().replace(/\s+/g, " ");
 }
 
+export type GallerySearchQuery =
+  | { kind: "text"; terms: readonly string[] }
+  | { kind: "number"; collection: "catalogue" | "community"; from: number; to: number };
+
+/** Numbers refer to the displayed catalogue, not digits within titles or IDs. */
+export function parseGalleryQuery(query: string): GallerySearchQuery {
+  const normalized = normalizeGalleryQuery(query);
+  const number = /^([gu]?)(\d+)(?:\s*[-–—〜~]\s*([gu]?)(\d+))?$/.exec(normalized);
+  if (number) {
+    const collection = number[1] === "u" ? "community" : "catalogue";
+    const lastCollection = !number[3] ? collection : number[3] === "u" ? "community" : "catalogue";
+    const first = Number(number[2]);
+    const last = Number(number[4] ?? number[2]);
+    if (
+      collection === lastCollection &&
+      Number.isSafeInteger(first) &&
+      Number.isSafeInteger(last) &&
+      first >= 0 &&
+      last >= 0
+    ) {
+      return {
+        kind: "number",
+        collection,
+        from: Math.min(first, last),
+        to: Math.max(first, last),
+      };
+    }
+  }
+  return { kind: "text", terms: [...new Set(normalized.split(" ").filter(Boolean))] };
+}
+
+export function matchesParsedGalleryQuery(
+  artwork: GalleryCollectionArtwork,
+  query: GallerySearchQuery,
+  publicTitle?: string,
+): boolean {
+  if (query.kind === "number") {
+    const community = isCommunityGalleryId(artwork.id);
+    if (community !== (query.collection === "community")) return false;
+    const catalogueNumber = /^g(\d+)$/i.exec(artwork.id)?.[1];
+    const number = community ? artwork.communitySequence : Number(catalogueNumber);
+    return (
+      typeof number === "number" &&
+      Number.isSafeInteger(number) &&
+      number >= query.from &&
+      number <= query.to
+    );
+  }
+  if (query.terms.length === 0) return true;
+  const fields = [artwork.id, galleryNumberFor(artwork), publicTitle, artwork.alt]
+    .filter((value): value is string => typeof value === "string")
+    .map(normalizeGalleryQuery);
+  // Words may match different fields, but a word cannot cross an artificial
+  // boundary between a title and the image description.
+  return query.terms.every((term) => fields.some((field) => field.includes(term)));
+}
+
 export function matchesGalleryQuery(
   artwork: GalleryCollectionArtwork,
   query: string,
-  personalTitle?: string,
+  publicTitle?: string,
 ): boolean {
-  const normalized = normalizeGalleryQuery(query);
-  if (!normalized) return true;
-  const number = galleryNumberFor(artwork);
-  const searchable = normalizeGalleryQuery(
-    [artwork.id, number, personalTitle, artwork.alt].filter(Boolean).join(" "),
-  );
-  return searchable.includes(normalized);
+  return matchesParsedGalleryQuery(artwork, parseGalleryQuery(query), publicTitle);
 }
 
 export function filterGalleryArtworks(
@@ -38,11 +89,12 @@ export function filterGalleryArtworks(
   },
 ): GalleryCollectionArtwork[] {
   const favoriteIds = new Set(options.favorites);
+  const query = parseGalleryQuery(options.query);
   return artworks.filter(
     (artwork) =>
       (options.category === "all" || artwork.category === options.category) &&
       (!options.favoritesOnly || favoriteIds.has(artwork.id)) &&
-      matchesGalleryQuery(artwork, options.query, options.titles[artwork.id]),
+      matchesParsedGalleryQuery(artwork, query, options.titles[artwork.id]),
   );
 }
 
