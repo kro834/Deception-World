@@ -1,0 +1,113 @@
+/* Browser-local Ultra preference in the World side menu. */
+#site-side-panel .ultra-mode-setting {
+  width: 100%;
+  min-width: 0;
+}
+
+#site-side-panel .ultra-mode-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#site-side-panel .ultra-mode-toggle > span {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+#site-side-panel .ultra-mode-toggle > i {
+  flex: 0 0 auto;
+  min-width: 42px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+#site-side-panel .ultra-mode-toggle[aria-checked="true"] {
+  border-bottom-color: rgb(222 184 86 / 42%);
+  color: #f5e4b5;
+}
+
+#site-side-panel .ultra-mode-toggle[aria-checked="true"] > i {
+  border-color: rgb(222 184 86 / 58%);
+  background: rgb(222 184 86 / 13%);
+  color: #f5e4b5;
+}
+
+#site-side-panel .ultra-mode-toggle:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+#site-side-panel .ultra-mode-description,
+#site-side-panel .ultra-mode-preference,
+#site-side-panel .ultra-mode-feedback {
+  margin: 6px 0 0;
+  color: var(--dwc-text-2, #c3c5c6);
+  font-size: 11px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+#site-side-panel .ultra-mode-preference {
+  color: #e9d8a8;
+}
+
+#site-side-panel .ultra-mode-rendering-details {
+  margin-top: 6px;
+  color: var(--dwc-text-2, #c3c5c6);
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+#site-side-panel .ultra-mode-rendering-details > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+  color: #e9d8a8;
+}
+
+#site-side-panel .ultra-mode-rendering-details > p {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+#site-side-panel .ultra-mode-feedback:empty {
+  display: none;
+}
+
+#site-side-panel .ultra-mode-toggle:focus-visible {
+  outline: 2px solid var(--dwc-focus, #f5e4b5);
+  outline-offset: -3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-side-panel .ultra-mode-toggle,
+  #site-side-panel .ultra-mode-toggle > i {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  #site-side-panel .ultra-mode-toggle[aria-checked="true"] {
+    border: 1px solid Highlight;
+    color: CanvasText;
+  }
+
+  #site-side-panel .ultra-mode-toggle[aria-checked="true"] > i {
+    border-color: Highlight;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  #site-side-panel .ultra-mode-preference {
+    color: CanvasText;
+  }
+
+  #site-side-panel .ultra-mode-rendering-details > summary {
+    color: LinkText;
+  }
+}

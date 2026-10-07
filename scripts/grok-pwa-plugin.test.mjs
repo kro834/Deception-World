@@ -33,7 +33,9 @@ const NATIVE_APP_META = [
 
 test("root owns the opaque Home Screen metadata before the prepaint viewport guard", () => {
   const root = readFileSync(join(TEMPLATE_ROOT, "src/routes/__root.tsx"), "utf8");
-  const guard = root.indexOf("scripts: [{ children: IPAD_STANDALONE_VIEWPORT_SCRIPT }");
+  const guard = root.search(
+    /scripts:\s*\[\s*\{\s*children:\s*IPAD_STANDALONE_VIEWPORT_SCRIPT\s*\}/,
+  );
   assert.ok(guard > 0);
   for (const [name, content] of NATIVE_APP_META) {
     const declaration = `{ name: "${name}", content: "${content}" }`;

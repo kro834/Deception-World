@@ -26,6 +26,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
 import { LibraryCurrentButton } from "@/components/library/library-controls";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
+import { UltraModeToggle } from "@/components/ultra/ultra-mode-toggle";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -1126,6 +1127,7 @@ export function SideMenuLayer({
             )}
             <ZeusButtonToggle />
             <IpadMenuToggle />
+            <UltraModeToggle />
             <Link
               to="/"
               onClick={(e) => {
