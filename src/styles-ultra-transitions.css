@@ -1,0 +1,305 @@
+/* Ultra route optics: finite material cues on the existing moving surfaces.
+   The opaque shutter ink, panel coordinates, carry/dock crop and route clocks
+   remain owned by styles-transition-cinema.css and load-gate.tsx. In particular,
+   gradients never cover the four overlapping shutter faces: only their thin
+   inner edges catch light, so a held cover has no seams or moving atmosphere.
+   Opening/cut-in stages and Rexonance's call renderer keep their own choreography.
+   No page transform, perspective, filter, backdrop filter or persistent RAF. */
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* Economy/calm routes retain their existing opacity-only transition. The
+     small static registration line can still have a physical dark surround;
+     it creates no new animated layer or GPU quality requirement on mobile. */
+  html[data-ultra-mode="on"][data-ultra-motion="on"][data-world-effects="economy"]
+    body
+    .load-gate.has-cine
+    > .dwc-shutter
+    > i:last-child::after,
+  html[data-ultra-mode="on"][data-ultra-motion="on"]
+    body
+    .load-gate.has-cine.is-cine-calm
+    > .dwc-shutter
+    > i:last-child::after {
+    box-shadow:
+      0 1px 0 rgb(2 5 10 / 92%),
+      0 3px 8px rgb(0 0 0 / 48%);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]
+    body
+    .gallery-curtain.is-calm
+    .gallery-curtain-cloth,
+  html[data-ultra-mode="on"][data-ultra-motion="on"][data-world-effects="economy"]
+    body
+    .gallery-curtain
+    .gallery-curtain-cloth {
+    box-shadow:
+      inset 0 -80px 100px #100608a8,
+      inset 0 40px 50px #000b,
+      inset 0 1px 0 rgb(157 112 84 / 22%),
+      inset 1px 0 0 rgb(193 134 98 / 12%),
+      inset -1px 0 0 rgb(0 0 0 / 52%);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls) {
+    --ultra-shutter-close: var(--dwc-close, 320ms);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cine-flip {
+    --ultra-shutter-close: 300ms;
+  }
+
+  /* The original translate keyframes still reach the same aperture and close
+     completely. A soft acceleration makes the final settling feel weighted. */
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cine-iris:not(.rider-route-cutin):not(
+      .is-rexonance-calls
+    ).is-covering
+    > .dwc-shutter
+    > i {
+    animation-timing-function: cubic-bezier(0.26, 0.68, 0.18, 1);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls).is-revealing
+    > .dwc-shutter
+    > i {
+    animation-timing-function: cubic-bezier(0.42, 0, 0.18, 1);
+  }
+
+  /* A one-pixel rim plus a dark penumbra reads as panel thickness. The
+     penumbra is prepainted; only its existing rim opacity is animated. */
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls)
+    > .dwc-shutter
+    > i::after {
+    pointer-events: none;
+    box-shadow:
+      0 0 0 1px rgb(2 5 10 / 82%),
+      0 0 9px 1px color-mix(in srgb, var(--dwc-accent) 15%, transparent),
+      0 0 24px 8px rgb(0 0 0 / 36%);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls)
+    > .dwc-shutter
+    > :is(.is-left, .is-right)::after {
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--dwc-accent) 70%, #b6d9e8) 24%,
+      var(--dwc-accent) 52%,
+      color-mix(in srgb, var(--dwc-accent) 42%, #bea477) 79%,
+      transparent
+    );
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls)
+    > .dwc-shutter
+    > :is(.is-top, .is-bottom)::after {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--dwc-accent) 66%, #b6d9e8) 28%,
+      var(--dwc-accent) 58%,
+      color-mix(in srgb, var(--dwc-accent) 42%, #bea477) 78%,
+      transparent
+    );
+  }
+
+  /* The file's light lives on the mounting, leaving the art and the exact
+     docking crop intact. It fades within 160ms of reveal, before the 200ms
+     portrait dock finishes. No carried image gets a second transform. */
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls)
+    > .dwc-carry::before {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    opacity: 0.28;
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--dwc-accent) 52%, transparent),
+      inset 1px 0 0 color-mix(in srgb, var(--dwc-accent) 21%, transparent),
+      inset -1px 0 0 rgb(2 5 10 / 65%),
+      inset 0 -2px 0 rgb(2 5 10 / 72%);
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls).is-covering
+    > .dwc-carry::before {
+    animation: ultra-file-light-lift var(--ultra-shutter-close) cubic-bezier(0.24, 0.7, 0.18, 1)
+      both;
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-cutin):not(.is-rexonance-calls).is-revealing
+    > .dwc-carry::before {
+    animation: ultra-file-light-land 160ms ease-out both;
+  }
+
+  /* Velvet reflects a broad, dim grazing light while the existing 720/1120ms
+     cloth motion runs. The pseudo-element remains beneath the stickers and
+     away from the rail/safe area; its soft gradient substitutes for a blur. */
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .gallery-curtain:not(.is-calm)
+    .gallery-curtain-cloth::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      102deg,
+      transparent 18%,
+      rgb(197 149 117 / 3%) 35%,
+      rgb(213 166 135 / 9%) 48%,
+      rgb(136 72 83 / 4%) 63%,
+      transparent 80%
+    );
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .gallery-curtain:not(.is-calm)
+    .gallery-curtain-panel.is-left {
+    --ultra-cloth-light-from: -12%;
+    --ultra-cloth-light-to: 8%;
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .gallery-curtain:not(.is-calm)
+    .gallery-curtain-panel.is-right {
+    --ultra-cloth-light-from: 12%;
+    --ultra-cloth-light-to: -8%;
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .gallery-curtain:not(.is-calm).is-covering
+    .gallery-curtain-cloth::before {
+    animation: ultra-velvet-light-close 720ms cubic-bezier(0.22, 0.7, 0.18, 1) both;
+  }
+
+  html[data-ultra-mode="on"][data-ultra-motion="on"]:not([data-world-effects="economy"])
+    body
+    .gallery-curtain:not(.is-calm).is-revealing
+    .gallery-curtain-cloth::before {
+    animation: ultra-velvet-light-open 1120ms cubic-bezier(0.45, 0, 0.15, 1) both;
+  }
+}
+
+@keyframes ultra-file-light-lift {
+  from,
+  40% {
+    opacity: 0;
+  }
+  74% {
+    opacity: 0.72;
+  }
+  to {
+    opacity: 0.28;
+  }
+}
+
+@keyframes ultra-file-light-land {
+  from {
+    opacity: 0.28;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ultra-velvet-light-close {
+  from {
+    opacity: 0;
+    transform: translateX(var(--ultra-cloth-light-from));
+  }
+  58% {
+    opacity: 0.78;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ultra-velvet-light-open {
+  from,
+  12% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  38% {
+    opacity: 0.68;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(var(--ultra-cloth-light-to));
+  }
+}
+
+/* Default OFF removes the added material layer immediately, including when
+   the preference changes halfway through a route transition. Existing cover
+   opacity and pointer ownership continue to be controlled by the route gate. */
+html:not([data-ultra-mode="on"]) .load-gate > .dwc-carry::before,
+html:not([data-ultra-motion="on"]) .load-gate > .dwc-carry::before,
+html:not([data-ultra-mode="on"]) .gallery-curtain-cloth::before,
+html:not([data-ultra-motion="on"]) .gallery-curtain-cloth::before {
+  content: none;
+  animation: none;
+}
+
+/* Do not rely only on the runtime media observer: preference changes remove
+   the extra optics in the same style update, even before JavaScript runs. */
+@media (prefers-reduced-motion: reduce),
+  (prefers-reduced-transparency: reduce),
+  (prefers-contrast: more),
+  (forced-colors: active) {
+  html[data-ultra-mode="on"] body .load-gate > .dwc-carry::before,
+  html[data-ultra-mode="on"] body .gallery-curtain-cloth::before {
+    content: none !important;
+    animation: none !important;
+  }
+
+  html[data-ultra-mode="on"] body .load-gate.has-cine > .dwc-shutter > i::after {
+    box-shadow: none !important;
+    background: none !important;
+  }
+
+  html[data-ultra-mode="on"] body .gallery-curtain .gallery-curtain-cloth {
+    box-shadow:
+      inset 0 -80px 100px #100608a8,
+      inset 0 40px 50px #000b !important;
+  }
+
+  html[data-ultra-mode="on"]
+    body
+    .load-gate.has-cine.is-cine-full.is-cine-iris.is-covering
+    > .dwc-shutter
+    > i {
+    animation-timing-function: cubic-bezier(0.3, 0.7, 0.2, 1) !important;
+  }
+
+  html[data-ultra-mode="on"] body .load-gate.has-cine.is-cine-full.is-revealing > .dwc-shutter > i {
+    animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1) !important;
+  }
+}

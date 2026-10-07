@@ -1,5 +1,8 @@
 export type UltraRendererStatus = "ready" | "unsupported" | "context-lost" | "error";
+export type UltraRendererQuality = "high" | "cinema";
 export interface UltraRendererOptions {
+  /** Preset defaults; explicit numeric options still obey the renderer hard caps. */
+  quality?: UltraRendererQuality;
   onStatus?: (status: UltraRendererStatus) => void;
   maxPixels?: number;
   maxDpr?: number;
@@ -12,6 +15,11 @@ export interface UltraRenderer {
   resize(): void;
   dispose(): void;
   getDiagnostics(): {
+    requestedQuality: UltraRendererQuality;
+    /** Deterministic subpixel count; cinema backoff reduces this from two to one. */
+    effectiveSamples: 1 | 2;
+    /** Current march ceiling after adaptive load reduction. */
+    steps: number;
     requestedFps: number;
     /** Applied frame-rate ceiling after backoff, not measured throughput. */
     actualFps: number;

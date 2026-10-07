@@ -1,5 +1,12 @@
 import { useId, useState, useSyncExternalStore } from "react";
 import {
+  getUltraQualityServerSnapshot,
+  getUltraQualitySnapshot,
+  setUltraQuality,
+  subscribeUltraQuality,
+  type UltraQuality,
+} from "@/lib/ultra-quality.js";
+import {
   getUltraModeServerSnapshot,
   getUltraModeSnapshot,
   setUltraMode,
@@ -10,12 +17,33 @@ import {
 export function UltraModeToggle() {
   const descriptionId = useId();
   const motionId = useId();
+  const qualityDescriptionId = useId();
   const snapshot = useSyncExternalStore(
     subscribeUltraMode,
     getUltraModeSnapshot,
     getUltraModeServerSnapshot,
   );
+  const qualitySnapshot = useSyncExternalStore(
+    subscribeUltraQuality,
+    getUltraQualitySnapshot,
+    getUltraQualityServerSnapshot,
+  );
   const [feedback, setFeedback] = useState("");
+
+  const updateQuality = (quality: UltraQuality) => {
+    try {
+      setUltraQuality(quality);
+      const updated = getUltraQualitySnapshot();
+      const label = quality === "cinema" ? "シネマ" : "高精細";
+      setFeedback(
+        updated.storageAvailable
+          ? `画質を「${label}」にして、このブラウザーに保存しました。`
+          : "画質設定はこの画面に反映しましたが、保存できませんでした。再読み込み後は以前の設定に戻る場合があります。",
+      );
+    } catch {
+      setFeedback("画質設定を変更できませんでした。現在の設定を保っています。");
+    }
+  };
 
   const toggle = () => {
     try {
@@ -49,6 +77,48 @@ export function UltraModeToggle() {
       <p id={descriptionId} className="ultra-mode-description">
         光・反射・粒子・質感の描写を高めます。端末の発熱や消費電力が増える場合があります。設定はこのブラウザーに保存します。いつでもOFFに戻せます。
       </p>
+      {snapshot.enabled && (
+        <fieldset className="ultra-quality-options" aria-describedby={qualityDescriptionId}>
+          <legend>画質</legend>
+          <label className="ultra-quality-option">
+            <input
+              type="radio"
+              name="ultra-quality"
+              value="high"
+              checked={qualitySnapshot.quality === "high"}
+              disabled={!qualitySnapshot.ready}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                if (value === "high" || value === "cinema") updateQuality(value);
+              }}
+            />
+            <span>
+              <b>高精細</b>
+              <small>結晶内の光と多層反射を高精細に描写します。</small>
+            </span>
+          </label>
+          <label className="ultra-quality-option">
+            <input
+              type="radio"
+              name="ultra-quality"
+              value="cinema"
+              checked={qualitySnapshot.quality === "cinema"}
+              disabled={!qualitySnapshot.ready}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                if (value === "high" || value === "cinema") updateQuality(value);
+              }}
+            />
+            <span>
+              <b>シネマ</b>
+              <small>光の重なりと輪郭をさらに精密に描写します。処理負荷が高くなります。</small>
+            </span>
+          </label>
+          <p id={qualityDescriptionId} className="ultra-quality-description">
+            選んだ画質はウルトラモードをOFFにしても保存されます。
+          </p>
+        </fieldset>
+      )}
       <details className="ultra-mode-rendering-details">
         <summary>描画方式について</summary>
         <p>

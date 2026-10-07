@@ -11,10 +11,29 @@ html[data-ultra-mode="on"] .ultra-effects {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.46;
+  --ultra-light-strength: 0.38;
+  --ultra-cinema-light-strength: 0.44;
+  opacity: var(--ultra-light-strength);
   mix-blend-mode: screen;
   contain: paint;
   mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent);
+}
+
+html[data-ultra-mode="on"] .ultra-effects[data-ultra-quality="cinema"] {
+  opacity: var(--ultra-cinema-light-strength);
+}
+
+/* Optical detail is strongest on the cinematic landing page. Exhibition and
+   reading surfaces retain the same scene, with quieter light over original art
+   and Japanese body text. This never filters or transforms the page itself. */
+html[data-ultra-mode="on"][data-viewport-chrome="gallery"] .ultra-effects {
+  --ultra-light-strength: 0.28;
+  --ultra-cinema-light-strength: 0.34;
+}
+
+html[data-ultra-mode="on"][data-viewport-chrome="dream"] .ultra-effects {
+  --ultra-light-strength: 0.3;
+  --ultra-cinema-light-strength: 0.36;
 }
 
 .ultra-effects-canvas,

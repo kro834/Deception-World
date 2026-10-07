@@ -22,6 +22,8 @@ function makeHarness({
     loseContext: 0,
     removeListener: [],
     request: 0,
+    shaderSources: [],
+    uniformInts: [],
     viewport: [],
   };
   let nextId = 1;
@@ -40,7 +42,9 @@ function makeHarness({
     createShader(kind) {
       return { id: nextId++, kind };
     },
-    shaderSource() {},
+    shaderSource(shader, source) {
+      calls.shaderSources.push({ kind: shader.kind, source });
+    },
     compileShader() {},
     getShaderParameter() {
       return true;
@@ -88,7 +92,9 @@ function makeHarness({
     uniform2f() {},
     uniform1f() {},
     uniform3f() {},
-    uniform1i() {},
+    uniform1i(location, value) {
+      calls.uniformInts.push([location.name, value]);
+    },
     drawArrays() {
       calls.drawArrays++;
     },
@@ -198,6 +204,109 @@ test("backing dimensions respect both the DPR and pixel budget", (t) => {
   assert.ok(large.canvas.height / 1200 <= 2);
 });
 
+test("quality presets change render budgets and send sample counts to the shader", (t) => {
+  for (const [quality, expected] of [
+    [undefined, { name: "high", pixels: 1_600_000, dpr: 1.6, steps: 64, samples: 1 }],
+    ["cinema", { name: "cinema", pixels: 2_400_000, dpr: 2, steps: 96, samples: 2 }],
+  ]) {
+    const harness = makeHarness({ rect: { width: 800, height: 600 } });
+    t.after(harness.restore);
+    globalThis.devicePixelRatio = 3;
+    const renderer = createUltraRenderer(harness.canvas, { quality });
+    const beforeDraw = renderer.getDiagnostics();
+    assert.equal(beforeDraw.requestedQuality, expected.name);
+    assert.equal(beforeDraw.effectiveSamples, expected.samples);
+    assert.equal(beforeDraw.steps, expected.steps);
+    assert.equal(beforeDraw.maxPixels, expected.pixels);
+    assert.ok(harness.canvas.width * harness.canvas.height <= expected.pixels);
+    assert.ok(harness.canvas.width / 800 <= expected.dpr);
+    assert.ok(harness.canvas.height / 600 <= expected.dpr);
+
+    renderer.start();
+    harness.runFrame(100);
+    assert.deepEqual(Object.fromEntries(harness.calls.uniformInts.slice(-2)), {
+      uSteps: expected.steps,
+      uSamples: expected.samples,
+    });
+    const fragment = harness.calls.shaderSources.find(
+      ({ kind }) => kind === harness.gl.FRAGMENT_SHADER,
+    )?.source;
+    assert.match(fragment, /uniform\s+int\s+uSamples\s*;/);
+    assert.ok((fragment.match(/\buSamples\b/g) ?? []).length > 1);
+    renderer.dispose();
+  }
+});
+
+test("explicit render budgets override presets but remain within safety caps", (t) => {
+  const overridden = makeHarness({ rect: { width: 1200, height: 800 } });
+  t.after(overridden.restore);
+  globalThis.devicePixelRatio = 3;
+  const renderer = createUltraRenderer(overridden.canvas, {
+    quality: "cinema",
+    maxPixels: 800_000,
+    maxDpr: 1.25,
+    steps: 40,
+    maxFps: 30,
+  });
+  const diagnostics = renderer.getDiagnostics();
+  assert.equal(diagnostics.requestedQuality, "cinema");
+  assert.equal(diagnostics.maxPixels, 800_000);
+  assert.equal(diagnostics.requestedFps, 30);
+  assert.equal(diagnostics.steps, 40);
+  assert.equal(diagnostics.effectiveSamples, 2);
+  assert.ok(overridden.canvas.width * overridden.canvas.height <= 800_000);
+  assert.ok(overridden.canvas.width / 1200 <= 1.25);
+  renderer.start();
+  overridden.runFrame(100);
+  assert.deepEqual(Object.fromEntries(overridden.calls.uniformInts.slice(-2)), {
+    uSteps: 40,
+    uSamples: 2,
+  });
+  renderer.dispose();
+
+  const capped = makeHarness({ rect: { width: 1200, height: 800 } });
+  t.after(capped.restore);
+  const cappedRenderer = createUltraRenderer(capped.canvas, {
+    quality: "unknown",
+    maxPixels: 9_000_000,
+    maxDpr: 8,
+    steps: 200,
+    maxFps: 120,
+  });
+  const cappedDiagnostics = cappedRenderer.getDiagnostics();
+  assert.equal(cappedDiagnostics.requestedQuality, "high");
+  assert.equal(cappedDiagnostics.maxPixels, 2_400_000);
+  assert.equal(cappedDiagnostics.steps, 96);
+  assert.equal(cappedDiagnostics.requestedFps, 60);
+  assert.ok(capped.canvas.width * capped.canvas.height <= 2_400_000);
+  assert.ok(capped.canvas.width / 1200 <= 2);
+  cappedRenderer.dispose();
+});
+
+test("cinema drops extra sampling and march steps when sustained slow frames trigger backoff", (t) => {
+  const harness = makeHarness({ rect: { width: 1000, height: 600 } });
+  t.after(harness.restore);
+  const renderer = createUltraRenderer(harness.canvas, { quality: "cinema" });
+  renderer.start();
+  harness.runFrame(50);
+  assert.deepEqual(Object.fromEntries(harness.calls.uniformInts.slice(-2)), {
+    uSteps: 96,
+    uSamples: 2,
+  });
+  for (let timestamp = 100; timestamp <= 5_000; timestamp += 50) harness.runFrame(timestamp);
+  const diagnostics = renderer.getDiagnostics();
+  assert.equal(diagnostics.requestedQuality, "cinema");
+  assert.equal(diagnostics.resolutionScale, 0.8);
+  assert.equal(diagnostics.effectiveSamples, 1);
+  assert.equal(diagnostics.steps, 77);
+  assert.ok(harness.canvas.width * harness.canvas.height <= diagnostics.maxPixels);
+  assert.deepEqual(Object.fromEntries(harness.calls.uniformInts.slice(-2)), {
+    uSteps: 77,
+    uSamples: 1,
+  });
+  renderer.dispose();
+});
+
 test("ready is reported after the initial draw; start is idempotent and pause resumes", (t) => {
   const harness = makeHarness();
   t.after(harness.restore);
@@ -271,6 +380,7 @@ test("context loss stops rendering and restoration resumes only when running", (
   t.after(harness.restore);
   const statuses = [];
   const renderer = createUltraRenderer(harness.canvas, {
+    quality: "cinema",
     onStatus: (value) => statuses.push(value),
   });
   renderer.start();
@@ -290,6 +400,10 @@ test("context loss stops rendering and restoration resumes only when running", (
   const drawnBeforeLoss = harness.calls.drawArrays;
   harness.runFrame(100);
   assert.equal(harness.calls.drawArrays, drawnBeforeLoss + 1);
+  assert.deepEqual(Object.fromEntries(harness.calls.uniformInts.slice(-2)), {
+    uSteps: 96,
+    uSamples: 2,
+  });
 
   renderer.pause();
   harness.canvas.dispatch("webglcontextlost", { preventDefault() {} });

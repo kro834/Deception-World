@@ -51,6 +51,74 @@
   overflow-wrap: anywhere;
 }
 
+#site-side-panel .ultra-quality-options {
+  min-width: 0;
+  margin: 4px 0 8px;
+  padding: 0;
+  border: 0;
+}
+
+#site-side-panel .ultra-quality-options > legend {
+  padding: 0 0 2px;
+  color: #e9d8a8;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+#site-side-panel .ultra-quality-option {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgb(122 232 255 / 12%);
+  cursor: pointer;
+}
+
+#site-side-panel .ultra-quality-option > input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: #d8bd7d;
+}
+
+#site-side-panel .ultra-quality-option > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#site-side-panel .ultra-quality-option b {
+  display: block;
+  color: var(--dwc-text, #f2eee4);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#site-side-panel .ultra-quality-option small {
+  display: block;
+  color: var(--dwc-text-2, #c3c5c6);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+#site-side-panel .ultra-quality-option:focus-within {
+  outline: 2px solid var(--dwc-focus, #f5e4b5);
+  outline-offset: -2px;
+}
+
+#site-side-panel .ultra-quality-option > input:disabled + span {
+  opacity: 0.72;
+}
+
+#site-side-panel .ultra-quality-description {
+  margin: 6px 0 0;
+  color: var(--dwc-text-2, #c3c5c6);
+  font-size: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
 #site-side-panel .ultra-mode-preference {
   color: #e9d8a8;
 }
@@ -89,6 +157,12 @@
     scroll-behavior: auto;
     transition: none;
   }
+
+  #site-side-panel .ultra-quality-option,
+  #site-side-panel .ultra-quality-option > input {
+    scroll-behavior: auto;
+    transition: none;
+  }
 }
 
 @media (forced-colors: active) {
@@ -105,6 +179,15 @@
 
   #site-side-panel .ultra-mode-preference {
     color: CanvasText;
+  }
+
+  #site-side-panel .ultra-quality-options > legend,
+  #site-side-panel .ultra-quality-option b {
+    color: CanvasText;
+  }
+
+  #site-side-panel .ultra-quality-option {
+    border-bottom-color: CanvasText;
   }
 
   #site-side-panel .ultra-mode-rendering-details > summary {

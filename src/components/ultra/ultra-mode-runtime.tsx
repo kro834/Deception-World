@@ -6,6 +6,12 @@ import {
   subscribeUltraMode,
 } from "@/lib/ultra-mode.js";
 import { watchUltraSceneVisibility } from "@/lib/ultra-mode-visibility.js";
+import {
+  getUltraQualityServerSnapshot,
+  getUltraQualitySnapshot,
+  subscribeUltraQuality,
+  type UltraQuality,
+} from "@/lib/ultra-quality.js";
 
 // Neither this chunk nor the shader code is requested during ordinary browsing.
 const UltraEffects = lazy(() =>
@@ -26,7 +32,13 @@ class UltraRenderBoundary extends Component<{ children: ReactNode }, { failed: b
   }
 }
 
-function UltraModeSession({ motionAllowed }: { motionAllowed: boolean }) {
+function UltraModeSession({
+  motionAllowed,
+  quality,
+}: {
+  motionAllowed: boolean;
+  quality: UltraQuality;
+}) {
   const [blocked, setBlocked] = useState(true);
   const [activated, setActivated] = useState(false);
   useEffect(() => watchUltraSceneVisibility(setBlocked), []);
@@ -52,7 +64,7 @@ function UltraModeSession({ motionAllowed }: { motionAllowed: boolean }) {
       <Suspense fallback={null}>
         {/* The renderer independently checks live gates, including after lazy import.
             Temporary UI locks pause; only OFF/accessibility changes dispose. */}
-        <UltraEffects enabled motionAllowed={motionAllowed} />
+        <UltraEffects enabled motionAllowed={motionAllowed} quality={quality} />
       </Suspense>
     </UltraRenderBoundary>
   );
@@ -64,7 +76,12 @@ export function UltraModeRuntime() {
     getUltraModeSnapshot,
     getUltraModeServerSnapshot,
   );
-  return snapshot.ready && snapshot.enabled ? (
-    <UltraModeSession motionAllowed={snapshot.motionAllowed} />
+  const quality = useSyncExternalStore(
+    subscribeUltraQuality,
+    getUltraQualitySnapshot,
+    getUltraQualityServerSnapshot,
+  );
+  return snapshot.ready && snapshot.enabled && quality.ready ? (
+    <UltraModeSession motionAllowed={snapshot.motionAllowed} quality={quality.quality} />
   ) : null;
 }

@@ -15,7 +15,7 @@ const compiled = ts.transpileModule(source, {
     target: ts.ScriptTarget.ES2022,
   },
 }).outputText;
-const jsx = (type, props) => ({ type, props });
+const jsx = (type, props, key) => ({ type, props, key });
 const jsxRuntime = { jsx, jsxs: jsx };
 
 function createDeferred() {
@@ -43,42 +43,54 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
     },
   };
   const stage = { dataset: {}, style: { getPropertyValue: () => "" } };
-  const canvas = { nodeName: "CANVAS" };
+  let canvas = { nodeName: "CANVAS", identity: 0 };
+  let canvasKey;
+  let nextCanvasIdentity = 1;
   let blocked = blockedInitially;
   let visibilityCallback;
   let visibilityStops = 0;
   let observerInstance;
   const windowListeners = new Map();
   const mediaQueries = [];
-  const rendererCalls = { allocations: [], dispose: 0, pause: 0, start: 0, resize: 0 };
+  const rendererCalls = {
+    allocations: [],
+    instances: [],
+    dispose: 0,
+    pause: 0,
+    start: 0,
+    resize: 0,
+  };
   const statuses = [];
   const pendingImport = deferImport ? createDeferred() : null;
   let rendererModuleLoads = 0;
   let diagnostics = { lost: false, ready: false };
 
-  const fakeRenderer = {
-    getDiagnostics: () => ({ ...diagnostics }),
-    pause() {
-      rendererCalls.pause++;
-    },
-    start() {
-      rendererCalls.start++;
-    },
-    resize() {
-      rendererCalls.resize++;
-    },
-    dispose() {
-      rendererCalls.dispose++;
-    },
-    setPointer() {},
-    setTheme() {},
-  };
   let rendererOptions;
   const rendererModule = {
     createUltraRenderer(target, options) {
-      rendererCalls.allocations.push(target);
+      rendererCalls.allocations.push({ target, quality: options.quality, options });
       rendererOptions = options;
-      return fakeRenderer;
+      const instance = {
+        disposeCount: 0,
+        getDiagnostics: () => ({ ...diagnostics }),
+        pause() {
+          rendererCalls.pause++;
+        },
+        start() {
+          rendererCalls.start++;
+        },
+        resize() {
+          rendererCalls.resize++;
+        },
+        dispose() {
+          instance.disposeCount++;
+          rendererCalls.dispose++;
+        },
+        setPointer() {},
+        setTheme() {},
+      };
+      rendererCalls.instances.push(instance);
+      return instance;
     },
   };
   const mediaListenerSets = [];
@@ -179,6 +191,10 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
     if (tree) {
       tree.props.ref.current = stage;
       const canvasNode = tree.props.children[0];
+      if (canvasNode.key !== canvasKey) {
+        canvasKey = canvasNode.key;
+        canvas = { nodeName: "CANVAS", identity: nextCanvasIdentity++ };
+      }
       canvasNode.props.ref.current = canvas;
     }
     for (const index of [...pendingEffects].sort((a, b) => a - b)) {
@@ -191,7 +207,9 @@ function mount({ blockedInitially = false, deferImport = false } = {}) {
   }
 
   return {
-    canvas,
+    get canvas() {
+      return canvas;
+    },
     context,
     mediaQueries,
     observer: () => observerInstance,
@@ -344,4 +362,92 @@ test("OFF cleanup disposes the renderer and releases all registered listeners", 
   assert.equal(f.listenerCounts.media, 0);
   assert.equal(f.listenerCounts.visibilityStops, 1);
   assert.equal("ultraRenderer" in f.root.dataset, false);
+});
+
+test("renderer quality defaults to high and an explicit cinema choice reaches the renderer", async () => {
+  const high = mount();
+  const highTree = high.render({ enabled: true, motionAllowed: true });
+  assert.equal(highTree.props["data-ultra-quality"], "high");
+  assert.equal(highTree.props.children[0].key, "high");
+  await flushPromises();
+  assert.equal(high.rendererCalls.allocations.length, 1);
+  assert.equal(high.rendererCalls.allocations[0].quality, "high");
+  high.cleanup();
+
+  const cinema = mount();
+  const cinemaTree = cinema.render({ enabled: true, motionAllowed: true, quality: "cinema" });
+  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
+  assert.equal(cinemaTree.props.children[0].key, "cinema");
+  await flushPromises();
+  assert.equal(cinema.rendererCalls.allocations.length, 1);
+  assert.equal(cinema.rendererCalls.allocations[0].quality, "cinema");
+  cinema.cleanup();
+});
+
+test("changing quality disposes the old renderer once and allocates the new quality once", async () => {
+  const f = mount();
+  const base = { enabled: true, motionAllowed: true };
+  const highTree = f.render(base);
+  assert.equal(highTree.props.children[0].key, "high");
+  await flushPromises();
+  assert.equal(f.rendererCalls.allocations.length, 1);
+  assert.equal(f.rendererCalls.allocations[0].quality, "high");
+  const oldCanvas = f.rendererCalls.allocations[0].target;
+
+  const cinemaTree = f.render({ ...base, quality: "cinema" });
+  assert.equal(cinemaTree.props.children[0].key, "cinema");
+  assert.equal(f.rendererCalls.instances[0].disposeCount, 1);
+  await flushPromises();
+  assert.equal(f.rendererCalls.allocations.length, 2);
+  assert.equal(f.rendererCalls.allocations[1].quality, "cinema");
+  assert.notEqual(f.rendererCalls.allocations[1].target, oldCanvas);
+  assert.equal(f.rendererCalls.dispose, 1);
+
+  f.cleanup();
+  assert.deepEqual(
+    f.rendererCalls.instances.map((instance) => instance.disposeCount),
+    [1, 1],
+  );
+});
+
+test("a quality change during lazy import allocates only the latest cinema renderer", async () => {
+  const f = mount({ deferImport: true });
+  const base = { enabled: true, motionAllowed: true };
+  const highTree = f.render(base);
+  assert.equal(highTree.props["data-ultra-quality"], "high");
+  await flushPromises();
+  assert.equal(f.rendererModuleLoads(), 1);
+
+  const cinemaTree = f.render({ ...base, quality: "cinema" });
+  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
+  await flushPromises();
+  assert.equal(f.rendererModuleLoads(), 2);
+  assert.equal(f.rendererCalls.allocations.length, 0);
+
+  f.pendingImport.resolve(f.rendererModule);
+  await flushPromises();
+  assert.equal(f.rendererCalls.allocations.length, 1);
+  assert.equal(f.rendererCalls.allocations[0].quality, "cinema");
+  f.cleanup();
+});
+
+test("changing quality while a menu blocker is active does not allocate a renderer", async () => {
+  const f = mount();
+  const base = { enabled: true, motionAllowed: true };
+  f.render(base);
+  await flushPromises();
+  assert.equal(f.rendererCalls.allocations.length, 1);
+  assert.equal(f.rendererCalls.allocations[0].quality, "high");
+
+  f.visibility(true);
+  assert.equal(f.stage.dataset.ultraRenderer, "paused");
+  const cinemaTree = f.render({ ...base, quality: "cinema" });
+  assert.equal(cinemaTree.props["data-ultra-quality"], "cinema");
+  assert.equal(f.rendererCalls.instances[0].disposeCount, 1);
+  await flushPromises();
+  assert.equal(f.rendererCalls.allocations.length, 1);
+  assert.equal(f.rendererCalls.dispose, 1);
+
+  f.cleanup();
+  assert.equal(f.rendererCalls.dispose, 1);
 });

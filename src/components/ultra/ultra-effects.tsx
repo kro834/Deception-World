@@ -6,6 +6,7 @@ export type UltraEffectsStatus = "starting" | "webgl2" | "fallback" | "paused" |
 interface UltraEffectsProps {
   enabled: boolean;
   motionAllowed: boolean;
+  quality?: "high" | "cinema";
   onStatus?: (status: UltraEffectsStatus) => void;
 }
 
@@ -21,6 +22,7 @@ const ACCESSIBILITY_QUERIES = [
 export const UltraEffects = memo(function UltraEffects({
   enabled,
   motionAllowed,
+  quality = "high",
   onStatus,
 }: UltraEffectsProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -114,9 +116,7 @@ export const UltraEffects = memo(function UltraEffects({
           // Re-read live gates here, before even allocating a WebGL context.
           if (!allowed()) return;
           const candidate = createUltraRenderer(canvas, {
-            maxPixels: 1_600_000,
-            maxDpr: 1.6,
-            steps: 64,
+            quality,
             maxFps: 60,
             onStatus(status) {
               if (disposed) return;
@@ -184,11 +184,11 @@ export const UltraEffects = memo(function UltraEffects({
       renderer = null;
       if (root.dataset.ultraRenderer === reported) delete root.dataset.ultraRenderer;
     };
-  }, [enabled, motionAllowed]);
+  }, [enabled, motionAllowed, quality]);
 
   return enabled ? (
-    <div ref={stageRef} className="ultra-effects" aria-hidden="true">
-      <canvas ref={canvasRef} className="ultra-effects-canvas" />
+    <div ref={stageRef} className="ultra-effects" data-ultra-quality={quality} aria-hidden="true">
+      <canvas key={quality} ref={canvasRef} className="ultra-effects-canvas" />
       <div className="ultra-effects-fallback" />
     </div>
   ) : null;

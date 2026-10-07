@@ -41,6 +41,7 @@ import viewportChromeCss from "../styles-viewport-chrome.css?url";
 import ultraModeCss from "../styles-ultra-mode.css?url";
 import ultraEffectsCss from "../styles-ultra-effects.css?url";
 import ultraMaterialsCss from "../styles-ultra-materials.css?url";
+import ultraTransitionsCss from "../styles-ultra-transitions.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -173,6 +174,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: ultraModeCss },
       { rel: "stylesheet", href: ultraEffectsCss },
       { rel: "stylesheet", href: ultraMaterialsCss },
+      { rel: "stylesheet", href: ultraTransitionsCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

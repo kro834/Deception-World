@@ -14,6 +14,7 @@ const compile = (path) =>
     },
   }).outputText;
 const storeSource = compile("src/lib/ultra-mode.js");
+const qualitySource = compile("src/lib/ultra-quality.js");
 const toggleSource = compile("src/components/ultra/ultra-mode-toggle.tsx");
 const jsx = (type, props, key) => ({ type, props, key });
 const jsxRuntime = { jsx, jsxs: jsx };
@@ -33,6 +34,7 @@ function text(tree) {
 
 function mountToggle({
   stored = null,
+  storedQuality = null,
   reduced = false,
   forced = false,
   transparency = false,
@@ -41,10 +43,11 @@ function mountToggle({
 } = {}) {
   const attrs = new Map();
   const storage = {
-    getItem: () => stored,
-    setItem(_key, value) {
+    getItem: (key) => (key === "dw-ultra-quality-v1" ? storedQuality : stored),
+    setItem(key, value) {
       if (writeError) throw new Error("Quota exceeded");
-      stored = value;
+      if (key === "dw-ultra-quality-v1") storedQuality = value;
+      else stored = value;
     },
   };
   const browser = {
@@ -77,6 +80,9 @@ function mountToggle({
   });
   vm.runInContext(storeSource, context);
   const store = context.exports;
+  const qualityContext = { window: browser, document: context.document, exports: {} };
+  vm.runInNewContext(qualitySource, qualityContext);
+  const qualityStore = qualityContext.exports;
   let feedback = "";
   let id = 0;
   let failed = false;
@@ -93,12 +99,18 @@ function mountToggle({
           },
         ],
         useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
-          assert.equal(subscribe, store.subscribeUltraMode);
-          assert.equal(getSnapshot, store.getUltraModeSnapshot);
-          assert.equal(getServerSnapshot, store.getUltraModeServerSnapshot);
+          if (subscribe === qualityStore.subscribeUltraQuality) {
+            assert.equal(getSnapshot, qualityStore.getUltraQualitySnapshot);
+            assert.equal(getServerSnapshot, qualityStore.getUltraQualityServerSnapshot);
+          } else {
+            assert.equal(subscribe, store.subscribeUltraMode);
+            assert.equal(getSnapshot, store.getUltraModeSnapshot);
+            assert.equal(getServerSnapshot, store.getUltraModeServerSnapshot);
+          }
           return getSnapshot();
         },
       };
+    if (name === "@/lib/ultra-quality.js") return qualityStore;
     if (name === "@/lib/ultra-mode.js")
       return {
         ...store,
@@ -117,12 +129,16 @@ function mountToggle({
   return {
     render,
     store,
+    qualityStore,
     attrs,
     fail: () => {
       failed = true;
     },
     get stored() {
       return stored;
+    },
+    get storedQuality() {
+      return storedQuality;
     },
   };
 }
@@ -294,7 +310,53 @@ test("visibility observes only blocker flags and emits only when the aggregate s
   assert.equal(listeners.size, 0);
 });
 
-function mountRuntime(snapshot) {
+test("quality radios appear only while on and persist independently of the mode", () => {
+  const f = mountToggle({ stored: "false", storedQuality: "cinema" });
+  const stopMode = f.store.watchUltraMode();
+  const stopQuality = f.qualityStore.subscribeUltraQuality(() => {});
+  const radios = () =>
+    nodes(f.render(), (node) => node.type === "input" && node.props.type === "radio");
+  assert.equal(radios().length, 0);
+  nodes(f.render(), (node) => node.props?.role === "switch")[0].props.onClick();
+  assert.equal(radios().length, 2);
+  assert.equal(radios().find((node) => node.props.value === "cinema").props.checked, true);
+  const fieldset = nodes(f.render(), (node) => node.type === "fieldset")[0];
+  assert.match(text(fieldset), /画質.*高精細.*シネマ/);
+  assert.match(text(fieldset), /処理負荷が高く/);
+  radios()[0].props.onChange({ currentTarget: { value: "high" } });
+  assert.equal(f.storedQuality, "high");
+  assert.equal(f.stored, "true");
+  assert.match(text(f.render()), /画質を「高精細」にして.*保存しました/);
+  radios()[1].props.onChange({ currentTarget: { value: "cinema" } });
+  nodes(f.render(), (node) => node.props?.role === "switch")[0].props.onClick();
+  assert.equal(radios().length, 0);
+  assert.equal(f.storedQuality, "cinema");
+  assert.equal(f.stored, "false");
+  stopQuality();
+  stopMode();
+});
+
+test("quality controls wait for hydration and disclose a failed storage write", () => {
+  const f = mountToggle({ stored: "true", writeError: true, reduced: true });
+  const stopMode = f.store.watchUltraMode();
+  const getRadios = () =>
+    nodes(f.render(), (node) => node.type === "input" && node.props.type === "radio");
+  assert.ok(getRadios().every((node) => node.props.disabled));
+  const stopQuality = f.qualityStore.subscribeUltraQuality(() => {});
+  assert.ok(getRadios().every((node) => !node.props.disabled));
+  getRadios()[1].props.onChange({ currentTarget: { value: "cinema" } });
+  assert.equal(f.qualityStore.getUltraQualitySnapshot().quality, "cinema");
+  assert.equal(f.storedQuality, null);
+  assert.match(text(f.render()), /画質設定はこの画面に反映しましたが、保存できませんでした/);
+  assert.equal(f.attrs.has("data-ultra-motion"), false);
+  stopQuality();
+  stopMode();
+});
+
+function mountRuntime(
+  snapshot,
+  qualitySnapshot = { quality: "high", ready: true, storageAvailable: true },
+) {
   const attrs = new Map();
   const states = [];
   const effects = [];
@@ -355,6 +417,16 @@ function mountRuntime(snapshot) {
           },
         };
       if (name === "@/lib/ultra-mode.js") return store;
+      if (name === "@/lib/ultra-quality.js")
+        return {
+          subscribeUltraQuality() {},
+          getUltraQualitySnapshot: () => qualitySnapshot,
+          getUltraQualityServerSnapshot: () => ({
+            quality: "high",
+            ready: false,
+            storageAvailable: false,
+          }),
+        };
       if (name === "@/lib/ultra-mode-visibility.js")
         return {
           watchUltraSceneVisibility(notify) {
@@ -457,6 +529,30 @@ test("runtime keeps effects absent while unready, off, blocked, or motion restri
   assert.equal(f.attrs.has("data-ultra-renderer"), false);
 });
 
+test("runtime waits for the saved quality and forwards later quality changes", () => {
+  const snapshot = { ready: true, enabled: true, motionAllowed: true };
+  const quality = { ready: false, quality: "high", storageAvailable: false };
+  const f = mountRuntime(snapshot, quality);
+  assert.equal(f.render(), null);
+  assert.deepEqual(f.requests, []);
+  quality.ready = true;
+  quality.quality = "cinema";
+  let session = f.render();
+  assert.equal(session.props.quality, "cinema");
+  f.renderSession(session);
+  f.flush();
+  f.visibility(false);
+  f.renderSession(session);
+  f.flush();
+  let effects = nodes(f.renderSession(session), (node) => node.props?.enabled === true)[0];
+  assert.equal(effects.props.quality, "cinema");
+  quality.quality = "high";
+  session = f.render();
+  effects = nodes(f.renderSession(session), (node) => node.props?.enabled === true)[0];
+  assert.equal(effects.props.quality, "high");
+  f.unmount();
+});
+
 test("root and shared menu wire the prepaint gate, styles, runtime and toggle", () => {
   const root = read("src/routes/__root.tsx");
   const menu = read("src/components/world/world-chrome.tsx");
@@ -469,6 +565,7 @@ test("root and shared menu wire the prepaint gate, styles, runtime and toggle", 
     ["ultraModeCss", "styles-ultra-mode.css"],
     ["ultraEffectsCss", "styles-ultra-effects.css"],
     ["ultraMaterialsCss", "styles-ultra-materials.css"],
+    ["ultraTransitionsCss", "styles-ultra-transitions.css"],
   ]) {
     assert.ok(root.includes(`import ${variable} from "../${file}?url"`));
     assert.ok(root.includes(`{ rel: "stylesheet", href: ${variable} }`));
