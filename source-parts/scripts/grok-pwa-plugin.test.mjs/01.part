@@ -25,6 +25,53 @@ test("injects before </head>", () => {
   assert.ok(out.indexOf("manifest") < out.indexOf("</head>"));
 });
 
+const NATIVE_APP_META = [
+  ["mobile-web-app-capable", "yes"],
+  ["apple-mobile-web-app-capable", "yes"],
+  ["apple-mobile-web-app-status-bar-style", "black"],
+];
+
+test("root owns the opaque Home Screen metadata before the prepaint viewport guard", () => {
+  const root = readFileSync(join(TEMPLATE_ROOT, "src/routes/__root.tsx"), "utf8");
+  const guard = root.indexOf("scripts: [{ children: IPAD_STANDALONE_VIEWPORT_SCRIPT }");
+  assert.ok(guard > 0);
+  for (const [name, content] of NATIVE_APP_META) {
+    const declaration = `{ name: "${name}", content: "${content}" }`;
+    assert.equal(root.split(declaration).length - 1, 1, `${name} is root-owned once`);
+    assert.ok(root.indexOf(declaration) < guard, `${name} precedes the viewport guard`);
+  }
+});
+
+test("fallback injection includes one capable/status pair and preserves root-owned tags", () => {
+  const empty = "<html><head></head><body></body></html>";
+  const rootOwned = `<html><head>${NATIVE_APP_META.map(
+    ([name, content]) => `<meta name="${name}" content="${content}"/>`,
+  ).join("")}</head><body></body></html>`;
+  for (const original of [empty, rootOwned]) {
+    const once = injectGrokPwaHead(original);
+    const twice = injectGrokPwaHead(once);
+    assert.equal(once, twice);
+    for (const [name, content] of NATIVE_APP_META) {
+      assert.equal(once.split(`name="${name}"`).length - 1, 1);
+      assert.ok(once.includes(`name="${name}" content="${content}"`));
+      assert.ok(once.indexOf(`name="${name}"`) < once.indexOf("</head>"));
+    }
+    assert.ok(
+      once.indexOf('name="apple-mobile-web-app-capable"') <
+        once.indexOf('name="apple-mobile-web-app-status-bar-style"'),
+    );
+  }
+});
+
+test("Home Screen install tutorial uses the same opaque native metadata", () => {
+  const html = renderInstallPage("deception-world.vercel.app", "/?install=1&platform=ios");
+  for (const [name, content] of NATIVE_APP_META) {
+    assert.equal(html.split(`name="${name}"`).length - 1, 1);
+    assert.ok(html.includes(`name="${name}" content="${content}"`));
+    assert.ok(html.indexOf(`name="${name}"`) < html.indexOf("<script>"));
+  }
+});
+
 test("injects the extensions script without a project id", () => {
   const out = injectGrokPwaHead("<html><head></head></html>", "Demo", "");
   assert.match(out, /src="https:\/\/grok\.com\/grok-app-builder\/extensions\.js" defer/);
@@ -62,14 +109,8 @@ test("injects x:creator tags when both creator values are set", () => {
 
 test("escapes x:creator values", () => {
   const tags = grokXCreatorHeadTags('"><script>', '1" onclick="alert(1)');
-  assert.equal(
-    tags[0],
-    '<meta property="x:creator" content="&quot;&gt;&lt;script&gt;">',
-  );
-  assert.equal(
-    tags[1],
-    '<meta property="x:creator:id" content="1&quot; onclick=&quot;alert(1)">',
-  );
+  assert.equal(tags[0], '<meta property="x:creator" content="&quot;&gt;&lt;script&gt;">');
+  assert.equal(tags[1], '<meta property="x:creator:id" content="1&quot; onclick=&quot;alert(1)">');
 });
 
 test("does not duplicate x:creator tags", () => {

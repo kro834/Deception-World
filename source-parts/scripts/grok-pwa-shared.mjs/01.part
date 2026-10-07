@@ -95,9 +95,7 @@ export function publicAppHost(hostHeader) {
 }
 
 export function resolvePublicHost(hostHeader) {
-  return (
-    publicAppHost(hostHeader) || publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME)
-  );
+  return publicAppHost(hostHeader) || publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME);
 }
 
 export function isInstallQuery(url) {
@@ -172,10 +170,13 @@ export function renderWebManifest(hostHeader) {
 
 export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
   return [
-    // Standalone display comes from the manifest ("display": "standalone");
-    // the legacy *-web-app-capable metas it replaces are deliberately absent.
+    // The app owns these tags in its initial router head. Keep the same
+    // native Home Screen contract for documents using this fallback injector;
+    // the manifest's display setting does not replace Apple's status-bar pair.
     ["manifest", '<link rel="manifest" href="/__grok/manifest.webmanifest">'],
     ["apple-touch-icon", '<link rel="apple-touch-icon" href="/__grok/icon-180.png">'],
+    ["mobile-web-app-capable", '<meta name="mobile-web-app-capable" content="yes">'],
+    ["apple-mobile-web-app-capable", '<meta name="apple-mobile-web-app-capable" content="yes">'],
     [
       "apple-mobile-web-app-title",
       `<meta name="apple-mobile-web-app-title" content="${escapeHtml(appName)}">`,
@@ -244,13 +245,3 @@ function detectCustomOgCard(cwd = process.cwd(), site = {}) {
   if (siteHasCustomCard(site)) return true;
   return existsSync(join(cwd, "public/og.jpg")) || existsSync(join(cwd, "public/og.png"));
 }
-
-/** Snapshot for Vite/Nitro to bake into the server bundle (Vercel has no workspace FS). */
-export function snapshotOgIdentity(cwd = process.cwd()) {
-  const site = { ...readOgSite(cwd) };
-  if (detectCustomOgCard(cwd, site)) {
-    site.card = "custom";
-    site.image = site.image || customOgAssetPath(cwd);
-  }
-  if (existsSync(join(cwd, "public/x-banner.jpg"))) {
-    site.banner = site.banner || "/x-banner.jpg";

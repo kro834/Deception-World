@@ -1066,6 +1066,33 @@ function ZeusButton({
       }
       schedulePlacement();
     };
+    // The optional iPad launcher moves immediately when its root flags change.
+    // Waiting for scroll-settle and then gliding would leave this higher-z
+    // button over the new menu target. Reconcile only that footprint change,
+    // in the mutation microtask, without changing the reader's saved spot.
+    const root = document.documentElement;
+    const readCompactMenuFootprint = () =>
+      root.getAttribute("data-ipad-menu") === "compact" &&
+      root.getAttribute("data-ipad-menu-scrolled") === "true"
+        ? root.getAttribute("data-viewport-chrome") ?? ""
+        : "";
+    let compactMenuFootprint = readCompactMenuFootprint();
+    const reconcileCompactMenu = () => {
+      const nextFootprint = readCompactMenuFootprint();
+      if (nextFootprint === compactMenuFootprint) return;
+      compactMenuFootprint = nextFootprint;
+      // An active drag owns its position; its existing release placement
+      // already avoids critical controls, including the menu opener.
+      if (activePointer.current != null) return;
+      cancelPlacement();
+      glideNext.current = false;
+      placeButton(preferredPosition.current);
+    };
+    const compactMenuObserver = new MutationObserver(reconcileCompactMenu);
+    compactMenuObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-ipad-menu", "data-ipad-menu-scrolled", "data-viewport-chrome"],
+    });
     window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("message", onFrameAvoid);
@@ -1075,6 +1102,7 @@ function ZeusButton({
     document.addEventListener("toggle", onLayoutChange, { capture: true, passive: true });
     document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
+      compactMenuObserver.disconnect();
       document.removeEventListener("toggle", onLayoutChange, { capture: true });
       document.removeEventListener("scroll", onInnerScroll, { capture: true });
       window.removeEventListener("resize", onResize);
@@ -1088,7 +1116,7 @@ function ZeusButton({
       if (placementFrame.current != null) window.cancelAnimationFrame(placementFrame.current);
       placementFrame.current = null;
     };
-  }, [placeButton, getViewport, refreshDragViewport]);
+  }, [placeButton, getViewport, refreshDragViewport, cancelPlacement]);
 
   /* A permanent non-passive window touchmove listener makes every page scroll
      wait for the main thread. Install it only while a held drag owns the

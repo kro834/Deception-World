@@ -95,9 +95,7 @@ export function publicAppHost(hostHeader) {
 }
 
 export function resolvePublicHost(hostHeader) {
-  return (
-    publicAppHost(hostHeader) || publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME)
-  );
+  return publicAppHost(hostHeader) || publicAppHost(process.env?.VITE_PUBLIC_HOSTNAME);
 }
 
 export function isInstallQuery(url) {
@@ -172,10 +170,13 @@ export function renderWebManifest(hostHeader) {
 
 export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
   return [
-    // Standalone display comes from the manifest ("display": "standalone");
-    // the legacy *-web-app-capable metas it replaces are deliberately absent.
+    // The app owns these tags in its initial router head. Keep the same
+    // native Home Screen contract for documents using this fallback injector;
+    // the manifest's display setting does not replace Apple's status-bar pair.
     ["manifest", '<link rel="manifest" href="/__grok/manifest.webmanifest">'],
     ["apple-touch-icon", '<link rel="apple-touch-icon" href="/__grok/icon-180.png">'],
+    ["mobile-web-app-capable", '<meta name="mobile-web-app-capable" content="yes">'],
+    ["apple-mobile-web-app-capable", '<meta name="apple-mobile-web-app-capable" content="yes">'],
     [
       "apple-mobile-web-app-title",
       `<meta name="apple-mobile-web-app-title" content="${escapeHtml(appName)}">`,
@@ -377,13 +378,7 @@ export function normalizeHeadContext(ctx = {}) {
   };
 }
 
-export function injectGrokPwaHead(
-  html,
-  ctx = {},
-  legacyProjectId,
-  legacyCreator,
-  legacyCreatorId,
-) {
+export function injectGrokPwaHead(html, ctx = {}, legacyProjectId, legacyCreator, legacyCreatorId) {
   if (typeof html !== "string") return html;
   const context =
     typeof ctx === "string"
@@ -396,12 +391,7 @@ export function injectGrokPwaHead(
       : ctx;
   const { site, projectId, creator, creatorId, host } = normalizeHeadContext(context);
   const documentTitle = titleFromDocument(html);
-  const appName = resolveOgTitle(
-    site,
-    context.appName ?? DEFAULT_APP_NAME,
-    host,
-    documentTitle,
-  );
+  const appName = resolveOgTitle(site, context.appName ?? DEFAULT_APP_NAME, host, documentTitle);
   // A production caller opts into canonical share metadata by supplying its
   // request host or a baked site identity. Legacy positional calls only ask
   // for platform/PWA chrome and must preserve author-provided social tags.
@@ -423,14 +413,8 @@ export function injectGrokPwaHead(
       next,
       grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
     );
-  } else if (
-    !next.includes('name="twitter:card"') &&
-    !next.includes("name='twitter:card'")
-  ) {
-    next = insertAfterHeadOpen(
-      next,
-      '<meta name="twitter:card" content="summary_large_image">',
-    );
+  } else if (!next.includes('name="twitter:card"') && !next.includes("name='twitter:card'")) {
+    next = insertAfterHeadOpen(next, '<meta name="twitter:card" content="summary_large_image">');
   }
 
   if (!next.includes("/grok-app-builder/extensions.js")) {

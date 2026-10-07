@@ -18,6 +18,7 @@ import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
+import { IpadMenuMode } from "@/components/ipad-menu-mode";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
@@ -85,6 +86,12 @@ export const Route = createRootRoute({
       },
       { title: APP_NAME },
       { name: "description", content: "仮面ライダーサーガ Deception World — 映画オープニング" },
+      // Keep native Home Screen chrome in the router-owned, initial head.
+      // A manifest alone enables installation, but the Apple status-bar
+      // contract also needs its capable flag; do not rely on late injection.
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
       {
         name: "theme-color",
@@ -196,6 +203,7 @@ function RootDocument() {
               <Outlet />
               <InquiryNavigation />
               <GalleryStickerWarmup />
+              <IpadMenuMode />
             </ZeusButtonProvider>
           </LoadGateProvider>
         </AuthProvider>

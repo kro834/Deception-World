@@ -1,3 +1,13 @@
+
+/** Snapshot for Vite/Nitro to bake into the server bundle (Vercel has no workspace FS). */
+export function snapshotOgIdentity(cwd = process.cwd()) {
+  const site = { ...readOgSite(cwd) };
+  if (detectCustomOgCard(cwd, site)) {
+    site.card = "custom";
+    site.image = site.image || customOgAssetPath(cwd);
+  }
+  if (existsSync(join(cwd, "public/x-banner.jpg"))) {
+    site.banner = site.banner || "/x-banner.jpg";
   }
   return { site };
 }
@@ -121,13 +131,7 @@ export function normalizeHeadContext(ctx = {}) {
   };
 }
 
-export function injectGrokPwaHead(
-  html,
-  ctx = {},
-  legacyProjectId,
-  legacyCreator,
-  legacyCreatorId,
-) {
+export function injectGrokPwaHead(html, ctx = {}, legacyProjectId, legacyCreator, legacyCreatorId) {
   if (typeof html !== "string") return html;
   const context =
     typeof ctx === "string"
@@ -140,12 +144,7 @@ export function injectGrokPwaHead(
       : ctx;
   const { site, projectId, creator, creatorId, host } = normalizeHeadContext(context);
   const documentTitle = titleFromDocument(html);
-  const appName = resolveOgTitle(
-    site,
-    context.appName ?? DEFAULT_APP_NAME,
-    host,
-    documentTitle,
-  );
+  const appName = resolveOgTitle(site, context.appName ?? DEFAULT_APP_NAME, host, documentTitle);
   // A production caller opts into canonical share metadata by supplying its
   // request host or a baked site identity. Legacy positional calls only ask
   // for platform/PWA chrome and must preserve author-provided social tags.
@@ -167,14 +166,8 @@ export function injectGrokPwaHead(
       next,
       grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
     );
-  } else if (
-    !next.includes('name="twitter:card"') &&
-    !next.includes("name='twitter:card'")
-  ) {
-    next = insertAfterHeadOpen(
-      next,
-      '<meta name="twitter:card" content="summary_large_image">',
-    );
+  } else if (!next.includes('name="twitter:card"') && !next.includes("name='twitter:card'")) {
+    next = insertAfterHeadOpen(next, '<meta name="twitter:card" content="summary_large_image">');
   }
 
   if (!next.includes("/grok-app-builder/extensions.js")) {

@@ -25,6 +25,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
 import { LibraryCurrentButton } from "@/components/library/library-controls";
+import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -1124,6 +1125,7 @@ export function SideMenuLayer({
               </GuardedLink>
             )}
             <ZeusButtonToggle />
+            <IpadMenuToggle />
             <Link
               to="/"
               onClick={(e) => {

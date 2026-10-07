@@ -45,6 +45,15 @@ html:root[data-ipad-viewport="contained"][data-viewport-chrome] body {
   content: "";
 }
 
+/* An installed iPad can report a zero safe-area inset. Keep actual opaque
+   pixels INSIDE the viewport, not only the negative overflow above it.
+   This is a paint guard, not a guessed native status-bar height; the real
+   header remains above it and its layout/controls are unchanged. */
+html:root[data-ipad-standalone-viewport="contained"] .viewport-chrome-cover {
+  height: max(12px, env(safe-area-inset-top, 0px));
+  z-index: 39;
+}
+
 /* Preserve World's chapter colours, but put an opaque base below any
    decorative gradient. No composited glass on the viewport edge, including
    data-page-scrolled and the device/economy fallbacks. */
@@ -52,6 +61,79 @@ html:root[data-viewport-chrome] :is(.gallery-topbar, .topbar, .dream-site-header
   background-color: var(--world-atmosphere-base, var(--viewport-chrome-color)) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
+}
+
+/* Opt-in recovery for installed iPad chrome that still samples page content.
+   Keep the SAME menu opener and header layout boxes: World measures its full
+   height for anchors, and gallery/viewer restoration uses window.scrollY.
+   Visibility hides header links from keyboard/AT without collapsing layout.
+   No nested scroller, duplicate menu, or relocated focus target is created. */
+.ipad-menu-toggle {
+  display: none !important;
+}
+
+html:root[data-ipad-viewport="contained"] .ipad-menu-toggle {
+  display: flex !important;
+  gap: 16px;
+  align-items: center;
+}
+
+.ipad-menu-description {
+  display: block;
+  margin-top: 6px;
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.8;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+}
+
+.ipad-menu-toggle[aria-pressed="true"] {
+  outline: 1px solid #c9b587;
+  outline-offset: -1px;
+}
+
+html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header) {
+  visibility: hidden;
+  pointer-events: none;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  .dream-chapter-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  :is(.gallery-topbar, .topbar, .dream-site-header)
+  .side-panel-trigger {
+  position: fixed;
+  inset: auto max(24px, env(safe-area-inset-right))
+    max(112px, calc(104px + env(safe-area-inset-bottom))) auto;
+  z-index: 59;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  visibility: visible;
+  pointer-events: auto;
+  border: 1px solid #c9b587 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  color: #f7eedc !important;
+  background: var(--viewport-chrome-color) !important;
+  box-shadow: 0 6px 24px #0008 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html:root[data-ipad-menu="compact"][data-ipad-menu-scrolled="true"][data-viewport-chrome]
+  .side-panel-trigger:focus-visible {
+  outline: 2px solid #f7eedc;
+  outline-offset: 4px;
 }
 
 @media (forced-colors: active) {

@@ -18,12 +18,14 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     timers = new Map(),
     frames = new Map(),
     saved = [],
-    timerDelays = [];
+    timerDelays = [],
+    observers = [];
   let serial = 0,
     navigated = 0,
     layoutReads = 0,
     guardCalls = 0;
   class Element extends EventTarget {
+    attributes = new Map();
     dataset = {};
     style = {
       left: "0px",
@@ -39,7 +41,11 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     offsetTop = 0;
     offsetParent = null;
     setAttribute(name, value) {
+      this.attributes.set(name, value);
       this[name] = value;
+    }
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null;
     }
     closest() {
       return null;
@@ -72,6 +78,19 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
         width: size,
         height: size,
       };
+    }
+  }
+  class MutationObserver {
+    targets = new Map();
+    constructor(callback) {
+      this.callback = callback;
+      observers.push(this);
+    }
+    observe(target, options) {
+      this.targets.set(target, options);
+    }
+    disconnect() {
+      this.targets.clear();
     }
   }
   const button = new Element();
@@ -110,6 +129,7 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     getComputedStyle: () => ({ getPropertyValue: () => "0" }),
   });
   Object.assign(doc, {
+    documentElement: new Element(),
     hidden: false,
     querySelectorAll: () => [],
     createRange: () => ({}),
@@ -128,6 +148,7 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     Element,
     HTMLElement: Element,
     HTMLButtonElement: Element,
+    MutationObserver,
     require(name) {
       if (name === "react")
         return {
@@ -202,9 +223,44 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     reads: () => layoutReads,
     navigated: () => navigated,
     guardCalls: () => guardCalls,
+    observers,
+    mutateRoot: (name, value) => {
+      doc.documentElement.setAttribute(name, value);
+      // Deliver the mutation explicitly, as a microtask checkpoint, so tests
+      // can distinguish immediate reconciliation from deferred scroll work.
+      for (const observer of observers) {
+        const options = observer.targets.get(doc.documentElement);
+        if (options?.attributes && options.attributeFilter?.includes(name)) {
+          observer.callback([
+            { type: "attributes", target: doc.documentElement, attributeName: name },
+          ]);
+        }
+      }
+    },
     unmount: () => cleanups.forEach((fn) => fn?.()),
   };
 }
+
+test("compact-menu geometry changes reconcile without a scroll timer and disconnect on unmount", () => {
+  const ui = mount({ android: false });
+  const initialReads = ui.reads();
+  ui.mutateRoot("data-viewport-chrome", "gallery");
+  ui.mutateRoot("data-ipad-menu", "compact");
+  assert.equal(ui.reads(), initialReads, "the default/full header needs no new collision pass");
+  ui.mutateRoot("data-ipad-menu-scrolled", "true");
+  assert.ok(ui.reads() > initialReads, "the actual placement effect reacts immediately");
+  assert.equal(ui.timers.size, 0);
+  assert.equal(ui.frames.size, 0);
+  assert.equal(ui.saved.length, 0, "a safety relocation must not overwrite the saved position");
+  const settledReads = ui.reads();
+  ui.mutateRoot("data-ipad-menu-scrolled", "true");
+  assert.equal(ui.reads(), settledReads, "identical effective footprints do not repeat work");
+  assert.equal(ui.observers.length, 1);
+  ui.unmount();
+  assert.equal(ui.observers[0].targets.size, 0);
+  ui.mutateRoot("data-viewport-chrome", "dream");
+  assert.equal(ui.reads(), settledReads, "unmounted observers cannot reposition the button");
+});
 
 test("one pointer tap navigates once; a swipe or displaced release never navigates", () => {
   const tap = mount();
