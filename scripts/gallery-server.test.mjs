@@ -40,6 +40,14 @@ const losslessMigration = await readFile(
   new URL("../supabase/migrations/202610070001_gallery_lossless_uploads.sql", import.meta.url),
   "utf8",
 );
+const titleEditingMigration = await readFile(
+  new URL("../supabase/migrations/202610070002_gallery_title_editing.sql", import.meta.url),
+  "utf8",
+);
+const restoreProtocolMigration = await readFile(
+  new URL("../supabase/migrations/202610070003_restore_gallery_protocol.sql", import.meta.url),
+  "utf8",
+);
 
 test("gallery server validates static IDs, public UUIDs, titles and concurrency versions", () => {
   for (let number = 1; number <= 113; number++)
@@ -1191,6 +1199,281 @@ test("Supabase migration denies direct anonymous/authenticated mutations and RPC
     await db.exec("reset role");
   } finally {
     await db.close();
+  }
+});
+
+test("upload readiness is role-invariant and fails closed when either private bucket drifts", async () => {
+  const db = await database();
+  const readyAsService = async () => {
+    await db.exec("set role service_role");
+    try {
+      return await call(db, "gallery_upload_protocol_ready", []);
+    } finally {
+      await db.exec("reset role");
+    }
+  };
+  try {
+    // Supabase Storage uses RLS. The RPC must retain its fixed definer and
+    // cannot depend on the caller having direct access to Storage's tables.
+    await db.exec("alter table storage.buckets enable row level security");
+    const functionSecurity = await db.query(
+      `select prosecdef, proconfig from pg_proc
+       where oid = 'public.gallery_upload_protocol_ready()'::regprocedure`,
+    );
+    assert.equal(functionSecurity.rows.length, 1);
+    assert.equal(functionSecurity.rows[0].prosecdef, true);
+    assert.ok(functionSecurity.rows[0].proconfig.includes("search_path=pg_catalog"));
+    for (const role of ["anon", "authenticated"])
+      assert.equal(
+        (
+          await db.query(
+            "select has_function_privilege($1, 'public.gallery_upload_protocol_ready()', 'EXECUTE') as allowed",
+            [role],
+          )
+        ).rows[0].allowed,
+        false,
+      );
+    assert.equal(
+      (
+        await db.query(
+          "select has_function_privilege('service_role', 'public.gallery_upload_protocol_ready()', 'EXECUTE') as allowed",
+        )
+      ).rows[0].allowed,
+      true,
+    );
+    const rowSecurity = await db.query(
+      `select n.nspname, c.relname, c.relrowsecurity from pg_class c
+       join pg_namespace n on n.oid = c.relnamespace
+       where (n.nspname, c.relname) in
+         (('public', 'gallery_uploads'), ('storage', 'objects'), ('storage', 'buckets'))`,
+    );
+    assert.equal(rowSecurity.rows.length, 3);
+    assert.ok(rowSecurity.rows.every((row) => row.relrowsecurity));
+
+    assert.equal(await call(db, "gallery_upload_protocol_ready", []), true);
+    assert.equal(await readyAsService(), true);
+
+    // Reproduce the production drift: only the final gallery bucket has
+    // reverted to the legacy 3 MiB/WebP-only setting; staging remains v2.
+    await db.exec(`update storage.buckets
+      set file_size_limit = 3145728, allowed_mime_types = array['image/webp']
+      where id = 'gallery-images'`);
+    assert.equal(await call(db, "gallery_upload_protocol_ready", []), false);
+    assert.equal(await readyAsService(), false);
+    const staging = await db.query(
+      "select file_size_limit, allowed_mime_types from storage.buckets where id = 'gallery-upload-staging'",
+    );
+    assert.equal(Number(staging.rows[0].file_size_limit), 19 * 1024 * 1024);
+    assert.deepEqual(staging.rows[0].allowed_mime_types, ["image/jpeg", "image/png", "image/webp"]);
+
+    await db.exec(`update storage.buckets
+      set file_size_limit = 19922944,
+          allowed_mime_types = array['image/jpeg','image/png','image/webp']
+      where id = 'gallery-images'`);
+    assert.equal(await readyAsService(), true);
+
+    for (const [bucket, change] of [
+      ["gallery-images", "public = true"],
+      ["gallery-upload-staging", "file_size_limit = 3145728"],
+      ["gallery-upload-staging", "allowed_mime_types = array['image/webp']"],
+      [
+        "gallery-upload-staging",
+        "allowed_mime_types = array['image/jpeg','image/png','image/webp','image/svg+xml']",
+      ],
+    ]) {
+      await db.query(`update storage.buckets set ${change} where id = $1`, [bucket]);
+      assert.equal(await readyAsService(), false, `${bucket}: ${change}`);
+      await db.exec(`update storage.buckets
+        set public = false, file_size_limit = 19922944,
+            allowed_mime_types = array['image/jpeg','image/png','image/webp']
+        where id in ('gallery-images','gallery-upload-staging')`);
+      assert.equal(await readyAsService(), true);
+    }
+  } finally {
+    await db.close();
+  }
+});
+
+test("restore migration repairs replayed legacy setup without changing gallery data or browser grants", async () => {
+  const db = await database();
+  try {
+    await db.exec(titleEditingMigration);
+    await post(db, userA, postA, 12_345);
+    assert.deepEqual(await call(db, "gallery_set_title", [userB, "g113", "保存済みの作品名", 0]), {
+      title: "保存済みの作品名",
+      version: 1,
+    });
+    assert.equal((await call(db, "gallery_upload_init", [userB, postB, "image/png"])).upload.id, postB);
+
+    const dataSnapshot = async () => ({
+      posts: (await db.query("select * from public.gallery_posts order by id")).rows,
+      titles: (await db.query("select * from public.gallery_titles order by artwork_id")).rows,
+      history: (await db.query("select * from public.gallery_title_history order by id")).rows,
+      uploads: (await db.query("select * from public.gallery_uploads order by id")).rows,
+      titleBuckets: (await db.query("select * from public.gallery_title_buckets order by bucket_key")).rows,
+      rateLimits: (await db.query("select * from public.gallery_rate_limits order by user_id, action")).rows,
+      globalLimits: (await db.query("select * from public.gallery_global_limits order by action")).rows,
+    });
+    const functionState = async () => {
+      const result = await db.query(`select oid::regprocedure::text as signature, prosrc, proowner, prosecdef, proconfig, proacl
+        from pg_proc where oid in (
+          'public.gallery_reserve_upload(uuid,text,integer,integer,integer)'::regprocedure,
+          'public.gallery_set_title(uuid,text,text,integer)'::regprocedure,
+          'public.gallery_upload_protocol_ready()'::regprocedure)
+        order by oid::regprocedure::text`);
+      return result.rows.map((row) => ({
+        ...row,
+        prosrc: row.prosrc
+          .split("\n")
+          .filter((line) => !line.trim().startsWith("--"))
+          .join("\n")
+          .replace(/\n\s*\n/g, "\n")
+          .trim(),
+      }));
+    };
+    const browserGrants = async () => {
+      const results = [];
+      for (const role of ["anon", "authenticated"])
+        results.push((await db.query(`select
+          has_table_privilege($1,'public.gallery_posts','INSERT') as posts_insert,
+          has_table_privilege($1,'public.gallery_uploads','INSERT') as uploads_insert,
+          has_table_privilege($1,'public.gallery_titles','UPDATE') as titles_update,
+          has_table_privilege($1,'public.gallery_title_buckets','UPDATE') as title_rate_update,
+          has_function_privilege($1,'public.gallery_set_title(uuid,text,text,integer)','EXECUTE') as title_rpc,
+          has_function_privilege($1,'public.gallery_reserve_upload(uuid,text,integer,integer,integer)','EXECUTE') as reserve_rpc,
+          has_function_privilege($1,'public.gallery_upload_protocol_ready()','EXECUTE') as ready_rpc`, [role])).rows[0]);
+      return results;
+    };
+    const originalData = await dataSnapshot();
+    const originalFunctions = await functionState();
+    const originalGrants = await browserGrants();
+    assert.ok(originalGrants.every((grants) => Object.values(grants).every((allowed) => !allowed)));
+    assert.equal(await call(db, "gallery_upload_protocol_ready", []), true);
+
+    // Replaying obsolete bootstrap SQL reproduces the observed drift without
+    // attributing how the live installation reached that state.
+    await db.exec(migration);
+    assert.equal(await call(db, "gallery_upload_protocol_ready", []), false);
+    const driftedBuckets = await db.query(
+      "select id, file_size_limit, allowed_mime_types from storage.buckets order by id",
+    );
+    assert.deepEqual(
+      driftedBuckets.rows.map((row) => [row.id, Number(row.file_size_limit), row.allowed_mime_types]),
+      [
+        ["gallery-images", 3 * 1024 * 1024, ["image/webp"]],
+        ["gallery-upload-staging", 19 * 1024 * 1024, ["image/jpeg", "image/png", "image/webp"]],
+      ],
+    );
+    const driftedFunctions = await functionState();
+    const titleBody = driftedFunctions.find((entry) => entry.signature.includes("gallery_set_title"));
+    const reserveBody = driftedFunctions.find((entry) => entry.signature.includes("gallery_reserve_upload"));
+    assert.ok(titleBody.prosrc.includes("gallery_take_rate"));
+    assert.equal(titleBody.prosrc.includes("gallery_take_title_rate"), false);
+    assert.ok(reserveBody.prosrc.includes("insert into public.gallery_posts"));
+    assert.equal(reserveBody.prosrc.includes("public.gallery_reserve_upload(p_user,p_id,p_width,p_height,p_bytes,'webp')"), false);
+    assert.deepEqual(await dataSnapshot(), originalData);
+
+    for (let pass = 0; pass < 2; pass++) {
+      await db.exec(restoreProtocolMigration);
+      assert.equal(await call(db, "gallery_upload_protocol_ready", []), true);
+      await db.exec("set role service_role");
+      try {
+        assert.equal(await call(db, "gallery_upload_protocol_ready", []), true);
+      } finally {
+        await db.exec("reset role");
+      }
+      assert.deepEqual(await dataSnapshot(), originalData);
+      assert.deepEqual(await functionState(), originalFunctions);
+      assert.deepEqual(await browserGrants(), originalGrants);
+      const security = await db.query(`select n.nspname, c.relname, c.relrowsecurity
+        from pg_class c join pg_namespace n on n.oid=c.relnamespace
+        where (n.nspname,c.relname) in (('public','gallery_posts'),('public','gallery_titles'),
+          ('public','gallery_uploads'),('storage','objects'))`);
+      assert.equal(security.rows.length, 4);
+      assert.ok(security.rows.every((row) => row.relrowsecurity));
+      const policy = await db.query(`select permissive, roles, cmd from pg_policies
+        where schemaname='storage' and tablename='objects' and policyname='gallery_server_only'`);
+      assert.equal(policy.rows[0].permissive, "RESTRICTIVE");
+      assert.equal(policy.rows[0].cmd, "ALL");
+      assert.deepEqual(policy.rows[0].roles.sort(), ["anon", "authenticated"]);
+    }
+  } finally {
+    await db.close();
+  }
+});
+
+test("restore migration rolls back bucket changes when final readiness or prerequisites fail", async () => {
+  const db = await database();
+  try {
+    await db.exec(titleEditingMigration);
+    await db.exec(migration);
+    const buckets = async () =>
+      (await db.query("select id, public, file_size_limit, allowed_mime_types from storage.buckets order by id")).rows;
+    const titleBody = async () =>
+      (await db.query(
+        "select prosrc from pg_proc where oid='public.gallery_set_title(uuid,text,text,integer)'::regprocedure",
+      )).rows[0].prosrc;
+    const oldBuckets = await buckets();
+    const oldTitleBody = await titleBody();
+
+    // The final assertion is inside the transaction: an unmet Storage RLS
+    // prerequisite must not leave the bucket update or RPC replacements behind.
+    await db.exec("alter table storage.objects disable row level security");
+    await assert.rejects(db.exec(restoreProtocolMigration), /Gallery upload prerequisites are incomplete/);
+    await db.exec("rollback");
+    assert.deepEqual(await buckets(), oldBuckets);
+    assert.equal(await titleBody(), oldTitleBody);
+
+    await db.exec("alter table storage.objects enable row level security");
+    await db.exec("delete from storage.buckets where id='gallery-upload-staging'");
+    const singleBucket = await buckets();
+    await assert.rejects(db.exec(restoreProtocolMigration), /Both existing gallery buckets are required/);
+    await db.exec("rollback");
+    assert.deepEqual(await buckets(), singleBucket);
+    assert.equal(await titleBody(), oldTitleBody);
+  } finally {
+    await db.close();
+  }
+});
+
+test("restore migration never creates a missing replacement RPC with public EXECUTE", async () => {
+  for (const signature of [
+    "gallery_set_title(uuid,text,text,integer)",
+    "gallery_reserve_upload(uuid,text,integer,integer,integer)",
+  ]) {
+    const db = await database();
+    try {
+      await db.exec(titleEditingMigration);
+      await post(db);
+      await db.exec(migration);
+      const beforeBuckets = (
+        await db.query("select id, public, file_size_limit, allowed_mime_types from storage.buckets order by id")
+      ).rows;
+      const beforePosts = (await db.query("select * from public.gallery_posts order by id")).rows;
+      await db.exec(`drop function public.${signature}`);
+      assert.equal(
+        (await db.query("select to_regprocedure($1) as target", [`public.${signature}`])).rows[0].target,
+        null,
+      );
+      await assert.rejects(
+        db.exec(restoreProtocolMigration),
+        /Apply the four gallery migrations in order before this repair/,
+        signature,
+      );
+      await db.exec("rollback");
+      assert.equal(
+        (await db.query("select to_regprocedure($1) as target", [`public.${signature}`])).rows[0].target,
+        null,
+        `${signature} must remain absent rather than being recreated with default PUBLIC EXECUTE`,
+      );
+      assert.deepEqual(
+        (await db.query("select id, public, file_size_limit, allowed_mime_types from storage.buckets order by id")).rows,
+        beforeBuckets,
+      );
+      assert.deepEqual((await db.query("select * from public.gallery_posts order by id")).rows, beforePosts);
+    } finally {
+      await db.close();
+    }
   }
 });
 

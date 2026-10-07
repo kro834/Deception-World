@@ -5,13 +5,27 @@ Storage bucket. The application's existing Grok authentication and `migrations/`
 remain separate. Static gallery images remain available before this service is
 configured; shared writes fail closed.
 
-Provision a Supabase project and apply
-`migrations/202610060001_shared_gallery.sql` followed by
+For a new Supabase project, apply these four migrations in order with an
+administrator connection or its SQL editor:
+`migrations/202610060001_shared_gallery.sql`,
 `migrations/202610060002_gallery_catalogue_113.sql`,
 `migrations/202610070001_gallery_lossless_uploads.sql` and
-`migrations/202610070002_gallery_title_editing.sql` to that project's database
-with an administrator connection or its SQL editor. Existing installations apply
-only the migrations they have not already applied, in that order. The second replaces
+`migrations/202610070002_gallery_title_editing.sql`. Existing installations
+should apply only migrations not already recorded as applied, in that order.
+Never replay an older migration against an upgraded project: in particular,
+`202610060001_shared_gallery.sql` resets `gallery-images` to the legacy 3 MiB
+WebP-only configuration and can make the current client fail closed. Do not
+manually rerun the full migration set to repair a project.
+
+`migrations/202610070003_restore_gallery_protocol.sql` is a recovery-only
+migration for an existing project that has already applied the four migrations
+above but whose upload protocol readiness or bucket metadata has regressed. It
+is not part of fresh-project setup and does not replace the normal migration
+sequence. Before applying it, verify the existing gallery schema and helper
+objects; then validate both bucket rows and `/api/gallery/config` reports
+`ready: true`, `uploadProtocol: 2` and `maxFileBytes: 19922944`.
+
+The `202610060002_gallery_catalogue_113.sql` migration replaces
 the `gallery_titles_artwork_id_check` constraint and title RPC's static-ID
 validation atomically without modifying existing titles, posts, history, quotas
 or privileges; `g01` through `g113` retain their original IDs. Inspect the live
@@ -30,8 +44,8 @@ The service key must never use a `VITE_` prefix. A service JWT in the public-key
 variable makes the gallery fail closed. `/api/gallery/config` returns
 `ready: false` until credentials, the gallery schema and the two private 19 MiB
 buckets are available. A ready response includes `uploadProtocol: 2` and
-`maxFileBytes: 19922944`. Apply the third migration before publishing the new
-client: there is no fallback to the old lossy protocol.
+`maxFileBytes: 19922944`. For a new setup, apply the lossless-upload migration
+before publishing the new client; there is no fallback to the old lossy protocol.
 
 Enable anonymous sign-ins in Supabase Auth. The browser creates an anonymous
 session only on the visitor's first intentional write; viewing the gallery does
