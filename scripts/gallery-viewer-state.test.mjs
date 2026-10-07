@@ -71,9 +71,15 @@ test("Back/Forward records validate all fields and tolerate old boolean entries 
     { ...record, position: { top: NaN, left: 0 } },
     { ...record, position: { top: -1, left: 0 } },
     { ...record, ids: Array(1001).fill("b") },
+    { ...record, mode: "automatic" },
   ]) {
     assert.equal(readGalleryViewerRecord(value), null);
   }
+  assert.deepEqual(readGalleryViewerRecord({ ...record, mode: "shuffle" }), {
+    ...record,
+    ids: ["a", "b"],
+    mode: "shuffle",
+  });
 });
 
 test("horizontal swipes move one work; vertical, slow, diagonal and browser-edge gestures do not", () => {

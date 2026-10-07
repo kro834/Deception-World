@@ -1,8 +1,10 @@
 export type GalleryReadingPosition = { top: number; left: number };
+export type GalleryViewerMode = "normal" | "shuffle";
 export type GalleryViewerRecord = {
   id: string;
   ids: string[];
   position: GalleryReadingPosition;
+  mode?: GalleryViewerMode;
 };
 
 /** Document layout, excluding the frozen body's offset and entrance transforms. */
@@ -37,6 +39,7 @@ export function readGalleryViewerRecord(value: unknown): GalleryViewerRecord | n
     record.ids.length > 1000 ||
     !record.ids.every((id) => typeof id === "string") ||
     !record.ids.includes(record.id) ||
+    (record.mode !== undefined && record.mode !== "normal" && record.mode !== "shuffle") ||
     !record.position ||
     !Number.isFinite(record.position.top) ||
     !Number.isFinite(record.position.left) ||
@@ -44,7 +47,12 @@ export function readGalleryViewerRecord(value: unknown): GalleryViewerRecord | n
     record.position.left < 0
   )
     return null;
-  return { id: record.id, ids: [...new Set(record.ids)], position: { ...record.position } };
+  return {
+    id: record.id,
+    ids: [...new Set(record.ids)],
+    position: { ...record.position },
+    ...(record.mode === undefined ? {} : { mode: record.mode }),
+  };
 }
 
 /** The reading order belongs to this viewing session, not the changing filter. */
@@ -56,9 +64,15 @@ export function galleryViewerSequence<T extends { id: string }>(
   return filtered.some((work) => work.id === selected.id) ? [...filtered] : [...available];
 }
 
-export function galleryAdjacentId(ids: readonly string[], selected: string, step: number) {
+export function galleryAdjacentId(
+  ids: readonly string[],
+  selected: string,
+  step: number,
+  mode: GalleryViewerMode = "normal",
+) {
   const index = ids.indexOf(selected);
   if (index < 0 || ids.length < 2) return null;
+  if (mode === "shuffle") return ids[index + step] ?? null;
   return ids[(((index + step) % ids.length) + ids.length) % ids.length];
 }
 

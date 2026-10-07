@@ -19,6 +19,45 @@ const options = {
   communityFailed: false,
 };
 
+test("mixed shuffled reload waits for posts even when its current catalogue image is available", () => {
+  const privateId = "u-12345678-1234-4234-9234-123456789abd";
+  const record = {
+    id: "g81",
+    ids: [postId, "g81", privateId, "g01"],
+    mode: "shuffle",
+    position: { top: 560, left: 0 },
+  };
+  const pending = { ...options, viewerState: record };
+  assert.deepEqual(planGalleryArtworkEntry(pending), { kind: "waiting", failed: false });
+  assert.deepEqual(planGalleryArtworkEntry({ ...pending, communityFailed: true }), {
+    kind: "waiting",
+    failed: true,
+  });
+  assert.deepEqual(
+    planGalleryArtworkEntry({
+      ...pending,
+      communityLoaded: true,
+      communityFailed: true,
+      availableIds: [...catalogue, postId],
+    }),
+    { kind: "waiting", failed: true },
+  );
+  const loaded = planGalleryArtworkEntry({
+    ...pending,
+    communityLoaded: true,
+    availableIds: [...catalogue, postId],
+  });
+  assert.equal(loaded.kind, "open");
+  assert.deepEqual(loaded.record, { ...record, ids: [postId, "g81", "g01"] });
+  assert.equal(loaded.cleanHref, null);
+  assert.deepEqual(record.ids, [postId, "g81", privateId, "g01"]);
+  const normal = planGalleryArtworkEntry({
+    ...pending,
+    viewerState: { ...record, mode: "normal" },
+  });
+  assert.equal(normal.kind, "open", "ordinary catalogue viewers still open during post loading");
+});
+
 test("artwork links accept stable catalogue and public post IDs, not selectors or ambiguous targets", () => {
   assert.deepEqual(readGalleryArtworkLink("/gallery"), { kind: "none" });
   assert.deepEqual(readGalleryArtworkLink("/world?work=g81"), { kind: "none" });
@@ -209,4 +248,40 @@ test("post links wait for successful data, retry after failure, and never resolv
     kind: "missing",
     cleanHref: "/gallery",
   });
+});
+
+test("a shuffled session survives history restoration without sharing its private order", () => {
+  const record = {
+    id: "g81",
+    ids: ["g113", "g01", "g81"],
+    mode: "shuffle",
+    position: { top: 2364.5, left: 0 },
+  };
+  const history = createMemoryHistory({ initialEntries: ["/gallery"] });
+  history.push("/gallery?work=g81", { galleryViewer: record });
+  history.back();
+  assert.equal(history.location.href, "/gallery");
+  history.forward();
+  const restored = planGalleryArtworkEntry({
+    ...options,
+    href: history.location.href,
+    viewerState: history.location.state.galleryViewer,
+  });
+  assert.equal(restored.kind, "open");
+  assert.equal(restored.cleanHref, null);
+  assert.deepEqual(restored.record, record);
+  const sharedHref = galleryArtworkShareUrl("https://example.test/gallery", record.id);
+  assert.equal(sharedHref, "https://example.test/gallery?work=g81");
+  const sharedArrival = planGalleryArtworkEntry({ ...options, href: sharedHref });
+  assert.equal(sharedArrival.kind, "open");
+  assert.equal(sharedArrival.record.mode, undefined);
+  assert.deepEqual(sharedArrival.record.ids, catalogue);
+  const withMissingWork = planGalleryArtworkEntry({
+    ...options,
+    viewerState: record,
+    availableIds: ["g81", "g113"],
+  });
+  assert.equal(withMissingWork.kind, "open");
+  assert.equal(withMissingWork.record.mode, "shuffle");
+  assert.deepEqual(withMissingWork.record.ids, ["g113", "g81"]);
 });

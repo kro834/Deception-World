@@ -88,6 +88,15 @@ export function planGalleryArtworkEntry(options: {
       : { kind: "none" };
   }
   if (!isGalleryLinkId(id)) return { kind: "invalid", cleanHref: galleryWithoutArtwork(href) };
+  // Restoring a mixed finite deck requires a successful public-post listing.
+  // A catalogue work can already be available while the rest of its saved order
+  // is still unknown; treating those posts as absent would truncate it forever.
+  if (
+    record?.mode === "shuffle" &&
+    record.ids.some(isCommunityGalleryId) &&
+    (!communityLoaded || communityFailed)
+  )
+    return { kind: "waiting", failed: communityFailed };
   if (!availableIds.includes(id)) {
     if (isCommunityGalleryId(id) && (!communityLoaded || communityFailed))
       return { kind: "waiting", failed: communityFailed };

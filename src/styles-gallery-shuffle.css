@@ -1,0 +1,54 @@
+.gallery-shuffle-entry {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin: 1rem 0;
+}
+
+.gallery-shuffle-start,
+.gallery-shuffle-end button {
+  min-height: 44px;
+  border: 1px solid rgba(207, 178, 122, 0.45);
+  border-radius: 999px;
+  background: rgba(207, 178, 122, 0.08);
+  color: inherit;
+  padding: 0.7rem 1rem;
+  font: inherit;
+  cursor: pointer;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+.gallery-shuffle-start:focus-visible,
+.gallery-shuffle-end button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.gallery-shuffle-start:disabled,
+.gallery-shuffle-end button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.gallery-shuffle-entry p,
+.gallery-shuffle-end p {
+  margin: 0;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.gallery-shuffle-end {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.gallery-shuffle-end button {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.8rem;
+}

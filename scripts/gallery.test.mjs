@@ -74,7 +74,8 @@ test("gallery discovery combines search, categories, and local favorites without
   assert.match(discovery, /publicTitle, artwork\.alt/);
   assert.match(discovery, /knownIds\.has\(id\)/);
   assert.match(discovery, /deception-world\.gallery-favorites\.v1/);
-  assert.match(component, /viewerWorksRef\.current = galleryViewerSequence/);
+  assert.match(component, /const sequence = galleryViewerSequence\(allArtworks, works, work\)/);
+  assert.match(component, /viewerWorksRef\.current = sequence/);
   assert.match(component, /GALLERY_ARTWORKS\.find\(\(work\) => work\.id === selectedId\)/);
 });
 
@@ -139,7 +140,7 @@ test("viewer exposes dialog names, keyboard dismissal, live position, and image 
   assert.match(component, /aria-labelledby="gallery-viewer-title"/);
   assert.match(component, /onCancel=\{/);
   assert.match(component, /aria-live="polite"/);
-  assert.match(viewerImage, /onError=\{\(\) => setStatus\("error"\)\}/);
+  assert.match(viewerImage, /onError=\{\(\) => setFullStatus\("error"\)\}/);
   assert.match(viewerImage, /work\.medium/);
   assert.match(viewerImage, /再読み込み/);
   assert.match(viewerImage, /2倍で鑑賞/);

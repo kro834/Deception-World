@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { GalleryCollectionArtwork } from "./gallery-community-client";
+import { galleryImagePresentation, type GalleryImageLoadStatus } from "./gallery-image-state";
 import { gallerySwipeStep } from "./gallery-viewer-state";
 
 /** Remounted per artwork: stale loads and zoom state cannot leak into the next work. */
@@ -14,19 +15,23 @@ export function GalleryViewerImage({
   navigationDisabled: boolean;
   onMove: (step: number) => void;
 }) {
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [fullStatus, setFullStatus] = useState<GalleryImageLoadStatus>("loading");
+  const [mediumStatus, setMediumStatus] = useState<GalleryImageLoadStatus>("loading");
   const [attempt, setAttempt] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef<{ x: number; y: number; at: number } | null>(null);
+  const hasSeparateMedium = work.medium !== work.full;
+  const { showingMedium, waitingForMedium, imageUnavailable, busy, canZoom } =
+    galleryImagePresentation(fullStatus, mediumStatus, hasSeparateMedium);
   const source = attempt
     ? `${work.full}${work.full.includes("?") ? "&" : "?"}retry=${attempt}`
     : work.full;
 
   useEffect(() => {
     const img = imageRef.current;
-    if (img?.complete) setStatus(img.naturalWidth ? "ready" : "error");
+    if (img?.complete) setFullStatus(img.naturalWidth ? "ready" : "error");
   }, [source]);
 
   useEffect(() => {
@@ -42,7 +47,7 @@ export function GalleryViewerImage({
 
   useEffect(() => {
     if (
-      status !== "ready" ||
+      fullStatus !== "ready" ||
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
     )
       return;
@@ -58,7 +63,7 @@ export function GalleryViewerImage({
       pending.forEach((img) => {
         img.removeAttribute("src");
       });
-  }, [neighbors, status]);
+  }, [neighbors, fullStatus]);
 
   return (
     <div className="gallery-viewer-image" data-zoomed={zoomed}>
@@ -69,7 +74,7 @@ export function GalleryViewerImage({
         <button
           type="button"
           className="gallery-viewer-close"
-          disabled={status !== "ready"}
+          disabled={!canZoom}
           aria-pressed={zoomed}
           onClick={() => {
             setZoomed((current) => !current);
@@ -81,7 +86,7 @@ export function GalleryViewerImage({
       <div
         className="gallery-image-viewport"
         ref={viewportRef}
-        aria-busy={status === "loading"}
+        aria-busy={busy}
         aria-describedby="gallery-image-help"
         tabIndex={zoomed ? 0 : -1}
         onKeyDown={(event) => {
@@ -122,37 +127,70 @@ export function GalleryViewerImage({
         }}
       >
         <div className="gallery-image-canvas">
-          {status === "loading" && (
-            <img className="gallery-image-preview" src={work.medium} alt="" aria-hidden="true" />
+          {hasSeparateMedium && fullStatus !== "ready" && (
+            <img
+              className="gallery-image-preview"
+              data-ready={mediumStatus === "ready"}
+              src={work.medium}
+              alt={showingMedium ? work.alt : ""}
+              aria-hidden={!showingMedium}
+              width={work.width}
+              height={work.height}
+              decoding="async"
+              draggable={false}
+              onLoad={() => setMediumStatus("ready")}
+              onError={() => setMediumStatus("error")}
+            />
           )}
           <img
             key={source}
             className="gallery-image-full"
-            data-ready={status === "ready"}
+            data-ready={fullStatus === "ready"}
             ref={imageRef}
             src={source}
-            alt={work.alt}
+            alt={fullStatus === "ready" ? work.alt : ""}
+            aria-hidden={fullStatus !== "ready"}
             width={work.width}
             height={work.height}
             decoding="async"
             draggable={false}
-            onLoad={() => setStatus("ready")}
-            onError={() => setStatus("error")}
+            onLoad={() => setFullStatus("ready")}
+            onError={() => setFullStatus("error")}
           />
         </div>
-        {status === "loading" && (
-          <p className="gallery-image-status" role="status">
-            画像を読み込んでいます…
+        {(fullStatus === "loading" || (fullStatus === "error" && waitingForMedium)) && (
+          <p className="gallery-image-status" data-preview-ready={showingMedium} role="status">
+            {showingMedium
+              ? "高画質画像を読み込んでいます…"
+              : fullStatus === "error"
+                ? "標準画像を読み込んでいます…"
+                : "画像を読み込んでいます…"}
           </p>
         )}
-        {status === "error" && (
-          <div className="gallery-image-error" role="alert">
-            <p>画像を読み込めませんでした。</p>
+        {fullStatus === "error" && showingMedium && (
+          <div className="gallery-image-fallback" role="status">
+            <p>高画質画像を読み込めませんでした。標準画像を表示しています。</p>
             <button
               type="button"
               className="gallery-viewer-close"
               onClick={() => {
-                setStatus("loading");
+                setFullStatus("loading");
+                setAttempt((current) => current + 1);
+              }}
+            >
+              高画質を再読み込み
+            </button>
+          </div>
+        )}
+        {imageUnavailable && (
+          <div className="gallery-image-error" role="alert">
+            <p>画像を読み込めませんでした。</p>
+            <p className="gallery-image-description">{work.alt}</p>
+            <button
+              type="button"
+              className="gallery-viewer-close"
+              onClick={() => {
+                setFullStatus("loading");
                 setAttempt((current) => current + 1);
               }}
             >

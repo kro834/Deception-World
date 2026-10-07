@@ -35,6 +35,7 @@ import {
 } from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
 import { GalleryViewerImage } from "./gallery-viewer-image";
+import { availableGalleryDeck, shuffleGalleryDeck } from "./gallery-shuffle";
 import { GalleryShareControl } from "./gallery-share-control";
 import { GallerySearchControls } from "./gallery-search-controls";
 import { GalleryBackgroundControl, GalleryDisplaySettings } from "./gallery-display-settings";
@@ -52,6 +53,7 @@ import {
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
+  type GalleryViewerMode,
 } from "./gallery-viewer-state";
 import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
 import {
@@ -136,6 +138,7 @@ export function GalleryPage() {
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
+  const viewerModeRef = useRef<GalleryViewerMode>("normal");
   const allArtworksRef = useRef<GalleryCollectionArtwork[]>([]);
   const communityWorks = useMemo(
     () => communityPosts.map(communityPostToArtwork),
@@ -161,18 +164,33 @@ export function GalleryPage() {
     GALLERY_ARTWORKS.find((work) => work.id === selectedId) ??
     communityWorks.find((work) => work.id === selectedId) ??
     null;
-  const navigationSnapshot = viewerWorksRef.current
-    .map((work) => allArtworks.find((current) => current.id === work.id))
-    .filter((work): work is GalleryCollectionArtwork => Boolean(work));
-  const viewerWorks = navigationSnapshot.length ? navigationSnapshot : works;
+  const navigationSnapshot = availableGalleryDeck(viewerWorksRef.current, allArtworks);
+  const viewerWorks =
+    viewerModeRef.current === "shuffle"
+      ? navigationSnapshot
+      : navigationSnapshot.length
+        ? navigationSnapshot
+        : works;
   const selectedIndex = viewerWorks.findIndex((work) => work.id === selectedId);
+  const previousId = galleryAdjacentId(
+    viewerWorks.map((work) => work.id),
+    selectedId ?? "",
+    -1,
+    viewerModeRef.current,
+  );
+  const nextId = galleryAdjacentId(
+    viewerWorks.map((work) => work.id),
+    selectedId ?? "",
+    1,
+    viewerModeRef.current,
+  );
   const viewerOpen = selected !== null;
   const neighbors = useMemo(() => {
     if (viewerWorksRef.current.length < 2 || !selectedId) return [];
-    const ids = viewerWorksRef.current.map((work) => work.id);
+    const ids = availableGalleryDeck(viewerWorksRef.current, allArtworks).map((work) => work.id);
     const adjacent = new Set([
-      galleryAdjacentId(ids, selectedId, -1),
-      galleryAdjacentId(ids, selectedId, 1),
+      galleryAdjacentId(ids, selectedId, -1, viewerModeRef.current),
+      galleryAdjacentId(ids, selectedId, 1, viewerModeRef.current),
     ]);
     return allArtworks.filter((work) => adjacent.has(work.id));
     // The sequence is a session snapshot; only its IDs and the selected work matter.
@@ -451,6 +469,7 @@ export function GalleryPage() {
           id: viewerIdRef.current,
           ids: viewerWorksRef.current.map((work) => work.id),
           position: readingAt,
+          mode: viewerModeRef.current,
         },
       });
       viewerEntryRef.current = true;
@@ -562,6 +581,16 @@ export function GalleryPage() {
         return;
       }
       if (plan.kind === "waiting") {
+        const activeRecord = readGalleryViewerRecord(
+          (here.state as { galleryViewer?: unknown }).galleryViewer,
+        );
+        // A background refresh must leave an already open finite session intact.
+        if (
+          viewerActiveRef.current &&
+          activeRecord?.mode === "shuffle" &&
+          viewerIdRef.current === activeRecord.id
+        )
+          return;
         setLinkNotice(plan.failed ? "error" : "waiting");
         return;
       }
@@ -605,11 +634,14 @@ export function GalleryPage() {
         plan.cleanHref !== null
           ? null
           : document.querySelector<HTMLElement>(
-              `[data-gallery-artwork="${CSS.escape(record.id)}"] .gallery-work-open`,
+              record.mode === "shuffle"
+                ? ".gallery-shuffle-start"
+                : `[data-gallery-artwork="${CSS.escape(record.id)}"] .gallery-work-open`,
             );
       window.scrollTo({ ...record.position, behavior: "instant" });
       openerTopRef.current = openerRef.current ? galleryLayoutTop(openerRef.current) : null;
       viewerWorksRef.current = sequence;
+      viewerModeRef.current = record.mode ?? "normal";
       viewerIdRef.current = record.id;
       viewerEntryRef.current = plan.cleanHref === null;
       setLinkNotice(null);
@@ -631,10 +663,14 @@ export function GalleryPage() {
     [],
   );
 
-  const openWork = (event: MouseEvent<HTMLAnchorElement>, work: GalleryCollectionArtwork) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-      return;
-    event.preventDefault();
+  const openViewingSession = (
+    opener: HTMLElement,
+    keyboard: boolean,
+    sequence: GalleryCollectionArtwork[],
+    mode: GalleryViewerMode,
+    work = sequence[0],
+  ) => {
+    if (!work) return;
     finishReturnRef.current?.();
     const here = router.history.location;
     if (readGalleryArtworkLink(here.href).kind !== "none") {
@@ -651,13 +687,22 @@ export function GalleryPage() {
     }
     setLinkNotice(null);
     readingAtRef.current = { top: window.scrollY, left: window.scrollX };
-    openerRef.current = event.currentTarget;
-    openerTopRef.current = galleryLayoutTop(event.currentTarget);
-    restoreFocusRef.current = event.detail === 0;
-    viewerWorksRef.current = galleryViewerSequence(allArtworks, works, work);
+    openerRef.current = opener;
+    openerTopRef.current = galleryLayoutTop(opener);
+    restoreFocusRef.current = keyboard;
+    viewerWorksRef.current = sequence;
+    viewerModeRef.current = mode;
     viewerIdRef.current = work.id;
     resetEditor();
     setSelectedId(work.id);
+  };
+  const openWork = (event: MouseEvent<HTMLAnchorElement>, work: GalleryCollectionArtwork) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
+    event.preventDefault();
+    const sequence = galleryViewerSequence(allArtworks, works, work);
+    // Opening a card keeps its position in the ordinary circular sequence.
+    openViewingSession(event.currentTarget, event.detail === 0, sequence, "normal", work);
   };
   const refreshNow = async () => {
     if (refreshing) return;
@@ -684,13 +729,16 @@ export function GalleryPage() {
     dialogRef.current?.close();
     setSelectedId(null);
     viewerWorksRef.current = [];
+    viewerIdRef.current = null;
+    viewerModeRef.current = "normal";
   };
   const moveWork = (step: number) => {
     if (editing || confirmDelete || communityBusy) return;
     const next = galleryAdjacentId(
-      viewerWorks.map((work) => work.id),
-      selectedId ?? "",
+      availableGalleryDeck(viewerWorksRef.current, allArtworksRef.current).map((work) => work.id),
+      viewerIdRef.current ?? "",
       step,
+      viewerModeRef.current,
     );
     if (next) {
       resetEditor();
@@ -706,6 +754,34 @@ export function GalleryPage() {
           galleryViewer: { ...record, id: next },
         });
     }
+  };
+  const remixViewingSession = () => {
+    if (editing || confirmDelete || communityBusy || viewerModeRef.current !== "shuffle") return;
+    const deck = shuffleGalleryDeck(
+      availableGalleryDeck(viewerWorksRef.current, allArtworksRef.current),
+      viewerIdRef.current,
+    );
+    if (deck.length < 2) return;
+    // The end-of-deck action disappears after mixing; retain focus in the modal.
+    dialogRef.current?.focus({ preventScroll: true });
+    viewerWorksRef.current = deck;
+    viewerIdRef.current = deck[0].id;
+    resetEditor();
+    setSelectedId(deck[0].id);
+    const here = router.history.location;
+    const record = readGalleryViewerRecord(
+      (here.state as { galleryViewer?: unknown }).galleryViewer,
+    );
+    if (record)
+      router.history.replace(galleryArtworkHref(here.href, deck[0].id), {
+        ...here.state,
+        galleryViewer: {
+          ...record,
+          id: deck[0].id,
+          ids: deck.map((work) => work.id),
+          mode: "shuffle",
+        },
+      });
   };
   const changeFavorite = (id: string) => {
     try {
@@ -1217,6 +1293,24 @@ export function GalleryPage() {
               みんなの投稿<span>{communityWorks.length}</span>
             </button>
           </nav>
+          <div className="gallery-shuffle-entry">
+            <button
+              type="button"
+              className="gallery-shuffle-start"
+              disabled={works.length === 0}
+              onClick={(event) =>
+                openViewingSession(
+                  event.currentTarget,
+                  event.detail === 0,
+                  shuffleGalleryDeck(works),
+                  "shuffle",
+                )
+              }
+            >
+              この{works.length}作品から、おまかせで鑑賞
+            </button>
+            <p>一枚から気軽に、好きなところまで。</p>
+          </div>
           <GalleryDisplaySettings
             value={display.preferences}
             onChange={display.update}
@@ -1614,7 +1708,7 @@ export function GalleryPage() {
             <footer className="gallery-viewer-footer">
               <button
                 type="button"
-                disabled={editing || confirmDelete || communityBusy || viewerWorks.length < 2}
+                disabled={editing || confirmDelete || communityBusy || !previousId}
                 onClick={() => moveWork(-1)}
               >
                 ← 前の作品
@@ -1624,12 +1718,26 @@ export function GalleryPage() {
               </p>
               <button
                 type="button"
-                disabled={editing || confirmDelete || communityBusy || viewerWorks.length < 2}
+                disabled={editing || confirmDelete || communityBusy || !nextId}
                 onClick={() => moveWork(1)}
               >
                 次の作品 →
               </button>
             </footer>
+            {viewerModeRef.current === "shuffle" && selectedIndex >= 0 && !nextId && (
+              <div className="gallery-shuffle-end" role="status">
+                <p>この順番の最後の作品です</p>
+                {viewerWorks.length > 1 && (
+                  <button
+                    type="button"
+                    disabled={editing || confirmDelete || communityBusy}
+                    onClick={remixViewingSession}
+                  >
+                    もう一度混ぜる
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </dialog>
