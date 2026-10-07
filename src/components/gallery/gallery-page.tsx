@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -1178,6 +1179,7 @@ export function GalleryPage() {
             <label className="gallery-order">
               <span>並び順</span>
               <select
+                {...gallerySelectFocus}
                 value={order}
                 onChange={(event) => setOrder(event.target.value as "number" | "newest")}
               >

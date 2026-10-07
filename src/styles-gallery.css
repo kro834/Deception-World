@@ -525,6 +525,16 @@ body:has(.gallery-page) {
   font-size: 12px;
 }
 
+select[data-gallery-select="true"]:not([data-pointer-focus="true"]):focus-visible {
+  outline: 2px solid #f0d18d;
+  outline-offset: 3px;
+}
+
+select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .gallery-order select,
 .gallery-reset-filter {
   min-height: 46px;
