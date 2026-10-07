@@ -1,4 +1,20 @@
 /* Contemporary museum presentation for the visual collection route. */
+.gallery-tour-invitation {
+  margin: 22px 0 0;
+  line-height: 1.8;
+}
+.gallery-tour-invitation a {
+  display: inline-block;
+  padding: 8px 0;
+  color: var(--gallery-brass);
+  font-size: 15px;
+}
+.gallery-tour-invitation > span {
+  display: block;
+  color: var(--gallery-muted);
+  font-size: 12px;
+}
+
 html:has(.gallery-page),
 body:has(.gallery-page) {
   background-color: #171614;

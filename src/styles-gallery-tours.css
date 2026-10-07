@@ -1,0 +1,108 @@
+.gallery-tours-page {
+  --gallery-tour-accent: #d3b985;
+}
+.gallery-tours-main {
+  width: min(1360px, 100%);
+  margin: 0 auto;
+  padding: clamp(26px, 4vw, 64px) clamp(20px, 4vw, 56px);
+}
+.gallery-tours-main h1 {
+  outline: none;
+}
+.gallery-tours-main :is(button, input, select) {
+  font: inherit;
+}
+.gallery-tours-main button {
+  cursor: pointer;
+}
+.gallery-tours-main button:disabled {
+  cursor: default;
+}
+.gallery-tours-main :where(p, h1, h2, h3) {
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+.gallery-tour-sharing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.gallery-tour-sharing button {
+  min-height: 44px;
+  border: 1px solid var(--gallery-rule);
+  background: transparent;
+  padding: 10px 16px;
+  color: var(--gallery-ivory);
+}
+.gallery-tour-sharing button:hover {
+  background: #ffffff09;
+  border-color: var(--gallery-brass);
+}
+.gallery-tour-sharing :is(span, input) {
+  font-size: 12px;
+  color: var(--gallery-muted);
+  line-height: 1.7;
+}
+.gallery-tour-sharing input {
+  width: 100%;
+  min-height: 44px;
+  background: #171614;
+  border: 1px solid var(--gallery-rule);
+  padding: 8px;
+}
+.gallery-tour-storage-message {
+  margin: 18px 0;
+  color: var(--gallery-muted);
+  line-height: 1.8;
+  font-size: 13px;
+}
+.gallery-tours-colophon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: min(1248px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 28px 0 max(36px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--gallery-rule);
+  color: var(--gallery-muted);
+}
+.gallery-tours-colophon p {
+  max-width: 62ch;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.gallery-tours-colophon a {
+  flex-shrink: 0;
+  font-size: 13px;
+  padding: 12px 0;
+}
+@media (max-width: 640px) {
+  .gallery-tours-main {
+    padding-inline: 20px;
+  }
+  .gallery-tours-colophon {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .gallery-tours-page .gallery-topbar-actions > a {
+    display: inline-flex;
+    font-size: 11px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .gallery-tours-page .gallery-topbar {
+    gap: 12px;
+  }
+  .gallery-tours-page .gallery-brand {
+    font-size: 12px;
+  }
+  .gallery-tours-page .gallery-brand span {
+    font-size: 8px;
+  }
+}
