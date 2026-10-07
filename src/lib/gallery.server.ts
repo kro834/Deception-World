@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   GalleryError,
-  GALLERY_MAX_EDGE,
   GALLERY_MAX_IMAGE_BYTES,
   GALLERY_MAX_INPUT_BYTES,
   GALLERY_MAX_PIXELS,
@@ -70,7 +69,7 @@ export function galleryEnvironment() {
 }
 
 let clientCache: { url: string; key: string; client: SupabaseClient } | undefined;
-async function galleryClient(): Promise<SupabaseClient> {
+export async function galleryClient(): Promise<SupabaseClient> {
   if (typeof window !== "undefined")
     throw new Error("Gallery server module cannot run in a browser.");
   const config = galleryEnvironment();
@@ -89,7 +88,7 @@ async function galleryClient(): Promise<SupabaseClient> {
   return client;
 }
 
-async function galleryUser(
+export async function galleryUser(
   request: Request,
   client: SupabaseClient,
   required = true,
@@ -114,10 +113,27 @@ export function galleryResponse(body: unknown, status = 200): Response {
   });
 }
 
+class GalleryTitleRateError extends GalleryError {
+  readonly retryAfterSeconds: number;
+  constructor(seconds: number) {
+    const wait = Number.isFinite(seconds) ? Math.min(60, Math.max(1, Math.ceil(seconds))) : 3;
+    super(429, `作品名を続けて保存しています。${wait}秒ほど待ってから再度保存してください。`);
+    this.retryAfterSeconds = wait;
+  }
+}
+
 export async function galleryRoute(handler: () => Promise<Response>): Promise<Response> {
   try {
     return await handler();
   } catch (error) {
+    if (error instanceof GalleryTitleRateError) {
+      const response = galleryResponse(
+        { error: error.message, retryAfterSeconds: error.retryAfterSeconds },
+        error.status,
+      );
+      response.headers.set("retry-after", String(error.retryAfterSeconds));
+      return response;
+    }
     if (error instanceof GalleryError)
       return galleryResponse(
         { error: error.message, ...(error.current ? { current: error.current } : {}) },
@@ -136,15 +152,24 @@ export async function getGalleryConfig(): Promise<Response> {
   if (!config) return galleryResponse({ ready: false });
   try {
     const client = await galleryClient();
-    const { error } = await client.from("gallery_posts").select("id").limit(1);
-    if (error) return galleryResponse({ ready: false });
-    return galleryResponse({ ready: true, url: config.url, publishableKey: config.publishableKey });
+    const [{ error }, protocol] = await Promise.all([
+      client.from("gallery_posts").select("id").limit(1),
+      client.rpc("gallery_upload_protocol_ready"),
+    ]);
+    if (error || protocol.error || protocol.data !== true) return galleryResponse({ ready: false });
+    return galleryResponse({
+      ready: true,
+      url: config.url,
+      publishableKey: config.publishableKey,
+      uploadProtocol: 2,
+      maxFileBytes: 19 * 1024 * 1024,
+    });
   } catch {
     return galleryResponse({ ready: false });
   }
 }
 
-type PostRow = {
+export type PostRow = {
   id: string;
   sequence: number;
   owner_id: string;
@@ -154,8 +179,9 @@ type PostRow = {
   created_at: string;
   deleted_at: string | null;
 };
-type RpcResult = {
+export type RpcResult = {
   error?: string;
+  retry_after?: number;
   current?: { title: string; version: number };
   post?: PostRow;
   title?: string;
@@ -163,7 +189,7 @@ type RpcResult = {
   ok?: boolean;
 };
 
-async function rpc(
+export async function rpc(
   client: SupabaseClient,
   name: string,
   parameters: Record<string, unknown>,
@@ -172,12 +198,22 @@ async function rpc(
   if (error || !data) throw new GalleryError(503, unavailableMessage);
   const result = data as RpcResult;
   if (result.error) {
+    if (result.error === "title_rate") throw new GalleryTitleRateError(result.retry_after ?? 3);
     const errors: Record<string, { status: number; message: string }> = {
       auth: {
         status: 401,
         message: "操作の準備ができませんでした。ページを読み直してお試しください。",
       },
       input: { status: 400, message: "入力を確認してください。" },
+      busy: { status: 409, message: "画像を処理しています。少し待ってから再度お試しください。" },
+      expired: {
+        status: 410,
+        message: "画像投稿の有効期限が切れました。画像を選び直してください。",
+      },
+      upload_conflict: {
+        status: 409,
+        message: "保存中の画像と一致しません。時間をおいてお試しください。",
+      },
       forbidden: {
         status: 403,
         message: "投稿の削除・復元は投稿したブラウザーから行ってください。",
@@ -211,7 +247,7 @@ async function rpc(
 const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
 const SIGNED_URL_CACHE_MS = 15 * 60 * 1000;
 const SIGNED_URL_CACHE_MAX = 1000;
-async function galleryPosts(client: SupabaseClient, rows: PostRow[], userId: string | null) {
+export async function galleryPosts(client: SupabaseClient, rows: PostRow[], userId: string | null) {
   if (!rows.length) return [];
   const now = Date.now();
   const namespace = galleryEnvironment()?.url ?? "";
@@ -329,7 +365,7 @@ export async function getGallery(request: Request): Promise<Response> {
 
 export async function sanitizeGalleryImage(bytes: Uint8Array, type: string) {
   if (!bytes.length || bytes.length > GALLERY_MAX_INPUT_BYTES)
-    throw new GalleryError(413, "元の画像は1枚10MBまでです。");
+    throw new GalleryError(413, "元の画像は1枚19MBまでです。");
   const format = galleryImageFormat(bytes, type);
   if (galleryImageIsAnimated(bytes, format))
     throw new GalleryError(400, "アニメーション画像は投稿できません。静止画像を選んでください。");
@@ -351,20 +387,37 @@ export async function sanitizeGalleryImage(bytes: Uint8Array, type: string) {
       throw new GalleryError(400, "画像は4,000万画素までです。ファイルを確認してください。");
     if ((metadata.pages ?? 1) > 1)
       throw new GalleryError(400, "アニメーション画像は投稿できません。静止画像を選んでください。");
-    // The default sharp output omits EXIF/ICC/XMP and all original metadata.
-    const base = image
-      .rotate()
-      .resize(GALLERY_MAX_EDGE, GALLERY_MAX_EDGE, { fit: "inside", withoutEnlargement: true })
-      .timeout({ seconds: 10 });
-    for (const quality of [84, 68, 50]) {
-      const { data, info } = await base
-        .clone()
-        .webp({ quality, effort: 4 })
-        .toBuffer({ resolveWithObject: true });
-      if (data.byteLength <= GALLERY_MAX_IMAGE_BYTES)
-        return { bytes: data, width: info.width, height: info.height };
-    }
-    throw new GalleryError(413, "投稿用の画像が3MBを超えました。小さな画像でお試しください。");
+    // Gain maps use cross-container offsets and rendering XMP. Do not silently
+    // discard HDR or expose its original private metadata via an unsafe fallback.
+    if (metadata.gainMap)
+      throw new GalleryError(
+        400,
+        "HDR補助画像付きJPEGは画質を保って処理できません。通常のJPEG・PNG・WebPで投稿してください。",
+      );
+    // stats forces a full decode (metadata alone does not reject truncated files).
+    // No raster buffer, resize, colour transform or lossy encoder is used.
+    await image.timeout({ seconds: 25 }).stats();
+    const { optimizeGalleryLosslessly } = await import("./gallery-lossless.server.ts");
+    const optimized = await optimizeGalleryLosslessly(
+      bytes,
+      format,
+      metadata.orientation ?? 1,
+      metadata.width,
+      metadata.height,
+    );
+    if (optimized.byteLength > GALLERY_MAX_IMAGE_BYTES)
+      throw new GalleryError(
+        413,
+        "画質を保った投稿画像が19MBを超えました。別の画像でお試しください。",
+      );
+    const swapped = (metadata.orientation ?? 1) >= 5 && (metadata.orientation ?? 1) <= 8;
+    return {
+      bytes: optimized,
+      width: swapped ? metadata.height : metadata.width,
+      height: swapped ? metadata.width : metadata.height,
+      format,
+      contentType: format === "jpeg" ? "image/jpeg" : `image/${format}`,
+    };
   } catch (error) {
     if (error instanceof GalleryError) throw error;
     throw new GalleryError(
@@ -403,12 +456,17 @@ export async function postGallery(request: Request): Promise<Response> {
     p_width: image.width,
     p_height: image.height,
     p_bytes: image.bytes.byteLength,
+    p_format: image.format,
   });
   if (!reservation.post) throw new GalleryError(503, unavailableMessage);
   const path = reservation.post.object_path;
   const { error: uploadError } = await client.storage
     .from(BUCKET)
-    .upload(path, image.bytes, { contentType: "image/webp", cacheControl: "3600", upsert: false });
+    .upload(path, image.bytes, {
+      contentType: image.contentType,
+      cacheControl: "3600",
+      upsert: false,
+    });
   if (uploadError) {
     // A failed network response may still have saved an object. Keep its quota
     // reservation unless storage confirms removal, preventing orphan bypass.

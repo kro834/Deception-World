@@ -58,6 +58,41 @@ test("exhibits start numbered and visitor edits publish versioned shared titles 
   assert.match(component, /role="alert"/);
 });
 
+test("title saves apply their versioned response locally without a second gallery fetch", () => {
+  const publishMatch = component.match(
+    /const publishTitle = async \(\) => \{[\s\S]*?\n\x20{2}\};\n\n\x20{2}const exhibition/,
+  );
+  const publish = publishMatch?.[0];
+  assert.ok(publish);
+  assert.match(publish, /updateCommunityGalleryTitle\([\s\S]*?editingVersion/);
+  assert.match(publish, /mergeCommunityGalleryTitles\(current, \{ \[work\.id\]: entry \}\)/);
+  assert.doesNotMatch(publish, /communityReloadRef/);
+  assert.match(publish, /error\.status === 409[\s\S]*?error\.status === 429/);
+  assert.match(publish, /retryAfterSeconds/);
+  assert.match(component, /mergeCommunityGalleryTitles\(current, collection\.titles\)/);
+  assert.match(component, /maxLength=\{COMMUNITY_GALLERY_TITLE_LIMIT\}/);
+  assert.match(component, /ICC色プロファイルは保持/);
+  assert.match(component, /画像の向き情報だけを残し、その他のEXIF・GPS・XMPの撮影情報は除去/);
+  assert.match(component, /プロファイル内の説明情報は残る場合があります/);
+  assert.match(component, /圧縮で小さくならない場合も、同じ画質のまま保存/);
+  assert.match(component, /HDR補助画像付きJPEGには対応していません/);
+  assert.match(component, /下書きを最新versionで再試行/);
+  assert.match(component, /最新タイトルを使う/);
+  assert.match(component, /setDraft\(titleConflict\.title\)/);
+  assert.match(
+    component,
+    /const resolveTitleConflict = \(useLatestTitle: boolean\)[\s\S]*?if \(useLatestTitle\) setDraft\(titleConflict\.title\)/,
+  );
+  assert.match(
+    component,
+    /onClick=\{\(\) => resolveTitleConflict\(false\)\}[\s\S]*?下書きを最新versionで再試行/,
+  );
+  assert.match(
+    component,
+    /onClick=\{\(\) => resolveTitleConflict\(true\)\}[\s\S]*?最新タイトルを使う/,
+  );
+});
+
 test("gallery discovery combines search, categories, and local favorites without default titles", () => {
   assert.match(component, /filterGalleryArtworks\(allArtworks/);
   assert.match(searchControls, /type="search"/);

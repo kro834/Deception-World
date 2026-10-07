@@ -175,6 +175,8 @@ const galleryConfig = () => ({
   ready: true,
   url: "https://gallery.supabase.co",
   publishableKey: "sb_publishable_public_test",
+  uploadProtocol: 2,
+  maxFileBytes: 19 * 1024 * 1024,
 });
 const galleryCollection = () => ({
   posts: [
@@ -232,6 +234,21 @@ async function sharedGalleryReport({
   });
   return { report, seen };
 }
+
+test("shared gallery release gate accepts each lossless upload format with the exact signed object path", async () => {
+  for (const format of ["jpeg", "png", "webp"]) {
+    const collection = galleryCollection();
+    collection.posts[0].url =
+      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${format}?token=public-image-token`;
+    assert.equal((await sharedGalleryReport({ collection })).report.ok, true, format);
+  }
+  for (const suffix of ["jpg", "gif", "svg", "png/extra", "png%2fextra"]) {
+    const collection = galleryCollection();
+    collection.posts[0].url =
+      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${suffix}?token=public-image-token`;
+    assert.equal((await sharedGalleryReport({ collection })).report.ok, false, suffix);
+  }
+});
 
 test("new release identity requires shared gallery readiness and preserves artwork identity", () => {
   const source = readFileSync(
@@ -347,6 +364,13 @@ test("shared-gallery gate rejects unready config, secret keys and unsafe URLs wi
     `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ role })).toString("base64url")}.signature`;
   for (const config of [
     { ready: false },
+    {
+      ready: true,
+      url: "https://gallery.supabase.co",
+      publishableKey: "sb_publishable_public_test",
+    },
+    { ...galleryConfig(), uploadProtocol: 1 },
+    { ...galleryConfig(), maxFileBytes: 20 * 1024 * 1024 },
     { ...galleryConfig(), publishableKey: "sb_secret_never_print_me" },
     { ...galleryConfig(), publishableKey: jwt("service_role") },
     { ...galleryConfig(), secretKey: "never_print_me" },
@@ -378,7 +402,10 @@ test("shared-gallery gate rejects malformed, unavailable or private public data"
     { posts: [post], titles: { g79: { title: "stale", version: -1 } } },
     { posts: [{ ...post, ownerId: "private-session-id" }], titles: valid.titles },
     { posts: [{ ...post, canDelete: true }], titles: valid.titles },
-    { posts: [{ ...post, width: 2401 }], titles: valid.titles },
+    { posts: [{ ...post, width: 40_000_001, height: 1 }], titles: valid.titles },
+    { posts: [{ ...post, width: 10_000, height: 4001 }], titles: valid.titles },
+    { posts: [{ ...post, width: Number.MAX_SAFE_INTEGER, height: 1 }], titles: valid.titles },
+    { posts: [{ ...post, width: 5000.5, height: 8000 }], titles: valid.titles },
     { posts: [{ ...post, deletedAt: "2026-10-06T00:00:00.000Z" }], titles: valid.titles },
     { posts: [{ ...post, url: "javascript:alert(1)" }], titles: valid.titles },
     { posts: [{ ...post, url: "https://other.example/image.webp" }], titles: valid.titles },
@@ -396,6 +423,22 @@ test("shared-gallery gate rejects malformed, unavailable or private public data"
     { networkErrorPath: "/api/gallery" },
   ])
     assert.equal((await sharedGalleryReport(failure)).report.ok, false);
+});
+
+test("shared-gallery gate accepts exact 40 MP originals without a 2400px edge cap", async () => {
+  const valid = galleryCollection();
+  const post = valid.posts[0];
+  for (const dimensions of [
+    { width: 5000, height: 8000 },
+    { width: 8000, height: 5000 },
+    { width: 40_000_000, height: 1 },
+  ]) {
+    const collection = {
+      ...valid,
+      posts: [{ ...post, ...dimensions }],
+    };
+    assert.equal((await sharedGalleryReport({ collection })).report.ok, true);
+  }
 });
 
 test("shared-gallery gate accepts all 113 static titles together with the 1000-post quota", async () => {

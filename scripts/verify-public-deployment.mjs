@@ -4,6 +4,9 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const runFile = promisify(execFile);
+const MAX_GALLERY_IMAGE_PIXELS = 40_000_000;
+const GALLERY_UPLOAD_PROTOCOL = 2;
+const GALLERY_MAX_FILE_BYTES = 19 * 1024 * 1024;
 
 // The CLI supplies authenticated protection access without disabling protection.
 export async function vercelCurlFetch(url) {
@@ -163,10 +166,11 @@ function validPublicGalleryCollection(collection, storageOrigin) {
       sequences.has(post.sequence) ||
       !Number.isSafeInteger(post.width) ||
       post.width < 1 ||
-      post.width > 2400 ||
       !Number.isSafeInteger(post.height) ||
       post.height < 1 ||
-      post.height > 2400 ||
+      // Divide after validating height so even hostile safe-integer dimensions
+      // cannot overflow or lose precision when checking the 40 MP ceiling.
+      post.width > Math.floor(MAX_GALLERY_IMAGE_PIXELS / post.height) ||
       typeof post.createdAt !== "string" ||
       !Number.isFinite(Date.parse(post.createdAt)) ||
       post.canDelete !== false ||
@@ -180,7 +184,10 @@ function validPublicGalleryCollection(collection, storageOrigin) {
         image.protocol !== "https:" ||
         image.username ||
         image.password ||
-        image.pathname !== `/storage/v1/object/sign/gallery-images/${post.id}.webp` ||
+        !["jpeg", "png", "webp"].some(
+          (format) =>
+            image.pathname === `/storage/v1/object/sign/gallery-images/${post.id}.${format}`,
+        ) ||
         !image.searchParams.get("token")
       )
         return false;
@@ -222,8 +229,13 @@ async function verifySharedGallery(fetchImpl, origin, bypassToken, timeoutMs) {
       if (path === "/api/gallery/config") {
         if (
           !object(body) ||
-          Object.keys(body).some((key) => !["ready", "url", "publishableKey"].includes(key)) ||
+          Object.keys(body).some(
+            (key) =>
+              !["ready", "url", "publishableKey", "uploadProtocol", "maxFileBytes"].includes(key),
+          ) ||
           body.ready !== true ||
+          body.uploadProtocol !== GALLERY_UPLOAD_PROTOCOL ||
+          body.maxFileBytes !== GALLERY_MAX_FILE_BYTES ||
           !safeGalleryPublicKey(body.publishableKey)
         )
           throw new Error("Shared gallery config is unready or contains unsafe credentials");

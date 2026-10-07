@@ -1,10 +1,10 @@
 import type { GalleryArtwork } from "./gallery-data";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
-export const COMMUNITY_GALLERY_MAX_FILE_BYTES = 10 * 1024 * 1024;
+export const COMMUNITY_GALLERY_MAX_FILE_BYTES = 19 * 1024 * 1024;
 export const COMMUNITY_GALLERY_MAX_PIXELS = 40_000_000;
-export const COMMUNITY_GALLERY_MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
-export const COMMUNITY_GALLERY_MAX_EDGE = 2400;
+export const COMMUNITY_GALLERY_MAX_UPLOAD_BYTES = COMMUNITY_GALLERY_MAX_FILE_BYTES;
+export const COMMUNITY_GALLERY_TITLE_LIMIT = 120;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 let authClientPromise: Promise<SupabaseClient> | undefined;
 let authConfigKey = "";
@@ -35,7 +35,22 @@ export type CommunityGalleryConfig = {
   ready: boolean;
   url?: string;
   publishableKey?: string;
+  uploadProtocol?: number;
+  maxFileBytes?: number;
 };
+
+/** Merge snapshots without allowing an in-flight older read to undo a saved title version. */
+export function mergeCommunityGalleryTitles(
+  current: CommunityGalleryTitles,
+  incoming: CommunityGalleryTitles,
+): CommunityGalleryTitles {
+  const merged = { ...current };
+  for (const [id, entry] of Object.entries(incoming)) {
+    const previous = merged[id];
+    if (!previous || entry.version >= previous.version) merged[id] = entry;
+  }
+  return merged;
+}
 
 export function isCommunityGalleryId(id: string): boolean {
   return /^u-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
@@ -52,7 +67,7 @@ export function galleryNumberFor(
 export function validateCommunityImageFile(file: Pick<Blob, "size" | "type">): void {
   if (!imageTypes.has(file.type)) throw new Error("JPEG・PNG・WebPの画像を選んでください。");
   if (file.size <= 0) throw new Error("空のファイルは投稿できません。");
-  if (file.size > COMMUNITY_GALLERY_MAX_FILE_BYTES) throw new Error("元の画像は1枚10MBまでです。");
+  if (file.size > COMMUNITY_GALLERY_MAX_FILE_BYTES) throw new Error("元の画像は1枚19MBまでです。");
 }
 
 export function validateCommunityImageDimensions(width: number, height: number): void {
@@ -160,79 +175,28 @@ export function readCommunityImageDimensions(
   return { width, height };
 }
 
-function canvasBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error("画像を投稿用に変換できませんでした。"))),
-      "image/webp",
-      quality,
-    );
-  });
-}
-
+/** Preserve original bytes; decoding and reversible optimization happen on the server. */
 export async function prepareCommunityUpload(file: File): Promise<File> {
   validateCommunityImageFile(file);
   readCommunityImageDimensions(new Uint8Array(await file.arrayBuffer()), file.type);
-  const url = URL.createObjectURL(file);
-  const image = new Image();
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const finish = () => {
-        window.clearTimeout(timer);
-        image.onload = null;
-        image.onerror = null;
-      };
-      const timer = window.setTimeout(() => {
-        finish();
-        image.src = "";
-        reject(new Error("画像の読み込みに時間がかかっています。別の画像でお試しください。"));
-      }, 15_000);
-      image.onload = () => {
-        finish();
-        resolve();
-      };
-      image.onerror = () => {
-        finish();
-        reject(new Error("画像を読み込めませんでした。ファイルを確認してください。"));
-      };
-      image.src = url;
-    });
-    validateCommunityImageDimensions(image.naturalWidth, image.naturalHeight);
-    const scale = Math.min(
-      1,
-      COMMUNITY_GALLERY_MAX_EDGE / Math.max(image.naturalWidth, image.naturalHeight),
-    );
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("このブラウザーでは画像を変換できません。");
-    try {
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      let blob = await canvasBlob(canvas, 0.9);
-      if (blob.size > COMMUNITY_GALLERY_MAX_UPLOAD_BYTES) blob = await canvasBlob(canvas, 0.76);
-      if (blob.size > COMMUNITY_GALLERY_MAX_UPLOAD_BYTES) blob = await canvasBlob(canvas, 0.6);
-      if (blob.size > COMMUNITY_GALLERY_MAX_UPLOAD_BYTES)
-        throw new Error("投稿用の画像が3MBを超えました。小さな画像でお試しください。");
-      if (!imageTypes.has(blob.type))
-        throw new Error("このブラウザーでは投稿用の画像に変換できません。");
-      return new File([blob], "gallery-upload.webp", { type: blob.type });
-    } finally {
-      canvas.width = canvas.height = 0;
-    }
-  } finally {
-    image.src = "";
-    URL.revokeObjectURL(url);
-  }
+  const extension = file.type === "image/jpeg" ? "jpg" : file.type.slice(6);
+  return new File([file], `gallery-upload.${extension}`, { type: file.type });
 }
 
 export class GalleryRequestError extends Error {
   status: number;
   current?: CommunityGalleryTitle;
-  constructor(message: string, status: number, current?: CommunityGalleryTitle) {
+  retryAfterSeconds?: number;
+  constructor(
+    message: string,
+    status: number,
+    current?: CommunityGalleryTitle,
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.status = status;
     this.current = current;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -241,7 +205,7 @@ function isCommunityGalleryTitle(value: unknown): value is CommunityGalleryTitle
   const entry = value as Partial<CommunityGalleryTitle>;
   return (
     typeof entry.title === "string" &&
-    entry.title.length <= 100 &&
+    entry.title.length <= COMMUNITY_GALLERY_TITLE_LIMIT &&
     Number.isSafeInteger(entry.version) &&
     (entry.version ?? -1) >= 0
   );
@@ -301,11 +265,12 @@ async function galleryRequest<T>(
   path: string,
   options: RequestInit = {},
   token?: string,
+  timeoutMs = 35_000,
 ): Promise<T> {
   const headers = new Headers(options.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
   const controller = new AbortController();
-  const timer = globalThis.setTimeout(() => controller.abort(), 35_000);
+  const timer = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(path, {
       ...options,
@@ -315,14 +280,24 @@ async function galleryRequest<T>(
     });
     const parsed: unknown = await response.json().catch(() => ({}));
     const body = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
-    if (!response.ok)
+    if (!response.ok) {
+      const retryHeader = Number(response.headers.get("Retry-After"));
+      const retryBody = Number(body.retryAfterSeconds);
+      const retryAfterSeconds =
+        Number.isFinite(retryBody) && retryBody > 0
+          ? Math.min(3600, Math.ceil(retryBody))
+          : Number.isFinite(retryHeader) && retryHeader > 0
+            ? Math.min(3600, Math.ceil(retryHeader))
+            : undefined;
       throw new GalleryRequestError(
         typeof body.error === "string"
           ? body.error
           : "ギャラリーの通信に失敗しました。時間をおいてお試しください。",
         response.status,
         isCommunityGalleryTitle(body.current) ? body.current : undefined,
+        retryAfterSeconds,
       );
+    }
     return body as T;
   } catch (error) {
     if (controller.signal.aborted)
@@ -417,13 +392,51 @@ export async function readCommunityGallery(token?: string): Promise<CommunityGal
     await galleryRequest(`/api/gallery${token ? "?includeDeleted=1" : ""}`, {}, token),
   );
 }
-export function postCommunityGalleryImage(
+export async function postCommunityGalleryImage(
   file: File,
   token: string,
+  client?: SupabaseClient,
 ): Promise<{ post: CommunityGalleryPost }> {
-  const body = new FormData();
-  body.set("file", file);
-  return galleryRequest("/api/gallery", { method: "POST", body }, token);
+  validateCommunityImageFile(file);
+  const reservation = await galleryRequest<{ uploadId: string; path: string; token: string }>(
+    "/api/gallery/upload",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ size: file.size, type: file.type }),
+    },
+    token,
+  );
+  if (
+    !isCommunityGalleryId(reservation.uploadId) ||
+    reservation.path !== `${reservation.uploadId}/source` ||
+    typeof reservation.token !== "string" ||
+    !reservation.token ||
+    reservation.token.length > 8192
+  )
+    throw new Error("画像の送信先を確認できませんでした。ページを読み直してください。");
+  const storageClient =
+    client ?? (await createGalleryAuthClient(await readCommunityGalleryConfig()));
+  const { error } = await storageClient.storage
+    .from("gallery-upload-staging")
+    .uploadToSignedUrl(reservation.path, reservation.token, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+  if (error) throw new Error("画像の送信に失敗しました。接続を確認してお試しください。");
+  const result = await galleryRequest<{ post: CommunityGalleryPost }>(
+    "/api/gallery/upload/complete",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uploadId: reservation.uploadId }),
+    },
+    token,
+    90_000,
+  );
+  if (!isCommunityGalleryPost(result.post))
+    throw new Error("投稿の応答を確認できませんでした。再読み込みして公開結果をご確認ください。");
+  return result;
 }
 export async function updateCommunityGalleryTitle(
   artworkId: string,
@@ -434,11 +447,13 @@ export async function updateCommunityGalleryTitle(
   if (
     (!/^g(?:0[1-9]|[1-9][0-9]|10[0-9]|11[0-3])$/.test(artworkId) &&
       !isCommunityGalleryId(artworkId)) ||
-    title.trim().length > 100 ||
+    title.trim().length > COMMUNITY_GALLERY_TITLE_LIMIT ||
     !Number.isSafeInteger(expectedVersion) ||
     expectedVersion < 0
   )
-    throw new Error("タイトルまたは作品番号を確認してください。タイトルは100文字までです。");
+    throw new Error(
+      `タイトルまたは作品番号を確認してください。タイトルは${COMMUNITY_GALLERY_TITLE_LIMIT}文字までです。`,
+    );
   const entry = await galleryRequest(
     "/api/gallery/title",
     {
