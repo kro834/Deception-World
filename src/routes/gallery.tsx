@@ -8,6 +8,7 @@ import gallerySharingCssUrl from "@/styles-gallery-sharing.css?url";
 import galleryShuffleCssUrl from "@/styles-gallery-shuffle.css?url";
 import galleryImageFallbackCssUrl from "@/styles-gallery-image-fallback.css?url";
 import exhibitionStudioCssUrl from "@/styles-exhibition-studio.css?url";
+import galleryRefinementCssUrl from "@/styles-gallery-refinement.css?url";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
 export const Route = createFileRoute("/gallery")({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/gallery")({
         { rel: "stylesheet", href: galleryShuffleCssUrl },
         { rel: "stylesheet", href: galleryImageFallbackCssUrl },
         { rel: "stylesheet", href: exhibitionStudioCssUrl },
+        { rel: "stylesheet", href: galleryRefinementCssUrl },
       ],
     });
     return {

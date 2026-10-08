@@ -1158,87 +1158,100 @@ export function GalleryPage() {
                   : "投稿設定を確認しています。"}
               </p>
             )}
-          </section>
-          <div className="gallery-personal-controls" aria-busy={communityBusy}>
-            <div>
-              <p id="gallery-community-privacy">
-                追加した画像は公開ギャラリーに保存され、すべての訪問者に表示されます。公開してよい画像を選んでください。お気に入りとトップ作品の選択は、自分用の設定としてこのブラウザーに保存されます。
-              </p>
-              <p>
-                追加した画像はこのブラウザーから非公開・復元できます。ブラウザーのデータを消すと管理できなくなります。
-              </p>
-              <p id="gallery-community-limits">
-                JPEG・PNG・WebPの静止画像、元の画像は1枚19MB（19MiB）・4,000万画素まで。一度に5枚選べます。解像度・色・透過を保つ可逆圧縮で投稿し、縮小や画質を下げる再圧縮は行いません。圧縮で小さくならない場合も、同じ画質のまま保存します。画像の向き情報だけを残し、その他のEXIF・GPS・XMPの撮影情報は除去します。ICC色プロファイルは保持しますが、プロファイル内の説明情報は残る場合があります。HDR補助画像付きJPEGには対応していません。
-              </p>
-              <p>
-                このブラウザーで50枚・合計100MBまで、投稿は1日10回までです。非公開にした投稿も復元用に保存され、枚数と容量に含まれます。
-              </p>
-            </div>
-            <button
-              type="button"
-              className="gallery-personal-add"
-              disabled={!communityReady || communityBusy}
-              aria-describedby="gallery-community-privacy gallery-community-limits"
-              onClick={() => communityInputRef.current?.click()}
-            >
-              {communityBusy ? "処理しています…" : "自分の画像を追加"}
-            </button>
-            <input
-              ref={communityInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              hidden
-              aria-label="追加する自分の画像を選択"
-              onChange={(event) => {
-                const files = Array.from(event.currentTarget.files ?? []);
-                event.currentTarget.value = "";
-                if (!files.length) return;
-                if (files.length > 5) {
-                  setCommunityError("一度に選べる画像は5枚までです。");
-                  return;
-                }
-                setPendingImages(files);
-                setCommunityError("");
-                setCommunityMessage("");
-              }}
-            />
-            {pendingImages.length > 0 && (
-              <div className="gallery-pending-images">
-                <p>
-                  {pendingImages.length}
-                  点を選択しました。「投稿する」を押すと、すべての訪問者に公開されます。
+            <div className="gallery-personal-controls" aria-busy={communityBusy}>
+              <div className="gallery-submission-copy">
+                <p id="gallery-community-privacy">
+                  投稿した画像はすべての訪問者に公開されます。公開してよい画像を選んでください。
                 </p>
-                <ul>
-                  {pendingImages.map((file, index) => (
-                    <li key={`${file.name}-${index}`}>
-                      {file.name}（{(file.size / (1024 * 1024)).toFixed(1)}MB）
-                    </li>
-                  ))}
-                </ul>
-                <div className="gallery-viewer-actions">
-                  <button
-                    type="button"
-                    className="gallery-personal-add"
-                    disabled={communityBusy || !communityReady}
-                    onClick={() => {
-                      void addCommunityImages(pendingImages);
-                    }}
-                  >
-                    投稿する
-                  </button>
-                  <button
-                    type="button"
-                    className="gallery-viewer-close"
-                    disabled={communityBusy}
-                    onClick={() => setPendingImages([])}
-                  >
-                    選択を取り消す
-                  </button>
+                <div className="gallery-submission-specs" id="gallery-community-limits">
+                  <span>1枚19MB（19MiB）まで</span>
+                  <span>画質を保つ可逆圧縮</span>
+                  <span>JPEG · PNG · WebP</span>
                 </div>
+                <details className="gallery-submission-details">
+                  <summary>投稿前に確認</summary>
+                  <div>
+                    <p>
+                      お気に入りとトップ作品の選択は、自分用の設定としてこのブラウザーに保存されます。追加した画像はこのブラウザーから非公開・復元できます。ブラウザーのデータを消すと管理できなくなります。
+                    </p>
+                    <p>
+                      JPEG・PNG・WebPの静止画像、元の画像は1枚19MB（19MiB）・4,000万画素まで。一度に5枚選べます。解像度・色・透過を保つ可逆圧縮で投稿し、縮小や画質を下げる再圧縮は行いません。圧縮で小さくならない場合も、同じ画質のまま保存します。
+                    </p>
+                    <p>
+                      画像の向き情報だけを残し、その他のEXIF・GPS・XMPの撮影情報は除去します。ICC色プロファイルは保持しますが、プロファイル内の説明情報は残る場合があります。HDR補助画像付きJPEGには対応していません。
+                    </p>
+                    <p>
+                      このブラウザーで50枚・合計100MBまで、投稿は1日10回までです。非公開にした投稿も復元用に保存され、枚数と容量に含まれます。
+                    </p>
+                  </div>
+                </details>
               </div>
-            )}
-          </div>
+              <button
+                type="button"
+                className="gallery-personal-add"
+                disabled={!communityReady || communityBusy}
+                aria-describedby="gallery-community-privacy gallery-community-limits"
+                onClick={() => communityInputRef.current?.click()}
+              >
+                {communityBusy ? "処理しています…" : "自分の画像を追加"}
+              </button>
+              <input
+                ref={communityInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                hidden
+                aria-label="追加する自分の画像を選択"
+                onChange={(event) => {
+                  const files = Array.from(event.currentTarget.files ?? []);
+                  event.currentTarget.value = "";
+                  if (!files.length) return;
+                  if (files.length > 5) {
+                    setCommunityError("一度に選べる画像は5枚までです。");
+                    return;
+                  }
+                  setPendingImages(files);
+                  setCommunityError("");
+                  setCommunityMessage("");
+                }}
+              />
+              {pendingImages.length > 0 && (
+                <div className="gallery-pending-images">
+                  <p>
+                    {pendingImages.length}
+                    点を選択しました。「投稿する」を押すと、すべての訪問者に公開されます。
+                  </p>
+                  <ul>
+                    {pendingImages.map((file, index) => (
+                      <li key={`${file.name}-${index}`}>
+                        {file.name}（{(file.size / (1024 * 1024)).toFixed(1)}MB）
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="gallery-viewer-actions">
+                    <button
+                      type="button"
+                      className="gallery-personal-add"
+                      disabled={communityBusy || !communityReady}
+                      onClick={() => {
+                        void addCommunityImages(pendingImages);
+                      }}
+                    >
+                      投稿する
+                    </button>
+                    <button
+                      type="button"
+                      className="gallery-viewer-close"
+                      disabled={communityBusy}
+                      onClick={() => setPendingImages([])}
+                    >
+                      選択を取り消す
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
           {!communityLoaded && !communityLoadError && (
             <p className="gallery-save-message" role="status">
               共有作品を読み込んでいます。
@@ -1276,83 +1289,85 @@ export function GalleryPage() {
               </ul>
             </details>
           )}
-          <div className="gallery-discovery-controls">
-            <GallerySearchControls query={query} onQueryChange={setQuery} />
-            <button
-              type="button"
-              className="gallery-favorites-filter"
-              aria-pressed={favoritesOnly}
-              onClick={() => setFavoritesOnly((current) => !current)}
-            >
-              お気に入りのみ{" "}
-              <span>{allArtworkIds.filter((id) => favorites.includes(id)).length}</span>
-            </button>
-            <label className="gallery-order">
-              <span>並び順</span>
-              <select
-                {...gallerySelectFocus}
-                value={order}
-                onChange={(event) => setOrder(event.target.value as "number" | "newest")}
-              >
-                <option value="number">番号順</option>
-                <option value="newest">新しい作品から</option>
-              </select>
-            </label>
-            {(query || category !== "all" || favoritesOnly) && (
-              <button type="button" className="gallery-reset-filter" onClick={resetDiscovery}>
-                絞り込みを解除
-              </button>
-            )}
-          </div>
-          <nav className="gallery-filters" aria-label="展示の分類">
-            {GALLERY_CATEGORIES.map((item) => (
+          <div className="gallery-browse-panel">
+            <div className="gallery-discovery-controls">
+              <GallerySearchControls query={query} onQueryChange={setQuery} />
               <button
                 type="button"
-                key={item.id}
-                aria-pressed={category === item.id}
-                onClick={() => setCategory(item.id)}
+                className="gallery-favorites-filter"
+                aria-pressed={favoritesOnly}
+                onClick={() => setFavoritesOnly((current) => !current)}
               >
-                {item.label}
-                <span>
-                  {item.id === "all"
-                    ? allArtworks.length
-                    : allArtworks.filter((work) => work.category === item.id).length}
-                </span>
+                お気に入りのみ{" "}
+                <span>{allArtworkIds.filter((id) => favorites.includes(id)).length}</span>
               </button>
-            ))}
-            <button
-              type="button"
-              aria-pressed={category === "community"}
-              onClick={() => setCategory("community")}
-            >
-              みんなの投稿<span>{communityWorks.length}</span>
-            </button>
-          </nav>
-          <div className="gallery-shuffle-entry">
-            <button
-              type="button"
-              className="gallery-shuffle-start"
-              disabled={works.length === 0}
-              onClick={(event) =>
-                openViewingSession(
-                  event.currentTarget,
-                  event.detail === 0,
-                  shuffleGalleryDeck(works),
-                  "shuffle",
-                )
-              }
-            >
-              この{works.length}作品から、おまかせで鑑賞
-            </button>
-            <p>一枚から気軽に、好きなところまで。</p>
+              <label className="gallery-order">
+                <span>並び順</span>
+                <select
+                  {...gallerySelectFocus}
+                  value={order}
+                  onChange={(event) => setOrder(event.target.value as "number" | "newest")}
+                >
+                  <option value="number">番号順</option>
+                  <option value="newest">新しい作品から</option>
+                </select>
+              </label>
+              {(query || category !== "all" || favoritesOnly) && (
+                <button type="button" className="gallery-reset-filter" onClick={resetDiscovery}>
+                  絞り込みを解除
+                </button>
+              )}
+            </div>
+            <nav className="gallery-filters" aria-label="展示の分類">
+              {GALLERY_CATEGORIES.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  aria-pressed={category === item.id}
+                  onClick={() => setCategory(item.id)}
+                >
+                  {item.label}
+                  <span>
+                    {item.id === "all"
+                      ? allArtworks.length
+                      : allArtworks.filter((work) => work.category === item.id).length}
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                aria-pressed={category === "community"}
+                onClick={() => setCategory("community")}
+              >
+                みんなの投稿<span>{communityWorks.length}</span>
+              </button>
+            </nav>
+            <div className="gallery-shuffle-entry">
+              <button
+                type="button"
+                className="gallery-shuffle-start"
+                disabled={works.length === 0}
+                onClick={(event) =>
+                  openViewingSession(
+                    event.currentTarget,
+                    event.detail === 0,
+                    shuffleGalleryDeck(works),
+                    "shuffle",
+                  )
+                }
+              >
+                この{works.length}作品から、おまかせで鑑賞
+              </button>
+              <p>一枚から気軽に、好きなところまで。</p>
+            </div>
+            <GalleryDisplaySettings
+              value={display.preferences}
+              onChange={display.update}
+              onReset={display.reset}
+              status={display.status}
+              error={display.error}
+            />
           </div>
-          <GalleryDisplaySettings
-            value={display.preferences}
-            onChange={display.update}
-            onReset={display.reset}
-            status={display.status}
-            error={display.error}
-          />
           <div
             className="gallery-grid"
             data-gallery-density={display.preferences.density}

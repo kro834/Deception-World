@@ -37,10 +37,13 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
           </button>
         )}
       </div>
-      <p className="gallery-search-help" id={helpId}>
-        空白で区切ると、すべての語を含む作品を検索します（例：青 金）。番号は完全一致で、
-        080–089のような範囲も指定できます。投稿の番号はU001の形式です。
-      </p>
+      <details className="gallery-search-tips">
+        <summary>検索のヒント</summary>
+        <p className="gallery-search-help" id={helpId}>
+          空白で区切ると、すべての語を含む作品を検索します（例：青 金）。番号は完全一致で、
+          080–089のような範囲も指定できます。投稿の番号はU001の形式です。
+        </p>
+      </details>
     </div>
   );
 }
