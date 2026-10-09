@@ -1,0 +1,857 @@
+/* ================================================================
+   Form Archive — the Armour edition (rx7, 2026-10-10)
+
+   The archive drawn the way the Rexonance page and the suit-up render
+   armour: black plates lit from the top left, a dark bevel under a lit
+   rim, one diagonal sheen across every plate, chamfered corners on the
+   big plates, crystal light in ice and violet, gold for the trims and
+   the current row; a lattice ground with light shafts behind the key
+   visual, a halo behind it and a floor pool under it; FORM ARCHIVE and
+   the figures as cut metal; seams that glow. Paint only: no keyframes,
+   no timelines, no filter, no blur, no clip, nothing fetched (the
+   section brackets sit on real corners, so the plates stay square and
+   keep their rims and drops). It leaves every
+   measured geometry to the earlier sheets (the console's sticky box,
+   the analyzer's row parity, the 48px chips, the tables' 12/13/15px
+   type): boxes keep their size; only their paint changes.
+
+   Linked after archive-elevation.css in both standalone documents and
+   scoped to the same root; its declarations carry !important because
+   the earlier layers' do.
+   ================================================================ */
+
+/* ---------- Tokens: armour light ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) {
+  --aa-ink: #02050a;
+  --aa-ice: #7ae8ff;
+  --aa-violet: #a48bff;
+  --aa-magenta: #ff5cc8;
+  --aa-gold: #f0cf86;
+  --aa-gold-deep: #c9a15a;
+  --aa-white: #f4fbff;
+  /* The plate: a specular edge, a short tinted falloff, a near-black body. */
+  --aa-plate: linear-gradient(
+    172deg,
+    rgb(244 251 255 / 13%) 0,
+    rgb(122 232 255 / 7%) 3%,
+    #0d1826 11%,
+    #070d16 46%,
+    #03060c 100%
+  );
+  /* A smaller plate: the same light at card scale. */
+  --aa-card: linear-gradient(
+    168deg,
+    rgb(244 251 255 / 9%) 0,
+    rgb(122 232 255 / 5%) 5%,
+    #0b1522 16%,
+    #060c15 60%,
+    #03060c 100%
+  );
+  /* One diagonal band of light over every plate. */
+  --aa-sheen: linear-gradient(
+    118deg,
+    transparent 38%,
+    rgb(255 255 255 / 5%) 47%,
+    rgb(255 255 255 / 7%) 50%,
+    rgb(255 255 255 / 5%) 53%,
+    transparent 62%
+  );
+  /* The bevel: a lit top edge, a dark lower edge, a faint lit left edge. */
+  --aa-bevel:
+    inset 0 1px 0 rgb(255 255 255 / 30%), inset 1px 0 0 rgb(255 255 255 / 8%),
+    inset 0 -1px 0 rgb(0 0 0 / 85%), inset -1px 0 0 rgb(0 0 0 / 55%);
+  --aa-bevel-soft:
+    inset 0 1px 0 rgb(255 255 255 / 16%), inset 0 -1px 0 rgb(0 0 0 / 70%);
+  --aa-rim-ice: 0 0 0 1px rgb(122 232 255 / 28%);
+  --aa-rim-violet: 0 0 0 1px rgb(164 139 255 / 30%);
+  --aa-rim-gold: 0 0 0 1px rgb(240 207 134 / 36%);
+  --aa-rim-dim: 0 0 0 1px rgb(122 232 255 / 12%);
+  --aa-drop: 0 24px 48px -26px rgb(0 0 0 / 90%);
+  --aa-drop-card: 0 14px 28px -18px rgb(0 0 0 / 85%);
+  /* The lattice: a 28px grid of ice hairlines at 3%. */
+  --aa-lattice:
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px);
+  /* Cut metal for the big figures and titles. */
+  --aa-metal-ice: linear-gradient(180deg, #ffffff 12%, #d9f7ff 46%, #7ae8ff 100%);
+  --aa-metal-gold: linear-gradient(180deg, #fff7dc, #f0cf86 60%, #c9a15a);
+  --aa-seam: linear-gradient(90deg, #7ae8ff, #a48bff 40%, #ff5cc8 72%, #f0cf86);
+  --ar-edge: rgb(122 232 255 / 22%);
+  --ar-line: rgb(122 232 255 / 26%);
+}
+
+/* ---------- Ground: the lattice under shafts of light ---------- */
+html[data-embedded-archive="true"] {
+  background-color: #02050a !important;
+}
+
+html[data-embedded-archive="true"] > body {
+  background:
+    radial-gradient(ellipse 60% 34% at 84% 0%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 50% 26% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 50% 24% at 96% 62%, rgb(255 92 200 / 4%), transparent 70%),
+    radial-gradient(ellipse 60% 26% at 18% 98%, rgb(240 207 134 / 4%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    #02050a !important;
+}
+
+/* ---------- Section plates: armour, chamfered, lit from the top left ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.section, .saga-compare-section) {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background:
+    linear-gradient(90deg, var(--aa-ice), rgb(122 232 255 / 0%)) 0 0 / 38% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-plate) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice), var(--aa-drop) !important;
+}
+
+/* The analyzer's plate takes the violet channel on its seam. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section {
+  background:
+    linear-gradient(90deg, var(--aa-ice), var(--aa-violet) 60%, rgb(164 139 255 / 0%)) 0 0 / 52% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-plate) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-violet), var(--aa-drop) !important;
+}
+
+/* The prism rule each plate opens on glows; the brackets stay. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.section, .saga-compare-section)::before {
+  background: var(--aa-seam) !important;
+  box-shadow: 0 0 12px rgb(122 232 255 / 30%) !important;
+  opacity: 0.8 !important;
+}
+
+/* Cards inside a plate: smaller plates, bevelled, dimly rimmed. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.stage, .spec-item, .detail-toolbar, .ability-panel, .operation-panel, .realm-lore-grid section, .rexonance-setting-block, .selected-telemetry, .compare-toolbar, .compare-side, .compare-form-card, .compare-advantage-summary, .table-responsive) {
+  border-color: transparent !important;
+  border-top-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-dim), var(--aa-drop-card) !important;
+}
+
+/* The tiers keep their own hue (the document's) on the 2px top edge. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage {
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+  border-left-color: transparent !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage:has(.form-chip.is-selected) {
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 9%), transparent 55%),
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice), var(--aa-drop-card) !important;
+}
+
+/* ---------- Hero: shafts of light, a halo behind the key visual, a floor ---------- */
+/* The key visual stands at the hero's right (74%). Two shafts fall
+   behind it, ice from the left and violet from the right, a halo sits
+   behind its centre and a floor pool under it; the lattice runs under
+   all of it. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-hero {
+  border: 0 !important;
+  border-radius: 6px !important;
+  background:
+    radial-gradient(ellipse 10% 30% at 74% 42%, rgb(255 248 226 / 12%), transparent 70%),
+    radial-gradient(ellipse 26% 70% at 62% 44%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 26% 70% at 88% 44%, rgb(164 139 255 / 9%), transparent 70%),
+    radial-gradient(ellipse 30% 5% at 74% 93%, rgb(122 232 255 / 20%), transparent 70%),
+    radial-gradient(ellipse 22% 3% at 74% 93%, rgb(255 255 255 / 12%), transparent 70%),
+    radial-gradient(ellipse 19% 2px at 74% 93.2%, rgb(200 245 255 / 60%), transparent 70%),
+    radial-gradient(ellipse 48% 64% at 74% 48%, rgb(44 70 110 / 32%), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 8% 90%, rgb(164 139 255 / 6%), transparent 70%),
+    var(--aa-lattice),
+    linear-gradient(180deg, #050b14, #02050a 70%) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice), var(--aa-drop) !important;
+}
+
+/* The top bar: a glass plate with a lit seam. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-topline {
+  border-bottom: 0 !important;
+  background:
+    var(--aa-seam) 0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(244 251 255 / 6%), rgb(244 251 255 / 1%) 60%, transparent),
+    rgb(2 5 10 / 86%) !important;
+  box-shadow: 0 1px 14px -2px rgb(122 232 255 / 26%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .wordmark-sigil {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice) !important;
+}
+
+/* The wordmark in brushed metal. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-wordmark strong {
+  background: linear-gradient(90deg, #ffffff, #bff4ff 45%, #e3d8ff 75%, #f0cf86);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+/* The section nav: a plate of links; the current one a lit ice cell. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav a[aria-current="true"] {
+  background: linear-gradient(180deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 8%)) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav a[aria-current="true"]::after {
+  box-shadow: 0 0 8px rgb(122 232 255 / 60%) !important;
+}
+
+/* The eyebrow's cell lights. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-eyebrow .signal-dot {
+  background: var(--aa-ice) !important;
+  box-shadow: 0 0 8px rgb(122 232 255 / 70%) !important;
+}
+
+/* FORM ARCHIVE: cut metal, white at the top edge and ice below, lit by
+   its own seam; the misregistered ghost stays in the earlier layer's
+   drop shadows. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-hero h1 strong {
+  background: var(--aa-metal-ice) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* The series line reads as a lit seam under the title. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-hero h1 span {
+  color: var(--aa-white) !important;
+  text-shadow: 0 0 14px rgb(122 232 255 / 24%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-lead {
+  text-shadow: 0 0 18px rgb(122 232 255 / 14%);
+}
+
+/* Actions: the primary a lit ice plate with a gold trim, the other an
+   armour plate. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-action {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-action.is-primary {
+  background:
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 30%) 50%, transparent 62%),
+    linear-gradient(180deg, #effcff, #9eeeff 60%, #6fd6f2) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    inset 0 -1px 0 rgb(0 40 60 / 30%),
+    0 0 0 1px rgb(122 232 255 / 60%),
+    0 10px 26px -6px rgb(122 232 255 / 40%) !important;
+}
+
+/* Metrics: the figures as cut metal over lit ice rules. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics div {
+  border-left: 1px solid rgb(122 232 255 / 34%) !important;
+  box-shadow: -1px 0 8px -2px rgb(122 232 255 / 40%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics dd {
+  background: var(--aa-metal-ice);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics dt {
+  color: rgb(122 232 255 / 80%) !important;
+}
+
+/* The key visual: a glass plate with a halo behind it, the frame lit,
+   the brackets glowing. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .cover-gallery-solo-v14 {
+  border-color: transparent !important;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 46%, rgb(122 232 255 / 10%), transparent 70%),
+    var(--aa-sheen),
+    linear-gradient(172deg, rgb(244 251 255 / 10%) 0, rgb(122 232 255 / 5%) 3%, rgb(13 24 38 / 70%) 11%, rgb(7 13 22 / 70%) 46%, rgb(3 6 12 / 80%) 100%) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice), var(--aa-drop) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-frame-v14 {
+  border-color: rgb(122 232 255 / 55%) !important;
+  box-shadow:
+    0 0 0 1px rgb(2 5 10 / 90%),
+    0 0 28px -4px rgb(122 232 255 / 36%),
+    0 30px 60px -30px rgb(0 0 0 / 95%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-caption-v14 strong {
+  background: linear-gradient(90deg, #ffffff, #d9f7ff 60%, #f0cf86);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-caption-v14 i,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-edge i {
+  background: var(--aa-seam) !important;
+  box-shadow: 0 0 10px rgb(122 232 255 / 40%) !important;
+  opacity: 0.9 !important;
+}
+
+/* ---------- Headings: metal numerals, seams that glow ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.section > h2, .selector-title h2, .selector-heading h2, .compare-header h2, .section > .detail-head h2) {
+  color: var(--aa-white) !important;
+  text-shadow: 0 0 24px rgb(122 232 255 / 14%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .section > h2::before {
+  background: var(--aa-seam) !important;
+  box-shadow: 0 0 10px rgb(122 232 255 / 40%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.selector-kicker, .compare-kicker, .hero-eyebrow, .stage-index, .stage-meta, .chip-code, .toolbar-kicker) {
+  color: rgb(122 232 255 / 86%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .stage-index {
+  background: var(--aa-metal-ice);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+/* The counts and badges: gold-trimmed plates. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.selector-count, .compare-ready-badge) {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-gold) !important;
+}
+
+/* ---------- Form index: chips as plates, the selected one lit ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-dim) !important;
+}
+
+/* The selected chip: an ice plate behind a lit ring, the inset edge of
+   the earlier layer kept as the 3px seam on its left. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected {
+  /* The selection plate colour stays #142e3b (verify-archive-search-
+     interactions reads it); the light is drawn over it. */
+  background-color: #142e3b !important;
+  background-image:
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 10%) 50%, transparent 62%),
+    linear-gradient(180deg, rgb(26 58 74 / 100%), rgb(20 46 59 / 0%) 50%, rgb(13 34 48 / 100%)) !important;
+  box-shadow:
+    inset 3px 0 0 var(--aa-ice),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 60%),
+    0 0 0 1px rgb(122 232 255 / 70%),
+    0 0 16px -2px rgb(122 232 255 / 45%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip.is-selected .chip-name {
+  text-shadow: 0 0 10px rgb(122 232 255 / 40%);
+}
+
+/* The selected readout: the form's own tint lights its left seam. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selected-telemetry {
+  background:
+    linear-gradient(105deg, rgb(var(--active-rgb, 122 232 255) / 12%), transparent 55%),
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice), var(--aa-drop-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selected-telemetry::before {
+  box-shadow: 0 0 10px var(--active, #7ae8ff) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .telemetry-name {
+  text-shadow: 0 0 14px rgb(122 232 255 / 22%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.telemetry-index, .toolbar-index) {
+  background: var(--aa-metal-ice) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Progress rails: lit tubes. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.files-form-progress-v14 > span, .v6s-progress-rail) {
+  background: rgb(255 255 255 / 6%) !important;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 60%), inset 0 -1px 0 rgb(255 255 255 / 6%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.files-form-progress-v14 > span > i, .v6s-progress-rail > i) {
+  background: linear-gradient(90deg, #ffffff, var(--aa-ice) 30%, var(--aa-violet) 75%, var(--aa-gold)) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 0 10px rgb(122 232 255 / 45%) !important;
+}
+
+/* The search field: a recessed plate. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-search input {
+  border-color: transparent !important;
+  background: linear-gradient(180deg, #03060c, #070d16) !important;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 80%), inset 0 -1px 0 rgb(255 255 255 / 8%), var(--aa-rim-ice) !important;
+}
+
+/* ---------- Detail: the record as instrument plates ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-nav button {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .detail-head h3 {
+  background: linear-gradient(180deg, #ffffff 20%, #e6f9ff 60%, #bff0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-head {
+  border-bottom: 0 !important;
+  background: linear-gradient(90deg, rgb(var(--active-rgb, 122 232 255) / 70%), rgb(122 232 255 / 10%) 50%, transparent) 0 100% / 100% 1px no-repeat;
+}
+
+/* Status chips: the form's own light on a plate. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.telemetry-status, .viz-badge, .data-badge) {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(var(--active-2-rgb, 122 232 255) / 46%) !important;
+}
+
+/* Spec cards: the figures as cut metal over the form's light. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .detail-overview .spec-item {
+  background:
+    linear-gradient(90deg, rgb(var(--active-rgb, 122 232 255) / 70%), transparent) 0 0 / 40% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-dim), var(--aa-drop-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .detail-overview .spec-item .spec-value {
+  background: var(--aa-metal-ice);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+/* The art: a glass plate over a halo. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.art-trigger, .form-art) {
+  border-color: transparent !important;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 30%, rgb(var(--active-rgb, 122 232 255) / 14%), transparent 70%),
+    radial-gradient(ellipse 50% 8% at 50% 96%, rgb(122 232 255 / 16%), transparent 70%),
+    var(--aa-lattice),
+    #03060c !important;
+  box-shadow: var(--aa-bevel), 0 0 0 1px rgb(var(--active-rgb, 122 232 255) / 36%), var(--aa-drop) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .art-zoom-label {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice) !important;
+}
+
+/* Abilities: lit headings, gold-marked lists. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.ability-panel, .operation-panel) {
+  background:
+    linear-gradient(90deg, var(--aa-ice), transparent) 0 0 / 30% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .operation-panel {
+  background:
+    linear-gradient(90deg, var(--aa-gold), transparent) 0 0 / 30% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.ability-panel, .operation-panel) h3 {
+  color: var(--aa-white) !important;
+  text-shadow: 0 0 14px rgb(122 232 255 / 24%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .ability-cards li {
+  border-color: transparent !important;
+  background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 40%), rgb(3 6 12 / 60%) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), inset 0 -1px 0 rgb(0 0 0 / 60%), 0 0 0 1px rgb(122 232 255 / 10%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .ability-cards strong {
+  background: linear-gradient(90deg, #ffffff, #bff4ff 70%, #7ae8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.ability-list li, .fact-list li, .finisher-list li)::marker {
+  color: var(--aa-gold);
+}
+
+/* ---------- Analyzer: two channels of light ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-header {
+  border-bottom: 0 !important;
+  background: linear-gradient(90deg, var(--aa-ice), var(--aa-violet) 50%, transparent) 0 100% / 100% 1px no-repeat;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-swap {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-sync-rail {
+  background: rgb(255 255 255 / 6%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-sync-rail span {
+  background: var(--aa-seam) !important;
+  box-shadow: 0 0 10px rgb(122 232 255 / 50%) !important;
+}
+
+/* The two channels: plates whose top seam is their light. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-side {
+  border-top: 2px solid var(--side-accent, #7ae8ff) !important;
+  background:
+    linear-gradient(180deg, rgb(var(--side-rgb, 122 232 255) / 8%), transparent 40%),
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 26%), 0 -1px 12px -4px var(--side-accent, #7ae8ff), var(--aa-drop-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-side.is-catalog-leader {
+  box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 60%), 0 0 18px -4px rgb(var(--side-rgb, 122 232 255) / 45%), var(--aa-drop-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-side legend b {
+  text-shadow: 0 0 10px rgb(var(--side-rgb, 122 232 255) / 50%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+  border-color: transparent !important;
+  background-color: #03060c !important;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 80%), inset 0 -1px 0 rgb(255 255 255 / 8%), 0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 42%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-advantage-summary {
+  background:
+    linear-gradient(90deg, rgb(var(--side-rgb, 122 232 255) / 12%), transparent 60%),
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 30%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-advantage-summary b {
+  text-shadow: 0.06em 0.06em 0 rgb(164 139 255 / 36%), 0 0 14px rgb(var(--side-rgb, 122 232 255) / 40%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-form-card {
+  background:
+    linear-gradient(90deg, var(--side-accent, #7ae8ff), transparent) 0 0 / 44% 2px no-repeat,
+    linear-gradient(180deg, rgb(var(--side-rgb, 122 232 255) / 7%), transparent 30%),
+    var(--aa-sheen),
+    var(--aa-plate) !important;
+  box-shadow: var(--aa-bevel), 0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 24%), var(--aa-drop) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-form-card .spec-item {
+  border-color: transparent !important;
+  background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 40%), rgb(3 6 12 / 70%) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), inset 0 -1px 0 rgb(0 0 0 / 60%), 0 0 0 1px rgb(122 232 255 / 10%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-form-card .spec-item[data-compare-result="lead"] {
+  background: linear-gradient(90deg, rgb(var(--side-rgb, 122 232 255) / 16%), rgb(3 6 12 / 80%) 70%) !important;
+  box-shadow:
+    inset 3px 0 0 var(--side-accent, #7ae8ff),
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 60%),
+    0 0 14px -3px rgb(var(--side-rgb, 122 232 255) / 45%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .spec-item[data-compare-result="lead"] .spec-compare-badge {
+  box-shadow: 0 0 10px rgb(var(--side-rgb, 122 232 255) / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .spec-item[data-compare-result="tie"] {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), inset 0 -1px 0 rgb(0 0 0 / 60%), 0 0 0 1px rgb(240 207 134 / 40%) !important;
+}
+
+/* The sliders' thumbs glow in their channel. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-range::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--side-accent, #7ae8ff), 0 0 10px rgb(var(--side-rgb, 122 232 255) / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-range::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--side-accent, #7ae8ff), 0 0 10px rgb(var(--side-rgb, 122 232 255) / 60%) !important;
+}
+
+/* The spec difference panel. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-diff {
+  border-color: transparent !important;
+  background:
+    linear-gradient(90deg, var(--aa-ice), var(--aa-violet) 50%, transparent) 0 0 / 60% 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-dim), var(--aa-drop-card) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-diff-row {
+  border-color: rgb(122 232 255 / 8%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .is-a > .compare-diff-tag {
+  box-shadow: 0 0 8px rgb(122 232 255 / 50%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .is-b > .compare-diff-tag {
+  box-shadow: 0 0 8px rgb(164 139 255 / 50%);
+}
+
+/* ---------- Tables: recessed glass, the current row lit in gold ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive {
+  background: #03060c !important;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 80%), inset 0 -1px 0 rgb(255 255 255 / 6%), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.table th, .table td) {
+  background: #04080f !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody tr:nth-child(even) > * {
+  background: #060c15 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table thead th {
+  border-bottom: 1px solid rgb(122 232 255 / 40%) !important;
+  background: linear-gradient(180deg, #0d1826, #06101c) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%), 0 1px 10px -2px rgb(122 232 255 / 30%);
+  color: var(--aa-white) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody th {
+  background: linear-gradient(90deg, #0a1522, #060e19) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody tr:nth-child(even) > th {
+  background: linear-gradient(90deg, #0c1826, #080f1b) !important;
+}
+
+/* The selected form's row: gold light across every cell (each stays
+   opaque for the sticky column), a gold seam on its left. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody tr.is-current > :is(th, td) {
+  background:
+    linear-gradient(rgb(240 207 134 / 12%), rgb(240 207 134 / 12%)),
+    #0a1220 !important;
+  color: var(--aa-white) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody tr.is-current > th:first-child {
+  box-shadow: inset 3px 0 0 var(--aa-gold), inset 12px 0 12px -12px rgb(240 207 134 / 50%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tr.is-current .ratio-value {
+  color: var(--aa-gold) !important;
+}
+
+/* The ratio bars: lit tubes. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .ratio-track {
+  background: rgb(255 255 255 / 5%) !important;
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 70%), inset 0 -1px 0 rgb(255 255 255 / 5%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .ratio-fill {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%), 0 0 8px -1px currentColor !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .metric-punch {
+  background: linear-gradient(90deg, #d6ccff, #a48bff) !important;
+  color: #a48bff;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .metric-kick {
+  background: linear-gradient(90deg, #fff1cc, #f0cf86) !important;
+  color: #f0cf86;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .metric-speed {
+  background: linear-gradient(90deg, #d9f7ff, #7ae8ff) !important;
+  color: #7ae8ff;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .metric-compute {
+  background: linear-gradient(90deg, #ffc4ec, #ff5cc8) !important;
+  color: #ff5cc8;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .ratio-fill.has-yops {
+  background: linear-gradient(90deg, #ffc4ec, #ff5cc8 50%, #f0cf86) !important;
+  color: #ff9ad8;
+}
+
+/* The ability matrix: the core glyphs lit. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .cap-core {
+  text-shadow: 0 0 8px rgb(122 232 255 / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .cap-support {
+  text-shadow: 0 0 8px rgb(240 207 134 / 50%) !important;
+}
+
+/* ---------- Footer: a riveted end plate ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer {
+  background:
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--aa-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--aa-gold) 0 0) 100% 100% / 2px 22px no-repeat,
+    radial-gradient(circle at 50% 0, rgb(122 232 255 / 8%), transparent 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer::before {
+  background: var(--aa-seam);
+  box-shadow: 0 0 12px rgb(122 232 255 / 40%);
+  opacity: 0.9;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .footer-mark strong {
+  background: linear-gradient(90deg, #ffffff, #bff4ff 45%, #e3d8ff 75%, #f0cf86);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer a {
+  border-color: transparent !important;
+  background:
+    linear-gradient(var(--aa-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    var(--aa-sheen),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice) !important;
+}
+
+/* ---------- Phone dock, sheet, lightbox ---------- */
+/* The dock keeps its opaque ink (pinned); its seam and buttons light. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock::before {
+  background: var(--aa-seam);
+  box-shadow: 0 0 12px rgb(122 232 255 / 50%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock button {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-dim) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current {
+  background:
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 10%) 50%, transparent 62%),
+    linear-gradient(180deg, #1a3a4a, #142e3b 50%, #0d2230) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 26%), inset 0 -1px 0 rgb(0 0 0 / 60%), 0 0 0 1px rgb(122 232 255 / 70%), 0 0 16px -2px rgb(122 232 255 / 45%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.selector-collapse, .selector-sheet-close, .search-clear, .lightbox-close) {
+  border-color: transparent !important;
+  background: var(--aa-sheen), var(--aa-card) !important;
+  box-shadow: var(--aa-bevel-soft), var(--aa-rim-ice) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-inner {
+  background: var(--aa-sheen), var(--aa-plate) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice), var(--aa-drop) !important;
+}
+
+/* The open selector sheet: a plate with a lit seam at its top. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"][aria-modal="true"] {
+  background:
+    var(--aa-seam) 0 0 / 100% 2px no-repeat,
+    #03060c !important;
+  box-shadow: 0 -12px 40px -10px rgb(122 232 255 / 30%) !important;
+}
+
+/* ---------- Hover (mouse only): the plate lights, nothing moves further ---------- */
+@media (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    :is(.form-chip:not(.is-selected), .hero-action:not(.is-primary), .detail-nav button, .selector-collapse, .compare-swap, .archive-footer a, .mobile-dock button:not(.dock-current)):hover {
+    border-color: transparent !important;
+    background:
+      linear-gradient(180deg, rgb(122 232 255 / 14%), rgb(122 232 255 / 4%)),
+      var(--aa-sheen),
+      var(--aa-card) !important;
+    box-shadow: var(--aa-bevel), 0 0 0 1px rgb(122 232 255 / 60%), 0 0 14px -2px rgb(122 232 255 / 40%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-nav a:not([aria-current="true"]):hover {
+    background: linear-gradient(180deg, rgb(122 232 255 / 14%), rgb(122 232 255 / 4%)) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .spec-item:hover {
+    box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(122 232 255 / 46%), var(--aa-drop-card) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table tbody tr:not(.is-current):hover > :is(th, td) {
+    background: linear-gradient(rgb(122 232 255 / 8%), rgb(122 232 255 / 8%)), #04080f !important;
+  }
+}
+
+/* ---------- Economy: no glows, flat plates ---------- */
+html[data-embedded-archive][data-world-effects="economy"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) {
+  --aa-sheen: none;
+  --aa-drop: 0 0 0 0 transparent;
+  --aa-drop-card: 0 0 0 0 transparent;
+}
+
+/* ---------- Forced colours: the metal text and glows go ---------- */
+@media (forced-colors: active) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    :is(.archive-wordmark strong, .hero-metrics dd, .solo-cover-caption-v14 strong, .stage-index, .selector-count, .footer-mark strong, .ability-cards strong, .form-detail .detail-head h3) {
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+    background: none !important;
+    text-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    :is(.section, .saga-compare-section, .archive-hero, .stage, .spec-item, .form-chip, .compare-side, .compare-form-card, .table-responsive, .hero-action, .archive-footer a, .detail-nav button, .compare-swap, .archive-nav, .selected-telemetry, .ability-panel, .operation-panel, .ability-cards li, .compare-diff, .art-trigger, .form-art, .mobile-dock button) {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+  }
+
+}
