@@ -175,6 +175,32 @@ html[data-family="archive"] body .form-archive-page > header.form-archive-toolba
     0 1px 0 rgb(0 0 0 / 70%);
 }
 
+/* The World's chapters regrade its bar: the atmosphere sheet sets the
+   ground per phase and clears the bar's image, so the seam and the ruler
+   come back here in the chapter's own light. */
+@media (forced-colors: none) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition[data-world-phase]
+    > header.topbar {
+    --sh-bar-light: var(--world-atmosphere-accent, var(--sh-l1));
+    background-image:
+      linear-gradient(90deg, var(--sh-bar-light) 0 3px, transparent 3px),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sh-bar-light) 30%, transparent) 0 1px,
+        transparent 1px 12px
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sh-bar-light) 8%, transparent),
+        transparent 34%,
+        transparent 70%,
+        rgb(var(--sh-l2-rgb) / 7%)
+      );
+  }
+}
+
 /* The bar's lower edge is the reading line: 2px of the edition's light. */
 html[data-family="world"] body main.site-shell.film-edition > header.topbar::after,
 html[data-family="dossier"] body .manager-page > header.manager-topbar::after,
@@ -271,7 +297,18 @@ html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-moti
     0 0 0 1px rgb(var(--sh-l1-rgb) / 30%) !important;
   clip-path: none !important;
   color: var(--sh-on-l1) !important;
-  scale: none;
+}
+
+/* The older sheets lift the trigger on hover (scale 1.07); the lit square
+   stays put. A live press keeps the house sink (styles-press-feedback). */
+@media (hover: hover) {
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger.side-panel-trigger:hover:not([data-press]) {
+    scale: none;
+  }
 }
 
 html[data-family]:not([data-family="gallery"])
@@ -343,9 +380,11 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
   }
 }
 
+/* The square is no longer clipped, so its ring sits outside it on the
+   bar's ink (the World's older rule drew it inside, on the lit face). */
 html[data-family]:not([data-family="gallery"])
   body
-  .side-panel-trigger.side-panel-trigger:focus-visible {
+  .side-panel-trigger.side-panel-trigger.side-panel-trigger:focus-visible {
   outline: 2px solid var(--sh-focus);
   outline-offset: 3px;
 }
@@ -488,7 +527,9 @@ html[data-family="dream"]
 }
 
 /* ---------- The special sites: paint only (their bar's boxes are pinned) ---------- */
-html[data-family="special"] body .rxs-page > header.rxs-local-nav {
+/* The edition skins paint this bar at .rxs-page.rxs-page.<edition> weight,
+   so the page class is tripled here. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
   border-bottom: 1px solid rgb(var(--sh-l1-rgb) / 18%);
   background-color: var(--sh-ink);
   background-image:
@@ -532,9 +573,9 @@ html[data-family="special"] body .rxs-page > header.rxs-local-nav .rxs-brand::af
   width: 34px;
   color: var(--sh-l1);
   font-family: var(--sh-hud);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-indent: 0;
 }
 
@@ -619,6 +660,12 @@ html[data-family="library"] body .search-page > header.search-topbar > a.search-
   letter-spacing: 0.04em;
 }
 
+/* The library's home link is one line: the plate takes one row so the
+   name sits on its centre line (the search brand has two lines). */
+html[data-family="library"] body .library-page > header.library-topbar > a::before {
+  grid-row: 1;
+}
+
 html[data-family="library"] body .library-page .library-topbar-actions > span,
 html[data-family="library"] body .search-page > header.search-topbar > a.search-brand > span {
   margin: 0;
@@ -632,7 +679,9 @@ html[data-family="library"] body .search-page > header.search-topbar > a.search-
    4. The launcher
    ================================================================ */
 
-/* ---------- The sheet: the whole screen ---------- */
+/* ---------- The sheet: the whole screen ----------
+   The areas follow the menu's own order (SPECIAL, then STORIES), so the
+   Tab order and the reading order are the same at every width. */
 html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
   --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 18px);
   --sp-pad-inline: max(var(--sh-gutter), calc((100vw - 1680px) / 2));
@@ -646,8 +695,8 @@ html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
     "head"
     "find"
     "sec"
-    "sto"
     "spe"
+    "sto"
     "rid"
     "unm"
     "inf"
@@ -1027,6 +1076,7 @@ html[data-family]
 html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control {
   display: grid;
   min-width: 0;
+  margin: 0;
 }
 
 html[data-family]
@@ -1174,6 +1224,93 @@ html[data-family="dream"]
   color: var(--sh-l2);
 }
 
+/* The numerals follow the pages' own: the top of a page is 00 (序 on the
+   Dream Chapter, before its 第一幕), so the World reads 01 STORY, 02
+   RIDERS, 03 RECORDS as its bar does and the Dream acts 壱 to 肆 as its
+   act bar does. A part inside the chapter above (六詠 in STORY, RE DIVE
+   after RECORDS, Final Stage's second rider record) takes a short rule
+   instead of a number; the gallery's way back to the World an arrow. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([href$="#top"], [href$="#gallery-top"]),
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is(
+    [href="/world#manager-archive"],
+    [href="/world#re-dive"],
+    [href="/final-stage#realm-royal"],
+    [href="/world"]
+  ) {
+  counter-increment: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([href$="#top"], [href$="#gallery-top"])::before {
+  content: "00";
+  content: "00" / "";
+}
+
+html[data-family="dream"]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href$="#top"]::before {
+  content: "序";
+  content: "序" / "";
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is(
+    [href="/world#manager-archive"],
+    [href="/world#re-dive"],
+    [href="/final-stage#realm-royal"]
+  )::before {
+  content: "";
+  justify-self: start;
+  width: 12px;
+  height: 0;
+  margin-left: 14px;
+  padding: 0;
+  border-top: 2px solid rgb(var(--sh-l1-rgb) / 52%);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href="/world"]::before {
+  content: "←";
+  content: "←" / "";
+}
+
 html[data-family]
   body
   #site-side-panel.side-panel
@@ -1273,6 +1410,36 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-chil
   grid-area: sys;
 }
 
+/* Only the World's menu has RIDERS. Elsewhere its row stays empty, so the
+   row below takes back the extra gap: UNMANAGED (then the fifth group),
+   and from tablets up INFORMATION beside it. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group:nth-last-child(3) {
+  margin-top: -22px;
+}
+
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3)
+    + .side-panel-group {
+    margin-top: -22px;
+  }
+}
+
 html[data-family]
   body
   #site-side-panel.side-panel
@@ -1356,8 +1523,11 @@ html[data-family]
   background:
     linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 46%, rgb(var(--sh-ink-rgb) / 88%) 100%),
     var(--sh-art, none) var(--sh-art-pos, 50% 30%) / var(--sh-art-size, cover) no-repeat,
-    repeating-linear-gradient(135deg, rgb(var(--sh-l1-rgb) / 5%) 0 1px, transparent 1px 9px),
-    var(--sh-ink-2);
+    var(
+      --sh-art-hatch,
+      repeating-linear-gradient(135deg, rgb(var(--sh-l1-rgb) / 5%) 0 1px, transparent 1px 9px)
+    ),
+    var(--sh-art-ground, var(--sh-ink-2));
   box-shadow: none;
   opacity: 1;
   scale: none;
@@ -1410,11 +1580,12 @@ html[data-family]
   align-self: start;
   justify-self: start;
   max-width: 100%;
-  padding: 4px 7px;
+  padding: 4px 6px;
   border: 1px solid rgb(var(--sh-l1-rgb) / 42%);
   background: rgb(var(--sh-ink-rgb) / 82%);
   color: var(--sh-l1);
   line-height: 1.2;
+  letter-spacing: 0.08em;
   white-space: normal;
 }
 
@@ -1519,8 +1690,41 @@ html[data-family]
   > .side-panel-links
   > a[href^="/final-stage"] {
   --sh-art: url("/final-stage-logo-delivery-640.webp");
-  --sh-art-pos: 50% 42%;
-  --sh-art-size: min(88%, 300px) auto;
+}
+
+/* The Final Stage art is its title logo on black: the tile takes the
+   same black, and the logo sits above the tile's own name (the logo
+   spells it too), beside it on phones. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/final-stage"] {
+  --sh-art-ground: #000;
+  --sh-art-hatch: none;
+  --sh-art-pos: 50% 12%;
+  --sh-art-size: min(100%, 210px) auto;
+}
+
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links
+    > a[href^="/final-stage"] {
+    --sh-art-pos: 100% 50%;
+    --sh-art-size: auto 100%;
+  }
 }
 
 html[data-family]
@@ -1531,6 +1735,41 @@ html[data-family]
   > a[href="/characters/dante"] {
   --sh-art: url("/character-dante-thumb.webp");
   --sh-art-pos: 50% 16%;
+}
+
+/* Dante's portrait is shot on white: from tablets up it stands in the
+   right part of the tile, dimmed, so his face clears the chip and the
+   name sits on the ink beside him. */
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[href="/characters/dante"]::before {
+    left: 38%;
+    background:
+      linear-gradient(90deg, var(--sh-ink-2) 0, rgb(var(--sh-ink-rgb) / 0%) 46%),
+      linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 72%)),
+      linear-gradient(rgb(var(--sh-ink-rgb) / 34%), rgb(var(--sh-ink-rgb) / 34%)),
+      var(--sh-art, none) 50% 10% / cover no-repeat,
+      var(--sh-ink-3);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[href="/characters/dante"]::before {
+    background:
+      linear-gradient(90deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 75%)),
+      linear-gradient(rgb(var(--sh-ink-rgb) / 30%), rgb(var(--sh-ink-rgb) / 30%)),
+      var(--sh-art, none) var(--sh-art-pos, 50% 16%) / cover no-repeat,
+      var(--sh-ink-3);
+  }
 }
 
 html[data-family]
@@ -1958,6 +2197,39 @@ html[data-family]
   background: rgb(var(--sh-ink-rgb) / 60%);
 }
 
+/* The Zeus switch, when on, takes the edition's lights (its track,
+   word and knob geometry stay as chrome-elevation sets them). */
+@media (forced-colors: none) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"] {
+    border-color: rgb(var(--sh-l1-rgb) / 45%);
+    background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 9%), rgb(var(--sh-l2-rgb) / 5%));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"]
+    > i {
+    border-color: rgb(var(--sh-l1-rgb) / 62%);
+    background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 24%), rgb(var(--sh-l2-rgb) / 18%));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"]
+    > i
+    u {
+    background: var(--sh-l1);
+  }
+}
+
 /* The older markers on the rows were drawn with a transform of their
    own; the plates' ::before is art or a numeral here. */
 html[data-family]
@@ -1971,8 +2243,8 @@ html[data-family]
 /* ================================================================
    5. Layouts
    ================================================================ */
-/* Phones: one column. The films run as wide strips (their names are
-   long), the two special sites and the gallery side by side. */
+/* Phones: one column. The two special sites and the gallery side by
+   side, the films as wide strips (their names are long). */
 @media (max-width: 760px) {
   html[data-family] body #site-side-panel.side-panel .side-panel-head b {
     font-size: 15px;
@@ -2045,7 +2317,7 @@ html[data-family]
       "head head head head head head"
       "find find find find find find"
       "sec  sec  sec  sec  sec  sec"
-      "sto  sto  sto  sto  spe  spe"
+      "spe  spe  sto  sto  sto  sto"
       "rid  rid  rid  rid  rid  rid"
       "unm  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
@@ -2156,12 +2428,34 @@ html[data-family]
     grid-template-areas:
       "head head head head head head"
       "find find find find find find"
-      "sec  sto  sto  sto  spe  spe"
+      "sec  spe  spe  sto  sto  sto"
       "sec  rid  rid  rid  rid  rid"
       "sec  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
     column-gap: 18px;
     row-gap: 16px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3),
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3)
+    + .side-panel-group {
+    margin-top: -16px;
   }
 
   html[data-family]
@@ -2309,6 +2603,22 @@ html[data-family]
    7. Forced colours: plates keep real edges; art and lights drop out.
    ================================================================ */
 @media (forced-colors: active) {
+  /* The trigger keeps the system edge future-interface gives it. */
+  html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar .topbar-actions,
+      .manager-page > header.manager-topbar .detail-topbar-actions,
+      main.dream-page.dream-page > header.dream-site-header,
+      .rxs-page .rxs-local-nav-inner,
+      .library-page .library-topbar-actions,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar
+    )
+    > .side-panel-trigger.side-panel-trigger {
+    border: 1px solid ButtonText !important;
+  }
+
   html[data-family]
     body
     #site-side-panel.side-panel
@@ -2351,5 +2661,30 @@ html[data-family]
   html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before {
     border-color: CanvasText;
     color: CanvasText;
+  }
+
+  /* The current row's code is a Highlight chip (chrome-elevation unforces
+     it for that), never the edition's light. The id is doubled to outrank
+     the tile and chapter rules above. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel#site-side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"])
+    > i {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* The magnifier's handle is a shadow, which forced colours drop. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search::before {
+    forced-color-adjust: none;
+    border-color: ButtonText;
+    box-shadow: 5px 5px 0 -3.5px ButtonText;
   }
 }
