@@ -44,6 +44,7 @@ import ultraEffectsCss from "../styles-ultra-effects.css?url";
 import ultraMaterialsCss from "../styles-ultra-materials.css?url";
 import ultraTransitionsCss from "../styles-ultra-transitions.css?url";
 import stageCss from "../styles-stage.css?url";
+import stageShellCss from "../styles-stage-shell.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -181,6 +182,8 @@ export const Route = createRootRoute({
       // The site-wide interface tokens; each page family scopes its own
       // stage sheet to html[data-family].
       { rel: "stylesheet", href: stageCss },
+      // The command bar and the launcher menu, on every family.
+      { rel: "stylesheet", href: stageShellCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
