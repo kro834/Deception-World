@@ -36,9 +36,10 @@ async function verifyReader(page, route) {
   await page.goto(base + route);
   await ready(page);
   if (route === "/managers/lejas" && page.viewportSize().width < 760) {
+    // rx10 STAGE: phones show the portrait first, the name block directly beneath it.
     const name = await page.locator(".dossier-identity h1").boundingBox();
     const portrait = await page.locator(".manager-portrait-column").boundingBox();
-    assert.ok(name.y + name.height < portrait.y, "mobile identity precedes portrait");
+    assert.ok(portrait.y + portrait.height <= name.y + 1, "mobile portrait precedes identity");
   }
   await page.locator(".dossier-read-link").click();
   const destinations = await page

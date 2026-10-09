@@ -44,7 +44,7 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page {
   --sd-text-3: #93a4b5;
   --sd-pad: clamp(16px, 5vw, 44px);
   --sd-read: 720px;
-  --sd-stage-h: clamp(360px, 70svh, 980px);
+  --sd-stage-h: clamp(420px, 72svh, 980px);
   --sd-display: var(--dx-display, "Zen Kaku Gothic New", "Noto Sans JP", sans-serif);
   --sd-body: var(--dx-body, "Noto Sans JP", "Zen Kaku Gothic New", sans-serif);
   --sd-hud: var(--dx-hud, "Michroma", "Oxanium", "Noto Sans JP", sans-serif);
@@ -65,7 +65,8 @@ html[data-family="dossier"] body:has(> main.manager-page) {
 }
 
 /* The old lattice and its ring stand down: the stage carries the light. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign)
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
   > .manager-ambient {
   display: none;
 }
@@ -132,7 +133,9 @@ html[data-family="dossier"]
 /* ----------------------------------------------------------------
    1. The hero: stage first, then the name block (phones and tablets)
    ---------------------------------------------------------------- */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > #dossier-profile.manager-hero {
   position: relative;
   z-index: 1;
   /* A grid (a legacy tablet rule forces display: grid !important): one
@@ -151,22 +154,36 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossi
 }
 
 /* The stage: a lit floor with the person's light behind and below. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-portrait-column {
   position: relative;
   z-index: 0;
   order: 0;
+  /* Headroom: the figure stands on the floor with the stage's light above
+     it. It also keeps a file's carried art (the load gate docks it onto
+     this portrait) clear of the top of the screen, where the art has just
+     passed: no second flash there on a phone. */
+  --sd-headroom: clamp(96px, 18svh, 160px);
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   justify-items: center;
   align-items: end;
   width: auto;
   height: var(--sd-stage-h);
   margin: 0;
-  padding: 0;
+  padding: var(--sd-headroom) 0 0;
   isolation: isolate;
   overflow: clip;
   background:
-    radial-gradient(48% 40% at 50% 40%, var(--sd-glow), transparent 72%),
-    radial-gradient(70% 16% at 50% 100%, color-mix(in srgb, var(--sd-accent) 40%, transparent), transparent 72%),
+    radial-gradient(46% 34% at 50% 0%, var(--sd-glow), transparent 74%),
+    radial-gradient(56% 46% at 50% 44%, var(--sd-glow-soft), transparent 72%),
+    radial-gradient(
+      70% 16% at 50% 100%,
+      color-mix(in srgb, var(--sd-accent) 40%, transparent),
+      transparent 72%
+    ),
     repeating-linear-gradient(90deg, rgb(255 255 255 / 2.4%) 0 1px, transparent 1px 32px),
     linear-gradient(180deg, #060a12 0%, #03050a 100%);
   animation: none;
@@ -175,7 +192,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 /* The floor line and the rim light along the stage's edge. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-portrait-column::before {
+  #dossier-profile
+  .manager-portrait-column::before {
   content: "";
   position: absolute;
   z-index: 3;
@@ -184,21 +202,32 @@ html[data-family="dossier"]
   left: 0;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--sd-rule) 22%, var(--sd-accent-2) 50%, var(--sd-rule) 78%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--sd-rule) 22%,
+    var(--sd-accent-2) 50%,
+    var(--sd-rule) 78%,
+    transparent
+  );
 }
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-portrait-column::after {
+  #dossier-profile
+  .manager-portrait-column::after {
   content: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-portrait-frame {
   position: relative;
   top: auto;
   z-index: 1;
   display: block;
-  width: min(100%, calc(var(--sd-stage-h) * 0.8));
+  width: min(100%, max(288px, calc((var(--sd-stage-h) - var(--sd-headroom, 0px)) * 0.8)));
   height: 100%;
   max-height: none;
   aspect-ratio: auto;
@@ -215,7 +244,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-portrait-frame
+  #dossier-profile
+  .manager-portrait-frame
   > img {
   display: block;
   width: 100%;
@@ -231,7 +261,8 @@ html[data-family="dossier"]
    sides, and takes the person's light from above. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-portrait-frame::before {
+  #dossier-profile
+  .manager-portrait-frame::before {
   content: "";
   position: absolute;
   z-index: 2;
@@ -239,7 +270,12 @@ html[data-family="dossier"]
   pointer-events: none;
   background:
     linear-gradient(180deg, transparent 56%, rgb(3 5 10 / 58%) 82%, #03050a 100%),
-    radial-gradient(120% 90% at 50% 34%, transparent 52%, rgb(3 5 10 / 46%) 82%, rgb(3 5 10 / 82%) 100%);
+    radial-gradient(
+      120% 90% at 50% 34%,
+      transparent 52%,
+      rgb(3 5 10 / 46%) 82%,
+      rgb(3 5 10 / 82%) 100%
+    );
   border: 0;
   opacity: 1;
   animation: none;
@@ -249,15 +285,27 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-portrait-frame::after {
+  #dossier-profile
+  .manager-portrait-frame::after {
   content: "";
   position: absolute;
   z-index: 2;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(70% 34% at 50% 0%, var(--sd-glow-soft), transparent 70%);
+  /* The person's light: a halo from above and a lit floor under the
+     figure (plain alpha, no blending). */
+  background:
+    radial-gradient(
+      64% 26% at 50% 0%,
+      color-mix(in srgb, var(--sd-accent) 24%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      84% 20% at 50% 104%,
+      color-mix(in srgb, var(--sd-accent) 46%, transparent),
+      transparent 72%
+    );
   border: 0;
-  mix-blend-mode: screen;
   opacity: 1;
   animation: none;
   clip-path: none;
@@ -265,7 +313,10 @@ html[data-family="dossier"]
 }
 
 /* The file's number: a small HUD chip on the stage, not a numeral block. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-numeral {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-numeral {
   position: absolute;
   z-index: 4;
   top: 16px;
@@ -291,7 +342,10 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 }
 
 /* The name block, directly under the stage. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-introduction {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-introduction {
   position: relative;
   z-index: 1;
   order: 0;
@@ -303,7 +357,10 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
   padding: clamp(22px, 5vw, 40px) var(--sd-pad) clamp(28px, 6vw, 48px);
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .dossier-identity {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity {
   display: block;
   margin: 0;
   padding: 0;
@@ -313,9 +370,13 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .manager-file-number,
-html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-eyebrow {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -332,7 +393,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .manager-file-number::before {
   content: "";
   flex: none;
@@ -341,16 +403,27 @@ html[data-family="dossier"]
   background: var(--sd-accent);
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-eyebrow {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-eyebrow {
   display: flex;
   color: var(--sd-text-3);
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-eyebrow i {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-eyebrow
+  i {
   display: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .dossier-identity h1 {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity
+  h1 {
   display: flex;
   flex-direction: column-reverse;
   gap: 10px;
@@ -363,7 +436,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .manager-introduction
+  #dossier-profile
+  .manager-introduction
   .dossier-identity
   h1
   small {
@@ -377,7 +451,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .manager-display-name {
   display: block;
   margin: 0;
@@ -400,7 +475,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .manager-title {
   margin: 18px 0 0;
   padding: 0 0 0 14px;
@@ -413,7 +489,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .dossier-read-link {
   display: inline-flex;
   align-items: center;
@@ -424,9 +501,7 @@ html[data-family="dossier"]
   border: 1px solid var(--sd-line-2);
   border-radius: var(--dx-radius, 6px);
   color: var(--sd-text);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 6%), transparent),
-    var(--sd-plate);
+  background: linear-gradient(180deg, rgb(255 255 255 / 6%), transparent), var(--sd-plate);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
   font: 600 14px/1 var(--sd-display);
   letter-spacing: 0.06em;
@@ -436,7 +511,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .dossier-identity
+  #dossier-profile
+  .dossier-identity
   .dossier-read-link
   > span {
   color: var(--sd-accent);
@@ -445,14 +521,18 @@ html[data-family="dossier"]
 @media (hover: hover) and (pointer: fine) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
-    #dossier-profile .dossier-identity
+    #dossier-profile
+    .dossier-identity
     .dossier-read-link:hover {
     border-color: var(--sd-rule);
   }
 }
 
 /* The lines: one plate, the first line large. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-quotes {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes {
   position: relative;
   display: grid;
   gap: 12px;
@@ -461,14 +541,16 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-
   border: 1px solid var(--sd-line);
   border-left: 2px solid var(--sd-accent);
   border-radius: 0 var(--dx-radius, 6px) var(--dx-radius, 6px) 0;
-  background:
-    linear-gradient(90deg, var(--sd-glow-soft), transparent 46%),
-    var(--sd-plate);
+  background: linear-gradient(90deg, var(--sd-glow-soft), transparent 46%), var(--sd-plate);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   clip-path: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-quotes q {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes
+  q {
   display: block;
   margin: 0;
   padding: 0;
@@ -479,14 +561,18 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile .manager-quotes
+  #dossier-profile
+  .manager-quotes
   q:first-child {
   color: var(--sd-text);
   font: 600 clamp(17px, 4.6vw, 21px) / 1.7 var(--sd-display);
 }
 
 /* The facts: a ruled list, label over value. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-facts {
   position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -500,8 +586,13 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
   clip-path: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts > div {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-facts
+  > div {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
   align-content: start;
   min-width: 0;
@@ -512,7 +603,11 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
   background: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts dt {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-facts
+  dt {
   margin: 0;
   color: var(--sd-text-3);
   font: 400 12px/1.5 var(--sd-hud);
@@ -522,7 +617,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-profile .manager-facts
+  #dossier-profile
+  .manager-facts
   dd:not(.is-redacted) {
   margin: 0;
   color: var(--sd-text);
@@ -530,7 +626,10 @@ html[data-family="dossier"]
   letter-spacing: 0.02em;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-scroll-cue {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-scroll-cue {
   display: none;
 }
 
@@ -674,7 +773,10 @@ html[data-family="dossier"]
 }
 
 /* Section heads: a numbered HUD kicker over a Japanese title. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-section-index {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .manager-section-index {
   position: relative;
   display: flex;
   align-items: center;
@@ -690,7 +792,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-section-index
+  #dossier-index
+  .manager-section-index
   > span {
   display: inline-grid;
   place-items: center;
@@ -712,7 +815,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-section-index
+  #dossier-index
+  .manager-section-index
   > small {
   margin: 0;
   color: var(--sd-text-2);
@@ -722,7 +826,10 @@ html[data-family="dossier"]
 }
 
 /* The contents: a compact index of the chapters. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .dossier-contents {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -734,7 +841,11 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
   box-shadow: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents a {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .dossier-contents
+  a {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) 20px;
   align-items: center;
@@ -754,7 +865,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .dossier-contents
+  #dossier-index
+  .dossier-contents
   a
   .dossier-contents-number {
   color: var(--sd-accent);
@@ -764,7 +876,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .dossier-contents
+  #dossier-index
+  .dossier-contents
   a
   .dossier-contents-copy {
   display: grid;
@@ -774,7 +887,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .dossier-contents
+  #dossier-index
+  .dossier-contents
   a
   .dossier-contents-copy
   small {
@@ -785,7 +899,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .dossier-contents
+  #dossier-index
+  .dossier-contents
   a
   .dossier-contents-copy
   b {
@@ -796,7 +911,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .dossier-contents
+  #dossier-index
+  .dossier-contents
   a
   .dossier-contents-arrow {
   color: var(--sd-text-3);
@@ -804,21 +920,31 @@ html[data-family="dossier"]
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents a:hover {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-index
+    .dossier-contents
+    a:hover {
     background: linear-gradient(90deg, var(--sd-glow-soft), transparent 70%);
   }
 }
 
 /* The chapters: dark reading plates on the stage material (the white
    paper slabs are gone). */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-sections {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .manager-sections {
   display: grid;
   gap: 16px;
   margin: 0;
   padding: 0 0 clamp(48px, 9vw, 96px);
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-section {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .manager-copy-section {
   position: relative;
   display: block;
   width: auto;
@@ -838,11 +964,15 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section:target {
+  #dossier-index
+  .manager-copy-section:target {
   border-color: var(--sd-rule);
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-heading {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .manager-copy-heading {
   position: static;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -856,7 +986,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section
+  #dossier-index
+  .manager-copy-section
   .manager-copy-heading
   > span {
   grid-row: 1;
@@ -873,7 +1004,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section
+  #dossier-index
+  .manager-copy-section
   .manager-copy-heading
   > span::after {
   content: none;
@@ -881,7 +1013,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section
+  #dossier-index
+  .manager-copy-section
   .manager-copy-heading
   > p {
   grid-row: 1;
@@ -893,7 +1026,8 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section
+  #dossier-index
+  .manager-copy-section
   .manager-copy-heading
   h2 {
   grid-column: 1 / -1;
@@ -904,7 +1038,10 @@ html[data-family="dossier"]
   text-shadow: none;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-body {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index
+  .manager-copy-body {
   display: grid;
   gap: 1em;
   margin: 0;
@@ -914,7 +1051,8 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  #dossier-index .manager-copy-section
+  #dossier-index
+  .manager-copy-section
   .manager-copy-body
   p {
   margin: 0;
@@ -1125,7 +1263,11 @@ html[data-family="dossier"]
   gap: 0.8em;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page #identity-records figcaption dl {
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  figcaption
+  dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 16px;
@@ -1268,7 +1410,11 @@ html[data-family="dossier"]
   border-radius: 0;
   background:
     radial-gradient(48% 40% at 50% 40%, var(--sd-glow), transparent 72%),
-    radial-gradient(70% 16% at 50% 100%, color-mix(in srgb, var(--sd-accent) 40%, transparent), transparent 72%),
+    radial-gradient(
+      70% 16% at 50% 100%,
+      color-mix(in srgb, var(--sd-accent) 40%, transparent),
+      transparent 72%
+    ),
     repeating-linear-gradient(90deg, rgb(255 255 255 / 2.4%) 0 1px, transparent 1px 32px),
     linear-gradient(180deg, #060a12 0%, #03050a 100%);
   box-shadow: none;
@@ -1302,7 +1448,13 @@ html[data-family="dossier"]
   z-index: 1;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 64%, rgb(3 5 10 / 60%) 88%, #03050a 100%);
+  background:
+    radial-gradient(
+      84% 18% at 50% 104%,
+      color-mix(in srgb, var(--sd-accent) 40%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, transparent 64%, rgb(3 5 10 / 60%) 88%, #03050a 100%);
   border: 0;
   opacity: 1;
   animation: none;
@@ -1315,7 +1467,7 @@ html[data-family="dossier"]
   position: absolute;
   z-index: 3;
   top: 16px;
-  left: 16px;
+  left: calc(var(--sd-figure-inset, 0px) + 16px);
   right: auto;
   bottom: auto;
   display: inline-grid;
@@ -1343,11 +1495,20 @@ html[data-family="dossier"]
   content: none;
 }
 
+/* The figure's edge on a wide stacked stage: its chip and its HOLD +
+   SLIDE sit on the figure, not at the far edges of the stage. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual) {
+  --sd-figure-inset: max(0px, calc((100% - min(100%, var(--sd-stage-h) * 0.8)) / 2));
+}
+
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup-visual
   > .form-pickup-plus {
   z-index: 4;
+  right: calc(var(--sd-figure-inset) + 18px);
 }
 
 html[data-family="dossier"]
@@ -1583,10 +1744,15 @@ html[data-family="dossier"]
   > .manager-pagination
   > a
   > span:last-child {
+  position: static;
+  inset: auto;
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: center;
   display: grid;
+  margin: 0;
+  transform: none;
+  translate: none;
   place-items: center;
   width: 44px;
   height: 44px;
@@ -1655,6 +1821,9 @@ html[data-family="dossier"]
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-content: center;
+  justify-content: stretch;
+  justify-self: stretch;
+  text-align: left;
   gap: 2px 12px;
   width: auto;
   min-height: 72px;
@@ -1674,6 +1843,7 @@ html[data-family="dossier"]
   > .manager-pagination
   .dossier-index-return
   > span {
+  display: block;
   grid-column: 1;
   color: var(--sd-text-3);
   font: 400 12px/1.4 var(--sd-hud);
@@ -1746,6 +1916,7 @@ html[data-family="dossier"]
   > a:last-child:not(:first-child)
   > b {
   position: relative;
+  inset: auto;
   z-index: 2;
   grid-row: 2;
   font: 700 clamp(32px, 9vw, 64px) / 1.15 var(--sd-display);
@@ -1757,6 +1928,7 @@ html[data-family="dossier"]
   > a:last-child:not(:first-child)
   > small {
   position: relative;
+  inset: auto;
   z-index: 2;
   grid-row: 3;
   margin-top: 6px;
@@ -1768,6 +1940,7 @@ html[data-family="dossier"]
   > a:last-child:not(:first-child)
   > span:last-child {
   position: relative;
+  inset: auto;
   z-index: 2;
   grid-row: 2 / span 2;
   width: 56px;
@@ -1860,14 +2033,16 @@ html[data-family="dossier"]
 }
 
 /* A list of one (ダンテ): the index itself is the end card. */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
   > .manager-pagination:not(:has(> a))
   .dossier-index-return {
   min-height: 160px;
   padding-block: 32px;
 }
 
-html[data-family="dossier"] main.manager-page.manager-page.manager-page
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
   > .manager-pagination:not(:has(> a))
   .dossier-index-return
   > b {
@@ -1886,14 +2061,18 @@ html[data-family="dossier"]
    7. Wide screens: the split stage
    ---------------------------------------------------------------- */
 @supports (grid-template-rows: subgrid) {
-  @media (min-width: 1100px) and (min-height: 540px), (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
     html[data-family="dossier"] main.manager-page.manager-page.manager-page {
       --sd-stage-w: clamp(400px, 46vw, 820px);
       --sd-pad: clamp(32px, 4.4vw, 80px);
       --sd-read: 680px;
       --sd-stage-h: calc(100svh - var(--sd-head));
       display: grid;
-      grid-template-columns: [full-start stage-start] minmax(0, var(--sd-stage-w)) [stage-end read-start] minmax(0, 1fr) [read-end full-end];
+      grid-template-columns: [full-start stage-start] minmax(
+          0,
+          var(--sd-stage-w)
+        ) [stage-end read-start] minmax(0, 1fr) [read-end full-end];
       grid-template-rows: repeat(8, auto);
       align-items: start;
       gap: 0;
@@ -1902,7 +2081,9 @@ html[data-family="dossier"]
     /* The hero spans the first four rows (the name block, the ruler, the
        related records and the chapters): its stage stays pinned beside
        all of them. */
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > #dossier-profile.manager-hero {
       grid-column: full;
       grid-row: 1 / 5;
       align-self: stretch;
@@ -1913,11 +2094,17 @@ html[data-family="dossier"]
       pointer-events: none;
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero > * {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > #dossier-profile.manager-hero
+      > * {
       pointer-events: auto;
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-column {
       position: sticky;
       top: var(--sd-head);
       grid-column: stage;
@@ -1925,9 +2112,13 @@ html[data-family="dossier"]
       align-self: start;
       height: var(--sd-stage-h);
       margin-top: var(--sd-head);
+      padding-top: 0;
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column::after {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-column::after {
       content: "";
       position: absolute;
       z-index: 3;
@@ -1936,26 +2127,73 @@ html[data-family="dossier"]
       bottom: 0;
       width: 1px;
       pointer-events: none;
-      background: linear-gradient(180deg, transparent, var(--sd-rule) 30%, var(--sd-accent-2) 62%, transparent);
+      background: linear-gradient(
+        180deg,
+        transparent,
+        var(--sd-rule) 30%,
+        var(--sd-accent-2) 62%,
+        transparent
+      );
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-frame {
       width: 100%;
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame::before {
+    /* …and a rim light along the stage's edge, toward the words. */
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-frame::after {
+      background:
+        linear-gradient(
+          270deg,
+          color-mix(in srgb, var(--sd-accent) 26%, transparent),
+          transparent 84px
+        ),
+        radial-gradient(
+          64% 26% at 50% 0%,
+          color-mix(in srgb, var(--sd-accent) 24%, transparent),
+          transparent 72%
+        ),
+        radial-gradient(
+          84% 20% at 50% 104%,
+          color-mix(in srgb, var(--sd-accent) 46%, transparent),
+          transparent 72%
+        );
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-frame::before {
       background:
         linear-gradient(180deg, transparent 60%, rgb(3 5 10 / 52%) 84%, #03050a 100%),
-        linear-gradient(90deg, rgb(3 5 10 / 50%), transparent 18%, transparent 74%, rgb(3 5 10 / 72%)),
+        linear-gradient(
+          90deg,
+          rgb(3 5 10 / 50%),
+          transparent 18%,
+          transparent 74%,
+          rgb(3 5 10 / 72%)
+        ),
         radial-gradient(110% 80% at 46% 36%, transparent 50%, rgb(3 5 10 / 50%) 100%);
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-numeral {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-numeral {
       top: 24px;
       left: 24px;
     }
 
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-introduction {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-introduction {
       grid-column: read;
       grid-row: 1;
       align-self: end;
@@ -1967,7 +2205,8 @@ html[data-family="dossier"]
 
     html[data-family="dossier"]
       main.manager-page.manager-page.manager-page:not(.is-sovereign)
-      #dossier-profile .dossier-identity
+      #dossier-profile
+      .dossier-identity
       .manager-display-name {
       font-size: clamp(56px, 6.2vw, 100px);
     }
@@ -2071,7 +2310,13 @@ html[data-family="dossier"]
       width: 1px;
       height: auto;
       pointer-events: none;
-      background: linear-gradient(180deg, transparent, var(--sd-rule) 30%, var(--sd-accent-2) 62%, transparent);
+      background: linear-gradient(
+        180deg,
+        transparent,
+        var(--sd-rule) 30%,
+        var(--sd-accent-2) 62%,
+        transparent
+      );
       border: 0;
       opacity: 1;
       animation: none;
@@ -2203,7 +2448,10 @@ html[data-family="dossier"]
 
 /* Tablets (portrait) and wide phones: the stacked file, centred. */
 @media (min-width: 761px) {
-  html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-facts {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -2238,9 +2486,68 @@ html[data-family="dossier"]
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
-    #dossier-profile .dossier-identity
+    #dossier-profile
+    .dossier-identity
     .manager-display-name {
     font-size: clamp(56px, 8vw, 80px);
+  }
+}
+
+/* Phones: the facts as one ruled list, the label beside its value. */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-facts
+    > div {
+    grid-template-columns: minmax(84px, 0.36fr) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 4px 14px;
+  }
+}
+
+/* Phones: the previous file and the index each take a full row. */
+@media (max-width: 560px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:first-child {
+    grid-row: 2;
+    grid-column: 1;
+    border-right: 0;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .manager-pagination-index {
+    grid-row: 3;
+    grid-column: 1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
+    > a:first-child {
+    grid-row: 1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
+    > .manager-pagination-index {
+    grid-row: 2;
   }
 }
 
@@ -2260,7 +2567,8 @@ html[data-family="dossier"]
    The first rank: its own gold name, lines and status plate (the
    sovereign sheet's paint) at the stage's sizes.
    ---------------------------------------------------------------- */
-html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sovereign
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.is-sovereign
   #dossier-profile
   .dossier-identity
   .manager-display-name {
@@ -2269,8 +2577,10 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sover
 }
 
 @supports (grid-template-rows: subgrid) {
-  @media (min-width: 1100px) and (min-height: 540px), (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
-    html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sovereign
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page.is-sovereign
       #dossier-profile
       .dossier-identity
       .manager-display-name {
@@ -2284,7 +2594,12 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sover
    ---------------------------------------------------------------- */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  :is(.dossier-read-link, .dossier-reader-links a, .dossier-contents a, .manager-pagination a):focus-visible {
+  :is(
+    .dossier-read-link,
+    .dossier-reader-links a,
+    .dossier-contents a,
+    .manager-pagination a
+  ):focus-visible {
   outline: 2px solid var(--dx-focus, #fff0b5);
   outline-offset: -2px;
   box-shadow: none;
@@ -2293,7 +2608,8 @@ html[data-family="dossier"]
 @media (forced-colors: active) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
-    #dossier-profile .dossier-identity
+    #dossier-profile
+    .dossier-identity
     .manager-display-name {
     background: none;
     color: CanvasText;
@@ -2306,9 +2622,7 @@ html[data-family="dossier"]
     border: 1px solid CanvasText;
   }
 
-  html[data-family="dossier"]
-    main.manager-page.manager-page.manager-page
-    > .dossier-reader {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page > .dossier-reader {
     background-color: Canvas;
   }
 
