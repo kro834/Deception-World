@@ -1,0 +1,977 @@
+/* ================================================================
+   Form Archive — power profile, VS overlay radar and leaderboard
+   (rx9 Cockpit edition, 2026-10-10)
+
+   Paint for the three instruments archive-profile.js builds:
+   - section.archive-profile, the selected form's six-axis radar, its
+     ability octagon and the read-out of the six printed values, in the
+     form's own light (--active / --active-rgb from the master);
+   - section.archive-versus-profile, side A (ice) and side B (violet)
+     on the same six axes above the analyzer;
+   - button.archive-sort in the ratio table's header cells, the rank
+     plate drawn on each row's name cell, and the sorted column's light.
+   Still: no keyframes, no transitions, nothing fetched. Placement of
+   the two sections (grid areas, widths, outer margins) is left to the
+   cockpit and versus sheets: the defaults here sit in :where() so any
+   later rule wins. Text keeps the 12px floor.
+   ================================================================ */
+
+/* ---------- Placement defaults (zero specificity, so layouts override) ---------- */
+:where(html[data-embedded-archive]) :where(.archive-profile) {
+  margin-block-start: 16px;
+}
+
+:where(html[data-embedded-archive]) :where(.archive-versus-profile) {
+  margin-block: 0 16px;
+}
+
+/* ---------- 1. The power profile plate ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile {
+  position: relative !important;
+  display: grid !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 16px 16px 18px !important;
+  border: 0 !important;
+  border-radius: 2px !important;
+  color: #e8f6ff !important;
+  background:
+    var(--aa-sheen),
+    radial-gradient(ellipse 62% 52% at 28% 40%, rgb(var(--active-rgb, 122 232 255) / 13%), transparent 72%),
+    var(--aa-lattice),
+    var(--aa-card) !important;
+  box-shadow:
+    var(--aa-bevel),
+    0 0 0 1px rgb(var(--active-rgb, 122 232 255) / 26%),
+    var(--aa-drop-card) !important;
+  overflow: hidden !important;
+}
+
+/* Off screen the plate skips style and layout (on phones it sits under
+   the poster, so a form switch no longer styles its ~80 nodes in the
+   switch's own task). The placeholder follows its drawn height per width
+   band; `auto` keeps the real one once drawn. */
+@supports (content-visibility: auto) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 455px;
+  }
+
+  @media (max-width: 1409px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile {
+      contain-intrinsic-block-size: auto 830px;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile {
+      contain-intrinsic-block-size: auto 525px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile {
+      contain-intrinsic-block-size: auto 880px;
+    }
+  }
+}
+
+/* A seam of the form's light along the top edge. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, var(--active, #7ae8ff), var(--active-2, #a48bff) 60%, transparent) !important;
+  pointer-events: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile__head, .archive-versus-profile__head) {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 4px 12px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 0 10px !important;
+  border-bottom: 1px solid rgb(122 232 255 / 14%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__kicker {
+  flex-basis: 100% !important;
+  margin: 0 !important;
+  font: 400 12px/1.2 var(--ar-hud) !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+  color: var(--active, #7ae8ff) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile__title, .archive-versus-profile__title) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.04em !important;
+  color: #f4fbff !important;
+  background: none !important;
+  text-shadow: 0 0 18px rgb(var(--active-rgb, 122 232 255) / 35%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__title::before,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__title::after {
+  content: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__scale {
+  margin: 0 0 0 auto !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.06em !important;
+  color: rgb(214 236 248 / 62%) !important;
+}
+
+/* The two charts share a row when there is room, and wrap on phones. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__charts {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__chart {
+  display: grid !important;
+  gap: 8px !important;
+  justify-items: center !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__chart--radar {
+  flex: 1.3 1 196px !important;
+  max-width: 300px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__chart--ability {
+  flex: 1 1 168px !important;
+  max-width: 240px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__plot {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__chart--radar .archive-profile__plot {
+  min-width: 190px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__svg {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis {
+  position: absolute !important;
+  pointer-events: none !important;
+  transform: translate(calc(-50% + var(--ax, 0) * 28%), calc(-50% + var(--ay, 0) * 40%)) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.04em !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  color: rgb(232 246 255 / 88%) !important;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 90%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis[data-state="gap"] {
+  color: rgb(214 236 248 / 45%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis[data-state="unmeasurable"] {
+  color: rgb(255 176 226 / 82%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis--ability {
+  transform: translate(-50%, -50%) !important;
+  /* The script puts a line break after each ・ in these names. */
+  white-space: pre-line !important;
+  font-weight: 600 !important;
+  color: rgb(214 236 248 / 80%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__empty {
+  position: absolute !important;
+  inset: 50% auto auto 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-width: 70% !important;
+  margin: 0 !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.08em !important;
+  text-align: center !important;
+  color: #e8f6ff !important;
+  background: rgb(2 5 10 / 82%) !important;
+  box-shadow: 0 0 0 1px rgb(var(--active-rgb, 122 232 255) / 30%) !important;
+}
+
+/* ---------- SVG marks ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-ring {
+  fill: none;
+  stroke: rgb(122 232 255 / 14%);
+  stroke-width: 1;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-ring--rim {
+  fill: rgb(2 5 10 / 45%);
+  stroke: rgb(122 232 255 / 30%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-shape {
+  fill: rgb(var(--active-rgb, 122 232 255) / 24%);
+  stroke: var(--active, #7ae8ff);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-shape--glow {
+  fill: none;
+  stroke-width: 7;
+  stroke-opacity: 0.18;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-shape--open {
+  fill: none;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-shape--ability {
+  fill: rgb(var(--active-2-rgb, 164 139 255) / 22%);
+  stroke: var(--active-2, #a48bff);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-shape--ability.ap-shape--glow {
+  fill: none;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark {
+  fill: #f4fbff;
+  stroke: var(--active, #7ae8ff);
+  stroke-width: 1.6;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-mark--estimate {
+  fill: #02050a;
+  stroke-width: 1.6;
+  stroke-dasharray: 2 2;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-mark--unmeasurable {
+  fill: #02050a;
+  stroke: #ffb0e2;
+  stroke-width: 1.6;
+  stroke-dasharray: 3 2.4;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark--span-low {
+  fill: #02050a;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark--yops {
+  fill: var(--active-2, #a48bff);
+  stroke: #f4fbff;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark--level2 {
+  fill: #f4fbff;
+  stroke: var(--active-2, #a48bff);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark--level1 {
+  fill: #02050a;
+  stroke: var(--active-2, #a48bff);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-mark--unstated {
+  fill: none;
+  stroke: rgb(214 236 248 / 55%);
+  stroke-width: 1.4;
+  stroke-dasharray: 2.4 2;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-span {
+  stroke: var(--active-2, #a48bff);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-opacity: 0.85;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-chevron {
+  fill: none;
+  stroke: #f0cf86;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-halo {
+  fill: none;
+  stroke: var(--active-2, #a48bff);
+  stroke-width: 1.4;
+  stroke-opacity: 0.8;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-halo--outer {
+  stroke-opacity: 0.35;
+  stroke-dasharray: 2 3;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-glyph {
+  paint-order: stroke;
+  stroke: #02050a;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  fill: #f0cf86;
+  font-family: var(--ar-mono);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-glyph--yops {
+  fill: #d9ccff;
+  font-size: 13.5px;
+  letter-spacing: 0.08em;
+}
+
+/* ---------- Ability legend ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__legend {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 4px 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: rgb(214 236 248 / 72%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__legend .archive-profile__kicker {
+  flex-basis: auto !important;
+  color: var(--active-2, #a48bff) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__legend > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__key {
+  display: inline-block !important;
+  box-sizing: border-box !important;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--active-2, #a48bff) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__key--2 {
+  background: #f4fbff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__key--0 {
+  border-style: dashed !important;
+  border-color: rgb(214 236 248 / 55%) !important;
+}
+
+/* Realm's — means 非搭載: the vertex sits at the centre, so the key is a bare dash. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [data-absent="fitted"] .archive-profile__key--0 {
+  width: 10px !important;
+  height: 0 !important;
+  border: 0 !important;
+  border-top: 2px solid rgb(214 236 248 / 55%) !important;
+  border-radius: 0 !important;
+}
+
+/* ---------- The read-out: six printed values as instrument figures ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__readout {
+  display: grid !important;
+  /* One, two or three columns, never a ragged 4 + 2. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(7rem, calc((100% - 12px) / 3))), 1fr)) !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading {
+  position: relative !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-content: flex-start !important;
+  align-items: baseline !important;
+  gap: 3px 8px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 8px 10px 9px !important;
+  list-style: none !important;
+  background: linear-gradient(180deg, rgb(244 251 255 / 5%), rgb(2 5 10 / 40%)) !important;
+  box-shadow: var(--aa-bevel-soft), 0 0 0 1px rgb(122 232 255 / 10%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+  width: 2px !important;
+  height: auto !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgb(var(--active-rgb, 122 232 255) / 70%) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading:is([data-state="none"], [data-state="unknown"], [data-state="qualitative"], [data-state="unmeasurable"])::before {
+  background: rgb(214 236 248 / 22%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading-label {
+  flex: 1 0 100% !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.06em !important;
+  color: rgb(214 236 248 / 70%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading-label small {
+  font: 400 12px/1 var(--ar-mono) !important;
+  letter-spacing: 0.1em !important;
+  color: rgb(var(--active-rgb, 122 232 255) / 75%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading-value {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  font-family: var(--ar-mono) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.02em !important;
+  font-variant-numeric: tabular-nums !important;
+  overflow-wrap: break-word !important;
+  color: #f4fbff !important;
+  text-shadow: 0 0 12px rgb(var(--active-rgb, 122 232 255) / 30%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading:is([data-state="none"], [data-state="unknown"], [data-state="qualitative"]) .archive-profile__reading-value {
+  color: rgb(214 236 248 / 58%) !important;
+  text-shadow: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__tag {
+  display: inline-block !important;
+  padding: 1px 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.06em !important;
+  color: rgb(214 236 248 / 80%) !important;
+  border: 1px solid rgb(214 236 248 / 28%) !important;
+  border-radius: 2px !important;
+  background: rgb(2 5 10 / 50%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__tag[data-state="lower-bound"] {
+  color: #f0cf86 !important;
+  border-color: rgb(240 207 134 / 50%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__tag[data-state="estimate"] {
+  color: #d9ccff !important;
+  border-style: dashed !important;
+  border-color: rgb(164 139 255 / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__tag[data-state="unmeasurable"] {
+  color: #ffc4ea !important;
+  border-style: dashed !important;
+  border-color: rgb(255 92 200 / 55%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__tag[data-state="unlimited"] {
+  color: #7ae8ff !important;
+  border-color: rgb(122 232 255 / 55%) !important;
+}
+
+/* ---------- 2. The VS overlay radar ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile {
+  position: relative !important;
+  display: grid !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 16px !important;
+  border: 0 !important;
+  border-radius: 2px !important;
+  color: #e8f6ff !important;
+  background:
+    var(--aa-sheen),
+    radial-gradient(ellipse 46% 60% at 34% 50%, rgb(122 232 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 46% 60% at 66% 50%, rgb(164 139 255 / 10%), transparent 70%),
+    var(--aa-lattice),
+    var(--aa-card) !important;
+  box-shadow: var(--aa-bevel), var(--aa-rim-ice), var(--aa-drop-card) !important;
+  overflow: hidden !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .archive-profile__kicker {
+  background: linear-gradient(90deg, #7ae8ff, #a48bff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__title {
+  font-size: 16px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__body {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px 20px !important;
+  min-width: 0 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__plot {
+  flex: 0 1 340px !important;
+  min-width: 190px !important;
+  max-width: 360px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side .ap-shape {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side="a"] .ap-shape {
+  fill: rgb(122 232 255 / 17%);
+  stroke: #7ae8ff;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side="b"] .ap-shape {
+  fill: rgb(164 139 255 / 17%);
+  stroke: #a48bff;
+  stroke-dasharray: 6 3;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side .ap-shape--glow {
+  fill: none;
+  stroke-dasharray: none;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side="a"] .ap-mark {
+  fill: #f4fbff;
+  stroke: #7ae8ff;
+  stroke-width: 1.6;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side="b"] .ap-mark {
+  fill: #02050a;
+  stroke: #a48bff;
+  stroke-width: 2;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side .ap-mark--unmeasurable {
+  fill: #02050a;
+  stroke-dasharray: 3 2.4;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend {
+  display: grid !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend li {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  color: #f4fbff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend li::before {
+  content: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend b {
+  display: inline-grid !important;
+  place-items: center !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  font: 400 12px/1 var(--ar-hud) !important;
+  color: #02050a !important;
+  background: #7ae8ff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend li[data-side="b"] b {
+  background: #a48bff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__swatch {
+  display: inline-block !important;
+  flex: 0 0 22px !important;
+  height: 0 !important;
+  border-top: 3px solid #7ae8ff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend li[data-side="b"] .archive-versus-profile__swatch {
+  border-top-style: dashed !important;
+  border-top-color: #a48bff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend span {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__note {
+  flex-basis: 100% !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* ---------- 3. The leaderboard: sort buttons, rank plates, the sorted column ---------- */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) thead th.archive-sort-head {
+  padding-block: 0 !important;
+  vertical-align: bottom !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort {
+  appearance: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  text-align: start !important;
+  text-transform: inherit !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort:focus {
+  outline: none !important;
+}
+
+/* Inside the button: the scroll wrapper clips its top and the next
+   sticky header cell paints over its right edge. The type selectors
+   outrank the archive-wide focus rule (outline-offset: 3px). */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) thead th > button.archive-sort:focus-visible {
+  outline: 2px solid var(--ar-focus, #fff0b5) !important;
+  outline-offset: -3px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) thead th.archive-sort-head:not(:first-child):focus-within {
+  z-index: 5 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__label {
+  min-width: 0 !important;
+}
+
+/* Two stacked chevrons; the lit one is the direction in force. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon {
+  position: relative !important;
+  flex: 0 0 9px !important;
+  width: 9px !important;
+  height: 14px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::before,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  border-inline: 4.5px solid transparent !important;
+  opacity: 0.38 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::before {
+  top: 0 !important;
+  border-bottom: 5px solid currentColor !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::after {
+  bottom: 0 !important;
+  border-top: 5px solid currentColor !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort[data-sort-restore] .archive-sort__icon {
+  display: none !important;
+}
+
+/* Once sorted, the two archive-order columns show a small return mark. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) table[data-sort-col] .archive-sort[data-sort-restore] .archive-sort__icon {
+  display: inline-block !important;
+  flex: 0 0 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid currentColor !important;
+  border-right-color: transparent !important;
+  border-radius: 50% !important;
+  opacity: 0.7 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) table[data-sort-col] .archive-sort[data-sort-restore] .archive-sort__icon::before {
+  top: -3px !important;
+  left: 5px !important;
+  border-inline: 0 !important;
+  border-top: 3px solid transparent !important;
+  border-bottom: 3px solid transparent !important;
+  border-left: 4px solid currentColor !important;
+  opacity: 1 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) table[data-sort-col] .archive-sort[data-sort-restore] .archive-sort__icon::after {
+  content: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) th[aria-sort] {
+  color: #f0cf86 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) th[aria-sort="ascending"] .archive-sort__icon::before,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) th[aria-sort="descending"] .archive-sort__icon::after {
+  opacity: 1 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort:hover .archive-sort__label {
+    text-decoration: underline !important;
+    text-decoration-thickness: 1px !important;
+    text-underline-offset: 4px !important;
+  }
+}
+
+/* The rank plate on each row's name cell (no new column): from 621px it
+   stands centred in the slot the versus sheet opens at the head of the
+   cell once the table is sorted (the sticky cell is its containing block). */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody th[data-rank-label]::before {
+  content: attr(data-rank-label) !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: calc((var(--vs-rank-slot, 2.6rem) - 26px) / 2) !important;
+  translate: 0 -50% !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  min-width: 26px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  font: 700 12px/1 var(--ar-mono) !important;
+  letter-spacing: 0.04em !important;
+  color: #7ae8ff !important;
+  background: rgb(2 5 10 / 70%) !important;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 40%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody tr[data-rank="1"] > th[data-rank-label]::before {
+  color: #02050a !important;
+  background: var(--aa-metal-gold, #f0cf86) !important;
+  box-shadow: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody tr[data-rank="2"] > th[data-rank-label]::before {
+  color: #02050a !important;
+  background: var(--aa-metal-ice, #d9f7ff) !important;
+  box-shadow: none !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody tr[data-rank="3"] > th[data-rank-label]::before {
+  color: #02050a !important;
+  background: linear-gradient(180deg, #efe6ff, #a48bff) !important;
+  box-shadow: none !important;
+}
+
+/* The sorted column carries a faint gold light. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(
+  table[data-sort-col="2"] :is(td, th):nth-child(2),
+  table[data-sort-col="3"] :is(td, th):nth-child(3),
+  table[data-sort-col="4"] :is(td, th):nth-child(4),
+  table[data-sort-col="5"] :is(td, th):nth-child(5),
+  table[data-sort-col="6"] :is(td, th):nth-child(6),
+  table[data-sort-col="7"] :is(td, th):nth-child(7),
+  table[data-sort-col="8"] :is(td, th):nth-child(8),
+  table[data-sort-col="9"] :is(td, th):nth-child(9),
+  table[data-sort-col="10"] :is(td, th):nth-child(10)
+) {
+  background-image: linear-gradient(rgb(240 207 134 / 7%), rgb(240 207 134 / 7%)) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort-status {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ---------- Phones: tighter plates ---------- */
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) {
+    padding: 14px 12px 16px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__reading-value {
+    font-size: 14px !important;
+  }
+
+  /* The narrow sticky name column: the rank plate sits above the name. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody th[data-rank-label]::before {
+    position: static !important;
+    translate: none !important;
+    display: grid !important;
+    width: max-content !important;
+    margin: 0 0 4px !important;
+  }
+}
+
+/* ---------- Forced colours ---------- */
+@media (forced-colors: active) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) svg {
+    forced-color-adjust: none;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) :is(.ap-ring, .ap-ring--rim) {
+    fill: none;
+    stroke: GrayText;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) :is(.ap-shape, .ap-span, .ap-chevron, .ap-halo) {
+    fill: none;
+    stroke: Highlight;
+  }
+
+  /* The side rules carry more classes than the shared ones above. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side] :is(.ap-shape, .ap-shape--glow) {
+    fill: none;
+    stroke: Highlight;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side="b"] :is(.ap-shape, .ap-shape--glow) {
+    stroke: LinkText;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile .avp-side[data-side] .ap-mark {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile, .archive-versus-profile) .ap-mark {
+    fill: Canvas;
+    stroke: CanvasText;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile .ap-glyph {
+    fill: CanvasText;
+    stroke: Canvas;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile__axis, .archive-profile__reading-value, .archive-profile__tag, .archive-profile__empty, .archive-versus-profile__legend li, .archive-profile__kicker) {
+    color: CanvasText !important;
+    background: Canvas !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    text-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.archive-profile__reading, .archive-profile__tag) {
+    border: 1px solid CanvasText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) thead th > button.archive-sort:focus-visible {
+    outline-color: Highlight !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) tbody th[data-rank-label]::before {
+    color: CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+    border: 1px solid CanvasText !important;
+  }
+
+  /* Keep the transparent triangle sides; show only the active arrow once sorted. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon {
+    forced-color-adjust: none !important;
+    color: ButtonText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-sort__icon::after {
+    opacity: 1 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) th[aria-sort="ascending"] .archive-sort__icon::after,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) th[aria-sort="descending"] .archive-sort__icon::before {
+    visibility: hidden !important;
+  }
+}

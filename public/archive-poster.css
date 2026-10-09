@@ -1,0 +1,883 @@
+/* ==================================================================
+   Form Archive rx9 — the phone POSTER VIEWER (900px and narrower).
+
+   The selected form reads like a collectible poster: the art fills the
+   card in portrait, lit by the form's accent, with its name, tier and
+   badge laid over the art's foot on a dark scrim. The read-outs follow
+   as a two-column instrument grid, then the power profile (another
+   layer), the lead, the abilities and the lore.
+
+   All stacking happens inside the article's own grid
+   (.detail-overview becomes display: contents), so nothing escapes the
+   article box. Overlays never take pointer events; the art trigger's
+   centre stays clickable. Nothing here applies at 901px and wider.
+   ================================================================== */
+
+@media (max-width: 900px) {
+  /* ---------- Tokens -------------------------------------------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) {
+    --px-poster-w: min(100%, calc(78vh * 0.8));
+    --px-ink: #03060c;
+    --px-plate: linear-gradient(168deg, rgb(244 251 255 / 7%) 0, rgb(13 24 38 / 96%) 14%, rgb(6 12 21 / 98%) 62%, #03060c 100%);
+  }
+
+  @supports (height: 1svh) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) {
+      --px-poster-w: min(100%, calc(78svh * 0.8));
+    }
+  }
+
+  /* ---------- The detail section: a frameless poster stand ------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) section[aria-labelledby$="saga-detail-title-v5"] {
+    row-gap: 10px !important;
+  }
+
+  /* The heading becomes a small kicker line above the poster. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) section[aria-labelledby$="saga-detail-title-v5"] > h2[id$="saga-detail-title-v5"] {
+    gap: 8px !important;
+    margin: 2px 0 0 !important;
+    color: var(--ar-text-2, #c9d6e2) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1.4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) section[aria-labelledby$="saga-detail-title-v5"] > h2[id$="saga-detail-title-v5"]::before {
+    flex: 0 0 18px !important;
+    width: 18px !important;
+    height: 2px !important;
+    background: rgb(var(--active-rgb, 118 216 255)) !important;
+    box-shadow: 0 0 8px rgb(var(--active-rgb, 118 216 255) / 70%) !important;
+  }
+
+  /* ---------- The toolbar: a compact poster header --------------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-height: 0 !important;
+    padding: 6px 6px 6px 8px !important;
+    border-color: rgb(var(--active-rgb, 118 216 255) / 34%) !important;
+    background:
+      linear-gradient(90deg, rgb(var(--active-rgb, 118 216 255) / 16%), transparent 46%),
+      var(--px-plate) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 14%),
+      inset 0 -1px 0 rgb(0 0 0 / 70%),
+      inset 3px 0 0 rgb(var(--active-rgb, 118 216 255)) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .toolbar-index {
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 0 4px !important;
+    border: 0 !important;
+    font-family: var(--ar-hud) !important;
+    font-size: 13px !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .detail-toolbar-copy {
+    min-width: 0 !important;
+  }
+
+  /* The form name wraps rather than ending in an ellipsis. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .detail-toolbar-copy strong {
+    overflow: visible !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+  }
+
+  /* ---------- The poster: art and nameplate share one grid cell --- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail {
+    position: relative !important;
+    isolation: isolate;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row !important;
+    gap: 0 !important;
+    align-content: start !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview {
+    display: contents !important;
+  }
+
+  /* Unknown children sort after the known rows. Every row keeps its own
+     height (start, not stretch): a stretched item is laid out a second
+     time at the row's height, which doubled the layout of a form switch
+     (Realm's long lore). The nameplate keeps its own alignment (end). */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > *,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > * {
+    grid-column: 1 !important;
+    order: 9;
+    align-self: start !important;
+    min-width: 0 !important;
+  }
+
+  /* The poster's light box: the form's accent behind and around the art. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail::before {
+    content: "";
+    z-index: 0;
+    grid-row: 1;
+    grid-column: 1;
+    display: block;
+    margin: -10px -2px -6px;
+    border-radius: 10px;
+    background:
+      radial-gradient(70% 46% at 50% 34%, rgb(var(--active-rgb, 118 216 255) / 30%), transparent 72%),
+      radial-gradient(60% 10% at 50% 98%, rgb(var(--active-2-rgb, 143 123 255) / 34%), transparent 72%),
+      repeating-linear-gradient(90deg, rgb(var(--active-rgb, 118 216 255) / 5%) 0 1px, transparent 1px 24px),
+      repeating-linear-gradient(0deg, rgb(var(--active-rgb, 118 216 255) / 5%) 0 1px, transparent 1px 24px),
+      #02050a;
+    pointer-events: none;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger {
+    position: relative !important;
+    z-index: 1 !important;
+    grid-row: 1 !important;
+    order: 0;
+    justify-self: center !important;
+    width: var(--px-poster-w) !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: 4 / 5 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #02050a !important;
+    box-shadow:
+      0 0 0 1px rgb(var(--active-rgb, 118 216 255) / 62%),
+      0 0 0 4px rgb(2 5 10 / 90%),
+      0 0 0 5px rgb(var(--active-rgb, 118 216 255) / 22%),
+      0 22px 44px -18px rgb(var(--active-rgb, 118 216 255) / 46%) !important;
+  }
+
+  /* Focus ring. The poster fills the article's width, so the outside
+     outline was clipped, and the energy layer (z-index 2) paints over an
+     inset one. The otherwise hidden ::after draws the ring above both. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger:focus-visible::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 4 !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    border: 0 !important;
+    border-radius: inherit !important;
+    background: none !important;
+    box-shadow: inset 0 0 0 3px var(--ar-focus, #fff0b5) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger > .form-art {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: cover !important;
+    object-position: 50% 0 !important;
+  }
+
+  /* Accent light from the top, the foot darkened for the nameplate. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger::before {
+    inset: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background:
+      radial-gradient(90% 42% at 50% 0%, rgb(var(--active-rgb, 118 216 255) / 24%), transparent 70%),
+      linear-gradient(122deg, transparent 30%, rgb(255 255 255 / 7%) 42%, transparent 47%, transparent 60%, rgb(var(--active-2-rgb, 143 123 255) / 9%) 68%, transparent 76%),
+      linear-gradient(180deg, transparent 52%, rgb(2 5 10 / 50%) 70%, rgb(2 5 10 / 92%) 100%),
+      linear-gradient(90deg, rgb(2 5 10 / 40%), transparent 14%, transparent 86%, rgb(2 5 10 / 40%)) !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger::after {
+    display: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .art-trigger :is(.v6s-art-hud, .art-energy-field) {
+    pointer-events: none !important;
+  }
+
+  /* The zoom tag: a small glyph chip in the poster's top corner, clear of
+     the helmet's crest and of the nameplate. The words stay in the
+     button's own label (aria-label); the chip only shows the glyph. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .art-trigger .art-zoom-label {
+    inset: 8px 8px auto auto !important;
+    display: grid !important;
+    place-items: center !important;
+    gap: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 4px !important;
+    font-size: 0 !important;
+    letter-spacing: 0 !important;
+    background: rgb(2 5 10 / 72%) !important;
+    box-shadow: inset 0 0 0 1px rgb(var(--active-rgb, 118 216 255) / 46%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .art-trigger .art-zoom-label > span {
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  /* The nameplate: laid over the art's foot on a dark scrim. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head {
+    position: relative !important;
+    z-index: 2 !important;
+    grid-row: 1 !important;
+    order: 0;
+    align-self: end !important;
+    justify-self: center !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: start !important;
+    gap: 8px !important;
+    width: var(--px-poster-w) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 56px 16px 16px !important;
+    border: 0 !important;
+    border-radius: 0 0 6px 6px !important;
+    background: linear-gradient(180deg, transparent 0, rgb(2 5 10 / 66%) 34%, rgb(2 5 10 / 92%) 100%) !important;
+    box-shadow: inset 0 -3px 0 rgb(var(--active-rgb, 118 216 255)) !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head > div {
+    order: 2;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head :is(.viz-badge, .data-badge) {
+    order: 1;
+    margin: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head h3 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: clamp(1.4rem, 7.2vw, 2.6rem) !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    background-image: linear-gradient(180deg, #fff 30%, rgb(var(--active-rgb, 118 216 255) / 100%) 140%) !important;
+    filter: drop-shadow(0 2px 6px rgb(0 0 0 / 90%));
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head p {
+    margin: 6px 0 0 !important;
+    color: #dbe7f1 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 95%);
+  }
+
+  /* ---------- Under the poster ------------------------------------ */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .realm-voice {
+    order: 4;
+    justify-content: center !important;
+    margin: 18px 0 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .detail-lead {
+    order: 5;
+    margin: 16px 0 0 !important;
+    padding: 2px 0 2px 14px !important;
+    border-left: 2px solid rgb(var(--active-rgb, 118 216 255) / 70%) !important;
+    font-size: 14.5px !important;
+    line-height: 1.85 !important;
+  }
+
+  /* The read-outs: a two-column instrument grid. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .viz-grid {
+    order: 2;
+    counter-reset: px-spec;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px !important;
+    margin: 18px 0 0 !important;
+    padding: 1px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background: rgb(var(--active-rgb, 118 216 255) / 26%) !important;
+    box-shadow: 0 16px 32px -22px rgb(0 0 0 / 90%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item {
+    counter-increment: px-spec;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 12px 12px 13px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background:
+      linear-gradient(180deg, rgb(var(--active-rgb, 118 216 255) / 7%), transparent 60%),
+      #050a12 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item .text-muted {
+    order: 0 !important;
+    display: flex !important;
+    align-items: baseline;
+    gap: 6px;
+    color: #9fb4c6 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item .text-muted::before {
+    content: counter(px-spec, decimal-leading-zero);
+    flex: none;
+    color: rgb(var(--active-rgb, 118 216 255));
+    font-family: var(--ar-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item .spec-value {
+    order: 1 !important;
+    font-family: var(--ar-mono) !important;
+    font-size: clamp(15px, 4.2vw, 18px) !important;
+    font-weight: 700 !important;
+    line-height: 1.32 !important;
+    /* Japanese words (測定不能, 高継戦) break at their seams, not inside. */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* The narrowest phones: one read-out per row, so a value is never
+     squeezed into a 130px cell. */
+  @media (max-width: 360px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .viz-grid {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .viz-grid > .spec-item:last-child:nth-child(odd) {
+      grid-column: auto !important;
+    }
+  }
+
+  /* Room for the power profile another layer appends after the grid. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .archive-profile {
+    order: 3;
+    margin-top: 18px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > :is(.ability-layout, .rexonance-setting-dossier) {
+    order: 6;
+    margin: 20px 0 0 !important;
+  }
+  /* ---------- The tier rail: each card a small poster (4:5) --------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression .stage[data-tier] .stage-forms > .form-chip {
+    aspect-ratio: 4 / 5;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Names fit the small poster: an eight-kana name such as
+     バーストフォーム stays on one line, longer ones break at the ・. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression .stage[data-tier] .stage-forms > .form-chip {
+    padding-inline: 6px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression .stage[data-tier] .stage-forms > .form-chip .chip-name {
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* Tablets and large phones (621–900): two small posters a row inside
+     each tier, so the 4:5 cards stay compact instead of filling the
+     tier column. */
+  @media (min-width: 621px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression .stage[data-tier] .stage-forms {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    /* A last tier alone on its row (Realm's tier 04) spans the row and
+       lays its posters out side by side instead of leaving a void. */
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression > .stage[data-tier]:last-child:nth-child(3n+1) {
+      grid-column: 1 / -1 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .progression > .stage[data-tier]:last-child:nth-child(3n+1) .stage-forms {
+      grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)) !important;
+    }
+  }
+
+  /* ---------- The hero: the key visual as the archive's own poster --
+     The copy box dissolves (display: contents) so the eyebrow and the
+     title share the poster's grid cell and sit on its foot; the lead,
+     actions and figures follow under the poster. */
+  /* The hero's single track must not grow to the nav's min-content
+     width (621–760 it did, and the poster's right rim was clipped). */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid {
+    --px-hero-w: min(100%, calc(78vh * 0.8));
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) auto auto !important;
+    gap: 0 !important;
+    row-gap: 0 !important;
+  }
+
+  @supports (height: 1svh) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid {
+      --px-hero-w: min(100%, calc(78svh * 0.8));
+    }
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid > .hero-copy {
+    display: contents !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid > .cover-gallery-solo-v14 {
+    grid-row: 1 / 4 !important;
+    grid-column: 1 !important;
+    justify-self: center !important;
+    width: var(--px-hero-w) !important;
+    max-width: 100% !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-frame-v14 {
+    height: auto !important;
+    aspect-ratio: 4 / 5 !important;
+    border-radius: 6px !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    box-shadow:
+      0 0 0 1px rgb(var(--active-rgb, 118 216 255) / 62%),
+      0 0 0 4px rgb(2 5 10 / 90%),
+      0 0 0 5px rgb(var(--active-rgb, 118 216 255) / 22%),
+      0 22px 44px -18px rgb(var(--active-rgb, 118 216 255) / 40%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-frame-v14 img {
+    object-position: 50% 30% !important;
+  }
+
+  /* The vignette becomes the poster's foot scrim, lit from the top. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-vignette-v14 {
+    inset: 0 !important;
+    z-index: 1 !important;
+    display: block !important;
+    opacity: 1 !important;
+    background:
+      radial-gradient(90% 40% at 50% 0%, rgb(var(--active-rgb, 118 216 255) / 18%), transparent 70%),
+      linear-gradient(180deg, transparent 26%, rgb(2 5 10 / 58%) 46%, rgb(2 5 10 / 88%) 70%, #02050a 100%) !important;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--active-rgb, 118 216 255) / 62%),
+      inset 0 -3px 0 rgb(var(--active-rgb, 118 216 255)) !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-corners-v14 {
+    inset: 10px !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-caption-v14 {
+    top: 12px !important;
+    right: 12px !important;
+    max-width: calc(100% - 24px) !important;
+    padding: 5px 8px !important;
+    border-radius: 3px !important;
+    background: rgb(2 5 10 / 70%) !important;
+    box-shadow: inset 0 0 0 1px rgb(var(--active-rgb, 118 216 255) / 40%) !important;
+    pointer-events: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-caption-v14 strong {
+    white-space: nowrap !important;
+    letter-spacing: 0 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-eyebrow,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid [id$="archive-title"] {
+    position: relative !important;
+    z-index: 3 !important;
+    grid-column: 1 !important;
+    justify-self: center !important;
+    width: var(--px-hero-w) !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-inline: 18px !important;
+    pointer-events: none;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-eyebrow {
+    grid-row: 2 !important;
+    margin-bottom: 10px !important;
+    color: #9cefff !important;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 95%), 0 0 10px rgb(2 5 10 / 90%);
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid [id$="archive-title"] {
+    grid-row: 3 !important;
+    padding-bottom: 20px !important;
+    filter: drop-shadow(0 2px 8px rgb(0 0 0 / 85%));
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-lead {
+    grid-row: 4 !important;
+    margin: 20px 0 0 !important;
+    padding-inline: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-actions {
+    grid-row: 5 !important;
+    margin: 18px 0 0 !important;
+    padding-inline: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-metrics {
+    grid-row: 6 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    margin: 18px 0 0 !important;
+    padding-inline: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-metrics > div {
+    min-width: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .hero-metrics dd {
+    font-size: clamp(13px, 4.2vw, 18px) !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- The phone dock: the current name never spills ------- */
+  @media (max-width: 620px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current {
+      min-width: 0 !important;
+      overflow: hidden !important;
+      justify-items: center !important;
+      text-align: center !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current > span {
+      display: block !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current > small {
+      display: block !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+      font-size: 12px !important;
+      letter-spacing: 0.06em !important;
+      text-align: center !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current > small {
+      letter-spacing: 0 !important;
+    }
+  }
+
+  /* Narrow phones: a shorter scrim keeps the plate under the centre. */
+  @media (max-width: 400px) {
+    /* The header's name gets its own full-width line under the index
+       and arrows, so long names never break mid-word. */
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .toolbar-index {
+      grid-row: 1 !important;
+      grid-column: 1 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .detail-nav {
+      grid-row: 1 !important;
+      grid-column: 3 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-toolbar .detail-toolbar-copy {
+      grid-row: 2 !important;
+      grid-column: 1 / -1 !important;
+      padding: 0 4px 2px !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head {
+      gap: 6px !important;
+      padding: 34px 14px 14px !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head p {
+      margin-top: 4px !important;
+      font-size: 12px !important;
+    }
+  }
+
+  /* ---------- Short landscape phones: poster beside its read-outs --- */
+  @media (orientation: landscape) and (max-height: 520px) {
+    /* The hero poster is small here: the caption drops the archive name
+       (the wordmark above repeats it) and may wrap once. */
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-caption-v14 > span {
+      display: none !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-grid .solo-cover-caption-v14 strong {
+      white-space: normal !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail {
+      grid-template-columns: auto minmax(0, 1fr) !important;
+      grid-template-rows: 78vh !important;
+      column-gap: 16px !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > *,
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > * {
+      grid-column: 1 / -1 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail::before,
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head,
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger {
+      grid-column: 1 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .viz-grid {
+      grid-row: 1 / span 2 !important;
+      grid-column: 2 !important;
+      align-self: start !important;
+      margin: 0 !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger,
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head {
+      width: calc(78vh * 0.8) !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head {
+      padding: 36px 12px 12px !important;
+    }
+
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head h3 {
+      font-size: 22px !important;
+    }
+  }
+
+  /* ---------- Abilities and lore: the poster's reverse ------------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .ability-layout {
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  /* Realm's lore cards keep their own height beside a long ability panel. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .ability-layout .realm-lore-grid {
+    align-content: start !important;
+    grid-auto-rows: auto !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .ability-layout > :is(div, .ability-panel, aside) {
+    border-color: rgb(var(--active-rgb, 118 216 255) / 22%) !important;
+    box-shadow: inset 3px 0 0 rgb(var(--active-rgb, 118 216 255) / 80%), 0 14px 28px -20px rgb(0 0 0 / 90%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .ability-layout :is(h3, h4) {
+    color: rgb(var(--active-rgb, 118 216 255)) !important;
+  }
+
+  /* ---------- The Rexonance dossier ------------------------------- */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier {
+    gap: 14px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier > :is(.rexonance-setting-hero, .rexonance-setting-block) {
+    gap: 12px !important;
+    padding: 16px 14px 18px !important;
+    border: 1px solid rgb(var(--active-rgb, 158 124 255) / 22%) !important;
+    border-radius: 6px !important;
+    background:
+      linear-gradient(180deg, rgb(var(--active-rgb, 158 124 255) / 8%), transparent 120px),
+      #060b14 !important;
+    box-shadow: inset 3px 0 0 rgb(var(--active-rgb, 158 124 255) / 85%), 0 14px 28px -20px rgb(0 0 0 / 90%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier > .rexonance-setting-hero {
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgb(var(--active-rgb, 158 124 255) / 18%), transparent 70%),
+      radial-gradient(70% 50% at 50% 100%, rgb(var(--active-2-rgb, 91 228 255) / 12%), transparent 70%),
+      #060b14 !important;
+    text-align: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-setting-hero, .rexonance-setting-block) > small {
+    color: rgb(var(--active-rgb, 158 124 255)) !important;
+    font-family: var(--ar-hud) !important;
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1.5 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-setting-hero, .rexonance-setting-block) > h4 {
+    margin: -4px 0 2px !important;
+    font-size: 19px !important;
+    font-weight: 800 !important;
+    line-height: 1.4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-setting-hero, .rexonance-setting-block) > p {
+    color: #d2d7e1 !important;
+    font-size: 14.5px !important;
+    line-height: 1.95 !important;
+  }
+
+  /* Transformation calls read as a wrapped strip of tags. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-call-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-call-grid span {
+    max-width: 100% !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgb(var(--active-rgb, 158 124 255) / 40%) !important;
+    border-radius: 3px !important;
+    background: rgb(var(--active-rgb, 158 124 255) / 10%) !important;
+    font-family: var(--ar-mono) !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* The standard spec repeats the read-outs: a tight two-column table. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1px !important;
+    padding: 1px !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    background: rgb(var(--active-rgb, 158 124 255) / 22%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-stat-grid > div {
+    align-content: start !important;
+    gap: 4px !important;
+    padding: 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #050a12 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-stat-grid > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-stat-grid dt {
+    padding: 0 !important;
+    color: #9fb4c6 !important;
+    font-size: 12px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-stat-grid dd {
+    padding: 0 !important;
+    font-family: var(--ar-mono) !important;
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-ability-grid, .rexonance-finisher-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-ability-grid, .rexonance-finisher-grid) > article {
+    gap: 6px !important;
+    padding: 12px 12px 13px !important;
+    border: 1px solid rgb(255 255 255 / 7%) !important;
+    border-radius: 4px !important;
+    background: linear-gradient(90deg, rgb(var(--active-rgb, 158 124 255) / 9%), transparent 40%), #08101b !important;
+    box-shadow: inset 2px 0 0 rgb(var(--active-rgb, 158 124 255) / 70%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-ability-grid, .rexonance-finisher-grid) h5 {
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    line-height: 1.5 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier :is(.rexonance-ability-grid, .rexonance-finisher-grid) p {
+    color: #cdd3de !important;
+    font-size: 14px !important;
+    line-height: 1.85 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail .rexonance-setting-dossier .rexonance-setting-block li {
+    font-size: 14.5px !important;
+    line-height: 1.8 !important;
+  }
+}
+
+/* Forced colours: the poster keeps a visible frame and plain text. */
+@media (forced-colors: active) and (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-overview > .art-trigger {
+    border: 1px solid CanvasText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head {
+    background: Canvas !important;
+    forced-color-adjust: none;
+    color: CanvasText;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head h3 {
+    color: CanvasText !important;
+    background: none !important;
+    filter: none;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="saga-detail-v5"] > .form-detail > .detail-head :is(p, .viz-badge, .data-badge) {
+    color: CanvasText !important;
+    text-shadow: none !important;
+    background: Canvas !important;
+  }
+}

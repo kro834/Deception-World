@@ -1,0 +1,1156 @@
+/* Archive versus (rx9, Cockpit edition): the two-form analyzer becomes a
+   VS screen, the ratio and performance tables a leaderboard, the ability
+   matrix a heat-map, and the footer an end plate.
+
+   Contract kept here (see the rx9 audits):
+   - The analyzer's two sides stay equal width with identical content above
+     their rows; nothing here differs between side A and side B except the
+     mirrored direction of a gradient and the text alignment of the legend,
+     both of which leave every box the same height. No hover lift.
+   - .compare-layout is never moved: from 1181px it is display: contents,
+     so its fieldsets join the section's grid by named areas. The CSS-only
+     swap (#…swap-state:checked ~ .compare-layout) swaps those areas.
+   - .compare-diff and the profile package's .archive-versus-profile are
+     placed by grid area only; they stay inside the analyzer root.
+   - No motion; no 100vw; no fixed layers; the document stays the scroller.
+   - Table cells keep their display; the phone table widths in
+     archive-mobile-stability.css are not overridden. */
+
+/* ================================================================
+   Tokens for this layer.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) {
+  --vs-a: 122 232 255;
+  --vs-b: 164 139 255;
+  --vs-rank-slot: 2.6rem;
+}
+
+/* ================================================================
+   1. Analyzer, all widths: fighter plates for the two channels.
+   The legend (LEFT / FORM A / CYAN CHANNEL) becomes a lit plate in the
+   channel colour, the same box on both sides.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 0.5rem;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 0.7rem !important;
+  padding: 0.5rem 0.75rem 0.5rem 0.9rem !important;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgb(var(--side-rgb, 122 232 255) / 100%) 0 3px, transparent 3px),
+    linear-gradient(90deg, rgb(var(--side-rgb, 122 232 255) / 26%), rgb(var(--side-rgb, 122 232 255) / 6%) 62%, rgb(var(--side-rgb, 122 232 255) / 0%)),
+    #050a14 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 -1px 0 rgb(var(--side-rgb, 122 232 255) / 30%),
+    0 0 18px -6px rgb(var(--side-rgb, 122 232 255) / 60%) !important;
+  color: #b9c6d6 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b legend {
+  justify-content: flex-end;
+  padding: 0.5rem 0.9rem 0.5rem 0.75rem !important;
+  background:
+    linear-gradient(270deg, rgb(var(--side-rgb, 164 139 255) / 100%) 0 3px, transparent 3px),
+    linear-gradient(270deg, rgb(var(--side-rgb, 164 139 255) / 26%), rgb(var(--side-rgb, 164 139 255) / 6%) 62%, rgb(var(--side-rgb, 164 139 255) / 0%)),
+    #050a14 !important;
+  text-align: end;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend b {
+  color: var(--side-accent, #7ae8ff) !important;
+  text-shadow: 0 0 12px rgb(var(--side-rgb, 122 232 255) / 70%) !important;
+}
+
+/* Card names in the analyzer break at their own seams (・, spaces), not
+   inside a word; overflow-wrap from the older layers still catches a single
+   word wider than the card. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-form-card h3 {
+  word-break: keep-all;
+}
+
+/* The fighter's name is the select itself: a name plate in its colour. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-native-select {
+  border-radius: 6px !important;
+  background-color: #03060c !important;
+  background-image: linear-gradient(90deg, rgb(var(--side-rgb, 122 232 255) / 14%), rgb(var(--side-rgb, 122 232 255) / 0%) 70%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(0 0 0 / 80%),
+    inset 0 -1px 0 rgb(255 255 255 / 8%),
+    0 0 0 1px rgb(var(--side-rgb, 122 232 255) / 55%),
+    0 0 22px -6px rgb(var(--side-rgb, 122 232 255) / 55%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-native-select:focus-visible {
+  outline: 2px solid var(--ar-focus, #fff0b5) !important;
+  outline-offset: 2px !important;
+}
+
+/* ================================================================
+   2. VS SCREEN (≥1181px): A | centre | B.
+   Section children, in DOM order: .compare-header, input#…swap-state
+   (absolute, sr-only), .compare-toolbar, .compare-sync-rail,
+   p.compare-same-note[hidden], .compare-diff (lazy), [.archive-versus-profile
+   from the profile package], .compare-layout (contents: fieldset A,
+   fieldset B, and its ::before / ::after), noscript.
+   The swap toolbar sits above the face-off, so the eye and the Tab key
+   both meet it before side A and side B. The centre column is sized in
+   px, so enlarged text cannot squeeze the two sides.
+   ================================================================ */
+@media (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section {
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 23vw, 416px) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto auto auto auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      "head head head"
+      "rail rail rail"
+      "note note note"
+      ".    tool ."
+      "a    mark b"
+      "a    diff b"
+      "a    prof b" !important;
+    column-gap: clamp(0.9rem, 1.3vw, 1.4rem) !important;
+    row-gap: 0 !important;
+    align-items: start !important;
+    /* Clip, not hide: the section must not become the sticky radar's
+       scroll container. */
+    overflow: clip !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-header {
+    grid-area: head !important;
+    margin-bottom: 0.9rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-sync-rail {
+    grid-area: rail !important;
+    margin: 0 0 1.4rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-same-note {
+    grid-area: note !important;
+    margin: 0 0 1rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-toolbar {
+    grid-area: tool !important;
+    position: relative;
+    z-index: 2;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 0.6rem !important;
+    min-width: 0 !important;
+    margin: 0 0 1rem !important;
+    padding: 0.75rem 0.85rem !important;
+    text-align: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-toolbar .compare-live-status {
+    width: auto !important;
+    max-width: none !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-toolbar .compare-swap {
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff {
+    grid-area: diff !important;
+    position: relative;
+    z-index: 2;
+    min-width: 0 !important;
+    margin: 0 0 1rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile {
+    grid-area: prof !important;
+    position: sticky !important;
+    top: 1rem !important;
+    z-index: 2;
+    align-self: start !important;
+    min-width: 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > noscript {
+    grid-column: 1 / -1;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout {
+    display: contents !important;
+  }
+
+  /* Each plate ends with its own content (no empty plate under it). */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout > .compare-side-a {
+    grid-area: a !important;
+    align-self: start !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout > .compare-side-b {
+    grid-area: b !important;
+    align-self: start !important;
+  }
+
+  /* The no-script swap: the two channels trade places by area. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > [id$="saga-compare-swap-state"]:checked ~ .compare-layout > .compare-side-a {
+    grid-area: b !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > [id$="saga-compare-swap-state"]:checked ~ .compare-layout > .compare-side-b {
+    grid-area: a !important;
+  }
+
+  /* The centre column: a light well from the emblem down. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout::before {
+    content: "" !important;
+    grid-column: 2 !important;
+    grid-row: 5 / -1 !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 0 !important;
+    align-self: stretch !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 100%;
+    translate: none !important;
+    border-radius: 4px;
+    background:
+      linear-gradient(90deg, rgb(var(--vs-a) / 95%), rgb(var(--vs-a) / 0%) 42%, rgb(var(--vs-b) / 0%) 58%, rgb(var(--vs-b) / 95%)) 0 57px / 100% 2px no-repeat,
+      linear-gradient(90deg, rgb(var(--vs-a) / 30%), rgb(var(--vs-a) / 0%) 40%, rgb(var(--vs-b) / 0%) 60%, rgb(var(--vs-b) / 30%)) 0 50px / 100% 16px no-repeat,
+      radial-gradient(ellipse 70% 220px at 50% 70px, rgb(255 255 255 / 10%), transparent 70%),
+      radial-gradient(ellipse 60% 260px at 0% 80px, rgb(var(--vs-a) / 22%), transparent 70%),
+      radial-gradient(ellipse 60% 260px at 100% 80px, rgb(var(--vs-b) / 24%), transparent 70%),
+      linear-gradient(90deg, transparent calc(50% - 1px), rgb(var(--vs-a) / 34%) calc(50% - 1px), rgb(var(--vs-b) / 34%) calc(50% + 1px), transparent calc(50% + 1px)) 0 150px / 100% calc(100% - 150px) no-repeat,
+      linear-gradient(180deg, rgb(6 12 24 / 70%), rgb(4 8 16 / 30%) 40%, transparent) !important;
+    box-shadow: inset 1px 0 0 rgb(var(--vs-a) / 14%), inset -1px 0 0 rgb(var(--vs-b) / 14%) !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+
+  /* The VS emblem: a cut-metal plate between the two fighter plates. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout::after {
+    content: "VS" !important;
+    grid-area: mark !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 3 !important;
+    display: grid !important;
+    place-items: center !important;
+    justify-self: center !important;
+    width: min(100%, 12.5rem) !important;
+    height: 7.25rem !important;
+    margin: 0 0 0.9rem !important;
+    translate: none !important;
+    clip-path: polygon(14% 0, 86% 0, 100% 50%, 86% 100%, 14% 100%, 0 50%) !important;
+    background:
+      linear-gradient(118deg, transparent 30%, rgb(255 255 255 / 34%) 46%, transparent 58%),
+      linear-gradient(90deg, rgb(var(--vs-a) / 95%), rgb(214 246 255) 48%, rgb(230 222 255) 52%, rgb(var(--vs-b) / 95%)) !important;
+    color: #02050a !important;
+    font: 400 clamp(2.9rem, 3.6vw, 3.8rem)/1 var(--ar-hud, "Michroma", sans-serif) !important;
+    font-synthesis: none;
+    letter-spacing: 0.04em !important;
+    text-indent: 0.04em;
+    text-shadow: 0 1px 0 rgb(255 255 255 / 55%);
+    filter: drop-shadow(0 0 18px rgb(var(--vs-a) / 45%)) drop-shadow(0 0 26px rgb(var(--vs-b) / 40%));
+    pointer-events: none !important;
+  }
+
+  /* Fighter plates at full size. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend {
+    min-height: 4.4rem;
+    align-content: center;
+    padding: 0.7rem 1rem 0.7rem 1.15rem !important;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b legend {
+    padding: 0.7rem 1.15rem 0.7rem 1rem !important;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend b {
+    flex-basis: 100%;
+    order: -1;
+    min-width: 0;
+    font: 400 clamp(1.3rem, 1.75vw, 1.75rem)/1.1 var(--ar-hud, "Michroma", sans-serif) !important;
+    letter-spacing: 0.08em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend :is(span, small) {
+    min-width: 0;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend :is(span, small) {
+    font-size: 12px !important;
+    letter-spacing: 0.16em !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-native-select {
+    min-height: 64px !important;
+    font-size: clamp(19px, 1.55vw, 23px) !important;
+    font-weight: 850 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b .compare-native-select {
+    background-image: linear-gradient(270deg, rgb(var(--side-rgb, 164 139 255) / 14%), rgb(var(--side-rgb, 164 139 255) / 0%) 70%) !important;
+  }
+
+  /* The spec difference reads as a single column in the centre. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff {
+    padding: 0.85rem !important;
+    border-color: transparent !important;
+    border-radius: 6px !important;
+    background:
+      linear-gradient(90deg, rgb(var(--vs-a) / 80%), rgb(var(--vs-b) / 80%)) 0 0 / 100% 2px no-repeat,
+      linear-gradient(180deg, rgb(10 18 32 / 92%), rgb(4 8 16 / 94%)) !important;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 0 0 1px rgb(255 255 255 / 7%), 0 18px 36px -24px rgb(0 0 0 / 90%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-head {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-pair {
+    justify-content: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-rows {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.4rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-row {
+    padding: 0.55rem 0.65rem !important;
+    border-radius: 4px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-row[data-measured] .compare-diff-side-cell {
+    grid-template-columns: 1rem minmax(0, 1fr) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-diff .compare-diff-bar {
+    grid-column: 2;
+  }
+
+  /* Advantage counters face each other: A reads left, B mirrored. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b .compare-advantage-summary {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    text-align: end;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b .compare-advantage-summary :is(span, small) {
+    grid-column: 2 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b .compare-advantage-summary b {
+    grid-column: 1 !important;
+  }
+}
+
+/* ================================================================
+   3. Lighter face-off (901–1180px): diff above, the two sides below,
+   a VS emblem between the two fighter plates.
+   ================================================================ */
+@media (min-width: 901px) and (max-width: 1180px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-layout::after {
+    top: 6px !important;
+    width: 76px !important;
+    height: 52px !important;
+    clip-path: polygon(16% 0, 84% 0, 100% 50%, 84% 100%, 16% 100%, 0 50%) !important;
+    background:
+      linear-gradient(118deg, transparent 30%, rgb(255 255 255 / 34%) 46%, transparent 58%),
+      linear-gradient(90deg, rgb(var(--vs-a)), rgb(214 246 255) 48%, rgb(230 222 255) 52%, rgb(var(--vs-b))) !important;
+    font: 400 22px/1 var(--ar-hud, "Michroma", sans-serif) !important;
+    filter: drop-shadow(0 0 12px rgb(var(--vs-a) / 45%)) drop-shadow(0 0 16px rgb(var(--vs-b) / 40%));
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend {
+    min-height: 3.6rem;
+    align-content: center;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend b {
+    flex-basis: 100%;
+    order: -1;
+    font: 400 1.15rem/1.1 var(--ar-hud, "Michroma", sans-serif) !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend :is(span, small) {
+    font-size: 12px !important;
+  }
+
+  /* Keep the VS emblem clear of the two plates' inner ends. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-a legend {
+    padding-right: 2.6rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b legend {
+    padding-left: 2.6rem !important;
+  }
+}
+
+/* ================================================================
+   4. Phones and small tablets (≤900px): the two-column analyzer stays;
+   the plates keep their sizes from the older layers (11px floors).
+   ================================================================ */
+@media (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend {
+    padding: 0.38rem 0.5rem 0.38rem 0.62rem !important;
+    margin-bottom: 0.55rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b legend {
+    justify-content: flex-start;
+    padding: 0.38rem 0.5rem 0.38rem 0.62rem !important;
+    background:
+      linear-gradient(90deg, rgb(var(--side-rgb, 164 139 255) / 100%) 0 3px, transparent 3px),
+      linear-gradient(90deg, rgb(var(--side-rgb, 164 139 255) / 26%), rgb(var(--side-rgb, 164 139 255) / 6%) 62%, rgb(var(--side-rgb, 164 139 255) / 0%)),
+      #050a14 !important;
+    text-align: start;
+  }
+}
+
+/* ================================================================
+   4b. Up to 1180px the analyzer is one column: the two fighters (and
+   their pickers) come first, then the spec difference and the VS radar,
+   so the reader sees which two forms are compared before the verdict.
+   ================================================================ */
+@media (max-width: 1180px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > :is(.compare-diff, .archive-versus-profile) {
+    order: 1;
+  }
+}
+
+/* 621–1180px: the VS radar is a centred instrument, the chart beside its
+   legend, instead of a 340px chart alone in a full-width plate. */
+@media (min-width: 621px) and (max-width: 1180px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile {
+    justify-self: center !important;
+    width: 100% !important;
+    max-width: 46rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile .archive-versus-profile__body {
+    display: grid !important;
+    grid-template-columns: minmax(190px, 340px) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px 24px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile .archive-versus-profile__plot {
+    grid-row: 1 / span 2;
+    width: 100% !important;
+    max-width: 340px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile .archive-versus-profile__legend {
+    align-self: end !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .archive-versus-profile .archive-versus-profile__note {
+    align-self: start !important;
+    text-align: start !important;
+  }
+}
+
+/* Up to 900px the plate always takes two lines (FORM A, then LEFT and the
+   channel), as it does above 900px, so the two sides keep the same height.
+   On one line side B's longer words ("RIGHT", "VIOLET CHANNEL") wrapped at
+   360-375px and at 700-800px while side A's fitted, and side B's rows sat
+   18px lower. */
+@media (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend b {
+    flex-basis: 100%;
+    order: -1;
+  }
+}
+
+/* ================================================================
+   5. LEADERBOARD: the Saga ratio table and Realm 性能一覧.
+   Rows are ranked plates; header cells can hold a full-cell sort button.
+   Once the table is sorted (table[data-sort-col]) each row's name cell
+   opens a leading slot (--vs-rank-slot, 621px and up) where the profile
+   package draws the rank badge; in archive order there is no slot.
+   The tables are reached through their section (aria-labelledby), never
+   with :has(): the :has() form made the analyzer's measuring frames
+   restyle about a thousand more elements on load.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table {
+  border-collapse: separate !important;
+  border-spacing: 0 5px !important;
+  margin-top: -5px !important;
+  margin-bottom: -5px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] .table-responsive {
+  padding: 0 0.5rem 0.4rem !important;
+  border-radius: 6px !important;
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 5%), transparent 120px),
+    #03060c !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table thead th {
+  padding: 0.7rem 0.7rem !important;
+  border-bottom: 0 !important;
+  background: linear-gradient(180deg, #0f1b2b, #081221) !important;
+  box-shadow: inset 0 -2px 0 rgb(122 232 255 / 45%), 0 6px 14px -8px rgb(122 232 255 / 40%) !important;
+  color: #e9f6ff !important;
+  vertical-align: bottom;
+  letter-spacing: 0.04em;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table thead th:first-child {
+  /* The corner stays above the other sticky header cells (4) and the
+     sticky name cells (3) when the board scrolls sideways. */
+  z-index: 6 !important;
+  border-radius: 4px 0 0 0;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table thead th:last-child {
+  border-radius: 0 4px 0 0;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive table.table thead th.archive-sort-head {
+  padding: 0 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive table.table thead th.archive-sort-head:first-child {
+  padding-left: 0.7rem !important;
+}
+
+/* Every row: an armoured plate, rounded at its two ends. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr > :is(th, td) {
+  border-bottom: 0 !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 4.5%), rgb(255 255 255 / 0%) 55%),
+    #070d18 !important;
+  border-right-color: rgb(255 255 255 / 3.5%) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%), inset 0 -1px 0 rgb(0 0 0 / 75%) !important;
+  vertical-align: middle !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr:nth-child(even) > :is(th, td) {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 4.5%), rgb(255 255 255 / 0%) 55%),
+    #08101c !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr > th:first-child {
+  border-radius: 6px 0 0 6px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 5%), rgb(255 255 255 / 0%) 55%),
+    linear-gradient(90deg, #0d1828, #08111e) !important;
+  color: #f4fbff !important;
+  font-weight: 800 !important;
+}
+
+/* Sorted: the rank slot opens at the head of every name cell. */
+@media (min-width: 621px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table[data-sort-col] tbody tr > th:first-child {
+    padding-left: calc(var(--vs-rank-slot) + 0.2rem) !important;
+    background:
+      linear-gradient(90deg, rgb(255 255 255 / 3%) 0 var(--vs-rank-slot), rgb(122 232 255 / 22%) var(--vs-rank-slot) calc(var(--vs-rank-slot) + 1px), transparent calc(var(--vs-rank-slot) + 1px)),
+      linear-gradient(180deg, rgb(255 255 255 / 5%), rgb(255 255 255 / 0%) 55%),
+      linear-gradient(90deg, #0d1828, #08111e) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive table.table[data-sort-col] thead th.archive-sort-head:first-child {
+    padding-left: calc(var(--vs-rank-slot) + 0.2rem) !important;
+  }
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr > :last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr:not(.is-current):hover > :is(th, td) {
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 8%), rgb(122 232 255 / 2%)),
+    #0a1422 !important;
+}
+
+/* The selected form's row is lit in its own accent. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > :is(th, td) {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 0%) 60%),
+    linear-gradient(rgb(var(--active-rgb, 240 207 134) / 14%), rgb(var(--active-rgb, 240 207 134) / 14%)),
+    #0a1220 !important;
+  border-right-color: rgb(var(--active-rgb, 240 207 134) / 14%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--active-rgb, 240 207 134) / 70%),
+    inset 0 -1px 0 rgb(var(--active-rgb, 240 207 134) / 55%) !important;
+  color: #ffffff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > th:first-child {
+  background:
+    linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 85%) 0 3px, transparent 3px),
+    linear-gradient(180deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 0%) 60%),
+    linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 30%), rgb(var(--active-rgb, 240 207 134) / 14%)),
+    #0a1220 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--active-rgb, 240 207 134) / 70%),
+    inset 0 -1px 0 rgb(var(--active-rgb, 240 207 134) / 55%),
+    -6px 0 18px -6px rgb(var(--active-rgb, 240 207 134) / 70%) !important;
+  text-shadow: 0 0 14px rgb(var(--active-rgb, 240 207 134) / 70%);
+}
+
+@media (min-width: 621px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table[data-sort-col] tbody tr.is-current > th:first-child {
+    background:
+      linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 85%) 0 3px, rgb(var(--active-rgb, 240 207 134) / 18%) 3px var(--vs-rank-slot), rgb(var(--active-rgb, 240 207 134) / 60%) var(--vs-rank-slot) calc(var(--vs-rank-slot) + 1px), transparent calc(var(--vs-rank-slot) + 1px)),
+      linear-gradient(180deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 0%) 60%),
+      linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 30%), rgb(var(--active-rgb, 240 207 134) / 14%)),
+      #0a1220 !important;
+  }
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > :last-child {
+  box-shadow:
+    inset 0 1px 0 rgb(var(--active-rgb, 240 207 134) / 70%),
+    inset 0 -1px 0 rgb(var(--active-rgb, 240 207 134) / 55%),
+    inset -2px 0 0 rgb(var(--active-rgb, 240 207 134) / 70%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current .ratio-value {
+  color: #ffffff !important;
+  text-shadow: 0 0 10px rgb(var(--active-rgb, 240 207 134) / 80%);
+}
+
+/* Figures: instrument numerals. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table .ratio-value {
+  font-family: var(--ar-mono, "Oxanium", sans-serif) !important;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+}
+
+/* The bars: lit glass tubes. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table .ratio-track {
+  position: relative;
+  height: 8px !important;
+  margin-top: 0.35rem !important;
+  overflow: hidden;
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #010307, #0b1320) !important;
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 90%),
+    inset 0 -1px 0 rgb(255 255 255 / 9%),
+    0 0 0 1px rgb(255 255 255 / 5%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table .ratio-fill {
+  height: 100% !important;
+  border-radius: 999px !important;
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 55%),
+    inset 0 -2px 2px rgb(0 0 0 / 30%),
+    0 0 10px currentColor !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current .ratio-fill {
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 75%),
+    inset 0 -2px 2px rgb(0 0 0 / 20%),
+    0 0 14px currentColor,
+    0 0 4px #ffffff !important;
+}
+
+/* ================================================================
+   6. HEAT-MAP: the ability matrix. Each level is a tile.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table {
+  border-collapse: separate !important;
+  border-spacing: 3px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ability-title-v5"] .table-responsive {
+  padding: 0.25rem !important;
+  border-radius: 6px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table thead th {
+  border-bottom: 0 !important;
+  background: linear-gradient(180deg, #0f1b2b, #081221) !important;
+  box-shadow: inset 0 -2px 0 rgb(122 232 255 / 40%) !important;
+  color: #e9f6ff !important;
+  vertical-align: bottom;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > th {
+  border-bottom: 0 !important;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #0d1828, #08111e) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td {
+  border: 0 !important;
+  border-radius: 3px;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-weight: 800;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-core {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 22%), rgb(255 255 255 / 0%) 50%),
+    linear-gradient(180deg, rgb(122 232 255 / 62%), rgb(46 160 196 / 52%)) !important;
+  box-shadow: inset 0 0 0 1px rgb(190 245 255 / 70%), 0 0 10px -2px rgb(122 232 255 / 55%) !important;
+  color: #f4fdff !important;
+  text-shadow: 0 0 6px #ffffff, 0 0 2px rgb(2 5 10 / 80%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-support {
+  background:
+    linear-gradient(180deg, rgb(240 207 134 / 12%), rgb(240 207 134 / 4%)),
+    #070c15 !important;
+  box-shadow: inset 0 0 0 1.5px rgb(240 207 134 / 78%) !important;
+  color: #f6dfa6 !important;
+  text-shadow: 0 0 8px rgb(240 207 134 / 50%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-none {
+  background: #04070d !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%) !important;
+  color: rgb(185 198 214 / 45%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-undocumented {
+  background: #04070d !important;
+  box-shadow: inset 0 0 0 1px rgb(185 198 214 / 30%) !important;
+  color: rgb(185 198 214 / 70%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr:not(.is-current):hover > th {
+  background: linear-gradient(90deg, #12233a, #0b1626) !important;
+}
+
+/* The selected form's row: its name lit, its tiles brighter. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > th {
+  background:
+    linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 85%) 0 3px, transparent 3px),
+    linear-gradient(90deg, rgb(var(--active-rgb, 240 207 134) / 32%), rgb(var(--active-rgb, 240 207 134) / 10%)),
+    #0a1220 !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--active-rgb, 240 207 134) / 55%), 0 0 16px -4px rgb(var(--active-rgb, 240 207 134) / 70%) !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 12px rgb(var(--active-rgb, 240 207 134) / 70%);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > td.cap-core {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 34%), rgb(255 255 255 / 0%) 55%),
+    linear-gradient(180deg, rgb(150 240 255 / 85%), rgb(70 190 225 / 72%)) !important;
+  box-shadow: inset 0 0 0 1px #e6fbff, 0 0 14px rgb(122 232 255 / 70%) !important;
+  color: #ffffff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > td.cap-support {
+  background:
+    linear-gradient(180deg, rgb(240 207 134 / 26%), rgb(240 207 134 / 10%)),
+    #0a1220 !important;
+  box-shadow: inset 0 0 0 2px #f0cf86, 0 0 12px -2px rgb(240 207 134 / 70%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > td:is(.cap-none, .cap-undocumented) {
+  background: #0a1220 !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--active-rgb, 240 207 134) / 40%) !important;
+  color: rgb(220 230 240 / 70%) !important;
+}
+
+/* The legend matches the tiles. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong:is(.cap-core, .cap-support, .cap-none, .cap-undocumented) {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  height: 1.45em;
+  margin-right: 0.3em;
+  padding: 0 0.2em;
+  border-radius: 3px;
+  line-height: 1;
+  vertical-align: -0.25em;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-core {
+  background: linear-gradient(180deg, rgb(150 240 255 / 70%), rgb(46 160 196 / 58%)) !important;
+  box-shadow: inset 0 0 0 1px rgb(190 245 255 / 70%), 0 0 8px -2px rgb(122 232 255 / 60%) !important;
+  color: #f4fdff !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-support {
+  background: #070c15 !important;
+  box-shadow: inset 0 0 0 1.5px rgb(240 207 134 / 78%) !important;
+  color: #f6dfa6 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-none {
+  background: #04070d !important;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%) !important;
+  color: rgb(185 198 214 / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-undocumented {
+  background: #04070d !important;
+  box-shadow: inset 0 0 0 1px rgb(185 198 214 / 30%) !important;
+  color: rgb(185 198 214 / 80%) !important;
+}
+
+/* ================================================================
+   7. Phones: the leaderboard keeps the name column of the stability
+   sheet (7.25rem); there is no rank slot (a sorted row's badge sits above
+   its name), so a seven-kana name (ヴァーテックス, エクスプリーム) still
+   fits on one line at 13px.
+   ================================================================ */
+@media (max-width: 620px) {
+
+  /* Names break at their own seams (・) before they break inside a word. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive .table tbody th:first-child {
+    word-break: keep-all;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr > th:first-child,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table thead th:first-child {
+    padding-right: 0.2rem !important;
+    padding-left: 0.5rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table-responsive table.table thead th.archive-sort-head:first-child {
+    padding-left: 0.5rem !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table {
+    border-spacing: 2px !important;
+  }
+}
+
+/* ================================================================
+   8. Footer: the end plate.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer {
+  position: relative;
+  border-radius: 6px;
+  background:
+    linear-gradient(var(--aa-gold, #f0cf86) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--aa-gold, #f0cf86) 0 0) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--aa-gold, #f0cf86) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--aa-gold, #f0cf86) 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(90deg, rgb(var(--vs-a) / 10%), transparent 30%, transparent 70%, rgb(var(--vs-b) / 10%)),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 5%) 0 1px, transparent 1px 28px),
+    linear-gradient(180deg, #070e1a, #03060c) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%), 0 0 0 1px rgb(122 232 255 / 14%), 0 24px 48px -26px rgb(0 0 0 / 90%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer p {
+  font-family: var(--ar-mono, "Oxanium", sans-serif) !important;
+  letter-spacing: 0.22em !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer a {
+  min-height: 44px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%), 0 0 0 1px rgb(122 232 255 / 40%), 0 0 16px -6px rgb(122 232 255 / 60%) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer a:focus-visible {
+  outline: 2px solid var(--ar-focus, #fff0b5) !important;
+  outline-offset: 3px !important;
+}
+
+/* ================================================================
+   10. Placeholders for the sections that skip rendering off screen
+   (content-visibility: auto). A nav-link jump is measured against these
+   before the sections near the target draw; the rx9 layouts (cockpit,
+   VS screen, poster, leaderboard) changed every one of these heights, so
+   the placeholders follow the rendered heights per width band, and
+   `auto` keeps the real height once a section has been drawn. Same
+   selectors as archive-elevation.css, so this later sheet wins.
+   ================================================================ */
+@supports (content-visibility: auto) {
+  html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+    contain-intrinsic-block-size: auto 1500px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+    contain-intrinsic-block-size: auto 2050px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+    contain-intrinsic-block-size: auto 1315px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+    contain-intrinsic-block-size: auto 905px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+    contain-intrinsic-block-size: auto 2350px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+    contain-intrinsic-block-size: auto 3100px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+    contain-intrinsic-block-size: auto 605px;
+  }
+
+  html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+    contain-intrinsic-block-size: auto 565px;
+  }
+
+  @media (max-width: 1439px) {
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 3210px;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 1790px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 2970px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 2450px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4100px;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 860px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 780px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 590px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 560px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 1800px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 2500px;
+    }
+  }
+
+  @media (max-width: 833px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 3070px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4230px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 3390px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4540px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 1950px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 3530px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 1730px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 1035px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 2900px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4400px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 645px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 642px;
+    }
+  }
+
+  @media (max-width: 519px) {
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4790px;
+    }
+  }
+
+  @media (max-width: 479px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 3950px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 1830px;
+    }
+  }
+
+  @media (max-width: 419px) {
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 5260px;
+    }
+  }
+
+  @media (max-width: 359px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 4300px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 .saga-compare-section {
+      contain-intrinsic-block-size: auto 5990px;
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 520px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 480px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 410px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ratio-title-v5"] {
+      contain-intrinsic-block-size: auto 380px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="ability-title-v5"] {
+      contain-intrinsic-block-size: auto 400px;
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 520px) and (max-width: 900px) {
+    html[data-embedded-archive][data-archive-kind="saga"] #saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 1130px;
+    }
+
+    html[data-embedded-archive][data-archive-kind="realm"] #edition-panel-realm #realm--saga-forms-performance-v5 [aria-labelledby$="detail-title-v5"] {
+      contain-intrinsic-block-size: auto 1750px;
+    }
+  }
+}
+
+/* ================================================================
+   9. Forced colours: plates and tiles give way to system colours.
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side legend,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section .compare-side-b legend {
+    forced-color-adjust: auto;
+    background: Canvas !important;
+    border: 1px solid CanvasText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout::after {
+    forced-color-adjust: none;
+    background: CanvasText !important;
+    color: Canvas !important;
+    filter: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .saga-compare-section > .compare-layout::before {
+    background: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr > :is(th, td),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > :is(th, td) {
+    border: 1px solid CanvasText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > :is(th, td),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > th:first-child,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > th {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    box-shadow: none !important;
+    color: HighlightText !important;
+    text-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current > :is(th, td) *,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > th * {
+    color: HighlightText !important;
+    text-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current .ratio-track {
+    background: Highlight !important;
+    box-shadow: inset 0 0 0 1px HighlightText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [aria-labelledby$="ratio-title-v5"] table.table tbody tr.is-current .ratio-fill {
+    background: HighlightText !important;
+    box-shadow: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-core,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > td.cap-core,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-core {
+    forced-color-adjust: none;
+    background: CanvasText !important;
+    color: Canvas !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr > td.cap-support,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody tr.is-current > td.cap-support,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .legend strong.cap-support {
+    border: 2px solid CanvasText !important;
+  }
+}
