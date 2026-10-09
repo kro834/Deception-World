@@ -1,3 +1,7 @@
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="1.8"
@@ -484,5 +488,3 @@
                 expanded={pickupOpen}
                 label="ピックアップ"
                 onOpen={openPickup}
-              />
-            </div>

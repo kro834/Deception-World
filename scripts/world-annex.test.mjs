@@ -27,14 +27,17 @@ const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
   // Reviewed 2026-10-06: the requested rider hold guide and decorative
   // WorldAtmosphere and shared name-break markup, plus the source-led
-  // synopsis expansion requested on 2026-10-06. Fixed columns, records,
-  // artwork and displayed spelling remain pinned.
-  // Re-pinned in rx6 for two reviewed edits: the columns moved to
-  // world-columns-data.ts (same text, owner-copy.test pins it) and each column
-  // heading gained an id for /world#world-column-NN search links.
+  // synopsis expansion requested on 2026-10-06. Reviewed 2026-10-09:
+  // the owner requested Column 05 and its two control labels. The first
+  // four columns are additionally pinned in world-mystery.test.mjs;
+  // records, artwork and displayed spelling remain pinned here.
+  // Re-pinned in rx6 (merged over 2026-10-09): the columns moved to
+  // world-columns-data.ts (same text, Column 05 appended from
+  // world-mystery-data.ts) and each column heading gained an id for
+  // /world#world-column-NN search links.
   assert.deepEqual(worldViewContract(homeView), {
-    records: "332d02ed983fa519c54fc060bb84d9d8903e11185a3bbc21b014898a1344509c",
-    markup: "78a3a40dfcc51c7ac857dfc32159bc5037676599b3a19c174b40f6de0a2e9063",
+    records: "75248085b518563223b7a6a8b8237a8889c3044e7d62fbda436bc6e763cc74ed",
+    markup: "b5d0827aa52e1a85a7275f2c7c4a29e5ff8619c32e6fdd2e333253b32f8ea7d7",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -73,7 +76,7 @@ test("the annex data is complete", () => {
   assert.ok(WORLD_EPISODE_NOTES.every(({ synopsis }) => synopsis.length === 3));
   assert.equal(WORLD_GLOSSARY.length, 15);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
-  assert.equal(WORLD_QUOTES.length, 13);
+  assert.equal(WORLD_QUOTES.length, 17);
   // In-story text only: no chat handles, no ideographic indent spaces.
   assert.doesNotMatch(data, /@|\u3000/);
   // Conflicting or undecided facts stay out until the owner settles them.

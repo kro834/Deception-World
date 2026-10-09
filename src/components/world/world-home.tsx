@@ -617,6 +617,12 @@ const ColumnRail = memo(
                   <br className="tab-br" />
                   採録制
                 </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
+                </>
               ) : (
                 c.title
               )}
@@ -657,6 +663,12 @@ const PickupRail = memo(
                   脚本制と
                   <br className="tab-br" />
                   採録制
+                </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
                 </>
               ) : (
                 c.title

@@ -5,6 +5,8 @@ import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thu
 import { DisplayName } from "@/components/name-text";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { QuoteTranscript } from "./quote-transcript";
+import { mountQuoteTranscript } from "@/lib/quote-transcript.js";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -23,8 +25,10 @@ import {
    back, so nothing sits between the column rail and the riders heading
    (verify-world-reveal presses the rail beside part-lit type). Static
    documents: no reveal, no scroll motion; chapter openers are a still clone of
-   .section-index, never the class itself. Portraits reuse the dossiers' own
-   files through the site's image helpers. Styles: styles-world-annex.css. */
+   .section-index, never the class itself. Only the quotes log has a finite,
+   optional facsimile transcription; its selectable source remains intact.
+   Portraits reuse the dossiers' own files through the site's image helpers.
+   Styles: styles-world-annex.css and styles-world-transcript.css. */
 
 const ANNEX_CONTENTS: readonly { href: string; code: string; label: string }[] = [
   { href: "#cast-roster", code: "04", label: "人物一覧" },
@@ -153,12 +157,22 @@ const RIKUEI_KEYS = ["zeus", "rex-loi", "shuza", "lejas-portrait", "opus", "reem
 /* Dossier kind, read off the existing link: the affiliation colour. */
 const kindOf = (entry: WorldCastEntry) => entry.to?.split("/")[1] ?? "none";
 
-function AnnexQuote({ text, by, signature }: { text: string; by?: string; signature?: boolean }) {
+function AnnexQuote({
+  text,
+  by,
+  signature,
+  transcribed = false,
+}: {
+  text: string;
+  by?: string;
+  signature?: boolean;
+  transcribed?: boolean;
+}) {
   const voice = by ? PORTRAIT_BY_NAME.get(by) : undefined;
   return (
     <figure className={signature ? "wa-quote is-signature" : "wa-quote"}>
       <blockquote>
-        <p>「{text}」</p>
+        <p>{transcribed ? <QuoteTranscript text={`「${text}」`} /> : <>「{text}」</>}</p>
       </blockquote>
       {by ? (
         <figcaption className={voice ? "has-voice" : undefined}>
@@ -501,6 +515,12 @@ function QuoteRail({ children }: { children: ReactNode }) {
   const cancelSettleRef = useRef<(() => void) | null>(null);
   const [scrolls, setScrolls] = useState(true);
   const [active, setActive] = useState(0);
+  const [transcriptStopped, setTranscriptStopped] = useState(false);
+
+  useEffect(
+    () => mountQuoteTranscript(railRef.current, { disabled: transcriptStopped }),
+    [transcriptStopped],
+  );
 
   useEffect(() => {
     const rail = railRef.current;
@@ -569,6 +589,21 @@ function QuoteRail({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <div className="wa-transcript-toolbar">
+        <p id="world-transcript-help">
+          声の記録を綴る。ときどき、その輪郭が乱れる。
+          <small>軽量設定・動きを減らす設定では、全文を表示します。</small>
+        </p>
+        <button
+          type="button"
+          aria-controls="world-quotes-rail"
+          aria-describedby="world-transcript-help"
+          aria-pressed={transcriptStopped}
+          onClick={() => setTranscriptStopped((stopped) => !stopped)}
+        >
+          {transcriptStopped ? "演出を再生" : "全文を表示"}
+        </button>
+      </div>
       <div
         ref={railRef}
         className="wa-quote-rail"
@@ -729,7 +764,7 @@ function ArchiveLog() {
             <ol className="wa-quote-band">
               {WORLD_QUOTES.map((quote) => (
                 <li key={quote.text}>
-                  <AnnexQuote text={quote.text} by={quote.by} />
+                  <AnnexQuote text={quote.text} by={quote.by} transcribed />
                 </li>
               ))}
             </ol>

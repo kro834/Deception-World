@@ -21,7 +21,7 @@ function loadData(path) {
     exports,
     require: (specifier) => {
       assert.ok(specifier.startsWith("."), "catalogue has no runtime framework dependencies");
-      return loadData(resolve(dirname(absolute), `${specifier}.ts`));
+      return loadData(resolve(dirname(absolute), specifier.endsWith(".ts") ? specifier : `${specifier}.ts`));
     },
   });
   return exports;

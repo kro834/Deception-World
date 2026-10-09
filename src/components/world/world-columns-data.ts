@@ -1,3 +1,5 @@
+import { DOG_ISAKU_COLUMN } from "./world-mystery-data";
+
 // The World page's 世界観コラム, word for word as the owner wrote them
 // (scripts/owner-copy.test.mjs). Kept as pure data so the site search can
 // index the columns without bundling the World page.
@@ -47,4 +49,6 @@ export const WORLD_COLUMNS = [
       "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
     ],
   },
+  // 05, the owner's mystery column (bbb4853), kept in its own module.
+  DOG_ISAKU_COLUMN,
 ] as const;

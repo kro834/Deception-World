@@ -1,3 +1,5 @@
+import { WORLD_MYSTERY_QUOTES } from "./world-mystery-data.ts";
+
 // World annex (世界と組織, 人物一覧, エピソードの記録, 用語集, 名台詞).
 // Quotes preserve the owner's story source wording; profiles and definitions
 // summarize facts supported by the story texts supplied on 2026-10-01 and
@@ -592,4 +594,5 @@ export const WORLD_QUOTES: readonly WorldAnnexLine[] = [
     text: "少し来てくれるか、サーガ",
     by: "フェイブル",
   },
+  ...WORLD_MYSTERY_QUOTES,
 ];

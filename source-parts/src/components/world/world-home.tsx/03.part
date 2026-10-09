@@ -1,3 +1,11 @@
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {
       if (cancelled) return;
       const destination = {
         path: "/world",
@@ -480,9 +488,3 @@
         setShuffling(false);
       });
       return;
-    }
-
-    const previewReady = new Set<number>();
-    previewPool.forEach((index) => {
-      const decoded = index === finalPoster ? finalReady : loadPoster(index, "low");
-      void decoded.then((ready) => {
