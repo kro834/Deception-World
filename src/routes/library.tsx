@@ -3,6 +3,7 @@ import { LibraryPage } from "@/components/library/library-page";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import libraryCssUrl from "@/styles-library.css?url";
 import inquiryCssUrl from "@/styles-library-inquiry.css?url";
+import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import { getInquiryGuide, validateInquirySearch } from "@/lib/inquiry-guides";
 
 export const Route = createFileRoute("/library")({
@@ -17,6 +18,8 @@ export const Route = createFileRoute("/library")({
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: libraryCssUrl },
         { rel: "stylesheet", href: inquiryCssUrl },
+        // STAGE: the index pages' redesign, scoped to html[data-family="library"].
+        { rel: "stylesheet", href: stageLibraryCssUrl },
       ],
     }),
 });

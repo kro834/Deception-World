@@ -1,45 +1,47 @@
-/* 404 / LOST RECORD: the not-found surface as a Mirage record plate.
+/* 404 / LOST RECORD as a STAGE poster card (rx10, 2026-10-10).
 
    Linked by NotFoundComponent itself (src/lib/error-component.tsx) as a
    hoisted stylesheet, so no other route loads it. React may put it ahead of
    the root sheets, so every selector doubles the page class and outranks
    the fallback in styles.css (kept, so a deep link still reads before this
-   sheet arrives).
+   sheet arrives). A 404 can render under any page family, so the sheet
+   keys on the page class rather than html[data-family].
 
-   The page keeps its words and their order. It becomes the World's grammar:
-   ice on ink under the 96px grid, one plate locked on with ice brackets over
-   gold and topped by the prism, a HUD header in Michroma, the heading in
-   ice ink with a still misregistered ghost, a large outlined 404 left in
-   the plate as a watermark (generated, silent), and the way back as the
-   page's one filled ice plate, its arrow first.
+   The page keeps its words and their order. The record plate becomes a
+   case-file card: an empty ID-photo slot (lattice, corner ticks, the DW
+   sigil where the picture should be, the lost record's number outlined at
+   its foot), a HUD header (status left, archive right), the heading, the
+   line, then the way back as the card's one filled ice plate and the
+   record index as a quiet second way. On phones the slot is a band above
+   the words.
 
-   Motion is one finite boot (the plate locks on, the prism draws, the
+   Motion is one finite boot (the card locks on, the prism draws, the
    heading is wiped in), under 1.2 s, with transform, opacity and clip-path
    only, and only without reduced motion or economy rendering. Nothing
-   flashes: the plate is dark and the control is already lit. */
+   flashes: the card is dark and the control is already lit. */
 
 .app-not-found.app-not-found {
-  --lr-ink: #04080f;
-  --lr-deck: #0a1220;
+  --lr-ink: #03060c;
+  --lr-deck: #08111c;
   --lr-ice: #7ae8ff;
   --lr-ice-hi: #c6f5ff;
   --lr-violet: #a48bff;
   --lr-magenta: #ff5cc8;
   --lr-gold: #f0cf86;
   --lr-signal: #ff5a7e;
-  --lr-text-2: #b9cad8;
-  --lr-text-3: #8fa6ba;
+  --lr-text-2: #bccbd8;
+  --lr-text-3: #8fa3b5;
   --lr-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
-  --lr-pad-x: clamp(22px, 5vw, 48px);
-  --lr-pad-y: clamp(26px, 5vw, 44px);
-  /* The plate is the grid's middle column and rows; the words sit inside. */
+  --lr-pad-x: clamp(20px, 5vw, 44px);
+  --lr-pad-y: clamp(22px, 5vw, 40px);
+  /* The card is the grid's middle columns and rows; the words sit inside. */
   display: grid;
   grid-template-columns:
-    minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [copy-start] minmax(0, 560px)
-    [copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
+    minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [slot-start copy-start] minmax(0, 560px)
+    [slot-end copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
   grid-template-rows:
-    minmax(32px, 1fr) [plate-start] var(--lr-pad-y) [head-start] auto auto [head-end] auto auto
-    auto var(--lr-pad-y) [plate-end] minmax(32px, 1fr);
+    minmax(32px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+    auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] minmax(32px, 1fr);
   place-content: stretch;
   gap: 0;
   min-height: 100svh;
@@ -47,37 +49,40 @@
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
   overflow: hidden;
-  color: #f1f7fb;
+  color: #f2f7fb;
   text-align: left;
   background:
-    radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 10%), transparent 70%),
-    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(164 139 255 / 7%), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
+    radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
+    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(164 139 255 / 8%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     var(--lr-ink);
 }
 
-/* The plate: deck ink, an ice line, ice brackets over gold, the prism on
-   top (::before) and the outlined 404 watermark (::after). */
+/* The card: deck ink, an ice rim, ice ticks over gold, the prism on top
+   (::before) and the outlined 404 (::after, phones). */
 .app-not-found.app-not-found > .app-not-found-plate {
   position: relative;
   z-index: 0;
   grid-column: plate-start / plate-end;
   grid-row: plate-start / plate-end;
   overflow: hidden;
-  border: 1px solid rgb(122 232 255 / 20%);
+  border: 1px solid rgb(122 232 255 / 22%);
+  border-radius: 6px;
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 26px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 26px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 26px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 26px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 26px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 26px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 26px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 26px no-repeat,
-    linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 5%, transparent 22%),
     var(--lr-deck);
-  box-shadow: 0 30px 80px rgb(0 0 0 / 45%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 40px 90px rgb(0 0 0 / 50%);
   pointer-events: none;
 }
 
@@ -98,18 +103,20 @@
   transform-origin: 0 50%;
 }
 
-/* The lost record's number, left in the plate: outlined, cut by its edge. */
+/* The lost record's number now stands in the photo slot (below); the
+   card's own watermark is retired. */
 .app-not-found.app-not-found > .app-not-found-plate::after {
+  display: none;
   position: absolute;
-  right: -0.08em;
+  right: -0.06em;
   bottom: -0.2em;
   content: "404" / "";
   color: transparent;
   font:
-    700 clamp(120px, 30vw, 240px) / 1 "Oxanium",
+    700 clamp(120px, 30vw, 220px) / 1 "Oxanium",
     sans-serif;
   letter-spacing: -0.04em;
-  -webkit-text-stroke: 1px rgb(122 232 255 / 22%);
+  -webkit-text-stroke: 1px rgb(122 232 255 / 20%);
 }
 
 /* :where() keeps this under the per-element margins below. */
@@ -120,8 +127,85 @@
   margin: 0;
 }
 
+/* The ID-photo slot, empty: lattice, ticks, the DW sigil in its place. */
+.app-not-found.app-not-found > .app-not-found-sigil {
+  grid-column: slot-start / slot-end;
+  grid-row: slot-start / slot-end;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-sizing: border-box;
+  min-height: 124px;
+  margin-bottom: 22px;
+  padding: 18px 22px;
+  overflow: hidden;
+  border: 1px dashed rgb(122 232 255 / 30%);
+  border-radius: 4px;
+  background:
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 14px 1px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 14px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 14px 1px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 14px no-repeat,
+    radial-gradient(70% 90% at 30% 40%, rgb(122 232 255 / 12%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
+    #050a12;
+}
+
+/* The sigil: a cut diamond with DW, the World's brand mark. */
+.app-not-found.app-not-found > .app-not-found-sigil > i {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  color: #dff9ff;
+  background: linear-gradient(135deg, var(--lr-ice), var(--lr-violet) 55%, var(--lr-gold));
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  font:
+    700 20px / 1 "Oxanium",
+    sans-serif;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-indent: 0.08em;
+}
+
+.app-not-found.app-not-found > .app-not-found-sigil > i::before {
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  content: "";
+  background: linear-gradient(135deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 2%) 60%), #070d16;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.app-not-found.app-not-found > .app-not-found-sigil > i::after {
+  position: absolute;
+  inset: 14px;
+  z-index: -1;
+  content: "";
+  background: linear-gradient(135deg, rgb(122 232 255 / 16%), rgb(164 139 255 / 6%));
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* The slot's own number, outlined at its foot (wide screens). */
+.app-not-found.app-not-found > .app-not-found-sigil::after {
+  position: absolute;
+  right: 12px;
+  bottom: -0.18em;
+  content: "404" / "";
+  color: transparent;
+  font:
+    700 64px / 1 "Oxanium",
+    sans-serif;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px rgb(122 232 255 / 34%);
+}
+
 /* The header: the record's status on the left, the archive on the right. */
-.app-not-found.app-not-found > span {
+.app-not-found.app-not-found > span:not(.app-not-found-sigil) {
   grid-row: head-start;
   display: inline-flex;
   align-items: center;
@@ -133,7 +217,7 @@
 }
 
 /* Signal red marks where the record is missing: a still cell, no blink. */
-.app-not-found.app-not-found > span::before {
+.app-not-found.app-not-found > span:not(.app-not-found-sigil)::before {
   flex: none;
   width: 8px;
   height: 8px;
@@ -143,9 +227,9 @@
 }
 
 .app-not-found.app-not-found > p:first-of-type {
-  grid-row: 4;
+  grid-row: 5;
   margin-top: 8px;
-  padding-bottom: 18px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgb(122 232 255 / 16%);
   background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px) 0
     100% / 100% 5px no-repeat;
@@ -155,34 +239,36 @@
 }
 
 .app-not-found.app-not-found > h1 {
-  grid-row: 5;
-  margin: clamp(22px, 4vw, 34px) 0 0;
+  grid-row: 6;
+  margin: clamp(20px, 4vw, 30px) 0 0;
   color: var(--lr-ice-hi);
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
-  font-size: clamp(26px, 6vw, 44px);
+  font-size: clamp(20px, 6.6vw, 42px);
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: 0.02em;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
   text-shadow:
-    -2px 0 rgb(255 92 200 / 32%),
-    2px 0 rgb(122 232 255 / 38%),
-    0 0 30px rgb(122 232 255 / 16%);
+    -2px 0 rgb(255 92 200 / 30%),
+    2px 0 rgb(122 232 255 / 36%);
 }
 
 .app-not-found.app-not-found > p:last-of-type {
-  grid-row: 6;
+  grid-row: 7;
   max-width: 34em;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   color: var(--lr-text-2);
   font-size: clamp(14px, 3.6vw, 16px);
   line-height: 1.9;
 }
 
-/* The way back: the page's one filled ice plate, its arrow first, held in
+/* The way back: the card's one filled ice plate, its arrow first, held in
    12px brackets like the /download ZIP plate. Square, not cut: a clip-path
    would clip the focus ring away. */
 .app-not-found.app-not-found > a {
-  grid-row: 7;
+  grid-row: 8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -190,7 +276,7 @@
   gap: 14px;
   box-sizing: border-box;
   min-height: 48px;
-  margin: clamp(26px, 4vw, 34px) 6px 6px;
+  margin: clamp(24px, 4vw, 30px) 6px 6px;
   padding: 0 24px 0 20px;
   border: 0;
   border-radius: 0;
@@ -242,15 +328,44 @@
   transform: none;
 }
 
+/* The second way: the record index, a quiet outlined plate. */
+.app-not-found.app-not-found > a.app-not-found-search {
+  grid-row: 9;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 0 20px;
+  border: 1px solid rgb(122 232 255 / 45%);
+  color: var(--lr-ice-hi);
+  background: rgb(122 232 255 / 6%);
+  box-shadow: none;
+  font:
+    600 14px / 1.2 "Noto Sans JP",
+    sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.app-not-found.app-not-found > a.app-not-found-search::before,
+.app-not-found.app-not-found > a.app-not-found-search::after {
+  display: none;
+}
+
+.app-not-found.app-not-found > a.app-not-found-search:hover {
+  background: rgb(122 232 255 / 14%);
+}
+
 /* The focus ring sits outside the brackets, in the site's warm family. */
 .app-not-found.app-not-found > a:focus-visible {
   outline: 2px solid #fff0b5;
   outline-offset: 9px;
 }
 
+.app-not-found.app-not-found > a.app-not-found-search:focus-visible {
+  outline-offset: 4px;
+}
+
 /* Narrow phones: WORLD ARCHIVEへ戻る holds one line. The Michroma label
    closes up to the allowed tracking, and under 375px the plate takes the
-   record plate's whole width (its brackets 6px inside the plate's edge),
+   record card's whole width (its brackets 6px inside the card's edge),
    with a tighter side padding. The label stays 13px. */
 @media (max-width: 389px) {
   .app-not-found.app-not-found > a {
@@ -266,6 +381,10 @@
     margin-inline: 12px;
     padding: 0 14px;
   }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    padding-inline: 16px;
+  }
 }
 
 @media (min-width: 560px) {
@@ -280,17 +399,47 @@
     text-align: right;
   }
 
-  .app-not-found.app-not-found > span {
-    padding-bottom: 18px;
+  .app-not-found.app-not-found > span:not(.app-not-found-sigil) {
+    padding-bottom: 16px;
   }
 
   /* The ruler under the header runs the whole width of the words. */
   .app-not-found.app-not-found > h1 {
-    padding-top: clamp(22px, 4vw, 34px);
+    padding-top: clamp(20px, 4vw, 30px);
     margin-top: 0;
     border-top: 1px solid rgb(122 232 255 / 16%);
     background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px)
       0 0 / 100% 5px no-repeat;
+  }
+}
+
+/* Wide screens: the slot stands beside the words, as tall as they are. */
+@media (min-width: 760px) {
+  .app-not-found.app-not-found {
+    grid-template-columns:
+      minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [slot-start] 212px [slot-end] 36px
+      [copy-start] minmax(0, 500px) [copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    grid-row: head-start / 10;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 280px;
+    margin-bottom: 0;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil > i {
+    width: 104px;
+    height: 104px;
+    font-size: 24px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil::after {
+    right: auto;
+    left: 50%;
+    translate: -50% 0;
+    font-size: 88px;
   }
 }
 
@@ -307,6 +456,10 @@
 
   html:not([data-world-effects="economy"]) .app-not-found.app-not-found > h1 {
     animation: lr-wipe 0.8s cubic-bezier(0.77, 0, 0.18, 1) 0.3s both;
+  }
+
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > .app-not-found-sigil > i {
+    animation: lr-sigil 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s both;
   }
 }
 
@@ -333,6 +486,13 @@
   }
 }
 
+@keyframes lr-sigil {
+  from {
+    opacity: 0;
+    scale: 0.86;
+  }
+}
+
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .app-not-found.app-not-found > .app-not-found-plate {
     box-shadow: none;
@@ -351,7 +511,25 @@
   }
 
   .app-not-found.app-not-found > .app-not-found-plate::after,
-  .app-not-found.app-not-found > span::before {
+  .app-not-found.app-not-found > .app-not-found-sigil::after,
+  .app-not-found.app-not-found > span:not(.app-not-found-sigil)::before {
+    display: none;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    border: 1px dashed CanvasText;
+    background: Canvas;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil > i {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    clip-path: none;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil > i::before,
+  .app-not-found.app-not-found > .app-not-found-sigil > i::after {
     display: none;
   }
 

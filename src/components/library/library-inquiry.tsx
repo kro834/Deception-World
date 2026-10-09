@@ -1,5 +1,7 @@
 import { getInquiryGuide, INQUIRY_GUIDES } from "@/lib/inquiry-guides";
 import { Link } from "@tanstack/react-router";
+import { pathArt } from "@/lib/record-art";
+import { RecordArtFrame } from "./record-art";
 
 export function LibraryInquiry({
   guide,
@@ -26,6 +28,22 @@ export function LibraryInquiry({
             aria-controls="inquiry-guide"
             onClick={() => onGuideChange(selected?.id === item.id ? "" : item.id)}
           >
+            <span className="inquiry-choice-art" aria-hidden="true">
+              {item.stops.map((stop) => {
+                const art = pathArt(stop.to, stop.hash);
+                return art.src ? (
+                  <img
+                    key={stop.id}
+                    src={art.src}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    style={art.pos ? { objectPosition: art.pos } : undefined}
+                  />
+                ) : null;
+              })}
+            </span>
             <span className="inquiry-choice-label">問い {String(index + 1).padStart(2, "0")}</span>
             <span className="inquiry-choice-title">{item.question}</span>
             <span className="inquiry-choice-intro">{item.intro}</span>
@@ -54,6 +72,11 @@ export function LibraryInquiry({
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <article className="inquiry-stop-body">
+                    <RecordArtFrame
+                      art={pathArt(stop.to, stop.hash)}
+                      title={stop.title}
+                      className="is-stop"
+                    />
                     <p className="inquiry-stop-label">
                       入口 {index + 1} / {stop.sourceLabel}
                     </p>

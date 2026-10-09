@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink } from "@/components/load-gate";
@@ -12,8 +12,17 @@ import {
   type LibraryEntry,
   type LibraryKind,
 } from "@/lib/library-data";
+import { pathArt, RIDER_ART } from "@/lib/record-art";
 import { toggleBookmark, useLibraryStore } from "./library-store";
 import { LibraryHub } from "./library-hub";
+import { RecordArtFrame } from "./record-art";
+
+const byPath = new Map(LIBRARY_ENTRIES.map((entry) => [entry.path, entry]));
+// The hero's visual index: the eight riders' files, in the World's order.
+const CAST = RIDER_ART.flatMap((rider) => {
+  const entry = byPath.get(`/riders/${rider.id}`);
+  return entry ? [{ ...rider, entry }] : [];
+});
 
 function EntryCard({
   entry,
@@ -25,7 +34,8 @@ function EntryCard({
   ready: boolean;
 }) {
   return (
-    <article className="library-card">
+    <article className="library-card" data-kind={entry.kind}>
+      <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
       <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
       <h3>
         <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
@@ -86,22 +96,51 @@ export function LibraryPage({
         </header>
         <main id="library-main">
           <section className="library-intro">
-            <p className="library-eyebrow">THE REFERENCE ROOM</p>
-            <h1>
-              世界を辿る、
-              <br />
-              資料を見つける。
-            </h1>
-            <p>
-              人物の名前から、物語の章へ。公開された資料を横断して探し、気になるページにしおりを残せます。
-            </p>
-            <div className="library-index-summary">
-              <span>{LIBRARY_ENTRIES.length} 資料への入口</span>
-              <span>人物 / 章 / 展示</span>
+            <div className="library-intro-copy">
+              <p className="library-eyebrow">THE REFERENCE ROOM</p>
+              <h1>
+                世界を辿る、
+                <br />
+                資料を見つける。
+              </h1>
+              <p>
+                人物の名前から、物語の章へ。公開された資料を横断して探し、気になるページにしおりを残せます。
+              </p>
+              <div className="library-index-summary">
+                <span>{LIBRARY_ENTRIES.length} 資料への入口</span>
+                <span>人物 / 章 / 展示</span>
+              </div>
+              <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
+                本文から検索 <span aria-hidden="true">↗</span>
+              </GuardedLink>
             </div>
-            <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
-              本文から検索 <span aria-hidden="true">↗</span>
-            </GuardedLink>
+            <nav className="library-cast" aria-label="ライダーの人物資料">
+              {CAST.map(({ entry, no, tone, src, pos }) => (
+                <GuardedLink
+                  key={entry.id}
+                  to={entry.path}
+                  assets={[]}
+                  className="library-cast-tile"
+                  style={{ "--cast-tone": tone } as CSSProperties}
+                >
+                  <span className="library-cast-art" aria-hidden="true">
+                    <img
+                      src={src}
+                      alt=""
+                      decoding="async"
+                      draggable={false}
+                      style={{ objectPosition: pos }}
+                    />
+                  </span>
+                  <span className="library-cast-no" aria-hidden="true">
+                    RIDER {no}
+                  </span>
+                  <span className="library-cast-name">
+                    <DisplayName value={entry.title} />
+                  </span>
+                </GuardedLink>
+              ))}
+            </nav>
           </section>
           <LibraryHub saved={saved} ready={ready} />
           <LibraryInquiry guide={guide} onGuideChange={onGuideChange} />

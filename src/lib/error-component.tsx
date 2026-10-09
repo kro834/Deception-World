@@ -40,11 +40,17 @@ export function NotFoundComponent() {
       {/* Hoisted by React into <head>, and only where a 404 renders. */}
       <link rel="stylesheet" href={notFoundCss} precedence="default" />
       <i className="app-not-found-plate" aria-hidden="true" />
+      <span className="app-not-found-sigil" aria-hidden="true">
+        <i>DW</i>
+      </span>
       <span aria-hidden="true">404 / LOST RECORD</span>
       <p>DECEPTION WORLD</p>
       <h1>記録が見つかりません。</h1>
       <p>指定された資料は存在しないか、まだ公開されていません。</p>
       <Link to="/world">WORLD ARCHIVEへ戻る</Link>
+      <Link to="/search" className="app-not-found-search">
+        資料検索で探す
+      </Link>
     </main>
   );
 }

@@ -1,7 +1,10 @@
-/* /download in the Mirage/dossier grammar: the archive's export slip, one
-   square plate locked onto the ink deck. The sheet adds no text and no
-   markup: .export-page::before is the fixed ice grid ground (out of flow so
-   it takes no grid cell), ::after is the plate, a grid item spanning rows. */
+/* /download as a STAGE poster card (rx10, 2026-10-10): the archive's export
+   slip on the ink deck, its top the World's key art under a fall of ink, the
+   DW sigil standing on the art's edge, the EXPORT label, the chrome wordmark,
+   the ZIP plate and the retry link, and the way back to the main site as the
+   card's foot. .export-page::before is the fixed ice grid ground (out of flow
+   so it takes no grid cell), ::after is the card, a grid item spanning rows.
+   The label words are the page's own; the sheet adds no text. */
 
 /* ================================================================
    Tokens and ground
@@ -36,6 +39,8 @@
   --dl-hud: Michroma, Oxanium, "Noto Sans JP", sans-serif;
   /* Plate inner side padding, carried by the children's inline margins. */
   --dl-inset: clamp(16px, 5vw, 48px);
+  /* The poster's art: the first row, under the sigil. */
+  --dl-art: clamp(150px, 30vh, 280px);
 
   position: relative;
   isolation: isolate;
@@ -46,8 +51,8 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   display: grid;
-  grid-template-columns: min(100%, 640px);
-  grid-template-rows: repeat(6, auto);
+  grid-template-columns: min(100%, 460px);
+  grid-template-rows: var(--dl-art) repeat(8, auto);
   gap: 0;
   align-content: safe center;
   justify-content: center;
@@ -91,7 +96,9 @@ body:has(main.export-page) {
 }
 
 /* ================================================================
-   The plate: ::after spans every row; children sit above it
+   The poster (rx10 STAGE): ::after is the card, a grid item spanning
+   every row; its top is the key art under a fall of ink, the DW sigil
+   stands on the art's lower edge, and the way back is the card's foot.
    ================================================================ */
 .export-page > * {
   grid-column: 1;
@@ -101,22 +108,28 @@ body:has(main.export-page) {
 }
 /* Explicit rows: auto-placement would push the children below the plate's span. */
 .export-page > :nth-child(1) {
-  grid-row: 1;
-}
-.export-page > :nth-child(2) {
   grid-row: 2;
 }
-.export-page > :nth-child(3) {
+.export-page > :nth-child(2) {
   grid-row: 3;
 }
-.export-page > :nth-child(4) {
+.export-page > :nth-child(3) {
   grid-row: 4;
 }
-.export-page > :nth-child(5) {
+.export-page > :nth-child(4) {
   grid-row: 5;
 }
-.export-page > :nth-child(6) {
+.export-page > :nth-child(5) {
   grid-row: 6;
+}
+.export-page > :nth-child(6) {
+  grid-row: 7;
+}
+.export-page > :nth-child(7) {
+  grid-row: 8;
+}
+.export-page > :nth-child(8) {
+  grid-row: 9;
 }
 
 .export-page::after {
@@ -128,10 +141,10 @@ body:has(main.export-page) {
   align-self: stretch;
   z-index: 0;
   pointer-events: none;
-  border: 1px solid rgb(122 232 255 / 16%);
-  border-radius: 4px;
+  border: 1px solid rgb(122 232 255 / 22%);
+  border-radius: 6px;
   background:
-    var(--dl-prism) top / 100% 1px no-repeat,
+    var(--dl-prism) top / 100% 2px no-repeat,
     linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
     linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
     linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
@@ -140,20 +153,56 @@ body:has(main.export-page) {
     linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
     linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
     linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
-    linear-gradient(135deg, rgb(122 232 255 / 7%), transparent 42%),
-    linear-gradient(315deg, rgb(164 139 255 / 5%), transparent 40%),
-    rgb(10 18 32 / 82%);
+    linear-gradient(
+        180deg,
+        rgb(4 8 15 / 0%) 0,
+        rgb(4 8 15 / 30%) calc(var(--dl-art) * 0.45),
+        #070d16 calc(var(--dl-art) + 30px)
+      )
+      0 0 / 100% calc(var(--dl-art) + 31px),
+    linear-gradient(#070d16 0 0) 0 calc(var(--dl-art) + 30px) / 100% 100%,
+    url("/poster-card-03-delivery.webp") 50% 0 / 100% auto,
+    #070d16;
   background-repeat: no-repeat;
   box-shadow:
-    0 30px 80px rgb(0 0 0 / 55%),
-    inset 0 1px 0 rgb(255 255 255 / 4%);
+    0 40px 90px rgb(0 0 0 / 60%),
+    0 0 0 1px rgb(3 6 12 / 80%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
+/* The DW sigil: a cut diamond on the art's lower edge. */
+.export-page-sigil {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: -32px;
+  border: 1px solid rgb(122 232 255 / 70%);
+  color: #dff9ff;
+  background: linear-gradient(135deg, rgb(122 232 255 / 22%), rgb(122 232 255 / 4%) 60%), #070d16;
+  box-shadow:
+    0 0 0 5px rgb(4 8 15 / 85%),
+    0 0 0 6px rgb(240 207 134 / 55%),
+    0 14px 30px rgb(0 0 0 / 60%);
+  rotate: 45deg;
+}
+
+.export-page-sigil > i {
+  rotate: -45deg;
+  font:
+    700 18px / 1 Oxanium,
+    "Noto Sans JP",
+    sans-serif;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-indent: 0.08em;
 }
 
 /* ================================================================
    Type: HUD label, chrome-ink wordmark, file-number strip
    ================================================================ */
 .export-page p {
-  margin: clamp(28px, 5vw, 44px) 0 0;
+  margin: 34px 0 0;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -317,7 +366,7 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page small {
   display: block;
-  margin: 12px 0 clamp(24px, 5vw, 40px);
+  margin: 12px 0 20px;
   padding-top: 14px;
   /* 17em: the first line holds exactly the clause before the ／ separator
      (197px at 12px) and the second the rest, so nothing breaks mid-word.
@@ -331,9 +380,44 @@ html[data-world-effects="economy"] .export-page h1 {
   text-wrap: pretty;
 }
 
-.export-page :is(.export-page-btn, .export-page-alt):focus-visible {
+/* The way back: the poster's foot, the full width of the card. */
+.export-page .export-page-back {
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 0;
+  border-top: 1px solid rgb(122 232 255 / 18%);
+  border-radius: 0 0 6px 6px;
+  color: #dff9ff;
+  background: linear-gradient(180deg, rgb(122 232 255 / 8%), rgb(122 232 255 / 2%));
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+/* A drawn chevron, pointing back. */
+.export-page .export-page-back::before {
+  flex: none;
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border-bottom: 2px solid var(--dl-ice);
+  border-left: 2px solid var(--dl-ice);
+  rotate: 45deg;
+}
+
+.export-page :is(.export-page-btn, .export-page-alt, .export-page-back):focus-visible {
   outline: 2px solid var(--dl-focus);
   outline-offset: 3px;
+}
+
+.export-page .export-page-back:focus-visible {
+  outline-offset: -4px;
 }
 
 /* The ZIP plate's brackets sit 3–5px outside it, so its ring goes a band
@@ -360,6 +444,9 @@ html[data-world-effects="economy"] .export-page h1 {
   .export-page-alt:hover {
     color: #dff9ff;
     text-decoration-color: var(--dl-ice);
+  }
+  .export-page .export-page-back:hover {
+    background: linear-gradient(180deg, rgb(122 232 255 / 16%), rgb(122 232 255 / 4%));
   }
 }
 
@@ -429,6 +516,9 @@ html[data-world-effects="economy"] .export-page h1 {
   html:not([data-world-effects="economy"]) .export-page-btn::before {
     animation: dl-lock 420ms steps(3, jump-end) 520ms backwards;
   }
+  html:not([data-world-effects="economy"]) .export-page-sigil {
+    animation: dl-sigil 640ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms backwards;
+  }
 }
 
 @keyframes dl-lock {
@@ -439,6 +529,16 @@ html[data-world-effects="economy"] .export-page h1 {
   to {
     opacity: 1;
     scale: 1;
+  }
+}
+@keyframes dl-sigil {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
   }
 }
 @keyframes dl-title {
@@ -512,7 +612,21 @@ html[data-world-effects="economy"] .export-page h1 {
     border: 2px solid ButtonText;
     box-shadow: none;
   }
-  .export-page-alt {
+  .export-page-alt,
+  .export-page .export-page-back {
     color: LinkText;
+  }
+  .export-page .export-page-back {
+    border-top-color: CanvasText;
+    background: Canvas;
+  }
+  .export-page .export-page-back::before {
+    border-color: LinkText;
+  }
+  .export-page-sigil {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

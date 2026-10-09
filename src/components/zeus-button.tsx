@@ -112,6 +112,14 @@ const ZEUS_AVOID_SELECTOR = [
   ".dream-chapter-nav a",
   ".dossier-reader-links a",
   ".hero-actions .primary-action",
+  // rx10 STAGE: the library's rider files and card bookmarks, the record
+  // index's field, and the /download and 404 cards' ways back, which the
+  // button covered on phones.
+  ".library-cast-tile",
+  ".library-card-actions button",
+  ".search-input-row",
+  ".export-page :is(.export-page-alt, .export-page-back)",
+  ".app-not-found > a",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.

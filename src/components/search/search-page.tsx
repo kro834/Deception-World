@@ -10,6 +10,8 @@ import {
   type KeyboardEvent,
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { RecordArtFrame } from "@/components/library/record-art";
+import { documentArt } from "@/lib/record-art";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
@@ -30,6 +32,9 @@ const BROWSE_PREVIEW = 6;
 const URL_DELAY_MS = 280;
 const STARTING_QUERIES = ["ゼウス", "月城悠真", "六詠", "エクスプリーム", "Dream"];
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
+
+// Each record's place in the index, printed on its card as a file number.
+const RECORD_NUMBER = new Map(SEARCH_DOCUMENTS.map((document, index) => [document.id, index + 1]));
 
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
 const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
@@ -476,6 +481,10 @@ const ResultCard = memo(function ResultCard({
       className="search-result-card"
       onOpen={onOpen}
     >
+      <RecordArtFrame
+        art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
+        title={document.title}
+      />
       <span className="search-result-meta">
         <span>{categoryLabel(document.category)}</span>
         {place ? <span>{place}</span> : null}

@@ -1,0 +1,2483 @@
+/* ================================================================
+   STAGE — the index pages: /library and /search (rx10, 2026-10-10)
+
+   The reference room and the record index become case-file indexes in
+   the site's STAGE language. Every record card carries its art (the
+   published picture at its smallest delivery size, lazy) or, without
+   one, a typographic plate of its name; one card vocabulary serves both
+   pages: art window with a HUD file code, kind, Japanese title, a short
+   description, then its actions. Sections open on the one head grammar
+   (an outlined number, a HUD kicker, the Japanese title, a seam).
+
+   /library: the hero is a visual index (the eight riders standing on a
+   lit floor), My Library is a slim instrument row, 問いから辿る are
+   image-led question tiles, then the shelves of art cards.
+   /search: the field is the stage's centre, the filters are one chip
+   row, the results are art cards under numbered group heads.
+
+   Every rule is scoped to html[data-family="library"] (set before paint;
+   route sheets persist across client navigation). The page bars
+   (.library-topbar, .search-topbar) belong to the shell and are left
+   alone. Text is 12px or more. Motion is transform and opacity only,
+   finite, gated by reduced motion and economy rendering.
+   ================================================================ */
+
+html[data-family="library"] {
+  --dxl-deck: #08111c;
+  --dxl-deck-2: #0c1828;
+  --dxl-well: rgb(2 5 10 / 62%);
+  --dxl-line: rgb(var(--dx-edition-rgb) / 15%);
+  --dxl-line-2: rgb(var(--dx-edition-rgb) / 32%);
+  --dxl-hot: rgb(var(--dx-edition-rgb) / 72%);
+  --dxl-gold-rgb: 240 207 134;
+  --dxl-wrap: 1320px;
+  --dxl-gap: clamp(10px, 1.1vw, 16px);
+  --dxl-ticks:
+    linear-gradient(var(--dx-edition) 0 0) 0 0 / 14px 1px,
+    linear-gradient(var(--dx-edition) 0 0) 0 0 / 1px 14px,
+    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 14px 1px,
+    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 1px 14px;
+  background-color: var(--dx-ink);
+}
+
+html[data-family="library"] body {
+  background-color: var(--dx-ink);
+}
+
+/* ================================================================
+   Ground: one stage light from above, a faint violet side light,
+   the lattice, ink.
+   ================================================================ */
+html[data-family="library"] :is(.library-page, .search-page) {
+  color: var(--dx-text);
+  font-family: var(--dx-body);
+  background:
+    radial-gradient(90% 520px at 50% -140px, rgb(var(--dx-edition-rgb) / 14%), transparent 72%),
+    radial-gradient(50% 40% at 104% 22%, rgb(var(--dx-edition-2-rgb) / 8%), transparent 70%),
+    radial-gradient(40% 30% at -6% 64%, rgb(var(--dxl-gold-rgb) / 4%), transparent 70%),
+    var(--dx-lattice), var(--dx-ink);
+}
+
+html[data-family="library"] .library-page main#library-main,
+html[data-family="library"] .search-page .search-main {
+  box-sizing: border-box;
+  max-width: calc(var(--dxl-wrap) + 2 * var(--dx-gutter));
+  margin-inline: auto;
+  padding: 0 var(--dx-gutter) clamp(48px, 7vw, 96px);
+}
+
+html[data-family="library"] :is(.library-page, .search-page) :is(h1, h2, h3, h4) {
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="library"] :is(.library-page, .search-page) :is(a, button, input):focus-visible {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   The section head grammar: outlined number, HUD kicker, title, seam
+   ================================================================ */
+html[data-family="library"] #library-main {
+  counter-reset: dxl-section;
+}
+
+html[data-family="library"] #library-main > :is(.library-hub, .library-inquiry, .library-browser) {
+  counter-increment: dxl-section;
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading) {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-auto-flow: row dense;
+  column-gap: clamp(14px, 2vw, 26px);
+  align-items: end;
+  max-width: none;
+  margin: 0 0 clamp(18px, 2.6vw, 28px);
+  padding: 0 0 14px;
+  border: 0;
+  border-bottom: 1px solid var(--dxl-line);
+  background: linear-gradient(
+      90deg,
+      var(--dx-edition),
+      rgb(var(--dx-edition-2-rgb) / 60%) 60%,
+      transparent
+    )
+    0 100% / min(220px, 40%) 1px no-repeat;
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)::before {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: end;
+  content: counter(dxl-section, decimal-leading-zero) / "";
+  color: transparent;
+  font: 600 clamp(46px, 6vw, 76px) / 0.78 var(--dx-mono);
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px rgb(var(--dx-edition-rgb) / 58%);
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  > * {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+}
+
+html[data-family="library"] .library-page :is(.library-eyebrow, .inquiry-eyebrow) {
+  margin: 0 0 8px;
+  color: var(--dx-edition);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  h2 {
+  margin: 0;
+  color: var(--dx-text);
+  font: 700 clamp(24px, 3vw, 38px) / 1.25 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  > p:last-child:not(:first-child) {
+  grid-column: 1 / -1;
+}
+
+html[data-family="library"]
+  .library-page
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  > p:last-child {
+  margin-top: 10px;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"]
+    .library-page
+    :is(.library-hub-heading, .inquiry-heading, .library-browser-heading) {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 30rem);
+  }
+
+  html[data-family="library"]
+    .library-page
+    :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+    > p:last-child:not(:first-child) {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+    align-self: end;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
+/* ================================================================
+   The art window: one component for every record card, row and stop
+   ================================================================ */
+html[data-family="library"] .dxl-art {
+  --tint: var(--dx-edition);
+  --tint-rgb: var(--dx-edition-rgb);
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background:
+    radial-gradient(80% 60% at 50% 18%, rgb(var(--tint-rgb) / 16%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(var(--tint-rgb) / 5%) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(0deg, rgb(var(--tint-rgb) / 5%) 0 1px, transparent 1px 18px), #060c15;
+  pointer-events: none;
+  user-select: none;
+}
+
+html[data-family="library"] .dxl-art[data-edition="dream"] {
+  --tint: #e0614f;
+  --tint-rgb: 224 97 79;
+}
+
+html[data-family="library"] .dxl-art[data-edition="extreme"] {
+  --tint: #f0cf86;
+  --tint-rgb: 240 207 134;
+}
+
+html[data-family="library"] .dxl-art[data-edition="final"] {
+  --tint: #9d8cff;
+  --tint-rgb: 157 140 255;
+}
+
+html[data-family="library"] .dxl-art[data-edition="gallery"] {
+  --tint: #d8b27a;
+  --tint-rgb: 216 178 122;
+}
+
+html[data-family="library"] .dxl-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+/* The floor of the window: a scrim and the edition's light on its edge. */
+html[data-family="library"] .dxl-art::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, var(--tint), rgb(var(--tint-rgb) / 0%) 70%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(3 6 12 / 0%) 52%, rgb(3 6 12 / 72%) 100%);
+}
+
+/* The file code, top left, in a cut tab. */
+html[data-family="library"] .dxl-art > i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: 5px 12px 5px 8px;
+  color: var(--tint);
+  background: rgb(3 6 12 / 82%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  font: 400 12px / 1.3 var(--dx-hud);
+  font-style: normal;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+/* A record without a picture: its name, set as a spine. */
+html[data-family="library"] .dxl-art[data-plate="type"] {
+  container-type: inline-size;
+}
+
+html[data-family="library"] .dxl-art[data-plate="type"] > b {
+  position: absolute;
+  top: 36px;
+  right: 10%;
+  bottom: 10px;
+  overflow: hidden;
+  color: rgb(var(--tint-rgb) / 66%);
+  font: 700 clamp(14px, 10.5cqi, 26px) / 1.1 var(--dx-display);
+  letter-spacing: 0.08em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+
+html[data-family="library"] .dxl-art[data-plate="type"]::before {
+  position: absolute;
+  inset: 34px auto 10px 12px;
+  width: 1px;
+  content: "";
+  background: linear-gradient(180deg, var(--tint), transparent);
+  opacity: 0.6;
+}
+
+/* ================================================================
+   The card: art window, kind, title, description, actions
+   ================================================================ */
+html[data-family="library"] :is(.library-grid, .search-result-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dxl-gap);
+}
+
+@media (min-width: 560px) {
+  html[data-family="library"] :is(.library-grid, .search-result-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"] :is(.library-grid, .search-result-grid) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  html[data-family="library"] :is(.library-grid, .search-result-grid) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1400px) {
+  html[data-family="library"] :is(.library-grid, .search-result-grid) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+html[data-family="library"] .library-page .library-card,
+html[data-family="library"] .search-page :is(.search-result-card, .search-more-option) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--dxl-line);
+  border-radius: var(--dx-radius);
+  color: var(--dx-text);
+  background: var(--dx-plate);
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+  text-decoration: none;
+}
+
+/* Corner ticks over the plate: ice above, gold below. */
+html[data-family="library"] .library-page .library-card::before,
+html[data-family="library"] .search-page :is(.search-result-card, .search-more-option)::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  content: "";
+  border: 0;
+  background: var(--dxl-ticks);
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  pointer-events: none;
+  -webkit-mask: none;
+  mask: none;
+}
+
+html[data-family="library"] .library-page .library-card > :not(.dxl-art),
+html[data-family="library"] .search-page .search-result-card > :not(.dxl-art) {
+  margin-inline: 12px;
+}
+
+html[data-family="library"] .library-page .library-card > .dxl-art,
+html[data-family="library"] .search-page .search-result-card > .dxl-art {
+  flex: none;
+  border-bottom: 1px solid var(--dxl-line);
+}
+
+/* Kind / place: the card's file line */
+html[data-family="library"] .library-page .library-card-kind,
+html[data-family="library"] .search-page .search-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 11px;
+  margin-bottom: 0;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .search-page .search-result-meta > span + span::before {
+  margin-right: 8px;
+  content: "/" / "";
+  color: rgb(var(--dx-edition-rgb) / 45%);
+}
+
+html[data-family="library"] .library-page .library-card h3,
+html[data-family="library"] .search-page .search-result-title {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 0;
+  color: var(--dx-text);
+  font: 700 clamp(14px, 1.15vw, 16px) / 1.45 var(--dx-display);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="library"] .library-page .library-card h3 a {
+  display: inline;
+  min-height: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The whole card opens the record; its actions sit above that layer. */
+html[data-family="library"] .library-page .library-card h3 a::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  border-radius: inherit;
+}
+
+html[data-family="library"] .library-page .library-card h3 a:focus-visible {
+  outline: none;
+}
+
+html[data-family="library"] .library-page .library-card h3 a:focus-visible::after {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: -3px;
+}
+
+html[data-family="library"] .library-page .library-card-description,
+html[data-family="library"] .search-page .search-result-snippet {
+  display: -webkit-box;
+  margin-top: 6px;
+  margin-bottom: 0;
+  overflow: hidden;
+  color: var(--dx-text-2);
+  font-size: 12px;
+  line-height: 1.75;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+html[data-family="library"] .search-page :is(.search-result-via, .search-result-section) {
+  display: block;
+  margin-top: 6px;
+  color: var(--dx-gold);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+html[data-family="library"] .search-page .search-result-section {
+  color: var(--dx-edition);
+}
+
+html[data-family="library"] .library-page .library-card-actions,
+html[data-family="library"] .search-page .search-result-open {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+  margin-top: auto;
+  padding: 10px 0 10px;
+  border-top: 1px solid var(--dxl-line);
+}
+
+/* The card body keeps a breath above its foot. */
+html[data-family="library"] .library-page .library-card-description,
+html[data-family="library"] .search-page .search-result-snippet {
+  margin-bottom: 12px;
+}
+
+html[data-family="library"] .search-page .search-result-open {
+  z-index: auto;
+  color: var(--dx-edition);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-card-actions > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  color: var(--dx-edition);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+html[data-family="library"] .library-page .library-card-actions button {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text-2);
+  background: rgb(3 6 12 / 60%);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+html[data-family="library"] .library-page .library-card-actions button[aria-pressed="true"] {
+  border-color: rgb(var(--dxl-gold-rgb) / 70%);
+  color: #1a1305;
+  background: var(--dx-gold);
+}
+
+html[data-family="library"] .search-page mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  color: #03141c;
+  background: rgb(122 232 255 / 82%);
+  box-shadow: none;
+}
+
+/* Hover and the listbox's active record: the rim lights. */
+html[data-family="library"] .library-page .library-card:hover,
+html[data-family="library"]
+  .search-page
+  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]) {
+  border-color: var(--dxl-hot);
+  background: var(--dx-plate);
+}
+
+html[data-family="library"]
+  .search-page
+  :is(.search-result-card, .search-more-option)[data-active="true"] {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   /library — the hero: a visual index of the eight riders
+   ================================================================ */
+html[data-family="library"] .library-page .library-intro {
+  position: relative;
+  display: grid;
+  gap: clamp(24px, 3.4vw, 44px);
+  max-width: none;
+  padding: clamp(28px, 5vw, 64px) 0 clamp(40px, 5vw, 72px);
+}
+
+html[data-family="library"] .library-intro-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+  min-width: 0;
+}
+
+html[data-family="library"] .library-intro-copy > * {
+  min-width: 0;
+}
+
+html[data-family="library"] .library-page .library-intro h1 {
+  margin: 10px 0 0;
+  color: var(--dx-text);
+  font: 700 clamp(34px, 5.4vw, 76px) / 1.16 var(--dx-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"] .library-intro-copy > p:not(.library-eyebrow) {
+  max-width: 34em;
+  margin: 18px 0 0;
+  color: var(--dx-text-2);
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.95;
+}
+
+html[data-family="library"] .library-page .library-index-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  color: var(--dx-text-2);
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page .library-index-summary > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 3px;
+  background: rgb(3 6 12 / 55%);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="library"] .library-page .library-index-summary > span:first-child {
+  border-color: rgb(var(--dxl-gold-rgb) / 45%);
+  color: var(--dx-gold);
+}
+
+html[data-family="library"] .library-page .library-fulltext-link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 14px;
+  min-height: 48px;
+  margin-top: 18px;
+  padding: 0 18px;
+  border: 1px solid var(--dxl-hot);
+  border-radius: 4px;
+  color: #03141c;
+  background: linear-gradient(180deg, #c6f5ff, var(--dx-edition));
+  box-shadow: 0 10px 26px -12px rgb(var(--dx-edition-rgb) / 60%);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"] .library-intro-copy {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "title lede"
+      "title summary"
+      "title link";
+    column-gap: clamp(32px, 6vw, 96px);
+  }
+
+  html[data-family="library"] .library-intro-copy > .library-eyebrow {
+    grid-area: eyebrow;
+  }
+
+  html[data-family="library"] .library-intro-copy > h1 {
+    grid-area: title;
+    align-self: end;
+  }
+
+  html[data-family="library"] .library-intro-copy > p:not(.library-eyebrow) {
+    grid-area: lede;
+  }
+
+  html[data-family="library"] .library-intro-copy > .library-index-summary {
+    grid-area: summary;
+  }
+
+  html[data-family="library"] .library-intro-copy > .library-fulltext-link {
+    grid-area: link;
+  }
+}
+
+/* The cast strip: eight files standing on the stage floor. */
+html[data-family="library"] .library-cast {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(6px, 0.8vw, 12px);
+  padding-bottom: 22px;
+}
+
+html[data-family="library"] .library-cast::after {
+  position: absolute;
+  right: -3%;
+  bottom: 0;
+  left: -3%;
+  height: 22px;
+  content: "";
+  border-top: 1px solid var(--dxl-line-2);
+  background: radial-gradient(
+    50% 100% at 50% 0%,
+    rgb(var(--dx-edition-rgb) / 20%),
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+html[data-family="library"] .library-page .library-cast-tile {
+  --cast-tone: var(--dx-edition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--dxl-line);
+  border-radius: var(--dx-radius);
+  color: var(--dx-text);
+  background: var(--dxl-deck);
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+  text-decoration: none;
+}
+
+html[data-family="library"] .library-cast-art {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3 / 4.3;
+  background: var(--dx-lattice), #060c15;
+}
+
+html[data-family="library"] .library-cast-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-family="library"] .library-cast-art::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, var(--cast-tone), transparent 80%) 0 100% / 100% 3px no-repeat,
+    linear-gradient(180deg, transparent 58%, rgb(3 6 12 / 78%));
+}
+
+html[data-family="library"] .library-cast-no {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 10px 0;
+  color: var(--dx-text-3);
+  font: 400 12px / 1.3 var(--dx-hud);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+html[data-family="library"] .library-cast-no::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  content: "";
+  background: var(--cast-tone);
+}
+
+html[data-family="library"] .library-cast-name {
+  display: block;
+  margin: 4px 10px 12px;
+  font: 700 13px / 1.45 var(--dx-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"] .library-page .library-cast-tile:hover {
+  border-color: var(--cast-tone);
+}
+
+html[data-family="library"] .library-page .library-cast-tile:focus-visible {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 3px;
+}
+
+/* Under 1180px the files stand in a row that scrolls sideways. */
+@media (max-width: 1179px) {
+  html[data-family="library"] .library-cast {
+    grid-template-columns: none;
+    grid-auto-columns: clamp(118px, 33vw, 168px);
+    grid-auto-flow: column;
+    margin-inline: calc(-1 * var(--dx-gutter));
+    padding: 2px var(--dx-gutter) 18px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--dx-gutter);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  html[data-family="library"] .library-cast::-webkit-scrollbar {
+    display: none;
+  }
+
+  html[data-family="library"] .library-cast::after {
+    display: none;
+  }
+
+  html[data-family="library"] .library-page .library-cast-tile {
+    scroll-snap-align: start;
+  }
+}
+
+/* ================================================================
+   /library — My Library: a slim instrument row
+   ================================================================ */
+html[data-family="library"] .library-page .library-hub {
+  margin: 0 0 clamp(48px, 7vw, 88px);
+  padding: clamp(16px, 2.2vw, 26px);
+  border: 1px solid var(--dxl-line);
+  border-radius: var(--dx-radius);
+  background: var(--dx-plate);
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .library-hub::before {
+  inset: -1px 24px auto;
+  height: 1px;
+  background: var(--dx-seam);
+}
+
+html[data-family="library"] .library-page .library-hub::after {
+  display: none;
+}
+
+html[data-family="library"] .library-page .library-hub-loading {
+  margin: 0;
+  color: var(--dx-text-3);
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-hub-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 700px) {
+  html[data-family="library"] .library-page .library-hub-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  html[data-family="library"] .library-page .library-hub-grid {
+    grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
+  }
+}
+
+html[data-family="library"]
+  .library-page
+  .library-hub-grid
+  > :is(.library-continue, .library-shelf, .library-history, .library-searches) {
+  position: relative;
+  grid-column: auto;
+  min-width: 0;
+  max-height: 360px;
+  padding: 14px 14px 10px;
+  overflow-y: auto;
+  border: 1px solid var(--dxl-line) !important;
+  border-radius: 4px;
+  background:
+    var(--dxl-ticks), linear-gradient(180deg, rgb(255 255 255 / 3%), transparent 40%),
+    var(--dxl-well) !important;
+  background-repeat: no-repeat !important;
+  scrollbar-color: rgb(var(--dx-edition-rgb) / 30%) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-family="library"] .library-page .library-hub h3 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  color: var(--dx-text);
+  font: 700 15px / 1.4 var(--dx-display);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-hub h3 > span {
+  color: var(--dx-edition);
+  font: 400 12px / 1.3 var(--dx-hud);
+  letter-spacing: 0.18em;
+}
+
+html[data-family="library"] .library-page .library-hub-subhead {
+  position: sticky;
+  top: -14px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -14px -14px 10px;
+  padding: 14px 14px 8px;
+  border-bottom: 1px solid var(--dxl-line);
+  background: #060c15;
+}
+
+/* The count is the instrument's read-out. */
+html[data-family="library"] .library-page .library-hub-subhead > b {
+  color: var(--dx-text);
+  font: 600 30px / 0.9 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"] .library-page .library-shelf .library-hub-subhead > b {
+  color: var(--dx-gold);
+}
+
+html[data-family="library"] .library-page :is(.library-hub-empty, .library-hub-note) {
+  margin: 8px 0 0;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+/* Continue: the record's art beside where the reader left off. */
+html[data-family="library"] .library-page .library-continue {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  grid-auto-rows: min-content;
+  column-gap: 14px;
+  border-color: var(--dxl-line-2) !important;
+}
+
+html[data-family="library"] .library-page .library-continue > h3,
+html[data-family="library"] .library-page .library-continue > .library-hub-empty {
+  grid-column: 1 / -1;
+}
+
+html[data-family="library"] .library-page .library-continue > h3 {
+  min-height: 48px;
+  justify-content: flex-end;
+  margin: -14px -14px 12px;
+  padding: 14px 14px 8px;
+  border-bottom: 1px solid var(--dxl-line);
+  background: #060c15;
+}
+
+html[data-family="library"] .library-page .dxl-art.is-continue {
+  grid-column: 1;
+  grid-row: 2 / span 3;
+  align-self: start;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+}
+
+html[data-family="library"] .library-page .dxl-art.is-continue:not([data-plate]) > i,
+html[data-family="library"] .library-page .dxl-art.is-continue > b {
+  display: none;
+}
+
+/* A small plate keeps only its code, set on its floor. */
+html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"] > i {
+  top: auto;
+  bottom: 8px;
+  left: 0;
+  padding: 3px 8px;
+  background: none;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"]
+  .library-page
+  .library-continue
+  > :not(h3, .dxl-art, .library-hub-empty) {
+  grid-column: 2;
+}
+
+html[data-family="library"] .library-page .library-continue-kind {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0;
+  color: var(--dx-gold);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+html[data-family="library"] .library-page .library-continue-kind > span {
+  color: var(--dx-text-3);
+}
+
+html[data-family="library"] .library-page .library-continue-title {
+  margin: 4px 0 10px;
+  color: var(--dx-text);
+  font: 700 clamp(17px, 1.6vw, 22px) / 1.4 var(--dx-display);
+}
+
+html[data-family="library"] .library-page .library-continue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+html[data-family="library"] .library-page .library-continue-actions > a {
+  min-height: 44px;
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-continue-actions > .library-primary-link {
+  padding: 0 16px;
+  border-radius: 4px;
+  color: #03141c;
+  background: linear-gradient(180deg, #c6f5ff, var(--dx-edition));
+  font-weight: 600;
+}
+
+html[data-family="library"] .library-page .library-continue-actions > a:not(.library-primary-link) {
+  color: var(--dx-text-2);
+}
+
+/* Saved and history rows: a small art tab, the label, the name. */
+html[data-family="library"] .library-page .library-rows {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="library"] .library-page .library-rows > li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+}
+
+html[data-family="library"] .library-page .library-rows > li > a {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-content: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 4px;
+  color: var(--dx-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+html[data-family="library"] .library-page .library-rows > li > a:hover {
+  color: var(--dx-text);
+  background: rgb(var(--dx-edition-rgb) / 7%);
+}
+
+html[data-family="library"] .library-page .dxl-art.is-row {
+  grid-row: 1 / span 2;
+  width: 34px;
+  aspect-ratio: 4 / 5;
+  border-radius: 3px;
+}
+
+html[data-family="library"] .library-page .dxl-art.is-row > :is(i, b),
+html[data-family="library"] .library-page .dxl-art.is-row::before {
+  display: none;
+}
+
+html[data-family="library"] .library-page .library-rows small {
+  grid-column: 2;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+html[data-family="library"] .library-page .library-shelf .library-rows small {
+  color: var(--dx-gold);
+}
+
+html[data-family="library"] .library-page .library-rows > li > a > span:last-child {
+  grid-column: 2;
+  min-width: 0;
+}
+
+html[data-family="library"] .library-page .library-rows button {
+  flex: none;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--dxl-line);
+  border-radius: 4px;
+  color: var(--dx-text-3);
+  background: transparent;
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page .library-history-day > p {
+  margin: 8px 0 2px;
+  color: var(--dx-edition);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="library"] .library-page .library-text-button {
+  min-height: 44px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--dx-text-3);
+  background: none;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+html[data-family="library"] .library-page .library-search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="library"] .library-page .library-search-chips a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text);
+  background: rgb(var(--dx-edition-rgb) / 5%);
+  font-size: 13px;
+}
+
+/* The instrument's foot: the saved data's two controls. */
+html[data-family="library"] .library-page .library-data-controls {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 2px;
+  padding: 10px 2px 0;
+  border-top: 1px dashed var(--dxl-line);
+}
+
+html[data-family="library"] .library-page .library-data-controls > p:first-child {
+  margin: 0 6px 0 0;
+  color: var(--dx-text-3);
+  font: 400 12px / 1.4 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="library"] .library-page .library-data-controls > button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text-2);
+  background: rgb(3 6 12 / 55%);
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page .library-data-controls > .library-danger {
+  border-color: #ffb4a3;
+  color: #ffd9cf;
+  background: rgb(255 140 110 / 12%);
+}
+
+html[data-family="library"] .library-page .library-data-controls > .library-hub-note {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* ================================================================
+   /library — 問いから辿る: image-led question tiles
+   ================================================================ */
+html[data-family="library"] .library-page .library-inquiry {
+  margin: 0 0 clamp(48px, 7vw, 88px);
+  padding: 0;
+  border: 0;
+}
+
+html[data-family="library"] .library-page .inquiry-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dxl-gap);
+}
+
+html[data-family="library"] .library-page .inquiry-choice {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: clamp(280px, 30vw, 380px);
+  padding: clamp(18px, 2.4vw, 28px);
+  overflow: hidden;
+  border: 1px solid var(--dxl-line-2);
+  border-top: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  color: var(--dx-text);
+  background: var(--dxl-deck);
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+  text-align: left;
+}
+
+html[data-family="library"] .inquiry-choice-art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: flex;
+  gap: 2px;
+  background: #03060c;
+  pointer-events: none;
+}
+
+html[data-family="library"] .inquiry-choice-art > img {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-family="library"] .inquiry-choice-art > img:first-child {
+  flex-grow: 1.7;
+}
+
+html[data-family="library"] .inquiry-choice-art::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(180deg, rgb(3 6 12 / 8%) 0%, rgb(3 6 12 / 46%) 38%, rgb(3 6 12 / 94%) 74%),
+    linear-gradient(90deg, rgb(3 6 12 / 70%), transparent 70%);
+}
+
+/* The accent stands on the tile's top edge. */
+html[data-family="library"] .library-page .inquiry-choice::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  content: "";
+  background: linear-gradient(90deg, var(--inquiry-accent), transparent 85%);
+}
+
+html[data-family="library"] .library-page .inquiry-choice-label {
+  color: var(--inquiry-accent);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="library"] .library-page .inquiry-choice-title {
+  color: var(--dx-text);
+  font: 700 clamp(22px, 2.6vw, 34px) / 1.35 var(--dx-display);
+  letter-spacing: 0.03em;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="library"] .library-page .inquiry-choice-intro {
+  max-width: 34em;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+html[data-family="library"] .library-page .inquiry-choice-action {
+  display: flex;
+  align-self: stretch;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--inquiry-accent);
+  border-radius: 4px;
+  color: var(--inquiry-accent);
+  background: rgb(3 6 12 / 60%);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html[data-family="library"] .library-page .inquiry-choice:hover,
+html[data-family="library"] .library-page .inquiry-choice[aria-pressed="true"] {
+  border-color: var(--inquiry-accent);
+  color: var(--dx-text);
+  background: var(--dxl-deck);
+}
+
+html[data-family="library"]
+  .library-page
+  .inquiry-choice[aria-pressed="true"]
+  .inquiry-choice-action {
+  color: #120d04;
+  background: var(--inquiry-accent);
+}
+
+html[data-family="library"] .library-page .inquiry-start-note {
+  margin: 14px 0 0;
+  color: var(--dx-text-3);
+  font-size: 13px;
+}
+
+/* The opened guide: three numbered entrances, each with its art. */
+html[data-family="library"] .library-page .inquiry-route {
+  margin-top: var(--dxl-gap);
+  padding: clamp(16px, 2.4vw, 28px);
+  border: 1px solid var(--dxl-line-2);
+  border-top: 2px solid var(--inquiry-accent);
+  border-radius: var(--dx-radius);
+  background: var(--dx-plate);
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .inquiry-route-heading {
+  margin-bottom: 18px;
+}
+
+html[data-family="library"] .library-page .inquiry-route-heading h3 {
+  margin: 0 0 6px;
+  font: 700 clamp(20px, 2.2vw, 28px) / 1.4 var(--dx-display);
+}
+
+html[data-family="library"] .library-page .inquiry-route-heading > p:last-child {
+  color: var(--dx-text-3);
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page .inquiry-stops {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dxl-gap);
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"] .library-page .inquiry-stops {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+html[data-family="library"] .library-page .inquiry-stop {
+  position: relative;
+  display: block;
+  padding: 0;
+}
+
+html[data-family="library"] .library-page .inquiry-stop::before {
+  display: none;
+}
+
+html[data-family="library"] .library-page .inquiry-stop-number {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-bottom-left-radius: 4px;
+  color: #120d04;
+  background: var(--inquiry-accent);
+  font: 600 18px / 1 var(--dx-mono);
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--dxl-line);
+  border-radius: var(--dx-radius);
+  background: rgb(3 6 12 / 55%);
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body > :not(.dxl-art) {
+  margin-inline: 14px;
+}
+
+html[data-family="library"] .library-page .dxl-art.is-stop {
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--dxl-line);
+}
+
+html[data-family="library"] .library-page .dxl-art.is-stop > img {
+  object-position: 50% 22%;
+}
+
+html[data-family="library"] .library-page .inquiry-stop-label {
+  margin-top: 12px;
+  color: var(--inquiry-accent);
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body h4 {
+  margin-top: 4px;
+  margin-bottom: 0;
+  font: 700 16px / 1.5 var(--dx-display);
+}
+
+html[data-family="library"] .library-page .inquiry-look-for {
+  margin-top: 6px;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body blockquote {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--inquiry-accent);
+  background: rgb(255 255 255 / 3%);
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body blockquote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body cite {
+  display: block;
+  margin-top: 4px;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  font-style: normal;
+}
+
+html[data-family="library"] .library-page .inquiry-source-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: auto;
+  margin-bottom: 12px;
+  padding-top: 12px;
+  color: var(--inquiry-accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html[data-family="library"] .library-page .inquiry-return-note {
+  margin: 14px 0 0;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ================================================================
+   /library — the index: search, one chip row, shelves of art cards
+   ================================================================ */
+html[data-family="library"] .library-page .library-browser {
+  padding: 0;
+}
+
+html[data-family="library"] .library-page .library-search-note {
+  max-width: 60em;
+  margin: 8px 0 0;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+html[data-family="library"] .library-page .library-search-label {
+  display: block;
+  margin: 18px 0 8px;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background:
+    linear-gradient(90deg, var(--dx-edition), transparent) 0 0 / 120px 1px no-repeat,
+    var(--dxl-well);
+  box-shadow: var(--dx-bevel);
+}
+
+html[data-family="library"] .library-page .library-search:focus-within {
+  border-color: var(--dx-edition);
+  box-shadow: 0 0 0 2px var(--dx-focus);
+}
+
+html[data-family="library"] .library-page .library-search > span {
+  color: var(--dx-edition);
+  font-size: 24px;
+}
+
+html[data-family="library"] .library-page .library-search input {
+  min-height: 56px;
+  color: var(--dx-text);
+  font-size: 16px;
+}
+
+html[data-family="library"] .library-page .library-search input:focus-visible {
+  outline: none;
+}
+
+/* The kinds: one chip row. */
+html[data-family="library"] .library-page .library-filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+html[data-family="library"] .library-page .library-filter-row button,
+html[data-family="library"] .search-page .search-categories button {
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 999px;
+  color: var(--dx-text-2);
+  background: rgb(3 6 12 / 55%);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+html[data-family="library"] .library-page .library-filter-row button[aria-pressed="true"],
+html[data-family="library"] .search-page .search-categories button[aria-pressed="true"] {
+  border-color: var(--dx-edition);
+  color: #03141c;
+  background: var(--dx-edition);
+}
+
+html[data-family="library"] .library-page .library-results-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  margin: 22px 0 18px;
+  color: var(--dx-text-2);
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-results-heading > p {
+  margin: 0;
+  font-family: var(--dx-mono);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-fulltext-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--dx-edition);
+}
+
+/* A shelf's head: its name, its count, a rule to the edge. */
+html[data-family="library"] .library-page .library-shelf-section + .library-shelf-section {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+html[data-family="library"] .library-page .library-shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  color: var(--dx-text);
+  font: 700 clamp(17px, 1.6vw, 20px) / 1.4 var(--dx-display);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-shelf-title::before {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  content: "";
+  border: 1px solid var(--dx-edition);
+  rotate: 45deg;
+}
+
+html[data-family="library"] .library-page .library-shelf-title::after {
+  position: static;
+  flex: 1;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, var(--dxl-line-2), transparent);
+}
+
+html[data-family="library"] .library-page .library-shelf-title > span {
+  order: 2;
+  padding: 2px 8px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 3px;
+  color: var(--dx-edition);
+  font: 500 13px / 1.4 var(--dx-mono);
+}
+
+html[data-family="library"] .library-page .library-error {
+  margin: 14px 0 0;
+  color: #ffd9cf;
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-empty {
+  padding: clamp(20px, 4vw, 40px);
+  border: 1px dashed var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background: var(--dxl-well);
+  text-align: center;
+}
+
+html[data-family="library"] .library-page .library-empty p {
+  color: var(--dx-text-2);
+  font-size: 13px;
+}
+
+/* ================================================================
+   /library — the end of the page (the 7px leak of footer p/a is gone)
+   ================================================================ */
+html[data-family="library"] .library-page footer.library-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  justify-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: clamp(36px, 5vw, 56px) var(--dx-gutter) clamp(72px, 9vw, 112px);
+  border: 0;
+  border-top: 1px solid var(--dxl-line);
+  background:
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--dx-edition),
+        var(--dx-edition-2),
+        var(--dx-gold),
+        transparent
+      )
+      50% 0 / min(560px, 80%) 1px no-repeat,
+    radial-gradient(50% 120px at 50% 0, rgb(var(--dx-edition-rgb) / 9%), transparent 80%);
+  text-align: center;
+}
+
+html[data-family="library"] .library-page footer.library-footer p,
+html[data-family="library"] .library-page footer.library-footer a {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="library"] .library-page footer.library-footer p {
+  margin: 0;
+  color: var(--dx-text-2);
+  line-height: 1.8;
+}
+
+html[data-family="library"] .library-page footer.library-footer > a {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: min(100%, 240px);
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--dxl-hot);
+  border-radius: 4px;
+  color: var(--dx-text);
+  background: rgb(var(--dx-edition-rgb) / 8%);
+  font-weight: 600;
+  transition: none;
+}
+
+/* ================================================================
+   /search — the stage: the field at its centre
+   ================================================================ */
+html[data-family="library"] .search-page .search-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  justify-items: center;
+  gap: 18px;
+  padding: clamp(36px, 6vw, 80px) 0 clamp(20px, 3vw, 32px);
+  text-align: center;
+}
+
+html[data-family="library"] .search-page .search-intro > div:first-child {
+  display: grid;
+  justify-items: center;
+  order: 2;
+}
+
+html[data-family="library"] .search-page .search-eyebrow {
+  margin: 0 0 12px;
+  color: var(--dx-edition);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="library"] .search-page h1 {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--dx-text);
+  font: 700 clamp(36px, 6vw, 80px) / 1.1 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .search-page h1 > span {
+  display: block;
+  margin: 0;
+  color: var(--dx-text-3);
+  font: 600 13px / 1.4 var(--dx-body);
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+}
+
+html[data-family="library"] .search-page .search-lede {
+  margin: 16px 0 0;
+  color: var(--dx-text-2);
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.9;
+}
+
+/* 171 RECORDS: the index's read-out, a strip above the title. */
+html[data-family="library"] .search-page .search-index-mark {
+  order: 1;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  height: auto;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 999px;
+  outline: 0;
+  background: rgb(3 6 12 / 65%);
+  box-shadow: var(--dx-bevel);
+}
+
+html[data-family="library"] .search-page .search-index-mark::before,
+html[data-family="library"] .search-page .search-index-mark::after {
+  display: none;
+}
+
+html[data-family="library"] .search-page .search-index-mark > span {
+  color: var(--dx-text-3);
+  font: 400 12px / 1.3 var(--dx-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="library"] .search-page .search-index-mark > .search-index-wide {
+  display: inline;
+  max-width: none;
+  white-space: nowrap;
+  padding-left: 12px;
+  border-left: 1px solid var(--dxl-line-2);
+}
+
+html[data-family="library"] .search-page .search-index-mark strong {
+  color: var(--dx-gold);
+  font: 600 22px / 1 var(--dx-mono);
+  letter-spacing: 0.06em;
+}
+
+/* The workbench is the lit stage under the title. */
+html[data-family="library"] .search-page .search-workbench {
+  position: relative;
+  max-width: 940px;
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 32px) clamp(16px, 3vw, 36px) clamp(16px, 2.4vw, 26px);
+  border: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background:
+    var(--dxl-ticks),
+    radial-gradient(80% 140% at 50% 0%, rgb(var(--dx-edition-rgb) / 12%), transparent 70%),
+    var(--dx-plate);
+  background-repeat: no-repeat;
+  box-shadow:
+    var(--dx-bevel),
+    0 40px 90px -40px rgb(var(--dx-edition-rgb) / 30%),
+    var(--dx-drop);
+}
+
+html[data-family="library"] .search-page .search-workbench::before {
+  position: absolute;
+  inset: -1px 32px auto;
+  height: 1px;
+  content: "";
+  border: 0;
+  background: var(--dx-seam);
+  -webkit-mask: none;
+  mask: none;
+}
+
+html[data-family="library"] .search-page .search-workbench::after {
+  display: none;
+}
+
+html[data-family="library"] .search-page .search-form > label {
+  display: block;
+  margin: 0 0 10px;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+html[data-family="library"] .search-page .search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 18px;
+  border: 1px solid var(--dxl-hot);
+  border-radius: var(--dx-radius);
+  background: rgb(2 5 10 / 85%);
+  box-shadow:
+    inset 0 0 0 1px rgb(3 6 12 / 80%),
+    0 0 0 4px rgb(var(--dx-edition-rgb) / 7%);
+}
+
+html[data-family="library"] .search-page .search-input-row:focus-within {
+  border-color: var(--dx-edition);
+  box-shadow: 0 0 0 2px var(--dx-focus);
+}
+
+html[data-family="library"] .search-page .search-input-row > svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--dx-edition);
+}
+
+html[data-family="library"] .search-page .search-input-row input {
+  flex: 1;
+  min-width: 0;
+  min-height: clamp(56px, 6vw, 72px);
+  border: 0;
+  color: var(--dx-text);
+  background: transparent;
+  font-size: clamp(16px, 1.8vw, 22px);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"] .search-page .search-clear {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  color: var(--dx-text-2);
+  background: transparent;
+  font-size: 20px;
+}
+
+html[data-family="library"] .search-page .search-submit {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 4px;
+  color: #03141c;
+  background: linear-gradient(180deg, #c6f5ff, var(--dx-edition));
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="library"] .search-page #record-query-help {
+  margin: 10px 0 0;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+html[data-family="library"] .search-page .search-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 14px 0 0;
+}
+
+html[data-family="library"] .search-page .search-suggestions > span {
+  margin-right: 4px;
+  color: var(--dx-text-3);
+  font-size: 12px;
+}
+
+html[data-family="library"] .search-page .search-suggestions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--dxl-line-2);
+  border-radius: 0;
+  color: var(--dx-text);
+  background: transparent;
+  font-size: 13px;
+}
+
+/* The kinds: one chip row under the field, scrolled sideways if narrow. */
+html[data-family="library"] .search-page .search-categories {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: safe center;
+  gap: 6px;
+  margin: 16px calc(-1 * clamp(16px, 3vw, 36px)) 0;
+  padding: 16px clamp(16px, 3vw, 36px) 2px;
+  overflow-x: auto;
+  border-top: 1px solid var(--dxl-line);
+  scrollbar-width: none;
+}
+
+html[data-family="library"] .search-page .search-categories::-webkit-scrollbar,
+html[data-family="library"] .library-page .library-filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+html[data-family="library"] .search-page .search-categories button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-family="library"] .search-page .search-categories button span {
+  min-width: 2ch;
+  color: inherit;
+  font: 500 12px / 1 var(--dx-mono);
+  opacity: 0.8;
+}
+
+/* ================================================================
+   /search — results: a count read-out, numbered groups of art cards
+   ================================================================ */
+html[data-family="library"] .search-page .search-results {
+  padding-top: clamp(36px, 5vw, 64px);
+}
+
+html[data-family="library"] .search-page .search-results-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin: 0 0 clamp(18px, 3vw, 28px);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--dxl-line);
+  background: linear-gradient(90deg, var(--dx-edition), transparent) 0 100% / min(220px, 40%) 1px
+    no-repeat;
+}
+
+html[data-family="library"] .search-page .search-results-heading h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+  color: var(--dx-text);
+  font: 700 clamp(22px, 2.6vw, 34px) / 1.3 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .search-page .search-results-heading h2 > span {
+  display: inline;
+  margin: 0;
+  color: var(--dx-edition);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.18em;
+}
+
+html[data-family="library"] .search-page .search-results-heading > p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--dx-text-2);
+  font-size: 13px;
+}
+
+html[data-family="library"] .search-page .search-results-heading > p strong {
+  color: var(--dx-gold);
+  font: 600 clamp(30px, 3.4vw, 44px) / 1 var(--dx-mono);
+}
+
+html[data-family="library"] .search-page .search-results-heading > p > span {
+  max-width: none;
+  color: var(--dx-text);
+}
+
+html[data-family="library"] .search-page .search-groups {
+  display: grid;
+  gap: clamp(36px, 5vw, 56px);
+  counter-reset: dxl-group;
+}
+
+html[data-family="library"] .search-page .search-group {
+  counter-increment: dxl-group;
+}
+
+/* A group's head: number, Japanese name, code, count. */
+html[data-family="library"] .search-page .search-group-head {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 14px;
+  margin: 0 0 14px;
+  padding: 0 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--dxl-line);
+}
+
+html[data-family="library"] .search-page .search-group-head::before {
+  grid-column: 1;
+  content: counter(dxl-group, decimal-leading-zero) / "";
+  color: transparent;
+  font: 600 clamp(36px, 4vw, 52px) / 0.8 var(--dx-mono);
+  -webkit-text-stroke: 1px rgb(var(--dx-edition-rgb) / 58%);
+}
+
+html[data-family="library"] .search-page .search-group-head::after {
+  display: none;
+}
+
+html[data-family="library"] .search-page .search-group-head > span {
+  grid-column: 2;
+  color: var(--dx-text);
+  font: 700 clamp(18px, 1.8vw, 22px) / 1.2 var(--dx-display);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .search-page .search-group-head > i {
+  grid-column: 3;
+  justify-self: start;
+  color: var(--dx-edition);
+  font: 400 12px / 1.6 var(--dx-hud);
+  font-style: normal;
+  letter-spacing: 0.18em;
+}
+
+html[data-family="library"] .search-page .search-group-head > b {
+  grid-column: 4;
+  color: var(--dx-text-2);
+  font: 500 15px / 1.4 var(--dx-mono);
+}
+
+/* "See all of a kind": a card-sized tile with the count as its art. */
+html[data-family="library"] .search-page .search-more-option {
+  flex-flow: row wrap;
+  align-content: flex-end;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  min-height: 112px;
+  padding: 16px 14px;
+  background:
+    radial-gradient(90% 70% at 30% 30%, rgb(var(--dx-edition-rgb) / 12%), transparent 70%),
+    var(--dx-lattice), var(--dx-plate);
+}
+
+/* The tile closes its row: it takes the columns the row has left. */
+html[data-family="library"] .search-page .search-more-option:is(:nth-child(5), :nth-child(7)) {
+  grid-column: span 2;
+}
+
+@media (min-width: 560px) {
+  html[data-family="library"] .search-page .search-more-option:nth-child(7) {
+    grid-column: span 3;
+  }
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"] .search-page .search-more-option:nth-child(5) {
+    grid-column: span 4;
+  }
+
+  html[data-family="library"] .search-page .search-more-option:nth-child(7) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1180px) {
+  html[data-family="library"] .search-page .search-more-option:nth-child(5) {
+    grid-column: span 1;
+  }
+
+  html[data-family="library"] .search-page .search-more-option:nth-child(7) {
+    grid-column: span 4;
+  }
+}
+
+@media (min-width: 1400px) {
+  html[data-family="library"] .search-page .search-more-option:nth-child(5) {
+    grid-column: span 2;
+  }
+
+  html[data-family="library"] .search-page .search-more-option:nth-child(7) {
+    grid-column: span 6;
+  }
+}
+
+html[data-family="library"] .search-page .search-more-option > span {
+  color: var(--dx-text);
+  font: 700 14px / 1.5 var(--dx-display);
+}
+
+html[data-family="library"] .search-page .search-more-option > b {
+  color: var(--dx-edition);
+  font: 600 clamp(28px, 2.6vw, 40px) / 1 var(--dx-mono);
+}
+
+html[data-family="library"] .search-page .search-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 18px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  color: var(--dx-text);
+  background: var(--dx-plate);
+  font-size: 14px;
+}
+
+html[data-family="library"] .search-page .search-more > span {
+  color: var(--dx-text-3);
+  font-family: var(--dx-mono);
+}
+
+html[data-family="library"] .search-page .search-empty {
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px dashed var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background: var(--dxl-well);
+  text-align: center;
+}
+
+html[data-family="library"] .search-page .search-empty > svg {
+  color: var(--dx-edition);
+}
+
+html[data-family="library"] .search-page .search-empty button,
+html[data-family="library"] .search-page .search-close-matches button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text);
+  background: rgb(3 6 12 / 55%);
+  font-size: 13px;
+}
+
+/* The end of the index. */
+html[data-family="library"] .search-page .search-scope-note {
+  margin: clamp(40px, 6vw, 72px) auto 0;
+  padding-top: 22px;
+  max-width: 46em;
+  border-top: 1px solid var(--dxl-line);
+  background: linear-gradient(90deg, transparent, var(--dx-edition), var(--dx-gold), transparent)
+    50% 0 / 60% 1px no-repeat;
+  color: var(--dx-text-3);
+  font-size: 12px;
+  line-height: 1.9;
+  text-align: center;
+}
+
+/* ================================================================
+   Phones
+   ================================================================ */
+@media (max-width: 699px) {
+  html[data-family="library"] .library-page .inquiry-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="library"] .library-page .inquiry-choice {
+    min-height: 260px;
+  }
+
+  html[data-family="library"] .search-page .search-index-mark > .search-index-wide {
+    display: none;
+  }
+
+  html[data-family="library"] .search-page .search-eyebrow {
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="library"] .search-page .search-submit {
+    padding: 0 14px;
+  }
+
+  html[data-family="library"] .search-page .search-submit > span {
+    display: none;
+  }
+
+  html[data-family="library"] .search-page .search-categories {
+    justify-content: flex-start;
+  }
+
+  html[data-family="library"] .search-page .search-group-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: 2px;
+  }
+
+  html[data-family="library"] .search-page .search-group-head::before {
+    grid-row: 1 / span 2;
+  }
+
+  html[data-family="library"] .search-page .search-group-head > i {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  html[data-family="library"] .search-page .search-group-head > b {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+
+  html[data-family="library"] .library-page .library-cast-name {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 559px) {
+  html[data-family="library"] .library-page .library-card-actions > a {
+    display: none;
+  }
+
+  html[data-family="library"] .library-page .library-card-actions button {
+    flex: 1;
+  }
+}
+
+/* Narrow cards: the title closes up so a whole name holds its line. */
+@media (max-width: 559px) {
+  html[data-family="library"] .library-page .library-card h3,
+  html[data-family="library"] .search-page .search-result-title {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  html[data-family="library"]
+    .library-page
+    :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+    h2 {
+    font-size: clamp(21px, 6.4vw, 30px);
+  }
+
+  html[data-family="library"] .library-page :is(.library-eyebrow, .inquiry-eyebrow) {
+    letter-spacing: 0.14em;
+  }
+}
+
+/* The smallest phones: a card is a row, its art a spine with the code
+   set down its edge. */
+@media (max-width: 359px) {
+  html[data-family="library"] :is(.library-grid, .search-result-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="library"] .library-page .library-card,
+  html[data-family="library"] .search-page .search-result-card {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-auto-rows: min-content;
+    align-content: start;
+  }
+
+  html[data-family="library"] .library-page .library-card > .dxl-art,
+  html[data-family="library"] .search-page .search-result-card > .dxl-art {
+    grid-column: 1;
+    grid-row: 1 / span 8;
+    align-self: stretch;
+    min-height: 136px;
+    aspect-ratio: auto;
+    border-right: 1px solid var(--dxl-line);
+    border-bottom: 0;
+  }
+
+  html[data-family="library"] .library-page .library-card > :not(.dxl-art),
+  html[data-family="library"] .search-page .search-result-card > :not(.dxl-art) {
+    grid-column: 2;
+  }
+
+  html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art > i {
+    top: 0;
+    bottom: 0;
+    padding: 8px 3px;
+    clip-path: none;
+    writing-mode: vertical-rl;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="library"]
+    :is(.library-card, .search-result-card)
+    > .dxl-art[data-plate="type"]
+    > b {
+    right: 8px;
+    font-size: 18px;
+  }
+
+  html[data-family="library"] .search-page .search-more-option:is(:nth-child(5), :nth-child(7)) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 389px) {
+  html[data-family="library"] .library-page .library-card > :not(.dxl-art),
+  html[data-family="library"] .search-page .search-result-card > :not(.dxl-art) {
+    margin-inline: 10px;
+  }
+
+  html[data-family="library"] .dxl-art > i {
+    padding-inline: 6px 10px;
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family="library"] .library-page .library-continue {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  html[data-family="library"] .search-page .search-input-row {
+    padding-left: 12px;
+  }
+
+  html[data-family="library"] .search-page .search-eyebrow {
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family="library"] .search-page .search-input-row > svg {
+    width: 20px;
+  }
+}
+
+/* ================================================================
+   Motion: the files rise onto the stage once; cards lift under a
+   pointer. Transform and opacity only, finite, gated.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile {
+    animation: dxl-cast-rise 640ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(2) {
+    animation-delay: 50ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(4) {
+    animation-delay: 150ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(5) {
+    animation-delay: 200ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(6) {
+    animation-delay: 250ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(7) {
+    animation-delay: 300ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-loading])
+    .library-cast-tile:nth-child(8) {
+    animation-delay: 350ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    :is(
+      .library-card,
+      .search-result-card,
+      .search-more-option,
+      .library-cast-tile,
+      .inquiry-choice
+    ),
+  html:not([data-world-effects="economy"])[data-family="library"]
+    :is(.dxl-art, .library-cast-art, .inquiry-choice-art)
+    > img {
+    transition:
+      transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      opacity 220ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    :is(.library-card, .search-result-card, .search-more-option, .library-cast-tile):hover {
+    transform: translateY(-3px);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]:not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    :is(.library-card, .search-result-card, .library-cast-tile, .inquiry-choice):hover
+    :is(.dxl-art, .library-cast-art, .inquiry-choice-art)
+    > img {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes dxl-cast-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+
+/* ================================================================
+   Forced colours: the system's colours, every edge drawn.
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="library"] :is(.library-page, .search-page) {
+    background: Canvas;
+  }
+
+  html[data-family="library"]
+    .library-page
+    :is(
+      .library-card,
+      .library-hub,
+      .inquiry-choice,
+      .inquiry-route,
+      .library-cast-tile,
+      .library-search
+    ),
+  html[data-family="library"]
+    .search-page
+    :is(
+      .search-result-card,
+      .search-more-option,
+      .search-workbench,
+      .search-input-row,
+      .search-index-mark
+    ) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="library"]
+    .search-page
+    :is(.search-result-card, .search-more-option)[data-active="true"] {
+    outline: 3px solid Highlight;
+  }
+
+  html[data-family="library"] :is(.dxl-art, .library-cast-art)::after,
+  html[data-family="library"] .inquiry-choice-art,
+  html[data-family="library"] :is(.library-card, .search-result-card, .search-more-option)::before,
+  html[data-family="library"] .library-cast::after {
+    display: none;
+  }
+
+  html[data-family="library"]
+    :is(.library-page, .search-page)
+    :is(h1, h2, h3, h4, p, span, b, i, small, strong) {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  html[data-family="library"]
+    .library-page
+    :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)::before,
+  html[data-family="library"] .search-page .search-group-head::before {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  html[data-family="library"]
+    :is(.library-page, .search-page)
+    :is(button, .library-fulltext-link, .library-primary-link, .search-submit) {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+
+  html[data-family="library"] :is(.library-page, .search-page) :is(button[aria-pressed="true"]) {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+}

@@ -1,24 +1,43 @@
 /* Loaded only for a route failure. The normal dossiers and comparison
    screens keep their own typography, images and layout. Static recovery
-   controls remain readable even when cinematic assets cannot be fetched. */
+   controls remain readable even when cinematic assets cannot be fetched.
+
+   rx10 STAGE: the failure reads as the same card as the 404 (the lost
+   record): deck ink under the lattice, an ice rim with ice ticks over gold,
+   the prism on top, the reload as the one filled ice plate and the way back
+   as an outlined one. Still: no motion, no blur, nothing fetched. */
 .app-load-error {
   box-sizing: border-box;
   min-height: 100svh;
-  padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
-  background: radial-gradient(ellipse at 50% 20%, #122234, #04080f 70%);
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background:
+    radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px), #03060c;
 }
 
 .app-load-error-panel {
+  position: relative;
   display: grid;
   width: min(100%, 34rem);
   gap: 18px;
   justify-items: center;
-  padding: clamp(24px, 5vw, 40px);
-  border: 1px solid #53758c;
-  border-top: 2px solid #7ae8ff;
-  border-radius: 12px;
-  background: #0a1220;
+  box-sizing: border-box;
+  padding: clamp(28px, 6vw, 44px) clamp(20px, 5vw, 40px);
+  border: 1px solid rgb(122 232 255 / 24%);
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, #7ae8ff, #a48bff 34%, #ff5cc8 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 6%, transparent 24%),
+    #08111c;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 40px 90px rgb(0 0 0 / 50%);
 }
 
 .app-load-error h1,
@@ -27,8 +46,19 @@
   overflow-wrap: anywhere;
 }
 
+.app-load-error h1 {
+  color: #c6f5ff;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(20px, 5vw, 26px);
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: keep-all;
+  line-break: strict;
+}
+
 .app-load-error p {
-  color: #b9cad8;
+  color: #bccbd8;
+  font-size: 14px;
   line-height: 1.8;
 }
 
@@ -38,7 +68,7 @@
   justify-content: center;
   gap: 12px;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .app-load-error-actions button,
@@ -47,22 +77,23 @@
   min-height: 48px;
   align-items: center;
   justify-content: center;
-  padding: 12px 18px;
+  padding: 12px 20px;
   border: 1px solid #7ae8ff;
-  border-radius: 10px;
-  background: #c6f5ff;
-  color: #04080f;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #c6f5ff, #7ae8ff);
+  color: #03141c;
   font: inherit;
   font-size: 14px;
+  font-weight: 600;
   line-height: 1.5;
   text-decoration: none;
   cursor: pointer;
 }
 
 .app-load-error-actions a {
-  border-color: #53758c;
-  background: #0a1220;
-  color: #f1f7fb;
+  border-color: rgb(122 232 255 / 45%);
+  background: rgb(122 232 255 / 6%);
+  color: #f2f7fb;
 }
 
 .app-load-error-actions :focus-visible {
@@ -71,6 +102,11 @@
 }
 
 @media (forced-colors: active) {
+  .app-load-error-panel {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+
   .app-load-error-actions button,
   .app-load-error-actions a {
     border-color: ButtonText;
