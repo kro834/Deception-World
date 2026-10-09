@@ -30,6 +30,7 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // synopsis expansion requested on 2026-10-06. Reviewed 2026-10-09:
   // the owner requested Column 05 and its two control labels. The first
   // four columns are additionally pinned in world-mystery.test.mjs;
+  // the follow-up reading edition adds semantic chapters only to Column 05.
   // records, artwork and displayed spelling remain pinned here.
   // Re-pinned in rx6 (merged over 2026-10-09): the columns moved to
   // world-columns-data.ts (same text, Column 05 appended from
@@ -37,7 +38,7 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // /world#world-column-NN search links.
   assert.deepEqual(worldViewContract(homeView), {
     records: "75248085b518563223b7a6a8b8237a8889c3044e7d62fbda436bc6e763cc74ed",
-    markup: "b5d0827aa52e1a85a7275f2c7c4a29e5ff8619c32e6fdd2e333253b32f8ea7d7",
+    markup: "29648a801361c1a6c4c859f6857854b220b9d40a30a6f36592a5d489e04568c0",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

@@ -204,6 +204,7 @@ test("SSR shows the original once accessibly; decorative glyphs cannot inject ma
   );
   assert.match(html, /class="wa-transcript-source">「誰？ 👩‍🚀 &lt;script&gt;」<\/span>/);
   assert.match(html, /class="wa-transcript-visual" aria-hidden="true"/);
+  assert.match(html, /class="wa-transcript-state" aria-hidden="true"/);
   assert.equal((html.match(/class="wa-transcript-source"/g) ?? []).length, 1);
   assert.doesNotMatch(html, /<script>|aria-live|data-transcript-phase=/);
 });

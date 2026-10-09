@@ -1,4 +1,3 @@
-    }
 
     const previewReady = new Set<number>();
     previewPool.forEach((index) => {
@@ -488,3 +487,5 @@
                       />
                       <rect
                         x="6"
+                        y="10"
+                        width="12"

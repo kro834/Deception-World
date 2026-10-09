@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { runInNewContext } from "node:vm";
 import test from "node:test";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 import {
   DOG_ISAKU_COLUMN,
@@ -14,6 +18,33 @@ const home = read("src/components/world/world-home.tsx");
 const annex = read("src/components/world/world-annex.tsx");
 const css = read("src/styles-world-transcript.css");
 const hash = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+
+test("the reading edition preserves all seven paragraphs and emphasizes names as safe text", () => {
+  const exports = {};
+  runInNewContext(
+    ts.transpileModule(read("src/components/world/mystery-column-prose.tsx"), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+    }).outputText,
+    { exports, require: createRequire(import.meta.url) },
+  );
+  const html = renderToStaticMarkup(
+    React.createElement(exports.MysteryColumnProse, { paragraphs: DOG_ISAKU_COLUMN.pickup }),
+  );
+  assert.equal((html.match(/<section /g) ?? []).length, 7);
+  assert.equal((html.match(/<h4>/g) ?? []).length, 7);
+  const plain = html.replace(/<[^>]+>/g, "");
+  for (const paragraph of DOG_ISAKU_COLUMN.pickup) assert.ok(plain.includes(paragraph));
+  assert.match(html, /<strong class="world-mystery-term">“犬”<\/strong>/);
+  assert.match(html, /<strong class="world-mystery-term">“イサク”<\/strong>/);
+  assert.match(plain, /まだ確定していません/);
+  const hostile = renderToStaticMarkup(
+    React.createElement(exports.MysteryTerms, { text: '“犬”<script>alert("x")</script>' }),
+  );
+  assert.doesNotMatch(hostile, /<script>/);
+  assert.match(hostile, /&lt;script&gt;/);
+  assert.match(home, /item\.no === "05"[\s\S]*?<MysteryColumnProse paragraphs=\{item.pickup\}/);
+  assert.match(css, /#column-dialog-panel-4 > \.world-mystery-reading \{\s*columns: auto;/);
+});
 
 test("Column 05 is appended to both existing controls; the first four documents are unchanged", () => {
   // rx6: the columns live in world-columns-data.ts (pure data, so the site
@@ -74,7 +105,9 @@ test("the mystery distinguishes recorded facts, inference and the unresolved end
 });
 
 test("both mystery names use the owner's emphasis in the title, synopsis, prose and two tabs", () => {
-  const copy = [DOG_ISAKU_COLUMN.title, DOG_ISAKU_COLUMN.body, ...DOG_ISAKU_COLUMN.pickup].join("\n");
+  const copy = [DOG_ISAKU_COLUMN.title, DOG_ISAKU_COLUMN.body, ...DOG_ISAKU_COLUMN.pickup].join(
+    "\n",
+  );
   const withoutNames = copy.replaceAll("“犬”", "").replaceAll("“イサク”", "");
   assert.doesNotMatch(withoutNames.replace("動物としての犬", ""), /犬|イサク/);
   assert.equal((home.match(/“犬”と/g) ?? []).length, 2);

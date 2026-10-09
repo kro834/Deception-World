@@ -101,10 +101,103 @@
   display: block;
 }
 
+/* A restrained instrument readout shares the existing finite lifecycle.
+   It never adds an announcement or a second animation clock. */
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-state {
+  display: block;
+  min-height: 22px;
+  margin-bottom: 12px;
+  color: var(--mr-text-3);
+  font: 500 12px/1.8 var(--mr-mono);
+  letter-spacing: 0.08em;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-state::before {
+  content: "RECORD " counter(wa-q, decimal-leading-zero) " / 記録";
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-phase="writing"]
+  .wa-transcript-state::before {
+  content: "RECORD " counter(wa-q, decimal-leading-zero) " / 受信中";
+  color: var(--mr-ice-hi);
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-fault="interference"]
+  .wa-transcript-state::before {
+  content: "RECORD " counter(wa-q, decimal-leading-zero) " / 信号干渉";
+  color: var(--mr-violet);
+}
+
+/* Column 05 is a long-form reading record, not newspaper columns. Other
+   columns keep their original composition and artwork. */
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 > .world-mystery-reading {
+  columns: auto;
+  max-inline-size: 72ch;
+  margin-inline: auto;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-note {
+  margin-block: 0 32px;
+  padding: 18px 22px;
+  border-inline-start: 2px solid var(--mr-ice);
+  background: var(--mr-deck-raised);
+  color: var(--mr-text-2);
+  font: 400 14px/1.9 var(--font-body);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-chapter {
+  margin-block: 32px;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--mr-line);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-chapter h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 18px;
+  color: var(--mr-ice-hi);
+  font: 600 clamp(17px, 2vw, 22px)/1.65 var(--font-body);
+  text-wrap: pretty;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-chapter h4 span {
+  flex: 0 0 auto;
+  color: var(--mr-text-3);
+  font: 500 12px/1.5 var(--mr-mono);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-chapter p {
+  margin: 0;
+  color: var(--mr-text-2);
+  font: 400 clamp(15px, 1.3vw, 18px)/2.1 var(--font-body);
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-term {
+  color: var(--mr-ice-hi);
+  font-weight: 600;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-4 .world-mystery-end {
+  padding-block: 20px;
+  border-block-start: 1px solid var(--mr-line);
+  color: var(--mr-text-3);
+  font: 500 12px/1.8 var(--mr-mono);
+  letter-spacing: 0.1em;
+}
+
 .site-shell.film-edition.mirage-edition #quotes .wa-transcript-visual {
   display: none;
   position: absolute;
   inset: 0;
+  /* Match the source offset below the stable instrument readout. */
+  inset-block-start: 34px;
   color: inherit;
   pointer-events: none;
   user-select: none;
