@@ -12,7 +12,7 @@ import {
   type LibraryEntry,
   type LibraryKind,
 } from "@/lib/library-data";
-import { pathArt, RIDER_ART } from "@/lib/record-art";
+import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
 import { toggleBookmark, useLibraryStore } from "./library-store";
 import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
@@ -37,7 +37,7 @@ function EntryCard({
     <article className="library-card" data-kind={entry.kind}>
       <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
       <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
-      <h3>
+      <h3 style={titleRunStyle(entry.title)}>
         <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
           <DisplayName value={entry.title} />
         </GuardedLink>

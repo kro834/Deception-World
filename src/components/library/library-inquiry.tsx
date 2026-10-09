@@ -1,6 +1,6 @@
 import { getInquiryGuide, INQUIRY_GUIDES } from "@/lib/inquiry-guides";
 import { Link } from "@tanstack/react-router";
-import { pathArt } from "@/lib/record-art";
+import { pathArt, titleRunStyle } from "@/lib/record-art";
 import { RecordArtFrame } from "./record-art";
 
 export function LibraryInquiry({
@@ -45,7 +45,9 @@ export function LibraryInquiry({
               })}
             </span>
             <span className="inquiry-choice-label">問い {String(index + 1).padStart(2, "0")}</span>
-            <span className="inquiry-choice-title">{item.question}</span>
+            <span className="inquiry-choice-title" style={titleRunStyle(item.question)}>
+              {item.question}
+            </span>
             <span className="inquiry-choice-intro">{item.intro}</span>
             <span className="inquiry-choice-action">
               {selected?.id === item.id ? "案内をたたむ" : "この問いを辿る"}
@@ -62,7 +64,7 @@ export function LibraryInquiry({
           <div className={`inquiry-route inquiry-color-${selected.color}`}>
             <header className="inquiry-route-heading">
               <p className="inquiry-eyebrow">THREE ENTRANCES</p>
-              <h3>{selected.question}</h3>
+              <h3 style={titleRunStyle(selected.question)}>{selected.question}</h3>
               <p>番号は案内の順番です。物語の時系列や読了を示すものではありません。</p>
             </header>
             <ol className="inquiry-stops">

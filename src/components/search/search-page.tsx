@@ -11,7 +11,7 @@ import {
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { RecordArtFrame } from "@/components/library/record-art";
-import { documentArt } from "@/lib/record-art";
+import { documentArt, titleRunStyle } from "@/lib/record-art";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
@@ -489,7 +489,7 @@ const ResultCard = memo(function ResultCard({
         <span>{categoryLabel(document.category)}</span>
         {place ? <span>{place}</span> : null}
       </span>
-      <span className="search-result-title">
+      <span className="search-result-title" style={titleRunStyle(document.title)}>
         <HighlightedName text={document.title} ranges={result.titleRanges} />
       </span>
       {result.via ? <span className="search-result-via">{result.via}</span> : null}

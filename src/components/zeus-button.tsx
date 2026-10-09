@@ -120,6 +120,10 @@ const ZEUS_AVOID_SELECTOR = [
   ".search-input-row",
   ".export-page :is(.export-page-alt, .export-page-back)",
   ".app-not-found > a",
+  // rx10 review: the ZIP plate, which the button settled on at 390x844 once
+  // the card's foot became a way back, and the field's suggestion row.
+  ".export-page-btn",
+  ".search-suggestions button",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -1082,7 +1086,7 @@ function ZeusButton({
     const readCompactMenuFootprint = () =>
       root.getAttribute("data-ipad-menu") === "compact" &&
       root.getAttribute("data-ipad-menu-scrolled") === "true"
-        ? root.getAttribute("data-viewport-chrome") ?? ""
+        ? (root.getAttribute("data-viewport-chrome") ?? "")
         : "";
     let compactMenuFootprint = readCompactMenuFootprint();
     const reconcileCompactMenu = () => {

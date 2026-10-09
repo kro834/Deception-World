@@ -7,6 +7,9 @@
 // whose only file is too heavy for a card, gets a typographic plate instead.
 // Paths and positions only: no prose, and nothing heavy is imported.
 
+import type { CSSProperties } from "react";
+import { nameWords } from "./name-breaks";
+
 export type RecordEdition =
   "world" | "dream" | "rexonance" | "extreme" | "final" | "gallery" | "archive";
 
@@ -150,7 +153,8 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     code: "DREAM",
   },
   "/gallery": { src: "/gallery/g01-480.webp", pos: "50% 30%", edition: "gallery", code: "GALLERY" },
-  "/form-archive": { ...formThumb("saga", "multi"), edition: "archive", code: "ARCHIVE" },
+  // Vertex, not Multi: the archive's own Multi form card sits next to it in /search.
+  "/form-archive": { ...formThumb("saga", "vertex"), edition: "archive", code: "ARCHIVE" },
   "/rexonance-saga": {
     ...formThumb("saga", "rexonance-ultra"),
     edition: "rexonance",
@@ -300,4 +304,28 @@ export function documentArt(document: ArtDocument, number: number): RecordArt {
     edition: editionOf(document.to),
     code: `${CATEGORY_CODES[document.category] ?? "RECORD"} ${String(number).padStart(3, "0")}`,
   };
+}
+
+/** The widest run of a title that cannot wrap, in ems: no space, no name seam
+ * (nameWords), no break after 、。 or a closing quote or before an opening
+ * one. A full-width letter counts 1, a Latin letter or digit about 0.62. The
+ * index cards set a title small enough to hold this run on one line (down to
+ * the 12px floor), so a long single name such as ディセプションワールド never
+ * loses its last kana to the next line. Undefined when any card holds it. */
+export function titleRun(title: string): number | undefined {
+  let widest = 0;
+  for (const word of nameWords(title)) {
+    for (const run of word.text.split(/\s+|(?<=[、。”」』）])|(?=[“「『（])/u)) {
+      let em = 0;
+      for (const letter of run) em += letter.charCodeAt(0) < 0x250 ? 0.62 : 1;
+      widest = Math.max(widest, em);
+    }
+  }
+  return widest >= 8 ? Math.round(widest * 100) / 100 : undefined;
+}
+
+/** A title's widest unbreakable run as --dxl-run, so its card can fit it. */
+export function titleRunStyle(title: string): CSSProperties | undefined {
+  const run = titleRun(title);
+  return run ? ({ "--dxl-run": run } as CSSProperties) : undefined;
 }

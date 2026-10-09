@@ -327,6 +327,9 @@ html[data-family="library"] .search-page :is(.search-result-card, .search-more-o
   position: relative;
   display: flex;
   flex-direction: column;
+  /* Each card is the measure for its own title (and the closing card's side
+     layout and the see-all tile's mark): see the title rule below. */
+  container-type: inline-size;
   min-width: 0;
   min-height: 0;
   margin: 0;
@@ -387,13 +390,24 @@ html[data-family="library"] .search-page .search-result-meta > span + span::befo
   color: rgb(var(--dx-edition-rgb) / 45%);
 }
 
+/* The title holds its widest unbreakable run (--dxl-run, in ems, set from
+   the markup only when it is long) on one line: the type steps down from
+   its size to what the card's text measure (--dxl-room) allows, never under
+   12px, so a long single name keeps its last kana on its line. */
 html[data-family="library"] .library-page .library-card h3,
 html[data-family="library"] .search-page .search-result-title {
+  --dxl-title: clamp(14px, 1.15vw, 16px);
+  --dxl-room: calc(100cqi - 24px);
+  --dxl-fit: 1.05;
   display: block;
   margin-top: 4px;
   margin-bottom: 0;
   color: var(--dx-text);
-  font: 700 clamp(14px, 1.15vw, 16px) / 1.45 var(--dx-display);
+  font: 700 var(--dxl-title) / 1.45 var(--dx-display);
+  font-size: min(
+    var(--dxl-title),
+    max(12px, calc(var(--dxl-room) / (var(--dxl-run, 0.01) * var(--dxl-fit))))
+  );
   letter-spacing: 0.03em;
 }
 
@@ -1170,6 +1184,8 @@ html[data-family="library"] .library-page .inquiry-choice {
   background: var(--dxl-deck);
   box-shadow: var(--dx-bevel), var(--dx-drop);
   text-align: left;
+  /* The question's measure (see .inquiry-choice-title). */
+  container-type: inline-size;
 }
 
 html[data-family="library"] .inquiry-choice-art {
@@ -1217,9 +1233,13 @@ html[data-family="library"] .library-page .inquiry-choice-label {
   letter-spacing: 0.16em;
 }
 
+/* A question is one unbreakable phrase (keep-all): on a narrow tile it steps
+   down to hold its line (--dxl-run, its length in ems) rather than leave its
+   ？ alone on the next one. */
 html[data-family="library"] .library-page .inquiry-choice-title {
   color: var(--dx-text);
   font: 700 clamp(22px, 2.6vw, 34px) / 1.35 var(--dx-display);
+  font-size: min(clamp(22px, 2.6vw, 34px), max(17px, calc(100cqi / (var(--dxl-run, 0.01) * 1.05))));
   letter-spacing: 0.03em;
   word-break: keep-all;
   line-break: strict;
@@ -1273,6 +1293,7 @@ html[data-family="library"] .library-page .inquiry-start-note {
 
 /* The opened guide: three numbered entrances, each with its art. */
 html[data-family="library"] .library-page .inquiry-route {
+  container-type: inline-size;
   margin-top: var(--dxl-gap);
   padding: clamp(16px, 2.4vw, 28px);
   border: 1px solid var(--dxl-line-2);
@@ -1289,6 +1310,7 @@ html[data-family="library"] .library-page .inquiry-route-heading {
 html[data-family="library"] .library-page .inquiry-route-heading h3 {
   margin: 0 0 6px;
   font: 700 clamp(20px, 2.2vw, 28px) / 1.4 var(--dx-display);
+  font-size: min(clamp(20px, 2.2vw, 28px), max(17px, calc(100cqi / (var(--dxl-run, 0.01) * 1.05))));
 }
 
 html[data-family="library"] .library-page .inquiry-route-heading > p:last-child {
@@ -2104,6 +2126,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="people"]
   .search-more-option::after {
+  --dxl-mark: 5.8;
   content: "PEOPLE" / "";
 }
 
@@ -2111,6 +2134,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="riders"]
   .search-more-option::after {
+  --dxl-mark: 5.56;
   content: "RIDERS" / "";
 }
 
@@ -2118,6 +2142,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="forms"]
   .search-more-option::after {
+  --dxl-mark: 5.53;
   content: "FORMS" / "";
 }
 
@@ -2125,6 +2150,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="story"]
   .search-more-option::after {
+  --dxl-mark: 5.31;
   content: "STORY" / "";
 }
 
@@ -2132,6 +2158,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="world"]
   .search-more-option::after {
+  --dxl-mark: 5.78;
   content: "WORLD" / "";
 }
 
@@ -2139,6 +2166,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="systems"]
   .search-more-option::after {
+  --dxl-mark: 7.66;
   content: "SYSTEMS" / "";
 }
 
@@ -2146,6 +2174,7 @@ html[data-family="library"]
   .search-page
   .search-group[data-category="pages"]
   .search-more-option::after {
+  --dxl-mark: 5.14;
   content: "PAGES" / "";
 }
 
@@ -2291,7 +2320,8 @@ html[data-family="library"] .search-page .search-scope-note {
 @media (max-width: 559px) {
   html[data-family="library"] .library-page .library-card h3,
   html[data-family="library"] .search-page .search-result-title {
-    font-size: 13px;
+    --dxl-title: 13px;
+    --dxl-fit: 1.02;
     letter-spacing: 0;
   }
 
@@ -2366,6 +2396,11 @@ html[data-family="library"] .search-page .search-scope-note {
     margin-inline: 10px;
   }
 
+  html[data-family="library"] .library-page .library-card h3,
+  html[data-family="library"] .search-page .search-result-title {
+    --dxl-room: calc(100cqi - 20px);
+  }
+
   html[data-family="library"] .dxl-art > i {
     padding-inline: 6px 10px;
     letter-spacing: 0.04em;
@@ -2385,6 +2420,337 @@ html[data-family="library"] .search-page .search-scope-note {
 
   html[data-family="library"] .search-page .search-input-row > svg {
     width: 20px;
+  }
+}
+
+/* ================================================================
+   Review pass (rx10): fits, the closing card, the press, small phones
+   ================================================================ */
+
+/* The smallest phones: a row card's words sit beside its 96px spine. */
+@media (max-width: 359px) {
+  html[data-family="library"] .library-page .library-card h3,
+  html[data-family="library"] .search-page .search-result-title {
+    --dxl-room: calc(100cqi - 116px);
+  }
+}
+
+/* The card's stretched link keeps the card's size while it is pressed. The
+   house press (scale and filter on the pressed control) made the inline link
+   the containing block of its ::after, so mid-press the hit area shrank to
+   the title and the release landed on the card: a tap or click on the art or
+   the words opened nothing. The card answers the press instead, as the
+   World's episode card does through its select button. */
+html[data-family="library"] .library-page .library-card > h3 > a[data-press] {
+  scale: none;
+  filter: none;
+}
+
+html[data-press-ready][data-family="library"]
+  .library-page
+  .library-card:has(> h3 > a[data-press]) {
+  transition:
+    scale var(--dw-dur-settle) var(--dw-ease-out),
+    filter var(--dw-dur-settle) var(--dw-ease-out),
+    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html[data-press-ready][data-family="library"]
+  .library-page
+  .library-card:has(> h3 > a:is([data-press="in"], [data-press="touch"])) {
+  filter: brightness(1.08);
+  transition-duration: var(--dw-dur-press), var(--dw-dur-press), 220ms;
+  transition-timing-function: var(--dw-ease-press), var(--dw-ease-press), ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready][data-family="library"]
+    .library-page
+    .library-card:has(> h3 > a:is([data-press="in"], [data-press="touch"])) {
+    scale: 0.982;
+  }
+}
+
+/* The see-all tile's mark holds its whole word at any tile width (it was cut
+   to RIDER, FORM, STOR on one-column tiles) and grows on a tall tile that
+   closes a row of cards. --dxl-mark is the word's width in ems. */
+html[data-family="library"] .search-page .search-more-option {
+  container-type: size;
+}
+
+html[data-family="library"] .search-page .search-more-option::after {
+  font-size: max(
+    18px,
+    min(calc(100cqi / var(--dxl-mark, 7.7)), max(clamp(34px, 4.4vw, 64px), 42cqh), 150px)
+  );
+}
+
+/* The last record closes its row: a shelf or a group that stops part-way
+   along a row gives its last card the columns that are left, and the card
+   lies on its side, art at the left and its words beside it, so no shelf
+   ends on an empty run of the grid. */
+@media (min-width: 360px) and (max-width: 559px) {
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(2n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  /* The art lies out of flow on a closing card: the words hold it open. */
+  html[data-family="library"]
+    :is(.library-grid > .library-card, .search-result-grid > .search-result-card):last-child:is(
+      :nth-child(2n + 1)
+    ) {
+    min-height: clamp(210px, 20vw, 260px);
+  }
+}
+
+@media (min-width: 560px) and (max-width: 899px) {
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  /* The art lies out of flow on a closing card: the words hold it open. */
+  html[data-family="library"]
+    :is(.library-grid > .library-card, .search-result-grid > .search-result-card):last-child:is(
+      :nth-child(3n + 1),
+      :nth-child(3n + 2)
+    ) {
+    min-height: clamp(210px, 20vw, 260px);
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(3n + 2) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1179px) {
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(4n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  /* The art lies out of flow on a closing card: the words hold it open. */
+  html[data-family="library"]
+    :is(.library-grid > .library-card, .search-result-grid > .search-result-card):last-child:is(
+      :nth-child(4n + 1),
+      :nth-child(4n + 2),
+      :nth-child(4n + 3)
+    ) {
+    min-height: clamp(210px, 20vw, 260px);
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(4n + 2) {
+    grid-column: span 3;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(4n + 3) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1180px) and (max-width: 1399px) {
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(5n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  /* The art lies out of flow on a closing card: the words hold it open. */
+  html[data-family="library"]
+    :is(.library-grid > .library-card, .search-result-grid > .search-result-card):last-child:is(
+      :nth-child(5n + 1),
+      :nth-child(5n + 2),
+      :nth-child(5n + 3),
+      :nth-child(5n + 4)
+    ) {
+    min-height: clamp(210px, 20vw, 260px);
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(5n + 2) {
+    grid-column: span 4;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(5n + 3) {
+    grid-column: span 3;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(5n + 4) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1400px) {
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(6n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  /* The art lies out of flow on a closing card: the words hold it open. */
+  html[data-family="library"]
+    :is(.library-grid > .library-card, .search-result-grid > .search-result-card):last-child:is(
+      :nth-child(6n + 1),
+      :nth-child(6n + 2),
+      :nth-child(6n + 3),
+      :nth-child(6n + 4),
+      :nth-child(6n + 5)
+    ) {
+    min-height: clamp(210px, 20vw, 260px);
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(6n + 2) {
+    grid-column: span 5;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(6n + 3) {
+    grid-column: span 4;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(6n + 4) {
+    grid-column: span 3;
+  }
+
+  html[data-family="library"]
+    :is(
+      .library-grid > .library-card,
+      .search-result-grid > .search-result-card
+    ):last-child:nth-child(6n + 5) {
+    grid-column: span 2;
+  }
+}
+
+/* On its side. Only a card spanning columns is this wide: one column is
+   never more than about 280px, and the smallest phones' one-column row
+   cards keep their own layout (the media gate). */
+@media (min-width: 360px) {
+  @container (min-width: 300px) {
+    html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: clamp(120px, 34cqi, 380px);
+      aspect-ratio: auto;
+      border-right: 1px solid var(--dxl-line);
+      border-bottom: 0;
+    }
+
+    html[data-family="library"] .library-page .library-card > :not(.dxl-art),
+    html[data-family="library"] .search-page .search-result-card > :not(.dxl-art) {
+      margin-inline: calc(clamp(120px, 34cqi, 380px) + clamp(14px, 2.4cqi, 28px))
+        clamp(14px, 2.4cqi, 28px);
+    }
+
+    html[data-family="library"] .library-page .library-card > :first-child:not(.dxl-art),
+    html[data-family="library"] .library-page .library-card > .dxl-art + *,
+    html[data-family="library"] .search-page .search-result-card > .dxl-art + * {
+      margin-top: clamp(14px, 2cqi, 24px);
+    }
+
+    html[data-family="library"] .library-page .library-card h3,
+    html[data-family="library"] .search-page .search-result-title {
+      --dxl-title: clamp(16px, 1.5vw, 21px);
+      --dxl-room: calc(100cqi - clamp(120px, 34cqi, 380px) - 2 * clamp(14px, 2.4cqi, 28px));
+    }
+
+    html[data-family="library"] .library-page .library-card-description,
+    html[data-family="library"] .search-page .search-result-snippet {
+      max-width: 44em;
+    }
+  }
+}
+
+/* The continue cell on the smallest phones: its two ways on take the
+   cell's full width under the art, so 次の章 keeps "CASE 3" together, and
+   the plate's code sits on two lines rather than losing its number. */
+@media (max-width: 389px) {
+  html[data-family="library"] .library-page .dxl-art.is-continue {
+    grid-row: 2 / span 2;
+  }
+
+  html[data-family="library"] .library-page .library-continue > .library-continue-actions {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+  }
+
+  html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"] > i {
+    white-space: normal;
+    line-height: 1.2;
+  }
+}
+
+/* The empty states' headings are sentences, not names: keep-all made each
+   one a single word that broke at any letter when too long for a phone
+   (見つかりませ／んでした。). They break at phrases where the browser can,
+   else as prose, never before 。 */
+html[data-family="library"] :is(.search-page .search-empty, .library-page .library-empty) h3 {
+  word-break: normal;
+  word-break: auto-phrase;
+  overflow-wrap: normal;
+  line-break: strict;
+  text-wrap: balance;
+}
+
+/* A field narrower than its placeholder ends it with an ellipsis instead
+   of a cut letter; on phones the hint is set a size down (the typed text
+   keeps 16px, so iOS does not zoom). */
+html[data-family="library"] .search-page .search-input-row input,
+html[data-family="library"] .library-page .library-search input {
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 699px) {
+  html[data-family="library"] .search-page .search-input-row input::placeholder,
+  html[data-family="library"] .library-page .library-search input::placeholder {
+    font-size: 14px;
   }
 }
 
