@@ -1,3 +1,10 @@
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previewPosters = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
     const finalReady = loadPoster(finalPoster);
     if (motionReduced) {
       void finalReady.then((ready) => {
@@ -487,8 +494,3 @@
                         rx="2"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">

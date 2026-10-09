@@ -27,6 +27,7 @@ import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
+import { DOG_ISAKU_COLUMN } from "./world-mystery-data";
 
 const POSTERS = [
   {
@@ -366,6 +367,7 @@ const COLUMNS = [
       "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
     ],
   },
+  DOG_ISAKU_COLUMN,
 ];
 
 type EpisodePickup = {
@@ -662,6 +664,12 @@ const ColumnRail = memo(
                   <br className="tab-br" />
                   採録制
                 </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
+                </>
               ) : (
                 c.title
               )}
@@ -702,6 +710,12 @@ const PickupRail = memo(
                   脚本制と
                   <br className="tab-br" />
                   採録制
+                </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
                 </>
               ) : (
                 c.title

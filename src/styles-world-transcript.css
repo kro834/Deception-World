@@ -1,0 +1,216 @@
+/* Column 05 and the voices log. The source record is never rewritten:
+   only an aria-hidden facsimile receives finite, viewport-gated effects. */
+.site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
+  /* The shared frosted sheet forces a one-row flex rail. Only this expanded
+     five-column selector needs a grid; its glass and lens remain unchanged. */
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs > button b {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 899px) {
+  /* Five labels remain readable, and the existing lens supports both rows. */
+  .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(90px, auto);
+    gap: 6px;
+    padding: 8px;
+    --liquid-shell-radius: 36px !important;
+    border-radius: var(--liquid-shell-radius) !important;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    .world-column-tabs.liquid-swipe-tabs
+    > .liquid-rail-surface {
+    border-radius: 34px !important;
+  }
+
+  .site-shell.film-edition.mirage-edition
+    .world-column-tabs.liquid-swipe-tabs
+    > button[role="tab"] {
+    block-size: auto;
+    min-block-size: 90px;
+    max-block-size: none;
+  }
+
+  .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs .tab-br {
+    display: block;
+  }
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-block: 24px;
+  padding-block: 16px;
+  border-block: 1px solid var(--mr-line);
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar p {
+  flex: 1 1 260px;
+  min-width: 0;
+  margin: 0;
+  color: var(--mr-text-2);
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar small {
+  display: block;
+  margin-top: 4px;
+  color: var(--mr-text-3);
+  font-size: 12px;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 120px;
+  padding: 10px 18px;
+  border: 1px solid var(--mr-line-strong);
+  background: var(--mr-deck-raised);
+  color: var(--mr-ice-hi);
+  font: 500 14px/1.5 var(--font-body);
+  cursor: pointer;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar button:hover {
+  border-color: var(--mr-ice-hi);
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-toolbar button:focus-visible {
+  outline: 2px solid var(--mr-focus);
+  outline-offset: 4px;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript {
+  display: block;
+  position: relative;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-source {
+  /* The whole original determines wrapping, height, selection and AX text. */
+  display: block;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-visual {
+  display: none;
+  position: absolute;
+  inset: 0;
+  color: inherit;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-phase="writing"]
+  .wa-transcript-source {
+  color: transparent;
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-phase="writing"]
+  .wa-transcript-visual {
+  display: block;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-glyph {
+  opacity: 0;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-glyph.is-written {
+  opacity: 1;
+  animation: waTranscriptInk 160ms ease-out both;
+}
+
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-glyph.is-cursor {
+  border-bottom: 1px solid var(--mr-ice);
+}
+
+/* One 180ms interruption per record: two narrow misregistered slices, not
+   a flashing error message or a repeating full-screen glitch. */
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-visual::before,
+.site-shell.film-edition.mirage-edition #quotes .wa-transcript-visual::after {
+  content: attr(data-echo);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-fault="interference"]
+  .wa-transcript-visual {
+  transform: translateX(-1px);
+  text-shadow: 1px 0 rgb(122 232 255 / 45%);
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-fault="interference"]
+  .wa-transcript-visual::before {
+  opacity: 0.38;
+  color: var(--mr-ice-hi);
+  clip-path: inset(23% 0 67% 0);
+  transform: translateX(3px);
+}
+
+.site-shell.film-edition.mirage-edition
+  #quotes
+  [data-transcript-fault="interference"]
+  .wa-transcript-visual::after {
+  opacity: 0.28;
+  color: var(--mr-violet);
+  clip-path: inset(61% 0 31% 0);
+  transform: translateX(-2px);
+}
+
+@keyframes waTranscriptInk {
+  from {
+    opacity: 0.45;
+    text-shadow: 0 0 7px rgb(122 232 255 / 35%);
+  }
+  to {
+    opacity: 1;
+    text-shadow: none;
+  }
+}
+
+html[data-world-effects="economy"]
+  .site-shell.film-edition.mirage-edition
+  #quotes
+  .wa-transcript-source {
+  color: inherit;
+}
+
+html[data-world-effects="economy"]
+  .site-shell.film-edition.mirage-edition
+  #quotes
+  .wa-transcript-visual {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active), print {
+  .site-shell.film-edition.mirage-edition #quotes .wa-transcript .wa-transcript-source {
+    color: inherit;
+  }
+
+  .site-shell.film-edition.mirage-edition #quotes .wa-transcript .wa-transcript-visual {
+    display: none;
+  }
+
+  .site-shell.film-edition.mirage-edition #quotes .wa-transcript .wa-transcript-glyph {
+    animation: none;
+  }
+}

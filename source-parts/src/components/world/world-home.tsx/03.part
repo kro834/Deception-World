@@ -1,3 +1,13 @@
+    [],
+  );
+
+  useLayoutEffect(() => {
+    const returnId = readRiderReturn();
+    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
+    if (returnIndex < 0) return;
+    riderTabRef.current = returnIndex;
+    setInitialRiderTab(returnIndex);
+    setRiderTab(returnIndex);
   }, []);
 
   useLayoutEffect(() => {
@@ -485,10 +495,3 @@
       (poster + 2) % POSTERS.length,
     ].filter((value, index, values) => values.indexOf(value) === index);
     for (let index = previewPool.length - 1; index > 0; index -= 1) {
-      const swapIndex = randomBelow(index + 1);
-      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
-    }
-    const previewPosters = Array.from(
-      { length: 9 },
-      (_, index) => previewPool[index % previewPool.length],
-    );

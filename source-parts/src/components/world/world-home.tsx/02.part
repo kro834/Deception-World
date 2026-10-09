@@ -168,6 +168,12 @@ const ColumnRail = memo(
                   <br className="tab-br" />
                   採録制
                 </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
+                </>
               ) : (
                 c.title
               )}
@@ -208,6 +214,12 @@ const PickupRail = memo(
                   脚本制と
                   <br className="tab-br" />
                   採録制
+                </>
+              ) : c.no === "05" ? (
+                <>
+                  “犬”と
+                  <br className="tab-br" />
+                  “イサク”の謎
                 </>
               ) : (
                 c.title
@@ -482,13 +494,3 @@ export function WorldHome() {
         RIDERS.map((rider) => rider.img),
         riderTabRef.current,
       ),
-    [],
-  );
-
-  useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);

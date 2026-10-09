@@ -25,11 +25,13 @@ const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 test("world-home preserves its layout and copy outside explicitly approved edits", () => {
   // Reviewed 2026-10-06: the requested rider hold guide and decorative
   // WorldAtmosphere and shared name-break markup, plus the source-led
-  // synopsis expansion requested on 2026-10-06. Fixed columns, records,
-  // artwork and displayed spelling remain pinned.
+  // synopsis expansion requested on 2026-10-06. Reviewed 2026-10-09:
+  // the owner requested Column 05 and its two control labels. The first
+  // four columns are additionally pinned in world-mystery.test.mjs;
+  // records, artwork and displayed spelling remain pinned here.
   assert.deepEqual(worldViewContract(home), {
-    records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
-    markup: "a7c10042924fc85c748b1d9c4e16a52f8cc4090b2663d49090c7d4136a705ceb",
+    records: "046a7745f3f3648372541d1784cd6e0169bfe69ed32f13be3bef317fd3ec99a6",
+    markup: "e54277662767a3a965ac0915dc722db2f5255ae29f594c61291a1199b133a51a",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -68,7 +70,7 @@ test("the annex data is complete", () => {
   assert.ok(WORLD_EPISODE_NOTES.every(({ synopsis }) => synopsis.length === 3));
   assert.equal(WORLD_GLOSSARY.length, 15);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
-  assert.equal(WORLD_QUOTES.length, 13);
+  assert.equal(WORLD_QUOTES.length, 17);
   // In-story text only: no chat handles, no ideographic indent spaces.
   assert.doesNotMatch(data, /@|\u3000/);
   // Conflicting or undecided facts stay out until the owner settles them.

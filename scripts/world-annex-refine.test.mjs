@@ -311,7 +311,7 @@ test("the sheet stays still paint at the 12px floor", () => {
   }
 });
 
-test("world-annex.tsx keeps its labels and accessibility with the approved episode expansion", () => {
+test("world-annex.tsx keeps its labels and accessibility with the approved episode expansion and voice controls", () => {
   const texts = [...annex.matchAll(/>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
     .map((match) => match[1].replace(/\s+/g, " ").trim())
     .filter((text) => text && !/^[=&|;)(,.:?]/.test(text) && !/=>/.test(text));
@@ -323,6 +323,8 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     "最終判定",
     "LOCATIONS",
     "舞台",
+    "声の記録を綴る。ときどき、その輪郭が乱れる。",
+    "軽量設定・動きを減らす設定では、全文を表示します。",
     "スワイプ・左右キーで切替",
     "EP.01〜03の展開を含みます。",
     "EPISODE",
@@ -344,7 +346,16 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     'id={`wa-term-${entry.term}`}',
   ];
   for (const anchor of searchAnchors) assert.equal(count(anchor), 1, anchor);
-  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 67);
+  // 2026-10-09: source transcription adds its help ID and button's
+  // described-by, controls and pressed state, preserving the earlier 67.
+  const voiceControls = [
+    'id="world-transcript-help"',
+    'aria-describedby="world-transcript-help"',
+    'aria-pressed={transcriptStopped}',
+  ];
+  for (const attr of voiceControls) assert.equal(count(attr), 1, attr);
+  assert.equal(count('aria-controls="world-quotes-rail"'), 3);
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 71);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
   assert.equal(count('lang="en"'), 5);
