@@ -257,6 +257,17 @@ html[data-family="dossier"]
   border-radius: 0;
 }
 
+/* Phones: the figure takes the stage's full width (no gutter that reads
+   as a framed photo). */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame {
+    width: 100%;
+  }
+}
+
 /* The art sits on the floor: it fades into the stage at its foot and its
    sides, and takes the person's light from above. */
 html[data-family="dossier"]
@@ -268,7 +279,10 @@ html[data-family="dossier"]
   z-index: 2;
   inset: 0;
   pointer-events: none;
+  /* The figure comes up out of the stage's dark at its head as at its
+     foot: no hard edge under the headroom. */
   background:
+    linear-gradient(180deg, rgb(3 5 10 / 72%) 0%, transparent 14%),
     linear-gradient(180deg, transparent 56%, rgb(3 5 10 / 58%) 82%, #03050a 100%),
     radial-gradient(
       120% 90% at 50% 34%,
@@ -277,6 +291,8 @@ html[data-family="dossier"]
       rgb(3 5 10 / 82%) 100%
     );
   border: 0;
+  /* No inset frame line: the figure stands on the stage, not in a box. */
+  box-shadow: none;
   opacity: 1;
   animation: none;
   clip-path: none;
@@ -306,6 +322,7 @@ html[data-family="dossier"]
       transparent 72%
     );
   border: 0;
+  box-shadow: none;
   opacity: 1;
   animation: none;
   clip-path: none;
@@ -1457,6 +1474,11 @@ html[data-family="dossier"]
   position: absolute;
   z-index: 1;
   inset: 0;
+  /* The premium pickup's 2px edge light set a size here: the floor fills
+     the stage. */
+  width: auto;
+  height: auto;
+  box-shadow: none;
   pointer-events: none;
   background:
     radial-gradient(
@@ -1629,6 +1651,37 @@ html[data-family="dossier"]
   .rider-special-site-copy
   .rider-special-site-link {
   margin-top: 16px;
+}
+
+/* The premium (Rexonance) pickup joins the same scene: its rings, orbit,
+   corner diamond, blurred wash and crown line stand down, and its form
+   line is set like every other. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-card
+  > .rexonance-card-ornaments {
+  display: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup.is-rexonance-pickup::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup.is-rexonance-pickup::after {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .is-rexonance-pickup
+  .form-pickup-copy
+  > em {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 html[data-family="dossier"] main.manager-page.manager-page.manager-page > .rider-special-site,
@@ -2045,7 +2098,16 @@ html[data-family="dossier"]
   grid-column: 1 / -1;
 }
 
-/* A list of one (ダンテ): the index itself is the end card. */
+/* A list of one (ダンテ): the index itself is the end card. The older
+   reader sheet centres a lone index in one column with a heavier selector
+   (two :has()); the doubled class keeps this grid above it. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination.manager-pagination:not(:has(> a)) {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: stretch;
+}
+
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination:not(:has(> a))
@@ -2068,6 +2130,23 @@ html[data-family="dossier"]
   > .manager-pagination:has(> .manager-pagination-spacer:first-child)
   > .manager-pagination-index {
   grid-column: 1 / -1;
+}
+
+/* Tablets (portrait): a taller stacked stage. Written before the split
+   stage so a landscape tablet (900px and wider) takes the split's full
+   height stage, not this one. */
+@media (min-width: 761px) and (max-width: 1099px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page {
+    --sd-stage-h: clamp(420px, 64svh, 900px);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name {
+    font-size: clamp(56px, 8vw, 80px);
+  }
 }
 
 /* ----------------------------------------------------------------
@@ -2334,13 +2413,19 @@ html[data-family="dossier"]
       animation: none;
     }
 
+    /* …and its words hold beside it, centred on the stage, so the column
+       is never an empty field while the art holds. */
     html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
       :is(.form-pickup-copy, .rider-special-site-copy) {
-      align-self: center;
+      position: sticky;
+      top: var(--sd-head);
+      align-self: start;
+      justify-content: center;
       width: 100%;
+      min-height: var(--sd-stage-h);
       margin: 0;
-      padding: 48px var(--sd-pad);
+      padding: 72px var(--sd-pad) 48px;
     }
 
     html[data-family="dossier"]
@@ -2455,6 +2540,13 @@ html[data-family="dossier"]
       > .manager-pagination-index {
       grid-column: 2 / -1;
     }
+
+    /* A list of one: the index card stands in the reading column. */
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination.manager-pagination:not(:has(> a)) {
+      grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, 1fr);
+    }
   }
 }
 
@@ -2488,20 +2580,6 @@ html[data-family="dossier"]
     #identity-records
     > .rider-archive-civilian:not(.rider-partner-card) {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (min-width: 761px) and (max-width: 1099px) {
-  html[data-family="dossier"] main.manager-page.manager-page.manager-page {
-    --sd-stage-h: clamp(420px, 64svh, 900px);
-  }
-
-  html[data-family="dossier"]
-    main.manager-page.manager-page.manager-page:not(.is-sovereign)
-    #dossier-profile
-    .dossier-identity
-    .manager-display-name {
-    font-size: clamp(56px, 8vw, 80px);
   }
 }
 
@@ -2639,7 +2717,91 @@ html[data-family="dossier"]
 }
 
 /* ----------------------------------------------------------------
-   8. Focus and forced colours
+   8. Layout placeholders
+   The chapters and the form stacks skip layout until approached
+   (content-visibility, World sheet 25 and the edition sheet). Their
+   placeholders were measured on the old file; the stage changes both
+   heights, so the page grew or shrank by up to 1600px mid-scroll and End
+   landed short. These follow the stage: a form scene is the stage plus
+   its words (stacked) or the stage plus its hold (split); the chapters
+   follow their count, as before. `auto` still keeps the real size once
+   laid out.
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page .rider-form-pickup-stack {
+  --sd-scene: calc(var(--sd-stage-h) + 270px);
+  contain-intrinsic-size: auto var(--sd-scene);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-form-pickup-stack:has(> .form-pickup + .form-pickup) {
+  contain-intrinsic-size: auto calc(2 * var(--sd-scene));
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-form-pickup-stack:has(> .form-pickup + .form-pickup + .form-pickup) {
+  contain-intrinsic-size: auto calc(3 * var(--sd-scene));
+}
+
+@media (min-width: 561px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page .rider-form-pickup-stack {
+    --sd-scene: calc(var(--sd-stage-h) + 340px);
+  }
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      .rider-form-pickup-stack {
+      --sd-scene: calc(var(--sd-stage-h) + 36svh);
+    }
+  }
+}
+
+/* The chapters on the stage's reading column (phones). */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index.manager-dossier {
+    contain-intrinsic-size: auto 1000px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index.manager-dossier:has(.manager-copy-section:nth-child(3)) {
+    contain-intrinsic-size: auto 1750px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index.manager-dossier:has(.manager-copy-section:nth-child(4)) {
+    contain-intrinsic-size: auto 3600px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index.manager-dossier:has(.manager-copy-section:nth-child(5)) {
+    contain-intrinsic-size: auto 3000px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index.manager-dossier:has(.manager-copy-section:nth-child(6)) {
+    contain-intrinsic-size: auto 6000px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.is-sovereign
+    #dossier-index.manager-dossier {
+    contain-intrinsic-size: auto 2150px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   9. Focus and forced colours
    ---------------------------------------------------------------- */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
@@ -2652,6 +2814,17 @@ html[data-family="dossier"]
   outline: 2px solid var(--dx-focus, #fff0b5);
   outline-offset: -2px;
   box-shadow: none;
+}
+
+/* The end card's own ring is partly under its portrait and the ruler: its
+   arrow carries a second ring, so the focus always shows. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child):focus-visible
+  > span:last-child {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: 4px;
 }
 
 @media (forced-colors: active) {
