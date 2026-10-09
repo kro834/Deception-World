@@ -151,12 +151,14 @@ html[data-family="archive"] body .form-archive-page > header.form-archive-toolba
   background-color: var(--sh-ink);
   background-image:
     linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
-    repeating-linear-gradient(
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 30%) 0 1px, transparent 1px 12px),
+    linear-gradient(
       90deg,
-      rgb(var(--sh-l1-rgb) / 30%) 0 1px,
-      transparent 1px 12px
-    ),
-    linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 8%), transparent 34%, transparent 70%, rgb(var(--sh-l2-rgb) / 7%));
+      rgb(var(--sh-l1-rgb) / 8%),
+      transparent 34%,
+      transparent 70%,
+      rgb(var(--sh-l2-rgb) / 7%)
+    );
   background-size:
     100% 100%,
     100% 4px,
@@ -196,8 +198,7 @@ html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-si
   border-radius: 0;
   background:
     linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
-    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%),
-    var(--sh-ink-2);
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
   clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
   transform: none;
@@ -264,8 +265,7 @@ html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-moti
   border: 0 !important;
   border-radius: 3px !important;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%),
-    var(--sh-l1) !important;
+    linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%), var(--sh-l1) !important;
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 22%),
     0 0 0 1px rgb(var(--sh-l1-rgb) / 30%) !important;
@@ -287,7 +287,9 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
 
 /* Four cells: three filled, the last an open square (the launcher). */
 @media (forced-colors: none) {
-  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
     body
     .side-panel-trigger
     > .side-panel-trigger-glyph {
@@ -299,7 +301,9 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
     justify-items: stretch;
   }
 
-  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
     body
     .side-panel-trigger
     > .side-panel-trigger-glyph
@@ -313,7 +317,9 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
     rotate: none;
   }
 
-  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
     body
     .side-panel-trigger
     > .side-panel-trigger-glyph::after {
@@ -326,7 +332,9 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
   }
 
   @media (hover: hover) and (pointer: fine) {
-    html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+        [data-ipad-menu-motion]
+      )
       body
       .side-panel-trigger:hover
       > .side-panel-trigger-glyph::after {
@@ -335,7 +343,9 @@ html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-pan
   }
 }
 
-html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-panel-trigger:focus-visible {
+html[data-family]:not([data-family="gallery"])
+  body
+  .side-panel-trigger.side-panel-trigger:focus-visible {
   outline: 2px solid var(--sh-focus);
   outline-offset: 3px;
 }
@@ -388,13 +398,23 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar nav 
   translate: none;
 }
 
-html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a[aria-current="location"] {
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  nav
+  a[aria-current="location"] {
   color: #fff;
   background: linear-gradient(0deg, rgb(255 255 255 / 7%), transparent 80%);
   text-shadow: none;
 }
 
-html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a[aria-current="location"]::after {
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  nav
+  a[aria-current="location"]::after {
   opacity: 1;
 }
 
@@ -419,7 +439,11 @@ html[data-family="dossier"] body .manager-page > header.manager-topbar .manager-
 }
 
 /* ---------- Dream Chapter: the same bar in Taisho light ---------- */
-html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header .dream-back-link {
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > header.dream-site-header
+  .dream-back-link {
   border: 1px solid rgb(var(--sh-l2-rgb) / 42%);
   border-radius: 3px;
   background: var(--sh-ink-2);
@@ -427,7 +451,12 @@ html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-he
   color: var(--sh-text);
 }
 
-html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header .dream-back-link > span:first-child {
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > header.dream-site-header
+  .dream-back-link
+  > span:first-child {
   color: var(--sh-l2);
 }
 
@@ -448,7 +477,11 @@ html[data-family="dream"] body main.dream-page.dream-page > .dream-chapter-nav {
   box-shadow: 0 1px 0 rgb(0 0 0 / 60%);
 }
 
-html[data-family="dream"] body main.dream-page.dream-page > .dream-chapter-nav a[aria-current="location"] {
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > .dream-chapter-nav
+  a[aria-current="location"] {
   color: var(--sh-text);
   background: linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 18%), transparent 85%);
   box-shadow: inset 0 -2px 0 var(--sh-l1);
@@ -489,8 +522,7 @@ html[data-family="special"] body .rxs-page > header.rxs-local-nav .rxs-brand::be
   border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
   background:
     linear-gradient(225deg, var(--sh-l1) 0 5px, transparent 5px),
-    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%),
-    var(--sh-ink-2);
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
   clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
   transform: translateY(-50%);
 }
@@ -524,7 +556,12 @@ html[data-family="special"] body .rxs-page > header.rxs-local-nav nav a {
       bottom: -1px;
       left: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--sh-l1), var(--sh-l2) 70%, rgb(var(--sh-l2-rgb) / 0%));
+      background: linear-gradient(
+        90deg,
+        var(--sh-l1),
+        var(--sh-l2) 70%,
+        rgb(var(--sh-l2-rgb) / 0%)
+      );
       pointer-events: none;
       transform-origin: 0 50%;
       animation: sh-shell-reading auto linear both;
@@ -574,8 +611,7 @@ html[data-family="library"] body .search-page > header.search-topbar > a.search-
   border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
   background:
     linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
-    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%),
-    var(--sh-ink-2);
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
   clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
   color: var(--sh-l1);
   font-family: var(--sh-hud);
@@ -647,8 +683,8 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head {
   padding-bottom: 16px;
   border-bottom: 0;
   background:
-    linear-gradient(90deg, var(--sh-l1), var(--sh-l2) 46%, rgb(var(--sh-l2-rgb) / 0%) 92%) var(--sp-pad-inline) 100% /
-      calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
+    linear-gradient(90deg, var(--sh-l1), var(--sh-l2) 46%, rgb(var(--sh-l2-rgb) / 0%) 92%)
+      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
     var(--sh-ink);
 }
 
@@ -681,8 +717,7 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::bef
   border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
   background:
     linear-gradient(225deg, var(--sh-l1) 0 7px, transparent 7px),
-    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 20%), transparent 62%),
-    var(--sh-ink-2);
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 20%), transparent 62%), var(--sh-ink-2);
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   color: var(--sh-l1);
   font-family: var(--sh-hud);
@@ -730,7 +765,10 @@ html[data-family] body #site-side-panel.side-panel .side-panel-close.side-panel-
   }
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-close.side-panel-close:focus-visible {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-close.side-panel-close:focus-visible {
   outline: 2px solid var(--sh-focus);
   outline-offset: 2px;
 }
@@ -779,7 +817,11 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group > .side-p
 }
 
 /* Every direct row: a plate. Nested settings (Ultra, iPad) keep theirs. */
-html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button) {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button) {
   position: relative;
   box-sizing: border-box;
   min-height: 48px;
@@ -792,7 +834,12 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
   translate: none;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button) > span {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > span {
   font-family: var(--sh-display);
   font-weight: 700;
   word-break: keep-all;
@@ -800,7 +847,12 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
   overflow-wrap: anywhere;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button) > i {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > i {
   border: 0;
   border-radius: 2px;
   background: none;
@@ -812,7 +864,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
   letter-spacing: 0.12em;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button):focus-visible {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button):focus-visible {
   outline: 2px solid var(--sh-focus);
   outline-offset: 2px;
 }
@@ -856,11 +912,20 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-pa
   grid-area: find;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group > .side-panel-links {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr) auto;
@@ -869,13 +934,15 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
   min-height: 58px;
   padding: 0 14px 0 16px;
   border-color: rgb(var(--sh-l1-rgb) / 46%);
-  background:
-    linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 10%), transparent 60%),
-    var(--sh-ink-2);
+  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 10%), transparent 60%), var(--sh-ink-2);
 }
 
 /* The magnifier, drawn: a ring and its handle. */
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search::before {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search::before {
   content: "";
   position: static;
   display: block;
@@ -891,20 +958,35 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
   translate: none;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search > span {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  > span {
   color: var(--sh-text);
   font-size: 16px;
   font-weight: 500;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search > i {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  > i {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--sh-text-3);
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search kbd {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  kbd {
   display: inline-grid;
   min-width: 26px;
   height: 26px;
@@ -916,7 +998,13 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
   font: 600 13px/1 var(--sh-mono);
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group > .side-panel-links > a {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links
+  > a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -925,7 +1013,14 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-pa
   padding: 10px 14px;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group > .side-panel-links > a > span {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links
+  > a
+  > span {
   font-size: 14px;
 }
 
@@ -934,7 +1029,12 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-
   min-width: 0;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control > button {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button {
   min-height: 48px;
   padding: 10px 14px;
   border: 1px dashed rgb(var(--sh-l1-rgb) / 42%);
@@ -947,18 +1047,34 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-
   text-align: left;
 }
 
-html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control > button[aria-pressed="true"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button[aria-pressed="true"] {
   border-style: solid;
   border-color: var(--sh-l1);
   color: var(--sh-text);
 }
 
 /* ---------- SECTIONS: the page's chapters, numbered ---------- */
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group {
   grid-area: sec;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group > .side-panel-links {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links {
   gap: 0;
   counter-reset: sh-chapter;
   border-top: 1px solid rgb(var(--sh-l1-rgb) / 16%);
@@ -1120,7 +1236,13 @@ html[data-family]
 
 /* ---------- Tiles: every destination with its art ---------- */
 /* The tile groups: SPECIAL, STORIES, RIDERS, UNMANAGED, INFORMATION. */
-html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group {
   grid-area: spe;
 }
 
@@ -1156,7 +1278,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1173,7 +1299,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1201,7 +1331,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1236,7 +1370,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1256,7 +1394,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1297,7 +1439,11 @@ html[data-family]
     #site-side-panel.side-panel
     > :is(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
     )
     > .side-panel-links
     > a
@@ -1308,75 +1454,173 @@ html[data-family]
 
 /* Which art each destination shows (delivery files the site already
    serves; the films' and sites' own warm-up images where they are small). */
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links > a[href^="/extreme-saga"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/extreme-saga"] {
   --sh-art: url("/archive-media/thumbs/saga-extreme.webp");
   --sh-art-pos: 50% 24%;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links > a[href^="/rexonance-saga"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/rexonance-saga"] {
   --sh-art: url("/archive-media/thumbs/saga-rexonance.webp");
   --sh-art-pos: 50% 24%;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links > a[href^="/dream-chapter"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/dream-chapter"] {
   --sh-art: url("/dream-chapter-poster-05-delivery.webp");
   --sh-art-pos: 50% 40%;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links > a[href^="/world"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/world"] {
   --sh-art: url("/episode-03-deception-world-delivery-600.webp");
   --sh-art-pos: 50% 30%;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links > a[href^="/final-stage"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/final-stage"] {
   --sh-art: url("/final-stage-logo-delivery-640.webp");
   --sh-art-pos: 50% 42%;
   --sh-art-size: min(88%, 300px) auto;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-group:nth-last-child(3) > .side-panel-links > a[href="/characters/dante"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:nth-last-child(3)
+  > .side-panel-links
+  > a[href="/characters/dante"] {
   --sh-art: url("/character-dante-thumb.webp");
   --sh-art-pos: 50% 16%;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-group:nth-last-child(2) > .side-panel-links > a[href="/gallery"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:nth-last-child(2)
+  > .side-panel-links
+  > a[href="/gallery"] {
   --sh-art: url("/gallery/g03-480.webp");
   --sh-art-pos: 50% 50%;
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a {
   --sh-art-pos: 50% 18%;
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/saga"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/saga"] {
   --sh-art: url("/rider-saga-rexonance-thumbnail-20260827.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/realm"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/realm"] {
   --sh-art: url("/rider-realm.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/lore"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/lore"] {
   --sh-art: url("/rider-loa.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/vandal"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/vandal"] {
   --sh-art: url("/rider-vandal-thumbnail-20260827.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/leddic"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/leddic"] {
   --sh-art: url("/rider-leddic-home.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/argenome"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/argenome"] {
   --sh-art: url("/rider-algenome.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/over-zeztz"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/over-zeztz"] {
   --sh-art: url("/rider-over-zeztz-thumbnail-20260829.webp");
 }
 
-html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel[data-open="true"] > .side-panel-riders > .side-panel-links > a[href="/riders/cipher"] {
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/cipher"] {
   --sh-art: url("/rider-cipher-thumbnail-20260825.webp");
 }
 
@@ -1386,7 +1630,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1405,7 +1653,11 @@ html[data-family]
   #site-side-panel.side-panel
   > :where(
     .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
     .side-panel-riders,
     .side-panel-group:nth-last-child(3),
     .side-panel-group:nth-last-child(2)
@@ -1419,7 +1671,11 @@ html[data-family]
 }
 
 /* The notice: no art, the edition's light on a ruled plate. */
-html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-announcement-trigger::before {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-announcement-trigger::before {
   background:
     radial-gradient(ellipse 80% 70% at 100% 0%, rgb(var(--sh-l1-rgb) / 18%), transparent 70%),
     repeating-linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 7%) 0 1px, transparent 1px 10px),
@@ -1439,7 +1695,12 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
     padding: 10px 8px 10px 10px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a::before {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a::before {
     background:
       linear-gradient(270deg, rgb(var(--sh-ink-rgb) / 86%) 0, rgb(var(--sh-ink-rgb) / 0%) 46%),
       linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 62%, rgb(var(--sh-ink-rgb) / 70%)),
@@ -1447,7 +1708,13 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
       var(--sh-ink-3);
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a > span {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > span {
     grid-column: 2;
     grid-row: 1;
     align-self: start;
@@ -1460,7 +1727,13 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
     text-wrap: nowrap;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a > i {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > i {
     grid-column: 1;
     grid-row: 1;
   }
@@ -1525,7 +1798,13 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
     white-space: nowrap;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a > i {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > i {
     position: absolute;
     left: 4px;
     bottom: 4px;
@@ -1533,7 +1812,13 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
     font-size: 12px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) > .side-panel-links > a > i {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a
+    > i {
     grid-row: 2;
     grid-column: 1;
     padding: 0;
@@ -1541,8 +1826,24 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
     background: none;
   }
 
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[aria-current="page"]
+    > i {
+    background: none;
+    color: var(--sh-l1);
+  }
+
   /* The older rule between the two columns: the cards have their own edge. */
-  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a::after {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a::after {
     content: none;
   }
 }
@@ -1554,13 +1855,22 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > button.si
 }
 
 /* ---------- SYSTEM: one compact strip ---------- */
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links {
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 10px;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links > a {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-content: center;
@@ -1569,23 +1879,45 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-chil
   padding: 8px 14px;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links > a > span {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a
+  > span {
   font-size: 14px;
   line-height: 1.35;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links > a > i {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a
+  > i {
   justify-self: start;
   padding: 0;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links > a[href^="/form-archive"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"] {
   padding-left: 74px;
   overflow: hidden;
   isolation: isolate;
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links > a[href^="/form-archive"]::before {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"]::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -1605,11 +1937,20 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-chil
   translate: none;
 }
 
-html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-group:last-child > .side-panel-links > a[href^="/form-archive"] {
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"] {
   --sh-art: url("/archive-media/thumbs/realm-royal.webp");
 }
 
-html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child .side-panel-zeus-toggle {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  .side-panel-zeus-toggle {
   min-height: 56px;
   margin: 0;
   border-color: rgb(var(--sh-l1-rgb) / 22%);
@@ -1619,7 +1960,11 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-chil
 
 /* The older markers on the rows were drawn with a transform of their
    own; the plates' ::before is art or a numeral here. */
-html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button)::before {
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)::before {
   transform: none;
 }
 
@@ -1634,7 +1979,22 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     letter-spacing: 0.06em;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group > .side-panel-links {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before {
+    width: 40px;
+    height: 40px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div {
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1655,12 +2015,23 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
     --sh-tile-h: 168px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(2) > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
     --sh-tile-h: 118px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1681,15 +2052,30 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     column-gap: 14px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
     grid-template-columns: minmax(0, 2.4fr) repeat(3, minmax(0, 1fr));
   }
 
-  html[data-family] body #site-side-panel.side-panel .side-panel-links > button.side-panel-quick-search {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search {
     grid-column: auto;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 24px;
   }
@@ -1699,7 +2085,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     #site-side-panel.side-panel
     > :is(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
     )
     > .side-panel-links {
     --sh-tile-h: 190px;
@@ -1713,20 +2103,40 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) > .side-panel-links,
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(2) > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
     --sh-tile-h: 112px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(2) > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child .ultra-mode-setting {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .ultra-mode-setting {
     grid-column: 1 / -1;
   }
 }
@@ -1754,12 +2164,23 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     row-gap: 16px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group {
     align-self: start;
     padding-right: 6px;
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group + .side-panel-group > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -1768,7 +2189,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     #site-side-panel.side-panel
     > :is(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
     )
     > .side-panel-links {
     --sh-tile-h: clamp(160px, 21vh, 250px);
@@ -1778,16 +2203,32 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     --sh-tile-h: clamp(128px, 17vh, 190px);
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) > .side-panel-links,
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(2) > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
     --sh-tile-h: clamp(96px, 12vh, 132px);
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child > .side-panel-links {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
-  html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child .ultra-mode-setting {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .ultra-mode-setting {
     grid-column: span 2;
   }
 }
@@ -1807,7 +2248,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     #site-side-panel.side-panel
     > :where(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
       .side-panel-riders,
       .side-panel-group:nth-last-child(3),
       .side-panel-group:nth-last-child(2)
@@ -1823,7 +2268,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     #site-side-panel.side-panel[data-open="true"]
     > :where(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
       .side-panel-riders,
       .side-panel-group:nth-last-child(3),
       .side-panel-group:nth-last-child(2)
@@ -1840,7 +2289,11 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
     #site-side-panel.side-panel[data-open="true"]
     > :where(
       .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
-      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
       .side-panel-riders,
       .side-panel-group:nth-last-child(3),
       .side-panel-group:nth-last-child(2)
@@ -1856,11 +2309,21 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, bu
    7. Forced colours: plates keep real edges; art and lights drop out.
    ================================================================ */
 @media (forced-colors: active) {
-  html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
     border: 1px solid CanvasText;
   }
 
-  html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button.side-panel-link-button)::before {
+  /* The art drops out; the search field keeps its drawn magnifier (a
+     border, so it takes the system colour) and its column. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):not(.side-panel-quick-search)::before {
     display: none;
   }
 
