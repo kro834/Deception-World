@@ -42,9 +42,14 @@ type Option =
 
 export default function QuickSearchDialog({
   open,
+  seed = "",
+  onSeeded,
   onClose,
 }: {
   open: boolean;
+  /** Keys typed before the overlay first painted (kept by the host). */
+  seed?: string;
+  onSeeded?: () => void;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -65,8 +70,13 @@ export default function QuickSearchDialog({
     if (open && !dialog.open) {
       dialog.showModal();
       inputRef.current?.focus();
-      inputRef.current?.select();
+      if (seed) {
+        setDraft(seed);
+        onSeeded?.();
+      } else inputRef.current?.select();
     } else if (!open && dialog.open) dialog.close();
+    // The seed is read once, as the overlay opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const results = useMemo(

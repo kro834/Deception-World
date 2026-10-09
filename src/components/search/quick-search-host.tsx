@@ -10,6 +10,10 @@ export function QuickSearchHost() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
+  // Keys typed between the shortcut and the overlay's first paint (its chunk
+  // loads on first use) are kept and handed to the field, not lost.
+  const [seed, setSeed] = useState("");
+  const pendingRef = useRef<string | null>(null);
   const pathnameRef = useRef(pathname);
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -29,10 +33,27 @@ export function QuickSearchHost() {
         field.select();
         return;
       }
+      if (!document.querySelector("dialog.quick-search[open]")) pendingRef.current = "";
       setMounted(true);
       setOpen(true);
     };
     const onKeyDown = (event: KeyboardEvent) => {
+      if (pendingRef.current !== null) {
+        if (document.querySelector("dialog.quick-search[open]")) {
+          pendingRef.current = null;
+        } else if (
+          event.key.length === 1 &&
+          !event.ctrlKey &&
+          !event.metaKey &&
+          !event.altKey &&
+          !event.isComposing
+        ) {
+          event.preventDefault();
+          pendingRef.current += event.key;
+          setSeed(pendingRef.current);
+          return;
+        }
+      }
       if (!isQuickSearchShortcut(event) || isTypingTarget(event.target)) return;
       if (quickSearchBlocked(document, pathnameRef.current)) return;
       event.preventDefault();
@@ -49,7 +70,15 @@ export function QuickSearchHost() {
   if (!mounted) return null;
   return (
     <Suspense fallback={null}>
-      <QuickSearchDialog open={open} onClose={() => setOpen(false)} />
+      <QuickSearchDialog
+        open={open}
+        seed={seed}
+        onSeeded={() => {
+          pendingRef.current = null;
+          setSeed("");
+        }}
+        onClose={() => setOpen(false)}
+      />
     </Suspense>
   );
 }

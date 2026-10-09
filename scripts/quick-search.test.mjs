@@ -223,3 +223,18 @@ test("the library page puts the hub before the guides and offers export and a co
   assert.match(hub, /本当に消去する/);
   assert.match(hub, /clearLibraryAll\(\);\s*clearRecentSearches\(\);/);
 });
+
+test("keys typed while the overlay first loads are kept and seeded into the field", () => {
+  const host = readFileSync(
+    new URL("../src/components/search/quick-search-host.tsx", import.meta.url),
+    "utf8",
+  );
+  const dialog = readFileSync(
+    new URL("../src/components/search/quick-search-dialog.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(host, /pendingRef\.current \+= event\.key/);
+  assert.match(host, /!event\.isComposing/);
+  assert.match(host, /seed=\{seed\}/);
+  assert.match(dialog, /if \(seed\) \{\s*setDraft\(seed\);\s*onSeeded\?\.\(\);/);
+});
