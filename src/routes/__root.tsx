@@ -43,9 +43,11 @@ import ultraModeCss from "../styles-ultra-mode.css?url";
 import ultraEffectsCss from "../styles-ultra-effects.css?url";
 import ultraMaterialsCss from "../styles-ultra-materials.css?url";
 import ultraTransitionsCss from "../styles-ultra-transitions.css?url";
+import stageCss from "../styles-stage.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
+import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
@@ -176,6 +178,9 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: ultraEffectsCss },
       { rel: "stylesheet", href: ultraMaterialsCss },
       { rel: "stylesheet", href: ultraTransitionsCss },
+      // The site-wide interface tokens; each page family scopes its own
+      // stage sheet to html[data-family].
+      { rel: "stylesheet", href: stageCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -197,8 +202,14 @@ export const Route = createRootRoute({
 function RootDocument() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const chrome = getViewportChrome(pathname);
+  const family = getRouteFamily(pathname);
   return (
-    <html lang="ja" data-viewport-chrome={chrome} suppressHydrationWarning>
+    <html
+      lang="ja"
+      data-viewport-chrome={chrome}
+      data-family={family}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>

@@ -1,0 +1,67 @@
+/* ================================================================
+   STAGE — the site-wide interface system (rx10, 2026-10-10)
+
+   Tokens only. Every page family is redrawn in its own stage sheet,
+   scoped to html[data-family="…"] (set before paint from the route in
+   __root.tsx), and reads these tokens: one ground, one plate, one card,
+   one rule, one focus ring, one set of type roles over the unchanged
+   Japanese faces. A family re-tints the stage with --dx-edition and
+   --dx-edition-2; the World chapters keep their own phase grades.
+   ================================================================ */
+:root {
+  /* Ground and materials */
+  --dx-ink: #03060c;
+  --dx-ink-2: #070d16;
+  --dx-deck: #0b1522;
+  --dx-plate: linear-gradient(172deg, rgb(244 251 255 / 10%) 0, rgb(122 232 255 / 5%) 4%, #0b1522 14%, #060c15 58%, #03060c 100%);
+  --dx-sheen: linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 5%) 48%, rgb(255 255 255 / 7%) 50%, rgb(255 255 255 / 5%) 52%, transparent 62%);
+  --dx-bevel: inset 0 1px 0 rgb(255 255 255 / 22%), inset 0 -1px 0 rgb(0 0 0 / 80%);
+  --dx-rim: 0 0 0 1px rgb(var(--dx-edition-rgb) / 26%);
+  --dx-drop: 0 22px 46px -26px rgb(0 0 0 / 90%);
+  --dx-lattice:
+    repeating-linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 3%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(var(--dx-edition-rgb) / 3%) 0 1px, transparent 1px 28px);
+
+  /* Light: the edition's two lights (World and the archive: ice and violet) */
+  --dx-edition: #7ae8ff;
+  --dx-edition-rgb: 122 232 255;
+  --dx-edition-2: #a48bff;
+  --dx-edition-2-rgb: 164 139 255;
+  --dx-gold: #f0cf86;
+  --dx-seam: linear-gradient(90deg, var(--dx-edition), var(--dx-edition-2) 55%, var(--dx-gold));
+
+  /* Text */
+  --dx-text: #f2f7fb;
+  --dx-text-2: #bccbd8;
+  --dx-text-3: #8fa3b5;
+  --dx-focus: #fff0b5;
+
+  /* Type roles (the Japanese faces are the site's own, unchanged) */
+  --dx-display: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --dx-body: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
+  --dx-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --dx-mono: "Oxanium", "Noto Sans JP", sans-serif;
+
+  /* Geometry */
+  --dx-radius: 6px;
+  --dx-cut: 14px;
+  --dx-gutter: clamp(16px, 4vw, 56px);
+  --dx-hit: 44px;
+}
+
+/* Editions re-tint the same stage. */
+html[data-family="dream"] {
+  --dx-edition: #e0614f;
+  --dx-edition-rgb: 224 97 79;
+  --dx-edition-2: #c9a15a;
+  --dx-edition-2-rgb: 201 161 90;
+  --dx-ink: #130c17;
+}
+
+html[data-family="gallery"] {
+  --dx-edition: #d8b27a;
+  --dx-edition-rgb: 216 178 122;
+  --dx-edition-2: #8a7a66;
+  --dx-edition-2-rgb: 138 122 102;
+  --dx-ink: #171614;
+}
