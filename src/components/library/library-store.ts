@@ -78,3 +78,9 @@ export function recordLibraryVisit(id: string) {
 export function clearLibraryRecent() {
   update((saved) => ({ ...saved, recent: [] }));
 }
+export function clearLibraryBookmarks() {
+  update((saved) => ({ ...saved, bookmarks: [] }));
+}
+export function clearLibraryAll() {
+  update(() => emptyLibrarySaved());
+}

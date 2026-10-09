@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
@@ -11,8 +12,8 @@ import {
   type LibraryEntry,
   type LibraryKind,
 } from "@/lib/library-data";
-import { RECENT_LIMIT } from "@/lib/library-storage";
-import { clearLibraryRecent, toggleBookmark, useLibraryStore } from "./library-store";
+import { toggleBookmark, useLibraryStore } from "./library-store";
+import { LibraryHub } from "./library-hub";
 
 function EntryCard({
   entry,
@@ -60,13 +61,16 @@ export function LibraryPage({
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [kind, setKind] = useState<LibraryKind | "all">("all");
-  const [view, setView] = useState<"all" | "saved" | "recent">("all");
   const { saved, ready, error } = useLibraryStore();
-  const matches = searchLibrary(query, kind);
-  const visible =
-    view === "recent"
-      ? saved.recent.flatMap(({ id }) => matches.filter((entry) => entry.id === id))
-      : matches.filter((entry) => view !== "saved" || saved.bookmarks.includes(entry.id));
+  const visible = searchLibrary(query, kind);
+  // Browsing everything reads best shelved by kind; a search or filter is one list.
+  const shelves =
+    kind === "all" && !query.trim()
+      ? (Object.keys(LIBRARY_KINDS) as LibraryKind[]).map((id) => ({
+          id,
+          entries: visible.filter((entry) => entry.kind === id),
+        }))
+      : [{ id: "results" as const, entries: visible }];
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
@@ -99,11 +103,12 @@ export function LibraryPage({
               本文から検索 <span aria-hidden="true">↗</span>
             </GuardedLink>
           </section>
+          <LibraryHub saved={saved} ready={ready} />
           <LibraryInquiry guide={guide} onGuideChange={onGuideChange} />
           <section className="library-browser" aria-labelledby="library-browser-title">
             <div className="library-browser-heading">
               <h2 id="library-browser-title">資料を探す</h2>
-              <p>しおりと閲覧履歴は、このブラウザーに保存されます。</p>
+              <p>{LIBRARY_ENTRIES.length}件の入口を、種類ごとに並べています。</p>
             </div>
             <p className="library-search-note">
               ここでは資料名・入口を検索できます。文章の中の言葉を探すには「本文から検索」を開いてください。
@@ -140,93 +145,61 @@ export function LibraryPage({
                 </button>
               ))}
             </div>
-            <div className="library-view-row" role="group" aria-label="表示する資料">
-              <button type="button" aria-pressed={view === "all"} onClick={() => setView("all")}>
-                資料一覧
-              </button>
-              <button
-                type="button"
-                aria-pressed={view === "saved"}
-                onClick={() => setView("saved")}
-              >
-                しおり <span>{ready ? saved.bookmarks.length : "—"}</span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={view === "recent"}
-                onClick={() => setView("recent")}
-              >
-                最近見た資料
-              </button>
-            </div>
             {error ? (
               <p className="library-error" role="status">
                 {error}
               </p>
             ) : null}
             <div className="library-results-heading">
-              <p role="status">
-                {(view === "saved" || view === "recent") && !ready
-                  ? "保存データを確認しています…"
-                  : `${visible.length}件の資料`}
-              </p>
-              {view === "recent" ? (
-                <>
-                  <small>直近{RECENT_LIMIT}件まで。読了を示すものではありません。</small>
-                  <button
-                    type="button"
-                    disabled={!ready || !saved.recent.length}
-                    onClick={clearLibraryRecent}
-                  >
-                    履歴を消去
-                  </button>
-                </>
+              <p role="status">{`${visible.length}件の資料`}</p>
+              {query.trim() ? (
+                <Link to="/search" search={{ q: query.trim() }} className="library-fulltext-inline">
+                  「{query.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+                </Link>
               ) : null}
             </div>
             {visible.length ? (
-              <div className="library-grid">
-                {visible.map((entry) => (
-                  <EntryCard
-                    key={entry.id}
-                    entry={entry}
-                    bookmarked={saved.bookmarks.includes(entry.id)}
-                    ready={ready}
-                  />
-                ))}
-              </div>
-            ) : ready || view === "all" ? (
-              <div className="library-empty">
-                <h3>
-                  {query || kind !== "all"
-                    ? "条件に合う資料が見つかりません"
-                    : view === "saved"
-                      ? "しおりはまだありません"
-                      : "閲覧履歴はまだありません"}
-                </h3>
-                <p>
-                  {query || kind !== "all"
-                    ? "短い名前や別の表記で検索するか、資料の種類を「すべて」に戻してください。"
-                    : view === "saved"
-                      ? "資料カードの「しおり ＋」から保存できます。"
-                      : "人物資料や章のページを開くと、ここに表示されます。"}
-                </p>
-                {query || kind !== "all" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuery("");
-                      setKind("all");
-                    }}
+              shelves.map((shelf) =>
+                shelf.entries.length ? (
+                  <section
+                    key={shelf.id}
+                    className="library-shelf-section"
+                    aria-label={shelf.id === "results" ? undefined : LIBRARY_KINDS[shelf.id]}
                   >
-                    検索条件をクリア
-                  </button>
-                ) : (
-                  <button type="button" onClick={() => setView("all")}>
-                    資料一覧を見る
-                  </button>
-                )}
+                    {shelf.id === "results" ? null : (
+                      <h3 className="library-shelf-title">
+                        {LIBRARY_KINDS[shelf.id]}
+                        <span>{shelf.entries.length}</span>
+                      </h3>
+                    )}
+                    <div className="library-grid">
+                      {shelf.entries.map((entry) => (
+                        <EntryCard
+                          key={entry.id}
+                          entry={entry}
+                          bookmarked={saved.bookmarks.includes(entry.id)}
+                          ready={ready}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ) : null,
+              )
+            ) : (
+              <div className="library-empty">
+                <h3>条件に合う資料が見つかりません</h3>
+                <p>短い名前や別の表記で検索するか、資料の種類を「すべて」に戻してください。</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setKind("all");
+                  }}
+                >
+                  検索条件をクリア
+                </button>
               </div>
-            ) : null}
+            )}
           </section>
         </main>
         <footer className="library-footer">

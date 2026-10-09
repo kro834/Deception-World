@@ -10,10 +10,38 @@ import formArchiveCssUrl from "@/styles-form-archive.css?url";
 
 type ArchiveKind = "saga" | "realm";
 
+// The reader's form and compared pair live in this URL (?form=vertex,
+// ?compare=multi.vertex), so a shared link, a reload or Back reopens them.
+// The sandboxed archive cannot read the page URL: the frame receives them in
+// its #fragment and reports each choice (public/archive-state-bridge.js).
+const ARCHIVE_STATE_MESSAGE = "deception-world:archive-state";
+const ARCHIVE_FORM_ID = /^[a-z0-9-]{1,40}$/;
+const ARCHIVE_COMPARE_PAIR = /^[a-z0-9-]{1,40}\.[a-z0-9-]{1,40}$/;
+
+type ArchiveFrameState = { form?: string; compare?: string };
+
+function archiveFormId(value: unknown) {
+  return typeof value === "string" && ARCHIVE_FORM_ID.test(value) ? value : undefined;
+}
+
+function archiveComparePair(value: unknown) {
+  return typeof value === "string" && ARCHIVE_COMPARE_PAIR.test(value) ? value : undefined;
+}
+
+function archiveFrameHash({ form, compare }: ArchiveFrameState) {
+  const params = new URLSearchParams();
+  if (form) params.set("form", form);
+  if (compare) params.set("compare", compare);
+  const fragment = params.toString();
+  return fragment ? `#${fragment}` : "";
+}
+
 export const Route = createFileRoute("/form-archive")({
   validateSearch: (search: Record<string, unknown>) => ({
     ...validateInquirySearch(search),
     archive: search.archive === "realm" ? ("realm" as const) : undefined,
+    form: archiveFormId(search.form),
+    compare: archiveComparePair(search.compare),
   }),
   component: FormArchive,
   head: () => ({
@@ -44,9 +72,21 @@ type ArchiveReadyFallback = ArchiveTransition & {
 
 function FormArchive() {
   useWorldMode();
-  const { archive: requestedArchive = "saga" } = Route.useSearch();
+  const {
+    archive: requestedArchive = "saga",
+    form: requestedForm,
+    compare: requestedCompare,
+  } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [archive, setArchive] = useState<ArchiveKind>(requestedArchive);
+  // Fixed for each frame: a new src would reload the archive and add a frame
+  // history entry, so later choices travel up by message, not down by src.
+  const [frameState, setFrameState] = useState<ArchiveFrameState>(() => ({
+    form: requestedForm,
+    compare: requestedCompare,
+  }));
+  const knownStateRef = useRef<ArchiveFrameState>(frameState);
+  const reportsInFlightRef = useRef(0);
   const [transitionGeneration, setTransitionGeneration] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -61,11 +101,13 @@ function FormArchive() {
   const loadedFrameTransitionRef = useRef<ArchiveTransition | null>(null);
   const readyFallbackRef = useRef<ArchiveReadyFallback | null>(null);
   const restoreSwitcherFocusRef = useRef<ArchiveTransition | null>(null);
-  const selectArchiveRef = useRef<(next: ArchiveKind) => void>(() => {});
+  const selectArchiveRef = useRef<
+    (next: ArchiveKind, nextState?: ArchiveFrameState, reopen?: boolean) => void
+  >(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20261006-r50"
-    : "/realm-form-archive-embedded.html?v=20261006-r50";
+    ? "/saga-form-archive-embedded.html?v=20261009-r51"
+    : "/realm-form-archive-embedded.html?v=20261009-r51";
 
   // An SSR iframe can finish before hydration and lose its one-shot load
   // event. Mount it only after React can own that event and its ready fallback.
@@ -145,11 +187,11 @@ function FormArchive() {
   }, [archive, clientReady, transitionGeneration]);
 
   const selectArchive = useCallback(
-    (next: ArchiveKind) => {
+    (next: ArchiveKind, nextState: ArchiveFrameState = {}, reopen = false) => {
       // Let WebKit release the current iframe document before another archive is
       // requested. Rapid Saga/Realm toggles during onLoad can otherwise overlap
       // two image-heavy document constructions on iPhone and iPad.
-      if (!loaded || next === activeTransitionRef.current.archive) return;
+      if (!loaded || (next === activeTransitionRef.current.archive && !reopen)) return;
       const generation = transitionGenerationRef.current + 1;
       transitionGenerationRef.current = generation;
       activeTransitionRef.current = { archive: next, generation };
@@ -161,13 +203,21 @@ function FormArchive() {
       if (fallback) window.clearTimeout(fallback.timer);
       readyFallbackRef.current = null;
       setLoaded(false);
+      knownStateRef.current = nextState;
+      setFrameState(nextState);
       setTransitionGeneration(generation);
       setArchive(next);
       // Keep this history entry tied to the document being read. Replacing
       // it preserves Back's meaning while reloads and shared URLs retain Realm.
+      // The other archive's forms are not this one's, so its record starts over.
       if (next !== requestedArchive) {
         void navigate({
-          search: (previous) => ({ ...previous, archive: next === "realm" ? next : undefined }),
+          search: (previous) => ({
+            ...previous,
+            archive: next === "realm" ? next : undefined,
+            form: undefined,
+            compare: undefined,
+          }),
           hash: true,
           replace: true,
           resetScroll: false,
@@ -181,13 +231,53 @@ function FormArchive() {
     selectArchiveRef.current = selectArchive;
   }, [selectArchive]);
 
-  // A same-page history traversal may request another archive while a frame
-  // is loading. Let that frame settle before replacing it, just as for taps.
+  // A same-page history traversal may request another archive, form or pair
+  // while a frame is loading. Let that frame settle before replacing it, just
+  // as for taps. The frame's own reports are already known and change nothing.
   useEffect(() => {
-    if (loaded && requestedArchive !== activeTransitionRef.current.archive) {
-      selectArchiveRef.current(requestedArchive);
+    if (!loaded || reportsInFlightRef.current > 0) return;
+    const known = knownStateRef.current;
+    const archiveChanged = requestedArchive !== activeTransitionRef.current.archive;
+    const recordChanged = requestedForm !== known.form || requestedCompare !== known.compare;
+    if (archiveChanged || recordChanged) {
+      selectArchiveRef.current(
+        requestedArchive,
+        { form: requestedForm, compare: requestedCompare },
+        !archiveChanged,
+      );
     }
-  }, [loaded, requestedArchive]);
+  }, [loaded, requestedArchive, requestedForm, requestedCompare]);
+
+  // The current frame reports the reader's form and pair; this entry's URL
+  // keeps them (replaced, like the archive switch, so Back keeps its meaning).
+  useEffect(() => {
+    const keepArchiveState = (event: MessageEvent) => {
+      const data = event.data as {
+        type?: unknown;
+        kind?: unknown;
+        form?: unknown;
+        compare?: unknown;
+      };
+      if (data?.type !== ARCHIVE_STATE_MESSAGE) return;
+      const frame = frameRef.current;
+      if (!frame || event.source === null || event.source !== frame.contentWindow) return;
+      if (data.kind !== activeTransitionRef.current.archive) return;
+      const form = archiveFormId(data.form);
+      const compare = archiveComparePair(data.compare);
+      knownStateRef.current = { form, compare };
+      reportsInFlightRef.current += 1;
+      void navigate({
+        search: (previous) => ({ ...previous, form, compare }),
+        hash: true,
+        replace: true,
+        resetScroll: false,
+      }).finally(() => {
+        reportsInFlightRef.current -= 1;
+      });
+    };
+    window.addEventListener("message", keepArchiveState);
+    return () => window.removeEventListener("message", keepArchiveState);
+  }, [navigate]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -306,7 +396,7 @@ function FormArchive() {
           data-archive-kind={archive}
           data-archive-generation={transitionGeneration}
           title={`仮面ライダー${isSaga ? "サーガ" : "レルム"} フォームアーカイブ`}
-          src={archiveDocument}
+          src={`${archiveDocument}${archiveFrameHash(frameState)}`}
           sandbox="allow-scripts allow-downloads"
           referrerPolicy="no-referrer"
           loading="eager"

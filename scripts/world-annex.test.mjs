@@ -17,6 +17,8 @@ import {
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const home = read("src/components/world/world-home.tsx");
+// The columns render from their own data module (rx6); the contract reads both.
+const homeView = `${home}\n${read("src/components/world/world-columns-data.ts")}`;
 const annex = read("src/components/world/world-annex.tsx");
 const data = read("src/components/world/world-annex-data.ts");
 const route = read("src/routes/world.tsx");
@@ -27,9 +29,12 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // WorldAtmosphere and shared name-break markup, plus the source-led
   // synopsis expansion requested on 2026-10-06. Fixed columns, records,
   // artwork and displayed spelling remain pinned.
-  assert.deepEqual(worldViewContract(home), {
-    records: "02d6fc9ef9971922e1d42799f086591ebba25758ad623fae83be9d12e7a23958",
-    markup: "a7c10042924fc85c748b1d9c4e16a52f8cc4090b2663d49090c7d4136a705ceb",
+  // Re-pinned in rx6 for two reviewed edits: the columns moved to
+  // world-columns-data.ts (same text, owner-copy.test pins it) and each column
+  // heading gained an id for /world#world-column-NN search links.
+  assert.deepEqual(worldViewContract(homeView), {
+    records: "332d02ed983fa519c54fc060bb84d9d8903e11185a3bbc21b014898a1344509c",
+    markup: "78a3a40dfcc51c7ac857dfc32159bc5037676599b3a19c174b40f6de0a2e9063",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -87,30 +92,30 @@ test("the annex data is complete", () => {
 });
 
 test("the view contract still detects changes to story data, copy and layout", () => {
-  const original = worldViewContract(home);
+  const original = worldViewContract(homeView);
   assert.notEqual(
-    worldViewContract(home.replace('title: "脚本制と採録制"', 'title: "変更"')).records,
+    worldViewContract(homeView.replace('title: "脚本制と採録制"', 'title: "変更"')).records,
     original.records,
   );
   assert.notEqual(
-    worldViewContract(home.replace("救うべき世界は、目の前にある。", "変更")).markup,
+    worldViewContract(homeView.replace("救うべき世界は、目の前にある。", "変更")).markup,
     original.markup,
   );
   assert.notEqual(
-    worldViewContract(home.replace('className="riders-section"', 'className="changed"')).markup,
+    worldViewContract(homeView.replace('className="riders-section"', 'className="changed"')).markup,
     original.markup,
   );
   assert.deepEqual(
-    worldViewContract(home.replace("onClick={shufflePoster}", "onClick={revisedHandler}")),
+    worldViewContract(homeView.replace("onClick={shufflePoster}", "onClick={revisedHandler}")),
     original,
   );
   // This readiness marker changes GPU timing, not artwork or rendered layout.
   assert.deepEqual(
-    worldViewContract(home.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, "")),
+    worldViewContract(homeView.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, "")),
     original,
   );
   assert.notEqual(
-    worldViewContract(home.replace('className="riders-section"', 'className="riders-section" data-ultra-artwork-ready="true"')).markup,
+    worldViewContract(homeView.replace('className="riders-section"', 'className="riders-section" data-ultra-artwork-ready="true"')).markup,
     original.markup,
   );
 });

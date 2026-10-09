@@ -7,11 +7,14 @@ import { buildRealmArchiveMotion } from "./build-realm-archive-motion.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
-  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20260930-r48">';
+  '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20261009-r51">';
 const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260930-r48" defer></script>';
 // Reports the archive's titles and fixed controls to the page, so the
 // floating Zeus button keeps off them inside this sandboxed frame too.
 const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20260928-z1" defer></script>';
+// Carries the reader's form and compared pair between the page URL and this
+// sandboxed frame (the page passes them in the frame's #fragment).
+const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261009-s1" defer></script>';
 const nameWordAssets = '<link rel="stylesheet" href="/name-words.css?v=20261006-names">\n<script src="/archive-name-words.generated.js?v=20261006-names" defer></script>';
 // The frame intentionally has an opaque sandbox origin. Classic scripts
 // preserve that boundary; ES module fetches would require CORS permission.
@@ -104,9 +107,12 @@ for (const archive of archives) {
   }
 })();
 </script>`;
-  const withNameWords = withZeusBridge.includes(nameWordAssets)
+  const withStateBridge = withZeusBridge.includes(stateBridgeScript)
     ? withZeusBridge
-    : withZeusBridge.replace("</head>", `${nameWordAssets}\n</head>`);
+    : withZeusBridge.replace("</head>", `${stateBridgeScript}\n</head>`);
+  const withNameWords = withStateBridge.includes(nameWordAssets)
+    ? withStateBridge
+    : withStateBridge.replace("</head>", `${nameWordAssets}\n</head>`);
   const withReadySignal = withNameWords.includes("data-archive-ready-signal")
     ? withNameWords
     : withNameWords.replace("</body>", `${readySignal}\n</body>`);

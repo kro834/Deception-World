@@ -27,6 +27,7 @@ import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
+import { WORLD_COLUMNS } from "./world-columns-data";
 
 const POSTERS = [
   {
@@ -320,53 +321,7 @@ const RIDERS = [
   },
 ];
 
-const COLUMNS = [
-  {
-    no: "01",
-    title: "脚本制と採録制",
-    kicker: "SCRIPT / RECORD",
-    body: "世界には、脚本として書かれるものと、現場で採録されるものの二つがある。最上位管理人はその境目を管轄していて、物語が現実に漏れ出す瞬間を見張っている。",
-    pickup: [
-      "世界には、脚本として書かれるものと、現場で採録されるものの二つがある。最上位管理人はその境目を管轄していて、物語が現実に漏れ出す瞬間を見張っている。",
-      "脚本制では、結末が先に決まっている。採録制では、現場で選ばれたことがそのまま正史になる。どちらが勝つかで、サーガ世界の因果は大きく変わる。",
-      "漏れ出すのは、いつもほんの少しだけ。台詞や小道具、ライダーの視線が現実側に染み出したとき、管理人は記録を封じるか、物語として認めるかを決める。",
-      "なお、このコラムは確定した年表ではない。今まさに起きている干渉を拾い集めた、覚え書きのようなものだ。",
-    ],
-  },
-  {
-    no: "02",
-    title: "六詠",
-    kicker: "RIKUEI",
-    body: "世界・概念・領域・物語・法則。あらゆるものを管轄する管理人の中でも、最上位にいるのが六詠。六つの信号が揃うと、サーガ世界の勝敗条件は書き換えられてしまう。",
-    pickup: [
-      "世界・概念・領域・物語・法則。あらゆるものを管轄する管理人の中でも、最上位にいるのが六詠。六つの信号が揃うと、サーガ世界の勝敗条件は書き換えられてしまう。",
-      "六詠は、人格というより権限のかたまりとして扱われている。名前が明かされるのは、その信号が物語の側に現れたときだけだ。",
-      "今のフロントでは、六人全員の記録を見ることができる。全員が表に出たことで、六詠同士の関係や、権限のぶつかり合いも見え始めている。",
-      "ライダーが世界に踏み込むたびに、六詠の均衡は少しずつ傾いていく。それを戻すのも、さらに傾けるのも、今の管理人たち次第だ。",
-    ],
-  },
-  {
-    no: "03",
-    title: "レジェンズ",
-    kicker: "LEGENDS",
-    body: "過去作から帰ってきたライダーと、この世界で新しく名乗りを上げた者たち。彼らにとって伝説は昔の記録ではなく、今も続いている干渉だ。",
-    pickup: [
-      "過去作から帰ってきたライダーと、この世界で新しく名乗りを上げた者たち。彼らにとって伝説は昔の記録ではなく、今も続いている干渉だ。",
-      "仮面ライダーレルム、ベル・アレインの復活はその代表例。失われていた信号がもう一度名前を持つと、周りの因果は付け足されるのではなく、丸ごと書き換えられる。",
-      "伝説として扱われた人物は、その時点で「終わった物語」にされてしまう。レジェンズはそれを拒んで、今動いている盤面へ自分から戻ってくる。",
-      "八人のライダーが交差するこの世界では、誰が伝説で誰が新人なのかさえ、見る側の権限によって変わってしまう。",
-    ],
-  },
-  {
-    no: "04",
-    title: "ゼウス",
-    kicker: "ZEUS",
-    body: "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
-    pickup: [
-      "ゼウスは最上位に位置する神であり、彼は5代目。初心者故に手の甲にはなんと初心者マークが付いており、管理の主権はレックスが握っている。学習能力の高さ故にレックスに軟禁されていたが……？",
-    ],
-  },
-];
+const COLUMNS = WORLD_COLUMNS;
 
 type EpisodePickup = {
   label: string;
@@ -998,6 +953,14 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-unmanaged") return;
     setManagerTab(1);
     syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  // A search result opens one column: /world#world-column-02.
+  useLayoutEffect(() => {
+    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);
+    if (index < 0) return;
+    setColumnTab(index);
+    syncRail(columnRail.current, index);
   }, [locationHash]);
 
   useLayoutEffect(() => {
@@ -2446,6 +2409,7 @@ export function WorldHome() {
                 {COLUMNS.map((item, index) => (
                   <h3
                     key={item.no}
+                    id={`world-column-${item.no}`}
                     className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
                     aria-hidden={index !== columnTab}
                   >

@@ -383,6 +383,48 @@ html :is(#saga-forms-performance-v5, #edition-panel-saga #saga--saga-forms-perfo
   }
 }
 
+/* The selector's 閉じる closes the phone sheet. In the page flow it had
+   nothing to close, so it shows only while the sheet is open or closing. */
+html[data-embedded-archive="true"]
+  [id$="saga-forms-performance-v5"]:not(.is-selector-sheet-open):not(.is-selector-sheet-closing)
+  .selector-heading
+  .selector-sheet-close {
+  display: none !important;
+}
+
+/* Phone tables: the sticky form column took half the width, so the ratio
+   and ability figures sat off-screen. A narrower column (names wrap at
+   their word breaks) leaves the first figures in view beside it. */
+@media (max-width: 620px) {
+  html[data-embedded-archive="true"] [id$="saga-forms-performance-v5"] .table-responsive .table th:first-child {
+    width: 7.25rem !important;
+    min-width: 7.25rem !important;
+    max-width: 7.25rem !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* Saga's ratio table names each form's tier and role beside it; that
+     column wraps in a narrower width and the table drops its desktop
+     minimum, so the first ratio column shows beside the names. */
+  html[data-embedded-archive="true"] #saga-forms-performance-v5 .table:has(> tbody#saga-ratio-body-v5) {
+    min-width: 36rem !important;
+  }
+
+  html[data-embedded-archive="true"] #saga-forms-performance-v5 #saga-ratio-body-v5 .ratio-cell {
+    min-width: 6.5rem !important;
+  }
+
+  html[data-embedded-archive="true"] #saga-forms-performance-v5 .table:has(> tbody#saga-ratio-body-v5) :is(th, td):nth-child(2) {
+    width: 6.75rem !important;
+    min-width: 6.75rem !important;
+    max-width: 6.75rem !important;
+    white-space: normal !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+}
+
 /* Under 390px the four section links outgrew their pill: 2形態比較 was cut to
    2形態比 at 360px (a Galaxy) and 375px, with nothing to say the nav scrolls.
    A slightly tighter header and link spacing lets all four fit from 360px,

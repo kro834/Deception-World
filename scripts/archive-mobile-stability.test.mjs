@@ -21,11 +21,16 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20261006-r50/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20261006-r50/);
+  // r51: the archives gained URL state and the spec difference (rx6).
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20261009-r51/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20261009-r51/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
-  assert.match(route, /if \(!loaded \|\| next === activeTransitionRef\.current\.archive\) return/);
+  // A history step to another form of the same archive reopens it (reopen).
+  assert.match(
+    route,
+    /if \(!loaded \|\| \(next === activeTransitionRef\.current\.archive && !reopen\)\) return/,
+  );
   assert.doesNotMatch(route, /setTimeout\(\(\) => setLoaded\(true\), 1800\)/);
   assert.match(route, /saga-archive:ready/);
 });
@@ -62,7 +67,8 @@ test("embedded archives externalize base64 images and load the mobile stability 
     assert.match(html, /data-embedded-archive="true"/);
     assert.match(html, /data-archive-kind="(?:saga|realm)"/);
     assert.match(html, /archive-mobile-stability\.css/);
-    assert.match(html, /archive-mobile-stability\.css\?v=20260930-r48/);
+    // r51: phone table columns and the in-flow 閉じる (rx6).
+    assert.match(html, /archive-mobile-stability\.css\?v=20261009-r51/);
     assert.match(html, /archive-scroll-stability\.js\?v=20260930-r48/);
     assert.match(html, /data-archive-ready-signal/);
     assert.match(html, /saga-archive:ready/);

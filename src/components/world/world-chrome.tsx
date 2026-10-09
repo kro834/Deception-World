@@ -25,6 +25,8 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
 import { LibraryCurrentButton } from "@/components/library/library-controls";
+import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
+import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { UltraModeToggle } from "@/components/ultra/ultra-mode-toggle";
 
@@ -784,6 +786,23 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>FIND A RECORD</p>
           <div className="side-panel-links">
+            <button
+              type="button"
+              className="side-panel-link-button side-panel-quick-search"
+              aria-haspopup="dialog"
+              aria-keyshortcuts="/ Control+K Meta+K"
+              onPointerEnter={prefetchQuickSearch}
+              onFocus={prefetchQuickSearch}
+              onClick={() => {
+                close();
+                window.requestAnimationFrame(openQuickSearch);
+              }}
+            >
+              <span>クイック検索</span>
+              <i>
+                QUICK <kbd aria-hidden="true">/</kbd>
+              </i>
+            </button>
             <GuardedLink
               to="/search"
               assets={[]}
@@ -810,30 +829,13 @@ export function SideMenuLayer({
           <div className="side-panel-links">
             {isSpecialSite ? (
               <>
-                {(context === "rexonance"
-                  ? [
-                      ["top", "トップ", "TOP"],
-                      ["performance", "パフォーマンス", "PERFORMANCE"],
-                      ["p14", "P14", "PROCESSOR"],
-                      ["stages", "三つの運用段階", "STAGES"],
-                      ["system", "トリニティ・レゾナンス", "SYSTEM"],
-                    ]
-                  : context === "extreme"
-                    ? [
-                        ["top", "トップ", "TOP"],
-                        ["performance", "性能比較", "COMPARISON"],
-                        ["p14", "P14", "PROCESSOR"],
-                        ["stages", "二つの運用段階", "STAGES"],
-                        ["system", "中核システム", "SYSTEM"],
-                      ]
-                    : [
-                        ["top", "トップ", "TOP"],
-                        ["story", "あらすじ", "STORY"],
-                        ["characters", "登場人物", "CHARACTERS"],
-                        ["far-from-saga", "ファーフロムサーガ", "RIDER 01"],
-                        ["realm-royal", "レルムロイヤル", "RIDER 02"],
-                      ]
-                ).map(([hash, label, code]) => (
+                {SPECIAL_SITE_SECTIONS[
+                  context === "rexonance"
+                    ? "rexonance"
+                    : context === "extreme"
+                      ? "extreme"
+                      : "final-stage"
+                ].map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
                     to={

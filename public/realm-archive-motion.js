@@ -41,10 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEFAULT_FORM_ID = 'stella';
   const defaultIndex = items.findIndex(item => item.formId === DEFAULT_FORM_ID);
   if (defaultIndex < 0) return;
+  // A shared link, a reload or a return names its form in the page URL; the
+  // state bridge (archive-state-bridge.js) hands it over before this runs.
+  // Without one, every opening still begins on the default form.
+  const requestedIndex = items.findIndex(item => item.formId === document.documentElement.dataset.archiveRequestedForm);
+  let openingIndex = requestedIndex >= 0 ? requestedIndex : defaultIndex;
 
   function resetDefaultInputs() {
     items.forEach((item, index) => {
-      const isDefault = index === defaultIndex;
+      const isDefault = index === openingIndex;
       item.input.autocomplete = 'off';
       item.input.name = 'realm--saga-selected-form-v6s-20260808';
       item.input.checked = isDefault;
@@ -55,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // WebKit/LINE previews may restore the last radio state before this script runs.
-  // Ignore that restored state: every new opening must begin on Multi Form.
+  // Ignore that restored state: every new opening begins on Multi Form, or on
+  // the form its URL names.
   resetDefaultInputs();
 
   const accents = {
@@ -207,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
   scrollProgress.innerHTML = '<i></i>';
   root.prepend(scrollProgress);
 
-  let selectedIndex = defaultIndex;
+  let selectedIndex = openingIndex;
   let activeIndex = selectedIndex;
   let renderToken = 0;
   let animations = [];
@@ -740,6 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cancelAnimations();
     selectedIndex = index;
+    reportSelection(index);
 
     if (index === previousIndex) {
       activeIndex = index;
@@ -775,10 +782,23 @@ document.addEventListener('DOMContentLoaded', () => {
     transitionArticles(previousIndex, index, direction, token);
   }
 
+  // Tell the state bridge which form the reader chose, so the page URL keeps
+  // it. Inside the page, a return from the back-forward cache then reopens
+  // that form: the URL the reader returns to names it.
+  function reportSelection(index) {
+    const item = items[index];
+    if (!item) return;
+    if (window.parent !== window) openingIndex = index;
+    root.dispatchEvent(new CustomEvent('archive:formchange', {
+      bubbles: true,
+      detail: { formId: item.formId, isDefault: index === defaultIndex }
+    }));
+  }
+
   function showOpeningDefault() {
     renderToken += 1;
-    selectedIndex = defaultIndex;
-    activeIndex = defaultIndex;
+    selectedIndex = openingIndex;
+    activeIndex = openingIndex;
     window.clearTimeout(rapidSelectionTimer);
     rapidSelectionTimer = 0;
     lastSelectionAt = 0;
@@ -786,12 +806,12 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelAnimations();
     motionController?.apply();
     resetDefaultInputs();
-    applyAccent(items[defaultIndex]);
-    updateControlState(defaultIndex);
-    showOnly(defaultIndex);
-    updateTextAndTables(defaultIndex, false);
-    warmImage(items[defaultIndex]);
-    warmNeighbors(defaultIndex);
+    applyAccent(items[openingIndex]);
+    updateControlState(openingIndex);
+    showOnly(openingIndex);
+    updateTextAndTables(openingIndex, false);
+    warmImage(items[openingIndex]);
+    warmNeighbors(openingIndex);
   }
 
   function moveSelection(step, options = {}, fromIndex = selectedIndex) {

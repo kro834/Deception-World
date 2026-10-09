@@ -1,9 +1,3 @@
-                className="world-column-slide-open"
-                expanded={pickupOpen}
-                label="ピックアップ"
-                onOpen={openPickup}
-              />
-            </div>
           </div>
         </section>
       </section>

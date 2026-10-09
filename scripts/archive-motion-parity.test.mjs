@@ -40,7 +40,8 @@ test("Windows and Unix source archives generate identical controllers", () => {
 
 test("Realm archive loads its normalized motion controller in both deliverables", () => {
   for (const html of [realmStandalone, realmEmbedded]) {
-    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261003-r49" defer><\/script>/);
+    // r51: the controller now opens on a requested form (rx6).
+    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261009-r51" defer><\/script>/);
   }
 });
 

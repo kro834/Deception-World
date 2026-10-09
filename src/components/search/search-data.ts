@@ -1,5 +1,9 @@
 import type { SearchDocument } from "./search-engine";
+import { FORM_ARCHIVE_FORMS } from "./form-archive-index";
 import { DANTE_FACTS, DANTE_FORMS, DANTE_SECTIONS } from "../world/dante-data";
+import { RELATED_SECTIONS } from "../world/related-data";
+import { YOAKE_MAMORI_SECTIONS } from "../world/yoake-mamori-data";
+import { WORLD_COLUMNS } from "../world/world-columns-data";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -12,15 +16,27 @@ import {
   DREAM_CAST_ROSTER,
   DREAM_CHARACTERS,
   DREAM_DOLMINENCE,
+  DREAM_FACTIONS,
+  DREAM_GLOSSARY,
 } from "../dream-chapter/dream-chapter-data";
+import { CAST, FAR_FROM_SAGA, REALM_ROYAL, STORY } from "../final-stage/final-stage-data";
+import { LIBRARY_ENTRIES } from "../../lib/library-data";
+import {
+  SPECIAL_SITE_PATHS,
+  SPECIAL_SITE_SECTIONS,
+  SPECIAL_SITE_TITLES,
+  type SpecialSiteId,
+} from "../../lib/special-site-sections";
 
 export const SEARCH_CATEGORIES = [
-  { id: "all", label: "すべて" },
-  { id: "people", label: "人物" },
-  { id: "riders", label: "ライダー" },
-  { id: "story", label: "物語" },
-  { id: "world", label: "世界・用語" },
-  { id: "systems", label: "システム" },
+  { id: "all", label: "すべて", code: "ALL" },
+  { id: "people", label: "人物", code: "PEOPLE" },
+  { id: "riders", label: "ライダー", code: "RIDERS" },
+  { id: "forms", label: "フォーム", code: "FORMS" },
+  { id: "story", label: "物語", code: "STORY" },
+  { id: "world", label: "世界・用語", code: "WORLD" },
+  { id: "systems", label: "システム", code: "SYSTEMS" },
+  { id: "pages", label: "ページ", code: "PAGES" },
 ] as const;
 
 export type SearchCategory = (typeof SEARCH_CATEGORIES)[number]["id"];
@@ -39,6 +55,10 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["六詠", "I"],
     to: "/managers/zeus",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "生まれながらに、第一位の名を継いだ神。" },
+      { no: "02", title: "気さくなまま、拒否する余地だけを消す。" },
+    ],
   },
   {
     id: "manager-rex-loi",
@@ -49,6 +69,14 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["六詠", "II", "仮面ライダーヴァンダール", "ヴァンダールドライバー × スペシャルコア"],
     to: "/managers/rex-loi",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "世界を残し、支配だけを終わらせるために。" },
+      { no: "02", title: "他者の選択を奪わない、六詠唯一の完全なる良心。" },
+      { no: "03", title: "敵の能力と逃走手段を見抜き、正面から圧倒する。" },
+      { no: "04", title: "光で現実へ定着させ、闇で外の干渉を遮る。" },
+      { no: "05", title: "世界を管理する前に、自らの力を問い直す。" },
+      { no: "06", title: "分配" },
+    ],
   },
   {
     id: "manager-shuza",
@@ -59,6 +87,11 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["六詠", "III", "仮面ライダールーラー", "ディセプションガヴ × グリードゴチゾウ"],
     to: "/managers/shuza",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "欲望そのものを書き換え、従わせる。" },
+      { no: "02", title: "希望を与え、相手が自ら跪くのを待つ。" },
+      { no: "03", title: "欲望を力に変え、紅紫の糸で攻撃の向きを操る。" },
+    ],
   },
   {
     id: "manager-opus",
@@ -74,6 +107,12 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/managers/opus",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "祈りが他者へ委ねられた瞬間、申請は受理される。" },
+      { no: "02", title: "願いを優先し、犠牲は顧みない。" },
+      { no: "03", title: "祈願に応じて、戦うための能力と武装を追加する。" },
+      { no: "04", title: "祈りが個人へ向かわぬよう、顔を隠す。" },
+    ],
   },
   {
     id: "manager-reemu",
@@ -84,6 +123,11 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["六詠", "VI", "仮面ライダーフリート", "デザイアドライバー × キジンソードバックル"],
     to: "/managers/reemu",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "状況も責任も、自分に都合よく組み替える。" },
+      { no: "02", title: "言い訳に合わせて、因果まで変える。" },
+      { no: "03", title: "不意打ちと誘導で、戦闘前から勝利条件を変える。" },
+    ],
   },
   {
     id: "manager-lejas",
@@ -130,6 +174,11 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/saga",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "仲間と夢を叶え、奪われた世界を取り戻す。" },
+      { no: "02", title: "変身後の能力を活かした遠距離戦。" },
+      { no: "03", title: "万物を拒絶する、半汎用式​ライダーシステム。" },
+    ],
   },
   {
     id: "rider-realm",
@@ -153,6 +202,11 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/realm",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "前線で戦いながら、部隊の戦況を管理する。" },
+      { no: "02", title: "軽口を絶やさず、共存できるかを見極める。" },
+      { no: "03", title: "生身でも、この世界で最強とされる。" },
+    ],
   },
   {
     id: "rider-lore",
@@ -177,6 +231,10 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/lore",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "世界を弄んだ管理人は、かつての敵と並び立つ。" },
+      { no: "02", title: "憂さ晴らしに創造した世界を、バッドエンドへ導いた。" },
+    ],
   },
   {
     id: "rider-vandal",
@@ -204,6 +262,14 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/vandal",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "世界を残し、支配だけを終わらせるために。" },
+      { no: "02", title: "他者の選択を奪わない、六詠唯一の完全なる良心。" },
+      { no: "03", title: "敵の能力と逃走手段を見抜き、正面から圧倒する。" },
+      { no: "04", title: "光で現実へ定着させ、闇で外の干渉を遮る。" },
+      { no: "05", title: "世界を管理する前に、自らの力を問い直す。" },
+      { no: "06", title: "分配" },
+    ],
   },
   {
     id: "rider-leddic",
@@ -233,6 +299,10 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/leddic",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "何気ない一言で、事件の核心を突く。" },
+      { no: "02", title: "負け知らずの体術と、設計通りに使わない能力。" },
+    ],
   },
   {
     id: "rider-argenome",
@@ -256,6 +326,10 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/argenome",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "幻想郷を救った、紅魔館の執事。" },
+      { no: "02", title: "高速機動と無音の接近。" },
+    ],
   },
   {
     id: "rider-over-zeztz",
@@ -280,6 +354,10 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/over-zeztz",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "軽口を飛ばしながら、任務を遂行する。" },
+      { no: "02", title: "戦闘・潜入・解析を支えるCODE装備。" },
+    ],
   },
   {
     id: "rider-cipher",
@@ -309,6 +387,13 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/riders/cipher",
     hash: "dossier-profile",
+    sections: [
+      { no: "01", title: "スカーズに所属する、謎の男。" },
+      { no: "02", title: "相手にどう見られているかを、正確に把握する。" },
+      { no: "03", title: "準備不足の犠牲を、必要な犠牲と呼ばない。" },
+      { no: "04", title: "ベルとは情報を共有し、悠真には敵意を演じる。" },
+      { no: "05", title: "偽装と経路追跡で、敵の判断を狂わせる。" },
+    ],
   },
   {
     id: "system-extreme-01",
@@ -372,6 +457,57 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
   },
 ];
 
+/** Every string of published prose inside a record (no paths, colours or codes). */
+function proseOf(value: unknown, out: string[] = []): string[] {
+  if (typeof value === "string") {
+    if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(value) && !value.startsWith("/")) out.push(value);
+  } else if (Array.isArray(value)) {
+    for (const item of value) proseOf(item, out);
+  } else if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      if (!["image", "alt", "accent", "src", "pos", "assets", "img"].includes(key))
+        proseOf(item, out);
+    }
+  }
+  return out;
+}
+
+const SAGA_RECORD = DOSSIER_DOCUMENTS.find((document) => document.id === "rider-saga")!;
+
+const SPECIAL_SITE_DOCUMENTS = (Object.keys(SPECIAL_SITE_SECTIONS) as SpecialSiteId[]).flatMap(
+  (site) =>
+    SPECIAL_SITE_SECTIONS[site]
+      .filter(([hash]) => hash !== "top")
+      .map(([hash, label, code]): SearchCatalogueDocument => ({
+        id: `site-${site}-${hash}`,
+        title: `${SPECIAL_SITE_TITLES[site]}／${label}`,
+        category: "pages",
+        description: `${SPECIAL_SITE_TITLES[site]}の「${label}」へ。`,
+        keywords: [label, code, SPECIAL_SITE_TITLES[site]],
+        to: SPECIAL_SITE_PATHS[site],
+        hash,
+      })),
+);
+
+const LIBRARY_PAGE_ANCHORS: Record<string, string> = {
+  world: "top",
+  dream: "top",
+  gallery: "gallery-collection",
+};
+
+/** The library's English and romaji spellings for the same destination. */
+const aliasesFor = (to: string): string[] =>
+  LIBRARY_ENTRIES.filter((entry) => entry.path === to && !entry.hash).flatMap(
+    (entry) => entry.aliases,
+  );
+
+const withAliases = (document: SearchCatalogueDocument): SearchCatalogueDocument => {
+  const aliases = aliasesFor(document.to);
+  return aliases.length && document.hash === "dossier-profile"
+    ? { ...document, aliases: [...(document.aliases ?? []), ...aliases] }
+    : document;
+};
+
 export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
   ...DOSSIER_DOCUMENTS,
   {
@@ -380,6 +516,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     category: "people",
     description: DANTE_SECTIONS[0].title,
     body: DANTE_SECTIONS.flatMap((section) => [section.title, ...section.body]).join("\n"),
+    sections: DANTE_SECTIONS.map(({ no, title }) => ({ no, title })),
     keywords: [
       ...DANTE_FACTS.map((row) => row.dd),
       ...DANTE_FORMS.flatMap((form) => [form.name, form.system]),
@@ -391,10 +528,37 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     id: "person-ciel",
     title: "シエル",
     category: "people",
-    description: DOSSIER_DOCUMENTS.find((document) => document.id === "rider-saga")!.description,
-    body: DOSSIER_DOCUMENTS.find((document) => document.id === "rider-saga")!.body,
+    description: SAGA_RECORD.description,
+    body: SAGA_RECORD.body,
+    sections: SAGA_RECORD.sections,
     keywords: ["RE DIVE", "六詠", "RIKUEI I", "月城悠真", "仮面ライダーサーガ"],
     to: "/characters/ciel",
+    hash: "dossier-profile",
+  },
+  ...(["terra", "luna"] as const).map((id): SearchCatalogueDocument => {
+    const roster = WORLD_CAST_ROSTER.find((person) => person.id === id)!;
+    const sections = RELATED_SECTIONS[id];
+    return {
+      id: `character-${id}`,
+      title: roster.name,
+      category: "people",
+      description: sections[0].title,
+      body: sections.flatMap((section) => [section.title, ...section.body]).join("\n"),
+      sections: sections.map(({ no, title }) => ({ no, title })),
+      keywords: [roster.role, ...sections.map((section) => section.kicker)],
+      to: `/characters/${id}`,
+      hash: "dossier-profile",
+    };
+  }),
+  {
+    id: "character-yoake-mamori",
+    title: "夜明護尊",
+    category: "people",
+    description: YOAKE_MAMORI_SECTIONS[0].title,
+    body: YOAKE_MAMORI_SECTIONS.flatMap((section) => [section.title, ...section.body]).join("\n"),
+    sections: YOAKE_MAMORI_SECTIONS.map(({ no, title }) => ({ no, title })),
+    keywords: ["よあけまもりのみこと", ...YOAKE_MAMORI_SECTIONS.map((section) => section.kicker)],
+    to: "/characters/yoake-mamori",
     hash: "dossier-profile",
   },
   ...WORLD_CAST_ROSTER.map((person): SearchCatalogueDocument => ({
@@ -406,6 +570,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: [person.role, ...(person.line ? [person.line] : [])],
     to: person.to ?? "/world",
     hash: person.to ? "dossier-profile" : "wa-person-" + person.id,
+    secondary: Boolean(person.to),
   })),
   ...DREAM_CAST_ROSTER.map((person): SearchCatalogueDocument => ({
     id: "dream-person-" + person.id,
@@ -452,6 +617,16 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     to: "/dream-chapter",
     hash: "dream-dolminence-" + record.id,
   })),
+  ...CAST.map((person): SearchCatalogueDocument => ({
+    id: "final-stage-cast-" + person.id,
+    title: person.name,
+    category: "people",
+    description: person.role,
+    body: person.body.join("\n"),
+    keywords: ["FINAL STAGE", "ファイナルステージ", person.en, person.kicker],
+    to: "/final-stage",
+    hash: "characters",
+  })),
   ...DREAM_CASES.map((episode): SearchCatalogueDocument => ({
     id: "dream-case-" + episode.no,
     title: "CASE " + episode.no + "「" + episode.title + "」",
@@ -471,6 +646,27 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["Deception World", "ディセプションワールド", episode.stage],
     to: "/world",
     hash: "wa-episode-" + episode.no,
+  })),
+  {
+    id: "final-stage",
+    title: "仮面ライダーサーガ FINAL STAGE",
+    category: "story",
+    description:
+      "仮面ライダーファーフロムサーガと仮面ライダーレルムロイヤル、ファイナルステージ限定の二形態の記録を収録。",
+    body: [STORY.title, STORY.lead, ...STORY.paragraphs].join("\n"),
+    keywords: ["ファイナルステージ", "ファーフロムサーガ", "レルムロイヤル"],
+    to: "/final-stage",
+    hash: "story",
+  },
+  ...WORLD_COLUMNS.map((column): SearchCatalogueDocument => ({
+    id: "world-column-" + column.no,
+    title: "コラム" + column.no + " " + column.title,
+    category: "world",
+    description: column.body,
+    body: column.pickup.join("\n"),
+    keywords: ["世界観コラム", "WORLD COLUMN", column.kicker],
+    to: "/world",
+    hash: "world-column-" + column.no,
   })),
   ...WORLD_BRIEF.map((entry): SearchCatalogueDocument => ({
     id: "world-brief-" + entry.id,
@@ -499,12 +695,43 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     to: "/world",
     hash: "wa-location-" + entry.name,
   })),
+  ...DREAM_FACTIONS.map((faction): SearchCatalogueDocument => ({
+    id: "dream-faction-" + faction.id,
+    title: faction.name,
+    category: "world",
+    description: faction.statements[0]?.text ?? faction.name,
+    body: proseOf([
+      faction.statements.map((statement) => statement.text),
+      faction.members?.map((member) => member.name + " " + member.note),
+      faction.pact,
+      faction.creed,
+      faction.limit,
+    ]).join("\n"),
+    keywords: [
+      "DREAM CHAPTER",
+      "ドリームチャプター",
+      ...(faction.members ?? []).map((member) => member.name),
+    ],
+    to: "/dream-chapter",
+    hash: "dream-faction-" + faction.id,
+  })),
+  ...DREAM_GLOSSARY.map((entry): SearchCatalogueDocument => ({
+    id: "dream-term-" + entry.term,
+    title: entry.term,
+    category: "world",
+    description: entry.body[0] ?? entry.said ?? entry.term,
+    body: [...entry.body, ...(entry.said ? [entry.said] : [])].join("\n"),
+    keywords: ["DREAM CHAPTER", "ドリームチャプター", "用語集"],
+    to: "/dream-chapter",
+    hash: "glossary",
+  })),
   {
     id: "extreme-saga",
     title: "仮面ライダーエクスプリームサーガ",
     category: "riders",
     description: "殴り合い、歓迎。長引くほど、こっちのもの。",
     keywords: ["エクスプリームサーガ・ウルトラ", "EXTREME", "P14", "性能比較"],
+    aliases: ["extreme saga"],
     to: "/extreme-saga",
     hash: "top",
   },
@@ -515,44 +742,25 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     description:
       "究極が始まる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14演算基盤、三つの形態、三者の共鳴構造まで。",
     keywords: ["HIGH", "MAX", "ULTRA", "SA-GA OS 5.5", "P14", "TRINITY RESONANCE"],
+    aliases: ["rexonance saga"],
     to: "/rexonance-saga",
     hash: "top",
-  },
-  {
-    id: "extreme-p14",
-    title: "P14 / EXTREME TUNING",
-    category: "systems",
-    description:
-      "エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。",
-    keywords: ["エクスプリームサーガ", "KHAOS Ultra", "KOSMOS Ultra"],
-    to: "/extreme-saga",
-    hash: "p14",
-  },
-  {
-    id: "rexonance-p14",
-    title: "P14 / レクソナンスサーガ",
-    category: "systems",
-    description: "P14 / P1比",
-    keywords: ["P1", "P2", "KHAOS DeuX", "KOSMOS DeuX", "SA-GA OS 5.5"],
-    to: "/rexonance-saga",
-    hash: "p14",
-  },
-  {
-    id: "final-stage",
-    title: "仮面ライダーサーガ FINAL STAGE",
-    category: "story",
-    description:
-      "仮面ライダーファーフロムサーガと仮面ライダーレルムロイヤル、ファイナルステージ限定の二形態の記録を収録。",
-    keywords: ["ファイナルステージ", "ファーフロムサーガ", "レルムロイヤル"],
-    to: "/final-stage",
-    hash: "story",
   },
   {
     id: "far-from-saga",
     title: "仮面ライダーファーフロムサーガ",
     category: "riders",
     description: "SA-GA OS 6.0",
-    keywords: ["FINAL STAGE", "FARFROM DRIVE", "ファーフロムビット"],
+    body: proseOf([FAR_FROM_SAGA.overview, FAR_FROM_SAGA.theories, FAR_FROM_SAGA.stages]).join(
+      "\n",
+    ),
+    keywords: [
+      "FINAL STAGE",
+      "FARFROM DRIVE",
+      "ファーフロムビット",
+      FAR_FROM_SAGA.en,
+      ...Object.values(FAR_FROM_SAGA.stages).map((stage) => stage.label),
+    ],
     to: "/final-stage",
     hash: "far-from-saga",
   },
@@ -561,17 +769,53 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "仮面ライダーレルムロイヤル",
     category: "riders",
     description: "ロイヤル・マルチタイプ",
-    keywords: ["FINAL STAGE", "ROYALLL", "パラレム・ロイヤル"],
+    body: proseOf([REALM_ROYAL.overview, REALM_ROYAL.armor, REALM_ROYAL.abilities]).join("\n"),
+    keywords: [
+      "FINAL STAGE",
+      "ROYALLL",
+      "パラレム・ロイヤル",
+      REALM_ROYAL.en,
+      ...Object.values(REALM_ROYAL.forms).map((form) => form.name),
+    ],
     to: "/final-stage",
     hash: "realm-royal",
   },
   {
     id: "form-archive",
     title: "フォームアーカイブ",
-    category: "riders",
+    category: "forms",
     description: "仮面ライダーサーガと仮面ライダーレルムのフォーム一覧・スペック・比較アーカイブ。",
     keywords: ["サーガ", "レルム", "性能比較", "フォーム検索", "レルムレジェンズ"],
+    aliases: ["form archive"],
     to: "/form-archive",
     hash: "archive-switcher",
   },
-];
+  ...FORM_ARCHIVE_FORMS.map((form): SearchCatalogueDocument => ({
+    id: `form-${form.archive}-${form.id}`,
+    title: form.name,
+    category: "forms",
+    description:
+      form.tier || (form.archive === "realm" ? "仮面ライダーレルム" : "仮面ライダーサーガ"),
+    keywords: [
+      form.archive === "realm" ? "仮面ライダーレルム" : "仮面ライダーサーガ",
+      form.archive === "realm" ? "REALM" : "SAGA",
+      "フォームアーカイブ",
+    ],
+    to: "/form-archive",
+    hash: "archive-switcher",
+    // The archive opens on the form itself (?form=, rx6 shareable state).
+    search: form.archive === "realm" ? { archive: "realm", form: form.id } : { form: form.id },
+  })),
+  ...LIBRARY_ENTRIES.filter((entry) => entry.id in LIBRARY_PAGE_ANCHORS).map(
+    (entry): SearchCatalogueDocument => ({
+      id: "page-" + entry.id,
+      title: entry.title,
+      category: "pages",
+      description: entry.description,
+      aliases: entry.aliases,
+      to: entry.path,
+      hash: entry.hash ?? LIBRARY_PAGE_ANCHORS[entry.id],
+    }),
+  ),
+  ...SPECIAL_SITE_DOCUMENTS,
+].map(withAliases);

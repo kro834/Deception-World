@@ -48,8 +48,12 @@ test("Final Stage is listed under STORIES after Dream Chapter, not under SPECIAL
   assert.ok(dreamPosition >= 0);
   assert.ok(finalStagePosition > dreamPosition);
   assert.match(stories, /<i>FINAL STAGE<\/i>/);
-  assert.match(menu, /\["story", "あらすじ", "STORY"\]/);
-  assert.match(menu, /\["characters", "登場人物", "CHARACTERS"\]/);
+  // rx6: the chapter list moved to src/lib/special-site-sections.ts, which the
+  // side menu and the site search share.
+  const sections = readFileSync(new URL("../src/lib/special-site-sections.ts", import.meta.url), "utf8");
+  assert.match(menu, /SPECIAL_SITE_SECTIONS\[/);
+  assert.match(sections, /\["story", "あらすじ", "STORY"\]/);
+  assert.match(sections, /\["characters", "登場人物", "CHARACTERS"\]/);
 });
 
 test("Final Stage component wires the shared chrome, section anchors, and hero title", () => {

@@ -9,7 +9,9 @@ export function worldViewContract(source) {
   const printer = ts.createPrinter({ removeComments: true });
   const records = [];
   const markup = [];
-  const recordNames = new Set(["POSTERS", "RIDERS", "COLUMNS", "EPISODES", "STORY_TITLE", "RIDERS_TITLE", "RECORDS_TITLE", "FINALE_TITLE"]);
+  // WORLD_COLUMNS: the columns' own module (world-columns-data.ts), read
+  // together with world-home since rx6 moved them there for the site search.
+  const recordNames = new Set(["POSTERS", "RIDERS", "COLUMNS", "WORLD_COLUMNS", "EPISODES", "STORY_TITLE", "RIDERS_TITLE", "RECORDS_TITLE", "FINALE_TITLE"]);
   for (const statement of file.statements) {
     if (!ts.isVariableStatement(statement)) continue;
     for (const declaration of statement.declarationList.declarations) {

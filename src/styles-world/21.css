@@ -45,6 +45,12 @@ html[data-mode="world"]:has(.site-shell) {
   pointer-events: none;
 }
 
+/* A search result opens one column (/world#world-column-02): its number and
+   heading land below the fixed header. */
+.site-shell .world-column-heading-stack > h3[id^="world-column-"] {
+  scroll-margin-top: calc(150px + env(safe-area-inset-top));
+}
+
 /* UPDATE belongs to the opening composition and should not cover deep links. */
 html[data-mode="world"] .site-shell > .site-update-control {
   position: absolute;

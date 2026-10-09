@@ -1,0 +1,329 @@
+/* Quick search (/ or Ctrl/⌘+K): a light overlay loaded with its chunk on
+   first use. Ice on ink, prism hairline, gold brackets; labels 12px or more. */
+dialog.quick-search {
+  --qs-ink: #e6f1f8;
+  --qs-muted: #a9bccb;
+  --qs-faint: #8196a8;
+  --qs-ice: #7ae8ff;
+  --qs-gold: #f0cf86;
+  --qs-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --qs-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
+  box-sizing: border-box;
+  width: min(680px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(640px, calc(100dvh - 48px));
+  margin: max(48px, 10vh) auto auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  color: var(--qs-ink);
+  background: transparent;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-align: left;
+}
+dialog.quick-search::backdrop {
+  background: rgb(2 5 10 / 0.72);
+}
+dialog.quick-search *,
+dialog.quick-search *::before,
+dialog.quick-search *::after {
+  box-sizing: border-box;
+}
+.quick-search-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: min(640px, calc(100dvh - 48px));
+  border: 1px solid rgb(122 232 255 / 0.28);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgb(122 232 255 / 0.05), transparent 30%), #070d15;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.55);
+}
+.quick-search-panel::before {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 1px;
+  border-radius: 6px 6px 0 0;
+  background: var(--qs-prism);
+  pointer-events: none;
+}
+.quick-search-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto -1px -1px;
+  height: 12px;
+  border: solid var(--qs-gold);
+  border-width: 0 1px 1px;
+  border-radius: 0 0 6px 6px;
+  -webkit-mask: linear-gradient(90deg, #000 26px, transparent 26px calc(100% - 26px), #000 0);
+  mask: linear-gradient(90deg, #000 26px, transparent 26px calc(100% - 26px), #000 0);
+  pointer-events: none;
+}
+.quick-search-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 0 18px;
+}
+.quick-search-head > p {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  color: var(--qs-muted);
+  font-size: 13px;
+}
+.quick-search-head > p > span {
+  color: var(--qs-ice);
+  font-family: var(--qs-hud);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+dialog.quick-search button {
+  font: inherit;
+  cursor: pointer;
+}
+.quick-search-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--qs-muted);
+  background: transparent;
+  font-size: 13px;
+}
+dialog.quick-search kbd {
+  padding: 1px 6px;
+  border: 1px solid rgb(167 200 214 / 0.35);
+  border-radius: 3px;
+  color: var(--qs-faint);
+  font-family: "Oxanium", ui-monospace, monospace;
+  font-size: 12px;
+}
+.quick-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 14px 10px;
+  padding: 2px 14px;
+  border: 1px solid rgb(122 232 255 / 0.5);
+  border-radius: 4px;
+  color: var(--qs-ice);
+  background: #03070c;
+}
+.quick-search-field:focus-within {
+  box-shadow: 0 0 0 3px rgb(122 232 255 / 0.16);
+}
+.quick-search-field svg {
+  flex-shrink: 0;
+}
+.quick-search-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--qs-ink);
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  appearance: none;
+}
+.quick-search-field input::-webkit-search-cancel-button {
+  display: none;
+}
+.quick-search-field input::placeholder {
+  color: #7f93a3;
+}
+.quick-search-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 8px 8px;
+  border-top: 1px solid rgb(122 232 255 / 0.12);
+}
+.quick-search-list[hidden] {
+  display: none;
+}
+.quick-search-group-label {
+  padding: 12px 10px 4px;
+  color: var(--qs-faint);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+.quick-search-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 14px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  color: var(--qs-ink);
+  text-decoration: none;
+}
+.quick-search-option:hover {
+  background: rgb(122 232 255 / 0.07);
+}
+.quick-search-option[data-active="true"] {
+  background: rgb(122 232 255 / 0.13);
+  box-shadow: inset 2px 0 0 var(--qs-ice);
+  outline: 1px solid rgb(122 232 255 / 0.5);
+}
+.quick-search-option-title {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.quick-search-option-place {
+  align-self: baseline;
+  color: var(--qs-faint);
+  font-size: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.quick-search-option-snippet {
+  grid-column: 1 / -1;
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--qs-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.quick-search-option.is-all {
+  margin-top: 6px;
+  border: 1px dashed rgb(122 232 255 / 0.35);
+  color: var(--qs-ice);
+}
+.quick-search-option.is-link .quick-search-option-place {
+  font-family: var(--qs-hud);
+  letter-spacing: 0.1em;
+}
+dialog.quick-search mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  color: #effcff;
+  background: rgb(122 232 255 / 0.22);
+  box-shadow: inset 0 -1px 0 var(--qs-ice);
+}
+.quick-search-empty {
+  padding: 18px 18px 8px;
+  border-top: 1px solid rgb(122 232 255 / 0.12);
+}
+.quick-search-empty > p {
+  margin: 0 0 10px;
+  color: var(--qs-muted);
+}
+.quick-search-empty > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.quick-search-empty span {
+  color: var(--qs-gold);
+  font-size: 12px;
+}
+.quick-search-empty button {
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid rgb(240 207 134 / 0.55);
+  border-radius: 3px;
+  color: #fbe8bf;
+  background: rgb(240 207 134 / 0.08);
+}
+.quick-search-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 4px 10px 6px 18px;
+  border-top: 1px solid rgb(122 232 255 / 0.12);
+}
+.quick-search-foot > p {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  color: var(--qs-faint);
+  font-size: 12px;
+}
+.quick-search-foot button {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  color: var(--qs-muted);
+  background: transparent;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+dialog.quick-search :is(button, a):focus-visible {
+  outline: 2px solid var(--qs-ice);
+  outline-offset: 2px;
+}
+@media (pointer: coarse), (max-width: 640px) {
+  .quick-search-keys {
+    display: none;
+  }
+}
+@media (max-width: 400px) {
+  .quick-search-head > p > span {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  dialog.quick-search {
+    width: calc(100vw - 24px);
+    margin-top: 12px;
+    max-height: calc(100dvh - 24px);
+  }
+  .quick-search-panel {
+    max-height: calc(100dvh - 24px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) dialog.quick-search[open] .quick-search-panel {
+    animation: quick-search-in 0.18s ease-out;
+  }
+}
+@keyframes quick-search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@media (forced-colors: active) {
+  .quick-search-panel {
+    border: 1px solid CanvasText;
+  }
+  .quick-search-panel::before,
+  .quick-search-panel::after {
+    display: none;
+  }
+  .quick-search-option[data-active="true"] {
+    outline: 3px solid Highlight;
+  }
+  dialog.quick-search mark {
+    color: HighlightText;
+    background: Highlight;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+}

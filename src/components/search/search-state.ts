@@ -1,4 +1,13 @@
-const SEARCH_CATEGORIES = ["all", "people", "riders", "story", "world", "systems"] as const;
+const SEARCH_CATEGORIES = [
+  "all",
+  "people",
+  "riders",
+  "forms",
+  "story",
+  "world",
+  "systems",
+  "pages",
+] as const;
 const MIN_SHOWN = 24;
 const MAX_SHOWN = 144;
 const MAX_QUERY_LENGTH = 120;

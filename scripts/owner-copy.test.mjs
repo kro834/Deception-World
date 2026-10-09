@@ -116,14 +116,21 @@ const DREAM = [
 ];
 
 test("the World columns are the owner's text, word for word", () => {
+  // The columns moved out of world-home.tsx into a pure data module (rx6) so
+  // the site search indexes them; the World page renders the same array.
   const home = readFileSync(
-    new URL("../src/components/world/world-home.tsx", import.meta.url),
+    new URL("../src/components/world/world-columns-data.ts", import.meta.url),
     "utf8",
   );
-  const block = home.slice(
-    home.indexOf("const COLUMNS = ["),
-    home.indexOf("];", home.indexOf("const COLUMNS = [")),
+  assert.match(
+    readFileSync(new URL("../src/components/world/world-home.tsx", import.meta.url), "utf8"),
+    /const COLUMNS = WORLD_COLUMNS;/,
   );
+  const block = home.slice(
+    home.indexOf("export const WORLD_COLUMNS = ["),
+    home.indexOf("] as const;", home.indexOf("export const WORLD_COLUMNS = [")),
+  );
+  assert.ok(block.length > 200, "the column block is found");
   for (const column of COLUMNS) {
     assert.ok(block.includes(`title: "${column.title}"`), column.title);
     assert.ok(block.includes(`body: "${column.paragraphs[0]}"`), `${column.title}: body`);

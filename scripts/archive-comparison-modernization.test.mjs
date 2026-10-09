@@ -24,8 +24,9 @@ test("Saga and Realm archives load one shared modern comparison layer", () => {
       new URL(`../${archive.dir}/${archive.file}`, import.meta.url),
       "utf8",
     );
-    assert.match(html, /archive-comparison-modern\.css\?v=20260918-readable/);
-    assert.match(html, /archive-comparison-modern\.js\?v=20260918-readable/);
+    // 20261009-diff: the spec difference panel and deferred first pass (rx6).
+    assert.match(html, /archive-comparison-modern\.css\?v=20261009-diff/);
+    assert.match(html, /archive-comparison-modern\.js\?v=20261009-diff/);
   }
 });
 

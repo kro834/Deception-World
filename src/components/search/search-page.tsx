@@ -1,13 +1,42 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { DisplayName } from "@/components/name-text";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
-import { searchDocuments, type SearchResult } from "./search-engine";
+import {
+  groupSearchResults,
+  searchDocuments,
+  suggestSearchQueries,
+  type SearchResult,
+} from "./search-engine";
+import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search-recent";
+import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
+import { placeLabel, stepActive } from "./search-ui-helpers";
+import { useOpenResult } from "./use-open-result";
 
 const PAGE_SIZE = 24;
+const GROUP_PREVIEW = 4;
+const BROWSE_PREVIEW = 6;
+const URL_DELAY_MS = 280;
 const STARTING_QUERIES = ["ゼウス", "月城悠真", "六詠", "エクスプリーム", "Dream"];
+const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
+
+const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
+const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
+
+type Option =
+  | { kind: "result"; id: string; result: SearchResult }
+  | { kind: "more"; id: string; category: string; count: number };
 
 function SearchGlyph() {
   return (
@@ -36,20 +65,159 @@ export function SearchPage({
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [draft, setDraft] = useState(query);
-  const composingRef = useRef(false);
+  const [active, setActive] = useState(-1);
+  const [composing, setComposing] = useState(false);
   const compositionEndedRef = useRef(-Infinity);
+  const writtenRef = useRef(query);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLHeadingElement>(null);
-  const matching = searchDocuments(SEARCH_DOCUMENTS, query);
-  const results =
-    category === "all"
-      ? matching
-      : matching.filter((result) => result.document.category === category);
-  const selectedCategory =
-    SEARCH_CATEGORIES.find((item) => item.id === category)?.label ?? "すべて";
+  const listboxId = useId().replace(/:/g, "") + "-records";
+  const recent = useRecentSearches();
+  const openResult = useOpenResult();
+  const onQueryChangeRef = useRef(onQueryChange);
   useEffect(() => {
-    if (!composingRef.current) setDraft(query);
+    onQueryChangeRef.current = onQueryChange;
+  });
+
+  // Results follow the field as it is typed; React may skip stale renders.
+  const typed = useDeferredValue(draft);
+  const trimmed = typed.trim();
+  const all = useMemo(() => searchDocuments(SEARCH_DOCUMENTS, typed), [typed]);
+  const counts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const result of all)
+      map.set(result.document.category, (map.get(result.document.category) ?? 0) + 1);
+    return map;
+  }, [all]);
+  const filtered = category === "all" ? all : all.filter((r) => r.document.category === category);
+  const suggestions = useMemo(
+    () => (trimmed && !all.length ? suggestSearchQueries(SEARCH_DOCUMENTS, trimmed) : []),
+    [all.length, trimmed],
+  );
+
+  const { groups, options } = useMemo(() => {
+    const list: Option[] = [];
+    const sections: { category: string; total: number; items: Option[] }[] = [];
+    if (category === "all") {
+      for (const group of groupSearchResults(all, CATEGORY_ORDER, Boolean(trimmed))) {
+        const limit = trimmed ? GROUP_PREVIEW : BROWSE_PREVIEW;
+        const items: Option[] = group.results.slice(0, limit).map((result) => ({
+          kind: "result",
+          id: `${listboxId}-${result.document.id}`,
+          result,
+        }));
+        if (group.results.length > limit)
+          items.push({
+            kind: "more",
+            id: `${listboxId}-more-${group.category}`,
+            category: group.category,
+            count: group.results.length,
+          });
+        sections.push({ category: group.category, total: group.results.length, items });
+        list.push(...items);
+      }
+    } else {
+      const items: Option[] = filtered.slice(0, shown).map((result) => ({
+        kind: "result",
+        id: `${listboxId}-${result.document.id}`,
+        result,
+      }));
+      if (items.length) sections.push({ category, total: filtered.length, items });
+      list.push(...items);
+    }
+    return { groups: sections, options: list };
+  }, [all, category, filtered, listboxId, shown, trimmed]);
+
+  // A new query or kind starts again from the field.
+  useEffect(() => setActive(-1), [typed, category]);
+
+  // Back/Forward or a link changed ?q=: show it. Our own writes are skipped.
+  useEffect(() => {
+    if (query === writtenRef.current) return;
+    writtenRef.current = query;
+    setDraft(query);
   }, [query]);
+
+  // Keep ?q= in step with the field, after a pause in typing.
+  useEffect(() => {
+    if (composing || draft === writtenRef.current) return;
+    const timer = window.setTimeout(() => {
+      writtenRef.current = draft;
+      onQueryChangeRef.current(draft);
+    }, URL_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [composing, draft]);
+
+  const flushQuery = () => {
+    if (draft !== writtenRef.current) {
+      writtenRef.current = draft;
+      onQueryChange(draft);
+    }
+  };
+
+  const activeOption = active >= 0 ? options[active] : undefined;
+  useEffect(() => {
+    if (!activeOption) return;
+    document.getElementById(activeOption.id)?.scrollIntoView({ block: "nearest" });
+  }, [activeOption]);
+
+  const setQuery = (value: string, focus = true) => {
+    setDraft(value);
+    writtenRef.current = value;
+    onQueryChange(value);
+    if (focus) inputRef.current?.focus({ preventScroll: true });
+  };
+
+  const open = (result: SearchResult, fromKeyboard: boolean) => {
+    if (draft.trim()) rememberSearch(draft);
+    flushQuery();
+    openResult(result, fromKeyboard);
+  };
+
+  // Cards keep one handler, so moving the active option re-renders two cards.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  });
+  const openStable = useCallback(
+    (result: SearchResult, fromKeyboard: boolean) => openRef.current(result, fromKeyboard),
+    [],
+  );
+
+  const choose = (option: Option, fromKeyboard: boolean) => {
+    if (option.kind === "more") {
+      onCategoryChange(option.category);
+      inputRef.current?.focus({ preventScroll: true });
+    } else open(option.result, fromKeyboard);
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    const native = event.nativeEvent;
+    if (composing || native.isComposing || native.keyCode === 229) {
+      if (event.key === "Enter") event.preventDefault();
+      return;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      setActive((current) =>
+        stepActive(current, options.length, event.key === "ArrowDown" ? 1 : -1),
+      );
+    } else if (event.key === "Enter" && activeOption) {
+      event.preventDefault();
+      choose(activeOption, true);
+    } else if (event.key === "Escape") {
+      if (active >= 0) {
+        event.preventDefault();
+        setActive(-1);
+      } else if (draft) {
+        event.preventDefault();
+        setQuery("");
+      }
+    }
+  };
+
+  const selectedLabel = categoryLabel(category) || "すべて";
+  const total = category === "all" ? all.length : filtered.length;
 
   return (
     <div className="world search-page" data-search-page="true">
@@ -76,9 +244,9 @@ export function SearchPage({
             className="search-index-mark"
             aria-label={`${SEARCH_DOCUMENTS.length}件の公開資料を検索できます`}
           >
-            <span>PUBLIC RECORDS</span>
+            <span>RECORDS</span>
             <strong>{String(SEARCH_DOCUMENTS.length).padStart(3, "0")}</strong>
-            <span>ONE CONNECTED WORLD</span>
+            <span className="search-index-wide">ONE CONNECTED WORLD</span>
           </div>
         </section>
 
@@ -90,8 +258,9 @@ export function SearchPage({
             method="get"
             onSubmit={(event) => {
               event.preventDefault();
-              if (composingRef.current || performance.now() - compositionEndedRef.current < 50)
-                return;
+              if (composing || performance.now() - compositionEndedRef.current < 50) return;
+              if (draft.trim()) rememberSearch(draft);
+              flushQuery();
               resultsRef.current?.focus({ preventScroll: true });
               resultsRef.current?.scrollIntoView({ block: "start" });
             }}
@@ -104,44 +273,34 @@ export function SearchPage({
                 id="record-query"
                 name="q"
                 type="search"
+                role="combobox"
+                aria-expanded={options.length > 0}
+                aria-controls={listboxId}
+                aria-autocomplete="list"
+                aria-activedescendant={activeOption?.id}
                 value={draft}
                 maxLength={120}
                 placeholder="人物名・ライダー名・用語を入力"
                 autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 enterKeyHint="search"
                 aria-describedby="record-query-help"
-                onChange={(event) => {
-                  setDraft(event.target.value);
-                  if (!composingRef.current) onQueryChange(event.target.value);
-                }}
-                onCompositionStart={() => {
-                  composingRef.current = true;
-                }}
+                onChange={(event) => setDraft(event.target.value)}
+                onCompositionStart={() => setComposing(true)}
                 onCompositionEnd={(event) => {
-                  composingRef.current = false;
+                  setComposing(false);
                   compositionEndedRef.current = performance.now();
                   setDraft(event.currentTarget.value);
-                  onQueryChange(event.currentTarget.value);
                 }}
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" &&
-                    (composingRef.current ||
-                      event.nativeEvent.isComposing ||
-                      event.nativeEvent.keyCode === 229)
-                  )
-                    event.preventDefault();
-                }}
+                onKeyDown={onKeyDown}
               />
-              {query && (
+              {draft && (
                 <button
                   className="search-clear"
                   type="button"
                   aria-label="検索語を消す"
-                  onClick={() => {
-                    onQueryChange("");
-                    inputRef.current?.focus();
-                  }}
+                  onClick={() => setQuery("")}
                 >
                   ×
                 </button>
@@ -152,63 +311,144 @@ export function SearchPage({
             </div>
             {category !== "all" && <input type="hidden" name="category" value={category} />}
             <p id="record-query-help">
-              ひらがな・カタカナでも検索できます。複数の言葉はスペースで区切ってください。
+              ひらがな・カタカナ・ローマ字でも検索できます。複数の言葉はスペースで区切ってください。
+              <span className="search-key-hint">↑↓で選んでEnterで開く。Escで消去。</span>
             </p>
           </form>
-          <div className="search-suggestions" aria-label="検索のヒント">
-            <span>例えば</span>
-            {STARTING_QUERIES.map((term) => (
+          {recent.length ? (
+            <div className="search-suggestions search-recent" aria-label="最近の検索">
+              <span>最近の検索</span>
+              {recent.map((term) => (
+                <button key={term} type="button" onClick={() => setQuery(term)}>
+                  {term}
+                </button>
+              ))}
+              <button type="button" className="search-recent-clear" onClick={clearRecentSearches}>
+                履歴を消す
+              </button>
+            </div>
+          ) : (
+            <div className="search-suggestions" aria-label="検索のヒント">
+              <span>例えば</span>
+              {STARTING_QUERIES.map((term) => (
+                <button key={term} type="button" onClick={() => setQuery(term)}>
+                  {term}
+                  <span aria-hidden="true">↗</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="search-categories" role="group" aria-label="資料の分類">
+            {SEARCH_CATEGORIES.map((item) => (
               <button
-                key={term}
                 type="button"
-                onClick={() => {
-                  onQueryChange(term);
-                  inputRef.current?.focus({ preventScroll: true });
-                }}
+                key={item.id}
+                aria-pressed={category === item.id}
+                onClick={() => onCategoryChange(item.id)}
               >
-                {term}
-                <span aria-hidden="true">↗</span>
+                {item.label}
+                <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
               </button>
             ))}
           </div>
-          <div className="search-categories" role="group" aria-label="資料の分類">
-            {SEARCH_CATEGORIES.map((item) => {
-              const count =
-                item.id === "all"
-                  ? matching.length
-                  : matching.filter((result) => result.document.category === item.id).length;
-              return (
-                <button
-                  type="button"
-                  key={item.id}
-                  aria-pressed={category === item.id}
-                  onClick={() => onCategoryChange(item.id)}
-                >
-                  {item.label}
-                  <span>{count}</span>
-                </button>
-              );
-            })}
-          </div>
         </section>
 
-        <SearchResults
-          key={`${query}\n${category}`}
-          results={results}
-          headingRef={resultsRef}
-          categoryLabel={selectedCategory}
-          query={query}
-          limit={shown}
-          onShowMore={() => onShownChange(shown + PAGE_SIZE)}
-          filtered={category !== "all"}
-          onClearCategory={() => onCategoryChange("all")}
-          onClearQuery={() => {
-            onQueryChange("");
-            inputRef.current?.focus();
-          }}
-        />
+        <section className="search-results" aria-labelledby="record-results-heading">
+          <div className="search-results-heading">
+            <h2 id="record-results-heading" ref={resultsRef} tabIndex={-1}>
+              {trimmed ? "検索結果" : "公開資料の索引"}
+              <span>{selectedLabel}</span>
+            </h2>
+            <p role="status" aria-live="polite" aria-atomic="true">
+              <strong>{total}</strong> 件{trimmed && <span>「{trimmed}」</span>}
+            </p>
+          </div>
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label={trimmed ? `「${trimmed}」の検索結果` : "公開資料の索引"}
+            className="search-groups"
+            hidden={!options.length}
+          >
+            {groups.map((group) => (
+              <div
+                key={group.category}
+                role="group"
+                aria-labelledby={`${listboxId}-${group.category}-label`}
+                className="search-group"
+                data-category={group.category}
+              >
+                <div className="search-group-head" role="presentation">
+                  <span id={`${listboxId}-${group.category}-label`}>
+                    {categoryLabel(group.category)}
+                  </span>
+                  <i aria-hidden="true">{categoryCode(group.category)}</i>
+                  <b>{group.total}</b>
+                </div>
+                <div className="search-result-grid" role="presentation">
+                  {group.items.map((option) =>
+                    option.kind === "more" ? (
+                      <a
+                        key={option.id}
+                        id={option.id}
+                        role="option"
+                        aria-selected={activeOption?.id === option.id}
+                        data-active={activeOption?.id === option.id ? "true" : undefined}
+                        tabIndex={-1}
+                        href={`/search?${new URLSearchParams({
+                          ...(trimmed ? { q: trimmed } : {}),
+                          category: option.category,
+                        })}`}
+                        className="search-more-option"
+                        onClick={(event) => {
+                          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+                            return;
+                          event.preventDefault();
+                          choose(option, event.detail === 0);
+                        }}
+                      >
+                        <span>{categoryLabel(option.category)}をすべて見る</span>
+                        <b>{option.count}件</b>
+                      </a>
+                    ) : (
+                      <ResultCard
+                        key={option.id}
+                        option={option}
+                        active={activeOption?.id === option.id}
+                        onOpen={openStable}
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {category !== "all" && shown < filtered.length ? (
+            <button
+              type="button"
+              className="search-more"
+              onClick={() => onShownChange(shown + PAGE_SIZE)}
+            >
+              さらに {Math.min(PAGE_SIZE, filtered.length - shown)} 件を表示
+              <span>
+                {Math.min(shown, filtered.length)} / {filtered.length}
+              </span>
+            </button>
+          ) : null}
+          {!options.length ? (
+            <EmptyState
+              query={trimmed}
+              filtered={category !== "all"}
+              elsewhere={all.length}
+              suggestions={suggestions}
+              onSuggest={setQuery}
+              onClearCategory={() => onCategoryChange("all")}
+              onClearQuery={() => setQuery("")}
+            />
+          ) : null}
+        </section>
         <p className="search-scope-note">
-          公開資料の見出し・紹介文・用語を検索しています。ギャラリーの公開タイトルは、展示室内の検索から探せます。
+          公開資料の見出し・紹介文・本文・用語を検索しています。ギャラリーの公開タイトルは、展示室内の検索から探せます。
         </p>
       </main>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
@@ -216,97 +456,96 @@ export function SearchPage({
   );
 }
 
-function SearchResults({
-  results,
-  headingRef,
-  categoryLabel,
+const ResultCard = memo(function ResultCard({
+  option,
+  active,
+  onOpen,
+}: {
+  option: Extract<Option, { kind: "result" }>;
+  active: boolean;
+  onOpen: (result: SearchResult, fromKeyboard: boolean) => void;
+}) {
+  const { result } = option;
+  const { document } = result;
+  const place = placeLabel(document);
+  return (
+    <ResultOption
+      result={result}
+      id={option.id}
+      active={active}
+      className="search-result-card"
+      onOpen={onOpen}
+    >
+      <span className="search-result-meta">
+        <span>{categoryLabel(document.category)}</span>
+        {place ? <span>{place}</span> : null}
+      </span>
+      <span className="search-result-title">
+        <HighlightedName text={document.title} ranges={result.titleRanges} />
+      </span>
+      {result.via ? <span className="search-result-via">{result.via}</span> : null}
+      {result.section ? <span className="search-result-section">{result.section}</span> : null}
+      <span className="search-result-snippet">
+        <Highlighted text={result.snippet} ranges={result.snippetRanges} />
+      </span>
+      <span className="search-result-open">
+        {result.section ? "この章を読む" : result.hash ? "該当箇所を読む" : "資料を読む"}
+        <span aria-hidden="true">↗</span>
+      </span>
+    </ResultOption>
+  );
+});
+
+function EmptyState({
   query,
-  limit,
-  onShowMore,
   filtered,
+  elsewhere,
+  suggestions,
+  onSuggest,
   onClearCategory,
   onClearQuery,
 }: {
-  results: SearchResult[];
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  categoryLabel: string;
   query: string;
-  limit: number;
-  onShowMore: () => void;
   filtered: boolean;
+  elsewhere: number;
+  suggestions: readonly string[];
+  onSuggest: (value: string) => void;
   onClearCategory: () => void;
   onClearQuery: () => void;
 }) {
   return (
-    <section className="search-results" aria-labelledby="record-results-heading">
-      <div className="search-results-heading">
-        <h2 id="record-results-heading" ref={headingRef} tabIndex={-1}>
-          {query.trim() ? "検索結果" : "公開資料の索引"}
-          <span>{categoryLabel}</span>
-        </h2>
-        <p role="status" aria-live="polite" aria-atomic="true">
-          <strong>{results.length}</strong> 件{query.trim() && <span>「{query.trim()}」</span>}
-        </p>
-      </div>
-      {results.length ? (
-        <>
-          <ol className="search-result-grid">
-            {results.slice(0, limit).map(({ document, snippet }, index) => (
-              <li key={document.id}>
-                <GuardedLink
-                  to={document.to}
-                  hash={document.hash}
-                  assets={[]}
-                  className="search-result-card"
-                >
-                  <div className="search-result-meta">
-                    <span>
-                      {SEARCH_CATEGORIES.find((item) => item.id === document.category)?.label}
-                    </span>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                  </div>
-                  <h3>
-                    <DisplayName value={document.title} />
-                  </h3>
-                  <p>{snippet}</p>
-                  <span className="search-result-open">
-                    {document.hash ? "該当箇所を読む" : "資料を読む"}
-                    <span aria-hidden="true">↗</span>
-                  </span>
-                </GuardedLink>
-              </li>
-            ))}
-          </ol>
-          {limit < results.length && (
-            <button type="button" className="search-more" onClick={onShowMore}>
-              さらに {Math.min(PAGE_SIZE, results.length - limit)} 件を表示
-              <span>
-                {Math.min(limit, results.length)} / {results.length}
-              </span>
-            </button>
-          )}
-        </>
-      ) : (
-        <div className="search-empty">
-          <SearchGlyph />
-          <h3>一致する資料が見つかりませんでした。</h3>
-          <p>
-            名前の一部や短い言葉で探してみてください。分類を解除すると、ほかの資料も検索できます。
-          </p>
+    <div className="search-empty">
+      <SearchGlyph />
+      <h3>一致する資料が見つかりませんでした。</h3>
+      {suggestions.length ? (
+        <div className="search-close-matches">
+          <p>もしかして</p>
           <div>
-            {filtered && (
-              <button type="button" onClick={onClearCategory}>
-                すべての分類で探す
+            {suggestions.map((term) => (
+              <button key={term} type="button" onClick={() => onSuggest(term)}>
+                {term}
               </button>
-            )}
-            {query && (
-              <button type="button" onClick={onClearQuery}>
-                検索語を消す
-              </button>
-            )}
+            ))}
           </div>
         </div>
-      )}
-    </section>
+      ) : null}
+      <p>名前の一部や短い言葉で探してみてください。分類を解除すると、ほかの資料も検索できます。</p>
+      <div>
+        {filtered && elsewhere ? (
+          <button type="button" onClick={onClearCategory}>
+            すべての分類で探す（{elsewhere}件）
+          </button>
+        ) : filtered ? (
+          <button type="button" onClick={onClearCategory}>
+            すべての分類で探す
+          </button>
+        ) : null}
+        {query ? (
+          <button type="button" onClick={onClearQuery}>
+            検索語を消す
+          </button>
+        ) : null}
+      </div>
+    </div>
   );
 }

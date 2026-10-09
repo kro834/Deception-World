@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { LibraryVisitTracker } from "@/components/library/library-controls";
 import { InquiryNavigation } from "@/components/library/inquiry-navigation";
+import { QuickSearchHost } from "@/components/search/quick-search-host";
 import inquiryNavigationCss from "@/styles-inquiry-navigation.css?url";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
@@ -216,6 +217,7 @@ function RootDocument() {
               <LibrarySession />
               <Outlet />
               <InquiryNavigation />
+              <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
               <UltraModeRuntime />

@@ -1,42 +1,3 @@
-        label: "仮面ライダーレディック",
-        src: "/rider-leddic-ishihen.jpeg",
-        pos: "50% 12%",
-        alt: "仮面ライダーレディック",
-        width: 750,
-        height: 1400,
-        to: "/riders/leddic",
-        assets: RIDER_NAV.find((item) => item.id === "leddic")?.assets ?? [
-          "/rider-leddic-ishihen.jpeg",
-        ],
-      },
-      {
-        label: "夜明護尊",
-        src: "/character-yoake-mamori.jpeg",
-        pos: "50% 12%",
-        alt: "夜明護尊",
-        width: 736,
-        height: 976,
-        to: "/characters/yoake-mamori",
-        assets: ["/character-yoake-mamori.jpeg"],
-      },
-    ],
-  },
-  {
-    no: "04",
-    title: "殺す",
-    src: "/episode-04-kill.jpeg",
-    pos: "50% 16%",
-    alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
-  },
-  {
-    no: "05",
-    title: "FARCE",
-    src: "/episode-05-farce.jpeg",
-    pos: "50% 44%",
-    alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
-  },
-  {
-    no: "06",
     title: "DEUS",
     src: "/episode-06-deus.webp",
     pos: "42% 38%",
@@ -492,3 +453,36 @@ export function WorldHome() {
     riderTabRef.current = returnIndex;
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
+    syncRail(managerRail.current, 2);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  // A search result opens one column: /world#world-column-02.
+  useLayoutEffect(() => {
+    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);
+    if (index < 0) return;
+    setColumnTab(index);
+    syncRail(columnRail.current, index);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let retryFrame = 0;
+    let cancelled = false;
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
+    // fixed 24-frame budget, which can expire early on throttled devices.
+    const destinationReadyDeadline = window.performance.now() + 2_000;
+
+    const announceDestination = () => {

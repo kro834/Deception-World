@@ -47,9 +47,11 @@ const byId = new Map(SEARCH_DOCUMENTS.map((document) => [document.id, document])
 
 test("catalogue contains unique, complete records in the agreed categories", () => {
   assert.equal(byId.size, SEARCH_DOCUMENTS.length);
-  assert.ok(SEARCH_DOCUMENTS.length >= 50 && SEARCH_DOCUMENTS.length <= 150);
+  // rx6 widened coverage (columns, Terra/Luna/夜明護尊, Final Stage cast, Dream
+  // factions and terms, archive forms, pages) and added the forms and pages kinds.
+  assert.ok(SEARCH_DOCUMENTS.length >= 150 && SEARCH_DOCUMENTS.length <= 320, String(SEARCH_DOCUMENTS.length));
   assert.deepEqual(Array.from(SEARCH_CATEGORIES, (category) => category.id),
-    ["all", "people", "riders", "story", "world", "systems"]);
+    ["all", "people", "riders", "forms", "story", "world", "systems", "pages"]);
   const categories = new Set(SEARCH_CATEGORIES.slice(1).map((category) => category.id));
   for (const document of SEARCH_DOCUMENTS) {
     for (const field of ["id", "title", "description", "to", "hash"]) {
@@ -123,6 +125,7 @@ test("every destination is an existing public route with its actual heading anch
     "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
     "/form-archive": read("src/routes/form-archive.tsx"),
+    "/gallery": read("src/components/gallery/gallery-page.tsx"),
   };
   const actualWorldAnchors = new Set([
     ...world.WORLD_CAST_ROSTER.map((entry) => `wa-person-${entry.id}`),
@@ -136,7 +139,11 @@ test("every destination is an existing public route with its actual heading anch
     ...dream.DREAM_CASES.map((entry) => `dream-case-${entry.no}`),
     ...dream.DREAM_CHARACTERS.map((entry) => `dream-character-${entry.id}`),
     ...dream.DREAM_DOLMINENCE.map((entry) => `dream-dolminence-${entry.id}`),
+    ...dream.DREAM_FACTIONS.map((entry) => `dream-faction-${entry.id}`),
   ]);
+  const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
+  for (const column of columns) actualWorldAnchors.add(`world-column-${column.no}`);
+  assert.ok(read("src/components/world/world-home.tsx").includes("id={`world-column-${item.no}`}"));
   for (const doc of SEARCH_DOCUMENTS) {
     let source = routeComponents[doc.to];
     if (doc.to.startsWith("/riders/")) {
@@ -156,6 +163,7 @@ test("every destination is an existing public route with its actual heading anch
     assert.ok(source, `${doc.id}: route source exists`);
     if (doc.to === "/world" && actualWorldAnchors.has(doc.hash)) continue;
     if (doc.to === "/dream-chapter" && actualDreamAnchors.has(doc.hash)) continue;
+    if (doc.hash === "top" && /<(?:section|main|div)[^>]*\bid="top"/.test(source)) continue;
     assert.ok(source.includes(`id="${doc.hash}"`), `${doc.id}: actual anchor ${doc.hash}`);
   }
   for (const expression of ["wa-person-${entry.id}", "wa-brief-${entry.id}", "wa-episode-${episode.no}", "wa-term-${entry.term}", "wa-location-${place.name}"]) {
