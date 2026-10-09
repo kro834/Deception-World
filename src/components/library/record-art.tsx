@@ -1,4 +1,4 @@
-import type { RecordArt } from "@/lib/record-art";
+import { plateWords, type RecordArt } from "@/lib/record-art";
 
 /** The index card's art window (rx10 STAGE): the record's picture, or a
  * typographic plate of its name when it has none, with its HUD code.
@@ -31,7 +31,7 @@ export function RecordArtFrame({
           style={art.pos ? { objectPosition: art.pos } : undefined}
         />
       ) : (
-        <b>{title}</b>
+        <b>{plateWords(title)}</b>
       )}
       <i>{art.code}</i>
     </span>

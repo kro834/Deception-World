@@ -29,6 +29,8 @@ import { useOpenResult } from "./use-open-result";
 const PAGE_SIZE = 24;
 const GROUP_PREVIEW = 4;
 const BROWSE_PREVIEW = 6;
+// The see-all tile shows the art of the next few records it holds.
+const MORE_PEEK = 4;
 const URL_DELAY_MS = 280;
 const STARTING_QUERIES = ["ゼウス", "月城悠真", "六詠", "エクスプリーム", "Dream"];
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
@@ -41,7 +43,13 @@ const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id ==
 
 type Option =
   | { kind: "result"; id: string; result: SearchResult }
-  | { kind: "more"; id: string; category: string; count: number };
+  | {
+      kind: "more";
+      id: string;
+      category: string;
+      count: number;
+      peek: readonly SearchResult["document"][];
+    };
 
 function SearchGlyph() {
   return (
@@ -117,6 +125,7 @@ export function SearchPage({
             id: `${listboxId}-more-${group.category}`,
             category: group.category,
             count: group.results.length,
+            peek: group.results.slice(limit, limit + MORE_PEEK).map((result) => result.document),
           });
         sections.push({ category: group.category, total: group.results.length, items });
         list.push(...items);
@@ -412,6 +421,15 @@ export function SearchPage({
                           choose(option, event.detail === 0);
                         }}
                       >
+                        <span className="search-more-peek" aria-hidden="true">
+                          {option.peek.map((document) => (
+                            <RecordArtFrame
+                              key={document.id}
+                              art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
+                              title={document.title}
+                            />
+                          ))}
+                        </span>
                         <span>{categoryLabel(option.category)}をすべて見る</span>
                         <b>{option.count}件</b>
                       </a>

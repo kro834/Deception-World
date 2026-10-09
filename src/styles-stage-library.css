@@ -271,13 +271,23 @@ html[data-family="library"] .dxl-art[data-plate="type"] > b {
   bottom: 10px;
   overflow: hidden;
   color: rgb(var(--tint-rgb) / 66%);
-  font: 700 clamp(14px, 10.5cqi, 26px) / 1.1 var(--dx-display);
+  font: 700 clamp(16px, 12.5cqi, 32px) / 1.1 var(--dx-display);
   letter-spacing: 0.08em;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   white-space: nowrap;
   -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
   mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+
+/* Dream's plates in Mincho, as the Dream Chapter sets its names (system
+   Mincho faces only: no web font is added). */
+html[data-family="library"] .dxl-art[data-edition="dream"][data-plate="type"] > b {
+  color: rgb(var(--tint-rgb) / 84%);
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-weight: 600;
+  letter-spacing: 0.16em;
 }
 
 html[data-family="library"] .dxl-art[data-plate="type"]::before {
@@ -384,10 +394,18 @@ html[data-family="library"] .search-page .search-result-meta {
   letter-spacing: 0.06em;
 }
 
-html[data-family="library"] .search-page .search-result-meta > span + span::before {
-  margin-right: 8px;
-  content: "/" / "";
-  color: rgb(var(--dx-edition-rgb) / 45%);
+/* The kind is a small tag and the place follows it, with no separator: a
+   place that wraps (アーカイブ / サーガ on a narrow card) starts its own line
+   cleanly instead of with a stray slash. */
+html[data-family="library"] .search-page .search-result-meta {
+  align-items: center;
+}
+
+html[data-family="library"] .search-page .search-result-meta > span:first-child {
+  padding: 0 6px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 2px;
+  color: var(--dx-text-2);
 }
 
 /* The title holds its widest unbreakable run (--dxl-run, in ems, set from
@@ -929,8 +947,23 @@ html[data-family="library"] .library-page .dxl-art.is-continue {
   border-radius: 4px;
 }
 
-html[data-family="library"] .library-page .dxl-art.is-continue:not([data-plate]) > i,
-html[data-family="library"] .library-page .dxl-art.is-continue > b {
+html[data-family="library"] .library-page .dxl-art.is-continue:not([data-plate]) > i {
+  display: none;
+}
+
+/* A small plate sets its words upright in its middle (開ける), its code on
+   its floor. */
+html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"] > b {
+  top: 10px;
+  right: 50%;
+  bottom: 30px;
+  translate: 50% 0;
+  font-size: 16px;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"]::before {
   display: none;
 }
 
@@ -2485,6 +2518,78 @@ html[data-family="library"] .search-page .search-more-option::after {
   );
 }
 
+/* The see-all tile shows what it holds (rx10 review): the art of its next
+   records, dimmed and fading out under the label and the count. A tall tile
+   that closes a row of cards fills with them; a bar keeps them at card shape
+   along its right end, fading to the left. Decorative (aria-hidden). */
+html[data-family="library"] .search-page .search-more-option > .search-more-peek {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(180deg, #000 34%, transparent 88%);
+  mask-image: linear-gradient(180deg, #000 34%, transparent 88%);
+  pointer-events: none;
+}
+
+html[data-family="library"]
+  .search-page
+  .search-more-option:is(:hover, [data-active="true"])
+  > .search-more-peek {
+  opacity: 0.7;
+}
+
+html[data-family="library"] .search-page .search-more-peek > .dxl-art {
+  height: 100%;
+  min-width: 0;
+  aspect-ratio: auto;
+}
+
+html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
+  display: none;
+}
+
+@container (max-width: 559px) {
+  html[data-family="library"] .search-page .search-more-peek > :nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@container (max-width: 359px) {
+  html[data-family="library"] .search-page .search-more-peek > :nth-child(n + 3) {
+    display: none;
+  }
+}
+
+/* A bar (a tile with a row of its own): a strip of the next records along
+   its right side, fading in from the left. */
+@container (max-height: 180px) {
+  html[data-family="library"] .search-page .search-more-option > .search-more-peek {
+    left: 38%;
+    opacity: 0.46;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 42%);
+    mask-image: linear-gradient(90deg, transparent, #000 42%);
+  }
+
+  html[data-family="library"] .search-page .search-more-peek::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(180deg, rgb(3 6 12 / 0%) 30%, rgb(3 6 12 / 78%));
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] .search-page .search-more-option > .search-more-peek {
+    display: none;
+  }
+}
+
 /* The last record closes its row: a shelf or a group that stops part-way
    along a row gives its last card the columns that are left, and the card
    lies on its side, art at the left and its words beside it, so no shelf
@@ -2710,7 +2815,8 @@ html[data-family="library"] .search-page .search-more-option::after {
 
 /* The continue cell on the smallest phones: its two ways on take the
    cell's full width under the art, so 次の章 keeps "CASE 3" together, and
-   the plate's code sits on two lines rather than losing its number. */
+   the plate keeps only its words (its code would wrap in 64px; the title
+   beside it carries the code). */
 @media (max-width: 389px) {
   html[data-family="library"] .library-page .dxl-art.is-continue {
     grid-row: 2 / span 2;
@@ -2722,8 +2828,11 @@ html[data-family="library"] .search-page .search-more-option::after {
   }
 
   html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"] > i {
-    white-space: normal;
-    line-height: 1.2;
+    display: none;
+  }
+
+  html[data-family="library"] .library-page .dxl-art.is-continue[data-plate="type"] > b {
+    bottom: 10px;
   }
 }
 

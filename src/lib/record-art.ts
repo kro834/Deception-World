@@ -265,8 +265,9 @@ const SITE_ART: Record<string, readonly Picture[]> = {
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
 };
 
-/** A search record's picture (src may be empty: a typographic plate). */
-function documentPicture(document: ArtDocument): Picture | undefined {
+/** A search record's picture (src may be empty: a typographic plate).
+ * `number` is the record's place in the index. */
+function documentPicture(document: ArtDocument, number: number): Picture | undefined {
   const { id, to } = document;
   if (id.startsWith("form-") && to === "/form-archive" && document.search?.form) {
     return formThumb(document.search.archive === "realm" ? "realm" : "saga", document.search.form);
@@ -286,24 +287,33 @@ function documentPicture(document: ArtDocument): Picture | undefined {
   if (id === "final-stage") return PAGES["/final-stage"];
   if (id === "form-archive") return PAGES["/form-archive"];
   if (id.startsWith("page-") && PAGES[to]) return PAGES[to];
-  // A special site's own sections take one of the site's forms, turn about.
+  // A special site's own sections take one of the site's forms, turn about
+  // by their place in the index, so neighbouring sections never share one.
   if (id.startsWith("site-") && SITE_ART[to]) {
     const set = SITE_ART[to];
-    const turn = [...(document.hash ?? "")].reduce((sum, letter) => sum + letter.charCodeAt(0), 0);
-    return set[turn % set.length];
+    return set[number % set.length];
   }
   return undefined;
 }
 
 /** The art and HUD code for a search record; `number` is its place in the index. */
 export function documentArt(document: ArtDocument, number: number): RecordArt {
-  const picture = documentPicture(document);
+  const picture = documentPicture(document, number);
   return {
     src: picture?.src,
     pos: picture?.pos,
     edition: editionOf(document.to),
     code: `${CATEGORY_CODES[document.category] ?? "RECORD"} ${String(number).padStart(3, "0")}`,
   };
+}
+
+/** The words a typographic plate sets: the name after a title's file code
+ * (CASE 0「交わる」 and CASE 0／交わる → 交わる; コラム01 脚本制と採録制 →
+ * 脚本制と採録制), since the plate's tab already carries the code. Other
+ * titles are set whole. */
+export function plateWords(title: string): string {
+  const match = /^(?:CASE\s*\d+|コラム\s*\d+)\s*[／/]?\s*[「『]?(.+?)[」』]?$/u.exec(title.trim());
+  return match ? match[1] : title;
 }
 
 /** The widest run of a title that cannot wrap, in ems: no space, no name seam

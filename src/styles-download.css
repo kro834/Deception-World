@@ -39,8 +39,12 @@
   --dl-hud: Michroma, Oxanium, "Noto Sans JP", sans-serif;
   /* Plate inner side padding, carried by the children's inline margins. */
   --dl-inset: clamp(16px, 5vw, 48px);
-  /* The poster's art: the first row, under the sigil. */
-  --dl-art: clamp(150px, 30vh, 280px);
+  /* The poster's art: the first row, under the sigil. The art and the
+     vertical rhythm follow the screen's height, so the whole poster fits
+     without the page's own scroll at every common size (Zeus does not follow
+     that inner scroll, and would settle on the ZIP plate or the way back). */
+  --dl-art: clamp(84px, 30vh - 44px, 260px);
+  --dl-step: clamp(14px, 3.4vh, 34px);
 
   position: relative;
   isolation: isolate;
@@ -57,7 +61,7 @@
   align-content: safe center;
   justify-content: center;
   justify-items: center;
-  padding: clamp(40px, 8vh, 72px) 16px calc(clamp(40px, 8vh, 72px) + 4vh);
+  padding: clamp(12px, 4.6vh, 56px) 16px;
   text-align: center;
   color: #f4f6fb;
   font-family: var(--font-sans, "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif);
@@ -202,7 +206,7 @@ body:has(main.export-page) {
    Type: HUD label, chrome-ink wordmark, file-number strip
    ================================================================ */
 .export-page p {
-  margin: 34px 0 0;
+  margin: var(--dl-step) 0 0;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -258,7 +262,7 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page b {
   display: inline-block;
-  margin-top: 18px;
+  margin-top: calc(var(--dl-step) * 0.55);
   padding: 7px 14px 6px 12px;
   font-family: var(--dl-hud);
   font-size: 12px;
@@ -279,7 +283,7 @@ html[data-world-effects="economy"] .export-page h1 {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-top: 34px;
+  margin-top: var(--dl-step);
   /* The plate's inner width, capped: the inline margins are outside it. */
   min-width: min(100% - 2 * var(--dl-inset), 320px);
   min-height: 52px;
@@ -366,8 +370,8 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page small {
   display: block;
-  margin: 12px 0 20px;
-  padding-top: 14px;
+  margin: 8px 0 calc(var(--dl-step) * 0.6);
+  padding-top: calc(var(--dl-step) * 0.4);
   /* 17em: the first line holds exactly the clause before the ／ separator
      (197px at 12px) and the second the rest, so nothing breaks mid-word.
      Balance would prefer an even split inside a word. */
@@ -453,18 +457,40 @@ html[data-world-effects="economy"] .export-page h1 {
 /* ================================================================
    Short viewports
    ================================================================ */
-@media (max-height: 480px) {
-  .export-page {
-    padding-block: 20px 28px;
+/* Short screens: a smaller sigil and wordmark. */
+@media (max-height: 640px) {
+  .export-page-sigil {
+    width: 52px;
+    height: 52px;
+    margin-top: -26px;
+  }
+  .export-page-sigil > i {
+    font-size: 15px;
   }
   .export-page h1 {
-    font-size: 30px;
+    font-size: clamp(26px, 3.2vw + 14px, 40px);
   }
-  .export-page > p {
-    margin-top: 18px;
+}
+
+/* Landscape phones: the art is a band, and the steps are tighter still. */
+@media (max-height: 480px) {
+  .export-page {
+    --dl-art: 44px;
+    --dl-step: 10px;
+    padding-block: 8px;
+  }
+  .export-page-sigil {
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+  }
+  .export-page-sigil > i {
+    font-size: 13px;
+  }
+  .export-page h1 {
+    font-size: 28px;
   }
   .export-page-btn {
-    margin-top: 20px;
     min-height: 48px;
   }
   /* The compact rule takes back the retry control's 21px the same way. */
@@ -473,17 +499,15 @@ html[data-world-effects="economy"] .export-page h1 {
   }
   .export-page small {
     margin-top: 2px;
-    padding-top: 10px;
-    margin-bottom: 18px;
   }
 }
 
-/* Small phones: the plate ends above the fixed Zeus button. */
+/* Small phones: the poster fits the screen whole (it no longer leaves a
+   140px foot for the Zeus button, which now settles clear of its controls;
+   a foot that made the card scroll let the button land on the ZIP plate). */
 @media (max-width: 400px) and (max-height: 640px) {
   .export-page {
-    align-content: start;
-    padding-top: 24px;
-    padding-bottom: 140px;
+    padding-block: 12px;
   }
 }
 
@@ -616,8 +640,10 @@ html[data-world-effects="economy"] .export-page h1 {
   .export-page .export-page-back {
     color: LinkText;
   }
+  /* The foot is opaque here and covers the card's own edges along its row,
+     so it draws the card's sides and bottom itself. */
   .export-page .export-page-back {
-    border-top-color: CanvasText;
+    border: 1px solid CanvasText;
     background: Canvas;
   }
   .export-page .export-page-back::before {

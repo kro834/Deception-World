@@ -1086,7 +1086,7 @@ function ZeusButton({
     const readCompactMenuFootprint = () =>
       root.getAttribute("data-ipad-menu") === "compact" &&
       root.getAttribute("data-ipad-menu-scrolled") === "true"
-        ? (root.getAttribute("data-viewport-chrome") ?? "")
+        ? root.getAttribute("data-viewport-chrome") ?? ""
         : "";
     let compactMenuFootprint = readCompactMenuFootprint();
     const reconcileCompactMenu = () => {
