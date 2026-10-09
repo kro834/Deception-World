@@ -1165,6 +1165,7 @@ html[data-family="dossier"]
   display: grid;
   align-content: start;
   gap: 8px;
+  min-height: 0;
   margin: 0;
   padding: clamp(18px, 5vw, 28px);
   border: 0;
@@ -1281,6 +1282,12 @@ html[data-family="dossier"]
   figcaption
   dl
   > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
   padding: 10px 0;
   border-bottom: 1px solid var(--sd-line);
 }
@@ -1291,6 +1298,8 @@ html[data-family="dossier"]
   figcaption
   dl
   dt {
+  margin: 0;
+  padding: 0;
   color: var(--sd-text-3);
   font: 400 12px/1.5 var(--sd-hud);
   letter-spacing: 0.12em;
@@ -1303,6 +1312,7 @@ html[data-family="dossier"]
   dl
   dd {
   margin: 2px 0 0;
+  padding: 0;
   color: var(--sd-text);
   font: 600 14px/1.6 var(--sd-display);
 }
@@ -1805,6 +1815,8 @@ html[data-family="dossier"]
   grid-row: 2;
   grid-column: 2;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
   justify-items: stretch;
   text-align: left;
   margin: 0;
@@ -1822,6 +1834,7 @@ html[data-family="dossier"]
   grid-template-columns: minmax(0, 1fr) auto;
   align-content: center;
   justify-content: stretch;
+  justify-items: start;
   justify-self: stretch;
   text-align: left;
   gap: 2px 12px;
@@ -2069,10 +2082,9 @@ html[data-family="dossier"]
       --sd-read: 680px;
       --sd-stage-h: calc(100svh - var(--sd-head));
       display: grid;
-      grid-template-columns: [full-start stage-start] minmax(
-          0,
-          var(--sd-stage-w)
-        ) [stage-end read-start] minmax(0, 1fr) [read-end full-end];
+      grid-template-columns:
+        [full-start stage-start] minmax(0, var(--sd-stage-w))
+        [stage-end read-start] minmax(0, 1fr) [read-end full-end];
       grid-template-rows: repeat(8, auto);
       align-items: start;
       gap: 0;
@@ -2493,23 +2505,60 @@ html[data-family="dossier"]
   }
 }
 
-/* Phones: the facts as one ruled list, the label beside its value. */
-@media (max-width: 560px) {
-  html[data-family="dossier"]
-    main.manager-page.manager-page.manager-page
-    #dossier-profile
-    .manager-facts {
-    grid-template-columns: minmax(0, 1fr);
+/* Short screens (a phone on its side, 200% zoom): the stage fits the
+   screen under the header, and the ruler scrolls away with the file (as
+   the reader did: the root's scroll padding drops to the header there). */
+@media (max-height: 500px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page {
+    --sd-stage-h: max(280px, calc(100svh - var(--sd-head) - 8px));
   }
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     #dossier-profile
-    .manager-facts
+    .manager-portrait-column {
+    --sd-headroom: 40px;
+  }
+
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page > .dossier-reader {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* Phones: the facts as one ruled list, each label beside its value, the
+   labels in one column as wide as the longest. */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl) {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 16px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl)
     > div {
-    grid-template-columns: minmax(84px, 0.36fr) minmax(0, 1fr);
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(96px, 0.4fr) minmax(0, 1fr);
+    grid-template-columns: subgrid;
     align-items: baseline;
-    gap: 4px 14px;
+    gap: 4px 16px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl)
+    dt {
+    overflow-wrap: anywhere;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl)
+    dd {
+    margin: 0;
   }
 }
 
