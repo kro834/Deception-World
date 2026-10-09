@@ -28,6 +28,7 @@ import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
+import { MysteryColumnProse } from "./mystery-column-prose";
 
 const POSTERS = [
   {
@@ -487,4 +488,3 @@ const EPISODES: EpisodeRecord[] = [
   {
     no: "06",
     title: "DEUS",
-    src: "/episode-06-deus.webp",

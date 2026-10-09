@@ -488,3 +488,4 @@
         setShuffling(false);
       });
       return;
+    }

@@ -28,6 +28,7 @@ import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
+import { MysteryColumnProse } from "./mystery-column-prose";
 
 const POSTERS = [
   {
@@ -2918,11 +2919,15 @@ export function WorldHome() {
               >
                 <p className="world-column-dialog-number">コラム{item.no}</p>
                 <h3>{item.title}</h3>
-                <div>
-                  {item.pickup.map((para) => (
-                    <p key={para.slice(0, 18)}>{para}</p>
-                  ))}
-                </div>
+                {item.no === "05" ? (
+                  <MysteryColumnProse paragraphs={item.pickup} />
+                ) : (
+                  <div>
+                    {item.pickup.map((para) => (
+                      <p key={para.slice(0, 18)}>{para}</p>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

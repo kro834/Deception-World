@@ -6,6 +6,7 @@ import { transcriptGraphemes } from "@/lib/quote-transcript.js";
 export const QuoteTranscript = memo(function QuoteTranscript({ text }: { text: string }) {
   return (
     <span className="wa-transcript" data-quote-transcript>
+      <span className="wa-transcript-state" aria-hidden="true" />
       <span className="wa-transcript-source">{text}</span>
       <span className="wa-transcript-visual" aria-hidden="true" data-echo={text}>
         {transcriptGraphemes(text).map((glyph: string, index: number) => (
