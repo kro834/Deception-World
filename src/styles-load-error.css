@@ -49,11 +49,13 @@
 .app-load-error h1 {
   color: #c6f5ff;
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
-  font-size: clamp(20px, 5vw, 26px);
+  font-size: clamp(16px, 4.9vw, 26px);
   font-weight: 700;
   line-height: 1.4;
+  letter-spacing: 0.02em;
   word-break: keep-all;
   line-break: strict;
+  overflow-wrap: anywhere;
 }
 
 .app-load-error p {

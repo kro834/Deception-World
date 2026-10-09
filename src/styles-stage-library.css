@@ -2086,6 +2086,74 @@ html[data-family="library"] .search-page .search-more-option:is(:nth-child(5), :
   }
 }
 
+/* The kind's code, outlined large across the tile (silent). */
+html[data-family="library"] .search-page .search-more-option::after {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 0;
+  color: transparent;
+  font: 400 clamp(34px, 4.4vw, 64px) / 1 var(--dx-hud);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(var(--dx-edition-rgb) / 20%);
+  pointer-events: none;
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="people"]
+  .search-more-option::after {
+  content: "PEOPLE" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="riders"]
+  .search-more-option::after {
+  content: "RIDERS" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="forms"]
+  .search-more-option::after {
+  content: "FORMS" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="story"]
+  .search-more-option::after {
+  content: "STORY" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="world"]
+  .search-more-option::after {
+  content: "WORLD" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="systems"]
+  .search-more-option::after {
+  content: "SYSTEMS" / "";
+}
+
+html[data-family="library"]
+  .search-page
+  .search-group[data-category="pages"]
+  .search-more-option::after {
+  content: "PAGES" / "";
+}
+
+html[data-family="library"] .search-page .search-more-option > :is(span, b) {
+  position: relative;
+  z-index: 1;
+}
+
 html[data-family="library"] .search-page .search-more-option > span {
   color: var(--dx-text);
   font: 700 14px / 1.5 var(--dx-display);
@@ -2448,6 +2516,7 @@ html[data-family="library"] .search-page .search-scope-note {
   html[data-family="library"] :is(.dxl-art, .library-cast-art)::after,
   html[data-family="library"] .inquiry-choice-art,
   html[data-family="library"] :is(.library-card, .search-result-card, .search-more-option)::before,
+  html[data-family="library"] .search-page .search-more-option::after,
   html[data-family="library"] .library-cast::after {
     display: none;
   }
