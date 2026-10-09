@@ -97,9 +97,10 @@ const timed = moving.filter((rule) => !scrollLinked.includes(rule));
 test("the Zeus route links the sheet last, after the World sheets, and no other route does", async () => {
   const route = await read("src/routes/managers/zeus.tsx");
   assert.match(route, /import sovereignFileCssUrl from "@\/styles-sovereign-file\.css\?url";/);
+  // rx10 STAGE: the shared stage-dossier sheet sits between them, so the file shares the art stage and its own sheet stays last.
   assert.match(
     route,
-    /stylesheetLinks: \[\s*\.\.\.WORLD_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: sovereignFileCssUrl \},?\s*\]/,
+    /stylesheetLinks: \[\s*\.\.\.WORLD_STYLESHEET_LINKS,\s*STAGE_DOSSIER_STYLESHEET_LINK,\s*\{ rel: "stylesheet", href: sovereignFileCssUrl \},?\s*\]/,
   );
   // The sovereign file keeps its own edition: not the dossier sheets.
   assert.doesNotMatch(route, /DOSSIER_STYLESHEET_LINKS|PICKUP_CINEMA/);

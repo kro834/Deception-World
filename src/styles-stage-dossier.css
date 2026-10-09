@@ -1,0 +1,2335 @@
+/* ================================================================
+   STAGE — the character files (rx10, 2026-10-10)
+
+   The nineteen files (/riders/*, /managers/*, /characters/*) as a lit
+   stage and a script. On a wide screen the person's portrait holds a
+   large sticky art stage on the left while the reading column (name,
+   epithet, lines, facts, chapters) scrolls beside it; from 変身記録 on,
+   each form takes the stage in turn, and the file ends on one card that
+   shows the next person. On a phone the portrait comes first (about 70%
+   of the screen, never under text), the name block directly beneath it,
+   then the reading plates.
+
+   The per-person light (--manager-accent, --manager-accent-soft, set on
+   <main> by each file) lights the stage: halo, floor and rim. The first
+   rank (Zeus) keeps its gold edition and seal inside the same stage.
+
+   Markup, ids and behaviour are the files' own; this sheet only reflows
+   and repaints them. Every rule is scoped to html[data-family="dossier"]
+   (route sheets persist across client navigation) and to the doubled page
+   class so it sits above the older dossier sheets without !important. It
+   leaves the top bar (.manager-topbar), the record dialogs and the HOLD +
+   SLIDE controls' own look alone. It adds no text: generated labels are
+   silent ("…" / ""). No animation is added here.
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   0. Tokens and the ground
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page {
+  --sd-accent: var(--manager-accent, #7ae8ff);
+  --sd-accent-2: var(--manager-accent-soft, var(--sd-accent));
+  --sd-head: var(--detail-header-height, 76px);
+  --sd-ink: #04070d;
+  --sd-ink-2: #070c15;
+  --sd-plate: #0a111b;
+  --sd-plate-2: #0d1520;
+  --sd-line: rgb(255 255 255 / 9%);
+  --sd-line-2: rgb(255 255 255 / 15%);
+  --sd-glow: color-mix(in srgb, var(--sd-accent) 34%, transparent);
+  --sd-glow-soft: color-mix(in srgb, var(--sd-accent) 14%, transparent);
+  --sd-rule: color-mix(in srgb, var(--sd-accent) 62%, transparent);
+  --sd-text: #f2f6fa;
+  --sd-text-2: #c3cfdb;
+  --sd-text-3: #93a4b5;
+  --sd-pad: clamp(16px, 5vw, 44px);
+  --sd-read: 720px;
+  --sd-stage-h: clamp(360px, 70svh, 980px);
+  --sd-display: var(--dx-display, "Zen Kaku Gothic New", "Noto Sans JP", sans-serif);
+  --sd-body: var(--dx-body, "Noto Sans JP", "Zen Kaku Gothic New", sans-serif);
+  --sd-hud: var(--dx-hud, "Michroma", "Oxanium", "Noto Sans JP", sans-serif);
+  --sd-mono: var(--dx-mono, "Oxanium", "Noto Sans JP", sans-serif);
+  display: block;
+  min-height: 100svh;
+  padding: 0;
+  overflow-x: clip;
+  color: var(--sd-text);
+  background:
+    radial-gradient(90% 60% at 100% 0%, var(--sd-glow-soft), transparent 62%),
+    linear-gradient(180deg, var(--sd-ink-2) 0%, var(--sd-ink) 38%, var(--sd-ink) 100%);
+  background-color: var(--sd-ink);
+}
+
+html[data-family="dossier"] body:has(> main.manager-page) {
+  background-color: #04070d;
+}
+
+/* The old lattice and its ring stand down: the stage carries the light. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  > .manager-ambient {
+  display: none;
+}
+
+/* Japanese: strict line breaking everywhere; headings and short labels
+   never break inside a word (they wrap at their seams, or anywhere only
+   when a word is wider than its column). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(p, q, dd, figcaption, small, em) {
+  line-break: strict;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page :is(h1, h2, h3) {
+  word-break: keep-all;
+  line-break: strict;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(h1, h2, .manager-display-name) {
+  overflow-wrap: anywhere;
+}
+
+/* The old bracket corners, lock-on frames and outlined numerals go: one
+   plate, one rule, one card. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(
+    .manager-quotes,
+    .manager-facts,
+    .dossier-reader,
+    .rider-archive-civilian,
+    .rider-nightmare-card,
+    .manager-section-index,
+    .dossier-contents,
+    .manager-copy-section,
+    .form-pickup-card,
+    #form-records,
+    .rider-special-site-card,
+    .manager-pagination,
+    .dossier-index-return
+  )::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(
+    .manager-quotes,
+    .manager-facts,
+    .dossier-reader,
+    .rider-archive-civilian,
+    .rider-nightmare-card,
+    .manager-section-index,
+    .dossier-contents,
+    .manager-copy-section,
+    .form-pickup-card,
+    #form-records,
+    .rider-special-site-card,
+    .manager-pagination,
+    .dossier-index-return
+  )::after {
+  content: none;
+}
+
+/* ----------------------------------------------------------------
+   1. The hero: stage first, then the name block (phones and tablets)
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero {
+  position: relative;
+  z-index: 1;
+  /* A grid (a legacy tablet rule forces display: grid !important): one
+     column, the stage first. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: stretch;
+  width: auto;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: var(--sd-head) 0 0;
+  gap: 0;
+  background: none;
+}
+
+/* The stage: a lit floor with the person's light behind and below. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column {
+  position: relative;
+  z-index: 0;
+  order: 0;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+  width: auto;
+  height: var(--sd-stage-h);
+  margin: 0;
+  padding: 0;
+  isolation: isolate;
+  overflow: clip;
+  background:
+    radial-gradient(48% 40% at 50% 40%, var(--sd-glow), transparent 72%),
+    radial-gradient(70% 16% at 50% 100%, color-mix(in srgb, var(--sd-accent) 40%, transparent), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 2.4%) 0 1px, transparent 1px 32px),
+    linear-gradient(180deg, #060a12 0%, #03050a 100%);
+  animation: none;
+}
+
+/* The floor line and the rim light along the stage's edge. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-portrait-column::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--sd-rule) 22%, var(--sd-accent-2) 50%, var(--sd-rule) 78%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-portrait-column::after {
+  content: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame {
+  position: relative;
+  top: auto;
+  z-index: 1;
+  display: block;
+  width: min(100%, calc(var(--sd-stage-h) * 0.8));
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: clip;
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-portrait-frame
+  > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+/* The art sits on the floor: it fades into the stage at its foot and its
+   sides, and takes the person's light from above. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-portrait-frame::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 56%, rgb(3 5 10 / 58%) 82%, #03050a 100%),
+    radial-gradient(120% 90% at 50% 34%, transparent 52%, rgb(3 5 10 / 46%) 82%, rgb(3 5 10 / 82%) 100%);
+  border: 0;
+  opacity: 1;
+  animation: none;
+  clip-path: none;
+  transform: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-portrait-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(70% 34% at 50% 0%, var(--sd-glow-soft), transparent 70%);
+  border: 0;
+  mix-blend-mode: screen;
+  opacity: 1;
+  animation: none;
+  clip-path: none;
+  transform: none;
+}
+
+/* The file's number: a small HUD chip on the stage, not a numeral block. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-numeral {
+  position: absolute;
+  z-index: 4;
+  top: 16px;
+  right: auto;
+  bottom: auto;
+  left: 16px;
+  display: inline-grid;
+  place-items: center;
+  width: auto;
+  min-width: 44px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--sd-rule);
+  border-radius: 3px;
+  color: var(--sd-text);
+  background: rgb(4 7 13 / 82%);
+  box-shadow: none;
+  font: 500 12px/1 var(--sd-hud);
+  letter-spacing: 0.14em;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  transform: none;
+}
+
+/* The name block, directly under the stage. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-introduction {
+  position: relative;
+  z-index: 1;
+  order: 0;
+  display: block;
+  width: auto;
+  max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+  min-height: 0;
+  margin: 0 auto;
+  padding: clamp(22px, 5vw, 40px) var(--sd-pad) clamp(28px, 6vw, 48px);
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .dossier-identity {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .manager-file-number,
+html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sd-accent);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .manager-file-number::before {
+  content: "";
+  flex: none;
+  width: 28px;
+  height: 1px;
+  background: var(--sd-accent);
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-eyebrow {
+  display: flex;
+  color: var(--sd-text-3);
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-eyebrow i {
+  display: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .dossier-identity h1 {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  color: var(--sd-text);
+  font-size: inherit;
+  line-height: 1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .manager-introduction
+  .dossier-identity
+  h1
+  small {
+  display: block;
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .manager-display-name {
+  display: block;
+  margin: 0;
+  color: var(--sd-text);
+  background: linear-gradient(
+    172deg,
+    #ffffff 0%,
+    #eef3f8 46%,
+    color-mix(in srgb, var(--sd-accent) 30%, #e6edf4) 78%,
+    color-mix(in srgb, var(--sd-accent-2) 52%, #dfe7ef) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font: 700 clamp(40px, 11vw, 64px) / 1.08 var(--sd-display);
+  letter-spacing: 0.02em;
+  text-shadow: none;
+  filter: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .manager-title {
+  margin: 18px 0 0;
+  padding: 0 0 0 14px;
+  border: 0;
+  border-left: 2px solid var(--sd-accent);
+  color: var(--sd-text-2);
+  font: 500 clamp(15px, 4vw, 18px) / 1.6 var(--sd-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .dossier-read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  margin: 24px 0 0;
+  padding: 0 18px;
+  border: 1px solid var(--sd-line-2);
+  border-radius: var(--dx-radius, 6px);
+  color: var(--sd-text);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 6%), transparent),
+    var(--sd-plate);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+  font: 600 14px/1 var(--sd-display);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .dossier-identity
+  .dossier-read-link
+  > span {
+  color: var(--sd-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile .dossier-identity
+    .dossier-read-link:hover {
+    border-color: var(--sd-rule);
+  }
+}
+
+/* The lines: one plate, the first line large. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-quotes {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  margin: 32px 0 0;
+  padding: 22px 22px 22px 24px;
+  border: 1px solid var(--sd-line);
+  border-left: 2px solid var(--sd-accent);
+  border-radius: 0 var(--dx-radius, 6px) var(--dx-radius, 6px) 0;
+  background:
+    linear-gradient(90deg, var(--sd-glow-soft), transparent 46%),
+    var(--sd-plate);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  clip-path: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page:not(.is-sovereign) #dossier-profile .manager-quotes q {
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: var(--sd-text-2);
+  font: 500 15px/1.85 var(--sd-body);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile .manager-quotes
+  q:first-child {
+  color: var(--sd-text);
+  font: 600 clamp(17px, 4.6vw, 21px) / 1.7 var(--sd-display);
+}
+
+/* The facts: a ruled list, label over value. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+  margin: 28px 0 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--sd-line-2);
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts > div {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 0 13px;
+  border: 0;
+  border-bottom: 1px solid var(--sd-line);
+  background: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts dt {
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile .manager-facts
+  dd:not(.is-redacted) {
+  margin: 0;
+  color: var(--sd-text);
+  font: 600 16px/1.6 var(--sd-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-scroll-cue {
+  display: none;
+}
+
+/* ----------------------------------------------------------------
+   2. The chapter ruler (DossierReader)
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > .dossier-reader {
+  position: sticky;
+  top: var(--sd-head);
+  z-index: 24;
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  width: auto;
+  max-width: none;
+  min-height: 48px;
+  height: auto;
+  margin: 0;
+  padding: 0 var(--sd-pad);
+  border: 0;
+  border-bottom: 1px solid var(--sd-line);
+  border-radius: 0;
+  background: none;
+  background-color: #060a12;
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-name {
+  display: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  flex: 1;
+  gap: 4px;
+  width: 100%;
+  max-width: var(--sd-read);
+  margin: 0 auto;
+  padding: 0;
+  counter-reset: sd-ruler;
+  background: none;
+  border: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  a {
+  counter-increment: sd-ruler;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 52px;
+  margin: 0;
+  padding: 6px 2px 4px;
+  border: 0;
+  border-top: 2px solid rgb(255 255 255 / 12%);
+  border-radius: 0;
+  color: var(--sd-text-3);
+  background: none;
+  box-shadow: none;
+  font: 600 13px/1.3 var(--sd-display);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  a::before {
+  content: counter(sd-ruler, decimal-leading-zero) / "";
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  color: inherit;
+  background: none;
+  font: 400 12px/1.2 var(--sd-mono);
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  a::after {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  a[aria-current] {
+  border-top-color: var(--sd-accent);
+  color: var(--sd-text);
+  background: linear-gradient(180deg, var(--sd-glow-soft), transparent 70%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links
+    a:hover {
+    color: var(--sd-text);
+    border-top-color: var(--sd-rule);
+  }
+}
+
+/* ----------------------------------------------------------------
+   3. The reading column: shared width
+   ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > :is(#identity-records, #dossier-index) {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+  margin: 0 auto;
+  padding: clamp(36px, 8vw, 64px) var(--sd-pad) 0;
+}
+
+/* Section heads: a numbered HUD kicker over a Japanese title. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-section-index {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  min-height: 0;
+  margin: 0 0 20px;
+  padding: 0 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--sd-line-2);
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-section-index
+  > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 26px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--sd-rule);
+  border-radius: 3px;
+  color: var(--sd-accent);
+  background: none;
+  font: 500 12px/1 var(--sd-hud);
+  letter-spacing: 0.12em;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  transform: none;
+  opacity: 1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-section-index
+  > small {
+  margin: 0;
+  color: var(--sd-text-2);
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* The contents: a compact index of the chapters. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0 0 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents a {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  margin: 0;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--sd-line);
+  border-radius: 0;
+  color: var(--sd-text);
+  background: none;
+  box-shadow: none;
+  text-decoration: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .dossier-contents
+  a
+  .dossier-contents-number {
+  color: var(--sd-accent);
+  font: 500 12px/1 var(--sd-mono);
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .dossier-contents
+  a
+  .dossier-contents-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .dossier-contents
+  a
+  .dossier-contents-copy
+  small {
+  color: var(--sd-text-3);
+  font: 500 12px/1.4 var(--sd-body);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .dossier-contents
+  a
+  .dossier-contents-copy
+  b {
+  color: var(--sd-text);
+  font: 600 15px/1.55 var(--sd-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .dossier-contents
+  a
+  .dossier-contents-arrow {
+  color: var(--sd-text-3);
+  font-size: 14px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .dossier-contents a:hover {
+    background: linear-gradient(90deg, var(--sd-glow-soft), transparent 70%);
+  }
+}
+
+/* The chapters: dark reading plates on the stage material (the white
+   paper slabs are gone). */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-sections {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0 0 clamp(48px, 9vw, 96px);
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-section {
+  position: relative;
+  display: block;
+  width: auto;
+  margin: 0;
+  padding: clamp(22px, 5vw, 36px) clamp(18px, 5vw, 36px) clamp(24px, 5vw, 38px);
+  border: 1px solid var(--sd-line);
+  border-top: 1px solid var(--sd-line-2);
+  border-radius: var(--dx-radius, 6px);
+  color: var(--sd-text);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 120px),
+    linear-gradient(90deg, var(--sd-accent) 0 0) 0 0 / 56px 2px no-repeat,
+    var(--sd-plate);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section:target {
+  border-color: var(--sd-rule);
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-heading {
+  position: static;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section
+  .manager-copy-heading
+  > span {
+  grid-row: 1;
+  display: block;
+  margin: 0;
+  color: var(--sd-accent);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  font: 500 12px/1.5 var(--sd-mono);
+  letter-spacing: 0.12em;
+  transform: none;
+  opacity: 1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section
+  .manager-copy-heading
+  > span::after {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section
+  .manager-copy-heading
+  > p {
+  grid-row: 1;
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 500 12px/1.5 var(--sd-body);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section
+  .manager-copy-heading
+  h2 {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  color: var(--sd-text);
+  font: 700 clamp(20px, 5.4vw, 26px) / 1.5 var(--sd-display);
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-index .manager-copy-body {
+  display: grid;
+  gap: 1em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-index .manager-copy-section
+  .manager-copy-body
+  p {
+  margin: 0;
+  color: var(--sd-text-2);
+  font: 400 15px/2 var(--sd-body);
+  letter-spacing: 0.04em;
+  text-wrap: pretty;
+}
+
+/* ----------------------------------------------------------------
+   4. Related records: one card, always with its art
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #identity-records {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  > :is(.rider-archive-civilian, .rider-nightmare-card) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+  border: 1px solid var(--sd-line);
+  border-radius: var(--dx-radius, 6px);
+  color: var(--sd-text);
+  background: var(--sd-plate);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual) {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: clip;
+  border: 0;
+  border-radius: 0;
+  background: #05080e;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual)
+  img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  transform: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual)
+  > span {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 12px;
+  right: auto;
+  bottom: auto;
+  display: inline-grid;
+  place-items: center;
+  height: 26px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--sd-rule);
+  border-radius: 3px;
+  color: var(--sd-text);
+  background: rgb(4 7 13 / 82%);
+  box-shadow: none;
+  font: 500 12px/1 var(--sd-hud);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual)
+  > span::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual)
+  > span::after {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(figcaption, .rider-nightmare-card-copy) {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+  padding: clamp(18px, 5vw, 28px);
+  border: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(figcaption, .rider-nightmare-card-copy)
+  > p:first-child {
+  margin: 0;
+  color: var(--sd-accent);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(figcaption, .rider-nightmare-card-copy)
+  > small {
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 500 12px/1.5 var(--sd-body);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(figcaption, .rider-nightmare-card-copy)
+  h2 {
+  margin: 2px 0 4px;
+  color: var(--sd-text);
+  font: 700 clamp(22px, 6vw, 28px) / 1.35 var(--sd-display);
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(figcaption, .rider-nightmare-card-copy)
+  h2
+  span {
+  color: inherit;
+  background: none;
+  -webkit-text-fill-color: currentcolor;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  figcaption
+  > p:not(:first-child),
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  .rider-partner-copy
+  p {
+  margin: 0;
+  color: var(--sd-text-2);
+  font: 400 14px/1.9 var(--sd-body);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  :is(.rider-partner-call, .rider-nightmare-card-copy q) {
+  display: block;
+  margin: 4px 0;
+  padding: 10px 14px;
+  border: 0;
+  border-left: 2px solid var(--sd-accent);
+  color: var(--sd-text);
+  background: var(--sd-glow-soft);
+  font: 600 15px/1.7 var(--sd-display);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  .rider-partner-en-name {
+  color: var(--sd-text-3);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  .rider-partner-copy {
+  display: grid;
+  gap: 0.8em;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page #identity-records figcaption dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+  margin: 6px 0 0;
+  border-top: 1px solid var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  figcaption
+  dl
+  > div {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  figcaption
+  dl
+  dt {
+  color: var(--sd-text-3);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  figcaption
+  dl
+  dd {
+  margin: 2px 0 0;
+  color: var(--sd-text);
+  font: 600 14px/1.6 var(--sd-display);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  .rider-nightmare-pickup-button {
+  justify-self: start;
+  margin-top: 8px;
+}
+
+/* The portrait is on the stage already: the BEFORE record keeps its words
+   and drops its second copy of the same picture. シエル's file shows 月城
+   悠真 there, a different picture, so his stays. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.rider-dossier-page:not(.ciel-dossier-page)
+  #identity-records
+  > .rider-archive-civilian:not(.rider-partner-card)
+  > .rider-archive-civilian-visual {
+  display: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.rider-dossier-page:not(.ciel-dossier-page)
+  #identity-records
+  > .rider-archive-civilian:not(.rider-partner-card) {
+  border-left: 2px solid var(--sd-accent);
+  border-radius: 0 var(--dx-radius, 6px) var(--dx-radius, 6px) 0;
+}
+
+/* ----------------------------------------------------------------
+   5. The forms take the stage: one scene per form (phones: art first)
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > #form-records {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms)
+  .rider-form-pickup-stack,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-partner-forms
+  > .rider-form-pickup-stack {
+  display: grid;
+  gap: 0;
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page .form-pickup {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-card, .rider-special-site-card) {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: auto;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+  border: 0;
+  border-top: 1px solid var(--sd-line);
+  border-radius: 0;
+  background:
+    radial-gradient(60% 40% at 50% 34%, var(--sd-glow-soft), transparent 72%),
+    linear-gradient(180deg, #05080e, var(--sd-ink));
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual) {
+  position: relative;
+  top: auto;
+  width: auto;
+  height: var(--sd-stage-h);
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+  margin: 0;
+  overflow: clip;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(48% 40% at 50% 40%, var(--sd-glow), transparent 72%),
+    radial-gradient(70% 16% at 50% 100%, color-mix(in srgb, var(--sd-accent) 40%, transparent), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 2.4%) 0 1px, transparent 1px 32px),
+    linear-gradient(180deg, #060a12 0%, #03050a 100%);
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual)
+  > img {
+  position: absolute;
+  inset: 0;
+  /* On a narrow stage the figure fills it; on a wide one it stands in the
+     middle, the stage's light around it. */
+  width: min(100%, calc(var(--sd-stage-h) * 0.8));
+  margin: 0 auto;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+  border: 0;
+  border-radius: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual)::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 64%, rgb(3 5 10 / 60%) 88%, #03050a 100%);
+  border: 0;
+  opacity: 1;
+  animation: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual)
+  > span {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 16px;
+  right: auto;
+  bottom: auto;
+  display: inline-grid;
+  place-items: center;
+  height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--sd-rule);
+  border-radius: 3px;
+  color: var(--sd-text);
+  background: rgb(4 7 13 / 82%);
+  box-shadow: none;
+  font: 500 12px/1 var(--sd-hud);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual)
+  > span::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-visual, .rider-special-site-visual)
+  > span::after {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-visual
+  > .form-pickup-plus {
+  z-index: 4;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy) {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+  margin: 0 auto;
+  padding: clamp(24px, 6vw, 48px) var(--sd-pad) clamp(40px, 9vw, 72px);
+  border: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)::after,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)::before {
+  content: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  > p {
+  margin: 0;
+  color: var(--sd-accent);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  > small {
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  h2 {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  color: var(--sd-text);
+  text-shadow: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  h2
+  > span {
+  color: var(--sd-text-2);
+  font: 600 14px/1.4 var(--sd-display);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  h2
+  > b {
+  color: var(--sd-text);
+  font: 700 clamp(30px, 8.4vw, 52px) / 1.18 var(--sd-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  > em {
+  margin: 0;
+  color: var(--sd-text-2);
+  font: 500 13px/1.6 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup-copy, .rider-special-site-copy)
+  > q {
+  display: block;
+  margin: 10px 0 0;
+  padding: 0 0 0 14px;
+  border: 0;
+  border-left: 2px solid var(--sd-accent);
+  color: var(--sd-text-2);
+  background: none;
+  font: 500 15px/1.85 var(--sd-body);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-special-site-copy
+  .rider-special-site-link {
+  margin-top: 16px;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > .rider-special-site,
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > .rider-partner-forms {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .rider-partner-forms
+  > header {
+  width: auto;
+  max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+  margin: 0 auto;
+  padding: clamp(40px, 8vw, 72px) var(--sd-pad) 24px;
+  border: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .rider-partner-forms
+  > header
+  p {
+  margin: 0 0 10px;
+  color: var(--sd-accent);
+  font: 400 12px/1.5 var(--sd-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .rider-partner-forms
+  > header
+  h2 {
+  margin: 0;
+  color: var(--sd-text);
+  font: 700 clamp(22px, 6vw, 30px) / 1.4 var(--sd-display);
+}
+
+/* ----------------------------------------------------------------
+   6. The end of the file: one card for the next person
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--sd-line-2);
+  background: var(--sd-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > .manager-pagination-spacer {
+  display: none;
+}
+
+/* Every link: a plain row; the next file becomes the card. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination > a {
+  position: relative;
+  justify-items: start;
+  text-align: left;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 4px 12px;
+  min-width: 0;
+  min-height: 72px;
+  margin: 0;
+  padding: 16px var(--sd-pad);
+  border: 0;
+  border-radius: 0;
+  color: var(--sd-text);
+  background: none;
+  box-shadow: none;
+  text-decoration: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a
+  > small {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.12em;
+  white-space: normal;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a
+  > b {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  color: var(--sd-text);
+  font: 700 18px/1.4 var(--sd-display);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a
+  > span:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--sd-line-2);
+  border-radius: 50%;
+  color: var(--sd-accent);
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a
+  > .dossier-nav-portrait {
+  display: none;
+}
+
+/* The previous file sits small, under the card; the arrow leads. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:first-child {
+  grid-row: 2;
+  grid-column: 1;
+  grid-template-columns: auto minmax(0, 1fr);
+  border-top: 1px solid var(--sd-line);
+  border-right: 1px solid var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:first-child
+  > :is(small, b) {
+  grid-column: 2;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:first-child
+  > span:last-child {
+  grid-column: 1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > .manager-pagination-index {
+  grid-row: 2;
+  grid-column: 2;
+  display: grid;
+  justify-items: stretch;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--sd-line);
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-index-return {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 2px 12px;
+  width: auto;
+  min-height: 72px;
+  margin: 0;
+  padding: 16px var(--sd-pad);
+  border: 0;
+  border-radius: 0;
+  color: var(--sd-text);
+  background: none;
+  box-shadow: none;
+  text-decoration: none;
+  clip-path: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-index-return
+  > span {
+  grid-column: 1;
+  color: var(--sd-text-3);
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-index-return
+  > b {
+  grid-column: 1;
+  color: var(--sd-text);
+  font: 700 16px/1.4 var(--sd-display);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-index-return
+  > i {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--sd-text-3);
+  font: 400 12px/1 var(--sd-mono);
+  font-style: normal;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The next file: its portrait on a lit floor, its name large. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child) {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  align-content: end;
+  min-height: min(64svh, 560px);
+  padding: 0 var(--sd-pad) clamp(24px, 6vw, 40px);
+  overflow: clip;
+  isolation: isolate;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)::before {
+  content: "NEXT FILE" / "";
+  position: relative;
+  z-index: 2;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0 0 8px;
+  color: var(--sd-accent);
+  background: none;
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > b {
+  position: relative;
+  z-index: 2;
+  grid-row: 2;
+  font: 700 clamp(32px, 9vw, 64px) / 1.15 var(--sd-display);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > small {
+  position: relative;
+  z-index: 2;
+  grid-row: 3;
+  margin-top: 6px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > span:last-child {
+  position: relative;
+  z-index: 2;
+  grid-row: 2 / span 2;
+  width: 56px;
+  height: 56px;
+  color: var(--sd-ink);
+  background: var(--sd-accent);
+  border-color: var(--sd-accent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > .dossier-nav-portrait {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background:
+    radial-gradient(48% 46% at 50% 36%, var(--sd-glow), transparent 72%),
+    linear-gradient(180deg, #060a12, #03050a);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > .dossier-nav-portrait
+  img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  opacity: 0.72;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > .dossier-nav-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(3 5 10 / 10%) 30%, rgb(3 5 10 / 78%) 72%, #03050a 100%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child):hover
+    > .dossier-nav-portrait
+    img {
+    opacity: 0.9;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:first-child:hover,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-index-return:hover {
+    background: linear-gradient(90deg, var(--sd-glow-soft), transparent 80%);
+  }
+}
+
+/* No next file (the last of a list): the previous one and the index share
+   the row. A list of one keeps the index alone. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
+  > :is(a, .manager-pagination-index) {
+  grid-row: 1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination:not(:has(> a))
+  > .manager-pagination-index {
+  grid-column: 1 / -1;
+}
+
+/* A list of one (ダンテ): the index itself is the end card. */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page
+  > .manager-pagination:not(:has(> a))
+  .dossier-index-return {
+  min-height: 160px;
+  padding-block: 32px;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page
+  > .manager-pagination:not(:has(> a))
+  .dossier-index-return
+  > b {
+  font-size: clamp(24px, 6vw, 36px);
+}
+
+/* No previous file (the first of a list): the index takes the row. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination:has(> .manager-pagination-spacer:first-child)
+  > .manager-pagination-index {
+  grid-column: 1 / -1;
+}
+
+/* ----------------------------------------------------------------
+   7. Wide screens: the split stage
+   ---------------------------------------------------------------- */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px), (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page {
+      --sd-stage-w: clamp(400px, 46vw, 820px);
+      --sd-pad: clamp(32px, 4.4vw, 80px);
+      --sd-read: 680px;
+      --sd-stage-h: calc(100svh - var(--sd-head));
+      display: grid;
+      grid-template-columns: [full-start stage-start] minmax(0, var(--sd-stage-w)) [stage-end read-start] minmax(0, 1fr) [read-end full-end];
+      grid-template-rows: repeat(8, auto);
+      align-items: start;
+      gap: 0;
+    }
+
+    /* The hero spans the first four rows (the name block, the ruler, the
+       related records and the chapters): its stage stays pinned beside
+       all of them. */
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero {
+      grid-column: full;
+      grid-row: 1 / 5;
+      align-self: stretch;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-profile.manager-hero > * {
+      pointer-events: auto;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column {
+      position: sticky;
+      top: var(--sd-head);
+      grid-column: stage;
+      grid-row: 1 / -1;
+      align-self: start;
+      height: var(--sd-stage-h);
+      margin-top: var(--sd-head);
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-column::after {
+      content: "";
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 1px;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent, var(--sd-rule) 30%, var(--sd-accent-2) 62%, transparent);
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame {
+      width: 100%;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-portrait-frame::before {
+      background:
+        linear-gradient(180deg, transparent 60%, rgb(3 5 10 / 52%) 84%, #03050a 100%),
+        linear-gradient(90deg, rgb(3 5 10 / 50%), transparent 18%, transparent 74%, rgb(3 5 10 / 72%)),
+        radial-gradient(110% 80% at 46% 36%, transparent 50%, rgb(3 5 10 / 50%) 100%);
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-numeral {
+      top: 24px;
+      left: 24px;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-introduction {
+      grid-column: read;
+      grid-row: 1;
+      align-self: end;
+      width: 100%;
+      max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+      margin: 0;
+      padding: calc(var(--sd-head) + clamp(48px, 10svh, 120px)) var(--sd-pad) 56px;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page:not(.is-sovereign)
+      #dossier-profile .dossier-identity
+      .manager-display-name {
+      font-size: clamp(56px, 6.2vw, 100px);
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > .dossier-reader {
+      grid-column: read;
+      grid-row: 2;
+      align-self: start;
+      padding: 0 var(--sd-pad);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .dossier-reader
+      .dossier-reader-links {
+      margin: 0;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .dossier-reader
+      .dossier-reader-links
+      a {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 0 4px;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #identity-records {
+      grid-column: read;
+      grid-row: 3;
+      margin: 0;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #dossier-index {
+      grid-column: read;
+      grid-row: 4;
+      margin: 0;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > :is(#identity-records, #dossier-index) {
+      width: 100%;
+      padding-inline: var(--sd-pad);
+    }
+
+    /* Forms, the special site, the partner's forms: each takes the
+       stage for one scene, its words in the reading column. */
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > #form-records {
+      grid-column: full;
+      grid-row: 5;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > .rider-special-site {
+      grid-column: full;
+      grid-row: 6;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > .rider-partner-forms {
+      grid-column: full;
+      grid-row: 7;
+    }
+
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination {
+      grid-column: full;
+      grid-row: 8;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      :is(.form-pickup-card, .rider-special-site-card) {
+      grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, 1fr);
+      /* Taller than the stage: the art holds while its words pass. */
+      min-height: calc(var(--sd-stage-h) + 36svh);
+      border-top: 0;
+      background: none;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      :is(.form-pickup-visual, .rider-special-site-visual) {
+      position: sticky;
+      top: var(--sd-head);
+      align-self: start;
+      height: var(--sd-stage-h);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      :is(.form-pickup-visual, .rider-special-site-visual)::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: 1px;
+      height: auto;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent, var(--sd-rule) 30%, var(--sd-accent-2) 62%, transparent);
+      border: 0;
+      opacity: 1;
+      animation: none;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      :is(.form-pickup-copy, .rider-special-site-copy) {
+      align-self: center;
+      width: 100%;
+      margin: 0;
+      padding: 48px var(--sd-pad);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .rider-partner-forms
+      > header {
+      max-width: none;
+      margin: 0 0 0 var(--sd-stage-w);
+      padding: 72px var(--sd-pad) 32px;
+      border-top: 1px solid var(--sd-line);
+    }
+
+    /* The end card: the next person on the stage side, the name beside. */
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination {
+      grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:first-child {
+      grid-column: 2;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index {
+      grid-column: 3;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child) {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, max-content) minmax(0, 1fr);
+      align-content: center;
+      min-height: min(calc(100svh - var(--sd-head) - 74px), 720px);
+      padding: 48px var(--sd-pad) 48px 0;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)::before {
+      grid-column: 2 / -1;
+      padding-left: var(--sd-pad);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > :is(b, small) {
+      grid-column: 2;
+      padding-left: var(--sd-pad);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > span:last-child {
+      grid-column: 3;
+      justify-self: start;
+      margin-left: 20px;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > .dossier-nav-portrait {
+      inset: 0 auto 0 0;
+      width: var(--sd-stage-w);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > .dossier-nav-portrait::after {
+      background:
+        linear-gradient(180deg, transparent 60%, rgb(3 5 10 / 70%) 100%),
+        linear-gradient(90deg, transparent 70%, rgb(3 5 10 / 70%) 100%);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > .dossier-nav-portrait
+      img {
+      opacity: 0.86;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
+      > a:first-child {
+      grid-column: 2;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination:has(> .manager-pagination-spacer:first-child)
+      > .manager-pagination-index,
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination:not(:has(> a))
+      > .manager-pagination-index {
+      grid-column: 2 / -1;
+    }
+  }
+}
+
+/* Tablets (portrait) and wide phones: the stacked file, centred. */
+@media (min-width: 761px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page #dossier-profile .manager-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* Related records: art beside the words. */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records
+    > :is(.rider-archive-civilian, .rider-nightmare-card) {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records
+    :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual) {
+    aspect-ratio: auto;
+    min-height: 360px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.rider-dossier-page:not(.ciel-dossier-page)
+    #identity-records
+    > .rider-archive-civilian:not(.rider-partner-card) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1099px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page {
+    --sd-stage-h: clamp(420px, 64svh, 900px);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile .dossier-identity
+    .manager-display-name {
+    font-size: clamp(56px, 8vw, 80px);
+  }
+}
+
+/* Phones: the ruler's number sits over its label. */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+}
+
+/* ----------------------------------------------------------------
+   The first rank: its own gold name, lines and status plate (the
+   sovereign sheet's paint) at the stage's sizes.
+   ---------------------------------------------------------------- */
+html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sovereign
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name {
+  font-size: clamp(48px, 13vw, 72px);
+  line-height: 1.1;
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px), (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"] main.manager-page.manager-page.manager-page.is-sovereign
+      #dossier-profile
+      .dossier-identity
+      .manager-display-name {
+      font-size: clamp(64px, 6.6vw, 112px);
+    }
+  }
+}
+
+/* ----------------------------------------------------------------
+   8. Focus and forced colours
+   ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.dossier-read-link, .dossier-reader-links a, .dossier-contents a, .manager-pagination a):focus-visible {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile .dossier-identity
+    .manager-display-name {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(.manager-quotes, .manager-copy-section, #identity-records > *, .dossier-read-link) {
+    border: 1px solid CanvasText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader {
+    background-color: Canvas;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links
+    a[aria-current] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    border-top-color: Highlight;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > span:last-child {
+    color: ButtonText;
+    background: ButtonFace;
+    border-color: ButtonText;
+  }
+}
