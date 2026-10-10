@@ -168,9 +168,9 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
   justify-items: center;
   align-content: center;
   width: auto;
-  min-height: clamp(320px, 44svh, 460px);
-  margin: 0 calc(-1 * var(--dr-inset)) clamp(36px, 4.4vw, 64px);
-  padding: clamp(48px, 6vw, 80px) var(--dr-gut);
+  min-height: clamp(280px, 40svh, 420px);
+  margin: 0 calc(-1 * var(--dr-inset)) clamp(28px, 3.6vw, 52px);
+  padding: clamp(40px, 5vw, 64px) var(--dr-gut);
   border: 0;
   border-block: 1px solid var(--dr-rule-2);
   text-align: center;
@@ -258,7 +258,7 @@ html[data-family="dream"]
   max-width: 100%;
   margin: 0;
   padding-inline-start: 0.24em;
-  font-size: clamp(44px, 7vw, 108px);
+  font-size: clamp(30px, 8.4vw, 108px);
   line-height: 1.1;
   letter-spacing: 0.24em;
 }
@@ -381,14 +381,14 @@ html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::befor
   min-height: 52px;
   margin: 0;
   padding: 6px 8px;
-  border: 1px solid var(--dr-shu);
-  outline: 1px solid rgb(204 73 59 / 40%);
+  border: 1px solid rgb(243 224 176 / 50%);
+  outline: 1px solid var(--dr-shu);
   outline-offset: 2px;
-  color: var(--dr-shu-text);
-  background: rgb(74 29 39 / 55%);
+  color: var(--dr-text);
+  background: var(--dr-shu-deep);
   clip-path: none;
   font-family: var(--dr-num);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: 0.08em;
@@ -853,16 +853,66 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:focus-v
   outline-offset: -2px;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li:last-child {
+    display: grid;
+    grid-template-columns: 4.6em repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 0 4px;
+  }
+
   html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
-    width: 4.4em;
+    grid-row: span 3;
+    align-self: start;
+    width: auto;
+    padding-top: 14px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents a + a {
+    border-left: 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:nth-of-type(even) {
+    border-left: 1px solid var(--dr-rule-2);
+  }
+}
+
+@media (max-width: 400px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li:last-child {
+    grid-template-columns: 4em repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
     letter-spacing: 0.12em;
   }
 
   html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
-    padding: 0 8px;
+    padding: 0 6px;
     font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents {
+    padding-inline: 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents li:last-child {
+    grid-template-columns: 3.6em repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
     letter-spacing: 0.04em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
+    padding: 0 4px;
+    font-size: 13px;
+    letter-spacing: 0;
   }
 }
 
@@ -1191,7 +1241,13 @@ html[data-family="dream"] main.dream-page.dream-page .dream-roster {
   border: 1px solid var(--dr-rule);
   outline: 1px solid var(--dr-rule-3);
   outline-offset: 4px;
-  background: var(--dr-rule-2);
+  background: transparent;
+}
+
+/* The hairlines between plates are each plate's own edge, so an empty
+   cell at the end of the board stays dark. */
+html[data-family="dream"] main.dream-page.dream-page .dream-roster > li {
+  box-shadow: 0 0 0 1px var(--dr-rule-2);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-roster article {
@@ -1214,27 +1270,47 @@ html[data-family="dream"] main.dream-page.dream-page .dream-roster-profile {
   line-height: 1.85;
 }
 
-/* The portrait plate: the art on the plate's far side, fading into it. */
+/* The art plates: the picture across the plate's head, fading into it. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-roster
+  article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"]) {
+  --dr-band: clamp(120px, 11vw, 168px);
+  padding-top: calc(var(--dr-band) + 10px);
+  background:
+    linear-gradient(180deg, rgb(27 17 32 / 0%) 0, rgb(27 17 32 / 35%) calc(var(--dr-band) * 0.55), var(--dr-plate) calc(var(--dr-band) + 4px)),
+    var(--dr-art) var(--dr-art-pos) / 100% auto no-repeat,
+    var(--dr-plate);
+}
+
+/* ベル's portrait is a tall file: it is sized to the band (head and
+   shoulders), centred, with the plate on either side. */
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-roster
   article[aria-labelledby="dream-roster-bell"] {
   background:
-    linear-gradient(90deg, var(--dr-plate) 0, var(--dr-plate) 38%, rgb(27 17 32 / 78%) 62%, rgb(27 17 32 / 30%) 100%),
-    linear-gradient(0deg, var(--dr-plate) 0, var(--dr-plate) 42%, transparent 72%),
-    url("/civilian-bell-20260826-delivery-360.webp") right top / auto min(420px, 100%) no-repeat,
+    linear-gradient(180deg, rgb(27 17 32 / 0%) 0, rgb(27 17 32 / 30%) calc(var(--dr-band) * 0.6), var(--dr-plate) calc(var(--dr-band) + 4px)),
+    linear-gradient(90deg, var(--dr-plate) 0, rgb(27 17 32 / 0%) 30%, rgb(27 17 32 / 0%) 70%, var(--dr-plate) 100%),
+    url("/civilian-bell-20260826-delivery-360.webp") 50% 0 / auto calc(var(--dr-band) * 1.9) no-repeat,
     var(--dr-plate);
 }
 
-/* The scene plate: the nightmare across the plate's head. */
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-roster
   article[aria-labelledby="dream-roster-machiavel"] {
-  background:
-    linear-gradient(180deg, rgb(27 17 32 / 30%) 0, rgb(27 17 32 / 72%) 90px, var(--dr-plate) 170px),
-    url("/dream-chapter-poster-thumb-15.jpeg") center top / 100% auto no-repeat,
-    var(--dr-plate);
+  --dr-art: url("/dream-chapter-poster-thumb-15.jpeg");
+  --dr-art-pos: 50% 0;
+}
+
+/* The seal sits on the art's foot, clear of the face. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-roster
+  article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
+  .dream-roster-seal {
+  top: calc(var(--dr-band) - 34px);
 }
 
 @media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
@@ -1494,7 +1570,7 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
     grid-template-columns: none;
     grid-template-rows: none;
     grid-auto-columns: min(84%, 340px);
-    align-items: stretch;
+    align-items: start;
     gap: 10px;
     columns: auto;
     margin-inline: calc(-1 * var(--dr-inset));
@@ -1632,5 +1708,681 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
   /* The speakers' folds keep their 48px rows, closer together. */
   html[data-family="dream"] main.dream-page.dream-page .dream-voices-grid {
     gap: 6px;
+  }
+}
+
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-roster
+    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"]) {
+    --dr-band: 104px;
+    padding-top: calc(var(--dr-band) + 4px);
+  }
+}
+
+/* ----------------------------------------------------------------
+   17. The tanzaku row fits the programme column on wide screens
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band {
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
+    padding-inline: 10px;
+    border-color: var(--dr-rule);
+  }
+}
+
+/* ----------------------------------------------------------------
+   18. 終: the end card
+   The credits close the programme on its last intertitle: the same
+   full-bleed band and gilt frame as the act cards, the title, the three
+   credit columns side by side, the 終 seal and the way back.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page > .dream-footer {
+  isolation: isolate;
+  gap: clamp(14px, 1.8vw, 20px);
+  padding: clamp(56px, 7vw, 96px) var(--dr-gut) clamp(56px, 7vw, 96px);
+  border-top: 1px solid var(--dr-rule-2);
+  background:
+    radial-gradient(46% 60% at 50% 0, rgb(230 194 142 / 12%), transparent 72%),
+    radial-gradient(38% 46% at 50% 100%, rgb(204 73 59 / 10%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-footer::before {
+  top: clamp(10px, 1.6vw, 22px);
+  right: max(var(--dr-gut), calc(var(--dr-inset) - 40px));
+  bottom: clamp(10px, 1.6vw, 22px);
+  left: max(var(--dr-gut), calc(var(--dr-inset) - 40px));
+  z-index: -1;
+  width: auto;
+  height: auto;
+  translate: none;
+  rotate: none;
+  border: 1px solid var(--dr-rule);
+  outline: 1px solid var(--dr-rule-3);
+  outline-offset: 5px;
+  background:
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 40px;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    width: min(900px, 100%);
+    margin: 6px 0 0;
+    padding: 20px 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits > div {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 10px;
+    padding: 0 clamp(12px, 2vw, 28px);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits > div + div {
+    border-left: 1px solid var(--dr-rule-2);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dt {
+    color: var(--dr-shu-text);
+    text-align: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-footer-end {
+  width: 96px;
+  height: 96px;
+  margin-top: 8px;
+  border-radius: 0;
+  border: 1px solid rgb(243 224 176 / 55%);
+  outline: 1px solid var(--dr-shu);
+  outline-offset: 4px;
+  color: var(--dr-text);
+  background: var(--dr-shu-deep);
+  font-size: 46px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-footer > a {
+  min-width: min(100%, 320px);
+  margin-top: 8px;
+}
+
+/* ----------------------------------------------------------------
+   19. Narrow phones (under 360px)
+   ---------------------------------------------------------------- */
+@media (max-width: 400px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-name {
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-footer > a span {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* The four Dolminence slips lie on their side again, portrait left and
+   billing right, so the katakana names keep their width. */
+@media (max-width: 359px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-tie {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "a"
+      "knot"
+      "b"
+      "quote";
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot + .dream-relations-name {
+    text-align: start;
+  }
+}
+
+/* The rails are keyboard scrollers: they take the page's focus ring. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  :is(.dream-agent-roster, .dream-case-notes, .dream-atlas-grid, .dream-quote-band):focus-visible {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------
+   20. Skipped-scene estimates
+   Every act and annex is content-visibility: auto; a jump from the act
+   bar, the 目次 or a /dream-chapter#id link lands on its heading only if
+   the skipped scenes hold their drawn heights. These are this sheet's
+   layouts measured at the ten viewports of verify-dream-estimates.mjs
+   (1920, 1440, 1194, 1024, 768, 412, 390, 320, 844 x 390, 667 x 375),
+   rounded up to 5px, in cascade order.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page #posters {
+  contain-intrinsic-size: auto 1255px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #characters {
+  contain-intrinsic-size: auto 1200px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #dolminence {
+  contain-intrinsic-size: auto 1290px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+  contain-intrinsic-size: auto 2380px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #factions {
+  contain-intrinsic-size: auto 3465px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #case-notes {
+  contain-intrinsic-size: auto 760px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #chronicle {
+  contain-intrinsic-size: auto 2045px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #atlas {
+  contain-intrinsic-size: auto 2355px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #relations {
+  contain-intrinsic-size: auto 1090px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #arsenal {
+  contain-intrinsic-size: auto 545px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary {
+  contain-intrinsic-size: auto 2520px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #quotes {
+  contain-intrinsic-size: auto 1335px;
+}
+
+@media (max-width: 1299px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1175px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1100px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1215px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3110px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3790px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 780px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2035px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 2650px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1110px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 535px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2715px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1705px;
+  }
+}
+
+@media (max-width: 1100px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1065px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 970px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 2060px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3330px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3825px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1070px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2025px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 2730px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1645px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 525px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3090px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1570px;
+  }
+}
+
+@media (max-width: 980px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1345px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1635px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1725px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3925px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 5330px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1020px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2130px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3400px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1685px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 510px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3345px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1625px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1150px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1340px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1305px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2450px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3795px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 430px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2490px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 800px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2155px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 750px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 4085px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1895px;
+  }
+}
+
+@media (max-width: 400px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1130px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1305px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1280px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2450px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3955px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 430px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2565px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 800px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2175px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 745px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 4210px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1895px;
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1130px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1170px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1335px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 3105px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 4515px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 450px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2915px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 1020px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 2555px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 765px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 4755px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 2000px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1180px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 865px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1800px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1330px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 5225px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 1030px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2045px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 3140px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1660px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 510px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3190px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1630px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1155px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 830px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1620px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 1945px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3325px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 410px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2135px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 1000px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1875px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 525px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 3800px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1645px;
+  }
+}
+
+@media (min-width: 1600px) {
+  html[data-family="dream"] main.dream-page.dream-page #posters {
+    contain-intrinsic-size: auto 1315px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #characters {
+    contain-intrinsic-size: auto 1200px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #dolminence {
+    contain-intrinsic-size: auto 1290px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #cast-roster {
+    contain-intrinsic-size: auto 2390px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #factions {
+    contain-intrinsic-size: auto 3465px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #case-notes {
+    contain-intrinsic-size: auto 760px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #chronicle {
+    contain-intrinsic-size: auto 2045px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #atlas {
+    contain-intrinsic-size: auto 2355px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #relations {
+    contain-intrinsic-size: auto 1090px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #arsenal {
+    contain-intrinsic-size: auto 545px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #glossary {
+    contain-intrinsic-size: auto 2520px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page #quotes {
+    contain-intrinsic-size: auto 1335px;
   }
 }
