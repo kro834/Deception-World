@@ -2324,25 +2324,6 @@ html[data-family="world"]:root
     width: min(40%, 380px);
     margin-top: auto;
   }
-
-  /* The rider's initial, outlined, stands behind the title card. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > #riders
-    .rider-detail
-    > .rider-monogram {
-    display: block;
-    top: auto;
-    right: auto;
-    bottom: -0.16em;
-    left: clamp(12px, 2vw, 32px);
-    color: transparent;
-    font: 700 clamp(320px, 34vw, 520px) / 1 var(--sw-mono);
-    opacity: 1;
-    -webkit-text-stroke: 1px color-mix(in srgb, var(--rider-tone, #cfd8e3) 42%, transparent);
-    pointer-events: none;
-  }
 }
 
 @media (max-width: 760px) {
@@ -3057,8 +3038,25 @@ html[data-family="world"]:root
   > #cast-roster
   .wa-person
   .wa-role::before {
-  width: 14px;
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 12px;
   height: 1px;
+  margin: 0;
+}
+
+/* The dash hangs in the margin, so it never stands alone on a line above
+   a long epithet (— / レルムズフランス本部 on two-up phone cards). */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-role {
+  position: relative;
+  padding-left: 18px;
+  letter-spacing: 0.04em;
 }
 
 html[data-family="world"]:root
@@ -3083,6 +3081,19 @@ html[data-family="world"]:root
   color: var(--sw-text);
 }
 
+/* The epithet breaks between phrases where the browser can (CODE最強の /
+   エージェント, not エージェ / ント); elsewhere the shared keep-all stays. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-role
+  .name-word {
+  word-break: keep-all;
+  word-break: auto-phrase;
+}
+
 /* ---------- 05 WORLD FILES ---------- */
 html[data-family="world"]:root
   body
@@ -3104,6 +3115,38 @@ html[data-family="world"]:root
   background: var(--sw-ticks), linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
 }
 
+/* The plate holds its list inside: the kicker, the title and the rows sit
+   off the hairline and the corner ticks, as on every other annex plate. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #world-brief
+  .wa-locations {
+  padding: clamp(18px, 2.4vw, 30px) clamp(16px, 2.6vw, 32px) clamp(6px, 1vw, 12px);
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #world-brief
+  .wa-locations
+  h3 {
+  background: none;
+  color: var(--sw-text);
+  -webkit-text-fill-color: currentColor;
+  font-family: var(--sw-display);
+  filter: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #world-brief
+  .wa-locations
+  li:last-child {
+  border-bottom: 0;
+}
+
 /* ---------- 06.2 the glossary: the annex's dark plate, not paper ---------- */
 @media (forced-colors: none) {
   html[data-family="world"]:root
@@ -3115,6 +3158,34 @@ html[data-family="world"]:root
     border-radius: 2px;
     background: var(--sw-ticks), linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
     box-shadow: none;
+  }
+}
+
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #glossary .wa-glossary {
+  padding: clamp(4px, 1vw, 10px) clamp(16px, 2.6vw, 32px);
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary
+  > div:last-child {
+  border-bottom: 0;
+}
+
+/* Term beside definition on tablets: the column holds the longest term
+   whole (マキャベルゴアナイトメア, twelve characters), which broke as
+   メ / ア in the owner's 232px column. */
+@media (min-width: 700px) and (max-width: 1099px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    grid-template-columns: 272px minmax(0, 1fr);
+    gap: 28px;
   }
 }
 
