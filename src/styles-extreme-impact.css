@@ -1504,8 +1504,7 @@ html[data-press-ready][data-family="special"]
     :is(
       .rxs-footer > a,
       .exs-chapter-index a,
-      .rxs-scroll-cue,
-      .rxs-comparison-selector select
+      .rxs-scroll-cue
     )[data-press="out"][data-press="out"] {
     transition-timing-function:
       var(--exi-spring), var(--dw-ease-out), var(--exi-spring), var(--exi-spring),
@@ -1518,7 +1517,7 @@ html[data-press-ready][data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.exs-page
-    :is(.rxs-footer > a, .exs-chapter-index a) {
+    :is(.rxs-footer > a, .exs-chapter-index a, .rxs-comparison-selector select) {
     transition:
       translate 420ms var(--exi-spring),
       border-color 220ms ease,
@@ -1528,7 +1527,12 @@ html[data-press-ready][data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.exs-page
-    :is(.rxs-footer > a, .exs-chapter-index a):is(:hover, :focus-visible) {
+    :is(.rxs-footer > a, .exs-chapter-index a):is(:hover, :focus-visible),
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.exs-page
+    .rxs-comparison-selector
+    select:is(:hover, :focus-visible) {
     translate: 0 -3px;
   }
 }
