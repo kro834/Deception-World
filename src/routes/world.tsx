@@ -22,6 +22,7 @@ import worldExhibitionCssUrl from "@/styles-world-exhibition.css?url";
 import worldPhasesCssUrl from "@/styles-world-phases.css?url";
 import worldAtmosphereCssUrl from "@/styles-world-atmosphere.css?url";
 import worldTranscriptCssUrl from "@/styles-world-transcript.css?url";
+import stageWorldCssUrl from "@/styles-stage-world.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -57,6 +58,8 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldPhasesCssUrl },
         { rel: "stylesheet", href: worldAtmosphereCssUrl },
         { rel: "stylesheet", href: worldTranscriptCssUrl },
+        // STAGE: the chapters as lit scenes, ahead of the HUD face and the last sheet.
+        { rel: "stylesheet", href: stageWorldCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],
