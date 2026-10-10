@@ -1240,6 +1240,10 @@ html[data-family="special"]
     width: min(78%, 300px);
   }
 
+}
+
+/* From a large phone up the two processors read side by side. */
+@media (min-width: 420px) and (max-width: 760px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
