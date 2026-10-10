@@ -2324,6 +2324,25 @@ html[data-family="world"]:root
     width: min(40%, 380px);
     margin-top: auto;
   }
+
+  /* The rider's initial, outlined, stands behind the title card. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-detail
+    > .rider-monogram {
+    display: block;
+    top: auto;
+    right: auto;
+    bottom: -0.16em;
+    left: clamp(12px, 2vw, 32px);
+    color: transparent;
+    font: 700 clamp(320px, 34vw, 520px) / 1 var(--sw-mono);
+    opacity: 1;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--rider-tone, #cfd8e3) 42%, transparent);
+    pointer-events: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -3139,6 +3158,7 @@ html[data-family="world"]:root
     position: absolute;
     inset: calc(var(--film-topbar-height, 76px) + 18px) var(--sw-gutter) 28px;
     border: 1px solid rgb(var(--sw-light-rgb) / 22%);
+    box-shadow: 0 0 0 100vmax rgb(10 5 3 / 88%);
     background:
       linear-gradient(var(--sw-light) 0 0) 0 0 / 22px 1px no-repeat,
       linear-gradient(var(--sw-light) 0 0) 0 0 / 1px 22px no-repeat,
@@ -3187,6 +3207,27 @@ html[data-family="world"]:root
   font-family: var(--sw-display);
   font-weight: 700;
   text-shadow: 0 2px 0 rgb(0 0 0 / 40%);
+}
+
+/* The house dark outside the frame: the stage clips it (overflow: clip
+   keeps the stage from becoming a scroller, so its timeline stays). */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .finale-section
+  > .finale-sticky {
+  overflow: clip;
+}
+
+@media (max-width: 560px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-content
+    > span {
+    letter-spacing: 0.14em;
+  }
 }
 
 /* The credit line under the end card: centred, in the order the page
@@ -3402,5 +3443,30 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > b {
     font-size: 12px;
     line-height: 1.35;
+  }
+}
+
+/* The narrowest phones: the column labels keep their lines inside the
+   segment (“犬”と / “イサク”の謎). */
+@media (max-width: 400px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    .world-column-index
+    > .world-column-tabs
+    > button[role="tab"] {
+    padding-inline: 4px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    .world-column-index
+    > .world-column-tabs
+    > button[role="tab"]
+    > b {
+    letter-spacing: 0;
   }
 }
