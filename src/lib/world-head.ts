@@ -7,6 +7,7 @@ import dossierEditionCssUrl from "@/styles-dossier-edition.css?url";
 import dossierCinemaCssUrl from "@/styles-dossier-cinema.css?url";
 import pickupCinemaCssUrl from "@/styles-pickup-cinema.css?url";
 import dossierReadingCssUrl from "@/styles-dossier-reading.css?url";
+import stageDossierCssUrl from "@/styles-stage-dossier.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -54,6 +55,14 @@ export const PICKUP_CINEMA_STYLESHEET_LINK: RouteStylesheetLink = {
 // these.
 export const DOSSIER_HUD_FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Michroma&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%2F-.%3A%2B%23%25%26%C2%B7%7C%3C%3E%20";
+// The STAGE dossier (rx10): the art stage and its reading column, scoped to
+// html[data-family="dossier"]. Last of the dossier sheets, so it sits above
+// them; page sheets (シエル's, ダンテ's) still follow it. The first-rank
+// file links it on its own, ahead of its own sheet.
+export const STAGE_DOSSIER_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: stageDossierCssUrl,
+};
 export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_STYLESHEET_LINKS,
   { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
@@ -61,6 +70,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   { rel: "stylesheet", href: dossierCinemaCssUrl },
   PICKUP_CINEMA_STYLESHEET_LINK,
   { rel: "stylesheet", href: dossierReadingCssUrl },
+  STAGE_DOSSIER_STYLESHEET_LINK,
 ];
 
 type WorldHeadInput = {

@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { UiVectorIcon } from "./ui-vector-icon";
+import { dossierImage } from "@/lib/dossier-images";
 
 export type DossierLink = {
   id: string;
@@ -185,6 +186,20 @@ export function NameText({ value, seams = false }: { value: string; seams?: bool
   );
 }
 
+/** The neighbour's portrait for the file's end card: its first warm-up
+ * asset, with the same delivery candidates the next page asks for, so the
+ * card's picture is the one the page then shows. Decorative (the link is
+ * named by its label). */
+function NavPortrait({ item }: { item: DossierLink }) {
+  const src = item.assets[0];
+  if (!src) return null;
+  return (
+    <span className="dossier-nav-portrait" aria-hidden="true">
+      <img src={src} {...dossierImage(src)} alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
 function neighbors(items: DossierLink[], currentHref: string) {
   const idx = items.findIndex((item) => item.href === currentHref);
   if (idx < 0) return { idx, prev: undefined, next: undefined };
@@ -223,6 +238,7 @@ export function DossierNav({
     <nav className="manager-pagination" aria-label="前後の資料">
       {prev?.href ? (
         <GuardedLink to={prev.href} assets={prev.assets} aria-label={`${prev.name}の資料へ`}>
+          <NavPortrait item={prev} />
           <small>PREV / {prev.kicker}</small>
           <b>
             <NameText value={prev.name} />
@@ -251,6 +267,7 @@ export function DossierNav({
       </div>
       {next?.href ? (
         <GuardedLink to={next.href} assets={next.assets} aria-label={`${next.name}の資料へ`}>
+          <NavPortrait item={next} />
           <small>NEXT / {next.kicker}</small>
           <b>
             <NameText value={next.name} />
