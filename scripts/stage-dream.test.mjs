@@ -6,7 +6,8 @@ import test from "node:test";
    (src/styles-stage-dream.css). A reflow and repaint only: linked last of
    the Dream sheets and before the cinematic edition, scoped to the dream
    family and the doubled page class, no words of its own, no motion,
-   nothing under 12px, no !important, and only two published pictures. */
+   nothing under 12px, no !important, and only pictures the site already
+   publishes (two card-sized portraits, the poster console's own WebPs). */
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -88,20 +89,36 @@ test("the sheet adds no words, no motion, no blur and nothing under 12px", () =>
   assert.doesNotMatch(css, /border-image:\s*none|translate:\s*none/);
 });
 
-test("the roster's art is two pictures the site already publishes, at card size", async () => {
-  const urls = [...css.matchAll(/url\("([^"]+)"\)/g)].map((match) => match[1]);
-  assert.deepEqual([...new Set(urls)].sort(), [
+test("the art is the site's own published files: two card pictures and the console's posters", async () => {
+  const urls = [...new Set([...css.matchAll(/url\("([^"]+)"\)/g)].map((match) => match[1]))].sort();
+  assert.deepEqual(urls, [
     "/civilian-bell-20260826-delivery-360.webp",
+    "/dream-chapter-poster-13-delivery.webp",
+    "/dream-chapter-poster-14-delivery.webp",
+    "/dream-chapter-poster-15-delivery.webp",
     "/dream-chapter-poster-thumb-15.jpeg",
   ]);
   for (const url of urls) {
     const { size } = await stat(new URL(`../public${url}`, import.meta.url));
-    assert.ok(size < 40_000, `${url} ${size}`);
+    // Card art stays card-sized; the stage posters are the console's own WebPs.
+    assert.ok(size < (url.includes("-delivery.webp") && url.includes("poster") ? 200_000 : 40_000), `${url} ${size}`);
+  }
+  // The posters are the ones the console already offers.
+  const data = await read("src/components/dream-chapter/dream-chapter-data.ts");
+  for (const no of ["13", "14", "15"]) assert.match(data, new RegExp(`src: "/dream-chapter-poster-${no}\\.jpeg"`));
+  // The large art only on wide screens: the phone plates use the 20KB thumbnail.
+  const wide = css.slice(css.indexOf("@media (min-width: 761px) and (min-height: 521px)"));
+  assert.ok(wide.includes("poster-15-delivery"));
+  assert.ok(css.indexOf("poster-15-delivery") > css.indexOf("@media (min-width: 761px) and (min-height: 521px)"));
+  for (const no of ["13", "14"]) {
+    assert.ok(
+      css.indexOf(`poster-${no}-delivery`) > css.indexOf("@media (min-width: 1181px) and (min-height: 700px)"),
+      no,
+    );
   }
   // Keyed on the owner's own roster ids, not on new markup.
   const page = await read("src/components/dream-chapter/dream-chapter.tsx");
   assert.match(page, /aria-labelledby=\{`dream-roster-\$\{entry\.id\}`\}/);
-  const data = await read("src/components/dream-chapter/dream-chapter-data.ts");
   assert.match(data, /id: "bell",\s*name: "ベル"/);
   assert.match(data, /id: "machiavel",\s*name: "マキャベル"/);
 });
