@@ -26,7 +26,7 @@ test("Final Stage special site has a route, menu entry, warmup asset, and dedica
   assert.match(menu, /FINAL_STAGE_ENTER_ASSETS/);
   assert.match(
     menu,
-    /context\?: "world" \| "archive" \| "movie" \| "rexonance" \| "extreme" \| "final-stage" \| "gallery";/,
+    /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "rexonance" \| "extreme" \| "final-stage" \| "gallery";/,
   );
   assert.match(loader, /export const FINAL_STAGE_ENTER_ASSETS/);
   assert.match(loadGate, /"\/final-stage": "final-stage"/);
@@ -50,7 +50,10 @@ test("Final Stage is listed under STORIES after Dream Chapter, not under SPECIAL
   assert.match(stories, /<i>FINAL STAGE<\/i>/);
   // rx6: the chapter list moved to src/lib/special-site-sections.ts, which the
   // side menu and the site search share.
-  const sections = readFileSync(new URL("../src/lib/special-site-sections.ts", import.meta.url), "utf8");
+  const sections = readFileSync(
+    new URL("../src/lib/special-site-sections.ts", import.meta.url),
+    "utf8",
+  );
   assert.match(menu, /SPECIAL_SITE_SECTIONS\[/);
   assert.match(sections, /\["story", "あらすじ", "STORY"\]/);
   assert.match(sections, /\["characters", "登場人物", "CHARACTERS"\]/);

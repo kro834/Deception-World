@@ -1,0 +1,80 @@
+/* Reuse the shared menu's responsive art tiles, including its readable
+   bottom veil and mobile thumbnail layout. Fetch only when opened. */
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  .side-panel-links
+  > .side-panel-cinema-link {
+  --sh-art: url("/saga-cinema-assets/menu-thumbnail.webp");
+  --sh-art-pos: 50% 18%;
+}
+
+.external-cinema-exit {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  color: #f4e5c6;
+}
+.external-cinema-exit-curtain {
+  position: absolute;
+  inset: 0;
+  background: #08090d;
+  animation: cinema-exit-cover 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.external-cinema-exit-title {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  max-width: calc(100vw - 40px);
+  text-align: center;
+  animation: cinema-exit-title 650ms ease-out both;
+}
+.external-cinema-exit-title small,
+.external-cinema-exit-title span {
+  font-size: 12px;
+  letter-spacing: 0.25em;
+}
+.external-cinema-exit-title b {
+  font-family: "Noto Serif JP", serif;
+  font-size: clamp(18px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+@keyframes cinema-exit-cover {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.02);
+  }
+  65%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+@keyframes cinema-exit-title {
+  0%,
+  30% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  70%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .external-cinema-exit-curtain,
+  .external-cinema-exit-title {
+    animation: none;
+  }
+}
+html[data-world-effects="economy"] .external-cinema-exit-curtain,
+html[data-world-effects="economy"] .external-cinema-exit-title {
+  animation: none;
+}

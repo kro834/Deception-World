@@ -10,6 +10,7 @@ import {
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { DisplayName } from "@/components/name-text";
+import { isCastRosterOrigin } from "@/lib/dossier-origin";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -29,6 +30,7 @@ import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { UltraModeToggle } from "@/components/ultra/ultra-mode-toggle";
+import { CinemaLink } from "./external-cinema-link";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -177,6 +179,12 @@ export function DossierTopbar({
   returnAriaLabel?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const fromCastRoster = useRouterState({
+    select: (state) => isCastRosterOrigin(state.location.search),
+  });
+  const targetHash = fromCastRoster ? "cast-roster" : returnHash;
+  const targetLabel = fromCastRoster ? "人物一覧へ戻る" : returnLabel;
+  const targetAriaLabel = fromCastRoster ? "人物一覧へ戻る" : returnAriaLabel;
 
   return (
     <>
@@ -184,7 +192,7 @@ export function DossierTopbar({
       <header className="manager-topbar">
         <GuardedLink
           to="/world"
-          hash={returnHash}
+          hash={targetHash}
           assets={[]}
           className="brand"
           aria-label={`${fileLabel}からDeception Worldへ戻る`}
@@ -200,12 +208,12 @@ export function DossierTopbar({
         <div className="detail-topbar-actions">
           <GuardedLink
             to="/world"
-            hash={returnHash}
+            hash={targetHash}
             assets={[]}
             className="manager-back"
-            aria-label={returnAriaLabel}
+            aria-label={targetAriaLabel}
           >
-            <span>{returnLabel}</span>
+            <span>{targetLabel}</span>
             <i aria-hidden="true">
               <UiVectorIcon kind="arrow-left" size={14} />
             </i>
@@ -222,7 +230,8 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?: "world" | "archive" | "movie" | "rexonance" | "extreme" | "final-stage" | "gallery";
+  context?:
+    "world" | "archive" | "movie" | "cinema" | "rexonance" | "extreme" | "final-stage" | "gallery";
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -746,15 +755,17 @@ export function SideMenuLayer({
             <b>
               {context === "archive"
                 ? "FORM ARCHIVE"
-                : context === "movie"
-                  ? "DREAM CHAPTER"
-                  : context === "rexonance"
-                    ? "REXONANCE SAGA"
-                    : context === "extreme"
-                      ? "EXTREME SAGA"
-                      : context === "final-stage"
-                        ? "FINAL STAGE"
-                        : "DECEPTION WORLD"}
+                : context === "cinema"
+                  ? "SAGA CINEMA"
+                  : context === "movie"
+                    ? "DREAM CHAPTER"
+                    : context === "rexonance"
+                      ? "REXONANCE SAGA"
+                      : context === "extreme"
+                        ? "EXTREME SAGA"
+                        : context === "final-stage"
+                          ? "FINAL STAGE"
+                          : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -895,6 +906,27 @@ export function SideMenuLayer({
                   </GuardedLink>
                 ))}
               </>
+            ) : context === "cinema" ? (
+              <>
+                {[
+                  ["top", "トップ", "TOP"],
+                  ["introduction", "作品について", "INTRODUCTION"],
+                  ["films", "映画4部作", "THE FOUR FILMS"],
+                  ["visuals", "ビジュアル", "VISUAL ARCHIVE"],
+                  ["information", "公開情報", "INFORMATION"],
+                ].map(([hash, label, code]) => (
+                  <GuardedLink
+                    key={hash}
+                    to="/saga-cinema"
+                    hash={hash}
+                    assets={[]}
+                    beforeNavigate={close}
+                  >
+                    <span>{label}</span>
+                    <i>{code}</i>
+                  </GuardedLink>
+                ))}
+              </>
             ) : context === "movie" ? (
               <>
                 <GuardedLink to="/dream-chapter" hash="top" assets={[]} beforeNavigate={close}>
@@ -992,6 +1024,7 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>STORIES</p>
           <div className="side-panel-links">
+            <CinemaLink beforeNavigate={close} active={context === "cinema"} />
             {context === "movie" ? (
               <>
                 <GuardedLink
@@ -1027,7 +1060,7 @@ export function SideMenuLayer({
                 </GuardedLink>
                 {/* The special sites stand apart from the World: its way home
                     sits in story order, as it does on the Dream Chapter. */}
-                {isSpecialSite ? (
+                {isSpecialSite || context === "cinema" ? (
                   <GuardedLink
                     to="/world"
                     hash="top"

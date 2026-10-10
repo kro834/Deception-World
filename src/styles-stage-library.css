@@ -2419,9 +2419,9 @@ html[data-family="library"] .search-page .search-scope-note {
   }
 }
 
-/* The smallest phones: a card is a row, its art a spine with the code
-   set down its edge. */
-@media (max-width: 359px) {
+/* Phones: a readable record row, its art a spine with the code down its
+   edge. Two tiny poster columns made long names and excerpts too dense. */
+@media (max-width: 439px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
     --dxl-cols: 1;
   }
@@ -2518,11 +2518,18 @@ html[data-family="library"] .search-page .search-scope-note {
    Review pass (rx10): fits, the closing card, the press, small phones
    ================================================================ */
 
-/* The smallest phones: a row card's words sit beside its 96px spine. */
-@media (max-width: 359px) {
+/* A phone row's words sit beside its 96px spine. */
+@media (max-width: 439px) {
   html[data-family="library"] .library-page .library-card h3,
   html[data-family="library"] .search-page .search-result-title {
+    --dxl-title: 16px;
     --dxl-room: calc(var(--dxl-col-w) - 116px);
+  }
+
+  html[data-family="library"] .library-page .library-card-description,
+  html[data-family="library"] .search-page .search-result-snippet {
+    font-size: 14px;
+    line-height: 1.8;
   }
 }
 
@@ -2658,7 +2665,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate
    along a row gives its last card the columns that are left, and the card
    lies on its side, art at the left and its words beside it, so no shelf
    ends on an empty run of the grid. */
-@media (min-width: 360px) and (max-width: 559px) {
+@media (min-width: 440px) and (max-width: 559px) {
   html[data-family="library"]
     :is(
       .library-grid > .library-card,
@@ -2861,7 +2868,7 @@ html[data-family="library"]
    never more than about 280px, and the smallest phones' one-column row
    cards keep their own layout (the media gate). Only the closing cards are
    dxl-card containers (the rules above). */
-@media (min-width: 360px) {
+@media (min-width: 440px) {
   @container dxl-card (min-width: 300px) {
     html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art {
       position: absolute;

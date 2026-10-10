@@ -102,3 +102,20 @@ test("the marquee bands and the hero HUD layer are hidden, the copy is not", asy
     assert.match(annex, new RegExp(`id="${id}"`), id);
   }
 });
+
+test("poster operations form two rows and fall back to one column for narrow portraits", () => {
+  const controls = css.match(/> \.poster-controls \{([^}]*)\}/)?.[1];
+  assert.ok(controls);
+  assert.match(controls, /container-type:\s*inline-size;/);
+  assert.match(controls, /width:\s*var\(--poster-width\);/);
+  assert.match(
+    css,
+    /\.poster-control-cluster \{\s*display: grid;\s*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1\.4fr\);/,
+  );
+  assert.match(css, /> \.poster-shuffle \{\s*grid-column: 1 \/ -1;/);
+  assert.match(
+    css,
+    /@container \(max-width: 230px\) \{[^}]*\.poster-control-cluster \{\s*grid-template-columns: minmax\(0, 1fr\);/,
+  );
+  assert.match(css, /\.poster-control-cluster\s*> button \{[^}]*min-height: 48px;/);
+});

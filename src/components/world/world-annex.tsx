@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thumbnail-images";
 import { DisplayName } from "@/components/name-text";
+import { CAST_ROSTER_SEARCH } from "@/lib/dossier-origin";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { QuoteTranscript } from "./quote-transcript";
@@ -363,6 +364,7 @@ function CastFiles() {
                   <GuardedLink
                     className="wa-open"
                     to={entry.to}
+                    search={CAST_ROSTER_SEARCH}
                     assets={DOSSIER_ASSETS.get(entry.to) ?? []}
                     aria-label={`${entry.name}の個別資料を開く`}
                   >

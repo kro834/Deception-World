@@ -837,7 +837,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
 html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 12px;
   border: 0;
   color: var(--dr-text);
@@ -846,6 +846,16 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
   font-weight: 800;
   letter-spacing: 0.1em;
   white-space: nowrap;
+}
+
+/* Keep the act's pause on a phone without spending almost half a screen
+   on its title alone. The poster console and its measured rails stay intact. */
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading {
+    min-height: clamp(248px, 30svh, 300px);
+    margin-bottom: 24px;
+    padding-block: 28px;
+  }
 }
 
 html[data-family="dream"] main.dream-page.dream-page > .dream-contents a + a {

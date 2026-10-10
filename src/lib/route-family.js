@@ -21,7 +21,12 @@ export function getRouteFamily(pathname) {
   if (path === "/world") return "world";
   if (/^\/(?:riders|managers|characters)\/[^/]+$/.test(path)) return "dossier";
   if (path === "/dream-chapter") return "dream";
-  if (path === "/rexonance-saga" || path === "/extreme-saga" || path === "/final-stage") {
+  if (
+    path === "/rexonance-saga" ||
+    path === "/extreme-saga" ||
+    path === "/final-stage" ||
+    path === "/saga-cinema"
+  ) {
     return "special";
   }
   if (path === "/gallery" || path === "/gallery-tours" || path === "/exhibition") return "gallery";

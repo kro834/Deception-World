@@ -93,7 +93,8 @@ test("detail routes use per-location restoration without overwriting the world s
 
 test("all rider dossiers return deeper without a doubled fixed-header inset", () => {
   assert.match(riderPage, /<DossierTopbar[\s\S]*?returnHash="riders-return"/);
-  assert.equal((worldChrome.match(/hash=\{returnHash\}/g) ?? []).length, 2);
+  assert.match(worldChrome, /const targetHash = fromCastRoster \? "cast-roster" : returnHash;/);
+  assert.equal((worldChrome.match(/hash=\{targetHash\}/g) ?? []).length, 2);
   assert.match(worldHome, /id="riders-return" className="riders-return-anchor"/);
   assert.match(worldPolishStyles, /#riders-return[\s\S]*?top:\s*clamp\(64px, 6vw, 88px\)/);
   assert.match(
@@ -122,7 +123,8 @@ test("the rider selected before opening a dossier is restored once on return", (
 
 test("the compact mobile return control keeps an accessible name", () => {
   assert.match(riderPage, /returnLabel="ライダー一覧へ戻る"/);
-  assert.match(worldChrome, /className="manager-back"[\s\S]*?aria-label=\{returnAriaLabel\}/);
+  assert.match(worldChrome, /const targetAriaLabel = fromCastRoster \? "人物一覧へ戻る" : returnAriaLabel;/);
+  assert.match(worldChrome, /className="manager-back"[\s\S]*?aria-label=\{targetAriaLabel\}/);
   assert.match(
     riderPage,
     /loading="eager"[\s\S]{0,100}?decoding="async"[\s\S]{0,100}?fetchPriority="high"/,

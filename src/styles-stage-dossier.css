@@ -927,7 +927,7 @@ html[data-family="dossier"]
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  gap: 8px;
   margin: 0 0 32px;
   padding: 0;
   border: 0;
@@ -944,14 +944,13 @@ html[data-family="dossier"]
   grid-template-columns: 34px minmax(0, 1fr) 20px;
   align-items: center;
   gap: 12px;
-  min-height: 56px;
+  min-height: 64px;
   margin: 0;
-  padding: 10px 4px;
-  border: 0;
-  border-bottom: 1px solid var(--sd-line);
-  border-radius: 0;
+  padding: 12px;
+  border: 1px solid var(--sd-line);
+  border-radius: 4px;
   color: var(--sd-text);
-  background: none;
+  background: var(--sd-plate);
   box-shadow: none;
   text-decoration: none;
   clip-path: none;
@@ -1025,6 +1024,18 @@ html[data-family="dossier"]
 
 /* The chapters: dark reading plates on the stage material (the white
    paper slabs are gone). */
+@media (min-width: 761px) and (max-width: 1099px) {
+  /* Pair chapters only when the reading lane has room for two 270px cards.
+     A landscape tablet's sticky portrait leaves a narrower lane, which
+     must remain a single list rather than squeezing Japanese into a spine. */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-index
+    .dossier-contents {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  }
+}
+
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   #dossier-index
@@ -1130,6 +1141,7 @@ html[data-family="dossier"]
   font: 700 clamp(20px, 5.4vw, 26px) / 1.5 var(--sd-display);
   letter-spacing: 0.02em;
   text-shadow: none;
+  text-wrap: balance;
 }
 
 html[data-family="dossier"]
@@ -1141,6 +1153,7 @@ html[data-family="dossier"]
   margin: 0;
   padding: 0;
   border: 0;
+  max-width: 40em;
 }
 
 html[data-family="dossier"]
@@ -1151,7 +1164,7 @@ html[data-family="dossier"]
   p {
   margin: 0;
   color: var(--sd-text-2);
-  font: 400 15px/2 var(--sd-body);
+  font: 400 16px/1.95 var(--sd-body);
   letter-spacing: 0.04em;
   text-wrap: pretty;
 }

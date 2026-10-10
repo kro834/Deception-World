@@ -44,7 +44,7 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   ].map(([, id, index]) => id ?? ["I", "II", "III", "IV", "V", "VI"][Number(index)]);
   assert.deepEqual(order, ["I", "II", "III", "IV", "V", "VI"]);
   assert.match(list, /href: "\/characters\/ciel"/);
-  assert.match(nav, /const returnHash = listHash \?\? pathHash;/);
+  assert.match(nav, /const returnHash = fromCastRoster \? "cast-roster" : \(listHash \?\? pathHash\);/);
 });
 
 test("his colours are emerald green and light blue", async () => {
