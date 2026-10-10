@@ -1,0 +1,2690 @@
+/* ================================================================
+   STAGE shell: the command bar and the launcher (rx10, 2026-10-10)
+
+   Every family's top bar is redrawn as one instrument: a slim opaque
+   bar with a ruler of ticks along its foot, a square DW plate, the
+   edition's name in HUD capitals, the section in view lit in the bar,
+   the reading progress on its lower edge, and the menu trigger as a
+   lit square holding a 2x2 launcher glyph. The side menu becomes a
+   full-screen launcher: FIND A RECORD across the top, the page's
+   SECTIONS as a numbered chapter list, every destination as an art
+   tile (films, special sites, the eight riders, the unmanaged file,
+   the gallery), and SYSTEM as one compact strip at the foot.
+
+   Markup, ids, groups, gestures, focus handling and copy are unchanged
+   (world-chrome.tsx and each page's header). The groups are placed by
+   grid areas keyed on their position (no :has), and the art is a CSS
+   background on each link's ::before, set only while the menu is open,
+   so nothing is fetched until the reader opens it.
+
+   This is a root sheet and route sheets load after it, so every rule
+   carries html[data-family] + body and the panel id or the page root;
+   the few declarations the older sheets paint with !important answer
+   with !important. Geometry pinned by tests is left alone: the bar
+   heights (76 / 64), the special sites' nav and trigger boxes, the
+   48px close and trigger, the rows' 48px floor and the iPad compact
+   launcher (its states are excluded below).
+
+   Motion: transform and opacity only, finite, under no-preference and
+   outside economy rendering. No blur, no backdrop-filter.
+   ================================================================ */
+
+/* ================================================================
+   0. Lights: one set per family; the stage tokens are the base.
+   ================================================================ */
+html[data-family] {
+  --sh-ink: #03060c;
+  --sh-ink-rgb: 3 6 12;
+  --sh-ink-2: #08101b;
+  --sh-ink-3: #0e1826;
+  --sh-l1: #7ae8ff;
+  --sh-l1-rgb: 122 232 255;
+  --sh-l2: #a48bff;
+  --sh-l2-rgb: 164 139 255;
+  --sh-on-l1: #03060c;
+  --sh-text: #f2f7fb;
+  --sh-text-2: #bccbd8;
+  --sh-text-3: #8fa3b5;
+  --sh-focus: #fff0b5;
+  --sh-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --sh-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --sh-display: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --sh-gutter: clamp(16px, 3.2vw, 48px);
+  --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dream Chapter: Taisho vermilion and gold on night plum. */
+html[data-family="dream"] {
+  --sh-ink: #130c17;
+  --sh-ink-rgb: 19 12 23;
+  --sh-ink-2: #1c1120;
+  --sh-ink-3: #27172b;
+  --sh-l1: #e0614f;
+  --sh-l1-rgb: 224 97 79;
+  --sh-l2: #c9a15a;
+  --sh-l2-rgb: 201 161 90;
+  --sh-on-l1: #1a0b0e;
+  --sh-text: #f6ecdf;
+  --sh-text-2: #dccbb6;
+  --sh-text-3: #b7a18c;
+  --sh-display: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+}
+
+/* Gallery: bronze on warm charcoal. */
+html[data-family="gallery"] {
+  --sh-ink: #171614;
+  --sh-ink-rgb: 23 22 20;
+  --sh-ink-2: #1f1d1a;
+  --sh-ink-3: #29261f;
+  --sh-l1: #d8b27a;
+  --sh-l1-rgb: 216 178 122;
+  --sh-l2: #8a7a66;
+  --sh-l2-rgb: 138 122 102;
+  --sh-on-l1: #1a1206;
+  --sh-text: #f4ede2;
+  --sh-text-2: #d6cbbb;
+  --sh-text-3: #ab9f8e;
+}
+
+/* The special sites, each in its own edition light. */
+html[data-family="special"] .rxs-page.rxs-rexonance-page {
+  --sh-ink: #02050a;
+  --sh-ink-rgb: 2 5 10;
+  --sh-l1: #79e8ff;
+  --sh-l1-rgb: 121 232 255;
+  --sh-l2: #ff8fd8;
+  --sh-l2-rgb: 255 143 216;
+}
+
+html[data-family="special"] .rxs-page.exs-page {
+  --sh-ink: #050403;
+  --sh-ink-rgb: 5 4 3;
+  --sh-ink-2: #0f0d09;
+  --sh-ink-3: #19150e;
+  --sh-l1: #ffd57a;
+  --sh-l1-rgb: 255 213 122;
+  --sh-l2: #c9a24f;
+  --sh-l2-rgb: 201 162 79;
+  --sh-on-l1: #150f02;
+  --sh-text: #fff6e3;
+  --sh-text-2: #e3d6bd;
+  --sh-text-3: #b5a68a;
+}
+
+html[data-family="special"] .rxs-page.fst-page {
+  --sh-ink: #05061a;
+  --sh-ink-rgb: 5 6 26;
+  --sh-ink-2: #0b0d24;
+  --sh-ink-3: #131634;
+  --sh-l1: #aab2ff;
+  --sh-l1-rgb: 170 178 255;
+  --sh-l2: #c99bff;
+  --sh-l2-rgb: 201 155 255;
+  --sh-on-l1: #070818;
+}
+
+/* The character files keep their own accent as the second light. */
+html[data-family="dossier"] .manager-page {
+  --sh-l2: var(--manager-accent, #a48bff);
+}
+
+/* The Dream Chapter numbers its chapters as its own plates do (壱, 弐). */
+@counter-style sh-daiji {
+  system: fixed;
+  symbols: "壱" "弐" "参" "肆" "伍" "陸" "漆" "捌" "玖";
+  suffix: "";
+  fallback: decimal;
+}
+
+/* ================================================================
+   1. The command bar: shared paint
+   One opaque bar: the family ink, a lit seam on the left edge, a ruler
+   of ticks along the foot, a hairline under it. No blur.
+   ================================================================ */
+html[data-family="world"] body main.site-shell.film-edition > header.topbar,
+html[data-family="dossier"] body .manager-page > header.manager-topbar,
+html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header,
+html[data-family="library"] body .library-page > header.library-topbar,
+html[data-family="library"] body .search-page > header.search-topbar,
+html[data-family="archive"] body .form-archive-page > header.form-archive-toolbar {
+  border-bottom: 1px solid rgb(var(--sh-l1-rgb) / 18%);
+  background-color: var(--sh-ink);
+  background-image:
+    linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 30%) 0 1px, transparent 1px 12px),
+    linear-gradient(
+      90deg,
+      rgb(var(--sh-l1-rgb) / 8%),
+      transparent 34%,
+      transparent 70%,
+      rgb(var(--sh-l2-rgb) / 7%)
+    );
+  background-size:
+    100% 100%,
+    100% 4px,
+    100% 100%;
+  background-position:
+    0 0,
+    0 100%,
+    0 0;
+  background-repeat: no-repeat;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%),
+    0 1px 0 rgb(0 0 0 / 70%);
+}
+
+/* The World's chapters regrade its bar: the atmosphere sheet sets the
+   ground per phase and clears the bar's image, so the seam and the ruler
+   come back here in the chapter's own light. */
+@media (forced-colors: none) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition[data-world-phase]
+    > header.topbar {
+    --sh-bar-light: var(--world-atmosphere-accent, var(--sh-l1));
+    background-image:
+      linear-gradient(90deg, var(--sh-bar-light) 0 3px, transparent 3px),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sh-bar-light) 30%, transparent) 0 1px,
+        transparent 1px 12px
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sh-bar-light) 8%, transparent),
+        transparent 34%,
+        transparent 70%,
+        rgb(var(--sh-l2-rgb) / 7%)
+      );
+  }
+}
+
+/* The bar's lower edge is the reading line: 2px of the edition's light. */
+html[data-family="world"] body main.site-shell.film-edition > header.topbar::after,
+html[data-family="dossier"] body .manager-page > header.manager-topbar::after,
+html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header::after {
+  height: 2px;
+  bottom: -1px;
+  background: linear-gradient(90deg, var(--sh-l1), var(--sh-l2) 70%, rgb(var(--sh-l2-rgb) / 0%));
+  opacity: 1;
+}
+
+/* ---------- The DW plate ---------- */
+/* A square plate with one cut corner, lit on its rim. The World's and
+   the files' sigil is turned square (it was a diamond); the other bars
+   draw it in front of their home link, as text that is not read out. */
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
+  border-radius: 0;
+  background:
+    linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  transform: none;
+  color: var(--sh-l1);
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil::before,
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil::after,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil::before,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil::after {
+  content: none;
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil i,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil i {
+  transform: none;
+  color: var(--sh-l1);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-indent: 0;
+}
+
+/* ---------- The edition's name ---------- */
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand b,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand b {
+  color: var(--sh-text);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-shadow: none;
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand small,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand small {
+  color: rgb(var(--sh-l1-rgb) / 82%);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+/* ================================================================
+   2. The trigger: a lit square with a 2x2 launcher glyph
+   (the iPad compact launcher's states keep their own look).
+   ================================================================ */
+html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  body
+  :is(
+    main.site-shell.film-edition > header.topbar .topbar-actions,
+    .manager-page > header.manager-topbar .detail-topbar-actions,
+    main.dream-page.dream-page > header.dream-site-header,
+    .rxs-page .rxs-local-nav-inner,
+    .library-page .library-topbar-actions,
+    .search-page > header.search-topbar,
+    .form-archive-page > header.form-archive-toolbar
+  )
+  > .side-panel-trigger.side-panel-trigger {
+  border: 0 !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%), var(--sh-l1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 22%),
+    0 0 0 1px rgb(var(--sh-l1-rgb) / 30%) !important;
+  clip-path: none !important;
+  color: var(--sh-on-l1) !important;
+}
+
+/* The older sheets lift the trigger on hover (scale 1.07); the lit square
+   stays put. A live press keeps the house sink (styles-press-feedback). */
+@media (hover: hover) {
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger.side-panel-trigger:hover:not([data-press]) {
+    scale: none;
+  }
+}
+
+html[data-family]:not([data-family="gallery"])
+  body
+  .side-panel-trigger
+  > :is(.side-panel-trigger-ring, .side-panel-trigger-convergence, .liquid-pointer-glow) {
+  display: none;
+}
+
+html[data-family]:not([data-family="gallery"]) body .side-panel-trigger.side-panel-trigger::before {
+  content: none;
+}
+
+/* Four cells: three filled, the last an open square (the launcher). */
+@media (forced-colors: none) {
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger
+    > .side-panel-trigger-glyph {
+    display: grid;
+    grid-template-columns: repeat(2, 7px);
+    grid-template-rows: repeat(2, 7px);
+    gap: 4px;
+    place-content: center;
+    justify-items: stretch;
+  }
+
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger
+    > .side-panel-trigger-glyph
+    i {
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: currentColor;
+    box-shadow: none;
+    translate: none;
+    rotate: none;
+  }
+
+  html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger
+    > .side-panel-trigger-glyph::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border: 1.5px solid currentColor;
+    border-radius: 1px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family]:not([data-family="gallery"]):not([data-ipad-menu-scrolled="true"]):not(
+        [data-ipad-menu-motion]
+      )
+      body
+      .side-panel-trigger:hover
+      > .side-panel-trigger-glyph::after {
+      background: currentColor;
+    }
+  }
+}
+
+/* The square is no longer clipped, so its ring sits outside it on the
+   bar's ink (the World's older rule drew it inside, on the lit face). */
+html[data-family]:not([data-family="gallery"])
+  body
+  .side-panel-trigger.side-panel-trigger.side-panel-trigger:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   3. The command bar per family
+   ================================================================ */
+
+/* ---------- World ---------- */
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand {
+  gap: 14px;
+}
+
+/* The three chapters as lit segments: the numeral, the word, and a
+   2px foot in the chapter's own colour on the one in view. */
+@media (min-width: 761px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav {
+    gap: 0;
+    border-inline: 1px solid rgb(var(--sh-l1-rgb) / 14%);
+  }
+
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a {
+    position: relative;
+    min-height: 48px;
+    padding-inline: 18px;
+    border-radius: 0;
+    color: var(--sh-text-2);
+    font-family: var(--sh-hud);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+  }
+
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a + a {
+    border-inline-start: 1px solid rgb(var(--sh-l1-rgb) / 14%);
+  }
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a::after {
+  content: "";
+  position: absolute;
+  inset: auto 10px 0;
+  height: 2px;
+  border: 0;
+  border-radius: 0;
+  background: var(--mr-ice, var(--sh-l1));
+  box-shadow: none;
+  opacity: 0;
+  transform: none;
+  scale: 1;
+  translate: none;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  nav
+  a[aria-current="location"] {
+  color: #fff;
+  background: linear-gradient(0deg, rgb(255 255 255 / 7%), transparent 80%);
+  text-shadow: none;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  nav
+  a[aria-current="location"]::after {
+  opacity: 1;
+}
+
+/* ---------- Character files ---------- */
+html[data-family="dossier"] body .manager-page > header.manager-topbar .manager-back {
+  border: 1px solid rgb(var(--sh-l1-rgb) / 30%);
+  border-radius: 3px;
+  background: var(--sh-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+  color: var(--sh-text);
+}
+
+html[data-family="dossier"] body .manager-page > header.manager-topbar .manager-back > i {
+  color: var(--sh-l1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"] body .manager-page > header.manager-topbar .manager-back:hover {
+    border-color: rgb(var(--sh-l1-rgb) / 62%);
+    background: rgb(var(--sh-l1-rgb) / 9%);
+  }
+}
+
+/* ---------- Dream Chapter: the same bar in Taisho light ---------- */
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > header.dream-site-header
+  .dream-back-link {
+  border: 1px solid rgb(var(--sh-l2-rgb) / 42%);
+  border-radius: 3px;
+  background: var(--sh-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  color: var(--sh-text);
+}
+
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > header.dream-site-header
+  .dream-back-link
+  > span:first-child {
+  color: var(--sh-l2);
+}
+
+html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header > p > span {
+  color: rgb(var(--sh-l2-rgb) / 92%);
+}
+
+html[data-family="dream"] body main.dream-page.dream-page > header.dream-site-header > p > b {
+  color: var(--sh-text);
+}
+
+html[data-family="dream"] body main.dream-page.dream-page > .dream-chapter-nav {
+  border-bottom: 1px solid rgb(var(--sh-l2-rgb) / 26%);
+  background-color: var(--sh-ink);
+  background-image: linear-gradient(180deg, rgb(var(--sh-l2-rgb) / 6%), transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 60%);
+}
+
+html[data-family="dream"]
+  body
+  main.dream-page.dream-page
+  > .dream-chapter-nav
+  a[aria-current="location"] {
+  color: var(--sh-text);
+  background: linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 18%), transparent 85%);
+  box-shadow: inset 0 -2px 0 var(--sh-l1);
+}
+
+/* ---------- The special sites: paint only (their bar's boxes are pinned) ---------- */
+/* The edition skins paint this bar at .rxs-page.rxs-page.<edition> weight,
+   so the page class is tripled here. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
+  border-bottom: 1px solid rgb(var(--sh-l1-rgb) / 18%);
+  background-color: var(--sh-ink);
+  background-image:
+    linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 28%) 0 1px, transparent 1px 12px);
+  background-size:
+    100% 100%,
+    100% 4px;
+  background-position:
+    0 0,
+    0 100%;
+  background-repeat: no-repeat;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%),
+    0 1px 0 rgb(0 0 0 / 70%);
+}
+
+html[data-family="special"] body .rxs-page > header.rxs-local-nav .rxs-brand > span {
+  color: rgb(var(--sh-l1-rgb) / 88%);
+}
+
+/* The diamond becomes the square DW plate (the box stays inside the
+   link's own 42px inset, so the brand's measured box is unchanged). */
+html[data-family="special"] body .rxs-page > header.rxs-local-nav .rxs-brand::before {
+  left: 0;
+  width: 34px;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
+  background:
+    linear-gradient(225deg, var(--sh-l1) 0 5px, transparent 5px),
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  transform: translateY(-50%);
+}
+
+html[data-family="special"] body .rxs-page > header.rxs-local-nav .rxs-brand::after {
+  left: 0;
+  width: 34px;
+  color: var(--sh-l1);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-indent: 0;
+}
+
+html[data-family="special"] body .rxs-page > header.rxs-local-nav nav a {
+  color: var(--sh-text-2);
+}
+
+/* The reading line along the bar's foot, from the page's own scroll. */
+@supports (animation-timeline: scroll(root block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page
+      > header.rxs-local-nav
+      > .rxs-local-nav-inner::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      left: 0;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        var(--sh-l1),
+        var(--sh-l2) 70%,
+        rgb(var(--sh-l2-rgb) / 0%)
+      );
+      pointer-events: none;
+      transform-origin: 0 50%;
+      animation: sh-shell-reading auto linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes sh-shell-reading {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Library and search ---------- */
+html[data-family="library"] body .library-page > header.library-topbar > a,
+html[data-family="library"] body .search-page > header.search-topbar > a.search-brand {
+  display: inline-grid;
+  grid-template-columns: 40px auto;
+  grid-auto-flow: row;
+  align-items: center;
+  align-content: center;
+  justify-content: start;
+  column-gap: 14px;
+  row-gap: 2px;
+  min-height: 44px;
+  color: var(--sh-text);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+}
+
+html[data-family="library"] body .library-page > header.library-topbar > a::before,
+html[data-family="library"] body .search-page > header.search-topbar > a.search-brand::before {
+  content: "DW";
+  content: "DW" / "";
+  grid-row: 1 / 3;
+  grid-column: 1;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
+  background:
+    linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 18%), transparent 62%), var(--sh-ink-2);
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  color: var(--sh-l1);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* The library's home link is one line: the plate takes one row so the
+   name sits on its centre line (the search brand has two lines). */
+html[data-family="library"] body .library-page > header.library-topbar > a::before {
+  grid-row: 1;
+}
+
+html[data-family="library"] body .library-page .library-topbar-actions > span,
+html[data-family="library"] body .search-page > header.search-topbar > a.search-brand > span {
+  margin: 0;
+  color: rgb(var(--sh-l1-rgb) / 86%);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+/* ================================================================
+   4. The launcher
+   ================================================================ */
+
+/* ---------- The sheet: the whole screen ----------
+   The areas follow the menu's own order (SPECIAL, then STORIES), so the
+   Tab order and the reading order are the same at every width. */
+html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+  --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 18px);
+  --sp-pad-inline: max(var(--sh-gutter), calc((100vw - 1680px) / 2));
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "head"
+    "find"
+    "sec"
+    "spe"
+    "sto"
+    "rid"
+    "unm"
+    "inf"
+    "sys";
+  align-content: start;
+  gap: 22px;
+  padding-top: var(--sp-pad-top);
+  padding-right: max(var(--sp-pad-inline), env(safe-area-inset-right, 0px));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+  padding-left: max(var(--sp-pad-inline), env(safe-area-inset-left, 0px));
+  border: 0;
+  background:
+    radial-gradient(ellipse 55% 42% at 100% 0%, rgb(var(--sh-l1-rgb) / 11%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgb(var(--sh-l2-rgb) / 9%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    var(--sh-ink) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  color: var(--sh-text);
+}
+
+html[data-family] body #site-side-panel.side-panel > .liquid-pointer-glow {
+  display: none;
+}
+
+/* ---------- The head: plate, name, close ---------- */
+html[data-family] body #site-side-panel.side-panel > .side-panel-head {
+  grid-area: head;
+  align-items: center;
+  margin-bottom: 0;
+  padding-bottom: 16px;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, var(--sh-l1), var(--sh-l2) 46%, rgb(var(--sh-l2-rgb) / 0%) 92%)
+      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
+    var(--sh-ink);
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-head::after {
+  content: none;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-head::before {
+  background: linear-gradient(180deg, var(--sh-ink) 0 40%, rgb(var(--sh-ink-rgb) / 0%));
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-head > div {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before {
+  content: "DW";
+  content: "DW" / "";
+  grid-row: 1 / 3;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 62%);
+  background:
+    linear-gradient(225deg, var(--sh-l1) 0 7px, transparent 7px),
+    linear-gradient(145deg, rgb(var(--sh-l1-rgb) / 20%), transparent 62%), var(--sh-ink-2);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  color: var(--sh-l1);
+  font-family: var(--sh-hud);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+html[data-family] body #site-side-panel.side-panel .side-panel-head p {
+  margin: 0;
+  color: rgb(var(--sh-l1-rgb) / 88%);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.26em;
+}
+
+html[data-family] body #site-side-panel.side-panel .side-panel-head b {
+  max-width: none;
+  margin: 4px 0 0;
+  color: var(--sh-text);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+  font-family: var(--sh-hud);
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  overflow-wrap: anywhere;
+}
+
+html[data-family] body #site-side-panel.side-panel .side-panel-close.side-panel-close {
+  border: 1px solid rgb(var(--sh-l1-rgb) / 42%);
+  border-radius: 3px;
+  background: var(--sh-ink-2) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%) !important;
+  color: var(--sh-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family] body #site-side-panel.side-panel .side-panel-close.side-panel-close:hover {
+    border-color: var(--sh-l1);
+    background: rgb(var(--sh-l1-rgb) / 12%) !important;
+    rotate: none;
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-close.side-panel-close:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Groups: a kicker and a body ---------- */
+html[data-family] body #site-side-panel.side-panel > .side-panel-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group > p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  color: var(--sh-l1);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  letter-spacing: 0.22em;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::before {
+  content: "";
+  width: 12px;
+  height: 2px;
+  flex: 0 0 12px;
+  border: 0;
+  background: var(--sh-l1);
+  transform: none;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 34%), rgb(var(--sh-l1-rgb) / 0%));
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group > .side-panel-links {
+  display: grid;
+  gap: 10px;
+}
+
+/* Every direct row: a plate. Nested settings (Ultra, iPad) keep theirs. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button) {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 48px;
+  margin: 0;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 20%);
+  border-radius: 3px;
+  background: rgb(var(--sh-ink-rgb) / 60%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  color: var(--sh-text);
+  translate: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > span {
+  font-family: var(--sh-display);
+  font-weight: 700;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > i {
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: rgb(var(--sh-l1-rgb) / 86%);
+  font-family: var(--sh-mono);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button):focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):not([aria-current]):hover:not([data-press]) {
+    border-color: rgb(var(--sh-l1-rgb) / 58%);
+    background: rgb(var(--sh-l1-rgb) / 8%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  }
+}
+
+/* The page (or chapter) the reader is on: a lit rim and a filled code. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+  border-color: var(--sh-l1);
+  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 16%), rgb(var(--sh-l1-rgb) / 3%) 80%);
+  box-shadow: inset 3px 0 0 var(--sh-l1);
+  color: #fff;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"])
+  > i {
+  background: var(--sh-l1);
+  color: var(--sh-on-l1);
+}
+
+/* ---------- FIND A RECORD: a search field and three short ways in ---------- */
+html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group {
+  grid-area: find;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 58px;
+  padding: 0 14px 0 16px;
+  border-color: rgb(var(--sh-l1-rgb) / 46%);
+  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 10%), transparent 60%), var(--sh-ink-2);
+}
+
+/* The magnifier, drawn: a ring and its handle. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search::before {
+  content: "";
+  position: static;
+  display: block;
+  width: 15px;
+  height: 15px;
+  box-sizing: border-box;
+  border: 2px solid var(--sh-l1);
+  border-radius: 50%;
+  background: none;
+  box-shadow: 5px 5px 0 -3.5px var(--sh-l1);
+  opacity: 1;
+  scale: none;
+  translate: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  > span {
+  color: var(--sh-text);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  > i {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sh-text-3);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-quick-search
+  kbd {
+  display: inline-grid;
+  min-width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 50%);
+  border-radius: 3px;
+  background: var(--sh-ink);
+  color: var(--sh-l1);
+  font: 600 13px/1 var(--sh-mono);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links
+  > a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding: 10px 14px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  > .side-panel-links
+  > a
+  > span {
+  font-size: 14px;
+}
+
+html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px dashed rgb(var(--sh-l1-rgb) / 42%);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--sh-text-2);
+  font-family: var(--sh-display);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button[aria-pressed="true"] {
+  border-style: solid;
+  border-color: var(--sh-l1);
+  color: var(--sh-text);
+}
+
+/* ---------- SECTIONS: the page's chapters, numbered ---------- */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group {
+  grid-area: sec;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links {
+  gap: 0;
+  counter-reset: sh-chapter;
+  border-top: 1px solid rgb(var(--sh-l1-rgb) / 16%);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a {
+  counter-increment: sh-chapter;
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  align-content: center;
+  gap: 2px 8px;
+  min-height: 56px;
+  padding: 8px 12px 8px 0;
+  border-width: 0 0 1px;
+  border-color: rgb(var(--sh-l1-rgb) / 16%);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* The chapter in view, or the page itself: lit from the left. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([aria-current="page"], [aria-current="location"]) {
+  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 16%), rgb(var(--sh-l1-rgb) / 0%) 90%);
+  box-shadow: inset 3px 0 0 var(--sh-l1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links
+    > a:not([aria-current]):hover:not([data-press]) {
+    background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 9%), rgb(var(--sh-l1-rgb) / 0%) 90%);
+    box-shadow: inset 2px 0 0 rgb(var(--sh-l1-rgb) / 60%);
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a::before {
+  content: counter(sh-chapter, decimal-leading-zero);
+  content: counter(sh-chapter, decimal-leading-zero) / "";
+  grid-row: 1 / 3;
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  padding-left: 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: rgb(var(--sh-l1-rgb) / 72%);
+  font: 600 18px/1 var(--sh-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  opacity: 1;
+  scale: none;
+  translate: none;
+}
+
+html[data-family="dream"]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a::before {
+  content: counter(sh-chapter, sh-daiji);
+  content: counter(sh-chapter, sh-daiji) / "";
+  font: 700 17px/1 var(--sh-display);
+  color: var(--sh-l2);
+}
+
+/* The numerals follow the pages' own: the top of a page is 00 (序 on the
+   Dream Chapter, before its 第一幕), so the World reads 01 STORY, 02
+   RIDERS, 03 RECORDS as its bar does and the Dream acts 壱 to 肆 as its
+   act bar does. A part inside the chapter above (六詠 in STORY, RE DIVE
+   after RECORDS, Final Stage's second rider record) takes a short rule
+   instead of a number; the gallery's way back to the World an arrow. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([href$="#top"], [href$="#gallery-top"]),
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is(
+    [href="/world#manager-archive"],
+    [href="/world#re-dive"],
+    [href="/final-stage#realm-royal"],
+    [href="/world"]
+  ) {
+  counter-increment: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([href$="#top"], [href$="#gallery-top"])::before {
+  content: "00";
+  content: "00" / "";
+}
+
+html[data-family="dream"]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href$="#top"]::before {
+  content: "序";
+  content: "序" / "";
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is(
+    [href="/world#manager-archive"],
+    [href="/world#re-dive"],
+    [href="/final-stage#realm-royal"]
+  )::before {
+  content: "";
+  justify-self: start;
+  width: 12px;
+  height: 0;
+  margin-left: 14px;
+  padding: 0;
+  border-top: 2px solid rgb(var(--sh-l1-rgb) / 52%);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href="/world"]::before {
+  content: "←";
+  content: "←" / "";
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a
+  > span {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a
+  > i {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+  padding: 0;
+  color: var(--sh-text-3);
+  font-family: var(--sh-hud);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([aria-current="page"], [aria-current="location"])
+  > i {
+  background: none;
+  color: var(--sh-l1);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a:is([aria-current="page"], [aria-current="location"])::before {
+  color: var(--sh-l1);
+}
+
+/* ---------- Tiles: every destination with its art ---------- */
+/* The tile groups: SPECIAL, STORIES, RIDERS, UNMANAGED, INFORMATION. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group {
+  grid-area: spe;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group {
+  grid-area: sto;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-riders {
+  grid-area: rid;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) {
+  grid-area: unm;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(2) {
+  grid-area: inf;
+}
+
+html[data-family] body #site-side-panel.side-panel > .side-panel-group:last-child {
+  grid-area: sys;
+}
+
+/* Only the World's menu has RIDERS. Elsewhere its row stays empty, so the
+   row below takes back the extra gap: UNMANAGED (then the fifth group),
+   and from tablets up INFORMATION beside it. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group:nth-last-child(3) {
+  margin-top: -22px;
+}
+
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3)
+    + .side-panel-group {
+    margin-top: -22px;
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links {
+  --sh-tile-h: 150px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  grid-auto-rows: minmax(var(--sh-tile-h), auto);
+  gap: 10px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-content: end;
+  align-items: end;
+  gap: 4px;
+  min-height: var(--sh-tile-h);
+  padding: 12px;
+  overflow: hidden;
+  isolation: isolate;
+  border-color: rgb(var(--sh-l1-rgb) / 24%);
+  background: var(--sh-ink-2);
+  text-align: left;
+}
+
+/* The art: a still plate under a veil, set only while the menu is open. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  top: 0;
+  left: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 46%, rgb(var(--sh-ink-rgb) / 88%) 100%),
+    var(--sh-art, none) var(--sh-art-pos, 50% 30%) / var(--sh-art-size, cover) no-repeat,
+    var(
+      --sh-art-hatch,
+      repeating-linear-gradient(135deg, rgb(var(--sh-l1-rgb) / 5%) 0 1px, transparent 1px 9px)
+    ),
+    var(--sh-art-ground, var(--sh-ink-2));
+  box-shadow: none;
+  opacity: 1;
+  scale: none;
+  translate: none;
+  pointer-events: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > span {
+  grid-row: 2;
+  font-size: clamp(14px, 1.05vw, 17px);
+  line-height: 1.35;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 85%);
+  text-wrap: balance;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > i {
+  grid-row: 1;
+  align-self: start;
+  justify-self: start;
+  max-width: 100%;
+  padding: 4px 6px;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 42%);
+  background: rgb(var(--sh-ink-rgb) / 82%);
+  color: var(--sh-l1);
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  white-space: normal;
+}
+
+/* The films' and sites' names are long: their size follows the tile's
+   own width, so 「ドリームチャプター」 and ディセプションワールド keep a
+   line each in a narrow tile. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :is(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group + .side-panel-group
+  )
+  > .side-panel-links
+  > a {
+  container-type: inline-size;
+}
+
+@supports (font-size: 1cqi) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links
+    > a
+    > span {
+    font-size: clamp(12px, calc((100cqi - 26px) / 11.6), 17px);
+  }
+}
+
+/* Which art each destination shows (delivery files the site already
+   serves; the films' and sites' own warm-up images where they are small). */
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/extreme-saga"] {
+  --sh-art: url("/archive-media/thumbs/saga-extreme.webp");
+  --sh-art-pos: 50% 24%;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/rexonance-saga"] {
+  --sh-art: url("/archive-media/thumbs/saga-rexonance.webp");
+  --sh-art-pos: 50% 24%;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/dream-chapter"] {
+  --sh-art: url("/dream-chapter-poster-05-delivery.webp");
+  --sh-art-pos: 50% 40%;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/world"] {
+  --sh-art: url("/episode-03-deception-world-delivery-600.webp");
+  --sh-art-pos: 50% 30%;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/final-stage"] {
+  --sh-art: url("/final-stage-logo-delivery-640.webp");
+}
+
+/* The Final Stage art is its title logo on black: the tile takes the
+   same black, and the logo sits above the tile's own name (the logo
+   spells it too), beside it on phones. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/final-stage"] {
+  --sh-art-ground: #000;
+  --sh-art-hatch: none;
+  --sh-art-pos: 50% 12%;
+  --sh-art-size: min(100%, 210px) auto;
+}
+
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links
+    > a[href^="/final-stage"] {
+    --sh-art-pos: 100% 50%;
+    --sh-art-size: auto 100%;
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:nth-last-child(3)
+  > .side-panel-links
+  > a[href="/characters/dante"] {
+  --sh-art: url("/character-dante-thumb.webp");
+  --sh-art-pos: 50% 16%;
+}
+
+/* Dante's portrait is shot on white: from tablets up it stands in the
+   right part of the tile, dimmed, so his face clears the chip and the
+   name sits on the ink beside him. */
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[href="/characters/dante"]::before {
+    left: 38%;
+    background:
+      linear-gradient(90deg, var(--sh-ink-2) 0, rgb(var(--sh-ink-rgb) / 0%) 46%),
+      linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 72%)),
+      linear-gradient(rgb(var(--sh-ink-rgb) / 34%), rgb(var(--sh-ink-rgb) / 34%)),
+      var(--sh-art, none) 50% 10% / cover no-repeat,
+      var(--sh-ink-3);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[href="/characters/dante"]::before {
+    background:
+      linear-gradient(90deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 75%)),
+      linear-gradient(rgb(var(--sh-ink-rgb) / 30%), rgb(var(--sh-ink-rgb) / 30%)),
+      var(--sh-art, none) var(--sh-art-pos, 50% 16%) / cover no-repeat,
+      var(--sh-ink-3);
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:nth-last-child(2)
+  > .side-panel-links
+  > a[href="/gallery"] {
+  --sh-art: url("/gallery/g03-480.webp");
+  --sh-art-pos: 50% 50%;
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a {
+  --sh-art-pos: 50% 18%;
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/saga"] {
+  --sh-art: url("/rider-saga-rexonance-thumbnail-20260827.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/realm"] {
+  --sh-art: url("/rider-realm.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/lore"] {
+  --sh-art: url("/rider-loa.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/vandal"] {
+  --sh-art: url("/rider-vandal-thumbnail-20260827.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/leddic"] {
+  --sh-art: url("/rider-leddic-home.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/argenome"] {
+  --sh-art: url("/rider-algenome.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/over-zeztz"] {
+  --sh-art: url("/rider-over-zeztz-thumbnail-20260829.webp");
+}
+
+html[data-family]:not([data-world-effects="economy"])
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-riders
+  > .side-panel-links
+  > a[href="/riders/cipher"] {
+  --sh-art: url("/rider-cipher-thumbnail-20260825.webp");
+}
+
+/* The page the reader is on, among the tiles. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button)[aria-current="page"] {
+  border-color: var(--sh-l1);
+  background: var(--sh-ink-2);
+  box-shadow:
+    inset 0 0 0 1px var(--sh-l1),
+    inset 0 -3px 0 var(--sh-l1);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > :where(
+    .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+    .side-panel-head
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group
+      + .side-panel-group,
+    .side-panel-riders,
+    .side-panel-group:nth-last-child(3),
+    .side-panel-group:nth-last-child(2)
+  )
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button)[aria-current="page"]
+  > i {
+  border-color: var(--sh-l1);
+  background: var(--sh-l1);
+  color: var(--sh-on-l1);
+}
+
+/* The notice: no art, the edition's light on a ruled plate. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > button.side-panel-announcement-trigger::before {
+  background:
+    radial-gradient(ellipse 80% 70% at 100% 0%, rgb(var(--sh-l1-rgb) / 18%), transparent 70%),
+    repeating-linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 7%) 0 1px, transparent 1px 10px),
+    var(--sh-ink-2);
+}
+
+/* ---------- RIDERS ---------- */
+/* Tablets and desktop: a cast board. Each rider stands full height in
+   the tile, the number at the top left, the name set vertically down the
+   right edge, so a seven-letter name never breaks. */
+@media (min-width: 761px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links > a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: start;
+    align-content: stretch;
+    padding: 10px 8px 10px 10px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a::before {
+    background:
+      linear-gradient(270deg, rgb(var(--sh-ink-rgb) / 86%) 0, rgb(var(--sh-ink-rgb) / 0%) 46%),
+      linear-gradient(180deg, rgb(var(--sh-ink-rgb) / 0%) 62%, rgb(var(--sh-ink-rgb) / 70%)),
+      var(--sh-art, none) var(--sh-art-pos, 50% 18%) / cover no-repeat,
+      var(--sh-ink-3);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > span {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 16px;
+    line-height: 1.1;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+    text-wrap: nowrap;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > i {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+
+/* Phones: short cards in two columns (one under 390px), the art at the
+   left edge with the number on it, the name beside it on one line. The
+   unmanaged file reads the same way. */
+@media (max-width: 760px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(.side-panel-riders, .side-panel-group:nth-last-child(3))
+    > .side-panel-links {
+    --sh-tile-h: 60px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(.side-panel-riders, .side-panel-group:nth-last-child(3))
+    > .side-panel-links
+    > a {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: center;
+    align-content: center;
+    padding: 8px 8px 8px 66px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(.side-panel-riders, .side-panel-group:nth-last-child(3))
+    > .side-panel-links
+    > a::before {
+    inset: 0 auto 0 0;
+    width: 56px;
+    background:
+      linear-gradient(90deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 75%)),
+      var(--sh-art, none) var(--sh-art-pos, 50% 18%) / cover no-repeat,
+      var(--sh-ink-3);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(.side-panel-riders, .side-panel-group:nth-last-child(3))
+    > .side-panel-links
+    > a
+    > span {
+    grid-row: 1;
+    grid-column: 1;
+    overflow: hidden;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a
+    > i {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    padding: 1px 5px;
+    font-size: 12px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a
+    > i {
+    grid-row: 2;
+    grid-column: 1;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links
+    > a[aria-current="page"]
+    > i {
+    background: none;
+    color: var(--sh-l1);
+  }
+
+  /* The older rule between the two columns: the cards have their own edge. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-riders
+    > .side-panel-links
+    > a::after {
+    content: none;
+  }
+}
+
+@media (max-width: 389px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- SYSTEM: one compact strip ---------- */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 8px 14px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a
+  > span {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a
+  > i {
+  justify-self: start;
+  padding: 0;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"] {
+  padding-left: 74px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"]::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  display: block;
+  width: 60px;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(var(--sh-ink-rgb) / 0%) 55%, rgb(var(--sh-ink-rgb) / 75%)),
+    var(--sh-art, none) 50% 22% / cover no-repeat,
+    var(--sh-ink-3);
+  box-shadow: none;
+  opacity: 1;
+  scale: none;
+  translate: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-group:last-child
+  > .side-panel-links
+  > a[href^="/form-archive"] {
+  --sh-art: url("/archive-media/thumbs/realm-royal.webp");
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  > .side-panel-group:last-child
+  .side-panel-zeus-toggle {
+  min-height: 56px;
+  margin: 0;
+  border-color: rgb(var(--sh-l1-rgb) / 22%);
+  border-radius: 3px;
+  background: rgb(var(--sh-ink-rgb) / 60%);
+}
+
+/* The Zeus switch, when on, takes the edition's lights (its track,
+   word and knob geometry stay as chrome-elevation sets them). */
+@media (forced-colors: none) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"] {
+    border-color: rgb(var(--sh-l1-rgb) / 45%);
+    background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 9%), rgb(var(--sh-l2-rgb) / 5%));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"]
+    > i {
+    border-color: rgb(var(--sh-l1-rgb) / 62%);
+    background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 24%), rgb(var(--sh-l2-rgb) / 18%));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .side-panel-zeus-toggle[aria-pressed="true"]
+    > i
+    u {
+    background: var(--sh-l1);
+  }
+}
+
+/* The older markers on the rows were drawn with a transform of their
+   own; the plates' ::before is art or a numeral here. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)::before {
+  transform: none;
+}
+
+/* ================================================================
+   5. Layouts
+   ================================================================ */
+/* Phones: one column. The two special sites and the gallery side by
+   side, the films as wide strips (their names are long). */
+@media (max-width: 760px) {
+  html[data-family] body #site-side-panel.side-panel .side-panel-head b {
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before {
+    width: 40px;
+    height: 40px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div {
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
+    --sh-tile-h: 104px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
+    --sh-tile-h: 168px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    --sh-tile-h: 118px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablets: the chapters in two columns, the tiles in wider rows. */
+@media (min-width: 761px) {
+  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-areas:
+      "head head head head head head"
+      "find find find find find find"
+      "sec  sec  sec  sec  sec  sec"
+      "spe  spe  sto  sto  sto  sto"
+      "rid  rid  rid  rid  rid  rid"
+      "unm  unm  inf  inf  inf  inf"
+      "sys  sys  sys  sys  sys  sys";
+    column-gap: 14px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
+    grid-template-columns: minmax(0, 2.4fr) repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search {
+    grid-column: auto;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: 190px;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    --sh-tile-h: 168px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    --sh-tile-h: 112px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .ultra-mode-setting {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1000px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    --sh-tile-h: 156px;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: the chapters hold the left column beside the tiles; the
+   settings close the screen in one row. */
+@media (min-width: 1180px) {
+  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+    grid-template-columns: minmax(250px, 1.1fr) repeat(5, minmax(0, 1fr));
+    grid-template-areas:
+      "head head head head head head"
+      "find find find find find find"
+      "sec  spe  spe  sto  sto  sto"
+      "sec  rid  rid  rid  rid  rid"
+      "sec  unm  inf  inf  inf  inf"
+      "sys  sys  sys  sys  sys  sys";
+    column-gap: 18px;
+    row-gap: 16px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3),
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group:nth-last-child(3)
+    + .side-panel-group {
+    margin-top: -16px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group {
+    align-self: start;
+    padding-right: 6px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: clamp(160px, 21vh, 250px);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    --sh-tile-h: clamp(128px, 17vh, 190px);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    --sh-tile-h: clamp(96px, 12vh, 132px);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    .ultra-mode-setting {
+    grid-column: span 2;
+  }
+}
+
+/* ================================================================
+   6. Motion (opening the launcher, hovering a tile)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"]) body #site-side-panel.side-panel {
+    transition:
+      translate 0.42s var(--sh-ease),
+      visibility 0.42s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel
+    > :where(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
+      .side-panel-riders,
+      .side-panel-group:nth-last-child(3),
+      .side-panel-group:nth-last-child(2)
+    )
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button)::before {
+    transform: scale(1.08);
+    transition: transform 0.9s var(--sh-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > :where(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
+      .side-panel-riders,
+      .side-panel-group:nth-last-child(3),
+      .side-panel-group:nth-last-child(2)
+    )
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button)::before {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > :where(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
+      .side-panel-riders,
+      .side-panel-group:nth-last-child(3),
+      .side-panel-group:nth-last-child(2)
+    )
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button):hover::before {
+    transform: scale(1.05);
+    transition-duration: 0.5s;
+  }
+}
+
+/* ================================================================
+   7. Forced colours: plates keep real edges; art and lights drop out.
+   ================================================================ */
+@media (forced-colors: active) {
+  /* The trigger keeps the system edge future-interface gives it. */
+  html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar .topbar-actions,
+      .manager-page > header.manager-topbar .detail-topbar-actions,
+      main.dream-page.dream-page > header.dream-site-header,
+      .rxs-page .rxs-local-nav-inner,
+      .library-page .library-topbar-actions,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar
+    )
+    > .side-panel-trigger.side-panel-trigger {
+    border: 1px solid ButtonText !important;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
+    border: 1px solid CanvasText;
+  }
+
+  /* The art drops out; the search field keeps its drawn magnifier (a
+     border, so it takes the system colour) and its column. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):not(.side-panel-quick-search)::before {
+    display: none;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links
+    > a::before {
+    display: block;
+    color: CanvasText;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+    border: 2px solid Highlight;
+    border-inline-start-width: 4px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before {
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+
+  /* The current row's code is a Highlight chip (chrome-elevation unforces
+     it for that), never the edition's light. The id is doubled to outrank
+     the tile and chapter rules above. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel#site-side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"])
+    > i {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  /* The magnifier's handle is a shadow, which forced colours drop. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search::before {
+    forced-color-adjust: none;
+    border-color: ButtonText;
+    box-shadow: 5px 5px 0 -3.5px ButtonText;
+  }
+}

@@ -109,12 +109,26 @@ async function verifyKeyboardMenu(page) {
     return box && box.left < innerWidth - box.width / 2;
   });
   const pageScrollBefore = await page.evaluate(() => scrollY);
-  await page.mouse.move(40, Math.round(page.viewportSize().height / 2));
-  await page.mouse.wheel(0, 800);
-  await page.waitForTimeout(100);
-  const pageScrollAfter = await page.evaluate(() => scrollY);
-  const panelScrollBefore = await panel.evaluate((element) => element.scrollTop);
+  // rx10: the menu is a full-screen launcher (styles-stage-shell.css), so the
+  // scrim is only tested where it still shows beside the panel at rest.
+  await panel.evaluate((element) =>
+    Promise.all(element.getAnimations().map((animation) => animation.finished.catch(() => {}))),
+  );
   const panelBounds = await panel.boundingBox();
+  const scrimShows = panelBounds.x > 60;
+  if (scrimShows) {
+    await page.mouse.move(40, Math.round(page.viewportSize().height / 2));
+    await page.mouse.wheel(0, 800);
+    await page.waitForTimeout(100);
+  }
+  const pageScrollAfter = await page.evaluate(() => scrollY);
+  await panel.evaluate((element) => {
+    element.scrollTop = 0;
+  });
+  const panelScrollBefore = await panel.evaluate((element) => element.scrollTop);
+  const panelScrolls = await panel.evaluate(
+    (element) => element.scrollHeight > element.clientHeight + 1,
+  );
   await page.mouse.move(
     Math.round(panelBounds.x + panelBounds.width / 2),
     Math.round(panelBounds.y + panelBounds.height * 0.8),
@@ -123,8 +137,16 @@ async function verifyKeyboardMenu(page) {
   await page.waitForTimeout(100);
   const panelScrollAfter = await panel.evaluate((element) => element.scrollTop);
   assert.equal(pageScrollAfter, pageScrollBefore, "wheel over the scrim must not scroll the page behind the menu");
-  assert.ok(panelScrollAfter > panelScrollBefore, "wheel inside the menu should scroll its list");
-  await page.mouse.click(40, Math.round(page.viewportSize().height / 2));
+  assert.equal(
+    await page.evaluate(() => scrollY),
+    pageScrollBefore,
+    "wheel inside the menu must not scroll the page behind it",
+  );
+  if (panelScrolls) {
+    assert.ok(panelScrollAfter > panelScrollBefore, "wheel inside the menu should scroll its list");
+  }
+  if (scrimShows) await page.mouse.click(40, Math.round(page.viewportSize().height / 2));
+  else await page.locator("#site-side-panel .side-panel-close").click();
   await page.waitForFunction(() => document.querySelector(".side-panel-trigger")?.getAttribute("aria-expanded") === "false");
   assert.equal(await page.evaluate(() => document.documentElement.dataset.sideMenuOpen), undefined);
   return {
