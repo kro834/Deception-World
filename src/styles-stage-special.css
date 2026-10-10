@@ -30,6 +30,9 @@ html[data-family="special"] body .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs
   --dxs-hot: rgb(var(--dx-edition-rgb) / 76%);
   --dxs-wrap: 1240px;
   --dxs-nav: var(--rxs-local-nav-reserve, 62px);
+  /* The showcase's 28px product tiles square up to the STAGE plate. */
+  --sc-radius: 4px;
+  --sc-radius-small: 3px;
   font-family: var(--dx-body);
 }
 
@@ -117,9 +120,16 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
   > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
-  :is(a, button, select, input):focus-visible {
+  :is(a, button, select, input):focus-visible:not([data-pointer-focus="true"]) {
   outline: 2px solid var(--dx-focus);
   outline-offset: 3px;
+}
+
+/* The last chapter is at least a screen tall, so a jump to it lands
+   under the bar like the others (the page must scroll that far). */
+html[data-family="special"] body .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page) > #system,
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders {
+  min-height: calc(100svh - var(--dxs-nav) - 24px);
 }
 
 /* ================================================================
@@ -153,13 +163,9 @@ html[data-family="special"]
   padding: 0 0 clamp(16px, 1.8vw, 22px);
   text-align: start;
   border: 0;
-  background: linear-gradient(
-      90deg,
-      var(--dx-edition),
-      rgb(var(--dx-edition-2-rgb) / 60%) 55%,
-      transparent
-    )
-    0 100% / min(240px, 42%) 1px no-repeat,
+  background:
+    linear-gradient(90deg, var(--dx-edition), rgb(var(--dx-edition-2-rgb) / 60%) 55%, transparent) 0
+      100% / min(240px, 42%) 1px no-repeat,
     linear-gradient(var(--dxs-line), var(--dxs-line)) 0 100% / 100% 1px no-repeat;
   box-shadow: none;
 }
@@ -295,8 +301,7 @@ html[data-family="special"]
   --liquid-control-radius: 3px !important;
   border-radius: 4px !important;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 40%),
-    var(--dx-ink-2) !important;
+    linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 40%), var(--dx-ink-2) !important;
   box-shadow:
     inset 0 0 0 1px rgb(var(--dx-edition-rgb) / 24%),
     inset 0 1px 0 rgb(255 255 255 / 10%) !important;
@@ -443,7 +448,7 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
     > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
-    :is(a, button, select, input):focus-visible {
+    :is(a, button, select, input):focus-visible:not([data-pointer-focus="true"]) {
     outline-color: Highlight;
   }
 }

@@ -41,8 +41,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page {
   --fsx-gutter: clamp(16px, 4vw, 64px);
   --fsx-measure: 38em;
   background:
-    radial-gradient(80% 40% at 50% 0, rgb(170 178 255 / 7%), transparent 70%),
-    var(--fsx-ink);
+    radial-gradient(80% 40% at 50% 0, rgb(170 178 255 / 7%), transparent 70%), var(--fsx-ink);
 }
 
 /* ================================================================
@@ -66,9 +65,22 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::bef
   height: 9px;
   margin: 0;
   background:
-    linear-gradient(45deg, transparent 0 calc(50% - 0.5px), var(--fsx-violet) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 50% 0 / 9px 9px no-repeat,
-    linear-gradient(-45deg, transparent 0 calc(50% - 0.5px), var(--fsx-violet) calc(50% - 0.5px) calc(50% + 0.5px), transparent calc(50% + 0.5px)) 50% 0 / 9px 9px no-repeat,
-    linear-gradient(90deg, transparent, var(--fsx-line-2) 30%, var(--fsx-line-2) 70%, transparent) 0 4px / 100% 1px no-repeat;
+    linear-gradient(
+        45deg,
+        transparent 0 calc(50% - 0.5px),
+        var(--fsx-violet) calc(50% - 0.5px) calc(50% + 0.5px),
+        transparent calc(50% + 0.5px)
+      )
+      50% 0 / 9px 9px no-repeat,
+    linear-gradient(
+        -45deg,
+        transparent 0 calc(50% - 0.5px),
+        var(--fsx-violet) calc(50% - 0.5px) calc(50% + 0.5px),
+        transparent calc(50% + 0.5px)
+      )
+      50% 0 / 9px 9px no-repeat,
+    linear-gradient(90deg, transparent, var(--fsx-line-2) 30%, var(--fsx-line-2) 70%, transparent) 0
+      4px / 100% 1px no-repeat;
   border: 0;
   opacity: 1;
   translate: -50% 0;
@@ -86,20 +98,41 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .r
   margin: 0 auto clamp(36px, 5vw, 64px);
   padding: 0 0 clamp(20px, 2.4vw, 28px);
   text-align: center;
-  background: linear-gradient(90deg, transparent, var(--fsx-line-2) 35%, var(--fsx-line-2) 65%, transparent) 50% 100% / min(420px, 80%) 1px no-repeat;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--fsx-line-2) 35%,
+      var(--fsx-line-2) 65%,
+      transparent
+    )
+    50% 100% / min(420px, 80%) 1px no-repeat;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading::before {
   content: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading > * {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > * {
   grid-column: 1;
   justify-self: center;
 }
 
 /* The slate: the chapter's number and name in a hairline frame. */
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading > p {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > p {
   display: inline-block;
   margin: 0 0 clamp(16px, 2vw, 24px);
   padding: 7px 16px 7px 18px;
@@ -111,7 +144,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .r
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading > h2 {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > h2 {
   max-width: 20em;
   font-size: clamp(30px, 4.2vw, 58px);
   line-height: 1.24;
@@ -119,7 +157,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .r
   text-align: center;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading > span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > span {
   max-width: 36em;
   text-align: center;
   color: var(--dx-text-2);
@@ -143,8 +186,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   text-align: center;
   background:
     radial-gradient(46% 40% at 50% 34%, rgb(170 178 255 / 14%), transparent 70%),
-    radial-gradient(60% 30% at 50% 100%, rgb(201 155 255 / 10%), transparent 72%),
-    var(--fsx-house);
+    radial-gradient(60% 30% at 50% 100%, rgb(201 155 255 / 10%), transparent 72%), var(--fsx-house);
 }
 
 /* The poster's frame: an inset hairline with lit corners. */
@@ -173,7 +215,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero::after 
   content: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero > :is(.rxs-hero-ambient, .fsk-map) {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  > :is(.rxs-hero-ambient, .fsk-map) {
   position: absolute;
   inset: 0;
 }
@@ -224,7 +270,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-he
 }
 
 /* The credit line. */
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-copy > p:first-child {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  .rxs-hero-copy
+  > p:first-child {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -234,8 +285,18 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-he
   letter-spacing: 0.3em;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-copy > p:first-child::before,
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-copy > p:first-child::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  .rxs-hero-copy
+  > p:first-child::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  .rxs-hero-copy
+  > p:first-child::after {
   content: "";
   display: block;
   flex: none;
@@ -318,8 +379,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-sc
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story {
   background:
-    radial-gradient(60% 28% at 50% 0, rgb(170 178 255 / 9%), transparent 72%),
-    var(--fsx-house);
+    radial-gradient(60% 28% at 50% 0, rgb(170 178 255 / 9%), transparent 72%), var(--fsx-house);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
@@ -396,7 +456,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story
   text-align: start;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy p:first-child {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #story
+  .fst-story-copy
+  p:first-child {
   color: var(--dx-text);
   font: 500 clamp(17px, 1.45vw, 20px) / 2.05 var(--dx-display);
   letter-spacing: 0.05em;
@@ -423,13 +488,25 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-console::before,
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-console::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-console::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-console::after {
   content: none;
 }
 
 /* Eight billing slots; the names stand vertically. */
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-tabs.liquid-swipe-tabs {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.liquid-swipe-tabs {
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 6px;
   width: min(1040px, 100%);
@@ -502,7 +579,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail > figure {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  > figure {
   grid-column: 1;
   grid-row: 1;
   position: relative;
@@ -516,14 +598,26 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
   box-shadow: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail > figure img {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  > figure
+  img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail > figure figcaption {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  > figure
+  figcaption {
   position: absolute;
   inset: auto auto 14px 14px;
   margin: 0;
@@ -531,7 +625,14 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail > figure figcaption span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  > figure
+  figcaption
+  span {
   display: inline-block;
   padding: 5px 10px;
   color: var(--fsx-ink);
@@ -617,8 +718,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders {
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(40px, 5vw, 64px);
   background:
-    radial-gradient(50% 30% at 50% 100%, rgb(201 155 255 / 8%), transparent 72%),
-    var(--fsx-ink);
+    radial-gradient(50% 30% at 50% 100%, rgb(201 155 255 / 8%), transparent 72%), var(--fsx-ink);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders > .rxs-section-heading {
@@ -779,8 +879,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
   border: 0;
   border-top: 1px solid var(--fsx-line);
   background:
-    radial-gradient(50% 60% at 50% 0, rgb(170 178 255 / 10%), transparent 72%),
-    var(--fsx-house);
+    radial-gradient(50% 60% at 50% 0, rgb(170 178 255 / 10%), transparent 72%), var(--fsx-house);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
@@ -869,7 +968,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     grid-template-columns: auto minmax(0, var(--fsx-measure)) minmax(0, 1fr);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-tabs.liquid-swipe-tabs {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-tabs.liquid-swipe-tabs {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
@@ -898,8 +1001,33 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
-    letter-spacing: 0.2em;
-    text-indent: 0.2em;
+    font-size: clamp(22px, 7.2vw, 30px);
+    letter-spacing: 0.14em;
+    text-indent: 0.14em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child {
+    letter-spacing: 0.16em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child::after {
+    width: 16px;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
@@ -987,7 +1115,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     -webkit-text-stroke: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading > p,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-section
+    > .rxs-section-heading
+    > p,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a {
     border: 1px solid CanvasText;
   }

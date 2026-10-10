@@ -53,7 +53,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   text-align: start;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-copy
+  > p:first-child {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -64,7 +69,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   letter-spacing: 0.24em;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-copy
+  > p:first-child::before {
   content: "";
   flex: none;
   width: 34px;
@@ -101,7 +111,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   letter-spacing: 0.06em;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-lede::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-lede::before {
   content: "";
   flex: none;
   width: 22px;
@@ -124,7 +138,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   box-shadow: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-scroll-cue i {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-scroll-cue
+  i {
   position: relative;
   display: block;
   width: 64px;
@@ -137,13 +156,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
 }
 
 /* The stage the armour stands on. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual {
-  background:
-    var(--rxt-stage-light),
-    var(--ra-lattice, var(--dx-lattice));
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual {
+  background: var(--rxt-stage-light), var(--ra-lattice, var(--dx-lattice));
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual img {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  img {
   object-fit: contain;
   object-position: 50% 100%;
 }
@@ -154,11 +180,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
 @media (min-width: 1100px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     display: grid;
-    grid-template-columns: [stage-start] minmax(0, var(--rxt-stage)) [stage-end script-start] minmax(
+    grid-template-columns:
+      [stage-start] minmax(0, var(--rxt-stage)) [stage-end script-start] minmax(
         0,
         var(--rxt-script)
-      ) [script-end];
-    grid-template-rows: [title-start] max(560px, calc(100svh - var(--dxs-nav))) [title-end] repeat(6, auto);
+      )
+      [script-end];
+    grid-template-rows: [title-start] max(560px, calc(100svh - var(--dxs-nav))) [title-end] repeat(
+        6,
+        auto
+      );
     align-items: start;
   }
 
@@ -167,10 +198,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     grid-row: 1 / 5;
     align-self: stretch;
     display: grid;
-    grid-template-columns: [stage-start] minmax(0, var(--rxt-stage)) [stage-end script-start] minmax(
+    grid-template-columns:
+      [stage-start] minmax(0, var(--rxt-stage)) [stage-end script-start] minmax(
         0,
         var(--rxt-script)
-      ) [script-end];
+      )
+      [script-end];
     grid-template-rows: [title-start] max(560px, calc(100svh - var(--dxs-nav))) [title-end] 1fr;
     align-items: stretch;
     justify-items: stretch;
@@ -198,7 +231,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     inset: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual {
     grid-column: stage;
     grid-row: 1 / -1;
     align-self: start;
@@ -227,7 +264,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     bottom: 0;
     z-index: 4;
     width: 1px;
-    background: linear-gradient(180deg, transparent, var(--rxt-ice) 30%, var(--rxt-pink) 64%, transparent);
+    background: linear-gradient(
+      180deg,
+      transparent,
+      var(--rxt-ice) 30%,
+      var(--rxt-pink) 64%,
+      transparent
+    );
     opacity: 0.7;
     pointer-events: none;
   }
@@ -263,7 +306,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     translate: -50% -52%;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-copy {
     grid-column: script;
     grid-row: title;
     align-self: center;
@@ -273,7 +320,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     padding: 0 var(--rxt-gutter) 0 clamp(40px, 5vw, 96px);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-scroll-cue {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-scroll-cue {
     grid-column: script;
     grid-row: title;
     align-self: end;
@@ -325,12 +376,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
     grid-row: 7;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.rxs-rexonance-page
-    > :is(#performance, #p14) {
-    padding: clamp(72px, 9vw, 120px) var(--rxt-gutter) clamp(64px, 7vw, 96px)
-      clamp(40px, 5vw, 96px);
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > :is(#performance, #p14) {
+    padding: clamp(72px, 9vw, 120px) var(--rxt-gutter) clamp(64px, 7vw, 96px) clamp(40px, 5vw, 96px);
     background: none;
   }
 }
@@ -371,17 +418,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-ch
   box-shadow: none;
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-chapter-index a + a {
+  border-left: 1px solid rgb(121 232 255 / 14%);
+}
+
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rxs-chapter-index
-  a
-  + a {
-  border-left: 1px solid rgb(121 232 255 / 14%);
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-chapter-index a::before,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-chapter-index a::after {
+  a::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-chapter-index
+  a::after {
   content: none;
 }
 
@@ -425,7 +475,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #perfor
   counter-reset: rxt-cut;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
@@ -612,19 +666,26 @@ html[data-family="special"]
 }
 
 /* The comparison: one armour plate, an instrument. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-comparison {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-comparison {
   max-width: none;
   margin: 0;
   border-radius: 0;
   clip-path: polygon(0 0, calc(100% - var(--dx-cut)) 0, 100% var(--dx-cut), 100% 100%, 0 100%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-comparison-note {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-comparison-note {
   max-width: none;
   margin: clamp(20px, 2.4vw, 28px) 0 0;
   text-align: start;
 }
-
 
 /* ================================================================
    02 P14: the core and its instrument, in the same column
@@ -638,7 +699,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   margin: 0 0 clamp(36px, 4.4vw, 56px);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-overview figure {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview
+  figure {
   aspect-ratio: 21 / 8;
   margin: 0;
   border: 1px solid rgb(121 232 255 / 26%);
@@ -647,11 +713,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   box-shadow: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-overview figure::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview
+  figure::after {
   border-radius: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-overview img {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview
+  img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -663,7 +739,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   margin: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy > small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > small {
   display: block;
   margin: 0 0 12px;
   color: var(--rxt-ice);
@@ -692,7 +773,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   border-block: 1px solid rgb(121 232 255 / 18%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dl > div {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div {
   display: grid;
   gap: 6px;
   padding: 14px 12px 14px 0;
@@ -700,7 +787,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dl > div + div {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div
+  + div {
   padding-left: 14px;
   border-left: 1px solid rgb(121 232 255 / 14%);
 }
@@ -742,7 +836,13 @@ html[data-family="special"]
   letter-spacing: 0.2em;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-comparator > header h3 {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-comparator
+  > header
+  h3 {
   font: 700 clamp(22px, 2vw, 28px) / 1.3 var(--dx-display);
   letter-spacing: 0.02em;
 }
@@ -755,7 +855,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   border-top: 1px solid rgb(121 232 255 / 22%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
@@ -774,12 +879,28 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article::before,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article::after {
   content: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article
+  > small {
   grid-area: label;
   margin: 0;
   color: var(--dx-text);
@@ -787,7 +908,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   letter-spacing: 0.03em;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics .rxs-p14-values {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  .rxs-p14-values {
   grid-area: values;
   display: grid;
   grid-template-columns: auto auto;
@@ -798,7 +924,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   border: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values > span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-values
+  > span {
   display: grid;
   justify-items: end;
   gap: 2px;
@@ -822,7 +953,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   white-space: nowrap;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-values
+  strong {
   color: var(--dx-text);
   font: 600 clamp(26px, 2.6vw, 36px) / 1 var(--dx-mono);
   letter-spacing: -0.01em;
@@ -831,7 +967,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article
+  > p {
   grid-area: delta;
   display: flex;
   flex-wrap: wrap;
@@ -843,12 +985,26 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
   border: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article
+  > p
+  span {
   color: var(--dx-text-3);
   font: 500 12px / 1.4 var(--dx-body);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p b {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  > article
+  > p
+  b {
   color: var(--rxt-ice);
   font: 600 13px / 1.4 var(--dx-mono);
   white-space: nowrap;
@@ -868,12 +1024,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages {
   padding-inline: var(--rxt-gutter);
   background:
-    radial-gradient(50% 60% at 28% 58%, rgb(var(--rxt-form-rgb, 150 156 255) / 14%), transparent 70%),
+    radial-gradient(
+      50% 60% at 28% 58%,
+      rgb(var(--rxt-form-rgb, 150 156 255) / 14%),
+      transparent 70%
+    ),
     radial-gradient(36% 26% at 28% 100%, rgb(121 232 255 / 16%), transparent 70%),
     linear-gradient(104deg, transparent 0 18%, rgb(121 232 255 / 5%) 18% 21%, transparent 21%),
     linear-gradient(80deg, transparent 0 36%, rgb(255 143 216 / 4%) 36% 38%, transparent 38%),
-    var(--ra-lattice, var(--dx-lattice)),
-    var(--dx-ink);
+    var(--ra-lattice, var(--dx-lattice)), var(--dx-ink);
   border-top: 1px solid rgb(121 232 255 / 22%);
 }
 
@@ -886,7 +1045,11 @@ html[data-family="special"]
   margin-inline: auto;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-switcher {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-switcher {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   max-width: var(--dxs-wrap);
@@ -894,7 +1057,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
 }
 
 /* The form selector: a hard-edged segment bar, left on the scene. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-tabs.liquid-swipe-tabs {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-tabs.liquid-swipe-tabs {
   justify-self: start;
   width: min(560px, 100%);
   margin: 0 0 12px;
@@ -924,7 +1091,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   box-shadow: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure {
   position: relative;
   grid-column: 2;
   grid-row: 1;
@@ -938,12 +1110,22 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   border-radius: 0;
   background:
     radial-gradient(60% 34% at 50% 100%, rgb(121 232 255 / 18%), transparent 72%),
-    radial-gradient(70% 60% at 50% 42%, color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 16%, transparent), transparent 72%);
+    radial-gradient(
+      70% 60% at 50% 42%,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 16%, transparent),
+      transparent 72%
+    );
   box-shadow: none;
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure img {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure
+  img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -951,7 +1133,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   border-radius: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div {
   position: relative;
   grid-column: 1;
   grid-row: 1;
@@ -961,7 +1148,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   text-align: start;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > small {
   display: inline-block;
   margin: 0 0 clamp(16px, 1.8vw, 22px);
   padding: 4px 10px;
@@ -974,7 +1167,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > h3 {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > h3 {
   margin: 0 0 clamp(16px, 1.8vw, 22px);
   color: var(--dx-text);
   font: 700 clamp(30px, 3.6vw, 52px) / 1.2 var(--dx-display);
@@ -983,13 +1182,25 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > p {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > p {
   margin: 0;
   color: var(--dx-text-2);
   font: 400 clamp(14px, 1.2vw, 16px) / 1.95 var(--dx-body);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > ul {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul {
   display: grid;
   gap: 0;
   margin: clamp(20px, 2.4vw, 30px) 0 0;
@@ -998,7 +1209,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   border-top: 1px solid rgb(121 232 255 / 18%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > ul > li {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1013,7 +1231,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > ul > li::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li::before {
   content: "";
   flex: none;
   width: 8px;
@@ -1042,7 +1267,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   border-block: 1px solid rgb(121 232 255 / 20%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article {
   display: grid;
   grid-template-rows: auto auto 1fr;
   align-content: start;
@@ -1058,23 +1288,49 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   clip-path: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article + article {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article
+  + article {
   border-left: 1px solid rgb(121 232 255 / 16%);
 }
 
 /* The last facet (the human will) keeps its gold, as a lit edge. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article:last-child {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article:last-child {
   color: var(--dx-text);
   background: linear-gradient(180deg, rgb(242 216 150 / 9%), transparent 70%);
   box-shadow: inset 0 2px 0 var(--rxt-gold);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article::before,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article::after {
   content: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid header {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -1082,29 +1338,60 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   margin: 0;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid header span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  header
+  span {
   color: transparent;
   font: 600 clamp(40px, 4vw, 60px) / 0.9 var(--dx-mono);
   -webkit-text-stroke: 1px rgb(121 232 255 / 70%);
   background: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article:last-child header span {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article:last-child
+  header
+  span {
   -webkit-text-stroke-color: rgb(242 216 150 / 86%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid header small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  header
+  small {
   color: var(--rxt-ice);
   font: 400 12px / 1.4 var(--dx-hud);
   letter-spacing: 0.18em;
   text-align: end;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article:last-child header small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article:last-child
+  header
+  small {
   color: var(--rxt-gold);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid h3 {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  h3 {
   margin: 0;
   color: var(--dx-text);
   font: 700 clamp(22px, 2vw, 28px) / 1.35 var(--dx-display);
@@ -1112,7 +1399,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   -webkit-text-fill-color: currentcolor;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid p {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  p {
   margin: 0;
   color: var(--dx-text-2);
   font: 400 14px / 1.95 var(--dx-body);
@@ -1136,8 +1428,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
   border-top: 1px solid rgb(121 232 255 / 22%);
   background:
     radial-gradient(50% 80% at 10% 100%, rgb(121 232 255 / 10%), transparent 70%),
-    radial-gradient(40% 70% at 90% 100%, rgb(255 143 216 / 8%), transparent 70%),
-    var(--dx-ink);
+    radial-gradient(40% 70% at 90% 100%, rgb(255 143 216 / 8%), transparent 70%), var(--dx-ink);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div {
@@ -1175,7 +1466,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > a:first-of-type {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > a:first-of-type {
   color: var(--dx-ink);
   border-color: transparent;
   background: var(--rxt-ice);
@@ -1194,7 +1489,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
 
 @media (min-width: 1100px) {
   /* The selector and its hint sit over the copy, at the scene's left. */
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-switcher {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-switcher {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     column-gap: clamp(28px, 4vw, 72px);
   }
@@ -1208,19 +1507,88 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
     grid-column: 1;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel {
     grid-column: 1 / -1;
     margin-top: calc(-1 * clamp(8px, 1vw, 12px));
   }
 }
 
 /* The scene's figure stands unframed on the lit floor. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel::before,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel::after,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure::after,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div::before,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel::after,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure::after,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div::after {
   content: none;
+}
+
+/* The convergence ring keeps its one pass on a change of form, but no
+   frame at rest; the copy column loses its old rules. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure
+  > span {
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* The form's art melts into the scene instead of standing in a box. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure
+  img {
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(180deg, transparent, #000 14%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent),
+    linear-gradient(180deg, transparent, #000 14%, #000 88%, transparent);
+  mask-composite: intersect;
 }
 
 /* ================================================================
@@ -1251,7 +1619,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     inset: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual {
     grid-row: 1;
     grid-column: 1;
     position: relative;
@@ -1296,7 +1668,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     translate: -50% -52%;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-copy {
     grid-row: 2;
     grid-column: 1;
     position: relative;
@@ -1306,7 +1682,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     padding: clamp(26px, 6vw, 48px) var(--rxt-gutter) 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-scroll-cue {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-scroll-cue {
     grid-row: 3;
     grid-column: 1;
     justify-self: start;
@@ -1328,18 +1708,32 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     padding-inline: var(--rxt-gutter);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel {
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(20px, 4vw, 32px);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > figure {
     grid-column: 1;
     grid-row: 1;
     width: min(100%, calc(64svh * 0.75));
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div {
     grid-column: 1;
     grid-row: 2;
     max-width: 40rem;
@@ -1352,7 +1746,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     --rxt-gutter: clamp(16px, 5vw, 24px);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual {
     height: clamp(340px, 56svh, 560px);
   }
 
@@ -1397,7 +1795,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     font-size: clamp(76px, 25vw, 124px);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-overview figure {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-overview
+    figure {
     aspect-ratio: 16 / 9;
   }
 
@@ -1405,23 +1808,52 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dl > div,
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dl > div + div {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div
+    + div {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: baseline;
     padding: 12px 0;
     border-left: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dl > div + div {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div
+    + div {
     border-top: 1px solid rgb(121 232 255 / 12%);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-comparator {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-comparator {
     padding: 18px 14px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    > article {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "label label"
@@ -1430,17 +1862,33 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     gap: 8px 12px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    > article
+    > p {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    .rxs-system-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid > article + article {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    .rxs-system-grid
+    > article
+    + article {
     border-left: 0;
     border-top: 1px solid rgb(121 232 255 / 16%);
   }
@@ -1524,11 +1972,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     border: 1px solid CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-visual {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual {
     border-right: 1px solid CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > small {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div
+    > small {
     color: CanvasText;
     background: Canvas;
     border: 1px solid CanvasText;
