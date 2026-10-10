@@ -622,8 +622,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-b
   }
 }
 
-/* The console beside nothing: a full-width instrument panel, its meters
-   in one column and the architectures in the other on wide screens. */
+/* After the stage, the console is a full-width instrument panel: its
+   meters in one column and the architectures in the other on wide screens. */
 @media (min-width: 1100px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
     display: grid;
@@ -922,14 +922,16 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     animation: exi-tremor 420ms linear 820ms both;
   }
 
-  /* A figure that has counted lands with a punch; the punch's focus lines
-     flare and a shock ring leaves it. */
+  /* A headline figure that has counted lands with a punch; the punch's
+     focus lines flare and a shock ring leaves it. (The comparator's
+     readouts keep the overdrive's own strike.) */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-    .exi-figure[data-exi-landed="true"] {
+    :is(strong, dd)
+    > .exi-figure[data-exi-landed="true"] {
     transform-origin: 50% 70%;
     animation: exi-land 420ms var(--exi-hit) both;
   }
