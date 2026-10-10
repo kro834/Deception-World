@@ -16,7 +16,7 @@ test("Rexonance special site is reachable from every shared side menu", () => {
   assert.match(route, /createFileRoute\("\/rexonance-saga"\)/);
   assert.match(menu, /<span>\s*<DisplayName value="レクソナンスサーガ" \/>\s*<\/span>/);
   assert.match(menu, /REXONANCE_SAGA_ENTER_ASSETS/);
-  assert.match(menu, /context\?: "world" \| "archive" \| "movie" \| "rexonance"/);
+  assert.match(menu, /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "rexonance"/);
   assert.match(component, /<SideMenuLayer context="rexonance"/);
   assert.match(loader, /export const REXONANCE_SAGA_ENTER_ASSETS/);
 });

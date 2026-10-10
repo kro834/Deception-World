@@ -64,6 +64,13 @@ test("public verification hashes Blender frame and exhibition assets and rejects
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
+    "/saga-cinema-assets/chapter-1.jpg",
+    "/saga-cinema-assets/chapter-2.jpg",
+    "/saga-cinema-assets/chapter-3.jpg",
+    "/saga-cinema-assets/chapter-4.jpg",
+    "/saga-cinema-assets/saga-logo-original.webp",
+    "/saga-cinema-assets/menu-thumbnail.webp",
+    "/saga-cinema-assets/michroma-latin.woff2",
   ];
   const bytes = new Map(
     paths.map((path) => [path, readFileSync(new URL(`../public${path}`, import.meta.url))]),
@@ -107,12 +114,19 @@ test("public verification hashes Blender frame and exhibition assets and rejects
     "/exhibition-studio/unknown.hdr",
     "/exhibition-studio/studio-light.hdr/extra",
     "/exhibition-studio/../secret.png",
+    "/saga-cinema-assets/unknown.jpg",
+    "/saga-cinema-assets/chapter-5.jpg",
+    "/saga-cinema-assets/chapter-1.jpg/extra",
+    "/saga-cinema-assets/../secret.png",
   ]) {
     const invalid = await run({ unknown });
     assert.equal(invalid.report.ok, false, unknown);
     assert.equal(
       invalid.seen.some(
-        (path) => path.startsWith("/ultra-materials/") || path.startsWith("/exhibition-studio/"),
+        (path) =>
+          path.startsWith("/ultra-materials/") ||
+          path.startsWith("/exhibition-studio/") ||
+          path.startsWith("/saga-cinema-assets/"),
       ),
       false,
     );
@@ -123,6 +137,7 @@ test("publication covers the new shared search and personal library routes", () 
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/search"));
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/library"));
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/exhibition"));
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/saga-cinema"));
 });
 
 test("public smoke routes pass while all retired AI routes remain 404", async () => {
@@ -227,14 +242,12 @@ async function sharedGalleryReport({
 test("shared gallery release gate accepts each lossless upload format with the exact signed object path", async () => {
   for (const format of ["jpeg", "png", "webp"]) {
     const collection = galleryCollection();
-    collection.posts[0].url =
-      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${format}?token=public-image-token`;
+    collection.posts[0].url = `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${format}?token=public-image-token`;
     assert.equal((await sharedGalleryReport({ collection })).report.ok, true, format);
   }
   for (const suffix of ["jpg", "gif", "svg", "png/extra", "png%2fextra"]) {
     const collection = galleryCollection();
-    collection.posts[0].url =
-      `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${suffix}?token=public-image-token`;
+    collection.posts[0].url = `https://gallery.supabase.co/storage/v1/object/sign/gallery-images/${POST_ID}.${suffix}?token=public-image-token`;
     assert.equal((await sharedGalleryReport({ collection })).report.ok, false, suffix);
   }
 });

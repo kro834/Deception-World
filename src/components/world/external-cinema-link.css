@@ -1,16 +1,12 @@
-/* Keep the full Japanese title readable in the narrow shared menu. */
-html body #site-side-panel .side-panel-links > .side-panel-cinema-link {
-  display: flex;
-  flex-wrap: wrap;
-}
-html body #site-side-panel .side-panel-links > .side-panel-cinema-link > span {
-  flex: 1 1 220px;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-html body #site-side-panel .side-panel-links > .side-panel-cinema-link > i {
-  flex-shrink: 0;
-  font-size: 12px;
+/* Reuse the shared menu's responsive art tiles, including its readable
+   bottom veil and mobile thumbnail layout. Fetch only when opened. */
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  .side-panel-links
+  > .side-panel-cinema-link {
+  --sh-art: url("/saga-cinema-assets/menu-thumbnail.webp");
+  --sh-art-pos: 50% 18%;
 }
 
 .external-cinema-exit {

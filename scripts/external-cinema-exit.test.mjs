@@ -190,16 +190,17 @@ test("the shared STORIES group adds exactly one cinema row above both Dream bran
     "utf8",
   );
   const stories = chrome.slice(chrome.indexOf("<p>STORIES</p>"));
-  assert.equal(chrome.match(/<ExternalCinemaLink /g)?.length, 1);
-  assert.ok(stories.indexOf("<ExternalCinemaLink ") < stories.indexOf('context === "movie"'));
+  assert.equal(chrome.match(/<CinemaLink /g)?.length, 1);
+  assert.ok(stories.indexOf("<CinemaLink ") < stories.indexOf('context === "movie"'));
   const component = readFileSync(
     new URL("../src/components/world/external-cinema-link.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(component, /https:\/\/kamen-rider-saga-cinema\.akiopromax13\.chatgpt\.site\//);
+  assert.match(component, /const CINEMA_PATH = "\/saga-cinema"/);
+  assert.doesNotMatch(component, /window\.location|https:\/\//);
   assert.match(component, /映画四部作「仮面ライダーサーガ」/);
   assert.match(component, /<i>本編リメイク<\/i>/);
-  assert.match(component, /<a href=\{CINEMA_URL\}/);
+  assert.match(component, /href=\{`\$\{CINEMA_PATH\}#top`\}/);
   assert.match(component, /createPortal\([\s\S]*document\.body/);
   const css = readFileSync(
     new URL("../src/components/world/external-cinema-link.css", import.meta.url),

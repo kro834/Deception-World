@@ -143,7 +143,7 @@ test("wayfinding: the special sites show their way home", () => {
   assert.ok(dream >= 0 && home > dream && finale > home, "Dream → MAIN SITE → Final Stage");
   assert.match(
     stories,
-    /\{isSpecialSite \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>ディセプションワールド<\/span>\s*<i>MAIN SITE<\/i>/,
+    /\{isSpecialSite \|\| context === "cinema" \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>ディセプションワールド<\/span>\s*<i>MAIN SITE<\/i>/,
   );
   assert.match(
     chrome,
