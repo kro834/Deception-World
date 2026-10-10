@@ -52,6 +52,21 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
     let pending: Phase | null = null;
     let fading = false;
     let line = 0;
+    let tinted: HTMLElement | null = null;
+
+    // The bar and its controls are the only readers of the chapter colours,
+    // so they are written on the bar itself. The shell keeps a copy for the
+    // Ultra renderer and the verifiers; the atmosphere sheet registers both
+    // as non-inheriting, so that copy no longer restyles the whole page at
+    // each chapter boundary (about 3,000 elements, a visible scroll hitch).
+    const tint = (element: HTMLElement, phase: Phase) => {
+      element.style.setProperty("--world-atmosphere-accent", PALETTES[phase].accent);
+      element.style.setProperty("--world-atmosphere-base", PALETTES[phase].base);
+    };
+    const untint = (element: HTMLElement) => {
+      element.style.removeProperty("--world-atmosphere-accent");
+      element.style.removeProperty("--world-atmosphere-base");
+    };
 
     const paint = (layer: HTMLElement, phase: Phase) => {
       layer.style.setProperty("--atmosphere-light", PALETTES[phase].accent);
@@ -120,10 +135,13 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
           ? inside.sort((a, b) => a.rect.height - b.rect.height)[0]
           : positioned.filter(({ rect, readingLine }) => rect.top <= readingLine).at(-1)
         )?.phase ?? "projection";
-      if (shell.dataset.worldPhase !== phase) {
+      const bar = shell.querySelector<HTMLElement>(":scope > header.topbar");
+      if (shell.dataset.worldPhase !== phase || bar !== tinted) {
         shell.dataset.worldPhase = phase;
-        shell.style.setProperty("--world-atmosphere-accent", PALETTES[phase].accent);
-        shell.style.setProperty("--world-atmosphere-base", PALETTES[phase].base);
+        tint(shell, phase);
+        if (tinted && tinted !== bar) untint(tinted);
+        if (bar) tint(bar, phase);
+        tinted = bar;
       }
       fadeLight(phase);
     };
@@ -179,8 +197,8 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
       if (fadeFrame) window.cancelAnimationFrame(fadeFrame);
       window.clearTimeout(fadeTimer);
       delete shell.dataset.worldPhase;
-      shell.style.removeProperty("--world-atmosphere-accent");
-      shell.style.removeProperty("--world-atmosphere-base");
+      untint(shell);
+      if (tinted) untint(tinted);
     };
   }, []);
 
