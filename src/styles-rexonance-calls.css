@@ -1072,13 +1072,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    figure, still; forced colours drop it all. Scoped to .rx-call-sequence.
    ================================================================ */
 .rx-call-sequence .rx-suit {
-  /* The figure's height; its box (the artwork's aspect, --rx-suit-ar, set
-     by the component) is centred below the caption row. Callout anchors
-     sit in its outer bands, clear of the calls. */
-  --rx-suit-h: min(86vh, 150vw, 960px, 100vh - 128px);
-  --rx-suit-ar: 0.5446;
-  /* The figure's centre: the frame's, or beside the calls (below). */
-  --rx-suit-cx: 50%;
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -1089,28 +1082,50 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   display: block;
 }
 
+/* rx12: the suit has its own stage and the calls their own zone, so no
+   call ever crosses the armour (the face's burst least of all), and the
+   figure needs no dimmed torso band. Portrait frames stand the figure in
+   the upper frame under the caption row and set the calls in a band below
+   it; wide landscape frames (below) stand it on the right, at nearly the
+   frame's height, and set the calls on the left. The figure's box has the
+   artwork's aspect (--rx-suit-ar). */
+.rx-call-sequence[data-mode="entry"] {
+  --rx-suit-ar: 0.5446;
+  --rx-suit-top: max(72px, calc(env(safe-area-inset-top) + 52px));
+  --rx-suit-band: clamp(210px, 31vh, 360px);
+  --rx-suit-h: min(
+    960px,
+    100vh - var(--rx-suit-band) - var(--rx-suit-top),
+    (100vw - 32px) / var(--rx-suit-ar)
+  );
+  --rx-suit-cx: 50%;
+  --rx-suit-cy: calc(var(--rx-suit-top) + var(--rx-suit-h) / 2);
+  --rx-call-zone: calc(100vw - 48px);
+}
+
 @supports (height: 1svh) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-h: min(86svh, 150vw, 960px, 100svh - 128px);
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-band: clamp(210px, 31svh, 360px);
+    --rx-suit-h: min(
+      960px,
+      100svh - var(--rx-suit-band) - var(--rx-suit-top),
+      (100vw - 32px) / var(--rx-suit-ar)
+    );
   }
 }
 
-/* The torso band behind the calls is drawn at under half strength, so the
-   calls stay the hero and the frame's middle never brightens past them;
-   the helmet, the core and the legs keep full strength. */
+.rx-call-sequence[data-mode="entry"] .rx-call-words {
+  padding-top: calc(var(--rx-suit-top) + var(--rx-suit-h) + 8px);
+  padding-bottom: max(40px, calc(env(safe-area-inset-bottom) + 24px));
+}
+
 .rx-call-sequence .rx-suit-figure {
   position: absolute;
-  top: 50%;
+  top: var(--rx-suit-cy);
   left: var(--rx-suit-cx);
   width: calc(var(--rx-suit-h) * var(--rx-suit-ar));
   height: var(--rx-suit-h);
   translate: -50% -50%;
-  -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
-  mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
-  /* The band masks only the box; the helmet hovering above the head and
-     the burst's squares stay whole past its edges. */
-  -webkit-mask-clip: no-clip;
-  mask-clip: no-clip;
 }
 
 .rx-call-sequence .rx-suit-figure > * {
@@ -1405,7 +1420,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   --rx-suit-x: 0;
   --rx-suit-y: 0.5;
   position: absolute;
-  top: calc(50% + (var(--rx-suit-y) - 0.5) * var(--rx-suit-h));
+  top: calc(var(--rx-suit-cy) + (var(--rx-suit-y) - 0.5) * var(--rx-suit-h));
   right: max(36px, calc(env(safe-area-inset-right) + 16px));
   left: calc(var(--rx-suit-cx) + var(--rx-suit-x) * var(--rx-suit-h));
   display: flex;
@@ -1447,7 +1462,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-callout.is-lock {
-  top: calc(50% - 0.475 * var(--rx-suit-h));
+  top: calc(var(--rx-suit-cy) - 0.475 * var(--rx-suit-h));
   /* Left of the crown: the tail arches over the right. */
   right: calc(100% - var(--rx-suit-cx) + 0.06 * var(--rx-suit-h));
   left: auto;
@@ -1556,10 +1571,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 /* Short landscapes: the figure fits under the caption row and the check
    keeps its first two readings, clear of the calls. */
 @media (orientation: landscape) and (max-height: 560px) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-h: calc(100vh - 88px);
-  }
-
   .rx-call-sequence .rx-suit-boot {
     bottom: max(40px, calc(env(safe-area-inset-bottom) + 20px));
     left: max(24px, calc(env(safe-area-inset-left) + 12px));
@@ -1570,35 +1581,32 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-@supports (height: 1svh) {
-  @media (orientation: landscape) and (max-height: 560px) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: calc(100svh - 88px);
-    }
-  }
-}
-
-/* Wide landscape frames: the figure stands beside the calls, in the room
-   the chant leaves on the right (the chant measures about 9.2 em at its
-   own size; the figure is --rx-suit-ar of its height wide), so the
-   fitting reads whole and the words stay clear. */
+/* Wide landscape frames: the figure stands on the right at nearly the
+   frame's height; the calls keep the zone on its left (--rx-call-zone),
+   each call's type capped to fit that zone (its measured width in em:
+   FAR UP！ 5.3, the chant 9.7, REXONANCE！ 9.1, REXONANCE 8.9). */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-chant: clamp(24px, 5.75vw, 100px);
-    --rx-suit-edge: 36px;
-    --rx-suit-h: min(
-      86vh,
-      960px,
-      100vh - 128px,
-      (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
-    );
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-edge: max(28px, 4vw);
+    --rx-suit-h: min(960px, 100vh - 120px);
     --rx-suit-cx: calc(100% - var(--rx-suit-edge) - var(--rx-suit-h) * var(--rx-suit-ar) / 2);
+    --rx-suit-cy: 50%;
+    --rx-call-zone: calc(
+      100vw - 2 * var(--rx-suit-edge) - var(--rx-suit-h) * var(--rx-suit-ar) - 24px
+    );
   }
 
-  /* Only the last call reaches the figure here: a lighter torso band. */
-  .rx-call-sequence .rx-suit-figure {
-    -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
-    mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
+  .rx-call-sequence[data-mode="entry"] .rx-call-words {
+    padding: 64px calc(var(--rx-suit-edge) + var(--rx-suit-h) * var(--rx-suit-ar) + 24px) 64px
+      var(--rx-suit-edge);
+  }
+
+  .rx-call-sequence[data-mode="entry"] .rx-call-opening {
+    font-size: max(24px, min(10.5vw, 156px, 22vh, var(--rx-call-zone) / 5.6));
+  }
+
+  .rx-call-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {
+    font-size: max(18px, min(5.75vw, 100px, 10vh, var(--rx-call-zone) / 10.3));
   }
 
   /* Every label reads on the right, the legs' too (from the right boot):
@@ -1621,36 +1629,54 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+@supports (height: 1svh) {
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+    .rx-call-sequence[data-mode="entry"] {
+      --rx-suit-h: min(960px, 100svh - 120px);
+    }
+  }
+}
+
+/* Short landscapes (phones on their side): the figure takes the frame's
+   height under the caption row, and its part labels, which would cross
+   the armour in so narrow a margin, stay off. */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-chant: min(5.75vw, 10vh);
-    --rx-suit-edge: 24px;
-    --rx-suit-h: min(
-      100vh - 88px,
-      (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
-    );
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-h: calc(100vh - 84px);
+  }
+
+  .rx-call-sequence[data-mode="entry"] .rx-suit-callouts {
+    visibility: hidden;
   }
 }
 
 @supports (height: 1svh) {
-  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: min(
-        86svh,
-        960px,
-        100svh - 128px,
-        (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
-      );
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
+    .rx-call-sequence[data-mode="entry"] {
+      --rx-suit-h: calc(100svh - 84px);
     }
   }
+}
 
-  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: min(
-        100svh - 88px,
-        (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
-      );
-    }
+/* The last call, the largest type, keeps to the calls' zone too. */
+@media (prefers-reduced-motion: no-preference) and (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-final {
+    font-size: max(24px, min(9vw, 150px, 18vh, var(--rx-call-zone) / 9.4));
+  }
+}
+
+/* Portrait frames: the system check reads top left, beside the helmet,
+   its first two readings only (the calls' band is below the figure). */
+@media not ((orientation: landscape) and (min-aspect-ratio: 13 / 10)) {
+  .rx-call-sequence .rx-suit-boot {
+    top: max(74px, calc(env(safe-area-inset-top) + 54px));
+    bottom: auto;
+  }
+
+  .rx-call-sequence .rx-suit-boot p:nth-child(n + 4) {
+    display: none;
   }
 }
 
@@ -2517,7 +2543,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    colours. It stands in the figure's place, a little wider and taller. */
 .rx-call-sequence .rx-suit-stage {
   position: absolute;
-  top: 50%;
+  top: var(--rx-suit-cy);
   left: var(--rx-suit-cx);
   width: calc(var(--rx-suit-h) * 0.95);
   height: calc(var(--rx-suit-h) * 1.12);

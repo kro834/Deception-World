@@ -436,11 +436,7 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
   const { motes, pixels } = suitSquares();
   const visor = REXONANCE_SUIT_MARKS.visor;
   return (
-    <div
-      className="rx-suit"
-      data-suit={suit}
-      style={{ "--rx-suit-ar": (FIG.width / FIG.height).toFixed(4) } as CSSProperties}
-    >
+    <div className="rx-suit" data-suit={suit}>
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />
@@ -637,6 +633,8 @@ export function RexonanceCallSequence({
           "--rx-call-response-start": `${REXONANCE_CALL_BEATS[3].start}ms`,
           "--rx-call-response-duration": `${REXONANCE_CALL_BEATS[3].duration}ms`,
           "--rx-call-final-start": `${REXONANCE_CALL_BEATS[4].start}ms`,
+          // rx12: the suit's box keeps the artwork's aspect.
+          ...(entry ? { "--rx-suit-ar": (FIG.width / FIG.height).toFixed(4) } : null),
         } as CSSProperties
       }
     >

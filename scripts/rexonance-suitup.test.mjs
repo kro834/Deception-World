@@ -581,7 +581,9 @@ test("forced colours drop the suit and the badge; text keeps its 12px floor", ()
   let sizes = 0;
   for (const [, value] of suitCss.matchAll(/font-size:\s*([^;]+);/g)) {
     sizes += 1;
-    const px = value.match(/^(\d+(?:\.\d+)?)px$/);
+    // rx12: the calls fitted to their zone beside the figure keep a px
+    // floor of their own through max(), never under 12px.
+    const px = value.match(/^(\d+(?:\.\d+)?)px$/) ?? value.match(/^max\((\d+(?:\.\d+)?)px,/);
     assert.ok(px && Number(px[1]) >= 12, value);
   }
   assert.ok(sizes >= 2);

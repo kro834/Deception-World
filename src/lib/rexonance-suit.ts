@@ -77,7 +77,7 @@ export const REXONANCE_SUIT_PIECES: readonly RexonanceSuitPiece[] = [
     w: 142,
     h: 225,
     seat: [282.1, 204.9],
-    float: [0, -0.085, 0, 1.06],
+    float: [0, -0.055, 0, 1.06],
   },
   {
     id: "core",
