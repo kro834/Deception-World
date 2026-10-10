@@ -48,7 +48,13 @@ html[data-family] {
   --sh-focus: #fff0b5;
   --sh-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --sh-mono: "Oxanium", "Noto Sans JP", sans-serif;
-  --sh-display: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  /* One web face per stack, then the system's Japanese face: a second
+     segmented web face made each arriving subset relayout everything. */
+  --sh-jp-fallback:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans CJK JP",
+    sans-serif;
+  --sh-display: "Zen Kaku Gothic New", var(--sh-jp-fallback);
+  --sh-body: "Noto Sans JP", var(--sh-jp-fallback);
   --sh-gutter: clamp(16px, 3.2vw, 48px);
   --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -774,7 +780,7 @@ html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
    earlier page (the special sites' .rxs-page face) cannot restyle it. The
    Dream Chapter's launcher keeps the chapter's Mincho, as before. */
 html[data-family]:not([data-family="dream"]) body #site-side-panel.side-panel {
-  font-family: var(--dx-body, "Noto Sans JP", "Zen Kaku Gothic New", sans-serif);
+  font-family: var(--sh-body);
 }
 
 html[data-family] body #site-side-panel.side-panel > .liquid-pointer-glow {

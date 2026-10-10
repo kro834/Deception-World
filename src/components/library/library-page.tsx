@@ -115,7 +115,7 @@ export function LibraryPage({
               </GuardedLink>
             </div>
             <nav className="library-cast" aria-label="ライダーの人物資料">
-              {CAST.map(({ entry, no, tone, src, pos }) => (
+              {CAST.map(({ entry, no, tone, src, pos }, index) => (
                 <GuardedLink
                   key={entry.id}
                   to={entry.path}
@@ -124,9 +124,13 @@ export function LibraryPage({
                   style={{ "--cast-tone": tone } as CSSProperties}
                 >
                   <span className="library-cast-art" aria-hidden="true">
+                    {/* The first two files are on a phone's first screen; the
+                        rest of the rail loads as it comes near (not
+                        preloaded with the page). */}
                     <img
                       src={src}
                       alt=""
+                      loading={index < 2 ? undefined : "lazy"}
                       decoding="async"
                       draggable={false}
                       style={{ objectPosition: pos }}

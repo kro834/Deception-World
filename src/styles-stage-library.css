@@ -23,6 +23,15 @@
    ================================================================ */
 
 html[data-family="library"] {
+  /* The site's Japanese faces, each backed by the system's Japanese face
+     rather than by the other web face (two segmented web faces in one
+     stack relaid the whole page out for every subset that arrived). */
+  --dx-display:
+    "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI",
+    "Yu Gothic", "Noto Sans CJK JP", sans-serif;
+  --dx-body:
+    "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
+    "Noto Sans CJK JP", sans-serif;
   --dxl-deck: #08111c;
   --dxl-deck-2: #0c1828;
   --dxl-well: rgb(2 5 10 / 62%);
@@ -302,33 +311,41 @@ html[data-family="library"] .dxl-art[data-plate="type"]::before {
 /* ================================================================
    The card: art window, kind, title, description, actions
    ================================================================ */
+/* The grid is the measure for its cards (one query container per shelf,
+   not one per card: a container per card made the relayout after the web
+   fonts arrive a 550ms task on a mid-range phone). A card's width is the
+   grid's column (--dxl-col-w, in the grid's cqi); only a card that closes
+   its row and lies on its side measures itself (dxl-card, below). */
 html[data-family="library"] :is(.library-grid, .search-result-grid) {
+  --dxl-cols: 2;
+  --dxl-col-w: calc((100cqi - (var(--dxl-cols) - 1) * var(--dxl-gap)) / var(--dxl-cols));
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--dxl-cols), minmax(0, 1fr));
   gap: var(--dxl-gap);
 }
 
 @media (min-width: 560px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    --dxl-cols: 3;
   }
 }
 
 @media (min-width: 900px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    --dxl-cols: 4;
   }
 }
 
 @media (min-width: 1180px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    --dxl-cols: 5;
   }
 }
 
 @media (min-width: 1400px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    --dxl-cols: 6;
   }
 }
 
@@ -337,9 +354,6 @@ html[data-family="library"] .search-page :is(.search-result-card, .search-more-o
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Each card is the measure for its own title (and the closing card's side
-     layout and the see-all tile's mark): see the title rule below. */
-  container-type: inline-size;
   min-width: 0;
   min-height: 0;
   margin: 0;
@@ -415,7 +429,7 @@ html[data-family="library"] .search-page .search-result-meta > span:first-child 
 html[data-family="library"] .library-page .library-card h3,
 html[data-family="library"] .search-page .search-result-title {
   --dxl-title: clamp(14px, 1.15vw, 16px);
-  --dxl-room: calc(100cqi - 24px);
+  --dxl-room: calc(var(--dxl-col-w) - 24px);
   --dxl-fit: 1.05;
   display: block;
   margin-top: 4px;
@@ -2374,7 +2388,7 @@ html[data-family="library"] .search-page .search-scope-note {
    set down its edge. */
 @media (max-width: 359px) {
   html[data-family="library"] :is(.library-grid, .search-result-grid) {
-    grid-template-columns: minmax(0, 1fr);
+    --dxl-cols: 1;
   }
 
   html[data-family="library"] .library-page .library-card,
@@ -2431,7 +2445,7 @@ html[data-family="library"] .search-page .search-scope-note {
 
   html[data-family="library"] .library-page .library-card h3,
   html[data-family="library"] .search-page .search-result-title {
-    --dxl-room: calc(100cqi - 20px);
+    --dxl-room: calc(var(--dxl-col-w) - 20px);
   }
 
   html[data-family="library"] .dxl-art > i {
@@ -2464,7 +2478,7 @@ html[data-family="library"] .search-page .search-scope-note {
 @media (max-width: 359px) {
   html[data-family="library"] .library-page .library-card h3,
   html[data-family="library"] .search-page .search-result-title {
-    --dxl-room: calc(100cqi - 116px);
+    --dxl-room: calc(var(--dxl-col-w) - 116px);
   }
 }
 
@@ -2609,6 +2623,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
       :nth-child(2n + 1)
     ) {
     min-height: clamp(210px, 20vw, 260px);
+    container: dxl-card / inline-size;
   }
 }
 
@@ -2628,6 +2643,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
       :nth-child(3n + 2)
     ) {
     min-height: clamp(210px, 20vw, 260px);
+    container: dxl-card / inline-size;
   }
 
   html[data-family="library"]
@@ -2656,6 +2672,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
       :nth-child(4n + 3)
     ) {
     min-height: clamp(210px, 20vw, 260px);
+    container: dxl-card / inline-size;
   }
 
   html[data-family="library"]
@@ -2693,6 +2710,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
       :nth-child(5n + 4)
     ) {
     min-height: clamp(210px, 20vw, 260px);
+    container: dxl-card / inline-size;
   }
 
   html[data-family="library"]
@@ -2739,6 +2757,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
       :nth-child(6n + 5)
     ) {
     min-height: clamp(210px, 20vw, 260px);
+    container: dxl-card / inline-size;
   }
 
   html[data-family="library"]
@@ -2776,9 +2795,10 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
 
 /* On its side. Only a card spanning columns is this wide: one column is
    never more than about 280px, and the smallest phones' one-column row
-   cards keep their own layout (the media gate). */
+   cards keep their own layout (the media gate). Only the closing cards are
+   dxl-card containers (the rules above). */
 @media (min-width: 360px) {
-  @container (min-width: 300px) {
+  @container dxl-card (min-width: 300px) {
     html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art {
       position: absolute;
       inset: 0 auto 0 0;

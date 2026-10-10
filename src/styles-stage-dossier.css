@@ -45,8 +45,15 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page {
   --sd-pad: clamp(16px, 5vw, 44px);
   --sd-read: 720px;
   --sd-stage-h: clamp(420px, 72svh, 980px);
-  --sd-display: var(--dx-display, "Zen Kaku Gothic New", "Noto Sans JP", sans-serif);
-  --sd-body: var(--dx-body, "Noto Sans JP", "Zen Kaku Gothic New", sans-serif);
+  /* The site's Japanese faces, each backed by the system's Japanese face
+     (not by the other web face): two segmented web faces in one stack made
+     every subset that arrived relayout the whole file again, a 750ms task
+     on a mid-range phone (rx10 review). */
+  --sd-jp-fallback:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans CJK JP",
+    sans-serif;
+  --sd-display: "Zen Kaku Gothic New", var(--sd-jp-fallback);
+  --sd-body: "Noto Sans JP", var(--sd-jp-fallback);
   --sd-hud: var(--dx-hud, "Michroma", "Oxanium", "Noto Sans JP", sans-serif);
   --sd-mono: var(--dx-mono, "Oxanium", "Noto Sans JP", sans-serif);
   display: block;
