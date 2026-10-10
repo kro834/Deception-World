@@ -1,21 +1,20 @@
-import type { CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import {
   REXONANCE_CALL_BEATS,
   REXONANCE_CALLS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
-  REXONANCE_SUIT_FORM_MS,
-  REXONANCE_SUIT_HELM_FORM,
+  REXONANCE_SUIT_ACCENTS,
+  REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
-  REXONANCE_SUIT_RIBBONS,
-  REXONANCE_SUIT_SNAP,
+  REXONANCE_SUIT_REVEAL_MS,
   REXONANCE_SUIT_SYSTEMS,
-  REXONANCE_SUIT_TAIL,
   type RexonanceStage,
 } from "@/lib/rexonance-calls";
 import {
+  REXONANCE_SUIT_ATLAS,
   REXONANCE_SUIT_BODY,
   REXONANCE_SUIT_FACE,
   REXONANCE_SUIT_FACE_GLOW,
@@ -26,6 +25,7 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
+import { SuitNanites } from "./rexonance-suit-nanites";
 
 type RexonanceCallSequenceProps = {
   mode: "entry" | "stage";
@@ -254,17 +254,17 @@ function SuitBadge() {
 }
 
 // rx12 (2026-10-10, owner): the suit-up is the approved full-body artwork
-// itself, cut into raster pieces by scripts/build-rexonance-suit.mjs
-// (src/lib/rexonance-suit.ts holds their files and places, in delivery
-// pixels of the figure). The bare undersuit is scanned in; each armour
-// piece forms out of nanites — motes converge into a coarse square mosaic
-// that resolves into the plate — floating a little off the body with a
-// faint cyan rim, then snaps onto its seat on its DEUS！ with a hard stop,
-// a hair past it and a spark at the seam, and the whole figure jolts. The
-// tail grows out section by section, the ribbons stream down, the helmet
-// forms above the head and clamps down, and the face's lights fill with
-// pixel squares that scatter. Every layer is a small box that moves by
-// transform and opacity on the call clock (styles-rexonance-calls.css).
+// itself, cut by scripts/build-rexonance-suit.mjs (src/lib/rexonance-suit.ts
+// holds its files and places, in delivery pixels of the figure). The bare
+// undersuit is scanned in; rx13 (2026-10-11, owner): the armour forms right
+// on it out of nanites and fits plate by plate, up the body — 60 plates
+// from one atlas, each assembled from micro-tiles of the art that stream in
+// and lock (the nanite engine, rexonance-suit-nanites.tsx) or, without it,
+// growing from its seam through its gathered nanite mosaic (the DOM plates
+// below). The DEUS！ accents clank hardest with a spark and a jolt; the tail
+// grows midway, the helmet seats last, and the face's lights fill with
+// pixel squares that hold, then scatter. Every DOM layer is a small box that
+// moves by transform and opacity on the call clock.
 const FIG = REXONANCE_SUIT_SIZE;
 const pct = (value: number, total: number) => `${((value / total) * 100).toFixed(3)}%`;
 const place = (x: number, y: number, w: number, h: number): CSSProperties => ({
@@ -278,58 +278,61 @@ const at = ([x, y]: readonly [number, number]): CSSProperties => ({
   top: pct(y, FIG.height),
 });
 
-// Within a group the pieces bite a beat apart, so each DEUS！ lands as a
-// rattle of clanks (ガチャガチャ) rather than one: ms after the group's snap.
-const SUIT_RATTLE: Record<string, number> = {
-  "boot-r": 22,
-  "knee-l": 12,
-  "knee-r": 34,
-  "gauntlet-r": 24,
-  chest: 18,
-  "shoulder-r": 26,
-  core: 40,
-  "thigh-r": 20,
-  belt: 30,
-  tasset: 42,
-};
-// When a piece forms, snaps and how long its forming takes (ms).
-const suitClock = (piece: RexonanceSuitPiece) => {
-  if (piece.group === "tail") {
-    const section = Number(piece.id.slice(5));
-    const t = REXONANCE_SUIT_TAIL.start + section * REXONANCE_SUIT_TAIL.step;
-    return { t, s: t + REXONANCE_SUIT_TAIL.grow, f: REXONANCE_SUIT_TAIL.grow };
-  }
-  if (piece.group === "ribbon") {
-    const t = REXONANCE_SUIT_RIBBONS.start + (piece.id.endsWith("-r") ? 40 : 0);
-    return { t, s: t + REXONANCE_SUIT_RIBBONS.stream, f: REXONANCE_SUIT_RIBBONS.stream };
-  }
-  const s = REXONANCE_SUIT_SNAP[piece.group] + (SUIT_RATTLE[piece.id] ?? 0);
-  const t = piece.group === "helm" ? REXONANCE_SUIT_HELM_FORM : s - REXONANCE_SUIT_FORM_MS;
-  return { t, s, f: REXONANCE_SUIT_FORM_MS };
-};
-// Back to front: ribbons and the tail behind, the legs, the waist, the
-// arms, the chest and shoulders, the helmet in front.
-const SUIT_ORDER = ["ribbon", "tail", "legs", "waist", "arms", "chest", "helm"] as const;
+// rx13: the plates fit one after another (REXONANCE_SUIT_FIT): each one's
+// nanites gather on the body, then it grows from its seam (a frame that
+// slides over it while its art holds still: two transforms) and seats with
+// a short clank; the accents clank hardest. Back to front: ribbons and the
+// tail behind, then legs, waist, arms, chest, shoulders, the helmet.
+const SUIT_ORDER = [
+  "ribbon",
+  "tail",
+  "legs",
+  "waist",
+  "arms",
+  "chest",
+  "shoulders",
+  "helm",
+] as const;
 const SUIT_STACK = SUIT_ORDER.flatMap((group) =>
   REXONANCE_SUIT_PIECES.filter((piece) => piece.group === group).reverse(),
 );
-const pieceStyle = (piece: RexonanceSuitPiece) => {
-  const { t, s, f } = suitClock(piece);
-  const [dx, dy, turn, scale] = piece.float ?? [0, 0, 0, 1];
+const SUIT_GROW = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] } as const;
+// Where a plate's cell sits in the atlas, as background percentages.
+const atlasCell = (piece: RexonanceSuitPiece, half: 0 | 1): CSSProperties => {
+  const { width, height, src } = REXONANCE_SUIT_ATLAS;
+  const ax = piece.ax + (half * width) / 2;
+  const share = (offset: number, size: number, total: number) =>
+    total === size ? "0%" : `${((offset / (total - size)) * 100).toFixed(4)}%`;
+  return {
+    backgroundImage: `url("${src}")`,
+    backgroundSize: `${((width / piece.w) * 100).toFixed(4)}% ${((height / piece.h) * 100).toFixed(4)}%`,
+    backgroundPosition: `${share(ax, piece.w, width)} ${share(piece.ay, piece.h, height)}`,
+  };
+};
+const pieceClock = (piece: RexonanceSuitPiece) => {
+  const fit = REXONANCE_SUIT_FIT[piece.id];
+  const [gx, gy] = SUIT_GROW[piece.dir];
   return {
     ...place(piece.x, piece.y, piece.w, piece.h),
-    // Grows (the tail's sections, the ribbons) and snaps turn about the seam.
-    transformOrigin: `${pct(piece.seat[0] - piece.x, piece.w)} ${pct(piece.seat[1] - piece.y, piece.h)}`,
-    "--rx-suit-src": `url("${piece.src}")`,
-    "--rx-suit-t": `${t}ms`,
-    "--rx-suit-s": `${s}ms`,
-    "--rx-suit-f": `${f}ms`,
-    "--rx-suit-dx": dx,
-    "--rx-suit-dy": dy,
-    "--rx-suit-r": `${turn}deg`,
-    "--rx-suit-k": scale,
+    "--rx-suit-t": `${fit - REXONANCE_SUIT_REVEAL_MS}ms`,
+    "--rx-suit-gx": gx,
+    "--rx-suit-gy": gy,
+    "--rx-suit-k": REXONANCE_SUIT_ACCENTS.includes(piece.id) ? 1.07 : 1.025,
   } as CSSProperties;
 };
+// Sparks: every accent, and the first bite of each run.
+const SUIT_SPARKS = [
+  ...REXONANCE_SUIT_ACCENTS,
+  "boot-foot-l",
+  "boot-foot-r",
+  "knee-disc-l",
+  "knee-disc-r",
+  "arm-fist-l",
+  "shoulder-disc-l",
+  "shoulder-disc-r",
+  "tail-4b",
+  "helmet-jaw",
+];
 
 // Deterministic scatter (seeded, so server and client draw the same).
 const seeded = (seed: number) => {
@@ -423,7 +426,7 @@ function SquarePaths({ squares }: { squares: Squares }) {
 
 // Each label lands on the line its group snaps on (the helmet's on the
 // last call).
-const SUIT_PART_LINE = { LEGS: 0, ARMS: 1, CHEST: 2, HEAD: 3 } as const;
+const SUIT_PART_LINE = { LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 } as const;
 // The halos' places and widths (figure pixels): the core and the eyes.
 const SUIT_HALOS = [
   { name: "core", at: REXONANCE_SUIT_MARKS.core, size: 150 },
@@ -432,11 +435,15 @@ const SUIT_HALOS = [
 // The phases of the resonance rings from the core.
 const SUIT_PHASES = ["ice", "violet", "gold"] as const;
 
-function Suit({ suit }: { suit: "build" | "whole" }) {
+function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) {
   const { motes, pixels } = suitSquares();
   const visor = REXONANCE_SUIT_MARKS.visor;
+  // rx13: the nanite engine (micro-tiles on a canvas) takes over the plates
+  // once it is ready in time; until then, or without it, the DOM plates play.
+  const [nanites, setNanites] = useState<"dom" | "canvas">("dom");
+  const onNanites = useCallback(() => setNanites("canvas"), []);
   return (
-    <div className="rx-suit" data-suit={suit}>
+    <div className="rx-suit" data-suit={suit} data-nanites={nanites}>
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />
@@ -494,18 +501,27 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
               backgroundImage: `url("${REXONANCE_SUIT_BODY.src}")`,
             }}
           />
+          {/* Each plate's nanites gather on the body first ... */}
           {SUIT_STACK.map((piece) => (
             <i
               key={piece.id}
-              className={`rx-suit-piece is-${piece.group}`}
+              className={`rx-suit-mote is-${piece.group}`}
+              style={{ ...pieceClock(piece), ...atlasCell(piece, 1) }}
+            />
+          ))}
+          {/* ... then the plate grows through them from its seam. */}
+          {SUIT_STACK.map((piece) => (
+            <i
+              key={piece.id}
+              className={`rx-suit-plate is-${piece.group}`}
               data-piece={piece.id}
-              style={pieceStyle(piece)}
+              style={pieceClock(piece)}
             >
-              <i className="rx-suit-halo-rim" />
-              <i className="rx-suit-mosaic" />
-              <i className="rx-suit-art" />
+              <i className="rx-suit-art" style={atlasCell(piece, 0)} />
             </i>
           ))}
+          {/* ... or, at full motion, its micro-tiles stream in and lock. */}
+          {animate ? <SuitNanites onReady={onNanites} /> : null}
           {/* The face's lights, lit: they come on under the pixel squares. */}
           <i
             className="rx-suit-face"
@@ -519,13 +535,16 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
               backgroundImage: `url("${REXONANCE_SUIT_FACE.src}")`,
             }}
           />
-          {/* A spark at the seam of every piece as it bites. */}
-          {SUIT_STACK.filter((piece) => piece.float).map((piece) => (
+          {/* A spark at the seam as a plate bites (the accents brightest). */}
+          {SUIT_STACK.filter((piece) => SUIT_SPARKS.includes(piece.id)).map((piece) => (
             <i
               key={piece.id}
-              className="rx-suit-spark"
+              className={`rx-suit-spark${REXONANCE_SUIT_ACCENTS.includes(piece.id) ? " is-accent" : ""}`}
               style={
-                { ...at(piece.seat), "--rx-suit-s": `${suitClock(piece).s}ms` } as CSSProperties
+                {
+                  ...at(piece.seat),
+                  "--rx-suit-s": `${REXONANCE_SUIT_FIT[piece.id]}ms`,
+                } as CSSProperties
               }
             />
           ))}
@@ -660,7 +679,7 @@ export function RexonanceCallSequence({
           <i />
         </div>
       )}
-      {entry ? <Suit suit={suit} /> : <SuitBadge />}
+      {entry ? <Suit suit={suit} animate={tier === "full"} /> : <SuitBadge />}
       <div className="rx-call-caption">
         <span>TRINITY RESONANCE</span>
         <span>{entry ? "P14 / FINAL ARRIVAL" : `P14 / ${REXONANCE_STAGE_LABELS[stage]}`}</span>

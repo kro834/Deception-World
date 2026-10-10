@@ -193,6 +193,8 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
         return {
           warmRexonanceSuit: () => new Promise(() => {}),
           isRexonanceSuitReady: () => false,
+          // rx13: the idle warm-up never runs here.
+          scheduleRexonanceSuitWarm: () => () => {},
         };
       if (name === "@/lib/rexonance-transition-loader")
         return {

@@ -189,7 +189,11 @@ async function suitFixture({
   reduced = false,
   economy = false,
   fail = false,
+  pathname = "/world",
+  readyState = "complete",
 } = {}) {
+  const timers = [];
+  const idles = [];
   const originals = new Map(
     ["window", "document", "navigator", "Image"].map((key) => [
       key,
@@ -208,8 +212,20 @@ async function suitFixture({
     }
   }
   for (const [key, value] of Object.entries({
-    window: { matchMedia: () => ({ matches: reduced }) },
-    document: { documentElement: { dataset: economy ? { worldEffects: "economy" } : {} } },
+    window: {
+      matchMedia: () => ({ matches: reduced }),
+      location: { pathname },
+      setTimeout: (f) => timers.push(f),
+      clearTimeout: () => {},
+      requestIdleCallback: (f) => idles.push(f),
+      cancelIdleCallback: () => {},
+      addEventListener: (_, f) => timers.push(f),
+      removeEventListener: () => {},
+    },
+    document: {
+      readyState,
+      documentElement: { dataset: economy ? { worldEffects: "economy" } : {} },
+    },
     navigator: { connection },
     Image,
   })) {
@@ -220,6 +236,8 @@ async function suitFixture({
     images,
     module,
     load: () => images.forEach((image) => image.onload?.()),
+    timers,
+    idles,
     restore() {
       for (const [key, descriptor] of originals) {
         if (descriptor) Object.defineProperty(globalThis, key, descriptor);
@@ -284,5 +302,34 @@ test("A failed suit-up decode leaves the call whole and lets a later intent retr
     assert.ok(f.images.length > count, "retried");
   } finally {
     f.restore();
+  }
+});
+
+test("rx13: the suit-up warms in advance, at idle after the page has loaded", async () => {
+  const f = await suitFixture({ readyState: "loading" });
+  try {
+    const cancel = f.module.scheduleRexonanceSuitWarm();
+    assert.equal(f.images.length, 0, "never during the page's own load");
+    f.timers.shift()(); // load
+    assert.equal(f.images.length, 0);
+    f.timers.shift()(); // the delay after load
+    assert.equal(f.images.length, 0, "it waits for idle");
+    f.idles.shift()();
+    assert.ok(f.images.length > 0);
+    assert.ok(f.images.every((image) => image.fetchPriority === "low"));
+    cancel();
+  } finally {
+    f.restore();
+  }
+  for (const options of [{ pathname: "/rexonance-saga" }, { reduced: true }]) {
+    const g = await suitFixture(options);
+    try {
+      g.module.scheduleRexonanceSuitWarm();
+      for (const run of [...g.timers, ...g.idles]) run();
+      for (const run of [...g.timers, ...g.idles]) run();
+      assert.equal(g.images.length, 0, JSON.stringify(options));
+    } finally {
+      g.restore();
+    }
   }
 });

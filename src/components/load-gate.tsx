@@ -25,7 +25,11 @@ import {
   type RexonanceTransitionRenderer,
 } from "@/lib/rexonance-transition-loader";
 import { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS } from "@/lib/rexonance-calls";
-import { isRexonanceSuitReady, warmRexonanceSuit } from "@/lib/rexonance-suit-warmup";
+import {
+  isRexonanceSuitReady,
+  scheduleRexonanceSuitWarm,
+  warmRexonanceSuit,
+} from "@/lib/rexonance-suit-warmup";
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 
 type RiderDiveVariant =
@@ -849,6 +853,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const busy = useRef(false);
   const transitionId = useRef(0);
   const rexonanceTransition = useRef<number | null>(null);
+
+  // rx13: the Rexonance call's suit-up decodes in advance, at idle after the
+  // first page has loaded (low priority; the same data-saving skips).
+  useEffect(() => scheduleRexonanceSuitWarm(), []);
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);
