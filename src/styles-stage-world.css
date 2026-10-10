@@ -717,6 +717,37 @@ html[data-family="world"]:root
   content: none;
 }
 
+/* Landscape tablets: resolve the print against the viewport, not its own
+   shrink-to-fit grid. A percentage in --poster-width created a circular
+   intrinsic size and left a 244px print on otherwise roomy iPads.
+   Reserve the header, caption, two 48px control rows and breathing room.
+   svh keeps the composition stable while browser chrome opens/closes. */
+@media (min-width: 981px) and (max-width: 1440px) and (min-height: 650px) and (orientation: landscape) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(
+      36vw,
+      440px,
+      calc((100svh - var(--film-topbar-height, 76px) - 230px) * 2 / 3)
+    );
+    width: var(--poster-width);
+    max-width: 100%;
+    padding: 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage
+    .poster-control-cluster {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+
 /* Portrait tablets keep the two-column title stage with a larger print. */
 @media (min-width: 901px) and (max-width: 1100px) and (orientation: portrait) {
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
