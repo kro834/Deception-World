@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LIBRARY_ENTRIES, LIBRARY_KINDS } from "@/lib/library-data";
+import { pathArt } from "@/lib/record-art";
 import { RECENT_LIMIT, type LibrarySaved } from "@/lib/library-storage";
 import {
   buildLibraryExport,
@@ -22,6 +23,7 @@ import {
   clearLibraryRecent,
   toggleBookmark,
 } from "./library-store";
+import { RecordArtFrame } from "./record-art";
 
 const byId = new Map(LIBRARY_ENTRIES.map((entry) => [entry.id, entry]));
 
@@ -72,6 +74,11 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
             </h3>
             {resume ? (
               <>
+                <RecordArtFrame
+                  art={pathArt(resume.entry.path, resume.entry.hash)}
+                  title={resume.entry.title}
+                  className="is-continue"
+                />
                 <p className="library-continue-kind">
                   {LIBRARY_KINDS[resume.entry.kind]}
                   <span>{formatVisitTime(resume.at, now)}に開いた資料</span>
@@ -114,6 +121,11 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
                 {bookmarks.map((entry) => (
                   <li key={entry.id}>
                     <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
+                      <RecordArtFrame
+                        art={pathArt(entry.path, entry.hash)}
+                        title={entry.title}
+                        className="is-row"
+                      />
                       <small>{LIBRARY_KINDS[entry.kind]}</small>
                       <span>
                         <DisplayName value={entry.title} />
@@ -156,6 +168,11 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
                     {group.visits.map(({ entry, at }) => (
                       <li key={entry.id}>
                         <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
+                          <RecordArtFrame
+                            art={pathArt(entry.path, entry.hash)}
+                            title={entry.title}
+                            className="is-row"
+                          />
                           <small>{formatVisitClock(at, now)}</small>
                           <span>
                             <DisplayName value={entry.title} />

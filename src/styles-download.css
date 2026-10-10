@@ -1,7 +1,10 @@
-/* /download in the Mirage/dossier grammar: the archive's export slip, one
-   square plate locked onto the ink deck. The sheet adds no text and no
-   markup: .export-page::before is the fixed ice grid ground (out of flow so
-   it takes no grid cell), ::after is the plate, a grid item spanning rows. */
+/* /download as a STAGE poster card (rx10, 2026-10-10): the archive's export
+   slip on the ink deck, its top the World's key art under a fall of ink, the
+   DW sigil standing on the art's edge, the EXPORT label, the chrome wordmark,
+   the ZIP plate and the retry link, and the way back to the main site as the
+   card's foot. .export-page::before is the fixed ice grid ground (out of flow
+   so it takes no grid cell), ::after is the card, a grid item spanning rows.
+   The label words are the page's own; the sheet adds no text. */
 
 /* ================================================================
    Tokens and ground
@@ -36,6 +39,12 @@
   --dl-hud: Michroma, Oxanium, "Noto Sans JP", sans-serif;
   /* Plate inner side padding, carried by the children's inline margins. */
   --dl-inset: clamp(16px, 5vw, 48px);
+  /* The poster's art: the first row, under the sigil. The art and the
+     vertical rhythm follow the screen's height, so the whole poster fits
+     without the page's own scroll at every common size (Zeus does not follow
+     that inner scroll, and would settle on the ZIP plate or the way back). */
+  --dl-art: clamp(84px, 30vh - 44px, 260px);
+  --dl-step: clamp(14px, 3.4vh, 34px);
 
   position: relative;
   isolation: isolate;
@@ -46,13 +55,13 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   display: grid;
-  grid-template-columns: min(100%, 640px);
-  grid-template-rows: repeat(6, auto);
+  grid-template-columns: min(100%, 460px);
+  grid-template-rows: var(--dl-art) repeat(8, auto);
   gap: 0;
   align-content: safe center;
   justify-content: center;
   justify-items: center;
-  padding: clamp(40px, 8vh, 72px) 16px calc(clamp(40px, 8vh, 72px) + 4vh);
+  padding: clamp(12px, 4.6vh, 56px) 16px;
   text-align: center;
   color: #f4f6fb;
   font-family: var(--font-sans, "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif);
@@ -91,7 +100,9 @@ body:has(main.export-page) {
 }
 
 /* ================================================================
-   The plate: ::after spans every row; children sit above it
+   The poster (rx10 STAGE): ::after is the card, a grid item spanning
+   every row; its top is the key art under a fall of ink, the DW sigil
+   stands on the art's lower edge, and the way back is the card's foot.
    ================================================================ */
 .export-page > * {
   grid-column: 1;
@@ -101,22 +112,28 @@ body:has(main.export-page) {
 }
 /* Explicit rows: auto-placement would push the children below the plate's span. */
 .export-page > :nth-child(1) {
-  grid-row: 1;
-}
-.export-page > :nth-child(2) {
   grid-row: 2;
 }
-.export-page > :nth-child(3) {
+.export-page > :nth-child(2) {
   grid-row: 3;
 }
-.export-page > :nth-child(4) {
+.export-page > :nth-child(3) {
   grid-row: 4;
 }
-.export-page > :nth-child(5) {
+.export-page > :nth-child(4) {
   grid-row: 5;
 }
-.export-page > :nth-child(6) {
+.export-page > :nth-child(5) {
   grid-row: 6;
+}
+.export-page > :nth-child(6) {
+  grid-row: 7;
+}
+.export-page > :nth-child(7) {
+  grid-row: 8;
+}
+.export-page > :nth-child(8) {
+  grid-row: 9;
 }
 
 .export-page::after {
@@ -128,10 +145,10 @@ body:has(main.export-page) {
   align-self: stretch;
   z-index: 0;
   pointer-events: none;
-  border: 1px solid rgb(122 232 255 / 16%);
-  border-radius: 4px;
+  border: 1px solid rgb(122 232 255 / 22%);
+  border-radius: 6px;
   background:
-    var(--dl-prism) top / 100% 1px no-repeat,
+    var(--dl-prism) top / 100% 2px no-repeat,
     linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
     linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
     linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
@@ -140,20 +157,56 @@ body:has(main.export-page) {
     linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
     linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
     linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
-    linear-gradient(135deg, rgb(122 232 255 / 7%), transparent 42%),
-    linear-gradient(315deg, rgb(164 139 255 / 5%), transparent 40%),
-    rgb(10 18 32 / 82%);
+    linear-gradient(
+        180deg,
+        rgb(4 8 15 / 0%) 0,
+        rgb(4 8 15 / 30%) calc(var(--dl-art) * 0.45),
+        #070d16 calc(var(--dl-art) + 30px)
+      )
+      0 0 / 100% calc(var(--dl-art) + 31px),
+    linear-gradient(#070d16 0 0) 0 calc(var(--dl-art) + 30px) / 100% 100%,
+    url("/poster-card-03-delivery.webp") 50% 0 / 100% auto,
+    #070d16;
   background-repeat: no-repeat;
   box-shadow:
-    0 30px 80px rgb(0 0 0 / 55%),
-    inset 0 1px 0 rgb(255 255 255 / 4%);
+    0 40px 90px rgb(0 0 0 / 60%),
+    0 0 0 1px rgb(3 6 12 / 80%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
+/* The DW sigil: a cut diamond on the art's lower edge. */
+.export-page-sigil {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: -32px;
+  border: 1px solid rgb(122 232 255 / 70%);
+  color: #dff9ff;
+  background: linear-gradient(135deg, rgb(122 232 255 / 22%), rgb(122 232 255 / 4%) 60%), #070d16;
+  box-shadow:
+    0 0 0 5px rgb(4 8 15 / 85%),
+    0 0 0 6px rgb(240 207 134 / 55%),
+    0 14px 30px rgb(0 0 0 / 60%);
+  rotate: 45deg;
+}
+
+.export-page-sigil > i {
+  rotate: -45deg;
+  font:
+    700 18px / 1 Oxanium,
+    "Noto Sans JP",
+    sans-serif;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-indent: 0.08em;
 }
 
 /* ================================================================
    Type: HUD label, chrome-ink wordmark, file-number strip
    ================================================================ */
 .export-page p {
-  margin: clamp(28px, 5vw, 44px) 0 0;
+  margin: var(--dl-step) 0 0;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -209,7 +262,7 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page b {
   display: inline-block;
-  margin-top: 18px;
+  margin-top: calc(var(--dl-step) * 0.55);
   padding: 7px 14px 6px 12px;
   font-family: var(--dl-hud);
   font-size: 12px;
@@ -230,7 +283,7 @@ html[data-world-effects="economy"] .export-page h1 {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-top: 34px;
+  margin-top: var(--dl-step);
   /* The plate's inner width, capped: the inline margins are outside it. */
   min-width: min(100% - 2 * var(--dl-inset), 320px);
   min-height: 52px;
@@ -317,8 +370,8 @@ html[data-world-effects="economy"] .export-page h1 {
 
 .export-page small {
   display: block;
-  margin: 12px 0 clamp(24px, 5vw, 40px);
-  padding-top: 14px;
+  margin: 8px 0 calc(var(--dl-step) * 0.6);
+  padding-top: calc(var(--dl-step) * 0.4);
   /* 17em: the first line holds exactly the clause before the ／ separator
      (197px at 12px) and the second the rest, so nothing breaks mid-word.
      Balance would prefer an even split inside a word. */
@@ -331,9 +384,44 @@ html[data-world-effects="economy"] .export-page h1 {
   text-wrap: pretty;
 }
 
-.export-page :is(.export-page-btn, .export-page-alt):focus-visible {
+/* The way back: the poster's foot, the full width of the card. */
+.export-page .export-page-back {
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 0;
+  border-top: 1px solid rgb(122 232 255 / 18%);
+  border-radius: 0 0 6px 6px;
+  color: #dff9ff;
+  background: linear-gradient(180deg, rgb(122 232 255 / 8%), rgb(122 232 255 / 2%));
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+/* A drawn chevron, pointing back. */
+.export-page .export-page-back::before {
+  flex: none;
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border-bottom: 2px solid var(--dl-ice);
+  border-left: 2px solid var(--dl-ice);
+  rotate: 45deg;
+}
+
+.export-page :is(.export-page-btn, .export-page-alt, .export-page-back):focus-visible {
   outline: 2px solid var(--dl-focus);
   outline-offset: 3px;
+}
+
+.export-page .export-page-back:focus-visible {
+  outline-offset: -4px;
 }
 
 /* The ZIP plate's brackets sit 3–5px outside it, so its ring goes a band
@@ -361,23 +449,48 @@ html[data-world-effects="economy"] .export-page h1 {
     color: #dff9ff;
     text-decoration-color: var(--dl-ice);
   }
+  .export-page .export-page-back:hover {
+    background: linear-gradient(180deg, rgb(122 232 255 / 16%), rgb(122 232 255 / 4%));
+  }
 }
 
 /* ================================================================
    Short viewports
    ================================================================ */
-@media (max-height: 480px) {
-  .export-page {
-    padding-block: 20px 28px;
+/* Short screens: a smaller sigil and wordmark. */
+@media (max-height: 640px) {
+  .export-page-sigil {
+    width: 52px;
+    height: 52px;
+    margin-top: -26px;
+  }
+  .export-page-sigil > i {
+    font-size: 15px;
   }
   .export-page h1 {
-    font-size: 30px;
+    font-size: clamp(26px, 3.2vw + 14px, 40px);
   }
-  .export-page > p {
-    margin-top: 18px;
+}
+
+/* Landscape phones: the art is a band, and the steps are tighter still. */
+@media (max-height: 480px) {
+  .export-page {
+    --dl-art: 44px;
+    --dl-step: 10px;
+    padding-block: 8px;
+  }
+  .export-page-sigil {
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+  }
+  .export-page-sigil > i {
+    font-size: 13px;
+  }
+  .export-page h1 {
+    font-size: 28px;
   }
   .export-page-btn {
-    margin-top: 20px;
     min-height: 48px;
   }
   /* The compact rule takes back the retry control's 21px the same way. */
@@ -386,17 +499,15 @@ html[data-world-effects="economy"] .export-page h1 {
   }
   .export-page small {
     margin-top: 2px;
-    padding-top: 10px;
-    margin-bottom: 18px;
   }
 }
 
-/* Small phones: the plate ends above the fixed Zeus button. */
+/* Small phones: the poster fits the screen whole (it no longer leaves a
+   140px foot for the Zeus button, which now settles clear of its controls;
+   a foot that made the card scroll let the button land on the ZIP plate). */
 @media (max-width: 400px) and (max-height: 640px) {
   .export-page {
-    align-content: start;
-    padding-top: 24px;
-    padding-bottom: 140px;
+    padding-block: 12px;
   }
 }
 
@@ -429,6 +540,9 @@ html[data-world-effects="economy"] .export-page h1 {
   html:not([data-world-effects="economy"]) .export-page-btn::before {
     animation: dl-lock 420ms steps(3, jump-end) 520ms backwards;
   }
+  html:not([data-world-effects="economy"]) .export-page-sigil {
+    animation: dl-sigil 640ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms backwards;
+  }
 }
 
 @keyframes dl-lock {
@@ -439,6 +553,16 @@ html[data-world-effects="economy"] .export-page h1 {
   to {
     opacity: 1;
     scale: 1;
+  }
+}
+@keyframes dl-sigil {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
   }
 }
 @keyframes dl-title {
@@ -512,7 +636,23 @@ html[data-world-effects="economy"] .export-page h1 {
     border: 2px solid ButtonText;
     box-shadow: none;
   }
-  .export-page-alt {
+  .export-page-alt,
+  .export-page .export-page-back {
     color: LinkText;
+  }
+  /* The foot is opaque here and covers the card's own edges along its row,
+     so it draws the card's sides and bottom itself. */
+  .export-page .export-page-back {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  .export-page .export-page-back::before {
+    border-color: LinkText;
+  }
+  .export-page-sigil {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

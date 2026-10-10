@@ -10,6 +10,8 @@ import {
   type KeyboardEvent,
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
+import { RecordArtFrame } from "@/components/library/record-art";
+import { documentArt, titleRunStyle } from "@/lib/record-art";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
@@ -27,16 +29,27 @@ import { useOpenResult } from "./use-open-result";
 const PAGE_SIZE = 24;
 const GROUP_PREVIEW = 4;
 const BROWSE_PREVIEW = 6;
+// The see-all tile shows the art of the next few records it holds.
+const MORE_PEEK = 4;
 const URL_DELAY_MS = 280;
 const STARTING_QUERIES = ["ゼウス", "月城悠真", "六詠", "エクスプリーム", "Dream"];
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
+
+// Each record's place in the index, printed on its card as a file number.
+const RECORD_NUMBER = new Map(SEARCH_DOCUMENTS.map((document, index) => [document.id, index + 1]));
 
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
 const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
 
 type Option =
   | { kind: "result"; id: string; result: SearchResult }
-  | { kind: "more"; id: string; category: string; count: number };
+  | {
+      kind: "more";
+      id: string;
+      category: string;
+      count: number;
+      peek: readonly SearchResult["document"][];
+    };
 
 function SearchGlyph() {
   return (
@@ -112,6 +125,7 @@ export function SearchPage({
             id: `${listboxId}-more-${group.category}`,
             category: group.category,
             count: group.results.length,
+            peek: group.results.slice(limit, limit + MORE_PEEK).map((result) => result.document),
           });
         sections.push({ category: group.category, total: group.results.length, items });
         list.push(...items);
@@ -407,6 +421,15 @@ export function SearchPage({
                           choose(option, event.detail === 0);
                         }}
                       >
+                        <span className="search-more-peek" aria-hidden="true">
+                          {option.peek.map((document) => (
+                            <RecordArtFrame
+                              key={document.id}
+                              art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
+                              title={document.title}
+                            />
+                          ))}
+                        </span>
                         <span>{categoryLabel(option.category)}をすべて見る</span>
                         <b>{option.count}件</b>
                       </a>
@@ -476,11 +499,15 @@ const ResultCard = memo(function ResultCard({
       className="search-result-card"
       onOpen={onOpen}
     >
+      <RecordArtFrame
+        art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
+        title={document.title}
+      />
       <span className="search-result-meta">
         <span>{categoryLabel(document.category)}</span>
         {place ? <span>{place}</span> : null}
       </span>
-      <span className="search-result-title">
+      <span className="search-result-title" style={titleRunStyle(document.title)}>
         <HighlightedName text={document.title} ranges={result.titleRanges} />
       </span>
       {result.via ? <span className="search-result-via">{result.via}</span> : null}

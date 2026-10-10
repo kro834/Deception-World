@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   createWorldHead,
   DOSSIER_HUD_FONTS_URL,
@@ -27,6 +27,9 @@ export const Route = createFileRoute("/download")({
 function DownloadPage() {
   return (
     <main className="export-page">
+      <span className="export-page-sigil" aria-hidden="true">
+        <i>DW</i>
+      </span>
       <p>EXPORT</p>
       <h1>Deception World</h1>
       <b>MAIN ARCHIVE</b>
@@ -37,6 +40,9 @@ function DownloadPage() {
         ダウンロードを再試行
       </a>
       <small>GitHub上の最新mainを取得します ／ node_modules は含みません</small>
+      <Link to="/world" className="export-page-back">
+        メインサイトへ戻る
+      </Link>
     </main>
   );
 }
