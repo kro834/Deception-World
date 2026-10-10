@@ -2016,7 +2016,7 @@ html[data-family="dream"]
 @media (min-width: 1181px) and (min-height: 700px) {
   html[data-family="dream"] main.dream-page.dream-page > .dream-annex#factions,
   html[data-family="dream"] main.dream-page.dream-page > .dream-annex#atlas {
-    --dr-stage-w: minmax(0, 0.34fr);
+    --dr-stage-w: minmax(0, 0.3fr);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     column-gap: clamp(24px, 2.6vw, 44px);
@@ -2104,7 +2104,7 @@ html[data-family="dream"] main.dream-page.dream-page #cast-roster {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #factions {
-  contain-intrinsic-size: auto 4305px;
+  contain-intrinsic-size: auto 4095px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #case-notes {
@@ -2116,7 +2116,7 @@ html[data-family="dream"] main.dream-page.dream-page #chronicle {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #atlas {
-  contain-intrinsic-size: auto 2955px;
+  contain-intrinsic-size: auto 2860px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #relations {
@@ -2153,7 +2153,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 4615px;
+    contain-intrinsic-size: auto 4595px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
@@ -2553,7 +2553,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 4330px;
+    contain-intrinsic-size: auto 4095px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
@@ -2565,7 +2565,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 2955px;
+    contain-intrinsic-size: auto 2860px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
