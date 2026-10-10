@@ -14,6 +14,8 @@ import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import extremeEditionCssUrl from "@/styles-extreme-edition.css?url";
 import extremeOverdriveCssUrl from "@/styles-extreme-overdrive.css?url";
+import stageSpecialCssUrl from "@/styles-stage-special.css?url";
+import stageExtremeCssUrl from "@/styles-stage-extreme.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   validateSearch: validateInquirySearch,
@@ -44,6 +46,10 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: motionEditionCssUrl },
       { rel: "stylesheet", href: extremeEditionCssUrl },
       { rel: "stylesheet", href: extremeOverdriveCssUrl },
+      // STAGE (rx10): the gold overdrive trailer (the shared special-site
+      // grammar, then this page's scenes).
+      { rel: "stylesheet", href: stageSpecialCssUrl },
+      { rel: "stylesheet", href: stageExtremeCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

@@ -1,0 +1,458 @@
+/* ================================================================
+   STAGE — the special sites, shared grammar (rx10, 2026-10-10)
+
+   /rexonance-saga, /extreme-saga and /final-stage stop being one
+   product-page skeleton in three colours. Each becomes a trailer with
+   its own scene grammar (styles-stage-rexonance.css, -extreme.css,
+   -final-stage.css); this sheet holds only what the three share with
+   the rest of the site's STAGE language:
+
+   - the type roles: Zen Kaku for display, Noto Sans for reading,
+     Michroma for HUD capitals, Oxanium for numbers. No system-font
+     headlines, no gradient-filled or glowing Japanese titles.
+   - one section-head grammar: a numbered HUD kicker over the Japanese
+     title and a seam that starts bright.
+   - one focus ring, Japanese line breaking, the 12px floor.
+
+   Every rule is scoped to html[data-family="special"] and the doubled
+   page class, so it reaches only these three pages (route sheets
+   persist across client navigation). The local nav, the side menu, the
+   entry calls and the dialogs are left to their own sheets. Paint and
+   layout only here; motion lives in the skins and is gated there.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page) {
+  --rxs-font-text: var(--dx-body);
+  --rxs-font-display: var(--dx-display);
+  --sc-mono: var(--dx-mono);
+  --dxs-line: rgb(var(--dx-edition-rgb) / 16%);
+  --dxs-line-2: rgb(var(--dx-edition-rgb) / 34%);
+  --dxs-hot: rgb(var(--dx-edition-rgb) / 76%);
+  --dxs-wrap: 1240px;
+  --dxs-nav: var(--rxs-local-nav-reserve, 62px);
+  /* The showcase's 28px product tiles square up to the STAGE plate. */
+  --sc-radius: 4px;
+  --sc-radius-small: 3px;
+  font-family: var(--dx-body);
+}
+
+/* Edition lights on the shared tokens. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
+  --dx-edition: #79e8ff;
+  --dx-edition-rgb: 121 232 255;
+  --dx-edition-2: #ff8fd8;
+  --dx-edition-2-rgb: 255 143 216;
+  --dx-gold: #f2d896;
+  --dx-ink: #02050a;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page {
+  --dx-edition: #ffd57a;
+  --dx-edition-rgb: 255 213 122;
+  --dx-edition-2: #ff9d4a;
+  --dx-edition-2-rgb: 255 157 74;
+  --dx-gold: #ffd57a;
+  --dx-ink: #050403;
+  --dx-text: #fff7e6;
+  --dx-text-2: #e3d6bd;
+  --dx-text-3: #b5a68a;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page {
+  --dx-edition: #aab2ff;
+  --dx-edition-rgb: 170 178 255;
+  --dx-edition-2: #c99bff;
+  --dx-edition-2-rgb: 201 155 255;
+  --dx-gold: #e9d3a0;
+  --dx-ink: #05061a;
+  --dx-text: #f1f2ff;
+  --dx-text-2: #c4c7e6;
+  --dx-text-3: #9ea2c6;
+}
+
+/* ---------- Type roles over every scene (not the bar, menu or calls) ---------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index) {
+  font-family: var(--dx-body);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
+  :is(h1, h2, h3, h4) {
+  font-family: var(--dx-display);
+  font-feature-settings: "palt" 1;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+/* The gradient-filled, glowing titles become plain lit type. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > :is(.rxs-hero, .rxs-section, .rxs-footer)
+  :is(h1, h2) {
+  color: var(--dx-text);
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+  filter: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
+  :is(p, li, dd, dt, small, em, q, label) {
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+
+/* ---------- One focus ring ---------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
+  :is(a, button, select, input):focus-visible:not([data-pointer-focus="true"]) {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 3px;
+}
+
+/* The end card holds at least half a screen, so a jump to the last
+   chapter can still land under the bar on tall tablets (the page must
+   scroll that far). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-footer {
+  min-height: min(56svh, 620px);
+  align-content: flex-end;
+}
+
+/* ================================================================
+   The section-head grammar: a numbered HUD kicker, the Japanese
+   title, the edition's seam. The skins place it; this sets its type.
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page)
+  > .rxs-section {
+  counter-increment: dxs-scene;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page) {
+  counter-reset: dxs-scene;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-auto-flow: row;
+  column-gap: clamp(14px, 2vw, 26px);
+  align-items: end;
+  max-width: none;
+  margin: 0 0 clamp(28px, 4vw, 52px);
+  padding: 0 0 clamp(16px, 1.8vw, 22px);
+  text-align: start;
+  border: 0;
+  background:
+    linear-gradient(90deg, var(--dx-edition), rgb(var(--dx-edition-2-rgb) / 60%) 55%, transparent) 0
+      100% / min(240px, 42%) 1px no-repeat,
+    linear-gradient(var(--dxs-line), var(--dxs-line)) 0 100% / 100% 1px no-repeat;
+  box-shadow: none;
+}
+
+/* The scene number: an outlined Oxanium numeral beside the kicker and
+   the title (silent to assistive technology). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading::before {
+  content: counter(dxs-scene, decimal-leading-zero) / "";
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: end;
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.04em;
+  padding: 0;
+  color: transparent;
+  font: 600 clamp(46px, 6vw, 80px) / 0.78 var(--dx-mono);
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px rgb(var(--dx-edition-rgb) / 62%);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  opacity: 1;
+  translate: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading::after {
+  content: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* The kicker: Michroma capitals. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > p {
+  display: block;
+  margin: 0 0 clamp(10px, 1.2vw, 16px);
+  padding: 0;
+  color: var(--dx-edition);
+  font: 400 12px / 1.5 var(--dx-hud);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > p::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > p::after {
+  content: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > h2 {
+  margin: 0;
+  max-width: 18em;
+  font-weight: 700;
+  font-size: clamp(32px, 4.4vw, 62px);
+  line-height: 1.16;
+  letter-spacing: 0.01em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  > .rxs-section-heading
+  > span {
+  grid-column: 1 / -1;
+  display: block;
+  max-width: 40em;
+  margin: clamp(16px, 1.8vw, 22px) 0 0;
+  color: var(--dx-text-2);
+  font: 400 clamp(14px, 1.2vw, 16px) / 1.9 var(--dx-body);
+  letter-spacing: 0.02em;
+  text-align: start;
+}
+
+/* ================================================================
+   The form selectors (liquid rails): restyled as the STAGE tab, a
+   squared plate with the chosen slot lit from below in the edition's
+   light. Paint only: the rail's engine, its geometry and its gestures
+   are untouched (the frosted sheet paints rails with html body …
+   !important, so this answers in kind).
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > .liquid-rail-surface {
+  --liquid-shell-radius: 4px !important;
+  --liquid-control-radius: 3px !important;
+  border-radius: 4px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 40%), var(--dx-ink-2) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--dx-edition-rgb) / 24%),
+    inset 0 1px 0 rgb(255 255 255 / 10%) !important;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > :is(button[role="tab"], .liquid-selection-lens),
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-radius: 3px !important;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  background: linear-gradient(
+    180deg,
+    rgb(var(--dx-edition-rgb) / 26%),
+    rgb(var(--dx-edition-rgb) / 10%)
+  ) !important;
+  box-shadow:
+    inset 0 -2px 0 var(--dx-edition),
+    inset 0 0 0 1px rgb(var(--dx-edition-rgb) / 52%),
+    inset 0 1px 0 rgb(255 255 255 / 22%) !important;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"] {
+  color: var(--dx-text-3);
+  text-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"]
+  span {
+  font-family: var(--dx-display);
+  font-weight: 700;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"]
+  small {
+  font-family: var(--dx-hud);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-section
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"] {
+  color: var(--dx-text);
+}
+
+/* Phones: the scene number sits on the kicker's line, so the title has
+   the full width. */
+@media (max-width: 560px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > .rxs-section
+    > .rxs-section-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > .rxs-section
+    > .rxs-section-heading::before {
+    grid-row: 1;
+    align-self: baseline;
+    margin: 0;
+    font-size: 30px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > .rxs-section
+    > .rxs-section-heading
+    > :is(h2, span) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    font-size: clamp(28px, 8.4vw, 38px);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > .rxs-section
+    > .rxs-section-heading {
+    border-bottom: 1px solid CanvasText;
+    background: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > :is(.rxs-hero, .rxs-section, .rxs-footer)
+    :is(h1, h2) {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+    > :is(.rxs-hero, .rxs-section, .rxs-footer, .rxs-chapter-index)
+    :is(a, button, select, input):focus-visible:not([data-pointer-focus="true"]) {
+    outline-color: Highlight;
+  }
+}

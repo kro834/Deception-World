@@ -12,6 +12,8 @@ import finalStageKiroCssUrl from "@/styles-final-stage-kiro.css?url";
 import finalStageLamplightCssUrl from "@/styles-final-stage-lamplight.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
+import stageSpecialCssUrl from "@/styles-stage-special.css?url";
+import stageFinalStageCssUrl from "@/styles-stage-final-stage.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 
 export const Route = createFileRoute("/final-stage")({
@@ -45,6 +47,10 @@ export const Route = createFileRoute("/final-stage")({
       // The Lamplight edition: the station's finish, its states and one
       // signature, over the motion sheet (styles-final-stage-lamplight.css).
       { rel: "stylesheet", href: finalStageLamplightCssUrl },
+      // STAGE (rx10): the third film's poster and title cards (the shared
+      // special-site grammar, then this page's scenes).
+      { rel: "stylesheet", href: stageSpecialCssUrl },
+      { rel: "stylesheet", href: stageFinalStageCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
