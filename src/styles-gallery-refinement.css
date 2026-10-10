@@ -1,6 +1,62 @@
 /* Small, artwork-first refinements layered over the established gallery skin. */
 .gallery-page .gallery-intro {
-  padding-block: clamp(64px, 8vw, 112px) clamp(72px, 9vw, 124px);
+  gap: clamp(28px, 4vw, 64px);
+  padding-block: clamp(40px, 5vw, 72px) clamp(48px, 6vw, 88px);
+}
+
+.gallery-page .gallery-intro-description {
+  font-size: clamp(14px, 1.2vw, 16px);
+  line-height: 1.95;
+}
+
+.gallery-page .gallery-intro-actions {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
+  gap: 14px clamp(20px, 3vw, 36px);
+  margin-top: 28px;
+}
+
+.gallery-page .gallery-intro-actions .gallery-enter {
+  min-height: 48px;
+  margin: 0;
+}
+
+.gallery-page .gallery-intro-actions .gallery-tour-invitation {
+  min-width: 0;
+  margin: 0;
+}
+
+.gallery-page .gallery-intro-actions .gallery-tour-invitation a {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-block: 8px;
+  box-sizing: border-box;
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.gallery-page .gallery-intro-actions .gallery-tour-invitation > span {
+  max-width: 32ch;
+  line-height: 1.7;
+}
+
+.gallery-page .gallery-edition {
+  margin-top: 28px;
+}
+
+.gallery-page .gallery-feature-settings :is(a, button) {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .gallery-page .gallery-collection {
@@ -362,7 +418,29 @@
 
 @media (max-width: 700px) {
   .gallery-page .gallery-intro {
-    padding-block: 58px 72px;
+    gap: 28px;
+    padding-block: 32px 48px;
+  }
+
+  .gallery-page .gallery-intro h1 {
+    margin-block: 16px 14px;
+  }
+
+  .gallery-page .gallery-intro-copy {
+    padding-top: 0;
+  }
+
+  .gallery-page .gallery-intro-actions {
+    gap: 12px 20px;
+    margin-top: 22px;
+  }
+
+  .gallery-page .gallery-intro-actions .gallery-tour-invitation a {
+    font-size: 14px;
+  }
+
+  .gallery-page .gallery-edition {
+    margin-top: 22px;
   }
 
   .gallery-page .gallery-personal-controls {
@@ -412,6 +490,28 @@
 }
 
 @media (max-width: 390px) {
+  .gallery-page .gallery-topbar {
+    gap: 8px;
+  }
+
+  .gallery-page .gallery-brand {
+    font-size: clamp(12px, 3.35vw, 13px);
+    letter-spacing: 0.04em;
+  }
+
+  .gallery-page .gallery-brand span {
+    letter-spacing: 0.04em;
+  }
+
+  .gallery-page .gallery-topbar-actions {
+    gap: 8px;
+  }
+
+  .gallery-page .gallery-refresh {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
   .gallery-page .gallery-submission-specs span {
     padding-inline: 8px;
     font-size: 12px;

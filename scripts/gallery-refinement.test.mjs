@@ -196,3 +196,42 @@ test("refinement stylesheet is the final gallery-specific route layer", () => {
   assert.match(refinementCss, /@media \(max-width: 700px\)/);
   assert.match(refinementCss, /@media \(max-width: 390px\)/);
 });
+
+test("hero entrances share one responsive navigation without changing their destinations", () => {
+  const actions = page.match(
+    /<nav className="gallery-intro-actions" aria-label="ギャラリーの入口">([\s\S]*?)<\/nav>/,
+  )?.[1];
+  assert.ok(actions);
+  assert.match(actions, /className="gallery-enter" href="#gallery-collection"/);
+  assert.match(actions, /<Link to="\/gallery-tours">/);
+  const layout = rule(refinementCss, ".gallery-page .gallery-intro-actions");
+  assert.match(layout, /display:\s*grid;/);
+  assert.match(layout, /grid-template-columns:\s*max-content minmax\(0, 1fr\);/);
+  for (const selector of [
+    ".gallery-page .gallery-intro-actions .gallery-enter",
+    ".gallery-page .gallery-intro-actions .gallery-tour-invitation a",
+    ".gallery-page .gallery-feature-settings :is(a, button)",
+  ]) {
+    assert.match(rule(refinementCss, selector), /min-height:\s*(?:44|48)px;/, selector);
+  }
+  assert.match(
+    refinementCss,
+    /@media \(max-width: 700px\)[\s\S]*?\.gallery-page \.gallery-intro \{\s*gap: 28px;\s*padding-block: 32px 48px;/,
+  );
+  // Geometry polish must not crop the user's personally selected top artwork.
+  assert.match(page, /--gallery-feature-ratio[^\n]*featured\.width \/ featured\.height/);
+  assert.doesNotMatch(refinementCss, /\.gallery-feature(?:-open)?\s+img\s*\{/);
+});
+
+test("narrow header keeps the full brand and refresh labels without shrinking touch targets", () => {
+  assert.match(
+    refinementCss,
+    /@media \(max-width: 390px\) \{[\s\S]*?\.gallery-page \.gallery-brand \{\s*font-size: clamp\(12px, 3\.35vw, 13px\);/,
+  );
+  assert.match(rule(refinementCss, ".gallery-page .gallery-topbar-actions"), /gap: 8px;/);
+  assert.match(rule(refinementCss, ".gallery-page .gallery-refresh"), /padding-inline: 6px;/);
+  assert.match(page, /DECEPTION WORLD<span>VISUAL COLLECTION<\/span>/);
+  assert.match(page, /refreshing \? "更新中" : justRefreshed \? "更新済み" : "更新"/);
+  assert.match(rule(baseCss, ".gallery-refresh"), /min-height: 44px;/);
+  assert.doesNotMatch(refinementCss, /\.gallery-(?:brand|refresh)\s*\{[^}]*display: none;/);
+});

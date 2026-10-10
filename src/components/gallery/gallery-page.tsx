@@ -1059,15 +1059,17 @@ export function GalleryPage() {
                 <span className="gallery-copy-phrase">一点ずつ巡るギャラリー。</span>
               </span>
             </p>
-            <a className="gallery-enter" href="#gallery-collection">
-              展示室へ<span aria-hidden="true">↓</span>
-            </a>
-            <p className="gallery-tour-invitation">
-              <Link to="/gallery-tours">
-                テーマから作品を巡る <span aria-hidden="true">↗</span>
-              </Link>
-              <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
-            </p>
+            <nav className="gallery-intro-actions" aria-label="ギャラリーの入口">
+              <a className="gallery-enter" href="#gallery-collection">
+                展示室へ<span aria-hidden="true">↓</span>
+              </a>
+              <p className="gallery-tour-invitation">
+                <Link to="/gallery-tours">
+                  テーマから作品を巡る <span aria-hidden="true">↗</span>
+                </Link>
+                <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
+              </p>
+            </nav>
             <p className="gallery-edition">
               COLLECTION <b>{GALLERY_ARTWORKS.length}</b> WORKS
             </p>

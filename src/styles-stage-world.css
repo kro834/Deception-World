@@ -505,6 +505,7 @@ html[data-family="world"]:root
   align-items: center;
   gap: 10px;
   box-sizing: border-box;
+  container-type: inline-size;
   width: var(--poster-width);
   margin: 4px 0 0;
 }
@@ -515,8 +516,8 @@ html[data-family="world"]:root
   > .hero
   > .poster-stage
   .poster-control-cluster {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 6px;
   width: 100%;
   margin: 0;
@@ -528,17 +529,39 @@ html[data-family="world"]:root
   > .hero
   > .poster-stage
   .poster-control-cluster
+  > .poster-shuffle {
+  grid-column: 1 / -1;
+}
+
+/* A very narrow portrait keeps the same 48px controls in a single column. */
+@container (max-width: 230px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage
+    .poster-control-cluster {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-control-cluster
   > button {
   display: inline-flex;
-  flex: 1 1 auto;
+  box-sizing: border-box;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  min-width: 48px;
+  gap: 6px;
+  min-width: 0;
   min-height: 48px;
-  width: auto;
+  width: 100%;
   margin: 0;
-  padding: 0 12px;
+  padding: 0 8px;
   border: 1px solid rgb(122 232 255 / 22%) !important;
   border-radius: 3px !important;
   background: #08111c !important;
