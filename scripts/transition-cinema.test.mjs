@@ -167,7 +167,7 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.match(gate, /router\.subscribe\("onRendered", \(event\) => \{/);
   assert.doesNotMatch(gate, /announceRouteCommit/);
   const branches = gate.match(
-    /await navigateUnderCover\(router, \(\) => navigate\(\{ to: to as never, hash \}\), to\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?document\.documentElement\.removeAttribute\("data-loading"\);[\s\S]*?phase: "revealing",[\s\S]*?await revealRan\(\s*timings\.reveal/g,
+    /await navigateUnderCover\(router, \(\) => navigate\(\{ to, hash, search: navigationSearch \}\), to\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?document\.documentElement\.removeAttribute\("data-loading"\);[\s\S]*?phase: "revealing",[\s\S]*?await revealRan\(\s*timings\.reveal/g,
   );
   assert.equal(branches?.length, 2, "rider dives/cut-ins and the sovereign gate");
   // Only a prepared Rexonance renderer has no portrait to dock. A failed

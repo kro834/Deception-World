@@ -1173,10 +1173,12 @@ html[data-family="world"]:root
   > .story-layout
   > .story-copy
   > p {
+  max-width: 40em;
   margin: 0;
   color: var(--sw-text-2);
-  font: 400 clamp(15px, 1.15vw, 17px) / 2 var(--sw-body);
+  font: 400 clamp(16px, 1.2vw, 17px) / 1.95 var(--sw-body);
   letter-spacing: 0.04em;
+  text-wrap: pretty;
 }
 
 html[data-family="world"]:root
@@ -2867,10 +2869,10 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
   ol {
-  gap: 0;
-  border: 1px solid rgb(var(--sw-light-rgb) / 18%);
-  border-radius: 2px;
-  background: rgb(4 10 8 / 60%);
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 html[data-family="world"]:root
@@ -2880,7 +2882,7 @@ html[data-family="world"]:root
   ol
   > li
   + li {
-  box-shadow: inset 1px 0 0 rgb(var(--sw-light-rgb) / 14%);
+  box-shadow: none;
 }
 
 html[data-family="world"]:root
@@ -2890,14 +2892,16 @@ html[data-family="world"]:root
   ol
   a {
   display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
   align-content: center;
   justify-items: start;
-  gap: 4px;
-  min-height: 60px;
+  gap: 8px;
+  min-height: 64px;
   padding: 10px 14px;
-  border: 0;
-  border-radius: 0;
-  background: none;
+  border: 1px solid rgb(var(--sw-light-rgb) / 22%);
+  border-radius: 3px;
+  background: rgb(4 10 8 / 46%);
   color: var(--sw-text);
   font: 700 14px / 1.4 var(--sw-display);
 }
@@ -2913,6 +2917,19 @@ html[data-family="world"]:root
   color: var(--sw-light);
   font: 600 12px / 1 var(--sw-mono);
   letter-spacing: 0.14em;
+}
+
+@media (max-width: 560px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .wa-contents
+    ol
+    a {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding-inline: 12px;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2973,7 +2990,9 @@ html[data-family="world"]:root
 }
 
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .world-annex .wa-prose {
+  max-width: 40em;
   color: var(--sw-text-2);
+  text-wrap: pretty;
 }
 
 html[data-family="world"]:root

@@ -482,11 +482,13 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy p {
+  max-width: 38em;
   margin: 0 0 1.7em;
   color: var(--dx-text-2);
-  font: 400 clamp(15px, 1.2vw, 17px) / 2.15 var(--dx-body);
+  font: 400 clamp(16px, 1.25vw, 17px) / 2 var(--dx-body);
   letter-spacing: 0.04em;
   text-align: start;
+  text-wrap: pretty;
 }
 
 html[data-family="special"]

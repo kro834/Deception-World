@@ -77,6 +77,7 @@ type CineScene = {
 type GoOptions = {
   to: string;
   hash?: string;
+  search?: Record<string, string>;
   assets?: readonly string[];
   transition?: "dream";
   transitionCovered?: boolean;
@@ -152,6 +153,11 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 const nextFrame = () =>
   new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+
+function guardedHref(to: string, hash?: string, search?: Record<string, string>) {
+  const query = search ? new URLSearchParams(search).toString() : "";
+  return `${to}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+}
 
 // The call hold can be shortened while it is playing. A live reduced
 // motion/economy preference must not leave the static final word waiting for
@@ -1094,11 +1100,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     async ({
       to,
       hash,
+      search,
       assets = [],
       transition,
       transitionCovered,
       focusDestination,
     }: GoOptions) => {
+      const navigationSearch = search ? () => search : undefined;
       if (transitionCovered) {
         const runtime = openingHandoff.current;
         if (!runtime || to !== "/world") return;
@@ -1128,7 +1136,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
           if (!isCurrent()) return;
-          await navigate({ to: to as never, hash });
+          await navigate({ to, hash, search: navigationSearch });
           if (!isCurrent()) return;
           const destination = await Promise.race([
             runtime.destination.promise,
@@ -1185,7 +1193,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         );
         if (!isCurrent()) return false;
         if (!ready)
-          setDelayedRoute({ href: hash ? `${to}#${hash}` : to, focus: Boolean(focusDestination) });
+          setDelayedRoute({ href: guardedHref(to, hash, search), focus: Boolean(focusDestination) });
         return ready;
       };
       if (
@@ -1211,7 +1219,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           // A section jump stays in the current document, including its
           // selected archive. Only a new document starts with fresh search.
-          await navigate({ to: to as never, hash, search: changesDocument ? undefined : true });
+          await navigate({ to, hash, search: navigationSearch ?? (changesDocument ? undefined : true) });
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           if (hash) await settleRouteHash(hash);
@@ -1244,7 +1252,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const remaining = timings.cover - (performance.now() - startedAt);
           if (remaining > 0) await wait(remaining);
           if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to: to as never, hash }), to);
+          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
@@ -1351,7 +1359,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             } else await wait(coverTimeLeft);
           }
           if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to: to as never, hash }), to);
+          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
@@ -1421,7 +1429,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to: to as never, hash }), to);
+          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
@@ -1481,7 +1489,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         if (!isCurrent()) return;
         if (progressTimer) window.clearInterval(progressTimer);
         setGate({ active: true, percent: 100, variant: "archive", phase: "covering", scene });
-        await navigate({ to: to as never, hash });
+        await navigate({ to, hash, search: navigationSearch });
         if (!isCurrent()) return;
         if (focusDestination) focusRouteDestination(hash);
         await settleUnderCover();
@@ -1863,6 +1871,7 @@ function RiderRouteCutIn({ variant }: { variant: RiderCutInVariant }) {
 export function GuardedLink({
   to,
   hash,
+  search,
   assets,
   transition,
   className,
@@ -1873,6 +1882,7 @@ export function GuardedLink({
 }: {
   to: string;
   hash?: string;
+  search?: Record<string, string>;
   assets: readonly string[];
   transition?: "dream";
   className?: string;
@@ -1886,7 +1896,7 @@ export function GuardedLink({
   const router = useRouter();
   const preloadedRoute = useRef<string | null>(null);
   const preloadedAssetKey = useRef<string | null>(null);
-  const href = hash ? `${to}#${hash}` : to;
+  const href = guardedHref(to, hash, search);
 
   const preloadDestination = useCallback(() => {
     if (preloadedRoute.current !== to) {
@@ -1911,7 +1921,7 @@ export function GuardedLink({
     e.stopPropagation();
     beforeNavigate?.();
     // detail 0: activated from the keyboard (Enter), not a pointer.
-    void go({ to, hash, assets, transition, focusDestination: e.detail === 0 });
+    void go({ to, hash, search, assets, transition, focusDestination: e.detail === 0 });
   };
 
   return (

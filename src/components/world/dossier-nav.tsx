@@ -1,8 +1,10 @@
 import { Fragment } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { dossierImage } from "@/lib/dossier-images";
+import { CAST_ROSTER_SEARCH, isCastRosterOrigin } from "@/lib/dossier-origin";
 
 export type DossierLink = {
   id: string;
@@ -229,6 +231,9 @@ export function DossierNav({
   /** The list on the World page to return to, when the path does not say. */
   returnHash?: string;
 }) {
+  const fromCastRoster = useRouterState({
+    select: (state) => isCastRosterOrigin(state.location.search),
+  });
   const { idx, prev, next } = neighbors(items, currentHref);
   if (idx < 0) return null;
   const pathHash = currentHref.startsWith("/riders/")
@@ -238,12 +243,13 @@ export function DossierNav({
       : currentHref.startsWith("/characters/")
         ? "manager-archive-other"
         : "manager-archive";
-  const returnHash = listHash ?? pathHash;
+  const returnHash = fromCastRoster ? "cast-roster" : (listHash ?? pathHash);
+  const originSearch = fromCastRoster ? CAST_ROSTER_SEARCH : undefined;
 
   return (
     <nav className="manager-pagination" aria-label="前後の資料">
       {prev?.href ? (
-        <GuardedLink to={prev.href} assets={prev.assets} aria-label={`${prev.name}の資料へ`}>
+        <GuardedLink to={prev.href} search={originSearch} assets={prev.assets} aria-label={`${prev.name}の資料へ`}>
           <NavPortrait item={prev} />
           <small>PREV / {prev.kicker}</small>
           <b>
@@ -264,7 +270,7 @@ export function DossierNav({
           className="dossier-index-return"
           aria-label="人物一覧へ戻る"
         >
-          <span>{indexLabel}</span>
+          <span>{fromCastRoster ? "CAST FILES" : indexLabel}</span>
           <b>一覧へ戻る</b>
           <i>
             {String(idx + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
@@ -272,7 +278,7 @@ export function DossierNav({
         </GuardedLink>
       </div>
       {next?.href ? (
-        <GuardedLink to={next.href} assets={next.assets} aria-label={`${next.name}の資料へ`}>
+        <GuardedLink to={next.href} search={originSearch} assets={next.assets} aria-label={`${next.name}の資料へ`}>
           <NavPortrait item={next} />
           <small>NEXT / {next.kicker}</small>
           <b>

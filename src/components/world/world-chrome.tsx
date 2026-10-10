@@ -10,6 +10,7 @@ import {
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { DisplayName } from "@/components/name-text";
+import { isCastRosterOrigin } from "@/lib/dossier-origin";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
@@ -177,6 +178,12 @@ export function DossierTopbar({
   returnAriaLabel?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const fromCastRoster = useRouterState({
+    select: (state) => isCastRosterOrigin(state.location.search),
+  });
+  const targetHash = fromCastRoster ? "cast-roster" : returnHash;
+  const targetLabel = fromCastRoster ? "人物一覧へ戻る" : returnLabel;
+  const targetAriaLabel = fromCastRoster ? "人物一覧へ戻る" : returnAriaLabel;
 
   return (
     <>
@@ -184,7 +191,7 @@ export function DossierTopbar({
       <header className="manager-topbar">
         <GuardedLink
           to="/world"
-          hash={returnHash}
+          hash={targetHash}
           assets={[]}
           className="brand"
           aria-label={`${fileLabel}からDeception Worldへ戻る`}
@@ -200,12 +207,12 @@ export function DossierTopbar({
         <div className="detail-topbar-actions">
           <GuardedLink
             to="/world"
-            hash={returnHash}
+            hash={targetHash}
             assets={[]}
             className="manager-back"
-            aria-label={returnAriaLabel}
+            aria-label={targetAriaLabel}
           >
-            <span>{returnLabel}</span>
+            <span>{targetLabel}</span>
             <i aria-hidden="true">
               <UiVectorIcon kind="arrow-left" size={14} />
             </i>
