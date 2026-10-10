@@ -7,6 +7,8 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
+import { mountExtremeImpact } from "@/lib/extreme-impact.js";
+import { ExtremeImpactDefs } from "./extreme-impact-art";
 
 type ExtremeStage = "middle" | "ultra";
 type ExtremeBaseline = "diluculum" | "vinculum";
@@ -263,7 +265,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
   };
   return (
     <section id="performance" className="rxs-performance rxs-section">
-      <header className="rxs-section-heading rxs-reveal">
+      <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
         <p>PERFORMANCE COMPARISON</p>
         <h2>
           <span className="exo-line">肉弾戦なら、</span>
@@ -278,26 +280,66 @@ const ExtremePerformance = memo(function ExtremePerformance() {
         </span>
       </header>
 
+      {/* IMPACT (rx11): the punch meter. The stage holds the two figures and
+          hidden ornaments (focus lines, the shock ring, the cut between them,
+          speed lines, afterimages); a decorative tally runs over the owner's
+          figure, which stays in the text. */}
       <div className="rxs-headline-metrics">
-        <article className="rxs-reveal">
-          <small>PUNCH POWER / EXTREME</small>
-          <strong>
-            205.6<span>t〜</span>
-            <i className="exo-burst" aria-hidden="true" />
-          </strong>
-          <p>標準状態のパンチ力</p>
-        </article>
-        <article className="rxs-reveal">
-          <small>100M TIME / EXTREME</small>
-          <strong>
-            0.002<span>SEC</span>
-            <i className="exo-speed" aria-hidden="true" />
-          </strong>
-          <p>標準状態の100m走破時間</p>
-        </article>
+        <div className="exi-stage">
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
+            <small>PUNCH POWER / EXTREME</small>
+            <strong>
+              <b className="exi-figure">
+                <b className="exi-real">205.6</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="205.6" />
+              </b>
+              <span>t〜</span>
+              <i className="exo-burst" aria-hidden="true" />
+              <svg
+                className="exi-rays"
+                viewBox="-100 -100 200 200"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+              </svg>
+              <i className="exi-ring" aria-hidden="true" />
+            </strong>
+            <p>標準状態のパンチ力</p>
+          </article>
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
+            <svg
+              className="exi-streaks"
+              viewBox="0 0 200 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <use href="#exi-streaks" width="200" height="100" />
+            </svg>
+            <small>100M TIME / EXTREME</small>
+            <strong>
+              0.002<span>SEC</span>
+              <i className="exo-speed" aria-hidden="true" />
+              <b className="exi-ghosts" aria-hidden="true">
+                <b>0.002</b>
+                <b>0.002</b>
+                <b>0.002</b>
+              </b>
+            </strong>
+            <p>標準状態の100m走破時間</p>
+          </article>
+          <i className="exi-band" aria-hidden="true" />
+        </div>
       </div>
 
-      <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
+      <div
+        className="rxs-comparison rxs-reveal"
+        aria-label="標準カタログ値の比較"
+        data-exi-hit=""
+        data-exi-rekey=""
+      >
         <label className="rxs-comparison-selector">
           <span>比較する相手</span>
           <select
@@ -351,7 +393,14 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 </div>
                 <span className="rxs-comparison-result">
                   <i>基準比</i>
-                  <b>{metric.relative}</b>
+                  <b className="exi-figure">
+                    <span className="exi-real">{metric.relative}</span>
+                    <span
+                      className="exi-tally"
+                      aria-hidden="true"
+                      data-exi-tally={metric.relative}
+                    />
+                  </b>
                   <em>
                     {metric.multiplier} / {metric.delta}
                   </em>
@@ -440,6 +489,7 @@ export function ExtremeSaga() {
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
+  useEffect(() => mountExtremeImpact(pageRef.current), []);
 
   // A change of form cuts the art in before the next paint, unless the last
   // cut was under STAGE_CUT_GAP_MS ago; then it waits, and a reader who has
@@ -546,8 +596,19 @@ export function ExtremeSaga() {
       </header>
 
       <SideMenuLayer context="extreme" open={menuOpen} onOpenChange={setMenuOpen} />
+      <ExtremeImpactDefs />
 
       <section className="rxs-hero exs-hero" aria-labelledby="exs-title">
+        <svg
+          className="exi-rays"
+          viewBox="-100 -100 200 200"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+          focusable="false"
+          data-exi-depth="-0.5"
+        >
+          <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+        </svg>
         <div className="rxs-hero-ambient" aria-hidden="true">
           <i />
           <i />
@@ -584,6 +645,20 @@ export function ExtremeSaga() {
             fetchPriority="high"
           />
         </div>
+        <svg
+          className="exi-shards"
+          viewBox="-100 -100 200 200"
+          aria-hidden="true"
+          focusable="false"
+          data-exi-depth="1.2"
+        >
+          <polygon points="-58,-34 -46,-29 -78,-49" />
+          <polygon points="52,-41 63,-47 86,-66 66,-44" />
+          <polygon points="-66,22 -52,18 -90,33" />
+          <polygon points="60,30 72,33 94,44" />
+          <polygon points="-24,-70 -18,-62 -31,-92" />
+          <polygon points="30,-66 26,-74 40,-93" />
+        </svg>
         <a className="rxs-scroll-cue" href="#performance">
           <span>腕っぷしを、数字で。</span>
           <i aria-hidden="true" />
@@ -611,7 +686,7 @@ export function ExtremeSaga() {
       <ExtremePerformance />
 
       <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
-        <header className="rxs-section-heading rxs-reveal">
+        <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <p>PROCESSING CORE / P14</p>
           <h2 id="exs-p14-title">
             <span className="exo-line">可能性は増やす。</span>
@@ -624,7 +699,7 @@ export function ExtremeSaga() {
           </span>
         </header>
 
-        <div className="rxs-p14-overview rxs-reveal">
+        <div className="rxs-p14-overview rxs-reveal" data-exi-hit="">
           <figure>
             <img
               src="/extreme-p14-core.jpg"
@@ -645,11 +720,23 @@ export function ExtremeSaga() {
             <dl aria-label="エクスプリームのP14構成">
               <div className="exo-read">
                 <dt>KHAOS Ultra</dt>
-                <dd>20,000YOPS</dd>
+                <dd>
+                  <span className="exi-figure">
+                    <span className="exi-real">20,000</span>
+                    <span className="exi-tally" aria-hidden="true" data-exi-tally="20,000" />
+                  </span>
+                  YOPS
+                </dd>
               </div>
               <div className="exo-read">
                 <dt>KOSMOS Ultra</dt>
-                <dd>5,000TOPS</dd>
+                <dd>
+                  <span className="exi-figure">
+                    <span className="exi-real">5,000</span>
+                    <span className="exi-tally" aria-hidden="true" data-exi-tally="5,000" />
+                  </span>
+                  TOPS
+                </dd>
               </div>
               <div className="exo-read">
                 <dt>TUNING</dt>
@@ -685,7 +772,7 @@ export function ExtremeSaga() {
       </section>
 
       <section id="stages" className="rxs-stages rxs-section">
-        <header className="rxs-section-heading rxs-reveal">
+        <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <p>TWO OPERATING STAGES</p>
           <h2>
             <span className="exo-line">ミドルで育てて、</span>
@@ -735,8 +822,18 @@ export function ExtremeSaga() {
             aria-labelledby={`exs-stage-tab-${stage}`}
             aria-live="polite"
             data-exo-cut={stageCut ? "true" : undefined}
+            data-exi-warm={`${EXTREME_STAGES.middle.image} ${EXTREME_STAGES.ultra.image}`}
           >
             <figure key={shownStage} data-form={shownStage}>
+              <svg
+                className="exi-streaks"
+                viewBox="0 0 200 100"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="#exi-streaks" width="200" height="100" />
+              </svg>
               <span className="exo-frame" aria-hidden="true" />
               <img
                 src={shownArt.image}
@@ -747,6 +844,15 @@ export function ExtremeSaga() {
                 decoding="async"
               />
               <i className="exo-slash" aria-hidden="true" />
+              <svg
+                className="exi-rays"
+                viewBox="-100 -100 200 200"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+              </svg>
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
@@ -772,7 +878,7 @@ export function ExtremeSaga() {
       </section>
 
       <section id="system" className="rxs-system rxs-section exs-system">
-        <header className="rxs-section-heading rxs-reveal">
+        <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <p>EXTREME ARCHITECTURE</p>
           <h2>
             <span className="exo-line">学習、充填、</span>
@@ -798,7 +904,11 @@ export function ExtremeSaga() {
           <div>
             <small>KHAOS Ultra</small>
             <strong>
-              20,000<span>YOPS</span>
+              <b className="exi-figure">
+                <b className="exi-real">20,000</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="20,000" />
+              </b>
+              <span>YOPS</span>
             </strong>
             <p>∞ CORE</p>
           </div>
@@ -806,7 +916,11 @@ export function ExtremeSaga() {
           <div>
             <small>KOSMOS Ultra</small>
             <strong>
-              5,000<span>TOPS</span>
+              <b className="exi-figure">
+                <b className="exi-real">5,000</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="5,000" />
+              </b>
+              <span>TOPS</span>
             </strong>
             <p>300 CORE</p>
           </div>
@@ -814,6 +928,15 @@ export function ExtremeSaga() {
       </section>
 
       <footer className="rxs-footer">
+        <svg
+          className="exi-rays"
+          viewBox="-100 -100 200 200"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+        </svg>
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
           <h2>

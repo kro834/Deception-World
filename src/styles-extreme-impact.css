@@ -1,0 +1,1923 @@
+/* ================================================================
+   Extreme — IMPACT (rx11, 2026-10-10)
+
+   The STAGE trailer (styles-stage-extreme.css) cut the rounds on the
+   slant; this layer makes them fight. A different film from Rexonance's
+   calm resonance: the grammar is a manga fist fight.
+   - Hit-stop: things arrive at once, stop dead and settle; nothing drifts.
+   - Impact panels: manga focus lines (集中線, #exi-rays) converge on the
+     point of impact; speed lines (流線, #exi-streaks) and afterimages
+     trail what is faster than the eye; a short, damped quake takes the hit.
+   - Scene cuts: a gold blade runs along each slanted edge as the scene
+     arrives, and every heading is smashed in, its two lines a one-two.
+   - Depth: the cold open is a layered stage. The focus lines lag far
+     behind, the colossus behind the page, the shards fly ahead of it,
+     and a fine pointer turns the figure against its light.
+   - ROUND 1 is a pinned punch meter: the stage holds the screen while
+     205.6 counts up and lands in its focus lines and shock ring, a gold
+     cut crosses the stage, and 0.002 SEC dashes in with its afterimages.
+     Then the console stands as a full-width instrument panel.
+   - ROUND 2 turns the P14 chip in 3-D as it passes and turns its bezel.
+   - ROUND 3 dollies out from the form; a change of form lands as an
+     impact around the component's own cut and rest guard.
+   - ROUND 4 charges the drive train; the end card's slab converges.
+   - Figures count up as punch meters: a decorative, silent copy runs
+     over the owner's figure, which stays in the text at its final value.
+
+   Loaded on /extreme-saga after the STAGE scene sheet, before the
+   cinematic sheet, scoped to html[data-family="special"] and the doubled
+   Extreme page class. Scroll-linked motion rides named view timelines
+   behind @supports, reduced motion, economy rendering and the side-menu,
+   loading and dialog flags. Time-based beats play from one-shot keys set
+   by src/lib/extreme-impact.js ("true" for the beat, then "done") behind
+   the same gates, so nothing replays when a lock lifts. Keyframes move
+   opacity, transform, translate, scale and rotate only, end, and turn
+   opacity at most once. Reduced motion, economy rendering and browsers
+   without view timelines get the full composition at rest; forced
+   colours drop every ornament. Guard: scripts/extreme-impact.test.mjs.
+   ================================================================ */
+
+/* ---------- Tokens ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page {
+  /* There at once, then a short settle. */
+  --exi-hit: cubic-bezier(0.05, 0.9, 0.12, 1);
+  /* A wind-up: accelerates into the stop. */
+  --exi-wind: cubic-bezier(0.62, 0, 0.88, 0.32);
+  /* A blade: fast through, soft out. */
+  --exi-blade: cubic-bezier(0.45, 0, 0.12, 1);
+  --exi-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* A release that overshoots once. */
+  --exi-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --exi-stage: calc(100svh - var(--dxs-nav));
+  --exi-pin: 96svh;
+  --exi-wrap: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
+}
+
+/* The defs live once, out of the flow. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exi-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Every drawn effect is a silent, unclickable layer. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  :is(.exi-rays, .exi-streaks, .exi-shards) {
+  position: absolute;
+  display: block;
+  overflow: visible;
+  fill: currentcolor;
+  pointer-events: none;
+}
+
+/* ================================================================
+   Tallies: the owner's figure stays in the text; the decorative copy
+   runs over it only while it counts.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure {
+  position: relative;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(strong, dd) > .exi-figure {
+  display: inline-block;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-real {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-tally {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exi-figure[data-exi-counting]
+  > .exi-real {
+  opacity: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exi-figure[data-exi-counting]
+  > .exi-tally {
+  visibility: visible;
+}
+
+/* Right-set figures count from their right edge. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .rxs-comparison-result
+  .exi-figure
+  > .exi-tally {
+  right: 0;
+  left: auto;
+}
+
+/* ================================================================
+   Cold open: the impact field
+   ================================================================ */
+/* The focus lines replace the drawn conic burst behind the colossus. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
+  background:
+    radial-gradient(38% 56% at 50% 46%, rgb(var(--ext-gold-rgb) / 16%), transparent 70%),
+    radial-gradient(30% 22% at 50% 100%, rgb(var(--ext-amber-rgb) / 22%), transparent 72%),
+    var(--ext-ink);
+}
+
+/* Centred on the colossus's core (44% down the art). */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 88%;
+  color: rgb(var(--ext-gold-rgb) / 26%);
+  /* Full strength round the colossus, a third of it under the copy. */
+  -webkit-mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 34%) 100%);
+  mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 34%) 100%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
+  z-index: 2;
+  top: calc(44% - min(30svh, 22vw));
+  left: calc(50% - min(30svh, 22vw));
+  width: min(60svh, 44vw);
+  height: min(60svh, 44vw);
+  color: var(--ext-gold);
+  opacity: 0.85;
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
+    height: calc(0.88 * clamp(380px, 58svh, 860px));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
+    top: calc(0.44 * clamp(380px, 58svh, 860px) - min(32svh, 36vw));
+    left: calc(50% - min(32svh, 36vw));
+    width: min(64svh, 72vw);
+    height: min(64svh, 72vw);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
+    height: calc(0.88 * clamp(340px, 54svh, 560px));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
+    top: calc(0.44 * clamp(340px, 54svh, 560px) - min(27svh, 46vw));
+    left: calc(50% - min(27svh, 46vw));
+    width: min(54svh, 92vw);
+    height: min(54svh, 92vw);
+  }
+}
+
+/* The figure turns against its light under a fine pointer (inline
+   transform from the engine): its plane is kept for the compositor. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page[data-exi-armed="true"]
+    > .exs-hero
+    :is(.rxs-hero-visual, .exi-rays, .exi-shards) {
+    will-change: transform;
+  }
+}
+
+/* ================================================================
+   Scene cuts: the blade along each slanted edge
+   ================================================================ */
+/* A short gold-white edge on the cut's diagonal: its box is 28% of the
+   band each way, so moving it by its own size keeps it on the line. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system, .rxs-footer)::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--ext-slant) * 0.72 + 1px);
+  left: 0;
+  display: block;
+  width: 28%;
+  height: calc(var(--ext-slant) * 0.28);
+  margin: 0;
+  background:
+    linear-gradient(
+      to bottom right,
+      transparent calc(50% - 2px),
+      #fffaf0 calc(50% - 1px) calc(50% + 1.5px),
+      transparent calc(50% + 2.5px)
+    ),
+    linear-gradient(
+      to bottom right,
+      transparent calc(50% - 9px),
+      rgb(var(--ext-gold-rgb) / 70%) 50%,
+      transparent calc(50% + 12px)
+    );
+  -webkit-mask: linear-gradient(90deg, transparent, #000 62%, #000 94%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 62%, #000 94%, transparent);
+  border: 0;
+  opacity: 0;
+  transform: none;
+  pointer-events: none;
+}
+
+/* The heading's seam lights once from its anchored end. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  height: 2px;
+  margin: 0;
+  background: linear-gradient(90deg, #fff6dc, var(--ext-gold) 40%, rgb(var(--ext-gold-rgb) / 0%));
+  opacity: 0;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* ================================================================
+   ROUND 1: the punch meter
+   ================================================================ */
+/* The chapter carries no gutter of its own: the stage runs full bleed,
+   the head, the console and the note keep the measure. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance {
+  grid-template-columns: minmax(0, 1fr);
+  padding-inline: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  > :is(.rxs-section-heading, .rxs-comparison, .rxs-comparison-note) {
+  grid-column: 1;
+  grid-row: auto;
+  width: var(--exi-wrap);
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* The panel (in the pinned edition, the runway the stage holds over). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  > .rxs-headline-metrics {
+  position: relative;
+  grid-column: 1;
+  grid-row: auto;
+  top: auto;
+  align-self: stretch;
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0 0 clamp(48px, 6vw, 96px);
+  padding: 0;
+  overflow: clip;
+  background:
+    radial-gradient(48% 60% at 28% 30%, rgb(var(--ext-gold-rgb) / 9%), transparent 72%),
+    radial-gradient(40% 50% at 78% 78%, rgb(var(--ext-amber-rgb) / 8%), transparent 72%),
+    repeating-linear-gradient(-9deg, transparent 0 58px, rgb(var(--ext-gold-rgb) / 3%) 58px 59px),
+    var(--ext-ink);
+  border-block: 1px solid rgb(var(--ext-gold-rgb) / 20%);
+}
+
+/* The stage: the punch at the top left, the time at the bottom right,
+   a gold cut between them. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(clamp(96px, 16svh, 180px), 1fr) auto;
+  padding: clamp(48px, 9svh, 112px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: auto auto auto auto;
+  align-content: start;
+  row-gap: clamp(10px, 1.4vw, 18px);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  color: var(--dx-text);
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > :is(small, strong, p) {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > small {
+  grid-row: 1;
+  color: var(--ext-gold);
+  font: 400 12px / 1.5 var(--dx-hud);
+  letter-spacing: 0.2em;
+  filter: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong {
+  grid-row: 2;
+  display: block;
+  color: var(--dx-text);
+  font: 600 clamp(64px, min(21vw, 27svh), 264px) / 0.86 var(--dx-mono);
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  -webkit-text-fill-color: currentcolor;
+  background: none;
+  text-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong
+  > span {
+  margin-left: 0.05em;
+  color: var(--ext-gold);
+  font: 600 0.3em / 1 var(--dx-mono);
+  letter-spacing: 0.02em;
+  -webkit-text-fill-color: currentcolor;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article > p {
+  grid-row: 4;
+  color: var(--dx-text-2);
+  font: 500 clamp(14px, 1.2vw, 16px) / 1.6 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+/* The punch's gauge lies under the figure as a segmented power meter. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:first-child::after {
+  content: "";
+  position: static;
+  grid-column: 1;
+  grid-row: 3;
+  display: block;
+  width: 100%;
+  height: clamp(10px, 1.1vw, 16px);
+  margin: 0;
+  background: linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 70%, #fff3cf);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  aspect-ratio: auto;
+  opacity: 1;
+  transform: none;
+  transform-origin: 0 50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)::after {
+  content: none;
+}
+
+/* The time lands at the far side of the cut. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2) {
+  grid-row: 3;
+  justify-self: end;
+  justify-items: end;
+  text-align: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong {
+  font-size: clamp(56px, min(18vw, 22svh), 216px);
+}
+
+/* Focus lines frame the punch (stretched to its shape, so the clear
+   centre hugs the figure) and a shock ring leaves it when it lands; both
+   ride the figure's throw. The overdrive's own burst and streaks give way. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-rays {
+  z-index: -1;
+  top: -170%;
+  left: -40%;
+  width: 180%;
+  height: 440%;
+  color: rgb(var(--ext-gold-rgb) / 22%);
+  -webkit-mask: radial-gradient(closest-side, #000 52%, transparent 100%);
+  mask: radial-gradient(closest-side, #000 52%, transparent 100%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-ring {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 42%;
+  display: block;
+  width: 64%;
+  aspect-ratio: 1;
+  margin: -32% 0 0 -32%;
+  border: 3px solid rgb(var(--ext-gold-rgb) / 80%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  :is(.exo-burst, .exo-speed) {
+  display: none;
+}
+
+/* Speed lines behind the time, trailing to its left. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-streaks {
+  z-index: 0;
+  top: 6%;
+  left: -110%;
+  width: 216%;
+  height: 64%;
+  color: rgb(var(--ext-gold-rgb) / 30%);
+  transform-origin: 100% 50%;
+}
+
+/* Afterimages: three ghost copies of the time, drawn only in the dash. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-ghosts {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: block;
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-ghosts > b {
+  --exi-g: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--ext-gold);
+  -webkit-text-fill-color: currentcolor;
+  opacity: 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-ghosts > b + b {
+  --exi-g: 2;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-ghosts > b + b + b {
+  --exi-g: 3;
+}
+
+/* The gold cut between the figures, centred in the gap between them and
+   turned about its middle; the edge itself (::before) is drawn from the
+   left. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-band {
+  position: relative;
+  z-index: 0;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  display: block;
+  width: 124vw;
+  height: clamp(5px, 0.7vw, 10px);
+  margin: 0;
+  rotate: -8deg;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--ext-gold-rgb) / 0%),
+    var(--ext-gold) 18%,
+    #fff6dc 50%,
+    var(--ext-gold) 82%,
+    rgb(var(--ext-gold-rgb) / 0%)
+  );
+  transform-origin: 0 50%;
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-band {
+    rotate: -12deg;
+  }
+
+  /* On a phone the focus lines fill the punch's half of the stage. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-rays {
+    top: -360%;
+    left: -30%;
+    width: 160%;
+    height: 820%;
+    color: rgb(var(--ext-gold-rgb) / 26%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    .exi-streaks {
+    top: -40%;
+    height: 180%;
+    color: rgb(var(--ext-gold-rgb) / 36%);
+  }
+}
+
+/* The console beside nothing: a full-width instrument panel, its meters
+   in one column and the architectures in the other on wide screens. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+    column-gap: clamp(36px, 4vw, 64px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > :not(.rxs-processing-comparison) {
+    grid-column: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-processing-comparison {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    margin-top: 0;
+  }
+}
+
+/* ================================================================
+   ROUND 3: the change of form
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > figure > .exi-rays {
+  z-index: 3;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  color: rgb(255 246 220 / 30%);
+  opacity: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exi-rays {
+  color: rgb(122 232 255 / 26%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exi-streaks {
+  z-index: 3;
+  top: 12%;
+  left: -10%;
+  width: 120%;
+  height: 70%;
+  color: rgb(255 246 220 / 34%);
+  opacity: 0;
+}
+
+/* The old form stands behind the cut (the STAGE scene's ink had covered
+   the overdrive's backdrop, so every change of form opened on black). The
+   same crop as the art: cover, 50% 18%. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel[data-exo-cut="true"]
+  > figure[data-form="ultra"] {
+  background: var(--ext-ink) url("/saga-extreme-middle-20261006.webp") 50% 18% / cover no-repeat;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel[data-exo-cut="true"]
+  > figure[data-form="middle"] {
+  background: var(--ext-ink) url("/saga-extreme-ultra-20261006.jpeg") 50% 18% / cover no-repeat;
+}
+
+/* ================================================================
+   The end card: ink focus lines on the gold slab
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
+  isolation: isolate;
+  overflow: clip;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exi-rays {
+  z-index: -1;
+  top: -10%;
+  left: -30%;
+  width: 140%;
+  height: 140%;
+  color: rgb(5 4 3 / 12%);
+}
+
+/* ================================================================
+   Motion: the hits (time-based, one-shot keys)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* Unreached arrivals wait while the engine is armed. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    :is(.rxs-section-heading, .rxs-footer)[data-exi-hit=""]
+    h2
+    > .exo-line {
+    opacity: 0;
+    animation: none;
+  }
+
+  /* Smashed in: the first line from the left, the second from the right. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    :is(.rxs-section-heading, .rxs-footer)[data-exi-hit="true"]
+    h2
+    > .exo-line:first-child {
+    animation: exi-smash-l 560ms var(--exi-hit) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    :is(.rxs-section-heading, .rxs-footer)[data-exi-hit="true"]
+    h2
+    > .exo-line:last-child {
+    animation: exi-smash-r 560ms var(--exi-hit) 120ms both;
+  }
+
+  /* Once landed they stand: the scroll jab never takes them back. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    :is(.rxs-section-heading, .rxs-footer)[data-exi-hit="done"]
+    h2
+    > .exo-line {
+    animation: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > .rxs-section
+    > .rxs-section-heading:not([data-exi-hit="true"])::after {
+    animation: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > .rxs-section
+    > .rxs-section-heading[data-exi-hit="true"]::after {
+    animation: exi-seam 700ms var(--exi-blade) 140ms both;
+  }
+
+  /* The blade runs the cut as the scene arrives. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > :is(#performance, #p14, #stages, #system, .rxs-footer)[data-exi-hit="true"]::after {
+    animation: exi-blade 620ms var(--exi-blade) both;
+  }
+
+  /* The cold open: when the needle pegs, the focus lines slam in round
+     the core, the shards are blasted out and the colossus takes the hit. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+    > .exs-hero
+    > .exi-rays {
+    transform-origin: 50% 50%;
+    animation: exi-ray-slam 700ms var(--exi-hit) 760ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+    > .exs-hero
+    > .exi-shards {
+    animation: exi-shard-burst 620ms var(--exi-out) 800ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+    > .exs-hero
+    .rxs-hero-visual {
+    animation: exi-quake 360ms linear 820ms both;
+  }
+
+  /* A figure that has counted lands with a punch; the punch's focus lines
+     flare and a shock ring leaves it. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .exi-figure[data-exi-landed="true"] {
+    transform-origin: 50% 70%;
+    animation: exi-land 420ms var(--exi-hit) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .exi-figure[data-exi-landed="true"]
+    ~ .exi-rays {
+    animation: exi-ray-punch 640ms var(--exi-hit) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .exi-figure[data-exi-landed="true"]
+    ~ .exi-ring {
+    animation: exi-shock 700ms var(--exi-out) both;
+  }
+
+  /* P14: once both counts land, the tuning is stamped. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    .rxs-p14-overview[data-exi-hit=""]
+    .exo-read:nth-child(3)
+    dd {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-p14-overview[data-exi-hit="true"]
+    .exo-read:nth-child(3)
+    dd {
+    transform-origin: 0 60%;
+    animation: exi-stamp 520ms var(--exi-hit) 1150ms both;
+  }
+
+  /* The change of form: speed lines ride the slash, the focus lines go
+     off as it completes, the new form takes the hit. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-exi-impact="true"]
+    > .exi-streaks {
+    animation: exi-streak-pass 460ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-exi-impact="true"]
+    > .exi-rays {
+    animation: exi-impact-rays 520ms var(--exi-out) 340ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-exi-impact="true"]
+    > img {
+    animation:
+      exo-cut 420ms var(--exo-slash) backwards,
+      exi-quake 300ms linear 400ms both;
+  }
+
+  /* The chosen tab answers with a spring. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .exs-stage-tabs[data-exi-pop="true"]
+    > button[aria-selected="true"]
+    > :is(span, small) {
+    animation: exi-pop 440ms var(--exi-spring) both;
+  }
+}
+
+/* Browsers without view timelines: the punch stage plays its beats on
+   arrival instead of on the scroll. */
+@supports not ((animation-timeline: view()) and (animation-range: entry 0% entry 100%)) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)[data-exi-hit="true"]
+      > strong {
+      animation: exi-dash 520ms var(--exi-hit) both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)[data-exi-hit="true"]
+      .exi-ghosts
+      > b {
+      animation: exi-ghost 520ms var(--exi-hit) both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)[data-exi-hit="true"]
+      > .exi-streaks {
+      animation: exi-streak-in 640ms var(--exi-out) both;
+    }
+  }
+}
+
+/* ================================================================
+   Motion: the scroll (named view timelines)
+   ================================================================ */
+/* The punch stage pins (layout only, so a menu or a dialog never moves
+   the page): the stage holds the screen for --exi-pin of scroll while its
+   beats run, then the console follows. Short screens keep it in the flow. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.exs-page
+      > #performance
+      > .rxs-headline-metrics {
+      height: calc(var(--exi-stage) + var(--exi-pin));
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.exs-page
+      #performance
+      .exi-stage {
+      position: sticky;
+      top: var(--dxs-nav);
+      height: var(--exi-stage);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      padding-block: clamp(36px, 8svh, 96px);
+    }
+  }
+
+  /* A phone's tall stage sets each figure in the middle of its half. */
+  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) and (max-width: 760px) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.exs-page
+      #performance
+      .exi-stage {
+      grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.exs-page
+      #performance
+      .exi-stage
+      > article {
+      align-self: center;
+    }
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Named timelines. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > .exs-hero {
+      view-timeline: --exi-hero block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > #performance
+      > .rxs-headline-metrics {
+      view-timeline: --exi-punch block;
+      view-timeline-inset: var(--dxs-nav) 0;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #exs-stage-panel {
+      view-timeline: --exi-stage block;
+    }
+
+    /* The cold open falls away in depth: the focus lines lag furthest and
+       open out, the colossus lags behind the page, the shards fly ahead. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > .exs-hero
+      > .exi-rays {
+      animation-name: exi-ray-exit;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > .exs-hero
+      > .exi-shards {
+      animation-name: exi-shard-exit;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > .exs-hero
+      .rxs-hero-visual {
+      animation-name: exi-lag;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    /* ROUND 1. The punch is thrown from depth and stops dead. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:first-child
+      > strong {
+      transform-origin: 0 80%;
+      animation-name: exi-throw;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: entry 35% contain 4%;
+    }
+
+    /* The meter fills as the stage holds. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:first-child::after {
+      animation-name: exi-meter;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-wind);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 2% contain 30%;
+    }
+
+    /* The gold cut crosses the stage. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > .exi-band::before {
+      animation-name: exi-cut-across;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-blade);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 30% contain 48%;
+    }
+
+    /* The time dashes in across it, its afterimages collapsing behind it,
+       and lands; the speed lines fade to a trail. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)
+      > strong {
+      animation-name: exi-dash;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 46% contain 66%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)
+      .exi-ghosts
+      > b {
+      animation-name: exi-ghost;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 46% contain 72%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)
+      > .exi-streaks {
+      animation-name: exi-streak-in;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-out);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 44% contain 80%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)
+      > :is(small, p) {
+      animation-name: exi-tag;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-hit);
+      animation-fill-mode: both;
+      animation-timeline: --exi-punch;
+      animation-range: contain 58% contain 74%;
+    }
+
+    /* ROUND 2. The chip turns in 3-D through its pass; the bezel turns
+       like a dial being set (the overdrive's --exo-core on the overview). */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > #p14
+      .rxs-p14-overview
+      figure
+      img {
+      animation-name: exi-chip-turn;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-core;
+      animation-range: entry 5% contain 30%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > #p14
+      .rxs-p14-overview
+      figure::before {
+      animation-name: exi-dial-set;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-core;
+      animation-range: entry 0% contain 30%;
+    }
+
+    /* ROUND 3. The camera pulls back from the form. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #exs-stage-panel
+      > figure {
+      transform-origin: 50% 24%;
+      animation-name: exi-dolly;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --exi-stage;
+      animation-range: entry 0% contain 22%;
+    }
+
+    /* ROUND 4. Power runs plate to plate down the drive train. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > #system
+      .rxs-system-grid
+      > article
+      + article::before {
+      transform-origin: 0 50%;
+      animation-name: exi-couple;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-wind);
+      animation-fill-mode: both;
+      animation-timeline: --sc-tile;
+      animation-range: entry 20% entry 70%;
+    }
+
+    @media (max-width: 760px) {
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+        > #system
+        .rxs-system-grid
+        > article
+        + article::before {
+        transform-origin: 50% 0;
+        animation-name: exi-couple-down;
+        animation-duration: auto;
+        animation-timing-function: var(--exi-wind);
+        animation-fill-mode: both;
+        animation-timeline: --sc-tile;
+        animation-range: entry 20% entry 70%;
+      }
+    }
+
+    /* The end card: ink focus lines converge on the slab. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > .rxs-footer
+      > .exi-rays {
+      animation-name: exi-converge;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 0% entry 80%;
+    }
+  }
+}
+
+/* The cold open's arrival joins ahead of its own depth on the same layer:
+   the beat holds the layer for its moment, then the scroll has it alone. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+      > .exs-hero
+      > .exi-rays {
+      animation-name: exi-ray-exit, exi-ray-slam;
+      animation-duration: auto, 700ms;
+      animation-timing-function: linear, var(--exi-hit);
+      animation-delay: 0s, 760ms;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero, auto;
+      animation-range:
+        exit 0% exit 100%,
+        normal;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+      > .exs-hero
+      > .exi-shards {
+      animation-name: exi-shard-exit, exi-shard-burst;
+      animation-duration: auto, 620ms;
+      animation-timing-function: linear, var(--exi-out);
+      animation-delay: 0s, 800ms;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero, auto;
+      animation-range:
+        exit 0% exit 100%,
+        normal;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+      > .exs-hero
+      .rxs-hero-visual {
+      animation-name: exi-lag, exi-quake;
+      animation-duration: auto, 360ms;
+      animation-timing-function: linear;
+      animation-delay: 0s, 820ms;
+      animation-fill-mode: both;
+      animation-timeline: --exi-hero, auto;
+      animation-range:
+        exit 0% exit 100%,
+        normal;
+    }
+  }
+}
+
+/* ================================================================
+   Controls: a firmer press, a sprung release, a charge on hover
+   ================================================================ */
+html[data-press-ready][data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  :is(.rxs-footer > a, .exs-chapter-index a, .rxs-scroll-cue) {
+  --dw-press-scale: 0.94;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready][data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(
+      .rxs-footer > a,
+      .exs-chapter-index a,
+      .rxs-scroll-cue,
+      .rxs-comparison-selector select
+    )[data-press="out"][data-press="out"] {
+    transition-timing-function:
+      var(--exi-spring), var(--dw-ease-out), var(--exi-spring), var(--exi-spring),
+      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.rxs-footer > a, .exs-chapter-index a) {
+    transition:
+      translate 420ms var(--exi-spring),
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.rxs-footer > a, .exs-chapter-index a):is(:hover, :focus-visible) {
+    translate: 0 -3px;
+  }
+}
+
+/* ================================================================
+   Keyframes
+   ================================================================ */
+@keyframes exi-smash-l {
+  0% {
+    opacity: 0;
+    translate: -0.9em 0.18em;
+    scale: 1.28;
+    transform: skewX(-14deg);
+  }
+  46% {
+    opacity: 1;
+    translate: 0.04em 0;
+    scale: 0.97;
+    transform: skewX(2deg);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transform: none;
+  }
+}
+
+@keyframes exi-smash-r {
+  0% {
+    opacity: 0;
+    translate: 0.9em 0.18em;
+    scale: 1.28;
+    transform: skewX(-14deg);
+  }
+  46% {
+    opacity: 1;
+    translate: -0.04em 0;
+    scale: 0.97;
+    transform: skewX(2deg);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transform: none;
+  }
+}
+
+@keyframes exi-seam {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  30% {
+    opacity: 1;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-blade {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 257% -257%;
+  }
+}
+
+@keyframes exi-ray-slam {
+  0% {
+    opacity: 0;
+    scale: 1.7;
+  }
+  40% {
+    opacity: 1;
+    scale: 0.97;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exi-ray-exit {
+  from {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    rotate: 0deg;
+  }
+  to {
+    opacity: 0;
+    translate: 0 26svh;
+    scale: 1.45;
+    rotate: 9deg;
+  }
+}
+
+@keyframes exi-shard-burst {
+  from {
+    opacity: 0;
+    scale: 0.35;
+    rotate: -12deg;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes exi-shard-exit {
+  from {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -34svh;
+    scale: 1.6;
+  }
+}
+
+@keyframes exi-lag {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 16svh;
+  }
+}
+
+/* A damped quake: three swings, each smaller, back to rest. */
+@keyframes exi-quake {
+  0% {
+    translate: 0 0;
+  }
+  16% {
+    translate: -7px 3px;
+  }
+  34% {
+    translate: 6px -3px;
+  }
+  52% {
+    translate: -4px 2px;
+  }
+  70% {
+    translate: 2px -1px;
+  }
+  86% {
+    translate: -1px 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes exi-land {
+  0% {
+    scale: 1.14;
+  }
+  45% {
+    scale: 0.97;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* Thrown from depth: huge and faint, then there at once, a touch under,
+   and settled. */
+@keyframes exi-throw {
+  0% {
+    opacity: 0;
+    scale: 2.1;
+    translate: 6% -10%;
+  }
+  62% {
+    opacity: 1;
+    scale: 0.96;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes exi-ray-punch {
+  0% {
+    opacity: 0.4;
+    scale: 1.32;
+  }
+  35% {
+    opacity: 1;
+    scale: 0.98;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes exi-converge {
+  0% {
+    opacity: 0;
+    scale: 1.8;
+    rotate: -6deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes exi-shock {
+  0% {
+    opacity: 0;
+    scale: 0.15;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 2.4;
+  }
+}
+
+@keyframes exi-meter {
+  from {
+    scale: 0.04 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-cut-across {
+  from {
+    opacity: 0;
+    scale: 0 1;
+  }
+  12% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-dash {
+  0% {
+    opacity: 0;
+    translate: -46vw 0;
+  }
+  58% {
+    opacity: 1;
+    translate: 0.06em 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* The ghosts trail the dash and collapse into the figure. */
+/* Each copy trails by its own factor (--exi-g: 1, 2, 3). */
+@keyframes exi-ghost {
+  0% {
+    opacity: 0;
+    translate: calc(var(--exi-g) * -0.55em) 0;
+  }
+  30% {
+    opacity: calc(0.6 / var(--exi-g));
+    translate: calc(var(--exi-g) * -0.4em) 0;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes exi-streak-in {
+  0% {
+    opacity: 0;
+    scale: 2.6 1;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-tag {
+  from {
+    opacity: 0;
+    translate: -24px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* The chip lies flat on its board, then stands up to face the reader. */
+@keyframes exi-chip-turn {
+  from {
+    transform: perspective(900px) rotateX(66deg) rotateZ(-34deg);
+    scale: 0.78;
+  }
+  to {
+    transform: perspective(900px) rotateX(0deg) rotateZ(0deg);
+    scale: 1;
+  }
+}
+
+@keyframes exi-dial-set {
+  from {
+    rotate: -96deg;
+  }
+  to {
+    rotate: 0deg;
+  }
+}
+
+@keyframes exi-dolly {
+  from {
+    scale: 1.34;
+    translate: 0 5%;
+  }
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes exi-couple {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-couple-down {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exi-streak-pass {
+  0% {
+    opacity: 0;
+    translate: -14% 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 14% 0;
+  }
+}
+
+@keyframes exi-impact-rays {
+  0% {
+    opacity: 0;
+    scale: 1.5;
+  }
+  30% {
+    opacity: 1;
+    scale: 1.02;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes exi-stamp {
+  0% {
+    opacity: 0;
+    scale: 2.2;
+    rotate: -9deg;
+  }
+  55% {
+    opacity: 1;
+    scale: 0.94;
+    rotate: 1deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes exi-pop {
+  0% {
+    scale: 0.82;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Accessibility modes
+   ================================================================ */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.exi-rays, .exi-streaks, .exi-shards, .exi-ring, .exi-ghosts) {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.exi-rays, .exi-streaks, .exi-shards, .exi-ring, .exi-ghosts, .exi-band, .exi-tally) {
+    display: none;
+  }
+
+  /* The figure stands on Canvas, never on the other form's art. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel[data-exo-cut="true"]
+    > figure[data-form] {
+    background: Canvas;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-real {
+    opacity: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14, #stages, #system, .rxs-footer)::after,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading::after {
+    content: none;
+  }
+}
