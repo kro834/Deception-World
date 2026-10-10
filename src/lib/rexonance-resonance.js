@@ -96,15 +96,14 @@ export function mountRexonanceResonance(page, environment = window) {
   const flags = new Map();
   const flag = (element, name, value, ms) => {
     if (!element) return;
-    const key = `${name}`;
     let timers = flags.get(element);
     if (!timers) flags.set(element, (timers = new Map()));
-    environment.clearTimeout(timers.get(key));
+    environment.clearTimeout(timers.get(name));
     element.setAttribute(name, value);
     timers.set(
-      key,
+      name,
       environment.setTimeout(() => {
-        timers.delete(key);
+        timers.delete(name);
         if (!disposed) element.removeAttribute(name);
       }, ms),
     );
@@ -297,22 +296,26 @@ export function mountRexonanceResonance(page, environment = window) {
   /* ---------------- pointer ---------------- */
   const hosts = [page.querySelector(".rxs-hero-visual"), panel]
     .filter(Boolean)
-    .map((element) => ({ element, inView: false, written: false }));
+    .map((element) => ({ element, inView: false, written: "" }));
   let pointerFrame = 0;
   let pointerOn = false;
   let targetX = 0;
   let targetY = 0;
   let x = 0;
   let y = 0;
+  // Writes only a changed lean: each write restyles the host's subtree.
   const write = (host) => {
-    host.element.style.setProperty("--rsn-px", x.toFixed(3));
-    host.element.style.setProperty("--rsn-py", y.toFixed(3));
-    host.written = true;
+    const px = x.toFixed(3);
+    const py = y.toFixed(3);
+    if (host.written === `${px} ${py}`) return;
+    host.element.style.setProperty("--rsn-px", px);
+    host.element.style.setProperty("--rsn-py", py);
+    host.written = `${px} ${py}`;
   };
   const clear = (host) => {
     host.element.style.removeProperty("--rsn-px");
     host.element.style.removeProperty("--rsn-py");
-    host.written = false;
+    host.written = "";
   };
   const lean = () => {
     pointerFrame = 0;

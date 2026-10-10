@@ -10,14 +10,14 @@
      the page scrolls (and lean toward a fine pointer), so the figure
      holding the screen is never a flat picture;
    - the hit: one hard cut. A number counts up once and locks, rings burst
-     from it and from the armour's core, a refraction band crosses a scene
-     as it opens, type arrives from depth and settles.
+     from it and from the armour's core, a cut of prism light draws across
+     a chapter as it opens, type arrives from depth and settles.
 
    Scenes: the cold open; 01's two cuts as a pinned stack (each figure
    holds the screen, the next cut slides over while the held one recedes);
-   02's chip turning in 3-D; 03's halo and the form change as a
-   transformation; 04's core ringing out between the three facets; the
-   end card's gold wave. Controls answer with springy feedback.
+   02's chip turning in 3-D; 03's form change as a transformation; 04's
+   core ringing out between the three facets; the end card's gold wave.
+   Controls answer with springy feedback.
 
    Route-only (after styles-stage-rexonance.css, before the cinematic
    sheet) and scoped to the doubled Rexonance page class. Motion is
@@ -565,14 +565,16 @@ html[data-family="special"]
   z-index: 3;
   inset: -30% -60%;
   display: block;
+  /* The chip art is pale: its light reads as colour, not white. */
   background: linear-gradient(
     106deg,
-    transparent 0 40%,
-    rgb(var(--rsn-white) / 0%) 44%,
-    rgb(var(--rsn-white) / 34%) 49%,
-    rgb(var(--rsn-ice) / 30%) 51%,
-    rgb(var(--rsn-pink) / 18%) 54%,
-    transparent 59% 100%
+    transparent 0 41%,
+    rgb(var(--rsn-violet) / 0%) 43%,
+    rgb(var(--rsn-violet) / 34%) 46.5%,
+    rgb(var(--rsn-white) / 55%) 48.5%,
+    rgb(var(--rsn-pink) / 46%) 50.5%,
+    rgb(var(--rsn-pink) / 0%) 54%,
+    transparent 56% 100%
   );
   opacity: 0;
   pointer-events: none;
@@ -593,32 +595,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-
     radial-gradient(closest-side, transparent 88%, rgb(var(--rsn-pink) / 18%) 88.3% 88.6%, transparent 89%);
   opacity: 0.55;
   translate: -50% -22%;
-  pointer-events: none;
-}
-
-/* ---------- 03: rays from the form's core, over the art ---------- */
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  > #stages
-  .rxs-stage-panel
-  figure
-  > .rsn-form::before {
-  content: "";
-  position: absolute;
-  top: 34%;
-  left: 52%;
-  width: 150%;
-  aspect-ratio: 1;
-  background: repeating-conic-gradient(
-    from 4deg,
-    color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 22%, transparent) 0 0.5deg,
-    transparent 0.5deg 12deg
-  );
-  -webkit-mask-image: radial-gradient(closest-side, transparent 12%, #000 22%, rgb(0 0 0 / 40%) 52%, transparent 78%);
-  mask-image: radial-gradient(closest-side, transparent 12%, #000 22%, rgb(0 0 0 / 40%) 52%, transparent 78%);
-  opacity: 0.5;
-  translate: -50% -50%;
   pointer-events: none;
 }
 
@@ -828,6 +804,17 @@ html[data-family="special"]
   font-size: var(--rsn-figure-size);
 }
 
+/* Stacked tablets: the cut spans the page, so the figure scales with it. */
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    --rsn-figure-size: clamp(130px, 22vw, 240px);
+  }
+}
+
 @media (max-width: 760px) {
   html[data-family="special"]
     body
@@ -838,7 +825,16 @@ html[data-family="special"]
   }
 }
 
-/* The chapters clip sideways so a refraction band never widens the page. */
+/* The end card's last line stays whole on the narrowest phones (its 。 used
+   to fall onto a line of its own at 320). */
+@media (max-width: 374px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+    font-size: clamp(30px, 10.4vw, 40px);
+  }
+}
+
+/* The chapters clip sideways, so their lines and rings never widen the page,
+   and isolate, so the numeral's rings sit between their ground and words. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section {
   overflow-x: clip;
   isolation: isolate;
@@ -1216,7 +1212,7 @@ html[data-family="special"]
       }
     }
 
-    /* ---------- Chapters: the prism line, the band, the numeral ---------- */
+    /* ---------- Chapters: the prism line and the numeral ---------- */
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-loading]
       ):not([data-dialog-open])
@@ -1265,40 +1261,7 @@ html[data-family="special"]
       animation-range: entry 10% entry 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-      > .rxs-section
-      > .rxs-section-heading
-      > p {
-      animation-name: rsn-slate;
-      animation-duration: auto;
-      animation-timing-function: var(--rsn-out);
-      animation-fill-mode: both;
-      animation-timeline: --sc-chapter;
-      animation-range: entry 0% entry 70%;
-    }
-
     /* ---------- 01: the cuts arrive, hold, and give way ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-      > #performance
-      .rxs-headline-metrics
-      article
-      > small {
-      animation-name: rsn-slate;
-      animation-duration: auto;
-      animation-timing-function: var(--rsn-out);
-      animation-fill-mode: both;
-      animation-timeline: --rxp-metric;
-      animation-range: entry 20% entry 75%;
-    }
-
     /* Forwards fill: before its range the figure rests in place, so a
        clipping audit of a cut not yet reached reads it whole. */
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1317,23 +1280,6 @@ html[data-family="special"]
       animation-fill-mode: forwards;
       animation-timeline: --rxp-metric;
       animation-range: entry 25% entry 100%;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-      > #performance
-      .rxs-headline-metrics
-      article
-      > p {
-      animation-name: rsn-rise;
-      animation-duration: auto;
-      animation-timing-function: var(--rsn-out);
-      animation-fill-mode: both;
-      animation-timeline: --rxp-metric;
-      animation-range: entry 55% entry 100%;
     }
 
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1504,24 +1450,6 @@ html[data-family="special"]
       animation-range: entry 20% exit 60%;
     }
 
-    /* ---------- 03: the rays turn with the scene ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-      > #stages
-      .rxs-stage-panel
-      figure
-      > .rsn-form::before {
-      animation-name: rsn-halo;
-      animation-duration: auto;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: --rxp-stage;
-      animation-range: entry 0% exit 100%;
-    }
-
     /* ---------- 04: the core rings out between the facets ---------- */
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-loading]
@@ -1632,14 +1560,16 @@ html[data-family="special"]
     transform: translate3d(calc(var(--rsn-px, 0) * 40px), calc(var(--rsn-py, 0) * 30px), 0);
   }
 
+  /* The form leans too (its rise ends on the same offset, so it never
+     snaps when the transformation hands back). */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > #stages
     .rxs-stage-panel
     figure
-    > .rsn-form::before {
-    transform: translate3d(calc(var(--rsn-px, 0) * 18px), calc(var(--rsn-py, 0) * 14px), 0);
+    > img {
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0);
   }
 }
 
@@ -1647,11 +1577,11 @@ html[data-family="special"]
    The hits (time-based, once, keyed to the page script's transient
    attributes; the full gate)
    ================================================================ */
-@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   /* While a figure waits, counts and locks, its counter paints over its
      own (transparent) digits; "done" hands it back. Not an animation:
      a paint state the script sets, so the menu never changes it. Forced
-     colours keep the figures' own text. */
+     colours and print keep the figures' own text. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
@@ -2111,7 +2041,7 @@ html[data-world-effects="economy"]
 html[data-world-effects="economy"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  :is(.rxs-p14-overview, .rxs-system-grid, .rxs-section, .rsn-form)::before,
+  :is(.rxs-p14-overview, .rxs-system-grid, .rxs-section)::before,
 html[data-world-effects="economy"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
@@ -2330,28 +2260,6 @@ html[data-world-effects="economy"]
   }
 }
 
-@keyframes rsn-slate {
-  from {
-    opacity: 0;
-    translate: -28px 0;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
-@keyframes rsn-rise {
-  from {
-    opacity: 0;
-    translate: 0 28px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
 /* The figure comes out of depth: held off, struck in large, settled. */
 @keyframes rsn-figure-in {
   0%,
@@ -2467,19 +2375,6 @@ html[data-world-effects="economy"]
   to {
     opacity: 1;
     scale: 1.25;
-  }
-}
-
-@keyframes rsn-halo {
-  from {
-    opacity: 0;
-    scale: 0.7;
-    rotate: -24deg;
-  }
-  to {
-    opacity: 0.5;
-    scale: 1.1;
-    rotate: 30deg;
   }
 }
 
@@ -2653,7 +2548,7 @@ html[data-world-effects="economy"]
   }
   100% {
     opacity: 1;
-    transform: none;
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0);
   }
 }
 
