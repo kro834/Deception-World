@@ -59,7 +59,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
     var(--ext-ink);
 }
 
-/* Every scene opens on a slanted cut with a gold edge. */
+/* Every scene opens on a slanted cut with a gold edge. The edge runs from
+   bottom left to top right like the clip; "to bottom right" puts the
+   gradient's 50% line on that diagonal. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
@@ -82,10 +84,10 @@ html[data-family="special"]
   height: var(--ext-slant);
   margin: 0;
   background: linear-gradient(
-    to top right,
-    transparent calc(50% - 1px),
-    rgb(var(--ext-gold-rgb) / 80%) calc(50% - 1px) calc(50% + 1px),
-    transparent calc(50% + 1px)
+    to bottom right,
+    transparent 50%,
+    rgb(var(--ext-gold-rgb) / 80%) 50% calc(50% + 2px),
+    transparent calc(50% + 2px)
   );
   border: 0;
   opacity: 1;

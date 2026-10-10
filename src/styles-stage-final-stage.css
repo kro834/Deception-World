@@ -198,13 +198,16 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero::after 
   content: none;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.fst-page
-  > .fst-hero
-  > :is(.rxs-hero-ambient, .fsk-map) {
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero > .rxs-hero-ambient {
   position: absolute;
   inset: 0;
+}
+
+/* The route map was drawn round the old free-standing logo; against the
+   letterboxed screen its marks broke out over the frame's top edge, so
+   the screen's own lit corners replace it. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero > .fsk-map {
+  display: none;
 }
 
 /* The screen: the title projected in a letterboxed frame (2.39:1),
@@ -831,6 +834,13 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pick
   text-align: center;
 }
 
+/* Credits carry no station-clock ring or kicker dash: centred, both would
+   cross the billing (the elevation sheet already drops them under 1100px). */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-copy::before,
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-copy > p::after {
+  display: none;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-copy > p {
   margin: 0 0 6px;
   color: var(--fst-accent, var(--fsx-violet));
@@ -1103,8 +1113,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     margin: 0;
   }
 
+  /* Room for the paragraph markers, which sit 24px left of each paragraph;
+     without it they were cut by the screen edge. */
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy {
     grid-column: 1;
+    padding-left: 20px;
   }
 
   html[data-family="special"]
@@ -1149,6 +1162,24 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer h2 {
     font-size: clamp(25px, 8vw, 34px);
     letter-spacing: 0.04em;
+  }
+}
+
+/* The gate's shutter (styles-final-stage-kiro.css) runs on the whole
+   record card. Now that the still is a tall 4:5 frame with the credits
+   under it, its full entry range kept the still covered until the credits
+   arrived; it lifts over the first half of the card's entry instead. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > #riders
+      .fst-pickup-visual::before {
+      animation-range: entry 6% entry 50%;
+    }
   }
 }
 
