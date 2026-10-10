@@ -151,6 +151,14 @@ html[data-family="dossier"]
   padding: var(--sd-head) 0 0;
   gap: 0;
   background: none;
+  /* Headroom: the figure stands on the floor with the stage's light above
+     it. It also keeps a file's carried art (the load gate docks it onto
+     the portrait) clear of the top of the screen, where the art has just
+     passed: no second flash there on a phone (verify-route-transitions,
+     world-saga on phone and Android; about 120px already counts two). The
+     file's label stands in it as the stage's slate (below), and the art
+     comes up out of the stage's dark under it. */
+  --sd-headroom: clamp(96px, 18svh, 160px);
 }
 
 /* The stage: a lit floor with the person's light behind and below. */
@@ -161,11 +169,6 @@ html[data-family="dossier"]
   position: relative;
   z-index: 0;
   order: 0;
-  /* Headroom: the figure stands on the floor with the stage's light above
-     it. It also keeps a file's carried art (the load gate docks it onto
-     this portrait) clear of the top of the screen, where the art has just
-     passed: no second flash there on a phone. */
-  --sd-headroom: clamp(96px, 18svh, 160px);
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   justify-items: center;
@@ -255,6 +258,71 @@ html[data-family="dossier"]
   aspect-ratio: auto;
   border: 0;
   border-radius: 0;
+  /* The art's own ground fades up out of the stage's dark: no hard edge
+     where the picture starts. (Static: the docked file hands over to the
+     plate under it, and the flash budget was measured with it.) */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+}
+
+/* The first rank's own rim and light, over the plate, fade with it. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.is-sovereign
+  #dossier-profile
+  .sovereign-portrait-effects {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 24%);
+}
+
+/* Wide phones and portrait tablets: the stage is wider than the figure, so
+   the art also fades into it at its sides (no picture pasted on a dark
+   ground), and the figure takes more of the stage's width. */
+@media (min-width: 561px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame {
+    width: min(100%, max(288px, calc((var(--sd-stage-h) - var(--sd-headroom, 0px)) * 0.92)));
+  }
+
+  /* The plate's own light and shade fade with it, so no darker box is
+     left where the picture was. (The first rank's crown of brackets
+     keeps its corners.) */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    :is(.manager-portrait-frame > img, .sovereign-portrait-effects),
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-portrait-frame::before,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-portrait-frame::after {
+    -webkit-mask-image:
+      linear-gradient(180deg, transparent 0, #000 24%),
+      linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(180deg, transparent 0, #000 24%),
+      linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+    mask-composite: intersect;
+  }
+}
+
+/* The first rank's plate drops its outer rule on the stacked stage: the
+   art fades into the stage at its top, where the rule would be the hard
+   edge again. */
+@media (max-width: 899px),
+  (max-width: 1099px) and (orientation: portrait),
+  (max-width: 1099px) and (max-height: 599px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.is-sovereign
+    #dossier-profile
+    .manager-portrait-frame {
+    outline: 0;
+  }
 }
 
 /* Phones: the figure takes the stage's full width (no gutter that reads
@@ -367,7 +435,9 @@ html[data-family="dossier"]
   z-index: 1;
   order: 0;
   display: block;
-  width: auto;
+  /* Full width (to its cap): auto margins in the hero's grid would shrink
+     it to its words, so each file's name would start at its own x. */
+  width: 100%;
   max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
   min-height: 0;
   margin: 0 auto;
@@ -2149,6 +2219,91 @@ html[data-family="dossier"]
   }
 }
 
+/* Phones and portrait tablets: the file's label is the stage's slate, set
+   in the headroom over the figure. The headroom is never an empty band,
+   and the label is clear of the Zeus button's resting spot beside the
+   name block. (Short screens keep it in the name block: their headroom is
+   a strip.) */
+@media (max-width: 1099px) and (min-height: 501px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-introduction {
+    position: static;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity
+    .manager-file-number,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-dominance {
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--sd-head) + var(--sd-headroom) / 2);
+    left: max(var(--sd-pad), calc((100% - var(--sd-read)) / 2));
+    max-width: calc(100% - 2 * var(--sd-pad));
+    margin: 0;
+    translate: 0 -50%;
+  }
+
+  /* レジャス: the board's line leads the slate, the file label under it. */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity:has(> .manager-eyebrow)
+    > :is(.manager-eyebrow, .manager-file-number) {
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--sd-head) + var(--sd-headroom) / 2);
+    left: max(var(--sd-pad), calc((100% - var(--sd-read)) / 2));
+    max-width: calc(100% - 2 * var(--sd-pad));
+    margin: 0;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity:has(> .manager-eyebrow)
+    > .manager-eyebrow {
+    translate: 0 calc(-100% - 4px);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity:has(> .manager-eyebrow)
+    > .manager-file-number {
+    translate: 0 4px;
+  }
+}
+
+/* Phones: the plate's own caption (レジャス's VISUAL CONFIRMED row) ends
+   short of the Zeus button's resting spot at the plate's foot. */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-meta {
+    padding-inline-end: 72px;
+  }
+}
+
+/* Phones: the first rank's seal stands at the plate's foot on the left,
+   off the Zeus button's resting spot at the right. */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.is-sovereign
+    #dossier-profile
+    .sovereign-apex-seal {
+    right: auto;
+    left: 12px;
+  }
+}
+
 /* ----------------------------------------------------------------
    7. Wide screens: the split stage
    ---------------------------------------------------------------- */
@@ -2158,6 +2313,10 @@ html[data-family="dossier"]
     html[data-family="dossier"] main.manager-page.manager-page.manager-page {
       --sd-stage-w: clamp(400px, 46vw, 820px);
       --sd-pad: clamp(32px, 4.4vw, 80px);
+      /* The reading column's right edge stops short of the Zeus button's
+         resting lane (its left edge sits about 5vw + 46px from the right
+         edge of the screen), so the words never run under it. */
+      --sd-pad-end: max(var(--sd-pad), calc(5vw + 58px));
       --sd-read: 680px;
       --sd-stage-h: calc(100svh - var(--sd-head));
       display: grid;
@@ -2234,6 +2393,15 @@ html[data-family="dossier"]
       width: 100%;
     }
 
+    /* The split stage fills the screen under the bar: no feather there. */
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      :is(.manager-portrait-frame > img, .sovereign-portrait-effects) {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
     /* …and a rim light along the stage's edge, toward the words. */
     html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
@@ -2282,16 +2450,36 @@ html[data-family="dossier"]
     }
 
     html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page:not(.is-sovereign)
+      #dossier-profile
+      .dossier-identity
+      .manager-file-number,
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page.is-sovereign
+      #dossier-profile
+      .sovereign-dominance,
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page:not(.is-sovereign)
+      #dossier-profile
+      .dossier-identity:has(> .manager-eyebrow)
+      > :is(.manager-eyebrow, .manager-file-number) {
+      position: static;
+      max-width: none;
+      translate: none;
+    }
+
+    html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
       #dossier-profile
       .manager-introduction {
+      position: relative;
       grid-column: read;
       grid-row: 1;
       align-self: end;
       width: 100%;
-      max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+      max-width: calc(var(--sd-read) + var(--sd-pad) + var(--sd-pad-end));
       margin: 0;
-      padding: calc(var(--sd-head) + clamp(48px, 10svh, 120px)) var(--sd-pad) 56px;
+      padding: calc(var(--sd-head) + clamp(48px, 10svh, 120px)) var(--sd-pad-end) 56px var(--sd-pad);
     }
 
     html[data-family="dossier"]
@@ -2328,7 +2516,7 @@ html[data-family="dossier"]
       grid-column: read;
       grid-row: 2;
       align-self: start;
-      padding: 0 var(--sd-pad);
+      padding: 0 var(--sd-pad-end) 0 var(--sd-pad);
     }
 
     html[data-family="dossier"]
@@ -2366,7 +2554,8 @@ html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
       > :is(#identity-records, #dossier-index) {
       width: 100%;
-      padding-inline: var(--sd-pad);
+      max-width: calc(var(--sd-read) + var(--sd-pad) + var(--sd-pad-end));
+      padding-inline: var(--sd-pad) var(--sd-pad-end);
     }
 
     /* Forms, the special site, the partner's forms: each takes the
@@ -2445,9 +2634,10 @@ html[data-family="dossier"]
       align-self: start;
       justify-content: center;
       width: 100%;
+      max-width: calc(var(--sd-read) + var(--sd-pad) + var(--sd-pad-end));
       min-height: var(--sd-stage-h);
       margin: 0;
-      padding: 72px var(--sd-pad) 48px;
+      padding: 72px var(--sd-pad-end) 48px var(--sd-pad);
     }
 
     html[data-family="dossier"]
@@ -2456,7 +2646,7 @@ html[data-family="dossier"]
       > header {
       max-width: none;
       margin: 0 0 0 var(--sd-stage-w);
-      padding: 72px var(--sd-pad) 32px;
+      padding: 72px var(--sd-pad-end) 32px var(--sd-pad);
       border-top: 1px solid var(--sd-line);
     }
 
@@ -2487,7 +2677,7 @@ html[data-family="dossier"]
       grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, max-content) minmax(0, 1fr);
       align-content: center;
       min-height: min(calc(100svh - var(--sd-head) - 74px), 720px);
-      padding: 48px var(--sd-pad) 48px 0;
+      padding: 48px var(--sd-pad-end) 48px 0;
     }
 
     html[data-family="dossier"]
@@ -2615,8 +2805,7 @@ html[data-family="dossier"]
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
-    #dossier-profile
-    .manager-portrait-column {
+    > #dossier-profile.manager-hero {
     --sd-headroom: 40px;
   }
 
