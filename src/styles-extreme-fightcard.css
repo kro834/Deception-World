@@ -1214,6 +1214,32 @@ html[data-family="special"]
     .rxs-page.rxs-page.exs-page
     > #performance
     .rxs-processing-comparison
+    > div
+    > section {
+    padding: 12px 10px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-processing-comparison
+    > div
+    > section
+    li {
+    padding: 6px 0;
+    font-size: 12px;
+  }
+}
+
+/* The narrowest phones stack the two architectures; from 380px they face
+   each other like the corners. */
+@media (max-width: 379.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-processing-comparison
     > div {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1590,6 +1616,23 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
     height: clamp(440px, 72svh, 640px);
   }
+}
+
+/* ================================================================
+   ROUND 4: the moves, each numbered on its own plate
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  > article
+  .exo-number {
+  padding: 0.12em 0.3em 0.06em 0.12em;
+  color: var(--ext-ink);
+  font-size: clamp(38px, 4vw, 58px);
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.26em) 100%, 0 100%);
 }
 
 /* ================================================================
@@ -2018,7 +2061,14 @@ html[data-family="special"]
     .rxs-comparison
     > .rxs-comparison-key
     > span:first-child,
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::before {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article
+    .exo-number {
     color: CanvasText;
     background: Canvas;
     border: 1px solid CanvasText;
