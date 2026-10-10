@@ -1035,7 +1035,10 @@ for (const [index, piece] of PIECES.entries()) {
       for (let y = Math.max(by, box.top); y < Math.min(by + MOSAIC, box.top + h); y += 1) {
         for (let x = Math.max(bx, box.left); x < Math.min(bx + MOSAIC, box.left + w); x += 1) {
           const i = (y - box.top) * w + (x - box.left);
-          const a = cover[i];
+          // Weighted by light: the mosaic follows the lit armour (gold,
+          // crystal, rims), not the black suit inside a cut.
+          const lit = Math.max(art[i * 4], art[i * 4 + 1], art[i * 4 + 2]);
+          const a = cover[i] * Math.min(1, Math.max(0.05, (lit - 30) / 70));
           sum += a;
           r += art[i * 4] * a;
           g += art[i * 4 + 1] * a;
@@ -1044,7 +1047,7 @@ for (const [index, piece] of PIECES.entries()) {
         }
       }
       const coverage = sum / (MOSAIC * MOSAIC);
-      if (coverage < 0.28 || !count) continue;
+      if (coverage < 0.2 || !count) continue;
       r /= sum;
       g /= sum;
       b /= sum;

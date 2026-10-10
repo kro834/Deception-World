@@ -2212,24 +2212,24 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 /* A group of pixel squares lands on the face's lights (fast), holds, then
-   bursts outward from the visor and goes. */
+   bursts outward from the visor and goes (its box is the burst's size). */
 @keyframes rxSuitPixels {
   0% {
     opacity: 0;
-    transform: scale(0.7);
+    transform: scale(calc(0.7 / var(--rx-suit-burst)));
   }
   8% {
     opacity: 1;
-    transform: none;
+    transform: scale(calc(1 / var(--rx-suit-burst)));
   }
   40% {
     animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
     opacity: 1;
-    transform: none;
+    transform: scale(calc(1 / var(--rx-suit-burst)));
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--rx-suit-r)) scale(var(--rx-suit-burst));
+    transform: rotate(var(--rx-suit-r));
   }
 }
 @keyframes rxSuitGlint {

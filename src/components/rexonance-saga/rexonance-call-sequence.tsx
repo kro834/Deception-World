@@ -384,7 +384,7 @@ const suitPixels = (): Squares[] => {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!inside(glow, x, y)) continue;
-    const size = [3, 4, 5, 6][found % 4];
+    const size = [4, 5, 6, 8][found % 4];
     // Ice along the outer wings, pink down the centre, a few burn white.
     const centre = Math.abs(x - REXONANCE_SUIT_MARKS.visor[0]) < 14 + (y - y0) * 0.12;
     const tone = found % 7 === 0 ? "white" : centre ? "pink" : "cyan";
@@ -403,12 +403,12 @@ const FACE_BOX = (() => {
 })();
 // Each burst group flies its own way: a scale from the visor and a turn.
 const SUIT_BURST = [
-  [2.6, -14],
-  [3.4, 10],
-  [2.2, 22],
-  [3.9, -6],
-  [2.9, -24],
-  [3.6, 16],
+  [3.4, -14],
+  [4.6, 10],
+  [3, 22],
+  [5.2, -6],
+  [3.9, -24],
+  [4.8, 16],
 ] as const;
 
 function SquarePaths({ squares }: { squares: Squares }) {
@@ -434,7 +434,6 @@ const SUIT_PHASES = ["ice", "violet", "gold"] as const;
 
 function Suit({ suit }: { suit: "build" | "whole" }) {
   const { motes, pixels } = suitSquares();
-  const faceView = `${FACE_BOX.x} ${FACE_BOX.y} ${FACE_BOX.w} ${FACE_BOX.h}`;
   const visor = REXONANCE_SUIT_MARKS.visor;
   return (
     <div
@@ -452,7 +451,7 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
         <i className="rx-suit-floor" />
       </i>
       <div className="rx-suit-figure">
-        {/* FAR UP！ scans the bare undersuit top to bottom: a window that
+        {/* FAR UP！ scans the bare undersuit top to bottom: a frame that
             slides down over a picture that holds still (two transforms).
             The finished figure stands in it for the still tiers, or when
             the pieces were not ready in time. */}
@@ -537,24 +536,37 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
         </div>
         {/* REXONANCE DEUS！: the face's lights fill with pixel squares,
             group by group, and each group bursts outward from the visor. */}
-        {pixels.map((group, index) => (
-          <svg
-            key={SUIT_BURST[index].join()}
-            className="rx-suit-pixels"
-            viewBox={faceView}
-            style={
-              {
-                ...place(FACE_BOX.x, FACE_BOX.y, FACE_BOX.w, FACE_BOX.h),
-                transformOrigin: `${pct(visor[0] - FACE_BOX.x, FACE_BOX.w)} ${pct(visor[1] - FACE_BOX.y, FACE_BOX.h)}`,
-                "--rx-suit-i": index,
-                "--rx-suit-burst": SUIT_BURST[index][0],
-                "--rx-suit-r": `${SUIT_BURST[index][1]}deg`,
-              } as CSSProperties
-            }
-          >
-            <SquarePaths squares={group} />
-          </svg>
-        ))}
+        {pixels.map((group, index) => {
+          // Each group draws the face's squares at its burst's full size,
+          // about the visor, and starts scaled down onto the face: the
+          // squares stay crisp as they fly out (a compositor scale up would
+          // blur them).
+          const [burst, turn] = SUIT_BURST[index];
+          const box = {
+            x: visor[0] - (visor[0] - FACE_BOX.x) * burst,
+            y: visor[1] - (visor[1] - FACE_BOX.y) * burst,
+            w: FACE_BOX.w * burst,
+            h: FACE_BOX.h * burst,
+          };
+          return (
+            <svg
+              key={SUIT_BURST[index].join()}
+              className="rx-suit-pixels"
+              viewBox={`${FACE_BOX.x} ${FACE_BOX.y} ${FACE_BOX.w} ${FACE_BOX.h}`}
+              style={
+                {
+                  ...place(box.x, box.y, box.w, box.h),
+                  transformOrigin: `${pct(visor[0] - box.x, box.w)} ${pct(visor[1] - box.y, box.h)}`,
+                  "--rx-suit-i": index,
+                  "--rx-suit-burst": burst,
+                  "--rx-suit-r": `${turn}deg`,
+                } as CSSProperties
+              }
+            >
+              <SquarePaths squares={group} />
+            </svg>
+          );
+        })}
         {SUIT_PHASES.map((phase, index) => (
           <i
             key={phase}
