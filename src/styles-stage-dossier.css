@@ -2299,7 +2299,7 @@ html[data-family="dossier"]
       #dossier-profile
       .dossier-identity
       .manager-display-name {
-      font-size: clamp(60px, 6.8vw, 108px);
+      font-size: clamp(56px, 6.2vw, 100px);
     }
 
     /* The first screen is a title card: the name alone beside the figure,
