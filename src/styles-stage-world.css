@@ -27,8 +27,10 @@
 
    This sheet is linked on /world only, before the HUD face and the Mirage
    sheet (which stays last), so every rule carries html[data-family="world"]
-   body and the full shell class chain (and the chapter id where the phase
-   sheets use one) to outrank the earlier World layers. The few properties
+   :root, body and the full shell class chain (and the chapter id where the
+   phase sheets use one) to outrank the earlier World layers, the Android
+   tier's own paint included (it would otherwise bring the lilac paper
+   back). The few properties
    the frosted-control and pickup sheets force with !important answer with
    !important. The top bar and the side menu belong to the shell sheet and
    are not touched. No motion, no blur, no backdrop-filter; text is 12px or
@@ -38,7 +40,7 @@
 /* ================================================================
    0. Scene tokens: the phase lights per chapter
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
   --sw-light: #7ae8ff;
   --sw-light-rgb: 122 232 255;
   --sw-warm: #ff5cc8;
@@ -66,7 +68,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition {
     linear-gradient(var(--sw-gold) 0 0) 100% 100% / 1px 14px no-repeat;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story {
   --sw-light: #a9c4ff;
   --sw-light-rgb: 169 196 255;
   --sw-warm: #c9abff;
@@ -78,7 +80,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #st
   --sw-text-3: #9ba9cc;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition #manager-archive {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition #manager-archive {
   --sw-light: #c8a3ff;
   --sw-light-rgb: 200 163 255;
   --sw-warm: #ff7fa4;
@@ -90,7 +92,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition #mana
   --sw-text-3: #ab9cc2;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #riders {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
   --sw-light: #cfd8e3;
   --sw-light-rgb: 207 216 227;
   --sw-warm: #a48bff;
@@ -102,7 +104,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #ri
   --sw-text-3: #9ea9b6;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #records {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #records {
   --sw-light: #efb96f;
   --sw-light-rgb: 239 185 111;
   --sw-warm: #e98c5e;
@@ -114,7 +116,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #re
   --sw-text-3: #bba58a;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.wa-contents, .world-annex) {
@@ -131,7 +133,7 @@ html[data-family="world"]
   --sw-text-3: #93b2a6;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.finale-section, footer, .rw-gate) {
@@ -151,7 +153,7 @@ html[data-family="world"]
 /* The glossary was the annex's paper sheet: on the stage it reads on the
    same dark plate as the rest of the annex, so its ink tokens return to the
    annex's light ones. */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #glossary {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #glossary {
   --mr-text: #eef6f2;
   --mr-text-2: #c5dbd2;
   --mr-text-3: #93b2a6;
@@ -172,7 +174,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #gl
    1. Scenes: every chapter a full-bleed lit stage in its phase grade
    ================================================================ */
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > :is(#story, #riders, #records, .wa-contents, .world-annex, .finale-section) {
@@ -185,28 +187,28 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #gl
   /* The phase colours of the owner's grounds, re-lit: the story's ice dusk
      deepening to its mauve horizon, the riders' gunmetal hangar, the
      records' lamplit sepia, the annex's verdigris vault, the finale's ember. */
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story {
     background:
       radial-gradient(60% 620px at 50% 0, rgb(176 200 255 / 15%), transparent 72%),
       radial-gradient(80% 420px at 50% 100%, rgb(214 150 236 / 14%), transparent 72%),
       linear-gradient(180deg, #0a1126 0%, #0e1734 34%, #141c40 70%, #1d1840 100%);
   }
 
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #riders {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
     background:
       radial-gradient(42% 760px at 62% 0, rgb(236 242 250 / 13%), transparent 74%),
       radial-gradient(50% 300px at 62% 100%, rgb(164 139 255 / 14%), transparent 72%),
       linear-gradient(180deg, #14181e 0%, #222831 44%, #262c35 62%, #161a20 100%);
   }
 
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #records {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #records {
     background:
       radial-gradient(60% 560px at 50% 0, rgb(255 184 96 / 15%), transparent 72%),
       radial-gradient(60% 300px at 50% 100%, rgb(233 140 94 / 8%), transparent 72%),
       linear-gradient(180deg, #140d07 0%, #1e150b 46%, #160f08 100%);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > :is(.wa-contents, .world-annex) {
@@ -215,21 +217,21 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #gl
       linear-gradient(180deg, #08150f, #0b1a15 50%, #08130f);
   }
 
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #quotes {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #quotes {
     background:
       radial-gradient(60% 420px at 50% 0, rgb(109 223 186 / 9%), transparent 72%),
       linear-gradient(180deg, #0a1813, #050b09);
   }
 
   /* The old chapter rules and light curtains give way to the head's seam. */
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > :is(#story, #riders, #records, .world-annex.is-chapter)::before {
     background: linear-gradient(90deg, var(--sw-light), rgb(var(--sw-light-rgb) / 18%) 22%, rgb(var(--sw-light-rgb) / 10%));
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > :is(#story, #riders, #records)::after {
@@ -241,30 +243,30 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #gl
    2. Decoration that only decorates: the marquee bands, the hero HUD
       layer, the HUD jargon after the chapter kickers
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .mr-ticker {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .mr-ticker {
   display: none;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero > .mr-hero-hud {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .mr-hero-hud {
   visibility: hidden;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   .section-index
   small::after,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   .section-index
   small::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   .section-index
   > span::after,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   .section-index::after {
@@ -275,7 +277,7 @@ html[data-family="world"]
    3. The chapter head: an outlined number, the HUD kicker and a seam,
       the Japanese title beneath
    ================================================================ */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -294,7 +296,7 @@ html[data-family="world"]
   background: linear-gradient(90deg, var(--sw-light), rgb(var(--sw-warm-rgb) / 60%) 60%, transparent) 0 100% / min(240px, 42%) 1px no-repeat;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -311,7 +313,7 @@ html[data-family="world"]
   background: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -327,7 +329,7 @@ html[data-family="world"]
   opacity: 1;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -337,7 +339,7 @@ html[data-family="world"]
 }
 
 /* The kicker over each chapter title. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -352,7 +354,7 @@ html[data-family="world"]
   letter-spacing: 0.22em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -364,7 +366,7 @@ html[data-family="world"]
   letter-spacing: inherit;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -378,7 +380,7 @@ html[data-family="world"]
   background: rgb(var(--sw-light-rgb) / 50%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -397,7 +399,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
@@ -411,7 +413,7 @@ html[data-family="world"]
 /* ================================================================
    4. The hero: the title stage
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
   --poster-width: min(31vw, 430px, calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3));
   grid-template:
     "identity visual" auto
@@ -428,7 +430,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
     background:
       radial-gradient(46% 70% at 76% 46%, rgb(122 232 255 / 10%), transparent 70%),
       linear-gradient(90deg, rgb(3 6 12 / 94%) 0%, rgb(3 6 12 / 70%) 46%, rgb(3 6 12 / 30%) 100%);
@@ -436,7 +438,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
 
   /* The key art fills the stage behind, held down by the dark at the left
      and a floor fade, so the poster in front reads as the lit object. */
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -451,7 +453,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
   }
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero > .poster-stage {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .poster-stage {
   grid-area: visual;
   align-self: center;
   justify-self: center;
@@ -464,7 +466,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -473,7 +475,7 @@ html[data-family="world"]
   display: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -492,7 +494,7 @@ html[data-family="world"]
   letter-spacing: 0.22em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -507,7 +509,7 @@ html[data-family="world"]
   margin: 4px 0 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -520,7 +522,7 @@ html[data-family="world"]
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -547,7 +549,7 @@ html[data-family="world"]
   white-space: nowrap;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -558,7 +560,7 @@ html[data-family="world"]
   opacity: 0.6;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -569,7 +571,7 @@ html[data-family="world"]
   color: #f0cf86;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -588,7 +590,7 @@ html[data-family="world"]
   transform: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -602,7 +604,7 @@ html[data-family="world"]
 }
 
 /* The counter is announced from here and shown in the caption above. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -617,7 +619,7 @@ html[data-family="world"]
   white-space: nowrap;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -629,7 +631,7 @@ html[data-family="world"]
 
 /* The poster: one framed print on a lit floor. */
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -644,7 +646,7 @@ html[data-family="world"]
       0 40px 60px -30px rgb(0 0 0 / 90%);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -661,7 +663,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -672,7 +674,7 @@ html[data-family="world"]
 }
 
 /* The identity: the work's line, the wordmark, the edition tag. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -688,7 +690,7 @@ html[data-family="world"]
   border-bottom: 1px solid rgb(122 232 255 / 18%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -702,7 +704,7 @@ html[data-family="world"]
   background: linear-gradient(90deg, #7ae8ff, rgb(164 139 255 / 60%) 60%, transparent);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -713,7 +715,7 @@ html[data-family="world"]
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -725,7 +727,7 @@ html[data-family="world"]
   letter-spacing: 0.22em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -735,7 +737,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -747,7 +749,7 @@ html[data-family="world"]
   letter-spacing: -0.02em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -768,7 +770,7 @@ html[data-family="world"]
 }
 
 /* The copy: the typed headline and the way in. */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy {
   grid-area: copy;
   align-self: start;
   margin: 0;
@@ -776,12 +778,12 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
   border: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
   > .hero-copy::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -789,7 +791,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy h1 {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy h1 {
   margin: 0 0 clamp(18px, 3vh, 30px);
   padding: 0;
   border: 0;
@@ -797,7 +799,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .he
   line-height: 1.32;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -806,7 +808,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -820,7 +822,7 @@ html[data-family="world"]
 }
 
 /* The context: the lead and the facts set as credits. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -833,7 +835,7 @@ html[data-family="world"]
   padding: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -847,7 +849,7 @@ html[data-family="world"]
   font: 400 15px / 1.9 var(--sw-body);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -864,7 +866,7 @@ html[data-family="world"]
   background: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -882,7 +884,7 @@ html[data-family="world"]
   background: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -894,7 +896,7 @@ html[data-family="world"]
   border-left: 1px solid rgb(122 232 255 / 12%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -906,7 +908,7 @@ html[data-family="world"]
   letter-spacing: 0.12em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -919,7 +921,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .hero
@@ -928,7 +930,7 @@ html[data-family="world"]
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero::before {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero::before {
     content: none;
   }
 }
@@ -936,7 +938,7 @@ html[data-family="world"]
 /* Phones and portrait tablets: the title, the way in, the key visual, the
    credits, in one column. */
 @media (max-width: 900px), (orientation: portrait) and (max-width: 1100px) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
     --poster-width: min(78vw, 440px, calc((100svh - 220px) * 2 / 3));
     grid-template:
       "identity" auto
@@ -949,7 +951,7 @@ html[data-family="world"]
     gap: 22px;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -959,11 +961,11 @@ html[data-family="world"]
     font-size: clamp(44px, 14.4vw, 96px);
   }
 
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy h1 {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy h1 {
     font-size: clamp(28px, 7.6vw, 46px);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -973,7 +975,7 @@ html[data-family="world"]
 }
 
 @media (max-width: 420px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -982,7 +984,7 @@ html[data-family="world"]
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -995,7 +997,7 @@ html[data-family="world"]
     border-bottom: 1px solid rgb(122 232 255 / 12%);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -1007,7 +1009,7 @@ html[data-family="world"]
     border-left: 0;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
@@ -1021,11 +1023,11 @@ html[data-family="world"]
 /* ================================================================
    5. 01 STORY: the synopsis on a dark reading plate
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story {
   padding-inline: var(--sw-gutter);
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
   align-items: start;
@@ -1046,7 +1048,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #st
 /* Ten layers, as the plate always had: the four corner ticks (two each),
    the lit top edge and the deck. */
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
     background:
       linear-gradient(var(--sw-light) 0 0) 0 0 / 18px 1px no-repeat,
       linear-gradient(var(--sw-light) 0 0) 0 0 / 1px 18px no-repeat,
@@ -1062,12 +1064,12 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #st
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
   > .story-layout::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1075,7 +1077,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1087,7 +1089,7 @@ html[data-family="world"]
   padding: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1101,7 +1103,7 @@ html[data-family="world"]
   color: var(--sw-text-2);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1114,7 +1116,7 @@ html[data-family="world"]
   letter-spacing: 0.04em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1135,7 +1137,7 @@ html[data-family="world"]
   letter-spacing: 0.08em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1147,7 +1149,7 @@ html[data-family="world"]
   font: inherit;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1160,12 +1162,12 @@ html[data-family="world"]
 }
 
 @media (max-width: 860px) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .story-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 26px;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1174,7 +1176,7 @@ html[data-family="world"]
     position: static;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1186,17 +1188,17 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
   > .section-index::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > section
   > .section-index::after,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1205,7 +1207,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1219,7 +1221,7 @@ html[data-family="world"]
 /* ================================================================
    6. 六詠: the six portraits as a line-up on their own lit stage
    ================================================================ */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1243,7 +1245,7 @@ html[data-family="world"]
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1256,12 +1258,12 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
   > #manager-archive::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1269,7 +1271,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1284,7 +1286,7 @@ html[data-family="world"]
   padding: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1298,7 +1300,7 @@ html[data-family="world"]
   letter-spacing: 0.24em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1312,7 +1314,7 @@ html[data-family="world"]
   text-shadow: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1327,7 +1329,7 @@ html[data-family="world"]
   font: 400 14px / 1.85 var(--sw-body);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1336,7 +1338,7 @@ html[data-family="world"]
   display: contents;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1348,7 +1350,7 @@ html[data-family="world"]
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1360,7 +1362,7 @@ html[data-family="world"]
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1376,7 +1378,7 @@ html[data-family="world"]
 
 /* The floor the line-up stands on. */
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1395,7 +1397,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1418,7 +1420,7 @@ html[data-family="world"]
   transform: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1426,7 +1428,7 @@ html[data-family="world"]
   .manager-slot-grid
   > :is(.signal, .other-archive-card)
   > img,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1444,7 +1446,7 @@ html[data-family="world"]
   object-fit: cover;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1460,7 +1462,7 @@ html[data-family="world"]
 }
 
 /* The name plate at each figure's feet. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1474,7 +1476,7 @@ html[data-family="world"]
   padding: 12px 12px 14px;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1490,7 +1492,7 @@ html[data-family="world"]
   text-shadow: 0 1px 0 rgb(0 0 0 / 60%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1501,7 +1503,7 @@ html[data-family="world"]
   display: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1518,7 +1520,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1537,7 +1539,7 @@ html[data-family="world"]
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1549,7 +1551,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1565,7 +1567,7 @@ html[data-family="world"]
       segments, the selection a lit segment with a foot in the light.
       Geometry stays with the rail engine; only paint changes here.
    ================================================================ */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs).liquid-swipe-tabs {
@@ -1577,7 +1579,7 @@ html[data-family="world"]
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%) !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1585,12 +1587,12 @@ html[data-family="world"]
   visibility: hidden;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
   .liquid-selection-lens,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1598,7 +1600,7 @@ html[data-family="world"]
   border-radius: 0 !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1610,7 +1612,7 @@ html[data-family="world"]
   box-shadow: inset 0 0 0 1px rgb(var(--sw-light-rgb) / 36%) !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1618,7 +1620,7 @@ html[data-family="world"]
   display: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1636,7 +1638,7 @@ html[data-family="world"]
   text-align: left;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1645,7 +1647,7 @@ html[data-family="world"]
   box-shadow: inset 1px 0 0 rgb(var(--sw-light-rgb) / 14%) !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1656,7 +1658,7 @@ html[data-family="world"]
   letter-spacing: 0.14em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1667,7 +1669,7 @@ html[data-family="world"]
   letter-spacing: 0.06em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1675,7 +1677,7 @@ html[data-family="world"]
   color: #fff;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs)
@@ -1684,7 +1686,7 @@ html[data-family="world"]
   color: var(--sw-light);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   :is(#manager-archive .manager-archive-tabs, .world-column-index > .world-column-tabs, .rider-tabs)
@@ -1696,7 +1698,7 @@ html[data-family="world"]
 /* ================================================================
    8. WORLD COLUMN: a reading plate in the story's light
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story > .world-column {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .world-column {
   box-sizing: border-box;
   width: min(100%, var(--sw-wrap));
   max-width: none;
@@ -1709,7 +1711,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #st
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #story > .world-column {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .world-column {
     background:
       var(--sw-ticks),
       linear-gradient(90deg, var(--sw-gold), rgb(var(--sw-gold-rgb) / 30%) 30%, transparent 60%) 0 0 / 100% 1px no-repeat,
@@ -1717,12 +1719,12 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #st
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
   > .world-column::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1730,7 +1732,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1743,7 +1745,7 @@ html[data-family="world"]
   border: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1755,7 +1757,7 @@ html[data-family="world"]
   letter-spacing: 0.24em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1764,7 +1766,7 @@ html[data-family="world"]
   column-gap: clamp(24px, 4vw, 64px);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1776,7 +1778,7 @@ html[data-family="world"]
   letter-spacing: 0.18em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1793,7 +1795,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #story
@@ -1807,7 +1809,7 @@ html[data-family="world"]
 }
 
 @media (max-width: 860px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1820,7 +1822,7 @@ html[data-family="world"]
     align-items: stretch;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1829,7 +1831,7 @@ html[data-family="world"]
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1839,7 +1841,7 @@ html[data-family="world"]
     width: 100%;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1848,7 +1850,7 @@ html[data-family="world"]
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1860,7 +1862,7 @@ html[data-family="world"]
 }
 
 @media (max-width: 359px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1871,7 +1873,7 @@ html[data-family="world"]
 }
 
 @media (max-width: 860px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     :is(#manager-archive .manager-archive-tabs)
@@ -1881,7 +1883,7 @@ html[data-family="world"]
     overflow-wrap: anywhere;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1893,7 +1895,7 @@ html[data-family="world"]
     letter-spacing: 0.06em;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
@@ -1910,11 +1912,11 @@ html[data-family="world"]
 /* ================================================================
    9. 02 RIDERS: the selected rider stands tall beside the rail
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #riders {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
   padding-inline: var(--sw-gutter);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -1929,7 +1931,7 @@ html[data-family="world"]
   margin: 0 auto clamp(26px, 3.4vw, 44px);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -1938,7 +1940,7 @@ html[data-family="world"]
   grid-column: 1;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -1955,7 +1957,7 @@ html[data-family="world"]
   font: 400 15px / 1.95 var(--sw-body);
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #riders > .rider-console {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders > .rider-console {
   box-sizing: border-box;
   width: min(100%, var(--sw-wrap));
   max-width: none;
@@ -1966,12 +1968,12 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #ri
   box-shadow: 0 34px 70px -40px rgb(0 0 0 / 90%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
   > .rider-console::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -1979,7 +1981,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -1991,7 +1993,7 @@ html[data-family="world"]
 
 /* The rail: dark segments, the selection a lit plate with a foot in the
    rider's light. Sizes, gaps and the lens geometry are the engine's. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2002,7 +2004,7 @@ html[data-family="world"]
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%) !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2011,7 +2013,7 @@ html[data-family="world"]
   visibility: hidden;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2020,7 +2022,7 @@ html[data-family="world"]
   border-radius: 2px !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2033,7 +2035,7 @@ html[data-family="world"]
   box-shadow: inset 0 0 0 1px rgb(var(--sw-light-rgb) / 40%) !important;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2042,7 +2044,7 @@ html[data-family="world"]
   display: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2055,7 +2057,7 @@ html[data-family="world"]
   color: var(--sw-text-3);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2068,7 +2070,7 @@ html[data-family="world"]
   letter-spacing: 0.12em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2081,7 +2083,7 @@ html[data-family="world"]
   letter-spacing: 0.14em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2091,7 +2093,7 @@ html[data-family="world"]
   opacity: 0.5;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2100,7 +2102,7 @@ html[data-family="world"]
   color: #fff;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2112,7 +2114,7 @@ html[data-family="world"]
 }
 
 /* The gesture note reads as a caption under the rail, not a box. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2126,7 +2128,7 @@ html[data-family="world"]
   box-shadow: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2137,7 +2139,7 @@ html[data-family="world"]
 }
 
 /* The stage: lit from above in the rider's tone, a floor under the art. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2146,7 +2148,7 @@ html[data-family="world"]
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2157,7 +2159,7 @@ html[data-family="world"]
       linear-gradient(180deg, #11151b, #0b0e12);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2174,7 +2176,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2189,7 +2191,7 @@ html[data-family="world"]
   letter-spacing: 0.16em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2201,7 +2203,7 @@ html[data-family="world"]
   letter-spacing: 0.12em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2213,7 +2215,7 @@ html[data-family="world"]
   text-shadow: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2223,7 +2225,7 @@ html[data-family="world"]
   font: 400 15px / 1.95 var(--sw-body);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2233,7 +2235,7 @@ html[data-family="world"]
   background: linear-gradient(90deg, var(--rider-tone, #cfd8e3), transparent);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #riders
@@ -2249,7 +2251,7 @@ html[data-family="world"]
 /* Wide screens: the art takes the larger side of the stage, full height,
    and fades into the stage at its inner edge. */
 @media (min-width: 1121px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2259,7 +2261,7 @@ html[data-family="world"]
     padding: 64px clamp(36px, 4vw, 64px) 56px;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2272,7 +2274,7 @@ html[data-family="world"]
     mask-image: linear-gradient(90deg, transparent 0, #000 16%);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2284,7 +2286,7 @@ html[data-family="world"]
 }
 
 @media (max-width: 760px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2292,7 +2294,7 @@ html[data-family="world"]
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
@@ -2308,11 +2310,11 @@ html[data-family="world"]
    10. 03 RECORDS: the episodes as a contact strip of frames running
        through a lit gate (the strip still swipes and snaps as before)
    ================================================================ */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > #records {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #records {
   padding-inline: var(--sw-gutter);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2323,7 +2325,7 @@ html[data-family="world"]
   margin: 0 auto clamp(26px, 3.4vw, 44px);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2340,7 +2342,7 @@ html[data-family="world"]
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #records
@@ -2352,7 +2354,7 @@ html[data-family="world"]
   }
 
   /* The gate: two sprocket rails the frames run between. */
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #records
@@ -2364,12 +2366,12 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
   > .episode-archive::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2377,7 +2379,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2387,7 +2389,7 @@ html[data-family="world"]
   border-bottom: 1px solid rgb(var(--sw-light-rgb) / 18%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2399,7 +2401,7 @@ html[data-family="world"]
   letter-spacing: 0.24em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2411,7 +2413,7 @@ html[data-family="world"]
   text-shadow: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2424,7 +2426,7 @@ html[data-family="world"]
   color: var(--sw-text);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2434,7 +2436,7 @@ html[data-family="world"]
   font-family: var(--sw-mono);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2445,7 +2447,7 @@ html[data-family="world"]
 }
 
 @media (min-width: 1121px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #records
@@ -2455,7 +2457,7 @@ html[data-family="world"]
 }
 
 @media (min-width: 841px) and (max-width: 1120px) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #records
@@ -2465,7 +2467,7 @@ html[data-family="world"]
 }
 
 /* A frame: the still, then its caption on the strip's own dark. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2477,7 +2479,7 @@ html[data-family="world"]
   box-shadow: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2487,7 +2489,7 @@ html[data-family="world"]
   box-shadow: 0 0 0 1px rgb(var(--sw-light-rgb) / 24%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2498,7 +2500,7 @@ html[data-family="world"]
   border-bottom: 1px solid rgb(var(--sw-light-rgb) / 16%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2512,7 +2514,7 @@ html[data-family="world"]
   letter-spacing: 0.14em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2528,7 +2530,7 @@ html[data-family="world"]
   color: var(--sw-text);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2541,12 +2543,12 @@ html[data-family="world"]
     linear-gradient(180deg, #23170a, #110b05);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
   .episode-card-copy::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2554,7 +2556,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2567,7 +2569,7 @@ html[data-family="world"]
   letter-spacing: 0.16em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2579,7 +2581,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2590,7 +2592,7 @@ html[data-family="world"]
   letter-spacing: 0.14em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #records
@@ -2605,7 +2607,7 @@ html[data-family="world"]
    11. The annex (04-06): one scene grammar for the contents, the cast
        wall, the world files and the archive log
    ================================================================ */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.world-annex, .wa-contents) {
@@ -2613,7 +2615,7 @@ html[data-family="world"]
   color: var(--sw-text);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.world-annex, .wa-contents)
@@ -2621,7 +2623,7 @@ html[data-family="world"]
   max-width: var(--sw-wrap);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2631,7 +2633,7 @@ html[data-family="world"]
 }
 
 /* The chapter opener: the same head as 01-03. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2646,18 +2648,18 @@ html[data-family="world"]
   background: linear-gradient(90deg, var(--sw-light), rgb(var(--sw-warm-rgb) / 60%) 60%, transparent) 0 100% / min(240px, 42%) 1px no-repeat;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
   .wa-chapter::before,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
   .wa-chapter
   > span::after,
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2666,7 +2668,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2679,7 +2681,7 @@ html[data-family="world"]
   -webkit-text-stroke: 1px rgb(var(--sw-light-rgb) / 64%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2691,7 +2693,7 @@ html[data-family="world"]
   letter-spacing: 0.24em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2701,7 +2703,7 @@ html[data-family="world"]
 }
 
 /* The title block: kicker (with its sub-number), the count, the title. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2710,7 +2712,7 @@ html[data-family="world"]
   margin-bottom: clamp(22px, 3vw, 34px);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2719,7 +2721,7 @@ html[data-family="world"]
   opacity: 1;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2729,7 +2731,7 @@ html[data-family="world"]
   letter-spacing: 0.22em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2742,7 +2744,7 @@ html[data-family="world"]
   line-height: 1;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.world-annex, .wa-contents)
@@ -2759,7 +2761,7 @@ html[data-family="world"]
   overflow-wrap: anywhere;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > :is(.world-annex, .wa-contents)
@@ -2768,7 +2770,7 @@ html[data-family="world"]
 }
 
 /* The contents: one strip of numbered chapter tiles. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2779,7 +2781,7 @@ html[data-family="world"]
   background: var(--sw-ticks), linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2787,7 +2789,7 @@ html[data-family="world"]
   content: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2796,7 +2798,7 @@ html[data-family="world"]
   font-size: clamp(22px, 2.4vw, 30px);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2807,7 +2809,7 @@ html[data-family="world"]
   background: rgb(4 10 8 / 60%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2817,7 +2819,7 @@ html[data-family="world"]
   box-shadow: inset 1px 0 0 rgb(var(--sw-light-rgb) / 14%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2836,7 +2838,7 @@ html[data-family="world"]
   font: 700 14px / 1.4 var(--sw-display);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .wa-contents
@@ -2850,7 +2852,7 @@ html[data-family="world"]
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .wa-contents
@@ -2862,7 +2864,7 @@ html[data-family="world"]
 }
 
 /* The plate: ink deck, hairline, ice and gold corner ticks, a lit edge. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2883,7 +2885,7 @@ html[data-family="world"]
   background-origin: border-box;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2895,7 +2897,7 @@ html[data-family="world"]
   opacity: 0.8;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2906,11 +2908,11 @@ html[data-family="world"]
   text-shadow: none;
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .world-annex .wa-prose {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .world-annex .wa-prose {
   color: var(--sw-text-2);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2918,7 +2920,7 @@ html[data-family="world"]
   background: linear-gradient(180deg, var(--sw-light), rgb(var(--sw-gold-rgb) / 70%));
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .world-annex
@@ -2929,7 +2931,7 @@ html[data-family="world"]
 }
 
 /* ---------- 04 CAST FILES: art cards ---------- */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -2951,7 +2953,7 @@ html[data-family="world"]
 
 @media (forced-colors: none) {
   /* The art window's floor takes the chapter's light. */
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #cast-roster
@@ -2964,7 +2966,7 @@ html[data-family="world"]
 }
 
 /* The index as a cut HUD tab on the art. */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -2980,7 +2982,7 @@ html[data-family="world"]
   clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -2989,7 +2991,7 @@ html[data-family="world"]
   color: var(--wa-kind, var(--sw-text-3));
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -2999,7 +3001,7 @@ html[data-family="world"]
   height: 1px;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -3010,7 +3012,7 @@ html[data-family="world"]
   font-weight: 700;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #cast-roster
@@ -3022,7 +3024,7 @@ html[data-family="world"]
 }
 
 /* ---------- 05 WORLD FILES ---------- */
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #world-brief
@@ -3032,7 +3034,7 @@ html[data-family="world"]
   color: rgb(var(--sw-warm-rgb) / 92%);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #world-brief
@@ -3044,7 +3046,7 @@ html[data-family="world"]
 
 /* ---------- 06.2 the glossary: the annex's dark plate, not paper ---------- */
 @media (forced-colors: none) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #glossary
@@ -3056,7 +3058,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #glossary
@@ -3066,7 +3068,7 @@ html[data-family="world"]
   font-family: var(--sw-display);
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #glossary
@@ -3079,7 +3081,7 @@ html[data-family="world"]
    12. The finale: the end card, then its credit line
    ================================================================ */
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > .finale-section {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .finale-section {
     background:
       radial-gradient(80% 44% at 50% 100%, rgb(255 150 60 / 22%), transparent 72%),
       linear-gradient(180deg, #0c0604, #120804 60%, #0c0604);
@@ -3087,7 +3089,7 @@ html[data-family="world"]
 
   /* The screen's edge: a thin ember frame inset from the scene, with its
      corner ticks, so the key art reads as the last projected frame. */
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .finale-section
@@ -3108,7 +3110,7 @@ html[data-family="world"]
     pointer-events: none;
   }
 
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .finale-section
@@ -3123,7 +3125,7 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .finale-section
@@ -3134,7 +3136,7 @@ html[data-family="world"]
   letter-spacing: 0.3em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .finale-section
@@ -3148,7 +3150,7 @@ html[data-family="world"]
 
 /* The credit line under the end card: centred, in the order the page
    wrote it. */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > footer {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-items: center;
@@ -3159,7 +3161,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > foo
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"] body main.site-shell.film-edition.mirage-edition > footer {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > footer {
     background:
       linear-gradient(90deg, transparent, var(--sw-light) 50%, transparent) 50% 0 / min(320px, 60%) 1px no-repeat,
       radial-gradient(50% 120px at 50% 0, rgb(var(--sw-light-rgb) / 10%), transparent 72%),
@@ -3167,7 +3169,7 @@ html[data-family="world"] body main.site-shell.film-edition.mirage-edition > foo
   }
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3179,7 +3181,7 @@ html[data-family="world"]
   margin: 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3190,7 +3192,7 @@ html[data-family="world"]
   letter-spacing: 0.3em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3202,7 +3204,7 @@ html[data-family="world"]
   margin-right: -0.4em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3213,7 +3215,7 @@ html[data-family="world"]
   margin: 10px 0 0;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3224,7 +3226,7 @@ html[data-family="world"]
   letter-spacing: 0.2em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3237,7 +3239,7 @@ html[data-family="world"]
   margin-right: -0.3em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3248,7 +3250,7 @@ html[data-family="world"]
   letter-spacing: 0.14em;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3268,7 +3270,7 @@ html[data-family="world"]
   text-decoration: none;
 }
 
-html[data-family="world"]
+html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
@@ -3278,7 +3280,7 @@ html[data-family="world"]
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="world"]
+  html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > footer
@@ -3289,7 +3291,75 @@ html[data-family="world"]
   }
 }
 
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > footer > * {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > footer > * {
   grid-column: 1;
   justify-self: center;
+}
+
+/* Phones: the next chapter's head follows the column closely, so the
+   riders' title is already on screen under the column rail. */
+@media (max-width: 760px) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
+    padding-top: 36px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index {
+    margin-bottom: 22px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index
+    > span {
+    font-size: 48px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .world-column {
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    .world-column-index
+    > .world-column-tabs.liquid-swipe-tabs {
+    grid-auto-rows: minmax(62px, auto);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    .world-column-index
+    > .world-column-tabs
+    > button[role="tab"] {
+    min-height: 48px;
+    padding: 8px 8px;
+    gap: 2px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    .world-column-index
+    > .world-column-tabs
+    > button[role="tab"]
+    > b {
+    font-size: 12px;
+    line-height: 1.35;
+  }
 }
