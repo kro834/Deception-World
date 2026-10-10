@@ -8,6 +8,7 @@ import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
 import { mountExtremeImpact } from "@/lib/extreme-impact.js";
+import { mountExtremeFightCard } from "@/lib/extreme-fightcard.js";
 import { ExtremeImpactDefs } from "./extreme-impact-art";
 
 type ExtremeStage = "middle" | "ultra";
@@ -364,11 +365,14 @@ const ExtremePerformance = memo(function ExtremePerformance() {
         <p className="rxs-comparison-formula">
           比較基準：<b>{activeComparison.label}＝100%</b>
         </p>
+        {/* FIGHT CARD (rx15): the bout line, Extreme's corner VS the
+            challenger's (the select is the challenger's plate). */}
         <div className="rxs-comparison-key" aria-hidden="true">
           <span>
             <i className="is-rexonance" />
             エクスプリーム
           </span>
+          <b className="exf-vs">VS</b>
           <span>
             <i className="is-extreme" />
             {activeComparison.label}
@@ -381,8 +385,13 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           aria-live="polite"
           aria-atomic="true"
         >
+          {/* Each metric is a clash: Extreme's bar from the left, the
+              challenger's from the right, meeting at their share. */}
           {activeComparison.metrics.map((metric) => (
-            <article key={metric.label}>
+            <article
+              key={metric.label}
+              data-exf-win={metric.currentBar >= metric.baselineBar ? "extreme" : "rival"}
+            >
               <header>
                 <div>
                   <small>{metric.label}</small>
@@ -390,14 +399,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 </div>
                 <span className="rxs-comparison-result">
                   <i>基準比</i>
-                  <b className="exi-figure">
-                    <span className="exi-real">{metric.relative}</span>
-                    <span
-                      className="exi-tally"
-                      aria-hidden="true"
-                      data-exi-tally={metric.relative}
-                    />
-                  </b>
+                  <b>{metric.relative}</b>
                   <em>
                     {metric.multiplier} / {metric.delta}
                   </em>
@@ -419,7 +421,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 <i className="is-extreme" style={{ width: `${metric.baselineBar}%` }} />
               </div>
               <p>
-                {activeComparison.code} / {metric.previous}
+                {activeComparison.code} / <b>{metric.previous}</b>
                 {metric.note ? <span> / {metric.note}</span> : null}
               </p>
             </article>
@@ -487,6 +489,7 @@ export function ExtremeSaga() {
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
   useEffect(() => mountExtremeImpact(pageRef.current), []);
+  useEffect(() => mountExtremeFightCard(pageRef.current), []);
 
   // A change of form cuts the art in before the next paint, unless the last
   // cut was under STAGE_CUT_GAP_MS ago; then it waits, and a reader who has
@@ -606,6 +609,11 @@ export function ExtremeSaga() {
             <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
           </svg>
         </i>
+        {/* FIGHT CARD (rx15): the poster's billing, outlined behind the
+            colossus. */}
+        <b className="exf-billing" aria-hidden="true">
+          EXTREME
+        </b>
         <div className="rxs-hero-ambient" aria-hidden="true">
           <i />
           <i />
@@ -826,6 +834,7 @@ export function ExtremeSaga() {
             aria-live="polite"
             data-exo-cut={stageCut ? "true" : undefined}
             data-exi-warm={`${EXTREME_STAGES.middle.image} ${EXTREME_STAGES.ultra.image}`}
+            data-exi-hit=""
           >
             <figure key={shownStage} data-form={shownStage}>
               <i className="exi-streaks" aria-hidden="true">
@@ -847,6 +856,12 @@ export function ExtremeSaga() {
                 loading={shownStage === "middle" ? "eager" : "lazy"}
                 decoding="async"
               />
+              {/* FIGHT CARD (rx15): the other form waits beyond a slanted
+                  seam (its art is the sheet's backdrop of this box); a change
+                  of form drives the seam across the body. */}
+              <span className="exf-rival" aria-hidden="true">
+                <span />
+              </span>
               <i className="exo-slash" aria-hidden="true" />
               <i className="exi-rays" aria-hidden="true">
                 <svg

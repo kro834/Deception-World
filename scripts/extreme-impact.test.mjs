@@ -246,40 +246,36 @@ test("scroll-linked motion rides named timelines behind the full gate, with auto
   // rx11 review: the punch's throw and meter, the P14 core, the couplings and
   // the end card play on their hits (each scroll-linked animation restyles its
   // element every frame it is in range), so fewer ride the scroll.
-  assert.ok(linked >= 8, String(linked));
+  // rx15 (FIGHT CARD): the punch's cut, dash and speed lines play on the time's
+  // hit (the stage no longer pins) and the form's dolly is gone (the duel's
+  // seam is the form's motion), so only the cold open's depth rides the scroll.
+  assert.ok(linked >= 3, String(linked));
   // Scroll-linked keyframes never repaint (no clip-path, colour or background anywhere here).
   assert.doesNotMatch(css, /@keyframes[^{]+\{[^@]*?(?:clip-path|background|color)\s*:/);
 });
 
-test("the pinned punch stage is layout only: no lock moves the page", () => {
-  const pinned = rules.filter(({ body }) => /position:\s*sticky|--exi-pin\)/.test(body));
-  assert.ok(pinned.length >= 2);
-  for (const { selector, context } of pinned) {
-    assert.ok(
-      context.some((at) => at.startsWith("@supports (animation-timeline: view())")),
-      selector,
-    );
-    assert.ok(
-      context.some((at) =>
-        /prefers-reduced-motion: no-preference\) and \(min-height: 560px\)/.test(at),
-      ),
-      selector,
-    );
-    for (const part of splitTopLevel(selector)) {
-      assert.match(
-        part,
-        /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\) body/,
-      );
-      assert.doesNotMatch(
-        part,
-        /data-side-menu-open|data-loading|data-dialog-open|data-motion-ready/,
-      );
-    }
-  }
-  // rx11 review: the punch is thrown and charged on its hit, so the hold only
-  // carries the cut and the dash (96svh left most of a screen empty).
-  assert.match(css, /--exi-pin: 72svh;/);
+// rx15 (FIGHT CARD): the punch stage no longer pins. Its hold left frames of
+// an empty lane after the punch was thrown; the one-two now lands on hits,
+// the same with or without view timelines, and the page is a screen shorter.
+test("the one-two plays on its hits: the punch stage holds no runway", () => {
+  assert.equal(rules.filter(({ body }) => /position:\s*sticky|--exi-pin/.test(body)).length, 0);
+  assert.doesNotMatch(css, /--exi-pin|--exi-punch|view-timeline:\s*--exi-stage/);
   assert.match(css, /--exi-stage: calc\(100svh - var\(--dxs-nav\)\);/);
+  for (const [target, name] of [
+    ["~ .exi-band::before", "exi-cut-across"],
+    ["> strong", "exi-dash"],
+    ["> .exi-streaks", "exi-streak-in"],
+  ]) {
+    const rule = rules.find(
+      ({ selector, body }) =>
+        selector.includes('article:nth-child(2)[data-exi-hit="true"]') &&
+        selector.endsWith(target) &&
+        declarations(body, "animation").some((value) => value.startsWith(`${name} `)),
+    );
+    assert.ok(rule, target);
+    assert.ok(!timed(rule.body), target);
+    assert.ok(!rule.context.some((at) => at.startsWith("@supports")), target);
+  }
 });
 
 test("unreached arrivals are held back only while the engine is armed", () => {
@@ -359,9 +355,11 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
     ),
   ];
   // rx11 review: the specs no longer count the P14 figures a second time (each
-  // draw is a text change, the costliest beat on the page); four tallies remain.
-  assert.equal(tallies.length, 4);
-  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 4);
+  // draw is a text change, the costliest beat on the page).
+  // rx15 (FIGHT CARD): the console's ratios no longer count either: its clash
+  // bars carry that beat on the compositor; three tallies remain.
+  assert.equal(tallies.length, 3);
+  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 3);
   for (const [, , real, literal, expression] of tallies) {
     if (literal) assert.equal(literal, real.trim());
     else assert.equal(`{${expression}}`, real.trim());
