@@ -61,16 +61,29 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exi-defs {
   overflow: hidden;
 }
 
-/* Every drawn effect is a silent, unclickable layer. */
+/* Every drawn effect is a silent, unclickable layer: an HTML box (the
+   compositor can move it; an SVG target with independent transforms it
+   cannot) filled by its drawing. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   :is(.exi-rays, .exi-streaks, .exi-shards) {
   position: absolute;
   display: block;
-  overflow: visible;
+  margin: 0;
   fill: currentcolor;
   pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  :is(.exi-rays, .exi-streaks, .exi-shards)
+  > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 /* ================================================================
@@ -93,15 +106,18 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-
   letter-spacing: inherit;
 }
 
+/* The copy's box is the figure's, so its characters change inside it
+   alone (strict containment: no layout reaches past it). It aligns as the
+   figure's own text does. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-tally {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   font: inherit;
   letter-spacing: inherit;
   white-space: nowrap;
   visibility: hidden;
   pointer-events: none;
+  contain: strict;
 }
 
 html[data-family="special"]
@@ -118,17 +134,6 @@ html[data-family="special"]
   .exi-figure[data-exi-counting]
   > .exi-tally {
   visibility: visible;
-}
-
-/* Right-set figures count from their right edge. */
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  .rxs-comparison-result
-  .exi-figure
-  > .exi-tally {
-  right: 0;
-  left: auto;
 }
 
 /* ================================================================
@@ -642,6 +647,28 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-b
 }
 
 /* ================================================================
+   ROUND 2: the core
+   ================================================================ */
+/* Possibilities converge on one answer: focus lines round the dial,
+   clear over the chip, strongest just outside the bezel. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-overview
+  figure
+  > .exi-rays {
+  z-index: 0;
+  top: -70%;
+  left: -70%;
+  width: 240%;
+  height: 240%;
+  color: rgb(var(--ext-gold-rgb) / 30%);
+  -webkit-mask: radial-gradient(closest-side, transparent 36%, #000 46%, transparent 96%);
+  mask: radial-gradient(closest-side, transparent 36%, #000 46%, transparent 96%);
+}
+
+/* ================================================================
    ROUND 3: the change of form
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > figure > .exi-rays {
@@ -650,8 +677,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > 
   left: -20%;
   width: 140%;
   height: 140%;
-  color: rgb(255 246 220 / 30%);
+  color: rgb(255 248 228 / 52%);
   opacity: 0;
+  /* Strongest at the frame's edges, clear over the form's face. */
+  -webkit-mask: radial-gradient(closest-side, transparent 30%, #000 78%);
+  mask: radial-gradient(closest-side, transparent 30%, #000 78%);
 }
 
 html[data-family="special"]
@@ -660,7 +690,7 @@ html[data-family="special"]
   #exs-stage-panel
   > figure[data-form="middle"]
   > .exi-rays {
-  color: rgb(122 232 255 / 26%);
+  color: rgb(150 236 255 / 46%);
 }
 
 html[data-family="special"]
@@ -700,6 +730,31 @@ html[data-family="special"]
 }
 
 /* ================================================================
+   ROUND 4: the drive train climbs
+   ================================================================ */
+/* On wide screens the three stages rise to the right, a gear at a time:
+   learning, charging, then the result fixed at the top. */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article:first-child {
+    margin-top: 72px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article:nth-child(2) {
+    margin-top: 36px;
+  }
+}
+
+/* ================================================================
    The end card: ink focus lines on the gold slab
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
@@ -731,6 +786,27 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     > .exo-line {
     opacity: 0;
     animation: none;
+  }
+
+  /* A figure not yet reached stands at zero on its copy. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    .exi-figure[data-exi-waiting]
+    > .exi-real {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    .exi-figure[data-exi-waiting]
+    > .exi-tally {
+    visibility: visible;
   }
 
   /* Smashed in: the first line from the left, the second from the right. */
@@ -799,14 +875,17 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
   }
 
   /* The cold open: when the needle pegs, the focus lines slam in round
-     the core, the shards are blasted out and the colossus takes the hit. */
+     the core, the shards are blasted out and the colossus takes the hit.
+     The drawings move inside their boxes (the boxes keep the scroll's
+     depth), with whole transforms the compositor runs on an SVG. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
     > .exs-hero
-    > .exi-rays {
+    > .exi-rays
+    > svg {
     transform-origin: 50% 50%;
     animation: exi-ray-slam 700ms var(--exi-hit) 760ms both;
   }
@@ -817,7 +896,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
     > .exs-hero
-    > .exi-shards {
+    > .exi-shards
+    > svg {
+    transform-origin: 50% 50%;
     animation: exi-shard-burst 620ms var(--exi-out) 800ms both;
   }
 
@@ -828,7 +909,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
     > .exs-hero
     .rxs-hero-visual {
-    animation: exi-quake 360ms linear 820ms both;
+    transform-origin: 50% 100%;
+    animation: exi-tremor 420ms linear 820ms both;
   }
 
   /* A figure that has counted lands with a punch; the punch's focus lines
@@ -1009,8 +1091,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     }
   }
 
-  /* A phone's tall stage sets each figure in the middle of its half. */
-  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) and (max-width: 760px) {
+  /* A tall stage (a phone, a portrait tablet) sets each figure in the
+     middle of its half. */
+  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) and (orientation: portrait) {
     html[data-family="special"]:not([data-world-effects="economy"])
       body
       .rxs-page.rxs-page.exs-page
@@ -1224,7 +1307,15 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
       #performance
       .exi-stage
       > article:nth-child(2)
-      > :is(small, p) {
+      > :is(small, p),
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      #performance
+      .exi-stage
+      > article:nth-child(2)::before {
       animation-name: exi-tag;
       animation-duration: auto;
       animation-timing-function: var(--exi-hit);
@@ -1250,6 +1341,23 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
       animation-fill-mode: both;
       animation-timeline: --exo-core;
       animation-range: entry 5% contain 30%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+      > #p14
+      .rxs-p14-overview
+      figure
+      > .exi-rays {
+      animation-name: exi-converge;
+      animation-duration: auto;
+      animation-timing-function: var(--exi-out);
+      animation-fill-mode: both;
+      animation-timeline: --exo-core;
+      animation-range: entry 0% contain 30%;
     }
 
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1342,8 +1450,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
   }
 }
 
-/* The cold open's arrival joins ahead of its own depth on the same layer:
-   the beat holds the layer for its moment, then the scroll has it alone. */
+/* The colossus's tremor joins its own depth on the same layer: a turn
+   about its feet beside the scroll's lag, so neither takes the other's
+   property. */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1352,45 +1461,10 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
       body
       .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
       > .exs-hero
-      > .exi-rays {
-      animation-name: exi-ray-exit, exi-ray-slam;
-      animation-duration: auto, 700ms;
-      animation-timing-function: linear, var(--exi-hit);
-      animation-delay: 0s, 760ms;
-      animation-fill-mode: both;
-      animation-timeline: --exi-hero, auto;
-      animation-range:
-        exit 0% exit 100%,
-        normal;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
-      > .exs-hero
-      > .exi-shards {
-      animation-name: exi-shard-exit, exi-shard-burst;
-      animation-duration: auto, 620ms;
-      animation-timing-function: linear, var(--exi-out);
-      animation-delay: 0s, 800ms;
-      animation-fill-mode: both;
-      animation-timeline: --exi-hero, auto;
-      animation-range:
-        exit 0% exit 100%,
-        normal;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
-      > .exs-hero
       .rxs-hero-visual {
-      animation-name: exi-lag, exi-quake;
-      animation-duration: auto, 360ms;
+      transform-origin: 50% 100%;
+      animation-name: exi-lag, exi-tremor;
+      animation-duration: auto, 420ms;
       animation-timing-function: linear;
       animation-delay: 0s, 820ms;
       animation-fill-mode: both;
@@ -1528,15 +1602,15 @@ html[data-press-ready][data-family="special"]
 @keyframes exi-ray-slam {
   0% {
     opacity: 0;
-    scale: 1.7;
+    transform: scale(1.7);
   }
   40% {
     opacity: 1;
-    scale: 0.97;
+    transform: scale(0.97);
   }
   100% {
     opacity: 1;
-    scale: 1;
+    transform: none;
   }
 }
 
@@ -1558,12 +1632,35 @@ html[data-press-ready][data-family="special"]
 @keyframes exi-shard-burst {
   from {
     opacity: 0;
-    scale: 0.35;
-    rotate: -12deg;
+    transform: scale(0.35) rotate(-12deg);
   }
   to {
     opacity: 1;
-    scale: 1;
+    transform: none;
+  }
+}
+
+/* The colossus takes the hit: a damped turn about its feet. */
+@keyframes exi-tremor {
+  0% {
+    rotate: 0deg;
+  }
+  16% {
+    rotate: -0.9deg;
+  }
+  34% {
+    rotate: 0.75deg;
+  }
+  52% {
+    rotate: -0.5deg;
+  }
+  70% {
+    rotate: 0.28deg;
+  }
+  86% {
+    rotate: -0.1deg;
+  }
+  100% {
     rotate: 0deg;
   }
 }

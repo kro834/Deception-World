@@ -378,11 +378,21 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
   // Ornaments are hidden and textless (the afterimages repeat the figure).
   for (const ornament of ["exi-ring", "exi-band", "exi-ghosts"])
     assert.match(component, new RegExp(`className="${ornament}" aria-hidden="true"`));
+  // Each drawing sits in a hidden HTML box that carries its class (the box
+  // animates on the compositor; an SVG target with translate, scale or
+  // rotate falls back to the main thread every frame).
   const drawings = [
-    ...component.matchAll(/<svg\s+className="exi-(?:rays|streaks|shards)"[\s\S]*?>/g),
+    ...component.matchAll(
+      /<i className="exi-(?:rays|streaks|shards)" aria-hidden="true"(?: data-exi-depth="[-\d.]+")?>\s*<svg\s([^>]*)>/g,
+    ),
   ];
-  assert.ok(drawings.length >= 6, String(drawings.length));
-  for (const [tag] of drawings) assert.match(tag, /aria-hidden="true"/);
+  assert.equal(drawings.length, 8);
+  for (const [, attributes] of drawings) {
+    assert.match(attributes, /aria-hidden="true"/);
+    assert.match(attributes, /focusable="false"/);
+    assert.doesNotMatch(attributes, /className/);
+  }
+  assert.doesNotMatch(component, /<svg\s+className="exi-/);
   assert.match(
     art,
     /<svg className="exi-defs" aria-hidden="true" focusable="false" width="0" height="0">/,
@@ -727,11 +737,15 @@ test("a tally counts up from zero over the owner's figure, lands on it and never
   const cleanup = t.mount();
   const figure = t.punch.querySelector(".exi-figure");
   const copy = figure.querySelector(".exi-tally");
+  // Not reached yet: it waits at zero on its copy (never a final figure that jumps back).
+  assert.equal(figure.getAttribute("data-exi-waiting"), "true");
+  assert.equal(copy.textContent, "000.0");
   // The section around it landing does not start it: its own hit does.
   t.reach(t.page.querySelector("#performance"));
   assert.equal(figure.hasAttribute("data-exi-counting"), false);
   t.reach(t.punch);
   assert.equal(figure.getAttribute("data-exi-counting"), "true");
+  assert.equal(figure.hasAttribute("data-exi-waiting"), false);
   assert.equal(copy.textContent, "000.0");
   t.tick(500);
   t.flush();
@@ -809,10 +823,15 @@ test("reduced motion, economy and Save-Data disarm it; a lifted preference re-ar
   assert.equal(t.page.getAttribute("data-exi-armed"), "true");
   t.reach(t.punch);
   assert.equal(t.punch.querySelector(".exi-figure").getAttribute("data-exi-counting"), "true");
-  // Economy mid-count: the count finishes on the owner's figure at once.
+  // Economy mid-count: the count finishes on the owner's figure at once,
+  // and a figure still waiting shows its own figure again.
+  const waiting = t.specs.querySelector(".exi-figure");
+  assert.equal(waiting.getAttribute("data-exi-waiting"), "true");
   t.htmlElement.dataset.worldEffects = "economy";
   t.watchers.filter((w) => w.target === t.htmlElement).forEach((w) => w.callback([]));
   assert.equal(t.page.hasAttribute("data-exi-armed"), false);
+  assert.equal(waiting.hasAttribute("data-exi-waiting"), false);
+  assert.equal(waiting.querySelector(".exi-tally").textContent, "");
   const figure = t.punch.querySelector(".exi-figure");
   assert.equal(figure.hasAttribute("data-exi-counting"), false);
   assert.equal(figure.getAttribute("data-exi-landed"), "done");

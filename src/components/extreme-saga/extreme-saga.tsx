@@ -295,29 +295,31 @@ const ExtremePerformance = memo(function ExtremePerformance() {
               </b>
               <span>t〜</span>
               <i className="exo-burst" aria-hidden="true" />
-              <svg
-                className="exi-rays"
-                viewBox="-100 -100 200 200"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
-              </svg>
+              <i className="exi-rays" aria-hidden="true">
+                <svg
+                  viewBox="-100 -100 200 200"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+                </svg>
+              </i>
               <i className="exi-ring" aria-hidden="true" />
             </strong>
             <p>標準状態のパンチ力</p>
           </article>
           <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
-            <svg
-              className="exi-streaks"
-              viewBox="0 0 200 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <use href="#exi-streaks" width="200" height="100" />
-            </svg>
+            <i className="exi-streaks" aria-hidden="true">
+              <svg
+                viewBox="0 0 200 100"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="#exi-streaks" width="200" height="100" />
+              </svg>
+            </i>
             <small>100M TIME / EXTREME</small>
             <strong>
               0.002<span>SEC</span>
@@ -599,16 +601,16 @@ export function ExtremeSaga() {
       <ExtremeImpactDefs />
 
       <section className="rxs-hero exs-hero" aria-labelledby="exs-title">
-        <svg
-          className="exi-rays"
-          viewBox="-100 -100 200 200"
-          preserveAspectRatio="xMidYMid slice"
-          aria-hidden="true"
-          focusable="false"
-          data-exi-depth="-0.5"
-        >
-          <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
-        </svg>
+        <i className="exi-rays" aria-hidden="true" data-exi-depth="-0.5">
+          <svg
+            viewBox="-100 -100 200 200"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+          </svg>
+        </i>
         <div className="rxs-hero-ambient" aria-hidden="true">
           <i />
           <i />
@@ -645,20 +647,16 @@ export function ExtremeSaga() {
             fetchPriority="high"
           />
         </div>
-        <svg
-          className="exi-shards"
-          viewBox="-100 -100 200 200"
-          aria-hidden="true"
-          focusable="false"
-          data-exi-depth="1.2"
-        >
-          <polygon points="-58,-34 -46,-29 -78,-49" />
-          <polygon points="52,-41 63,-47 86,-66 66,-44" />
-          <polygon points="-66,22 -52,18 -90,33" />
-          <polygon points="60,30 72,33 94,44" />
-          <polygon points="-24,-70 -18,-62 -31,-92" />
-          <polygon points="30,-66 26,-74 40,-93" />
-        </svg>
+        <i className="exi-shards" aria-hidden="true" data-exi-depth="1.2">
+          <svg viewBox="-100 -100 200 200" aria-hidden="true" focusable="false">
+            <polygon points="-58,-34 -46,-29 -78,-49" />
+            <polygon points="52,-41 63,-47 86,-66 66,-44" />
+            <polygon points="-66,22 -52,18 -90,33" />
+            <polygon points="60,30 72,33 94,44" />
+            <polygon points="-24,-70 -18,-62 -31,-92" />
+            <polygon points="30,-66 26,-74 40,-93" />
+          </svg>
+        </i>
         <a className="rxs-scroll-cue" href="#performance">
           <span>腕っぷしを、数字で。</span>
           <i aria-hidden="true" />
@@ -701,6 +699,16 @@ export function ExtremeSaga() {
 
         <div className="rxs-p14-overview rxs-reveal" data-exi-hit="">
           <figure>
+            <i className="exi-rays" aria-hidden="true">
+              <svg
+                viewBox="-100 -100 200 200"
+                preserveAspectRatio="xMidYMid slice"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+              </svg>
+            </i>
             <img
               src="/extreme-p14-core.jpg"
               alt="青い回路に接続されたP14演算コア"
@@ -825,15 +833,16 @@ export function ExtremeSaga() {
             data-exi-warm={`${EXTREME_STAGES.middle.image} ${EXTREME_STAGES.ultra.image}`}
           >
             <figure key={shownStage} data-form={shownStage}>
-              <svg
-                className="exi-streaks"
-                viewBox="0 0 200 100"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <use href="#exi-streaks" width="200" height="100" />
-              </svg>
+              <i className="exi-streaks" aria-hidden="true">
+                <svg
+                  viewBox="0 0 200 100"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <use href="#exi-streaks" width="200" height="100" />
+                </svg>
+              </i>
               <span className="exo-frame" aria-hidden="true" />
               <img
                 src={shownArt.image}
@@ -844,15 +853,16 @@ export function ExtremeSaga() {
                 decoding="async"
               />
               <i className="exo-slash" aria-hidden="true" />
-              <svg
-                className="exi-rays"
-                viewBox="-100 -100 200 200"
-                preserveAspectRatio="xMidYMid slice"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
-              </svg>
+              <i className="exi-rays" aria-hidden="true">
+                <svg
+                  viewBox="-100 -100 200 200"
+                  preserveAspectRatio="xMidYMid slice"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+                </svg>
+              </i>
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
@@ -928,15 +938,16 @@ export function ExtremeSaga() {
       </section>
 
       <footer className="rxs-footer">
-        <svg
-          className="exi-rays"
-          viewBox="-100 -100 200 200"
-          preserveAspectRatio="xMidYMid slice"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
-        </svg>
+        <i className="exi-rays" aria-hidden="true">
+          <svg
+            viewBox="-100 -100 200 200"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
+          </svg>
+        </i>
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
           <h2>

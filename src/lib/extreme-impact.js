@@ -41,6 +41,8 @@ const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -45% 0px" };
 // Scenes keyed by the engine itself (their opening tags stay as they are).
 const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope .rxs-specs";
 const TALLY_MS = 1100;
+// A counter reads as rolling at thirty draws a second; half the frames' text work.
+const TALLY_STEP_MS = 32;
 const TILT_EASE = 0.14;
 // Each key outlives the latest beat it starts (every beat ends by 2 s).
 export const BEATS = { hit: 2100, landed: 800, impact: 1000, pop: 500, arrival: 2200 };
@@ -91,7 +93,7 @@ export function mountExtremeImpact(page, environment = window) {
         ...[...hero.querySelectorAll(".rxs-hero-visual")].map((element) => ({
           element,
           depth: 0.45,
-          turn: 4,
+          turn: 5,
         })),
         ...[...hero.querySelectorAll("[data-exi-depth]")].map((element) => ({
           element,
@@ -122,6 +124,7 @@ export function mountExtremeImpact(page, environment = window) {
   let pointerBound = false;
   const timers = new Map();
   const tallies = new Map();
+  const waiting = new Set();
   let tallyFrame = 0;
   let tiltFrame = 0;
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -156,6 +159,31 @@ export function mountExtremeImpact(page, environment = window) {
   };
 
   /* ---------- Tallies ---------- */
+  // A figure not yet reached shows its tally at zero (data-exi-waiting), so
+  // the count starts from the zero the reader already sees, never from the
+  // final figure jumping back.
+  const unwait = (figure) => {
+    if (!waiting.delete(figure)) return false;
+    figure.removeAttribute("data-exi-waiting");
+    return true;
+  };
+  const wait = (tally) => {
+    const figure = tally.parentElement;
+    if (!figure || tallies.has(figure) || waiting.has(figure)) return;
+    if (figure.hasAttribute("data-exi-landed")) return;
+    const parts = parseTally(tally.getAttribute("data-exi-tally"));
+    if (!parts) return;
+    tally.textContent = formatTally(parts, 0);
+    figure.setAttribute("data-exi-waiting", "true");
+    waiting.add(figure);
+  };
+  const releaseWaiting = () => {
+    for (const figure of [...waiting]) {
+      unwait(figure);
+      const copy = figure.querySelector("[data-exi-tally]");
+      if (copy) copy.textContent = "";
+    }
+  };
   const finishTally = (figure, landed) => {
     const run = tallies.get(figure);
     if (!run) return;
@@ -175,11 +203,15 @@ export function mountExtremeImpact(page, environment = window) {
         finishTally(figure, true);
         continue;
       }
-      // Fast off the line, braking hard into the value.
+      if (time - run.drawn < TALLY_STEP_MS) continue;
+      // Fast off the line, braking hard into the value. The copy keeps one
+      // text node and only its characters change (no node is inserted).
       const text = formatTally(run.parts, run.parts.value * (1 - (1 - progress) ** 4));
       if (text !== run.text) {
         run.text = text;
-        run.tally.textContent = text;
+        run.drawn = time;
+        if (run.node) run.node.data = text;
+        else run.tally.textContent = text;
       }
     }
     if (tallies.size) tallyFrame = environment.requestAnimationFrame(stepTallies);
@@ -192,7 +224,9 @@ export function mountExtremeImpact(page, environment = window) {
     const text = formatTally(parts, 0);
     tally.textContent = text;
     figure.setAttribute("data-exi-counting", "true");
-    tallies.set(figure, { tally, parts, text, start: now() });
+    unwait(figure);
+    const time = now();
+    tallies.set(figure, { tally, parts, text, node: tally.firstChild, start: time, drawn: time });
     if (!tallyFrame) tallyFrame = environment.requestAnimationFrame(stepTallies);
   };
   const stopTallies = () => {
@@ -226,9 +260,10 @@ export function mountExtremeImpact(page, environment = window) {
     for (const record of records)
       for (const node of record.addedNodes)
         if (node.nodeType === 1)
-          talliesIn(node)
-            .filter((tally) => (scopeOf(tally)?.getAttribute("data-exi-hit") ?? "true") !== "")
-            .forEach(startTally);
+          for (const tally of talliesIn(node)) {
+            if ((scopeOf(tally)?.getAttribute("data-exi-hit") ?? "true") === "") wait(tally);
+            else startTally(tally);
+          }
   };
   const onFigure = (records) => {
     if (!running || panel.getAttribute("data-exo-cut") !== "true") return;
@@ -253,6 +288,10 @@ export function mountExtremeImpact(page, environment = window) {
       });
       elements.forEach((element) => observer.observe(element));
       observers.push(observer);
+      for (const element of elements)
+        talliesIn(element)
+          .filter((tally) => scopeOf(tally) === element)
+          .forEach(wait);
     }
     const Watcher = environment.MutationObserver;
     for (const container of page.querySelectorAll("[data-exi-rekey]")) {
@@ -384,6 +423,7 @@ export function mountExtremeImpact(page, environment = window) {
   const stop = () => {
     running = false;
     stopTallies();
+    releaseWaiting();
     retireAll();
     unobserve();
     unwatchHero();
