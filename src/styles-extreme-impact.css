@@ -211,8 +211,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-
 /* ================================================================
    Scene cuts: the blade along each slanted edge
    ================================================================ */
-/* A short gold-white edge on the cut's diagonal: its box is 28% of the
-   band each way, so moving it by its own size keeps it on the line. */
+/* A gold-white edge on the cut's diagonal with a flare at its head: its
+   box is 40% of the band each way, so moving it by its own size keeps it
+   on the line (from the left end to the right end: 150% each way). */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
@@ -220,13 +221,19 @@ html[data-family="special"]
   content: "";
   position: absolute;
   z-index: 3;
-  top: calc(var(--ext-slant) * 0.72 + 1px);
+  top: calc(var(--ext-slant) * 0.6 + 1px);
   left: 0;
   display: block;
-  width: 28%;
-  height: calc(var(--ext-slant) * 0.28);
+  width: 40%;
+  height: calc(var(--ext-slant) * 0.4);
   margin: 0;
   background:
+    radial-gradient(
+      circle at 100% 0,
+      #fffaf0 0 2px,
+      rgb(var(--ext-gold-rgb) / 85%) 4px,
+      rgb(var(--ext-gold-rgb) / 0%) 22px
+    ),
     linear-gradient(
       to bottom right,
       transparent calc(50% - 2px),
@@ -235,12 +242,12 @@ html[data-family="special"]
     ),
     linear-gradient(
       to bottom right,
-      transparent calc(50% - 9px),
-      rgb(var(--ext-gold-rgb) / 70%) 50%,
-      transparent calc(50% + 12px)
+      transparent calc(50% - 10px),
+      rgb(var(--ext-gold-rgb) / 80%) 50%,
+      transparent calc(50% + 14px)
     );
-  -webkit-mask: linear-gradient(90deg, transparent, #000 62%, #000 94%, transparent);
-  mask: linear-gradient(90deg, transparent, #000 62%, #000 94%, transparent);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 58%);
+  mask: linear-gradient(90deg, transparent, #000 58%);
   border: 0;
   opacity: 0;
   transform: none;
@@ -305,6 +312,7 @@ html[data-family="special"]
   max-width: none;
   margin: 0 0 clamp(48px, 6vw, 96px);
   padding: 0;
+  overflow: hidden;
   overflow: clip;
   background:
     radial-gradient(48% 60% at 28% 30%, rgb(var(--ext-gold-rgb) / 9%), transparent 72%),
@@ -759,6 +767,7 @@ html[data-family="special"]
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
   isolation: isolate;
+  overflow: hidden;
   overflow: clip;
 }
 
@@ -1595,7 +1604,7 @@ html[data-press-ready][data-family="special"]
   }
   100% {
     opacity: 0;
-    translate: 257% -257%;
+    translate: 150% -150%;
   }
 }
 
