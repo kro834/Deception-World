@@ -10,6 +10,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
+import { mountRexonanceResonance } from "@/lib/rexonance-resonance.js";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
@@ -543,22 +544,43 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         </span>
       </header>
 
+      {/* RESONANCE (rx11): each cut holds the screen. The figure keeps the
+          owner's value as its text; the hidden <b> is the counter that runs
+          over it once, and the field rings out from it on the lock. */}
       <div className="rxs-headline-metrics">
         <article className="rxs-reveal">
           <small>REACTION / VS VINCULUM</small>
-          <strong>
+          <strong data-rsn-count="">
             650<span>%+</span>
+            <b className="rsn-count" aria-hidden="true">
+              650<span>%+</span>
+            </b>
           </strong>
           <p>ヴィンクルムサーガと比較した反応速度</p>
           <i className="rxp-gauge" aria-hidden="true" />
+          <span className="rsn-field" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
         </article>
         <article className="rxs-reveal">
           <small>MOBILITY / VS EXTREME</small>
-          <strong>
+          <strong data-rsn-count="">
             900<span>%</span>
+            <b className="rsn-count" aria-hidden="true">
+              900<span>%</span>
+            </b>
           </strong>
           <p>エクスプリームサーガと比較した最大機動力</p>
           <i className="rxp-gauge" aria-hidden="true" />
+          <span className="rsn-field" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
         </article>
       </div>
 
@@ -901,6 +923,12 @@ export function RexonanceSaga() {
     };
   }, []);
 
+  // RESONANCE (rx11): the figures' one-time count and lock, and the stage's
+  // fine-pointer parallax. Mounted once; it follows reduced motion, economy
+  // rendering and page visibility itself, so a form, menu or baseline change
+  // never restarts it.
+  useEffect(() => mountRexonanceResonance(pageRef.current), []);
+
   useEffect(() => {
     // Where view timelines run, the motion sheet's recede already follows the
     // scroll on the compositor; this per-frame write cost ~5 ms of style work
@@ -1059,6 +1087,25 @@ export function RexonanceSaga() {
             decoding="async"
             fetchPriority="high"
           />
+          {/* RESONANCE (rx11): the stage in depth. Prism shafts behind the
+              armour, waves from its core, the burst each locked figure rings
+              into it, shards in front; each layer drifts at its own rate. */}
+          <span className="rsn-depth">
+            <i className="rsn-shaft" />
+            <i className="rsn-shaft" />
+            <i className="rsn-shaft" />
+            <i className="rsn-wave" />
+            <i className="rsn-wave" />
+            <i className="rsn-wave" />
+            <i className="rsn-burst" />
+            <i className="rsn-burst" />
+            <i className="rsn-shard" />
+            <i className="rsn-shard" />
+            <i className="rsn-shard" />
+            <i className="rsn-shard" />
+            <i className="rsn-shard" />
+            <i className="rsn-shard" />
+          </span>
         </div>
         <a className="rxs-scroll-cue" href="#performance">
           <span>まず、数字から。</span>
@@ -1113,6 +1160,8 @@ export function RexonanceSaga() {
               loading="lazy"
               decoding="async"
             />
+            {/* RESONANCE (rx11): the light the chip catches as it turns. */}
+            <i className="rsn-glint" aria-hidden="true" />
           </figure>
           <div className="rxs-p14-copy">
             <small>P14 / FOURTEENTH GENERATION</small>
@@ -1123,15 +1172,30 @@ export function RexonanceSaga() {
             <dl aria-label="P14の主要指標">
               <div>
                 <dt>実効変換率</dt>
-                <dd>90%</dd>
+                <dd data-rsn-count="">
+                  90%
+                  <b className="rsn-count" aria-hidden="true">
+                    90%
+                  </b>
+                </dd>
               </div>
               <div>
                 <dt>応答時間</dt>
-                <dd>約0.06ms</dd>
+                <dd data-rsn-count="">
+                  約0.06ms
+                  <b className="rsn-count" aria-hidden="true">
+                    約0.06ms
+                  </b>
+                </dd>
               </div>
               <div>
                 <dt>最大出力安定率</dt>
-                <dd>96%</dd>
+                <dd data-rsn-count="">
+                  96%
+                  <b className="rsn-count" aria-hidden="true">
+                    96%
+                  </b>
+                </dd>
               </div>
             </dl>
           </div>
@@ -1208,6 +1272,15 @@ export function RexonanceSaga() {
                 loading={stage === "standard" ? "eager" : "lazy"}
                 decoding="async"
               />
+              {/* RESONANCE (rx11): the transformation, replayed with each
+                  form (the figure re-keys): three rings from the core and
+                  one refraction band, in the form's light. */}
+              <i className="rsn-form" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <i />
+              </i>
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
@@ -1249,8 +1322,11 @@ export function RexonanceSaga() {
         <div className="rxs-specs rxs-reveal">
           <div>
             <small>KHAOS DeuX</small>
-            <strong>
+            <strong data-rsn-count="">
               50,000<span>YOPS</span>
+              <b className="rsn-count" aria-hidden="true">
+                50,000<span>YOPS</span>
+              </b>
             </strong>
             <p>∞ CORE</p>
           </div>
@@ -1259,8 +1335,11 @@ export function RexonanceSaga() {
           <i aria-hidden="true" />
           <div>
             <small>KOSMOS DeuX</small>
-            <strong>
+            <strong data-rsn-count="">
               9,000<span>TOPS</span>
+              <b className="rsn-count" aria-hidden="true">
+                9,000<span>TOPS</span>
+              </b>
             </strong>
             <p>300 CORE</p>
           </div>
@@ -1268,6 +1347,12 @@ export function RexonanceSaga() {
       </section>
 
       <footer className="rxs-footer">
+        {/* RESONANCE (rx11): the last wave, gold — the decision is his. */}
+        <span className="rsn-coda" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         <div>
           <p>REXONANCE SAGA / FINAL ARRIVAL</p>
           <h2>

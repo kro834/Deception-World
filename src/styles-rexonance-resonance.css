@@ -1,0 +1,2567 @@
+/* ================================================================
+   RESONANCE — Rexonance, made dynamic (rx11, 2026-10-10)
+
+   共鳴: calm power that suddenly hits. The STAGE trailer (rx10) laid the
+   page out as a sticky armour stage beside a script column; this layer
+   makes it move like a film. Two beats, everywhere:
+
+   - stillness: the stage stands in depth. Prism shafts behind the armour,
+     waves from its core and shards in front drift at their own rates as
+     the page scrolls (and lean toward a fine pointer), so the figure
+     holding the screen is never a flat picture;
+   - the hit: one hard cut. A number counts up once and locks, rings burst
+     from it and from the armour's core, a cut of prism light draws across
+     a chapter as it opens, type arrives from depth and settles.
+
+   Scenes: the cold open; 01's two cuts as a pinned stack (each figure
+   holds the screen, the next cut slides over while the held one recedes);
+   02's chip turning in 3-D; 03's form change as a transformation; 04's
+   core ringing out between the three facets; the end card's gold wave.
+   Controls answer with springy feedback.
+
+   Route-only (after styles-stage-rexonance.css, before the cinematic
+   sheet) and scoped to the doubled Rexonance page class. Motion is
+   transform and opacity only, finite, behind prefers-reduced-motion,
+   economy rendering and the open menu, dialogs and load gate; scroll-
+   linked motion rides named view timelines (the elevation's and the
+   Premiere's are reused) and never animates clip-path or colour. One-
+   shot hits key off transient attributes the page script clears
+   (src/lib/rexonance-resonance.js), so closing the menu never replays
+   one. Without scroll timelines (iOS 18) the scenes play time-based
+   versions once on entry. Reduced motion, economy and forced colours
+   rest fully drawn; the figures' own text is never replaced.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
+  --rsn-ice: 121 232 255;
+  --rsn-violet: 182 163 255;
+  --rsn-pink: 255 143 216;
+  --rsn-gold: 242 216 150;
+  --rsn-white: 244 251 255;
+  /* Overshoot and settle: the lock. */
+  --rsn-hit: cubic-bezier(0.18, 1.5, 0.32, 1);
+  --rsn-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rsn-snap: cubic-bezier(0.7, 0, 0.2, 1);
+  --rsn-spring: cubic-bezier(0.34, 1.8, 0.5, 1);
+  /* The armour's chest core inside the hero stage (both layouts). */
+  --rsn-core-x: 59.4%;
+  --rsn-core-y: 38%;
+}
+
+/* ================================================================
+   Paint: the layers every mode draws (static, aria-hidden, inert)
+   ================================================================ */
+
+/* ---------- The cold open: the stage in depth ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rsn-depth {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+/* Three prism shafts fall through the stage behind the armour. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shaft {
+  z-index: 0;
+  top: -14%;
+  left: 18%;
+  width: 13%;
+  height: 128%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rsn-ice) / 20%) 38%,
+    rgb(var(--rsn-white) / 26%) 50%,
+    rgb(var(--rsn-ice) / 16%) 62%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 58%, transparent 92%);
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 58%, transparent 92%);
+  transform-origin: 50% 0;
+  rotate: -16deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shaft:nth-child(2) {
+  left: 50%;
+  width: 7%;
+  rotate: 7deg;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rsn-violet) / 22%) 40%,
+    rgb(var(--rsn-white) / 20%) 50%,
+    rgb(var(--rsn-violet) / 16%) 60%,
+    transparent
+  );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shaft:nth-child(3) {
+  left: 70%;
+  width: 11%;
+  rotate: 19deg;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rsn-pink) / 18%) 40%,
+    rgb(var(--rsn-white) / 16%) 50%,
+    rgb(var(--rsn-pink) / 13%) 60%,
+    transparent
+  );
+}
+
+/* Waves and bursts ring out from the core, over the armour (the figure is
+   opaque); at rest they are out of sight. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > :is(.rsn-wave, .rsn-burst) {
+  z-index: 3;
+  top: var(--rsn-core-y);
+  left: var(--rsn-core-x);
+  width: 44%;
+  aspect-ratio: 1;
+  border: 2px solid rgb(var(--rsn-ice) / 92%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 22px rgb(var(--rsn-ice) / 45%),
+    inset 0 0 16px rgb(var(--rsn-ice) / 26%);
+  opacity: 0;
+  translate: -50% -50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-wave:nth-child(5) {
+  border-color: rgb(var(--rsn-violet) / 92%);
+  box-shadow:
+    0 0 22px rgb(var(--rsn-violet) / 45%),
+    inset 0 0 16px rgb(var(--rsn-violet) / 26%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-wave:nth-child(6) {
+  border-color: rgb(var(--rsn-pink) / 88%);
+  box-shadow:
+    0 0 22px rgb(var(--rsn-pink) / 42%),
+    inset 0 0 16px rgb(var(--rsn-pink) / 24%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-burst {
+  width: 30%;
+  border-width: 1.5px;
+  border-color: rgb(var(--rsn-white) / 85%);
+  box-shadow:
+    0 0 18px rgb(var(--rsn-ice) / 45%),
+    inset 0 0 14px rgb(var(--rsn-ice) / 30%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-burst:nth-child(8) {
+  border-color: rgb(var(--rsn-pink) / 80%);
+  box-shadow:
+    0 0 18px rgb(var(--rsn-pink) / 40%),
+    inset 0 0 14px rgb(var(--rsn-pink) / 26%);
+}
+
+/* Six prism shards hang in front of the armour. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard {
+  z-index: 3;
+  width: 2.4%;
+  aspect-ratio: 0.42;
+  background: linear-gradient(
+    165deg,
+    rgb(var(--rsn-white) / 90%),
+    rgb(var(--rsn-ice) / 70%) 38%,
+    rgb(var(--rsn-pink) / 50%) 72%,
+    transparent
+  );
+  clip-path: polygon(50% 0, 100% 46%, 50% 100%, 0 54%);
+  opacity: 0.62;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(9) {
+  top: 20%;
+  left: 10%;
+  rotate: -18deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(10) {
+  top: 14%;
+  left: 84%;
+  width: 1.6%;
+  rotate: 24deg;
+  opacity: 0.5;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(11) {
+  top: 58%;
+  left: 6%;
+  width: 3.2%;
+  rotate: 12deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(12) {
+  top: 66%;
+  left: 90%;
+  width: 2%;
+  rotate: -28deg;
+  opacity: 0.55;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(13) {
+  top: 36%;
+  left: 92%;
+  width: 1.3%;
+  rotate: 8deg;
+  opacity: 0.45;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-hero-visual
+  > .rsn-depth
+  > .rsn-shard:nth-child(14) {
+  top: 84%;
+  left: 22%;
+  width: 1.8%;
+  rotate: -40deg;
+  opacity: 0.5;
+}
+
+/* Phones carry fewer layers: two shafts and three shards (less to
+   composite on the scroll; the depth reads the same at that size). */
+@media (max-width: 760px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rsn-depth
+    > :is(.rsn-shaft:nth-child(3), .rsn-shard:nth-child(n + 12)) {
+    display: none;
+  }
+}
+
+/* The title catches one refraction band on the arrival (clipped to its
+   own words: the box shrinks to them). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  overflow: clip;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    104deg,
+    transparent 0 34%,
+    rgb(var(--rsn-ice) / 0%) 39%,
+    rgb(var(--rsn-ice) / 46%) 45%,
+    rgb(var(--rsn-white) / 56%) 49%,
+    rgb(var(--rsn-pink) / 46%) 53%,
+    rgb(var(--rsn-gold) / 0%) 59%,
+    transparent 62% 100%
+  );
+  opacity: 0;
+  translate: -100% 0;
+  pointer-events: none;
+}
+
+/* A ghost of the name, outlined, behind the title card: scale against the
+   type, and a slower plane when the card lifts away. Silent text. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy::before {
+  content: "REXONANCE" / "";
+  position: absolute;
+  z-index: -1;
+  top: auto;
+  right: auto;
+  bottom: -0.74em;
+  left: clamp(28px, 4vw, 80px);
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  color: transparent;
+  font: 600 clamp(96px, 12.5vw, 210px) / 0.8 var(--dx-mono, "Oxanium", sans-serif);
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(var(--rsn-ice) / 20%);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy::before {
+    top: -0.56em;
+    bottom: auto;
+    left: -0.04em;
+    font-size: clamp(76px, 25vw, 200px);
+  }
+}
+
+/* ---------- 01: the cuts ---------- */
+/* Each figure's counter sits exactly over its own digits (same font, same
+   tracking, from the figure's padding edge); it is shown only while it
+   waits, counts and locks. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-headline-metrics strong, .rxs-specs strong, .rxs-p14-copy dd)[data-rsn-count] {
+  position: relative;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rsn-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: inherit;
+  text-align: inherit;
+  color: var(--dx-text, #f2f7fb);
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  font-variant-numeric: inherit;
+  -webkit-text-fill-color: currentcolor;
+  background: none;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+  transform-origin: 0.9em 55%;
+}
+
+/* The suffix copy only holds the line's layout; the figure's own shows. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rsn-count > span {
+  visibility: hidden;
+}
+
+/* The figure's field: four rings around the number, behind it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field
+  > i {
+  position: absolute;
+  top: var(--rsn-field-y, 50%);
+  left: calc(var(--rsn-figure-size) * 0.94);
+  display: block;
+  width: calc(var(--rsn-figure-size) * 1.5);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--rsn-ice) / 26%);
+  border-radius: 50%;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field
+  > i:nth-child(2) {
+  width: calc(var(--rsn-figure-size) * 2.13);
+  border-color: rgb(var(--rsn-violet) / 20%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field
+  > i:nth-child(3) {
+  width: calc(var(--rsn-figure-size) * 2.91);
+  border-color: rgb(var(--rsn-ice) / 14%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field
+  > i:nth-child(4) {
+  width: calc(var(--rsn-figure-size) * 0.93);
+  border-width: 2px;
+  border-color: rgb(var(--rsn-white) / 90%);
+  box-shadow:
+    0 0 24px rgb(var(--rsn-ice) / 55%),
+    inset 0 0 18px rgb(var(--rsn-ice) / 35%);
+  opacity: 0;
+}
+
+/* The lock's streak: one line of light through the figure. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article
+  > .rsn-field::after {
+  content: "";
+  position: absolute;
+  top: var(--rsn-field-y, 50%);
+  right: 0;
+  left: 0;
+  height: 2px;
+  margin-top: -1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rsn-ice) / 80%) 18%,
+    rgb(var(--rsn-white)) 30%,
+    rgb(var(--rsn-pink) / 80%) 46%,
+    transparent 78%
+  );
+  box-shadow: 0 0 16px rgb(var(--rsn-ice) / 60%);
+  opacity: 0;
+  transform-origin: calc(var(--rsn-figure-size) * 0.94) 50%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-headline-metrics
+  article:nth-child(2)
+  > .rsn-field
+  > i:first-child {
+  border-color: rgb(var(--rsn-pink) / 30%);
+}
+
+/* The prism edge each cut enters with (the motion sheet draws it). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics
+  article::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--rsn-ice)),
+    rgb(var(--rsn-violet)) 55%,
+    rgb(var(--rsn-pink)) 88%,
+    rgb(var(--rsn-white)) 99%
+  );
+  box-shadow: 0 0 22px rgb(var(--rsn-ice) / 50%);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* ---------- 02: the chip's light ---------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-p14-overview
+  figure
+  > .rsn-glint {
+  position: absolute;
+  z-index: 3;
+  inset: -30% -60%;
+  display: block;
+  /* The chip art is pale: its light reads as colour, not white. */
+  background: linear-gradient(
+    106deg,
+    transparent 0 41%,
+    rgb(var(--rsn-violet) / 0%) 43%,
+    rgb(var(--rsn-violet) / 34%) 46.5%,
+    rgb(var(--rsn-white) / 55%) 48.5%,
+    rgb(var(--rsn-pink) / 46%) 50.5%,
+    rgb(var(--rsn-pink) / 0%) 54%,
+    transparent 56% 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Rings around the chip, behind it (the overview is isolated). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  width: min(118%, 900px);
+  aspect-ratio: 1.6;
+  background:
+    radial-gradient(closest-side, transparent 52%, rgb(var(--rsn-ice) / 30%) 52.4% 52.8%, transparent 53.2%),
+    radial-gradient(closest-side, transparent 70%, rgb(var(--rsn-violet) / 24%) 70.3% 70.6%, transparent 71%),
+    radial-gradient(closest-side, transparent 88%, rgb(var(--rsn-pink) / 18%) 88.3% 88.6%, transparent 89%);
+  opacity: 0.55;
+  translate: -50% -22%;
+  pointer-events: none;
+}
+
+/* The transformation's ornaments: three rings from the core and one band. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rsn-form {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: block;
+  overflow: clip;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rsn-form
+  > i {
+  position: absolute;
+  top: 34%;
+  left: 52%;
+  display: block;
+  width: 34%;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--rxs-stage-accent, #79e8ff);
+  border-radius: 50%;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 50%, transparent);
+  opacity: 0;
+  translate: -50% -50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rsn-form
+  > i:nth-child(4) {
+  top: -20%;
+  left: 0;
+  width: 70%;
+  height: 140%;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0 40%,
+    color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 22%, transparent) 46%,
+    rgb(var(--rsn-white) / 30%) 50%,
+    rgb(var(--rsn-pink) / 16%) 53%,
+    transparent 60% 100%
+  );
+  translate: -110% 0;
+}
+
+/* ---------- 04: the core between the facets ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(92vw, 980px);
+  aspect-ratio: 1;
+  background:
+    radial-gradient(closest-side, transparent 24%, rgb(var(--rsn-ice) / 26%) 24.3% 24.6%, transparent 25%),
+    radial-gradient(closest-side, transparent 44%, rgb(var(--rsn-violet) / 22%) 44.2% 44.5%, transparent 44.9%),
+    radial-gradient(closest-side, transparent 66%, rgb(var(--rsn-gold) / 22%) 66.2% 66.5%, transparent 66.9%),
+    radial-gradient(closest-side, rgb(var(--rsn-ice) / 10%), transparent 30%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 18%, #000 36%, #000 64%, transparent 82%);
+  mask-image: linear-gradient(180deg, transparent 18%, #000 36%, #000 64%, transparent 82%);
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+/* ---------- The end card: the last wave ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > .rsn-coda {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rsn-coda
+  > i {
+  position: absolute;
+  top: 46%;
+  left: 22%;
+  display: block;
+  width: min(54vw, 640px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--rsn-gold) / 30%);
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rsn-coda
+  > i:nth-child(2) {
+  width: min(84vw, 1000px);
+  border-color: rgb(var(--rsn-ice) / 18%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rsn-coda
+  > i:nth-child(3) {
+  width: min(118vw, 1400px);
+  border-color: rgb(var(--rsn-pink) / 12%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > :not(.rsn-coda) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ================================================================
+   Layout: 01 as a pinned stack (motion allowed, not economy)
+
+   Each cut holds the screen under the bar; the next slides up over the
+   held one. The first cut's margin and a spacer after the last are the
+   holds: the stack stays pinned while they scroll underneath, unseen.
+   Persistent preferences only (never the menu or dialog flags), so
+   opening the menu never moves the page.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics
+    > article {
+    position: sticky;
+    top: var(--dxs-nav);
+    min-height: calc(100svh - var(--dxs-nav));
+    overflow: clip;
+    background-color: var(--dx-ink, #02050a);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics
+    > article:first-child {
+    margin-bottom: 36svh;
+  }
+
+  /* The last cut's hold is a spacer after it, not its margin: a sticky
+     box keeps its margin inside the stack, which left an empty screen
+     behind the cuts as they lifted away. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics::after {
+    content: "";
+    display: block;
+    height: 40svh;
+    pointer-events: none;
+  }
+}
+
+/* The figure grows into the held frame (its field is sized from it). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+  --rsn-figure-size: clamp(110px, 15.5vw, 252px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics
+  strong {
+  font-size: var(--rsn-figure-size);
+}
+
+/* Stacked tablets: the cut spans the page, so the figure scales with it. */
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    --rsn-figure-size: clamp(130px, 22vw, 240px);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    --rsn-figure-size: clamp(76px, 29vw, 132px);
+  }
+}
+
+/* The end card's last line stays whole on the narrowest phones (its 。 used
+   to fall onto a line of its own at 320). */
+@media (max-width: 374px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+    font-size: clamp(30px, 10.4vw, 40px);
+  }
+}
+
+/* The chapters clip sideways, so their lines and rings never widen the page,
+   and isolate, so the numeral's rings sit between their ground and words. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section {
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+/* Each chapter opens on a cut of light: the prism line, split into its
+   four colours like light through a prism, with a hot tip, drawn across
+   as the chapter arrives (01 gains the line the later chapters had). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 7px;
+  background:
+    linear-gradient(90deg, transparent 0 calc(100% - 64px), rgb(var(--rsn-white)) calc(100% - 3px), transparent)
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, rgb(var(--rsn-ice)), rgb(var(--rsn-ice) / 40%) 70%, rgb(var(--rsn-white)))
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(var(--rsn-violet) / 70%), rgb(var(--rsn-violet) / 20%) 70%, rgb(var(--rsn-white) / 80%))
+      0 2px / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(var(--rsn-pink) / 60%), rgb(var(--rsn-pink) / 15%) 70%, rgb(var(--rsn-white) / 70%))
+      0 4px / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(var(--rsn-gold) / 50%), rgb(var(--rsn-gold) / 10%) 70%, rgb(var(--rsn-white) / 60%))
+      0 6px / 100% 1px no-repeat;
+  box-shadow: 0 0 18px rgb(var(--rsn-ice) / 22%);
+  opacity: 1;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* The scene numeral's emitter: a double ring at the numeral. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-section
+  > .rxs-section-heading::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  top: auto;
+  right: auto;
+  bottom: calc(clamp(46px, 6vw, 80px) * 0.42);
+  left: 50%;
+  display: block;
+  width: clamp(40px, 5vw, 64px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--rsn-ice) / 70%);
+  border-radius: 50%;
+  outline: 1px solid rgb(var(--rsn-pink) / 36%);
+  outline-offset: 9px;
+  opacity: 0;
+  translate: -50% 50%;
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-section
+    > .rxs-section-heading::after {
+    grid-row: 1;
+    bottom: 50%;
+    width: 30px;
+    outline-offset: 6px;
+  }
+}
+
+/* ================================================================
+   The two instruments stand drawn under timelines: the scroll brings
+   them in (below) instead of the observer's late reveal, which left an
+   empty frame after the pinned cuts. Their swaps still play on the
+   reveal's class. Persistent flags only (not the menu or dialogs).
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      :is(.rxs-comparison, .rxs-p14-comparator).rxs-reveal {
+      opacity: 1;
+      translate: none;
+      transition: none;
+    }
+  }
+}
+
+/* ================================================================
+   Scroll-linked motion (view timelines, full gate)
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* ---------- Timelines ----------
+       Declared under the persistent flags only: the menu, a dialog or the
+       load gate stop the animations below, not the timelines, so opening
+       the menu does not rebuild them. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      :is(.rxs-comparison, .rxs-p14-comparator).rxs-reveal {
+      view-timeline: --rsn-plate block, --rsn-ch2 block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"] {
+      timeline-scope: --rsn-cut-next, --rsn-ch1, --rsn-ch2, --rsn-ch3;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > img {
+      view-timeline: --rsn-figure block;
+    }
+
+    /* The form's art, named for the transformation's list (its settle). */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #stages
+      .rxs-stage-panel
+      figure
+      > img {
+      view-timeline: --rsn-art block;
+    }
+
+    /* The hero keeps the iOS 27 name beside its own (that sheet reads it). */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-hero {
+      view-timeline: --rsn-hero block, --rxs-ios27-hero block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section {
+      view-timeline: --rsn-scene block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance {
+      view-timeline: --rsn-scene block, --rsn-ch1 block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #p14 {
+      view-timeline: --rsn-scene block, --rsn-ch3 block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      > article:nth-child(2) {
+      view-timeline: --rsn-cut-next block, --rxp-metric block;
+    }
+
+    /* ---------- The cold open: layers at their own rates ---------- */
+    /* Desktop: the stage holds the screen while 01 and 02 run beside it,
+       so the layers drift through the hero's whole held range. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > i {
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rsn-hero;
+      animation-range: contain 0% contain 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-shaft {
+      animation-name: rsn-shaft-a;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-shaft:nth-child(2) {
+      animation-name: rsn-shaft-b;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-shaft:nth-child(3) {
+      animation-name: rsn-shaft-c;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-wave {
+      animation-name: rsn-wave-1;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-wave:nth-child(5) {
+      animation-name: rsn-wave-2;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-wave:nth-child(6) {
+      animation-name: rsn-wave-3;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-burst {
+      animation-name: none;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-shard {
+      animation-name: rsn-shard-a;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > .rsn-depth
+      > .rsn-shard:nth-child(2n) {
+      animation-name: rsn-shard-b;
+    }
+
+    /* The camera pushes in on the armour while it holds the stage; the
+       arrival's iris and the motion sheet's recede keep their places in
+       the list (the recede on the image's own, now named, timeline). */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      > img {
+      animation:
+        rxp-iris 900ms var(--rxp-resolve) backwards,
+        mx-recede linear both,
+        rsn-push linear both;
+      animation-timeline: auto, --rsn-figure, --rsn-hero;
+      animation-range:
+        normal,
+        exit 0% exit 100%,
+        contain 0% contain 100%;
+    }
+
+    /* Held beside the script, the core rings out once as each new part
+       of it arrives: 01, its instrument, 02. */
+    @media (min-width: 1100px) {
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-hero-visual
+        > .rsn-depth
+        > .rsn-wave {
+        animation-name: rsn-wave;
+        animation-timing-function: var(--rsn-out);
+        animation-timeline: --rsn-ch1;
+        animation-range: entry 5% entry 95%;
+      }
+
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-hero-visual
+        > .rsn-depth
+        > .rsn-wave:nth-child(5) {
+        animation-timeline: --rsn-ch2;
+      }
+
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-hero-visual
+        > .rsn-depth
+        > .rsn-wave:nth-child(6) {
+        animation-timeline: --rsn-ch3;
+      }
+    }
+
+    /* Narrow layouts: the stage scrolls away above the copy; the layers
+       part as it leaves. */
+    @media (max-width: 1099.98px) {
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-hero-visual
+        > .rsn-depth
+        > i {
+        animation-range: exit 0% exit 100%;
+      }
+
+      html[data-family="special"]:not([data-world-effects="economy"]):not(
+          [data-side-menu-open]
+        ):not([data-loading]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-hero-visual
+        > img {
+        animation-range:
+          normal,
+          exit 0% exit 100%,
+          exit 0% exit 100%;
+      }
+    }
+
+    /* ---------- Chapters: the prism line and the numeral ---------- */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section::before {
+      transform-origin: 0 50%;
+      animation-name: rsn-draw;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rsn-scene;
+      animation-range: entry 5% entry 55%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section
+      > .rxs-section-heading::after {
+      animation-name: rsn-emit;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 40% cover 55%;
+    }
+
+    /* The chapter title is cut in from depth and settles. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section
+      > .rxs-section-heading
+      > h2 {
+      transform-origin: 0 70%;
+      animation-name: rsn-cut-in;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 10% entry 100%;
+    }
+
+    /* ---------- 01: the cuts arrive, hold, and give way ---------- */
+    /* Forwards fill: before its range the figure rests in place, so a
+       clipping audit of a cut not yet reached reads it whole. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      article
+      > strong {
+      transform-origin: 0.9em 55%;
+      animation-name: rsn-figure-in;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      animation-timeline: --rxp-metric;
+      animation-range: entry 25% entry 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      article::before {
+      animation-name: rsn-draw;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-metric;
+      animation-range: entry 0% entry 60%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      article
+      > .rsn-field
+      > i:not(:nth-child(4)) {
+      animation-name: rsn-field-open;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-metric;
+      animation-range: entry 30% entry 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      article
+      > .rsn-field
+      > i:nth-child(2) {
+      animation-range: entry 40% entry 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      article
+      > .rsn-field
+      > i:nth-child(3) {
+      animation-range: entry 50% entry 100%;
+    }
+
+    /* The held cut gives way: as the next one slides over it, it sinks
+       back into the dark (the whole card: its figure stays inside it). */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-headline-metrics
+      > article:first-child {
+      transform-origin: 50% 30%;
+      animation-name: rsn-recede;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rsn-cut-next;
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* The instruments rise into place on their own timelines. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      :is(.rxs-comparison, .rxs-p14-comparator).rxs-reveal {
+      animation-name: rsn-plate-in;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rsn-plate;
+      animation-range: entry 0% entry 30%;
+    }
+
+    /* 01's comparison bars fill with the scroll, Rexonance first. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-comparison-metrics
+      > article {
+      view-timeline: --rsn-row block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #performance
+      .rxs-comparison-metrics
+      .rxs-bars {
+      transform-origin: 0 50%;
+      animation-name: rsn-fill;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rsn-row;
+      animation-range: entry 40% cover 50%;
+    }
+
+    /* ---------- 02: the chip turns in 3-D and catches the light ---------- */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview
+      figure {
+      transform-origin: 50% 70%;
+      animation-name: rsn-chip-turn;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rxp-core;
+      animation-range: entry 0% exit 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview
+      figure
+      > .rsn-glint {
+      animation-name: rsn-glint;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rxp-core;
+      animation-range: entry 35% cover 52%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview::before {
+      animation-name: rsn-ring-out;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --rxp-core;
+      animation-range: entry 20% exit 60%;
+    }
+
+    /* ---------- 04: the core rings out between the facets ---------- */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      .rxs-system-grid::before {
+      animation-name: rsn-core-open;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rxp-grid;
+      animation-range: entry 0% cover 60%;
+    }
+
+    /* ---------- The end card: the last wave ---------- */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer
+      > .rsn-coda
+      > i {
+      animation-name: rsn-coda;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --sc-end;
+      animation-range: entry 0% entry 80%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer
+      > .rsn-coda
+      > i:nth-child(2) {
+      animation-range: entry 10% entry 90%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer
+      > .rsn-coda
+      > i:nth-child(3) {
+      animation-range: entry 20% entry 100%;
+    }
+  }
+}
+
+/* ================================================================
+   Fine pointers: the stage and the form lean toward the pointer
+   (--rsn-px / --rsn-py from the page script, -1 to 1; zero at rest)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > img {
+    transform: translate3d(
+        calc(var(--rsn-px, 0) * 12px),
+        calc(var(--rsn-py, 0) * 9px),
+        0
+      )
+      rotate(calc(var(--rsn-px, 0) * 0.6deg));
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rxs-aperture {
+    transform: translate3d(calc(var(--rsn-px, 0) * -14px), calc(var(--rsn-py, 0) * -10px), 0);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-shaft {
+    transform: translate3d(calc(var(--rsn-px, 0) * -26px), 0, 0);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rsn-depth
+    > :is(.rsn-wave, .rsn-burst) {
+    transform: translate3d(calc(var(--rsn-px, 0) * 6px), calc(var(--rsn-py, 0) * 5px), 0);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-shard {
+    transform: translate3d(calc(var(--rsn-px, 0) * 40px), calc(var(--rsn-py, 0) * 30px), 0);
+  }
+
+  /* The form leans too (its rise ends on the same offset, so it never
+     snaps when the transformation hands back). */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    figure
+    > img {
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0);
+  }
+}
+
+/* ================================================================
+   The hits (time-based, once, keyed to the page script's transient
+   attributes; the full gate)
+   ================================================================ */
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* While a figure waits, counts and locks, its counter paints over its
+     own (transparent) digits; "done" hands it back. Not an animation:
+     a paint state the script sets, so the menu never changes it. Forced
+     colours and print keep the figures' own text. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #system)
+    [data-rsn-count]:is([data-rsn-state="armed"], [data-rsn-state="count"], [data-rsn-state="lock"]) {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    /* Metal figures paint a text-clipped gradient under their fill. */
+    background: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #system)
+    [data-rsn-count]:is([data-rsn-state="armed"], [data-rsn-state="count"], [data-rsn-state="lock"])
+    > .rsn-count {
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The lock: the counter punches once from depth and settles. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    [data-rsn-count][data-rsn-state="lock"]
+    > .rsn-count {
+    animation: rsn-punch 520ms var(--rsn-hit) both;
+  }
+
+  /* While the figure counts, its field draws in (the charge)... */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-headline-metrics
+    article
+    > strong[data-rsn-state="count"]
+    ~ .rsn-field {
+    transform-origin: calc(var(--rsn-figure-size) * 0.94) var(--rsn-field-y, 50%);
+    animation: rsn-charge 900ms cubic-bezier(0.5, 0, 0.9, 0.4) both;
+  }
+
+  /* ...and on the lock it bursts once from the figure: a white ring flies out,
+     the field shudders outward and settles, a streak crosses the frame. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-headline-metrics
+    article[data-rsn-hit]
+    > .rsn-field
+    > i:nth-child(4) {
+    animation: rsn-burst 1100ms var(--rsn-out) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-headline-metrics
+    article[data-rsn-hit]
+    > .rsn-field {
+    transform-origin: calc(var(--rsn-figure-size) * 0.94) var(--rsn-field-y, 50%);
+    animation: rsn-shock 760ms var(--rsn-hit) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-headline-metrics
+    article[data-rsn-hit]
+    > .rsn-field::after {
+    animation: rsn-streak 640ms var(--rsn-out) both;
+  }
+
+  /* The readouts and the processors light their own rule. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    :is(.rxs-p14-copy dl > div, .rxs-specs > div)[data-rsn-hit]::after {
+    animation: rsn-tick 900ms var(--rsn-out) both;
+  }
+
+  /* Each lock rings in the armour's core (the stage beside 01 and 02). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]:is(
+      [data-rsn-pulse="a"],
+      [data-rsn-pulse="b"]
+    )
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-burst {
+    animation: rsn-core-burst-a 1200ms var(--rsn-out) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-pulse="b"]
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-burst {
+    animation-name: rsn-core-burst-b;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-pulse]
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-burst:nth-child(8) {
+    animation-delay: 140ms;
+  }
+
+  /* The cold open's hit: once the cover has handed over and the figure
+     stands, the core bursts and the title catches one refraction band. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-burst {
+    animation: rsn-core-burst-a 1300ms var(--rsn-out) 820ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    .rxs-hero-visual
+    > .rsn-depth
+    > .rsn-burst:nth-child(8) {
+    animation-delay: 980ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    h1::after {
+    animation: rsn-title-sweep 900ms var(--rsn-snap) 900ms both;
+  }
+
+  /* 03: the transformation. The form's light rings out from its core,
+     one refraction band crosses it and the figure rises from depth and
+     settles, timed to the card's entrance (the rest guard's delay). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance][data-rsn-form]
+    figure
+    > .rsn-form
+    > i {
+    animation: rsn-form-ring 980ms var(--rsn-out) var(--rxp-entrance-delay, 0ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance][data-rsn-form]
+    figure
+    > .rsn-form
+    > i:nth-child(2) {
+    animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 110ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance][data-rsn-form]
+    figure
+    > .rsn-form
+    > i:nth-child(3) {
+    animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 220ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance][data-rsn-form]
+    figure
+    > .rsn-form
+    > i:nth-child(4) {
+    animation: rsn-form-band 720ms var(--rsn-snap) calc(var(--rxp-entrance-delay, 0ms) + 60ms) both;
+  }
+
+  /* Under a card the figure rises from depth as the card opens: transform
+     composes with the motion sheet's scroll settle (scale) on the same
+     image, which keeps its place in the list. A quiet change never dims
+     the art (the rest guard's flash budget). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"][data-rsn-form]
+    figure
+    > img {
+    animation: rsn-form-rise 820ms var(--rsn-hit) var(--rxp-entrance-delay, 0ms) both;
+  }
+
+  /* The code badge slams in from its top-left corner (its top edge, the
+     copy start the verifies measure, never moves). The Premiere's own
+     entrance stays first in the list, so clearing the flag never replays
+     it. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="card"][data-rsn-form]
+    > div
+    > small {
+    transform-origin: 0 0;
+    animation:
+      rxp-resolve 360ms var(--rxp-strike) calc(var(--rxp-entrance-delay, 0ms) + 40ms) backwards,
+      rsn-badge 560ms var(--rsn-hit) calc(var(--rxp-entrance-delay, 0ms) + 40ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-entrance="quiet"][data-rsn-form]
+    > div
+    > small {
+    transform-origin: 0 0;
+    animation:
+      rxp-measure 240ms linear backwards,
+      rsn-badge 560ms var(--rsn-hit) both;
+  }
+}
+
+/* With scroll timelines the figure's own scroll settle joins the rise. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      #rxs-stage-panel[data-entrance="card"][data-rsn-form]
+      figure
+      > img {
+      animation:
+        mx-settle linear both,
+        rsn-form-rise 820ms var(--rsn-hit) var(--rxp-entrance-delay, 0ms) both;
+      animation-timeline: --rsn-art, auto;
+      animation-range:
+        cover 0% cover 55%,
+        normal;
+    }
+  }
+}
+
+/* The readouts' and processors' rules (lit by their lock). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-p14-copy dl > div, .rxs-specs > div) {
+  position: relative;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-p14-copy dl > div, .rxs-specs > div)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgb(var(--rsn-ice)), rgb(var(--rsn-pink)) 70%, transparent);
+  opacity: 0;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* ================================================================
+   Without scroll timelines (iOS 18 and older): the scenes play once,
+   time-based, when the page script marks them in view (data-rsn-in,
+   cleared when they have played)
+   ================================================================ */
+@supports not ((animation-timeline: view()) and (animation-range: entry 0% entry 100%)) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section
+      > .rxs-section-heading[data-rsn-in]
+      > h2 {
+      transform-origin: 0 70%;
+      animation: rsn-cut-in 900ms linear both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-section
+      > .rxs-section-heading[data-rsn-in]::after {
+      animation: rsn-emit 1200ms var(--rsn-out) 200ms both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview[data-rsn-in]
+      figure {
+      transform-origin: 50% 70%;
+      animation: rsn-chip-land 1100ms var(--rsn-out) both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-p14-overview[data-rsn-in]
+      figure
+      > .rsn-glint {
+      animation: rsn-glint 900ms linear 300ms both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      .rxs-system-grid[data-rsn-in]::before {
+      animation: rsn-core-open 1400ms var(--rsn-out) both;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer[data-rsn-in]
+      > .rsn-coda
+      > i {
+      animation: rsn-coda 1400ms var(--rsn-out) both;
+    }
+  }
+}
+
+/* ================================================================
+   Feedback: springy, on the compositor
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* A press sinks on the house curve; its release springs past rest. */
+  html[data-press-ready][data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-footer > a, .rxs-chapter-index a, .rxs-p14-range-labels button, .rxs-scroll-cue)[data-press="out"][data-press] {
+    transition-timing-function: var(--rsn-spring);
+  }
+
+  /* The form tabs' labels squash under a press (the rail keeps its own
+     geometry and lens; only the words inside move). */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    > :is(span, small) {
+    transition: scale 420ms var(--rsn-spring);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]:active
+    > :is(span, small) {
+    scale: 0.9;
+    transition-duration: 90ms;
+    transition-timing-function: var(--rsn-out);
+  }
+
+  /* Doors and shortcuts lean toward where they lead. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-footer > a, .rxs-chapter-index a)
+    > i {
+    transition: translate 380ms var(--rsn-spring);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-footer > a:not(.rxs-footer-return), .rxs-chapter-index a):hover
+    > i {
+    translate: 4px -4px;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-footer
+    > a.rxs-footer-return:hover
+    > i {
+    translate: -5px 0;
+  }
+}
+
+/* ================================================================
+   Rest: reduced motion, economy and forced colours
+   ================================================================ */
+html[data-world-effects="economy"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-hero-visual > .rsn-depth > i, .rsn-field > i, .rsn-form > i, .rsn-coda > i),
+html[data-world-effects="economy"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-p14-overview, .rxs-system-grid, .rxs-section)::before,
+html[data-world-effects="economy"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-section-heading, .rxs-hero h1, .rsn-field)::after {
+  animation: none;
+}
+
+/* Forced colours: every ornament leaves (as specific as its paint). */
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-visual > .rsn-depth,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-headline-metrics article > .rsn-field,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel figure > .rsn-form,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > .rsn-coda,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure > .rsn-glint,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rsn-count,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1::after,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::after,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-p14-copy dl > div, .rxs-specs > div)::after,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics article::before {
+    display: none;
+  }
+}
+
+/* ================================================================
+   Keyframes (rsn-: this sheet only; transform and opacity)
+   ================================================================ */
+@keyframes rsn-push {
+  from {
+    translate: -50% 0;
+    scale: 1;
+  }
+  to {
+    translate: -50% -3%;
+    scale: 1.08;
+  }
+}
+
+@keyframes rsn-shaft-a {
+  from {
+    opacity: 0.5;
+    translate: -40% 0;
+    rotate: -24deg;
+  }
+  to {
+    opacity: 1;
+    translate: 90% 0;
+    rotate: -6deg;
+  }
+}
+
+@keyframes rsn-shaft-b {
+  from {
+    opacity: 0.35;
+    translate: 120% 0;
+    rotate: 14deg;
+  }
+  to {
+    opacity: 0.95;
+    translate: -150% 0;
+    rotate: -2deg;
+  }
+}
+
+@keyframes rsn-shaft-c {
+  from {
+    opacity: 0.85;
+    translate: 40% 0;
+    rotate: 26deg;
+  }
+  to {
+    opacity: 0.4;
+    translate: -110% 0;
+    rotate: 10deg;
+  }
+}
+
+@keyframes rsn-wave {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  12% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    scale: 2;
+  }
+}
+
+@keyframes rsn-wave-1 {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  34% {
+    opacity: 0;
+    scale: 1.7;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+
+@keyframes rsn-wave-2 {
+  0%,
+  33% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  41% {
+    opacity: 0.85;
+  }
+  67% {
+    opacity: 0;
+    scale: 1.7;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+
+@keyframes rsn-wave-3 {
+  0%,
+  66% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  74% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+
+@keyframes rsn-shard-a {
+  from {
+    translate: 0 40%;
+    rotate: -10deg;
+    scale: 0.8;
+  }
+  to {
+    translate: 0 -700%;
+    rotate: 40deg;
+    scale: 1.25;
+  }
+}
+
+@keyframes rsn-shard-b {
+  from {
+    translate: 0 60%;
+    rotate: 12deg;
+    scale: 0.9;
+  }
+  to {
+    translate: 0 -1000%;
+    rotate: -48deg;
+    scale: 1.4;
+  }
+}
+
+@keyframes rsn-draw {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes rsn-emit {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  16% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.4;
+  }
+}
+
+/* A hard cut: held off, then struck in a little large and settled. */
+@keyframes rsn-cut-in {
+  0%,
+  34% {
+    opacity: 0;
+    scale: 1.32;
+    translate: 0 0.16em;
+  }
+  35% {
+    opacity: 1;
+    scale: 1.07;
+    translate: 0 0;
+  }
+  60% {
+    scale: 0.985;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+/* The figure comes out of depth: held off, struck in large, settled. */
+@keyframes rsn-figure-in {
+  0%,
+  30% {
+    opacity: 0;
+    scale: 1.55;
+  }
+  31% {
+    opacity: 1;
+    scale: 1.12;
+  }
+  62% {
+    scale: 0.97;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rsn-field-open {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rsn-recede {
+  from {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0.18;
+    scale: 0.86;
+    translate: 0 -5%;
+  }
+}
+
+@keyframes rsn-plate-in {
+  from {
+    opacity: 0.3;
+    translate: 0 72px;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes rsn-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes rsn-chip-turn {
+  0% {
+    opacity: 0.25;
+    transform: perspective(1100px) rotateX(58deg) rotateZ(-10deg) scale(0.82);
+  }
+  44%,
+  56% {
+    opacity: 1;
+    transform: perspective(1100px) rotateX(0deg) rotateZ(0deg) scale(1);
+  }
+  100% {
+    opacity: 0.9;
+    transform: perspective(1100px) rotateX(-14deg) rotateZ(2deg) scale(0.97);
+  }
+}
+
+@keyframes rsn-chip-land {
+  from {
+    opacity: 0.25;
+    transform: perspective(1100px) rotateX(58deg) rotateZ(-10deg) scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1100px) rotateX(0deg) rotateZ(0deg) scale(1);
+  }
+}
+
+@keyframes rsn-glint {
+  0% {
+    opacity: 0;
+    translate: -46% 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    translate: 46% 0;
+  }
+}
+
+@keyframes rsn-ring-out {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+  to {
+    opacity: 1;
+    scale: 1.25;
+  }
+}
+
+@keyframes rsn-core-open {
+  from {
+    opacity: 0;
+    scale: 0.35;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rsn-coda {
+  from {
+    opacity: 0;
+    scale: 0.25;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rsn-punch {
+  0% {
+    scale: 1.2;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes rsn-charge {
+  from {
+    scale: 1;
+    opacity: 0.7;
+  }
+  to {
+    scale: 0.8;
+    opacity: 1;
+  }
+}
+
+@keyframes rsn-shock {
+  0% {
+    scale: 1;
+  }
+  22% {
+    scale: 1.14;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes rsn-streak {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.6 1;
+  }
+}
+
+@keyframes rsn-burst {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 4.4;
+  }
+}
+
+@keyframes rsn-tick {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  30% {
+    opacity: 1;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1 1;
+  }
+}
+
+@keyframes rsn-core-burst-a {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+  14% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.1;
+  }
+}
+
+@keyframes rsn-core-burst-b {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+  14% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.1;
+  }
+}
+
+@keyframes rsn-title-sweep {
+  0% {
+    opacity: 1;
+    translate: -100% 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 100% 0;
+  }
+}
+
+@keyframes rsn-form-ring {
+  0% {
+    opacity: 0;
+    scale: 0.18;
+  }
+  14% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.4;
+  }
+}
+
+@keyframes rsn-form-band {
+  0% {
+    opacity: 1;
+    translate: -110% 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 170% 0;
+  }
+}
+
+/* From depth: smaller and lower, so the art's feathered edges stay
+   inside the frame's clip the whole way. */
+@keyframes rsn-form-rise {
+  0% {
+    opacity: 0.4;
+    transform: translate3d(0, 6%, 0) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0);
+  }
+}
+
+@keyframes rsn-badge {
+  0% {
+    opacity: 0;
+    scale: 1.7;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
