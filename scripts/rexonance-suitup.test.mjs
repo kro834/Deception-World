@@ -5,19 +5,22 @@ import {
   REXONANCE_CALL_BEATS,
   REXONANCE_CHANT_ANSWER,
   REXONANCE_ENTRY_TIMINGS,
-  REXONANCE_SUIT_FORM_MS,
-  REXONANCE_SUIT_HELM_FORM,
+  REXONANCE_SUIT_ACCENTS,
+  REXONANCE_SUIT_CASCADE,
+  REXONANCE_SUIT_CLANK_MS,
+  REXONANCE_SUIT_FIT,
+  REXONANCE_SUIT_GATHER_MS,
   REXONANCE_SUIT_LATE_MS,
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
-  REXONANCE_SUIT_RIBBONS,
+  REXONANCE_SUIT_REVEAL_MS,
   REXONANCE_SUIT_SNAP,
-  REXONANCE_SUIT_SNAP_MS,
   REXONANCE_SUIT_SYSTEMS,
-  REXONANCE_SUIT_TAIL,
 } from "../src/lib/rexonance-calls.ts";
 import {
   REXONANCE_SUIT_ASSETS,
+  REXONANCE_SUIT_ATLAS,
+  REXONANCE_SUIT_TILE,
   REXONANCE_SUIT_FACE_GLOW,
   REXONANCE_SUIT_FIGURE,
   REXONANCE_SUIT_PIECES,
@@ -25,7 +28,17 @@ import {
 } from "../src/lib/rexonance-suit.ts";
 import { REXONANCE_STAGE_CARD_LEAVE_MS } from "../src/lib/rexonance-stage-call.ts";
 
-/* 2026-10-10 rx12 (owner): the suit-up is the approved full-body artwork,
+/* 2026-10-11 rx13 (owner): finer pieces, formed by nanites right on the
+   undersuit and fitted one after another. The figure is cut into 60 plates
+   (one atlas), each assembled from its micro-tiles of the artwork that
+   stream in along the body and lock, seam outward, in a cascade up the body
+   (legs, waist, arms, chest and core, shoulders, the tail midway, the
+   ribbons, the helmet last); each DEUS！ seats a group's last plate with the
+   strongest clank and a jolt. The canvas engine
+   (rexonance-suit-nanites.tsx) draws the tiles; the DOM plates (each grows
+   from its seam through its gathered nanite mosaic) are its fallback and
+   the clock these pins check.
+   2026-10-10 rx12 (owner): the suit-up is the approved full-body artwork,
    cut into raster pieces by scripts/build-rexonance-suit.mjs. FAR UP！ scans
    the bare undersuit; RIDER！ seeds the P14 core and gathers nanite motes;
    on each SA-GA！ a group of pieces forms out of nanites floating a little
@@ -160,7 +173,9 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
   // groups now fit legs, arms, chest (the owner's order), each label on its
   // group's DEUS！ (the helmet's on the last call).
   assert.match(component, /REXONANCE_SUIT_PARTS\.map\(\(part\)[\s\S]*?SUIT_PART_LINE\[part\]/);
-  assert.match(component, /SUIT_PART_LINE = \{ LEGS: 0, ARMS: 1, CHEST: 2, HEAD: 3 \}/);
+  // rx13: the cascade fits legs, waist, arms, then the chest; the labels
+  // land on their groups' DEUS！.
+  assert.match(component, /SUIT_PART_LINE = \{ LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 \}/);
   assert.match(
     sheet,
     /--rx-suit-lock: calc\(var\(--rx-call-chant-start\) \+ 230ms \+ var\(--rx-suit-i\) \* 120ms\)/,
@@ -168,8 +183,12 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
 });
 
 test("the suit is entry-only, the badge stage-only, both inside the aria-hidden root", () => {
-  // rx12: the entry suit takes the gate's readiness (build, or whole).
-  assert.match(component, /\{entry \? <Suit suit=\{suit\} \/> : <SuitBadge \/>\}/);
+  // rx12: the entry suit takes the gate's readiness (build, or whole);
+  // rx13: and plays its nanite engine only in the full tier.
+  assert.match(
+    component,
+    /\{entry \? <Suit suit=\{suit\} animate=\{tier === "full"\} \/> : <SuitBadge \/>\}/,
+  );
   assert.match(component, /className="rx-call-sequence"[\s\S]*?aria-hidden="true"/);
   // The badge is textless: polygons only.
   const badge = component.match(/function SuitBadge\(\) \{[\s\S]*?\n\}/)?.[0];
@@ -252,31 +271,22 @@ const covering = (fragment) =>
       selector.includes('[data-phase="covering"]') && selector.endsWith(fragment) && animates(body),
   );
 
-// A piece's clock as the component sets it (suitClock): when it forms
-// (--rx-suit-t), when it snaps (--rx-suit-s) and how long forming takes.
-const RATTLE_MAX = 42;
-const pieceClocks = REXONANCE_SUIT_PIECES.map((piece) => {
-  if (piece.group === "tail") {
-    const t = REXONANCE_SUIT_TAIL.start + Number(piece.id.slice(5)) * REXONANCE_SUIT_TAIL.step;
-    return { piece, t, s: t + REXONANCE_SUIT_TAIL.grow, f: REXONANCE_SUIT_TAIL.grow };
-  }
-  if (piece.group === "ribbon") {
-    const t = REXONANCE_SUIT_RIBBONS.start + (piece.id.endsWith("-r") ? 40 : 0);
-    return { piece, t, s: t + REXONANCE_SUIT_RIBBONS.stream, f: REXONANCE_SUIT_RIBBONS.stream };
-  }
-  const s = REXONANCE_SUIT_SNAP[piece.group] + RATTLE_MAX;
-  const t = piece.group === "helm" ? REXONANCE_SUIT_HELM_FORM : s - REXONANCE_SUIT_FORM_MS;
-  return { piece, t, s, f: REXONANCE_SUIT_FORM_MS };
-});
-const vars = ({ t, s, f }) => ({ "--rx-suit-t": t, "--rx-suit-s": s, "--rx-suit-f": f });
+// rx13: a plate's clock as the component sets it: --rx-suit-t, when it
+// starts to grow (its fit, its clank, REVEAL later); --rx-suit-s, its fit.
+const pieceClocks = REXONANCE_SUIT_PIECES.map((piece) => ({
+  piece,
+  t: REXONANCE_SUIT_FIT[piece.id] - REXONANCE_SUIT_REVEAL_MS,
+  s: REXONANCE_SUIT_FIT[piece.id],
+}));
+const vars = ({ t, s }) => ({ "--rx-suit-t": t, "--rx-suit-s": s });
 
 test("the suit keeps the call clock and is finished before the hand-over", () => {
   const cover = REXONANCE_ENTRY_TIMINGS.cover;
   const chant = REXONANCE_CALL_BEATS[2];
   const response = REXONANCE_CALL_BEATS[3];
   const final = REXONANCE_CALL_BEATS[4].start;
-  // rx12: each group snaps on its line's DEUS！ — the chant's answers, as the
-  // call sheet strikes them (rxCallAnswer: 230 ms in, then every 120 ms).
+  // The accents land on the chant's DEUS！ answers, as the call sheet strikes
+  // them (rxCallAnswer: 230 ms in, then every 120 ms).
   assert.match(
     sheet,
     new RegExp(
@@ -285,74 +295,90 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   );
   const deus = (n) => chant.start + REXONANCE_CHANT_ANSWER.first + n * REXONANCE_CHANT_ANSWER.every;
   assert.deepEqual(
-    ["legs", "arms", "chest", "waist"].map((group) => REXONANCE_SUIT_SNAP[group]),
+    ["legs", "waist", "arms", "chest"].map((group) => REXONANCE_SUIT_SNAP[group]),
     [0, 1, 2, 3].map(deus),
   );
-  // Each group forms on its SA-GA！ (inside the chant), and every bite of a
-  // group's rattle lands before the next line's DEUS！ and inside the chant.
-  for (const [n, group] of ["legs", "arms", "chest", "waist"].entries()) {
-    assert.ok(REXONANCE_SUIT_SNAP[group] - REXONANCE_SUIT_FORM_MS >= chant.start, group);
-    assert.ok(
-      REXONANCE_SUIT_SNAP[group] + RATTLE_MAX <
-        (n < 3 ? deus(n + 1) : chant.start + chant.duration),
+  // rx13: every plate is in the cascade exactly once, and the plates fit one
+  // after another: legs, waist, arms, chest (each group's last plate on its
+  // DEUS！, the accent), shoulders, the tail midway, the ribbons, the helmet
+  // last (its crest clamping near the end of REXONANCE！).
+  const ids = REXONANCE_SUIT_CASCADE.flatMap(({ order }) => order);
+  assert.deepEqual([...ids].sort(), REXONANCE_SUIT_PIECES.map(({ id }) => id).sort());
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(REXONANCE_SUIT_PIECES.length >= 40, String(REXONANCE_SUIT_PIECES.length));
+  for (const { group, order } of REXONANCE_SUIT_CASCADE) {
+    const fits = order.map((id) => REXONANCE_SUIT_FIT[id]);
+    for (let k = 1; k < fits.length; k += 1) {
+      const gap = fits[k] - fits[k - 1];
+      assert.ok(gap >= 10 && gap <= 80, `${group}: one after another (${gap} ms)`);
+    }
+    if (group in REXONANCE_SUIT_SNAP) assert.equal(fits.at(-1), REXONANCE_SUIT_SNAP[group]);
+  }
+  assert.deepEqual(REXONANCE_SUIT_ACCENTS, [
+    "thigh-top-r",
+    "belt-jewel",
+    "arm-fist-r",
+    "core-disc",
+    "helmet-crest",
+  ]);
+  const span = (group) => {
+    const fits = REXONANCE_SUIT_CASCADE.find((entry) => entry.group === group).order.map(
+      (id) => REXONANCE_SUIT_FIT[id],
     );
+    return [Math.min(...fits), Math.max(...fits)];
+  };
+  const sequence = ["legs", "waist", "arms", "chest", "shoulders", "tail", "helm"].map(span);
+  for (let k = 1; k < sequence.length; k += 1) {
+    assert.ok(sequence[k][0] > sequence[k - 1][1], "group after group");
   }
-  const rattle = [...component.matchAll(/^\s+"?([\w-]+)"?: (\d+),$/gm)]
-    .filter(([, id]) => REXONANCE_SUIT_PIECES.some((piece) => piece.id === id))
-    .map(([, , ms]) => Number(ms));
-  assert.ok(rattle.length >= 6 && Math.max(...rattle) <= RATTLE_MAX, String(rattle));
-  // Through REXONANCE！ the tail grows (root to blade) and the ribbons
-  // stream, after the waist's snap; the helmet forms above the head and
-  // clamps down in the beat's last quarter; all before the last call.
-  const tails = pieceClocks.filter(({ piece }) => piece.group === "tail");
-  assert.ok(tails.length >= 4);
   assert.ok(
-    tails.every(({ t }, k) => k === 0 || t > tails[k - 1].t),
-    "root to blade",
+    span("legs")[0] - REXONANCE_SUIT_REVEAL_MS - REXONANCE_SUIT_GATHER_MS >=
+      REXONANCE_CALL_BEATS[1].start,
   );
-  for (const { t, s } of pieceClocks.filter(({ piece }) => /tail|ribbon/.test(piece.group))) {
-    assert.ok(t >= response.start && s <= final, `${t}-${s}`);
-  }
-  assert.ok(REXONANCE_SUIT_HELM_FORM >= response.start);
+  assert.ok(
+    span("tail")[0] >= response.start && span("tail")[1] < span("helm")[0],
+    "the tail midway",
+  );
+  assert.ok(span("ribbon")[0] >= response.start && span("ribbon")[1] < span("helm")[0]);
   assert.ok(REXONANCE_SUIT_SNAP.helm >= response.start + (3 * response.duration) / 4);
-  assert.ok(REXONANCE_SUIT_SNAP.helm + REXONANCE_SUIT_SNAP_MS <= final);
-  // The layers on a piece's clock: the snap at --rx-suit-s over the snap
-  // time; the mosaic forms from --rx-suit-t over --rx-suit-f; the plate
-  // resolves through it and is whole before the snap; the rim floats with
-  // it and is gone 70 ms after.
-  const piece = { "--rx-suit-t": 1000, "--rx-suit-s": 1230, "--rx-suit-f": 230 };
-  const snap = layerTimes(declaration(covering(".rx-suit-piece").body, "animation"), piece);
-  const mosaic = layerTimes(
-    declaration(covering(".rx-suit-piece > .rx-suit-mosaic").body, "animation"),
-    piece,
-  );
-  const art = layerTimes(
-    declaration(covering(".rx-suit-piece > .rx-suit-art").body, "animation"),
-    piece,
-  );
-  const rim = layerTimes(
-    declaration(covering(":not(.is-tail, .is-ribbon) > .rx-suit-halo-rim").body, "animation"),
+  assert.ok(REXONANCE_SUIT_SNAP.helm + REXONANCE_SUIT_CLANK_MS <= final);
+  // The layers on a plate's clock: its nanites gather from GATHER before it
+  // grows and go once it seats; it grows from its seam over REVEAL (its
+  // window and its art on one easing, so the art holds still) and clanks
+  // over CLANK; the spark bites on the fit.
+  const piece = { "--rx-suit-t": 1000, "--rx-suit-s": 1100 };
+  const gather = layerTimes(declaration(covering(".rx-suit-mote").body, "animation"), piece);
+  const wipe = layerTimes(declaration(covering(".rx-suit-plate").body, "animation"), piece);
+  const artHold = layerTimes(
+    declaration(covering(".rx-suit-plate > .rx-suit-art").body, "animation"),
     piece,
   );
   assert.deepEqual(
-    [snap.name, snap.delay, snap.duration],
-    ["rxSuitSnap", 1230, REXONANCE_SUIT_SNAP_MS],
+    [gather.delay, gather.end],
+    [1000 - REXONANCE_SUIT_GATHER_MS, 1100 + REXONANCE_SUIT_CLANK_MS],
   );
-  assert.deepEqual([mosaic.delay, mosaic.duration], [1000, 230]);
-  assert.ok(art.delay > 1000 && art.end <= 1230, "resolved while floating");
-  assert.deepEqual([rim.delay, rim.end], [1000, 1300]);
+  assert.deepEqual(
+    [wipe.name, wipe.delay, wipe.duration],
+    ["rxSuitWipe", 1000, REXONANCE_SUIT_REVEAL_MS + REXONANCE_SUIT_CLANK_MS],
+  );
+  assert.deepEqual([artHold.delay, artHold.duration], [1000, REXONANCE_SUIT_REVEAL_MS]);
+  const wipeFrames = keyframes.get("rxSuitWipe");
+  const reveal =
+    (REXONANCE_SUIT_REVEAL_MS / (REXONANCE_SUIT_REVEAL_MS + REXONANCE_SUIT_CLANK_MS)) * 100;
+  assert.match(wipeFrames, new RegExp(`${reveal.toFixed(3)}% \\{`), "grown at the fit");
+  const easing = (frames) =>
+    frames.match(/animation-timing-function: (cubic-bezier\([^)]*\))/)?.[1];
+  assert.equal(
+    easing(wipeFrames),
+    declaration(covering(".rx-suit-plate > .rx-suit-art").body, "animation").match(
+      /cubic-bezier\([^)]*\)/,
+    )[0],
+  );
+  assert.match(keyframes.get("rxSuitWipe"), /scale\(var\(--rx-suit-k\)\)/, "the clank");
+  // Close to the body: the nanites stream in from 2 % of the figure away.
+  assert.match(keyframes.get("rxSuitGather"), /var\(--rx-suit-h\) \* -0\.02/);
   const spark = layerTimes(declaration(covering(".rx-suit-spark").body, "animation"), piece);
-  assert.ok(
-    spark.delay > 1230 && spark.delay < 1230 + REXONANCE_SUIT_SNAP_MS,
-    "the spark bites on impact",
-  );
-  // The snap seats the piece: it starts from the float pose and ends at none.
-  const snapFrames = keyframes.get("rxSuitSnap");
-  assert.match(
-    snapFrames,
-    /0% \{[^}]*translate3d\(\s*calc\(var\(--rx-suit-dx\) \* var\(--rx-suit-h\)\)/,
-  );
-  assert.match(snapFrames, /100% \{\s*transform: none;\s*\}/);
+  assert.equal(spark.delay, 1100, "the spark bites on the fit");
   // The jolt: 2 px on each group's impact (snap + 40 ms) and the helmet's.
   const jolt = layerTimes(declaration(covering(".rx-suit-figure").body, "animation"), {});
   const impacts = [];
@@ -365,7 +391,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   }
   assert.deepEqual(
     impacts,
-    ["legs", "arms", "chest", "waist", "helm"].map((group) => REXONANCE_SUIT_SNAP[group] + 40),
+    ["legs", "waist", "arms", "chest", "helm"].map((group) => REXONANCE_SUIT_SNAP[group] + 40),
   );
   assert.doesNotMatch(keyframes.get("rxSuitJolt"), /[3-9]px|\d{2,}px/, "a micro-jolt, 1-2 px");
   // REXONANCE DEUS！: the squares fill the face's lights from the last call,
@@ -392,7 +418,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   }
   for (const layer of [".rx-suit-body", ".rx-suit-face"]) {
     const { delay, end } = layerTimes(declaration(covering(layer).body, "animation"), {});
-    assert.ok(delay >= REXONANCE_SUIT_SNAP.helm + REXONANCE_SUIT_SNAP_MS && end <= cover, layer);
+    assert.ok(delay >= REXONANCE_SUIT_SNAP.helm + REXONANCE_SUIT_CLANK_MS && end <= cover, layer);
   }
   // A late switch to the build happens only while FAR UP！'s scan runs:
   // before any piece could have formed.
@@ -401,7 +427,9 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   assert.equal(scan.replace(/^\S+/, ""), hold.replace(/^\S+/, ""));
   assert.ok(layerTimes(scan, {}).end <= REXONANCE_CALL_BEATS[1].start, "scanned on FAR UP！");
   assert.ok(REXONANCE_SUIT_LATE_MS <= layerTimes(scan, {}).end);
-  assert.ok(REXONANCE_SUIT_LATE_MS < REXONANCE_SUIT_SNAP.legs - REXONANCE_SUIT_FORM_MS);
+  assert.ok(
+    REXONANCE_SUIT_LATE_MS < Math.min(...pieceClocks.map(({ t }) => t)) - REXONANCE_SUIT_GATHER_MS,
+  );
   // Resonance: one ring per REXONANCE！ quarter-beat, with the arcs.
   for (const phase of [0, 1, 2]) {
     const ring = layerTimes(declaration(covering(".rx-suit-ring").body, "animation"), {
@@ -633,9 +661,9 @@ test("the stage badge swaps the crest per form inside the card's first beat", ()
   }
 });
 
-test("rx12: the raster suit — the artwork's pieces, delivery-sized, decoded before the call", () => {
-  // The figure, the undersuit, the bodysuit and the face's lights, and every
-  // piece's sprite (art | nanite mosaic | rim), are versioned files under
+test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decoded before the call", () => {
+  // The figure, the undersuit, the bodysuit, the face's lights and (rx13)
+  // the plates' one atlas (art | nanite mosaic) are versioned files under
   // public/, at the generated module's paths; the set stays well under
   // 600 KB.
   const files = [...REXONANCE_SUIT_ASSETS, REXONANCE_SUIT_FIGURE];
@@ -652,8 +680,9 @@ test("rx12: the raster suit — the artwork's pieces, delivery-sized, decoded be
   );
   assert.equal(readdirSync(directory).length, new Set(files).size, "no stray files");
   assert.ok(bytes < 560_000, String(bytes));
-  // The owner's groups: legs, arms, chest and shoulders, waist, the tail
-  // (sections), the ribbons and the helmet; every piece inside the figure.
+  assert.ok(bytes < 520_000, `rx13: finer plates in one atlas (${bytes})`);
+  // The groups of the cascade; every plate inside the figure and its cell
+  // inside the atlas's art half, with its micro-tiles (rx13: thousands).
   const groups = new Set(REXONANCE_SUIT_PIECES.map((piece) => piece.group));
   assert.deepEqual([...groups].sort(), [
     "arms",
@@ -661,9 +690,20 @@ test("rx12: the raster suit — the artwork's pieces, delivery-sized, decoded be
     "helm",
     "legs",
     "ribbon",
+    "shoulders",
     "tail",
     "waist",
   ]);
+  let tiles = 0;
+  for (const piece of REXONANCE_SUIT_PIECES) {
+    assert.ok(piece.ax + piece.w <= REXONANCE_SUIT_ATLAS.width / 2, piece.id);
+    assert.ok(piece.ay + piece.h <= REXONANCE_SUIT_ATLAS.height, piece.id);
+    assert.match(piece.dir, /^(up|down|left|right)$/);
+    for (const byte of Buffer.from(piece.tiles, "base64"))
+      for (let bit = 0; bit < 8; bit += 1) tiles += (byte >> bit) & 1;
+  }
+  assert.ok(tiles >= 2000, `micro-tiles: ${tiles}`);
+  assert.ok(REXONANCE_SUIT_TILE >= 6 && REXONANCE_SUIT_TILE <= 12);
   for (const piece of REXONANCE_SUIT_PIECES) {
     assert.ok(piece.x >= 0 && piece.y >= 0, piece.id);
     assert.ok(
@@ -671,12 +711,6 @@ test("rx12: the raster suit — the artwork's pieces, delivery-sized, decoded be
         piece.y + piece.h <= REXONANCE_SUIT_SIZE.height,
       piece.id,
     );
-    // Snapping pieces float a little off the body (4-10 % of the figure).
-    if (!piece.float) continue;
-    const [dx, dy, turn, scale] = piece.float;
-    const off = Math.hypot(dx, dy);
-    assert.ok(off >= 0.01 && off <= 0.1, `${piece.id} floats ${off}`);
-    assert.ok(Math.abs(turn) <= 8 && scale >= 1 && scale <= 1.15, piece.id);
   }
   assert.ok(REXONANCE_SUIT_FACE_GLOW.length >= 8);
   // The pipeline is committed with its source.
@@ -684,11 +718,28 @@ test("rx12: the raster suit — the artwork's pieces, delivery-sized, decoded be
     existsSync(new URL("../design/rexonance-suit/rexonance-full-20261010.jpg", import.meta.url)),
   );
   assert.match(read("scripts/build-rexonance-suit.mjs"), /src\/lib\/rexonance-suit\.ts/);
-  // Each piece is one box with its three layers; the face's squares are
-  // drawn once, from a seed, so server and client render the same.
-  for (const layer of ["rx-suit-art", "rx-suit-mosaic", "rx-suit-halo-rim"]) {
-    assert.match(component, new RegExp(`<i className="${layer}" />`));
-  }
+  // Each plate is a mote (its gathered mosaic) and a window over its art,
+  // drawn from the atlas; the face's squares are drawn once, from a seed,
+  // so server and client render the same.
+  assert.match(component, /className=\{`rx-suit-mote is-\$\{piece\.group\}`\}/);
+  assert.match(component, /className=\{`rx-suit-plate is-\$\{piece\.group\}`\}/);
+  assert.match(component, /<i className="rx-suit-art" style=\{atlasCell\(piece, 0\)\} \/>/);
+  // rx13: the nanite engine is its own module (it reads the browser), the
+  // overlay's own clock drives it, and the DOM plates stand down only once
+  // it runs.
+  const nanites = read("src/components/rexonance-saga/rexonance-suit-nanites.tsx");
+  assert.match(nanites, /querySelector\(".rx-call-meter > i"\)/);
+  assert.match(nanites, /getAnimations\(\)\[0\]/);
+  assert.match(nanites, /now > START_BY/);
+  assert.match(nanites, /cancelAnimationFrame/);
+  assert.doesNotMatch(
+    nanites,
+    /setInterval|setTimeout|Math\.random|filter =|globalCompositeOperation/,
+  );
+  assert.match(
+    sheet,
+    /\.rx-suit\[data-nanites="canvas"\] \.rx-suit-build > :is\(\.rx-suit-mote, \.rx-suit-plate\) \{\s*display: none;/,
+  );
   assert.match(component, /const seeded = \(seed: number\)/);
   assert.doesNotMatch(component, /Math\.random/);
   // The rig wakes with the HUD; the core's seed glows on RIDER！ and the

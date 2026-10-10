@@ -58,3 +58,35 @@ export function warmRexonanceSuit(priority: "low" | "high" = "low"): Promise<boo
 
 /** Whether every suit-up layer is decoded (the call can build the suit). */
 export const isRexonanceSuitReady = () => ready;
+
+/** rx13 (owner): the suit-up's layers are warmed in advance, not only on
+ * intent: once the page has loaded and gone idle (after its own critical
+ * images), the warm-up runs at low priority, so the call almost always
+ * builds the suit. The same skips apply (Save-Data, 2G/3G, reduced motion,
+ * economy); /rexonance-saga itself, where the call does not play, waits for
+ * intent. Returns its cancel. */
+export function scheduleRexonanceSuitWarm(delayMs = 2500) {
+  if (typeof window === "undefined" || ready || pending) return () => {};
+  if (window.location.pathname.startsWith("/rexonance-saga")) return () => {};
+  let timer = 0;
+  let idle = 0;
+  let cancelled = false;
+  const run = () => {
+    timer = 0;
+    if (cancelled) return;
+    if (window.requestIdleCallback)
+      idle = window.requestIdleCallback(() => void warmRexonanceSuit(), { timeout: 4000 });
+    else void warmRexonanceSuit();
+  };
+  const afterLoad = () => {
+    if (!cancelled) timer = window.setTimeout(run, delayMs);
+  };
+  if (document.readyState === "complete") afterLoad();
+  else window.addEventListener("load", afterLoad, { once: true });
+  return () => {
+    cancelled = true;
+    window.removeEventListener("load", afterLoad);
+    if (timer) window.clearTimeout(timer);
+    if (idle) window.cancelIdleCallback?.(idle);
+  };
+}

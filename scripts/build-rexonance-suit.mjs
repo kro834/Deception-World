@@ -581,6 +581,126 @@ const PIECES = [
   },
 ];
 
+// rx13 (owner, 2026-10-11): finer pieces. Each region above splits into its
+// natural plates by clips (first claims; null = the rest), so the plates
+// still tile the figure exactly once. group: where it falls in the fitting
+// cascade (src/lib/rexonance-calls.ts orders it); dir: the way the plate
+// grows from its seam ("up" | "down" | "left" | "right").
+const rect = (x0, y0, x1, y1) => [
+  [x0, y0],
+  [x1, y0],
+  [x1, y1],
+  [x0, y1],
+];
+const ALL = null;
+const sided = (side, plates) =>
+  plates.map(([id, clip, dir, group]) => ({
+    id: `${id}-${side}`,
+    clip: clip && side === "r" ? mirror(clip) : clip,
+    dir: side === "r" && dir === "left" ? "right" : side === "r" && dir === "right" ? "left" : dir,
+    group,
+  }));
+const SPLITS = {
+  helmet: [
+    { id: "helmet-crest", clip: rect(0, 0, 1055, 215), dir: "up", group: "helm" },
+    { id: "helmet-visor", clip: rect(0, 215, 1055, 330), dir: "up", group: "helm" },
+    { id: "helmet-jaw", clip: ALL, dir: "up", group: "helm" },
+  ],
+  core: [
+    { id: "core-disc", clip: circle(527, 532, 58), dir: "up", group: "chest" },
+    { id: "core-swirl", clip: ALL, dir: "up", group: "chest" },
+  ],
+  belt: [
+    { id: "belt-l2", clip: rect(0, 0, 400, 2000), dir: "left", group: "waist" },
+    { id: "belt-l1", clip: rect(0, 0, 470, 2000), dir: "left", group: "waist" },
+    { id: "belt-jewel", clip: rect(0, 0, 585, 2000), dir: "up", group: "waist" },
+    { id: "belt-r1", clip: rect(0, 0, 655, 2000), dir: "right", group: "waist" },
+    { id: "belt-r2", clip: ALL, dir: "right", group: "waist" },
+  ],
+  tasset: [
+    { id: "tasset-pendant", clip: rect(0, 1300, 1055, 2000), dir: "down", group: "waist" },
+    { id: "tasset-low", clip: rect(0, 1100, 1055, 2000), dir: "down", group: "waist" },
+    { id: "tasset-top", clip: ALL, dir: "down", group: "waist" },
+  ],
+  "shoulder-l": [
+    { id: "shoulder-disc-l", clip: circle(340, 462, 72), dir: "up", group: "shoulders" },
+    { id: "shoulder-upper-l", clip: rect(0, 0, 1055, 400), dir: "up", group: "shoulders" },
+    { id: "shoulder-outer-l", clip: rect(0, 0, 250, 2000), dir: "left", group: "shoulders" },
+    { id: "shoulder-lower-l", clip: ALL, dir: "down", group: "shoulders" },
+  ],
+  "shoulder-r": [
+    { id: "shoulder-disc-r", clip: circle(720, 462, 72), dir: "up", group: "shoulders" },
+    { id: "shoulder-upper-r", clip: rect(0, 0, 1055, 400), dir: "up", group: "shoulders" },
+    { id: "shoulder-outer-r", clip: rect(800, 0, 1055, 2000), dir: "right", group: "shoulders" },
+    { id: "shoulder-lower-r", clip: ALL, dir: "down", group: "shoulders" },
+  ],
+  ...Object.fromEntries(
+    ["l", "r"].flatMap((side) => [
+      [
+        `gauntlet-${side}`,
+        sided(side, [
+          ["arm-upper", rect(0, 0, 1055, 760), "down", "arms"],
+          ["arm-bracer", rect(0, 0, 1055, 925), "down", "arms"],
+          ["arm-cuff", rect(0, 0, 1055, 968), "down", "arms"],
+          ["arm-fist", ALL, "down", "arms"],
+        ]),
+      ],
+      [
+        `thigh-${side}`,
+        sided(side, [
+          ["thigh-top", rect(0, 0, 1055, 1000), "up", "legs"],
+          ["thigh-plate", ALL, "up", "legs"],
+        ]),
+      ],
+      [
+        `knee-${side}`,
+        sided(side, [
+          ["knee-disc", rect(0, 0, 1055, 1400), "up", "legs"],
+          ["knee-point", ALL, "up", "legs"],
+        ]),
+      ],
+      [
+        `boot-${side}`,
+        sided(side, [
+          ["boot-foot", rect(0, 1790, 1055, 2000), "up", "legs"],
+          ["boot-ankle", rect(0, 1640, 1055, 2000), "up", "legs"],
+          ["boot-shin", ALL, "up", "legs"],
+        ]),
+      ],
+      [
+        `ribbon-${side}`,
+        sided(side, [
+          ["ribbon-upper", rect(0, 0, 1055, 1100), "down", "ribbon"],
+          ["ribbon-lower", ALL, "down", "ribbon"],
+        ]),
+      ],
+    ]),
+  ),
+  chest: [
+    { id: "chest-pec-l", clip: rect(0, 0, 527, 620), dir: "up", group: "chest" },
+    { id: "chest-pec-r", clip: rect(0, 0, 1055, 620), dir: "up", group: "chest" },
+    { id: "chest-abs-l", clip: rect(0, 0, 527, 2000), dir: "up", group: "chest" },
+    { id: "chest-abs-r", clip: ALL, dir: "up", group: "chest" },
+  ],
+  "tail-0": [{ id: "tail-0", clip: ALL, dir: "up", group: "tail" }],
+  "tail-1": [
+    { id: "tail-1a", clip: rect(0, 120, 1055, 2000), dir: "up", group: "tail" },
+    { id: "tail-1b", clip: ALL, dir: "up", group: "tail" },
+  ],
+  "tail-2": [
+    { id: "tail-2a", clip: rect(0, 0, 850, 2000), dir: "right", group: "tail" },
+    { id: "tail-2b", clip: ALL, dir: "right", group: "tail" },
+  ],
+  "tail-3": [
+    { id: "tail-3a", clip: rect(0, 0, 1055, 200), dir: "down", group: "tail" },
+    { id: "tail-3b", clip: ALL, dir: "down", group: "tail" },
+  ],
+  "tail-4": [
+    { id: "tail-4a", clip: rect(0, 0, 1055, 420), dir: "down", group: "tail" },
+    { id: "tail-4b", clip: ALL, dir: "down", group: "tail" },
+  ],
+};
+
 // Background pockets the figure encloses (flood-filled like the edges).
 const ENCLOSED = [[850, 240]];
 
@@ -881,6 +1001,26 @@ for (const piece of PIECES) {
 const body = new Float32Array(N);
 for (let i = 0; i < N; i += 1) body[i] = Math.max(0, alpha[i] - claimed[i]);
 
+// Each region splits into its plates (first clip claims; the last takes the rest).
+const plates = [];
+for (const [index, region] of PIECES.entries()) {
+  const splits = SPLITS[region.id];
+  if (!splits) throw new Error(`${region.id}: no split`);
+  const field = pieceFields[index];
+  const left = Float32Array.from(field);
+  for (const split of splits) {
+    const clip = split.clip ? await rasterise([split.clip]) : null;
+    const plate = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      if (!left[i]) continue;
+      const take = clip ? left[i] * clip[i] : left[i];
+      plate[i] = take;
+      left[i] -= take;
+    }
+    plates.push({ ...split, region: region.id, field: plate });
+  }
+}
+
 // --- Outputs ------------------------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
 for (const file of readdirSync(OUT_DIR)) rmSync(join(OUT_DIR, file));
@@ -1004,24 +1144,25 @@ const FACE = await writeWebp(
   { quality: 86 },
 );
 
-// Each piece: [art | nanite mosaic | rim] in one sprite.
-const RIM = 12; // delivery px of room around a piece for its rim light
+// The plates: one atlas, its art on the left half and each plate's coarse
+// nanite mosaic at the same place on the right half (one file, one decode).
+const MARGIN = 2; // delivery px of air round each plate (and the atlas gutter)
+const TILE = 9; // delivery px: the nanite micro-tiles the plates assemble from
+let tileCount = 0;
 const pieces = [];
-for (const [index, piece] of PIECES.entries()) {
-  const field = pieceFields[index];
-  const found = bounds(field);
-  if (!found && !DEBUG) throw new Error(`${piece.id}: the polygon claims nothing`);
-  if (!found) continue;
-  const box = deliveryBox(found, Math.ceil(RIM / SCALE) + 1);
-  const colours = piece.id === "helmet" ? unlit : rgb;
-  const art = extractRaw(await toDelivery(rgba(field, colours)), box);
+const cells = [];
+for (const [index, plate] of plates.entries()) {
+  const found = bounds(plate.field);
+  if (!found) throw new Error(`${plate.id}: the clip claims nothing`);
+  const box = deliveryBox(found, Math.ceil(MARGIN / SCALE) + 1);
+  const colours = plate.region === "helmet" ? unlit : rgb;
+  const art = extractRaw(await toDelivery(rgba(plate.field, colours)), box);
   const { width: w, height: h } = box;
-  // Coverage in the delivery box.
   const cover = new Float32Array(w * h);
   for (let i = 0; i < w * h; i += 1) cover[i] = art[i * 4 + 3] / 255;
-  // The mosaic: blocks on the figure's grid (so neighbouring pieces' blocks
-  // line up), each the block's average colour pushed toward the nanite
-  // light, with a hairline gap; a few blocks burn white.
+  // The mosaic: blocks on the figure's grid (so neighbouring plates' blocks
+  // line up), weighted to the lit armour, each the block's own light pushed
+  // toward its family (gold, pink, ice); a few burn whiter.
   const mosaic = Buffer.alloc(w * h * 4);
   const gx0 = Math.floor(box.left / MOSAIC) * MOSAIC;
   const gy0 = Math.floor(box.top / MOSAIC) * MOSAIC;
@@ -1031,37 +1172,34 @@ for (const [index, piece] of PIECES.entries()) {
       let r = 0;
       let g = 0;
       let b = 0;
-      let count = 0;
+      let raw = 0;
       for (let y = Math.max(by, box.top); y < Math.min(by + MOSAIC, box.top + h); y += 1) {
         for (let x = Math.max(bx, box.left); x < Math.min(bx + MOSAIC, box.left + w); x += 1) {
           const i = (y - box.top) * w + (x - box.left);
-          // Weighted by light: the mosaic follows the lit armour (gold,
-          // crystal, rims), not the black suit inside a cut.
           const lit = Math.max(art[i * 4], art[i * 4 + 1], art[i * 4 + 2]);
           const a = cover[i] * Math.min(1, Math.max(0.05, (lit - 30) / 70));
           sum += a;
+          raw += cover[i];
           r += art[i * 4] * a;
           g += art[i * 4 + 1] * a;
           b += art[i * 4 + 2] * a;
-          count += 1;
         }
       }
       const coverage = sum / (MOSAIC * MOSAIC);
-      if (coverage < 0.2 || !count) continue;
+      // Small plates keep a block wherever they mostly cover it.
+      if (coverage < 0.16 && raw / (MOSAIC * MOSAIC) < 0.6) continue;
+      if (!sum) continue;
       r /= sum;
       g /= sum;
       b /= sum;
-      // Each block keeps its own light (so forming never flashes brighter
-      // than the plate it becomes), tinted toward its family: gold, pink
-      // or ice; one in sixteen burns a little whiter.
       const k = hash(bx, by + index * 7919);
       const gold = r > b * 1.25 && g > b * 1.05;
       const tint = k > 0.94 ? WHITE : gold ? GOLD : r > g * 1.1 ? PINK : CYAN;
-      const lift = k > 0.94 ? 0.45 : 0.3;
+      const lift = k > 0.94 ? 0.5 : 0.36;
       const colour = [r, g, b].map((value, c) =>
-        Math.min(255, value * (1 - lift) + tint[c] * lift * 0.8),
+        Math.min(255, value * (1 - lift) + tint[c] * lift * 0.85),
       );
-      const opacity = Math.min(0.92, 0.45 + coverage * 0.5);
+      const opacity = Math.min(0.92, 0.5 + coverage * 0.5);
       for (let y = by + 1; y < by + MOSAIC - 1; y += 1) {
         for (let x = bx + 1; x < bx + MOSAIC - 1; x += 1) {
           if (x < box.left || y < box.top || x >= box.left + w || y >= box.top + h) continue;
@@ -1074,35 +1212,77 @@ for (const [index, piece] of PIECES.entries()) {
       }
     }
   }
-  // The rim: a soft cyan halo just outside the piece.
-  const halo = await blurField(cover, 4.5, w, h);
-  const rim = Buffer.alloc(w * h * 4);
-  for (let i = 0; i < w * h; i += 1) {
-    const a = Math.min(1, Math.max(0, (halo[i] - cover[i]) * 2.4));
-    rim[i * 4] = 150;
-    rim[i * 4 + 1] = 240;
-    rim[i * 4 + 2] = 255;
-    rim[i * 4 + 3] = Math.round(a * 200);
+  // The seam it grows from: the middle of the box's edge behind its growth.
+  const seat = {
+    up: [box.left + w / 2, box.top + h],
+    down: [box.left + w / 2, box.top],
+    left: [box.left + w, box.top + h / 2],
+    right: [box.left, box.top + h / 2],
+  }[plate.dir];
+  // rx13: the plate's micro-tiles (TILE px squares) that carry any of its
+  // art, as a bitmask (row-major, LSB first, base64): the nanite engine
+  // streams only these.
+  const cols = Math.ceil(w / TILE);
+  const rows = Math.ceil(h / TILE);
+  const bits = new Uint8Array(Math.ceil((cols * rows) / 8));
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      let any = false;
+      for (let y = row * TILE; y < Math.min(h, (row + 1) * TILE) && !any; y += 1)
+        for (let x = col * TILE; x < Math.min(w, (col + 1) * TILE); x += 1)
+          if (art[(y * w + x) * 4 + 3] > 12) {
+            any = true;
+            break;
+          }
+      if (any) {
+        const bit = row * cols + col;
+        bits[bit >> 3] |= 1 << (bit & 7);
+        tileCount += 1;
+      }
+    }
   }
-  const sprite = Buffer.alloc(w * 3 * h * 4);
-  for (let y = 0; y < h; y += 1) {
-    art.copy(sprite, y * w * 3 * 4, y * w * 4, (y + 1) * w * 4);
-    mosaic.copy(sprite, (y * w * 3 + w) * 4, y * w * 4, (y + 1) * w * 4);
-    rim.copy(sprite, (y * w * 3 + 2 * w) * 4, y * w * 4, (y + 1) * w * 4);
-  }
-  const src = await writeWebp(`${piece.id}.webp`, sprite, w * 3, h);
+  cells.push({ w, h, art, mosaic });
   pieces.push({
-    id: piece.id,
-    group: piece.group,
-    src,
+    id: plate.id,
+    group: plate.group,
+    dir: plate.dir,
     x: box.left,
     y: box.top,
     w,
     h,
-    seat: [fx(piece.seat[0]), fy(piece.seat[1])],
-    ...(piece.float ? { float: piece.float } : {}),
+    seat: seat.map((v) => Math.round(v * 10) / 10),
+    tiles: Buffer.from(bits).toString("base64"),
   });
 }
+// Shelf-pack the cells, tallest first, into a column ATLAS_W wide.
+const ATLAS_W = 1024;
+const GUTTER = 2;
+const order = cells.map((_, i) => i).sort((a, b) => cells[b].h - cells[a].h || a - b);
+let shelfX = 0;
+let shelfY = 0;
+let shelfH = 0;
+for (const i of order) {
+  const { w, h } = cells[i];
+  if (shelfX + w + GUTTER > ATLAS_W) {
+    shelfX = 0;
+    shelfY += shelfH + GUTTER;
+    shelfH = 0;
+  }
+  pieces[i].ax = shelfX;
+  pieces[i].ay = shelfY;
+  shelfX += w + GUTTER;
+  shelfH = Math.max(shelfH, h);
+}
+const ATLAS_H = shelfY + shelfH;
+const atlasRaw = Buffer.alloc(ATLAS_W * 2 * ATLAS_H * 4);
+for (const [i, { w, h, art, mosaic }] of cells.entries()) {
+  const { ax, ay } = pieces[i];
+  for (let y = 0; y < h; y += 1) {
+    art.copy(atlasRaw, ((ay + y) * ATLAS_W * 2 + ax) * 4, y * w * 4, (y + 1) * w * 4);
+    mosaic.copy(atlasRaw, ((ay + y) * ATLAS_W * 2 + ATLAS_W + ax) * 4, y * w * 4, (y + 1) * w * 4);
+  }
+}
+const ATLAS = await writeWebp("plates.webp", atlasRaw, ATLAS_W * 2, ATLAS_H, { quality: 78 });
 
 // --- The module -------------------------------------------------------------------
 const point = ([x, y]) => `[${fx(x)}, ${fy(y)}]`;
@@ -1135,16 +1315,38 @@ export const REXONANCE_SUIT_FACE_GLOW: readonly (readonly [number, number])[] = 
   ${FACE_GLOW.map(point).join(", ")},
 ];
 
-export type RexonanceSuitGroup = "legs" | "arms" | "chest" | "waist" | "tail" | "ribbon" | "helm";
-export type RexonanceSuitPiece = RexonanceSuitLayer & {
+export type RexonanceSuitGroup =
+  | "legs"
+  | "waist"
+  | "arms"
+  | "chest"
+  | "shoulders"
+  | "tail"
+  | "ribbon"
+  | "helm";
+/** One plate of the armour: its box in the figure, its cell in the atlas
+ * (art on the left half, its nanite mosaic at ax + REXONANCE_SUIT_ATLAS.width / 2),
+ * the way it grows from its seam, and the seam. */
+export type RexonanceSuitPiece = {
   readonly id: string;
   readonly group: RexonanceSuitGroup;
-  /** Where its clank sparks (a seam). */
+  readonly dir: "up" | "down" | "left" | "right";
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly ax: number;
+  readonly ay: number;
   readonly seat: readonly [number, number];
-  /** The hover it forms in: [dx, dy] in figure heights, a turn (deg), a scale. */
-  readonly float?: readonly [number, number, number, number];
+  /** Its micro-tiles that carry art (REXONANCE_SUIT_TILE px squares,
+   * row-major over its box, LSB-first bitmask, base64). */
+  readonly tiles: string;
 };
-/** Each piece's sprite holds three panels: art, nanite mosaic, rim. Front first. */
+/** The nanite micro-tile, in delivery px (${tileCount} tiles in all). */
+export const REXONANCE_SUIT_TILE = ${TILE};
+/** The plates' atlas: art | mosaic, side by side. */
+export const REXONANCE_SUIT_ATLAS = ${JSON.stringify({ src: ATLAS, width: ATLAS_W * 2, height: ATLAS_H })} as const;
+/** The plates, front first; they tile the figure with the bodysuit layer. */
 export const REXONANCE_SUIT_PIECES: readonly RexonanceSuitPiece[] = [
 ${pieces.map((piece) => `  ${JSON.stringify(piece)},`).join("\n")}
 ];
@@ -1159,7 +1361,7 @@ export const REXONANCE_SUIT_MARKS = {
 /** Every file the suit-up paints, for the warm-up. */
 export const REXONANCE_SUIT_ASSETS = [
   REXONANCE_SUIT_UNDERSUIT,
-  ...REXONANCE_SUIT_PIECES.map((piece) => piece.src),
+  REXONANCE_SUIT_ATLAS.src,
   REXONANCE_SUIT_BODY.src,
   REXONANCE_SUIT_FACE.src,
 ] as const;
@@ -1193,7 +1395,7 @@ if (DEBUG) {
     let r = rgb[i * 3] * 0.55;
     let g = rgb[i * 3 + 1] * 0.55;
     let b = rgb[i * 3 + 2] * 0.55;
-    pieceFields.forEach((field, k) => {
+    plates.forEach(({ field }, k) => {
       const t = field[i] * 0.45;
       if (!t) return;
       const [pr, pg, pb] = palette[k % palette.length];

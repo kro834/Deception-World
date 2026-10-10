@@ -1228,10 +1228,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   fill: #f2fbff;
 }
 
-/* The armour: the artwork's pieces over the undersuit (full tier). Each
-   piece is one small box carrying three layers of its sprite — the art,
-   the coarse nanite mosaic it forms out of, and the faint cyan rim it
-   floats with — placed in figure percentages by the component. */
+/* The armour: the artwork's plates over the undersuit (full tier), placed
+   in figure percentages by the component, their cells drawn from one atlas
+   (art | nanite mosaic). Each plate is a window (overflow hidden) over its
+   art; its mote is the mosaic its nanites gather into, under it. */
 .rx-call-sequence .rx-suit-figure > .rx-suit-build {
   inset: 0;
   display: none;
@@ -1243,32 +1243,47 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   background: no-repeat 0 0 / 100% 100%;
 }
 
-.rx-call-sequence .rx-suit-piece > i {
+.rx-call-sequence .rx-suit-build > :is(.rx-suit-mote, .rx-suit-plate) {
+  background-repeat: no-repeat;
+}
+
+.rx-call-sequence .rx-suit-build > .rx-suit-mote {
+  opacity: 0;
+}
+
+.rx-call-sequence .rx-suit-build > .rx-suit-plate {
+  overflow: hidden;
+}
+
+/* rx13: the nanite engine's canvases (settled plates under the tiles in
+   flight) fill the figure; once it runs, the DOM plates stand down. */
+.rx-call-sequence .rx-suit-build > .rx-suit-nanites {
+  inset: 0;
+}
+
+.rx-call-sequence .rx-suit-nanites > canvas {
   position: absolute;
   inset: 0;
   display: block;
-  background-image: var(--rx-suit-src);
+  width: 100%;
+  height: 100%;
+}
+
+.rx-call-sequence .rx-suit[data-nanites="canvas"] .rx-suit-build > :is(.rx-suit-mote, .rx-suit-plate) {
+  display: none;
+}
+
+.rx-call-sequence .rx-suit-plate > .rx-suit-art {
+  position: absolute;
+  inset: 0;
+  display: block;
   background-repeat: no-repeat;
-  background-size: 300% 100%;
 }
 
-.rx-call-sequence .rx-suit-piece > .rx-suit-art {
-  background-position: 0 0;
-}
-
-.rx-call-sequence .rx-suit-piece > .rx-suit-mosaic {
-  background-position: 50% 0;
-  opacity: 0;
-}
-
-.rx-call-sequence .rx-suit-piece > .rx-suit-halo-rim {
-  background-position: 100% 0;
-  opacity: 0;
-}
-
-/* The clank: a four-point glint at the seam as a piece bites. */
+/* The clank: a four-point glint at the seam as a plate bites; the
+   accents' is larger. */
 .rx-call-sequence .rx-suit-build > .rx-suit-spark {
-  width: 9%;
+  width: 5.5%;
   aspect-ratio: 1;
   opacity: 0;
   background:
@@ -1278,6 +1293,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
       62% no-repeat,
     radial-gradient(circle, rgb(255 251 236 / 95%) 0 7%, rgb(121 232 255 / 40%) 18%, transparent 46%);
   translate: -50% -50%;
+}
+
+.rx-call-sequence .rx-suit-build > .rx-suit-spark.is-accent {
+  width: 11%;
 }
 
 /* REXONANCE DEUS！'s pixel squares (full tier). */
@@ -1815,48 +1834,36 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitMotes 970ms linear var(--rx-call-rider-start) both;
   }
 
-  /* SA-GA！DEUS！: on each SA-GA！ a group of pieces forms out of nanites
-     (--rx-suit-t; over --rx-suit-f): the mosaic converges out of a wider
-     cloud, the plate resolves through it and the mosaic goes, all while the
-     piece floats off the body (its float pose, set per piece) with a faint
-     cyan rim. On its DEUS！ (--rx-suit-s) it snaps onto its seat: a fast
-     travel, a hard stop a hair past it, settled; a spark bites at the
-     seam and the whole figure jolts. Legs, arms, chest and shoulders, then
-     belt and waist; the pieces of a group bite a beat apart. */
+  /* SA-GA！DEUS！ and REXONANCE！: the plates fit one after another up the
+     body (--rx-suit-t: when a plate starts to grow, its fit 100 ms later).
+     Its nanites gather on the body first — the mosaic streams in from the
+     seam side, 2 % of the figure away, and settles in its place — then the
+     plate grows from its seam through them (the window slides off its art
+     while the art holds still) and seats with a short clank (--rx-suit-k;
+     the DEUS！ accents hardest, with a spark and a jolt). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece {
-    animation: rxSuitSnap 90ms linear var(--rx-suit-s) both;
+    .rx-suit-mote {
+    animation: rxSuitGather 300ms linear calc(var(--rx-suit-t) - 160ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece
-    > .rx-suit-mosaic {
-    animation: rxSuitMote var(--rx-suit-f) linear var(--rx-suit-t) both;
+    .rx-suit-plate {
+    animation: rxSuitWipe 140ms linear var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece
+    .rx-suit-plate
     > .rx-suit-art {
-    animation: rxSuitResolve calc(var(--rx-suit-f) * 0.5) linear
-      calc(var(--rx-suit-t) + var(--rx-suit-f) * 0.35) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece:not(.is-tail, .is-ribbon)
-    > .rx-suit-halo-rim {
-    animation: rxSuitRimLight calc(var(--rx-suit-s) - var(--rx-suit-t) + 70ms) linear
-      var(--rx-suit-t) both;
+    animation: rxSuitHold 100ms cubic-bezier(0.3, 0.55, 0.35, 1) var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-spark {
-    animation: rxSuitSpark 170ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-s) + 55ms)
-      both;
+    animation: rxSuitSpark 170ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-s) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1892,10 +1899,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 
   /* REXONANCE！: resonance rings run from the core, one phase per line
-     with the aperture's arcs — ice, violet, gold. The tail grows out from
-     behind the shoulder section by section, root to blade (each from the
-     joint it shares with the last), and the ribbons stream down; the
-     helmet forms above the head and hovers (same layers as the pieces). */
+     with the aperture's arcs — ice, violet, gold (the shoulders, the tail,
+     the ribbons and the helmet fit in the cascade above). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
     .rx-suit-ring {
@@ -1908,18 +1913,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-ring {
     animation: rxSuitRing 360ms cubic-bezier(0.1, 0.6, 0.3, 1) var(--rx-suit-at) forwards;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece.is-tail {
-    animation: rxSuitGrow var(--rx-suit-f) cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-t) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-piece.is-ribbon {
-    animation: rxSuitStream var(--rx-suit-f) cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-t) both;
   }
 
   /* The reticle acquires on FAR UP！, dims as the helmet forms above it
@@ -1999,13 +1992,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-/* A piece's float pose: off the body by [--rx-suit-dx, --rx-suit-dy]
-   figure heights, turned and scaled (forward > 1). */
-.rx-call-sequence .rx-suit-piece {
-  --rx-suit-dx: 0;
-  --rx-suit-dy: 0;
-  --rx-suit-r: 0deg;
-  --rx-suit-k: 1;
+/* A plate's growth: [--rx-suit-gx, --rx-suit-gy] is the way it grows from
+   its seam; --rx-suit-k its clank. */
+.rx-call-sequence .rx-suit-build > :is(.rx-suit-mote, .rx-suit-plate) {
+  --rx-suit-gx: 0;
+  --rx-suit-gy: -1;
+  --rx-suit-k: 1.025;
 }
 
 @keyframes rxSuitRim {
@@ -2118,43 +2110,24 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: scale(0.96);
   }
 }
-/* The snap: from the float pose, accelerating to the seat (60 %), a hair
-   past it on impact, settled. */
-@keyframes rxSuitSnap {
-  0% {
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.7);
-    transform: translate3d(
-        calc(var(--rx-suit-dx) * var(--rx-suit-h)),
-        calc(var(--rx-suit-dy) * var(--rx-suit-h)),
-        0
-      )
-      rotate(var(--rx-suit-r)) scale(var(--rx-suit-k));
-  }
-  60% {
-    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
-    transform: translate3d(
-        calc(var(--rx-suit-dx) * var(--rx-suit-h) * -0.07),
-        calc(var(--rx-suit-dy) * var(--rx-suit-h) * -0.07),
-        0
-      )
-      scale(0.99);
-  }
-  100% {
-    transform: none;
-  }
-}
-/* The nanite mosaic: converges out of a wider cloud, holds while the
-   plate resolves through it, and goes. */
-@keyframes rxSuitMote {
+/* The nanites stream in from the seam side along the body (2 % of the
+   figure away), settle in the plate's place, hold while it grows through
+   them and go as it seats. 300 ms: in by 120, the plate grows 160-260. */
+@keyframes rxSuitGather {
   0% {
     opacity: 0;
-    transform: scale(1.5);
+    transform: translate3d(
+        calc(var(--rx-suit-gx) * var(--rx-suit-h) * -0.02),
+        calc(var(--rx-suit-gy) * var(--rx-suit-h) * -0.02),
+        0
+      )
+      scale(1.06);
   }
   40% {
     opacity: 1;
     transform: none;
   }
-  68% {
+  86.667% {
     opacity: 1;
     transform: none;
   }
@@ -2163,27 +2136,32 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-@keyframes rxSuitResolve {
+/* The plate grows from its seam: its window slides in from behind the seam
+   over 100 ms (the art holds still, rxSuitHold, same easing), then the
+   plate seats with a short clank. 140 ms. */
+@keyframes rxSuitWipe {
+  0% {
+    animation-timing-function: cubic-bezier(0.3, 0.55, 0.35, 1);
+    transform: translate3d(calc(var(--rx-suit-gx) * -100%), calc(var(--rx-suit-gy) * -100%), 0);
+  }
+  71.429% {
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+    transform: none;
+  }
+  80% {
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+    transform: scale(var(--rx-suit-k));
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes rxSuitHold {
   from {
-    opacity: 0;
+    transform: translate3d(calc(var(--rx-suit-gx) * 100%), calc(var(--rx-suit-gy) * 100%), 0);
   }
   to {
-    opacity: 1;
-  }
-}
-/* The rim: on while the piece floats, off as it bites. */
-@keyframes rxSuitRimLight {
-  0% {
-    opacity: 0;
-  }
-  30% {
-    opacity: 0.85;
-  }
-  78% {
-    opacity: 0.85;
-  }
-  100% {
-    opacity: 0;
+    transform: none;
   }
 }
 @keyframes rxSuitSpark {
@@ -2223,24 +2201,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   36.036%,
   94.595% {
     transform: translate3d(0, 2px, 0);
-  }
-}
-/* A tail section grows from the joint it shares with the last. */
-@keyframes rxSuitGrow {
-  from {
-    transform: rotate(-32deg) scale(0.12);
-  }
-  to {
-    transform: none;
-  }
-}
-/* A ribbon streams down from the shoulder. */
-@keyframes rxSuitStream {
-  from {
-    transform: scale(0.82, 0.06);
-  }
-  to {
-    transform: none;
   }
 }
 /* A group of pixel squares lands on the face's lights (fast), holds, then
