@@ -30,6 +30,7 @@ import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { UltraModeToggle } from "@/components/ultra/ultra-mode-toggle";
+import { ExternalCinemaLink } from "./external-cinema-link";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -999,6 +1000,7 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>STORIES</p>
           <div className="side-panel-links">
+            <ExternalCinemaLink beforeNavigate={close} />
             {context === "movie" ? (
               <>
                 <GuardedLink
