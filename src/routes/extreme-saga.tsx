@@ -16,6 +16,7 @@ import extremeEditionCssUrl from "@/styles-extreme-edition.css?url";
 import extremeOverdriveCssUrl from "@/styles-extreme-overdrive.css?url";
 import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageExtremeCssUrl from "@/styles-stage-extreme.css?url";
+import extremeImpactCssUrl from "@/styles-extreme-impact.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   validateSearch: validateInquirySearch,
@@ -50,6 +51,8 @@ export const Route = createFileRoute("/extreme-saga")({
       // grammar, then this page's scenes).
       { rel: "stylesheet", href: stageSpecialCssUrl },
       { rel: "stylesheet", href: stageExtremeCssUrl },
+      // IMPACT (rx11): the fight's motion and the pinned punch meter.
+      { rel: "stylesheet", href: extremeImpactCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
