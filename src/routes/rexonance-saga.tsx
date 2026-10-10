@@ -18,6 +18,8 @@ import rexonanceFinishCssUrl from "@/styles-rexonance-finish.css?url";
 import rexonancePremiereCssUrl from "@/styles-rexonance-premiere.css?url";
 import rexonanceCoutureCssUrl from "@/styles-rexonance-couture.css?url";
 import rexonanceArmourCssUrl from "@/styles-rexonance-armour.css?url";
+import stageSpecialCssUrl from "@/styles-stage-special.css?url";
+import stageRexonanceCssUrl from "@/styles-stage-rexonance.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -56,6 +58,10 @@ export const Route = createFileRoute("/rexonance-saga")({
       // The Armour edition: the page drawn as the suit-up renders its armour
       // (styles-rexonance-armour.css), paint only, after Couture.
       { rel: "stylesheet", href: rexonanceArmourCssUrl },
+      // STAGE (rx10): the trailer, over the Armour materials (the shared
+      // special-site grammar, then this page's scenes).
+      { rel: "stylesheet", href: stageSpecialCssUrl },
+      { rel: "stylesheet", href: stageRexonanceCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
