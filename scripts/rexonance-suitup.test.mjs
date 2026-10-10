@@ -382,8 +382,8 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
         i * REXONANCE_SUIT_PIXELS.scatterStep +
         REXONANCE_SUIT_PIXELS.scatterMs,
     );
-    // The burst starts at the keyframes' 40 %: within 10 ms of the scatter.
-    const burst = pixels.delay + 0.4 * pixels.duration;
+    // The burst starts at the keyframes' 83 % (after the ~0.6 s hold): within 10 ms of the scatter.
+    const burst = pixels.delay + 0.83 * pixels.duration;
     assert.ok(
       Math.abs(burst - (REXONANCE_SUIT_PIXELS.scatter + i * REXONANCE_SUIT_PIXELS.scatterStep)) <=
         10,

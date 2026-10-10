@@ -392,7 +392,8 @@ async function verifyProfile(profile) {
     ),
   );
   assert.ok(
-    entryDuration < 3200,
+    // rx12: +580 ms for the face's pixel hold (cover 2880).
+    entryDuration < 3780,
     `${profile.name}: route entry and call sequence must hand off promptly (${entryDuration.toFixed(0)} ms)`,
   );
   assert.ok(

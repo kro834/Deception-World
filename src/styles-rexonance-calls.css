@@ -1638,14 +1638,15 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 /* Short landscapes (phones on their side): the figure takes the frame's
-   height under the caption row, and its part labels, which would cross
-   the armour in so narrow a margin, stay off. */
+   height under the caption row; its part labels (which would cross the
+   armour in so narrow a margin) and the system check (which would meet
+   the chant in the calls' zone) stay off. */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
   .rx-call-sequence[data-mode="entry"] {
     --rx-suit-h: calc(100vh - 84px);
   }
 
-  .rx-call-sequence[data-mode="entry"] .rx-suit-callouts {
+  .rx-call-sequence[data-mode="entry"] :is(.rx-suit-callouts, .rx-suit-boot) {
     visibility: hidden;
   }
 }
@@ -1956,20 +1957,20 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-pixels {
-    animation: rxSuitPixels calc(240ms - var(--rx-suit-i) * 4ms) linear
+    animation: rxSuitPixels calc(820ms - var(--rx-suit-i) * 4ms) linear
       calc(var(--rx-call-final-start) + 10ms + var(--rx-suit-i) * 14ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-face {
-    animation: rxSuitTick 60ms linear calc(var(--rx-call-final-start) + 90ms) both;
+    animation: rxSuitTick 60ms linear calc(var(--rx-call-final-start) + 700ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-halo.is-eyes {
-    animation: rxSuitHalo 140ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 100ms) both;
+    animation: rxSuitHalo 140ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 710ms) both;
   }
 
   /* The hand-over: the suit leaves with the caption and the frame. */
@@ -2249,11 +2250,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     opacity: 0;
     transform: scale(calc(0.7 / var(--rx-suit-burst)));
   }
-  8% {
+  7% {
     opacity: 1;
     transform: scale(calc(1 / var(--rx-suit-burst)));
   }
-  40% {
+  /* Held still on the face (~0.6 s, no pulse), then the burst. */
+  83% {
     animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
     opacity: 1;
     transform: scale(calc(1 / var(--rx-suit-burst)));
