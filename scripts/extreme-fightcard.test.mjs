@@ -207,17 +207,21 @@ test("every beat plays from a one-shot key behind every gate and ends by 2 s", (
     for (const part of splitTopLevel(selector)) assert.match(part, FULL_GATE, part);
 });
 
-test("unreached beats are held back only while the IMPACT engine is armed", () => {
-  const holds = rules.filter(({ selector }) => /\[data-exi-hit=""\]/.test(selector));
-  assert.ok(holds.length >= 2, String(holds.length));
-  for (const { selector, context, body } of holds) {
+test("unreached beats are held back only while an engine waits on them", () => {
+  // The rows: only while the fight-card engine marks one waiting (data-exf-clash="").
+  const rows = rules.filter(({ selector }) => /\[data-exf-clash=""\]/.test(selector));
+  assert.equal(rows.length, 2);
+  // The sliver: only while the IMPACT engine is armed and the stage unreached.
+  const sliver = rules.filter(({ selector }) => /#exs-stage-panel\[data-exi-hit=""\]/.test(selector));
+  assert.equal(sliver.length, 2);
+  for (const { selector, context, body } of [...rows, ...sliver]) {
     assert.ok(context.includes("@media (prefers-reduced-motion: no-preference)"), selector);
     assert.doesNotMatch(body, /animation/);
-    for (const part of splitTopLevel(selector)) {
-      assert.match(part, FULL_GATE, part);
-      assert.match(part, /\[data-exi-armed="true"\]/, part);
-    }
+    for (const part of splitTopLevel(selector)) assert.match(part, FULL_GATE, part);
   }
+  for (const { selector } of sliver) assert.match(selector, /\[data-exi-armed="true"\]/);
+  // Nothing else waits on a scene key.
+  assert.equal(rules.filter(({ selector }) => /data-exi-hit=""/.test(selector)).length, 2);
 });
 
 test("the seam's art stands still while it travels, and always shows the other form", () => {
@@ -372,29 +376,49 @@ function eventTarget() {
   };
 }
 
-function element(className, attributes = {}) {
+function element(className, attributes = {}, children = []) {
   const values = new Map(Object.entries(attributes));
   return {
     nodeType: 1,
     className,
+    children,
     getAttribute: (name) => (values.has(name) ? values.get(name) : null),
     setAttribute: (name, value) => values.set(name, String(value)),
     removeAttribute: (name) => values.delete(name),
     hasAttribute: (name) => values.has(name),
     matches: (selector) => selector === `.${className}`,
+    querySelector(selector) {
+      return selector === ":scope > .rxs-comparison-metrics"
+        ? (children.find((child) => child.className === "rxs-comparison-metrics") ?? null)
+        : null;
+    },
+    querySelectorAll(selector) {
+      return selector === ":scope > article"
+        ? children.filter((child) => child.className === "article")
+        : [];
+    },
   };
 }
+
+const metrics = (count = 4) =>
+  element(
+    "rxs-comparison-metrics",
+    {},
+    Array.from({ length: count }, () => element("article")),
+  );
 
 function setup({ reduced = false, economy = false, loading = false } = {}) {
   const timers = new Map();
   const watchers = [];
+  const observers = [];
   let serial = 0;
   let clock = 0;
   const reducedMotion = { ...eventTarget(), matches: reduced };
   const html = element("html", loading ? { "data-loading": "" } : {});
   html.dataset = { worldEffects: economy ? "economy" : "full" };
   const document = { ...eventTarget(), hidden: false, documentElement: html };
-  const comparison = element("rxs-comparison", { "data-exi-hit": "" });
+  const initial = metrics();
+  const comparison = element("rxs-comparison", {}, [initial]);
   const page = {
     ownerDocument: document,
     querySelector: (selector) => (selector === ".rxs-comparison" ? comparison : null),
@@ -422,24 +446,51 @@ function setup({ reduced = false, economy = false, loading = false } = {}) {
         this.disconnected = true;
       }
     },
+    IntersectionObserver: class {
+      constructor(callback, options) {
+        this.callback = callback;
+        this.options = options;
+        this.targets = new Set();
+        this.disconnected = false;
+        observers.push(this);
+      }
+      observe(target) {
+        this.targets.add(target);
+      }
+      unobserve(target) {
+        this.targets.delete(target);
+      }
+      disconnect() {
+        this.disconnected = true;
+        this.targets.clear();
+      }
+    },
   };
   const live = (target) => watchers.filter((w) => !w.disconnected && w.target === target);
+  const io = () => observers.filter((o) => !o.disconnected);
   return {
     environment,
     document,
     html,
     comparison,
+    initial,
     reducedMotion,
     timers,
     watchers,
+    observers,
     live,
+    io,
     mount: () => mountExtremeFightCard(page, environment),
+    reach(row) {
+      for (const observer of io().filter((o) => o.targets.has(row)))
+        observer.callback([{ target: row, isIntersecting: true }], observer);
+    },
     rekey() {
-      const rows = element("rxs-comparison-metrics");
+      const rows = metrics();
       const processing = element("rxs-processing-comparison");
       for (const watcher of live(comparison))
         watcher.callback([{ addedNodes: [rows, processing] }]);
-      return { rows, processing };
+      return rows;
     },
     tick(ms) {
       clock += ms;
@@ -452,20 +503,35 @@ function setup({ reduced = false, economy = false, loading = false } = {}) {
   };
 }
 
-test("a change of challenger keys the new rows once the console has been reached, as a one-shot key", () => {
+test("each row waits, clashes once when it is reached, and retires its key", () => {
   const t = setup();
   const cleanup = t.mount();
-  assert.equal(t.live(t.comparison).length, 1);
+  assert.equal(t.io().length, 1);
+  assert.equal(t.io()[0].options.rootMargin, "0px 0px -12% 0px");
   assert.deepEqual(t.live(t.comparison)[0].options, { childList: true });
-  // Not reached yet: the rows wait for the console's own hit.
-  const early = t.rekey();
-  assert.equal(early.rows.getAttribute("data-exf-clash"), null);
-  t.comparison.setAttribute("data-exi-hit", "done");
-  const { rows, processing } = t.rekey();
-  assert.equal(rows.getAttribute("data-exf-clash"), "true");
-  assert.equal(processing.getAttribute("data-exf-clash"), null);
+  const [first, second] = t.initial.children;
+  for (const row of t.initial.children) assert.equal(row.getAttribute("data-exf-clash"), "");
+  t.reach(first);
+  assert.equal(first.getAttribute("data-exf-clash"), "true");
+  assert.equal(second.getAttribute("data-exf-clash"), "");
+  // Unobserved after its beat: a second crossing does nothing.
+  assert.equal(t.io()[0].targets.has(first), false);
   t.tick(CLASH_MS);
-  assert.equal(rows.getAttribute("data-exf-clash"), "done");
+  assert.equal(first.getAttribute("data-exf-clash"), "done");
+  cleanup();
+});
+
+test("a change of challenger arms the new rows, which clash when they are (or already are) in view", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const rows = t.rekey();
+  for (const row of rows.children) {
+    assert.equal(row.getAttribute("data-exf-clash"), "");
+    assert.ok(t.io()[0].targets.has(row));
+  }
+  t.reach(rows.children[2]);
+  assert.equal(rows.children[2].getAttribute("data-exf-clash"), "true");
+  assert.equal(rows.children[0].getAttribute("data-exf-clash"), "");
   cleanup();
 });
 
@@ -474,24 +540,34 @@ test("the engine stands down for reduced motion, economy rendering, the load gat
     const t = setup(options);
     const cleanup = t.mount();
     assert.equal(t.live(t.comparison).length, 0, JSON.stringify(options));
+    assert.equal(t.io().length, 0, JSON.stringify(options));
+    // Nothing waits: every row stands drawn.
+    for (const row of t.initial.children) assert.equal(row.getAttribute("data-exf-clash"), null);
     cleanup();
   }
   const t = setup();
   const cleanup = t.mount();
-  t.comparison.setAttribute("data-exi-hit", "true");
-  const { rows } = t.rekey();
-  assert.equal(rows.getAttribute("data-exf-clash"), "true");
-  // Hidden: the beat retires at once and nothing listens.
+  const [first, second] = t.initial.children;
+  t.reach(first);
+  assert.equal(first.getAttribute("data-exf-clash"), "true");
+  // Hidden: the beat retires at once, waiting rows stand drawn, nothing listens.
   t.document.hidden = true;
   [...t.document.listeners.get("visibilitychange")].forEach((callback) => callback());
-  assert.equal(rows.getAttribute("data-exf-clash"), "done");
+  assert.equal(first.getAttribute("data-exf-clash"), "done");
+  assert.equal(second.getAttribute("data-exf-clash"), null);
   assert.equal(t.live(t.comparison).length, 0);
+  assert.equal(t.io().length, 0);
   assert.equal(t.timers.size, 0);
+  // Back: the played row stays done; the others wait again.
   t.document.hidden = false;
   [...t.document.listeners.get("visibilitychange")].forEach((callback) => callback());
+  assert.equal(first.getAttribute("data-exf-clash"), "done");
+  assert.equal(second.getAttribute("data-exf-clash"), "");
   assert.equal(t.live(t.comparison).length, 1);
   cleanup();
   assert.equal(t.watchers.every((watcher) => watcher.disconnected), true);
+  assert.equal(t.observers.every((observer) => observer.disconnected), true);
+  assert.equal(second.getAttribute("data-exf-clash"), null);
   assert.equal(t.document.listeners.size, 0);
   assert.equal(t.environment.listeners.size, 0);
   assert.equal(t.reducedMotion.listeners.size, 0);

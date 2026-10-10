@@ -1647,14 +1647,17 @@ html[data-family="special"]
     animation: none;
   }
 
-  /* The tale of the tape: until the console is reached the bars stand
-     back in their corners; then both blows are thrown and meet. */
+  /* The tale of the tape: until a row is reached its bars stand back in
+     their corners (the engine marks it waiting); then both blows are thrown
+     and meet, and the burst goes off where they do. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
-    .rxs-comparison[data-exi-hit=""]
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .rxs-comparison-metrics
+    > article[data-exf-clash=""]
     .rxs-bars
     > i::before {
     scale: 0 1;
@@ -1664,8 +1667,10 @@ html[data-family="special"]
       [data-loading]
     ):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
-    .rxs-comparison[data-exi-hit=""]
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .rxs-comparison-metrics
+    > article[data-exf-clash=""]
     .rxs-bars
     > i::after {
     opacity: 0;
@@ -1676,10 +1681,8 @@ html[data-family="special"]
     ):not([data-dialog-open])
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-    :is(
-      .rxs-comparison[data-exi-hit="true"] .rxs-comparison-metrics,
-      .rxs-comparison-metrics[data-exf-clash="true"]
-    )
+    .rxs-comparison-metrics
+    > article[data-exf-clash="true"]
     .rxs-bars
     > i::before {
     animation: exf-blow 420ms var(--exi-wind) var(--exf-row, 0ms) both;
@@ -1690,10 +1693,8 @@ html[data-family="special"]
     ):not([data-dialog-open])
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-    :is(
-      .rxs-comparison[data-exi-hit="true"] .rxs-comparison-metrics,
-      .rxs-comparison-metrics[data-exf-clash="true"]
-    )
+    .rxs-comparison-metrics
+    > article[data-exf-clash="true"]
     .rxs-bars
     > i.is-rexonance::after {
     animation: exf-burst 520ms var(--exi-hit) calc(var(--exf-row, 0ms) + 400ms) both;
@@ -1730,8 +1731,31 @@ html[data-family="special"]
   }
 
 
-  /* The duel. The other form's sliver slides in from the edge when the
-     stage is reached. */
+  /* The duel. The other form's sliver waits beyond the edge until the
+     stage is reached, then slides in. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #exs-stage-panel[data-exi-hit=""]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival {
+    translate: 52% 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #exs-stage-panel[data-exi-hit=""]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival
+    > span {
+    translate: -104% 0;
+  }
+
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
