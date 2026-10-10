@@ -1107,6 +1107,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   translate: -50% -50%;
   -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
   mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
+  /* The band masks only the box; the helmet hovering above the head and
+     the burst's squares stay whole past its edges. */
+  -webkit-mask-clip: no-clip;
+  mask-clip: no-clip;
 }
 
 .rx-call-sequence .rx-suit-figure > * {
@@ -1576,7 +1580,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 /* Wide landscape frames: the figure stands beside the calls, in the room
    the chant leaves on the right (the chant measures about 9.2 em at its
-   own size), so the fitting reads whole and the words stay clear. */
+   own size; the figure is --rx-suit-ar of its height wide), so the
+   fitting reads whole and the words stay clear. */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
   .rx-call-sequence .rx-suit {
     --rx-suit-chant: clamp(24px, 5.75vw, 100px);
@@ -1585,7 +1590,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
       86vh,
       960px,
       100vh - 128px,
-      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+      (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
     );
     --rx-suit-cx: calc(100% - var(--rx-suit-edge) - var(--rx-suit-h) * var(--rx-suit-ar) / 2);
   }
@@ -1622,7 +1627,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     --rx-suit-edge: 24px;
     --rx-suit-h: min(
       100vh - 88px,
-      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+      (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
     );
   }
 }
@@ -1634,7 +1639,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
         86svh,
         960px,
         100svh - 128px,
-        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+        (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
       );
     }
   }
@@ -1643,7 +1648,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence .rx-suit {
       --rx-suit-h: min(
         100svh - 88px,
-        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+        (100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)) / (2 * var(--rx-suit-ar))
       );
     }
   }
