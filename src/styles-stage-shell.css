@@ -1104,6 +1104,18 @@ html[data-family]
   font: 600 13px/1 var(--sh-mono);
 }
 
+/* Touch screens have no / key: the field keeps its magnifier only. */
+@media (hover: none) and (pointer: coarse) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search
+    > i {
+    display: none;
+  }
+}
+
 html[data-family]
   body
   #site-side-panel.side-panel

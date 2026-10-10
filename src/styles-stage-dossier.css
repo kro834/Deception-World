@@ -1903,15 +1903,16 @@ html[data-family="dossier"]
   display: none;
 }
 
-/* The previous file sits small, under the card; the arrow leads. */
+/* The previous file sits small, over the card (the source's order, so
+   the Tab order reads down the screen); the arrow leads. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   > a:first-child {
-  grid-row: 2;
+  grid-row: 1;
   grid-column: 1;
   grid-template-columns: auto minmax(0, 1fr);
-  border-top: 1px solid var(--sd-line);
+  border-bottom: 1px solid var(--sd-line);
   border-right: 1px solid var(--sd-line);
 }
 
@@ -1935,7 +1936,7 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   > .manager-pagination-index {
-  grid-row: 2;
+  grid-row: 1;
   grid-column: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1945,7 +1946,7 @@ html[data-family="dossier"]
   margin: 0;
   padding: 0;
   border: 0;
-  border-top: 1px solid var(--sd-line);
+  border-bottom: 1px solid var(--sd-line);
   background: none;
 }
 
@@ -2011,12 +2012,13 @@ html[data-family="dossier"]
   font-variant-numeric: tabular-nums;
 }
 
-/* The next file: its portrait on a lit floor, its name large. */
+/* The next file: its portrait on a lit floor, its name large. The file
+   ends on it. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   > a:last-child:not(:first-child) {
-  grid-row: 1;
+  grid-row: 2;
   grid-column: 1 / -1;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto auto;
@@ -2200,6 +2202,31 @@ html[data-family="dossier"]
   > .manager-pagination:has(> .manager-pagination-spacer:first-child)
   > .manager-pagination-index {
   grid-column: 1 / -1;
+}
+
+/* Wide phones and portrait tablets: the next person stands in the card's
+   right part, near the shape of the portrait, so the crop keeps the face;
+   the name sits on the ink beside it. */
+@media (min-width: 561px) and (max-width: 1099px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-portrait {
+    inset: 0 0 0 auto;
+    width: min(100%, 58%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 28%);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-portrait
+    img {
+    object-position: 50% 8%;
+  }
 }
 
 /* Tablets (portrait): a taller stacked stage. Written before the split
@@ -2624,8 +2651,11 @@ html[data-family="dossier"]
       animation: none;
     }
 
-    /* …and its words hold beside it, centred on the stage, so the column
-       is never an empty field while the art holds. */
+    /* …and its words hold beside it in the upper part of the column, so
+       the column is never an empty field while the art holds. Their block
+       is shorter than the stage, so a scene's words linger a moment as its
+       art leaves and the next scene's words arrive as these go (about
+       0.7 of the stage apart, not a whole stage). */
     html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
       :is(.form-pickup-copy, .rider-special-site-copy) {
@@ -2635,7 +2665,7 @@ html[data-family="dossier"]
       justify-content: center;
       width: 100%;
       max-width: calc(var(--sd-read) + var(--sd-pad) + var(--sd-pad-end));
-      min-height: var(--sd-stage-h);
+      min-height: calc(var(--sd-stage-h) * 0.8);
       margin: 0;
       padding: 72px var(--sd-pad-end) 48px var(--sd-pad);
     }
@@ -2714,6 +2744,8 @@ html[data-family="dossier"]
       > .dossier-nav-portrait {
       inset: 0 auto 0 0;
       width: var(--sd-stage-w);
+      -webkit-mask-image: none;
+      mask-image: none;
     }
 
     html[data-family="dossier"]
@@ -2762,13 +2794,16 @@ html[data-family="dossier"]
   }
 }
 
-/* Tablets (portrait) and wide phones: the stacked file, centred. */
+/* Tablets (portrait) and wide phones: the stacked file, centred. The facts
+   take as many columns as keep a cell 200px wide (three on a tablet, two
+   beside the split stage), so the longer values (両性具有（…）) keep their
+   punctuation with their words. */
 @media (min-width: 761px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     #dossier-profile
     .manager-facts {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
   /* Related records: art beside the words. */
@@ -2851,6 +2886,24 @@ html[data-family="dossier"]
   }
 }
 
+/* The narrowest phones: each label stands over its value, so the value
+   has the line's full width. */
+@media (max-width: 359px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(#dossier-profile .manager-facts, #identity-records figcaption dl)
+    > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
 /* Phones: the previous file and the index each take a full row. */
 @media (max-width: 560px) {
   html[data-family="dossier"] main.manager-page.manager-page.manager-page > .manager-pagination {
@@ -2861,7 +2914,7 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     > .manager-pagination
     > a:first-child {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 1;
     border-right: 0;
   }
@@ -2870,22 +2923,43 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     > .manager-pagination
     > .manager-pagination-index {
-    grid-row: 3;
+    grid-row: 2;
     grid-column: 1;
   }
 
+  /* No previous file: the index leads, the card follows. */
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
-    > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
-    > a:first-child {
+    > .manager-pagination:has(> .manager-pagination-spacer:first-child)
+    > .manager-pagination-index {
     grid-row: 1;
   }
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
-    > .manager-pagination:not(:has(> a:last-child:not(:first-child)))
-    > .manager-pagination-index {
+    > .manager-pagination
+    > a:last-child:not(:first-child) {
+    grid-row: 3;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination:has(> .manager-pagination-spacer:first-child)
+    > a:last-child:not(:first-child) {
     grid-row: 2;
+  }
+}
+
+/* Phones: the next person's name keeps one line beside the arrow (the
+   longest names are seven characters). */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > b {
+    font-size: min(clamp(32px, 9vw, 64px), calc((100vw - 120px) / 7.2));
+    white-space: nowrap;
   }
 }
 

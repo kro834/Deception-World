@@ -186,16 +186,22 @@ export function NameText({ value, seams = false }: { value: string; seams?: bool
   );
 }
 
+/* The end card's art box (styles-stage-dossier.css): the card's width on
+   phones, its right part on tablets, the stage's width on wide screens. */
+const NAV_PORTRAIT_SIZES = "(max-width: 560px) 100vw, (max-width: 1099px) 58vw, min(46vw, 820px)";
+
 /** The neighbour's portrait for the file's end card: its first warm-up
  * asset, with the same delivery candidates the next page asks for, so the
- * card's picture is the one the page then shows. Decorative (the link is
- * named by its label). */
+ * card's picture is the one the page then shows (sized for the card's own
+ * box). Decorative (the link is named by its label). */
 function NavPortrait({ item }: { item: DossierLink }) {
   const src = item.assets[0];
   if (!src) return null;
+  const image = dossierImage(src);
+  if (image.sizes) image.sizes = NAV_PORTRAIT_SIZES;
   return (
     <span className="dossier-nav-portrait" aria-hidden="true">
-      <img src={src} {...dossierImage(src)} alt="" loading="lazy" decoding="async" />
+      <img src={src} {...image} alt="" loading="lazy" decoding="async" />
     </span>
   );
 }
