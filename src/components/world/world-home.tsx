@@ -1380,6 +1380,17 @@ export function WorldHome() {
     syncRail(riderRail.current, riderTab);
   }, [riderTab]);
 
+  // Only the selected classification's panel is rendered, so only its tab
+  // names a panel; the others would point screen readers at nothing.
+  useEffect(() => {
+    managerRail.current
+      ?.querySelectorAll<HTMLElement>('button[role="tab"]')
+      .forEach((tab, i) => {
+        if (i === managerTab) tab.setAttribute("aria-controls", `manager-panel-${i}`);
+        else tab.removeAttribute("aria-controls");
+      });
+  }, [managerTab]);
+
   useEffect(() => {
     return () => {
       if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
