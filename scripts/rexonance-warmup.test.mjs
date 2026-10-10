@@ -93,7 +93,10 @@ test("Alternate forms warm only near the rail, sequentially and at low priority"
   const f = fixture();
   let cleanup;
   try {
-    cleanup = warmRexonanceStages({}, ["/rider-rexonance-max-20260922.webp", "/rider-rexonance-ultra-20260922.webp"]);
+    cleanup = warmRexonanceStages({}, [
+      "/rider-rexonance-max-20260922.webp",
+      "/rider-rexonance-ultra-20260922.webp",
+    ]);
     f.flush();
     assert.equal(f.images.length, 0);
     f.near();
@@ -152,11 +155,16 @@ test("A resolver warms the visible element's own candidates, sizes only when it 
   const f = fixture();
   let cleanup;
   try {
-    cleanup = warmRexonanceStages({}, ["/civilian-bell-20260826.jpeg", "/character-nagi-20260922.webp"], (source) =>
-      source.endsWith(".jpeg") ? { srcSet: source.replace(/\.jpeg$/, "-delivery.webp") } : {
-        srcSet: `${source.replace(/\.webp$/, "")}-delivery-640.webp 640w`,
-        sizes: "(max-width: 767px) 100vw, 64vw",
-      },
+    cleanup = warmRexonanceStages(
+      {},
+      ["/civilian-bell-20260826.jpeg", "/character-nagi-20260922.webp"],
+      (source) =>
+        source.endsWith(".jpeg")
+          ? { srcSet: source.replace(/\.jpeg$/, "-delivery.webp") }
+          : {
+              srcSet: `${source.replace(/\.webp$/, "")}-delivery-640.webp 640w`,
+              sizes: "(max-width: 767px) 100vw, 64vw",
+            },
     );
     f.near();
     f.flush();
@@ -170,6 +178,111 @@ test("A resolver warms the visible element's own candidates, sizes only when it 
     assert.match(f.images[1].srcset, /character-nagi-20260922-delivery-640\.webp 640w/);
   } finally {
     cleanup?.();
+    f.restore();
+  }
+});
+
+// rx12: the entry call's suit-up pieces decode on intent, once, and never
+// gate navigation; the call builds the suit only once they all decoded.
+async function suitFixture({
+  connection = {},
+  reduced = false,
+  economy = false,
+  fail = false,
+} = {}) {
+  const originals = new Map(
+    ["window", "document", "navigator", "Image"].map((key) => [
+      key,
+      Object.getOwnPropertyDescriptor(globalThis, key),
+    ]),
+  );
+  const images = [];
+  class Image {
+    constructor() {
+      images.push(this);
+    }
+    decode() {
+      return fail && this.src.endsWith("figure.webp")
+        ? Promise.reject(new Error("x"))
+        : Promise.resolve();
+    }
+  }
+  for (const [key, value] of Object.entries({
+    window: { matchMedia: () => ({ matches: reduced }) },
+    document: { documentElement: { dataset: economy ? { worldEffects: "economy" } : {} } },
+    navigator: { connection },
+    Image,
+  })) {
+    Object.defineProperty(globalThis, key, { configurable: true, value });
+  }
+  const module = await import(`../src/lib/rexonance-suit-warmup.ts?${Math.random()}`);
+  return {
+    images,
+    module,
+    load: () => images.forEach((image) => image.onload?.()),
+    restore() {
+      for (const [key, descriptor] of originals) {
+        if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+        else delete globalThis[key];
+      }
+    },
+  };
+}
+
+test("The suit-up's pieces decode once on intent, then the call may build", async () => {
+  const { REXONANCE_SUIT_ASSETS } = await import("../src/lib/rexonance-suit.ts");
+  const f = await suitFixture();
+  try {
+    const first = f.module.warmRexonanceSuit();
+    assert.equal(f.module.warmRexonanceSuit("high"), first, "one warm-up at a time");
+    assert.deepEqual(
+      f.images.map((image) => image.src),
+      [...REXONANCE_SUIT_ASSETS],
+    );
+    assert.ok(
+      f.images.every((image) => image.decoding === "async" && image.fetchPriority === "low"),
+    );
+    assert.equal(f.module.isRexonanceSuitReady(), false);
+    f.load();
+    assert.equal(await first, true);
+    assert.equal(f.module.isRexonanceSuitReady(), true);
+    await f.module.warmRexonanceSuit();
+    assert.equal(f.images.length, REXONANCE_SUIT_ASSETS.length, "never fetched twice");
+  } finally {
+    f.restore();
+  }
+});
+
+test("The suit-up never warms on data saving or where the call rests on a still", async () => {
+  for (const options of [
+    { connection: { saveData: true } },
+    { connection: { effectiveType: "3g" } },
+    { reduced: true },
+    { economy: true },
+  ]) {
+    const f = await suitFixture(options);
+    try {
+      assert.equal(await f.module.warmRexonanceSuit(), false);
+      assert.equal(f.images.length, 0);
+      assert.equal(f.module.isRexonanceSuitReady(), false);
+    } finally {
+      f.restore();
+    }
+  }
+});
+
+test("A failed suit-up decode leaves the call whole and lets a later intent retry", async () => {
+  const f = await suitFixture({ fail: true });
+  try {
+    const first = f.module.warmRexonanceSuit();
+    f.images.at(-1).onerror();
+    f.load();
+    assert.equal(await first, false);
+    assert.equal(f.module.isRexonanceSuitReady(), false);
+    const count = f.images.length;
+    void f.module.warmRexonanceSuit();
+    assert.ok(f.images.length > count, "retried");
+  } finally {
     f.restore();
   }
 });

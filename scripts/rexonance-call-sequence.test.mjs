@@ -55,7 +55,8 @@ test("entry calls stay identical to the published five-call sequence and order",
 });
 
 test("entry and stage timings stay bounded and stage labels are not new calls", () => {
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 2300);
+  // rx12: the face's pixel squares hold ~0.6 s on the last call (owner).
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 2880);
   assert.equal(REXONANCE_ENTRY_TIMINGS.reveal, 480);
   assert.equal(REXONANCE_STAGE_DURATION_MS, 650);
   assert.deepEqual(REXONANCE_STAGE_LABELS, {

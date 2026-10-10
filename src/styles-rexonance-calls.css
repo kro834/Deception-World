@@ -1056,20 +1056,22 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 /* ================================================================
-   rx3 — the suit-up. The five calls stay the hero of the frame; around
-   them a HUD boots, a schematic armour assembles on the call clock and
-   its faceplate shuts before the hand-over. Textless <i>/<svg>
-   ornaments plus a small HUD whose readouts are facts the page already
+   rx3 — the suit-up; rx12 (2026-10-10) — the raster suit-up. The five
+   calls stay the hero of the frame; around them a HUD boots and the
+   approved full-body artwork suits up on the call clock: FAR UP！ scans
+   the bare undersuit, RIDER！ seeds the P14 core and gathers nanite
+   motes, each SA-GA！ forms a group of armour pieces out of nanites
+   floating a little off the body and each DEUS！ snaps it on with a
+   clank, a spark and a jolt; REXONANCE！ grows the tail, streams the
+   ribbons and clamps the helmet down; REXONANCE DEUS！ fills the face's
+   lights with pixel squares that scatter. Textless <i>/<svg> layers
+   (the artwork's pieces are backgrounds from scripts/build-rexonance-
+   suit.mjs) plus a small HUD whose readouts are facts the page already
    prints. Full tier: transform/opacity only, finite, behind reduced
-   motion and economy. Calm, economy and reduced rest on a quiet still
-   schematic; forced colours drop it all. Scoped to .rx-call-sequence.
+   motion and economy. Calm, economy and reduced rest on the finished
+   figure, still; forced colours drop it all. Scoped to .rx-call-sequence.
    ================================================================ */
 .rx-call-sequence .rx-suit {
-  /* The figure's height; its 1:2 box is centred below the caption row.
-     Callout anchors sit in its outer bands, clear of the calls. */
-  --rx-suit-h: min(86vh, 150vw, 960px, 100vh - 128px);
-  /* The figure's centre: the frame's, or beside the calls (below). */
-  --rx-suit-cx: 50%;
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -1080,24 +1082,50 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   display: block;
 }
 
+/* rx12: the suit has its own stage and the calls their own zone, so no
+   call ever crosses the armour (the face's burst least of all), and the
+   figure needs no dimmed torso band. Portrait frames stand the figure in
+   the upper frame under the caption row and set the calls in a band below
+   it; wide landscape frames (below) stand it on the right, at nearly the
+   frame's height, and set the calls on the left. The figure's box has the
+   artwork's aspect (--rx-suit-ar). */
+.rx-call-sequence[data-mode="entry"] {
+  --rx-suit-ar: 0.5446;
+  --rx-suit-top: max(72px, calc(env(safe-area-inset-top) + 52px));
+  --rx-suit-band: clamp(210px, 31vh, 360px);
+  --rx-suit-h: min(
+    960px,
+    100vh - var(--rx-suit-band) - var(--rx-suit-top),
+    (100vw - 32px) / var(--rx-suit-ar)
+  );
+  --rx-suit-cx: 50%;
+  --rx-suit-cy: calc(var(--rx-suit-top) + var(--rx-suit-h) / 2);
+  --rx-call-zone: calc(100vw - 48px);
+}
+
 @supports (height: 1svh) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-h: min(86svh, 150vw, 960px, 100svh - 128px);
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-band: clamp(210px, 31svh, 360px);
+    --rx-suit-h: min(
+      960px,
+      100svh - var(--rx-suit-band) - var(--rx-suit-top),
+      (100vw - 32px) / var(--rx-suit-ar)
+    );
   }
 }
 
-/* The torso band behind the calls is drawn at under half strength, so the
-   calls stay the hero and the frame's middle never brightens past them;
-   the helmet, the core and the legs keep full strength. */
+.rx-call-sequence[data-mode="entry"] .rx-call-words {
+  padding-top: calc(var(--rx-suit-top) + var(--rx-suit-h) + 8px);
+  padding-bottom: max(40px, calc(env(safe-area-inset-bottom) + 24px));
+}
+
 .rx-call-sequence .rx-suit-figure {
   position: absolute;
-  top: 50%;
+  top: var(--rx-suit-cy);
   left: var(--rx-suit-cx);
-  width: calc(var(--rx-suit-h) / 2);
+  width: calc(var(--rx-suit-h) * var(--rx-suit-ar));
   height: var(--rx-suit-h);
   translate: -50% -50%;
-  -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
-  mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 52%) 40% 62%, #000 72%);
 }
 
 .rx-call-sequence .rx-suit-figure > * {
@@ -1110,25 +1138,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   overflow: visible;
 }
 
-.rx-call-sequence .rx-suit .rx-suit-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-
-.rx-call-sequence .rx-suit-figure > i > svg {
-  width: 100%;
-  height: 100%;
-}
-
-.rx-call-sequence .rx-suit path {
-  stroke-width: 1px;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-
-/* The undersuit, dashed, on its construction lines, inside the scan's
+/* The undersuit (or, still, the finished figure) inside the scan's
    window; the sweep is the window's lower edge. */
 .rx-call-sequence .rx-suit-scan {
   inset: 0 -20%;
@@ -1155,23 +1165,21 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   background: linear-gradient(90deg, transparent, #c9f6ff 22% 78%, transparent);
 }
 
-.rx-call-sequence .rx-suit-scan > .rx-suit-blueprint {
+.rx-call-sequence .rx-suit-scan > i {
   position: absolute;
   top: 0;
   left: 14.2857%;
+  display: block;
   width: 71.4286%;
   height: 100%;
+  background: no-repeat 0 0 / 100% 100%;
 }
 
-.rx-call-sequence .rx-suit-blueprint path {
-  fill: none;
-  stroke: rgb(121 232 255 / 46%);
-  stroke-dasharray: 2 4;
-}
-
-.rx-call-sequence .rx-suit-blueprint .rx-suit-guides {
-  stroke: rgb(121 232 255 / 10%);
-  stroke-dasharray: none;
+/* The bare undersuit plays only in the full tier; the finished figure
+   stands everywhere else (and in the full tier until the pieces are
+   ready). */
+.rx-call-sequence .rx-suit-scan > .rx-suit-under {
+  display: none;
 }
 
 /* Alignment brackets on the joints (full tier only). */
@@ -1194,185 +1202,91 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   translate: -50% -50%;
 }
 
-/* Plates: solid panels lit from above (a darker body under a lit top
-   edge, a rim brightest where the light strikes). Ice on the left,
-   violet on the right, white at the centre; gold is the trims'. */
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path {
-  stroke-width: 1.4px;
-}
 
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-ice path {
-  fill: url("#rx-suit-fill-ice");
-  stroke: url("#rx-suit-rim-ice");
-}
-
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-violet path {
-  fill: url("#rx-suit-fill-violet");
-  stroke: url("#rx-suit-rim-violet");
-}
-
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-white path {
-  fill: url("#rx-suit-fill-white");
-  stroke: url("#rx-suit-rim-white");
-}
-
-/* The crown and its horns are gold metal, as in the artwork; they form on
-   the last call, so gold still arrives last. */
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm).is-gold path {
-  fill: url("#rx-suit-fill-gold");
-  stroke: url("#rx-suit-rim-gold");
-}
-
-/* Crystals (the diamonds, the stars, the belt cells, the tail's blade) and
-   the energy ribbons: translucent ice on the left, pink on the right. */
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) path.rx-suit-accent {
-  fill: url("#rx-suit-fill-gem-ice");
-  stroke: url("#rx-suit-rim-gem-ice");
-}
-
-.rx-call-sequence :is(.rx-suit-plate.is-violet, .rx-suit-plate.is-white) path.rx-suit-accent {
-  fill: url("#rx-suit-fill-gem-violet");
-  stroke: url("#rx-suit-rim-gem-violet");
-}
-
-/* The energy ribbons: lit at the root, gone by the foot. */
-.rx-call-sequence .rx-suit-plate.is-ribbon path {
-  fill: url("#rx-suit-fill-ribbon-ice");
-  stroke: url("#rx-suit-rim-ribbon-ice");
-}
-
-.rx-call-sequence .rx-suit-plate.is-ribbon.is-violet path {
-  fill: url("#rx-suit-fill-ribbon-violet");
-  stroke: url("#rx-suit-rim-ribbon-violet");
-}
-
-/* The shoulder fans' feather-blades: crystal bodies with gold edges. */
-.rx-call-sequence .rx-suit-plate.is-plume path:not([class]) {
-  fill: url("#rx-suit-fill-plume-ice");
-  stroke: url("#rx-suit-rim-plume-ice");
-}
-
-.rx-call-sequence .rx-suit-plate.is-plume.is-violet path:not([class]) {
-  fill: url("#rx-suit-fill-plume-violet");
-  stroke: url("#rx-suit-rim-plume-violet");
-}
-
-/* The lock's rim glint: a bright copy of the outline, never a fill. */
-.rx-call-sequence .rx-suit-figure > i > .rx-suit-glint {
-  position: absolute;
+/* RIDER！'s nanite motes: squares in the air round the body (full tier). */
+.rx-call-sequence .rx-suit-figure > .rx-suit-motes {
   inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
   opacity: 0;
 }
 
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm) > svg.rx-suit-glint path {
-  fill: none;
-  stroke: #fbfeff;
-  stroke-width: 1.5px;
-}
-
-
-/* Nanite grains: each piece's cloud (resting unseen), and the seed. */
-.rx-call-sequence .rx-suit-figure > i > .rx-suit-cloud {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-
-.rx-call-sequence .rx-suit-cloud path {
-  fill: #bff4ff;
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path {
   stroke: none;
 }
 
-.rx-call-sequence .is-violet > .rx-suit-cloud path {
-  fill: #ffc4ec;
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-cyan {
+  fill: #8cefff;
 }
 
-.rx-call-sequence .is-white > .rx-suit-cloud path {
-  fill: #eef8ff;
-}
-
-.rx-call-sequence .is-gold > .rx-suit-cloud path {
-  fill: #ffecbf;
-}
-
-.rx-call-sequence .rx-suit-seed {
-  opacity: 0;
-}
-
-.rx-call-sequence .rx-suit-seed path {
-  fill: #dff9ff;
-  stroke: none;
-}
-
-/* The faceplate: two halves, folded into the helmet's sides until the
-   last call. */
-.rx-call-sequence .rx-suit-face path {
-  fill: url("#rx-suit-fill-white");
-  stroke: rgb(121 232 255 / 72%);
-}
-
-.rx-call-sequence .rx-suit-face.is-right path {
-  stroke: rgb(255 154 216 / 72%);
-}
-
-/* The trims: the owner's accent outlines, in gold. */
-.rx-call-sequence .rx-suit-trim path {
-  fill: none;
-  stroke: url("#rx-suit-rim-gold");
-  stroke-width: 1.6px;
-}
-
-.rx-call-sequence .rx-suit-eyes path {
-  stroke: none;
-}
-
-.rx-call-sequence .rx-suit-eyes.is-ice path {
-  fill: #79e8ff;
-}
-
-.rx-call-sequence .rx-suit-eyes.is-violet path {
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-pink {
   fill: #ff8fd8;
 }
 
-.rx-call-sequence .rx-suit-eyes.is-gold path {
-  fill: #f2d896;
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-white {
+  fill: #f2fbff;
 }
 
-.rx-call-sequence .rx-suit-eyes:not(.is-gold) {
+/* The armour: the artwork's pieces over the undersuit (full tier). Each
+   piece is one small box carrying three layers of its sprite — the art,
+   the coarse nanite mosaic it forms out of, and the faint cyan rim it
+   floats with — placed in figure percentages by the component. */
+.rx-call-sequence .rx-suit-figure > .rx-suit-build {
+  inset: 0;
+  display: none;
+}
+
+.rx-call-sequence .rx-suit-build > * {
+  position: absolute;
+  display: block;
+  background: no-repeat 0 0 / 100% 100%;
+}
+
+.rx-call-sequence .rx-suit-piece > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-image: var(--rx-suit-src);
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+}
+
+.rx-call-sequence .rx-suit-piece > .rx-suit-art {
+  background-position: 0 0;
+}
+
+.rx-call-sequence .rx-suit-piece > .rx-suit-mosaic {
+  background-position: 50% 0;
   opacity: 0;
 }
 
-/* Resonance: the plates' edges light from the core outward. */
-.rx-call-sequence .rx-suit-glow {
+.rx-call-sequence .rx-suit-piece > .rx-suit-halo-rim {
+  background-position: 100% 0;
   opacity: 0;
 }
 
-.rx-call-sequence .rx-suit-glow path {
-  fill: none;
-  stroke-width: 1.5px;
+/* The clank: a four-point glint at the seam as a piece bites. */
+.rx-call-sequence .rx-suit-build > .rx-suit-spark {
+  width: 9%;
+  aspect-ratio: 1;
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% /
+      100% 2px no-repeat,
+    linear-gradient(transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% / 2px
+      62% no-repeat,
+    radial-gradient(circle, rgb(255 251 236 / 95%) 0 7%, rgb(121 232 255 / 40%) 18%, transparent 46%);
+  translate: -50% -50%;
 }
 
-/* Under each resonance line, a wider, softer copy: the seam's light bleeds. */
-.rx-call-sequence .rx-suit-glow path.rx-suit-soft {
-  stroke-width: 5px;
-  opacity: 0.3;
-}
-
-.rx-call-sequence .rx-suit-glow.is-ice path {
-  stroke: #8ff0ff;
-}
-
-.rx-call-sequence .rx-suit-glow.is-violet path {
-  stroke: #ffa6df;
-}
-
-.rx-call-sequence .rx-suit-glow.is-gold path {
-  stroke: #f0d49a;
+/* REXONANCE DEUS！'s pixel squares (full tier). */
+.rx-call-sequence .rx-suit-figure > .rx-suit-pixels {
+  display: none;
+  opacity: 0;
 }
 
 .rx-call-sequence .rx-suit-ring {
-  top: 26.667%;
-  left: 50%;
   width: 44%;
   aspect-ratio: 1;
   border: 1px solid #79e8ff;
@@ -1389,35 +1303,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   border-color: #e3c185;
 }
 
-/* The core (spiral housing) and the belt jewel bloom gold last. */
-.rx-call-sequence :is(.rx-suit-core, .rx-suit-jewel) {
-  top: 26.667%;
-  left: 50%;
-  width: 8%;
-  aspect-ratio: 1;
-  background: radial-gradient(circle at 42% 38%, #fffbee 0 18%, #f6dc9c 40%, #c9a15a 72%, #7a5a2a);
-  border: 1px solid #ffe9b8;
-  border-radius: 50%;
-  box-shadow:
-    inset 0 0 0 2px rgb(255 255 255 / 25%),
-    0 0 12px 3px rgb(242 216 150 / 55%);
-  translate: -50% -50%;
-}
-
-.rx-call-sequence .rx-suit-jewel {
-  top: 39.583%;
-  width: 6%;
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 25%),
-    0 0 8px 2px rgb(242 216 150 / 45%);
-}
-
 /* The target: an ice reticle acquires the visor's place on FAR UP！ and
    holds around the helmet; on REXONANCE DEUS！ it hands over to four gold
    brackets that lock on. */
 .rx-call-sequence .rx-suit-lock {
-  top: 12.5%;
-  left: 50%;
   display: none;
   width: 30%;
   aspect-ratio: 1.6;
@@ -1531,7 +1420,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   --rx-suit-x: 0;
   --rx-suit-y: 0.5;
   position: absolute;
-  top: calc(50% + (var(--rx-suit-y) - 0.5) * var(--rx-suit-h));
+  top: calc(var(--rx-suit-cy) + (var(--rx-suit-y) - 0.5) * var(--rx-suit-h));
   right: max(36px, calc(env(safe-area-inset-right) + 16px));
   left: calc(var(--rx-suit-cx) + var(--rx-suit-x) * var(--rx-suit-h));
   display: flex;
@@ -1573,7 +1462,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 .rx-call-sequence .rx-suit-callout.is-lock {
-  top: calc(50% - 0.475 * var(--rx-suit-h));
+  top: calc(var(--rx-suit-cy) - 0.475 * var(--rx-suit-h));
   /* Left of the crown: the tail arches over the right. */
   right: calc(100% - var(--rx-suit-cx) + 0.06 * var(--rx-suit-h));
   left: auto;
@@ -1682,10 +1571,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 /* Short landscapes: the figure fits under the caption row and the check
    keeps its first two readings, clear of the calls. */
 @media (orientation: landscape) and (max-height: 560px) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-h: calc(100vh - 88px);
-  }
-
   .rx-call-sequence .rx-suit-boot {
     bottom: max(40px, calc(env(safe-area-inset-bottom) + 20px));
     left: max(24px, calc(env(safe-area-inset-left) + 12px));
@@ -1696,34 +1581,32 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-@supports (height: 1svh) {
-  @media (orientation: landscape) and (max-height: 560px) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: calc(100svh - 88px);
-    }
-  }
-}
-
-/* Wide landscape frames: the figure stands beside the calls, in the room
-   the chant leaves on the right (the chant measures about 9.2 em at its
-   own size), so the fitting reads whole and the words stay clear. */
+/* Wide landscape frames: the figure stands on the right at nearly the
+   frame's height; the calls keep the zone on its left (--rx-call-zone),
+   each call's type capped to fit that zone (its measured width in em:
+   FAR UP！ 5.3, the chant 9.7, REXONANCE！ 9.1, REXONANCE 8.9). */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-chant: clamp(24px, 5.75vw, 100px);
-    --rx-suit-edge: 36px;
-    --rx-suit-h: min(
-      86vh,
-      960px,
-      100vh - 128px,
-      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-edge: max(28px, 4vw);
+    --rx-suit-h: min(960px, 100vh - 120px);
+    --rx-suit-cx: calc(100% - var(--rx-suit-edge) - var(--rx-suit-h) * var(--rx-suit-ar) / 2);
+    --rx-suit-cy: 50%;
+    --rx-call-zone: calc(
+      100vw - 2 * var(--rx-suit-edge) - var(--rx-suit-h) * var(--rx-suit-ar) - 24px
     );
-    --rx-suit-cx: calc(100% - var(--rx-suit-edge) - var(--rx-suit-h) / 4);
   }
 
-  /* Only the last call reaches the figure here: a lighter torso band. */
-  .rx-call-sequence .rx-suit-figure {
-    -webkit-mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
-    mask-image: linear-gradient(#000 30%, rgb(0 0 0 / 74%) 40% 62%, #000 72%);
+  .rx-call-sequence[data-mode="entry"] .rx-call-words {
+    padding: 64px calc(var(--rx-suit-edge) + var(--rx-suit-h) * var(--rx-suit-ar) + 24px) 64px
+      var(--rx-suit-edge);
+  }
+
+  .rx-call-sequence[data-mode="entry"] .rx-call-opening {
+    font-size: max(24px, min(10.5vw, 156px, 22vh, var(--rx-call-zone) / 5.6));
+  }
+
+  .rx-call-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {
+    font-size: max(18px, min(5.75vw, 100px, 10vh, var(--rx-call-zone) / 10.3));
   }
 
   /* Every label reads on the right, the legs' too (from the right boot):
@@ -1746,36 +1629,55 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+@supports (height: 1svh) {
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+    .rx-call-sequence[data-mode="entry"] {
+      --rx-suit-h: min(960px, 100svh - 120px);
+    }
+  }
+}
+
+/* Short landscapes (phones on their side): the figure takes the frame's
+   height under the caption row; its part labels (which would cross the
+   armour in so narrow a margin) and the system check (which would meet
+   the chant in the calls' zone) stay off. */
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
-  .rx-call-sequence .rx-suit {
-    --rx-suit-chant: min(5.75vw, 10vh);
-    --rx-suit-edge: 24px;
-    --rx-suit-h: min(
-      100vh - 88px,
-      100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
-    );
+  .rx-call-sequence[data-mode="entry"] {
+    --rx-suit-h: calc(100vh - 84px);
+  }
+
+  .rx-call-sequence[data-mode="entry"] :is(.rx-suit-callouts, .rx-suit-boot) {
+    visibility: hidden;
   }
 }
 
 @supports (height: 1svh) {
-  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: min(
-        86svh,
-        960px,
-        100svh - 128px,
-        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
-      );
+  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
+    .rx-call-sequence[data-mode="entry"] {
+      --rx-suit-h: calc(100svh - 84px);
     }
   }
+}
 
-  @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
-    .rx-call-sequence .rx-suit {
-      --rx-suit-h: min(
-        100svh - 88px,
-        100vw - 9.2 * var(--rx-suit-chant) - 2 * var(--rx-suit-edge)
-      );
-    }
+/* The last call, the largest type, keeps to the calls' zone too. */
+@media (prefers-reduced-motion: no-preference) and (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-final {
+    font-size: max(24px, min(9vw, 150px, 18vh, var(--rx-call-zone) / 9.4));
+  }
+}
+
+/* Portrait frames: the system check reads top left, beside the helmet,
+   its first two readings only (the calls' band is below the figure). */
+@media not ((orientation: landscape) and (min-aspect-ratio: 13 / 10)) {
+  .rx-call-sequence .rx-suit-boot {
+    top: max(74px, calc(env(safe-area-inset-top) + 54px));
+    bottom: auto;
+  }
+
+  .rx-call-sequence .rx-suit-boot p:nth-child(n + 4) {
+    display: none;
   }
 }
 
@@ -1791,6 +1693,35 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-suit-boot {
     display: grid;
     opacity: 0;
+  }
+
+  /* The build: the undersuit, the motes, the pieces and the squares. Until
+     the pieces are decoded (data-suit="whole") the build keeps its clock
+     unseen and the finished figure stands in the scan; a switch inside
+     FAR UP！ shows the build from the next frame. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit-figure
+    > :is(.rx-suit-build, .rx-suit-motes, .rx-suit-pixels),
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit-scan
+    > .rx-suit-under {
+    display: block;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit[data-suit="whole"]
+    :is(.rx-suit-build, .rx-suit-under) {
+    visibility: hidden;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit[data-suit="build"]
+    .rx-suit-whole {
+    display: none;
   }
 
   /* FAR UP！: the HUD boots. The visor's edges draw in, the heading
@@ -1813,7 +1744,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitHeading 300ms steps(5, jump-end) 60ms both;
   }
 
-  /* The check gives way as the plates start to lock. */
+  /* The check gives way as the first pieces form. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-boot {
@@ -1834,9 +1765,9 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitTick 60ms steps(2, jump-end) calc(120ms + var(--rx-suit-i) * 32ms) both;
   }
 
-  /* FAR UP！ also scans the body: a single sweep runs top to bottom and
-     leaves the undersuit drawn behind it (the window slides down while
-     its drawing holds still: two transforms, no clip). */
+  /* FAR UP！ scans the bare undersuit: a single sweep runs top to bottom
+     and leaves the suit standing behind it (the window slides down while
+     its picture holds still: two transforms, no clip). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-scan {
@@ -1846,7 +1777,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-scan
-    > svg {
+    > i {
     animation:
       rxSuitScanHold 250ms cubic-bezier(0.45, 0, 0.55, 1) 70ms both,
       rxSuitUndersuit 60ms steps(2, jump-end) var(--rx-call-rider-start) both;
@@ -1861,8 +1792,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitSweep 330ms linear 70ms both;
   }
 
-  /* RIDER！: the undersuit locks (above) and alignment brackets bite on
-     the joints, core first, then shoulders, elbows, knees. */
+  /* RIDER！: alignment brackets bite on the joints, core first, then
+     shoulders, elbows, knees; the P14 core seeds (its halo blooms) and
+     nanite motes gather in the air round the body, spent as the pieces
+     form through the chant. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-joint {
@@ -1870,53 +1803,73 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
       both;
   }
 
-  /* RIDER！ seeds the core: a knot of grains gathers there. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-seed {
-    animation: rxSuitSeed 420ms linear calc(var(--rx-call-rider-start) + 40ms) both;
+    .rx-suit-halo.is-core {
+    animation: rxSuitHalo 420ms var(--rx-call-ease) calc(var(--rx-call-rider-start) + 40ms) both;
   }
 
-  /* SA-GA！DEUS！: the nanite front spreads from the core, one region per
-     line — chest, shoulders and arms to the hands, waist and legs to the
-     feet, the mantle — and the helmet rises up the neck on REXONANCE
-     DEUS！. Each piece's grains gather from 60 ms before the front reaches
-     it (--rx-suit-t) while the piece flows out from the core's side, the
-     plate solidifies behind the front, a bright seam runs its outline, and
-     the grains settle out. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-motes {
+    animation: rxSuitMotes 970ms linear var(--rx-call-rider-start) both;
+  }
+
+  /* SA-GA！DEUS！: on each SA-GA！ a group of pieces forms out of nanites
+     (--rx-suit-t; over --rx-suit-f): the mosaic converges out of a wider
+     cloud, the plate resolves through it and the mosaic goes, all while the
+     piece floats off the body (its float pose, set per piece) with a faint
+     cyan rim. On its DEUS！ (--rx-suit-s) it snaps onto its seat: a fast
+     travel, a hard stop a hair past it, settled; a spark bites at the
+     seam and the whole figure jolts. Legs, arms, chest and shoulders, then
+     belt and waist; the pieces of a group bite a beat apart. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-piece {
+    animation: rxSuitSnap 90ms linear var(--rx-suit-s) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-piece
+    > .rx-suit-mosaic {
+    animation: rxSuitMote var(--rx-suit-f) linear var(--rx-suit-t) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-piece
+    > .rx-suit-art {
+    animation: rxSuitResolve calc(var(--rx-suit-f) * 0.5) linear
+      calc(var(--rx-suit-t) + var(--rx-suit-f) * 0.35) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-piece:not(.is-tail, .is-ribbon)
+    > .rx-suit-halo-rim {
+    animation: rxSuitRimLight calc(var(--rx-suit-s) - var(--rx-suit-t) + 70ms) linear
+      var(--rx-suit-t) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-spark {
+    animation: rxSuitSpark 170ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-s) + 55ms)
+      both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-figure {
+    animation: rxSuitJolt 1110ms linear calc(var(--rx-call-chant-start) + 230ms) both;
+  }
+
+  /* Each label lands on its group's DEUS！ (the helmet's on the last call). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
     .rx-suit-callout {
-    --rx-suit-lock: calc(
-      var(--rx-call-chant-start) + var(--rx-suit-i) * var(--rx-call-chant-duration) / 4
-    );
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    :is(.rx-suit-plate, .rx-suit-helm) {
-    animation: rxSuitFlow 280ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-t) - 60ms) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    :is(.rx-suit-plate, .rx-suit-helm)
-    > svg:first-child {
-    animation: rxSuitSolid 220ms linear var(--rx-suit-t) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    :is(.rx-suit-plate, .rx-suit-helm)
-    > .rx-suit-cloud {
-    animation: rxSuitCloud 300ms linear calc(var(--rx-suit-t) - 60ms) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    :is(.rx-suit-plate, .rx-suit-helm)
-    > .rx-suit-glint {
-    animation: rxSuitGlint 180ms linear calc(var(--rx-suit-t) + 60ms) both;
+    --rx-suit-lock: calc(var(--rx-call-chant-start) + 230ms + var(--rx-suit-i) * 120ms);
   }
 
   html:not([data-world-effects="economy"])
@@ -1932,45 +1885,23 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitTick 60ms steps(2, jump-end) calc(var(--rx-suit-lock) + 50ms) both;
   }
 
-  /* The faceplate halves form with the shell, open, and close over it. */
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-face {
-    animation:
-      rxSuitFlow 280ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--rx-suit-t) - 60ms) both,
-      rxSuitSolid 220ms linear var(--rx-suit-t) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-face
-    > svg {
-    animation: rxSuitFaceShut 90ms cubic-bezier(0.6, 0, 0.15, 1)
-      calc(var(--rx-call-final-start) + 50ms) both;
-  }
-
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-callout.is-head {
     --rx-suit-lock: calc(var(--rx-call-final-start) + 80ms);
   }
 
-  /* REXONANCE！: resonance runs from the core through the armour, one
-     phase per line with the aperture's arcs — ice, violet, gold — and the
-     gold stays in the trims, core to arms to legs, the last on line four. */
+  /* REXONANCE！: resonance rings run from the core, one phase per line
+     with the aperture's arcs — ice, violet, gold. The tail grows out from
+     behind the shoulder section by section, root to blade (each from the
+     joint it shares with the last), and the ribbons stream down; the
+     helmet forms above the head and hovers (same layers as the pieces). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
-    :is(.rx-suit-glow, .rx-suit-ring) {
+    .rx-suit-ring {
     --rx-suit-at: calc(
       var(--rx-call-response-start) + var(--rx-suit-k) * var(--rx-call-response-duration) / 4
     );
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-glow {
-    animation: rxSuitGlow 300ms cubic-bezier(0.2, 0.7, 0.2, 1)
-      calc(var(--rx-suit-at) + var(--rx-suit-z) * 70ms) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1981,23 +1912,18 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-trim {
-    animation: rxSuitTick 240ms cubic-bezier(0.2, 0.7, 0.2, 1)
-      calc(
-        var(--rx-call-response-start) + var(--rx-call-response-duration) / 2 + var(--rx-suit-z) *
-          85ms
-      )
-      both;
+    .rx-suit-piece.is-tail {
+    animation: rxSuitGrow var(--rx-suit-f) cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-trim.is-head {
-    animation: rxSuitTick 80ms linear calc(var(--rx-call-final-start) + 190ms) both;
+    .rx-suit-piece.is-ribbon {
+    animation: rxSuitStream var(--rx-suit-f) cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-t) both;
   }
 
-  /* The reticle acquires on FAR UP！, dims as the helmet arrives above it
-     on the first REXONANCE！, and on REXONANCE DEUS！ hands over to the gold
+  /* The reticle acquires on FAR UP！, dims as the helmet forms above it
+     through REXONANCE！, and on REXONANCE DEUS！ hands over to the gold
      lock. Its keyframes sit on the call clock: 1300 ms (61.386 %) and the
      last call at 1980 ms (95.05 %). */
   html:not([data-world-effects="economy"])
@@ -2006,8 +1932,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitReticle 2020ms linear 60ms both;
   }
 
-  /* REXONANCE DEUS！: the lock settles on the visor, the helmet shuts,
-     and the eyes, the core and the belt jewel ignite — gold last. */
+  /* REXONANCE DEUS！: the lock settles on the visor; the bodysuit between
+     the plates takes the undersuit's place; the face's lights fill with
+     pixel squares, group by group, the lights come on under them and the
+     squares burst outward from the visor: transformation complete. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-lock::after {
@@ -2022,21 +1950,27 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-eyes {
-    animation: rxSuitIgnite 50ms linear
-      calc(var(--rx-call-final-start) + 140ms + var(--rx-suit-k) * 50ms) both;
+    .rx-suit-body {
+    animation: rxSuitTick 90ms linear var(--rx-call-final-start) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-core {
-    animation: rxSuitCore 70ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 240ms) both;
+    .rx-suit-pixels {
+    animation: rxSuitPixels calc(820ms - var(--rx-suit-i) * 4ms) linear
+      calc(var(--rx-call-final-start) + 10ms + var(--rx-suit-i) * 14ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-jewel {
-    animation: rxSuitCore 60ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 255ms) both;
+    .rx-suit-face {
+    animation: rxSuitTick 60ms linear calc(var(--rx-call-final-start) + 700ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-halo.is-eyes {
+    animation: rxSuitHalo 140ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 710ms) both;
   }
 
   /* The hand-over: the suit leaves with the caption and the frame. */
@@ -2065,38 +1999,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-/* The flow: each piece starts a little nearer the core (--rx-suit-fx/fy,
-   set per piece as fractions of the figure's height), slightly gathered,
-   and grows pieces (blades, mantle, iris, helmet) from their pivot. */
-.rx-call-sequence :is(.rx-suit-plate, .rx-suit-helm, .rx-suit-face) {
-  --rx-suit-fx: 0;
-  --rx-suit-fy: 0;
+/* A piece's float pose: off the body by [--rx-suit-dx, --rx-suit-dy]
+   figure heights, turned and scaled (forward > 1). */
+.rx-call-sequence .rx-suit-piece {
+  --rx-suit-dx: 0;
+  --rx-suit-dy: 0;
   --rx-suit-r: 0deg;
-  --rx-suit-sx: 0.94;
-  --rx-suit-sy: 0.94;
-}
-
-.rx-call-sequence .rx-suit-face {
-  --rx-suit-t: calc(var(--rx-call-final-start) + 20ms);
-  --rx-suit-sx: 0.8;
-  --rx-suit-sy: 0.2;
-  transform-origin: 50% 100%;
-}
-
-.rx-call-sequence .rx-suit-face {
-  --rx-suit-open: translate3d(-12%, 0, 0) scaleX(0.3);
-}
-
-.rx-call-sequence .rx-suit-face.is-right {
-  --rx-suit-open: translate3d(12%, 0, 0) scaleX(0.3);
-}
-
-.rx-call-sequence .rx-suit-face > svg {
-  transform-origin: 0 50%;
-}
-
-.rx-call-sequence .rx-suit-face.is-right > svg {
-  transform-origin: 100% 50%;
+  --rx-suit-k: 1;
 }
 
 @keyframes rxSuitRim {
@@ -2190,64 +2099,181 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-@keyframes rxSuitSeed {
+/* RIDER！'s motes gather in (330-650 ms) and are spent through the chant. */
+@keyframes rxSuitMotes {
   0% {
     opacity: 0;
-    transform: scale(2.4) rotate(-40deg);
+    transform: scale(1.3) rotate(-6deg);
   }
   30% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 0.6;
+    opacity: 0.9;
     transform: none;
-  }
-}
-/* The piece flows out from the core's side and from its pivot. */
-@keyframes rxSuitFlow {
-  from {
-    transform: translate3d(
-        calc(var(--rx-suit-fx) * var(--rx-suit-h) * -0.22),
-        calc(var(--rx-suit-fy) * var(--rx-suit-h) * -0.22),
-        0
-      )
-      rotate(var(--rx-suit-r)) scale(var(--rx-suit-sx), var(--rx-suit-sy));
-  }
-  to {
-    transform: none;
-  }
-}
-@keyframes rxSuitSolid {
-  from {
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.75;
-  }
-  to {
-    opacity: 1;
-  }
-}
-/* Grains gather out of a wider cloud onto the plate, then settle out. */
-@keyframes rxSuitCloud {
-  0% {
-    opacity: 0;
-    transform: scale(1.8) rotate(12deg);
-  }
-  25% {
-    opacity: 1;
   }
   55% {
-    opacity: 0.8;
+    opacity: 0.7;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+/* The snap: from the float pose, accelerating to the seat (60 %), a hair
+   past it on impact, settled. */
+@keyframes rxSuitSnap {
+  0% {
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.7);
+    transform: translate3d(
+        calc(var(--rx-suit-dx) * var(--rx-suit-h)),
+        calc(var(--rx-suit-dy) * var(--rx-suit-h)),
+        0
+      )
+      rotate(var(--rx-suit-r)) scale(var(--rx-suit-k));
+  }
+  60% {
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+    transform: translate3d(
+        calc(var(--rx-suit-dx) * var(--rx-suit-h) * -0.07),
+        calc(var(--rx-suit-dy) * var(--rx-suit-h) * -0.07),
+        0
+      )
+      scale(0.99);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* The nanite mosaic: converges out of a wider cloud, holds while the
+   plate resolves through it, and goes. */
+@keyframes rxSuitMote {
+  0% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+  68% {
+    opacity: 1;
     transform: none;
   }
   100% {
     opacity: 0;
     transform: none;
+  }
+}
+@keyframes rxSuitResolve {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* The rim: on while the piece floats, off as it bites. */
+@keyframes rxSuitRimLight {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  78% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rxSuitSpark {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5) rotate(30deg);
+  }
+}
+/* The jolt: the figure dips 2 px on each snap's impact (legs 880, arms
+   1000, chest 1120 and waist 1240 ms, +40) and on the helmet's (1890). */
+@keyframes rxSuitJolt {
+  0%,
+  1.802%,
+  7.207%,
+  12.613%,
+  18.018%,
+  23.423%,
+  28.829%,
+  34.234%,
+  39.64%,
+  92.793%,
+  98.198%,
+  100% {
+    transform: none;
+  }
+  3.604%,
+  14.414%,
+  25.225%,
+  36.036%,
+  94.595% {
+    transform: translate3d(0, 2px, 0);
+  }
+}
+/* A tail section grows from the joint it shares with the last. */
+@keyframes rxSuitGrow {
+  from {
+    transform: rotate(-32deg) scale(0.12);
+  }
+  to {
+    transform: none;
+  }
+}
+/* A ribbon streams down from the shoulder. */
+@keyframes rxSuitStream {
+  from {
+    transform: scale(0.82, 0.06);
+  }
+  to {
+    transform: none;
+  }
+}
+/* A group of pixel squares lands on the face's lights (fast), holds, then
+   bursts outward from the visor and goes (its box is the burst's size). */
+@keyframes rxSuitPixels {
+  0% {
+    opacity: 0;
+    transform: scale(calc(0.7 / var(--rx-suit-burst)));
+  }
+  7% {
+    opacity: 1;
+    transform: scale(calc(1 / var(--rx-suit-burst)));
+  }
+  /* Held still on the face (~0.6 s, no pulse), then the burst. */
+  83% {
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
+    opacity: 1;
+    transform: scale(calc(1 / var(--rx-suit-burst)));
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--rx-suit-r));
+  }
+}
+@keyframes rxSuitGlint {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
   }
 }
 @keyframes rxSuitBite {
@@ -2264,43 +2290,11 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-@keyframes rxSuitGlint {
-  0% {
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-  }
-}
 @keyframes rxSuitLead {
   from {
     transform: scaleX(0);
   }
   to {
-    transform: none;
-  }
-}
-@keyframes rxSuitFaceShut {
-  from {
-    transform: var(--rx-suit-open);
-  }
-  to {
-    transform: none;
-  }
-}
-@keyframes rxSuitGlow {
-  0% {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  18% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
     transform: none;
   }
 }
@@ -2344,24 +2338,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   from {
     opacity: 0;
     transform: scale(1.8);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes rxSuitIgnite {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes rxSuitCore {
-  from {
-    opacity: 0;
-    transform: scale(0.3);
   }
   to {
     opacity: 1;
@@ -2559,38 +2535,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 /* ================================================================
-   rx4 — the rendering. The same geometry and clock, drawn as armour:
-   opaque plates with a dark bevel under a lit rim and a diagonal sheen,
-   faceted crystals, a gold crown, light halos on the jewels and eyes, a
-   backlight and a floor behind the figure and its cast shadow. Static
-   paint; only opacity and transform move. Scoped to .rx-call-sequence.
+   rx4 — the rendering, rx12 — the artwork's own light. The light rig
+   stands behind the figure; the P14 core's seed and the face's lights
+   bloom with small radial halos. Static paint; only opacity and
+   transform move. Scoped to .rx-call-sequence.
    ================================================================ */
-/* Under every rim, a dark bevel: the plate's edge reads as a thickness. */
-.rx-call-sequence .rx-suit path.rx-suit-bevel {
-  fill: none;
-  stroke: rgb(1 3 8 / 70%);
-  stroke-width: 3.2px;
-}
-
-/* Over every plate, one diagonal band of light. */
-.rx-call-sequence .rx-suit path.rx-suit-sheen {
-  fill: url("#rx-suit-fill-sheen");
-  stroke: none;
-}
-
-/* A crystal's inner facet, near white. */
-.rx-call-sequence .rx-suit-figure .rx-suit-plate path.rx-suit-facet,
-.rx-call-sequence .rx-suit-figure .rx-suit-helm path.rx-suit-facet {
-  fill: rgb(255 255 255 / 78%);
-  stroke: none;
-}
-
 /* The light rig: a backlight in the two tones behind the figure, a faint
    lattice, and a floor pool under the boots with the figure's reflection
    colours. It stands in the figure's place, a little wider and taller. */
 .rx-call-sequence .rx-suit-stage {
   position: absolute;
-  top: 50%;
+  top: var(--rx-suit-cy);
   left: var(--rx-suit-cx);
   width: calc(var(--rx-suit-h) * 0.95);
   height: calc(var(--rx-suit-h) * 1.12);
@@ -2621,47 +2576,32 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   translate: -50% -50%;
 }
 
-/* The cast shadow: the silhouette, set back and down, under the plates. */
-.rx-call-sequence .rx-suit-figure > .rx-suit-shadow {
-  top: 0;
-  left: 14.2857%;
-  width: 71.4286%;
-  height: 100%;
-  translate: 3% 1.6%;
-}
-
-.rx-call-sequence .rx-suit-shadow path {
-  fill: rgb(0 2 6 / 62%);
-  stroke: none;
-}
-
-/* Light halos on the jewels and the eyes: soft radial light in the part's
-   own colour, small in area. */
+/* Light halos: the P14 core as it seeds (ice and pink round a white
+   heart) and the face's lights as they come on; soft, small in area. */
 .rx-call-sequence .rx-suit-halo {
   aspect-ratio: 1;
   border-radius: 50%;
   translate: -50% -50%;
 }
 
-.rx-call-sequence .rx-suit-halo.is-shoulder {
-  background: radial-gradient(circle, rgb(191 244 255 / 42%), rgb(121 232 255 / 14%) 38%, transparent 68%);
-}
-
-.rx-call-sequence .rx-suit-halo.is-shoulder.is-right {
-  background: radial-gradient(circle, rgb(255 212 240 / 42%), rgb(255 130 213 / 14%) 38%, transparent 68%);
+.rx-call-sequence .rx-suit-halo.is-core {
+  background: radial-gradient(
+    circle,
+    rgb(255 255 255 / 70%) 0 6%,
+    rgb(191 244 255 / 40%) 14%,
+    rgb(255 143 216 / 18%) 34%,
+    transparent 66%
+  );
 }
 
 .rx-call-sequence .rx-suit-halo.is-eyes {
-  aspect-ratio: 1.6;
-  background: radial-gradient(ellipse, rgb(255 244 214 / 48%), rgb(242 216 150 / 16%) 40%, transparent 70%);
-}
-
-.rx-call-sequence .rx-suit-halo.is-core {
-  background: radial-gradient(circle, rgb(255 248 226 / 46%), rgb(242 216 150 / 18%) 32%, transparent 66%);
-}
-
-.rx-call-sequence .rx-suit-halo.is-jewel {
-  background: radial-gradient(circle, rgb(255 248 226 / 40%), rgb(242 216 150 / 14%) 36%, transparent 68%);
+  aspect-ratio: 1.4;
+  background: radial-gradient(
+    ellipse,
+    rgb(255 196 236 / 34%),
+    rgb(121 232 255 / 14%) 40%,
+    transparent 70%
+  );
 }
 
 /* The badge, rendered the same way, with a halo behind the eyes. */
@@ -2701,41 +2641,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitStage 360ms var(--rx-call-ease) 40ms both;
   }
 
-  /* The shadow falls once the body stands (the legs' line of the chant). */
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-shadow {
-    animation: rxSuitTick 300ms linear
-      calc(var(--rx-call-chant-start) + var(--rx-call-chant-duration) * 0.6) both;
-  }
-
-  /* The shoulder jewels light as they form (line two of the chant). */
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-halo.is-shoulder {
-    animation: rxSuitHalo 420ms var(--rx-call-ease)
-      calc(var(--rx-call-chant-start) + var(--rx-call-chant-duration) / 4 + 60ms) both;
-  }
-
-  /* The eyes, the core and the belt jewel light with their gold. */
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-halo.is-eyes {
-    animation: rxSuitHalo 60ms linear calc(var(--rx-call-final-start) + 240ms) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-halo.is-core {
-    animation: rxSuitHalo 70ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 240ms) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-halo.is-jewel {
-    animation: rxSuitHalo 60ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 255ms) both;
-  }
-
   /* The badge's eye halo lights with its eyes. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="stage"][data-tier="full"]
@@ -2768,7 +2673,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-/* Calm, economy and reduced motion: a quiet still schematic. */
+/* Calm, economy and reduced motion: the finished figure, still. */
 .rx-call-sequence:is([data-tier="calm"], [data-tier="reduced"]) .rx-suit-figure,
 html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
   opacity: 0.5;

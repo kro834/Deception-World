@@ -16,7 +16,9 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
   ultra: "ULTRA",
 };
 
-export const REXONANCE_ENTRY_TIMINGS = { cover: 2300, reveal: 480 } as const;
+// rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
+// they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
+export const REXONANCE_ENTRY_TIMINGS = { cover: 2880, reveal: 480 } as const;
 export const REXONANCE_STAGE_DURATION_MS = 650;
 
 // Cover time is a minimum: the final call holds if the destination is late.
@@ -25,7 +27,7 @@ export const REXONANCE_CALL_BEATS = [
   { start: 330, duration: 320 },
   { start: 650, duration: 650 },
   { start: 1300, duration: 680 },
-  { start: 1980, duration: 320 },
+  { start: 1980, duration: 900 },
 ] as const;
 
 // rx3 suit-up HUD. The system check reads only what the page already states,
@@ -41,47 +43,61 @@ export const REXONANCE_SUIT_SYSTEMS = [
   ["Neural Resonancer Ultra", "ONLINE"],
 ] as const;
 
-// The schematic's part callouts, in the order their plates lock: one plate
-// group on each quarter-beat of SA-GA！DEUS！.
+// The part callouts, in the order their pieces snap on: one per DEUS！ of
+// SA-GA！DEUS！ (the helmet's on the last call).
 export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
 
-// suitup3: the armour forms like nanotech, spreading from the P14 core.
-// When the nanite front reaches each region (ms on the overlay's clock):
-// RIDER！ seeds the core; each SA-GA！DEUS！ line carries the front one
-// region further — chest, shoulders and arms to the hands, waist and legs
-// to the feet, then the tail streams out over the shoulder to its blade
-// with the ribbons — and on REXONANCE DEUS！ the helmet rises up the neck
-// and closes.
+// rx12 (2026-10-10, owner): the suit-up is the approved full-body artwork,
+// cut into raster pieces (scripts/build-rexonance-suit.mjs). FAR UP！ scans
+// the bare undersuit; RIDER！ seeds the P14 core and nanite motes gather;
+// on each SA-GA！ a group of armour pieces forms out of nanites floating a
+// little off the body, and on its DEUS！ it snaps on (ガチャガチャ); through
+// REXONANCE！ the tail grows out and the ribbons stream while the helmet
+// forms above the head and clamps down; on REXONANCE DEUS！ the face's
+// lights fill with pixel squares that scatter: transformation complete.
+// Times are ms on the overlay's clock.
 const SUIT_CHANT = REXONANCE_CALL_BEATS[2].start;
-const SUIT_LINE = REXONANCE_CALL_BEATS[2].duration / 4;
+const SUIT_RESPONSE = REXONANCE_CALL_BEATS[3].start;
 const SUIT_FINAL = REXONANCE_CALL_BEATS[4].start;
-export const REXONANCE_SUIT_FLOW = {
-  seed: REXONANCE_CALL_BEATS[1].start + 40,
-  iris: SUIT_CHANT,
-  chest: SUIT_CHANT + 40,
-  ribs: SUIT_CHANT + 80,
-  shoulder: SUIT_CHANT + SUIT_LINE,
-  blades: SUIT_CHANT + SUIT_LINE + 30,
-  upperArm: SUIT_CHANT + SUIT_LINE + 40,
-  forearm: SUIT_CHANT + SUIT_LINE + 90,
-  hand: SUIT_CHANT + SUIT_LINE + 135,
-  abdomen: SUIT_CHANT + 2 * SUIT_LINE,
-  pelvis: SUIT_CHANT + 2 * SUIT_LINE + 30,
-  thigh: SUIT_CHANT + 2 * SUIT_LINE + 60,
-  knee: SUIT_CHANT + 2 * SUIT_LINE + 90,
-  shin: SUIT_CHANT + 2 * SUIT_LINE + 120,
-  boot: SUIT_CHANT + 2 * SUIT_LINE + 150,
-  tail0: SUIT_CHANT + 3 * SUIT_LINE,
-  ribbons: SUIT_CHANT + 3 * SUIT_LINE + 15,
-  tail1: SUIT_CHANT + 3 * SUIT_LINE + 30,
-  tail2: SUIT_CHANT + 3 * SUIT_LINE + 60,
-  tail3: SUIT_CHANT + 3 * SUIT_LINE + 90,
-  blade: SUIT_CHANT + 3 * SUIT_LINE + 120,
-  neck: SUIT_FINAL,
-  crest: SUIT_FINAL + 40,
-  spike: SUIT_FINAL + 70,
+/** Each chant line's DEUS！ answers 230 ms into the chant, then every
+ * 120 ms (the call sheet's rxCallAnswer). */
+export const REXONANCE_CHANT_ANSWER = { first: 230, every: 120 } as const;
+const deus = (line: number) =>
+  SUIT_CHANT + REXONANCE_CHANT_ANSWER.first + line * REXONANCE_CHANT_ANSWER.every;
+/** When each group snaps onto the body: legs, arms, chest and shoulders,
+ * belt and waist on the four DEUS！; the helmet clamps down near the end of
+ * REXONANCE！. */
+export const REXONANCE_SUIT_SNAP = {
+  legs: deus(0),
+  arms: deus(1),
+  chest: deus(2),
+  waist: deus(3),
+  helm: SUIT_FINAL - 90,
 } as const;
-// A region condenses over this long after the front reaches it; its cloud
-// gathers from 60 ms before and settles out over 300 ms.
-export const REXONANCE_SUIT_FORM_MS = 220;
-export const REXONANCE_SUIT_CLOUD_MS = 300;
+/** A piece forms from nanites (motes converge, a coarse mosaic resolves)
+ * over this long, floating, before its snap. */
+export const REXONANCE_SUIT_FORM_MS = 230;
+/** The snap: a fast travel to the seat, a hair past it, settled. */
+export const REXONANCE_SUIT_SNAP_MS = 90;
+/** The helmet forms above the head from here and hovers until its snap. */
+export const REXONANCE_SUIT_HELM_FORM = SUIT_RESPONSE + 170;
+/** The tail grows out section by section, root to blade. */
+export const REXONANCE_SUIT_TAIL = { start: SUIT_RESPONSE + 30, step: 85, grow: 170 } as const;
+/** The energy ribbons stream down from the shoulders. */
+export const REXONANCE_SUIT_RIBBONS = { start: SUIT_RESPONSE + 60, stream: 320 } as const;
+/** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
+export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
+/** REXONANCE DEUS！: pixel squares fill the face's lights, then scatter. */
+export const REXONANCE_SUIT_PIXELS = {
+  fill: SUIT_FINAL + 10,
+  fillStep: 14,
+  // The squares hold on the face ~0.6 s, then scatter (owner, rx12).
+  scatter: SUIT_FINAL + 690,
+  scatterStep: 10,
+  scatterMs: 140,
+  groups: 6,
+} as const;
+/** If the pieces are not decoded when the call starts, the call plays with
+ * the finished figure; it switches to the build only while FAR UP！'s scan
+ * is still running, never once any armour could show. */
+export const REXONANCE_SUIT_LATE_MS = 300;

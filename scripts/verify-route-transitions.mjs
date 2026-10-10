@@ -378,12 +378,13 @@ async function audit(browser, analyser, profileName, name) {
     `${profileName} ${name}: red flashes ${JSON.stringify(flashes.red)}`,
   );
   assert.equal(blank.length, 0, `${profileName} ${name}: flat empty cover frames`);
+  // rx12: the Rexonance call holds 580 ms longer (the face's pixel hold).
   assert.ok(
-    doneAt && doneAt <= (scenario.dest === "/rexonance-saga" ? 3000 : GONE_BUDGET_MS),
+    doneAt && doneAt <= (scenario.dest === "/rexonance-saga" ? 3580 : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
-    releasedAt && releasedAt <= (scenario.dest === "/rexonance-saga" ? 3200 : RELEASE_BUDGET_MS),
+    releasedAt && releasedAt <= (scenario.dest === "/rexonance-saga" ? 3780 : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);

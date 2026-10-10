@@ -186,7 +186,14 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
-      if (name === "@/lib/rexonance-calls") return { REXONANCE_ENTRY_TIMINGS };
+      if (name === "@/lib/rexonance-calls")
+        return { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS: 300 };
+      // rx12: the suit-up's pieces never decode here, so the call stands whole.
+      if (name === "@/lib/rexonance-suit-warmup")
+        return {
+          warmRexonanceSuit: () => new Promise(() => {}),
+          isRexonanceSuitReady: () => false,
+        };
       if (name === "@/lib/rexonance-transition-loader")
         return {
           prepareRexonanceTransition:

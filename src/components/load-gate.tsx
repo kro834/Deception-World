@@ -24,7 +24,8 @@ import {
   prepareRexonanceTransition,
   type RexonanceTransitionRenderer,
 } from "@/lib/rexonance-transition-loader";
-import { REXONANCE_ENTRY_TIMINGS } from "@/lib/rexonance-calls";
+import { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS } from "@/lib/rexonance-calls";
+import { isRexonanceSuitReady, warmRexonanceSuit } from "@/lib/rexonance-suit-warmup";
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 
 type RiderDiveVariant =
@@ -39,6 +40,8 @@ type GateState = {
   phase: "covering" | "revealing";
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
+  // rx12: the suit-up builds from its decoded pieces, or stands whole.
+  rexonanceSuit?: "build" | "whole";
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -1275,6 +1278,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         const releaseScrollMotion = holdManagedScrollMotion();
         if (diveVariant === "rexonance") rexonanceTransition.current = requestId;
         let rexonanceCall: RexonanceTransitionRenderer | null = null;
+        // rx12: the suit-up's pieces decode beside the call's chunk (most
+        // often already warm from the link's intent); the call never waits
+        // for them.
+        const rexonanceSuitWarm =
+          diveVariant === "rexonance" && tier === "full" ? warmRexonanceSuit("high") : null;
+        let rexonanceSuit: "build" | "whole" = "whole";
         if (diveVariant === "rexonance") {
           const preparation = prepareRexonanceTransition();
           rexonanceCoverCancel.current = preparation.cancel;
@@ -1283,6 +1292,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             rexonanceCoverCancel.current = null;
           if (!isCurrent()) return;
           startedAt = performance.now();
+          if (isRexonanceSuitReady()) rexonanceSuit = "build";
         }
         // PREV / NEXT between dossiers flips the file; entry from anywhere
         // else keeps the rider's own dive or cut-in.
@@ -1323,10 +1333,30 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           phase: "covering",
           scene,
           rexonanceCall,
+          rexonanceSuit,
         });
         try {
           if (assets.length) {
             void preloadAssets(assets, () => undefined).catch(() => undefined);
+          }
+          // rx12: pieces that finish decoding while FAR UP！'s scan still
+          // runs switch the call to the build (its clock is already
+          // running unseen); later, the finished figure stays.
+          if (rexonanceCall && rexonanceSuit === "whole" && rexonanceSuitWarm) {
+            void rexonanceSuitWarm.then((decoded) => {
+              if (
+                !decoded ||
+                !isCurrent() ||
+                performance.now() - startedAt > REXONANCE_SUIT_LATE_MS
+              )
+                return;
+              rexonanceSuit = "build";
+              setGate((current) =>
+                current.active && current.phase === "covering" && current.rexonanceCall
+                  ? { ...current, rexonanceSuit }
+                  : current,
+              );
+            });
           }
           // Mobile Safari may coalesce the state update with route/module work.
           // Paint both cinematic entries before loading their route chunk.
@@ -1381,6 +1411,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             phase: "revealing",
             scene: landed,
             rexonanceCall,
+            rexonanceSuit,
           });
           await revealRan(
             timings.reveal,
@@ -1517,6 +1548,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         phase={gate.phase}
         scene={gate.scene}
         rexonanceCall={gate.rexonanceCall}
+        rexonanceSuit={gate.rexonanceSuit}
       />
       <RouteSignal state={signal} />
       {delayedRoute && (
@@ -1551,12 +1583,14 @@ function LoadOverlay({
   phase,
   scene,
   rexonanceCall,
+  rexonanceSuit,
 }: {
   active: boolean;
   variant: GateState["variant"];
   phase: GateState["phase"];
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
+  rexonanceSuit?: GateState["rexonanceSuit"];
 }) {
   if (!active) return null;
   if (variant === "gallery") return <GalleryCurtain phase={phase} />;
@@ -1571,7 +1605,13 @@ function LoadOverlay({
     variant === "final-stage";
   if (isRiderDive) {
     return (
-      <RiderRouteDive variant={variant} phase={phase} scene={scene} rexonanceCall={rexonanceCall} />
+      <RiderRouteDive
+        variant={variant}
+        phase={phase}
+        scene={scene}
+        rexonanceCall={rexonanceCall}
+        rexonanceSuit={rexonanceSuit}
+      />
     );
   }
   const isRiderCutIn =
@@ -1655,11 +1695,13 @@ function RiderRouteDive({
   phase,
   scene,
   rexonanceCall: RexonanceCallSequence,
+  rexonanceSuit,
 }: {
   variant: RiderDiveVariant;
   phase: GateState["phase"];
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
+  rexonanceSuit?: GateState["rexonanceSuit"];
 }) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
@@ -1676,7 +1718,12 @@ function RiderRouteDive({
       }
     >
       {rexonance && RexonanceCallSequence ? (
-        <RexonanceCallSequence mode="entry" phase={phase} tier={scene?.tier ?? "reduced"} />
+        <RexonanceCallSequence
+          mode="entry"
+          phase={phase}
+          tier={scene?.tier ?? "reduced"}
+          suit={rexonanceSuit}
+        />
       ) : (
         <>
           <CineLayers scene={scene} />
@@ -1889,6 +1936,8 @@ export function GuardedLink({
   const href = hash ? `${to}#${hash}` : to;
 
   const preloadDestination = useCallback(() => {
+    // rx12: the Rexonance call's suit-up pieces decode on intent.
+    if (to === "/rexonance-saga") void warmRexonanceSuit();
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
       void router.preloadRoute({ to }).catch(() => {
