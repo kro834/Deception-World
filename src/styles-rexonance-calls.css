@@ -2690,3 +2690,15 @@ html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
     display: none;
   }
 }
+
+/* Short landscapes: the part labels and the system check leave the layout
+   (not only the paint) on the full tier too, so their fade can never bring
+   them over the calls. Placed after the full tier's display rule, at its
+   weight. */
+@media (orientation: landscape) and (min-aspect-ratio: 13 / 10) and (max-height: 560px) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    :is(.rx-suit-callouts, .rx-suit-boot) {
+    display: none;
+  }
+}
