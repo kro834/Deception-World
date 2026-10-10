@@ -1,0 +1,1636 @@
+/* ================================================================
+   STAGE — the Dream Chapter as a film programme in scenes (rx10,
+   2026-10-10)
+
+   The Taisho edition (Shippori Mincho in vertical setting, 海老茶, gold,
+   vermilion seals) moves onto the site's stage grammar. The first screen
+   is a title stage: the key art lit inside a gilt proscenium with the
+   vertical gilt title on its own column. Each act opens on a full-bleed
+   intertitle card (the act's seal, its kicker, its title and its ghost
+   numeral) and then plays its scenes: the poster act hangs as a gallery
+   wall, the cast stands in arch-portrait line-ups, the roster is a
+   programme board of name plates (portrait cards where the person has
+   published art), and the long records of Acts III and IV read as one
+   tight rhythm of dark plates: two-column record sheets, case files and
+   notes under numbered seals, the chronicle as a timeline, the atlas as
+   location boards, the glossary on a dark ink plate. The credits and 終
+   close the programme on an end card.
+
+   Markup, ids, copy and behaviour are the page's own (dream-chapter.tsx,
+   dream-chapter-extra.tsx, dream-story-navigation.tsx); this sheet only
+   reflows and repaints them. Every rule is scoped to
+   html[data-family="dream"] and the doubled page class (route sheets
+   persist across client navigation), which outranks the older Dream
+   sheets without !important. The fixed header and the act bar belong to
+   the shell sheet and are left alone, as are the poster console's pinned
+   geometry (rail columns, 48px controls, contained poster, caption in
+   flow), the record dialogs and the story folds. Generated text is silent
+   (numerals with an empty alternative). No animation is added here: the
+   page's own reveals and scroll-linked rises keep running.
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   0. Tokens and the ground
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page {
+  --dr-ink: #0d0912;
+  --dr-night: #130c17;
+  --dr-lacquer: #1a1020;
+  --dr-plate: #1b1120;
+  --dr-plate-2: #22152a;
+  --dr-plate-hi: #2a1a31;
+  --dr-wall: #160e1b;
+  --dr-rule: rgb(200 164 92 / 38%);
+  --dr-rule-2: rgb(200 164 92 / 20%);
+  --dr-rule-3: rgb(200 164 92 / 12%);
+  --dr-gold: var(--ts-kin, #c8a45c);
+  --dr-gold-hi: var(--ts-kin-light, #e6c28e);
+  --dr-gold-deep: var(--ts-kin-deep, #8a6a2f);
+  --dr-shu: var(--ts-shu, #cc493b);
+  --dr-shu-deep: var(--ts-shu-deep, #a8352c);
+  --dr-shu-text: var(--ts-shu-text, #e0664f);
+  --dr-ebicha: var(--ts-ebicha-deep, #4a1d27);
+  --dr-text: var(--ts-kinari, #f4ecdc);
+  --dr-text-2: #ddd0ba;
+  --dr-text-3: #b9ab9c;
+  --dr-display: var(
+    --ts-display,
+    "Shippori Mincho B1",
+    "Shippori Mincho",
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    serif
+  );
+  --dr-serif: var(--ts-text, "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif);
+  --dr-latin: var(--ts-latin, "Cinzel", "Times New Roman", serif);
+  --dr-num: "Oxanium", var(--dr-latin);
+  --dr-gut: clamp(16px, 4vw, 56px);
+  --dr-col: min(1240px, calc(100% - 2 * var(--dr-gut)));
+  /* The column's inset from the screen edge (vw, so a full-bleed child can
+     take it back exactly). */
+  --dr-inset: max(var(--dr-gut), calc((100vw - 1240px) / 2));
+  --dr-bevel: inset 0 1px 0 rgb(243 224 176 / 9%);
+  --dr-plate-fill:
+    linear-gradient(174deg, rgb(243 224 176 / 5%) 0, transparent 22%), var(--dr-plate);
+  --dr-ticks:
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 14px 1px,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1px 14px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 14px 1px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1px 14px;
+  background:
+    radial-gradient(70% 40% at 50% 0, rgb(200 164 92 / 5%), transparent 70%),
+    var(--dr-night);
+}
+
+/* Japanese: strict breaking; titles and names never split inside a word. */
+html[data-family="dream"] main.dream-page.dream-page :is(p, dd, li, figcaption, blockquote) {
+  line-break: strict;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  :is(h2, h3, h4, h5, dt, .dream-roster-affiliation, .dream-character-copy b) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+/* ----------------------------------------------------------------
+   1. The programme's rhythm: one column, one gutter, scenes in order
+   ---------------------------------------------------------------- */
+/* An act spans the screen (its card is full-bleed inside the act's own
+   paint containment) and keeps the programme column with its padding; an
+   annex is the column itself. */
+html[data-family="dream"] main.dream-page.dream-page > .dream-section,
+html[data-family="dream"] main.dream-page.dream-page > .dream-section#cases {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding: 0 var(--dr-inset) clamp(48px, 6vw, 88px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-annex {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-annex,
+html[data-family="dream"] main.dream-page.dream-page > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal) {
+  padding: clamp(32px, 4vw, 60px) var(--dr-inset) clamp(36px, 4.6vw, 64px);
+  border-image: none;
+}
+
+/* Each act's scenes take the act's light: plum for the cast, vermilion
+   night for the organisation, indigo lacquer for the story and its
+   archive, ink for the appendix. */
+html[data-family="dream"] main.dream-page.dream-page > #cast-roster {
+  background: linear-gradient(180deg, var(--dr-night), #170f1c 60%, var(--dr-night));
+}
+
+html[data-family="dream"] main.dream-page.dream-page > #factions {
+  background: linear-gradient(180deg, #160c14, #1b0e17 50%, var(--dr-night));
+}
+
+html[data-family="dream"] main.dream-page.dream-page > :is(#case-notes, #chronicle, #atlas, #relations, #arsenal) {
+  background:
+    repeating-linear-gradient(90deg, rgb(185 163 222 / 2%) 0 1px, transparent 1px 48px),
+    linear-gradient(180deg, #11111f, #131326 50%, #11111f);
+}
+
+html[data-family="dream"] main.dream-page.dream-page > :is(#glossary, #quotes) {
+  background: var(--dr-ink);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal)::before,
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal)::after {
+  display: none;
+}
+
+/* ----------------------------------------------------------------
+   2. The act card: a full-bleed intertitle opens each act
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "act"
+    "kicker"
+    "title"
+    "count"
+    "rule";
+  justify-items: center;
+  align-content: center;
+  width: auto;
+  min-height: clamp(320px, 44svh, 460px);
+  margin: 0 calc(-1 * var(--dr-inset)) clamp(36px, 4.4vw, 64px);
+  padding: clamp(48px, 6vw, 80px) var(--dr-gut);
+  border: 0;
+  border-block: 1px solid var(--dr-rule-2);
+  text-align: center;
+  background:
+    radial-gradient(46% 70% at 50% 0, rgb(230 194 142 / 13%), transparent 72%),
+    radial-gradient(38% 50% at 50% 100%, rgb(204 73 59 / 9%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
+}
+
+/* The card's own gilt double frame, inside the band, with stepped corners. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: clamp(10px, 1.6vw, 22px) max(var(--dr-gut), calc(var(--dr-inset) - 40px));
+  z-index: -1;
+  border: 1px solid var(--dr-rule);
+  outline: 1px solid var(--dr-rule-3);
+  outline-offset: 5px;
+  background:
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 40px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 40px 2px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 40px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* The act's seal: 第一幕 set down a vermilion 落款. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > .dream-act-mark {
+  grid-area: act;
+  align-self: center;
+  justify-self: center;
+  margin: 0 0 clamp(16px, 2vw, 24px);
+  padding: 12px 9px;
+  border: 1px solid rgb(243 224 176 / 55%);
+  outline: 1px solid var(--dr-shu);
+  outline-offset: 3px;
+  writing-mode: vertical-rl;
+  color: var(--dr-text);
+  background: var(--dr-shu-deep);
+  clip-path: none;
+  box-shadow: 0 10px 24px -14px rgb(0 0 0 / 90%);
+  font-family: var(--dr-display);
+  font-size: clamp(16px, 1.4vw, 19px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.32em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > p {
+  grid-area: kicker;
+  margin: 0 0 clamp(8px, 1vw, 12px);
+  padding: 0;
+  border: 0;
+  color: var(--dr-gold-hi);
+  font-family: var(--dr-latin);
+  font-size: clamp(12px, 1vw, 14px);
+  font-weight: 600;
+  letter-spacing: 0.42em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  h2 {
+  grid-area: title;
+  max-width: 100%;
+  margin: 0;
+  padding-inline-start: 0.24em;
+  font-size: clamp(44px, 7vw, 108px);
+  line-height: 1.1;
+  letter-spacing: 0.24em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > span:not(.film-text-scan) {
+  grid-area: count;
+  align-self: center;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: clamp(10px, 1.4vw, 16px) 0 0;
+  padding: 0;
+  border: 0;
+  color: var(--dr-text-3);
+  font-family: var(--dr-latin);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > span:not(.film-text-scan)::before,
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > span:not(.film-text-scan)::after {
+  content: "";
+  width: clamp(28px, 4vw, 56px);
+  height: 1px;
+  background: var(--dr-rule);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > .film-boundary-line {
+  grid-area: rule;
+  justify-self: center;
+  width: min(360px, 60%);
+  margin-top: clamp(14px, 1.8vw, 22px);
+  transform-origin: 50% 50%;
+}
+
+/* The ghost numeral stands behind the title, centred on the card. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading[data-ts-numeral]::after {
+  top: 50%;
+  right: 0;
+  left: 0;
+  z-index: -1;
+  text-align: center;
+  -webkit-text-stroke: 1px rgb(200 164 92 / 15%);
+  font-size: clamp(200px, 30vw, 420px);
+  line-height: 1;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-dolminence-section
+  > .dream-section-heading[data-ts-numeral]::after {
+  right: 0;
+}
+
+/* Act III is the playbill act: its card is lit in vermilion. */
+html[data-family="dream"] main.dream-page.dream-page > .dream-dolminence-section > .dream-section-heading {
+  background:
+    radial-gradient(46% 70% at 50% 0, rgb(204 73 59 / 20%), transparent 72%),
+    radial-gradient(38% 50% at 50% 100%, rgb(200 164 92 / 8%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, #200f19 52%, var(--dr-ink) 100%);
+}
+
+/* Act IV, the story, is lit in indigo like the archive corners after it. */
+html[data-family="dream"] main.dream-page.dream-page > .dream-case-section > .dream-section-heading {
+  background:
+    radial-gradient(46% 70% at 50% 0, rgb(185 163 222 / 12%), transparent 72%),
+    radial-gradient(38% 50% at 50% 100%, rgb(200 164 92 / 8%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, #141429 52%, var(--dr-ink) 100%);
+}
+
+/* ----------------------------------------------------------------
+   3. The scene head: numbered seal, HUD kicker, Japanese title
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "mark kicker count"
+    "mark title count";
+  align-items: center;
+  column-gap: clamp(12px, 1.6vw, 20px);
+  margin: 0 0 clamp(20px, 2.6vw, 32px);
+  padding: 0 0 clamp(12px, 1.4vw, 16px);
+  background:
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 100% 1px no-repeat,
+    linear-gradient(var(--dr-rule-2) 0 0) 0 calc(100% - 4px) / 100% 1px no-repeat;
+}
+
+/* The seal: the act's numeral over the scene's number. */
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::before {
+  grid-area: mark;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  width: auto;
+  min-width: 52px;
+  min-height: 52px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--dr-shu);
+  outline: 1px solid rgb(204 73 59 / 40%);
+  outline-offset: 2px;
+  color: var(--dr-shu-text);
+  background: rgb(74 29 39 / 55%);
+  clip-path: none;
+  font-family: var(--dr-num);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.08em;
+  text-align: center;
+  white-space: pre;
+  animation: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #cast-roster > .dream-annex-heading::before {
+  content: "II\A 02" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #factions > .dream-annex-heading::before {
+  content: "III\A 02" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #case-notes > .dream-annex-heading::before {
+  content: "IV\A 02" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #chronicle > .dream-annex-heading::before {
+  content: "IV\A 03" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #atlas > .dream-annex-heading::before {
+  content: "IV\A 04" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #relations > .dream-annex-heading::before {
+  content: "IV\A 05" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #arsenal > .dream-annex-heading::before {
+  content: "IV\A 06" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary > .dream-annex-heading::before {
+  content: "附\A 01" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page #quotes > .dream-annex-heading::before {
+  content: "附\A 02" / "";
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > p {
+  grid-area: kicker;
+  align-self: end;
+  margin: 0 0 4px;
+  color: var(--dr-gold-hi);
+  font-family: var(--dr-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.36em;
+}
+
+/* One numbering: the seal carries it, the corners' old chips stand down. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  :is(#chronicle, #atlas, #relations, #arsenal)
+  .dream-annex-heading
+  > p::before {
+  content: none;
+  display: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading h2 {
+  grid-area: title;
+  align-self: start;
+  margin: 0;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.16;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > span {
+  grid-area: count;
+  align-self: end;
+  margin: 0 0 4px;
+  padding: 4px 0 4px 14px;
+  border-left: 1px solid var(--dr-rule);
+  color: var(--dr-text-3);
+  font-family: var(--dr-latin);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------
+   4. The title stage
+   Wide screens: the key art holds a lit proscenium on the left; the
+   title column beside it carries the vertical gilt title, the vertical
+   catch, the logo and the two act plates; the obi is the footlights.
+   Every hero layer stays at z-index:auto, unfiltered and fully opaque
+   (the logo's screen blend must not be isolated).
+   ---------------------------------------------------------------- */
+/* The copy block takes no transform at all: the older sheet's
+   "transform: none; translate: none" pair is folded by the minifier into
+   translate(0, 0), an identity that still isolates the logo's screen
+   blend and shows its black matte. A lone transform: none survives. */
+html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-copy {
+  transform: none;
+}
+
+@media (min-width: 981px) and (min-aspect-ratio: 1/1) and (min-height: 600px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero {
+    --ts-title-size: clamp(60px, min(5.6vw, 9.4svh), 104px);
+    --dr-script: clamp(360px, 30vw, 480px);
+    --dr-stage-gap: clamp(18px, 2.2vw, 32px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--dr-script);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "stage script"
+      "obi obi";
+    min-height: max(680px, 100svh);
+    padding: calc(var(--ts-chrome) + clamp(14px, 2svh, 24px)) 0 0;
+    background:
+      radial-gradient(50% 46% at 100% 16%, rgb(230 194 142 / 10%), transparent 70%),
+      linear-gradient(
+        90deg,
+        var(--dr-ink) 0,
+        var(--dr-ink) calc(100% - var(--dr-script)),
+        var(--dr-lacquer) calc(100% - var(--dr-script))
+      );
+  }
+
+  /* The frame moves onto the stage itself. */
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero::after {
+    display: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-field,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-vignette {
+    grid-area: stage;
+    position: relative;
+    inset: auto;
+    align-self: stretch;
+    justify-self: stretch;
+    height: auto;
+    min-height: 0;
+    margin: 0 var(--dr-stage-gap) var(--dr-stage-gap) var(--dr-gut);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-field {
+    overflow: hidden;
+    border: 1px solid var(--dr-rule);
+    outline: 1px solid var(--dr-rule-3);
+    outline-offset: 6px;
+    background: var(--dr-ink);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero .dream-hero-art {
+    position: absolute;
+    inset: 0;
+    object-position: 50% 26%;
+  }
+
+  /* House light on the stage: gilt corners, a dark floor under the plate. */
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-vignette {
+    background:
+      linear-gradient(var(--dr-gold) 0 0) 0 0 / 44px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 44px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 0 / 44px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 44px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 100% / 44px 3px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 44px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 100% / 44px 3px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 44px no-repeat,
+      linear-gradient(270deg, rgb(13 9 18 / 50%), transparent 22%),
+      linear-gradient(10deg, rgb(13 9 18 / 94%) 0, rgb(13 9 18 / 70%) 26%, transparent 52%),
+      radial-gradient(ellipse at 50% 38%, transparent 48%, rgb(13 9 18 / 46%) 100%);
+  }
+
+  /* The title column: the gilt title set down its right, the catch beside it. */
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-title {
+    grid-area: script;
+    position: relative;
+    inset: auto;
+    justify-self: end;
+    align-self: start;
+    margin: clamp(8px, 2svh, 24px) clamp(28px, 3.2vw, 52px) 0 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-catch {
+    grid-area: script;
+    position: relative;
+    inset: auto;
+    justify-self: start;
+    align-self: end;
+    margin: 0 0 clamp(28px, 6svh, 64px) clamp(28px, 3.2vw, 52px);
+    font-size: clamp(18px, 1.6vw, 26px);
+    text-shadow: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-catch > span:last-child {
+    padding-top: 4em;
+  }
+
+  /* The plate stands on the stage floor, bottom left. */
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-copy {
+    grid-area: stage;
+    position: relative;
+    inset: auto;
+    justify-self: start;
+    align-self: end;
+    width: clamp(320px, 30vw, 420px);
+    margin: 0 0 calc(var(--dr-stage-gap) + clamp(24px, 4svh, 48px)) calc(var(--dr-gut) + clamp(24px, 3vw, 48px));
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-obi {
+    grid-area: obi;
+    position: relative;
+    inset: auto;
+  }
+}
+
+/* Stacked stages (phones, portrait tablets): the art holds a framed stage
+   with the vertical title on its own edge column; the catch, the plate
+   and the obi read under it. Short landscape phones keep their own sheet. */
+@media (max-width: 980px) and (min-height: 521px), (min-width: 981px) and (max-aspect-ratio: 1/1) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero {
+    --dr-stage-h: clamp(320px, 50svh, 820px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: var(--dr-stage-h) auto auto auto;
+    grid-template-areas:
+      "stage title"
+      "catch catch"
+      "copy copy"
+      "obi obi";
+    min-height: 0;
+    padding: calc(var(--ts-chrome) + 10px) 0 0;
+    background:
+      radial-gradient(70% 40% at 100% 10%, rgb(230 194 142 / 10%), transparent 70%),
+      var(--dr-ink);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero::after {
+    display: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-field,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-vignette {
+    grid-area: stage;
+    position: relative;
+    inset: auto;
+    align-self: stretch;
+    justify-self: stretch;
+    height: auto;
+    min-height: 0;
+    margin: 0 0 0 var(--dr-gut);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-field {
+    overflow: hidden;
+    border: 1px solid var(--dr-rule);
+    outline: 1px solid var(--dr-rule-3);
+    outline-offset: 4px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero .dream-hero-art {
+    position: absolute;
+    inset: 0;
+    object-position: 52% 26%;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-vignette {
+    background:
+      linear-gradient(var(--dr-gold) 0 0) 0 0 / 28px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 28px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 0 / 28px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 28px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 100% / 28px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 28px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 100% / 28px 2px no-repeat,
+      linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 28px no-repeat,
+      linear-gradient(0deg, rgb(13 9 18 / 60%), transparent 34%),
+      radial-gradient(ellipse at 50% 36%, transparent 52%, rgb(13 9 18 / 44%) 100%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-title {
+    grid-area: title;
+    position: relative;
+    inset: auto;
+    align-self: start;
+    margin: 4px var(--dr-gut) 0 clamp(12px, 3vw, 28px);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-catch {
+    grid-area: catch;
+    position: relative;
+    inset: auto;
+    margin: clamp(16px, 2.6svh, 24px) var(--dr-gut) 10px;
+    text-shadow: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-copy {
+    grid-area: copy;
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-width: 520px;
+    margin: 0 var(--dr-gut) clamp(20px, 3.4svh, 36px);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-copy > p {
+    text-shadow: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-obi {
+    grid-area: obi;
+    position: relative;
+    inset: auto;
+  }
+}
+
+@media (min-width: 761px) and (max-aspect-ratio: 1/1) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero {
+    --ts-title-size: clamp(60px, 8vw, 92px);
+    --dr-stage-h: clamp(420px, 56svh, 820px);
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. The programme leaf: 口上 beside the 目次 on wide screens
+   ---------------------------------------------------------------- */
+@media (min-width: 981px) {
+  html[data-family="dream"] main.dream-page.dream-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-content: start;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > * {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-prologue {
+    grid-column: 1;
+    align-self: stretch;
+    justify-items: end;
+    align-content: center;
+    padding: clamp(48px, 6vw, 88px) clamp(14px, 1.6vw, 24px) clamp(48px, 6vw, 88px) var(--dr-inset);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents {
+    grid-column: 2;
+    align-self: center;
+    width: auto;
+    max-width: 600px;
+    margin: clamp(48px, 6vw, 88px) var(--dr-inset) clamp(48px, 6vw, 88px) clamp(14px, 1.6vw, 24px);
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-prologue {
+  background:
+    radial-gradient(50% 60% at 80% 50%, rgb(230 194 142 / 6%), transparent 70%),
+    var(--dr-night);
+}
+
+@media (max-width: 980px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-prologue {
+    padding: clamp(36px, 6vw, 56px) var(--dr-gut) clamp(16px, 3vw, 24px);
+  }
+}
+
+/* The 目次 as a playbill: one ruled row per act, its seal at the start,
+   its scenes after it as plates. */
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: clamp(18px, 2.2vw, 28px);
+  border: 1px solid var(--dr-rule);
+  outline: 1px solid var(--dr-rule-3);
+  outline-offset: 5px;
+  background:
+    var(--dr-ticks),
+    linear-gradient(174deg, rgb(243 224 176 / 6%), transparent 30%),
+    var(--dr-lacquer);
+  background-repeat: no-repeat;
+}
+
+@media (max-width: 980px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents {
+    width: var(--dr-col);
+    margin: clamp(16px, 3vw, 28px) auto clamp(40px, 6vw, 64px);
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents h2 {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin: 0;
+  padding: 0 0 10px;
+  writing-mode: horizontal-tb;
+  color: var(--dr-gold-hi);
+  background: linear-gradient(var(--dr-gold) 0 0) 0 100% / 100% 1px no-repeat;
+  clip-path: none;
+  font-family: var(--dr-display);
+  font-size: clamp(20px, 1.8vw, 24px);
+  font-weight: 800;
+  letter-spacing: 0.5em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents ol {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  direction: ltr;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents li,
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents li:last-child {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+  padding: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--dr-rule-2);
+  direction: ltr;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
+  flex: none;
+  width: 5.2em;
+  padding: 0;
+  color: var(--dr-shu-text);
+  font-family: var(--dr-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  color: var(--dr-text);
+  font-family: var(--dr-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents a + a {
+  border-left: 1px solid var(--dr-rule-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:focus-visible {
+  outline: 2px solid var(--ts-fuji, #b9a3de);
+  outline-offset: -2px;
+}
+
+@media (max-width: 400px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents small {
+    width: 4.4em;
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents a {
+    padding: 0 8px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ----------------------------------------------------------------
+   6. 第一幕: the gallery wall
+   The console keeps its pinned geometry (poster column, two-column rail
+   beside it from 981px, three 48px controls); the wall is paint: a
+   picture light over a dark damask, the poster in a gilt frame with its
+   caption as the brass label, the thumbnails hung as small frames.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage {
+  border: 1px solid var(--dr-rule-2);
+  outline: 0;
+  background:
+    radial-gradient(60% 34% at 42% 0, rgb(243 224 176 / 12%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 3%) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(0deg, rgb(200 164 92 / 2%) 0 1px, transparent 1px 22px),
+    var(--dr-wall);
+  box-shadow: var(--dr-bevel);
+}
+
+/* The poster hangs in its own frame on the wall: the picture box takes
+   the poster's proportions (still object-fit: contain, so a wide poster
+   letterboxes inside it), with a gilt moulding and a dark mat. */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure.dream-poster-current {
+  border: 1px solid var(--dr-rule-2);
+  outline: 0;
+  background:
+    radial-gradient(56% 70% at 50% 0, rgb(243 224 176 / 11%), transparent 76%),
+    transparent;
+  box-shadow: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure > img {
+  justify-self: center;
+  align-self: center;
+  width: auto;
+  max-width: calc(100% - 2 * clamp(12px, 2.4vw, 32px));
+  height: calc(100% - 2 * clamp(12px, 2vw, 24px));
+  padding: clamp(5px, 0.6vw, 8px);
+  border: 2px solid var(--dr-gold);
+  outline: 1px solid var(--dr-rule);
+  outline-offset: 3px;
+  background: #0a070d;
+  box-shadow: 0 24px 40px -24px rgb(0 0 0 / 95%);
+}
+
+/* The caption reads as the brass label under the picture. */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption {
+  border-top: 1px solid var(--dr-rule);
+  background:
+    linear-gradient(180deg, rgb(243 224 176 / 7%), transparent 70%),
+    #140d18;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption > span {
+  color: var(--dr-shu-text);
+  font-family: var(--dr-display);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption > b {
+  color: var(--dr-text-2);
+  font-family: var(--dr-serif);
+  font-weight: 500;
+}
+
+/* ----------------------------------------------------------------
+   7. 第二幕: the line-up
+   The three files stand on a lit stage floor under three lamps; the
+   arches and their 幟 keep their billing. Phones bill the lead alone and
+   the two after it side by side, each name on a plate under its arch.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
+  --dr-floor: clamp(150px, 15vw, 196px);
+  position: relative;
+  padding: clamp(28px, 3.4vw, 48px) clamp(16px, 2.4vw, 36px) clamp(24px, 3vw, 40px);
+  border: 1px solid var(--dr-rule-2);
+  background:
+    radial-gradient(16% 54% at 16.6% 0, rgb(243 224 176 / 13%), transparent 100%),
+    radial-gradient(16% 54% at 50% 0, rgb(243 224 176 / 13%), transparent 100%),
+    radial-gradient(16% 54% at 83.4% 0, rgb(243 224 176 / 13%), transparent 100%),
+    linear-gradient(
+      0deg,
+      var(--dr-ink) 0,
+      rgb(42 26 49 / 80%) var(--dr-floor),
+      rgb(200 164 92 / 40%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      transparent calc(var(--dr-floor) + 1px)
+    ),
+    var(--dr-wall);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-character-grid button img {
+  box-shadow: 0 30px 40px -28px rgb(0 0 0 / 95%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small {
+  color: var(--dr-gold-hi);
+}
+
+@media (max-width: 760px) and (min-height: 521px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 12px;
+    padding: 20px 12px 16px;
+    background:
+      radial-gradient(40% 30% at 50% 0, rgb(243 224 176 / 13%), transparent 100%),
+      radial-gradient(30% 24% at 25% 55%, rgb(243 224 176 / 8%), transparent 100%),
+      radial-gradient(30% 24% at 75% 55%, rgb(243 224 176 / 8%), transparent 100%),
+      var(--dr-wall);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-character-grid > article:first-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 320px);
+  }
+
+  /* The two after the lead: the name moves from the 幟 to a plate under
+     the arch (horizontal, on the same 海老茶 with gilt threads). */
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    button.ios26-glass {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    .dream-character-copy
+    b {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    margin: 10px 0 0;
+    padding: 9px 10px 8px;
+    border-top: 2px solid var(--dr-gold);
+    writing-mode: horizontal-tb;
+    background:
+      linear-gradient(var(--dr-gold) 0 0) 0 3px / 100% 1px no-repeat,
+      var(--ts-ebicha, #6e2c35);
+    clip-path: none;
+    font-size: 17px;
+    line-height: 1.3;
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    .dream-character-copy
+    small {
+    grid-row: 3;
+    margin-top: 10px;
+    padding-top: 8px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    .dream-character-copy
+    i {
+    grid-row: 4;
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    .dream-character-copy
+    em {
+    grid-row: 5;
+    margin-top: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-character-grid
+    > article:not(:first-child)
+    .dream-character-number {
+    width: 30px;
+    height: 30px;
+    margin: 0 0 10px 10px;
+    font-size: 12px;
+  }
+}
+
+/* The thumbnails hang as small frames on the same wall. */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-thumbnails button.ios26-glass {
+  outline: 1px solid rgb(200 164 92 / 16%);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------
+   8. The acts' old frames stand down: the act card opens each act now
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page > .dream-section::before,
+html[data-family="dream"] main.dream-page.dream-page > .dream-section::after,
+html[data-family="dream"] main.dream-page.dream-page > .dream-section#cases::before,
+html[data-family="dream"] main.dream-page.dream-page > .dream-section#cases::after {
+  display: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > .dream-dolminence-section {
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+/* ----------------------------------------------------------------
+   9. 第三幕: the antagonists' line-up, lit in vermilion
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-intro {
+  max-width: 46em;
+  margin: 0 auto clamp(20px, 2.6vw, 32px);
+  text-align: center;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
+  --dr-floor: clamp(118px, 11vw, 150px);
+  gap: clamp(12px, 1.6vw, 22px);
+  padding: clamp(24px, 3vw, 40px) clamp(14px, 2vw, 28px) clamp(18px, 2.4vw, 28px);
+  border: 1px solid var(--dr-rule-2);
+  background:
+    radial-gradient(12% 52% at 12.5% 0, rgb(224 97 79 / 15%), transparent 100%),
+    radial-gradient(12% 52% at 37.5% 0, rgb(224 97 79 / 15%), transparent 100%),
+    radial-gradient(12% 52% at 62.5% 0, rgb(224 97 79 / 15%), transparent 100%),
+    radial-gradient(12% 52% at 87.5% 0, rgb(224 97 79 / 15%), transparent 100%),
+    linear-gradient(
+      0deg,
+      var(--dr-ink) 0,
+      rgb(50 20 28 / 80%) var(--dr-floor),
+      rgb(200 164 92 / 40%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      transparent calc(var(--dr-floor) + 1px)
+    ),
+    #1a0d15;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid > article {
+  border: 1px solid var(--dr-rule-2);
+  outline: 0;
+  background:
+    linear-gradient(var(--dr-gold) 0 0) top / 100% 2px no-repeat,
+    rgb(13 9 18 / 88%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button img {
+  border-radius: 999px 999px 0 0;
+  border-color: var(--dr-rule);
+}
+
+@media (max-width: 760px) and (min-height: 521px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px 10px 12px;
+    background:
+      radial-gradient(30% 30% at 25% 0, rgb(224 97 79 / 15%), transparent 100%),
+      radial-gradient(30% 30% at 75% 0, rgb(224 97 79 / 15%), transparent 100%),
+      radial-gradient(30% 30% at 25% 52%, rgb(224 97 79 / 12%), transparent 100%),
+      radial-gradient(30% 30% at 75% 52%, rgb(224 97 79 / 12%), transparent 100%),
+      #1a0d15;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    padding: 6px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy {
+    gap: 3px;
+    padding: 10px 2px 4px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy b {
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy small {
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy i {
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy em {
+    white-space: normal;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-number {
+    top: 12px;
+    left: 12px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   10. 人物一覧: the programme board
+   One gilt-framed board of name plates on hairline rules, the person's
+   number in a vermilion seal, the name set large in Mincho. A person
+   with published art carries it on the plate: ベル his portrait, マキャベル
+   her nightmare's scene (the console's own poster thumbnail, already
+   fetched). Phones keep the PROFILE switch the page already has.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-roster {
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--dr-rule);
+  outline: 1px solid var(--dr-rule-3);
+  outline-offset: 4px;
+  background: var(--dr-rule-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster article {
+  gap: 8px;
+  padding: 20px 18px 18px;
+  border: 0;
+  outline: 0;
+  background:
+    linear-gradient(180deg, rgb(110 44 53 / 12%), transparent 46%),
+    var(--dr-plate);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster h3 {
+  font-size: clamp(22px, 2vw, 27px);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster-profile {
+  color: var(--dr-text-2);
+  line-height: 1.85;
+}
+
+/* The portrait plate: the art on the plate's far side, fading into it. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-roster
+  article[aria-labelledby="dream-roster-bell"] {
+  background:
+    linear-gradient(90deg, var(--dr-plate) 0, var(--dr-plate) 38%, rgb(27 17 32 / 78%) 62%, rgb(27 17 32 / 30%) 100%),
+    linear-gradient(0deg, var(--dr-plate) 0, var(--dr-plate) 42%, transparent 72%),
+    url("/civilian-bell-20260826-delivery-360.webp") right top / auto min(420px, 100%) no-repeat,
+    var(--dr-plate);
+}
+
+/* The scene plate: the nightmare across the plate's head. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-roster
+  article[aria-labelledby="dream-roster-machiavel"] {
+  background:
+    linear-gradient(180deg, rgb(27 17 32 / 30%) 0, rgb(27 17 32 / 72%) 90px, var(--dr-plate) 170px),
+    url("/dream-chapter-poster-thumb-15.jpeg") center top / 100% auto no-repeat,
+    var(--dr-plate);
+}
+
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-roster {
+    gap: 1px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-roster > li {
+    padding-bottom: 0;
+    background: var(--dr-plate);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-roster article {
+    padding: 12px 10px 10px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-roster h3 {
+    font-size: 19px;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ----------------------------------------------------------------
+   11. The plate: one dark plate for every record in Acts III and IV
+   ---------------------------------------------------------------- */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  :is(
+    .dream-faction,
+    .dream-agent-roster > li,
+    .dream-case-notes > li,
+    .dream-atlas-grid article,
+    .dream-relations-tie,
+    .dream-story-crossings
+  ) {
+  border: 1px solid var(--dr-rule-2);
+  border-radius: 0;
+  outline: 0;
+  background: var(--dr-plate-fill);
+  box-shadow: var(--dr-bevel);
+}
+
+/* ----------------------------------------------------------------
+   12. 組織と勢力: the record sheet, the agents' case files, two factions
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-factions {
+  gap: clamp(12px, 1.6vw, 20px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-faction {
+  gap: 12px;
+  padding: clamp(16px, 2.2vw, 30px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-faction.is-dolminence {
+  background:
+    radial-gradient(60% 40% at 0 0, rgb(204 73 59 / 10%), transparent 70%),
+    var(--dr-plate-fill);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-faction h3 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--dr-rule-2);
+}
+
+/* The record sheet: label column narrow and gilt, the text beside it. */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-sheet > div {
+  grid-template-columns: 3.2em minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px 0;
+  border-top-color: var(--dr-rule-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-sheet dt {
+  color: var(--dr-gold-hi);
+}
+
+/* The agents: case files under their code seals. */
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-title {
+  margin: 4px 0 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-roster {
+  gap: 8px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-roster > li {
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-roster > li.is-filed {
+  border-color: var(--dr-rule);
+  background:
+    linear-gradient(180deg, rgb(110 44 53 / 28%), transparent 60%),
+    var(--dr-plate-fill);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-code {
+  padding: 6px 0 8px;
+  border: 1px solid var(--dr-shu);
+  outline: 1px solid rgb(204 73 59 / 34%);
+  outline-offset: 2px;
+  color: var(--dr-text);
+  background: rgb(74 29 39 / 60%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-code small {
+  color: var(--dr-shu-text);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-code b {
+  font-family: var(--dr-num);
+  font-size: 24px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-code b.is-long {
+  font-size: 13px;
+}
+
+/* ----------------------------------------------------------------
+   13. 物語 and 章の言葉: case files under numbered seals
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-story-intro {
+  max-width: 52em;
+  margin: 0 0 clamp(18px, 2.4vw, 28px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
+  border: 1px solid var(--dr-rule-2);
+  outline: 0;
+  background: var(--dr-plate-fill);
+  box-shadow: var(--dr-bevel);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] {
+  border-color: var(--dr-rule);
+}
+
+/* The case number stands in a vermilion seal under 其ノ一 and CASE. */
+html[data-family="dream"] main.dream-page.dream-page .dream-reader .dream-story-case-number {
+  grid-template-columns: auto;
+  justify-items: center;
+  align-content: start;
+  gap: 3px;
+  letter-spacing: 0.2em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-number b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  min-height: 1.7em;
+  border: 1px solid var(--dr-shu);
+  outline: 1px solid rgb(204 73 59 / 34%);
+  outline-offset: 2px;
+  color: var(--dr-text);
+  background: rgb(74 29 39 / 70%);
+  font-family: var(--dr-num);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-case-notes {
+  gap: clamp(10px, 1.4vw, 16px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-case-notes > li {
+  padding: clamp(14px, 1.8vw, 20px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-case-note-head > span b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  min-height: 1.6em;
+  margin-left: 4px;
+  border: 1px solid var(--dr-shu);
+  color: var(--dr-text);
+  background: rgb(74 29 39 / 70%);
+  font-family: var(--dr-num);
+}
+
+/* ----------------------------------------------------------------
+   14. 出来事, 舞台, 繋がり, 武装: the archive on the indigo band
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-archive-fold > summary {
+  border-color: var(--dr-rule-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-chronicle-cases {
+  gap: 8px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-atlas-grid article {
+  padding: clamp(14px, 1.8vw, 20px) clamp(14px, 1.8vw, 20px) 0;
+}
+
+/* ----------------------------------------------------------------
+   15. 用語集: a dark ink plate instead of the bright ivory slab
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page > #glossary {
+  color: var(--dr-text);
+}
+
+html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-glossary,
+html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-glossary-index {
+  padding: clamp(14px, 2.2vw, 32px);
+  border: 1px solid var(--dr-rule);
+  outline: 1px solid var(--dr-rule-3);
+  outline-offset: 4px;
+  background:
+    var(--dr-ticks),
+    linear-gradient(174deg, rgb(243 224 176 / 6%), transparent 20%),
+    #120c11;
+  background-repeat: no-repeat;
+}
+
+html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-glossary-index {
+  margin-top: 10px;
+  padding-block: 4px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-glossary > div {
+  border-color: var(--dr-rule-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-glossary dt {
+  color: var(--dr-gold-hi);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-glossary dd,
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-glossary dd p {
+  color: var(--dr-text-2);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quote blockquote p {
+  color: var(--dr-text);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quote figcaption {
+  color: var(--dr-text-3);
+}
+
+/* ----------------------------------------------------------------
+   16. Phones: the long runs become scenes you step through
+   The uniform records of a scene (the agents' files, the six case notes,
+   the fifteen places, the nine tanzaku) stand side by side on a rail
+   that snaps a plate at a time and shows the edge of the next; every
+   word stays on the page, and the vertical swipe still scrolls it.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-agent-roster, .dream-case-notes, .dream-atlas-grid, .dream-quote-band) {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    grid-auto-columns: min(84%, 340px);
+    align-items: stretch;
+    gap: 10px;
+    columns: auto;
+    margin-inline: calc(-1 * var(--dr-inset));
+    padding: 2px var(--dr-inset) 14px;
+    scroll-padding-inline: var(--dr-inset);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dr-gold-deep) transparent;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-agent-roster, .dream-case-notes, .dream-atlas-grid, .dream-quote-band)
+    > li {
+    scroll-snap-align: start;
+    min-width: 0;
+    margin: 0;
+    break-inside: auto;
+  }
+
+  /* Inside the faction plate the rail runs to the plate's edges. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-faction .dream-agent-roster {
+    margin-inline: calc(-1 * clamp(16px, 2.2vw, 30px));
+    padding-inline: clamp(16px, 2.2vw, 30px);
+    scroll-padding-inline: clamp(16px, 2.2vw, 30px);
+  }
+
+  /* An agent's file: the code seal beside the name, the record full width. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-roster > li {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: 8px 10px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy {
+    display: contents;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-code {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 52px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy > h5 {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy > :not(h5) {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy > .dream-agent-open {
+    justify-self: start;
+  }
+
+  /* The record sheet: the label over its text, the text full width. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-sheet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-sheet > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  /* The tanzaku keep the desktop's row: vertical slips side by side. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
+    flex: none;
+  }
+
+  /* Scene heads: the title takes the whole line under the kicker. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
+    grid-template-areas:
+      "mark kicker count"
+      "mark title title";
+    column-gap: 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading h2 {
+    font-size: clamp(24px, 7.4vw, 32px);
+    letter-spacing: 0.1em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > span {
+    padding-left: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  /* A tie reads on two lines: the pair, then the knot and the words. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-tie {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "a b"
+      "knot knot"
+      "quote quote";
+    justify-items: stretch;
+    gap: 6px 10px;
+    padding: 12px 12px 14px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-name:first-child {
+    text-align: start;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot + .dream-relations-name {
+    text-align: end;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot > i {
+    display: block;
+    flex: 1 0 16px;
+    width: auto;
+    height: 1px;
+  }
+
+  /* The speakers' folds keep their 48px rows, closer together. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-voices-grid {
+    gap: 6px;
+  }
+}
