@@ -243,7 +243,10 @@ test("scroll-linked motion rides named timelines behind the full gate, with auto
       assert.match(duration, /^(?:auto|\d+ms)$/, selector);
     assert.ok(declarations(body, "animation-duration").length, `${selector}: longhands`);
   }
-  assert.ok(linked >= 14, String(linked));
+  // rx11 review: the punch's throw and meter, the P14 core, the couplings and
+  // the end card play on their hits (each scroll-linked animation restyles its
+  // element every frame it is in range), so fewer ride the scroll.
+  assert.ok(linked >= 8, String(linked));
   // Scroll-linked keyframes never repaint (no clip-path, colour or background anywhere here).
   assert.doesNotMatch(css, /@keyframes[^{]+\{[^@]*?(?:clip-path|background|color)\s*:/);
 });
@@ -273,7 +276,9 @@ test("the pinned punch stage is layout only: no lock moves the page", () => {
       );
     }
   }
-  assert.match(css, /--exi-pin: 96svh;/);
+  // rx11 review: the punch is thrown and charged on its hit, so the hold only
+  // carries the cut and the dash (96svh left most of a screen empty).
+  assert.match(css, /--exi-pin: 72svh;/);
   assert.match(css, /--exi-stage: calc\(100svh - var\(--dxs-nav\)\);/);
 });
 
@@ -338,7 +343,8 @@ test("forced colours and reduced transparency drop the ornaments and keep the fi
   assert.ok(forced.length > 200);
   assert.match(
     forced,
-    /:is\(\.exi-rays, \.exi-streaks, \.exi-shards, \.exi-ring, \.exi-ghosts, \.exi-band, \.exi-tally\) \{\s*display: none;/,
+    // (rx11 review: no afterimage copies any more, so no .exi-ghosts to drop.)
+    /:is\(\.exi-rays, \.exi-streaks, \.exi-shards, \.exi-ring, \.exi-band, \.exi-tally\) \{\s*display: none;/,
   );
   assert.match(forced, /\.exi-figure > \.exi-real \{\s*opacity: 1;/);
   assert.match(forced, /figure\[data-form\] \{\s*background: Canvas;/);
@@ -352,8 +358,10 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
       /<(?:b|span) className="exi-figure">\s*<(b|span) className="exi-real">([^<{]+|\{[^}]+\})<\/\1>\s*<\1\s+className="exi-tally"\s+aria-hidden="true"\s+data-exi-tally=(?:"([^"]+)"|\{([^}]+)\})\s*\/>/g,
     ),
   ];
-  assert.equal(tallies.length, 6);
-  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 6);
+  // rx11 review: the specs no longer count the P14 figures a second time (each
+  // draw is a text change, the costliest beat on the page); four tallies remain.
+  assert.equal(tallies.length, 4);
+  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 4);
   for (const [, , real, literal, expression] of tallies) {
     if (literal) assert.equal(literal, real.trim());
     else assert.equal(`{${expression}}`, real.trim());
@@ -375,8 +383,9 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
     assert.equal(formatTally(parts, parts.value), value);
     assert.equal(formatTally(parts, 0).length, value.length);
   }
-  // Ornaments are hidden and textless (the afterimages repeat the figure).
-  for (const ornament of ["exi-ring", "exi-band", "exi-ghosts"])
+  // Ornaments are hidden and textless. (rx11 review: the text afterimages
+  // were dropped; stopped mid-dash they read as extra digits, "00000.002".)
+  for (const ornament of ["exi-ring", "exi-band"])
     assert.match(component, new RegExp(`className="${ornament}" aria-hidden="true"`));
   // Each drawing sits in a hidden HTML box that carries its class (the box
   // animates on the compositor; an SVG target with translate, scale or

@@ -282,8 +282,8 @@ const ExtremePerformance = memo(function ExtremePerformance() {
 
       {/* IMPACT (rx11): the punch meter. The stage holds the two figures and
           hidden ornaments (focus lines, the shock ring, the cut between them,
-          speed lines, afterimages); a decorative tally runs over the owner's
-          figure, which stays in the text. */}
+          speed lines); a decorative tally runs over the owner's figure,
+          which stays in the text. */}
       <div className="rxs-headline-metrics">
         <div className="exi-stage">
           <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
@@ -324,11 +324,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             <strong>
               0.002<span>SEC</span>
               <i className="exo-speed" aria-hidden="true" />
-              <b className="exi-ghosts" aria-hidden="true">
-                <b>0.002</b>
-                <b>0.002</b>
-                <b>0.002</b>
-              </b>
             </strong>
             <p>標準状態の100m走破時間</p>
           </article>
@@ -914,11 +909,7 @@ export function ExtremeSaga() {
           <div>
             <small>KHAOS Ultra</small>
             <strong>
-              <b className="exi-figure">
-                <b className="exi-real">20,000</b>
-                <b className="exi-tally" aria-hidden="true" data-exi-tally="20,000" />
-              </b>
-              <span>YOPS</span>
+              20,000<span>YOPS</span>
             </strong>
             <p>∞ CORE</p>
           </div>
@@ -926,11 +917,7 @@ export function ExtremeSaga() {
           <div>
             <small>KOSMOS Ultra</small>
             <strong>
-              <b className="exi-figure">
-                <b className="exi-real">5,000</b>
-                <b className="exi-tally" aria-hidden="true" data-exi-tally="5,000" />
-              </b>
-              <span>TOPS</span>
+              5,000<span>TOPS</span>
             </strong>
             <p>300 CORE</p>
           </div>

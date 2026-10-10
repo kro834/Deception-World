@@ -14,7 +14,7 @@
      release it; without the engine everything simply stands drawn.
    - Tallies: a decorative copy (aria-hidden, [data-exi-tally]) counts its
      figure up from zero when the nearest hit around it lands, on
-     requestAnimationFrame for about a second, braking hard into the value.
+     requestAnimationFrame for under a second, braking hard into the value.
      Its accessible twin keeps the owner's value at all times; the sheet
      hides that twin only while the figure carries data-exi-counting, then
      the figure lands (data-exi-landed). A container marked data-exi-rekey
@@ -39,10 +39,12 @@
 
 const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -45% 0px" };
 // Scenes keyed by the engine itself (their opening tags stay as they are).
-const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope .rxs-specs";
-const TALLY_MS = 1100;
-// A counter reads as rolling at thirty draws a second; half the frames' text work.
-const TALLY_STEP_MS = 32;
+const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope :is(.rxs-system-grid, .rxs-specs)";
+const TALLY_MS = 900;
+// A counter reads as rolling at twenty draws a second. Every draw is a text
+// change (layout, paint and a commit of its layer), the costliest beat on the
+// page, so it runs a third of the frames and stops braking sooner.
+const TALLY_STEP_MS = 50;
 const TILT_EASE = 0.14;
 // Each key outlives the latest beat it starts (every beat ends by 2 s).
 export const BEATS = { hit: 2100, landed: 800, impact: 1000, pop: 500, arrival: 2200 };
@@ -453,7 +455,9 @@ export function mountExtremeImpact(page, environment = window) {
         key(page, "data-exi-arrival", BEATS.arrival);
     }
     observe();
-    watchHero();
+    // Only a fine pointer tilts the hero, so only then is it watched.
+    if (finePointer.matches) watchHero();
+    else unwatchHero();
     syncPointer();
   };
   const onPageHide = () => {
