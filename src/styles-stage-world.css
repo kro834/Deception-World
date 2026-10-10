@@ -673,6 +673,46 @@ html[data-family="world"]:root
   display: none;
 }
 
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-frame::before,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-frame::after,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-media::before {
+  content: none;
+}
+
+/* Portrait tablets keep the two-column title stage with a larger print. */
+@media (min-width: 901px) and (max-width: 1100px) and (orientation: portrait) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    --poster-width: min(40vw, 430px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    align-content: center;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context {
+    align-self: start;
+    margin-top: 12px;
+  }
+}
+
 /* The identity: the work's line, the wordmark, the edition tag. */
 html[data-family="world"]:root
   body
@@ -937,7 +977,7 @@ html[data-family="world"]:root
 
 /* Phones and portrait tablets: the title, the way in, the key visual, the
    credits, in one column. */
-@media (max-width: 900px), (orientation: portrait) and (max-width: 1100px) {
+@media (max-width: 900px) {
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
     --poster-width: min(78vw, 440px, calc((100svh - 220px) * 2 / 3));
     grid-template:
@@ -1880,7 +1920,8 @@ html[data-family="world"]:root
     > button[role="tab"]
     > small {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    letter-spacing: 0.04em;
   }
 
   html[data-family="world"]:root
