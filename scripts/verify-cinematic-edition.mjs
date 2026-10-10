@@ -37,26 +37,28 @@ try {
     { width: 390, height: 844 },
     { width: 1194, height: 834 },
     { width: 1024, height: 768 },
+    // rx10 review: the STAGE bar's segmented chapters overran the brand and
+    // the trigger at 761–799 (768 portrait tablets); the World bar only.
+    { width: 768, height: 1024, worldOnly: true },
   ]) {
-    const page = await browser.newPage({ viewport, hasTouch: true, reducedMotion: "reduce" });
+    const { worldOnly, ...size } = viewport;
+    const page = await browser.newPage({ viewport: size, hasTouch: true, reducedMotion: "reduce" });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    for (const route of [
-      "/world",
-      "/dream-chapter",
-      "/rexonance-saga",
-      "/extreme-saga",
-      "/final-stage",
-    ]) {
+    for (const route of worldOnly
+      ? ["/world"]
+      : ["/world", "/dream-chapter", "/rexonance-saga", "/extreme-saga", "/final-stage"]) {
       await page.goto(base + route, { waitUntil: "networkidle" });
       await noOverflow(page);
       if (route === "/world") {
         const links = page.locator(".topbar nav a");
         const menu = await rect(page, ".topbar-actions");
+        const brand = await rect(page, ".topbar .brand");
         for (let i = 0; i < (await links.count()); i++) {
           const link = links.nth(i);
           const box = await link.boundingBox();
           assert.ok(box.x + box.width <= menu.x, "nav must not overlap menu");
+          assert.ok(box.x >= brand.x + brand.width, "nav must not overlap the brand");
           assert.ok(
             await link.evaluate((el) =>
               el.contains(

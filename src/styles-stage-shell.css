@@ -422,6 +422,35 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar .bra
   }
 }
 
+/* Phones: the three chapters share the bar's spare width equally (not
+   three equal boxes), so the gaps between their words read even. The
+   narrowest phones keep the last one a little further from the trigger. */
+@media (max-width: 760px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a {
+    flex: 1 1 auto;
+    min-width: 44px;
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav {
+    margin-inline-end: 4px;
+  }
+}
+
+/* Narrow tablets (768 portrait): the three segments are tighter, and so is
+   the edition's name, so they all fit between the plate and the trigger. */
+@media (min-width: 761px) and (max-width: 899px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a {
+    padding-inline: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand :is(b, small) {
+    letter-spacing: 0.06em;
+  }
+}
+
 html[data-family="world"] body main.site-shell.film-edition > header.topbar nav a::after {
   content: "";
   position: absolute;
@@ -621,6 +650,27 @@ html[data-family="special"] body .rxs-page > header.rxs-local-nav nav a {
 }
 
 /* ---------- Library and search ---------- */
+/* The bar stays with the reader as on every other family (the page's own
+   anchors clear it: the root's scroll padding is 96px), and it takes the
+   World's and the files' inline inset, so the plate and the trigger do
+   not jump between families. */
+html[data-family="library"] body .library-page > header.library-topbar,
+html[data-family="library"] body .search-page > header.search-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding-inline: clamp(16px, 4vw, 72px);
+}
+
+/* The World mode's body clips sideways with overflow-x: hidden, which
+   makes it a scroll container of its own (it never scrolls: the document
+   does), and a sticky bar inside it would never stick. clip keeps the
+   sideways clip without that; browsers without clip keep hidden. */
+html[data-family="library"][data-mode="world"] body {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 html[data-family="library"] body .library-page > header.library-topbar > a,
 html[data-family="library"] body .search-page > header.search-topbar > a.search-brand {
   display: inline-grid;
@@ -718,6 +768,13 @@ html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
   backdrop-filter: none !important;
   box-shadow: none !important;
   color: var(--sh-text);
+}
+
+/* The launcher sets its own face, so a route sheet that persists from an
+   earlier page (the special sites' .rxs-page face) cannot restyle it. The
+   Dream Chapter's launcher keeps the chapter's Mincho, as before. */
+html[data-family]:not([data-family="dream"]) body #site-side-panel.side-panel {
+  font-family: var(--dx-body, "Noto Sans JP", "Zen Kaku Gothic New", sans-serif);
 }
 
 html[data-family] body #site-side-panel.side-panel > .liquid-pointer-glow {
@@ -2510,20 +2567,84 @@ html[data-family]
     --sh-tile-h: clamp(96px, 12vh, 132px);
   }
 
+  /* SYSTEM: the plates in two even rows on the left (フォームアーカイブ and
+     the Zeus switch, then オープニング), the Ultra setting beside them as
+     one block as tall as both rows. The reading order is the source's.
+     Four columns leave the switch and the archive's name room at 1180. */
   html[data-family]
     body
     #site-side-panel.side-panel
     > .side-panel-group:last-child
     > .side-panel-links {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
   }
 
   html[data-family]
     body
     #site-side-panel.side-panel
     > .side-panel-group:last-child
-    .ultra-mode-setting {
+    > .side-panel-links
+    > .ultra-mode-setting {
+    grid-column: 3 / span 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links
+    > a[href="/"] {
+    grid-column: 1 / span 2;
+  }
+
+  /* With the iPad's own setting: the three switches share the first row,
+     the Ultra setting and オープニング the second. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links:has(> .ipad-menu-setting) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links:has(> .ipad-menu-setting)
+    > :is(a, .side-panel-zeus-toggle, .ipad-menu-setting) {
     grid-column: span 2;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links:has(> .ipad-menu-setting)
+    > .ultra-mode-setting {
+    grid-column: 1 / span 4;
+    grid-row: auto;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:last-child
+    > .side-panel-links:has(> .ipad-menu-setting)
+    > a[href="/"] {
+    grid-column: span 2;
+    align-self: start;
+  }
+}
+
+/* The narrowest desktop columns: UNMANAGED fits its one column. */
+@media (min-width: 1180px) and (max-width: 1279px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) > p {
+    letter-spacing: 0.12em;
   }
 }
 
@@ -2535,6 +2656,33 @@ html[data-family]
     transition:
       translate 0.42s var(--sh-ease),
       visibility 0.42s;
+  }
+
+  /* The tiles keep their art while the sheet slides away: the art is set
+     only while it is open (nothing is fetched before the first open), so
+     its exit waits for the slide (0.42s) instead of emptying every plate
+     on the close's first frame. The tiles' own colour and press easing
+     are kept as they were. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > a {
+    transition:
+      color 0.16s ease,
+      border-color 0.16s ease,
+      background-color 0.16s ease,
+      transform 0.16s ease,
+      --sh-art 0s linear 0.44s;
+    transition-behavior: normal, normal, normal, normal, allow-discrete;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    .side-panel-links
+    > a {
+    transition-delay: 0s, 0s, 0s, 0s, 0s;
   }
 
   html[data-family]:not([data-world-effects="economy"])
