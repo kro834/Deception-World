@@ -125,11 +125,15 @@ html[data-family="special"]
   outline-offset: 3px;
 }
 
-/* The last chapter is at least a screen tall, so a jump to it lands
-   under the bar like the others (the page must scroll that far). */
-html[data-family="special"] body .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page) > #system,
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders {
-  min-height: calc(100svh - var(--dxs-nav) - 24px);
+/* The end card holds at least half a screen, so a jump to the last
+   chapter can still land under the bar on tall tablets (the page must
+   scroll that far). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page:is(.rxs-rexonance-page, .exs-page, .fst-page)
+  > .rxs-footer {
+  min-height: min(56svh, 620px);
+  align-content: flex-end;
 }
 
 /* ================================================================

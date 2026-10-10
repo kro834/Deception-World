@@ -710,6 +710,19 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
   background: rgb(170 178 255 / 6%);
 }
 
+/* The form selectors inside the records name their forms in Japanese. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"]
+  small {
+  font-family: var(--dx-body);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
 /* ================================================================
    03 RIDERS: the end credits
    ================================================================ */
