@@ -141,7 +141,6 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         return;
       }
       const s = width / FIG.width;
-      const half = REXONANCE_SUIT_ATLAS.width / 2;
       const all = plates();
       const done = new Set<Plate>();
       let last = -1;
