@@ -1118,7 +1118,9 @@ html[data-family]
     .side-panel-links
     > button.side-panel-quick-search
     > i {
-    display: none;
+    width: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 }
 
