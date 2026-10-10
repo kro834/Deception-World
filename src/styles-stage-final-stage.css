@@ -3,9 +3,9 @@
    (rx10, 2026-10-10)
 
    The page reads like a film's site rather than a product page:
-   - the cold open is a one-sheet: the title logo hung in a framed
-     poster, the credit line, the release title set wide and plain, the
-     tagline under it, the way in as the first title card.
+   - the cold open is the opening title on a screen: the logo projected
+     in a letterboxed frame, then the credit line, the release title set
+     wide and plain, the tagline, the way in as the first title card.
    - every chapter opens on a centred title card: the slate (01 / STORY)
      in a hairline frame, the Japanese title, the line under it.
    - the story is a cinematic reading column: one centred measure in a
@@ -169,7 +169,7 @@ html[data-family="special"]
 }
 
 /* ================================================================
-   Cold open: the one-sheet
+   Cold open: the title on the screen
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   position: relative;
@@ -189,26 +189,9 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
     radial-gradient(60% 30% at 50% 100%, rgb(201 155 255 / 10%), transparent 72%), var(--fsx-house);
 }
 
-/* The poster's frame: an inset hairline with lit corners. */
+/* The house has no frame of its own: the screen below carries it. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero::before {
-  content: "";
-  position: absolute;
-  inset: clamp(12px, 2.4vw, 32px);
-  z-index: 0;
-  display: block;
-  margin: 0;
-  border: 1px solid var(--fsx-line);
-  background:
-    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 22px 1px no-repeat,
-    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 1px 22px no-repeat,
-    linear-gradient(var(--fsx-violet) 0 0) 100% 0 / 22px 1px no-repeat,
-    linear-gradient(var(--fsx-violet) 0 0) 100% 0 / 1px 22px no-repeat,
-    linear-gradient(var(--fsx-lamp) 0 0) 0 100% / 22px 1px no-repeat,
-    linear-gradient(var(--fsx-lamp) 0 0) 0 100% / 1px 22px no-repeat,
-    linear-gradient(var(--fsx-lamp) 0 0) 100% 100% / 22px 1px no-repeat,
-    linear-gradient(var(--fsx-lamp) 0 0) 100% 100% / 1px 22px no-repeat;
-  opacity: 1;
-  pointer-events: none;
+  content: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero::after {
@@ -224,6 +207,9 @@ html[data-family="special"]
   inset: 0;
 }
 
+/* The screen: the title projected in a letterboxed frame (2.39:1),
+   lit from its centre, its edges hairlines with lit corners; the house
+   above and below it stays dark. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
   grid-column: 1;
   grid-row: 1;
@@ -231,11 +217,46 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   position: relative;
   inset: auto;
   z-index: 2;
-  width: min(760px, 78vw, calc((100svh - var(--dxs-nav)) * 0.86));
+  display: grid;
+  place-items: center;
+  width: min(1240px, 100%, calc((100svh - var(--dxs-nav) - 360px) * 2.39));
+  min-width: min(100%, 640px);
   height: auto;
-  margin: 0 0 clamp(14px, 2.4svh, 28px);
+  aspect-ratio: 2.39 / 1;
+  margin: 0 0 clamp(18px, 3svh, 32px);
+  overflow: hidden;
+  border-block: 1px solid var(--fsx-line-2);
+  background:
+    radial-gradient(52% 70% at 50% 50%, rgb(170 178 255 / 18%), transparent 72%),
+    radial-gradient(30% 50% at 50% 100%, rgb(201 155 255 / 12%), transparent 70%),
+    linear-gradient(180deg, #090b2a, #05061a);
   translate: none;
   scale: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  z-index: 3;
+  display: block;
+  margin: 0;
+  border: 0;
+  background:
+    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 22px 1px no-repeat,
+    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 1px 22px no-repeat,
+    linear-gradient(var(--fsx-violet) 0 0) 100% 0 / 22px 1px no-repeat,
+    linear-gradient(var(--fsx-violet) 0 0) 100% 0 / 1px 22px no-repeat,
+    linear-gradient(var(--fsx-lamp) 0 0) 0 100% / 22px 1px no-repeat,
+    linear-gradient(var(--fsx-lamp) 0 0) 0 100% / 1px 22px no-repeat,
+    linear-gradient(var(--fsx-lamp) 0 0) 100% 100% / 22px 1px no-repeat,
+    linear-gradient(var(--fsx-lamp) 0 0) 100% 100% / 1px 22px no-repeat;
+  opacity: 1;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::after {
+  content: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo .rxs-orbit {
@@ -246,12 +267,21 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   position: relative;
   inset: auto;
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 64%;
   height: auto;
-  max-height: none;
+  max-height: 92%;
   margin: 0;
   object-fit: contain;
   translate: none;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  mask-composite: intersect;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-copy {
@@ -1010,7 +1040,13 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
-    width: min(100%, 520px);
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo img {
+    max-width: 90%;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
@@ -1117,7 +1153,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 }
 
 @media (forced-colors: active) {
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero::before,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::before {
     content: none;
   }
