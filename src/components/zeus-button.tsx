@@ -124,6 +124,9 @@ const ZEUS_AVOID_SELECTOR = [
   // the card's foot became a way back, and the field's suggestion row.
   ".export-page-btn",
   ".search-suggestions button",
+  // rx10 review 2: the library's own search field (the button settled on its
+  // right end at 390 and 1024, over the placeholder and the help line).
+  ".library-search",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -1086,7 +1089,7 @@ function ZeusButton({
     const readCompactMenuFootprint = () =>
       root.getAttribute("data-ipad-menu") === "compact" &&
       root.getAttribute("data-ipad-menu-scrolled") === "true"
-        ? root.getAttribute("data-viewport-chrome") ?? ""
+        ? (root.getAttribute("data-viewport-chrome") ?? "")
         : "";
     let compactMenuFootprint = readCompactMenuFootprint();
     const reconcileCompactMenu = () => {

@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LIBRARY_ENTRIES, LIBRARY_KINDS } from "@/lib/library-data";
-import { pathArt } from "@/lib/record-art";
+import { pathArt, titleRunStyle } from "@/lib/record-art";
 import { RECENT_LIMIT, type LibrarySaved } from "@/lib/library-storage";
 import {
   buildLibraryExport,
@@ -83,7 +83,7 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
                   {LIBRARY_KINDS[resume.entry.kind]}
                   <span>{formatVisitTime(resume.at, now)}に開いた資料</span>
                 </p>
-                <p className="library-continue-title">
+                <p className="library-continue-title" style={titleRunStyle(resume.entry.title)}>
                   <DisplayName value={resume.entry.title} />
                 </p>
                 <div className="library-continue-actions">

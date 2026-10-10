@@ -114,7 +114,17 @@ export function LibraryPage({
                 本文から検索 <span aria-hidden="true">↗</span>
               </GuardedLink>
             </div>
-            <nav className="library-cast" aria-label="ライダーの人物資料">
+            <nav
+              className="library-cast"
+              aria-label="ライダーの人物資料"
+              onFocus={(event) => {
+                // The rail scrolls sideways with its scrollbar hidden: a file
+                // reached by the keyboard comes fully into view, ring and all.
+                const tile = event.target;
+                if (tile instanceof HTMLElement && tile.matches(":focus-visible"))
+                  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+              }}
+            >
               {CAST.map(({ entry, no, tone, src, pos }, index) => (
                 <GuardedLink
                   key={entry.id}

@@ -299,6 +299,24 @@ html[data-family="library"] .dxl-art[data-edition="dream"][data-plate="type"] > 
   letter-spacing: 0.16em;
 }
 
+/* On a card, a plate sets its name large down its middle, so a shelf of
+   records without pictures (the Dream cases) is not a wall of empty
+   windows with a word in the corner (rx10 review). Long names still fade
+   out at the foot. */
+html[data-family="library"]
+  :is(.library-card, .search-result-card)
+  > .dxl-art[data-plate="type"]
+  > b {
+  top: 34px;
+  right: 50%;
+  bottom: 12px;
+  translate: 50% 0;
+  font-size: clamp(20px, 18cqi, 48px);
+  text-align: center;
+  -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent);
+  mask-image: linear-gradient(180deg, #000 88%, transparent);
+}
+
 html[data-family="library"] .dxl-art[data-plate="type"]::before {
   position: absolute;
   inset: 34px auto 10px 12px;
@@ -693,6 +711,10 @@ html[data-family="library"] .library-cast {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: clamp(6px, 0.8vw, 12px);
+  /* The row of files stops short of the Zeus button's resting lane (its left
+     edge is about 5vw + 46px from the screen's right edge), so the button
+     rests at home on the first screen instead of stepping off the files. */
+  margin-inline-end: max(0px, calc(5vw + 58px - var(--dx-gutter)));
   padding-bottom: 22px;
 }
 
@@ -1524,9 +1546,12 @@ html[data-family="library"] .library-page .library-search {
   box-shadow: var(--dx-bevel);
 }
 
+/* The field's ring is an outline, so forced colours keep it (a shadow is
+   dropped there and the border is repainted the same either way). */
 html[data-family="library"] .library-page .library-search:focus-within {
   border-color: var(--dx-edition);
-  box-shadow: 0 0 0 2px var(--dx-focus);
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 2px;
 }
 
 html[data-family="library"] .library-page .library-search > span {
@@ -1983,6 +2008,16 @@ html[data-family="library"] .search-page .search-categories button span {
   color: inherit;
   font: 500 12px / 1 var(--dx-mono);
   opacity: 0.8;
+}
+
+/* Phones: the kinds wrap onto rows again, so every chip (and its focus
+   ring) is on screen; a sideways row hid the one keyboard focus reached. */
+@media (max-width: 559px) {
+  html[data-family="library"] .search-page .search-categories,
+  html[data-family="library"] .library-page .library-filter-row {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 
 /* ================================================================
@@ -2457,6 +2492,15 @@ html[data-family="library"] .search-page .search-scope-note {
     grid-template-columns: 64px minmax(0, 1fr);
   }
 
+  /* A long single name (ファイナルステージ) steps down to hold its line in
+     the narrow cell (its words' column is the screen less about 174px). */
+  html[data-family="library"] .library-page .library-continue-title {
+    font-size: min(
+      clamp(17px, 1.6vw, 22px),
+      max(13px, calc((100vw - 174px) / (var(--dxl-run, 0.01) * 1.05)))
+    );
+  }
+
   html[data-family="library"] .search-page .search-input-row {
     padding-left: 12px;
   }
@@ -2565,6 +2609,12 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art {
 }
 
 html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
+  display: none;
+}
+
+/* A preview without a picture keeps only its plate: its set-in name ran
+   through the tile's outlined kind mark (PEOPLE, WORLD) behind the count. */
+html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"] > b {
   display: none;
 }
 
@@ -2793,6 +2843,20 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
   }
 }
 
+/* The art's share of a card on its side (the rules below, which only a
+   closing card meets); a plate (a record without a picture) takes half,
+   its name set large, so the words beside it are not an empty field. The
+   tokens are set on the card itself (a container's own query does not
+   style it) and resolve against it where they are used. */
+html[data-family="library"] :is(.library-card, .search-result-card) {
+  --dxl-side-art: clamp(120px, 34cqi, 380px);
+}
+
+html[data-family="library"]
+  :is(.library-card, .search-result-card):has(> .dxl-art[data-plate="type"]) {
+  --dxl-side-art: clamp(140px, 48cqi, 460px);
+}
+
 /* On its side. Only a card spanning columns is this wide: one column is
    never more than about 280px, and the smallest phones' one-column row
    cards keep their own layout (the media gate). Only the closing cards are
@@ -2802,7 +2866,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
     html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art {
       position: absolute;
       inset: 0 auto 0 0;
-      width: clamp(120px, 34cqi, 380px);
+      width: var(--dxl-side-art);
       aspect-ratio: auto;
       border-right: 1px solid var(--dxl-line);
       border-bottom: 0;
@@ -2810,8 +2874,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
 
     html[data-family="library"] .library-page .library-card > :not(.dxl-art),
     html[data-family="library"] .search-page .search-result-card > :not(.dxl-art) {
-      margin-inline: calc(clamp(120px, 34cqi, 380px) + clamp(14px, 2.4cqi, 28px))
-        clamp(14px, 2.4cqi, 28px);
+      margin-inline: calc(var(--dxl-side-art) + clamp(14px, 2.4cqi, 28px)) clamp(14px, 2.4cqi, 28px);
     }
 
     html[data-family="library"] .library-page .library-card > :first-child:not(.dxl-art),
@@ -2823,7 +2886,7 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art > i {
     html[data-family="library"] .library-page .library-card h3,
     html[data-family="library"] .search-page .search-result-title {
       --dxl-title: clamp(16px, 1.5vw, 21px);
-      --dxl-room: calc(100cqi - clamp(120px, 34cqi, 380px) - 2 * clamp(14px, 2.4cqi, 28px));
+      --dxl-room: calc(100cqi - var(--dxl-side-art) - 2 * clamp(14px, 2.4cqi, 28px));
     }
 
     html[data-family="library"] .library-page .library-card-description,
