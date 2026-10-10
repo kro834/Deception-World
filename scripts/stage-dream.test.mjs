@@ -56,6 +56,10 @@ test("every rule is scoped to the dream family and the doubled page class", () =
     }
   }
   assert.ok(count > 150, String(count));
+  // A pseudo-element inside :is() silently drops the whole rule.
+  for (const [, inner] of css.matchAll(/:is\(([^)]*)\)/g)) {
+    assert.doesNotMatch(inner, /::/, inner);
+  }
   // The shell owns the header, the act bar and the side menu.
   assert.doesNotMatch(css, /dream-site-header|dream-chapter-nav|site-side-panel|side-panel/);
 });
@@ -79,6 +83,9 @@ test("the sheet adds no words, no motion, no blur and nothing under 12px", () =>
     assert.ok(Number(min) >= 12, min);
   }
   assert.doesNotMatch(css, /:has\(/);
+  // The minifier empties "border-image: none" and folds "transform: none;
+  // translate: none" into translate(0, 0): longhands only.
+  assert.doesNotMatch(css, /border-image:\s*none|translate:\s*none/);
 });
 
 test("the roster's art is two pictures the site already publishes, at card size", async () => {

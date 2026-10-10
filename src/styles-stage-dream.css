@@ -118,7 +118,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-annex {
 html[data-family="dream"] main.dream-page.dream-page > .dream-annex,
 html[data-family="dream"] main.dream-page.dream-page > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal) {
   padding: clamp(32px, 4vw, 60px) var(--dr-inset) clamp(36px, 4.6vw, 64px);
-  border-image: none;
+  border-image-source: none;
 }
 
 /* Each act's scenes take the act's light: plum for the cast, vermilion
@@ -527,6 +527,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
     inset: auto;
     align-self: stretch;
     justify-self: stretch;
+    width: auto;
     height: auto;
     min-height: 0;
     margin: 0 var(--dr-stage-gap) var(--dr-stage-gap) var(--dr-gut);
@@ -637,6 +638,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
     inset: auto;
     align-self: stretch;
     justify-self: stretch;
+    width: auto;
     height: auto;
     min-height: 0;
     margin: 0 0 0 var(--dr-gut);
@@ -923,15 +925,18 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:focus-v
    picture light over a dark damask, the poster in a gilt frame with its
    caption as the brass label, the thumbnails hung as small frames.
    ---------------------------------------------------------------- */
+/* The wall's edge is a shadow line, not a border: on the stacked console
+   the poster spans the stage's full width (verify-anime-ui). */
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage {
-  border: 1px solid var(--dr-rule-2);
   outline: 0;
   background:
     radial-gradient(60% 34% at 42% 0, rgb(243 224 176 / 12%), transparent 72%),
     repeating-linear-gradient(90deg, rgb(200 164 92 / 3%) 0 1px, transparent 1px 22px),
     repeating-linear-gradient(0deg, rgb(200 164 92 / 2%) 0 1px, transparent 1px 22px),
     var(--dr-wall);
-  box-shadow: var(--dr-bevel);
+  box-shadow:
+    0 0 0 1px var(--dr-rule-2),
+    var(--dr-bevel);
 }
 
 /* The poster hangs in its own frame on the wall: the picture box takes
@@ -1761,8 +1766,8 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-footer::before {
   z-index: -1;
   width: auto;
   height: auto;
-  translate: none;
-  rotate: none;
+  translate: 0 0;
+  rotate: 0deg;
   border: 1px solid var(--dr-rule);
   outline: 1px solid var(--dr-rule-3);
   outline-offset: 5px;
@@ -1939,7 +1944,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
 
 @media (max-width: 1299px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1175px;
+    contain-intrinsic-size: auto 1170px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
@@ -2189,7 +2194,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
 
 @media (max-width: 359px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1130px;
+    contain-intrinsic-size: auto 1125px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
@@ -2289,7 +2294,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
 
 @media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1155px;
+    contain-intrinsic-size: auto 1150px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
@@ -2384,5 +2389,66 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
     contain-intrinsic-size: auto 1335px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   21. Forced colours: the plates and bands give way to the system
+   ground; frames, rules and seals keep their lines.
+   ---------------------------------------------------------------- */
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page,
+  html[data-family="dream"] main.dream-page.dream-page > :is(.dream-hero, .dream-prologue, .dream-contents, .dream-section, .dream-annex, .dream-footer),
+  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > :is(#cast-roster, #factions, #case-notes, #chronicle, #atlas, #relations, #arsenal, #glossary, #quotes),
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-poster-stage,
+      .dream-character-grid,
+      .dream-dolminence-grid,
+      .dream-dolminence-grid > article,
+      .dream-roster article,
+      .dream-faction,
+      .dream-agent-roster > li,
+      .dream-case-notes > li,
+      .dream-atlas-grid article,
+      .dream-relations-tie,
+      .dream-story-crossings,
+      .dream-story-case,
+      .dream-glossary,
+      .dream-glossary-index,
+      .dream-poster-current > figcaption
+    ) {
+    background: Canvas;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::before,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-agent-code, .dream-story-case-number b, .dream-case-note-head > span b, .dream-footer-end) {
+    border-color: CanvasText;
+    outline-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading > .dream-act-mark {
+    border-color: CanvasText;
+    outline-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading::before,
+  html[data-family="dream"] main.dream-page.dream-page > .dream-footer::before {
+    border-color: CanvasText;
+    background: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure > img {
+    border-color: CanvasText;
   }
 }
