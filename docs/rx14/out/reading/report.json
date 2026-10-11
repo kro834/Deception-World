@@ -1,14 +1,15 @@
 {
   "branch": "codex/rx14-repair-20261011",
-  "commits": ["87e0b95", "c3a79f1", "df364c3", "b73922c"],
+  "commits": ["87e0b95", "c3a79f1", "df364c3", "b73922c", "1823b22", "3258e6a"],
   "checks": {
     "reference": "../../verification.json"
   },
   "integrationNotes": [
     "Reading was reapplied from 3bd6b33 / the inverse of 1c635c8, excluding its broken all-rail pan-y policy.",
-    "Upstream main through 00a3c72 was merged without discarding opening, native Dream focus, heap-cleanup, image-containment or Fight Card fixes.",
+    "Upstream main through 8b5968b was merged, including the owner's finished driver and nanite/gold formation work, without discarding opening, native Dream focus, heap-cleanup, image-containment or Fight Card fixes.",
     "src/components/world/world-home.tsx, manager-stub.tsx and rider-page.tsx match their generated source-parts.",
-    "No owner source, archive rows, IDs or shared-gallery data were rewritten. The dirty primary checkout and the separate rx17 branch were left untouched."
+    "No owner source, archive rows, IDs or shared-gallery data were rewritten. The dirty primary checkout and the separate rx17 branch were left untouched.",
+    "The listed package changes are rx14 work; separately authored incoming main changes remain attributed to their original commits."
   ],
   "package": "reading",
   "filesChanged": [

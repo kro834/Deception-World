@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import sharp from "sharp";
 import { dossierImage, dossierImageSources } from "../src/lib/dossier-images.ts";
@@ -7,7 +8,7 @@ import { recordImage } from "../src/lib/record-images.ts";
 import { FORM_RECORD_IMAGES } from "../src/lib/record-form-images.ts";
 import { LAUNCHER_TILE_IMAGES, launcherTile, posterImage } from "../src/lib/thumbnail-images.ts";
 
-const asset = (path) => new URL(`../public${path}`, import.meta.url).pathname;
+const asset = (path) => fileURLToPath(new URL(`../public${path}`, import.meta.url));
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("launcher delivery files match the declared 240/400 pixel candidates", async () => {
