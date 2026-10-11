@@ -448,6 +448,9 @@ function eventTarget() {
 
 // A small element tree with the selectors the engine uses.
 class Node {
+  getBoundingClientRect() {
+    return { top: 100, bottom: 200 };
+  }
   constructor(tag, attributes = {}, children = []) {
     Object.assign(this, eventTarget());
     this.nodeType = 1;
@@ -751,10 +754,10 @@ test("the engine arms the page, keys scenes it owns and lands a hit once, as a o
   assert.equal(t.page.getAttribute("data-exi-arrival"), "done");
   // Two trigger lines (beside the art warm-up's wide margin).
   const lines = t
-    .live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? ""))
+    .live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? ""))
     .map((o) => o.options.rootMargin)
     .sort();
-  assert.deepEqual(lines, ["0px 0px -20% 0px", "0px 0px -45% 0px"]);
+  assert.deepEqual(lines, ["0px 0px -20% 0px", "0px 0px -96px 0px"]);
   t.reach(t.heading);
   assert.equal(t.heading.getAttribute("data-exi-hit"), "true");
   t.tick(BEATS.hit);
@@ -770,7 +773,7 @@ test("the engine arms the page, keys scenes it owns and lands a hit once, as a o
 test("a chained hit follows the one before it once, by its own delay, and never replays", () => {
   const t = setup();
   const cleanup = t.mount();
-  const mid = () => t.live((o) => /-45%/.test(o.options?.rootMargin ?? ""))[0];
+  const mid = () => t.live((o) => /-96px/.test(o.options?.rootMargin ?? ""))[0];
   assert.ok(mid().targets.has(t.time));
   t.reach(t.punch);
   assert.equal(t.punch.getAttribute("data-exi-hit"), "true");
@@ -784,6 +787,16 @@ test("a chained hit follows the one before it once, by its own delay, and never 
   t.tick(BEATS.hit);
   assert.equal(t.time.getAttribute("data-exi-hit"), "done");
   cleanup();
+
+  const offscreen = setup();
+  const cleanupOffscreen = offscreen.mount();
+  offscreen.time.getBoundingClientRect = () => ({ top: 900, bottom: 1100 });
+  offscreen.reach(offscreen.punch);
+  offscreen.tick(380);
+  assert.equal(offscreen.time.getAttribute("data-exi-hit"), "", "the phone's second hit waits until it is visible");
+  offscreen.reach(offscreen.time);
+  assert.equal(offscreen.time.getAttribute("data-exi-hit"), "true");
+  cleanupOffscreen();
 
   // Reached first on its own line, it lands there and the punch does not re-key it.
   const u = setup();
@@ -933,7 +946,7 @@ test("nothing is keyed behind the load gate's cover, and the arrival waits for t
   const cleanup = t.mount();
   assert.equal(t.page.getAttribute("data-exi-armed"), "true");
   assert.equal(t.page.hasAttribute("data-exi-arrival"), false);
-  assert.equal(t.live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.htmlElement.removeAttribute("data-loading");
   t.watchers.filter((w) => w.target === t.htmlElement).forEach((w) => w.callback([]));
   assert.equal(t.page.getAttribute("data-exi-arrival"), "true");
@@ -949,18 +962,18 @@ test("a hidden tab and the bfcache suspend every beat; showing again resumes wit
   t.document.emit("visibilitychange");
   assert.equal(t.frames.size, 0);
   assert.equal(t.timers.size, 0);
-  assert.equal(t.live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.document.hidden = false;
   t.document.emit("visibilitychange");
-  const lines = t.live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? "")).length;
+  const lines = t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length;
   assert.ok(lines >= 1);
   // The landed punch is not watched again.
   assert.equal(t.live((o) => o.targets.has(t.punch)).length, 0);
   t.environment.emit("pagehide");
-  assert.equal(t.live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.environment.emit("pageshow");
   t.environment.emit("pageshow");
-  assert.equal(t.live((o) => /-20%|-45%/.test(o.options?.rootMargin ?? "")).length, lines);
+  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, lines);
   cleanup();
 });
 

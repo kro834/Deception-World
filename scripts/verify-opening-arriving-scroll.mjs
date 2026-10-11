@@ -27,7 +27,7 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(origin);
     await page.locator(".cine-stage.is-complete").waitFor();
-    await page.getByRole("button", { name: "ENTER THE WORLD", exact: true }).tap();
+    await page.getByRole("button", { name: "ディセプションワールドへ入る", exact: true }).tap();
     await page.waitForURL(/\/world$/);
 
     const arriving = page.locator(

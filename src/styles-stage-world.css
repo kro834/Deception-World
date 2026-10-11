@@ -3310,8 +3310,73 @@ html[data-family="world"]:root
 /* ================================================================
    12. The finale: the end card, then its credit line
    ================================================================ */
+/* rx14 #6: the delivered poster is a 1024 × 1536 print, not a panorama.
+   Keep the print inside the scene's frame and let the ember ground fill
+   the remainder. Neither the legacy backdrop transform nor the scroll
+   settle may enlarge it after this size limit has been applied. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .finale-section
+  .finale-backdrop {
+  --sw-poster-density: 1;
+  inset: calc(var(--film-topbar-height, 76px) + 18px) var(--sw-gutter) 28px;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .finale-section
+  .finale-backdrop
+  img {
+  width: min(100%, calc(1024px / var(--sw-poster-density)));
+  height: min(100%, calc(1536px / var(--sw-poster-density)));
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+  scale: none;
+  animation: none;
+  will-change: auto;
+}
+
+@media (resolution > 1dppx) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-backdrop {
+    --sw-poster-density: 2;
+  }
+}
+
+@media (resolution > 2dppx) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-backdrop {
+    --sw-poster-density: 3;
+  }
+}
+
+@media (resolution > 3dppx) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-backdrop {
+    --sw-poster-density: 4;
+  }
+}
+
 @media (forced-colors: none) {
-  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .finale-section {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section {
     background:
       radial-gradient(80% 44% at 50% 100%, rgb(255 150 60 / 22%), transparent 72%),
       linear-gradient(180deg, #0c0604, #120804 60%, #0c0604);

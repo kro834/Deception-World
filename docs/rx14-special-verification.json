@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-11",
+  "issues": [31, 6, 23, 14],
+  "baselineCommit": "1c635c840fae6edee642b3582f4818cc9ac4790d",
+  "fixCommits": ["8f35589", "59a4190"],
+  "browser": "Chrome 154.0.8037.98",
+  "heap": {
+    "method": "Production build; genuine SPA Library/Rexonance round trips; unchanged performance.timeOrigin; three forced GCs after each return; native heap retaining paths plus WeakRefs for main and every descendant Node, including text and comments.",
+    "retainingPathBefore": [
+      "HTMLDocument",
+      "MediaQueryMatcher",
+      "HTMLImageElement::ViewportChangeListener",
+      "P14 img sizes=auto",
+      "figure",
+      "section#p14",
+      "main.rxs-page"
+    ],
+    "baselineDetachedMainsAfterEachReturn": [1, 2, 3, 4, 5],
+    "baselineRetainedTrackedNodesAfterEachReturn": [1118, 2236, 3354, 4472, 5590],
+    "fixedScenarios": ["P14 decoded and viewed", "P14 left below the fold"],
+    "roundTripsPerScenario": 5,
+    "trackedNodesPerScenario": 5605,
+    "fixedDetachedMainsAfterEachReturn": [0, 0, 0, 0, 0],
+    "fixedRetainedTrackedNodesAfterEachReturn": [0, 0, 0, 0, 0],
+    "fixedDOMNodesAfterEachReturn": [1674, 1674, 1674, 1674, 1674],
+    "fixedEventListenersAfterEachReturn": [868, 868, 868, 868, 868],
+    "abandonedViewportListeners": 0,
+    "offDocumentResources": {
+      "countAfterEachReturn": [15, 15, 15, 15, 15],
+      "note": "Chromium detachedness=2 also counts deliberate off-document resources, not just leaked former DOM. Every remaining retaining path was inspected; histogram equality is asserted on all five returns.",
+      "owners": {
+        "suitWarmupHeldImages": 4,
+        "galleryStickerHeldImages": 9,
+        "suitPlanWorkingCanvas": 1,
+        "sharedGlassRendererCanvas": 1
+      }
+    },
+    "preloadProbe": "11 independent cleanup variants: fixing src to the already-decoded currentSrc before removing srcset/sizes released the native listener with zero extra image requests; clearing all attributes did not. The successful path is covered by the final heap assertions."
+  },
+  "layout": {
+    "profiles": ["1440x900 DPR1", "1024x1366 DPR2", "390x844 DPR3"],
+    "extreme": "Both forms and all three transition layers use matching contain geometry; physical draw scale <= 1.",
+    "world": "Entire poster stays within all four frame edges; physical draw scale <= 1; no extra transform or scroll-settle enlargement.",
+    "finalStage": "End-card underline centre differs from title centre by at most 0.016 CSS pixels.",
+    "horizontalOverflow": 0
+  },
+  "navigation": {
+    "routes": ["/rexonance-saga", "/extreme-saga"],
+    "viewportScenarios": 8,
+    "verifiedStates": 96,
+    "checks": [
+      "forward and reverse scroll",
+      "one aria-current=location",
+      "gold plus underline",
+      "resize and short landscape",
+      "hero clears the current link"
+    ],
+    "phoneNote": "The pre-existing narrow-screen CSS hides the nav at 390px; state and rotation to visible landscape were checked."
+  },
+  "regressions": {
+    "unitTestsPassed": 1955,
+    "unitTestsSkipped": 2,
+    "unitTestsFailed": 0,
+    "releaseBuild": "pass",
+    "existingChecks": [
+      "Rexonance operability desktop and phone-390",
+      "Back cancels transition",
+      "transition CSS failure recovers"
+    ],
+    "physicalSafariDevice": "not tested",
+    "webkit": "browser binary unavailable; not claimed as passed"
+  },
+  "commands": [
+    "npm run release:build",
+    "BASE_URL=<production-build> HEAP_REPORT=/tmp/decoded.json node scripts/verify-rexonance-heap.mjs",
+    "BASE_URL=<production-build> HEAP_REPORT=/tmp/unvisited.json node scripts/verify-rexonance-heap.mjs --unvisited-p14",
+    "BASE_URL=<production-build> OUTPUT_DIR=/tmp/layout node scripts/verify-rx14-special-layout.mjs",
+    "BASE_URL=<production-build> OUTPUT_DIR=/tmp/nav node scripts/verify-local-nav-current.mjs"
+  ]
+}

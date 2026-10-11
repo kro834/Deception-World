@@ -94,3 +94,18 @@ test("initial pickup art is lazy; explicit pickup opening retains its priority",
   assert.match(figure, /fetchPriority="auto"/);
   assert.match(component, /fetchPriority="high"/);
 });
+
+test("World reading-stage motion is finite and paused by all rendering guards", () => {
+  const css = source("src/styles-world-reading.css");
+  for (const guard of [
+    'data-world-effects="economy"',
+    "data-loading",
+    "data-route-cover",
+    "data-side-menu-open",
+    "data-dialog-open",
+  ])
+    assert.ok(css.includes(`:not([${guard}])`));
+  assert.match(css, /prefers-reduced-motion: no-preference/);
+  assert.match(css, /animation: sw-brief-art-in 360ms ease-out both/);
+  assert.doesNotMatch(css, /infinite|backdrop-filter/);
+});

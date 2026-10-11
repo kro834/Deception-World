@@ -210,9 +210,19 @@ async function checkLogoSitsInScene(browser, name) {
   await context.close();
 }
 
+async function checkEntrancePhase(page, name, ready) {
+  // Locate the DOM control even when hidden from the accessibility tree.
+  const entrance = page.locator(".cine-btn-primary");
+  assert.equal(await entrance.isVisible(), ready, `${name}: entrance visibility follows completion`);
+  assert.equal(await entrance.isDisabled(), !ready, `${name}: entrance cannot activate during playback`);
+  assert.equal(await page.locator(".cine-replay-slot").getAttribute("aria-hidden"), String(!ready));
+  assert.equal(await page.locator(".cine-stage").getAttribute("data-opening-entry"), ready ? "ready" : "pending");
+}
+
 async function checkBurnWebgl(browser, name) {
   const { context, page, errors } = await openTitle(browser, name, { init: [COUNT_WEBGL] });
   await page.waitForSelector(".cine-title-lockup[data-burn]", { timeout: 8000 });
+  await checkEntrancePhase(page, name, false);
   const during = await logoOpacity(page);
   assert.equal(during.burn, "webgl", `${name}: capable devices (Android included) burn in WebGL`);
   assert.equal(during.canvas, 1);
@@ -231,6 +241,7 @@ async function checkBurnWebgl(browser, name) {
   );
   await page.locator(".cine-stage.is-complete").waitFor({ timeout: 6000 });
   const complete = await logoOpacity(page);
+  await checkEntrancePhase(page, name, true);
   assert.deepEqual(
     { first: complete.first, core: complete.core, burn: complete.burn, canvas: complete.canvas },
     { first: 0, core: 1, burn: null, canvas: 0 },
@@ -241,12 +252,14 @@ async function checkBurnWebgl(browser, name) {
   await page.waitForTimeout(650);
   await page.getByRole("button", { name: "もう一度" }).click();
   await page.locator(".cine-stage.is-playing").waitFor();
+  await checkEntrancePhase(page, name, false);
   assert.equal((await logoOpacity(page)).first, 1, `${name}: replay starts on the ice logo`);
   await page.waitForSelector('.cine-title-lockup[data-burn="webgl"]', { timeout: 8000 });
   // Skip mid-burn lands on the prism logo in one change.
   await page.keyboard.press("Escape");
   await page.locator(".cine-stage.is-complete").waitFor();
   const skipped = await logoOpacity(page);
+  await checkEntrancePhase(page, name, true);
   assert.deepEqual(
     { first: skipped.first, core: skipped.core, burn: skipped.burn, canvas: skipped.canvas },
     { first: 0, core: 1, burn: null, canvas: 0 },
@@ -316,7 +329,7 @@ async function checkBurnTiers(browser, name) {
 }
 
 async function pressEnter(page, name) {
-  const button = page.getByRole("button", { name: "ENTER THE WORLD", exact: true });
+  const button = page.getByRole("button", { name: "ディセプションワールドへ入る", exact: true });
   if (PROFILES[name].hasTouch) await button.tap();
   else await button.click();
 }
@@ -398,7 +411,7 @@ async function checkDive(browser, name) {
     await page.keyboard.press("Escape");
     await page.waitForTimeout(1500);
     const box = await page
-      .getByRole("button", { name: "ENTER THE WORLD", exact: true })
+      .getByRole("button", { name: "ディセプションワールドへ入る", exact: true })
       .boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();

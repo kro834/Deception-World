@@ -7,14 +7,14 @@
    a dialog or a loading cover never replays when the page comes back.
 
    - Hits: an element carrying data-exi-hit="" is keyed the first time it
-     crosses the trigger line (80% of the viewport, or 55% for
-     data-exi-line="mid"). IntersectionObservers only, no scroll listener.
+     crosses the trigger line (the default inset, or 96px above the bottom
+     for data-exi-line="mid"). IntersectionObservers only, no scroll listener.
      While the engine runs the page carries data-exi-armed="true", so the
      sheet holds an unreached arrival back only while something will
      release it; without the engine everything simply stands drawn.
    - Combinations: an element marked data-exi-chain="<ms>" right after a
-     hit lands that long after it (ROUND 1: the time follows the punch),
-     still keyed by its own line if the reader gets there first.
+     hit lands that long after it if visible (ROUND 1: time follows punch),
+     otherwise it waits for its own line so an offscreen hit isn't wasted.
    - Tallies: a decorative copy (aria-hidden, [data-exi-tally]) counts its
      figure up from zero when the nearest hit around it lands, on
      requestAnimationFrame for under a second, braking hard into the value.
@@ -40,7 +40,10 @@
    the load gate, the pointer type, page visibility and the bfcache, and is
    released symmetrically on unmount. */
 
-const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -45% 0px" };
+// Percent root margins are measured against width, not height: the former
+// -45% held the punch hundreds of pixels on portrait tablets. A bounded
+// inset makes the first hit arrive as its panel enters on every aspect ratio.
+const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -96px 0px" };
 // Scenes keyed by the engine itself (their opening tags stay as they are).
 const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope :is(.rxs-system-grid, .rxs-specs)";
 const TALLY_MS = 900;
@@ -263,6 +266,10 @@ export function mountExtremeImpact(page, environment = window) {
       const id = environment.setTimeout(() => {
         timers.delete(id);
         if (!running || next.getAttribute("data-exi-hit") !== "") return;
+        // Do not spend the second punch below the fold on a phone. Its own
+        // observer will land it when reached; visible combinations keep 380ms.
+        const rect = next.getBoundingClientRect();
+        if (rect.top >= environment.innerHeight - 32 || rect.bottom <= 0) return;
         observers.forEach((observer) => observer.unobserve(next));
         land(next);
       }, delay);

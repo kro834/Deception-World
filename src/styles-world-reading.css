@@ -114,7 +114,11 @@ html[data-family="world"]:root
   }
 }
 @media (prefers-reduced-motion: no-preference) and (min-width: 1101px) {
-  html:not([data-world-effects="economy"]) .wa-brief-art > .is-current {
+  html:not([data-world-effects="economy"]):not([data-loading]):not([data-route-cover]):not(
+      [data-side-menu-open]
+    ):not([data-dialog-open])
+    .wa-brief-art
+    > .is-current {
     animation: sw-brief-art-in 360ms ease-out both;
   }
 }

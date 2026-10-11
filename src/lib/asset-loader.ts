@@ -103,18 +103,28 @@ async function decodeImageAsset(url: string, signal: AbortSignal, priority: Asse
   image.fetchPriority = priority;
 
   return new Promise<boolean>((resolve) => {
+    let settled = false;
     const finish = (loaded: boolean) => {
+      if (settled) return;
+      settled = true;
       image.onload = null;
       image.onerror = null;
       signal.removeEventListener("abort", abort);
       if (choosing.get(url) === image) choosing.delete(url);
-      if (loaded && !signal.aborted && image.currentSrc) picked.set(url, image.currentSrc);
+      const selected = loaded && !signal.aborted ? image.currentSrc : "";
+      if (selected) {
+        picked.set(url, selected);
+        // Pin the decoded candidate before dropping responsive selection:
+        // Chromium releases its viewport listener without a fallback request.
+        // Removing every source instead leaves its native Image listener alive.
+        image.src = selected;
+      } else image.removeAttribute?.("src");
+      image.removeAttribute?.("srcset");
+      image.removeAttribute?.("sizes");
       resolve(loaded && !signal.aborted);
     };
     const abort = () => {
       finish(false);
-      image.removeAttribute?.("srcset");
-      image.removeAttribute?.("src");
     };
     if (signal.aborted) {
       abort();

@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   ASSEMBLY_BEATS,
   ASSEMBLY_PARTS,
+  ASSEMBLY_TOUCH_ART_BUDGET,
   mountRexonanceAssembly,
   planAssembly,
 } from "../src/lib/rexonance-resonance.js";
@@ -12,6 +13,11 @@ import {
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
 } from "../src/lib/rexonance-suit.ts";
+import {
+  REXONANCE_LAYOUT_BOOT_SCRIPT,
+  syncRexonanceLayoutGate,
+} from "../src/lib/rexonance-layout-gate.js";
+import { runInNewContext } from "node:vm";
 
 /* 2026-10-11 rx15: Rexonance, ZENITH — the suit-up on the page
    (src/styles-rexonance-zenith.css, mountRexonanceAssembly and
@@ -269,8 +275,9 @@ test("the pinned runway is a layout of the persistent preferences, never of the 
     assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
     assert.doesNotMatch(
       selector,
-      /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready|data-rzn/,
+      /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready|data-rzn-state/,
     );
+    assert.match(selector, /:not\(\[data-rzn-constrained\]\)/);
   }
 });
 
@@ -315,12 +322,13 @@ test("text keeps its 12px floor; generated text is silent; forced colours drop t
   assert.match(forced, /\.rzn-end-figure \{\s*display: none;/);
 });
 
-test("the scene is decorative and reads only the suit fields every revision keeps", () => {
+test("the scene is decorative and passes the generated shape masks to its plan", () => {
   assert.match(page, /<div\s+ref=\{runwayRef\}\s+className="rzn-suitup"\s+aria-hidden="true"/);
   assert.match(
     page,
-    /REXONANCE_SUIT_PIECES\.map\(\(\{ id, group, x, y, w, h, seat \}\) => \(\{\s*id,\s*group,\s*x,\s*y,\s*w,\s*h,\s*seat,\s*\}\)\)/,
+    /REXONANCE_SUIT_PIECES\.map\(\(\{ id, group, x, y, w, h, seat, tiles \}\) => \(\{\s*id,\s*group,\s*x,\s*y,\s*w,\s*h,\s*seat,\s*tiles,\s*\}\)\)/,
   );
+  assert.match(page, /maskTile: REXONANCE_SUIT_TILE/);
   // No sprite, atlas or tile field of a piece is read by the page.
   assert.doesNotMatch(page, /piece\.(?:src|float|ax|ay|tiles|dir)\b/);
   assert.match(
@@ -435,7 +443,13 @@ test("the plan is deterministic and reads coverage from the sample", () => {
 });
 
 /* ---------------- the engine, in a minimal environment ---------------- */
-function environment({ reduced = false, economy = false, forced = false } = {}) {
+function environment({
+  reduced = false,
+  economy = false,
+  forced = false,
+  coarse = false,
+  idleHeld = false,
+} = {}) {
   const listeners = new Map();
   const target = (name) => ({
     addEventListener(type, callback) {
@@ -461,10 +475,12 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
             );
             return true;
           },
-          deleteProperty: (_, key) =>
+          deleteProperty: (_, key) => {
             attributes.delete(
               `data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
-            ),
+            );
+            return true;
+          },
         },
       ),
       setAttribute: (name, value) => attributes.set(name, String(value)),
@@ -490,13 +506,23 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
       set: () => true,
     },
   );
-  const makeCanvas = () => ({
-    width: 0,
-    height: 0,
-    clientWidth: 1440,
-    clientHeight: 837,
-    getContext: () => context2d,
-  });
+  let canvasId = 0;
+  const makeCanvas = () => {
+    const id = ++canvasId;
+    return {
+      width: 0,
+      height: 0,
+      clientWidth: 1440,
+      clientHeight: 837,
+      getContext: () =>
+        new Proxy(context2d, {
+          get: (ctx, key) => {
+            if (key === "drawImage") return (...args) => calls.push([key, args.length, id]);
+            return ctx[key];
+          },
+        }),
+    };
+  };
   const document = {
     documentElement: html,
     hidden: false,
@@ -543,8 +569,9 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
   });
   const observers = [];
   class IntersectionObserver {
-    constructor(callback) {
+    constructor(callback, options) {
       this.callback = callback;
+      this.options = options;
       observers.push(this);
     }
     observe(node) {
@@ -586,16 +613,21 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
   }
   let frameId = 0;
   const frames = new Map();
+  const idle = new Map();
+  let idleId = 0;
   const env = {
     ...target("window"),
     navigator: {},
+    innerHeight: 915,
     devicePixelRatio: 2,
     matchMedia: (query) => ({
       matches: query.includes("reduce")
         ? reduced
         : query.includes("forced-colors")
           ? forced
-          : false,
+          : query.includes("coarse")
+            ? coarse
+            : false,
       ...target(`media ${query}`),
     }),
     getComputedStyle: () => ({ top: "63px", getPropertyValue: () => "" }),
@@ -605,6 +637,17 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
     },
     cancelAnimationFrame: (id) => frames.delete(id),
     setTimeout: (callback, ms) => setTimeout(callback, ms),
+    clearTimeout,
+    requestIdleCallback(callback) {
+      const id = ++idleId;
+      idle.set(id, callback);
+      if (!idleHeld)
+        setTimeout(() => {
+          if (idle.delete(id)) callback({ timeRemaining: () => 40 });
+        }, 0);
+      return id;
+    },
+    cancelIdleCallback: (id) => idle.delete(id),
     IntersectionObserver,
     MutationObserver,
     ResizeObserver,
@@ -636,7 +679,17 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
     lines,
     parts,
     calls,
+    idle,
+    prepared: () => canvasId >= 3,
   };
+}
+
+// Assert completion, not machine speed. The old fixed 40 ms sleep failed on
+// the shared CI runner while its nested preparation tasks were still queued.
+async function until(check, message) {
+  const deadline = Date.now() + 5000;
+  while (!check() && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.ok(check(), message);
 }
 
 test("reduced motion, economy and forced colours keep the still and leave nothing behind", async () => {
@@ -685,7 +738,10 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   t.observers[0].callback([{ isIntersecting: true }]);
   assert.equal(t.runway.dataset.rznState, "loading");
   // The cut runs in steps (sample, plan, weld canvas), each its own task.
-  await new Promise((resolve) => setTimeout(resolve, 40));
+  await until(
+    () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+    "scene prepared and measured",
+  );
   assert.equal(t.runway.dataset.rznState, "live");
   // The backing store is sized in the first frame, after its layout read.
   assert.equal(t.canvas.width, 0);
@@ -719,6 +775,152 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
   assert.equal(t.frames.size, 0);
   assert.ok(t.observers.every((observer) => observer.disconnected));
+});
+
+const engineConfig = {
+  figure: "/f.webp",
+  undersuit: "/u.webp",
+  size: REXONANCE_SUIT_SIZE,
+  pieces: REXONANCE_SUIT_PIECES,
+  maskTile: 9,
+  core: REXONANCE_SUIT_MARKS.core,
+  visor: REXONANCE_SUIT_MARKS.visor,
+  glow: [],
+};
+
+test("mask holes belong to the ribbon, never the smaller arm box", () => {
+  const common = { x: 0, y: 0, seat: [5, 15] };
+  const plan = planAssembly({
+    size: { width: 30, height: 30 },
+    core: [15, 15],
+    tile: 10,
+    maskTile: 10,
+    pieces: [
+      {
+        ...common,
+        id: "arm",
+        group: "arms",
+        w: 20,
+        h: 30,
+        tiles: btoa(String.fromCharCode(0b010101)),
+      },
+      {
+        ...common,
+        id: "ribbon",
+        group: "ribbon",
+        w: 30,
+        h: 30,
+        tiles: btoa(String.fromCharCode(0b10110110, 1)),
+      },
+    ],
+  });
+  assert.equal(plan.tiles.find((t) => t.cx === 15 && t.cy === 15).pieceId, "ribbon");
+  assert.equal(plan.tiles.filter((t) => t.pieceId === "arm").length, 3);
+  assert.ok(plan.tiles.filter((t) => t.pieceId === "arm").every((t) => t.cx === 5));
+});
+
+test("3.5 screens ahead preparation is idle-only, does not activate layout, and cancels on exit", async () => {
+  const t = environment({ idleHeld: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  const warm = t.observers.find((o) => o.options.rootMargin === "3203px 0px");
+  assert.ok(warm);
+  warm.callback([{ isIntersecting: true }]);
+  assert.equal(t.idle.size, 1);
+  assert.equal(t.calls.length, 0);
+  assert.equal(t.runway.dataset.rznState, undefined);
+  dispose();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(t.idle.size, 0);
+  assert.equal(t.calls.filter((c) => c[0] === "drawImage").length, 0);
+  assert.equal(t.frames.size, 0);
+});
+
+test("touch art draws are bounded; settled endpoints and offscreen scenes do not keep painting", async () => {
+  const t = environment({ coarse: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  assert.equal(
+    t.runway.dataset.rznState,
+    undefined,
+    "warm preparation does not change the visible state",
+  );
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(
+    () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+    "warm scene activated",
+  );
+  for (const progress of [0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
+    t.calls.length = 0;
+    t.scrollTo(progress);
+    const art = t.calls.filter((c) => c[0] === "drawImage" && c[1] === 9 && c[2] === 1);
+    assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET + 1, `${progress}: ${art.length}`); // plus undersuit scan
+  }
+  t.scrollTo(1);
+  t.flush();
+  t.calls.length = 0;
+  t.scrollTo(1);
+  assert.equal(t.calls.length, 0);
+  t.observers[0].callback([{ isIntersecting: false }]);
+  assert.equal(t.listeners.has("window:scroll"), false);
+  assert.equal(t.frames.size, 0);
+  dispose();
+});
+
+test("pagehide cancels queued preparation and pageshow safely resumes it", async () => {
+  const t = environment({ idleHeld: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  t.listeners.get("window:pagehide")();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(t.idle.size, 0);
+  t.listeners.get("window:pageshow")();
+  assert.equal(t.idle.size, 1);
+  dispose();
+  assert.equal(t.idle.size, 0);
+});
+
+test("without requestIdleCallback the bounded timer fallback prepares the scene", async () => {
+  const t = environment();
+  delete t.env.requestIdleCallback;
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live", "timer fallback prepared the scene");
+  assert.equal(t.runway.dataset.rznState, "live");
+  dispose();
+  assert.equal(t.frames.size, 0);
+});
+
+test("Save-Data and 2G shorten layout before fragment restoration, not on connection changes", () => {
+  for (const connection of [
+    { saveData: true },
+    { effectiveType: "2g" },
+    { effectiveType: "slow-2g" },
+    { effectiveType: "4g" },
+    undefined,
+  ]) {
+    let flag;
+    const window = {
+      navigator: { connection },
+      document: {
+        documentElement: {
+          toggleAttribute: (key, on) => {
+            assert.equal(key, "data-rzn-constrained");
+            flag = on;
+          },
+        },
+      },
+    };
+    runInNewContext(REXONANCE_LAYOUT_BOOT_SCRIPT, { window });
+    assert.equal(flag, Boolean(connection && connection.effectiveType !== "4g"));
+    if (connection) connection.effectiveType = "4g";
+    const before = flag;
+    assert.equal(flag, before, "no live layout listener");
+    syncRexonanceLayoutGate(window);
+    assert.equal(flag, Boolean(connection?.saveData));
+  }
+  assert.match(read("src/routes/__root.tsx"), /children: REXONANCE_LAYOUT_BOOT_SCRIPT/);
+  assert.match(route, /cause === "enter"\) syncRexonanceLayoutGate/);
 });
 
 test("04: the trinity is a scene — three rings fall into phase, at rest locked", () => {

@@ -21,6 +21,11 @@ export function mountLocalNavCurrent(nav: Element | null | undefined): () => voi
   if (!sections.size) return () => {};
   const crossing = new Set<Element>();
   let current: HTMLAnchorElement | null = null;
+  let observer: IntersectionObserver | null = null;
+  let active = true;
+  let generation = 0;
+  let observedHeight = 0;
+  let frame = 0;
   const sync = () => {
     // The last chapter, in the bar's order, that spans the line.
     let next: HTMLAnchorElement | null = null;
@@ -30,21 +35,51 @@ export function mountLocalNavCurrent(nav: Element | null | undefined): () => voi
     current = next;
     current?.setAttribute("aria-current", "location");
   };
-  // A thin band across the middle of the screen: the line a chapter crosses.
-  const observer = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) crossing.add(entry.target);
-        else crossing.delete(entry.target);
-      }
-      sync();
-    },
-    { rootMargin: "-50% 0px -49% 0px", threshold: 0 },
-  );
-  sections.forEach((_, section) => observer.observe(section));
+  const observe = () => {
+    if (!active) return;
+    const height = Math.max(1, document.documentElement.clientHeight || window.innerHeight);
+    if (height === observedHeight) return;
+    observedHeight = height;
+    observer?.disconnect();
+    crossing.clear();
+    sync();
+    const version = ++generation;
+    // IntersectionObserver resolves even vertical percentages against width.
+    // Pixel margins keep the rx14 middle band inside a landscape viewport too.
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (!active || version !== generation) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) crossing.add(entry.target);
+          else crossing.delete(entry.target);
+        }
+        sync();
+      },
+      {
+        rootMargin: `-${Math.floor(height * 0.5)}px 0px -${Math.floor(height * 0.49)}px 0px`,
+        threshold: 0,
+      },
+    );
+    for (const section of sections.keys()) observer.observe(section);
+  };
+  const resize = () => {
+    if (!active || frame) return;
+    frame = window.requestAnimationFrame(() => {
+      frame = 0;
+      observe();
+    });
+  };
+  observe();
+  window.addEventListener("resize", resize, { passive: true });
   return () => {
-    observer.disconnect();
+    active = false;
+    window.removeEventListener("resize", resize);
+    if (frame) window.cancelAnimationFrame(frame);
+    observer?.disconnect();
+    observer = null;
     current?.removeAttribute("aria-current");
     current = null;
+    crossing.clear();
+    sections.clear();
   };
 }

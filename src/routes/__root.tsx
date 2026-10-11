@@ -22,6 +22,7 @@ import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
 import { UltraModeRuntime } from "@/components/ultra/ultra-mode-runtime";
 import { ULTRA_MODE_BOOTSTRAP_SCRIPT } from "@/lib/ultra-mode.js";
+import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
@@ -141,6 +142,7 @@ export const Route = createRootRoute({
       { children: IPAD_STANDALONE_VIEWPORT_SCRIPT },
       { children: DEVICE_PROFILE_SCRIPT },
       { children: ULTRA_MODE_BOOTSTRAP_SCRIPT },
+      { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
     ],
     links: [
       // The Zeus button's image, for every route that shows the button. The
