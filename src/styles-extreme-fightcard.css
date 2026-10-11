@@ -175,6 +175,25 @@ html[data-family="special"]
     padding-inline-start: clamp(20px, 2.4vw, 40px);
     border-inline-start: 1px solid rgb(var(--ext-gold-rgb) / 32%);
   }
+  /* Rounds without an introduction use both corners for the existing
+     one-two headline itself; keep both independently struck lines. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#stages, #system) > .rxs-section-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#stages, #system) > .rxs-section-heading > h2 {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2.2vw, 32px);
+    font-size: clamp(32px, 3.3vw, 52px);
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#stages, #system) > .rxs-section-heading > h2 > .exo-line {
+    white-space: nowrap;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#stages, #system) > .rxs-section-heading > h2 > br {
+    display: none;
+  }
 }
 
 @media (max-width: 359px) {
