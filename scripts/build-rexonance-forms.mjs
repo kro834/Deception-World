@@ -73,10 +73,15 @@ for (const form of ["max", "ultra"]) {
   };
   const art = bounds(data, info.width, info.height, 3, (p, i) => Math.max(p[i], p[i + 1], p[i + 2]) > 40);
   const fig = bounds(base, FIG.width, FIG.height, 4, (p, i) => p[i + 3] > 40);
-  const scale = (fig.y1 - fig.y0) / (art.y1 - art.y0);
+  // The same height as the figure — unless its ribbons would then run past
+  // the frame's sides (owner, 2026-10-12): then it fits the width, centred.
+  const scale = Math.min(
+    (fig.y1 - fig.y0) / (art.y1 - art.y0),
+    (FIG.width - 8) / (art.x1 - art.x0),
+  );
   const width = Math.round(info.width * scale);
   const height = Math.round(info.height * scale);
-  const left = Math.round((fig.x0 + fig.x1) / 2 - ((art.x0 + art.x1) / 2) * scale);
+  const left = Math.round(FIG.width / 2 - ((art.x0 + art.x1) / 2) * scale);
   const top = Math.round(fig.y1 - art.y1 * scale);
   const scaled = await sharp(src).removeAlpha().resize(width, height, { kernel: "lanczos3" }).raw().toBuffer();
   const out = Buffer.alloc(FIG.width * FIG.height * 4);

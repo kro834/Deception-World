@@ -368,7 +368,8 @@ export function warpPicture(context, picture, box, own, target) {
 
 /** Landmarks of the forms' art (normalised): the head, the shoulders, the
  * core, the belt, the forearms, the fists, the knees, the feet, the tail's
- * tip. `panel`: 03's stage art (1086 × 1448); `figure`: the suit figures. */
+ * tip. `panel`: 03's stage art (1086 × 1448); `figure`: the suit figures
+ * (EXCELSIOR's at its fit: scale 0.591, left -16, top 153 of its art). */
 export const FORM_LANDMARKS = {
   panel: {
     ultra: [
@@ -418,20 +419,20 @@ export const FORM_LANDMARKS = {
       [0.88, 0.28],
     ],
     excelsior: [
-      [0.505, 0.095],
-      [0.31, 0.2],
-      [0.69, 0.2],
-      [0.5, 0.255],
-      [0.5, 0.4],
-      [0.08, 0.4],
-      [0.91, 0.4],
-      [0.12, 0.53],
-      [0.87, 0.53],
-      [0.31, 0.65],
-      [0.69, 0.65],
-      [0.23, 0.925],
-      [0.78, 0.93],
-      [0.97, 0.18],
+      [0.506, 0.235],
+      [0.341, 0.324],
+      [0.662, 0.324],
+      [0.501, 0.37],
+      [0.501, 0.493],
+      [0.146, 0.493],
+      [0.848, 0.493],
+      [0.18, 0.603],
+      [0.814, 0.603],
+      [0.341, 0.704],
+      [0.662, 0.704],
+      [0.273, 0.937],
+      [0.738, 0.941],
+      [0.899, 0.307],
     ],
   },
 };
