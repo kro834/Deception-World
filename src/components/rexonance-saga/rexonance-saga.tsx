@@ -1698,7 +1698,7 @@ export function RexonanceSaga() {
               <h2>
                 標準の上に、
                 <br />
-                あと二段。
+                あと3段。
               </h2>
             </header>
 
