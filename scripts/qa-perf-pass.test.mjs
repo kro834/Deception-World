@@ -69,7 +69,8 @@ test("the portraits' sources stay exactly as supplied", () => {
     "/character-james-20260829.jpg": "8cd498d105a1951bb698ff314e0728cefce1ec6cb3ad1649b08a4889bafcb0d9",
     "/character-luna.jpeg": "c2687852ed8ef23244ecb21c7e54c52474058ac253e3aa7268647e4a20955dd6",
     "/character-terra.jpeg": "6d48828c402fa86515a58b9fb877c791c3f3aa05874270844d8e95ff83593641",
-    "/character-yoake-mamori.jpeg": "13c6d8e85e2a1c39ebac11c5fb7106707e9a048f99ec3289fa5aaecf8f86654a",
+    // 2026-10-11: the owner supplied the same portrait without the TikTok watermark.
+    "/character-yoake-mamori.jpeg": "30b2a3e4c886aeb0b73a74014d1fbe6a225bfdb2e6b0bb6c28ab81cd7f6376df",
   };
   for (const set of Object.values(PORTRAIT_THUMBNAILS)) {
     const hash = createHash("sha256").update(readFileSync(file(set.source))).digest("hex");

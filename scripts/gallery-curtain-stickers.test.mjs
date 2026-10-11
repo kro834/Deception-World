@@ -48,15 +48,17 @@ test("the menu's gallery link warms the stickers before the curtain closes", () 
   assert.match(chrome, /to="\/gallery"\s+assets=\{GALLERY_CURTAIN_STICKERS\}/);
 });
 
-test("every page warms the stickers on idle; the curtain paints them decoded; /gallery preloads them", () => {
+test("the stickers warm when the menu opens; the curtain paints them decoded; /gallery preloads them", () => {
   const root = read("src/routes/__root.tsx");
   const warm = read("src/lib/gallery-sticker-warmup.ts");
   const route = read("src/routes/gallery.tsx");
   assert.match(root, /scheduleGalleryStickerWarmup\(GALLERY_CURTAIN_STICKERS\)/);
   assert.match(root, /<GalleryStickerWarmup \/>/);
-  // After load, on idle, low priority, decoded and held; never under Save-Data or 2G.
+  // Owner's choice (2026-10-11): only once the side menu opens (no page pays
+  // ~290 KB up front), then on idle, low priority, decoded and held; never
+  // under Save-Data or 2G.
+  assert.match(warm, /attributeFilter: \["data-side-menu-open"\]/);
   assert.match(warm, /requestIdleCallback/);
-  assert.match(warm, /addEventListener\("load"/);
   assert.match(warm, /fetchPriority = "low"/);
   assert.match(warm, /held\.push\(image\)/);
   assert.match(warm, /image\.decode\(\)/);

@@ -1,9 +1,10 @@
 /* The gallery curtain's stickers must be on the cloth from its first frame.
-   Once a page has loaded and gone idle, fetch and decode all nine at low
-   priority and keep the decoded images referenced, so the curtain's <img>
-   elements paint from memory instead of waiting on the network or a decode.
-   About 290 KB; skipped under Save-Data and on 2G, where the menu link's own
-   warm-up (GuardedLink assets) still runs on intent. */
+   When the reader opens the side menu (the way into the gallery), fetch and
+   decode all nine at low priority and keep the decoded images referenced, so
+   the curtain's <img> elements paint from memory instead of waiting on the
+   network or a decode. About 290 KB, so no page pays for them until the menu
+   opens (owner's choice, 2026-10-11); skipped under Save-Data and on 2G, where
+   the menu link's own warm-up (GuardedLink assets) still runs on intent. */
 
 const held: HTMLImageElement[] = [];
 let started = false;
@@ -22,7 +23,8 @@ export function warmGalleryStickers(sources: readonly string[]) {
   }
 }
 
-/** After load, on idle: warm the stickers. Returns a cleanup. */
+/** When the side menu first opens (html[data-side-menu-open]), warm the
+ * stickers, low priority, in an idle slot. Returns a cleanup. */
 export function scheduleGalleryStickerWarmup(sources: readonly string[]) {
   if (typeof window === "undefined") return () => undefined;
   const connection = (
@@ -31,19 +33,26 @@ export function scheduleGalleryStickerWarmup(sources: readonly string[]) {
   if (connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType ?? "")) {
     return () => undefined;
   }
+  const root = document.documentElement;
   let idle = 0;
   let timer = 0;
   const run = () => {
     if (window.requestIdleCallback) {
-      idle = window.requestIdleCallback(() => warmGalleryStickers(sources), { timeout: 4000 });
+      idle = window.requestIdleCallback(() => warmGalleryStickers(sources), { timeout: 600 });
     } else {
-      timer = window.setTimeout(() => warmGalleryStickers(sources), 1200);
+      timer = window.setTimeout(() => warmGalleryStickers(sources), 120);
     }
   };
-  if (document.readyState === "complete") run();
-  else window.addEventListener("load", run, { once: true });
+  const observer = new MutationObserver(() => {
+    if (root.hasAttribute("data-side-menu-open")) {
+      observer.disconnect();
+      run();
+    }
+  });
+  if (root.hasAttribute("data-side-menu-open")) run();
+  else observer.observe(root, { attributes: true, attributeFilter: ["data-side-menu-open"] });
   return () => {
-    window.removeEventListener("load", run);
+    observer.disconnect();
     if (idle) window.cancelIdleCallback(idle);
     window.clearTimeout(timer);
   };
