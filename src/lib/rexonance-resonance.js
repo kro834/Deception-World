@@ -11,9 +11,9 @@
  * Transient hits. Each is an attribute the stylesheet animates from and this
  * script removes once it has played, so a menu or dialog closing (the motion
  * gate coming back) never replays a finished hit:
- * - data-rsn-hit on a locked figure's parent;
- * - data-rsn-pulse ("a" / "b") on the page, so the armour's core rings with
- *   each lock (alternating restarts a burst that is still running);
+ * - data-rsn-hit on a locked figure's parent (the armour's core no longer
+ *   rings with each lock: owner, 2026-10-11, it pulsed again and again on
+ *   an iPad);
  * - data-rsn-arrive on the page, once, when the cover has handed over;
  * - data-rsn-form on the stage panel when a new form is drawn;
  * - data-rsn-in on a scene as it comes into view, only where scroll
@@ -33,8 +33,6 @@ const COUNT_MS = 900;
 const READOUT_MS = 700;
 const LOCK_MS = 560;
 const HIT_MS = 1250;
-const PULSE_MS = 1500;
-const PULSE_GAP_MS = 700;
 const ARRIVE_MS = 2500;
 const FORM_MS = 1800;
 const SCENE_MS = 1800;
@@ -144,7 +142,6 @@ export function mountRexonanceResonance(page, environment = window) {
   const byHost = new Map(figures.map((figure) => [figure.host, figure]));
   const queued = new Set();
   let countFrame = 0;
-  let lastPulse = Number.NEGATIVE_INFINITY;
 
   const print = (figure, text) => {
     if (figure.printed === text) return;
@@ -167,11 +164,6 @@ export function mountRexonanceResonance(page, environment = window) {
     print(figure, figure.rendered);
     setState(figure, "lock");
     flag(figure.host.parentElement, "data-rsn-hit", "true", HIT_MS);
-    const at = clock();
-    if (at - lastPulse >= PULSE_GAP_MS) {
-      lastPulse = at;
-      flag(page, "data-rsn-pulse", page.dataset.rsnPulse === "a" ? "b" : "a", PULSE_MS);
-    }
     figure.lockTimer = environment.setTimeout(() => {
       figure.lockTimer = 0;
       if (!disposed) setState(figure, "done");

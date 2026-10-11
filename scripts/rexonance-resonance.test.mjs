@@ -220,7 +220,7 @@ test("time-based hits are gated, keyed to transient flags, finite and quick", ()
     );
     for (const part of splitTopLevel(selector)) {
       assert.match(part, FULL_GATE, part);
-      assert.match(part, /\[data-rsn-(?:state|hit|pulse|arrive|form|in)/, part);
+      assert.match(part, /\[data-rsn-(?:state|hit|arrive|form|in)/, part);
     }
     for (const layer of splitTopLevel(declaration(body, "animation") ?? "")) {
       const times = [...layer.matchAll(/(\d+)ms/g)].map((match) => Number(match[1]));
@@ -232,8 +232,9 @@ test("time-based hits are gated, keyed to transient flags, finite and quick", ()
     }
   }
   assert.ok(checked >= 14, String(checked));
-  // The script clears every flag after its hit has played.
-  for (const flag of ["data-rsn-hit", "data-rsn-pulse", "data-rsn-arrive", "data-rsn-form", "data-rsn-in"]) {
+  // The script clears every flag after its hit has played. (data-rsn-pulse
+  // is gone: owner, 2026-10-11, the core no longer rings with each lock.)
+  for (const flag of ["data-rsn-hit", "data-rsn-arrive", "data-rsn-form", "data-rsn-in"]) {
     assert.ok(script.includes(`"${flag}"`), flag);
   }
   assert.match(script, /element\.removeAttribute\(name\)/);
@@ -534,7 +535,8 @@ test("a figure counts once from zero, locks with a transient hit, and hands back
   assert.equal(cut.getAttribute("data-rsn-state"), "lock");
   assert.equal(cut.overlay.childNodes[0].data, "650");
   assert.equal(cut.parentElement.getAttribute("data-rsn-hit"), "true");
-  assert.match(t.pageNode.getAttribute("data-rsn-pulse"), /^[ab]$/);
+  // Owner (2026-10-11): the armour's core no longer rings with each lock.
+  assert.equal(t.pageNode.getAttribute("data-rsn-pulse"), null);
   t.advance(2600);
   assert.equal(cut.getAttribute("data-rsn-state"), "done");
   assert.equal(cut.parentElement.getAttribute("data-rsn-hit"), null);
